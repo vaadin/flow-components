@@ -1,0 +1,87 @@
+package com.vaadin.addon.spreadsheet.test.fixtures;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Workbook;
+
+import com.vaadin.addon.spreadsheet.Spreadsheet;
+import com.vaadin.addon.spreadsheet.SpreadsheetStyleFactory;
+
+public class StylesFixture implements SpreadsheetFixture {
+    @Override
+    public void loadFixture(Spreadsheet spreadsheet) {
+        Cell c;
+        CellStyle cellStyle;
+        Font font;
+        SpreadsheetStyleFactory sssf = spreadsheet.getSpreadsheetStyleFactory();
+
+        c = spreadsheet.createCell(0, 0, "Styles");
+        Workbook wb = c.getSheet().getWorkbook();
+
+        c = spreadsheet.createCell(1, 0, "hcenter");
+        cellStyle = wb.createCellStyle();
+        cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        c.setCellStyle(cellStyle);
+        sssf.cellStyleUpdated(c, true);
+
+        c = spreadsheet.createCell(1, 1, "right align");
+        cellStyle = wb.createCellStyle();
+        cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+        c.setCellStyle(cellStyle);
+        sssf.cellStyleUpdated(c, true);
+
+        c = spreadsheet.createCell(2, 0, "blue bottom");
+        cellStyle = wb.createCellStyle();
+        cellStyle.setBorderBottom(CellStyle.BORDER_THICK);
+        cellStyle.setBottomBorderColor(IndexedColors.BLUE.getIndex());
+        c.setCellStyle(cellStyle);
+        sssf.cellStyleUpdated(c, true);
+
+        c = spreadsheet.createCell(2, 1, "back green");
+        cellStyle = wb.createCellStyle();
+        cellStyle.setFillBackgroundColor(IndexedColors.GREEN.getIndex());
+        c.setCellStyle(cellStyle);
+        sssf.cellStyleUpdated(c, true);
+
+        c = spreadsheet.createCell(3, 0, "red text");
+        font = wb.createFont();
+        font.setColor(IndexedColors.RED.getIndex());
+        cellStyle = wb.createCellStyle();
+        cellStyle.setFont(font);
+        c.setCellStyle(cellStyle);
+        sssf.cellStyleUpdated(c, true);
+
+        c = spreadsheet.createCell(3, 1, "bold text");
+        font = wb.createFont();
+        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        cellStyle = wb.createCellStyle();
+        cellStyle.setFont(font);
+        c.setCellStyle(cellStyle);
+        sssf.cellStyleUpdated(c, true);
+
+        c = spreadsheet.createCell(3, 2, "italic");
+        font = wb.createFont();
+        font.setItalic(true);
+        cellStyle = wb.createCellStyle();
+        cellStyle.setFont(font);
+        c.setCellStyle(cellStyle);
+        sssf.cellStyleUpdated(c, true);
+
+        int column = 0;
+        for (short size : new Short[] { 8, 10, 12, 14 }) {
+
+            c = spreadsheet.createCell(4, column, "Size " + size);
+            font = wb.createFont();
+            font.setFontHeightInPoints(size);
+            cellStyle = wb.createCellStyle();
+            cellStyle.setFont(font);
+            c.setCellStyle(cellStyle);
+            sssf.cellStyleUpdated(c, true);
+            column++;
+        }
+
+        spreadsheet.updatedAndRecalculateAllCellValues();
+    }
+}

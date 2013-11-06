@@ -1,0 +1,85 @@
+package com.vaadin.addon.spreadsheet.demo.action;
+
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+
+import com.vaadin.addon.spreadsheet.Spreadsheet;
+import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
+import com.vaadin.addon.spreadsheet.SpreadsheetAction;
+
+public class UnHideHeadersAction extends SpreadsheetAction {
+
+    private int unhideHeaderIndex = 0;
+
+    public UnHideHeadersAction() {
+        super("");
+    }
+
+    @Override
+    public boolean isApplicableForSelection(Spreadsheet spreadhseet,
+            SelectionChangeEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean isApplicableForHeader(Spreadsheet spreadsheet,
+            CellRangeAddress headerRange) {
+        Sheet activeSheet = spreadsheet.getActiveSheet();
+        if (!isSheetProtected(activeSheet)) {
+            if (headerRange.isFullColumnRange()) {
+                int index = headerRange.getFirstColumn();
+                if (!activeSheet.isColumnHidden(index)) {
+                    if (index > 0 && activeSheet.isColumnHidden(index - 1)) {
+                        setCaption("Unhide column " + getColumnHeader(index));
+                        unhideHeaderIndex = index - 1;
+                        return true;
+                    } else if (activeSheet.isColumnHidden(index + 1)) {
+                        setCaption("Unhide column "
+                                + getColumnHeader(index + 2));
+                        unhideHeaderIndex = index + 1;
+                        return true;
+                    }
+                } else {
+                    setCaption("Unhide column " + getColumnHeader(index + 1));
+                    unhideHeaderIndex = index;
+                    return true;
+                }
+            } else if (headerRange.isFullRowRange()) {
+                int index = headerRange.getFirstRow();
+                if (!spreadsheet.isRowHidden(index)) {
+                    if (index > 0 && spreadsheet.isRowHidden(index - 1)) {
+                        setCaption("Unhide row " + (index));
+                        unhideHeaderIndex = index - 1;
+                        return true;
+                    } else if (spreadsheet.isRowHidden(index + 1)) {
+                        setCaption("Unhide row " + (index + 2));
+                        unhideHeaderIndex = index + 1;
+                        return true;
+                    }
+                } else {
+                    setCaption("Unhide row " + (index + 1));
+                    unhideHeaderIndex = index;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void executeActionOnSelection(Spreadsheet spreadsheet,
+            SelectionChangeEvent event) {
+        // TODO throw error
+    }
+
+    @Override
+    public void executeActionOnHeader(Spreadsheet spreadsheet,
+            CellRangeAddress headerRange) {
+        if (headerRange.isFullColumnRange()) {
+            spreadsheet.setColumnHidden(unhideHeaderIndex, false);
+        } else if (headerRange.isFullRowRange()) {
+            spreadsheet.setRowHidden(unhideHeaderIndex, false);
+        }
+    }
+
+}
