@@ -54,6 +54,8 @@ public class SheetWidget extends Panel {
             + HEADER_RESIZE_DND_SECOND_CLASSNAME + "\" ></div>";
     private static final String HYPERLINK_TOOLTIP_LABEL_CLASSNAME = "v-spreadsheet-hyperlink-tooltip-label";
     private static final String CELL_COMMENT_TRIANGLE_CLASSNAME = Cell.CELL_COMMENT_TRIANGLE_CLASSNAME;
+    private static final String NO_GRIDLINES_CLASSNAME = "nogrid";
+    private static final String NO_ROWCOLHEADINGS_CLASSNAME = "noheaders";
     private static final String CUSTOM_EDITOR_CELL = "custom-editor-cell";
     private static final String SELECTED_CELL_STYLE2 = " { outline: solid #06f 1px;"
             + " -moz-outline-offset: -2px; outline-offset: -2px; z-index: 3; }";
@@ -188,7 +190,7 @@ public class SheetWidget extends Panel {
 
     private final HashMap<String, String> cellData;
 
-    private final HashMap<Integer, Integer> cellStyleIndexMap;
+    private final HashMap<Integer, Integer> cellStyleToCSSRuleIndex;
 
     private Widget customEditorWidget;
 
@@ -258,6 +260,8 @@ public class SheetWidget extends Panel {
     private int cellCommentCellColumn = -1;
     private int cellCommentCellRow = -1;
 
+    private boolean displayRowColHeadings;
+
     private VLazyExecutor cellCommentHandler = new VLazyExecutor(350,
             new ScheduledCommand() {
 
@@ -274,7 +278,7 @@ public class SheetWidget extends Panel {
     public SheetWidget(SheetHandler view) {
         actionHandler = view;
         cellData = new HashMap<String, String>();
-        cellStyleIndexMap = new HashMap<Integer, Integer>();
+        cellStyleToCSSRuleIndex = new HashMap<Integer, Integer>();
         alwaysVisibleCellComments = new HashMap<String, CellComment>();
         sheetImages = new HashMap<String, SheetImage>();
         mergedCells = new HashMap<Integer, Cell>();
@@ -1695,10 +1699,17 @@ public class SheetWidget extends Panel {
      * the spreadsheet contents
      */
     private void moveHeadersToMatchScroll() {
-        updateCSSRule(style, ".v-spreadsheet .ch", "marginLeft",
-                (50 - sheet.getScrollLeft()) + "px");
-        updateCSSRule(style, ".v-spreadsheet .rh", "marginTop",
-                (49 - sheet.getScrollTop()) + "px");
+        if (displayRowColHeadings) {
+            updateCSSRule(style, ".v-spreadsheet .ch", "marginLeft",
+                    (50 - sheet.getScrollLeft()) + "px");
+            updateCSSRule(style, ".v-spreadsheet .rh", "marginTop",
+                    (49 - sheet.getScrollTop()) + "px");
+        } else {
+            updateCSSRule(style, ".v-spreadsheet .ch", "marginLeft",
+                    (0 - sheet.getScrollLeft()) + "px");
+            updateCSSRule(style, ".v-spreadsheet .rh", "marginTop",
+                    (31 - sheet.getScrollTop()) + "px");
+        }
     }
 
     /** Update styles in for this spreadsheet */
@@ -1731,12 +1742,15 @@ public class SheetWidget extends Panel {
             width += actionHandler.getColWidthActual(i);
         }
 
+        // these get properly assigned in moveHeadersToMatchScroll()
         rules[ruleIndex++] = "." + getStylePrimaryName()
-                + " .rh { margin-top: 49px; }";
+                + " .rh { margin-top: 0px; }";
         rules[ruleIndex++] = "." + getStylePrimaryName()
-                + " .ch { margin-left: 50px; }";
+                + " .ch { margin-left: 0px; }";
 
         resetStyleSheetRules(style, rules);
+
+        moveHeadersToMatchScroll();
 
         // update floater size the adjust scroll bars correctly
         floater.getStyle().setHeight(height, Unit.PT);
@@ -1744,7 +1758,8 @@ public class SheetWidget extends Panel {
 
         // styles for individual cells
         if (reloadCellStyles) {
-            Map<Integer, String> styles = actionHandler.getCellStyles();
+            Map<Integer, String> styles = actionHandler
+                    .getCellStyleToCSSStyle();
             if (styles != null) {
                 try {
                     for (Entry<Integer, String> entry : styles.entrySet()) {
@@ -1758,7 +1773,7 @@ public class SheetWidget extends Panel {
                                     ".notusedselector {" + entry.getValue()
                                             + "}");
                         }
-                        cellStyleIndexMap.put(entry.getKey(), styleIndex);
+                        cellStyleToCSSRuleIndex.put(entry.getKey(), styleIndex);
                     }
                 } catch (Exception e) {
                     debugConsole.log(
@@ -4063,35 +4078,42 @@ public class SheetWidget extends Panel {
         }
     }
 
-    public void updateVisibleCellStyles(
-            HashMap<Integer, String> selectorsToStyle) {
-        Map<Integer, String> cellStyles = actionHandler.getCellStyles();
+    /**
+     * builds a CSS rule for each cell style from its associated CSS selector
+     * and CSS style
+     * 
+     * @param cellStyleToCSSSelector
+     */
+    public void updateCellStyleCSSRules(
+            HashMap<Integer, String> cellStyleToCSSSelector) {
+        Map<Integer, String> cellStyles = actionHandler
+                .getCellStyleToCSSStyle();
         for (Entry<Integer, String> entry : cellStyles.entrySet()) {
             Integer key = entry.getKey();
             if (key == 0) { // the default style
                 continue;
             }
-            String selector = selectorsToStyle.get(key);
+            String selector = cellStyleToCSSSelector.get(key);
             if (selector == null || selector.isEmpty()) {
                 selector = ".notusedselector";
             } else {
                 selector = createCellStyleSelector(selector);
             }
-            if (cellStyleIndexMap.containsKey(key)) {
-                int ruleIndex = cellStyleIndexMap.get(key);
+            if (cellStyleToCSSRuleIndex.containsKey(key)) {
+                int ruleIndex = cellStyleToCSSRuleIndex.get(key);
                 try {
                     replaceSelector(sheetStyle, selector, ruleIndex);
                 } catch (Exception e) {
                     ruleIndex = insertRule(sheetStyle,
                             selector + "{" + entry.getValue() + "}");
-                    cellStyleIndexMap.put(key, ruleIndex);
+                    cellStyleToCSSRuleIndex.put(key, ruleIndex);
                 }
             } else {
                 final String style = entry.getValue();
                 if (style != null) {
                     int ruleIndex = insertRule(sheetStyle, selector + "{"
                             + style + "}");
-                    cellStyleIndexMap.put(key, ruleIndex);
+                    cellStyleToCSSRuleIndex.put(key, ruleIndex);
                 }
             }
         }
@@ -4409,6 +4431,26 @@ public class SheetWidget extends Panel {
             top += element.getOffsetHeight();
         }
         hyperlinkTooltip.setPopupPosition(left, top);
+    }
+
+    public void setDisplayGridlines(boolean displayGridlines) {
+        if (displayGridlines) {
+            spreadsheet.removeClassName(NO_GRIDLINES_CLASSNAME);
+        } else {
+            spreadsheet.addClassName(NO_GRIDLINES_CLASSNAME);
+        }
+    }
+
+    public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
+        this.displayRowColHeadings = displayRowColHeadings;
+
+        if (displayRowColHeadings) {
+            spreadsheet.removeClassName(NO_ROWCOLHEADINGS_CLASSNAME);
+        } else {
+            spreadsheet.addClassName(NO_ROWCOLHEADINGS_CLASSNAME);
+        }
+
+        moveHeadersToMatchScroll();
     }
 
 }

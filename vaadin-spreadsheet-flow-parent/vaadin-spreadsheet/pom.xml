@@ -18,10 +18,11 @@
 		<tag>Spreadsheet add-on for Vaadin</tag> </scm> -->
 
 	<properties>
+        <skipTests>false</skipTests>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.1.7</vaadin.version>
+		<vaadin.version>7.1.15</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
-		<poi.version>3.10-beta2</poi.version>
+		<poi.version>3.10-FINAL</poi.version>
 		<tb.hub>testbench-hub.intra.itmill.com</tb.hub>
 
 		<!-- ZIP Manifest fields -->

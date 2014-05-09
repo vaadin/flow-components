@@ -81,7 +81,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /** 1-based */
     private int activeSheetIndex;
 
-    private Map<Integer, String> indexToStyleMap;
+    private Map<Integer, String> cellStyleToCSSStyle;
 
     private List<String> customCellBorderStyles;
 
@@ -251,8 +251,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         return sheetContextMenuHandler != null;
     }
 
-    public void setCellStyles(HashMap<Integer, String> selectorsToStyle) {
-        sheetWidget.updateVisibleCellStyles(selectorsToStyle);
+    public void setCellStyleToCSSSelector(
+            HashMap<Integer, String> cellStyleToCSSSelector) {
+        sheetWidget.updateCellStyleCSSRules(cellStyleToCSSSelector);
     }
 
     public void addRequestedCells(HashMap<String, String> cellData) {
@@ -2268,8 +2269,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         this.horizontalScrollPositions = horizontalScrollPositions;
     }
 
-    public void setIndexToStyleMap(Map<Integer, String> indexToStyleMap) {
-        this.indexToStyleMap = indexToStyleMap;
+    public void setCellStyleToCSSStyle(Map<Integer, String> cellStyleToCSSStyle) {
+        this.cellStyleToCSSStyle = cellStyleToCSSStyle;
     }
 
     public void setCustomCellBorderStyles(List<String> customCellBorderStyles) {
@@ -2329,12 +2330,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     @Override
-    public Map<Integer, String> getCellStyles() {
-        if (indexToStyleMap != null) {
-            return indexToStyleMap;
-        } else {
-            return null;
-        }
+    public Map<Integer, String> getCellStyleToCSSStyle() {
+        return cellStyleToCSSStyle;
     }
 
     @Override
@@ -2469,4 +2466,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         return !sheetProtected;
     }
 
+    public void setDisplayGridlines(boolean displayGridlines) {
+        sheetWidget.setDisplayGridlines(displayGridlines);
+    }
+
+    public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
+        sheetWidget.setDisplayRowColHeadings(displayRowColHeadings);
+    }
 }

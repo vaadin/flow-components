@@ -3180,6 +3180,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         reloadSheets();
 
+        getState().displayGridlines = getActiveSheet().isDisplayGridlines();
+        getState().displayRowColHeadings = getActiveSheet()
+                .isDisplayRowColHeadings();
+
         markAsDirty();
     }
 
@@ -3539,13 +3543,13 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         if (removedCells.isEmpty()) {
             getRpcProxy(SpreadsheetClientRpc.class).addCells(updatedCellData,
-                    getCellIndexToStyleMap());
+                    createCellStyleToCSSSelector());
         } else {
             // FIXME investigate why HashSet<String> is not
             // serializing/deserializing
             getRpcProxy(SpreadsheetClientRpc.class).addUpdatedCells(
                     updatedCellData, new ArrayList<String>(removedCells),
-                    getCellIndexToStyleMap());
+                    createCellStyleToCSSSelector());
         }
         markedCells.clear();
         removedCells.clear();
@@ -3614,7 +3618,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 }
             }
             getRpcProxy(SpreadsheetClientRpc.class).addCells(map,
-                    getCellIndexToStyleMap());
+                    createCellStyleToCSSSelector());
 
             SpreadsheetFactory.logMemoryUsage();
         } catch (NullPointerException npe) {
@@ -3931,9 +3935,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
     }
 
-    private final HashMap<Integer, String> getCellIndexToStyleMap() {
+    private final HashMap<Integer, String> createCellStyleToCSSSelector() {
         // add the cell selector to correct style index
-        HashMap<Integer, String> styleMap = new HashMap<Integer, String>();
+        HashMap<Integer, String> cellStyleToCSSSelector = new HashMap<Integer, String>();
 
         final Sheet activeSheet = workbook.getSheetAt(workbook
                 .getActiveSheetIndex());
@@ -3946,25 +3950,53 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     if (cell != null) {
                         Integer cellStyleKey = (int) cell.getCellStyle()
                                 .getIndex();
+
+                        if (cell.getCellStyle().getAlignment() == CellStyle.ALIGN_GENERAL) {
+                            if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+                                cellStyleKey = SpreadsheetStyleFactory
+                                        .getLeftAlignedStyleIndex(cellStyleKey);
+                            } else if (cellContainsDate(cell)) {
+                                cellStyleKey = SpreadsheetStyleFactory
+                                        .getRightAlignedStyleIndex(cellStyleKey);
+                            } else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                cellStyleKey = SpreadsheetStyleFactory
+                                        .getRightAlignedStyleIndex(cellStyleKey);
+                            }
+                        }
+
                         if (cellStyleKey != 0) { // default style
-                            if (styleMap.containsKey(cellStyleKey)) {
-                                styleMap.put(cellStyleKey,
-                                        styleMap.get(cellStyleKey) + ",.col"
+                            if (cellStyleToCSSSelector
+                                    .containsKey(cellStyleKey)) {
+                                cellStyleToCSSSelector.put(
+                                        cellStyleKey,
+                                        cellStyleToCSSSelector
+                                                .get(cellStyleKey)
+                                                + ",.col"
                                                 + (cell.getColumnIndex() + 1)
                                                 + ".row"
                                                 + (cell.getRowIndex() + 1));
                             } else {
-                                styleMap.put(cellStyleKey,
-                                        ".col" + (cell.getColumnIndex() + 1)
-                                                + ".row"
-                                                + (cell.getRowIndex() + 1));
+                                cellStyleToCSSSelector.put(cellStyleKey, ".col"
+                                        + (cell.getColumnIndex() + 1) + ".row"
+                                        + (cell.getRowIndex() + 1));
                             }
                         }
                     }
                 }
             }
         }
-        return styleMap;
+        return cellStyleToCSSSelector;
+    }
+
+    // TODO: does this work? how to do it?
+    private boolean cellContainsDate(Cell cell) {
+        try {
+            Date date = cell.getDateCellValue();
+            return date != null;
+        } catch (NumberFormatException e) {
+        }
+
+        return false;
     }
 
     public void setSpreadsheetComponentFactory(
@@ -4406,6 +4438,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private void fireSelectedSheetChangeEvent(Sheet previousSheet,
             Sheet newSheet) {
         int newSheetPOIIndex = workbook.getActiveSheetIndex();
+
         fireEvent(new SelectedSheetChangeEvent(this, newSheet, previousSheet,
                 getSpreadsheetSheetIndex(newSheetPOIIndex), newSheetPOIIndex));
     }
@@ -4469,4 +4502,37 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
 
     }
+
+    // TODO: can activeSheet() be null?
+
+    public boolean isDisplayGridLines() {
+        if (getActiveSheet() != null) {
+            return getActiveSheet().isDisplayGridlines();
+        }
+        return true;
+    }
+
+    public void setDisplayGridlines(boolean displayGridlines) {
+        if (getActiveSheet() == null) {
+            throw new NullPointerException("no active sheet");
+        }
+        getActiveSheet().setDisplayGridlines(displayGridlines);
+        getState().displayGridlines = displayGridlines;
+    }
+
+    public boolean isDisplayRowColHeadings() {
+        if (getActiveSheet() != null) {
+            return getActiveSheet().isDisplayRowColHeadings();
+        }
+        return true;
+    }
+
+    public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
+        if (getActiveSheet() == null) {
+            throw new NullPointerException("no active sheet");
+        }
+        getActiveSheet().setDisplayRowColHeadings(displayRowColHeadings);
+        getState().displayRowColHeadings = displayRowColHeadings;
+    }
+
 }

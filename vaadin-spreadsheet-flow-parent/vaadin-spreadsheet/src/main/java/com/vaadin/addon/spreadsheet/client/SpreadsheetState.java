@@ -39,7 +39,7 @@ public class SpreadsheetState extends AbstractComponentState {
     public String[] sheetNames = null;
 
     @DelegateToWidget
-    public Map<Integer, String> indexToStyleMap = null;
+    public Map<Integer, String> cellStyleToCSSStyle = null;
 
     @DelegateToWidget
     public List<String> customCellBorderStyles = null;
@@ -81,4 +81,10 @@ public class SpreadsheetState extends AbstractComponentState {
     public Map<String, ImageInfo> resourceKeyToImage;
 
     public List<MergedRegion> mergedRegions;
+
+    @DelegateToWidget
+    public boolean displayGridlines = true;
+
+    @DelegateToWidget
+    public boolean displayRowColHeadings = true;
 }

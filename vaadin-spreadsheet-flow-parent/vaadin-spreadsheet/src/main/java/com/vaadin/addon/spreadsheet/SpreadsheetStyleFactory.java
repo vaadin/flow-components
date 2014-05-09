@@ -111,6 +111,11 @@ public class SpreadsheetStyleFactory {
             BORDER_SLANTED_DASH_DOT, BorderStyle.DASHED_MEDIUM, BORDER_THICK,
             BorderStyle.SOLID_THICK, BORDER_THIN, BorderStyle.SOLID_THIN);
 
+    // custom cell style indices used to implement default alignment. all POI
+    // indices are non-negative
+    public static final int CELL_STYLE_INDEX_ALIGN_LEFT = -1;
+    public static final int CELL_STYLE_INDEX_ALIGN_RIGHT = -2;
+
     /** CellStyle index to selector + style map */
     private final HashMap<Integer, String> shiftedBorderTopStyles = new HashMap<Integer, String>();
     /** CellStyle index to selector + style map */
@@ -149,41 +154,114 @@ public class SpreadsheetStyleFactory {
 
     public void reloadWorkbookStyles() {
         final Workbook workbook = spreadsheet.getWorkbook();
-        if (spreadsheet.getState().indexToStyleMap == null) {
-            spreadsheet.getState().indexToStyleMap = new HashMap<Integer, String>(
+        if (spreadsheet.getState().cellStyleToCSSStyle == null) {
+            spreadsheet.getState().cellStyleToCSSStyle = new HashMap<Integer, String>(
                     workbook.getNumCellStyles());
         } else {
-            spreadsheet.getState().indexToStyleMap.clear();
+            spreadsheet.getState().cellStyleToCSSStyle.clear();
         }
         shiftedBorderLeftStyles.clear();
         shiftedBorderTopStyles.clear();
         mergedCellBorders.clear();
 
-        for (short i = 0; i < workbook.getNumCellStyles(); i++) {
-            CellStyle cellStyle = workbook.getCellStyleAt(i);
-            StringBuilder sb = new StringBuilder();
-            // 0 is a special case, the default style for cells
-            if (i == 0) {
-                defaultFontStyle(cellStyle, sb);
-                colorConverter.defaultColorStyles(cellStyle, sb);
-                defaultTextAlign = cellStyle.getAlignment();
-                defaultVerticalAlign = cellStyle.getVerticalAlignment();
-            } else {
-                fontStyle(sb, cellStyle);
-                colorConverter.colorStyles(cellStyle, sb);
-                if (cellStyle.getAlignment() != defaultTextAlign) {
-                    styleOut(sb, "text-align", cellStyle.getAlignment(), ALIGN);
-                }
-                if (cellStyle.getVerticalAlignment() != defaultVerticalAlign) {
-                    styleOut(sb, "vertical-align", cellStyle.getAlignment(),
-                            VERTICAL_ALIGN);
-                }
-            }
-            borderStyles(sb, cellStyle);
+        // get default text alignments
+        CellStyle cellStyle = workbook.getCellStyleAt((short) 0);
+        defaultTextAlign = cellStyle.getAlignment();
+        defaultVerticalAlign = cellStyle.getVerticalAlignment();
 
-            spreadsheet.getState().indexToStyleMap.put(
-                    (int) cellStyle.getIndex(), sb.toString());
+        // create default style
+        StringBuilder sb = new StringBuilder();
+        borderStyles(sb, cellStyle);
+        defaultFontStyle(cellStyle, sb);
+        colorConverter.defaultColorStyles(cellStyle, sb);
+        spreadsheet.getState().cellStyleToCSSStyle.put(
+                (int) cellStyle.getIndex(), sb.toString());
+
+        // create default style, left aligned
+        sb = new StringBuilder();
+        defaultFontStyle(cellStyle, sb);
+        borderStyles(sb, cellStyle);
+        colorConverter.defaultColorStyles(cellStyle, sb);
+        styleOut(sb, "text-align", ALIGN_LEFT, ALIGN);
+        spreadsheet.getState().cellStyleToCSSStyle.put(
+                getLeftAlignedStyleIndex(cellStyle.getIndex()), sb.toString());
+
+        // create default style, right aligned
+        sb = new StringBuilder();
+        defaultFontStyle(cellStyle, sb);
+        borderStyles(sb, cellStyle);
+        colorConverter.defaultColorStyles(cellStyle, sb);
+        styleOut(sb, "text-align", ALIGN_RIGHT, ALIGN);
+        spreadsheet.getState().cellStyleToCSSStyle.put(
+                getRightAlignedStyleIndex(cellStyle.getIndex()), sb.toString());
+
+        // 0 is default style, create all styles indexed from 1 and upwards
+        for (short i = 1; i < workbook.getNumCellStyles(); i++) {
+            cellStyle = workbook.getCellStyleAt(i);
+            addNormalCellStyleCSS(cellStyle);
+            addLeftAlignedCellStyleCSS(cellStyle);
+            addRightAlignedCellStyleCSS(cellStyle);
         }
+
+        // Notification.show(spreadsheet.getState().cellStyleToCSSStyle.toString());
+    }
+
+    private void addNormalCellStyleCSS(CellStyle cellStyle) {
+        StringBuilder sb = new StringBuilder();
+
+        fontStyle(sb, cellStyle);
+        colorConverter.colorStyles(cellStyle, sb);
+        borderStyles(sb, cellStyle);
+        if (cellStyle.getAlignment() != defaultTextAlign) {
+            styleOut(sb, "text-align", cellStyle.getAlignment(), ALIGN);
+        }
+        if (cellStyle.getVerticalAlignment() != defaultVerticalAlign) {
+            styleOut(sb, "vertical-align", cellStyle.getAlignment(),
+                    VERTICAL_ALIGN);
+        }
+
+        spreadsheet.getState().cellStyleToCSSStyle.put(
+                (int) cellStyle.getIndex(), sb.toString());
+    }
+
+    private void addLeftAlignedCellStyleCSS(CellStyle cellStyle) {
+        StringBuilder sb = new StringBuilder();
+
+        fontStyle(sb, cellStyle);
+        colorConverter.colorStyles(cellStyle, sb);
+        borderStyles(sb, cellStyle);
+        styleOut(sb, "text-align", ALIGN_LEFT, ALIGN);
+        if (cellStyle.getVerticalAlignment() != defaultVerticalAlign) {
+            styleOut(sb, "vertical-align", cellStyle.getAlignment(),
+                    VERTICAL_ALIGN);
+        }
+
+        spreadsheet.getState().cellStyleToCSSStyle.put(
+                getLeftAlignedStyleIndex(cellStyle.getIndex()), sb.toString());
+    }
+
+    private void addRightAlignedCellStyleCSS(CellStyle cellStyle) {
+        StringBuilder sb = new StringBuilder();
+
+        fontStyle(sb, cellStyle);
+        colorConverter.colorStyles(cellStyle, sb);
+        borderStyles(sb, cellStyle);
+        styleOut(sb, "text-align", ALIGN_RIGHT, ALIGN);
+        if (cellStyle.getVerticalAlignment() != defaultVerticalAlign) {
+            styleOut(sb, "vertical-align", cellStyle.getAlignment(),
+                    VERTICAL_ALIGN);
+        }
+
+        spreadsheet.getState().cellStyleToCSSStyle.put(
+                getRightAlignedStyleIndex(cellStyle.getIndex()), sb.toString());
+    }
+
+    static public int getLeftAlignedStyleIndex(int styleIndex) {
+        return -2 * styleIndex - 1;
+    }
+
+    static public int getRightAlignedStyleIndex(int styleIndex) {
+        return -2 * styleIndex - 2;
     }
 
     public CellStyle createHyperlinkCellStyle() {
@@ -345,22 +423,11 @@ public class SpreadsheetStyleFactory {
         }
 
         // if a new style was created
-        if (!spreadsheet.getState().indexToStyleMap.containsKey(key)) {
-            final CellStyle cellStyle = cell.getCellStyle();
-            final StringBuilder sb = new StringBuilder();
-            fontStyle(sb, cellStyle);
-            colorConverter.colorStyles(cellStyle, sb);
-            if (cellStyle.getAlignment() != defaultTextAlign) {
-                styleOut(sb, "text-align", cellStyle.getAlignment(), ALIGN);
-            }
-            if (cellStyle.getVerticalAlignment() != defaultVerticalAlign) {
-                styleOut(sb, "vertical-align", cellStyle.getAlignment(),
-                        VERTICAL_ALIGN);
-            }
-            borderStyles(sb, cellStyle);
-
-            spreadsheet.getState().indexToStyleMap.put(
-                    (int) cellStyle.getIndex(), sb.toString());
+        if (!spreadsheet.getState().cellStyleToCSSStyle.containsKey(key)) {
+            CellStyle cellStyle = cell.getCellStyle();
+            addNormalCellStyleCSS(cellStyle);
+            addLeftAlignedCellStyleCSS(cellStyle);
+            addRightAlignedCellStyleCSS(cellStyle);
         }
 
         // custom styles

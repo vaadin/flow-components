@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.Format;
 import java.util.Calendar;
@@ -60,6 +59,7 @@ import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
+import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
 public class SpreadsheetDemoUI extends UI implements Receiver {
@@ -92,6 +92,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private final Handler spreadsheetActionHandler = new SpreadsheetDefaultActionHandler();
 
+    private CheckBox gridlines;
+    private CheckBox rowColHeadings;
+
     public SpreadsheetDemoUI() {
         super();
         SpreadsheetFactory.logMemoryUsage();
@@ -107,6 +110,36 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         layout.setMargin(true);
         layout.setSizeFull();
+
+        gridlines = new CheckBox("display grid lines");
+        gridlines.setImmediate(true);
+
+        rowColHeadings = new CheckBox("display row and column headers");
+        rowColHeadings.setImmediate(true);
+
+        gridlines.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                Boolean display = (Boolean) event.getProperty().getValue();
+
+                if (spreadsheet != null) {
+                    spreadsheet.setDisplayGridlines(display);
+                }
+            }
+        });
+
+        rowColHeadings.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                Boolean display = (Boolean) event.getProperty().getValue();
+
+                if (spreadsheet != null) {
+                    spreadsheet.setDisplayRowColHeadings(display);
+                }
+            }
+        });
 
         Button newSpreadsheetButton = new Button("Create new",
                 new Button.ClickListener() {
@@ -133,6 +166,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         previousFile = null;
                         openTestSheetSelect.setValue(null);
 
+                        gridlines.setValue(spreadsheet.isDisplayGridLines());
+                        rowColHeadings.setValue(spreadsheet
+                                .isDisplayRowColHeadings());
                     }
                 });
 
@@ -142,7 +178,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             URL resource = classLoader.getResource("testsheets"
                     + File.separator);
             root = new File(resource.toURI());
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         FilesystemContainer testSheetContainer = new FilesystemContainer(root);
@@ -235,9 +271,16 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                             spreadsheet
                                     .setSpreadsheetComponentFactory(spreadsheetFieldFactory);
                         }
-                    }
+
+                        gridlines.setValue(spreadsheet.isDisplayGridLines());
+                        rowColHeadings.setValue(spreadsheet
+                                .isDisplayRowColHeadings());
+                    }                    
                 });
 
+        VerticalLayout checkBoxLayout = new VerticalLayout();
+        checkBoxLayout.addComponents(gridlines, rowColHeadings);
+        options.addComponent(checkBoxLayout);
         options.addComponent(newSpreadsheetButton);
         options.addComponent(customComponentTest);
         options.addComponent(openTestSheetSelect);
@@ -281,6 +324,10 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
             @Override
             public void onSelectedSheetChange(SelectedSheetChangeEvent event) {
+                gridlines.setValue(event.getNewSheet().isDisplayGridlines());
+                rowColHeadings.setValue(event.getNewSheet()
+                        .isDisplayRowColHeadings());
+
                 // Workbook workbook = ((Spreadsheet) event.getComponent())
                 // .getWorkbook();
                 // c.removeAllItems();

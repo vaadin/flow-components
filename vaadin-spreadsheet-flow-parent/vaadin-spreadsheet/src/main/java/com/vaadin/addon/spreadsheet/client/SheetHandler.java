@@ -122,7 +122,7 @@ public interface SheetHandler {
 
     int[] getRowHeightsPX();
 
-    Map<Integer, String> getCellStyles();
+    Map<Integer, String> getCellStyleToCSSStyle();
 
     List<String> getCustomCellBorderStyles();
 
