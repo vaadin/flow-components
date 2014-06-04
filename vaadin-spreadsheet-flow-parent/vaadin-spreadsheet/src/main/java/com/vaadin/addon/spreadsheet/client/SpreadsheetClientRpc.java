@@ -9,6 +9,7 @@ import com.vaadin.shared.communication.ClientRpc;
 public interface SpreadsheetClientRpc extends ClientRpc {
 
     void addCells(HashMap<String, String> cellData,
+            HashMap<String, Double> numericCellData,
             HashMap<Integer, String> selectorsToStyleMap);
 
     /**
@@ -33,6 +34,7 @@ public interface SpreadsheetClientRpc extends ClientRpc {
             int lastRow, String value, boolean formula, boolean locked);
 
     void addUpdatedCells(HashMap<String, String> updatedCellData,
+            HashMap<String, Double> numericCellData,
             ArrayList<String> removedCells, HashMap<Integer, String> hashMap);
 
     /**

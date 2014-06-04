@@ -256,13 +256,16 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         sheetWidget.updateCellStyleCSSRules(cellStyleToCSSSelector);
     }
 
-    public void addRequestedCells(HashMap<String, String> cellData) {
-        sheetWidget.addCellsData(cellData, null);
+    public void addRequestedCells(HashMap<String, String> cellData,
+            HashMap<String, Double> numericCellData) {
+        sheetWidget.addCellsData(cellData, numericCellData, null);
     }
 
     public void updateCellValues(HashMap<String, String> updatedCellData,
+            HashMap<String, Double> numericCellData,
             ArrayList<String> removedCells) {
-        sheetWidget.addCellsData(updatedCellData, removedCells);
+        sheetWidget
+                .addCellsData(updatedCellData, numericCellData, removedCells);
     }
 
     public void showCellCustomComponents(Map<String, Widget> customWidgetMap) {

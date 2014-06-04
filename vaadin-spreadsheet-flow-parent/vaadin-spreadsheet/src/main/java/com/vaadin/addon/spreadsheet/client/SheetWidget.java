@@ -190,6 +190,8 @@ public class SheetWidget extends Panel {
 
     private final HashMap<String, String> cellData;
 
+    private final HashMap<String, Double> numericCellData;
+
     private final HashMap<Integer, Integer> cellStyleToCSSRuleIndex;
 
     private Widget customEditorWidget;
@@ -278,6 +280,7 @@ public class SheetWidget extends Panel {
     public SheetWidget(SheetHandler view) {
         actionHandler = view;
         cellData = new HashMap<String, String>();
+        numericCellData = new HashMap<String, Double>();
         cellStyleToCSSRuleIndex = new HashMap<Integer, Integer>();
         alwaysVisibleCellComments = new HashMap<String, CellComment>();
         sheetImages = new HashMap<String, SheetImage>();
@@ -333,6 +336,7 @@ public class SheetWidget extends Panel {
     public void resetFromModel(final int scrollLeft, final int scrollTop) {
         loaded = false;
         cellData.clear();
+        numericCellData.clear();
         if (ppiCounter.hasParentElement()) {
             ppi = ppiCounter.getOffsetWidth();
         }
@@ -1387,12 +1391,12 @@ public class SheetWidget extends Panel {
                     if (actionHandler.isColumnHidden(index)) {
                         index--;
                     } else {
-                        int nextHeaderHeight = actionHandler
+                        int nextHeaderWidth = actionHandler
                                 .getColWidthActual(index);
-                        if (delta + nextHeaderHeight < 0) { // has 0-height
+                        if (delta + nextHeaderWidth < 0) { // has 0-width
                             newSizes.put(index, 0);
                             index--;
-                            delta += nextHeaderHeight;
+                            delta += nextHeaderWidth;
                         } else {
                             break;
                         }
@@ -1412,11 +1416,30 @@ public class SheetWidget extends Panel {
                     newSizes.put(resizedColumnIndex, px);
                 }
             }
+
             if (!newSizes.isEmpty()) {
                 actionHandler.onColumnsResized(newSizes);
+                updateColWidths(newSizes);
             }
         }
+
         resizedColumnIndex = -1;
+    }
+
+    private void updateColWidths(Map<Integer, Integer> newSizes) {
+        for (Entry<Integer, Integer> entry : newSizes.entrySet()) {
+            int col = entry.getKey() - 1;
+
+            for (int i = firstRowIndex; i <= lastRowIndex; i++) {
+                if (i - firstRowIndex < rows.size()) {
+                    ArrayList<Cell> cells = rows.get(i - firstRowIndex);
+                    if (col < cells.size()) {
+                        Cell cell = cells.get(col);
+                        cell.refreshWidth();
+                    }
+                }
+            }
+        }
     }
 
     private void handleRowResizeDrag(int clientX, int clientY) {
@@ -1852,12 +1875,12 @@ public class SheetWidget extends Panel {
     public final static native void updateCSSRule(StyleElement stylesheet,
             String selector, String property, String value)
     /*-{
-    	var classes = stylesheet.sheet.cssRules;
-    	for(var x=0;x<classes.length;x++) {
-    		if(classes[x].selectorText.toLowerCase()==selector) {
-    			classes[x].style[property]=value;
-    		}
-    	}	
+            var classes = stylesheet.sheet.cssRules;
+            for(var x=0;x<classes.length;x++) {
+                    if(classes[x].selectorText.toLowerCase()==selector) {
+                            classes[x].style[property]=value;
+                    }
+            }       
     }-*/;
 
     public final static native int replaceCssRule(StyleElement stylesheet,
@@ -2090,9 +2113,11 @@ public class SheetWidget extends Panel {
                     final Cell cell;
                     if (row.size() > (j - firstColumnIndex)) {
                         cell = row.get(j - firstColumnIndex);
-                        cell.update(j, i, cellData.get(toKey(j, i)));
+                        cell.update(j, i, cellData.get(toKey(j, i)),
+                                numericCellData.get(toKey(j, i)));
                     } else {
-                        cell = new Cell(j, i, cellData.get(toKey(j, i)));
+                        cell = new Cell(j, i, cellData.get(toKey(j, i)),
+                                numericCellData.get(toKey(j, i)));
                         sheet.appendChild(cell.getElement());
                         row.add(j - firstColumnIndex, cell);
                     }
@@ -2194,7 +2219,8 @@ public class SheetWidget extends Panel {
 
                     if (cIndex != cell.getCol() || rIndex != cell.getRow()) {
                         cell.update(cIndex, rIndex,
-                                cellData.get(toKey(cIndex, rIndex)));
+                                cellData.get(toKey(cIndex, rIndex)),
+                                numericCellData.get(toKey(cIndex, rIndex)));
                     }
                 }
                 if (hScrollDiff > 0) {
@@ -2206,6 +2232,7 @@ public class SheetWidget extends Panel {
                     while (lastC < lastColumnIndex) {
                         lastC++;
                         Cell cell = new Cell(lastC, rIndex, cellData.get(toKey(
+                                lastC, rIndex)), numericCellData.get(toKey(
                                 lastC, rIndex)));
                         sheet.appendChild(cell.getElement());
                         row.add(cell);
@@ -2219,7 +2246,8 @@ public class SheetWidget extends Panel {
                     while (firstC > firstColumnIndex) {
                         firstC--;
                         Cell cell = new Cell(firstC, rIndex,
-                                cellData.get(toKey(firstC, rIndex)));
+                                cellData.get(toKey(firstC, rIndex)),
+                                numericCellData.get(toKey(firstC, rIndex)));
                         sheet.appendChild(cell.getElement());
                         row.add(0, cell);
                     }
@@ -2244,7 +2272,7 @@ public class SheetWidget extends Panel {
                     lastR++;
                     for (int i = firstColumnIndex; i <= lastColumnIndex; i++) {
                         Cell cell = new Cell(i, lastR, cellData.get(toKey(i,
-                                lastR)));
+                                lastR)), numericCellData.get(toKey(i, lastR)));
                         row.add(cell);
                         sheet.appendChild(cell.getElement());
                     }
@@ -2257,7 +2285,7 @@ public class SheetWidget extends Panel {
                     firstR--;
                     for (int i = firstColumnIndex; i <= lastColumnIndex; i++) {
                         Cell cell = new Cell(i, firstR, cellData.get(toKey(i,
-                                firstR)));
+                                firstR)), numericCellData.get(toKey(i, firstR)));
                         row.add(cell);
                         sheet.appendChild(cell.getElement());
                     }
@@ -2550,7 +2578,7 @@ public class SheetWidget extends Panel {
     }
 
     private void addCustomWidgetToCell(Cell cell, Widget customWidget) {
-        cell.setValue(null);
+        cell.setValue(null, null);
         Widget parent = customWidget.getParent();
         if (parent != null) {
             if (equals(parent)) {
@@ -2608,7 +2636,7 @@ public class SheetWidget extends Panel {
                 selectionWidget.countSum(actionHandler.getRowHeights(),
                         region.row1, region.row2 + 1), Unit.PT);
         if (cellData.containsKey(key)) {
-            mergedCell.setValue(cellData.get(key));
+            mergedCell.setValue(cellData.get(key), numericCellData.get(key));
         }
         sheet.appendChild(element);
         mergedCells.put(region.id, mergedCell);
@@ -2633,7 +2661,8 @@ public class SheetWidget extends Panel {
             String oldKey, int index) {
         final String key = toKey(region.col1, region.row1);
         Cell mergedCell = mergedCells.remove(region.id);
-        mergedCell.update(region.col1, region.row1, mergedCell.getValue());
+        mergedCell
+                .update(region.col1, region.row1, mergedCell.getValue(), null);
         StringBuilder sb = new StringBuilder();
         for (int r = region.row1; r <= region.row2; r++) {
             for (int c = region.col1; c <= region.col2; c++) {
@@ -3015,13 +3044,16 @@ public class SheetWidget extends Panel {
      * @param removedCells
      */
     public void addCellsData(HashMap<String, String> cellData2,
+            HashMap<String, Double> numericCellData2,
             ArrayList<String> removedCells) {
         // clear cached stuff
+
         if (removedCells != null) {
             for (String removed : removedCells) {
                 cellData.remove(removed);
+                numericCellData.remove(removed);
                 if (isMergedCell(removed)) {
-                    getMergedCell(removed).setValue(null);
+                    getMergedCell(removed).setValue(null, null);
                 }
             }
         }
@@ -3038,14 +3070,16 @@ public class SheetWidget extends Panel {
                         continue;
                     }
                     final String value = cellData2.get(key);
+                    Double numericValue = numericCellData2.get(key);
                     if (value != null) {
-                        row.get(c - firstColumnIndex).setValue(value);
+                        row.get(c - firstColumnIndex).setValue(value,
+                                numericValue);
                     } else // the cell should be cleared if it is blank
                            // (cellData2 contains key but has null value)
                            // or if it has been "removed"
                     if ((cellData2.containsKey(key) || (removedCells != null && removedCells
                             .contains(key)))) {
-                        row.get(c - firstColumnIndex).setValue(null);
+                        row.get(c - firstColumnIndex).setValue(null, null);
                     }
                 }
                 // remove the row key so it is not unnecessarily cached
@@ -3061,17 +3095,19 @@ public class SheetWidget extends Panel {
                         continue;
                     }
                     if (removedCells.contains(key)) {
-                        row.get(j - firstColumnIndex).setValue(null);
+                        row.get(j - firstColumnIndex).setValue(null, null);
                     }
                 }
             }
         }
         for (String key : cellData2.keySet()) {
             if (isMergedCell(key)) {
-                getMergedCell(key).setValue(cellData2.get(key));
+                getMergedCell(key).setValue(cellData2.get(key),
+                        numericCellData2.get(key));
             }
         }
         cellData.putAll(cellData2);
+        numericCellData.putAll(numericCellData2);
     }
 
     /**
@@ -3149,7 +3185,7 @@ public class SheetWidget extends Panel {
         try {
             final Cell selectedCell = rows.get(selectedCellRow - firstRowIndex)
                     .get(selectedCellCol - firstColumnIndex);
-            selectedCell.setValue(value);
+            selectedCell.setValue(value, null);
             int textWidth = selectedCell.getElement().getOffsetWidth() + 5;
             int col = selectedCell.getCol();
             int width;
@@ -3207,6 +3243,7 @@ public class SheetWidget extends Panel {
         }
         cleanDOM();
         cellData.clear();
+        numericCellData.clear();
 
         clearPositionStyles();
         clearCellRangeStyles();
@@ -3730,7 +3767,7 @@ public class SheetWidget extends Panel {
         replaceSelector(editedCellStyle, ".notusedselector", 0);
         this.customEditorWidget = customEditorWidget;
         Cell selectedCell = getSelectedCell();
-        selectedCell.setValue(null);
+        selectedCell.setValue(null, null);
 
         Widget parent = customEditorWidget.getParent();
         if (parent != null && !equals(parent)) {
@@ -3751,7 +3788,7 @@ public class SheetWidget extends Panel {
             customEditorWidget.removeFromParent();
             // the cell value should have been updated
             if (loaded) {
-                getSelectedCell().setValue(getSelectedCellLatestValue());
+                getSelectedCell().setValue(getSelectedCellLatestValue(), null);
             }
             customEditorWidget = null;
         }
@@ -3808,7 +3845,8 @@ public class SheetWidget extends Panel {
     public void updateSelectedCellValue(String value) {
         if (isSelectedCellInView()) {
             rows.get(selectedCellRow - firstRowIndex)
-                    .get(selectedCellCol - firstColumnIndex).setValue(value);
+                    .get(selectedCellCol - firstColumnIndex)
+                    .setValue(value, null);
         }
         cellData.put(toKey(getSelectedCellColumn(), getSelectedCellRow()),
                 value);
@@ -4067,12 +4105,13 @@ public class SheetWidget extends Panel {
             for (int j = col1; j <= col2; j++) {
                 String key = toKey(j, i);
                 cellData.remove(key);
+                numericCellData.remove(key);
             }
             if (i >= firstRowIndex && i <= lastRowIndex) {
                 ArrayList<Cell> row = rows.get(i - firstRowIndex);
                 for (int j = col1; j <= col2; j++) {
                     Cell cell = row.get(j - firstColumnIndex);
-                    cell.setValue("");
+                    cell.setValue("", null);
                 }
             }
         }

@@ -33,8 +33,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
 
         @Override
         public void addCells(HashMap<String, String> cellData,
+                HashMap<String, Double> numericCellData,
                 HashMap<Integer, String> cellStyleToCSSSelector) {
-            getWidget().addRequestedCells(cellData);
+            getWidget().addRequestedCells(cellData, numericCellData);
             getWidget().setCellStyleToCSSSelector(cellStyleToCSSSelector);
         }
 
@@ -65,9 +66,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
 
         @Override
         public void addUpdatedCells(HashMap<String, String> updatedCellData,
+                HashMap<String, Double> numericCellData,
                 ArrayList<String> removedCells,
                 HashMap<Integer, String> cellStyleToCSSSelector) {
-            getWidget().updateCellValues(updatedCellData, removedCells);
+            getWidget().updateCellValues(updatedCellData, numericCellData, removedCells);
             getWidget().setCellStyleToCSSSelector(cellStyleToCSSSelector);
         }
 

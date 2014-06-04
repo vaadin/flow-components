@@ -169,7 +169,7 @@ public class SpreadsheetStyleFactory {
         defaultTextAlign = cellStyle.getAlignment();
         defaultVerticalAlign = cellStyle.getVerticalAlignment();
 
-        // create default style
+        // create default style (cell style 0)
         StringBuilder sb = new StringBuilder();
         borderStyles(sb, cellStyle);
         defaultFontStyle(cellStyle, sb);
@@ -199,11 +199,10 @@ public class SpreadsheetStyleFactory {
         for (short i = 1; i < workbook.getNumCellStyles(); i++) {
             cellStyle = workbook.getCellStyleAt(i);
             addNormalCellStyleCSS(cellStyle);
+            // add custom styles for cells without specified alignment
             addLeftAlignedCellStyleCSS(cellStyle);
             addRightAlignedCellStyleCSS(cellStyle);
         }
-
-        // Notification.show(spreadsheet.getState().cellStyleToCSSStyle.toString());
     }
 
     private void addNormalCellStyleCSS(CellStyle cellStyle) {
@@ -256,6 +255,7 @@ public class SpreadsheetStyleFactory {
                 getRightAlignedStyleIndex(cellStyle.getIndex()), sb.toString());
     }
 
+    // calculate index for custom style. all POI indices are non-negative
     static public int getLeftAlignedStyleIndex(int styleIndex) {
         return -2 * styleIndex - 1;
     }

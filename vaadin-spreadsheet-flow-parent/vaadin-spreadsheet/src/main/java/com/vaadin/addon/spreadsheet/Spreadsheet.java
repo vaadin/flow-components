@@ -42,6 +42,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
@@ -3449,6 +3450,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         // not replace a custom component with a cell value
 
         final HashMap<String, String> updatedCellData = new HashMap<String, String>();
+        final HashMap<String, Double> numericCellData = new HashMap<String, Double>();
 
         Sheet sheet = getActiveSheet();
         if (r1 != 0) {
@@ -3468,6 +3470,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                                 sentCells.add(key);
                                 updatedCellData.put(key, value);
                                 rowHasContent = true;
+
+                                if (!cellContainsDate(cell)
+                                        && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    numericCellData.put(key,
+                                            cell.getNumericCellValue());
+                                }
                             }
                         } else if (sentCells.contains(key)) {
                             // cell doesn't exist, if it was removed the cell
@@ -3533,6 +3541,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     sentCells.add(key);
                     updatedCellData.put(key, value);
                     rowHasContent = true;
+
+                    if (!cellContainsDate(cell)
+                            && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                        numericCellData.put(key, cell.getNumericCellValue());
+                    }
+
                 }
             }
             if (rowHasContent) {
@@ -3543,12 +3557,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         if (removedCells.isEmpty()) {
             getRpcProxy(SpreadsheetClientRpc.class).addCells(updatedCellData,
-                    createCellStyleToCSSSelector());
+                    numericCellData, createCellStyleToCSSSelector());
+
         } else {
             // FIXME investigate why HashSet<String> is not
             // serializing/deserializing
             getRpcProxy(SpreadsheetClientRpc.class).addUpdatedCells(
-                    updatedCellData, new ArrayList<String>(removedCells),
+                    updatedCellData, numericCellData,
+                    new ArrayList<String>(removedCells),
                     createCellStyleToCSSSelector());
         }
         markedCells.clear();
@@ -3579,7 +3595,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         // hssf (xls) document contain something on all rows & columns, as xssf
         // (xlsx) documents don't (empty rows and cells just don't exist)
         try {
-            final HashMap<String, String> map = new HashMap<String, String>();
+            final HashMap<String, String> cellDataMap = new HashMap<String, String>();
+            final HashMap<String, Double> numericCellDataMap = new HashMap<String, Double>();
             final Sheet activeSheet = workbook.getSheetAt(workbook
                     .getActiveSheetIndex());
             Map<String, String> componentIDtoCellKeysMap = getState().componentIDtoCellKeysMap;
@@ -3600,12 +3617,19 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                             if (cell != null) {
                                 final String contents = getCellValue(cell);
                                 if (contents != null && !contents.isEmpty()) {
-                                    map.put(key, contents);
+                                    cellDataMap.put(key, contents);
                                     if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
                                         sentFormulaCells.add(key);
                                     } else {
                                         sentCells.add(key);
                                     }
+
+                                    if (!cellContainsDate(cell)
+                                            && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                        numericCellDataMap.put(key,
+                                                cell.getNumericCellValue());
+                                    }
+
                                     rowHasContent = true;
                                 }
                             }
@@ -3613,12 +3637,13 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     }
                     if (rowHasContent) {
                         final String key = Integer.toString(r + 1);
-                        map.put(key, null);
+                        cellDataMap.put(key, null);
                     }
                 }
             }
-            getRpcProxy(SpreadsheetClientRpc.class).addCells(map,
-                    createCellStyleToCSSSelector());
+
+            getRpcProxy(SpreadsheetClientRpc.class).addCells(cellDataMap,
+                    numericCellDataMap, createCellStyleToCSSSelector());
 
             SpreadsheetFactory.logMemoryUsage();
         } catch (NullPointerException npe) {
@@ -3951,6 +3976,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                         Integer cellStyleKey = (int) cell.getCellStyle()
                                 .getIndex();
 
+                        // get a new cellStyleKey with proper default alignment
+                        // if cell has unspecified alignment
                         if (cell.getCellStyle().getAlignment() == CellStyle.ALIGN_GENERAL) {
                             if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
                                 cellStyleKey = SpreadsheetStyleFactory
@@ -3988,15 +4015,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         return cellStyleToCSSSelector;
     }
 
-    // TODO: does this work? how to do it?
     private boolean cellContainsDate(Cell cell) {
-        try {
-            Date date = cell.getDateCellValue();
-            return date != null;
-        } catch (NumberFormatException e) {
-        }
-
-        return false;
+        return cell.getCellType() == Cell.CELL_TYPE_NUMERIC
+                && DateUtil.isCellDateFormatted(cell);
     }
 
     public void setSpreadsheetComponentFactory(

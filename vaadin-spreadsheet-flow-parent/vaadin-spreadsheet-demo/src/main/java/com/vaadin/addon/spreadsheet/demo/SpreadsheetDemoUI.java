@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.Format;
 import java.util.Calendar;
@@ -177,8 +178,10 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             ClassLoader classLoader = SpreadsheetDemoUI.class.getClassLoader();
             URL resource = classLoader.getResource("testsheets"
                     + File.separator);
-            root = new File(resource.toURI());
-        } catch (Exception e) {
+            if (resource != null) {
+                root = new File(resource.toURI());
+            }
+        } catch (URISyntaxException e) {
             e.printStackTrace();
         }
         FilesystemContainer testSheetContainer = new FilesystemContainer(root);
@@ -275,7 +278,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         gridlines.setValue(spreadsheet.isDisplayGridLines());
                         rowColHeadings.setValue(spreadsheet
                                 .isDisplayRowColHeadings());
-                    }                    
+                    }
                 });
 
         VerticalLayout checkBoxLayout = new VerticalLayout();
