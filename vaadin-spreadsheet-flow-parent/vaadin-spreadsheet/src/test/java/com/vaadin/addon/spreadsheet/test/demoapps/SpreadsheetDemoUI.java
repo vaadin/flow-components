@@ -2,8 +2,10 @@ package com.vaadin.addon.spreadsheet.test.demoapps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.Format;
@@ -36,6 +38,7 @@ import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
@@ -47,10 +50,14 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.Upload;
+import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Upload.SucceededEvent;
+import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
-public class SpreadsheetDemoUI extends UI {
+public class SpreadsheetDemoUI extends UI implements Receiver {
 
     VerticalLayout layout = new VerticalLayout();
 
@@ -72,6 +79,14 @@ public class SpreadsheetDemoUI extends UI {
 
     private Button update;
 
+    private CheckBox gridlines;
+
+    private AbstractField<Boolean> rowColHeadings;
+
+    private Upload upload = new Upload(null, this);
+
+    private File uploadedFile;
+
     public SpreadsheetDemoUI() {
         super();
         SpreadsheetFactory.logMemoryUsage();
@@ -87,6 +102,36 @@ public class SpreadsheetDemoUI extends UI {
 
         layout.setMargin(true);
         layout.setSizeFull();
+
+        gridlines = new CheckBox("display grid lines");
+        gridlines.setImmediate(true);
+
+        rowColHeadings = new CheckBox("display row and column headers");
+        rowColHeadings.setImmediate(true);
+
+        gridlines.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                Boolean display = (Boolean) event.getProperty().getValue();
+
+                if (spreadsheet != null) {
+                    spreadsheet.setDisplayGridlines(display);
+                }
+            }
+        });
+
+        rowColHeadings.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                Boolean display = (Boolean) event.getProperty().getValue();
+
+                if (spreadsheet != null) {
+                    spreadsheet.setDisplayRowColHeadings(display);
+                }
+            }
+        });
 
         Button newSpreadsheetButton = new Button("Create new",
                 new Button.ClickListener() {
@@ -110,7 +155,9 @@ public class SpreadsheetDemoUI extends UI {
                         save.setEnabled(true);
                         previousFile = null;
                         openTestSheetSelect.setValue(null);
-
+                        gridlines.setValue(spreadsheet.isDisplayGridLines());
+                        rowColHeadings.setValue(spreadsheet
+                                .isDisplayRowColHeadings());
                     }
                 });
 
@@ -213,9 +260,23 @@ public class SpreadsheetDemoUI extends UI {
                             spreadsheet
                                     .setSpreadsheetComponentFactory(spreadsheetFieldFactory);
                         }
+                        gridlines.setValue(spreadsheet.isDisplayGridLines());
+                        rowColHeadings.setValue(spreadsheet
+                                .isDisplayRowColHeadings());
                     }
                 });
 
+        upload.addSucceededListener(new SucceededListener() {
+
+            @Override
+            public void uploadSucceeded(SucceededEvent event) {
+                loadFile(uploadedFile);
+            }
+        });
+
+        VerticalLayout checkBoxLayout = new VerticalLayout();
+        checkBoxLayout.addComponents(gridlines, rowColHeadings);
+        options.addComponent(checkBoxLayout);
         options.addComponent(newSpreadsheetButton);
         options.addComponent(customComponentTest);
         options.addComponent(openTestSheetSelect);
@@ -232,6 +293,8 @@ public class SpreadsheetDemoUI extends UI {
                 }
             }
         }));
+        options.addComponent(upload);
+
         HorizontalLayout sheetOptions = new HorizontalLayout();
         sheetOptions.setSpacing(true);
         sheetOptions.addComponent(save);
@@ -264,6 +327,8 @@ public class SpreadsheetDemoUI extends UI {
                 // + ", New Sheet: " + event.getNewSheet().getSheetName()
                 // + " index: " + event.getNewSheetVisibleIndex()
                 // + " POIIndex: " + event.getNewSheetPOIIndex());
+                gridlines.setValue(spreadsheet.isDisplayGridLines());
+                rowColHeadings.setValue(spreadsheet.isDisplayRowColHeadings());
             }
         };
 
@@ -308,6 +373,8 @@ public class SpreadsheetDemoUI extends UI {
             previousFile = file;
             save.setEnabled(true);
             download.setEnabled(false);
+            gridlines.setValue(spreadsheet.isDisplayGridLines());
+            rowColHeadings.setValue(spreadsheet.isDisplayRowColHeadings());
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -740,5 +807,20 @@ public class SpreadsheetDemoUI extends UI {
             return testWorkbook;
         }
 
+    }
+
+    @Override
+    public OutputStream receiveUpload(final String filename, String mimeType) {
+        try {
+            File file = new File(filename);
+            file.deleteOnExit();
+            uploadedFile = file;
+            FileOutputStream fos = new FileOutputStream(uploadedFile);
+            return fos;
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 }

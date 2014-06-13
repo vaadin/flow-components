@@ -21,13 +21,13 @@ import com.vaadin.client.ui.VOverlay;
 public class PopupButtonWidget extends FocusWidget implements ClickHandler,
         HasCloseHandlers<PopupPanel> {
 
-    protected static final String FILTER_BUTTON_CLASSNAME = "popupbutton";
-    protected static final String FILTER_ARROW_CLASSNAME = FILTER_BUTTON_CLASSNAME
+    protected static final String BUTTON_CLASSNAME = "popupbutton";
+    protected static final String BUTTON_ARROW_CLASSNAME = BUTTON_CLASSNAME
             + "-arrow";
-    protected static final String FILTER_OVERLAY_CLASSNAME = "v-spreadsheet-"
-            + FILTER_BUTTON_CLASSNAME + "-overlay";
-    protected static final String FILTER_OVERLAY_LAYOUT_CLASSNAME = "overlay-layout";
-    protected static final String FILTER_ACTIVE_CLASSNAME = "active";
+    protected static final String POPUP_OVERLAY_CLASSNAME = "v-spreadsheet-"
+            + BUTTON_CLASSNAME + "-overlay";
+    protected static final String POPUP_OVERLAY_LAYOUT_CLASSNAME = "overlay-layout";
+    protected static final String BUTTON_ACTIVE_CLASSNAME = "active";
 
     private final DivElement root = Document.get().createDivElement();
     private final DivElement arrow = Document.get().createDivElement();
@@ -61,22 +61,22 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     private final PopupButtonHeader popupHeader;
     private final VerticalPanel popupLayout;
 
-    private final List<Widget> filters = new ArrayList<Widget>();
+    private final List<Widget> popupChildrenWidgets = new ArrayList<Widget>();
     private DivElement sheet;
     private int col;
     private int row;
     private SheetWidget owner;
 
     public PopupButtonWidget() {
-        root.setClassName(FILTER_BUTTON_CLASSNAME);
+        root.setClassName(BUTTON_CLASSNAME);
         root.setAttribute("role", "button");
-        arrow.setClassName(FILTER_ARROW_CLASSNAME);
+        arrow.setClassName(BUTTON_ARROW_CLASSNAME);
         root.appendChild(arrow);
 
         popup = new VOverlay(true, false, true);
-        popup.setStyleName(FILTER_OVERLAY_CLASSNAME);
+        popup.setStyleName(POPUP_OVERLAY_CLASSNAME);
         popupLayout = new VerticalPanel();
-        popupLayout.setStylePrimaryName(FILTER_OVERLAY_LAYOUT_CLASSNAME);
+        popupLayout.setStylePrimaryName(POPUP_OVERLAY_LAYOUT_CLASSNAME);
         popupHeader = new PopupButtonHeader();
         popupHeader.setPopup(popup);
         popupLayout.add(popupHeader);
@@ -95,6 +95,8 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     }
 
     /**
+     * 1-based
+     * 
      * @return the col
      */
     public int getCol() {
@@ -102,6 +104,8 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     }
 
     /**
+     * 1-based
+     * 
      * @param col
      *            the col to set
      */
@@ -110,6 +114,8 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     }
 
     /**
+     * 1-based
+     * 
      * @return the row
      */
     public int getRow() {
@@ -117,6 +123,8 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     }
 
     /**
+     * 1-based
+     * 
      * @param row
      *            the row to set
      */
@@ -124,18 +132,30 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
         this.row = row;
     }
 
+    /**
+     * 1-based
+     * 
+     * @param row
+     * @param col
+     */
     public void setRowCol(int row, int col) {
         Widget owner = popup.getOwner();
         if (owner != null && owner instanceof SheetWidget) {
             ((SheetWidget) owner).updatePopupButtonPosition(this, this.row,
                     this.col, row, col);
         }
+        getElement().removeClassName("c" + this.col + "r" + this.row);
         this.col = col;
         this.row = row;
+        getElement().addClassName("c" + this.col + "r" + this.row);
     }
 
     @Override
     public void onClick(ClickEvent event) {
+        openPopupOverlay();
+    }
+
+    protected void openPopupOverlay() {
         Element parentElement = root.getParentElement();
         if (parentElement != null) {
             popup.setPopupPositionAndShow(callback);
@@ -149,20 +169,20 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
 
     public void markActive(boolean active) {
         if (active) {
-            root.addClassName(FILTER_ACTIVE_CLASSNAME);
+            root.addClassName(BUTTON_ACTIVE_CLASSNAME);
         } else {
-            root.removeClassName(FILTER_ACTIVE_CLASSNAME);
+            root.removeClassName(BUTTON_ACTIVE_CLASSNAME);
         }
     }
 
-    public void addPopupComponent(Widget filter) {
-        filters.add(filter);
-        popupLayout.add(filter);
+    public void addPopupComponent(Widget widget) {
+        popupChildrenWidgets.add(widget);
+        popupLayout.add(widget);
     }
 
-    public void removePopupComponent(Widget filter) {
-        filters.remove(filter);
-        popupLayout.remove(filter);
+    public void removePopupComponent(Widget widget) {
+        popupChildrenWidgets.remove(widget);
+        popupLayout.remove(widget);
     }
 
     public void setPopupHeight(String popupHeight) {
@@ -182,7 +202,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     }
 
     /**
-     * Override the position callback method for the filter's popup.
+     * Override the position callback method for the button's popup.
      * 
      * @param positionCallback
      *            not null
@@ -194,7 +214,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     }
 
     /**
-     * Returns the position callback method used for the filter's popup.
+     * Returns the position callback method used for the button's popup.
      * 
      * @return
      */
@@ -219,6 +239,20 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     @Override
     public HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler) {
         return popup.addCloseHandler(handler);
+    }
+
+    public boolean isPopupClosed() {
+        return popup.isShowing();
+    }
+
+    public void closePopup() {
+        popup.hide();
+    }
+
+    public void openPopup() {
+        if (owner != null && owner.isCellInView(col, row)) {
+            openPopupOverlay();
+        }
     }
 
 }

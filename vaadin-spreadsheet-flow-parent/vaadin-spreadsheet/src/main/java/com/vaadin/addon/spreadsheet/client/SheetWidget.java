@@ -324,6 +324,13 @@ public class SheetWidget extends Panel {
         });
     }
 
+    @Override
+    public void onUnload() {
+        super.onUnload();
+        hyperlinkTooltip.hide();
+        resizeTooltip.hide();
+    }
+
     protected void requestCells() {
         actionHandler.onScrollViewChanged(firstRowIndex, lastRowIndex,
                 firstColumnIndex, lastColumnIndex);
@@ -477,6 +484,8 @@ public class SheetWidget extends Panel {
                     selectionWidget.getCol2(), selectionWidget.getRow1(),
                     selectionWidget.getRow2());
         } catch (Exception e) {
+            debugConsole.severe("Exception while relayouting spreadsheet, "
+                    + e.toString());
             resetScrollView(scrollLeft, scrollTop);
             actionHandler.onScrollViewChanged(firstRowIndex, lastRowIndex,
                     firstColumnIndex, lastColumnIndex);
@@ -2732,7 +2741,9 @@ public class SheetWidget extends Panel {
                 }
                 cell.showCellCommentMark();
             } catch (Exception e) {
-
+                debugConsole
+                        .severe("Exception while trying to update a cell comment visibility in merged cell, "
+                                + e.toString());
             }
         }
         mergedCells.put(region.id, mergedCell);
@@ -3206,6 +3217,9 @@ public class SheetWidget extends Panel {
             input.getStyle().setWidth(width, Unit.PX);
         } catch (Exception e) {
             // cell is not visible yet, should not happen, but try again
+            debugConsole
+                    .severe("Exception while calculating input element width, "
+                            + e.toString());
             handleInputElementValueChange(false);
         }
     }
@@ -4201,36 +4215,13 @@ public class SheetWidget extends Panel {
         sheet.setScrollTop(scrollTop);
     }
 
-    public void updatePopupButtons(List<PopupButtonWidget> popupButtons) {
-        if (sheetPopupButtons != null) {
-            for (Iterator<Entry<String, PopupButtonWidget>> iterator = sheetPopupButtons
-                    .entrySet().iterator(); iterator.hasNext();) {
-                Entry<String, PopupButtonWidget> entry = iterator.next();
-                PopupButtonWidget popupButton = entry.getValue();
-                if (popupButtons == null || !popupButtons.contains(popupButton)) {
-                    removePopupButtonWidget(popupButton);
-                    iterator.remove();
-                }
-            }
+    public void addPopupButton(PopupButtonWidget popupButton) {
+        if (sheetPopupButtons == null) {
+            sheetPopupButtons = new HashMap<String, PopupButtonWidget>();
         }
-        if (popupButtons != null) {
-            if (sheetPopupButtons == null) {
-                sheetPopupButtons = new HashMap<String, PopupButtonWidget>();
-            }
-            for (PopupButtonWidget popupButton : popupButtons) {
-                if (!sheetPopupButtons.containsValue(popupButton)) {
-                    addPopupButtonWidget(popupButton);
-                }
-            }
-        }
-    }
-
-    private void addPopupButtonWidget(PopupButtonWidget popupButton) {
         int col = popupButton.getCol();
         int row = popupButton.getRow();
-        if (col != 0 && row != 0) {
-            sheetPopupButtons.put(toKey(col, row), popupButton);
-        }
+        sheetPopupButtons.put(toKey(col, row), popupButton);
         if (col >= firstColumnIndex && col <= lastColumnIndex
                 && row >= firstRowIndex && row <= lastRowIndex) {
             Cell cell = rows.get(row - firstRowIndex).get(
@@ -4252,12 +4243,16 @@ public class SheetWidget extends Panel {
         popupButton.setSheetWidget(this, sheet);
     }
 
-    private void removePopupButtonWidget(PopupButtonWidget popupButton) {
+    public void removePopupButton(PopupButtonWidget popupButton) {
         int col = popupButton.getCol();
         int row = popupButton.getRow();
+        sheetPopupButtons.remove(toKey(col, row));
         if (col >= firstColumnIndex && col <= lastColumnIndex
                 && row >= firstRowIndex && row <= lastRowIndex) {
             remove(popupButton);
+            // need to remove the possible reference from the cell too
+            rows.get(row - firstRowIndex).get(col - firstColumnIndex)
+                    .removePopupButton();
         }
     }
 
@@ -4270,12 +4265,20 @@ public class SheetWidget extends Panel {
         sheetPopupButtons.remove(toKey(oldCol, oldRow));
         sheetPopupButtons.put(toKey(newCol, newRow), popupButton);
         Widget parent = popupButton.getParent();
+        // convert to
         if (newCol >= firstColumnIndex && newCol <= lastColumnIndex
                 && newRow >= firstRowIndex && newRow <= lastRowIndex) {
             Cell cell = rows.get(newRow - firstRowIndex).get(
                     newCol - firstColumnIndex);
             if (parent != null) {
                 if (equals(parent)) {
+                    if (oldCol >= firstColumnIndex && oldCol <= lastColumnIndex
+                            && oldRow >= firstRowIndex
+                            && oldRow <= lastRowIndex) {
+                        rows.get(oldRow - firstRowIndex)
+                                .get(oldCol - firstColumnIndex)
+                                .removePopupButton();
+                    }
                     cell.showPopupButton(popupButton.getElement());
                 } else {
                     popupButton.removeFromParent();
@@ -4329,7 +4332,9 @@ public class SheetWidget extends Panel {
                 return false;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            debugConsole.log(Level.SEVERE,
+                    "Error while removing child widget from SheetWidget, child:"
+                            + child.toString() + ", error: " + e.toString());
         }
         return false;
     }

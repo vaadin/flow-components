@@ -69,7 +69,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
                 HashMap<String, Double> numericCellData,
                 ArrayList<String> removedCells,
                 HashMap<Integer, String> cellStyleToCSSSelector) {
-            getWidget().updateCellValues(updatedCellData, numericCellData, removedCells);
+            getWidget().updateCellValues(updatedCellData, numericCellData,
+                    removedCells);
             getWidget().setCellStyleToCSSSelector(cellStyleToCSSSelector);
         }
 
@@ -351,15 +352,25 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
     }
 
     @Override
-    public void onConnectorHierarchyChange(
-            ConnectorHierarchyChangeEvent connectorHierarchyChangeEvent) {
+    public void onConnectorHierarchyChange(ConnectorHierarchyChangeEvent event) {
         List<PopupButtonWidget> popupButtons = new ArrayList<PopupButtonWidget>();
-        for (ComponentConnector child : getChildComponents()) {
-            if (child instanceof PopupButtonConnector) {
-                popupButtons.add(((PopupButtonConnector) child).getWidget());
+
+        // remove old popup buttons
+        List<ComponentConnector> oldChildren = event.getOldChildren();
+        for (ComponentConnector child : oldChildren) {
+            if (child instanceof PopupButtonConnector
+                    && child.getParent() != this) {
+                getWidget().removePopupButton(
+                        ((PopupButtonConnector) child).getWidget());
             }
         }
-        getWidget().updatePopupButtons(popupButtons);
-    }
 
+        for (ComponentConnector child : getChildComponents()) {
+            if (child instanceof PopupButtonConnector
+                    && !oldChildren.contains(child)) {
+                getWidget().addPopupButton(
+                        ((PopupButtonConnector) child).getWidget());
+            }
+        }
+    }
 }

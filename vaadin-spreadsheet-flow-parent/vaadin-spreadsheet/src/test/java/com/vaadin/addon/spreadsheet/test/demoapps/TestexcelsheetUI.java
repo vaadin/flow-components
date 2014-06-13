@@ -28,6 +28,7 @@ import com.vaadin.addon.spreadsheet.test.fixtures.CustomComponentFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.FormatsFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.HyperLinkFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.LockCellFixture;
+import com.vaadin.addon.spreadsheet.test.fixtures.PopupButtonFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.RowToggleFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.SheetsFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.ShiftFixture;
@@ -53,7 +54,7 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 public class TestexcelsheetUI extends UI {
 
-    Spreadsheet spreadsheet;
+    private Spreadsheet spreadsheet;
 
     private Button update;
     private TextField rowBufferSizeField;
@@ -92,6 +93,8 @@ public class TestexcelsheetUI extends UI {
                     ShiftFixture.DeleteRow.class));
             put("MERGE_CELLS", new EagerFixtureFactory(new CellMergeFixture(
                     TestexcelsheetUI.this)));
+            put("POPUPBUTTON", new EagerFixtureFactory(new PopupButtonFixture(
+                    TestexcelsheetUI.this)));
         }
     };
 
@@ -100,6 +103,13 @@ public class TestexcelsheetUI extends UI {
     public TestexcelsheetUI() {
         super();
         layout.setId("layout");
+    }
+
+    /**
+     * @return the spreadsheet
+     */
+    public Spreadsheet getSpreadsheet() {
+        return spreadsheet;
     }
 
     @Override
@@ -124,13 +134,13 @@ public class TestexcelsheetUI extends UI {
 
                     @Override
                     public void buttonClick(ClickEvent event) {
-                        if (spreadsheet == null) {
-                            spreadsheet = SpreadsheetFactory
-                                    .createSpreadsheetComponentWithXLSWorkbook();
-                            spreadsheet.setId("spreadsheetId");
+                        if (getSpreadsheet() == null) {
+                            spreadsheet = (SpreadsheetFactory
+                                    .createSpreadsheetComponentWithXLSWorkbook());
+                            getSpreadsheet().setId("spreadsheetId");
 
-                            spreadsheet
-                                    .addSelectedCellChangeListener(new SelectionChangeListener() {
+                            getSpreadsheet().addSelectedCellChangeListener(
+                                    new SelectionChangeListener() {
 
                                         @Override
                                         public void onSelectionChange(
@@ -189,13 +199,15 @@ public class TestexcelsheetUI extends UI {
 
                                         }
                                     });
-                            layout.addComponent(spreadsheet, 1);
-                            layout.setExpandRatio(spreadsheet, 1.0f);
+                            layout.addComponent(getSpreadsheet(), 1);
+                            layout.setExpandRatio(getSpreadsheet(), 1.0f);
 
                             rowBufferSizeField.setValue(Integer
-                                    .toString(spreadsheet.getRowBufferSize()));
+                                    .toString(getSpreadsheet()
+                                            .getRowBufferSize()));
                             columnBufferSizeField.setValue(Integer
-                                    .toString(spreadsheet.getColBufferSize()));
+                                    .toString(getSpreadsheet()
+                                            .getColBufferSize()));
                         }
 
                         previousFile = null;
@@ -207,23 +219,26 @@ public class TestexcelsheetUI extends UI {
             @Override
             public void buttonClick(ClickEvent event) {
                 try {
-                    if (spreadsheet != null) {
+                    if (getSpreadsheet() != null) {
                         Object value = openTestSheetSelect.getValue();
                         if (value != null && value instanceof File) {
                             loadFile((File) value);
                             openTestSheetSelect.setValue(null);
                         }
 
-                        spreadsheet.setRowBufferSize(Integer
-                                .parseInt(rowBufferSizeField.getValue()));
-                        spreadsheet.setColBufferSize(Integer
-                                .parseInt(columnBufferSizeField.getValue()));
+                        getSpreadsheet()
+                                .setRowBufferSize(
+                                        Integer.parseInt(rowBufferSizeField
+                                                .getValue()));
+                        getSpreadsheet().setColBufferSize(
+                                Integer.parseInt(columnBufferSizeField
+                                        .getValue()));
                     }
                 } catch (NumberFormatException nfe) {
-                    rowBufferSizeField.setValue(Integer.toString(spreadsheet
-                            .getRowBufferSize()));
-                    columnBufferSizeField.setValue(Integer.toString(spreadsheet
-                            .getColBufferSize()));
+                    rowBufferSizeField.setValue(Integer
+                            .toString(getSpreadsheet().getRowBufferSize()));
+                    columnBufferSizeField.setValue(Integer
+                            .toString(getSpreadsheet().getColBufferSize()));
                 }
             }
         });
@@ -233,7 +248,7 @@ public class TestexcelsheetUI extends UI {
 
             @Override
             public void buttonClick(ClickEvent event) {
-                if (spreadsheet != null) {
+                if (getSpreadsheet() != null) {
                     try {
                         if (previousFile != null) {
                             int i = previousFile.getName().lastIndexOf(".xls");
@@ -242,10 +257,10 @@ public class TestexcelsheetUI extends UI {
                                     + ("(1)")
                                     + previousFile.getName().substring(i);
                             previousFile = SpreadsheetFactory.write(
-                                    spreadsheet, fileName);
+                                    getSpreadsheet(), fileName);
                         } else {
                             previousFile = SpreadsheetFactory.write(
-                                    spreadsheet, "workbook1");
+                                    getSpreadsheet(), "workbook1");
                         }
                         download.setEnabled(true);
                         FileResource resource = new FileResource(previousFile);
@@ -302,7 +317,7 @@ public class TestexcelsheetUI extends UI {
 
             @Override
             public void buttonClick(ClickEvent event) {
-                if (spreadsheet == null) {
+                if (getSpreadsheet() == null) {
                     return;
                 }
 
@@ -314,7 +329,7 @@ public class TestexcelsheetUI extends UI {
                     return;
                 }
 
-                factory.create().loadFixture(spreadsheet);
+                factory.create().loadFixture(getSpreadsheet());
             }
         });
 
@@ -367,21 +382,21 @@ public class TestexcelsheetUI extends UI {
 
     protected void loadFile(File file) {
         try {
-            if (spreadsheet == null) {
-                spreadsheet = SpreadsheetFactory
-                        .createSpreadsheetComponent(file);
-                spreadsheet.setId("spreadsheetId");
-                rowBufferSizeField.setValue(Integer.toString(spreadsheet
+            if (getSpreadsheet() == null) {
+                spreadsheet = (SpreadsheetFactory
+                        .createSpreadsheetComponent(file));
+                getSpreadsheet().setId("spreadsheetId");
+                rowBufferSizeField.setValue(Integer.toString(getSpreadsheet()
                         .getRowBufferSize()));
-                columnBufferSizeField.setValue(Integer.toString(spreadsheet
-                        .getColBufferSize()));
-                layout.addComponent(spreadsheet);
-                layout.setExpandRatio(spreadsheet, 1.0f);
+                columnBufferSizeField.setValue(Integer
+                        .toString(getSpreadsheet().getColBufferSize()));
+                layout.addComponent(getSpreadsheet());
+                layout.setExpandRatio(getSpreadsheet(), 1.0f);
             } else {
                 if (previousFile == null
                         || !previousFile.getAbsolutePath().equals(
                                 file.getAbsolutePath())) {
-                    spreadsheet.reloadDataFrom(file);
+                    getSpreadsheet().reloadDataFrom(file);
                 }
             }
             previousFile = file;

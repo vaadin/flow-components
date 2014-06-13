@@ -21,9 +21,24 @@ import com.vaadin.shared.ui.Connect.LoadStyle;
 public class PopupButtonConnector extends AbstractHasComponentsConnector
         implements ClickHandler, CloseHandler<PopupPanel> {
 
+    public PopupButtonClientRpc rpc = new PopupButtonClientRpc() {
+
+        @Override
+        public void openPopup() {
+            getWidget().openPopup();
+        }
+
+        @Override
+        public void closePopup() {
+            getWidget().closePopup();
+        }
+
+    };
+
     @Override
     public void init() {
         super.init();
+        registerRpc(PopupButtonClientRpc.class, rpc);
         getWidget().addClickHandler(this);
         getWidget().addCloseHandler(this);
     }

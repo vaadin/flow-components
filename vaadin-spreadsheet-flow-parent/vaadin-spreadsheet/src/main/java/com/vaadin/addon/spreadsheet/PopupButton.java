@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.poi.ss.util.CellReference;
 
+import com.vaadin.addon.spreadsheet.client.PopupButtonClientRpc;
 import com.vaadin.addon.spreadsheet.client.PopupButtonServerRpc;
 import com.vaadin.addon.spreadsheet.client.PopupButtonState;
 import com.vaadin.addon.spreadsheet.client.PopupButtonWidget;
@@ -108,6 +109,20 @@ public class PopupButton extends AbstractComponentContainer {
      */
     public void setRow(int row) {
         getState().row = row + 1;
+    }
+
+    /**
+     * Opens the popup if the button is rendered inside the spreadsheet.
+     */
+    public void openPopup() {
+        getRpcProxy(PopupButtonClientRpc.class).openPopup();
+    }
+
+    /**
+     * Closes the popup if it is open.
+     */
+    public void closePopup() {
+        getRpcProxy(PopupButtonClientRpc.class).closePopup();
     }
 
     /**

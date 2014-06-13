@@ -266,14 +266,23 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             ArrayList<String> removedCells) {
         sheetWidget
                 .addCellsData(updatedCellData, numericCellData, removedCells);
+        // if selected cell content was deleted (server side checks for lock),
+        // need to update the formula field value
+        if (removedCells.contains(sheetWidget.getSelectedCellKey())) {
+            formulaBarWidget.setCellPlainValue("");
+        }
     }
 
     public void showCellCustomComponents(Map<String, Widget> customWidgetMap) {
         sheetWidget.showCustomWidgets(customWidgetMap);
     }
 
-    public void updatePopupButtons(List<PopupButtonWidget> popupButtons) {
-        sheetWidget.updatePopupButtons(popupButtons);
+    public void addPopupButton(PopupButtonWidget widget) {
+        sheetWidget.addPopupButton(widget);
+    }
+
+    public void removePopupButton(PopupButtonWidget popupButton) {
+        sheetWidget.removePopupButton(popupButton);
     }
 
     public void showCellValue(String value, int col, int row, boolean formula,
@@ -2476,4 +2485,5 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
         sheetWidget.setDisplayRowColHeadings(displayRowColHeadings);
     }
+
 }

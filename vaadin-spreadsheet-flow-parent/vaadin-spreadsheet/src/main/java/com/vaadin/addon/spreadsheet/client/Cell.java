@@ -8,6 +8,7 @@ import com.google.gwt.user.client.Element;
 public class Cell {
 
     public static final String CELL_COMMENT_TRIANGLE_CLASSNAME = "cell-comment-triangle";
+    private static final int ZINDEXVALUE = 2;
     private final DivElement element;
     private DivElement cellCommentTriangle;
     private int col;
@@ -28,8 +29,9 @@ public class Cell {
 
     public Cell(int col, int row, String html, Double numericValue) {
         this(col, row);
-        element.setInnerText(html);
+        value = html;
         this.numericValue = numericValue;
+        updateInnerText();
         refreshWidth();
     }
 
@@ -40,22 +42,28 @@ public class Cell {
     public void update(int col, int row, String html, Double numericValue) {
         this.col = col;
         this.row = row;
+        value = html;
 
-        if (html != null) {
-            value = html;
-        } else {
-            value = "";
-        }
-
-        element.setInnerText(value);
+        updateInnerText();
         this.numericValue = numericValue;
 
         updateCellValues();
         refreshWidth();
     }
 
+    private void updateInnerText() {
+        if (value == null || value.isEmpty()) {
+            element.setInnerText("");
+            element.getStyle().clearZIndex();
+        } else {
+            element.setInnerText(value);
+            element.getStyle().setZIndex(ZINDEXVALUE);
+        }
+    }
+
     private void updateCellValues() {
         removeCellCommentMark();
+        removePopupButton();
         element.setClassName(SheetWidget.toKey(col, row));
     }
 
@@ -82,13 +90,9 @@ public class Cell {
     }
 
     public void setValue(String value, Double numericValue) {
-        if (value == null) {
-            value = "";
-        }
-
         this.value = value;
         this.numericValue = numericValue;
-        element.setInnerText(value);
+        updateInnerText();
 
         if (cellCommentTriangle != null) {
             element.appendChild(cellCommentTriangle);

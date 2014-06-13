@@ -14,18 +14,13 @@
 	</organization>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.1.15</vaadin.version>
+		<vaadin.version>7.2.2</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 	</properties>
 	<!-- <scm> <url>git://github.com/mygithubaccount/Spreadsheet.git</url> <connection>scm:git:git://github.com/mygithubaccount/Spreadsheet.git</connection> 
 		<developerConnection>scm:git:ssh://git@github.com:/mygithubaccount/${ComponentClassName}.git</developerConnection> 
-		<tag>Spreadsheet add-on for Vaadin</tag> </scm>
-
-	<issueManagement>
-		<system>GitHub</system>
-		<url>https://github.com/mygithubaccount/Spreadsheet/issues</url>
-	</issueManagement>
-    -->
+		<tag>Spreadsheet add-on for Vaadin</tag> </scm> <issueManagement> <system>GitHub</system> 
+		<url>https://github.com/mygithubaccount/Spreadsheet/issues</url> </issueManagement> -->
 
 	<licenses>
 		<license>
@@ -125,10 +120,10 @@
 			</plugin>
 
 			<plugin>
-		        <artifactId>maven-war-plugin</artifactId>
-		        <version>2.3</version>
-		        <configuration>
-		        	<packagingExcludes>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<packagingExcludes>
 						**/VAADIN/gwt-unitCache/**,
 						**/VAADIN/widgetsets/WEB-INF/**,
 						**/WEB-INF/lib/servlet-api-*.jar,
@@ -140,7 +135,7 @@
 						**/WEB-INF/classes/widgetsets/**
 					</packagingExcludes>
 					<failOnMissingWebXml>false</failOnMissingWebXml>
-		        </configuration>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -181,13 +176,21 @@
 						<contextPath>/</contextPath>
 					</webApp>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.eclipse.jetty</groupId>
+						<artifactId>jetty-servlets</artifactId>
+						<version>8.1.10.v20130312</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 
 		</plugins>
-	
+
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>

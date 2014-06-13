@@ -50,8 +50,6 @@ import com.vaadin.addon.spreadsheet.client.MergedRegion;
 
 public class SpreadsheetStyleFactory {
 
-    private static final String BORDER_STYLE_ZINDEX_5 = "z-index:5;";
-
     public enum BorderStyle {
         SOLID_THIN("solid", 1, 1), DOTTED_THIN("dotted", 1, 1), DASHED_THIN(
                 "dashed", 1, 1), SOLID_MEDIUM("solid", 2, 2), DASHED_MEDIUM(
@@ -213,10 +211,17 @@ public class SpreadsheetStyleFactory {
         borderStyles(sb, cellStyle);
         if (cellStyle.getAlignment() != defaultTextAlign) {
             styleOut(sb, "text-align", cellStyle.getAlignment(), ALIGN);
+            // TODO for correct overflow, rtl should be used for right align
+            // if (cellStyle.getAlignment() == ALIGN_RIGHT) {
+            // sb.append("direction:rtl;");
+            // }
         }
         if (cellStyle.getVerticalAlignment() != defaultVerticalAlign) {
             styleOut(sb, "vertical-align", cellStyle.getAlignment(),
                     VERTICAL_ALIGN);
+        }
+        if (cellStyle.getWrapText()) { // default is to overflow
+            sb.append("overflow:hidden;white-space:normal;");
         }
 
         spreadsheet.getState().cellStyleToCSSStyle.put(
@@ -234,6 +239,9 @@ public class SpreadsheetStyleFactory {
             styleOut(sb, "vertical-align", cellStyle.getAlignment(),
                     VERTICAL_ALIGN);
         }
+        if (cellStyle.getWrapText()) { // default is to overflow
+            sb.append("overflow:hidden;white-space:normal;");
+        }
 
         spreadsheet.getState().cellStyleToCSSStyle.put(
                 getLeftAlignedStyleIndex(cellStyle.getIndex()), sb.toString());
@@ -249,6 +257,9 @@ public class SpreadsheetStyleFactory {
         if (cellStyle.getVerticalAlignment() != defaultVerticalAlign) {
             styleOut(sb, "vertical-align", cellStyle.getAlignment(),
                     VERTICAL_ALIGN);
+        }
+        if (cellStyle.getWrapText()) { // default is to overflow
+            sb.append("overflow:hidden;white-space:normal;");
         }
 
         spreadsheet.getState().cellStyleToCSSStyle.put(
@@ -515,7 +526,6 @@ public class SpreadsheetStyleFactory {
         StringBuilder sb = new StringBuilder(selector);
         sb.append("{");
         sb.append(rules);
-        sb.append(BORDER_STYLE_ZINDEX_5);
         sb.append("}");
         return sb.toString();
     }
@@ -863,7 +873,6 @@ public class SpreadsheetStyleFactory {
                 colorConverter.colorBorder(BorderSide.BOTTOM,
                         "border-bottom-color", cellStyle, sb);
             }
-            sb.append(BORDER_STYLE_ZINDEX_5);
         }
 
         // the top and right borders are transferred to previous cells
@@ -873,7 +882,6 @@ public class SpreadsheetStyleFactory {
                 sb2.append(borderTop.getBorderAttributeValue());
                 colorConverter.colorBorder(BorderSide.TOP,
                         "border-bottom-color", cellStyle, sb2);
-                sb2.append(BORDER_STYLE_ZINDEX_5);
                 sb2.append("}");
                 shiftedBorderTopStyles.put((int) cellStyle.getIndex(),
                         sb2.toString());
@@ -883,7 +891,6 @@ public class SpreadsheetStyleFactory {
                 sb2.append(borderLeft.getBorderAttributeValue());
                 colorConverter.colorBorder(BorderSide.LEFT,
                         "border-right-color", cellStyle, sb2);
-                sb2.append(BORDER_STYLE_ZINDEX_5);
                 sb2.append("}");
                 shiftedBorderLeftStyles.put((int) cellStyle.getIndex(),
                         sb2.toString());

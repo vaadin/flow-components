@@ -12,7 +12,7 @@ import com.vaadin.client.ui.VWindow;
 
 public class PopupButtonHeader extends Widget {
 
-    protected final static String CLASSNAME = PopupButtonWidget.FILTER_OVERLAY_CLASSNAME
+    protected final static String CLASSNAME = PopupButtonWidget.POPUP_OVERLAY_CLASSNAME
             + "-header";
     protected final static String CAPTION_CLASSNAME = "header-caption";
 

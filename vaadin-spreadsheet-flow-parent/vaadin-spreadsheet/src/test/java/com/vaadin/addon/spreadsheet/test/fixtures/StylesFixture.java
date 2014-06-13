@@ -82,6 +82,29 @@ public class StylesFixture implements SpreadsheetFixture {
             column++;
         }
 
+        c = spreadsheet.createCell(5, 1,
+                "default aligned should overflow by default to other cells");
+        c = spreadsheet.createCell(6, 1,
+                "right aligned that should overflow by default to other cells");
+        cellStyle = wb.createCellStyle();
+        cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+        c.setCellStyle(cellStyle);
+        sssf.cellStyleUpdated(c, true);
+        c = spreadsheet
+                .createCell(7, 1,
+                        "center aligned text that should overflow by default to other cells");
+        cellStyle = wb.createCellStyle();
+        cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        c.setCellStyle(cellStyle);
+        sssf.cellStyleUpdated(c, true);
+
+        c = spreadsheet.createCell(8, 1,
+                "wrapping long text will wrap to multiple lines");
+        cellStyle = wb.createCellStyle();
+        cellStyle.setWrapText(true);
+        c.setCellStyle(cellStyle);
+        sssf.cellStyleUpdated(c, true);
+
         spreadsheet.updatedAndRecalculateAllCellValues();
     }
 }
