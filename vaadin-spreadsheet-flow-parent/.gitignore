@@ -1,0 +1,7 @@
+*/target/
+*/bin/
+*.DS_Store
+*.project
+*.settings/
+*rebel.xml
+*.classpath

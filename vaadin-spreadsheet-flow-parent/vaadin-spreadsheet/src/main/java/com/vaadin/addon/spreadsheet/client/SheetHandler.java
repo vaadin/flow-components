@@ -210,4 +210,8 @@ public interface SheetHandler {
 
     MergedRegionContainer getMergedRegionContainer();
 
+    void onRedoPress();
+
+    void onUndoPress();
+
 }

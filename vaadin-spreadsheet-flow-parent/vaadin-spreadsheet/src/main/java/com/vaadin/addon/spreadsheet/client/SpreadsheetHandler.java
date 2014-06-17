@@ -2,13 +2,13 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.util.Map;
 
-public interface SpreadsheetViewActionHandler {
+public interface SpreadsheetHandler {
 
     /**
      * These cells have become visible and possibly need the content, if has not
      * been given previously or has not changed.
      */
-    public void loadCellsData(int firstRow, int lastRow, int firstColumn,
+    public void onSheetScroll(int firstRow, int lastRow, int firstColumn,
             int lastColumn);
 
     /** Address field value changed. */
@@ -195,4 +195,15 @@ public interface SpreadsheetViewActionHandler {
      *            1-based
      */
     public void onColumnAutofit(int columnIndex);
+
+    /**
+     * Client pressed undo ctrl/meta+z
+     */
+    public void onUndo();
+
+    /**
+     * Client pressed redo ctrl/meta+y
+     */
+    public void onRedo();
+
 }

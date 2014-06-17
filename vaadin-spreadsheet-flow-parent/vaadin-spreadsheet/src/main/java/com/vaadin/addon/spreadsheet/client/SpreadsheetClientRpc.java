@@ -43,4 +43,27 @@ public interface SpreadsheetClientRpc extends ClientRpc {
      * @param actionDetails
      */
     void showActions(List<SpreadsheetActionDetails> actionDetails);
+
+    /**
+     * Updates the selected cell and painted range. Displays the selected cell
+     * value. Indexes 1-based.
+     * 
+     * @param col
+     *            selected
+     * @param row
+     *            selected
+     * @param c1
+     *            painted
+     * @param c2
+     *            painted
+     * @param r1
+     *            painted
+     * @param r2
+     *            painted
+     * @param value
+     * @param formula
+     * @param cellLocked
+     */
+    void setSelectedCellAndRange(int col, int row, int c1, int c2, int r1,
+            int r2, String value, boolean formula, boolean cellLocked);
 }

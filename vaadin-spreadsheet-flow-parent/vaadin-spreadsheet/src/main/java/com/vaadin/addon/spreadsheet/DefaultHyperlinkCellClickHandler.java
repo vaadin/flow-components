@@ -42,7 +42,8 @@ public class DefaultHyperlinkCellClickHandler implements
                     // change selection to cell within the same sheet
                     String cellAddress = address
                             .substring(address.indexOf("#") + 1);
-                    spreadsheet.handleCellAddressChange(cellAddress);
+                    spreadsheet.getCellSelectionManager().onSheetAddressChanged(
+                            cellAddress);
                 }
             } else {
                 spreadsheet.getUI().getPage().open(address, "_new");

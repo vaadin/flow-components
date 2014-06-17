@@ -60,8 +60,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
         public void showSelectedCellRange(int firstColumn, int lastColumn,
                 int firstRow, int lastRow, String value, boolean formula,
                 boolean locked) {
-            getWidget().setCellRangeSelection(firstColumn, lastColumn,
-                    firstRow, lastRow, value, formula, locked);
+            getWidget().setCellRangeSelection(firstColumn, firstRow,
+                    firstColumn, lastColumn, firstRow, lastRow, value, formula,
+                    locked);
         }
 
         @Override
@@ -118,6 +119,14 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
                 }
             }, left, top);
         }
+
+        @Override
+        public void setSelectedCellAndRange(int col, int row, int c1, int c2,
+                int r1, int r2, String value, boolean formula,
+                boolean cellLocked) {
+            getWidget().setCellRangeSelection(col, row, c1, c2, r1, r2, value,
+                    formula, cellLocked);
+        }
     };
 
     private final ElementResizeListener elementResizeListener = new ElementResizeListener() {
@@ -142,7 +151,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
     protected void init() {
         super.init();
         registerRpc(SpreadsheetClientRpc.class, clientRPC);
-        getWidget().setActionHandler(getRpcProxy(SpreadsheetServerRpc.class));
+        getWidget().setSpreadsheetHandler(
+                getRpcProxy(SpreadsheetServerRpc.class));
         getWidget().setSheetContextMenuHandler(new SheetContextMenuHandler() {
 
             @Override
@@ -353,8 +363,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
 
     @Override
     public void onConnectorHierarchyChange(ConnectorHierarchyChangeEvent event) {
-        List<PopupButtonWidget> popupButtons = new ArrayList<PopupButtonWidget>();
-
         // remove old popup buttons
         List<ComponentConnector> oldChildren = event.getOldChildren();
         for (ComponentConnector child : oldChildren) {

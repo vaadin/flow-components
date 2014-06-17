@@ -748,19 +748,25 @@ public class SheetWidget extends Panel {
                     moveHeadersToMatchScroll();
                 } else if (typeInt == Event.ONFOCUS) {
                     sheetFocused = true;
-                    System.out.println("FOCUS GAINED !");
                 } else if (typeInt == Event.ONBLUR) {
                     sheetFocused = false;
-                    System.out.println("FOCUS LOST to: "
-                            + event.getRelatedEventTarget());
                 } else if (typeInt == Event.ONKEYPRESS && !editingCell) {
-                    final int keyCode = event.getKeyCode();
                     if (!sheetFocused) {
                         return; // focus in input or custom editor
                     }
+                    final int keyCode = event.getKeyCode();
+                    final int charCode = event.getCharCode();
                     // these have been handled with onKeyDown (FF causes both
                     // for some reason!)
+                    if ((charCode == 122 || charCode == 121)
+                            && (event.getCtrlKey() || event.getMetaKey())) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return;
+                    }
                     switch (keyCode) {
+                    // these have been handled with onKeyDown (FF causes both
+                    // for some reason!)
                     case KeyCodes.KEY_UP:
                     case KeyCodes.KEY_DOWN:
                     case KeyCodes.KEY_LEFT:
@@ -772,10 +778,8 @@ public class SheetWidget extends Panel {
                         event.stopPropagation();
                         break;
                     default:
-                        actionHandler
-                                .onSheetKeyPress(event,
-                                        convertUnicodeIntoCharacter(event
-                                                .getCharCode()));
+                        actionHandler.onSheetKeyPress(event,
+                                convertUnicodeIntoCharacter(charCode));
                     }
                 } else if (typeInt == Event.ONKEYDOWN && !editingCell) {
                     if (!sheetFocused) {
@@ -797,6 +801,16 @@ public class SheetWidget extends Panel {
                         actionHandler.onSheetKeyPress(event, "");
                         // prevent the default browser action (scroll to key
                         // direction) or switch focus (tab)
+                        event.preventDefault();
+                        event.stopPropagation();
+                    } else if (keyCode == 89 // y
+                            && (event.getCtrlKey() || event.getMetaKey())) {
+                        actionHandler.onRedoPress();
+                        event.preventDefault();
+                        event.stopPropagation();
+                    } else if (keyCode == 90 // z
+                            && (event.getCtrlKey() || event.getMetaKey())) {
+                        actionHandler.onUndoPress();
                         event.preventDefault();
                         event.stopPropagation();
                     }

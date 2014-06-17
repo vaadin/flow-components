@@ -3,7 +3,7 @@ package com.vaadin.addon.spreadsheet.client;
 import com.vaadin.shared.communication.ServerRpc;
 
 public interface SpreadsheetServerRpc extends ServerRpc,
-        SpreadsheetViewActionHandler {
+        SpreadsheetHandler {
 
     /**
      * Context menu should be created for the appropriate selection.
