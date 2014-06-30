@@ -293,7 +293,7 @@ public class SheetTabSheet extends Widget {
         Element selectedTab = tabs.get(selectedTabIndex).cast();
         selectedTab.getStyle().clearWidth();
         String value = input.getValue();
-        if (validateSheetName(value)) {
+        if (validateSheetName(value) && !cachedSheetName.equals(value)) {
             for (int i = 0; i < tabs.length(); i++) {
                 // value cannot be the same as with another sheet
                 if (value.equals(((Element) tabs.get(i).cast()).getInnerText())) {

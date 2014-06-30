@@ -18,7 +18,6 @@ import org.apache.poi.ss.util.CellReference;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeListener;
-import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.ActionFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.CellMergeFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.ClassFixtureFactory;
@@ -135,8 +134,7 @@ public class TestexcelsheetUI extends UI {
                     @Override
                     public void buttonClick(ClickEvent event) {
                         if (getSpreadsheet() == null) {
-                            spreadsheet = (SpreadsheetFactory
-                                    .createSpreadsheetComponentWithXLSWorkbook());
+                            spreadsheet = (new Spreadsheet());
                             getSpreadsheet().setId("spreadsheetId");
 
                             getSpreadsheet().addSelectedCellChangeListener(
@@ -256,11 +254,11 @@ public class TestexcelsheetUI extends UI {
                                     0, i)
                                     + ("(1)")
                                     + previousFile.getName().substring(i);
-                            previousFile = SpreadsheetFactory.write(
-                                    getSpreadsheet(), fileName);
+                            previousFile = getSpreadsheet()
+                                    .writeSpreadsheetIntoFile(fileName);
                         } else {
-                            previousFile = SpreadsheetFactory.write(
-                                    getSpreadsheet(), "workbook1");
+                            previousFile = getSpreadsheet()
+                                    .writeSpreadsheetIntoFile("workbook1");
                         }
                         download.setEnabled(true);
                         FileResource resource = new FileResource(previousFile);
@@ -383,8 +381,7 @@ public class TestexcelsheetUI extends UI {
     protected void loadFile(File file) {
         try {
             if (getSpreadsheet() == null) {
-                spreadsheet = (SpreadsheetFactory
-                        .createSpreadsheetComponent(file));
+                spreadsheet = new Spreadsheet(file);
                 getSpreadsheet().setId("spreadsheetId");
                 rowBufferSizeField.setValue(Integer.toString(getSpreadsheet()
                         .getRowBufferSize()));
@@ -396,7 +393,7 @@ public class TestexcelsheetUI extends UI {
                 if (previousFile == null
                         || !previousFile.getAbsolutePath().equals(
                                 file.getAbsolutePath())) {
-                    getSpreadsheet().reloadDataFrom(file);
+                    getSpreadsheet().reloadSpreadsheetFrom(file);
                 }
             }
             previousFile = file;

@@ -106,17 +106,6 @@ public class SpreadsheetFactory {
         return widthUnits;
     }
 
-    public static Spreadsheet createSpreadsheetComponentWithXLSWorkbook() {
-        final XSSFWorkbook workbook = new XSSFWorkbook();
-        final Sheet sheet = workbook.createSheet();
-        final Spreadsheet spreadsheet = new Spreadsheet(0);
-        spreadsheet.setInternalWorkbook(workbook);
-        generateNewSpreadsheet(spreadsheet, sheet, DEFAULT_ROWS,
-                DEFAULT_COLUMNS);
-        loadWorkbookStyles(spreadsheet);
-        return spreadsheet;
-    }
-
     protected static void loadSpreadsheetWith(Spreadsheet spreadsheet,
             Workbook workbook) {
         spreadsheet.clearSheetServerSide();
@@ -131,43 +120,17 @@ public class SpreadsheetFactory {
             int activeSheetIndex = workbook.getActiveSheetIndex();
             if (workbook.isSheetHidden(activeSheetIndex)
                     || workbook.isSheetVeryHidden(activeSheetIndex)) {
-                workbook.setActiveSheet(getFirstVisibleSheetPOIIndex(workbook));
+                workbook.setActiveSheet(SpreadsheetUtil
+                        .getFirstVisibleSheetPOIIndex(workbook));
             }
             sheet = workbook.getSheetAt(activeSheetIndex);
             spreadsheet.setInternalWorkbook(workbook);
-            reloadSpreadsheetData(spreadsheet, workbook, sheet);
+            reloadSpreadsheetData(spreadsheet, sheet);
         }
         loadWorkbookStyles(spreadsheet);
     }
 
-    /**
-     * Returns the POI index of the first visible sheet (not hidden & very
-     * hidden). If no sheets are visible, returns 0. This is not be possible at
-     * least in Excel, but unfortunately POI allows it.
-     * 
-     * @param workbook
-     * @return 0-based
-     */
-    public static int getFirstVisibleSheetPOIIndex(Workbook workbook) {
-        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-            if (!(workbook.isSheetHidden(i) && workbook.isSheetVeryHidden(i))) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
-    public static int getNumberOfVisibleSheets(Workbook workbook) {
-        int result = 0;
-        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-            if (!(workbook.isSheetHidden(i) || workbook.isSheetVeryHidden(i))) {
-                result++;
-            }
-        }
-        return result;
-    }
-
-    public static void loadNewXLSXSpreadsheet(Spreadsheet spreadsheet) {
+    protected static void loadNewXLSXSpreadsheet(Spreadsheet spreadsheet) {
         Workbook workbook = spreadsheet.getWorkbook();
         if (workbook != null && workbook instanceof SXSSFWorkbook) {
             ((SXSSFWorkbook) workbook).dispose();
@@ -179,14 +142,6 @@ public class SpreadsheetFactory {
         generateNewSpreadsheet(spreadsheet, sheet, DEFAULT_ROWS,
                 DEFAULT_COLUMNS);
         loadWorkbookStyles(spreadsheet);
-    }
-
-    public static Spreadsheet createSpreadsheetComponent(
-            final File spreadsheetFile) throws InvalidFormatException,
-            IOException {
-        final Spreadsheet spreadsheet = new Spreadsheet(0);
-        reloadSpreadsheetComponent(spreadsheet, spreadsheetFile);
-        return spreadsheet;
     }
 
     protected static void addNewSheet(final Spreadsheet spreadsheet,
@@ -212,14 +167,14 @@ public class SpreadsheetFactory {
         loadWorkbookStyles(spreadsheet);
     }
 
-    public static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
+    protected static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
             final File spreadsheetFile) throws InvalidFormatException,
             IOException {
         reloadSpreadsheetComponent(spreadsheet,
                 WorkbookFactory.create(spreadsheetFile));
     }
 
-    public static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
+    protected static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
             final Workbook workbook) {
         Workbook oldWorkbook = spreadsheet.getWorkbook();
         if (oldWorkbook != null) {
@@ -230,11 +185,11 @@ public class SpreadsheetFactory {
         }
         final Sheet sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
         spreadsheet.setInternalWorkbook(workbook);
-        reloadSpreadsheetData(spreadsheet, workbook, sheet);
+        reloadSpreadsheetData(spreadsheet, sheet);
         loadWorkbookStyles(spreadsheet);
     }
 
-    public static File write(Spreadsheet spreadsheet, String fileName)
+    protected static File write(Spreadsheet spreadsheet, String fileName)
             throws FileNotFoundException, IOException {
         final Workbook workbook = spreadsheet.getWorkbook();
         if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")) {
@@ -275,42 +230,19 @@ public class SpreadsheetFactory {
 
     protected static void generateNewSpreadsheet(final Spreadsheet component,
             final Sheet sheet, int rows, int columns) {
-        logMemoryUsage();
-        component.getState().rows = rows;
-        component.getState().cols = columns;
         sheet.createRow(rows - 1).createCell(columns - 1);
-
         final float defaultRowHeightInPoints = sheet
                 .getDefaultRowHeightInPoints();
         if (defaultRowHeightInPoints <= 0) {
             sheet.setDefaultRowHeightInPoints(DEFAULT_ROW_HEIGHT_POINTS);
-            component.getState().defRowH = DEFAULT_ROW_HEIGHT_POINTS;
-        } else {
-            component.getState().defRowH = defaultRowHeightInPoints;
         }
         // use excel default column width instead of Apache POI default (8)
-        final int charactersToPixels = ExcelToHtmlUtils
-                .getColumnWidthInPx(DEFAULT_COL_WIDTH_UNITS * 256);
         sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
-        component.getState().defColW = charactersToPixels;
-
-        final float[] rowHeights = new float[component.getRows()];
-        for (int i = 0; i < rowHeights.length; i++) {
-            rowHeights[i] = component.getState().defRowH;
-        }
-        final int[] colWidths = new int[component.getCols()];
-        for (int i = 0; i < colWidths.length; i++) {
-            colWidths[i] = component.getState().defColW;
-        }
-        component.getState().rowH = rowHeights;
-        component.getState().colW = colWidths;
-        component.getState().hiddenColumnIndexes = new ArrayList<Integer>();
-        component.getState().hiddenRowIndexes = new ArrayList<Integer>();
-        logMemoryUsage();
+        reloadSpreadsheetData(component, sheet);
     }
 
     protected static void reloadSpreadsheetData(final Spreadsheet component,
-            Workbook workbook, final Sheet sheet) {
+            final Sheet sheet) {
         logMemoryUsage();
         try {
             float defaultRowHeightInPoints = sheet
@@ -368,15 +300,16 @@ public class SpreadsheetFactory {
             component.getState().hiddenColumnIndexes = hiddenColumnIndexes;
             component.getState().colW = colWidths;
 
-            loadSheetImages(component, sheet);
-            loadMergedRegions(component, sheet);
+            loadSheetImages(component);
+            loadMergedRegions(component);
         } catch (NullPointerException npe) {
             npe.printStackTrace();
         }
         logMemoryUsage();
     }
 
-    protected static void loadSheetImages(Spreadsheet spreadsheet, Sheet sheet) {
+    protected static void loadSheetImages(Spreadsheet spreadsheet) {
+        final Sheet sheet = spreadsheet.getActiveSheet();
         Drawing drawing = sheet.createDrawingPatriarch();
         if (drawing instanceof XSSFDrawing) {
             for (XSSFShape shape : ((XSSFDrawing) drawing).getShapes()) {
@@ -428,7 +361,8 @@ public class SpreadsheetFactory {
         }
     }
 
-    protected static void loadMergedRegions(Spreadsheet spreadsheet, Sheet sheet) {
+    protected static void loadMergedRegions(Spreadsheet spreadsheet) {
+        final Sheet sheet = spreadsheet.getActiveSheet();
         spreadsheet.getState().mergedRegions = null;
         spreadsheet.mergedRegionCounter = 0;
         int numMergedRegions = sheet.getNumMergedRegions();

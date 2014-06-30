@@ -2,8 +2,8 @@ package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.Element;
 
 public class Cell {
 

@@ -2,6 +2,7 @@ package com.vaadin.addon.spreadsheet;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -35,6 +36,7 @@ import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.WorkbookUtil;
@@ -70,8 +72,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         /**
          * Called if a cell value has been edited by the user by using the
          * default cell editor. Use
-         * {@link Spreadsheet#setCellValueHandler(CellValueHandler)} to
-         * enable it for the spreadsheet.
+         * {@link Spreadsheet#setCellValueHandler(CellValueHandler)} to enable
+         * it for the spreadsheet.
          * 
          * @param cell
          *            the cell that has been edited, may be <code>null</code> if
@@ -194,6 +196,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
     };
 
+    /**
+     * Creates a new Spreadsheet component using the newer Excel version
+     * {@link XSSFWorkbook} and default {@link SpreadsheetFactory#DEFAULT_ROWS}
+     * and {@link SpreadsheetFactory#DEFAULT_COLUMNS}.
+     */
     public Spreadsheet() {
         sheetImages = new HashSet<SheetImageWrapper>();
         tables = new HashSet<SpreadsheetTable>();
@@ -204,6 +211,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         SpreadsheetFactory.loadSpreadsheetWith(this, null);
     }
 
+    /**
+     * Creates a new Spreadsheet component and loads the given Workbook.
+     * 
+     * @param workbook
+     */
     public Spreadsheet(Workbook workbook) {
         sheetImages = new HashSet<SheetImageWrapper>();
         tables = new HashSet<SpreadsheetTable>();
@@ -214,13 +226,15 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         SpreadsheetFactory.loadSpreadsheetWith(this, workbook);
     }
 
-    protected Spreadsheet(int x) {
-        sheetImages = new HashSet<SheetImageWrapper>();
-        tables = new HashSet<SpreadsheetTable>();
-
-        registerRpc(new SpreadsheetHandlerImpl(this));
-        setSizeFull(); // Default to full size
-
+    /**
+     * Creates a new Spreadsheet component and loads the given Excel file.
+     * 
+     * @param file
+     * @throws InvalidFormatException
+     * @throws IOException
+     */
+    public Spreadsheet(File file) throws InvalidFormatException, IOException {
+        this(WorkbookFactory.create(file));
     }
 
     /**
@@ -271,8 +285,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @param customCellValueHandler
      *            or <code>null</code> if none should be used
      */
-    public void setCellValueHandler(
-            CellValueHandler customCellValueHandler) {
+    public void setCellValueHandler(CellValueHandler customCellValueHandler) {
         this.customCellValueHandler = customCellValueHandler;
     }
 
@@ -507,7 +520,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             throws IllegalArgumentException {
         // POI allows user to hide all sheets ...
         if (hidden != 0
-                && SpreadsheetFactory.getNumberOfVisibleSheets(workbook) == 1) {
+                && SpreadsheetUtil.getNumberOfVisibleSheets(workbook) == 1) {
             throw new IllegalArgumentException(
                     "At least one sheet should be always visible.");
         }
@@ -520,7 +533,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         if (hidden == 0 && (isHidden || isVeryHidden) || hidden != 0
                 && !(isHidden && isVeryHidden)) {
             if (sheetPOIIndex != activeSheetIndex) {
-                reloadSheets();
+                reloadSheetNames();
                 getState().sheetIndex = getSpreadsheetSheetIndex(activeSheetIndex) + 1;
             } else { // the active sheet can be only set as hidden
                 int oldVisibleSheetIndex = getState().sheetIndex - 1;
@@ -532,8 +545,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 int newActiveSheetIndex = getVisibleSheetPOIIndex(oldVisibleSheetIndex);
                 workbook.setActiveSheet(newActiveSheetIndex);
                 reloadActiveSheetData();
-                SpreadsheetFactory.reloadSpreadsheetData(this, workbook,
-                        getActiveSheet());
+                SpreadsheetFactory
+                        .reloadSpreadsheetData(this, getActiveSheet());
             }
         }
     }
@@ -821,7 +834,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         workbook.setActiveSheet(sheetIndex);
         reloadActiveSheetData();
-        SpreadsheetFactory.reloadSpreadsheetData(this, workbook,
+        SpreadsheetFactory.reloadSpreadsheetData(this,
                 workbook.getSheetAt(sheetIndex));
     }
 
@@ -1534,7 +1547,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * {@link #reloadActiveSheetStyles()}.
      */
     public void reloadAllMergedRegions() {
-        SpreadsheetFactory.loadMergedRegions(this, getActiveSheet());
+        SpreadsheetFactory.loadMergedRegions(this);
     }
 
     /**
@@ -1624,9 +1637,25 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         return row == null ? false : row.getZeroHeight();
     }
 
-    public void reloadDataFrom(File file) throws InvalidFormatException,
+    /**
+     * Reloads the component from the given Excel file.
+     * 
+     * @param file
+     * @throws InvalidFormatException
+     * @throws IOException
+     */
+    public void reloadSpreadsheetFrom(File file) throws InvalidFormatException,
             IOException {
         SpreadsheetFactory.reloadSpreadsheetComponent(this, file);
+    }
+
+    public void reloadSpreadsheetWithNewWorkbook() {
+        SpreadsheetFactory.loadNewXLSXSpreadsheet(this);
+    }
+
+    public File writeSpreadsheetIntoFile(String fileName)
+            throws FileNotFoundException, IOException {
+        return SpreadsheetFactory.write(this, fileName);
     }
 
     public int getRowBufferSize() {
@@ -1763,12 +1792,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         // after first round trip.
         tablesLoaded = false;
 
-        reloadSheets();
+        reloadSheetNames();
 
         getState().displayGridlines = getActiveSheet().isDisplayGridlines();
         getState().displayRowColHeadings = getActiveSheet()
                 .isDisplayRowColHeadings();
-
         markAsDirty();
     }
 
@@ -1802,7 +1830,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
     }
 
-    private void reloadSheets() {
+    private void reloadSheetNames() {
         final ArrayList<String> sheetNamesList = new ArrayList<String>();
 
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
@@ -1898,6 +1926,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         return workbook;
     }
 
+    /**
+     * Reloads the component with the given Workbook.
+     * 
+     * @param workbook
+     */
     public void setWorkbook(Workbook workbook) {
         if (workbook == null) {
             throw new NullPointerException(
@@ -2139,7 +2172,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     }
                 }
                 sheetImages.clear();
-                SpreadsheetFactory.loadSheetImages(this, getActiveSheet());
+                SpreadsheetFactory.loadSheetImages(this);
             }
             for (final SheetImageWrapper image : sheetImages) {
                 if (image.isVisible(firstColumn, lastColumn, firstRow, lastRow)) {
@@ -2608,6 +2641,36 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         return valueManager.getCellValue(cell);
     }
 
+    public boolean isDisplayGridLines() {
+        if (getActiveSheet() != null) {
+            return getActiveSheet().isDisplayGridlines();
+        }
+        return true;
+    }
+
+    public void setDisplayGridlines(boolean displayGridlines) {
+        if (getActiveSheet() == null) {
+            throw new NullPointerException("no active sheet");
+        }
+        getActiveSheet().setDisplayGridlines(displayGridlines);
+        getState().displayGridlines = displayGridlines;
+    }
+
+    public boolean isDisplayRowColHeadings() {
+        if (getActiveSheet() != null) {
+            return getActiveSheet().isDisplayRowColHeadings();
+        }
+        return true;
+    }
+
+    public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
+        if (getActiveSheet() == null) {
+            throw new NullPointerException("no active sheet");
+        }
+        getActiveSheet().setDisplayRowColHeadings(displayRowColHeadings);
+        getState().displayRowColHeadings = displayRowColHeadings;
+    }
+
     public static class SelectionChangeEvent extends Component.Event {
 
         private final CellReference selectedCellReference;
@@ -2810,38 +2873,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             }
         }
 
-    }
-
-    // TODO: can activeSheet() be null?
-
-    public boolean isDisplayGridLines() {
-        if (getActiveSheet() != null) {
-            return getActiveSheet().isDisplayGridlines();
-        }
-        return true;
-    }
-
-    public void setDisplayGridlines(boolean displayGridlines) {
-        if (getActiveSheet() == null) {
-            throw new NullPointerException("no active sheet");
-        }
-        getActiveSheet().setDisplayGridlines(displayGridlines);
-        getState().displayGridlines = displayGridlines;
-    }
-
-    public boolean isDisplayRowColHeadings() {
-        if (getActiveSheet() != null) {
-            return getActiveSheet().isDisplayRowColHeadings();
-        }
-        return true;
-    }
-
-    public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
-        if (getActiveSheet() == null) {
-            throw new NullPointerException("no active sheet");
-        }
-        getActiveSheet().setDisplayRowColHeadings(displayRowColHeadings);
-        getState().displayRowColHeadings = displayRowColHeadings;
     }
 
 }

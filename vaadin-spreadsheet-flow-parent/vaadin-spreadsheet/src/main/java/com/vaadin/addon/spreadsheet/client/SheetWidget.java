@@ -10,10 +10,12 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Display;
@@ -23,14 +25,10 @@ import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
@@ -91,6 +89,8 @@ public class SheetWidget extends Panel {
 
     /** Sheet that will contain all the cells */
     private DivElement sheet = Document.get().createDivElement();
+
+    private SheetInputEventListener sheetInputEventListener;
 
     /** Header corner element that covers crossing headers */
     private DivElement corner = Document.get().createDivElement();
@@ -175,12 +175,11 @@ public class SheetWidget extends Panel {
      */
     private DivElement ppiCounter = Document.get().createDivElement();
 
-    /** An extra element used from scrolling a cell to the view. */
-    private DivElement extraElement = Document.get().createDivElement();
-
     private final VLazyExecutor scrollHandler;
 
     private VLazyExecutor requester;
+
+    private SheetJsniUtil jsniUtil = GWT.create(SheetJsniUtil.class);
 
     /**
      * Random id used as additional style for the widget element to connect
@@ -221,12 +220,12 @@ public class SheetWidget extends Panel {
     private boolean customCellEditorDisplayed;
     private boolean editingCell;
     private boolean editingMergedCell;
-    private boolean inputClicked;
     private boolean loaded;
     private boolean selectingCells;
 
     private final boolean isWebkit = BrowserInfo.get().isWebkit();
-    private final boolean isIE = BrowserInfo.get().isIE();
+    private final boolean isIE = BrowserInfo.get().isIE10()
+            || BrowserInfo.get().isIE9() || BrowserInfo.get().isIE8();
 
     private int firstColumnIndex;
     private int firstColumnPosition;
@@ -244,8 +243,6 @@ public class SheetWidget extends Panel {
     private int previousScrollTop;
     private int scrollViewHeight;
     private int scrollViewWidth;
-    private int emptyRowPointer;
-    private int emptyCellPointer;
     private int ppi;
     private int defRowH = -1;
     private int[] definedRowHeights;
@@ -322,6 +319,14 @@ public class SheetWidget extends Panel {
                 requestCells();
             }
         });
+    }
+
+    public SheetHandler getSheetHandler() {
+        return actionHandler;
+    }
+
+    protected SheetJsniUtil getSheetJsniUtil() {
+        return jsniUtil;
     }
 
     @Override
@@ -484,8 +489,8 @@ public class SheetWidget extends Panel {
                     selectionWidget.getCol2(), selectionWidget.getRow1(),
                     selectionWidget.getRow2());
         } catch (Exception e) {
-            debugConsole.severe("Exception while relayouting spreadsheet, "
-                    + e.toString());
+            debugConsole.severe("SheetWidget:relayoutSheet: " + e.toString()
+                    + " while relayouting spreadsheet");
             resetScrollView(scrollLeft, scrollTop);
             actionHandler.onScrollViewChanged(firstRowIndex, lastRowIndex,
                     firstColumnIndex, lastColumnIndex);
@@ -512,6 +517,14 @@ public class SheetWidget extends Panel {
                 scrollViewHeight = newScrollViewHeight;
                 scrollViewWidth = newScrollViewWidth;
                 // no need to trigger scroll handler if the same size or smaller
+            }
+            // vaadin does bunch of layout phases so this needs to be done in
+            // case the comment overlay position should be updated
+            if (alwaysVisibleCellComments != null
+                    && !alwaysVisibleCellComments.isEmpty()) {
+                for (CellComment cc : alwaysVisibleCellComments.values()) {
+                    cc.refreshPositionAccordingToCellRightCorner();
+                }
             }
         }
     }
@@ -561,7 +574,8 @@ public class SheetWidget extends Panel {
         style.getParentElement().appendChild(selectionStyle);
 
         // style for the selected cell when the cell range outline is hidden
-        insertRule(selectionStyle, ".notusedselector" + SELECTED_CELL_STYLE2);
+        jsniUtil.insertRule(selectionStyle, ".notusedselector"
+                + SELECTED_CELL_STYLE2);
 
         // styles for cell range selection (cells&headers background)
         cellRangeStyle.setType("text/css");
@@ -569,15 +583,17 @@ public class SheetWidget extends Panel {
         style.getParentElement().appendChild(cellRangeStyle);
 
         // initial cell range selection style (not visible)
-        insertRule(cellRangeStyle, ".notusedselector"
+        jsniUtil.insertRule(cellRangeStyle, ".notusedselector"
                 + SELECTED_CELL_RANGE_STYLES);
-        insertRule(cellRangeStyle, ".notusedselector" + SELECTED_HEADER_STYLES);
+        jsniUtil.insertRule(cellRangeStyle, ".notusedselector"
+                + SELECTED_HEADER_STYLES);
 
         // style for "hiding" the edited cell
         editedCellStyle.setType("text/css");
         editedCellStyle.setId(sheetId + "-editedCellStyle");
         style.getParentElement().appendChild(editedCellStyle);
-        insertRule(editedCellStyle, ".notusedselector" + EDITING_CELL_STYLE);
+        jsniUtil.insertRule(editedCellStyle, ".notusedselector"
+                + EDITING_CELL_STYLE);
 
         // style for hiding the cell inside merged regions
         mergedRegionStyle.setType("text/css");
@@ -647,475 +663,277 @@ public class SheetWidget extends Panel {
         }
     }
 
-    /** Initialize scroll and mouse listeners to make spreadsheet interactive */
-    private void initListeners() {
-        Event.sinkEvents(input, Event.ONKEYPRESS | Event.ONKEYDOWN
-                | Event.FOCUSEVENTS | Event.ONCLICK);
-        Event.setEventListener(input, new EventListener() {
+    protected void onSheetScroll(Event event) {
+        scrollHandler.trigger();
+        moveHeadersToMatchScroll();
+    }
 
-            @Override
-            public void onBrowserEvent(Event event) {
-                final int type = event.getTypeInt();
-                final int keyCode = event.getKeyCode();
-                if (type == Event.ONFOCUS) {
-                    actionHandler.onCellInputFocus();
-                    event.stopPropagation();
-                } else if (type == Event.ONBLUR) {
-                    if (editingCell) {
-                        actionHandler.onCellInputBlur(input.getValue());
-                        event.stopPropagation();
-                    }
-                } else if (type == Event.ONKEYDOWN) {
-                    if (editingCell) {
-                        switch (keyCode) {
-                        case KeyCodes.KEY_BACKSPACE:
-                            handleInputElementValueChange(true);
-                            break;
-                        case KeyCodes.KEY_ESCAPE:
-                            actionHandler.onCellInputCancel();
-                            break;
-                        case KeyCodes.KEY_TAB:
-                            actionHandler.onCellInputTab(input.getValue(),
-                                    event.getShiftKey());
-                            // prevent the default tab from happening (switches
-                            // focus)
-                            event.preventDefault();
-                            break;
-                        case KeyCodes.KEY_UP:
-                            if (!inputClicked) {
-                                actionHandler.onCellInputEnter(
-                                        input.getValue(), true);
-                            }
-                            break;
-                        case KeyCodes.KEY_DOWN:
-                            if (!inputClicked) {
-                                actionHandler.onCellInputEnter(
-                                        input.getValue(), false);
-                            }
-                            break;
-                        case KeyCodes.KEY_LEFT:
-                            if (!inputClicked) {
-                                actionHandler.onCellInputTab(input.getValue(),
-                                        true);
-                            }
-                            break;
-                        case KeyCodes.KEY_RIGHT:
-                            if (!inputClicked) {
-                                actionHandler.onCellInputTab(input.getValue(),
-                                        false);
-                            }
-                            break;
-                        default:
-                            break;
-                        }
-                    } else {
-                        actionHandler
-                                .onSheetKeyPress(event,
-                                        convertUnicodeIntoCharacter(event
-                                                .getCharCode()));
-                    }
-                    event.stopPropagation();
-                } else if (type == Event.ONCLICK && editingCell) {
-                    inputClicked = true;
-                } else { // ONKEYPRESS
-                    if (editingCell) {
-                        if (keyCode == KeyCodes.KEY_ENTER) {
-                            actionHandler.onCellInputEnter(input.getValue(),
-                                    event.getShiftKey());
-                        } else {
-                            handleInputElementValueChange(true);
-                        }
-                        event.stopPropagation();
-                    }
-                }
+    protected void onSheetMouseOverOrOut(Event event, Element sheetPaneElement) {
+        Element target = event.getEventTarget().cast();
+        String className = target.getClassName();
+        // cell comment lines are shown inside the sheet - skip those
+        if (className.startsWith(CellComment.COMMENT_OVERLAY_LINE_CLASSNAME)) {
+            return;
+        }
+        if (className.endsWith(MERGED_CELL_CLASSNAME)) {
+            className = className.replace(" " + MERGED_CELL_CLASSNAME, "");
+        } else if (className.equals(SheetImage.SHEET_IMAGE_CLASSNAME)) {
+            target = event.getCurrentEventTarget().cast();
+            className = target.getClassName();
+        } else if (event.getTypeInt() == Event.ONMOUSEOVER
+                && target.getParentElement().equals(sheetPaneElement)) {
+            // because of cell overflow, the target mouseover target might be a
+            // wrong cell
+            jsniUtil.parseColRow(className);
+            try {
+                target = getRealEventTargetCell(
+                        event.getClientX(),
+                        event.getClientY(),
+                        getCell(jsniUtil.getParsedCol(),
+                                jsniUtil.getParsedRow())).getElement();
+                className = target.getClassName();
+            } catch (IndexOutOfBoundsException ioobe) {
+                debugConsole
+                        .warning("SheetWidget:onSheetMouseOverOrOut: IOOBE while trying to find correct event target");
             }
-        });
-        Event.sinkEvents(sheet, Event.ONSCROLL | Event.ONMOUSEDOWN
-                | Event.ONMOUSEMOVE | Event.ONMOUSEOVER | Event.ONMOUSEOUT
-                | Event.ONMOUSEUP | Event.TOUCHEVENTS | Event.ONLOSECAPTURE
-                | Event.ONCLICK | Event.ONDBLCLICK | Event.ONKEYPRESS
-                | Event.ONKEYDOWN | Event.FOCUSEVENTS);
-        Event.setEventListener(sheet, new EventListener() {
-            private int tempCol;
-            private int tempRow;
-            private boolean sheetFocused;
+        }
+        jsniUtil.parseColRow(className);
 
-            @Override
-            public void onBrowserEvent(Event event) {
-                final int typeInt = event.getTypeInt();
-                if (typeInt == Event.ONSCROLL) {
-                    scrollHandler.trigger();
-                    moveHeadersToMatchScroll();
-                } else if (typeInt == Event.ONFOCUS) {
-                    sheetFocused = true;
-                } else if (typeInt == Event.ONBLUR) {
-                    sheetFocused = false;
-                } else if (typeInt == Event.ONKEYPRESS && !editingCell) {
-                    if (!sheetFocused) {
-                        return; // focus in input or custom editor
-                    }
-                    final int keyCode = event.getKeyCode();
-                    final int charCode = event.getCharCode();
-                    // these have been handled with onKeyDown (FF causes both
-                    // for some reason!)
-                    if ((charCode == 122 || charCode == 121)
-                            && (event.getCtrlKey() || event.getMetaKey())) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        return;
-                    }
-                    switch (keyCode) {
-                    // these have been handled with onKeyDown (FF causes both
-                    // for some reason!)
-                    case KeyCodes.KEY_UP:
-                    case KeyCodes.KEY_DOWN:
-                    case KeyCodes.KEY_LEFT:
-                    case KeyCodes.KEY_RIGHT:
-                    case KeyCodes.KEY_TAB:
-                    case KeyCodes.KEY_BACKSPACE:
-                    case KeyCodes.KEY_DELETE:
-                        event.preventDefault();
-                        event.stopPropagation();
-                        break;
-                    default:
-                        actionHandler.onSheetKeyPress(event,
-                                convertUnicodeIntoCharacter(charCode));
-                    }
-                } else if (typeInt == Event.ONKEYDOWN && !editingCell) {
-                    if (!sheetFocused) {
-                        return; // focus in input or custom editor
-                    }
-                    final int keyCode = event.getKeyCode();
-                    if (keyCode == KeyCodes.KEY_BACKSPACE) {
-                        actionHandler.onSheetKeyPress(event, "");
-                        // prevent the default browser action, i.e. Chrome would
-                        // try to navigate to previous page...
-                        event.preventDefault();
-                        event.stopPropagation();
-                    } else if (keyCode == KeyCodes.KEY_UP
-                            || keyCode == KeyCodes.KEY_DOWN
-                            || keyCode == KeyCodes.KEY_LEFT
-                            || keyCode == KeyCodes.KEY_RIGHT
-                            || keyCode == KeyCodes.KEY_TAB
-                            || keyCode == KeyCodes.KEY_DELETE) {
-                        actionHandler.onSheetKeyPress(event, "");
-                        // prevent the default browser action (scroll to key
-                        // direction) or switch focus (tab)
-                        event.preventDefault();
-                        event.stopPropagation();
-                    } else if (keyCode == 89 // y
-                            && (event.getCtrlKey() || event.getMetaKey())) {
-                        actionHandler.onRedoPress();
-                        event.preventDefault();
-                        event.stopPropagation();
-                    } else if (keyCode == 90 // z
-                            && (event.getCtrlKey() || event.getMetaKey())) {
-                        actionHandler.onUndoPress();
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                } else if (typeInt == Event.ONMOUSEOUT
-                        || typeInt == Event.ONMOUSEOVER) {
-                    if (selectingCells) {
-                        // cell comments && link tooltips not visible when
-                        // selecting cells with drag
-                        return;
-                    }
-                    Element target = event.getEventTarget().cast();
-                    String className = target.getClassName();
-                    if (className.endsWith(MERGED_CELL_CLASSNAME)) {
-                        className = className.replace(" "
-                                + MERGED_CELL_CLASSNAME, "");
-                    }
-                    if (className.equals(SheetImage.SHEET_IMAGE_CLASSNAME)) {
-                        target = event.getCurrentEventTarget().cast();
-                        className = target.getClassName();
-                    }
-                    // if mouse moved to/from a comment mark triangle, or the
-                    // latest cell comment's cell, show/hide cell comment
-                    if (className.equals(CELL_COMMENT_TRIANGLE_CLASSNAME)
-                            || className.equals(cellCommentCellClassName)
-                            || (cellCommentsMap != null && cellCommentsMap
-                                    .containsKey(className))) {
-                        updateCellCommentDisplay(event, target);
-                    } else {
-                        if (cellCommentOverlay.isShowing()) {
-                            cellCommentOverlay.hide();
-                            cellCommentCellClassName = null;
-                            cellCommentCellColumn = -1;
-                            cellCommentCellRow = -1;
-                        }
-                    }
+        // if mouse moved to/from a comment mark triangle, or the
+        // latest cell comment's cell, show/hide cell comment
+        if (className.equals(CELL_COMMENT_TRIANGLE_CLASSNAME)
+                || className.equals(cellCommentCellClassName)
+                || (cellCommentsMap != null && cellCommentsMap
+                        .containsKey(className))) {
+            updateCellCommentDisplay(event, target);
+        } else {
+            if (cellCommentOverlay.isShowing()) {
+                cellCommentOverlay.hide();
+                cellCommentCellClassName = null;
+                cellCommentCellColumn = -1;
+                cellCommentCellRow = -1;
+            }
+        }
 
-                    if (target.getParentElement().equals(sheet)
-                            && cellLinksMap != null
-                            && cellLinksMap.containsKey(className)) {
-                        parseColRow(className);
-                        updateCellLinkTooltip(typeInt, parsedCol, parsedRow,
-                                cellLinksMap.get(className));
-                        return;
-                    } else if (hyperlinkTooltip.isVisible()) {
-                        hyperlinkTooltip.hide();
-                    }
-                } else {
-                    if (typeInt == Event.ONMOUSEMOVE && !selectingCells) {
-                        if (cellCommentCellColumn != -1
-                                && cellCommentCellRow != -1) {
-                            // the comment should only be displayed after the
-                            // mouse has "stopped" on top of a cell with a
-                            // comment
-                            cellCommentHandler.trigger();
-                        }
-                        return;
-                    }
-                    final Element target = event.getEventTarget().cast();
+        if (target.getParentElement().equals(sheetPaneElement)
+                && cellLinksMap != null && cellLinksMap.containsKey(className)) {
+            updateCellLinkTooltip(event.getTypeInt(), jsniUtil.getParsedCol(),
+                    jsniUtil.getParsedRow(), cellLinksMap.get(className));
+            return;
+        } else if (hyperlinkTooltip.isVisible()) {
+            hyperlinkTooltip.hide();
+        }
+    }
 
-                    if (customEditorWidget != null) {
-                        Element customWidgetElement = customEditorWidget
-                                .getElement();
-                        if (customWidgetElement.isOrHasChild(target)
-                                || customWidgetElement.getParentElement() != null
-                                && customWidgetElement.getParentElement()
-                                        .isOrHasChild(target)) {
-                            // allow sheet context menu on top of custom editors
-                            // (if the widget event handling allows it)
-                            if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
-                                if (typeInt == Event.ONMOUSEDOWN) {
-                                    parseColRow(customWidgetElement
-                                            .getParentElement().getClassName());
-                                    actionHandler.onCellRightClick(event,
-                                            parsedCol, parsedRow);
-                                }
-                            } else {
-                                if (selectingCells) {
-                                    DOM.releaseCapture((Element) sheet.cast());
-                                    if ((selectedCellCol != tempCol || selectedCellRow != tempRow)
-                                            && tempCol != -1 && tempRow != -1) {
-                                        actionHandler
-                                                .onFinishedSelectingCellsWithDrag(
-                                                        selectedCellCol,
-                                                        tempCol,
-                                                        selectedCellRow,
-                                                        tempRow);
-                                    } else {
-                                        actionHandler.onCellClick(
-                                                parsedCol,
-                                                parsedRow,
-                                                target.getInnerText(),
-                                                event.getShiftKey(),
-                                                event.getMetaKey()
-                                                        || event.getCtrlKey(),
-                                                true);
-                                    }
-                                    selectingCells = false;
-                                }
-                            }
-                            tempCol = -1;
-                            tempRow = -1;
-                            return;
-                        }
-                    }
+    protected void onSheetMouseMove(Event event, Element sheetPaneElement) {
+        if (cellCommentCellColumn != -1 && cellCommentCellRow != -1) {
+            // the comment should only be displayed after the
+            // mouse has "stopped" on top of a cell with a comment
+            cellCommentHandler.trigger();
+        }
+    }
 
-                    if (input.isOrHasChild(target)) {
-                        if (typeInt == Event.ONMOUSEDOWN
-                                && event.getButton() == NativeEvent.BUTTON_RIGHT) {
-                            parseColRow(getSelectedCell().getElement()
-                                    .getClassName());
-                            actionHandler.onCellRightClick(event, parsedCol,
-                                    parsedRow);
-                        }
-                        return;
-                    }
-                    final boolean sheetOrChild = DOM.isOrHasChild(
-                            (Element) sheet.cast(), target);
+    protected boolean isEventInCustomEditorCell(Event event) {
+        if (customEditorWidget != null) {
+            final Element target = event.getEventTarget().cast();
+            final Element customWidgetElement = customEditorWidget.getElement();
+            return (customWidgetElement.isOrHasChild(target) || customWidgetElement
+                    .getParentElement() != null
+                    && customWidgetElement.getParentElement().isOrHasChild(
+                            target));
+        }
+        return false;
+    }
 
-                    final String className = target.getClassName();
-                    if (sheetOrChild) {
-                        parseColRow(className);
-                    }
-                    // Uncommenting this will prevent selecting (or painting) a
-                    // cell that has a component inside
-                    // if (customWidgetMap != null
-                    // && customWidgetMap.containsKey(toKey(parsedCol,
-                    // parsedRow))) {
-                    // return;
-                    // }
-                    if ((typeInt == Event.ONMOUSEDOWN || typeInt == Event.ONTOUCHSTART)
-                            && !target.getParentElement().equals(sheet)) {
-                        return;
-                    }
+    protected Cell getRealEventTargetCell(final int clientX, final int clientY,
+            final Cell cell) {
+        Cell mergedCell = getMergedCell(toKey(cell.getCol(), cell.getRow()));
+        if (mergedCell == null) {
+            Element target = cell.getElement();
+            if (clientX < target.getAbsoluteLeft()
+                    && cell.getCol() > firstColumnIndex) {
+                return getRealEventTargetCell(clientX, clientY,
+                        getCell(cell.getCol() - 1, cell.getRow()));
+            } else if (clientX > target.getAbsoluteRight()
+                    && cell.getCol() < lastColumnIndex) {
+                return getRealEventTargetCell(clientX, clientY,
+                        getCell(cell.getCol() + 1, cell.getRow()));
+            }
+            return cell;
+        } else {
+            return mergedCell;
+        }
+    }
 
-                    if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
-                        if (typeInt == Event.ONMOUSEDOWN && parsedCol != 0
-                                && parsedRow != 0) {
-                            actionHandler.onCellRightClick(event, parsedCol,
-                                    parsedRow);
-                        }
-                        event.stopPropagation();
-                        event.preventDefault();
-                    } else {
-                        switch (typeInt) {
-                        case Event.ONTOUCHSTART:
-                            if (event.getTouches().length() > 1) {
-                                return;
-                            }
-                        case Event.ONMOUSEDOWN:
-                            if (!sheetOrChild) {
-                                if (selectingCells) {
-                                    DOM.releaseCapture((Element) sheet.cast());
-                                    actionHandler
-                                            .onFinishedSelectingCellsWithDrag(
-                                                    selectedCellCol, tempCol,
-                                                    selectedCellRow, tempRow);
-                                    tempCol = -1;
-                                    tempRow = -1;
-                                }
-                                break;
-                            } else {
-                                sheet.focus();
-                            }
-                            if (editingCell && !input.isOrHasChild(target)) {
-                                actionHandler.onCellInputBlur(input.getValue());
-                            }
-                            if (target.equals(sheet) || target.equals(floater)) {
-                                // FIXME the click is so close to the edge that
-                                // somehow it is not registered to the proper
-                                // cell DIV.
-                                return;
-                            }
-                            event.stopPropagation();
-                            event.preventDefault();
-                            if (!event.getCtrlKey() && !event.getMetaKey()
-                                    && !event.getShiftKey()) {
-                                // link cells are special case (only when no
-                                // keys
-                                // used)
-                                if (cellLinksMap != null
-                                        && cellLinksMap.containsKey(toKey(
-                                                parsedCol, parsedRow))) {
-                                    actionHandler.onLinkCellClick(parsedCol,
-                                            parsedRow);
-                                    tempCol = -1;
-                                    tempRow = -1;
-                                    selectingCells = false;
-                                } else {
-                                    actionHandler.onCellClick(
-                                            parsedCol,
-                                            parsedRow,
-                                            target.getInnerText(),
-                                            event.getShiftKey(),
-                                            event.getMetaKey()
-                                                    || event.getCtrlKey(),
-                                            false);
-                                    selectingCells = true;
-                                    tempCol = parsedCol;
-                                    tempRow = parsedRow;
-                                    DOM.setCapture((Element) sheet.cast());
-                                }
-                            } else {
-                                actionHandler.onCellClick(parsedCol, parsedRow,
+    protected void onSheetMouseDown(Event event, Element sheetPaneElement) {
+        if (isEventInCustomEditorCell(event)) {
+            // allow sheet context menu on top of custom editors
+            if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
+                actionHandler.onCellRightClick(event, selectedCellCol,
+                        selectedCellRow);
+            } else if (selectingCells) { // this is probably unnecessary
+                stoppedSelectingCellsWithDrag(event);
+            }
+        } else {
+            Element target = event.getEventTarget().cast();
+            final boolean sheetOrChild = sheetPaneElement.isOrHasChild(target);
+            String className = target.getClassName();
+            if (sheetOrChild) {
+                jsniUtil.parseColRow(className);
+            } else {
+                return;
+            }
+
+            int targetCol = jsniUtil.getParsedCol();
+            int targetRow = jsniUtil.getParsedRow();
+            // because of text overflow, the click might have happened on
+            // top of a another cell than what event has.
+            // merged cells are a special case, text won't overflow -> skip
+            try {
+                if (!className.endsWith(MERGED_CELL_CLASSNAME)) {
+                    Cell targetCell = getRealEventTargetCell(
+                            event.getClientX(), event.getClientY(),
+                            getCell(targetCol, targetRow));
+                    target = targetCell.getElement();
+                    targetCol = targetCell.getCol();
+                    targetRow = targetCell.getRow();
+                }
+            } catch (IndexOutOfBoundsException ioobe) {
+                debugConsole
+                        .severe("SheetWidget:onSheetMouseDown - IOOBE while trying to find real event target");
+            }
+
+            event.stopPropagation();
+            event.preventDefault();
+            if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
+                actionHandler.onCellRightClick(event, targetCol, targetRow);
+            } else {
+                sheet.focus();
+                // quit input if active
+                if (editingCell && !input.isOrHasChild(target)) {
+                    actionHandler.onCellInputBlur(input.getValue());
+                }
+                if (event.getCtrlKey() || event.getMetaKey()
+                        || event.getShiftKey()) {
+                    actionHandler.onCellClick(targetCol, targetRow,
+                            target.getInnerText(), event.getShiftKey(),
+                            event.getMetaKey() || event.getCtrlKey(), true);
+                    tempCol = -1;
+                    tempRow = -1;
+                } else { // no special keys used
+                    // link cells are special keys
+                    // TODO should investigate what is the correct action when
+                    // clicking on hyperlink cells that overflow to next cells
+                    if (cellLinksMap != null
+                            && cellLinksMap.containsKey(toKey(
+                                    jsniUtil.getParsedCol(),
+                                    jsniUtil.getParsedRow()))) {
+                        actionHandler.onLinkCellClick(targetCol, targetRow);
+                    } else { // otherwise selecting starts
+                        actionHandler
+                                .onCellClick(targetCol, targetRow,
                                         target.getInnerText(),
                                         event.getShiftKey(), event.getMetaKey()
-                                                || event.getCtrlKey(), true);
-                                tempCol = -1;
-                                tempRow = -1;
-                                selectingCells = false;
-                            }
-                            // DOM.eventPreventDefault(event);
-                            break;
-                        case Event.ONMOUSEUP:
-                        case Event.ONTOUCHEND:
-                        case Event.ONTOUCHCANCEL:
-                        case Event.ONLOSECAPTURE:
-                            if (selectingCells) {
-                                DOM.releaseCapture((Element) sheet.cast());
-                                if ((selectedCellCol != tempCol || selectedCellRow != tempRow)
-                                        && tempCol != -1 && tempRow != -1) {
-                                    actionHandler
-                                            .onFinishedSelectingCellsWithDrag(
-                                                    selectedCellCol, tempCol,
-                                                    selectedCellRow, tempRow);
-                                } else {
-                                    actionHandler.onCellClick(
-                                            parsedCol,
-                                            parsedRow,
-                                            target.getInnerText(),
-                                            event.getShiftKey(),
-                                            event.getMetaKey()
-                                                    || event.getCtrlKey(), true);
-                                }
-                                selectingCells = false;
-                            }
-                            tempCol = -1;
-                            tempRow = -1;
-                            break;
-                        case Event.ONMOUSEMOVE:
-                        case Event.ONTOUCHMOVE:
-                            if (!sheetOrChild) {
-                                if (DOM.isOrHasChild(
-                                        (Element) spreadsheet.cast(), target)) {
-                                    final int header = isHeader(className);
-                                    if (header > 0) {
-                                        int parsedHeaderIndex = parseHeaderIndex(className);
-                                        if (header == 1) { // row
-                                            final int colIndex = getLeftColumnIndex() - 1;
-                                            tempCol = colIndex < 1 ? 1
-                                                    : colIndex;
-                                            tempRow = parsedHeaderIndex;
-                                            actionHandler
-                                                    .onSelectingCellsWithDrag(
-                                                            tempCol,
-                                                            parsedHeaderIndex);
-                                        } else { // column
-                                            final int rowIndex = getTopRowIndex() - 1;
-                                            tempRow = rowIndex < 1 ? 1
-                                                    : rowIndex;
-                                            tempCol = parsedHeaderIndex;
-                                            actionHandler
-                                                    .onSelectingCellsWithDrag(
-                                                            parsedHeaderIndex,
-                                                            tempRow);
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (selectingCells
-                                        && (parsedCol != tempCol || parsedRow != tempRow)) {
-                                    if (parsedCol == 0) { // on top of scroll
-                                                          // bar
-                                        if (event.getClientX() > sheet
-                                                .getAbsoluteRight()) {
-                                            parsedCol = getRightColumnIndex() + 1;
-                                        } else {
-                                            parsedCol = tempCol;
-                                        }
-                                    }
-                                    if (parsedRow == 0) {
-                                        if (event.getClientY() > sheet
-                                                .getAbsoluteBottom()) {
-                                            parsedRow = getBottomRowIndex() + 1;
-                                        } else {
-                                            parsedRow = tempRow;
-                                        }
-                                    }
-                                    actionHandler.onSelectingCellsWithDrag(
-                                            parsedCol, parsedRow);
-                                    tempCol = parsedCol;
-                                    tempRow = parsedRow;
-                                }
-                            }
-                            break;
-                        case Event.ONDBLCLICK:
-                            actionHandler.onCellDoubleClick(parsedCol,
-                                    parsedRow, target.getInnerText());
-                            event.stopPropagation();
-                        default:
-                            break;
-                        }
+                                                || event.getCtrlKey(), false);
+                        selectingCells = true;
+                        tempCol = targetCol;
+                        tempRow = targetRow;
+                        Event.setCapture(sheetPaneElement);
                     }
                 }
             }
-        });
+        }
+    }
+
+    protected void onMouseMoveWhenSelectingCells(Event event,
+            Element sheetPaneElement) {
+        final Element target = event.getEventTarget().cast();
+        final boolean sheetOrChild = sheetPaneElement.isOrHasChild(target);
+        final String className = target.getClassName();
+        if (!sheetOrChild) { // sheet has capture, gets all events
+            if (spreadsheet.isOrHasChild(target)) {
+                // dragging on top of row/column headers
+                final int header = jsniUtil.isHeader(className);
+                if (header > 0) {
+                    int parsedHeaderIndex = jsniUtil
+                            .parseHeaderIndex(className);
+                    if (header == 1) { // row
+                        final int colIndex = getLeftColumnIndex() - 1;
+                        tempCol = colIndex < 1 ? 1 : colIndex;
+                        tempRow = parsedHeaderIndex;
+                        actionHandler.onSelectingCellsWithDrag(tempCol,
+                                parsedHeaderIndex);
+                    } else { // column
+                        final int rowIndex = getTopRowIndex() - 1;
+                        tempRow = rowIndex < 1 ? 1 : rowIndex;
+                        tempCol = parsedHeaderIndex;
+                        actionHandler.onSelectingCellsWithDrag(
+                                parsedHeaderIndex, tempRow);
+                    }
+                }
+            }
+        } else {
+            jsniUtil.parseColRow(className);
+            int col = jsniUtil.getParsedCol();
+            int row = jsniUtil.getParsedRow();
+
+            // skip search of actual cell if this is a merged cell
+            if (!className.endsWith(MERGED_CELL_CLASSNAME)) {
+                Cell targetCell = getRealEventTargetCell(event.getClientX(),
+                        event.getClientY(), getCell(col, row));
+                col = targetCell.getCol();
+                row = targetCell.getRow();
+            }
+
+            if (col != tempCol || row != tempRow) {
+                if (col == 0) { // on top of scroll bar
+                    if (event.getClientX() > sheetPaneElement
+                            .getAbsoluteRight()) {
+                        col = getRightColumnIndex() + 1;
+                    } else {
+                        col = tempCol;
+                    }
+                }
+                if (row == 0) {
+                    if (event.getClientY() > sheet.getAbsoluteBottom()) {
+                        row = getBottomRowIndex() + 1;
+                    } else {
+                        row = tempRow;
+                    }
+                }
+                actionHandler.onSelectingCellsWithDrag(col, row);
+                tempCol = col;
+                tempRow = row;
+            }
+        }
+    }
+
+    protected void stoppedSelectingCellsWithDrag(Event event) {
+        Event.releaseCapture((Element) sheet.cast());
+        if ((selectedCellCol != tempCol || selectedCellRow != tempRow)
+                && tempCol != -1 && tempRow != -1) {
+            actionHandler.onFinishedSelectingCellsWithDrag(selectedCellCol,
+                    tempCol, selectedCellRow, tempRow);
+        } else {
+            actionHandler.onCellClick(tempCol, tempRow, ((Element) event
+                    .getEventTarget().cast()).getInnerText(), event
+                    .getShiftKey(), event.getMetaKey() || event.getCtrlKey(),
+                    true);
+        }
+        selectingCells = false;
+        tempCol = -1;
+        tempRow = -1;
+    }
+
+    private int tempCol;
+    private int tempRow;
+
+    private void initListeners() {
+        sheetInputEventListener = GWT.create(SheetInputEventListener.class);
+        sheetInputEventListener.setSheetWidget(this, input);
+
+        SheetEventListener listener = GWT.create(SheetEventListener.class);
+        listener.setSheetWidget(this, sheet);
         // for some reason the click event is not fired normally for headers
         Event.addNativePreviewHandler(new NativePreviewHandler() {
 
@@ -1126,9 +944,9 @@ public class SheetWidget extends Panel {
                 if (eventTypeInt == Event.ONCLICK) {
                     Element target = nativeEvent.getEventTarget().cast();
                     String className = target.getClassName();
-                    int i = isHeader(className);
+                    int i = jsniUtil.isHeader(className);
                     if (i == 1 || i == 2) {
-                        int index = parseHeaderIndex(className);
+                        int index = jsniUtil.parseHeaderIndex(className);
                         if (i == 1) {
                             actionHandler.onRowHeaderClick(
                                     index,
@@ -1151,13 +969,13 @@ public class SheetWidget extends Panel {
                     String className = target.getClassName();
                     if (className.equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)) {
                         className = target.getParentElement().getClassName();
-                        int i = isHeader(className);
+                        int i = jsniUtil.isHeader(className);
                         if (i == 1) { // row
-                            i = parseHeaderIndex(className);
+                            i = jsniUtil.parseHeaderIndex(className);
                             startRowResizeDrag(i - 1, nativeEvent.getClientX(),
                                     nativeEvent.getClientY());
                         } else if (i == 2) { // col
-                            i = parseHeaderIndex(className);
+                            i = jsniUtil.parseHeaderIndex(className);
                             columnResizeCancelled = false;
                             startColumnResizeDrag(i - 1,
                                     nativeEvent.getClientX(),
@@ -1167,13 +985,13 @@ public class SheetWidget extends Panel {
                     } else if (className
                             .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
                         className = target.getParentElement().getClassName();
-                        int i = isHeader(className);
+                        int i = jsniUtil.isHeader(className);
                         if (i == 1) { // row
-                            i = parseHeaderIndex(className);
+                            i = jsniUtil.parseHeaderIndex(className);
                             startRowResizeDrag(i, nativeEvent.getClientX(),
                                     nativeEvent.getClientY());
                         } else if (i == 2) { // col
-                            i = parseHeaderIndex(className);
+                            i = jsniUtil.parseHeaderIndex(className);
                             columnResizeCancelled = false;
                             startColumnResizeDrag(i, nativeEvent.getClientX(),
                                     nativeEvent.getClientY());
@@ -1194,7 +1012,7 @@ public class SheetWidget extends Panel {
                 } else if (resizing && eventTypeInt == Event.ONMOUSEUP) {
                     columnResizeCancelled = true;
                     resizing = false;
-                    clearCSSRules(resizeStyle);
+                    jsniUtil.clearCSSRules(resizeStyle);
                     resizeTooltip.hide();
                     event.cancel();
                     for (DivElement extraHeader : resizeExtraHeaders) {
@@ -1215,11 +1033,11 @@ public class SheetWidget extends Panel {
                     String className = target.getClassName();
                     if (className.equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)) {
                         className = target.getParentElement().getClassName();
-                        int i = isHeader(className);
+                        int i = jsniUtil.isHeader(className);
                         if (i == 1) { // row
                             // autofit row ???
                         } else if (i == 2) { // col
-                            i = parseHeaderIndex(className);
+                            i = jsniUtil.parseHeaderIndex(className);
                             actionHandler
                                     .onColumnHeaderResizeDoubleClick(i - 1);
                         }
@@ -1227,11 +1045,11 @@ public class SheetWidget extends Panel {
                     } else if (className
                             .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
                         className = target.getParentElement().getClassName();
-                        int i = isHeader(className);
+                        int i = jsniUtil.isHeader(className);
                         if (i == 1) { // row
                             // autofit row ???
                         } else if (i == 2) { // col
-                            i = parseHeaderIndex(className);
+                            i = jsniUtil.parseHeaderIndex(className);
                             actionHandler.onColumnHeaderResizeDoubleClick(i);
                         }
                         event.cancel();
@@ -1252,9 +1070,9 @@ public class SheetWidget extends Panel {
                         event.stopPropagation();
                     } else {
                         String className = target.getClassName();
-                        int i = isHeader(className);
+                        int i = jsniUtil.isHeader(className);
                         if (i == 1 || i == 2) {
-                            int index = parseHeaderIndex(className);
+                            int index = jsniUtil.parseHeaderIndex(className);
                             if (i == 1) {
                                 actionHandler.onRowHeaderRightClick(
                                         event.getNativeEvent(), index);
@@ -1270,6 +1088,14 @@ public class SheetWidget extends Panel {
                 }
             }
         }, ContextMenuEvent.getType());
+    }
+
+    protected boolean isEditingCell() {
+        return editingCell;
+    }
+
+    protected boolean isSelectingCells() {
+        return selectingCells;
     }
 
     private void startRowResizeDrag(int rowIndex, int clientX, int clientY) {
@@ -1474,7 +1300,7 @@ public class SheetWidget extends Panel {
         }
         resized = true;
         int delta = clientY - resizeFirstEdgePos;
-        clearCSSRules(resizeStyle);
+        jsniUtil.clearCSSRules(resizeStyle);
         String rule;
         if (delta <= 0) {
             // at least the dragged header is hidden
@@ -1493,12 +1319,12 @@ public class SheetWidget extends Panel {
                 }
             }
             rule += "{height:0pt;}";
-            insertRule(resizeStyle, rule);
+            jsniUtil.insertRule(resizeStyle, rule);
             if (delta != 0) {
                 // resize the "last" header
                 rule = ".v-spreadsheet > div.rh.row" + index + "{height:"
                         + (getRowHeight(index) + delta) + "px}";
-                insertRule(resizeStyle, rule);
+                jsniUtil.insertRule(resizeStyle, rule);
             }
 
         } else {
@@ -1509,7 +1335,7 @@ public class SheetWidget extends Panel {
             // enter custom size for the resized row header
             rule = ".v-spreadsheet > div.rh.row" + resizedRowIndex + "{height:"
                     + px + "px;}";
-            insertRule(resizeStyle, rule);
+            jsniUtil.insertRule(resizeStyle, rule);
         }
         int headersAfter = 0;
         int spaceAfter = sheet.getAbsoluteBottom() - clientY;
@@ -1552,11 +1378,11 @@ public class SheetWidget extends Panel {
             margin = 49 - sheet.getScrollTop() + margin;
             if (!rule.isEmpty()) {
                 rule += "{margin-top:" + margin + "px;}";
-                insertRule(resizeStyle, rule);
+                jsniUtil.insertRule(resizeStyle, rule);
             }
             rule = ".v-spreadsheet.row-resizing > div.resize-line.rh {margin-top:"
                     + (margin - 1) + "px;}";
-            insertRule(resizeStyle, rule);
+            jsniUtil.insertRule(resizeStyle, rule);
         }
         showResizeTooltipRelativeTo(clientX, clientY);
     }
@@ -1570,7 +1396,7 @@ public class SheetWidget extends Panel {
         }
         resized = true;
         int delta = clientX - resizeFirstEdgePos;
-        clearCSSRules(resizeStyle);
+        jsniUtil.clearCSSRules(resizeStyle);
         String rule;
         if (delta <= 0) {
             // at least the dragged header is hidden
@@ -1589,13 +1415,13 @@ public class SheetWidget extends Panel {
                 }
             }
             rule += "{width:0;}";
-            insertRule(resizeStyle, rule);
+            jsniUtil.insertRule(resizeStyle, rule);
             if (delta != 0) {
                 // resize the "last" header
                 rule = ".v-spreadsheet > div.ch.col" + index + "{width:"
                         + (actionHandler.getColWidthActual(index) + delta)
                         + "px}";
-                insertRule(resizeStyle, rule);
+                jsniUtil.insertRule(resizeStyle, rule);
             }
         } else {
             // only the dragged header size has changed.
@@ -1604,7 +1430,7 @@ public class SheetWidget extends Panel {
             // enter custom size for the resized column header
             rule = ".v-spreadsheet > div.ch.col" + resizedColumnIndex
                     + "{width:" + px + "px;}";
-            insertRule(resizeStyle, rule);
+            jsniUtil.insertRule(resizeStyle, rule);
         }
         int headersAfter = 0;
         int spaceAfter = sheet.getAbsoluteRight() - clientX;
@@ -1647,11 +1473,11 @@ public class SheetWidget extends Panel {
             margin = 50 - sheet.getScrollLeft() + margin;
             if (!rule.isEmpty()) {
                 rule += "{margin-left:" + margin + "px;}";
-                insertRule(resizeStyle, rule);
+                jsniUtil.insertRule(resizeStyle, rule);
             }
             rule = ".v-spreadsheet.col-resizing > div.resize-line.ch {margin-left:"
                     + (margin - 1) + "px;}";
-            insertRule(resizeStyle, rule);
+            jsniUtil.insertRule(resizeStyle, rule);
         }
         showResizeTooltipRelativeTo(clientX, clientY);
     }
@@ -1662,74 +1488,13 @@ public class SheetWidget extends Panel {
         resizeTooltip.setPopupPosition(left, top);
     }
 
-    /** returns 1 for row 2 for column 0 for not header */
-    public static native int isHeader(String str)
-    /*-{
-        var c = str.charAt(0);
-        if (c === 'r' ) {
-            c = str.charAt(1);
-            if (c === 'h') {
-                return 1;
-            }
-        } else if (c === 'c') {
-            c = str.charAt(1);
-            if (c === 'h') {
-            return 2;
-            }
+    /** Replace stylesheet with the array of rules given */
+    private void resetStyleSheetRules(StyleElement stylesheet, String[] rules) {
+        jsniUtil.clearCSSRules(stylesheet);
+        for (int i = 0; i < rules.length; i++) {
+            jsniUtil.insertRule(stylesheet, rules[i]);
         }
-        return 0;
-     }-*/;
-
-    /** returns the header index */
-    public static native int parseHeaderIndex(String str)
-    /*-{
-        var strlen = str.length;
-        var i = 0;
-        var code = 0;
-        var index = 0;
-        while(i<strlen) {
-            code = str.charCodeAt(i);
-            if(code > 47 && code < 58) {
-                index = index * 10 + code - 48;
-            }
-            i++;
-        }
-        return index;
-     }-*/;
-
-    int parsedRow;
-    int parsedCol;
-
-    public final native void parseColRow(String str)
-    /*-{
-        var strlen = str.length;
-        var i=0;
-        var code = 0;
-        var flags = 0;
-        var r = 0;
-        var c = 0;
-        while(i<strlen) {
-            code = str.charCodeAt(i);
-            if(code === 32) {
-                flags = 1;
-            } else if(code > 47 && code < 58) {
-                if(flags === 0) {
-                    c = c * 10 + code - 48;
-                } else {
-                    r = r * 10 + code - 48;
-                }
-            }
-            i++;
-        }
-        this.@com.vaadin.addon.spreadsheet.client.SheetWidget::parsedRow = r;
-        this.@com.vaadin.addon.spreadsheet.client.SheetWidget::parsedCol = c;
-
-    }-*/;
-
-    public final static native String convertUnicodeIntoCharacter(int charCode)
-    /*-{
-        return String.fromCharCode(charCode);
-     }-*/;
+    }
 
     public String getCellValue(int column, int row) {
         final String value = cellData.get(toKey(column, row));
@@ -1746,14 +1511,14 @@ public class SheetWidget extends Panel {
      */
     private void moveHeadersToMatchScroll() {
         if (displayRowColHeadings) {
-            updateCSSRule(style, ".v-spreadsheet .ch", "marginLeft",
+            jsniUtil.updateCSSRule(style, ".v-spreadsheet .ch", "marginLeft",
                     (50 - sheet.getScrollLeft()) + "px");
-            updateCSSRule(style, ".v-spreadsheet .rh", "marginTop",
+            jsniUtil.updateCSSRule(style, ".v-spreadsheet .rh", "marginTop",
                     (49 - sheet.getScrollTop()) + "px");
         } else {
-            updateCSSRule(style, ".v-spreadsheet .ch", "marginLeft",
+            jsniUtil.updateCSSRule(style, ".v-spreadsheet .ch", "marginLeft",
                     (0 - sheet.getScrollLeft()) + "px");
-            updateCSSRule(style, ".v-spreadsheet .rh", "marginTop",
+            jsniUtil.updateCSSRule(style, ".v-spreadsheet .rh", "marginTop",
                     (31 - sheet.getScrollTop()) + "px");
         }
     }
@@ -1811,120 +1576,31 @@ public class SheetWidget extends Panel {
                     for (Entry<Integer, String> entry : styles.entrySet()) {
                         int styleIndex;
                         if (entry.getKey() == 0) {
-                            styleIndex = insertRule(sheetStyle,
+                            styleIndex = jsniUtil.insertRule(sheetStyle,
                                     ".v-spreadsheet .sheet > div, .v-spreadsheet .sheet > input {"
                                             + entry.getValue() + "}");
                         } else {
-                            styleIndex = insertRule(sheetStyle,
+                            styleIndex = jsniUtil.insertRule(sheetStyle,
                                     ".notusedselector {" + entry.getValue()
                                             + "}");
                         }
                         cellStyleToCSSRuleIndex.put(entry.getKey(), styleIndex);
                     }
                 } catch (Exception e) {
-                    debugConsole.log(
-                            Level.SEVERE,
-                            "Error while creating the cell styles, "
-                                    + e.getMessage());
+                    debugConsole.severe("SheetWidget:updateStyles: "
+                            + e.toString() + " while creating the cell styles");
                 }
             }
             List<String> customCellBorderStyles = actionHandler
                     .getCustomCellBorderStyles();
             if (customCellBorderStyles != null) {
                 for (String cssText : customCellBorderStyles) {
-                    insertRule(customCellSizeStyle, cssText.replace(".col",
-                            ".v-spreadsheet .sheet div.col"));
+                    jsniUtil.insertRule(customCellSizeStyle, cssText.replace(
+                            ".col", ".v-spreadsheet .sheet div.col"));
                 }
             }
         }
     }
-
-    /** Replace stylesheet with the array of rules given */
-    static private void resetStyleSheetRules(StyleElement stylesheet,
-            String[] rules) {
-        clearCSSRules(stylesheet);
-        for (int i = 0; i < rules.length; i++) {
-            insertRule(stylesheet, rules[i]);
-        }
-    }
-
-    /** Insert one CSS rule to the end of given stylesheet */
-    public final static native int insertRule(StyleElement stylesheet,
-            String css)
-    /*-{
-        return stylesheet.sheet.insertRule(css, stylesheet.sheet.cssRules.length);
-    }-*/;
-
-    public final static native void deleteRule(StyleElement stylesheet,
-            int ruleindex)
-    /*-{
-        stylesheet.sheet.deleteRule(ruleindex);
-     }-*/;
-
-    public final static native int replaceSelector(StyleElement stylesheet,
-            String selector, int ruleindex)
-    /*-{
-        var oldSelector = stylesheet.sheet.cssRules[ruleindex].selectorText;        
-        var cssText = stylesheet.sheet.cssRules[ruleindex].cssText.replace(oldSelector, selector);
-        stylesheet.sheet.deleteRule(ruleindex);
-        return stylesheet.sheet.insertRule(cssText, ruleindex);
-    }-*/;
-
-    /**
-     * Adds the given selector into the specific rule in the stylesheet. The
-     * selector should be a single selector or a list of selectors, but should
-     * NOT end in a comma (",").
-     * 
-     * @param stylesheet
-     * @param selector
-     * @param ruleindex
-     */
-    public final static native int addSelector(StyleElement stylesheet,
-            String selector, int ruleindex)
-    /*-{
-        var cssText = selector + ","+stylesheet.sheet.cssRules[ruleindex].cssText;
-        stylesheet.sheet.deleteRule(ruleindex);
-        return stylesheet.sheet.insertRule(cssText, ruleindex);
-     }-*/;
-
-    public final static native String getSelector(StyleElement stylesheet,
-            int ruleindex)
-    /*-{
-        var x = stylesheet.sheet.cssRules[ruleindex].selectorText;
-        return x;
-    }-*/;
-
-    /** Search and update a given CSS rule in a stylesheet */
-    public final static native void updateCSSRule(StyleElement stylesheet,
-            String selector, String property, String value)
-    /*-{
-            var classes = stylesheet.sheet.cssRules;
-            for(var x=0;x<classes.length;x++) {
-                    if(classes[x].selectorText.toLowerCase()==selector) {
-                            classes[x].style[property]=value;
-                    }
-            }       
-    }-*/;
-
-    public final static native int replaceCssRule(StyleElement stylesheet,
-            String css, int ruleindex)
-    /*-{
-        stylesheet.sheet.deleteRule(ruleindex);
-        return stylesheet.sheet.insertRule(css, ruleindex);
-    }-*/;
-
-    /** Clears the rules starting from the given index */
-    public final static native void clearCSSRules(StyleElement stylesheet)
-    /*-{
-        var rules = stylesheet.sheet.cssRules? stylesheet.sheet.cssRules : stylesheet.sheet.rules;        
-        while ( rules.length > 0 ) {
-            if (stylesheet.sheet.deleteRule) {
-                stylesheet.sheet.deleteRule(0);
-            } else {
-                stylesheet.sheet.removeRule(0);
-            } 
-        }
-    }-*/;
 
     /**
      * Update the column headers to match the state. Create and recycle header
@@ -1985,8 +1661,6 @@ public class SheetWidget extends Panel {
         firstColumnIndex = 1;
         firstColumnPosition = 0;
         lastColumnIndex = 0;
-        emptyRowPointer = 1;
-        emptyCellPointer = 1;
         clearSelectedCellStyle();
         clearCellRangeStyles();
 
@@ -2107,7 +1781,8 @@ public class SheetWidget extends Panel {
 
             requester.trigger();
         } catch (Throwable t) {
-            debugConsole.log(Level.SEVERE, t.getMessage());
+            debugConsole.severe("SheetWidget:updateSheetDisplay: "
+                    + t.toString());
         }
 
         // update cells
@@ -2644,7 +2319,7 @@ public class SheetWidget extends Panel {
         }
         if (sb.length() != 0) {
             sb.append(MERGED_REGION_CELL_STYLE);
-            insertRule(mergedRegionStyle, sb.toString());
+            jsniUtil.insertRule(mergedRegionStyle, sb.toString());
         }
         String key = toKey(region.col1, region.row1);
         Cell mergedCell = new Cell(region.col1, region.row1);
@@ -2696,9 +2371,10 @@ public class SheetWidget extends Panel {
             }
         }
         if (sb.length() != 0) {
-            replaceSelector(mergedRegionStyle, sb.toString(), index);
+            jsniUtil.replaceSelector(mergedRegionStyle, sb.toString(), index);
         } else { // should never happen
-            replaceSelector(mergedRegionStyle, ".notusedselector", index);
+            jsniUtil.replaceSelector(mergedRegionStyle, ".notusedselector",
+                    index);
         }
         int width = 0;
         for (int i = region.col1; i <= region.col2; i++) {
@@ -2724,9 +2400,9 @@ public class SheetWidget extends Panel {
         }
         if (cellCommentsMap != null && cellCommentsMap.containsKey(oldKey)) {
             try {
-                parseColRow(oldKey);
-                Cell cell = rows.get(parsedRow - firstRowIndex).get(
-                        parsedCol - firstColumnIndex);
+                jsniUtil.parseColRow(oldKey);
+                Cell cell = rows.get(jsniUtil.getParsedCol() - firstRowIndex)
+                        .get(jsniUtil.getParsedCol() - firstColumnIndex);
                 cell.showCellCommentMark();
             } catch (Exception e) {
                 // the cell just isn't visible, no problem.
@@ -2750,14 +2426,15 @@ public class SheetWidget extends Panel {
                 if (isMergedCell(oldKey)) {
                     cell = getMergedCell(oldKey);
                 } else {
-                    cell = rows.get(parsedRow - firstRowIndex).get(
-                            parsedCol - firstColumnIndex);
+                    cell = rows.get(jsniUtil.getParsedRow() - firstRowIndex)
+                            .get(jsniUtil.getParsedRow() - firstColumnIndex);
                 }
                 cell.showCellCommentMark();
             } catch (Exception e) {
                 debugConsole
-                        .severe("Exception while trying to update a cell comment visibility in merged cell, "
-                                + e.toString());
+                        .severe("SheetWidget:updateMergedRegionSizeAndPosition: "
+                                + e.toString()
+                                + " while trying to update a cell comment visibility in merged cell.");
             }
         }
         mergedCells.put(region.id, mergedCell);
@@ -2794,7 +2471,7 @@ public class SheetWidget extends Panel {
 
     public void removeMergedRegion(MergedRegion region, int index) {
         String key = toKey(region.col1, region.row1);
-        deleteRule(mergedRegionStyle, index);
+        jsniUtil.deleteRule(mergedRegionStyle, index);
         mergedCells.remove(region.id).getElement().removeFromParent();
         // paint new "released cells" as selected
         if (region.col1 >= selectionWidget.getCol1()
@@ -2854,13 +2531,13 @@ public class SheetWidget extends Panel {
                 hyperlinkStyle.setId(sheetId + "-hyperlinkstyle");
                 style.getParentElement().appendChild(hyperlinkStyle);
                 sb.append(HYPERLINK_CELL_STYLE);
-                insertRule(hyperlinkStyle, sb.toString());
+                jsniUtil.insertRule(hyperlinkStyle, sb.toString());
             } else {
-                replaceSelector(hyperlinkStyle, sb.toString(), 0);
+                jsniUtil.replaceSelector(hyperlinkStyle, sb.toString(), 0);
             }
         } else {
             if (hyperlinkStyle != null) {
-                replaceSelector(hyperlinkStyle, ".notusedselector", 0);
+                jsniUtil.replaceSelector(hyperlinkStyle, ".notusedselector", 0);
             }
         }
     }
@@ -2909,18 +2586,19 @@ public class SheetWidget extends Panel {
 
     public void setCellCommentVisible(boolean visible, String key) {
         if (visible) {
-            parseColRow(key);
+            jsniUtil.parseColRow(key);
             final Cell cell;
             if (isMergedCell(key)) {
                 cell = getMergedCell(key);
             } else {
-                cell = rows.get(parsedRow - firstRowIndex).get(
-                        parsedCol - firstColumnIndex);
+                cell = rows.get(jsniUtil.getParsedRow() - firstRowIndex).get(
+                        jsniUtil.getParsedCol() - firstColumnIndex);
             }
             final CellComment cellComment = new CellComment(this, sheet);
             cellComment.setCommentText(cellCommentsMap.get(key));
             cellComment.showDependingToCellRightCorner((Element) cell
-                    .getElement().cast(), parsedRow, parsedCol);
+                    .getElement().cast(), jsniUtil.getParsedRow(), jsniUtil
+                    .getParsedCol());
             alwaysVisibleCellComments.put(key, cellComment);
         } else {
             CellComment comment = alwaysVisibleCellComments.remove(key);
@@ -2974,9 +2652,9 @@ public class SheetWidget extends Panel {
                 // MOUSEOVER triangle -> show comment unless already shown
                 if (!(cellCommentOverlay.isVisible() && cellElementClassName
                         .equals(cellCommentCellClassName))) {
-                    parseColRow(cellElementClassName);
-                    cellCommentCellColumn = parsedCol;
-                    cellCommentCellRow = parsedRow;
+                    jsniUtil.parseColRow(cellElementClassName);
+                    cellCommentCellColumn = jsniUtil.getParsedCol();
+                    cellCommentCellRow = jsniUtil.getParsedRow();
                     cellCommentHandler.trigger();
                 }
             } else {
@@ -3004,9 +2682,9 @@ public class SheetWidget extends Panel {
                 // show comment unless already shown
                 if (!(cellCommentOverlay.isVisible() && targetClassName
                         .equals(cellCommentCellClassName))) {
-                    parseColRow(targetClassName);
-                    cellCommentCellColumn = parsedCol;
-                    cellCommentCellRow = parsedRow;
+                    jsniUtil.parseColRow(targetClassName);
+                    cellCommentCellColumn = jsniUtil.getParsedCol();
+                    cellCommentCellRow = jsniUtil.getParsedRow();
                     cellCommentHandler.trigger();
                 }
             } else if (eventTypeInt == Event.ONMOUSEOUT) {
@@ -3048,8 +2726,14 @@ public class SheetWidget extends Panel {
             String tooltip) {
         if (eventTypeInt == Event.ONMOUSEOVER) {
             hyperlinkTooltipLabel.setText(tooltip);
-            final DivElement element = rows.get(row - firstRowIndex)
-                    .get(col - firstColumnIndex).getElement();
+            final DivElement element;
+            final String key = toKey(col, row);
+            if (isMergedCell(key)) {
+                element = getMergedCell(key).getElement();
+            } else {
+                element = rows.get(row - firstRowIndex)
+                        .get(col - firstColumnIndex).getElement();
+            }
             hyperlinkTooltip.setPopupPositionAndShow(new PositionCallback() {
 
                 @Override
@@ -3189,7 +2873,7 @@ public class SheetWidget extends Panel {
         return new BigDecimal(((float) pixels) / ppi * 72).floatValue();
     }
 
-    private void handleInputElementValueChange(final boolean update) {
+    protected void handleInputElementValueChange(final boolean update) {
         if (!isSelectedCellInView()) {
             scrollSelectedCellIntoView();
         }
@@ -3231,9 +2915,8 @@ public class SheetWidget extends Panel {
             input.getStyle().setWidth(width, Unit.PX);
         } catch (Exception e) {
             // cell is not visible yet, should not happen, but try again
-            debugConsole
-                    .severe("Exception while calculating input element width, "
-                            + e.toString());
+            debugConsole.severe("SheetWidget:recalculateInputElementWidth: "
+                    + e.toString() + " while calculating input element width");
             handleInputElementValueChange(false);
         }
     }
@@ -3360,7 +3043,7 @@ public class SheetWidget extends Panel {
         StringBuffer sb = new StringBuffer();
         // cells
         if (replace && col1 == col2 && row1 == row2) {
-            replaceSelector(cellRangeStyle, ".notusedselector", 0);
+            jsniUtil.replaceSelector(cellRangeStyle, ".notusedselector", 0);
         } else {
             for (int r = row1; r <= row2; r++) {
                 for (int c = col1; c <= col2; c++) {
@@ -3372,11 +3055,11 @@ public class SheetWidget extends Panel {
             }
             if (sb.length() > 0) {
                 if (replace) {
-                    replaceSelector(cellRangeStyle,
-                            sb.toString().substring(0, sb.length() - 1), 0);
+                    jsniUtil.replaceSelector(cellRangeStyle, sb.toString()
+                            .substring(0, sb.length() - 1), 0);
                 } else {
-                    addSelector(cellRangeStyle,
-                            sb.toString().substring(0, sb.length() - 1), 0);
+                    jsniUtil.addSelector(cellRangeStyle, sb.toString()
+                            .substring(0, sb.length() - 1), 0);
                 }
             }
         }
@@ -3396,9 +3079,9 @@ public class SheetWidget extends Panel {
             }
         }
         if (replace) {
-            replaceSelector(cellRangeStyle, sb.toString(), 1);
+            jsniUtil.replaceSelector(cellRangeStyle, sb.toString(), 1);
         } else {
-            addSelector(cellRangeStyle, sb.toString(), 1);
+            jsniUtil.addSelector(cellRangeStyle, sb.toString(), 1);
         }
     }
 
@@ -3408,10 +3091,10 @@ public class SheetWidget extends Panel {
      */
     public void clearSelectedCellStyle() {
         try {
-            replaceSelector(selectionStyle, ".notusedselector", 0);
+            jsniUtil.replaceSelector(selectionStyle, ".notusedselector", 0);
         } catch (Exception e) {
-            clearCSSRules(selectionStyle);
-            insertRule(selectionStyle, ".notusedselector"
+            jsniUtil.clearCSSRules(selectionStyle);
+            jsniUtil.insertRule(selectionStyle, ".notusedselector"
                     + SELECTED_CELL_STYLE2);
         }
     }
@@ -3422,35 +3105,35 @@ public class SheetWidget extends Panel {
      */
     public void clearCellRangeStyles() {
         try {
-            replaceSelector(cellRangeStyle, ".notusedselector", 0);
-            replaceSelector(cellRangeStyle, ".notusedselector", 1);
+            jsniUtil.replaceSelector(cellRangeStyle, ".notusedselector", 0);
+            jsniUtil.replaceSelector(cellRangeStyle, ".notusedselector", 1);
         } catch (Exception e) {
-            clearCSSRules(cellRangeStyle);
-            insertRule(cellRangeStyle, ".notusedselector "
+            jsniUtil.clearCSSRules(cellRangeStyle);
+            jsniUtil.insertRule(cellRangeStyle, ".notusedselector "
                     + SELECTED_CELL_RANGE_STYLES);
-            insertRule(cellRangeStyle, ".notusedselector"
+            jsniUtil.insertRule(cellRangeStyle, ".notusedselector"
                     + SELECTED_HEADER_STYLES);
         }
         cellRangeStylesCleared = true;
     }
 
     protected void clearPositionStyles() {
-        clearCSSRules(style);
+        jsniUtil.clearCSSRules(style);
     }
 
     protected void clearCellStyles() {
-        clearCSSRules(sheetStyle);
-        clearCSSRules(customCellSizeStyle);
+        jsniUtil.clearCSSRules(sheetStyle);
+        jsniUtil.clearCSSRules(customCellSizeStyle);
         // hyperlink style is created on-demand
         if (hyperlinkStyle != null) {
-            clearCSSRules(hyperlinkStyle);
+            jsniUtil.clearCSSRules(hyperlinkStyle);
             hyperlinkStyle.removeFromParent();
             hyperlinkStyle = null;
         }
     }
 
     protected void clearMergedCells() {
-        clearCSSRules(mergedRegionStyle);
+        jsniUtil.clearCSSRules(mergedRegionStyle);
         for (Cell mergedCell : mergedCells.values()) {
             mergedCell.getElement().removeFromParent();
         }
@@ -3478,10 +3161,10 @@ public class SheetWidget extends Panel {
         String newSelectionCssKey = toCssKey(column, row);
         String oldSelectionCssKey = toCssKey(selectedCellCol, selectedCellRow);
         if (cellRangeStylesCleared) {
-            replaceSelector(cellRangeStyle, oldSelectionCssKey, 0);
+            jsniUtil.replaceSelector(cellRangeStyle, oldSelectionCssKey, 0);
             cellRangeStylesCleared = false;
         } else {
-            final String oldSelector = getSelector(cellRangeStyle, 0);
+            final String oldSelector = jsniUtil.getSelector(cellRangeStyle, 0);
             // IE likes to switch the order of the selectors
             if (oldSelector.startsWith(".row")) {
                 newSelectionCssKey = ".row" + row + ".col" + column;
@@ -3490,18 +3173,18 @@ public class SheetWidget extends Panel {
             }
             if (oldSelector.contains(newSelectionCssKey + ",")) {
                 // replace
-                replaceSelector(cellRangeStyle, oldSelector.replace(
+                jsniUtil.replaceSelector(cellRangeStyle, oldSelector.replace(
                         newSelectionCssKey + ",", oldSelectionCssKey + ","), 0);
                 // the headers are already highlighted for the new cell
             } else if (oldSelector.endsWith(newSelectionCssKey)) {
-                replaceSelector(
+                jsniUtil.replaceSelector(
                         cellRangeStyle,
                         oldSelector.substring(0, oldSelector.length()
                                 - newSelectionCssKey.length())
                                 + oldSelectionCssKey, 0);
             } else {
                 // add
-                addSelector(cellRangeStyle, oldSelectionCssKey, 0);
+                jsniUtil.addSelector(cellRangeStyle, oldSelectionCssKey, 0);
                 // highlight the new selected cell headers
                 MergedRegion region = actionHandler
                         .getMergedRegionStartingFrom(column, row);
@@ -3521,12 +3204,12 @@ public class SheetWidget extends Panel {
                         sb.append(i);
                     }
                 }
-                addSelector(cellRangeStyle, sb.toString(), 1);
+                jsniUtil.addSelector(cellRangeStyle, sb.toString(), 1);
             }
 
         }
         // mark the new selected cell with light outline
-        replaceSelector(selectionStyle, newSelectionCssKey, 0);
+        jsniUtil.replaceSelector(selectionStyle, newSelectionCssKey, 0);
         setSelectedCell(column, row);
     }
 
@@ -3546,7 +3229,7 @@ public class SheetWidget extends Panel {
     public void swapSelectedCellInsideSelection(int col, int row) {
         // highlight previously selected cell (background white->selected), and
         // remove the highlighted background from the new selected cell
-        final String oldSelector = getSelector(cellRangeStyle, 0);
+        final String oldSelector = jsniUtil.getSelector(cellRangeStyle, 0);
         // for some nice reason, IE decides to switch the order of
         // selectors. i.e. ".col2.row3 -> .row3.col2"
         String cssKey;
@@ -3569,7 +3252,7 @@ public class SheetWidget extends Panel {
             newSelector = oldSelector.replace(cssKey + ",", oldSelectedKey
                     + ",");
         }
-        replaceSelector(cellRangeStyle, newSelector, 0);
+        jsniUtil.replaceSelector(cellRangeStyle, newSelector, 0);
         setSelectedCell(col, row);
     }
 
@@ -3592,7 +3275,7 @@ public class SheetWidget extends Panel {
                 }
             }
         }
-        addSelector(cellRangeStyle, sb.toString(), 0);
+        jsniUtil.addSelector(cellRangeStyle, sb.toString(), 0);
     }
 
     /**
@@ -3616,16 +3299,16 @@ public class SheetWidget extends Panel {
         }
         String newSelector = sb.toString();
         if (newSelector.length() > 1) {
-            replaceSelector(cellRangeStyle,
+            jsniUtil.replaceSelector(cellRangeStyle,
                     newSelector.substring(0, newSelector.length() - 1), 0);
         } else {
-            replaceSelector(cellRangeStyle, ".notusedselector", 0);
+            jsniUtil.replaceSelector(cellRangeStyle, ".notusedselector", 0);
         }
     }
 
     public void addRowHeaderAsSelected(int row) {
         final String selector = ".rh.row" + row;
-        addSelector(cellRangeStyle, selector, 1);
+        jsniUtil.addSelector(cellRangeStyle, selector, 1);
     }
 
     /**
@@ -3652,15 +3335,15 @@ public class SheetWidget extends Panel {
             }
         }
         if (sb.length() > 1) {
-            replaceSelector(cellRangeStyle, sb.toString(), 1);
+            jsniUtil.replaceSelector(cellRangeStyle, sb.toString(), 1);
         } else { // should be impossible though
-            replaceSelector(cellRangeStyle, ".notusedselector", 1);
+            jsniUtil.replaceSelector(cellRangeStyle, ".notusedselector", 1);
         }
     }
 
     public void addColumnHeaderAsSelected(int col) {
         final String selector = ".ch.col" + col;
-        addSelector(cellRangeStyle, selector, 1);
+        jsniUtil.addSelector(cellRangeStyle, selector, 1);
     }
 
     /**
@@ -3672,7 +3355,7 @@ public class SheetWidget extends Panel {
      * @param row2
      */
     public void removeFromSelectedCells(int col1, int col2, int row1, int row2) {
-        String selector = getSelector(cellRangeStyle, 0);
+        String selector = jsniUtil.getSelector(cellRangeStyle, 0);
         for (int r = row1; r <= row2; r++) {
             for (int c = col1; c <= col2; c++) {
                 final String key = toCssKey(c, r);
@@ -3687,40 +3370,40 @@ public class SheetWidget extends Panel {
         selector = selector.trim();
         if (selector.isEmpty() || selector.length() < 3) { // (",,")
             selector = ".notusedselector";
-            replaceSelector(cellRangeStyle, selector, 0);
+            jsniUtil.replaceSelector(cellRangeStyle, selector, 0);
         } else if (selector.endsWith(",")) {
-            replaceSelector(cellRangeStyle,
+            jsniUtil.replaceSelector(cellRangeStyle,
                     selector.substring(0, selector.lastIndexOf(",")), 0);
         } else {
-            replaceSelector(cellRangeStyle, selector, 0);
+            jsniUtil.replaceSelector(cellRangeStyle, selector, 0);
         }
     }
 
     public void removeRowHeaderFromSelected(int row) {
         final String headerSelector = ".rh.row" + row;
-        String oldSelector = getSelector(cellRangeStyle, 1);
+        String oldSelector = jsniUtil.getSelector(cellRangeStyle, 1);
         final String selector = oldSelector.endsWith(headerSelector) ? oldSelector
                 .substring(0, oldSelector.length() - headerSelector.length())
                 .trim() : oldSelector.replace(headerSelector + ",", "").trim();
         if (selector.endsWith(",")) {
-            replaceSelector(cellRangeStyle,
+            jsniUtil.replaceSelector(cellRangeStyle,
                     selector.substring(0, selector.lastIndexOf(",")), 1);
         } else {
-            replaceSelector(cellRangeStyle, selector, 1);
+            jsniUtil.replaceSelector(cellRangeStyle, selector, 1);
         }
     }
 
     public void removeColHeaderFromSelected(int col) {
         final String headerSelector = ".ch.col" + col;
-        String oldSelector = getSelector(cellRangeStyle, 1);
+        String oldSelector = jsniUtil.getSelector(cellRangeStyle, 1);
         final String selector = oldSelector.endsWith(headerSelector) ? oldSelector
                 .substring(0, oldSelector.length() - headerSelector.length())
                 .trim() : oldSelector.replace(headerSelector + ",", "").trim();
         if (selector.endsWith(",")) {
-            replaceSelector(cellRangeStyle,
+            jsniUtil.replaceSelector(cellRangeStyle,
                     selector.substring(0, selector.lastIndexOf(",")), 1);
         } else {
-            replaceSelector(cellRangeStyle, selector, 1);
+            jsniUtil.replaceSelector(cellRangeStyle, selector, 1);
         }
     }
 
@@ -3792,7 +3475,7 @@ public class SheetWidget extends Panel {
 
     public void displayCustomCellEditor(Widget customEditorWidget) {
         customCellEditorDisplayed = true;
-        replaceSelector(editedCellStyle, ".notusedselector", 0);
+        jsniUtil.replaceSelector(editedCellStyle, ".notusedselector", 0);
         this.customEditorWidget = customEditorWidget;
         Cell selectedCell = getSelectedCell();
         selectedCell.setValue(null, null);
@@ -3832,13 +3515,15 @@ public class SheetWidget extends Panel {
         }
     }
 
+    private Cell getCell(int col, int row) {
+        return rows.get(row - firstRowIndex).get(col - firstColumnIndex);
+    }
+
     public void startEditingCell(boolean focus, boolean recalculate,
             String value) {
         editingCell = true;
-        replaceSelector(
-                editedCellStyle,
-                EDITING_CELL_SELECTOR
-                        + toCssKey(selectedCellCol, selectedCellRow), 0);
+        jsniUtil.replaceSelector(editedCellStyle, EDITING_CELL_SELECTOR
+                + toCssKey(selectedCellCol, selectedCellRow), 0);
 
         input.setClassName(toKey(selectedCellCol, selectedCellRow));
         if (isMergedCell(toKey(selectedCellCol, selectedCellRow))) {
@@ -3894,8 +3579,9 @@ public class SheetWidget extends Panel {
     public void stopEditingCell() {
         editingCell = false;
         editingMergedCell = false;
-        inputClicked = false;
-        replaceSelector(editedCellStyle, ".notusedselector", 0);
+        sheetInputEventListener.cellEditingStopped();
+
+        jsniUtil.replaceSelector(editedCellStyle, ".notusedselector", 0);
         final String className = input.getClassName();
         input.setValue("");
         input.getStyle().setWidth(0.0d, Unit.PX);
@@ -4169,17 +3855,17 @@ public class SheetWidget extends Panel {
             if (cellStyleToCSSRuleIndex.containsKey(key)) {
                 int ruleIndex = cellStyleToCSSRuleIndex.get(key);
                 try {
-                    replaceSelector(sheetStyle, selector, ruleIndex);
+                    jsniUtil.replaceSelector(sheetStyle, selector, ruleIndex);
                 } catch (Exception e) {
-                    ruleIndex = insertRule(sheetStyle,
-                            selector + "{" + entry.getValue() + "}");
+                    ruleIndex = jsniUtil.insertRule(sheetStyle, selector + "{"
+                            + entry.getValue() + "}");
                     cellStyleToCSSRuleIndex.put(key, ruleIndex);
                 }
             } else {
                 final String style = entry.getValue();
                 if (style != null) {
-                    int ruleIndex = insertRule(sheetStyle, selector + "{"
-                            + style + "}");
+                    int ruleIndex = jsniUtil.insertRule(sheetStyle, selector
+                            + "{" + style + "}");
                     cellStyleToCSSRuleIndex.put(key, ruleIndex);
                 }
             }
@@ -4189,7 +3875,7 @@ public class SheetWidget extends Panel {
     public void addCustomCellStyles(List<String> styles) {
         for (String style : styles) {
             try {
-                insertRule(customCellSizeStyle,
+                jsniUtil.insertRule(customCellSizeStyle,
                         style.replace(".col", ".v-spreadsheet .sheet div.col"));
             } catch (Exception e) {
                 debugConsole.log(
@@ -4201,7 +3887,7 @@ public class SheetWidget extends Panel {
     }
 
     public void removeCustomCellStyles() {
-        clearCSSRules(customCellSizeStyle);
+        jsniUtil.clearCSSRules(customCellSizeStyle);
     }
 
     public final String createCellStyleSelector(String selectors) {
@@ -4510,5 +4196,4 @@ public class SheetWidget extends Panel {
 
         moveHeadersToMatchScroll();
     }
-
 }

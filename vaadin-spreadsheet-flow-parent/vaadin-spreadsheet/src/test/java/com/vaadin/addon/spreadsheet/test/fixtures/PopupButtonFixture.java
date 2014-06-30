@@ -16,7 +16,6 @@ import com.vaadin.addon.spreadsheet.PopupButton;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeListener;
-import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
 import com.vaadin.addon.spreadsheet.test.demoapps.TestexcelsheetUI;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -100,12 +99,9 @@ public class PopupButtonFixture implements SpreadsheetFixture {
             XSSFSheet sheet = workbook.createSheet("Sheet1");
             retrieveCell(sheet, 5, 5);
             if (spreadsheet == null) {
-                spreadsheet = SpreadsheetFactory
-                        .createSpreadsheetComponentWithXLSWorkbook();
-                spreadsheet.setWorkbook(workbook);
+                spreadsheet = new Spreadsheet(workbook);
             } else {
-                SpreadsheetFactory.reloadSpreadsheetComponent(spreadsheet,
-                        workbook);
+                spreadsheet.setWorkbook(workbook);
             }
 
             spreadsheet

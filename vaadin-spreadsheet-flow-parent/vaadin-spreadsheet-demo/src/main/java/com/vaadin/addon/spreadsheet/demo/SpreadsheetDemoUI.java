@@ -148,8 +148,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     @Override
                     public void buttonClick(ClickEvent event) {
                         if (spreadsheet == null) {
-                            spreadsheet = SpreadsheetFactory
-                                    .createSpreadsheetComponentWithXLSWorkbook();
+                            spreadsheet = new Spreadsheet();
                             spreadsheet
                                     .addSelectedCellChangeListener(selectionChangeListener);
                             spreadsheet
@@ -159,8 +158,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                             layout.addComponent(spreadsheet);
                             layout.setRowExpandRatio(1, 1.0f);
                         } else {
-                            SpreadsheetFactory
-                                    .loadNewXLSXSpreadsheet(spreadsheet);
+                            spreadsheet.reloadSpreadsheetWithNewWorkbook();
                         }
                         spreadsheet.setSpreadsheetComponentFactory(null);
                         save.setEnabled(true);
@@ -226,11 +224,11 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                                     0, i)
                                     + ("(1)")
                                     + previousFile.getName().substring(i);
-                            previousFile = SpreadsheetFactory.write(
-                                    spreadsheet, fileName);
+                            previousFile = spreadsheet
+                                    .writeSpreadsheetIntoFile(fileName);
                         } else {
-                            previousFile = SpreadsheetFactory.write(
-                                    spreadsheet, "workbook1");
+                            previousFile = spreadsheet
+                                    .writeSpreadsheetIntoFile("workbook1");
                         }
                         download.setEnabled(true);
                         FileResource resource = new FileResource(previousFile);
@@ -368,8 +366,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     private void loadFile(File file) {
         try {
             if (spreadsheet == null) {
-                spreadsheet = SpreadsheetFactory
-                        .createSpreadsheetComponent(file);
+                spreadsheet = new Spreadsheet(file);
                 spreadsheet
                         .addSelectedCellChangeListener(selectionChangeListener);
                 spreadsheet
@@ -381,7 +378,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 if (previousFile == null
                         || !previousFile.getAbsolutePath().equals(
                                 file.getAbsolutePath())) {
-                    spreadsheet.reloadDataFrom(file);
+                    spreadsheet.reloadSpreadsheetFrom(file);
                 }
             }
             spreadsheet.setSpreadsheetComponentFactory(null);

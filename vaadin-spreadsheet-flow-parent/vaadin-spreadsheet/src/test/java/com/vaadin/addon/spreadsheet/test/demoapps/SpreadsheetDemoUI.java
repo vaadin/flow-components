@@ -1,10 +1,12 @@
 package com.vaadin.addon.spreadsheet.test.demoapps;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -33,8 +35,11 @@ import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.FilesystemContainer;
+import com.vaadin.data.util.converter.Converter.ConversionException;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
+import com.vaadin.server.StreamResource;
+import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -49,12 +54,14 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")
 public class SpreadsheetDemoUI extends UI implements Receiver {
@@ -139,8 +146,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     @Override
                     public void buttonClick(ClickEvent event) {
                         if (spreadsheet == null) {
-                            spreadsheet = SpreadsheetFactory
-                                    .createSpreadsheetComponentWithXLSWorkbook();
+                            spreadsheet = new Spreadsheet();
                             spreadsheet
                                     .addSelectedCellChangeListener(selectionChangeListener);
                             spreadsheet
@@ -148,8 +154,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                             layout.addComponent(spreadsheet);
                             layout.setExpandRatio(spreadsheet, 1.0f);
                         } else {
-                            SpreadsheetFactory
-                                    .loadNewXLSXSpreadsheet(spreadsheet);
+                            spreadsheet.reloadSpreadsheetWithNewWorkbook();
                         }
                         spreadsheet.setSpreadsheetComponentFactory(null);
                         save.setEnabled(true);
@@ -214,11 +219,11 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                                     0, i)
                                     + ("(1)")
                                     + previousFile.getName().substring(i);
-                            previousFile = SpreadsheetFactory.write(
-                                    spreadsheet, fileName);
+                            previousFile = spreadsheet
+                                    .writeSpreadsheetIntoFile(fileName);
                         } else {
-                            previousFile = SpreadsheetFactory.write(
-                                    spreadsheet, "workbook1");
+                            previousFile = spreadsheet
+                                    .writeSpreadsheetIntoFile("workbook1");
                         }
                         download.setEnabled(true);
                         FileResource resource = new FileResource(previousFile);
@@ -275,9 +280,20 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         });
 
         VerticalLayout checkBoxLayout = new VerticalLayout();
+
+        Button freezePanesButton = new Button("Freeze Pane",
+                new Button.ClickListener() {
+
+                    @Override
+                    public void buttonClick(ClickEvent event) {
+                        addWindow(new FreezePaneWindow());
+                    }
+                });
+
         checkBoxLayout.addComponents(gridlines, rowColHeadings);
         options.addComponent(checkBoxLayout);
         options.addComponent(newSpreadsheetButton);
+        options.addComponent(freezePanesButton);
         options.addComponent(customComponentTest);
         options.addComponent(openTestSheetSelect);
         options.addComponent(update);
@@ -294,6 +310,24 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             }
         }));
         options.addComponent(upload);
+        Button downloadButton = new Button("Download");
+        new FileDownloader(new StreamResource(new StreamSource() {
+
+            @Override
+            public InputStream getStream() {
+                try {
+                    return new FileInputStream(spreadsheet
+                            .writeSpreadsheetIntoFile("testsheet.xlsx"));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }, "testsheet.xlsx")).extend(downloadButton);
+        ;
+        options.addComponent(downloadButton);
 
         HorizontalLayout sheetOptions = new HorizontalLayout();
         sheetOptions.setSpacing(true);
@@ -353,8 +387,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     private void loadFile(File file) {
         try {
             if (spreadsheet == null) {
-                spreadsheet = SpreadsheetFactory
-                        .createSpreadsheetComponent(file);
+                spreadsheet = new Spreadsheet(file);
                 spreadsheet
                         .addSelectedCellChangeListener(selectionChangeListener);
                 spreadsheet
@@ -366,7 +399,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 if (previousFile == null
                         || !previousFile.getAbsolutePath().equals(
                                 file.getAbsolutePath())) {
-                    spreadsheet.reloadDataFrom(file);
+                    spreadsheet.reloadSpreadsheetFrom(file);
                 }
             }
             spreadsheet.setSpreadsheetComponentFactory(null);
@@ -822,5 +855,54 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             e.printStackTrace();
         }
         return null;
+    }
+
+    class FreezePaneWindow extends Window {
+
+        public FreezePaneWindow() {
+            setCaption("Add/Remove freeze pane");
+            setWidth("300px");
+            setHeight("300px");
+            setResizable(false);
+            setModal(true);
+            center();
+
+            VerticalLayout l = new VerticalLayout();
+            setContent(l);
+
+            final TextField hSplitTF = new TextField(
+                    "Horizontal Split Position");
+            hSplitTF.setConverter(Integer.class);
+            final TextField vSplitTF = new TextField("Vertical Split Position");
+            vSplitTF.setConverter(Integer.class);
+            final TextField hSplitTRTF = new TextField(
+                    "Horizontal Split Top Row");
+            hSplitTRTF.setConverter(Integer.class);
+            final TextField vSplitLCTF = new TextField(
+                    "Vertical Split Left Column");
+            vSplitLCTF.setConverter(Integer.class);
+            l.addComponent(vSplitTF);
+            l.addComponent(hSplitTF);
+            // l.addComponent(vSplitLCTF);
+            // l.addComponent(hSplitTRTF);
+            l.addComponent(new Button("Submit values",
+                    new Button.ClickListener() {
+
+                        @Override
+                        public void buttonClick(ClickEvent event) {
+                            try {
+                                if (spreadsheet != null) {
+                                    // spreadsheet.createFreezePane(
+                                    // (Integer) hSplitTF
+                                    // .getConvertedValue(),
+                                    // (Integer) vSplitTF
+                                    // .getConvertedValue());
+                                }
+                            } catch (ConversionException e) {
+                            }
+                            close();
+                        }
+                    }));
+        }
     }
 }

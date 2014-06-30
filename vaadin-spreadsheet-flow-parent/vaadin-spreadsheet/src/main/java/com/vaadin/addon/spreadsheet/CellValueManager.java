@@ -902,9 +902,6 @@ public class CellValueManager {
             evaluator.notifyUpdateCell(newCell);
         }
         if (removeShifted) {
-            final String key = SpreadsheetUtil.toKey(
-                    shiftedCell.getColumnIndex() + 1,
-                    shiftedCell.getRowIndex() + 1);
             removedCells.add(Integer.toString(shiftedCell.getRowIndex() + 1));
             shiftedCell.setCellValue((String) null);
             cellDeleted(shiftedCell);

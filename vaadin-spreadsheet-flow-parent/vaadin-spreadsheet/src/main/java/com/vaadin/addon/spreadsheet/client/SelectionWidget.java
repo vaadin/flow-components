@@ -192,12 +192,12 @@ public class SelectionWidget extends Widget {
     private void beginPaintingCells(Event event) {
         paint.getStyle().setVisibility(Visibility.VISIBLE);
         paintMode = true;
-        origX = DOM.getAbsoluteLeft(getElement());
-        origY = DOM.getAbsoluteTop(getElement());
+        origX = getElement().getAbsoluteLeft();
+        origY = getElement().getAbsoluteTop();
         cornerX = origX + width;
         cornerY = origY + height;
         DOM.setCapture(getElement());
-        DOM.eventPreventDefault(event);
+        event.preventDefault();
     }
 
     private void stopPaintingCells(Event event) {

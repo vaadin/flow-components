@@ -4,7 +4,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -53,7 +52,7 @@ public class FormulaBarWidget extends Composite {
         Event.setEventListener(addressField.getElement(), new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                final int type = DOM.eventGetType(event);
+                final int type = event.getTypeInt();
                 if (type == Event.ONKEYUP) {
                     final int keyCode = event.getKeyCode();
                     if (keyCode == KeyCodes.KEY_ENTER) {

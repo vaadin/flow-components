@@ -1375,7 +1375,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 }
                 sheetWidget.scrollCellIntoView(col, row);
                 onCellSelectedWithKeyboard(col, row,
-                        sheetWidget.getCellValue(col, row));
+                        sheetWidget.getCellValue(col, row), region);
             }
         }
 
@@ -1463,7 +1463,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 }
                 sheetWidget.scrollCellIntoView(col, row);
                 onCellSelectedWithKeyboard(col, row,
-                        sheetWidget.getCellValue(col, row));
+                        sheetWidget.getCellValue(col, row), region);
             }
         }
     }
@@ -1548,7 +1548,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 }
                 sheetWidget.scrollCellIntoView(col, row);
                 onCellSelectedWithKeyboard(col, row,
-                        sheetWidget.getCellValue(col, row));
+                        sheetWidget.getCellValue(col, row), region);
             }
         }
     }
@@ -1633,12 +1633,21 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 }
                 sheetWidget.scrollCellIntoView(col, row);
                 onCellSelectedWithKeyboard(col, row,
-                        sheetWidget.getCellValue(col, row));
+                        sheetWidget.getCellValue(col, row), region);
             }
         }
     }
 
-    private void onCellSelectedWithKeyboard(int column, int row, String value) {
+    /**
+     * 
+     * @param column
+     * @param row
+     * @param value
+     * @param region
+     *            null if selected cell is not a merged cell
+     */
+    private void onCellSelectedWithKeyboard(int column, int row, String value,
+            MergedRegion region) {
         doCommitIfEditing();
         if (!sheetWidget.isCoherentSelection()) {
             sheetWidget.setCoherentSelection(true);
@@ -1649,7 +1658,13 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
         sheetWidget.setSelectedCell(column, row);
         sheetWidget.updateSelectionOutline(column, column, row, row);
-        sheetWidget.updateSelectedCellStyles(column, column, row, row, true);
+        if (region != null) {
+            sheetWidget.updateSelectedCellStyles(column, region.col2, row,
+                    region.row2, true);
+        } else {
+            sheetWidget
+                    .updateSelectedCellStyles(column, column, row, row, true);
+        }
         // display cell data address
         formulaBarWidget.setSelectedCellAddress(createCellAddress(column, row));
         newSelectedCellSet();
@@ -2499,5 +2514,4 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
         sheetWidget.setDisplayRowColHeadings(displayRowColHeadings);
     }
-
 }

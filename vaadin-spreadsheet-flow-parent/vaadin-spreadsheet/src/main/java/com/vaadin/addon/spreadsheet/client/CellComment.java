@@ -2,17 +2,17 @@ package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Element;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.VOverlay;
 
 public class CellComment extends VOverlay {
 
-    private static final String COMMENT_OVERLAY_LINE_CLASSNAME = "comment-overlay-line";
+    protected static final String COMMENT_OVERLAY_LINE_CLASSNAME = "comment-overlay-line";
     private static final String COMMENT_OVERLAY_CLASSNAME = "v-spreadsheet-comment-overlay";
     private static final String COMMENT_OVERLAY_LABEL_CLASSNAME = "comment-overlay-label";
     private static final String COMMENT_OVERLAY_SHADOW_CLASSNAME = COMMENT_OVERLAY_CLASSNAME
@@ -164,7 +164,6 @@ public class CellComment extends VOverlay {
         } else if (popupTop < sheet.getAbsoluteTop()) {
             popupTop += (sheet.getAbsoluteTop() - popupTop);
         }
-
         setPopupPosition(popupLeft, popupTop);
 
         if (linePositionClassName != null) {

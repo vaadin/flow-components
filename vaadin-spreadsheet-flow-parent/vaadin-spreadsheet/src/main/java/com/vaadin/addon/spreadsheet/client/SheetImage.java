@@ -1,10 +1,9 @@
 package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
@@ -33,9 +32,9 @@ public class SheetImage extends Widget {
     }
 
     private void initListeners() {
-        DOM.sinkEvents(root, Event.ONMOUSEDOWN | Event.ONCLICK
+        Event.sinkEvents(root, Event.ONMOUSEDOWN | Event.ONCLICK
                 | Event.ONDBLCLICK);
-        DOM.setEventListener(root, new EventListener() {
+        Event.setEventListener(root, new EventListener() {
 
             @Override
             public void onBrowserEvent(Event event) {

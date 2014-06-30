@@ -3,8 +3,6 @@ package com.vaadin.addon.spreadsheet.client;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -29,8 +27,8 @@ public class PopupButtonHeader extends Widget {
         caption.setClassName("header-caption");
         root.appendChild(close);
         root.appendChild(caption);
-        DOM.sinkEvents((Element) close.cast(), Event.ONCLICK);
-        DOM.setEventListener((Element) close.cast(), this);
+        Event.sinkEvents(close, Event.ONCLICK);
+        Event.setEventListener(close, this);
 
         setElement(root);
     }
