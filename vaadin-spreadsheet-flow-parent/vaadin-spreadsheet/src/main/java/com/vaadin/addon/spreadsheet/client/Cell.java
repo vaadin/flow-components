@@ -35,6 +35,14 @@ public class Cell {
         refreshWidth();
     }
 
+    public Cell(int col, int row, CellData cellData) {
+        this(col, row);
+        value = cellData == null ? null : cellData.value;
+        numericValue = cellData == null ? null : cellData.numericValue;
+        updateInnerText();
+        refreshWidth();
+    }
+
     public DivElement getElement() {
         return element;
     }
@@ -51,6 +59,14 @@ public class Cell {
         refreshWidth();
     }
 
+    public void update(int col, int row, CellData cellData) {
+        if (cellData == null) {
+            update(col, row, null, null);
+        } else {
+            update(col, row, cellData.value, cellData.numericValue);
+        }
+    }
+
     private void updateInnerText() {
         if (value == null || value.isEmpty()) {
             element.setInnerText("");
@@ -64,7 +80,7 @@ public class Cell {
     private void updateCellValues() {
         removeCellCommentMark();
         removePopupButton();
-        element.setClassName(SheetWidget.toKey(col, row));
+        element.setClassName(SheetWidget.toKey(col, row) + " cell");
     }
 
     public int getCol() {

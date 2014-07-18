@@ -1,11 +1,21 @@
 package com.vaadin.addon.spreadsheet.client;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.StyleElement;
 
 public class SheetJsniUtil {
 
     private int parsedCol;
     private int parsedRow;
+
+    public native void setSelectionRange(Element elem, int pos, int length)
+    /*-{
+        try {
+            elem.setSelectionRange(pos, pos + length);
+        } catch (e) {
+            // Firefox throws exception if TextBox is not visible, even if attached
+        }
+    }-*/;
 
     public final native void parseColRow(String str)
     /*-{
@@ -18,13 +28,16 @@ public class SheetJsniUtil {
         while(i<strlen) {
             code = str.charCodeAt(i);
             if(code === 32) {
-                flags = 1;
+                flags = flags + 1;
             } else if(code > 47 && code < 58) {
                 if(flags === 0) {
                     c = c * 10 + code - 48;
                 } else {
                     r = r * 10 + code - 48;
                 }
+            }
+            if (flags === 2) {
+                break;
             }
             i++;
         }
@@ -134,6 +147,12 @@ public class SheetJsniUtil {
                             classes[x].style[property]=value;
                     }
             }       
+    }-*/;
+
+    public native void updateCSSRuleWithIndex(StyleElement stylesheet,
+            int index, String property, String value)
+    /*-{
+            stylesheet.sheet.cssRules[index].style[property]=value;
     }-*/;
 
     public native int replaceCssRule(StyleElement stylesheet, String css,

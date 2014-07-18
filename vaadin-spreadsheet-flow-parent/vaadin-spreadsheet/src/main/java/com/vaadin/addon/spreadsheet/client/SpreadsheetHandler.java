@@ -127,13 +127,6 @@ public interface SpreadsheetHandler {
     public void sheetCreated(int scrollLeft, int scrollTop);
 
     /**
-     * 
-     * @param firstVisibleTab
-     *            0-based
-     */
-    public void firstVisibleTabChanged(int firstVisibleTab);
-
-    /**
      * Cell range selected by painting
      * 
      * @param selectedCellColumn

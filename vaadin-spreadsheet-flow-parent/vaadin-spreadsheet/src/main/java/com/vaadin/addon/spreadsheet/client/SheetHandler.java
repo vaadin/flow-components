@@ -1,6 +1,5 @@
 package com.vaadin.addon.spreadsheet.client;
 
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.dom.client.NativeEvent;
@@ -73,13 +72,13 @@ public interface SheetHandler {
 
     /**
      * Height of a row in points (pt) including bottom border. Rows are indexed
-     * from 1 to getRows(). Returns size for hidden rows too!
+     * from 1 to getRows(). Returns 0 for hidden rows.
      */
     float getRowHeight(int row);
 
     /**
      * Width of a row in pixels including right border. Columns are indexed from
-     * 1 to getColumns(). Returns size for hidden columns too!
+     * 1 to getColumns(). Returns 0 for hidden columns.
      */
     int getColWidth(int col);
 
@@ -123,8 +122,6 @@ public interface SheetHandler {
     int[] getRowHeightsPX();
 
     Map<Integer, String> getCellStyleToCSSStyle();
-
-    List<String> getCustomCellBorderStyles();
 
     /**
      * 

@@ -8,27 +8,39 @@ import com.google.gwt.user.client.EventListener;
 public class SheetEventListener implements EventListener {
 
     private SheetWidget widget;
-    private Element sheet;
 
     private boolean sheetFocused;
 
     public SheetEventListener() {
     }
 
-    public void setSheetWidget(SheetWidget sheetWidget, Element sheetElement) {
+    public void setSheetWidget(SheetWidget sheetWidget) {
         widget = sheetWidget;
-        sheet = sheetElement;
+    }
 
-        Event.sinkEvents(sheet, Event.ONSCROLL | Event.ONMOUSEDOWN
+    public void setSheetPaneElement(Element topLeftPane, Element topRightPane,
+            Element bottomLeftPane, Element bottomRightPane) {
+        listenToEventsOnPane(topLeftPane);
+        listenToEventsOnPane(topRightPane);
+        listenToEventsOnPane(bottomLeftPane);
+        listenToEventsOnPane(bottomRightPane);
+    }
+
+    protected void listenToEventsOnPane(Element sheetElement) {
+        Event.sinkEvents(sheetElement, Event.ONSCROLL | Event.ONMOUSEDOWN
                 | Event.ONMOUSEMOVE | Event.ONMOUSEOVER | Event.ONMOUSEOUT
                 | Event.ONMOUSEUP | Event.TOUCHEVENTS | Event.ONLOSECAPTURE
                 | Event.ONCLICK | Event.ONDBLCLICK | Event.ONKEYPRESS
                 | Event.ONKEYDOWN | Event.FOCUSEVENTS);
-        Event.setEventListener(sheet, this);
+        Event.setEventListener(sheetElement, this);
     }
 
     @Override
     public void onBrowserEvent(Event event) {
+        if (((Element) event.getEventTarget().cast()).getClassName().contains(
+                PopupButtonWidget.BUTTON_CLASSNAME)) {
+            return;
+        }
         if (widget.isSelectingCells()) {
             onSelectingCellsEvent(event);
         } else {
@@ -49,7 +61,7 @@ public class SheetEventListener implements EventListener {
                     break;
                 }
             case Event.ONMOUSEDOWN:
-                widget.onSheetMouseDown(event, sheet);
+                widget.onSheetMouseDown(event);
                 break;
             case Event.ONDBLCLICK:
                 onSheetDoubleClick(event);
@@ -62,11 +74,11 @@ public class SheetEventListener implements EventListener {
                 break;
             case Event.ONMOUSEOUT:
             case Event.ONMOUSEOVER:
-                widget.onSheetMouseOverOrOut(event, sheet);
+                widget.onSheetMouseOverOrOut(event);
                 break;
             case Event.ONTOUCHMOVE: // FIXME
             case Event.ONMOUSEMOVE:
-                widget.onSheetMouseMove(event, sheet);
+                widget.onSheetMouseMove(event);
             default:
                 break;
             }
@@ -75,7 +87,7 @@ public class SheetEventListener implements EventListener {
 
     private void onSheetDoubleClick(Event event) {
         final Element target = event.getEventTarget().cast();
-        if (target.getParentElement().equals(sheet)) {
+        if (target.getParentElement().getClassName().contains("sheet")) {
             SheetJsniUtil jsniUtil = widget.getSheetJsniUtil();
             jsniUtil.parseColRow(target.getClassName());
             widget.getSheetHandler().onCellDoubleClick(jsniUtil.getParsedCol(),
@@ -94,7 +106,7 @@ public class SheetEventListener implements EventListener {
             break;
         case Event.ONTOUCHMOVE: // FIXME remove
         case Event.ONMOUSEMOVE:
-            widget.onMouseMoveWhenSelectingCells(event, sheet);
+            widget.onMouseMoveWhenSelectingCells(event);
             break;
         default:
             break;
@@ -115,6 +127,10 @@ public class SheetEventListener implements EventListener {
                 event.preventDefault();
                 event.stopPropagation();
                 break;
+            case 190: // period, which gives same (46) as delete in key press
+                widget.getSheetHandler().onSheetKeyPress(event, ".");
+                event.preventDefault();
+                event.stopPropagation();
             case KeyCodes.KEY_UP:
             case KeyCodes.KEY_DOWN:
             case KeyCodes.KEY_LEFT:

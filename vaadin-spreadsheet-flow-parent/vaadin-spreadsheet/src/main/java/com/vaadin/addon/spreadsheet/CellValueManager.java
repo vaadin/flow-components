@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +35,7 @@ import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueHandler;
+import com.vaadin.addon.spreadsheet.client.CellData;
 import com.vaadin.addon.spreadsheet.command.CellValueCommand;
 import com.vaadin.ui.UI;
 
@@ -64,9 +64,11 @@ public class CellValueManager {
      */
     private final HashSet<String> sentFormulaCells = new HashSet<String>();
     /** */
-    private final HashSet<String> removedCells = new HashSet<String>();
+    private final HashSet<CellData> removedCells = new HashSet<CellData>();
     /** */
     private final HashSet<String> markedCells = new HashSet<String>();
+
+    private boolean topLeftCellsLoaded;
 
     public CellValueManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
@@ -76,6 +78,10 @@ public class CellValueManager {
         } else {
             formatter = new DataFormatter();
         }
+    }
+
+    public SpreadsheetStyleFactory getSpreadsheetStyleFactory() {
+        return spreadsheet.getSpreadsheetStyleFactory();
     }
 
     public CellSelectionManager getCellSelectionManager() {
@@ -92,6 +98,7 @@ public class CellValueManager {
         removedCells.clear();
         sentFormulaCells.clear();
         hyperlinkStyleIndex = -1;
+        topLeftCellsLoaded = false;
     }
 
     public DataFormatter getDataFormatter() {
@@ -171,8 +178,10 @@ public class CellValueManager {
 
     protected void markCellForRemove(Cell cell) {
         String cellKey = SpreadsheetUtil.toKey(cell);
-        removedCells.add(Integer.toString(cell.getRowIndex() + 1));
-        removedCells.add(cellKey);
+        CellData cd = new CellData();
+        cd.col = cell.getColumnIndex() + 1;
+        cd.row = cell.getRowIndex() + 1;
+        removedCells.add(cd);
         clearCellCache(cellKey);
     }
 
@@ -334,10 +343,15 @@ public class CellValueManager {
                 System.out.println(e.getMessage());
                 cell.setCellValue(value);
             }
+            markCellForUpdate(cell);
         }
 
-        // update cell values
-        updateMarkedCellValues(col, col, row, row);
+        // update cell values (done in Spreadsheet.updateMarkedCells())
+        // updateMarkedCellValues();
+
+        // need to update the style selectors so that alignments work...
+        // FIXME because of this style managing should be refactored completely
+        spreadsheet.updateMarkedCells();
     }
 
     /**
@@ -389,7 +403,7 @@ public class CellValueManager {
         }
         // removeCell and removeCells makes sure that cells are removed and
         // cleared from client side cache.
-        updateMarkedCellValues(0, 0, 0, 0);
+        updateMarkedCellValues();
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
     }
 
@@ -430,151 +444,130 @@ public class CellValueManager {
 
     protected void loadCellData(int firstRow, int lastRow, int firstColumn,
             int lastColumn) {
-        // hssf (xls) document contain something on all rows & columns, as xssf
-        // (xlsx) documents don't (empty rows and cells just don't exist)
         try {
-            Workbook workbook = spreadsheet.getWorkbook();
-            final HashMap<String, String> cellDataMap = new HashMap<String, String>();
-            final HashMap<String, Double> numericCellDataMap = new HashMap<String, Double>();
-            final Sheet activeSheet = workbook.getSheetAt(workbook
-                    .getActiveSheetIndex());
-            Map<String, String> componentIDtoCellKeysMap = spreadsheet
-                    .getState(false).componentIDtoCellKeysMap;
-            @SuppressWarnings("unchecked")
-            final Collection<String> customComponentCells = (Collection<String>) (componentIDtoCellKeysMap == null ? Collections
-                    .emptyList() : componentIDtoCellKeysMap.values());
-            for (int r = firstRow - 1; r < lastRow; r++) {
-                Row row = activeSheet.getRow(r);
-                if (row != null && row.getLastCellNum() != -1
-                        && row.getLastCellNum() >= firstColumn) {
-                    boolean rowHasContent = false;
-                    for (int c = firstColumn - 1; c < lastColumn; c++) {
-                        final String key = SpreadsheetUtil.toKey(c + 1, r + 1);
-                        if (!customComponentCells.contains(key)
-                                && !sentCells.contains(key)
-                                && !sentFormulaCells.contains(key)) {
-                            Cell cell = row.getCell(c);
-                            if (cell != null) {
-                                final String contents = getCellValue(cell);
-                                if (contents != null && !contents.isEmpty()) {
-                                    cellDataMap.put(key, contents);
-                                    if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
-                                        sentFormulaCells.add(key);
-                                    } else {
-                                        sentCells.add(key);
-                                    }
-
-                                    if (!SpreadsheetUtil.cellContainsDate(cell)
-                                            && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                                        numericCellDataMap.put(key,
-                                                cell.getNumericCellValue());
-                                    }
-
-                                    rowHasContent = true;
-                                }
-                            }
-                        }
-                    }
-                    if (rowHasContent) {
-                        final String key = Integer.toString(r + 1);
-                        cellDataMap.put(key, null);
-                    }
+            int verticalSplitPosition = spreadsheet.getVerticalSplitPosition();
+            int horizontalSplitPosition = spreadsheet
+                    .getHorizontalSplitPosition();
+            if (verticalSplitPosition > 0 && horizontalSplitPosition > 0
+                    && !topLeftCellsLoaded) { // top left pane
+                ArrayList<CellData> topLeftData = loadCellDataForRowAndColumnRange(
+                        1, verticalSplitPosition, 1, horizontalSplitPosition);
+                topLeftCellsLoaded = true;
+                if (!topLeftData.isEmpty()) {
+                    spreadsheet.getSpreadsheetRpcProxy()
+                            .updateTopLeftCellValues(topLeftData);
                 }
             }
-            HashMap<Integer, String> cellStyleToCSSSelector = spreadsheet
-                    .createCellStyleToCSSSelector();
-            if (!cellDataMap.isEmpty() || !cellStyleToCSSSelector.isEmpty()) {
-                spreadsheet.getSpreadsheetRpcProxy().addCells(cellDataMap,
-                        numericCellDataMap, cellStyleToCSSSelector);
+
+            if (verticalSplitPosition > 0) { // top right pane
+                ArrayList<CellData> topRightData = loadCellDataForRowAndColumnRange(
+                        1, verticalSplitPosition, firstColumn, lastColumn);
+                if (!topRightData.isEmpty()) {
+                    spreadsheet.getSpreadsheetRpcProxy()
+                            .updateTopRightCellValues(topRightData);
+                }
+            }
+            if (horizontalSplitPosition > 0) { // bottom left pane
+                ArrayList<CellData> bottomLeftData = loadCellDataForRowAndColumnRange(
+                        firstRow, lastRow, 1, horizontalSplitPosition);
+                if (!bottomLeftData.isEmpty()) {
+                    spreadsheet.getSpreadsheetRpcProxy()
+                            .updateBottomLeftCellValues(bottomLeftData);
+                }
             }
 
-            SpreadsheetFactory.logMemoryUsage();
+            ArrayList<CellData> bottomRightData = loadCellDataForRowAndColumnRange(
+                    firstRow, lastRow, firstColumn, lastColumn);
+            if (!bottomRightData.isEmpty()) {
+                spreadsheet.getSpreadsheetRpcProxy()
+                        .updateBottomRightCellValues(bottomRightData);
+            }
         } catch (NullPointerException npe) {
             npe.printStackTrace();
         }
+    }
+
+    protected ArrayList<CellData> loadCellDataForRowAndColumnRange(
+            int firstRow, int lastRow, int firstColumn, int lastColumn) {
+        ArrayList<CellData> cellData = new ArrayList<CellData>();
+        Workbook workbook = spreadsheet.getWorkbook();
+        final Sheet activeSheet = workbook.getSheetAt(workbook
+                .getActiveSheetIndex());
+        Map<String, String> componentIDtoCellKeysMap = spreadsheet
+                .getState(false).componentIDtoCellKeysMap;
+        @SuppressWarnings("unchecked")
+        final Collection<String> customComponentCells = (Collection<String>) (componentIDtoCellKeysMap == null ? Collections
+                .emptyList() : componentIDtoCellKeysMap.values());
+        for (int r = firstRow - 1; r < lastRow; r++) {
+            Row row = activeSheet.getRow(r);
+            if (row != null && row.getLastCellNum() != -1
+                    && row.getLastCellNum() >= firstColumn) {
+                for (int c = firstColumn - 1; c < lastColumn; c++) {
+                    final String key = SpreadsheetUtil.toKey(c + 1, r + 1);
+                    if (!customComponentCells.contains(key)
+                            && !sentCells.contains(key)
+                            && !sentFormulaCells.contains(key)) {
+                        Cell cell = row.getCell(c);
+                        if (cell != null) {
+                            final String contents = getCellValue(cell);
+                            if (contents != null && !contents.isEmpty()) {
+                                CellData cd = new CellData();
+                                cd.row = r + 1;
+                                cd.col = c + 1;
+                                cd.value = contents;
+                                if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+                                    sentFormulaCells.add(key);
+                                } else {
+                                    sentCells.add(key);
+                                }
+
+                                if (!SpreadsheetUtil.cellContainsDate(cell)
+                                        && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    cd.numericValue = cell
+                                            .getNumericCellValue();
+                                }
+                                cellData.add(cd);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return cellData;
     }
 
     /**
      * Method for updating the spreadsheet client side visible cells and cached
      * data correctly.
      * 
-     * Iterates over the given range and makes sure the client side is updated
-     * correctly for the range. Handles clearing of missing rows/ from the
-     * cache. This iteration can be skipped by giving r1 as 0.
-     * 
-     * Iterates over the whole spreadsheet (existing rows&columns) and updates
-     * client side cache for all sent formula cells, and cells that have been
-     * marked for updating.
-     * 
      * Parameters 1-based.
      */
-    protected void updateMarkedCellValues(int c1, int c2, int r1, int r2) {
-        // on both iterators it is unnecessary to worry about having custom
-        // components in the cell because the client side handles it -> it will
-        // not replace a custom component with a cell value
+    protected void updateVisibleCellValues() {
+        loadCellData(spreadsheet.getFirstRow(), spreadsheet.getLastRow(),
+                spreadsheet.getFirstColumn(), spreadsheet.getLastColumn());
+    }
 
-        final HashMap<String, String> updatedCellData = new HashMap<String, String>();
-        final HashMap<String, Double> numericCellData = new HashMap<String, Double>();
-        Workbook workbook = spreadsheet.getWorkbook();
+    /**
+     * Method for updating cells that are marked for update and formula cells.
+     * 
+     * Iterates over the whole sheet (existing rows&columns) and updates client
+     * side cache for all sent formula cells, and cells that have been marked
+     * for updating.
+     * 
+     */
+    protected void updateMarkedCellValues() {
+        final ArrayList<CellData> updatedCellData = new ArrayList<CellData>();
         Sheet sheet = spreadsheet.getActiveSheet();
-        if (r1 != 0) {
-            for (int r = r1; r <= r2; r++) {
-                Row row = sheet.getRow(r - 1);
-                if (row != null) {
-                    boolean rowHasContent = false;
-                    boolean hasRemovedContent = false;
-                    for (int c = c1; c <= c2; c++) {
-                        Cell cell = row.getCell(c - 1);
-                        final String key = SpreadsheetUtil.toKey(c, r);
-                        if (cell != null && !removedCells.contains(key)) {
-                            final String value = getCellValue(cell);
-                            if (cell.getCellType() != Cell.CELL_TYPE_FORMULA
-                                    && ((value != null && !value.isEmpty()) || sentCells
-                                            .contains(key))) {
-                                sentCells.add(key);
-                                updatedCellData.put(key, value);
-                                rowHasContent = true;
+        // it is unnecessary to worry about having custom components in the cell
+        // because the client side handles it -> it will not replace a custom
+        // component with a cell value
 
-                                if (!SpreadsheetUtil.cellContainsDate(cell)
-                                        && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                                    numericCellData.put(key,
-                                            cell.getNumericCellValue());
-                                }
-                            }
-                        } else if (sentCells.contains(key)) {
-                            // cell doesn't exist, if it was removed the cell
-                            // key
-                            // should be in removedCells
-                            sentCells.remove(key);
-                            removedCells.add(key);
-                            hasRemovedContent = true;
-                        } else if (sentFormulaCells.contains(key)) {
-                            sentFormulaCells.remove(key);
-                            removedCells.add(key);
-                            hasRemovedContent = true;
-                        }
-                    }
-                    if (rowHasContent) {
-                        updatedCellData.put(Integer.toString(r), null);
-                    }
-                    if (hasRemovedContent) {
-                        removedCells.add(Integer.toString(r));
-                    }
-                } else {
-                    // row doesn't exist, need to check that cached values are
-                    // removed for it properly
-                    updateDeletedRowsInClientCache(r, r);
-                }
-            }
-        }
         // update all cached formula cell values on client side, because they
         // might have changed. also make sure all marked cells are updated
-        Iterator<Row> rows = workbook
-                .getSheetAt(workbook.getActiveSheetIndex()).rowIterator();
+        Iterator<Row> rows = sheet.rowIterator();
         while (rows.hasNext()) {
             final Row r = rows.next();
             final Iterator<Cell> cells = r.cellIterator();
-            boolean rowHasContent = false;
             while (cells.hasNext()) {
                 final Cell cell = cells.next();
                 int rowIndex = cell.getRowIndex();
@@ -586,12 +579,13 @@ public class CellValueManager {
                 if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
                     if (value != null && !value.isEmpty()) {
                         if (sentFormulaCells.contains(key)
-                                || markedCells.contains(key)
-                                || (rowIndex + 1 >= r1 && rowIndex + 1 <= r2
-                                        && columnIndex + 1 >= c1 && columnIndex <= c2)) {
+                                || markedCells.contains(key)) {
                             sentFormulaCells.add(key);
-                            updatedCellData.put(key, value);
-                            rowHasContent = true;
+                            CellData cd = new CellData();
+                            cd.col = columnIndex + 1;
+                            cd.row = rowIndex + 1;
+                            cd.value = value;
+                            updatedCellData.add(cd);
                         }
                     } else if (sentFormulaCells.contains(key)) {
                         // in case the formula cell value has changed to null or
@@ -599,47 +593,86 @@ public class CellValueManager {
                         // pointing to a cell that was removed or had its value
                         // cleared ???
                         sentFormulaCells.add(key);
-                        updatedCellData.put(key, "");
-                        rowHasContent = true;
+                        CellData cd = new CellData();
+                        cd.col = columnIndex + 1;
+                        cd.row = rowIndex + 1;
+                        updatedCellData.add(cd);
                     }
                 } else if (markedCells.contains(key)) {
                     sentCells.add(key);
-                    updatedCellData.put(key, value);
-                    rowHasContent = true;
-
+                    CellData cd = new CellData();
+                    cd.col = columnIndex + 1;
+                    cd.row = rowIndex + 1;
+                    cd.value = value;
                     if (!SpreadsheetUtil.cellContainsDate(cell)
                             && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                        numericCellData.put(key, cell.getNumericCellValue());
+                        cd.numericValue = cell.getNumericCellValue();
                     }
-
+                    updatedCellData.add(cd);
                 }
             }
-            if (rowHasContent) {
-                final String key = Integer.toString(r.getRowNum() + 1);
-                updatedCellData.put(key, null);
-            }
-
         }
-        if (removedCells.isEmpty()) {
-            spreadsheet.getSpreadsheetRpcProxy()
-                    .addCells(updatedCellData, numericCellData,
-                            spreadsheet.createCellStyleToCSSSelector());
-
-        } else {
-            // FIXME investigate why HashSet<String> is not
-            // serializing/deserializing
-            spreadsheet.getSpreadsheetRpcProxy().addUpdatedCells(
-                    updatedCellData, numericCellData,
-                    new ArrayList<String>(removedCells),
-                    spreadsheet.createCellStyleToCSSSelector());
+        // empty cells have cell data with just col and row
+        updatedCellData.addAll(removedCells);
+        if (!updatedCellData.isEmpty()) {
+            spreadsheet.getSpreadsheetRpcProxy().cellsUpdated(updatedCellData);
         }
         markedCells.clear();
         removedCells.clear();
     }
 
+    protected ArrayList<CellData> updateCellDataForRowAndColumnRange(int r1,
+            int r2, int c1, int c2) {
+        final ArrayList<CellData> updatedCellData = new ArrayList<CellData>();
+        Sheet sheet = spreadsheet.getActiveSheet();
+        if (r1 != 0) {
+            for (int r = r1; r <= r2; r++) {
+                Row row = sheet.getRow(r - 1);
+                if (row != null) {
+                    for (int c = c1; c <= c2; c++) {
+                        Cell cell = row.getCell(c - 1);
+                        final String key = SpreadsheetUtil.toKey(c, r);
+                        CellData cd = new CellData();
+                        cd.col = c;
+                        cd.row = r;
+                        if (cell != null && !removedCells.contains(cd)) {
+                            final String value = getCellValue(cell);
+                            if (cell.getCellType() != Cell.CELL_TYPE_FORMULA
+                                    && ((value != null && !value.isEmpty()) || sentCells
+                                            .contains(key))) {
+                                sentCells.add(key);
+                                cd.value = value;
+                                if (!SpreadsheetUtil.cellContainsDate(cell)
+                                        && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                                    cd.numericValue = cell
+                                            .getNumericCellValue();
+                                }
+                                updatedCellData.add(cd);
+                            }
+                        } else if (sentCells.contains(key)) {
+                            // cell doesn't exist, if it was removed the cell
+                            // key
+                            // should be in removedCells
+                            sentCells.remove(key);
+                            removedCells.add(cd);
+                        } else if (sentFormulaCells.contains(key)) {
+                            sentFormulaCells.remove(key);
+                            removedCells.add(cd);
+                        }
+                    }
+                } else {
+                    // row doesn't exist, need to check that cached values are
+                    // removed for it properly
+                    updateDeletedRowsInClientCache(r, r);
+                }
+            }
+        }
+        return updatedCellData;
+    }
+
     /**
-     * Makes sure the next {@link #updateMarkedCellValues(int, int, int, int)}
-     * call will clear all removed rows from client cache.
+     * Makes sure the next {@link Spreadsheet#updateMarkedCells()} call will
+     * clear all removed rows from client cache.
      * 
      * @param startRow
      *            1-based
@@ -649,14 +682,15 @@ public class CellValueManager {
     protected void updateDeletedRowsInClientCache(int startRow, int endRow) {
         for (int i = startRow; i <= endRow; i++) {
             String rowKey = "row" + i;
-            boolean rowIsRemoved = false;
             for (Iterator<String> iterator = sentCells.iterator(); iterator
                     .hasNext();) {
                 String key = iterator.next();
                 if (key.endsWith(rowKey)) {
                     iterator.remove();
-                    removedCells.add(key);
-                    rowIsRemoved = true;
+                    CellData cd = new CellData();
+                    cd.col = SpreadsheetUtil.getColFromKey(key);
+                    cd.row = i;
+                    removedCells.add(cd);
                 }
             }
             for (Iterator<String> iterator = sentFormulaCells.iterator(); iterator
@@ -664,12 +698,11 @@ public class CellValueManager {
                 String key = iterator.next();
                 if (key.endsWith(rowKey)) {
                     iterator.remove();
-                    removedCells.add(key);
-                    rowIsRemoved = true;
+                    CellData cd = new CellData();
+                    cd.col = SpreadsheetUtil.getColFromKey(key);
+                    cd.row = i;
+                    removedCells.add(cd);
                 }
-            }
-            if (rowIsRemoved) {
-                removedCells.add(Integer.toString(i));
             }
         }
     }
@@ -691,7 +724,6 @@ public class CellValueManager {
         for (int i = row1 - 1; i < row2; i++) {
             Row row = activeSheet.getRow(i);
             if (row != null) {
-                removedCells.add(Integer.toString(i + 1));
                 for (int j = col1 - 1; j < col2; j++) {
                     Cell cell = row.getCell(j);
                     if (cell != null) {
@@ -713,7 +745,10 @@ public class CellValueManager {
                         // need to make protection etc. settings for the cell
                         // won't get effected. deleting the cell would make it
                         // locked
-                        removedCells.add(key);
+                        CellData cd = new CellData();
+                        cd.col = j + 1;
+                        cd.row = i + 1;
+                        removedCells.add(cd);
                         cell.setCellValue((String) null);
                         evaluator.notifyUpdateCell(cell);
                     }
@@ -739,7 +774,10 @@ public class CellValueManager {
         if (row != null) {
             final Cell cell = row.getCell(colIndex - 1);
             if (cell != null) {
-                removedCells.add(Integer.toString(rowIndex));
+                CellData cd = new CellData();
+                cd.col = colIndex;
+                cd.row = rowIndex;
+                removedCells.add(cd);
                 final String key = SpreadsheetUtil.toKey(colIndex, rowIndex);
                 if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
                     sentFormulaCells.remove(key);
@@ -758,8 +796,6 @@ public class CellValueManager {
                 }
                 cell.setCellValue((String) null);
                 evaluator.notifyUpdateCell(cell);
-
-                removedCells.add(key);
             }
         }
     }
@@ -899,10 +935,9 @@ public class CellValueManager {
             default:
                 break;
             }
-            evaluator.notifyUpdateCell(newCell);
+            cellUpdated(newCell);
         }
         if (removeShifted) {
-            removedCells.add(Integer.toString(shiftedCell.getRowIndex() + 1));
             shiftedCell.setCellValue((String) null);
             cellDeleted(shiftedCell);
         }

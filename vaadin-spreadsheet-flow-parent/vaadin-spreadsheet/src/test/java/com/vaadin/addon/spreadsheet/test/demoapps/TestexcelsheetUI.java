@@ -137,7 +137,7 @@ public class TestexcelsheetUI extends UI {
                             spreadsheet = (new Spreadsheet());
                             getSpreadsheet().setId("spreadsheetId");
 
-                            getSpreadsheet().addSelectedCellChangeListener(
+                            getSpreadsheet().addSelectionChangeListener(
                                     new SelectionChangeListener() {
 
                                         @Override

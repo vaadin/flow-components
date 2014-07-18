@@ -19,4 +19,6 @@ public interface ColorConverter {
             CellStyle cellStyle, StringBuilder sb);
 
     void defaultColorStyles(CellStyle cellStyle, StringBuilder sb);
+
+    boolean hasBackgroundColor(CellStyle cs);
 }

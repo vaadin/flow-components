@@ -128,4 +128,25 @@ public class HSSFColorConverter implements ColorConverter {
         sb.append("color:");
         sb.append(defaultColor);
     }
+
+    @Override
+    public boolean hasBackgroundColor(CellStyle cellStyle) {
+        HSSFCellStyle cs = (HSSFCellStyle) cellStyle;
+        short fillForegroundColor = cs.getFillForegroundColor();
+        short fillBackgroundColor = cs.getFillBackgroundColor();
+
+        HSSFColor fillForegroundColorColor = cs.getFillForegroundColorColor();
+        if (fillForegroundColorColor != null
+                && fillForegroundColor != HSSFColor.AUTOMATIC.index) {
+            return true;
+        } else {
+            HSSFColor fillBackgroundColorColor = cs
+                    .getFillBackgroundColorColor();
+            if (fillBackgroundColorColor != null
+                    && fillBackgroundColor != HSSFColor.AUTOMATIC.index) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

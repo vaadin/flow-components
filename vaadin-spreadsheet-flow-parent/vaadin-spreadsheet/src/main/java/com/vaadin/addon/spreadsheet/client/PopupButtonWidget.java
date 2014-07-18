@@ -153,6 +153,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     @Override
     public void onClick(ClickEvent event) {
         openPopupOverlay();
+        event.stopPropagation();
     }
 
     protected void openPopupOverlay() {
@@ -241,7 +242,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
         return popup.addCloseHandler(handler);
     }
 
-    public boolean isPopupClosed() {
+    public boolean isPopupOpen() {
         return popup.isShowing();
     }
 
@@ -250,7 +251,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     }
 
     public void openPopup() {
-        if (owner != null && owner.isCellInView(col, row)) {
+        if (owner != null && owner.isCellRendered(col, row)) {
             openPopupOverlay();
         }
     }

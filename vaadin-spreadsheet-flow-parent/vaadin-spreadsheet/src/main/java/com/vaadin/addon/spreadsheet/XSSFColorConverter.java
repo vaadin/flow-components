@@ -222,4 +222,29 @@ public class XSSFColorConverter implements ColorConverter {
         sb.append(defaultColor);
 
     }
+
+    @Override
+    public boolean hasBackgroundColor(CellStyle cellStyle) {
+        XSSFCellStyle cs = (XSSFCellStyle) cellStyle;
+        XSSFColor fillBackgroundXSSFColor = cs.getFillBackgroundXSSFColor();
+        XSSFColor fillForegroundXSSFColor = cs.getFillForegroundXSSFColor();
+        if (fillForegroundXSSFColor != null
+                && !fillForegroundXSSFColor.isAuto()) {
+            return true;
+        } else if (fillBackgroundXSSFColor != null
+                && !fillBackgroundXSSFColor.isAuto()) {
+            return true;
+        } else {
+            // bypass POI API and try to get the fill ourself, because of bug:
+            // https://issues.apache.org/bugzilla/show_bug.cgi?id=53262
+            try {
+                XSSFColor themeColor = getFillColor(cs);
+                if (themeColor != null && !themeColor.isAuto()) {
+                    return true;
+                }
+            } catch (Exception e) {
+            }
+        }
+        return false;
+    }
 }

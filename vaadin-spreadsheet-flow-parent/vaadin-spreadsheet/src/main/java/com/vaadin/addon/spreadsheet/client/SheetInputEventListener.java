@@ -11,7 +11,11 @@ public class SheetInputEventListener implements EventListener {
     private SheetWidget widget;
     private InputElement input;
 
-    private boolean inputClicked;
+    /**
+     * Input has full focus only when it has been clicked. Otherwise i.e. arrow
+     * keys change cell selection instead of input carret position.
+     */
+    private boolean inputFullFocus;
 
     public SheetInputEventListener() {
     }
@@ -24,6 +28,10 @@ public class SheetInputEventListener implements EventListener {
         Event.sinkEvents(input, Event.ONKEYPRESS | Event.ONKEYDOWN
                 | Event.FOCUSEVENTS | Event.ONCLICK | Event.ONMOUSEDOWN);
         Event.setEventListener(input, this);
+    }
+
+    public void setInputFullFocus(boolean inputFullFocus) {
+        this.inputFullFocus = inputFullFocus;
     }
 
     @Override
@@ -59,8 +67,8 @@ public class SheetInputEventListener implements EventListener {
             jsniUtil.parseColRow(widget.getSelectedCellKey());
             widget.getSheetHandler().onCellRightClick(event,
                     jsniUtil.getParsedCol(), jsniUtil.getParsedRow());
-            event.stopPropagation();
         }
+        event.stopPropagation();
     }
 
     protected void onInputFocus(Event event) {
@@ -77,8 +85,9 @@ public class SheetInputEventListener implements EventListener {
 
     protected void onInputClick(Event event) {
         if (widget.isEditingCell()) {
-            inputClicked = true;
+            inputFullFocus = true;
         }
+        event.stopPropagation();
     }
 
     protected void onInputKeyPress(Event event) {
@@ -112,22 +121,22 @@ public class SheetInputEventListener implements EventListener {
                 event.preventDefault();
                 break;
             case KeyCodes.KEY_UP:
-                if (!inputClicked) {
+                if (!inputFullFocus) {
                     handler.onCellInputEnter(input.getValue(), true);
                 }
                 break;
             case KeyCodes.KEY_DOWN:
-                if (!inputClicked) {
+                if (!inputFullFocus) {
                     handler.onCellInputEnter(input.getValue(), false);
                 }
                 break;
             case KeyCodes.KEY_LEFT:
-                if (!inputClicked) {
+                if (!inputFullFocus) {
                     handler.onCellInputTab(input.getValue(), true);
                 }
                 break;
             case KeyCodes.KEY_RIGHT:
-                if (!inputClicked) {
+                if (!inputFullFocus) {
                     handler.onCellInputTab(input.getValue(), false);
                 }
                 break;
@@ -142,7 +151,7 @@ public class SheetInputEventListener implements EventListener {
     }
 
     protected void cellEditingStopped() {
-        inputClicked = false;
+        inputFullFocus = false;
     }
 
 }

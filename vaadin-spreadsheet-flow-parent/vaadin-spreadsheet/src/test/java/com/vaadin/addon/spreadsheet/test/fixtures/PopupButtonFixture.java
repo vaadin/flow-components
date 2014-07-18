@@ -20,14 +20,12 @@ import com.vaadin.addon.spreadsheet.test.demoapps.TestexcelsheetUI;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.navigator.Navigator;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.ListSelect;
 
 public class PopupButtonFixture implements SpreadsheetFixture {
 
-    private Navigator navigator;
     private DataValidationButton popupButton;
     private boolean popupButtonActive = false;
     private TestexcelsheetUI ui;
@@ -105,7 +103,7 @@ public class PopupButtonFixture implements SpreadsheetFixture {
             }
 
             spreadsheet
-                    .addSelectedCellChangeListener(new SelectionChangeListener() {
+                    .addSelectionChangeListener(new SelectionChangeListener() {
                         @Override
                         public void onSelectionChange(SelectionChangeEvent event) {
                             List<Object> values = new ArrayList<Object>(VALUES);

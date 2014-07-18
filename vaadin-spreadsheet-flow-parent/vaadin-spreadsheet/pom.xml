@@ -18,9 +18,9 @@
 		<tag>Spreadsheet add-on for Vaadin</tag> </scm> -->
 
 	<properties>
-        <skipTests>false</skipTests>
+        <skipTests>true</skipTests>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.2.3</vaadin.version>
+		<vaadin.version>7.2.6</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<poi.version>3.10-FINAL</poi.version>
 		<tb.hub>testbench-hub.intra.itmill.com</tb.hub>

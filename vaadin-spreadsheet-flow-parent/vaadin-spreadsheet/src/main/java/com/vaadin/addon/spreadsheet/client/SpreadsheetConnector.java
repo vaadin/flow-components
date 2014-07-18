@@ -21,21 +21,21 @@ import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
 import com.vaadin.client.ui.Action;
 import com.vaadin.client.ui.ActionOwner;
+import com.vaadin.client.ui.PostLayoutListener;
 import com.vaadin.client.ui.layout.ElementResizeEvent;
 import com.vaadin.client.ui.layout.ElementResizeListener;
 import com.vaadin.shared.ui.Connect;
 import com.vaadin.shared.ui.Connect.LoadStyle;
 
 @Connect(value = Spreadsheet.class, loadStyle = LoadStyle.DEFERRED)
-public class SpreadsheetConnector extends AbstractHasComponentsConnector {
+public class SpreadsheetConnector extends AbstractHasComponentsConnector
+        implements PostLayoutListener {
 
     SpreadsheetClientRpc clientRPC = new SpreadsheetClientRpc() {
 
         @Override
-        public void addCells(HashMap<String, String> cellData,
-                HashMap<String, Double> numericCellData,
+        public void updateCellStyleToCSSSelectors(
                 HashMap<Integer, String> cellStyleToCSSSelector) {
-            getWidget().addRequestedCells(cellData, numericCellData);
             getWidget().setCellStyleToCSSSelector(cellStyleToCSSSelector);
         }
 
@@ -66,18 +66,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
         }
 
         @Override
-        public void addUpdatedCells(HashMap<String, String> updatedCellData,
-                HashMap<String, Double> numericCellData,
-                ArrayList<String> removedCells,
-                HashMap<Integer, String> cellStyleToCSSSelector) {
-            getWidget().updateCellValues(updatedCellData, numericCellData,
-                    removedCells);
-            getWidget().setCellStyleToCSSSelector(cellStyleToCSSSelector);
-        }
-
-        @Override
         public void showActions(
-                final List<SpreadsheetActionDetails> actionDetails) {
+                final ArrayList<SpreadsheetActionDetails> actionDetails) {
             int left;
             int top;
             if (latestCellContextMenuEvent != null) {
@@ -127,6 +117,32 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
             getWidget().setCellRangeSelection(col, row, c1, c2, r1, r2, value,
                     formula, cellLocked);
         }
+
+        @Override
+        public void updateBottomRightCellValues(ArrayList<CellData> cellData) {
+            getWidget().updateBottomRightCellValues(cellData);
+        }
+
+        @Override
+        public void updateTopLeftCellValues(ArrayList<CellData> cellData) {
+            getWidget().updateTopLeftCellValues(cellData);
+        }
+
+        @Override
+        public void updateTopRightCellValues(ArrayList<CellData> cellData) {
+            getWidget().updateTopRightCellValues(cellData);
+        }
+
+        @Override
+        public void updateBottomLeftCellValues(ArrayList<CellData> cellData) {
+            getWidget().updateBottomLeftCellValues(cellData);
+        }
+
+        @Override
+        public void cellsUpdated(ArrayList<CellData> updatedCellData) {
+            getWidget().cellValuesUpdated(updatedCellData);
+        }
+
     };
 
     private final ElementResizeListener elementResizeListener = new ElementResizeListener() {
@@ -193,8 +209,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
 
     @Override
     public void onUnregister() {
-        getWidget().getSheetWidget().clearAll();
-        getWidget().getSheetWidget().removeStyles();
+        getWidget().clearSpreadsheet(true);
         getLayoutManager().removeElementResizeListener(
                 getWidget().getElement(), elementResizeListener);
     }
@@ -235,7 +250,11 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
                     || stateChangeEvent.hasPropertyChanged("colW")
                     || stateChangeEvent.hasPropertyChanged("rowH")
                     || stateChangeEvent.hasPropertyChanged("rows")
-                    || stateChangeEvent.hasPropertyChanged("cols")) {
+                    || stateChangeEvent.hasPropertyChanged("cols")
+                    || stateChangeEvent
+                            .hasPropertyChanged("verticalSplitPosition")
+                    || stateChangeEvent
+                            .hasPropertyChanged("horizontalSplitPosition")) {
                 widget.relayoutSheet();
                 getWidget().updateMergedRegions(getState().mergedRegions);
             } else if (stateChangeEvent.hasPropertyChanged("mergedRegions")) {
@@ -245,11 +264,11 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
                 widget.setSheetProtected(state.sheetProtected);
             }
             if (stateChangeEvent.hasPropertyChanged("componentIDtoCellKeysMap")) {
-                Map<String, String> cellKeysToComponentIdMap = state.componentIDtoCellKeysMap;
+                HashMap<String, String> cellKeysToComponentIdMap = state.componentIDtoCellKeysMap;
                 if (cellKeysToComponentIdMap != null
                         && !cellKeysToComponentIdMap.isEmpty()) {
                     List<ComponentConnector> childComponents = getChildComponents();
-                    Map<String, Widget> customWidgetMap = new HashMap<String, Widget>();
+                    HashMap<String, Widget> customWidgetMap = new HashMap<String, Widget>();
                     for (ComponentConnector cc : childComponents) {
                         String connectorId = cc.getConnectorId();
                         if (cellKeysToComponentIdMap.containsKey(connectorId)) {
@@ -347,8 +366,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
             for (String key : visibleCellComments) {
                 if (!visibleCellCommentKeys.contains(key)) {
                     widget.addVisibleCellComment(key);
-                } else {
-                    // TODO update
                 }
             }
         }
@@ -380,5 +397,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector {
                         ((PopupButtonConnector) child).getWidget());
             }
         }
+    }
+
+    @Override
+    public void postLayout() {
+        getWidget().refreshOverlayPositions();
     }
 }

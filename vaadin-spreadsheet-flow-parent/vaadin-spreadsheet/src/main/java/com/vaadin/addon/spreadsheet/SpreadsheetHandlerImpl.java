@@ -114,12 +114,6 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void firstVisibleTabChanged(int firstVisibleTab) {
-        // workbook.setFirstVisibleTab(firstVisibleTab);
-        // getState().firstVisibleTab = firstVisibleTab;
-    }
-
-    @Override
     public void deleteSelectedCells() {
         spreadsheet.getCellValueManager().onDeleteSelectedCells();
     }

@@ -47,31 +47,27 @@ public class CellShifter {
                             r2 - 1, c1 - 1,
                             paintedCellRange.getFirstColumn() - 1));
                     shiftColumnsLeftInSelection(c1);
-                    spreadsheet.updateMarkedCellValues(c1,
-                            paintedCellRange.getFirstColumn(), r1, r2);
+                    spreadsheet.updateMarkedCells();
                 } else if (c2 != paintedCellRange.getLastColumn() + 1) {
                     // shift right
                     command.captureCellRangeValues(new CellRangeAddress(r1 - 1,
                             r2 - 1, paintedCellRange.getLastColumn() + 1,
                             c2 - 1));
                     shiftColumnsRightInSelection(c2);
-                    spreadsheet.updateMarkedCellValues(
-                            paintedCellRange.getLastColumn() + 2, c2, r1, r2);
+                    spreadsheet.updateMarkedCells();
                 } else if (r1 != paintedCellRange.getFirstRow() + 1) {
                     // shift top
                     command.captureCellRangeValues(new CellRangeAddress(r1 - 1,
                             paintedCellRange.getFirstRow() - 1, c1 - 1, c2 - 1));
                     shiftRowsUpInSelection(r1);
-                    spreadsheet.updateMarkedCellValues(c1, c2, r1,
-                            paintedCellRange.getFirstRow());
+                    spreadsheet.updateMarkedCells();
                 } else if (r2 != paintedCellRange.getLastRow() + 1) {
                     // shift bottom
                     command.captureCellRangeValues(new CellRangeAddress(
                             paintedCellRange.getLastRow() + 1, r2 - 1, c1 - 1,
                             c2 - 1));
                     shiftRowsDownInSelection(r2);
-                    spreadsheet.updateMarkedCellValues(c1, c2,
-                            paintedCellRange.getLastRow() + 2, r2);
+                    spreadsheet.updateMarkedCells();
                 }
                 CellRangeAddress newPaintedCellRange = spreadsheet
                         .createCorrectCellRangeAddress(c1, c2, r1, r2);
@@ -104,7 +100,7 @@ public class CellShifter {
                         paintedCellRange.getLastColumn() + 1, r,
                         paintedCellRange.getLastRow() + 1, false);
                 // removedCells makes sure that removed cells are marked.
-                spreadsheet.updateMarkedCellValues(0, 0, 0, 0);
+                spreadsheet.updateMarkedCells();
                 // range selection was updated if NOT all cells were painted
                 CellRangeAddress newPaintedCellRange = null;
                 if (c != paintedCellRange.getFirstColumn() + 1) {
@@ -369,8 +365,8 @@ public class CellShifter {
         }
         spreadsheet.updateMergedRegions();
         spreadsheet.triggerImageReload();
-        spreadsheet.updateMarkedCellValues(1, state.cols, startRow + n + 1,
-                endRow + n + 1);
+        spreadsheet.getCellValueManager().updateVisibleCellValues();
+        spreadsheet.updateMarkedCells();
         SpreadsheetStyleFactory styler = spreadsheet
                 .getSpreadsheetStyleFactory();
         // need to shift the cell styles, clear and update

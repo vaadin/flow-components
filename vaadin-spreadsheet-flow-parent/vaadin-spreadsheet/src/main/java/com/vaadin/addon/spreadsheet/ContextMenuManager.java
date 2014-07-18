@@ -2,7 +2,6 @@ package com.vaadin.addon.spreadsheet;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 
@@ -68,7 +67,7 @@ public class ContextMenuManager {
                 spreadsheet.getCellSelectionManager().onCellSelected(column,
                         row, true);
             }
-            List<SpreadsheetActionDetails> actions = createActionsListForSelection();
+            ArrayList<SpreadsheetActionDetails> actions = createActionsListForSelection();
             if (!actions.isEmpty()) {
                 spreadsheet.getSpreadsheetRpcProxy().showActions(actions);
             }
@@ -79,7 +78,7 @@ public class ContextMenuManager {
     }
 
     public void onRowHeaderContextMenuOpen(int rowIndex) {
-        List<SpreadsheetActionDetails> actions = createActionsListForRow(rowIndex);
+        ArrayList<SpreadsheetActionDetails> actions = createActionsListForRow(rowIndex);
         if (!actions.isEmpty()) {
             spreadsheet.getSpreadsheetRpcProxy().showActions(actions);
             contextMenuHeaderIndex = rowIndex;
@@ -87,7 +86,7 @@ public class ContextMenuManager {
     }
 
     public void onColumnHeaderContextMenuOpen(int columnIndex) {
-        List<SpreadsheetActionDetails> actions = createActionsListForColumn(columnIndex);
+        ArrayList<SpreadsheetActionDetails> actions = createActionsListForColumn(columnIndex);
         if (!actions.isEmpty()) {
             spreadsheet.getSpreadsheetRpcProxy().showActions(actions);
             contextMenuHeaderIndex = columnIndex;
@@ -120,8 +119,8 @@ public class ContextMenuManager {
         }
     }
 
-    protected List<SpreadsheetActionDetails> createActionsListForSelection() {
-        List<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
+    protected ArrayList<SpreadsheetActionDetails> createActionsListForSelection() {
+        ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
         for (Handler handler : actionHandlers) {
             Action[] actions2 = handler.getActions(getCellSelectionManager()
                     .getLatestSelectionEvent(), this);
@@ -140,9 +139,9 @@ public class ContextMenuManager {
         return actions;
     }
 
-    protected List<SpreadsheetActionDetails> createActionsListForColumn(
+    protected ArrayList<SpreadsheetActionDetails> createActionsListForColumn(
             int columnIndex) {
-        List<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
+        ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
         final CellRangeAddress column = new CellRangeAddress(-1, -1,
                 columnIndex - 1, columnIndex - 1);
         for (Handler handler : actionHandlers) {
@@ -159,9 +158,9 @@ public class ContextMenuManager {
         return actions;
     }
 
-    protected List<SpreadsheetActionDetails> createActionsListForRow(
+    protected ArrayList<SpreadsheetActionDetails> createActionsListForRow(
             int rowIndex) {
-        List<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
+        ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
         final CellRangeAddress row = new CellRangeAddress(rowIndex - 1,
                 rowIndex - 1, -1, -1);
         for (Handler handler : actionHandlers) {

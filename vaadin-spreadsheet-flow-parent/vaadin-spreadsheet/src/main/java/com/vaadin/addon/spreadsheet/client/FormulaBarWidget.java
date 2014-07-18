@@ -150,7 +150,7 @@ public class FormulaBarWidget extends Composite {
     }
 
     public void setCellPlainValue(String plainValue) {
-        cachedFunctionFieldValue = formulaField.getValue();
+        cachedFunctionFieldValue = plainValue;
         formulaField.setValue(plainValue);
     }
 

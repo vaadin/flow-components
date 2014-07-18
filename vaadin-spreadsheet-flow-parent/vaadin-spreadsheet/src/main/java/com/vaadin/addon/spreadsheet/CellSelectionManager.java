@@ -78,17 +78,19 @@ public class CellSelectionManager {
             boolean discardOldRangeSelection) {
         CellReference cellReference = new CellReference(row - 1, column - 1);
         CellReference previousCellReference = selectedCellReference;
-        handleCellSelection(column, row);
-        selectedCellReference = cellReference;
-        spreadsheet.loadCustomEditorOnSelectedCell();
-        if (discardOldRangeSelection) {
-            cellRangeAddresses.clear();
-            individualSelectedCells.clear();
-            paintedCellRange = spreadsheet.createCorrectCellRangeAddress(
-                    column, column, row, row);
-        }
         if (!cellReference.equals(previousCellReference)
-                || discardOldRangeSelection) {
+                || discardOldRangeSelection
+                && (!cellRangeAddresses.isEmpty() || !individualSelectedCells
+                        .isEmpty())) {
+            handleCellSelection(column, row);
+            selectedCellReference = cellReference;
+            spreadsheet.loadCustomEditorOnSelectedCell();
+            if (discardOldRangeSelection) {
+                cellRangeAddresses.clear();
+                individualSelectedCells.clear();
+                paintedCellRange = spreadsheet.createCorrectCellRangeAddress(
+                        column, column, row, row);
+            }
             fireNewSelectionChangeEvent();
         }
     }
@@ -443,7 +445,7 @@ public class CellSelectionManager {
         cellRangeAddresses.clear();
         individualSelectedCells.clear();
         CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(1,
-                spreadsheet.getCols(), row, row);
+                spreadsheet.getColumns(), row, row);
         paintedCellRange = cra;
         cellRangeAddresses.add(cra);
         fireNewSelectionChangeEvent();
@@ -466,7 +468,7 @@ public class CellSelectionManager {
         selectedCellReference = new CellReference(row - 1, firstColumnIndex - 1);
         spreadsheet.loadCustomEditorOnSelectedCell();
         cellRangeAddresses.add(spreadsheet.createCorrectCellRangeAddress(1,
-                spreadsheet.getCols(), row, row));
+                spreadsheet.getColumns(), row, row));
         paintedCellRange = null;
         fireNewSelectionChangeEvent();
     }

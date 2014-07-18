@@ -1,5 +1,8 @@
 package com.vaadin.addon.spreadsheet;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -7,6 +10,8 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
 public class SpreadsheetUtil {
+
+    private static final Pattern keyParser = Pattern.compile("-?\\d+");
 
     /**
      * 
@@ -78,4 +83,9 @@ public class SpreadsheetUtil {
         return result;
     }
 
+    public static int getColFromKey(String key) {
+        Matcher matcher = keyParser.matcher(key);
+        matcher.find();
+        return Integer.valueOf(matcher.group());
+    }
 }

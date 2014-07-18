@@ -1,7 +1,7 @@
 package com.vaadin.addon.spreadsheet.client;
 
-import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.vaadin.shared.AbstractComponentState;
 import com.vaadin.shared.annotations.DelegateToWidget;
@@ -39,18 +39,18 @@ public class SpreadsheetState extends AbstractComponentState {
     public String[] sheetNames = null;
 
     @DelegateToWidget
-    public Map<Integer, String> cellStyleToCSSStyle = null;
+    public HashMap<Integer, String> cellStyleToCSSStyle = null;
 
     @DelegateToWidget
-    public List<String> customCellBorderStyles = null;
-
-    /** 1-based */
-    @DelegateToWidget
-    public List<Integer> hiddenColumnIndexes = null;
+    public ArrayList<String> shiftedCellBorderStyles = null;
 
     /** 1-based */
     @DelegateToWidget
-    public List<Integer> hiddenRowIndexes = null;
+    public ArrayList<Integer> hiddenColumnIndexes = null;
+
+    /** 1-based */
+    @DelegateToWidget
+    public ArrayList<Integer> hiddenRowIndexes = null;
 
     @DelegateToWidget
     public int[] verticalScrollPositions;
@@ -63,28 +63,34 @@ public class SpreadsheetState extends AbstractComponentState {
     @DelegateToWidget
     public boolean workbookProtected;
 
-    public Map<String, String> cellKeysToEditorIdMap;
+    public HashMap<String, String> cellKeysToEditorIdMap;
 
-    public Map<String, String> componentIDtoCellKeysMap;
+    public HashMap<String, String> componentIDtoCellKeysMap;
 
     /** Cell CSS key -> link tooltip (usually same as address) */
     @DelegateToWidget
-    public Map<String, String> hyperlinksTooltips;
+    public HashMap<String, String> hyperlinksTooltips;
 
     @DelegateToWidget
-    public Map<String, String> cellComments;
+    public HashMap<String, String> cellComments;
 
-    public List<String> visibleCellComments;
+    public ArrayList<String> visibleCellComments;
 
     public boolean hasActions;
 
-    public Map<String, ImageInfo> resourceKeyToImage;
+    public HashMap<String, ImageInfo> resourceKeyToImage;
 
-    public List<MergedRegion> mergedRegions;
+    public ArrayList<MergedRegion> mergedRegions;
 
     @DelegateToWidget
     public boolean displayGridlines = true;
 
     @DelegateToWidget
     public boolean displayRowColHeadings = true;
+
+    @DelegateToWidget
+    public int verticalSplitPosition = 0;
+    @DelegateToWidget
+    public int horizontalSplitPosition = 0;
+
 }

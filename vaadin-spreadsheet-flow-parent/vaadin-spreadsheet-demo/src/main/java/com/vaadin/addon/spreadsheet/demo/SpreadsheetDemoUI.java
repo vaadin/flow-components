@@ -150,7 +150,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         if (spreadsheet == null) {
                             spreadsheet = new Spreadsheet();
                             spreadsheet
-                                    .addSelectedCellChangeListener(selectionChangeListener);
+                                    .addSelectionChangeListener(selectionChangeListener);
                             spreadsheet
                                     .addSelectedSheetChangeListener(selectedSheetChangeListener);
                             spreadsheet
@@ -368,7 +368,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             if (spreadsheet == null) {
                 spreadsheet = new Spreadsheet(file);
                 spreadsheet
-                        .addSelectedCellChangeListener(selectionChangeListener);
+                        .addSelectionChangeListener(selectionChangeListener);
                 spreadsheet
                         .addSelectedSheetChangeListener(selectedSheetChangeListener);
                 spreadsheet.addActionHandler(spreadsheetActionHandler);

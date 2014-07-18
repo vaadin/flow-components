@@ -20,7 +20,7 @@ public class CellComment extends VOverlay {
 
     private final VLabel label;
 
-    private final DivElement sheet;
+    private Element paneElement;
 
     private final DivElement line;
 
@@ -33,8 +33,8 @@ public class CellComment extends VOverlay {
     private int cellRow;
     private int cellCol;
 
-    public CellComment(final SheetWidget owner, DivElement sheet) {
-        this.sheet = sheet;
+    public CellComment(final SheetWidget owner, Element paneElement) {
+        this.paneElement = paneElement;
         line = Document.get().createDivElement();
         line.setClassName(COMMENT_OVERLAY_LINE_CLASSNAME);
         label = new VLabel();
@@ -113,10 +113,10 @@ public class CellComment extends VOverlay {
         if (cellElement != null) {
             int cellRight = cellElement.getAbsoluteRight();
             int cellTop = cellElement.getAbsoluteTop();
-            if (cellRight >= sheet.getAbsoluteLeft()
-                    && cellRight < sheet.getAbsoluteRight()
-                    && cellTop >= sheet.getAbsoluteTop()
-                    && cellTop <= sheet.getAbsoluteBottom()) {
+            if (cellRight >= paneElement.getAbsoluteLeft()
+                    && cellRight < paneElement.getAbsoluteRight()
+                    && cellTop >= paneElement.getAbsoluteTop()
+                    && cellTop <= paneElement.getAbsoluteBottom()) {
                 calculatePosition();
                 setVisible(true);
                 if (!isShowing()) {
@@ -145,24 +145,24 @@ public class CellComment extends VOverlay {
         int cellRight = cellElement.getAbsoluteRight();
         int cellTop = cellElement.getAbsoluteTop();
         int popupLeft = cellRight + 15;
-        if (popupLeft + offsetWidth > sheet.getAbsoluteRight()) {
+        if (popupLeft + offsetWidth > paneElement.getAbsoluteRight()) {
             // move to left side if it fits there
             int temp = cellElement.getAbsoluteLeft() - 15 - offsetWidth;
-            if (sheet.getAbsoluteLeft() < temp) {
+            if (paneElement.getAbsoluteLeft() < temp) {
                 popupLeft = temp;
             }
         }
         int popupTop = cellTop - 15;
-        int sheetBottom = sheet.getAbsoluteBottom();
+        int sheetBottom = paneElement.getAbsoluteBottom();
         if (popupTop + offsetHeight > sheetBottom) {
             // move upwards as much possible to make it fit
             popupTop -= (popupTop + offsetHeight - sheetBottom + 5);
-            int sheetTop = sheet.getAbsoluteTop();
+            int sheetTop = paneElement.getAbsoluteTop();
             if (popupTop < sheetTop) {
                 popupTop = sheetTop;
             }
-        } else if (popupTop < sheet.getAbsoluteTop()) {
-            popupTop += (sheet.getAbsoluteTop() - popupTop);
+        } else if (popupTop < paneElement.getAbsoluteTop()) {
+            popupTop += (paneElement.getAbsoluteTop() - popupTop);
         }
         setPopupPosition(popupLeft, popupTop);
 
@@ -201,6 +201,10 @@ public class CellComment extends VOverlay {
                 .setProperty("webkitTransform", "rotate(" + deg + "deg)");
 
         line.addClassName(linePositionClassName);
-        sheet.appendChild(line);
+        paneElement.appendChild(line);
+    }
+
+    public void setSheetElement(Element paneElement) {
+        this.paneElement = paneElement;
     }
 }

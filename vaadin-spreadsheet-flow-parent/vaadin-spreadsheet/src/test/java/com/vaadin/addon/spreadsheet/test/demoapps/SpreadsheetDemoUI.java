@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.ExcelStyleDateFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -148,7 +149,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         if (spreadsheet == null) {
                             spreadsheet = new Spreadsheet();
                             spreadsheet
-                                    .addSelectedCellChangeListener(selectionChangeListener);
+                                    .addSelectionChangeListener(selectionChangeListener);
                             spreadsheet
                                     .addSelectedSheetChangeListener(selectedSheetChangeListener);
                             layout.addComponent(spreadsheet);
@@ -183,7 +184,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             @Override
             public boolean accept(File dir, String name) {
                 if (name != null
-                        && (name.endsWith(".xls") || name.endsWith(".xlsx"))) {
+                        && (name.endsWith(".xls") || name.endsWith(".xlsx") || name
+                                .endsWith(".xlsm"))) {
                     return true;
                 } else {
                     return false;
@@ -194,6 +196,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         openTestSheetSelect.setId("testSheetSelect");
         openTestSheetSelect.setImmediate(true);
         openTestSheetSelect.setItemCaptionPropertyId("Name");
+        openTestSheetSelect.setPageLength(30);
 
         update = new Button("Update", new Button.ClickListener() {
 
@@ -371,25 +374,25 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     }
 
     private void printSelectionChangeEventContents(SelectionChangeEvent event) {
-        // System.out.println(event.getSelectedCellReference().toString());
-        // System.out.println("Merged region: "
-        // + event.getSelectedCellMergedRegion());
-        // System.out.println("Ranges:");
-        // for (CellRangeAddress range : event.getCellRangeAddresses()) {
-        // System.out.println(range.toString());
-        // }
-        // System.out.println("Individual Cells:");
-        // for (CellReference cell : event.getIndividualSelectedCells()) {
-        // System.out.println(cell.toString());
-        // }
+        System.out.println("Selected cell: "
+                + event.getSelectedCellReference().toString());
+        System.out.println("Merged region: "
+                + event.getSelectedCellMergedRegion());
+        System.out.println("Ranges:");
+        for (CellRangeAddress range : event.getCellRangeAddresses()) {
+            System.out.println(range.toString());
+        }
+        System.out.println("Individual Cells:");
+        for (CellReference cell : event.getIndividualSelectedCells()) {
+            System.out.println(cell.toString());
+        }
     }
 
     private void loadFile(File file) {
         try {
             if (spreadsheet == null) {
                 spreadsheet = new Spreadsheet(file);
-                spreadsheet
-                        .addSelectedCellChangeListener(selectionChangeListener);
+                spreadsheet.addSelectionChangeListener(selectionChangeListener);
                 spreadsheet
                         .addSelectedSheetChangeListener(selectedSheetChangeListener);
                 // spreadsheet.addActionHandler(spreadsheetActionHandler);
@@ -892,11 +895,11 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         public void buttonClick(ClickEvent event) {
                             try {
                                 if (spreadsheet != null) {
-                                    // spreadsheet.createFreezePane(
-                                    // (Integer) hSplitTF
-                                    // .getConvertedValue(),
-                                    // (Integer) vSplitTF
-                                    // .getConvertedValue());
+                                    spreadsheet.createFreezePane(
+                                            (Integer) hSplitTF
+                                                    .getConvertedValue(),
+                                            (Integer) vSplitTF
+                                                    .getConvertedValue());
                                 }
                             } catch (ConversionException e) {
                             }

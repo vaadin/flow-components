@@ -15,6 +15,7 @@ import org.apache.poi.hssf.usermodel.HSSFPictureData;
 import org.apache.poi.hssf.usermodel.HSSFShape;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.PaneInformation;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Row;
@@ -41,7 +42,7 @@ public class SpreadsheetFactory {
 
     public static final int DEFAULT_ROWS = 200;
 
-    private static final boolean LOG_MEMORY = false;
+    public static boolean LOG_MEMORY = false;
 
     private static final int DEFAULT_COL_WIDTH_UNITS = 10;
 
@@ -156,6 +157,7 @@ public class SpreadsheetFactory {
         int sheetIndex = workbook.getSheetIndex(sheet);
         workbook.setActiveSheet(sheetIndex);
         spreadsheet.reloadActiveSheetData();
+        spreadsheet.reloadActiveSheetStyles();
         final SpreadsheetState state = spreadsheet.getState();
         int[] verticalScrollPositions = Arrays.copyOf(
                 state.verticalScrollPositions, state.sheetNames.length);
@@ -164,7 +166,6 @@ public class SpreadsheetFactory {
         state.verticalScrollPositions = verticalScrollPositions;
         state.horizontalScrollPositions = horizontalScrollPositions;
         generateNewSpreadsheet(spreadsheet, sheet, rows, columns);
-        loadWorkbookStyles(spreadsheet);
     }
 
     protected static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
@@ -302,6 +303,7 @@ public class SpreadsheetFactory {
 
             loadSheetImages(component);
             loadMergedRegions(component);
+            loadFreezePane(component);
         } catch (NullPointerException npe) {
             npe.printStackTrace();
         }
@@ -379,6 +381,24 @@ public class SpreadsheetFactory {
                 mergedRegion.id = spreadsheet.mergedRegionCounter++;
                 spreadsheet.getState().mergedRegions.add(mergedRegion);
             }
+        }
+    }
+
+    protected static void loadFreezePane(Spreadsheet component) {
+        final Sheet sheet = component.getActiveSheet();
+        PaneInformation paneInformation = sheet.getPaneInformation();
+        // only freeze panes supported
+        if (paneInformation != null && paneInformation.isFreezePane()) {
+            // XXX WTF POI? HorizontalSplitPosition means rows and
+            // VerticalSplitPosition means columns. Changed the meaning for the
+            // component internals
+            component.getState().horizontalSplitPosition = paneInformation
+                    .getVerticalSplitPosition();
+            component.getState().verticalSplitPosition = paneInformation
+                    .getHorizontalSplitPosition();
+        } else {
+            component.getState().verticalSplitPosition = 0;
+            component.getState().horizontalSplitPosition = 0;
         }
     }
 

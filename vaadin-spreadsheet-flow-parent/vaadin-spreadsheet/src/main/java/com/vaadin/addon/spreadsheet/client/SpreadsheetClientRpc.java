@@ -2,15 +2,21 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import com.vaadin.shared.communication.ClientRpc;
 
 public interface SpreadsheetClientRpc extends ClientRpc {
 
-    void addCells(HashMap<String, String> cellData,
-            HashMap<String, Double> numericCellData,
-            HashMap<Integer, String> selectorsToStyleMap);
+    void updateCellStyleToCSSSelectors(
+            HashMap<Integer, String> cellStyleToCSSSelector);
+
+    void updateBottomRightCellValues(ArrayList<CellData> cellData);
+
+    void updateTopLeftCellValues(ArrayList<CellData> cellData);
+
+    void updateTopRightCellValues(ArrayList<CellData> cellData);
+
+    void updateBottomLeftCellValues(ArrayList<CellData> cellData);
 
     /**
      * 
@@ -33,16 +39,12 @@ public interface SpreadsheetClientRpc extends ClientRpc {
     void showSelectedCellRange(int firstColumn, int lastColumn, int firstRow,
             int lastRow, String value, boolean formula, boolean locked);
 
-    void addUpdatedCells(HashMap<String, String> updatedCellData,
-            HashMap<String, Double> numericCellData,
-            ArrayList<String> removedCells, HashMap<Integer, String> hashMap);
-
     /**
      * The String arrays contain the caption and the icon resource key.
      * 
      * @param actionDetails
      */
-    void showActions(List<SpreadsheetActionDetails> actionDetails);
+    void showActions(ArrayList<SpreadsheetActionDetails> actionDetails);
 
     /**
      * Updates the selected cell and painted range. Displays the selected cell
@@ -66,4 +68,6 @@ public interface SpreadsheetClientRpc extends ClientRpc {
      */
     void setSelectedCellAndRange(int col, int row, int c1, int c2, int r1,
             int r2, String value, boolean formula, boolean cellLocked);
+
+    void cellsUpdated(ArrayList<CellData> updatedCellData);
 }
