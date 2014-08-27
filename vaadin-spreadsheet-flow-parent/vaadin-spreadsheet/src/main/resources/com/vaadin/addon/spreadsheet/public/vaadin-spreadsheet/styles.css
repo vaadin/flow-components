@@ -19,7 +19,8 @@
 	cursor: col-resize;
 }
 
-.v-spreadsheet > div {
+.v-spreadsheet > div,
+.v-spreadsheet .sheet > div {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -89,13 +90,11 @@
 	overflow: visible;
 	padding: 0 2px;
 	position: absolute;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
 	white-space: nowrap;
+}
+
+.v-spreadsheet .sheet div.cell.r {
+	text-align: right;
 }
 
 .v-spreadsheet.nogrid .sheet .cell {

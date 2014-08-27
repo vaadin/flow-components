@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
@@ -182,6 +183,13 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     @Override
     public void onRedo() {
         spreadsheet.getSpreadsheetHistoryManager().redo();
+    }
+
+    @Override
+    public void setCellStyleWidthRatios(
+            HashMap<Integer, Float> cellStyleWidthRatioMap) {
+        spreadsheet.getCellValueManager().onCellStyleWidthRatioUpdate(
+                cellStyleWidthRatioMap);
     }
 
 }

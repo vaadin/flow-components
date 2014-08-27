@@ -37,7 +37,6 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FontFamily;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -110,11 +109,6 @@ public class SpreadsheetStyleFactory {
             BORDER_SLANTED_DASH_DOT, BorderStyle.DASHED_MEDIUM, BORDER_THICK,
             BorderStyle.SOLID_THICK, BORDER_THIN, BorderStyle.SOLID_THIN);
 
-    // custom cell style indices used to implement default alignment. all POI
-    // indices are non-negative
-    public static final int CELL_STYLE_INDEX_ALIGN_LEFT = -1;
-    public static final int CELL_STYLE_INDEX_ALIGN_RIGHT = -2;
-
     /** CellStyle index to selector + style map */
     private final HashMap<Integer, String> shiftedBorderTopStyles = new HashMap<Integer, String>();
     /** CellStyle index to selector + style map */
@@ -176,129 +170,14 @@ public class SpreadsheetStyleFactory {
         spreadsheet.getState().cellStyleToCSSStyle.put(
                 (int) cellStyle.getIndex(), sb.toString());
 
-        // create default style, left aligned
-        sb = new StringBuilder();
-        defaultFontStyle(cellStyle, sb);
-        borderStyles(sb, cellStyle);
-        colorConverter.defaultColorStyles(cellStyle, sb);
-        styleOut(sb, "text-align", ALIGN_LEFT, ALIGN);
-        spreadsheet.getState().cellStyleToCSSStyle.put(
-                getLeftAlignedStyleIndex(cellStyle.getIndex()), sb.toString());
-
-        // create default style, right aligned
-        sb = new StringBuilder();
-        defaultFontStyle(cellStyle, sb);
-        borderStyles(sb, cellStyle);
-        colorConverter.defaultColorStyles(cellStyle, sb);
-        styleOut(sb, "text-align", ALIGN_RIGHT, ALIGN);
-        spreadsheet.getState().cellStyleToCSSStyle.put(
-                getRightAlignedStyleIndex(cellStyle.getIndex()), sb.toString());
-
         // 0 is default style, create all styles indexed from 1 and upwards
         for (short i = 1; i < workbook.getNumCellStyles(); i++) {
             cellStyle = workbook.getCellStyleAt(i);
-            addNormalCellStyleCSS(cellStyle);
-            // add custom styles for cells without specified alignment
-            addLeftAlignedCellStyleCSS(cellStyle);
-            addRightAlignedCellStyleCSS(cellStyle);
+            addCellStyleCSS(cellStyle);
         }
     }
 
-    /**
-     * This is ment to be used for loading the css selectors for the cell
-     * styles. This arguments should always match the visible view area.
-     * 
-     * @param firstRow
-     *            1-based
-     * @param lastRow
-     * @param firstColumn
-     * @param lastColumn
-     */
-    protected void loadCellStyles(int firstRow, int lastRow, int firstColumn,
-            int lastColumn) {
-        // load cell based selectors for the current scroll view
-        HashMap<Integer, String> cellStyleToCSSSelector = createCellStyleToCSSSelector(
-                firstRow, lastRow, firstColumn, lastColumn, null);
-        // load styles for freeze pane areas
-        int verticalSplitPosition = spreadsheet.getVerticalSplitPosition();
-        int horizontalSplitPosition = spreadsheet.getHorizontalSplitPosition();
-        if (verticalSplitPosition > 0) { // top-right
-            createCellStyleToCSSSelector(1, verticalSplitPosition, firstColumn,
-                    lastColumn, cellStyleToCSSSelector);
-        }
-        if (horizontalSplitPosition > 0) { // bottom-left
-            createCellStyleToCSSSelector(firstRow, lastRow, 1,
-                    horizontalSplitPosition, cellStyleToCSSSelector);
-        }
-        if (horizontalSplitPosition > 0 && verticalSplitPosition > 0) { // top
-                                                                        // right
-            createCellStyleToCSSSelector(1, verticalSplitPosition, 1,
-                    horizontalSplitPosition, cellStyleToCSSSelector);
-        }
-        spreadsheet.getSpreadsheetRpcProxy().updateCellStyleToCSSSelectors(
-                cellStyleToCSSSelector);
-    }
-
-    protected final HashMap<Integer, String> createCellStyleToCSSSelector(
-            int firstRow, int lastRow, int firstColumn, int lastColumn,
-            HashMap<Integer, String> cellStyleToCSSSelector) {
-        // add the cell selector to correct style index
-        if (cellStyleToCSSSelector == null) {
-            cellStyleToCSSSelector = new HashMap<Integer, String>();
-        }
-        Workbook workbook = spreadsheet.getWorkbook();
-        final Sheet activeSheet = workbook.getSheetAt(workbook
-                .getActiveSheetIndex());
-        for (int r = firstRow - 1; r < lastRow; r++) {
-            Row row = activeSheet.getRow(r);
-            if (row != null && row.getLastCellNum() != -1
-                    && row.getLastCellNum() >= firstColumn) {
-                for (int c = firstColumn - 1; c < lastColumn; c++) {
-                    Cell cell = row.getCell(c);
-                    if (cell != null) {
-                        Integer cellStyleKey = (int) cell.getCellStyle()
-                                .getIndex();
-
-                        // get a new cellStyleKey with proper default alignment
-                        // if cell has unspecified alignment
-                        if (cell.getCellStyle().getAlignment() == CellStyle.ALIGN_GENERAL) {
-                            if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
-                                cellStyleKey = SpreadsheetStyleFactory
-                                        .getLeftAlignedStyleIndex(cellStyleKey);
-                            } else if (SpreadsheetUtil.cellContainsDate(cell)) {
-                                cellStyleKey = SpreadsheetStyleFactory
-                                        .getRightAlignedStyleIndex(cellStyleKey);
-                            } else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                                cellStyleKey = SpreadsheetStyleFactory
-                                        .getRightAlignedStyleIndex(cellStyleKey);
-                            }
-                        }
-
-                        if (cellStyleKey != 0) { // default style
-                            if (cellStyleToCSSSelector
-                                    .containsKey(cellStyleKey)) {
-                                cellStyleToCSSSelector.put(
-                                        cellStyleKey,
-                                        cellStyleToCSSSelector
-                                                .get(cellStyleKey)
-                                                + ",.col"
-                                                + (cell.getColumnIndex() + 1)
-                                                + ".row"
-                                                + (cell.getRowIndex() + 1));
-                            } else {
-                                cellStyleToCSSSelector.put(cellStyleKey, ".col"
-                                        + (cell.getColumnIndex() + 1) + ".row"
-                                        + (cell.getRowIndex() + 1));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return cellStyleToCSSSelector;
-    }
-
-    private void addNormalCellStyleCSS(CellStyle cellStyle) {
+    private void addCellStyleCSS(CellStyle cellStyle) {
         StringBuilder sb = new StringBuilder();
 
         fontStyle(sb, cellStyle);
@@ -321,53 +200,6 @@ public class SpreadsheetStyleFactory {
 
         spreadsheet.getState().cellStyleToCSSStyle.put(
                 (int) cellStyle.getIndex(), sb.toString());
-    }
-
-    private void addLeftAlignedCellStyleCSS(CellStyle cellStyle) {
-        StringBuilder sb = new StringBuilder();
-
-        fontStyle(sb, cellStyle);
-        colorConverter.colorStyles(cellStyle, sb);
-        borderStyles(sb, cellStyle);
-        styleOut(sb, "text-align", ALIGN_LEFT, ALIGN);
-        if (cellStyle.getVerticalAlignment() != defaultVerticalAlign) {
-            styleOut(sb, "vertical-align", cellStyle.getAlignment(),
-                    VERTICAL_ALIGN);
-        }
-        if (cellStyle.getWrapText()) { // default is to overflow
-            sb.append("overflow:hidden;white-space:normal;");
-        }
-
-        spreadsheet.getState().cellStyleToCSSStyle.put(
-                getLeftAlignedStyleIndex(cellStyle.getIndex()), sb.toString());
-    }
-
-    private void addRightAlignedCellStyleCSS(CellStyle cellStyle) {
-        StringBuilder sb = new StringBuilder();
-
-        fontStyle(sb, cellStyle);
-        colorConverter.colorStyles(cellStyle, sb);
-        borderStyles(sb, cellStyle);
-        styleOut(sb, "text-align", ALIGN_RIGHT, ALIGN);
-        if (cellStyle.getVerticalAlignment() != defaultVerticalAlign) {
-            styleOut(sb, "vertical-align", cellStyle.getAlignment(),
-                    VERTICAL_ALIGN);
-        }
-        if (cellStyle.getWrapText()) { // default is to overflow
-            sb.append("overflow:hidden;white-space:normal;");
-        }
-
-        spreadsheet.getState().cellStyleToCSSStyle.put(
-                getRightAlignedStyleIndex(cellStyle.getIndex()), sb.toString());
-    }
-
-    // calculate index for custom style. all POI indices are non-negative
-    static public int getLeftAlignedStyleIndex(int styleIndex) {
-        return -2 * styleIndex - 1;
-    }
-
-    static public int getRightAlignedStyleIndex(int styleIndex) {
-        return -2 * styleIndex - 2;
     }
 
     public CellStyle createHyperlinkCellStyle() {
@@ -531,9 +363,7 @@ public class SpreadsheetStyleFactory {
         // if a new style was created
         if (!spreadsheet.getState().cellStyleToCSSStyle.containsKey(key)) {
             CellStyle cellStyle = cell.getCellStyle();
-            addNormalCellStyleCSS(cellStyle);
-            addLeftAlignedCellStyleCSS(cellStyle);
-            addRightAlignedCellStyleCSS(cellStyle);
+            addCellStyleCSS(cellStyle);
         }
 
         // custom styles

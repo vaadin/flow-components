@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet.client;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public interface SpreadsheetHandler {
@@ -198,5 +199,8 @@ public interface SpreadsheetHandler {
      * Client pressed redo ctrl/meta+y
      */
     public void onRedo();
+
+    public void setCellStyleWidthRatios(
+            HashMap<Integer, Float> cellStyleWidthRatioMap);
 
 }

@@ -7,7 +7,8 @@ public class CellData implements Serializable {
     public int row;
     public int col;
     public String value;
-    public Double numericValue;
+    public String cellStyle = "cs0";
+    public boolean rightAlign = false;
 
     @Override
     public int hashCode() {
@@ -42,8 +43,7 @@ public class CellData implements Serializable {
     @Override
     public String toString() {
         return new StringBuilder().append("r").append(row).append("c")
-                .append(col).append("|").append(value).append("|")
-                .append(numericValue).toString();
+                .append(col).append(cellStyle).append("|").append(value)
+                .toString();
     }
-
 }

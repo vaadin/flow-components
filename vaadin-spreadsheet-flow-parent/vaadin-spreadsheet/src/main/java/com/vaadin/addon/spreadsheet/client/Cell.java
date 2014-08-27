@@ -3,7 +3,6 @@ package com.vaadin.addon.spreadsheet.client;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.i18n.client.NumberFormat;
 
 public class Cell {
 
@@ -15,9 +14,7 @@ public class Cell {
     private int row;
     private Element popupButtonElement;
     private String value;
-    private Double numericValue = null;
-
-    private static int NUMERIC_VALUE_NRDIGITS = 15;
+    private String cellStyle = "cs0";
 
     public Cell(int col, int row) {
         this.col = col;
@@ -27,43 +24,40 @@ public class Cell {
         updateCellValues();
     }
 
-    public Cell(int col, int row, String html, Double numericValue) {
-        this(col, row);
-        value = html;
-        this.numericValue = numericValue;
-        updateInnerText();
-        refreshWidth();
-    }
-
     public Cell(int col, int row, CellData cellData) {
-        this(col, row);
-        value = cellData == null ? null : cellData.value;
-        numericValue = cellData == null ? null : cellData.numericValue;
+        this.col = col;
+        this.row = row;
+        element = Document.get().createDivElement();
+        if (cellData == null) {
+            value = null;
+        } else {
+            value = cellData.value;
+            cellStyle = cellData.cellStyle;
+        }
+        updateCellValues();
         updateInnerText();
-        refreshWidth();
     }
 
     public DivElement getElement() {
         return element;
     }
 
-    public void update(int col, int row, String html, Double numericValue) {
+    public void update(int col, int row, String html, String cellStyle) {
         this.col = col;
         this.row = row;
+        this.cellStyle = cellStyle;
         value = html;
 
         updateInnerText();
-        this.numericValue = numericValue;
 
         updateCellValues();
-        refreshWidth();
     }
 
     public void update(int col, int row, CellData cellData) {
         if (cellData == null) {
-            update(col, row, null, null);
+            update(col, row, null, "cs0");
         } else {
-            update(col, row, cellData.value, cellData.numericValue);
+            update(col, row, cellData.value, cellData.cellStyle);
         }
     }
 
@@ -77,37 +71,42 @@ public class Cell {
         }
     }
 
-    private void updateCellValues() {
+    protected void updateCellValues() {
         removeCellCommentMark();
         removePopupButton();
-        element.setClassName(SheetWidget.toKey(col, row) + " cell");
+        updateClassName();
+    }
+
+    protected void updateClassName() {
+        element.setClassName(SheetWidget.toKey(col, row) + " cell " + cellStyle);
+    }
+
+    public String getCellStyle() {
+        return cellStyle;
     }
 
     public int getCol() {
         return col;
     }
 
-    public void setCol(int col) {
-        this.col = col;
-        updateCellValues();
-    }
-
     public int getRow() {
         return row;
-    }
-
-    public void setRow(int row) {
-        this.row = row;
-        updateCellValues();
     }
 
     public String getValue() {
         return value;
     }
 
-    public void setValue(String value, Double numericValue) {
+    public void setValue(String value, String cellStyle) {
+        if (!this.cellStyle.equals(cellStyle)) {
+            this.cellStyle = cellStyle;
+            updateClassName();
+        }
+        setValue(value);
+    }
+
+    public void setValue(String value) {
         this.value = value;
-        this.numericValue = numericValue;
         updateInnerText();
 
         if (cellCommentTriangle != null) {
@@ -116,8 +115,6 @@ public class Cell {
         if (popupButtonElement != null) {
             element.appendChild(popupButtonElement);
         }
-
-        refreshWidth();
     }
 
     public void showPopupButton(Element popupButtonElement) {
@@ -145,54 +142,6 @@ public class Cell {
             cellCommentTriangle.removeFromParent();
             cellCommentTriangle = null;
         }
-    }
-
-    public void refreshWidth() {
-        // width calculations are only applied for numeric cell types
-        if (numericValue == null) {
-            return;
-        }
-
-        // get cell width
-        int width = element.getOffsetWidth();
-
-        // override cell style's width. occupy only as much space as needed
-        // (getOffsetWidth gives us the content width)
-
-        String oldWidth = element.getStyle().getProperty("width");
-        element.getStyle().setProperty("width", "auto");
-
-        // select longest representation that fits (or ###)
-        for (int n = NUMERIC_VALUE_NRDIGITS + 1; n >= 0; n--) {
-            element.setInnerText(getNumberRepresentation(n));
-            int contentWidth = element.getOffsetWidth();
-            if (contentWidth <= width) {
-                break;
-            }
-        }
-
-        // restore width property
-        if (oldWidth != null) {
-            element.getStyle().setProperty("width", oldWidth);
-        } else {
-            element.getStyle().setProperty("width", "");
-        }
-    }
-
-    private String getNumberRepresentation(int nrDigits) {
-        if (nrDigits == NUMERIC_VALUE_NRDIGITS + 1) {
-            return value;
-        } else if (nrDigits == 0) {
-            return "###";
-        }
-
-        StringBuilder format = new StringBuilder("0.");
-        for (int i = 0; i < nrDigits; i++) {
-            format.append('#');
-        }
-        format.append("E0");
-
-        return NumberFormat.getFormat(format.toString()).format(numericValue);
     }
 
 }

@@ -249,11 +249,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         return sheetContextMenuHandler != null;
     }
 
-    public void setCellStyleToCSSSelector(
-            HashMap<Integer, String> cellStyleToCSSSelector) {
-        sheetWidget.updateCellStyleCSSRules(cellStyleToCSSSelector);
-    }
-
     public void showCellCustomComponents(HashMap<String, Widget> customWidgetMap) {
         sheetWidget.showCustomWidgets(customWidgetMap);
     }
@@ -2549,6 +2544,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      */
     public void cellValuesUpdated(ArrayList<CellData> updatedCellData) {
         sheetWidget.cellValuesUpdated(updatedCellData);
+    }
+
+    @Override
+    public void setCellStyleWidthRatios(
+            HashMap<Integer, Float> cellStyleWidthRatioMap) {
+        spreadsheetHandler.setCellStyleWidthRatios(cellStyleWidthRatioMap);
     }
 
 }

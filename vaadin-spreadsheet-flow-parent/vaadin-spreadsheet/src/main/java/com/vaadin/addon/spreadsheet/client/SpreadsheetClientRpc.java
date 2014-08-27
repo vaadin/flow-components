@@ -1,14 +1,10 @@
 package com.vaadin.addon.spreadsheet.client;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.vaadin.shared.communication.ClientRpc;
 
 public interface SpreadsheetClientRpc extends ClientRpc {
-
-    void updateCellStyleToCSSSelectors(
-            HashMap<Integer, String> cellStyleToCSSSelector);
 
     void updateBottomRightCellValues(ArrayList<CellData> cellData);
 

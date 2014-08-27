@@ -1036,7 +1036,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         // FIXME should be optimized, should not go through all links, comments
         // etc. always
         valueManager.updateMarkedCellValues();
-        styler.loadCellStyles(firstRow, lastRow, firstColumn, lastColumn);
         // if the selected cell is of type formula, there is a change that the
         // formula has been changed.
         selectionManager.reSelectSelectedCell();
@@ -1272,6 +1271,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         activeSheet.autoSizeColumn(columnIndex);
         getState().colW[columnIndex] = ExcelToHtmlUtils
                 .getColumnWidthInPx(activeSheet.getColumnWidth(columnIndex));
+        getCellValueManager().clearCacheForColumn(columnIndex + 1);
+        getCellValueManager().loadCellData(firstRow, lastRow, columnIndex + 1,
+                columnIndex + 1);
         if (sheetImages != null) {
             reloadImageSizesFromPOI = true;
             loadImages();
@@ -1644,6 +1646,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             getState().colW[columnIndex] = ExcelToHtmlUtils
                     .getColumnWidthInPx(getActiveSheet().getColumnWidth(
                             columnIndex));
+            getCellValueManager().clearCacheForColumn(columnIndex + 1);
+            getCellValueManager().loadCellData(firstRow, lastRow,
+                    columnIndex + 1, columnIndex + 1);
         }
         if (sheetImages != null) {
             reloadImageSizesFromPOI = true;
@@ -1780,7 +1785,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         loadCustomComponents();
         updateRowAndColumnRangeCellData(firstRow, lastRow, firstColumn,
                 lastColumn);
-        styler.loadCellStyles(firstRow, lastRow, firstColumn, lastColumn);
     }
 
     @Override
@@ -2061,7 +2065,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         loadTables();
         loadPopupButtons();
         valueManager.loadCellData(firstRow, lastRow, firstColumn, lastColumn);
-        styler.loadCellStyles(firstRow, lastRow, firstColumn, lastColumn);
     }
 
     protected void onLinkCellClick(int column, int row) {
@@ -2162,6 +2165,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             getState().colW[index] = width;
             getActiveSheet().setColumnWidth(index,
                     SpreadsheetFactory.pixel2WidthUnits(width));
+            getCellValueManager().clearCacheForColumn(index + 1);
+            getCellValueManager().loadCellData(firstRow, lastRow, index + 1,
+                    index + 1);
         }
     }
 
@@ -2702,13 +2708,15 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Returns the formatted value for the cell, using the {@link DataFormatter}
-     * with the current locale.
+     * with the current locale. See
+     * {@link DataFormatter#formatCellValue(Cell, FormulaEvaluator)}.
      * 
      * @param cell
-     * @return formatted value or "ERROR: errormsg"
+     * @return formatted value
      */
     public final String getCellValue(Cell cell) {
-        return valueManager.getCellValue(cell);
+        return valueManager.getDataFormatter().formatCellValue(cell,
+                valueManager.getFormulaEvaluator());
     }
 
     public boolean isDisplayGridLines() {

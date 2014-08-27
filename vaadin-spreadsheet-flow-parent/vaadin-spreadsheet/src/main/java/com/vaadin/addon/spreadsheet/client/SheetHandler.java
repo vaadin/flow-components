@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet.client;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.dom.client.NativeEvent;
@@ -210,5 +211,7 @@ public interface SheetHandler {
     void onRedoPress();
 
     void onUndoPress();
+
+    void setCellStyleWidthRatios(HashMap<Integer, Float> cellStyleWidthRatioMap);
 
 }

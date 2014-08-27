@@ -1,6 +1,9 @@
 package com.vaadin.addon.spreadsheet;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.Format;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -8,6 +11,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -69,6 +73,7 @@ public class CellValueManager {
     private final HashSet<String> markedCells = new HashSet<String>();
 
     private boolean topLeftCellsLoaded;
+    private HashMap<Integer, Float> cellStyleWidthRatioMap;
 
     public CellValueManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
@@ -126,12 +131,79 @@ public class CellValueManager {
                 .createFormulaEvaluator();
     }
 
-    public String getCellValue(Cell cell) {
+    protected CellData createCellDataForCell(Cell cell) {
+        CellData cellData = new CellData();
+        cellData.row = cell.getRowIndex() + 1;
+        cellData.col = cell.getColumnIndex() + 1;
+        CellStyle cellStyle = cell.getCellStyle();
+        cellData.cellStyle = "cs" + cellStyle.getIndex();
         try {
-            return formatter.formatCellValue(cell, evaluator);
+            String formattedCellValue = formatter.formatCellValue(cell,
+                    evaluator);
+            if (formattedCellValue != null && !formattedCellValue.isEmpty()
+                    || cellStyle.getIndex() != 0) {
+                // if the cell is not wrapping text, and is of type numeric or
+                // formula (but not date), calculate if formatted cell value
+                // fits the column width and possibly use scientific notation.
+                if (!cellStyle.getWrapText()
+                        && (!SpreadsheetUtil.cellContainsDate(cell)
+                                && cell.getCellType() == Cell.CELL_TYPE_NUMERIC || (cell
+                                .getCellType() == Cell.CELL_TYPE_FORMULA && !cell
+                                .getCellFormula().startsWith("HYPERLINK")))) {
+                    cellData.value = getScientificNotationStringForNumericCell(
+                            cell, formattedCellValue);
+                } else {
+                    cellData.value = formattedCellValue;
+                }
+                if (cellStyle.getAlignment() == CellStyle.ALIGN_GENERAL) {
+                    if (SpreadsheetUtil.cellContainsDate(cell)
+                            || cell.getCellType() == Cell.CELL_TYPE_NUMERIC
+                            || (cell.getCellType() == Cell.CELL_TYPE_FORMULA && !cell
+                                    .getCellFormula().startsWith("HYPERLINK"))) {
+                        cellData.cellStyle = cellData.cellStyle + " r";
+                    }
+                }
+
+                return cellData;
+            }
         } catch (RuntimeException rte) {
-            return "ERROR:" + rte.getMessage();
+            rte.printStackTrace();
+            cellData.value = "ERROR:" + rte.getMessage();
+            return cellData;
         }
+        return null;
+    }
+
+    protected String getScientificNotationStringForNumericCell(Cell cell,
+            String formattedValue) {
+        BigDecimal ratio = new BigDecimal(cellStyleWidthRatioMap.get((int) cell
+                .getCellStyle().getIndex()));
+        BigDecimal stringPixels = ratio.multiply(new BigDecimal(formattedValue
+                .length()));
+        BigDecimal columnWidth = new BigDecimal(
+                spreadsheet.getState(false).colW[cell.getColumnIndex()] - 10);
+        if (stringPixels.compareTo(columnWidth) == 1) {
+            int numberOfDigits = columnWidth.divide(ratio, RoundingMode.DOWN)
+                    .intValue() - 4; // 0.#E10
+            if (numberOfDigits < 1) {
+                return "###";
+            } else {
+                StringBuilder format = new StringBuilder("0.");
+                for (int i = 0; i < numberOfDigits; i++) {
+                    format.append('#');
+                }
+                format.append("E0");
+                try {
+                    return new DecimalFormat(format.toString()).format(cell
+                            .getNumericCellValue());
+                } catch (IllegalStateException ise) {
+                    System.err.println("CellType mismatch: " + ise.getMessage()
+                            + ", on cell " + SpreadsheetUtil.toKey(cell)
+                            + " of type " + cell.getCellType());
+                }
+            }
+        }
+        return formattedValue;
     }
 
     /**
@@ -346,11 +418,6 @@ public class CellValueManager {
             markCellForUpdate(cell);
         }
 
-        // update cell values (done in Spreadsheet.updateMarkedCells())
-        // updateMarkedCellValues();
-
-        // need to update the style selectors so that alignments work...
-        // FIXME because of this style managing should be refactored completely
         spreadsheet.updateMarkedCells();
     }
 
@@ -509,22 +576,13 @@ public class CellValueManager {
                             && !sentFormulaCells.contains(key)) {
                         Cell cell = row.getCell(c);
                         if (cell != null) {
-                            final String contents = getCellValue(cell);
-                            if (contents != null && !contents.isEmpty()) {
-                                CellData cd = new CellData();
-                                cd.row = r + 1;
-                                cd.col = c + 1;
-                                cd.value = contents;
-                                if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+                            final CellData cd = createCellDataForCell(cell);
+                            if (cd != null) {
+                                int cellType = cell.getCellType();
+                                if (cellType == Cell.CELL_TYPE_FORMULA) {
                                     sentFormulaCells.add(key);
                                 } else {
                                     sentCells.add(key);
-                                }
-
-                                if (!SpreadsheetUtil.cellContainsDate(cell)
-                                        && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                                    cd.numericValue = cell
-                                            .getNumericCellValue();
                                 }
                                 cellData.add(cd);
                             }
@@ -574,17 +632,13 @@ public class CellValueManager {
                 int columnIndex = cell.getColumnIndex();
                 final String key = SpreadsheetUtil.toKey(columnIndex + 1,
                         rowIndex + 1);
-                final String value = getCellValue(cell);
+                CellData cd = createCellDataForCell(cell);
                 // update formula cells
                 if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
-                    if (value != null && !value.isEmpty()) {
+                    if (cd != null) {
                         if (sentFormulaCells.contains(key)
                                 || markedCells.contains(key)) {
                             sentFormulaCells.add(key);
-                            CellData cd = new CellData();
-                            cd.col = columnIndex + 1;
-                            cd.row = rowIndex + 1;
-                            cd.value = value;
                             updatedCellData.add(cd);
                         }
                     } else if (sentFormulaCells.contains(key)) {
@@ -593,21 +647,14 @@ public class CellValueManager {
                         // pointing to a cell that was removed or had its value
                         // cleared ???
                         sentFormulaCells.add(key);
-                        CellData cd = new CellData();
+                        cd = new CellData();
                         cd.col = columnIndex + 1;
                         cd.row = rowIndex + 1;
+                        cd.cellStyle = "" + cell.getCellStyle().getIndex();
                         updatedCellData.add(cd);
                     }
                 } else if (markedCells.contains(key)) {
                     sentCells.add(key);
-                    CellData cd = new CellData();
-                    cd.col = columnIndex + 1;
-                    cd.row = rowIndex + 1;
-                    cd.value = value;
-                    if (!SpreadsheetUtil.cellContainsDate(cell)
-                            && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                        cd.numericValue = cell.getNumericCellValue();
-                    }
                     updatedCellData.add(cd);
                 }
             }
@@ -619,55 +666,6 @@ public class CellValueManager {
         }
         markedCells.clear();
         removedCells.clear();
-    }
-
-    protected ArrayList<CellData> updateCellDataForRowAndColumnRange(int r1,
-            int r2, int c1, int c2) {
-        final ArrayList<CellData> updatedCellData = new ArrayList<CellData>();
-        Sheet sheet = spreadsheet.getActiveSheet();
-        if (r1 != 0) {
-            for (int r = r1; r <= r2; r++) {
-                Row row = sheet.getRow(r - 1);
-                if (row != null) {
-                    for (int c = c1; c <= c2; c++) {
-                        Cell cell = row.getCell(c - 1);
-                        final String key = SpreadsheetUtil.toKey(c, r);
-                        CellData cd = new CellData();
-                        cd.col = c;
-                        cd.row = r;
-                        if (cell != null && !removedCells.contains(cd)) {
-                            final String value = getCellValue(cell);
-                            if (cell.getCellType() != Cell.CELL_TYPE_FORMULA
-                                    && ((value != null && !value.isEmpty()) || sentCells
-                                            .contains(key))) {
-                                sentCells.add(key);
-                                cd.value = value;
-                                if (!SpreadsheetUtil.cellContainsDate(cell)
-                                        && cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                                    cd.numericValue = cell
-                                            .getNumericCellValue();
-                                }
-                                updatedCellData.add(cd);
-                            }
-                        } else if (sentCells.contains(key)) {
-                            // cell doesn't exist, if it was removed the cell
-                            // key
-                            // should be in removedCells
-                            sentCells.remove(key);
-                            removedCells.add(cd);
-                        } else if (sentFormulaCells.contains(key)) {
-                            sentFormulaCells.remove(key);
-                            removedCells.add(cd);
-                        }
-                    }
-                } else {
-                    // row doesn't exist, need to check that cached values are
-                    // removed for it properly
-                    updateDeletedRowsInClientCache(r, r);
-                }
-            }
-        }
-        return updatedCellData;
     }
 
     /**
@@ -940,6 +938,34 @@ public class CellValueManager {
         if (removeShifted) {
             shiftedCell.setCellValue((String) null);
             cellDeleted(shiftedCell);
+        }
+    }
+
+    public void onCellStyleWidthRatioUpdate(
+            HashMap<Integer, Float> cellStyleWidthRatioMap) {
+        this.cellStyleWidthRatioMap = cellStyleWidthRatioMap;
+    }
+
+    /**
+     * 
+     * @param indexColumn
+     *            1-based
+     */
+    public void clearCacheForColumn(int indexColumn) {
+        final String columnKey = "col" + indexColumn + " r";
+        for (Iterator<String> iterator = sentCells.iterator(); iterator
+                .hasNext();) {
+            String key = iterator.next();
+            if (key.startsWith(columnKey)) {
+                iterator.remove();
+            }
+        }
+        for (Iterator<String> iterator = sentFormulaCells.iterator(); iterator
+                .hasNext();) {
+            String key = iterator.next();
+            if (key.startsWith(columnKey)) {
+                iterator.remove();
+            }
         }
     }
 }

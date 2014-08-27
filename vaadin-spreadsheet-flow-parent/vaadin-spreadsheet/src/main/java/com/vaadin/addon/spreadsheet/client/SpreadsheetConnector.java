@@ -34,12 +34,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     SpreadsheetClientRpc clientRPC = new SpreadsheetClientRpc() {
 
         @Override
-        public void updateCellStyleToCSSSelectors(
-                HashMap<Integer, String> cellStyleToCSSSelector) {
-            getWidget().setCellStyleToCSSSelector(cellStyleToCSSSelector);
-        }
-
-        @Override
         public void showCellValue(String value, int col, int row,
                 boolean formula, boolean locked) {
             getWidget().showCellValue(value, col, row, formula, locked);
