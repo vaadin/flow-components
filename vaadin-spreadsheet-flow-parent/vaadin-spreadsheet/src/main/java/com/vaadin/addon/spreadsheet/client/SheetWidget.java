@@ -18,7 +18,6 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -29,12 +28,14 @@ import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.ui.VLabel;
@@ -104,7 +105,7 @@ public class SheetWidget extends Panel {
     /** Header corner element that covers crossing headers */
     private DivElement corner = Document.get().createDivElement();
 
-    private InputElement input = Document.get().createTextInputElement();
+    private TextBox input;
 
     /** Invisible element for adjusting the scrollbars */
     private final DivElement floater = Document.get().createDivElement();
@@ -267,10 +268,6 @@ public class SheetWidget extends Panel {
     private boolean loaded;
     private boolean selectingCells;
 
-    private final boolean isWebkit = BrowserInfo.get().isWebkit();
-    private final boolean isIE = BrowserInfo.get().isIE10()
-            || BrowserInfo.get().isIE9() || BrowserInfo.get().isIE8();
-
     private int firstColumnIndex;
     private int firstColumnPosition;
     private int firstRowIndex;
@@ -312,6 +309,8 @@ public class SheetWidget extends Panel {
 
     private int tempCol;
     private int tempRow;
+
+    private final boolean isIE = BrowserInfo.get().isIE();
 
     private boolean displayRowColHeadings;
 
@@ -787,8 +786,11 @@ public class SheetWidget extends Panel {
         floater.setClassName("floater");
 
         // input
-        input.getStyle().setWidth(0.0d, Unit.PX);
-        sheet.appendChild(input);
+        input = new TextBox();
+        input.setWidth("0");
+        input.setValue("x");
+        DOM.appendChild(sheet, input.getElement());
+        adopt(input);
 
         // extra element for counting the pixels per inch so points can be
         // converted to pixels
@@ -955,7 +957,7 @@ public class SheetWidget extends Panel {
             } else {
                 sheet.focus();
                 // quit input if active
-                if (editingCell && !input.isOrHasChild(target)) {
+                if (editingCell && !input.getElement().isOrHasChild(target)) {
                     actionHandler.onCellInputBlur(input.getValue());
                 }
                 if (event.getCtrlKey() || event.getMetaKey()
@@ -1821,13 +1823,16 @@ public class SheetWidget extends Panel {
                 try {
                     for (Entry<Integer, String> entry : styles.entrySet()) {
                         if (entry.getKey() == 0) {
-                            jsniUtil.insertRule(sheetStyle,
-                                    ".v-spreadsheet .cell {" + entry.getValue()
-                                            + "}");
+                            jsniUtil.insertRule(
+                                    sheetStyle,
+                                    ".v-spreadsheet .sheet .cell {"
+                                            + entry.getValue() + "}");
                         } else {
-                            jsniUtil.insertRule(sheetStyle,
-                                    ".v-spreadsheet .cell.cs" + entry.getKey()
-                                            + " {" + entry.getValue() + "}");
+                            jsniUtil.insertRule(
+                                    sheetStyle,
+                                    ".v-spreadsheet .sheet .cell.cs"
+                                            + entry.getKey() + " {"
+                                            + entry.getValue() + "}");
                         }
                     }
                 } catch (Exception e) {
@@ -3430,12 +3435,6 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private boolean isCustomWidgetCell(int col, int row) {
-        final String key = toKey(col, row);
-        return ((row == selectedCellRow && col == selectedCellCol && customCellEditorDisplayed) || (customWidgetMap != null && customWidgetMap
-                .containsKey(key)));
-    }
-
     /**
      * 
      * @param row
@@ -3528,7 +3527,7 @@ public class SheetWidget extends Panel {
             while (width < textWidth && col <= actionHandler.getMaximumCols()) {
                 width += actionHandler.getColWidthActual(++col);
             }
-            input.getStyle().setWidth(width, Unit.PX);
+            input.setWidth(width + "px");
         } catch (Exception e) {
             // cell is not visible yet, should not happen, but try again
             debugConsole.severe("SheetWidget:recalculateInputElementWidth: "
@@ -3562,7 +3561,7 @@ public class SheetWidget extends Panel {
      *            if the widget is completely removed from DOM after this
      */
     public void clearAll(boolean removed) {
-        for (Iterator<Widget> i = iterator(); i.hasNext();) {
+        for (Iterator<Widget> i = getCustomWidgetIterator(); i.hasNext();) {
             remove(i.next());
         }
         customEditorWidget = null;
@@ -4183,42 +4182,33 @@ public class SheetWidget extends Panel {
                 EDITING_CELL_SELECTOR
                         + toCssKey(selectedCellCol, selectedCellRow), 0);
 
-        input.setClassName(toKey(selectedCellCol, selectedCellRow) + " cell"
+        input.setStyleName(toKey(selectedCellCol, selectedCellRow) + " cell"
                 + " " + getSelectedCellCellStyleString());
         if (isMergedCell(toKey(selectedCellCol, selectedCellRow))) {
             editingMergedCell = true;
-            input.getStyle().setProperty(
-                    "height",
-                    getMergedCell(toKey(selectedCellCol, selectedCellRow))
-                            .getElement().getStyle().getHeight());
+            input.setHeight(getMergedCell(
+                    toKey(selectedCellCol, selectedCellRow)).getElement()
+                    .getStyle().getHeight());
         }
 
         if (recalculate) {
             handleInputElementValueChange(false);
         }
         if (focus) {
-            if (isWebkit) {
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-                    @Override
-                    public void execute() {
-                        input.focus();
-                        if (value.endsWith("%")) {
-                            jsniUtil.setSelectionRange(input,
-                                    value.length() - 1, 0);
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() { //
+                        @Override
+                        public void execute() {
+                            input.setFocus(true);
+                            if (value.endsWith("%")) {
+                                input.setCursorPos(value.length() - 1);
+                            } else if (isIE) { // would get wrong position on
+                                               // first inline cell edit
+                                input.setCursorPos(value.length());
+                            }
                         }
-                    }
-                });
-            } else {
-                input.focus();
-                if (value.endsWith("%")) {
-                    jsniUtil.setSelectionRange(input, value.length() - 1, 0);
-                }
-            }
+                    });
         }
-        if (!isIE) { // ie would get the first letter twice, but WHY???
-            input.setValue(value);
-        }
+        input.setValue(value);
     }
 
     public void updateSelectedCellValue(String value) {
@@ -4250,13 +4240,10 @@ public class SheetWidget extends Panel {
 
         jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
                 ".notusedselector", 0);
-        final String className = input.getClassName();
         input.setValue("");
-        input.getStyle().setWidth(0.0d, Unit.PX);
-        input.getStyle().clearHeight();
-        if (className != null && !className.isEmpty()) {
-            input.removeClassName(className);
-        }
+        input.setWidth("0");
+        input.setHeight("");
+        input.setStyleName("");
         focusSheet();
     }
 
@@ -4679,8 +4666,26 @@ public class SheetWidget extends Panel {
         }
     }
 
+    // This is for GWT
     @Override
     public Iterator<Widget> iterator() {
+        final List<Widget> emptyList = new ArrayList<Widget>();
+        emptyList.add(input);
+        if (customEditorWidget != null) {
+            emptyList.add(customEditorWidget);
+        }
+        emptyList.addAll(sheetImages.values());
+        if (customWidgetMap != null) {
+            emptyList.addAll(customWidgetMap.values());
+        }
+        if (sheetPopupButtons != null) {
+            emptyList.addAll(sheetPopupButtons.values());
+        }
+        return emptyList.iterator();
+    }
+
+    // This is for clearing of sheet from custom widgets
+    protected Iterator<Widget> getCustomWidgetIterator() {
         final List<Widget> emptyList = new ArrayList<Widget>();
         if (customEditorWidget != null) {
             emptyList.add(customEditorWidget);

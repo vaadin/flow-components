@@ -9,7 +9,6 @@ import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
@@ -149,7 +148,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private SpreadsheetCustomEditorFactory customEditorFactory;
 
-    private Event latestCellContextMenuEvent;
+    private NativeEvent latestCellContextMenuEvent;
 
     private NativeEvent latestHeaderContextMenuEvent;
 
@@ -166,7 +165,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         getWidget().setSheetContextMenuHandler(new SheetContextMenuHandler() {
 
             @Override
-            public void cellContextMenu(Event event, int column, int row) {
+            public void cellContextMenu(NativeEvent event, int column, int row) {
                 if (getState().hasActions) {
                     latestCellContextMenuEvent = event;
                     latestHeaderContextMenuEvent = null;

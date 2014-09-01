@@ -11,7 +11,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
@@ -31,7 +30,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
          * @param row
          *            1-based, index of cell
          */
-        public void cellContextMenu(Event event, int column, int row);
+        public void cellContextMenu(NativeEvent event, int column, int row);
 
         /**
          * Right click (event) on top of row header at the index
@@ -273,7 +272,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 sheetWidget.updateInputValue("=" + value);
             } else {
                 formulaBarWidget.setCellPlainValue(value);
-                sheetWidget.updateInputValue(value);
                 if (!value.isEmpty()) {
                     cachedCellValue = value;
                 }
@@ -493,7 +491,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     @Override
-    public void onCellRightClick(Event event, int column, int row) {
+    public void onCellRightClick(NativeEvent event, int column, int row) {
         // logic handled on server side
         if (sheetContextMenuHandler != null) {
             if (column != sheetWidget.getSelectedCellColumn()
@@ -878,9 +876,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         formulaBarEditing = false;
         if (!cellLocked) {
             if (!inlineEditing && !customCellEditorDisplayed) {
-                sheetWidget.updateInputValue(value);
-                sheetWidget.startEditingCell(true, true, true, value);
                 inlineEditing = true;
+                sheetWidget.startEditingCell(true, true, true, value);
             }
         }
     }
@@ -896,13 +893,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /* This is only for when focus is changed from formula field to inline input */
     @Override
     public void onCellInputFocus() {
-        inlineEditing = true;
-        cancelDeferredCommit = true;
-        if (formulaBarEditing) { // just swap, everything should work
-            formulaBarEditing = false;
-        } else { // need to make sure the input value is correct
-            sheetWidget.startEditingCell(true, true, true,
-                    formulaBarWidget.getFormulaFieldValue());
+        if (!inlineEditing) {
+            inlineEditing = true;
+            cancelDeferredCommit = true;
+            if (formulaBarEditing) { // just swap, everything should work
+                formulaBarEditing = false;
+            } else { // need to make sure the input value is correct
+                sheetWidget.startEditingCell(true, true, false,
+                        formulaBarWidget.getFormulaFieldValue());
+            }
         }
     }
 
@@ -945,7 +944,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     @Override
-    public void onSheetKeyPress(Event event, String enteredCharacter) {
+    public void onSheetKeyPress(NativeEvent event, String enteredCharacter) {
         switch (event.getKeyCode()) {
         case KeyCodes.KEY_DELETE:
             if (!cellLocked) {
@@ -1006,17 +1005,17 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         case KeyCodes.KEY_BACKSPACE:
             if (!cellLocked && !customCellEditorDisplayed) {
                 // cache value and start editing cell as empty
-                cachedCellValue = sheetWidget.getSelectedCellLatestValue();
-                sheetWidget.updateInputValue("");
-                sheetWidget.startEditingCell(true, false, true, "");
-                formulaBarWidget.setCellPlainValue("");
                 inlineEditing = true;
+                cachedCellValue = sheetWidget.getSelectedCellLatestValue();
+                sheetWidget.startEditingCell(true, false, false, "");
+                formulaBarWidget.setCellPlainValue("");
             }
             break;
         default:
             if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
                     && !cellLocked && !customCellEditorDisplayed) {
                 // cache value and start editing cell as empty
+                inlineEditing = true;
                 cachedCellValue = sheetWidget.getSelectedCellLatestValue();
                 if (cachedCellValue.endsWith("%")) {
                     enteredCharacter = enteredCharacter + "%";
@@ -1028,7 +1027,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                             enteredCharacter);
                     formulaBarWidget.setCellPlainValue(enteredCharacter);
                 }
-                inlineEditing = true;
             }
         }
     }
@@ -1144,7 +1142,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 cachedCellValue = "";
             } else {
                 cachedCellValue = sheetWidget.getSelectedCellLatestValue();
-                sheetWidget.updateInputValue(value);
                 sheetWidget.startEditingCell(false, false, true, value);
             }
         }

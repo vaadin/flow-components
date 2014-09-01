@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.user.client.Event;
 import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
 
 public interface SheetHandler {
@@ -46,7 +45,7 @@ public interface SheetHandler {
 
     void onCellInputValueChange(String value);
 
-    void onSheetKeyPress(Event event, String enteredCharacter);
+    void onSheetKeyPress(NativeEvent nativeEvent, String enteredCharacter);
 
     int getRowBufferSize();
 
@@ -143,13 +142,13 @@ public interface SheetHandler {
     /**
      * Called on right mouse button click on top of some cell.
      * 
-     * @param event
+     * @param nativeEvent
      * @param column
      *            1-based
      * @param row
      *            1-based
      */
-    void onCellRightClick(Event event, int column, int row);
+    void onCellRightClick(NativeEvent nativeEvent, int column, int row);
 
     /**
      * Called on right mouse button click on top of a row header
