@@ -743,10 +743,15 @@ public class CellValueManager {
                         // need to make protection etc. settings for the cell
                         // won't get effected. deleting the cell would make it
                         // locked
-                        CellData cd = new CellData();
-                        cd.col = j + 1;
-                        cd.row = i + 1;
-                        removedCells.add(cd);
+                        if (clearRemovedCellStyle
+                                || cell.getCellStyle().getIndex() == 0) {
+                            CellData cd = new CellData();
+                            cd.col = j + 1;
+                            cd.row = i + 1;
+                            removedCells.add(cd);
+                        } else {
+                            markedCells.add(key);
+                        }
                         cell.setCellValue((String) null);
                         evaluator.notifyUpdateCell(cell);
                     }
@@ -775,8 +780,13 @@ public class CellValueManager {
                 CellData cd = new CellData();
                 cd.col = colIndex;
                 cd.row = rowIndex;
-                removedCells.add(cd);
                 final String key = SpreadsheetUtil.toKey(colIndex, rowIndex);
+                if (clearRemovedCellStyle
+                        || cell.getCellStyle().getIndex() == 0) {
+                    removedCells.add(cd);
+                } else {
+                    markedCells.add(key);
+                }
                 if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
                     sentFormulaCells.remove(key);
                 } else {

@@ -159,9 +159,16 @@ public class CellValueCommand extends SpreadsheetCommand {
         }
 
         if (value == null) { // delete
-            getSheet().getRow(row).removeCell(cell);
-            if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
-                spreadsheet.markCellAsDeleted(cell, false);
+            if (cell == null || cell.getCellStyle().getIndex() == 0) {
+                getSheet().getRow(row).removeCell(cell);
+                if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
+                    spreadsheet.markCellAsDeleted(cell, false);
+                }
+            } else {
+                cell.setCellValue((String) null);
+                if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
+                    spreadsheet.markCellAsUpdated(cell, false);
+                }
             }
         } else {
             if (value instanceof String) {
