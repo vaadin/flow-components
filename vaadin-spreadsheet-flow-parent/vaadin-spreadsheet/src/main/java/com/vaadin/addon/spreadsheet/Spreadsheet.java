@@ -902,9 +902,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         workbook.setActiveSheet(sheetIndex);
         reloadActiveSheetData();
-        reloadActiveSheetStyles();
         SpreadsheetFactory.reloadSpreadsheetData(this,
                 workbook.getSheetAt(sheetIndex));
+        reloadActiveSheetStyles();
     }
 
     protected void onSheetSelected(int tabIndex, int scrollLeft, int scrollTop) {

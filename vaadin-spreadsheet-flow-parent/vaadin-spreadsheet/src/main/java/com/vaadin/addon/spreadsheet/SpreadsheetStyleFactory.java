@@ -427,6 +427,7 @@ public class SpreadsheetStyleFactory {
                         value.substring(value.indexOf("{")));
             }
         }
+        mergedCellBorders.clear();
 
         if (spreadsheet.getState().shiftedCellBorderStyles == null) {
             spreadsheet.getState().shiftedCellBorderStyles = new ArrayList<String>();
