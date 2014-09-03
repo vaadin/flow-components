@@ -8,6 +8,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
@@ -198,13 +200,19 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         });
         getLayoutManager().addElementResizeListener(getWidget().getElement(),
                 elementResizeListener);
+        getRpcProxy(SpreadsheetServerRpc.class).onConnectorInit();
     }
 
     @Override
     public void onUnregister() {
+        super.onUnregister();
         getWidget().clearSpreadsheet(true);
         getLayoutManager().removeElementResizeListener(
                 getWidget().getElement(), elementResizeListener);
+        if (sheetImageKeys != null) {
+            sheetImageKeys.clear();
+        }
+        visibleCellCommentKeys.clear();
     }
 
     @Override
@@ -223,16 +231,25 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     }
 
     @Override
-    public void onStateChanged(StateChangeEvent stateChangeEvent) {
+    public void onStateChanged(final StateChangeEvent stateChangeEvent) {
         super.onStateChanged(stateChangeEvent);
         final SpreadsheetWidget widget = getWidget();
         SpreadsheetState state = getState();
-        if (state.reload) {
-            setupCustomEditors();
-            widget.sheetUpdated(state.sheetNames, state.sheetIndex);
-            widget.setSheetProtected(state.sheetProtected);
-            widget.load();
-            getWidget().updateMergedRegions(getState().mergedRegions);
+        // in case the component client side is just created, but server side
+        // has been existing (like when component has been invisible
+        if (!state.reload && stateChangeEvent.isInitialStateChange()) {
+            loadInitialStateDataToWidget(stateChangeEvent);
+            // this is deferred because the first layout of the spreadsheet is
+            // done as deferred
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+                @Override
+                public void execute() {
+                    loadStateChangeDataToWidget(stateChangeEvent);
+                }
+            });
+        } else if (state.reload) {
+            loadInitialStateDataToWidget(stateChangeEvent);
         } else {
             if (stateChangeEvent.hasPropertyChanged("sheetNames")
                     || stateChangeEvent.hasPropertyChanged("sheetIndex")) {
@@ -256,58 +273,75 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             if (stateChangeEvent.hasPropertyChanged("sheetProtected")) {
                 widget.setSheetProtected(state.sheetProtected);
             }
-            if (stateChangeEvent.hasPropertyChanged("componentIDtoCellKeysMap")) {
-                HashMap<String, String> cellKeysToComponentIdMap = state.componentIDtoCellKeysMap;
-                if (cellKeysToComponentIdMap != null
-                        && !cellKeysToComponentIdMap.isEmpty()) {
-                    List<ComponentConnector> childComponents = getChildComponents();
-                    HashMap<String, Widget> customWidgetMap = new HashMap<String, Widget>();
-                    for (ComponentConnector cc : childComponents) {
-                        String connectorId = cc.getConnectorId();
-                        if (cellKeysToComponentIdMap.containsKey(connectorId)) {
-                            customWidgetMap.put(
-                                    cellKeysToComponentIdMap.get(connectorId),
-                                    cc.getWidget());
-                        }
-                    }
-                    widget.showCellCustomComponents(customWidgetMap);
-                }
-            }
-            if (stateChangeEvent.hasPropertyChanged("cellKeysToEditorIdMap")) {
-                setupCustomEditors();
-            }
+            loadStateChangeDataToWidget(stateChangeEvent);
+        }
+    }
 
-            if (stateChangeEvent.hasPropertyChanged("visibleCellComments")) {
-                setupVisibleCellComments();
-            }
+    private void loadInitialStateDataToWidget(StateChangeEvent stateChangeEvent) {
+        SpreadsheetState state = getState();
+        SpreadsheetWidget widget = getWidget();
+        setupCustomEditors();
+        widget.sheetUpdated(state.sheetNames, state.sheetIndex);
+        widget.setSheetProtected(state.sheetProtected);
+        widget.load();
+        getWidget().updateMergedRegions(getState().mergedRegions);
+    }
 
-            if (stateChangeEvent.hasPropertyChanged("resourceKeyToImage")) {
-                Map<String, ImageInfo> resourceKeyToImage = getState().resourceKeyToImage;
-                // remove old:
-                if (sheetImageKeys != null) {
-                    for (String key : sheetImageKeys) {
-                        if (resourceKeyToImage != null
-                                && !resourceKeyToImage.containsKey(key)) {
-                            widget.removeImage(key);
-                        }
+    private void loadStateChangeDataToWidget(StateChangeEvent stateChangeEvent) {
+        final SpreadsheetWidget widget = getWidget();
+        SpreadsheetState state = getState();
+        if (stateChangeEvent.hasPropertyChanged("componentIDtoCellKeysMap")) {
+            HashMap<String, String> cellKeysToComponentIdMap = state.componentIDtoCellKeysMap;
+            if (cellKeysToComponentIdMap != null
+                    && !cellKeysToComponentIdMap.isEmpty()) {
+                List<ComponentConnector> childComponents = getChildComponents();
+                HashMap<String, Widget> customWidgetMap = new HashMap<String, Widget>();
+                for (ComponentConnector cc : childComponents) {
+                    String connectorId = cc.getConnectorId();
+                    if (cellKeysToComponentIdMap.containsKey(connectorId)) {
+                        customWidgetMap.put(
+                                cellKeysToComponentIdMap.get(connectorId),
+                                cc.getWidget());
                     }
                 }
-                if (resourceKeyToImage != null) {
-                    for (Entry<String, ImageInfo> entry : resourceKeyToImage
-                            .entrySet()) {
-                        String key = entry.getKey();
-                        ImageInfo imageInfo = entry.getValue();
-                        if (sheetImageKeys != null
-                                && sheetImageKeys.contains(key)) {
-                            widget.updateImage(key, imageInfo);
-                        } else {
-                            widget.addImage(key, getResourceUrl(key), imageInfo);
-                        }
-                    }
-                }
-                sheetImageKeys = resourceKeyToImage == null ? null
-                        : resourceKeyToImage.keySet();
+                widget.showCellCustomComponents(customWidgetMap);
             }
+        }
+        if (stateChangeEvent.hasPropertyChanged("cellKeysToEditorIdMap")) {
+            setupCustomEditors();
+        }
+        if (stateChangeEvent.hasPropertyChanged("cellComments")) {
+            widget.setCellComments(state.cellComments);
+        }
+        if (stateChangeEvent.hasPropertyChanged("visibleCellComments")) {
+            setupVisibleCellComments();
+        }
+
+        if (stateChangeEvent.hasPropertyChanged("resourceKeyToImage")) {
+            Map<String, ImageInfo> resourceKeyToImage = getState().resourceKeyToImage;
+            // remove old:
+            if (sheetImageKeys != null) {
+                for (String key : sheetImageKeys) {
+                    if (resourceKeyToImage != null
+                            && !resourceKeyToImage.containsKey(key)) {
+                        widget.removeImage(key);
+                    }
+                }
+            }
+            if (resourceKeyToImage != null) {
+                for (Entry<String, ImageInfo> entry : resourceKeyToImage
+                        .entrySet()) {
+                    String key = entry.getKey();
+                    ImageInfo imageInfo = entry.getValue();
+                    if (sheetImageKeys != null && sheetImageKeys.contains(key)) {
+                        widget.updateImage(key, imageInfo);
+                    } else {
+                        widget.addImage(key, getResourceUrl(key), imageInfo);
+                    }
+                }
+            }
+            sheetImageKeys = resourceKeyToImage == null ? null
+                    : resourceKeyToImage.keySet();
         }
     }
 

@@ -2,8 +2,17 @@ package com.vaadin.addon.spreadsheet.client;
 
 import com.vaadin.shared.communication.ServerRpc;
 
-public interface SpreadsheetServerRpc extends ServerRpc,
-        SpreadsheetHandler {
+public interface SpreadsheetServerRpc extends ServerRpc, SpreadsheetHandler {
+
+    /**
+     * Called when the client side connector has been initialized.
+     * 
+     * This is for making sure that the non-state related stuff is cleared from
+     * server side when needed, because non state stuff is not resent to client
+     * when the component is attached again. Thus this marks that cached should
+     * be cleared etc.
+     */
+    void onConnectorInit();
 
     /**
      * Context menu should be created for the appropriate selection.

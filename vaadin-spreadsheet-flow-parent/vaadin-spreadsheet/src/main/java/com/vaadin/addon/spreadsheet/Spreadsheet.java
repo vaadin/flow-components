@@ -139,6 +139,13 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private int firstColumn;
     private int lastColumn;
 
+    /**
+     * This is used for making sure the cells are sent to client side in when
+     * the next cell data request comes. This is triggered when the client side
+     * connector init() method is run.
+     */
+    private boolean reloadCellDataOnNextScroll;
+
     private int defaultNewSheetRows = SpreadsheetFactory.DEFAULT_ROWS;
     private int defaultNewSheetColumns = SpreadsheetFactory.DEFAULT_COLUMNS;
 
@@ -431,8 +438,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     protected void onSheetScroll(int firstRow, int lastRow, int firstColumn,
             int lastColumn) {
-        if (this.firstRow != firstRow || this.lastRow != lastRow
-                || this.firstColumn != firstColumn
+        if (reloadCellDataOnNextScroll || this.firstRow != firstRow
+                || this.lastRow != lastRow || this.firstColumn != firstColumn
                 || this.lastColumn != lastColumn) {
             this.firstRow = firstRow;
             this.lastRow = lastRow;
@@ -443,7 +450,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         if (initialSheetSelection != null) {
             selectionManager.onSheetAddressChanged(initialSheetSelection);
             initialSheetSelection = null;
+        } else if (reloadCellDataOnNextScroll) {
+            selectionManager.reloadCurrentSelection();
         }
+        reloadCellDataOnNextScroll = false;
     }
 
     protected boolean isRangeEditable(CellRangeAddress cellRangeAddress) {
@@ -2976,6 +2986,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             }
         }
 
+    }
+
+    protected void onConnectorInit() {
+        reloadCellDataOnNextScroll = true;
+        valueManager.clearCachedContent();
     }
 
 }

@@ -192,4 +192,9 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 cellStyleWidthRatioMap);
     }
 
+    @Override
+    public void onConnectorInit() {
+        spreadsheet.onConnectorInit();
+    }
+
 }

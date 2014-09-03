@@ -95,9 +95,15 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private File uploadedFile;
 
+    private HorizontalLayout options;
+
     public SpreadsheetDemoUI() {
         super();
         SpreadsheetFactory.logMemoryUsage();
+    }
+
+    protected HorizontalLayout getOptionsLayout() {
+        return options;
     }
 
     @Override
@@ -105,7 +111,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         SpreadsheetFactory.logMemoryUsage();
         setContent(layout);
 
-        HorizontalLayout options = new HorizontalLayout();
+        options = new HorizontalLayout();
         options.setSpacing(true);
 
         layout.setMargin(true);

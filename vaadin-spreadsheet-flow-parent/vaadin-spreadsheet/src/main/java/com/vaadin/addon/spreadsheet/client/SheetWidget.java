@@ -3167,7 +3167,9 @@ public class SheetWidget extends Panel {
             alwaysVisibleCellComments.put(key, cellComment);
         } else {
             CellComment comment = alwaysVisibleCellComments.remove(key);
-            comment.hide();
+            if (comment != null) { // possible if sheet has been cleared
+                comment.hide();
+            }
         }
     }
 
@@ -3578,6 +3580,7 @@ public class SheetWidget extends Panel {
         clearSelectedCellStyle();
         clearBasicCellStyles();
         clearMergedCells();
+        clearCellComments();
         if (removed) {
             clearShiftedBorderCellStyles();
             removeStyles();
@@ -3753,6 +3756,15 @@ public class SheetWidget extends Panel {
             mergedCell.getElement().removeFromParent();
         }
         mergedCells.clear();
+    }
+
+    protected void clearCellComments() {
+        cellCommentOverlay.hide();
+        for (CellComment cc : alwaysVisibleCellComments.values()) {
+            cc.hide();
+        }
+        alwaysVisibleCellComments.clear();
+        cellCommentsMap.clear();
     }
 
     /**

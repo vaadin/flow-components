@@ -73,6 +73,39 @@ public class CellSelectionManager {
         return inside;
     }
 
+    /**
+     * Reloads the current selection, but does not take non-coherent selection
+     * into account - discards multiple cell ranges and individually selected
+     * cells.
+     */
+    protected void reloadCurrentSelection() {
+        cellRangeAddresses.clear();
+        individualSelectedCells.clear();
+        if (paintedCellRange != null) {
+            if (selectedCellReference != null) {
+                if (paintedCellRange.isInRange(selectedCellReference.getRow(),
+                        selectedCellReference.getCol())) {
+                    handleCellRangeSelection(selectedCellReference,
+                            paintedCellRange);
+                } else {
+                    paintedCellRange = null;
+                    handleCellAddressChange(selectedCellReference.getCol() + 1,
+                            selectedCellReference.getRow() + 1);
+                }
+            } else {
+                handleCellRangeSelection(
+                        new CellReference(paintedCellRange.getFirstRow(),
+                                paintedCellRange.getFirstColumn()),
+                        paintedCellRange);
+            }
+        } else if (selectedCellReference != null) {
+            handleCellAddressChange(selectedCellReference.getCol() + 1,
+                    selectedCellReference.getRow() + 1);
+        } else {
+            handleCellAddressChange(1, 1);
+        }
+    }
+
     /* respond to client with the selected cells formula if any */
     protected void onCellSelected(int column, int row,
             boolean discardOldRangeSelection) {

@@ -71,7 +71,6 @@ public class SpreadsheetState extends AbstractComponentState {
     @DelegateToWidget
     public HashMap<String, String> hyperlinksTooltips;
 
-    @DelegateToWidget
     public HashMap<String, String> cellComments;
 
     public ArrayList<String> visibleCellComments;

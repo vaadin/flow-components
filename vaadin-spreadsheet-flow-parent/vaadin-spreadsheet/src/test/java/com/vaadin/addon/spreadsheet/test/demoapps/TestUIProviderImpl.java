@@ -17,6 +17,8 @@ public class TestUIProviderImpl extends UIProvider {
             return TestexcelsheetUI.class;
         } else if (name.contains(SpreadsheetDemoUI.class.getSimpleName())) {
             return SpreadsheetDemoUI.class;
+        } else if (name.contains(PushTestCase.class.getSimpleName())) {
+            return PushTestCase.class;
         }
         return null;
     }

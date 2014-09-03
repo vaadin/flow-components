@@ -20,7 +20,7 @@
 	<properties>
         <skipTests>true</skipTests>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<vaadin.version>7.2.6</vaadin.version>
+		<vaadin.version>7.3.0</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<poi.version>3.10-FINAL</poi.version>
 		<tb.hub>testbench-hub.intra.itmill.com</tb.hub>
@@ -354,6 +354,12 @@
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-themes</artifactId>
+			<version>${vaadin.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-push</artifactId>
 			<version>${vaadin.version}</version>
 			<scope>test</scope>
 		</dependency>
