@@ -871,6 +871,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             onCellClick(column, row, value, false, false, true);
         } else {
             cachedCellValue = value;
+            formulaBarWidget.cacheFormulaFieldValue();
             value = formulaBarWidget.getFormulaFieldValue();
         }
         formulaBarEditing = false;
@@ -1008,6 +1009,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 inlineEditing = true;
                 cachedCellValue = sheetWidget.getSelectedCellLatestValue();
                 sheetWidget.startEditingCell(true, false, false, "");
+                formulaBarWidget.cacheFormulaFieldValue();
                 formulaBarWidget.setCellPlainValue("");
             }
             break;
@@ -1025,6 +1027,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 } else {
                     sheetWidget.startEditingCell(true, false, true,
                             enteredCharacter);
+                    formulaBarWidget.cacheFormulaFieldValue();
                     formulaBarWidget.setCellPlainValue(enteredCharacter);
                 }
             }

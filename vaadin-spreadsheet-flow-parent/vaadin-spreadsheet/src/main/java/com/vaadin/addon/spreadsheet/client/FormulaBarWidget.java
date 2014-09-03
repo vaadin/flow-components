@@ -150,14 +150,12 @@ public class FormulaBarWidget extends Composite {
     }
 
     public void setCellPlainValue(String plainValue) {
-        cachedFunctionFieldValue = plainValue;
         formulaField.setValue(plainValue);
     }
 
     public void setCellFormulaValue(String formula) {
-        cachedFunctionFieldValue = formula;
         if (!formula.isEmpty()) {
-            formulaField.setValue("=" + cachedFunctionFieldValue);
+            formulaField.setValue("=" + formula);
         } else {
             formulaField.setValue(formula);
         }
@@ -178,6 +176,10 @@ public class FormulaBarWidget extends Composite {
 
     public void setFormulaFieldEnabled(boolean enabled) {
         formulaField.setEnabled(enabled);
+    }
+
+    public void cacheFormulaFieldValue() {
+        cachedFunctionFieldValue = formulaField.getValue();
     }
 
 }
