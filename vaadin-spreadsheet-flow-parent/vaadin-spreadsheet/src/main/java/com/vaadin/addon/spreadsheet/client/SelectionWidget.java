@@ -49,8 +49,6 @@ public class SelectionWidget extends Composite {
 
         private void initDOM() {
             root.setClassName("sheet-selection");
-            root.addClassName("rh");
-            root.addClassName("ch");
 
             top.setClassName("s-top");
             left.setClassName("s-left");
@@ -161,7 +159,7 @@ public class SelectionWidget extends Composite {
             right.getStyle().setHeight(f + 2, Unit.PT);
         }
 
-        public void setSpreadsheetElement(Element element) {
+        public void setSheetElement(Element element) {
             element.appendChild(root);
             element.appendChild(paint);
         }
@@ -268,7 +266,6 @@ public class SelectionWidget extends Composite {
     private int horizontalSplitPosition;
 
     private int verticalSplitPosition;
-    private Element spreadsheetElement;
 
     private final DivElement paint = Document.get().createDivElement();
     private int totalHeight;
@@ -286,21 +283,22 @@ public class SelectionWidget extends Composite {
         setVisible(false);
 
         paint.setClassName("s-paint");
-        paint.addClassName("rh");
-        paint.addClassName("ch");
         paint.addClassName(paintPaneClassName);
 
         paint.getStyle().setVisibility(Visibility.HIDDEN);
         paint.getStyle().setWidth(0, Unit.PX);
         paint.getStyle().setHeight(0, Unit.PX);
 
+        Element bottomRightPane = sheetWidget.getBottomRightPane();
+        bottomRight.setSheetElement(bottomRightPane);
+        bottomRightPane.appendChild(paint);
     }
 
     public void setHorizontalSplitPosition(int horizontalSplitPosition) {
         this.horizontalSplitPosition = horizontalSplitPosition;
         if (horizontalSplitPosition > 0 && bottomLeft == null) {
             bottomLeft = new SelectionOutlineWidget();
-            bottomLeft.setSpreadsheetElement(spreadsheetElement);
+            bottomLeft.setSheetElement(sheetWidget.getBottomLeftPane());
             bottomLeft.setVisible(false);
             bottomLeft.setZIndex(18);
             bottomLeft.addStyleName("bottom-left");
@@ -316,7 +314,7 @@ public class SelectionWidget extends Composite {
         this.verticalSplitPosition = verticalSplitPosition;
         if (verticalSplitPosition > 0 && topRight == null) {
             topRight = new SelectionOutlineWidget();
-            topRight.setSpreadsheetElement(spreadsheetElement);
+            topRight.setSheetElement(sheetWidget.getTopRightPane());
             topRight.setVisible(false);
             topRight.setZIndex(18);
             topRight.addStyleName("top-right");
@@ -332,7 +330,7 @@ public class SelectionWidget extends Composite {
         if (verticalSplitPosition > 0 && horizontalSplitPosition > 0
                 && topLeft == null) {
             topLeft = new SelectionOutlineWidget();
-            topLeft.setSpreadsheetElement(spreadsheetElement);
+            topLeft.setSheetElement(sheetWidget.getTopLeftPane());
             topLeft.setVisible(false);
             topLeft.setZIndex(28);
             topLeft.addStyleName("top-left");
@@ -428,12 +426,6 @@ public class SelectionWidget extends Composite {
                 && bottomLeft.isVisible() || topRight != null
                 && topRight.isVisible() || topLeft != null
                 && topLeft.isVisible();
-    }
-
-    public void setSpreadsheetElement(Element element) {
-        spreadsheetElement = element;
-        bottomRight.setSpreadsheetElement(element);
-        element.appendChild(paint);
     }
 
     /**

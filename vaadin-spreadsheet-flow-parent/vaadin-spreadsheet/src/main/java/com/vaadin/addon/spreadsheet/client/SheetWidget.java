@@ -20,6 +20,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.SpanElement;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
@@ -428,7 +429,6 @@ public class SheetWidget extends Panel {
         mergedCells = new HashMap<Integer, MergedCell>();
         resizeExtraHeaders = new ArrayList<DivElement>();
         overflownMergedCells = new HashMap<MergedRegion, Cell>();
-        selectionWidget = new SelectionWidget(view, this);
         hyperlinkTooltipLabel = new VLabel();
         hyperlinkTooltipLabel.setStyleName(HYPERLINK_TOOLTIP_LABEL_CLASSNAME);
         hyperlinkTooltip = new VOverlay();
@@ -444,6 +444,8 @@ public class SheetWidget extends Panel {
         cellCommentOverlay = new CellComment(this, sheet);
         cellCommentOverlay.bringForward();
         initDOM();
+
+        selectionWidget = new SelectionWidget(view, this);
 
         initListeners();
 
@@ -508,7 +510,8 @@ public class SheetWidget extends Panel {
                 if (ppi == 0 && ppiCounter.hasParentElement()) {
                     ppi = ppiCounter.getOffsetWidth();
                 }
-                updateStyles(true);
+                updateSheetStyles();
+                updateCellStyles();
                 resetScrollView(scrollLeft, scrollTop);
                 actionHandler.onScrollViewChanged(firstRowIndex, lastRowIndex,
                         firstColumnIndex, lastColumnIndex);
@@ -521,7 +524,7 @@ public class SheetWidget extends Panel {
     }
 
     public void relayoutSheet(boolean triggerRequest) {
-        updateStyles(false);
+        updateSheetStyles();
         int scrollTop = sheet.getScrollTop();
         int scrollLeft = sheet.getScrollLeft();
         int vScrollDiff = scrollTop - previousScrollTop;
@@ -568,8 +571,8 @@ public class SheetWidget extends Panel {
             for (int i = firstRowIndex; i <= lastRowIndex; i++) {
                 newLastRowPosition += getRowHeight(i);
             }
-            final int bottomBound = scrollTop + scrollViewHeight
-                    + actionHandler.getRowBufferSize();
+            final int bottomBound = topFrozenPanelHeight + scrollTop
+                    + scrollViewHeight + actionHandler.getRowBufferSize();
 
             int topEdgeChange = newFirstRowPosition - firstRowPosition;
             int bottomEdgeChange = newLastRowPosition - lastRowPosition;
@@ -588,8 +591,8 @@ public class SheetWidget extends Panel {
             for (int i = firstColumnIndex; i <= lastColumnIndex; i++) {
                 newLastColumnPosition += actionHandler.getColWidthActual(i);
             }
-            final int rightBound = scrollLeft + scrollViewWidth
-                    + actionHandler.getColumnBufferSize();
+            final int rightBound = leftFrozenPanelWidth + scrollLeft
+                    + scrollViewWidth + actionHandler.getColumnBufferSize();
 
             int leftEdgeChange = newFirstColumnPosition - firstColumnPosition;
             int rightEdgeChange = newLastColumnPosition - lastColumnPosition;
@@ -804,8 +807,6 @@ public class SheetWidget extends Panel {
         // for showing numbers and applying scientific notation.
         fontWidthDummyElement.getStyle().setVisibility(Visibility.HIDDEN);
         fontWidthDummyElement.setInnerText("5555555555");
-
-        selectionWidget.setSpreadsheetElement(spreadsheet);
     }
 
     /**
@@ -1444,9 +1445,9 @@ public class SheetWidget extends Panel {
     }
 
     private void handleRowResizeDrag(int clientX, int clientY) {
-        if (clientX < (sheet.getAbsoluteLeft() - 50)
+        if (clientX < (spreadsheet.getAbsoluteLeft())
                 || clientX > sheet.getAbsoluteRight()
-                || clientY < sheet.getAbsoluteTop()
+                || clientY < (sheet.getAbsoluteTop() - topFrozenPanelHeight)
                 || clientY > sheet.getAbsoluteBottom()) {
             return;
         }
@@ -1542,7 +1543,7 @@ public class SheetWidget extends Panel {
     private void handleColumnResizeDrag(int clientX, int clientY) {
         if (clientX < sheet.getAbsoluteLeft()
                 || clientX > sheet.getAbsoluteRight()
-                || clientY < (sheet.getAbsoluteTop() - 20)
+                || clientY < (sheet.getAbsoluteTop() - 20 - topFrozenPanelHeight)
                 || clientY > sheet.getAbsoluteBottom()) {
             return;
         }
@@ -1680,21 +1681,195 @@ public class SheetWidget extends Panel {
      * adjust to the scroll.
      */
     private void moveSelectionWidgetToMatchScroll() {
-        int marginLeftMod = 50;
-        int marginTopMod = 49;
-        if (!displayRowColHeadings) {
-            marginLeftMod = 0;
-            marginTopMod = 31;
+        // int marginLeftMod = 50;
+        // int marginTopMod = 49;
+        // if (!displayRowColHeadings) {
+        // marginLeftMod = 0;
+        // marginTopMod = 31;
+        // }
+        // jsniUtil.updateCSSRuleWithIndex(headerMarginStyle, 2, "marginLeft",
+        // marginLeftMod + "px");
+        // jsniUtil.updateCSSRuleWithIndex(headerMarginStyle, 3, "marginTop",
+        // marginTopMod + "px");
+    }
+
+    private float createRowStyles(String[] rules, int startIndex, int endIndex) {
+        float top = 0;
+        String stylePrimaryName = getStylePrimaryName();
+        for (int i = startIndex; i <= endIndex; i++) {
+            StringBuilder sb = new StringBuilder();
+            float rowHeight = actionHandler.getRowHeight(i);
+            sb.append(".").append(stylePrimaryName).append(" .row").append(i)
+                    .append(" { ").append(getRowDisplayString(i))
+                    .append("height: ").append(rowHeight).append("pt; top:")
+                    .append(top).append("pt; }\n");
+            top += rowHeight;
+            definedRowHeights[i - 1] = convertPointsToPixel(rowHeight);
+            rules[i - 1] = sb.toString();
         }
-        marginLeftMod -= sheet.getScrollLeft();
-        marginTopMod -= sheet.getScrollTop();
-        jsniUtil.updateCSSRuleWithIndex(headerMarginStyle, 2, "marginLeft",
-                marginLeftMod + "px");
-        jsniUtil.updateCSSRuleWithIndex(headerMarginStyle, 3, "marginTop",
-                marginTopMod + "px");
+        return top;
+    }
+
+    private int createColumnStyles(String[] rules, int ruleIndex,
+            int startIndex, int endIndex) {
+        int left = 0;
+        String stylePrimaryName = getStylePrimaryName();
+        for (int i = startIndex; i <= endIndex; i++) {
+            StringBuilder sb = new StringBuilder();
+            int colWidth = actionHandler.getColWidth(i);
+            sb.append(".").append(stylePrimaryName).append(" .col").append(i)
+                    .append(" { ").append(getColumnDisplayString(i))
+                    .append("width: ").append(colWidth).append("px; left:")
+                    .append(left).append("px; }\n");
+            left += colWidth;
+            rules[ruleIndex++] = sb.toString();
+        }
+        return left;
+    }
+
+    private String getRowDisplayString(int rowIndex) {
+        return actionHandler.isRowHidden(rowIndex) ? "display:none;" : "";
+    }
+
+    private String getColumnDisplayString(int columnIndex) {
+        return actionHandler.isColumnHidden(columnIndex) ? "display:none;" : "";
+    }
+
+    private void updateSheetStyles() {
+        // styles for sizes and position
+        final String[] sizeStyleRules = new String[actionHandler
+                .getMaximumRows() + actionHandler.getMaximumCols()];
+        // + verticalSplitPosition > 0 ? 1
+        // : 0 + horizontalSplitPosition > 0 ? 1 : 0]; // add extra rule if
+        // vertical split
+        // panel exists
+
+        // create row rules (height + top offset)
+        definedRowHeights = new int[actionHandler.getMaximumRows()];
+        topFrozenPanelHeight = 0;
+        float topFrozenPanelHeightPt = 0;
+        if (verticalSplitPosition > 0) {
+            topFrozenPanelHeightPt = createRowStyles(sizeStyleRules, 1,
+                    verticalSplitPosition);
+            topFrozenPanelHeight = convertPointsToPixel(topFrozenPanelHeightPt) + 1;
+        }
+        float bottomPanelHeightPt = createRowStyles(sizeStyleRules,
+                verticalSplitPosition + 1, actionHandler.getMaximumRows());
+
+        // create column rules (width + left offset)
+        leftFrozenPanelWidth = 0;
+        int ruleIndex = actionHandler.getMaximumRows();
+        if (horizontalSplitPosition > 0) {
+            leftFrozenPanelWidth = createColumnStyles(sizeStyleRules,
+                    ruleIndex, 1, horizontalSplitPosition);
+            ruleIndex += horizontalSplitPosition;
+        }
+        int bottomPanelWidth = createColumnStyles(sizeStyleRules, ruleIndex,
+                horizontalSplitPosition + 1, actionHandler.getMaximumCols());
+
+        resetStyleSheetRules(cellSizeAndPositionStyle, sizeStyleRules);
+
+        updateSheetPanePositions();
+
+        if (topFrozenPanelHeightPt > 0 && leftFrozenPanelWidth > 0) {
+            topLeftPane.removeClassName(FREEZE_PANE_INACTIVE_STYLENAME);
+        } else {
+            topLeftPane.addClassName(FREEZE_PANE_INACTIVE_STYLENAME);
+        }
+        if (topFrozenPanelHeightPt > 0) {
+            topRightPane.removeClassName(FREEZE_PANE_INACTIVE_STYLENAME);
+        } else {
+            topRightPane.addClassName(FREEZE_PANE_INACTIVE_STYLENAME);
+        }
+        if (leftFrozenPanelWidth > 0) {
+            bottomLeftPane.removeClassName(FREEZE_PANE_INACTIVE_STYLENAME);
+        } else {
+            bottomLeftPane.addClassName(FREEZE_PANE_INACTIVE_STYLENAME);
+        }
+
+        String stylePrimaryName = getStylePrimaryName();
+        // Styles for the header and selection widget location, scroll is faked
+        // with margins. moveHeadersToMatchScroll handles updating.
+        String[] headerMarginRules = new String[2];
+        headerMarginRules[0] = "." + stylePrimaryName
+                + " .bottom-left-pane { margin-top: 0px; }";
+        headerMarginRules[1] = "." + stylePrimaryName
+                + " .top-right-pane { margin-left: 0px; }";
+        // headerMarginRules[2] = "." + stylePrimaryName
+        // + " .sheet-selection.top-right, ." + stylePrimaryName
+        // + " .sheet-selection.bottom-right { margin-left: 0px; }";
+        // headerMarginRules[3] = "." + stylePrimaryName
+        // + " .sheet-selection.bottom-right, ." + stylePrimaryName
+        // + " .sheet-selection.bottom-left { margin-top: 0px; }";
+        resetStyleSheetRules(headerMarginStyle, headerMarginRules);
+
+        moveHeadersToMatchScroll();
+
+        // update floater size the adjust scroll bars correctly
+        floater.getStyle().setHeight(bottomPanelHeightPt, Unit.PT);
+        floater.getStyle().setWidth(bottomPanelWidth, Unit.PX);
+    }
+
+    /**
+     * Updates the left & top style property for sheet panes depending if
+     * headers are shown or not.
+     */
+    private void updateSheetPanePositions() {
+        int widthIncrease = 50;
+        int heightIncrease = 19;
+        int topOffset = 49;
+        if (!displayRowColHeadings) {
+            widthIncrease = 0;
+            heightIncrease = 0;
+            topOffset = 30;
+        }
+        Style style = topLeftPane.getStyle();
+        style.setWidth(leftFrozenPanelWidth + widthIncrease, Unit.PX);
+        style.setHeight(topFrozenPanelHeight + heightIncrease, Unit.PX);
+
+        style = topRightPane.getStyle();
+        // left offset is the same as the width increase
+        style.setLeft(leftFrozenPanelWidth + widthIncrease, Unit.PX);
+        style.setHeight(topFrozenPanelHeight + heightIncrease, Unit.PX);
+
+        style = bottomLeftPane.getStyle();
+        style.setWidth(leftFrozenPanelWidth + widthIncrease, Unit.PX);
+        style.setTop(topFrozenPanelHeight + topOffset, Unit.PX);
+
+        style = sheet.getStyle();
+        style.setLeft(leftFrozenPanelWidth + widthIncrease, Unit.PX);
+        style.setTop(topFrozenPanelHeight + topOffset, Unit.PX);
+    }
+
+    private void updateCellStyles() {
+        // styles for individual cells
+        Map<Integer, String> styles = actionHandler.getCellStyleToCSSStyle();
+        if (styles != null) {
+            try {
+                for (Entry<Integer, String> entry : styles.entrySet()) {
+                    if (entry.getKey() == 0) {
+                        jsniUtil.insertRule(
+                                sheetStyle,
+                                ".v-spreadsheet .sheet .cell {"
+                                        + entry.getValue() + "}");
+                    } else {
+                        jsniUtil.insertRule(
+                                sheetStyle,
+                                ".v-spreadsheet .sheet .cell.cs"
+                                        + entry.getKey() + " {"
+                                        + entry.getValue() + "}");
+                    }
+                }
+            } catch (Exception e) {
+                debugConsole.severe("SheetWidget:updateStyles: " + e.toString()
+                        + " while creating the cell styles");
+            }
+        }
+        recalculateCellStyleWidthValues();
     }
 
     /** Update styles in for this spreadsheet */
+    @Deprecated
     private void updateStyles(boolean reloadCellStyles) {
         // styles for sizes and position
         String[] sizeStyleRules = new String[actionHandler.getMaximumRows()
@@ -1998,27 +2173,15 @@ public class SheetWidget extends Panel {
         scrollViewWidth = sheet.getOffsetWidth();
         previousScrollLeft = scrollLeft;
         previousScrollTop = scrollTop;
-        int verticalSplitHeight = 0;
         firstRowIndex = 1;
         firstRowPosition = 0;
         if (verticalSplitPosition > 0) {
             firstRowIndex = verticalSplitPosition + 1;
-            // the top pane position needs to be taken into account
-            for (int i = 1; i <= verticalSplitPosition; i++) {
-                verticalSplitHeight += getRowHeight(i);
-            }
-            firstRowPosition += verticalSplitHeight;
         }
-        int horizontalSplitWidth = 0;
         firstColumnIndex = 1;
         firstColumnPosition = 0;
         if (horizontalSplitPosition > 0) {
             firstColumnIndex = horizontalSplitPosition + 1;
-            // the left pane position needs to be taken into account
-            for (int i = 1; i <= horizontalSplitPosition; i++) {
-                horizontalSplitWidth += actionHandler.getColWidthActual(i);
-            }
-            firstColumnPosition += horizontalSplitWidth;
         }
         lastColumnIndex = 0;
         clearSelectedCellStyle();
@@ -2187,13 +2350,11 @@ public class SheetWidget extends Panel {
                     handleVerticalScrollUp(scrollTop);
                 }
             }
-
             requester.trigger();
         } catch (Throwable t) {
             debugConsole.severe("SheetWidget:updateSheetDisplay: "
                     + t.toString());
         }
-
         // update cells
         updateCells(vScrollDiff, hScrollDiff);
     }
@@ -2438,11 +2599,9 @@ public class SheetWidget extends Panel {
 
     private void handleHorizontalScrollLeft(int scrollLeft) {
         int columnBufferSize = actionHandler.getColumnBufferSize();
-        int leftBound = scrollLeft - columnBufferSize + leftFrozenPanelWidth;
+        int leftBound = scrollLeft - columnBufferSize;
         int rightBound = scrollLeft + scrollViewWidth + columnBufferSize;
-        if (horizontalSplitPosition > 0 && leftBound < leftFrozenPanelWidth) {
-            leftBound = leftFrozenPanelWidth;
-        } else if (leftBound < 0) {
+        if (leftBound < 0) {
             leftBound = 0;
         }
         int move = 0;
@@ -2468,7 +2627,7 @@ public class SheetWidget extends Panel {
         }
         if (firstColumnPosition <= 0 || firstColumnIndex <= 1) {
             firstColumnPosition = 0;
-            firstColumnIndex = 1;
+            firstColumnIndex = maxFirstColumn;
         }
         while (rightBound < (lastColumnPosition - actionHandler
                 .getColWidthActual(lastColumnIndex)) && lastColumnIndex > 1) {
@@ -2515,12 +2674,9 @@ public class SheetWidget extends Panel {
      */
     private void handleHorizontalScrollRight(int scrollLeft) {
         int columnBufferSize = actionHandler.getColumnBufferSize();
-        int leftBound = scrollLeft - columnBufferSize + leftFrozenPanelWidth;
+        int leftBound = scrollLeft - columnBufferSize;
         int rightBound = scrollLeft + scrollViewWidth + columnBufferSize;
-        if (horizontalSplitPosition > 0
-                && leftBound < (leftFrozenPanelWidth - columnBufferSize)) {
-            leftBound = leftFrozenPanelWidth - columnBufferSize;
-        } else if (leftBound < 0) {
+        if (leftBound < 0) {
             leftBound = 0;
         }
         int move = 0;
@@ -2582,12 +2738,9 @@ public class SheetWidget extends Panel {
 
     private void handleVerticalScrollDown(int scrollTop) {
         int rowBufferSize = actionHandler.getRowBufferSize();
-        int topBound = scrollTop - rowBufferSize + topFrozenPanelHeight;
+        int topBound = scrollTop - rowBufferSize;
         int bottomBound = scrollTop + scrollViewHeight + rowBufferSize;
-        if (verticalSplitPosition > 0
-                && topBound < (topFrozenPanelHeight - rowBufferSize)) {
-            topBound = topFrozenPanelHeight - rowBufferSize;
-        } else if (topBound < 0) {
+        if (topBound < 0) {
             topBound = 0;
         }
         int move = 0;
@@ -2644,12 +2797,9 @@ public class SheetWidget extends Panel {
 
     private void handleVerticalScrollUp(int scrollTop) {
         int rowBufferSize = actionHandler.getRowBufferSize();
-        int topBound = scrollTop - rowBufferSize + topFrozenPanelHeight;
+        int topBound = scrollTop - rowBufferSize;
         int bottomBound = scrollTop + scrollViewHeight + rowBufferSize;
-        if (verticalSplitPosition > 0
-                && topBound < (topFrozenPanelHeight - rowBufferSize)) {
-            topBound = topFrozenPanelHeight - rowBufferSize;
-        } else if (topBound < 0) {
+        if (topBound < 0) {
             topBound = 0;
         }
         int move = 0;
@@ -2670,7 +2820,7 @@ public class SheetWidget extends Panel {
         }
         if (firstRowPosition <= 0 || firstRowIndex <= 1) {
             firstRowPosition = 0;
-            firstRowIndex = 1;
+            firstRowIndex = maxTopRow;
         }
         while (bottomBound < (lastRowPosition - getRowHeight(lastRowIndex))
                 && lastRowIndex > 1) {
@@ -3563,6 +3713,7 @@ public class SheetWidget extends Panel {
      *            if the widget is completely removed from DOM after this
      */
     public void clearAll(boolean removed) {
+        loaded = false;
         for (Iterator<Widget> i = getCustomWidgetIterator(); i.hasNext();) {
             remove(i.next());
         }
@@ -4045,7 +4196,7 @@ public class SheetWidget extends Panel {
      */
     public int getLeftVisibleColumnIndex() {
         int index = firstColumnIndex;
-        final int bound = sheet.getAbsoluteLeft() + leftFrozenPanelWidth;
+        final int bound = sheet.getAbsoluteLeft();
         for (Cell cell : rows.get(0)) {
             if (cell.getElement().getAbsoluteLeft() >= bound) {
                 return index;
@@ -4076,7 +4227,7 @@ public class SheetWidget extends Panel {
      */
     public int getTopVisibleRowIndex() {
         int index = firstRowIndex;
-        final int bound = sheet.getAbsoluteTop() + topFrozenPanelHeight;
+        final int bound = sheet.getAbsoluteTop();
         for (ArrayList<Cell> row : rows) {
             if (row.get(0).getElement().getAbsoluteTop() >= bound) {
                 return index;
@@ -4885,6 +5036,7 @@ public class SheetWidget extends Panel {
         } else {
             spreadsheet.addClassName(NO_GRIDLINES_CLASSNAME);
         }
+        updateSheetPanePositions();
     }
 
     public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
@@ -4897,6 +5049,7 @@ public class SheetWidget extends Panel {
         }
         if (loaded) {
             moveHeadersToMatchScroll();
+            updateSheetPanePositions();
         }
     }
 
@@ -4918,5 +5071,21 @@ public class SheetWidget extends Panel {
             jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
                     ".notusedselector", 1);
         }
+    }
+
+    protected Element getBottomRightPane() {
+        return sheet;
+    }
+
+    protected Element getBottomLeftPane() {
+        return bottomLeftPane;
+    }
+
+    protected Element getTopRightPane() {
+        return topRightPane;
+    }
+
+    protected Element getTopLeftPane() {
+        return topLeftPane;
     }
 }
