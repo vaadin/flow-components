@@ -123,7 +123,7 @@ public class ContextMenuManager {
         ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
         for (Handler handler : actionHandlers) {
             Action[] actions2 = handler.getActions(getCellSelectionManager()
-                    .getLatestSelectionEvent(), this);
+                    .getLatestSelectionEvent(), spreadsheet);
             if (actions2 != null) {
                 for (Action action : actions2) {
                     String key = actionMapper.key(action);
@@ -145,7 +145,7 @@ public class ContextMenuManager {
         final CellRangeAddress column = new CellRangeAddress(-1, -1,
                 columnIndex - 1, columnIndex - 1);
         for (Handler handler : actionHandlers) {
-            for (Action action : handler.getActions(column, this)) {
+            for (Action action : handler.getActions(column, spreadsheet)) {
                 String key = actionMapper.key(action);
                 spreadsheet.setResource(key, action.getIcon());
                 SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
@@ -164,7 +164,7 @@ public class ContextMenuManager {
         final CellRangeAddress row = new CellRangeAddress(rowIndex - 1,
                 rowIndex - 1, -1, -1);
         for (Handler handler : actionHandlers) {
-            for (Action action : handler.getActions(row, this)) {
+            for (Action action : handler.getActions(row, spreadsheet)) {
                 String key = actionMapper.key(action);
                 spreadsheet.setResource(key, action.getIcon());
                 SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
