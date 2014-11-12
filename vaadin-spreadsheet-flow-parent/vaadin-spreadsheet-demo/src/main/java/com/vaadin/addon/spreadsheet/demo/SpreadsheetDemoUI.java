@@ -26,6 +26,8 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
+import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedCellWriteAttemptedEvent;
+import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedCellWriteAttemptedListener;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectedSheetChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectedSheetChangeListener;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
@@ -367,11 +369,20 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         try {
             if (spreadsheet == null) {
                 spreadsheet = new Spreadsheet(file);
-                spreadsheet
-                        .addSelectionChangeListener(selectionChangeListener);
+                spreadsheet.addSelectionChangeListener(selectionChangeListener);
                 spreadsheet
                         .addSelectedSheetChangeListener(selectedSheetChangeListener);
                 spreadsheet.addActionHandler(spreadsheetActionHandler);
+                spreadsheet
+                        .addProtectedCellWriteAttemptedListener(new ProtectedCellWriteAttemptedListener() {
+
+                            @Override
+                            public void writeAttempted(
+                                    ProtectedCellWriteAttemptedEvent event) {
+                                Notification
+                                        .show("This cell is protected and cannot be changed");
+                            }
+                        });
                 layout.addComponent(spreadsheet);
                 layout.setRowExpandRatio(1, 1.0F);
             } else {

@@ -2820,6 +2820,54 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 SelectionChangeListener.SELECTION_CHANGE_METHOD);
     }
 
+    public static class ProtectedCellWriteAttemptedEvent extends
+            Component.Event {
+
+        public ProtectedCellWriteAttemptedEvent(Component source) {
+            super(source);
+        }
+    }
+
+    public interface ProtectedCellWriteAttemptedListener extends Serializable {
+        public static final Method SELECTION_CHANGE_METHOD = ReflectTools
+                .findMethod(ProtectedCellWriteAttemptedListener.class,
+                        "writeAttempted",
+                        ProtectedCellWriteAttemptedEvent.class);
+
+        /**
+         * Called when the SpreadSheet detects that the client tried to edit a
+         * locked cell (usually by pressing a key). Method is not called for
+         * each such event; instead, the SpreadSheet waits a second before
+         * sending a new event. This is done to give the user time to react to
+         * the results of this call (e.g. showing a notification).
+         * 
+         * @param event
+         */
+        public void writeAttempted(ProtectedCellWriteAttemptedEvent event);
+    }
+
+    /**
+     * Add listener for when user tries to modify a locked cell.
+     * 
+     * @param listener
+     */
+    public void addProtectedCellWriteAttemptedListener(
+            ProtectedCellWriteAttemptedListener listener) {
+        addListener(ProtectedCellWriteAttemptedEvent.class, listener,
+                ProtectedCellWriteAttemptedListener.SELECTION_CHANGE_METHOD);
+    }
+
+    /**
+     * Removes the specified listener.
+     * 
+     * @param listener
+     */
+    public void removeProtectedCellWriteAttemptedListener(
+            ProtectedCellWriteAttemptedListener listener) {
+        removeListener(ProtectedCellWriteAttemptedEvent.class, listener,
+                ProtectedCellWriteAttemptedListener.SELECTION_CHANGE_METHOD);
+    }
+
     /**
      * Creates or removes a freeze pane from the currently active sheet.
      * 

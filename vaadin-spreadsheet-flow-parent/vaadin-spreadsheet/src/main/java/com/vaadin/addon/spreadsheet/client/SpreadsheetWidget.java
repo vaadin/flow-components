@@ -11,10 +11,14 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
 import com.vaadin.addon.spreadsheet.client.SheetTabSheet.SheetTabSheetHandler;
+import com.vaadin.client.ServerConnector;
+import com.vaadin.client.Util;
+import com.vaadin.client.communication.RpcProxy;
 
 public class SpreadsheetWidget extends Composite implements SheetHandler,
         FormulaBarHandler, SheetTabSheetHandler {
@@ -102,6 +106,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private List<MergedRegion> mergedRegions;
     private int colBeforeMergedCell;
     private int rowBeforeMergedCell;
+
+    /**
+     * Timer flag for sending lazy RPCs to server. Used so that we don't send an
+     * RPC for each key press. Default timeout is a second.
+     */
+    private boolean okToSendCellProtectRpc = true;
 
     private MergedRegionContainer mergedRegionContainer = new MergedRegionContainer() {
 
@@ -875,6 +885,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             value = formulaBarWidget.getFormulaFieldValue();
         }
         formulaBarEditing = false;
+        checkEditableAndNotify();
         if (!cellLocked) {
             if (!inlineEditing && !customCellEditorDisplayed) {
                 inlineEditing = true;
@@ -948,6 +959,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void onSheetKeyPress(NativeEvent event, String enteredCharacter) {
         switch (event.getKeyCode()) {
         case KeyCodes.KEY_DELETE:
+            checkEditableAndNotify();
             if (!cellLocked) {
                 spreadsheetHandler.deleteSelectedCells();
             }
@@ -1004,6 +1016,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         case KeyCodes.KEY_SHIFT:
             break;
         case KeyCodes.KEY_BACKSPACE:
+            checkEditableAndNotify();
             if (!cellLocked && !customCellEditorDisplayed) {
                 // cache value and start editing cell as empty
                 inlineEditing = true;
@@ -1014,6 +1027,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             }
             break;
         default:
+
+            checkEditableAndNotify();
+
             if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
                     && !cellLocked && !customCellEditorDisplayed) {
                 // cache value and start editing cell as empty
@@ -1031,6 +1047,35 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     formulaBarWidget.setCellPlainValue(enteredCharacter);
                 }
             }
+        }
+    }
+
+    /**
+     * Checks if selected cell is locked, and sends an RPC to server if it is.
+     */
+    private void checkEditableAndNotify() {
+        if (cellLocked) {
+
+            if (!okToSendCellProtectRpc) {
+                // don't send just yet
+                return;
+            }
+
+            Timer timer = new Timer() {
+                @Override
+                public void run() {
+                    okToSendCellProtectRpc = true;
+                }
+            };
+            timer.schedule(1000);
+
+            okToSendCellProtectRpc = false;
+
+            ServerConnector connector = Util.findConnectorFor(this);
+            SpreadsheetServerRpc rpc = RpcProxy.create(
+                    SpreadsheetServerRpc.class, connector);
+
+            rpc.protectedCellWriteAttempted();
         }
     }
 

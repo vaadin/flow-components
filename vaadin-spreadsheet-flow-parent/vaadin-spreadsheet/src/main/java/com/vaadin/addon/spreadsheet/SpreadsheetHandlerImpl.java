@@ -3,6 +3,7 @@ package com.vaadin.addon.spreadsheet;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedCellWriteAttemptedEvent;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 
 public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
@@ -195,6 +196,12 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     @Override
     public void onConnectorInit() {
         spreadsheet.onConnectorInit();
+    }
+
+    @Override
+    public void protectedCellWriteAttempted() {
+        spreadsheet
+                .fireEvent(new ProtectedCellWriteAttemptedEvent(spreadsheet));
     }
 
 }

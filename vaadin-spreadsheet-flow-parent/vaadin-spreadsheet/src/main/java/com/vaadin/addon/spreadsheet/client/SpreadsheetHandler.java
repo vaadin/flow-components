@@ -203,4 +203,8 @@ public interface SpreadsheetHandler {
     public void setCellStyleWidthRatios(
             HashMap<Integer, Float> cellStyleWidthRatioMap);
 
+    /**
+     * Client tried to modify protected cell
+     */
+    public void protectedCellWriteAttempted();
 }
