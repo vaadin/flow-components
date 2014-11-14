@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
@@ -26,6 +27,7 @@ import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.dom.client.StyleElement;
+import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -39,6 +41,7 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.BrowserInfo;
+import com.vaadin.client.Util;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.VLazyExecutor;
 import com.vaadin.client.ui.VOverlay;
@@ -894,15 +897,36 @@ public class SheetWidget extends Panel {
         Cell mergedCell = getMergedCell(toKey(cell.getCol(), cell.getRow()));
         if (mergedCell == null) {
             Element target = cell.getElement();
+
+            int newX = cell.getCol();
+            int newY = cell.getRow();
+            boolean changed = false;
+
             if (clientX < target.getAbsoluteLeft()
                     && cell.getCol() > firstColumnIndex) {
-                return getRealEventTargetCell(clientX, clientY,
-                        getCell(cell.getCol() - 1, cell.getRow()));
+                newX = cell.getCol() - 1;
+                changed = true;
             } else if (clientX > target.getAbsoluteRight()
                     && cell.getCol() < lastColumnIndex) {
-                return getRealEventTargetCell(clientX, clientY,
-                        getCell(cell.getCol() + 1, cell.getRow()));
+                newX = cell.getCol() + 1;
+                changed = true;
             }
+
+            if (clientY < target.getAbsoluteTop()
+                    && cell.getRow() > firstRowIndex) {
+                newY = cell.getRow() - 1;
+                changed = true;
+            } else if (clientY > target.getAbsoluteBottom()
+                    && cell.getRow() < lastRowIndex) {
+                newY = cell.getRow() + 1;
+                changed = true;
+            }
+
+            if (changed) {
+                return getRealEventTargetCell(clientX, clientY,
+                        getCell(newX, newY));
+            }
+
             return cell;
         } else {
             return mergedCell;
@@ -911,6 +935,17 @@ public class SheetWidget extends Panel {
 
     protected void onSheetMouseDown(Event event) {
         Element target = event.getEventTarget().cast();
+        onClick(target, event);
+    }
+
+    /**
+     * 
+     * @param target
+     *            The clicked element
+     * @param event
+     *            The original event (that can be onClick or onTouchStart)
+     */
+    protected void onClick(Element target, Event event) {
         String className = target.getClassName();
         if (className.contains("sheet") || target.getTagName().equals("input")
                 || className.equals("floater")) {
@@ -934,8 +969,10 @@ public class SheetWidget extends Panel {
             // merged cells are a special case, text won't overflow -> skip
             try {
                 if (!className.endsWith(MERGED_CELL_CLASSNAME)) {
-                    Cell targetCell = getRealEventTargetCell(
-                            event.getClientX(), event.getClientY(),
+                    int clientX = Util.getTouchOrMouseClientX(event);
+                    int clientY = Util.getTouchOrMouseClientY(event);
+
+                    Cell targetCell = getRealEventTargetCell(clientX, clientY,
                             getCell(targetCol, targetRow));
                     target = targetCell.getElement();
                     targetCol = targetCell.getCol();
@@ -993,8 +1030,41 @@ public class SheetWidget extends Panel {
         }
     }
 
+    protected void onSheetTouchStart(Event event) {
+
+        if (event.getTouches().length() == 0) {
+            return;
+        }
+
+        Touch touch = event.getTouches().get(0);
+        Element e = touch.getTarget().cast();
+        onClick(e, event);
+    }
+
     protected void onMouseMoveWhenSelectingCells(Event event) {
-        final Element target = event.getEventTarget().cast();
+        final Element target;
+
+        /*
+         * Touch events handle target element differently. According to specs,
+         * Touch.getTarget() is the equivalent of event.getTarget(). Of course,
+         * Safari doesn't follow the specifications; all target references are
+         * to the element where we started the drag.
+         * 
+         * We need to manually parse x/y coords in #getRealEventTargetCell() to
+         * find the correct cell.
+         */
+        if (event.getChangedTouches() != null
+                && event.getChangedTouches().length() > 0) {
+            JsArray<Touch> touches = event.getChangedTouches();
+            target = touches.get(touches.length() - 1).getTarget().cast();
+        } else if (event.getTouches() != null
+                && event.getTouches().length() > 0) {
+            JsArray<Touch> touches = event.getTouches();
+            target = touches.get(touches.length() - 1).getTarget().cast();
+        } else {
+            target = event.getEventTarget().cast();
+        }
+
         final boolean sheetOrChild = target.getParentElement().getClassName()
                 .contains("sheet");
         final String className = target.getClassName();
@@ -1021,6 +1091,15 @@ public class SheetWidget extends Panel {
                 }
             }
         } else {
+
+            /*
+             * Parse according to classname of target element. As said above,
+             * Safari gives us the wrong target and hence we have the wrong
+             * style name here.
+             * 
+             * This also means that if we move outside the sheet, we continue
+             * execution past this check.
+             */
             jsniUtil.parseColRow(className);
             int col = jsniUtil.getParsedCol();
             int row = jsniUtil.getParsedRow();
@@ -1030,23 +1109,25 @@ public class SheetWidget extends Panel {
 
             // skip search of actual cell if this is a merged cell
             if (!className.endsWith(MERGED_CELL_CLASSNAME)) {
-                Cell targetCell = getRealEventTargetCell(event.getClientX(),
-                        event.getClientY(), getCell(col, row));
+                Cell targetCell = getRealEventTargetCell(
+                        Util.getTouchOrMouseClientX(event),
+                        Util.getTouchOrMouseClientY(event), getCell(col, row));
                 col = targetCell.getCol();
                 row = targetCell.getRow();
             }
 
             if (col != tempCol || row != tempRow) {
                 if (col == 0) { // on top of scroll bar
-                    if (event.getClientX() > target.getParentElement()
-                            .getAbsoluteRight()) {
+                    if (Util.getTouchOrMouseClientX(event) > target
+                            .getParentElement().getAbsoluteRight()) {
                         col = getRightVisibleColumnIndex() + 1;
                     } else {
                         col = tempCol;
                     }
                 }
                 if (row == 0) {
-                    if (event.getClientY() > sheet.getAbsoluteBottom()) {
+                    if (Util.getTouchOrMouseClientY(event) > sheet
+                            .getAbsoluteBottom()) {
                         row = getBottomVisibleRowIndex() + 1;
                     } else {
                         row = tempRow;
@@ -1150,11 +1231,13 @@ public class SheetWidget extends Panel {
                     }
                 } else if (resizing && eventTypeInt == Event.ONMOUSEMOVE) {
                     if (resizedColumnIndex != -1) {
-                        handleColumnResizeDrag(nativeEvent.getClientX(),
-                                nativeEvent.getClientY());
+                        handleColumnResizeDrag(
+                                Util.getTouchOrMouseClientX(nativeEvent),
+                                Util.getTouchOrMouseClientY(nativeEvent));
                     } else if (resizedRowIndex != -1) {
-                        handleRowResizeDrag(nativeEvent.getClientX(),
-                                nativeEvent.getClientY());
+                        handleRowResizeDrag(
+                                Util.getTouchOrMouseClientX(nativeEvent),
+                                Util.getTouchOrMouseClientY(nativeEvent));
                     } else {
                         resizing = false;
                     }
@@ -1175,7 +1258,8 @@ public class SheetWidget extends Panel {
                                 .getClientX());
                     } else {
                         spreadsheet.removeClassName(ROW_RESIZING_CLASSNAME);
-                        stopRowResizeDrag(event.getNativeEvent().getClientY());
+                        stopRowResizeDrag(Util.getTouchOrMouseClientY(event
+                                .getNativeEvent()));
                     }
                 } else if (eventTypeInt == Event.ONDBLCLICK
                         && actionHandler.canResize()) {

@@ -56,10 +56,7 @@ public class SheetEventListener implements EventListener {
                 onKeyDown(event);
                 break;
             case Event.ONTOUCHSTART:
-                // FIXME remove when rebuilding proper touch support
-                if (event.getTouches().length() > 1) {
-                    break;
-                }
+                widget.onSheetTouchStart(event);
             case Event.ONMOUSEDOWN:
                 widget.onSheetMouseDown(event);
                 break;

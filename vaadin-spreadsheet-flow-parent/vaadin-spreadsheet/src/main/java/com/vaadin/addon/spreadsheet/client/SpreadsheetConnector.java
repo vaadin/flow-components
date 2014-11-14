@@ -18,6 +18,7 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHan
 import com.vaadin.client.ApplicationConnection;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
+import com.vaadin.client.Util;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
 import com.vaadin.client.ui.Action;
@@ -66,11 +67,11 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             int left;
             int top;
             if (latestCellContextMenuEvent != null) {
-                left = latestCellContextMenuEvent.getClientX();
-                top = latestCellContextMenuEvent.getClientY();
+                left = Util.getTouchOrMouseClientX(latestCellContextMenuEvent);
+                top = Util.getTouchOrMouseClientY(latestCellContextMenuEvent);
             } else {
-                left = latestHeaderContextMenuEvent.getClientX();
-                top = latestHeaderContextMenuEvent.getClientY();
+                left = Util.getTouchOrMouseClientX(latestHeaderContextMenuEvent);
+                top = Util.getTouchOrMouseClientY(latestHeaderContextMenuEvent);
             }
             top += Window.getScrollTop();
             left += Window.getScrollLeft();
