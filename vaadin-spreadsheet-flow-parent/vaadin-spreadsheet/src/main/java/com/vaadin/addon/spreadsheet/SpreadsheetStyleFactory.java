@@ -198,6 +198,10 @@ public class SpreadsheetStyleFactory {
             sb.append("overflow:hidden;white-space:normal;");
         }
 
+        if (cellStyle.getIndention() > 0) {
+            sb.append("padding-left: " + cellStyle.getIndention() + "em;");
+        }
+
         spreadsheet.getState().cellStyleToCSSStyle.put(
                 (int) cellStyle.getIndex(), sb.toString());
     }
