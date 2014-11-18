@@ -151,6 +151,23 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         initWidget(sheetWidget);
     }
 
+    /**
+     * Sets the content of the info label.
+     * 
+     * @param value
+     *            the new content. Can not be HTML.
+     */
+    public void setInfoLabelValue(String value) {
+        sheetTabSheet.setInfoLabelValue(value);
+    }
+
+    /**
+     * @return current content of the info label.
+     */
+    public String getInfoLabelValue() {
+        return sheetTabSheet.getInfoLabelValue();
+    }
+
     public SheetWidget getSheetWidget() {
         return sheetWidget;
     }
@@ -1393,7 +1410,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         sheetWidget.getCellValue(col, row), region);
             }
         }
-
     }
 
     private void moveSelectedCellRight(boolean discardSelection) {

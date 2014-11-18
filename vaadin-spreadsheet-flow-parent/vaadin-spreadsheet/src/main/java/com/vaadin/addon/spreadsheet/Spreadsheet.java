@@ -3053,4 +3053,21 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void resetSpreadsheetFromData() {
         setWorkbook(getWorkbook());
     }
+
+    /**
+     * Sets the content of the info label.
+     * 
+     * @param value
+     *            the new content. Can not be HTML.
+     */
+    public void setInfoLabelValue(String value) {
+        getState().infoLabelValue = value;
+    }
+
+    /**
+     * @return current content of the info label.
+     */
+    public String getInfoLabelValue() {
+        return getState().infoLabelValue;
+    }
 }

@@ -621,6 +621,7 @@
 	left: 86px;
 	position: absolute;
 	z-index: inherit;
+	margin-right: 206px;
 }
 
 .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab
@@ -675,6 +676,22 @@
 	left: -5000px;
 	position: fixed;
 	white-space-collapse: preserve;
+}
+
+.v-spreadsheet .sheet-tabsheet .sheet-tabsheet-infolabel  {
+	z-index: inherit;
+	position: absolute;
+	right: 0;
+	font-weight: bold;
+	font-size: 8pt;
+	background: #e1e1e1;
+	border-left: 1px solid rgb(169, 169, 169);
+	padding-left: 5px;
+	padding-top: 2px;
+	width: 200px;
+	height: 16px;
+	display: inline;
+	text-overflow: ellipsis;
 }
 
 /** FILTER BUTTON */

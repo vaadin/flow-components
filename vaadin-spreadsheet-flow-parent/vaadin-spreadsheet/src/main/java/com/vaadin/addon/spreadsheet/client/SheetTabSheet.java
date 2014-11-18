@@ -67,6 +67,8 @@ public class SheetTabSheet extends Widget {
 
     private String cachedSheetName = "";
 
+    private DivElement infoLabel = Document.get().createDivElement();
+
     public SheetTabSheet(SheetTabSheetHandler handler) {
         this.handler = handler;
 
@@ -102,6 +104,9 @@ public class SheetTabSheet extends Widget {
         root.setClassName("sheet-tabsheet");
         root.appendChild(options);
         root.appendChild(container);
+
+        infoLabel.setClassName("sheet-tabsheet-infolabel");
+        root.appendChild(infoLabel);
 
         setElement(root);
     }
@@ -232,6 +237,30 @@ public class SheetTabSheet extends Widget {
         });
     }
 
+    /**
+     * Sets the content of the info label.
+     * 
+     * @param value
+     *            the new content. Can not be HTML.
+     */
+    public void setInfoLabelValue(String value) {
+        if (value == null) {
+            infoLabel.getStyle().setDisplay(Display.NONE);
+            container.getStyle().setMarginRight(0, Unit.PX);
+        } else {
+            container.getStyle().setMarginRight(206, Unit.PX);
+            infoLabel.getStyle().setDisplay(Display.INLINE);
+            infoLabel.setInnerText(value);
+        }
+    }
+
+    /**
+     * @return current content of the info label.
+     */
+    public String getInfoLabelValue() {
+        return infoLabel.getInnerText();
+    }
+
     private void doDeferredInputSizeUpdate() {
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
@@ -247,7 +276,10 @@ public class SheetTabSheet extends Widget {
     }
 
     private int getTabVisibleWithScrollIndex(int tabIndex) {
-        int tempWidth = root.getOffsetWidth() - 86;
+        int tempWidth = root.getOffsetWidth() - 86; // left margin
+        if (!infoLabel.getStyle().getDisplay().equals("none")) {
+            tempWidth -= 206; // right margin
+        }
         tempWidth -= ((Element) tabs.get(tabIndex).cast()).getOffsetWidth();
 
         while (tabIndex > 0

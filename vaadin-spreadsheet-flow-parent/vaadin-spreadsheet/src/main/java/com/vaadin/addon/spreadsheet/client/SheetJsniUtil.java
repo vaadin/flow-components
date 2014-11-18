@@ -133,8 +133,12 @@ public class SheetJsniUtil {
 
     public native String getSelector(StyleElement stylesheet, int ruleindex)
     /*-{
-        var x = stylesheet.sheet.cssRules[ruleindex].selectorText;
-        return x;
+        var classes = stylesheet.sheet.cssRules;
+        if (ruleindex < classes.length) {
+            var x = classes[ruleindex].selectorText;
+            return x;
+        }
+        return null;
     }-*/;
 
     /** Search and update a given CSS rule in a stylesheet */

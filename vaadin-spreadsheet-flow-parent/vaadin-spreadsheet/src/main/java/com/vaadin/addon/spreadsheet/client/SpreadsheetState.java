@@ -92,4 +92,7 @@ public class SpreadsheetState extends AbstractComponentState {
     @DelegateToWidget
     public int horizontalSplitPosition = 0;
 
+    @DelegateToWidget
+    public String infoLabelValue;
+
 }

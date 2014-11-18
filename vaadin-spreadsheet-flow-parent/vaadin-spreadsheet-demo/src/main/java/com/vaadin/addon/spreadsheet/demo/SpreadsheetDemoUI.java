@@ -11,6 +11,8 @@ import java.net.URL;
 import java.text.Format;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.annotation.WebServlet;
 
@@ -22,6 +24,7 @@ import org.apache.poi.ss.usermodel.ExcelStyleDateFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -398,6 +401,25 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     }
 
     private void printSelectionChangeEventContents(SelectionChangeEvent event) {
+
+        Set<String> cells = new HashSet<String>();
+
+        for (CellReference r : event.getIndividualSelectedCells()) {
+            cells.add(r.formatAsString());
+        }
+        cells.add(event.getSelectedCellReference().formatAsString());
+
+        if (event.getCellRangeAddresses() != null) {
+            for (CellRangeAddress a : event.getCellRangeAddresses()) {
+
+                for (int x = a.getFirstColumn(); x <= a.getLastColumn(); x++)
+                    for (int y = a.getFirstRow(); y <= a.getLastRow(); y++)
+                        cells.add(new CellReference(y, x).formatAsString());
+            }
+        }
+
+        spreadsheet.setInfoLabelValue(cells.size() + " selected cells");
+
         // System.out.println(event.getSelectedCellReference().toString());
         // System.out.println("Merged region: "
         // + event.getSelectedCellMergedRegion());
