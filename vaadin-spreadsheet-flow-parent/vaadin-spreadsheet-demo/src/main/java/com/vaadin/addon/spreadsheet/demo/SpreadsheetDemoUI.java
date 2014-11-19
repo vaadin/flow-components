@@ -63,6 +63,7 @@ import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")
 public class SpreadsheetDemoUI extends UI implements Receiver {
@@ -157,8 +158,43 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                                     .addSelectedSheetChangeListener(selectedSheetChangeListener);
                             spreadsheet
                                     .addActionHandler(spreadsheetActionHandler);
-                            layout.addComponent(spreadsheet);
-                            layout.setRowExpandRatio(1, 1.0f);
+                            Window w = new Window("Spreadsheet in window",
+                                    spreadsheet);
+                            addWindow(w);
+                        } else {
+                            spreadsheet.reloadSpreadsheetWithNewWorkbook();
+                        }
+                        spreadsheet.setSpreadsheetComponentFactory(null);
+                        save.setEnabled(true);
+                        previousFile = null;
+                        openTestSheetSelect.setValue(null);
+
+                        gridlines.setValue(spreadsheet.isDisplayGridLines());
+                        rowColHeadings.setValue(spreadsheet
+                                .isDisplayRowColHeadings());
+                    }
+                });
+
+        Button newSpreadsheetInWindowButton = new Button("Create new",
+                new Button.ClickListener() {
+
+                    @Override
+                    public void buttonClick(ClickEvent event) {
+                        if (spreadsheet == null) {
+                            spreadsheet = new Spreadsheet();
+                            spreadsheet
+                                    .addSelectionChangeListener(selectionChangeListener);
+                            spreadsheet
+                                    .addSelectedSheetChangeListener(selectedSheetChangeListener);
+                            spreadsheet
+                                    .addActionHandler(spreadsheetActionHandler);
+
+                            Window w = new Window("new Spreadsheet",
+                                    spreadsheet);
+                            w.setWidth("50%");
+                            w.setHeight("50%");
+                            w.center();
+                            addWindow(w);
                         } else {
                             spreadsheet.reloadSpreadsheetWithNewWorkbook();
                         }
@@ -285,6 +321,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         checkBoxLayout.addComponents(gridlines, rowColHeadings);
         options.addComponent(checkBoxLayout);
         options.addComponent(newSpreadsheetButton);
+        options.addComponent(newSpreadsheetInWindowButton);
         options.addComponent(customComponentTest);
         options.addComponent(openTestSheetSelect);
         options.addComponent(upload);

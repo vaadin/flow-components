@@ -469,4 +469,9 @@ public class SheetTabSheet extends Widget {
             scrollEnd.addClassName("hidden");
         }
     }
+
+    public void onWidgetResize() {
+        // check if we need to display scroll buttons
+        showHideScrollIcons();
+    }
 }

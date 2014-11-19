@@ -186,6 +186,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void widgetSizeChanged() {
         sheetWidget.onWidgetResize();
+        sheetTabSheet.onWidgetResize();
     }
 
     /** Clear all current sheet related data */
