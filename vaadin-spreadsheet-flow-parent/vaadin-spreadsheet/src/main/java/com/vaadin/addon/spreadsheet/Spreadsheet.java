@@ -1809,6 +1809,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         valueManager.clearCachedContent();
         selectionManager.clear();
+        customComponentFactory = null;
+        historyManager.clear();
+        hyperlinkCellClickHandler = null;
 
         for (SheetImageWrapper image : sheetImages) {
             setResource(image.resourceKey, null);
@@ -3041,4 +3044,13 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         valueManager.clearCachedContent();
     }
 
+    /**
+     * Reloads all data from the current spreadsheet and performs a full
+     * re-render. <br/>
+     * Functionally same as calling {@link #setWorkbook(Workbook)} with
+     * {@link #getWorkbook()} parameter.
+     */
+    public void resetSpreadsheetFromData() {
+        setWorkbook(getWorkbook());
+    }
 }

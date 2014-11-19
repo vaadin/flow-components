@@ -3236,9 +3236,9 @@ public class SheetWidget extends Panel {
         }
     }
 
-    public void removeMergedRegion(MergedRegion region, int index) {
+    public void removeMergedRegion(MergedRegion region, int ruleIndex) {
         String key = toKey(region.col1, region.row1);
-        jsniUtil.deleteRule(mergedRegionStyle, index);
+        jsniUtil.deleteRule(mergedRegionStyle, ruleIndex);
         mergedCells.remove(region.id).getElement().removeFromParent();
         overflownMergedCells.remove(region);
         // paint new "released cells" as selected
@@ -3281,7 +3281,15 @@ public class SheetWidget extends Panel {
     }
 
     public void setCellLinks(HashMap<String, String> cellLinksMap) {
-        this.cellLinksMap = cellLinksMap;
+        if (this.cellLinksMap == null) {
+            this.cellLinksMap = cellLinksMap;
+        } else {
+            this.cellLinksMap.clear();
+            if (cellLinksMap != null) {
+                this.cellLinksMap.putAll(cellLinksMap);
+            }
+        }
+
         if (cellLinksMap != null && !cellLinksMap.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             for (Iterator<String> i = cellLinksMap.keySet().iterator(); i

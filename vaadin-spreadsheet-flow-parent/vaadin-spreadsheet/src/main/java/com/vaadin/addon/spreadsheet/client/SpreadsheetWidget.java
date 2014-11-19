@@ -2,7 +2,6 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -195,12 +194,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         rowBeforeMergedCell = 0;
         // reset function bar
         formulaBarWidget.clear();
-        if (mergedRegions != null) {
-            while (0 < mergedRegions.size()) {
-                sheetWidget.removeMergedRegion(mergedRegions.remove(0), 0);
-            }
-            mergedRegions = null;
-        }
+        clearMergedRegions();
         // reset sheet
         sheetWidget.clearAll(removed);
     }
@@ -442,51 +436,27 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     public void updateMergedRegions(ArrayList<MergedRegion> mergedRegions) {
-        // remove removed, update updated ones
-        if (this.mergedRegions != null) {
-            int index = 0;
-            if (mergedRegions != null) {
-                for (Iterator<MergedRegion> iterator = this.mergedRegions
-                        .iterator(); iterator.hasNext();) {
-                    MergedRegion oldRegion = iterator.next();
-                    if (index < mergedRegions.size()) {
-                        MergedRegion newRegion = mergedRegions.get(index);
-                        if (oldRegion.id == newRegion.id) {
-                            if (oldRegion.col1 != newRegion.col1
-                                    || oldRegion.col2 != newRegion.col2
-                                    || oldRegion.row1 != newRegion.row1
-                                    || oldRegion.row2 != newRegion.row2) {
-                                sheetWidget.updateMergedRegionSizeAndPosition(
-                                        newRegion, oldRegion, index);
-                            } else {
-                                sheetWidget.updateMergedRegionSize(oldRegion);
-                            }
-                            index++;
-                        } else {
-                            iterator.remove();
-                            sheetWidget.removeMergedRegion(oldRegion, index);
-                        }
-                    } else {
-                        iterator.remove();
-                        sheetWidget.removeMergedRegion(oldRegion, index);
-                    }
-                }
-            } else {
-                // remove all
-                for (MergedRegion region : this.mergedRegions) {
-                    sheetWidget.removeMergedRegion(region, index++);
-                }
-            }
-        }
+        // remove old, add new
+        clearMergedRegions();
         if (mergedRegions != null) {
-            int i = (this.mergedRegions == null ? 0 : this.mergedRegions.size());
+            int i = 0;
             while (i < mergedRegions.size()) {
                 MergedRegion newMergedRegion = mergedRegions.get(i);
                 sheetWidget.addMergedRegion(newMergedRegion);
                 i++;
             }
         }
-        this.mergedRegions = mergedRegions;
+
+        // copy list for later
+        this.mergedRegions = new ArrayList<MergedRegion>(mergedRegions);
+    }
+
+    private void clearMergedRegions() {
+        if (this.mergedRegions != null) {
+            while (0 < mergedRegions.size()) {
+                sheetWidget.removeMergedRegion(this.mergedRegions.remove(0), 0);
+            }
+        }
     }
 
     @Override
@@ -2361,7 +2331,14 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void setCellStyleToCSSStyle(
             HashMap<Integer, String> cellStyleToCSSStyle) {
-        this.cellStyleToCSSStyle = cellStyleToCSSStyle;
+        if (this.cellStyleToCSSStyle == null) {
+            this.cellStyleToCSSStyle = cellStyleToCSSStyle;
+        } else {
+            this.cellStyleToCSSStyle.clear();
+            if (cellStyleToCSSStyle != null) {
+                this.cellStyleToCSSStyle.putAll(cellStyleToCSSStyle);
+            }
+        }
     }
 
     public void setShiftedCellBorderStyles(
@@ -2404,11 +2381,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     public void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
-        this.hiddenColumnIndexes = hiddenColumnIndexes;
+        this.hiddenColumnIndexes = new ArrayList<Integer>(hiddenColumnIndexes);
     }
 
     public void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
-        this.hiddenRowIndexes = hiddenRowIndexes;
+        this.hiddenRowIndexes = new ArrayList<Integer>(hiddenRowIndexes);
     }
 
     public void setCellComments(HashMap<String, String> cellComments) {

@@ -337,6 +337,15 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 }
             }
         }));
+        options.addComponent(new Button("Reset from data", new Button.ClickListener() {
+
+            @Override
+            public void buttonClick(ClickEvent event) {
+                if (spreadsheet != null) {
+                    spreadsheet.setWorkbook(spreadsheet.getWorkbook());
+                }
+            }
+        }));
         HorizontalLayout sheetOptions = new HorizontalLayout();
         sheetOptions.setSpacing(true);
         sheetOptions.addComponent(save);
