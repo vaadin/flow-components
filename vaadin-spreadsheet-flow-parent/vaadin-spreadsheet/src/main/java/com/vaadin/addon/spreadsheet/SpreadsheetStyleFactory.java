@@ -92,10 +92,9 @@ public class SpreadsheetStyleFactory {
             ALIGN_CENTER, "center", ALIGN_RIGHT, "right", ALIGN_FILL, "left",
             ALIGN_JUSTIFY, "left", ALIGN_CENTER_SELECTION, "center");
 
-    // FIXME vertical alignment isn't working currently
     private static final Map<Short, String> VERTICAL_ALIGN = mapFor(
-            VERTICAL_BOTTOM, "bottom", VERTICAL_CENTER, "middle", VERTICAL_TOP,
-            "top");
+            VERTICAL_BOTTOM, "flex-end", VERTICAL_CENTER, "center",
+            VERTICAL_TOP, "flex-start");
 
     private static final Map<Short, BorderStyle> BORDER = mapFor(
             BORDER_DASH_DOT, BorderStyle.DASHED_THIN, BORDER_DASH_DOT_DOT,
@@ -190,10 +189,13 @@ public class SpreadsheetStyleFactory {
             // sb.append("direction:rtl;");
             // }
         }
-        if (cellStyle.getVerticalAlignment() != defaultVerticalAlign) {
-            styleOut(sb, "vertical-align", cellStyle.getAlignment(),
-                    VERTICAL_ALIGN);
-        }
+
+        // excel default is bottom, so that is what we have in the CSS base
+        // files.
+        // TODO only works on modern (10+) IE.
+        styleOut(sb, "justify-content", cellStyle.getVerticalAlignment(),
+                VERTICAL_ALIGN);
+
         if (cellStyle.getWrapText()) { // default is to overflow
             sb.append("overflow:hidden;white-space:normal;");
         }
