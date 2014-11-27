@@ -97,12 +97,13 @@ public class ItemFilter extends Panel implements ValueChangeListener,
                 // options were left unchecked.
                 if (!allItems.getValue()) {
                     @SuppressWarnings("unchecked")
-                    Collection<Boolean> currentValue = (Collection<Boolean>) options
+                    Collection<String> currentValue = (Collection<String>) options
                             .getValue();
                     cancelValueChangeUpdate = true;
                     if (currentValue.isEmpty()) {
                         if (latestFilteredValues.isEmpty()
-                                || latestFilteredValues.contains(allCellValues)) {
+                                || latestFilteredValues
+                                        .containsAll(allCellValues)) {
                             allItems.setValue(true);
                             options.setValue(allCellValues);
                         } else {

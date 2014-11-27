@@ -1,6 +1,7 @@
 package com.vaadin.addon.spreadsheet.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -191,7 +192,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 sheetTabSheet.setTabs(sheetNames, true);
                 sheetTabSheet.setSelectedTab(sheetIndex);
             } else if (this.sheetNames == null
-                    || !this.sheetNames.equals(sheetNames)) {
+                    || !Arrays.equals(this.sheetNames, sheetNames)) {
                 // sheet renamed
                 sheetTabSheet.setTabs(sheetNames, false);
             }
@@ -465,7 +466,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
 
         // copy list for later
-        this.mergedRegions = new ArrayList<MergedRegion>(mergedRegions);
+        if (mergedRegions == null) {
+            this.mergedRegions = null;
+        } else {
+            this.mergedRegions = new ArrayList<MergedRegion>(mergedRegions);
+        }
     }
 
     private void clearMergedRegions() {
@@ -1542,7 +1547,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     // go to right most
                     col = rightCol;
                 }
-                while (hiddenColumnIndexes.contains(col) && col >= leftCol) {
+                while (hiddenColumnIndexes != null
+                        && hiddenColumnIndexes.contains(col) && col >= leftCol) {
                     col--;
                 }
             }

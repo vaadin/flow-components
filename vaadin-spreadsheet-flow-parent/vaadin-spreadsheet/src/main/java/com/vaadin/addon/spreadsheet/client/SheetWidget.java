@@ -1757,24 +1757,6 @@ public class SheetWidget extends Panel {
         jsniUtil.updateCSSRule(headerMarginStyle,
                 ".v-spreadsheet .bottom-left-pane", "marginTop",
                 (0 - sheet.getScrollTop()) + "px");
-        moveSelectionWidgetToMatchScroll();
-    }
-
-    /**
-     * If the pane the selection widget "belongs to" has changed, it needs to
-     * adjust to the scroll.
-     */
-    private void moveSelectionWidgetToMatchScroll() {
-        // int marginLeftMod = 50;
-        // int marginTopMod = 49;
-        // if (!displayRowColHeadings) {
-        // marginLeftMod = 0;
-        // marginTopMod = 31;
-        // }
-        // jsniUtil.updateCSSRuleWithIndex(headerMarginStyle, 2, "marginLeft",
-        // marginLeftMod + "px");
-        // jsniUtil.updateCSSRuleWithIndex(headerMarginStyle, 3, "marginTop",
-        // marginTopMod + "px");
     }
 
     private float createRowStyles(String[] rules, int startIndex, int endIndex) {
@@ -1950,157 +1932,6 @@ public class SheetWidget extends Panel {
             }
         }
         recalculateCellStyleWidthValues();
-    }
-
-    /** Update styles in for this spreadsheet */
-    @Deprecated
-    private void updateStyles(boolean reloadCellStyles) {
-        // styles for sizes and position
-        String[] sizeStyleRules = new String[actionHandler.getMaximumRows()
-                + actionHandler.getMaximumCols() + verticalSplitPosition > 0 ? 1
-                : 0 + horizontalSplitPosition > 0 ? 1 : 0]; // add extra rule if
-                                                            // vertical split
-                                                            // panel exists
-        definedRowHeights = new int[actionHandler.getMaximumRows()];
-        int ruleIndex = 0;
-
-        // rules for row positions -> height + top
-        float height = 0;
-        float topFrozenPanelHeightPt = 0;
-        topFrozenPanelHeight = 0;
-        String stylePrimaryName = getStylePrimaryName();
-        float capturedHeight = 0;
-        for (int i = 1; i <= actionHandler.getMaximumRows(); i++) {
-            String display = actionHandler.isRowHidden(i) ? "display:none;"
-                    : "";
-            float rowHeight = actionHandler.getRowHeight(i);
-            sizeStyleRules[ruleIndex++] = "." + stylePrimaryName + " .row" + i
-                    + " { " + display + "height: " + rowHeight + "pt; top: "
-                    + height + "pt;}\n";
-            height += rowHeight;
-            definedRowHeights[i - 1] = convertPointsToPixel(rowHeight);
-            if (verticalSplitPosition >= i) {
-                topFrozenPanelHeight += definedRowHeights[i - 1];
-            }
-            if (verticalSplitPosition == i) {
-                capturedHeight = rowHeight + 1;
-                height += 1.0F;
-                topFrozenPanelHeightPt = height;
-                topFrozenPanelHeight += 1;
-
-            }
-        }
-        // rules for column positions: width + left
-        int width = 0;
-        leftFrozenPanelWidth = 0;
-        int capturedWidth = 0;
-        for (int i = 1; i <= actionHandler.getMaximumCols(); i++) {
-            String display = actionHandler.isColumnHidden(i) ? "display: none;"
-                    : "";
-            int colWidth = actionHandler.getColWidth(i);
-            sizeStyleRules[ruleIndex++] = "." + stylePrimaryName + " .col" + i
-                    + " { " + display + "width: " + colWidth + "px; left: "
-                    + width + "px;}\n";
-            width += colWidth;
-            if (horizontalSplitPosition == i) {
-                capturedWidth = colWidth + 1;
-                width += 1;
-                leftFrozenPanelWidth = width;
-            }
-        }
-        if (capturedHeight > 0) { // increase the header height and border
-            sizeStyleRules[ruleIndex++] = "." + stylePrimaryName
-                    + " .bottom-left-pane .rh.row" + verticalSplitPosition
-                    + ", ." + stylePrimaryName + " .top-left-pane .rh.row"
-                    + verticalSplitPosition + " { height:" + capturedHeight
-                    + "pt; border-bottom: 2px solid rgb(169,169,169);}";
-        }
-        if (capturedWidth > 0) { // increase header width
-            sizeStyleRules[ruleIndex++] = "." + stylePrimaryName
-                    + " .bottom-left-pane .ch.cow" + horizontalSplitPosition
-                    + ", ." + stylePrimaryName + " .top-left-pane .ch.col"
-                    + horizontalSplitPosition + " { width:" + capturedWidth
-                    + "px;}";
-        }
-        resetStyleSheetRules(cellSizeAndPositionStyle, sizeStyleRules);
-
-        if (topFrozenPanelHeightPt > 0 && leftFrozenPanelWidth > 0) {
-            topLeftPane.removeClassName(FREEZE_PANE_INACTIVE_STYLENAME);
-        } else {
-            topLeftPane.addClassName(FREEZE_PANE_INACTIVE_STYLENAME);
-        }
-        // set the sizes for the freeze panes
-        if (topFrozenPanelHeightPt > 0) {
-            topLeftPane.getStyle().setHeight(topFrozenPanelHeightPt, Unit.PT);
-            topRightPane.removeClassName(FREEZE_PANE_INACTIVE_STYLENAME);
-        } else {
-            topLeftPane.getStyle().clearHeight();
-            topRightPane.addClassName(FREEZE_PANE_INACTIVE_STYLENAME);
-        }
-        if (leftFrozenPanelWidth > 0) {
-            topLeftPane.getStyle().setWidth(leftFrozenPanelWidth, Unit.PX);
-            bottomLeftPane.removeClassName(FREEZE_PANE_INACTIVE_STYLENAME);
-        } else {
-            topLeftPane.getStyle().clearWidth();
-            bottomLeftPane.addClassName(FREEZE_PANE_INACTIVE_STYLENAME);
-        }
-        bottomLeftPane.getStyle().setWidth(leftFrozenPanelWidth, Unit.PX);
-        topRightPane.getStyle().setHeight(topFrozenPanelHeightPt, Unit.PT);
-
-        // Styles for the header and selection widget location, scroll is faked
-        // with margins. moveHeadersToMatchScroll handles updating.
-        String[] headerMarginRules = new String[4];
-        headerMarginRules[0] = "." + stylePrimaryName
-                + " .bottom-left-pane { margin-top: 0px; }";
-        headerMarginRules[1] = "." + stylePrimaryName
-                + " .top-right-pane { margin-left: 0px; }";
-        headerMarginRules[2] = "." + stylePrimaryName
-                + " .sheet-selection.top-right, ." + stylePrimaryName
-                + " .sheet-selection.bottom-right { margin-left: 0px; }";
-        headerMarginRules[3] = "." + stylePrimaryName
-                + " .sheet-selection.bottom-right, ." + stylePrimaryName
-                + " .sheet-selection.bottom-left { margin-top: 0px; }";
-        resetStyleSheetRules(headerMarginStyle, headerMarginRules);
-
-        moveHeadersToMatchScroll();
-
-        // update floater size the adjust scroll bars correctly
-        floater.getStyle().setHeight(height, Unit.PT);
-        floater.getStyle().setWidth(width, Unit.PX);
-        if (verticalSplitPosition > 0) {
-            topRightPane.getStyle().setWidth(width, Unit.PX);
-        }
-        if (horizontalSplitPosition > 0) {
-            bottomLeftPane.getStyle().setHeight(height, Unit.PT);
-        }
-
-        // styles for individual cells
-        if (reloadCellStyles) {
-            Map<Integer, String> styles = actionHandler
-                    .getCellStyleToCSSStyle();
-            if (styles != null) {
-                try {
-                    for (Entry<Integer, String> entry : styles.entrySet()) {
-                        if (entry.getKey() == 0) {
-                            jsniUtil.insertRule(
-                                    sheetStyle,
-                                    ".v-spreadsheet .sheet .cell {"
-                                            + entry.getValue() + "}");
-                        } else {
-                            jsniUtil.insertRule(
-                                    sheetStyle,
-                                    ".v-spreadsheet .sheet .cell.cs"
-                                            + entry.getKey() + " {"
-                                            + entry.getValue() + "}");
-                        }
-                    }
-                } catch (Exception e) {
-                    debugConsole.severe("SheetWidget:updateStyles: "
-                            + e.toString() + " while creating the cell styles");
-                }
-            }
-            recalculateCellStyleWidthValues();
-        }
     }
 
     /**
@@ -3144,14 +2975,15 @@ public class SheetWidget extends Panel {
     public void updateMergedRegionSize(MergedRegion region) {
         String key = toKey(region.col1, region.row1);
         Cell mergedCell = mergedCells.get(region.id);
-        overflownMergedCells.remove(mergedRegionStyle);
+        overflownMergedCells.remove(region);
         updateMergedRegionRegionSize(region, mergedCell);
         DivElement element = mergedCell.getElement();
         // need to update the position of possible visible comment for merged
         // cell
         if (alwaysVisibleCellComments.containsKey(key)) {
             CellComment cellComment = alwaysVisibleCellComments.get(key);
-            if (element.getStyle().getDisplay().equals(Display.NONE)) {
+            if (element.getStyle().getDisplay()
+                    .equals(Display.NONE.getCssName())) {
                 cellComment.hide();
             } else {
                 cellComment.refreshPositionAccordingToCellRightCorner();
@@ -3773,7 +3605,6 @@ public class SheetWidget extends Panel {
     public void setSelectedCell(int col, int row) {
         selectedCellRow = row;
         selectedCellCol = col;
-        moveSelectionWidgetToMatchScroll();
     }
 
     public int getSelectionLeftCol() {

@@ -415,7 +415,9 @@ public class CellValueManager {
                 System.out.println(e.getMessage());
                 cell.setCellValue(value);
             }
-            markCellForUpdate(cell);
+            if (cell != null) {
+                markCellForUpdate(cell);
+            }
         }
 
         spreadsheet.updateMarkedCells();

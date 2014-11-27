@@ -22,8 +22,7 @@ public abstract class SpreadsheetAction extends Action {
     }
 
     public boolean isCellLocked(Cell cell) {
-        return cell.getSheet().getProtect()
-                && (cell == null || cell.getCellStyle().getLocked());
+        return cell.getSheet().getProtect() && cell.getCellStyle().getLocked();
     }
 
     public static String getColumnHeader(int col) {

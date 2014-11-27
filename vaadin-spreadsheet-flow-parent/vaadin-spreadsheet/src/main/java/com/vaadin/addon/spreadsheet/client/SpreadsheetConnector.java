@@ -70,7 +70,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                 left = Util.getTouchOrMouseClientX(latestCellContextMenuEvent);
                 top = Util.getTouchOrMouseClientY(latestCellContextMenuEvent);
             } else {
-                left = Util.getTouchOrMouseClientX(latestHeaderContextMenuEvent);
+                left = Util
+                        .getTouchOrMouseClientX(latestHeaderContextMenuEvent);
                 top = Util.getTouchOrMouseClientY(latestHeaderContextMenuEvent);
             }
             top += Window.getScrollTop();
@@ -398,7 +399,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             }
         }
         visibleCellCommentKeys.clear();
-        visibleCellCommentKeys.addAll(visibleCellComments);
+        if (visibleCellComments != null) {
+            visibleCellCommentKeys.addAll(visibleCellComments);
+        }
     }
 
     @Override
