@@ -3108,83 +3108,6 @@ public class SheetWidget extends Panel {
         return sheet;
     }
 
-    public void updateMergedRegionSizeAndPosition(MergedRegion region,
-            MergedRegion oldRegion, int index) {
-        final String key = toKey(region.col1, region.row1);
-        MergedCell mergedCell = mergedCells.remove(region.id);
-        overflownMergedCells.remove(region);
-        mergedCell.update(region.col1, region.row1, mergedCell.getValue(),
-                mergedCell.getCellStyle());
-        StringBuilder sb = new StringBuilder();
-        for (int r = region.row1; r <= region.row2; r++) {
-            for (int c = region.col1; c <= region.col2; c++) {
-                sb.append(toCssKey(c, r));
-                if (r != region.row2 || c != region.col2) {
-                    sb.append(",");
-                }
-            }
-        }
-        if (sb.length() != 0) {
-            jsniUtil.replaceSelector(mergedRegionStyle, sb.toString(), index);
-        } else { // should never happen
-            jsniUtil.replaceSelector(mergedRegionStyle, ".notusedselector",
-                    index);
-        }
-        DivElement element = mergedCell.getElement();
-        element.removeFromParent();
-        getPaneElementForCell(region.col1, region.row1).appendChild(element);
-        updateMergedRegionRegionSize(region, mergedCell);
-        element.addClassName(MERGED_CELL_CLASSNAME);
-        // POI doesn't shift cell comments together with rows, so comment might
-        // be removed/added
-        if (cellCommentsMap != null && cellCommentsMap.containsKey(key)) {
-            mergedCell.showCellCommentMark();
-        } else {
-            mergedCell.removeCellCommentMark();
-        }
-        String oldKey = toKey(oldRegion.col1, oldRegion.row1);
-        if (cellCommentsMap != null && cellCommentsMap.containsKey(oldKey)) {
-            try {
-                jsniUtil.parseColRow(oldKey);
-                Cell cell = rows.get(jsniUtil.getParsedCol() - firstRowIndex)
-                        .get(jsniUtil.getParsedCol() - firstColumnIndex);
-                cell.showCellCommentMark();
-            } catch (Exception e) {
-                // the cell just isn't visible, no problem.
-            }
-        }
-        // need to update the position of possible visible comment for merged
-        // cell
-        if (alwaysVisibleCellComments.containsKey(key)) {
-            CellComment cellComment = alwaysVisibleCellComments.get(key);
-            cellComment.showDependingToCellRightCorner((Element) mergedCell
-                    .getElement().cast(), region.row1, region.col1);
-            if (element.getStyle().getDisplay().equals(Display.NONE)) {
-                cellComment.hide();
-            }
-        } else if (alwaysVisibleCellComments.containsKey(oldKey)) {
-            alwaysVisibleCellComments.remove(oldKey).hide();
-            // add it to another cell
-            try {
-                setCellCommentVisible(true, oldKey);
-                Cell cell;
-                if (isMergedCell(oldKey)) {
-                    cell = getMergedCell(oldKey);
-                } else {
-                    cell = rows.get(jsniUtil.getParsedRow() - firstRowIndex)
-                            .get(jsniUtil.getParsedRow() - firstColumnIndex);
-                }
-                cell.showCellCommentMark();
-            } catch (Exception e) {
-                debugConsole
-                        .severe("SheetWidget:updateMergedRegionSizeAndPosition: "
-                                + e.toString()
-                                + " while trying to update a cell comment visibility in merged cell.");
-            }
-        }
-        mergedCells.put(region.id, mergedCell);
-    }
-
     private void updateMergedRegionRegionSize(MergedRegion region,
             Cell mergedCell) {
         int width = 0;
@@ -4127,28 +4050,6 @@ public class SheetWidget extends Panel {
     }
 
     /**
-     * Marks the given interval as selected (highlighted background), doesn't
-     * remove the old selected cells.
-     * 
-     * @param col1
-     * @param col2
-     * @param row1
-     * @param row2
-     */
-    public void addAsSelectedCells(int col1, int col2, int row1, int row2) {
-        final StringBuffer sb = new StringBuffer();
-        for (int r = row1; r <= row2; r++) {
-            for (int c = col1; c <= col2; c++) {
-                sb.append(toCssKey(c, r));
-                if (!(r == row2 && c == col2)) {
-                    sb.append(",");
-                }
-            }
-        }
-        jsniUtil.addSelector(cellRangeStyle, sb.toString(), 0);
-    }
-
-    /**
      * Marks the given interval as selected (highlighted background), replaces
      * old selected cells. Ignores the currently selected cell.
      * 
@@ -4174,11 +4075,6 @@ public class SheetWidget extends Panel {
         } else {
             jsniUtil.replaceSelector(cellRangeStyle, ".notusedselector", 0);
         }
-    }
-
-    public void addRowHeaderAsSelected(int row) {
-        final String selector = ".rh.row" + row;
-        jsniUtil.addSelector(cellRangeStyle, selector, 1);
     }
 
     /**
@@ -4208,72 +4104,6 @@ public class SheetWidget extends Panel {
             jsniUtil.replaceSelector(cellRangeStyle, sb.toString(), 1);
         } else { // should be impossible though
             jsniUtil.replaceSelector(cellRangeStyle, ".notusedselector", 1);
-        }
-    }
-
-    public void addColumnHeaderAsSelected(int col) {
-        final String selector = ".ch.col" + col;
-        jsniUtil.addSelector(cellRangeStyle, selector, 1);
-    }
-
-    /**
-     * Removes the given interval from selected (highlighted background).
-     * 
-     * @param col1
-     * @param col2
-     * @param row1
-     * @param row2
-     */
-    public void removeFromSelectedCells(int col1, int col2, int row1, int row2) {
-        String selector = jsniUtil.getSelector(cellRangeStyle, 0);
-        for (int r = row1; r <= row2; r++) {
-            for (int c = col1; c <= col2; c++) {
-                final String key = toCssKey(c, r);
-                if (selector.endsWith(key)) {
-                    selector = selector.substring(0,
-                            selector.length() - key.length());
-                } else {
-                    selector = selector.replace(key + ",", "");
-                }
-            }
-        }
-        selector = selector.trim();
-        if (selector.isEmpty() || selector.length() < 3) { // (",,")
-            selector = ".notusedselector";
-            jsniUtil.replaceSelector(cellRangeStyle, selector, 0);
-        } else if (selector.endsWith(",")) {
-            jsniUtil.replaceSelector(cellRangeStyle,
-                    selector.substring(0, selector.lastIndexOf(",")), 0);
-        } else {
-            jsniUtil.replaceSelector(cellRangeStyle, selector, 0);
-        }
-    }
-
-    public void removeRowHeaderFromSelected(int row) {
-        final String headerSelector = ".rh.row" + row;
-        String oldSelector = jsniUtil.getSelector(cellRangeStyle, 1);
-        final String selector = oldSelector.endsWith(headerSelector) ? oldSelector
-                .substring(0, oldSelector.length() - headerSelector.length())
-                .trim() : oldSelector.replace(headerSelector + ",", "").trim();
-        if (selector.endsWith(",")) {
-            jsniUtil.replaceSelector(cellRangeStyle,
-                    selector.substring(0, selector.lastIndexOf(",")), 1);
-        } else {
-            jsniUtil.replaceSelector(cellRangeStyle, selector, 1);
-        }
-    }
-
-    public void removeColHeaderFromSelected(int col) {
-        final String headerSelector = ".ch.col" + col;
-        String oldSelector = jsniUtil.getSelector(cellRangeStyle, 1);
-        final String selector = oldSelector.endsWith(headerSelector) ? oldSelector
-                .substring(0, oldSelector.length() - headerSelector.length())
-                .trim() : oldSelector.replace(headerSelector + ",", "").trim();
-        if (selector.endsWith(",")) {
-            jsniUtil.replaceSelector(cellRangeStyle,
-                    selector.substring(0, selector.lastIndexOf(",")), 1);
-        } else {
-            jsniUtil.replaceSelector(cellRangeStyle, selector, 1);
         }
     }
 
@@ -4503,7 +4333,6 @@ public class SheetWidget extends Panel {
     }
 
     public void focusSheet() {
-        // sheet.focus();
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
             @Override
@@ -4823,10 +4652,6 @@ public class SheetWidget extends Panel {
 
     public void removeShiftedCellBorderStyles() {
         jsniUtil.clearCSSRules(shiftedBorderCellStyle);
-    }
-
-    public final String createCellStyleSelector(String selectors) {
-        return selectors.replace(".col", ".v-spreadsheet .cell.col");
     }
 
     public int getSheetScrollLeft() {
