@@ -213,4 +213,18 @@ public interface SheetHandler {
 
     void setCellStyleWidthRatios(HashMap<Integer, Float> cellStyleWidthRatioMap);
 
+    /**
+     * Called when user pastes something inside the sheet.
+     * 
+     * @param text
+     *            the pasted content
+     */
+    void onSheetPaste(String text);
+
+    /**
+     * Called after successful cut operation; currently selected cells should be
+     * cleared
+     */
+    void clearSelectedCellsOnCut();
+
 }

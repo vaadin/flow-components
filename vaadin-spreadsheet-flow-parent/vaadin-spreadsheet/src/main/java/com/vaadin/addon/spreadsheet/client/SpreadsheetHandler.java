@@ -207,4 +207,17 @@ public interface SpreadsheetHandler {
      * Client tried to modify protected cell
      */
     public void protectedCellWriteAttempted();
+
+    /**
+     * Client pasted text at current selection.
+     * 
+     * @param text
+     */
+    public void onPaste(String text);
+
+    /**
+     * Called after successful cut operation; currently selected cells should be
+     * cleared
+     */
+    public void clearSelectedCellsOnCut();
 }

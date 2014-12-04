@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -14,7 +15,7 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetState;
 import com.vaadin.addon.spreadsheet.command.CellShiftValuesCommand;
 import com.vaadin.addon.spreadsheet.command.CellValueCommand;
 
-public class CellShifter {
+public class CellShifter implements Serializable {
 
     private final Spreadsheet spreadsheet;
 

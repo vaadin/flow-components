@@ -1,7 +1,17 @@
 package com.vaadin.addon.spreadsheet;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedCellWriteAttemptedEvent;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
@@ -202,6 +212,146 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     public void protectedCellWriteAttempted() {
         spreadsheet
                 .fireEvent(new ProtectedCellWriteAttemptedEvent(spreadsheet));
+    }
+
+    @Override
+    public void onPaste(String text) {
+        Workbook workbook = spreadsheet.getWorkbook();
+        Sheet activesheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
+
+        CellReference selectedCellReference = spreadsheet
+                .getSelectedCellReference();
+
+        String[] lines;
+        if (text.indexOf("\r\n") > -1) {
+            lines = text.split("\r\n");
+        } else if (text.indexOf("\n") > -1) {
+            lines = text.split("\n");
+        } else {
+            lines = text.split("\r");
+        }
+
+        int rowIndex = selectedCellReference.getRow();
+        int colIndex = -1;
+        for (String line : lines) {
+
+            Row row = activesheet.getRow(rowIndex);
+            if (row == null) {
+                row = activesheet.createRow(rowIndex);
+            }
+
+            colIndex = selectedCellReference.getCol();
+
+            for (String cellContent : splitOnTab(line)) {
+
+                Cell cell = row.getCell(colIndex);
+                if (cell == null) {
+                    cell = row.createCell(colIndex);
+                }
+                cell.setCellValue(cellContent);
+
+                colIndex++;
+            }
+            rowIndex++;
+        }
+
+        // remove last incrementation so that selection goes correctly
+        rowIndex--;
+        colIndex--;
+
+        // might have impacted formulas outside of selection area, so just
+        // reload all values
+        spreadsheet.updatedAndRecalculateAllCellValues();
+
+        // re-set selection to copied area
+        spreadsheet.setSelectionRange(selectedCellReference.getRow(), rowIndex,
+                selectedCellReference.getCol(), colIndex);
+    }
+
+    /**
+     * Splits tab-delimited string into an array of Strings, inserting empty
+     * strings between any tab characters and the beginning and end of the line
+     * if it would be a tab. Length of array will equal number of tabs + 1.
+     * <p>
+     * E.g.<br/>
+     * "1\t2" - {"1","2"}<br/>
+     * "\t\t" - {"","",""}<br/>
+     * 
+     * @param line
+     * @return
+     */
+    private static String[] splitOnTab(String line) {
+
+        List<String> list = new LinkedList<String>();
+        StringTokenizer tokenizer = new StringTokenizer(line, "\t", true);
+
+        // marker for when last token is a tab, meaning we need one
+        // additional empty string
+        boolean lastCharWasTab = false;
+
+        while (tokenizer.hasMoreTokens()) {
+
+            String content = tokenizer.nextToken();
+
+            if (content.equals("\t")) {
+                // empty content; insert empty string here
+                content = "";
+
+                if (!tokenizer.hasMoreTokens()) {
+                    lastCharWasTab = true;
+                }
+
+            } else {
+                // normal cell content, value in 'content'
+
+                // skip to next content by skipping tab token
+                // (we process 'content\t' on the same loop)
+                if (tokenizer.countTokens() > 1) {
+                    tokenizer.nextToken();
+                } else if (tokenizer.countTokens() == 1) {
+                    // if the tab is the last char we need to mark it
+                    tokenizer.nextToken();
+                    lastCharWasTab = true;
+                }
+            }
+
+            list.add(content);
+
+            if (lastCharWasTab) {
+                list.add("");
+            }
+        }
+
+        return list.toArray(new String[list.size()]);
+    }
+
+    @Override
+    public void clearSelectedCellsOnCut() {
+        // clear ranges
+        List<CellRangeAddress> cellRangeAddresses = spreadsheet
+                .getCellSelectionManager().getCellRangeAddresses();
+        for (CellRangeAddress a : cellRangeAddresses) {
+            for (int row = a.getFirstRow(); row <= a.getLastRow(); row++) {
+                for (int col = a.getFirstColumn(); col <= a.getLastColumn(); col++) {
+                    Cell cell = spreadsheet.getCell(row, col);
+                    if (cell != null) {
+                        cell.setCellType(Cell.CELL_TYPE_BLANK);
+                        spreadsheet.markCellAsDeleted(cell, true);
+                    }
+                }
+            }
+        }
+
+        // clear single cell
+        CellReference reference = spreadsheet.getCellSelectionManager()
+                .getSelectedCellReference();
+        Cell cell = spreadsheet.getCell(reference.getRow(), reference.getCol());
+        if (cell != null) {
+            cell.setCellType(Cell.CELL_TYPE_BLANK);
+            spreadsheet.markCellAsDeleted(cell, true);
+        }
+
+        spreadsheet.updatedAndRecalculateAllCellValues();
     }
 
 }

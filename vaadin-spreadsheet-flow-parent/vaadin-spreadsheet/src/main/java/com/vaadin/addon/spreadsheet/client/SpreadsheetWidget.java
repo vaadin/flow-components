@@ -2597,4 +2597,14 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         spreadsheetHandler.setCellStyleWidthRatios(cellStyleWidthRatioMap);
     }
 
+    @Override
+    public void onSheetPaste(String text) {
+        spreadsheetHandler.onPaste(text);
+    }
+
+    @Override
+    public void clearSelectedCellsOnCut() {
+        spreadsheetHandler.clearSelectedCellsOnCut();
+    }
+
 }

@@ -164,14 +164,13 @@ public class CellValueManager {
                     }
                 }
 
-                return cellData;
             }
         } catch (RuntimeException rte) {
             rte.printStackTrace();
             cellData.value = "ERROR:" + rte.getMessage();
-            return cellData;
         }
-        return null;
+
+        return cellData;
     }
 
     protected String getScientificNotationStringForNumericCell(Cell cell,

@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
 import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.Util;
 import com.vaadin.client.ui.VLabel;
@@ -220,6 +221,11 @@ public class SheetWidget extends Panel {
     private DivElement topRightPane = Document.get().createDivElement();
 
     private DivElement bottomLeftPane = Document.get().createDivElement();
+
+    /**
+     * Hidden textfield that handles all copy and paste functions.
+     */
+    private final CopyPasteTextBox copyPasteBox;
 
     /**
      * A dummy element for calculating the width each cell style need so need of
@@ -449,6 +455,8 @@ public class SheetWidget extends Panel {
         initDOM();
 
         selectionWidget = new SelectionWidget(view, this);
+        copyPasteBox = new CopyPasteTextBox(this, getCopyPasteHandler());
+        getElement().appendChild(copyPasteBox.getElement());
 
         initListeners();
 
@@ -471,6 +479,18 @@ public class SheetWidget extends Panel {
                         requestCells();
                     }
                 });
+    }
+
+    protected CopyPasteHandler getCopyPasteHandler() {
+        return new CopyPasteHandlerImpl(this);
+    }
+
+    @Override
+    protected void onAttach() {
+        super.onAttach();
+
+        // we need to use the selectAll() method that needs GWT attachment
+        adopt(copyPasteBox);
     }
 
     public SheetHandler getSheetHandler() {
@@ -4835,5 +4855,14 @@ public class SheetWidget extends Panel {
 
     protected Element getTopLeftPane() {
         return topLeftPane;
+    }
+
+    public boolean isSheetElement(Element cast) {
+        return cast == getBottomLeftPane() || cast == getTopLeftPane()
+                || cast == getTopRightPane() || cast == getBottomRightPane();
+    }
+
+    public void clearSelectedCellsOnCut() {
+        actionHandler.clearSelectedCellsOnCut();
     }
 }
