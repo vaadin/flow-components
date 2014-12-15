@@ -1291,34 +1291,48 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * See {@link Sheet#shiftRows(int, int, int)}.
+     * Shifts rows between startRow and endRow n number of rows.
+     * If you use a negative number, it will shift rows up.
+     * Code ensures that rows don't wrap around.
      * <p>
      * If you are adding / deleting rows, you might want to change the number of
      * visible rows rendered {@link #getRows()} with
      * {@link #setMaximumRows(int)}.
-     * 
+     * <p>
+     * See {@link Sheet#shiftRows(int, int, int)}.
+     *
      * @param startRow
-     *            0-based
+     *            The first row to shift (0-based)
      * @param endRow
-     *            0-based
+     *            The last row to shift (0-based)
      * @param n
+     *            number of rows to shift, positive shifts down, negative shifts up.
      */
     public void shiftRows(int startRow, int endRow, int n) {
         shiftRows(startRow, endRow, n, false, false);
     }
 
     /**
-     * See {@link Sheet#shiftRows(int, int, int, boolean, boolean)}.
+     * Shifts rows between startRow and endRow n number of rows.
+     * If you use a negative number, it will shift rows up.
+     * Code ensures that rows don't wrap around
      * <p>
      * If you are adding / deleting rows, you might want to change the number of
      * visible rows rendered {@link #getRows()} with
      * {@link #setMaximumRows(int)}.
-     * 
+     * <p>
+     * See {@link Sheet#shiftRows(int, int, int, boolean, boolean)}.
+     *
      * @param startRow
+     *            The first row to shift (0-based)
      * @param endRow
+     *            The last row to shift (0-based)
      * @param n
+     *            number of rows to shift, positive shifts down, negative shifts up.
      * @param copyRowHeight
+     *            whether to copy the row height during the shift
      * @param resetOriginalRowHeight
+     *            whether to set the original row's height to the default
      */
     public void shiftRows(int startRow, int endRow, int n,
             boolean copyRowHeight, boolean resetOriginalRowHeight) {
