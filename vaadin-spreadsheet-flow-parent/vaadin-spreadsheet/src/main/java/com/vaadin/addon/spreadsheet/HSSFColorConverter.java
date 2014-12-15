@@ -5,6 +5,7 @@ import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 
 public class HSSFColorConverter implements ColorConverter {
@@ -148,5 +149,19 @@ public class HSSFColorConverter implements ColorConverter {
             }
         }
         return false;
+    }
+
+    @Override
+    public String getBackgroundColorCSS(ConditionalFormattingRule rule) {
+        short index = rule.getFontFormatting().getFontColorIndex();
+        String styleColor = styleColor(index);
+        return styleColor;
+    }
+
+    @Override
+    public String getFontColorCSS(ConditionalFormattingRule rule) {
+        short color = rule.getPatternFormatting().getFillForegroundColor();
+        String styleColor = styleColor(color);
+        return styleColor;
     }
 }

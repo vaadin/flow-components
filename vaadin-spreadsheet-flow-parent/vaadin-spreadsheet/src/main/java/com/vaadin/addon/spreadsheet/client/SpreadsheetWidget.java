@@ -85,6 +85,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private int activeSheetIndex;
 
     private Map<Integer, String> cellStyleToCSSStyle;
+    private Map<Integer, String> conditionalFormattingStyles = new HashMap<Integer, String>();
 
     private boolean loaded;
     private boolean formulaBarEditing;
@@ -2605,6 +2606,16 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public void clearSelectedCellsOnCut() {
         spreadsheetHandler.clearSelectedCellsOnCut();
+    }
+
+    public Map<Integer, String> getConditionalFormattingStyles() {
+        return conditionalFormattingStyles;
+    }
+
+    public void setConditionalFormattingStyles(HashMap<Integer, String> map) {
+        conditionalFormattingStyles.clear();
+        if (map != null)
+            this.conditionalFormattingStyles.putAll(map);
     }
 
 }

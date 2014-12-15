@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -164,6 +165,16 @@ public class CellValueManager {
                     }
                 }
 
+                Set<Integer> cellFormattingIndexes = spreadsheet
+                        .getConditionalFormatter().getCellFormattingIndex(cell);
+                if (cellFormattingIndexes != null) {
+
+                    for (Integer i : cellFormattingIndexes) {
+                        cellData.cellStyle = cellData.cellStyle + " cf" + i;
+                    }
+                }
+
+                return cellData;
             }
         } catch (RuntimeException rte) {
             rte.printStackTrace();

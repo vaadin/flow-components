@@ -420,6 +420,13 @@
 		<!-- poi-ooxml above is pulling in the xml-apis jar 1.0.b2 which is not 
 			compatible with the selenium version. -->
 
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>ooxml-schemas</artifactId>
+			<version>1.1</version>
+		</dependency>
+
 		<dependency>
 			<groupId>xml-apis</groupId>
 			<artifactId>xml-apis</artifactId>

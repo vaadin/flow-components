@@ -123,6 +123,8 @@ public interface SheetHandler {
 
     Map<Integer, String> getCellStyleToCSSStyle();
 
+    Map<Integer, String> getConditionalFormattingStyles();
+
     /**
      * 
      * @param i

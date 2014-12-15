@@ -462,6 +462,10 @@ public class SpreadsheetStyleFactory {
                             entry.getValue()));
 
         }
+
+        // conditional formatting
+        spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
+
     }
 
     private String buildMergedCellBorderCSS(String selector, String rules) {

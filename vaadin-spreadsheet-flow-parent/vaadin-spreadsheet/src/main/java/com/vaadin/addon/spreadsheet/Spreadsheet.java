@@ -133,6 +133,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             this);
     private final SpreadsheetHistoryManager historyManager = new SpreadsheetHistoryManager(
             this);
+    private ConditionalFormatter conditionalFormatter;
 
     private int firstRow;
     private int lastRow;
@@ -233,6 +234,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         setSizeFull(); // Default to full size
 
         SpreadsheetFactory.loadSpreadsheetWith(this, workbook);
+
     }
 
     /**
@@ -1000,7 +1002,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 .getActiveSheetIndex());
         final Cell cell = activeSheet.getRow(row).getCell(col);
         if (cell != null) {
-            cell.setCellStyle(null);
+            // cell.setCellStyle(null); //TODO NPE on HSSF
             styler.cellStyleUpdated(cell, true);
             activeSheet.getRow(row).removeCell(cell);
             valueManager.cellDeleted(cell);
@@ -1043,6 +1045,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * cells. For that, use {@link #reloadVisibleCellContents()}
      */
     public void updateMarkedCells() {
+        // update conditional formatting in case styling has changed. New values
+        // are fetched in ValueManager (below).
+        conditionalFormatter.createConditionalFormatterRules();
         // FIXME should be optimized, should not go through all links, comments
         // etc. always
         valueManager.updateMarkedCellValues();
@@ -1851,6 +1856,18 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         getState().verticalScrollPositions = new int[getState().sheetNames.length];
         getState().horizontalScrollPositions = new int[getState().sheetNames.length];
+
+        conditionalFormatter = createConditionalFormatter();
+    }
+
+    /**
+     * Override this method to provide your own ConditionalFormatter
+     * implementation. Called each time we open a workbook.
+     * 
+     * @return A {@link ConditionalFormatter} that links to this spreadsheet.
+     */
+    protected ConditionalFormatter createConditionalFormatter() {
+        return new ConditionalFormatter(this);
     }
 
     protected void reloadActiveSheetData() {
@@ -3127,5 +3144,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         CellReference ref = new CellReference(selectionRange);
         selectionManager.handleCellSelection(ref);
+    }
+
+    /**
+     * @return the {@link ConditionalFormatter} used by this {@link Spreadsheet}
+     */
+    public ConditionalFormatter getConditionalFormatter() {
+        return conditionalFormatter;
     }
 }

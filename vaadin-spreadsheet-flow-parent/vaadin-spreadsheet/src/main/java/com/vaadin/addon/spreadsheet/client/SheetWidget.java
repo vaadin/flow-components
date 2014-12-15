@@ -2,6 +2,7 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -535,6 +536,7 @@ public class SheetWidget extends Panel {
                 }
                 updateSheetStyles();
                 updateCellStyles();
+                updateConditionalFormattingStyles();
                 resetScrollView(scrollLeft, scrollTop);
                 actionHandler.onScrollViewChanged(firstRowIndex, lastRowIndex,
                         firstColumnIndex, lastColumnIndex);
@@ -1925,6 +1927,35 @@ public class SheetWidget extends Panel {
         style = sheet.getStyle();
         style.setLeft(leftFrozenPanelWidth + widthIncrease, Unit.PX);
         style.setTop(topFrozenPanelHeight + topOffset, Unit.PX);
+    }
+
+    private void updateConditionalFormattingStyles() {
+        Map<Integer, String> styles = actionHandler
+                .getConditionalFormattingStyles();
+        if (styles != null) {
+            try {
+
+                // reverse numeral order, so that rules override each other
+                // correctly
+                List<Integer> list = new ArrayList<Integer>(styles.keySet());
+                Collections.sort(list);
+
+                for (int i = list.size() - 1; i >= 0; i--) {
+
+                    Integer key = list.get(i);
+                    String val = styles.get(key);
+
+                    jsniUtil.insertRule(sheetStyle,
+                            ".v-spreadsheet .sheet .cell.cf" + key + " {" + val
+                                    + "}");
+                }
+            } catch (Exception e) {
+                debugConsole
+                        .severe("SheetWidget:updateConditionalFormattingStyles: "
+                                + e.toString()
+                                + " while creating the cell styles");
+            }
+        }
     }
 
     private void updateCellStyles() {

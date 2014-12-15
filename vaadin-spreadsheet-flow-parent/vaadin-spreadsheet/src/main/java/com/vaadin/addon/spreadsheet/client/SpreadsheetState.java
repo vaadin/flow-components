@@ -44,6 +44,12 @@ public class SpreadsheetState extends AbstractComponentState {
     @DelegateToWidget
     public ArrayList<String> shiftedCellBorderStyles = null;
 
+    /**
+     * All conditional formatting styles for this sheet.
+     */
+    @DelegateToWidget
+    public HashMap<Integer, String> conditionalFormattingStyles = null;
+
     /** 1-based */
     @DelegateToWidget
     public ArrayList<Integer> hiddenColumnIndexes = null;

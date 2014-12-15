@@ -1,13 +1,22 @@
 package com.vaadin.addon.spreadsheet;
 
+import java.lang.reflect.Method;
+import java.util.logging.Logger;
+
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.xssf.model.ThemesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellFill;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCfRule;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTColor;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDxf;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFont;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
 
 public class XSSFColorConverter implements ColorConverter {
@@ -246,5 +255,70 @@ public class XSSFColorConverter implements ColorConverter {
             }
         }
         return false;
+    }
+
+    @Override
+    public String getBackgroundColorCSS(ConditionalFormattingRule rule) {
+
+        XSSFConditionalFormattingRule r = (XSSFConditionalFormattingRule) rule;
+
+        CTDxf dxf = getXMLColorDataWithReflection(r);
+
+        CTColor bgColor = dxf.getFill().getPatternFill().getBgColor();
+        byte[] rgb = bgColor.getRgb();
+
+        return rgb == null ? null : toRGBA(rgb);
+    }
+
+    /**
+     * XSSF doesn't have an API to get this value, so brute force it is..
+     * 
+     * @param rule
+     *            The rule that has color data defined
+     * @return OpenXML data format that contains the real defined styles
+     */
+    private CTDxf getXMLColorDataWithReflection(
+            XSSFConditionalFormattingRule rule) {
+        CTCfRule realRule = null;
+
+        Method declaredMethod = null;
+        try {
+            declaredMethod = rule.getClass().getDeclaredMethod("getCTCfRule");
+            declaredMethod.setAccessible(true);
+            realRule = (CTCfRule) declaredMethod.invoke(rule);
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).fine(e.getMessage());
+        } finally {
+            declaredMethod.setAccessible(false);
+        }
+
+        CTDxf dxf = workbook.getStylesSource().getCTStylesheet().getDxfs()
+                .getDxfArray((int) realRule.getDxfId());
+
+        return dxf;
+    }
+
+    @Override
+    public String getFontColorCSS(ConditionalFormattingRule rule) {
+
+        XSSFConditionalFormattingRule r = (XSSFConditionalFormattingRule) rule;
+
+        CTDxf dxf = getXMLColorDataWithReflection(r);
+        CTFont font = dxf.getFont();
+
+        if (font.getColorList() == null && font.getColorList().isEmpty()) {
+            // default color
+            return null;
+        }
+
+        CTColor ctColor = font.getColorList().get(0);
+        byte[] rgb = ctColor.getRgb();
+
+        if (rgb == null) {
+            // default color
+            return null;
+        }
+
+        return toRGBA(rgb);
     }
 }
