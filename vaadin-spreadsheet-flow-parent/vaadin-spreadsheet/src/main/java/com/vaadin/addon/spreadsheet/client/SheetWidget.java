@@ -1785,8 +1785,8 @@ public class SheetWidget extends Panel {
         for (int i = startIndex; i <= endIndex; i++) {
             StringBuilder sb = new StringBuilder();
             float rowHeight = actionHandler.getRowHeight(i);
-            sb.append(".").append(stylePrimaryName).append(" .row").append(i)
-                    .append(" { ").append(getRowDisplayString(i))
+            sb.append(".").append(stylePrimaryName).append(" .sheet .row")
+                    .append(i).append(" { ").append(getRowDisplayString(i))
                     .append("height: ").append(rowHeight).append("pt; top:")
                     .append(top).append("pt; }\n");
             top += rowHeight;
@@ -1803,8 +1803,8 @@ public class SheetWidget extends Panel {
         for (int i = startIndex; i <= endIndex; i++) {
             StringBuilder sb = new StringBuilder();
             int colWidth = actionHandler.getColWidth(i);
-            sb.append(".").append(stylePrimaryName).append(" .col").append(i)
-                    .append(" { ").append(getColumnDisplayString(i))
+            sb.append(".").append(stylePrimaryName).append(" .sheet .col")
+                    .append(i).append(" { ").append(getColumnDisplayString(i))
                     .append("width: ").append(colWidth).append("px; left:")
                     .append(left).append("px; }\n");
             left += colWidth;
