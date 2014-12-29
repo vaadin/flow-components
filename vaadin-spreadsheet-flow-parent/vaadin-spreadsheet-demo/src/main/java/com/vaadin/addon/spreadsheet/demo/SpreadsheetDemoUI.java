@@ -50,6 +50,15 @@ import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
+/**
+ * Demo class for the Spreadsheet component.
+ * <p>
+ * You can upload any xls or xlsx file using the upload component. You can also
+ * place spreadsheet files on the classpath, under the folder /testsheets/, and
+ * they will be picked up in a combobox in the menu.
+ * 
+ *
+ */
 @SuppressWarnings("serial")
 public class SpreadsheetDemoUI extends UI implements Receiver {
 
@@ -61,28 +70,20 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     VerticalLayout layout = new VerticalLayout();
 
     Upload upload = new Upload("Upload a XLS file to view it", this);
-    Spreadsheet spreadsheet;
-
     private File previousFile = null;
 
     private Button save;
-
     private Button download;
-
     private File uploadedFile;
-
     private ComboBox openTestSheetSelect;
-
-    private SelectionChangeListener selectionChangeListener;
-
-    private SpreadsheetComponentFactory spreadsheetFieldFactory;
-
-    private SelectedSheetChangeListener selectedSheetChangeListener;
-
-    private final Handler spreadsheetActionHandler = new SpreadsheetDefaultActionHandler();
-
     private CheckBox gridlines;
     private CheckBox rowColHeadings;
+
+    Spreadsheet spreadsheet;
+    private SelectionChangeListener selectionChangeListener;
+    private SpreadsheetComponentFactory spreadsheetFieldFactory;
+    private SelectedSheetChangeListener selectedSheetChangeListener;
+    private final Handler spreadsheetActionHandler = new SpreadsheetDefaultActionHandler();
 
     public SpreadsheetDemoUI() {
         super();
@@ -94,6 +95,31 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         SpreadsheetFactory.logMemoryUsage();
         setContent(layout);
 
+        buildOptions();
+
+        selectionChangeListener = new SelectionChangeListener() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                printSelectionChangeEventContents(event);
+            }
+        };
+
+        selectedSheetChangeListener = new SelectedSheetChangeListener() {
+
+            @Override
+            public void onSelectedSheetChange(SelectedSheetChangeEvent event) {
+                gridlines.setValue(event.getNewSheet().isDisplayGridlines());
+                rowColHeadings.setValue(event.getNewSheet()
+                        .isDisplayRowColHeadings());
+            }
+        };
+
+        spreadsheetFieldFactory = new TestComponentFactory();
+
+    }
+
+    private void buildOptions() {
         HorizontalLayout options = new HorizontalLayout();
         options.setSpacing(true);
 
@@ -256,42 +282,6 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 loadFile(uploadedFile);
             }
         });
-
-        selectionChangeListener = new SelectionChangeListener() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                printSelectionChangeEventContents(event);
-            }
-        };
-
-        selectedSheetChangeListener = new SelectedSheetChangeListener() {
-            // private int counter = 0;
-
-            @Override
-            public void onSelectedSheetChange(SelectedSheetChangeEvent event) {
-                gridlines.setValue(event.getNewSheet().isDisplayGridlines());
-                rowColHeadings.setValue(event.getNewSheet()
-                        .isDisplayRowColHeadings());
-
-                // Workbook workbook = ((Spreadsheet) event.getComponent())
-                // .getWorkbook();
-                // c.removeAllItems();
-                // for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-                // c.addItem(i);
-                // }
-
-                // System.out.println("SELECTED SHEET CHANGED: #" + counter++);
-                // System.out.println("Previous sheet:"
-                // + event.getPreviousSheet().getSheetName()
-                // + ", New Sheet: " + event.getNewSheet().getSheetName()
-                // + " index: " + event.getNewSheetVisibleIndex()
-                // + " POIIndex: " + event.getNewSheetPOIIndex());
-            }
-        };
-
-        spreadsheetFieldFactory = new TestComponentFactory();
-
     }
 
     protected void createNewSheet() {
@@ -392,19 +382,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             }
         }
 
-        spreadsheet.setInfoLabelValue(cells.size() + " selected cells");
+        spreadsheet.setInfoLabelValue(cells.size() + " selected cell(s)");
 
-        // System.out.println(event.getSelectedCellReference().toString());
-        // System.out.println("Merged region: "
-        // + event.getSelectedCellMergedRegion());
-        // System.out.println("Ranges:");
-        // for (CellRangeAddress range : event.getCellRangeAddresses()) {
-        // System.out.println(range.toString());
-        // }
-        // System.out.println("Individual Cells:");
-        // for (CellReference cell : event.getIndividualSelectedCells()) {
-        // System.out.println(cell.toString());
-        // }
     }
 
     private void loadFile(File file) {
