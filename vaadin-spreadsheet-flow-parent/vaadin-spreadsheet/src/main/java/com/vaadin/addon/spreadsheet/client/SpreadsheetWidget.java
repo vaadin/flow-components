@@ -57,14 +57,16 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     private final SheetWidget sheetWidget;
-    private final FormulaBarWidget formulaBarWidget;
+    final FormulaBarWidget formulaBarWidget;
     private final SheetTabSheet sheetTabSheet;
 
-    private SpreadsheetHandler spreadsheetHandler;
+    private final SelectionHandler selectionHandler;
+
+    SpreadsheetHandler spreadsheetHandler;
 
     private SheetContextMenuHandler sheetContextMenuHandler;
 
-    private SpreadsheetCustomEditorFactory customEditorFactory;
+    SpreadsheetCustomEditorFactory customEditorFactory;
 
     private int rowBufferSize;
 
@@ -92,8 +94,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private boolean inlineEditing;
     private boolean cancelDeferredCommit;
     private boolean selectedCellIsFormulaType;
-    private boolean cellLocked;
-    private boolean customCellEditorDisplayed;
+    boolean cellLocked;
+    boolean customCellEditorDisplayed;
     private boolean sheetProtected;
     private boolean cancelNextSheetRelayout;
     private boolean hasSelectedCellChangedOnClick;
@@ -102,11 +104,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private int[] horizontalScrollPositions;
     // private int firstVisibleTab; Not working in POI -> disabled
     private String[] sheetNames;
-    private List<Integer> hiddenColumnIndexes;
-    private List<Integer> hiddenRowIndexes;
+    List<Integer> hiddenColumnIndexes;
+    List<Integer> hiddenRowIndexes;
     private List<MergedRegion> mergedRegions;
-    private int colBeforeMergedCell;
-    private int rowBeforeMergedCell;
 
     /**
      * Timer flag for sending lazy RPCs to server. Used so that we don't send an
@@ -114,7 +114,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      */
     private boolean okToSendCellProtectRpc = true;
 
-    private MergedRegionContainer mergedRegionContainer = new MergedRegionContainer() {
+    MergedRegionContainer mergedRegionContainer = new MergedRegionContainer() {
 
         @Override
         public MergedRegion getMergedRegionStartingFrom(int column, int row) {
@@ -146,6 +146,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         sheetWidget = new SheetWidget(this);
         formulaBarWidget = new FormulaBarWidget(this);
         sheetTabSheet = new SheetTabSheet(this);
+        selectionHandler = new SelectionHandler(this, sheetWidget);
 
         sheetWidget.getElement().appendChild(formulaBarWidget.getElement());
         sheetWidget.getElement().appendChild(sheetTabSheet.getElement());
@@ -209,8 +210,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     /** Clear all current sheet related data */
     public void clearSpreadsheet(boolean removed) {
-        colBeforeMergedCell = 0;
-        rowBeforeMergedCell = 0;
+        selectionHandler.clearBeforeMergeCells();
+
         // reset function bar
         formulaBarWidget.clear();
         clearMergedRegions();
@@ -306,81 +307,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
     }
 
-    public void setCellSelection(int col, int row, String value,
-            boolean formula, boolean locked) {
-        if (customCellEditorDisplayed) {
-            customCellEditorDisplayed = false;
-            sheetWidget.removeCustomCellEditor();
-        }
-        cellLocked = locked;
-        sheetWidget.setSelectedCell(col, row);
-        newSelectedCellSet();
-        sheetWidget.focusSheet();
-        if (!sheetWidget.isCoherentSelection()) {
-            sheetWidget.setCoherentSelection(true);
-        }
-        if (!sheetWidget.isSelectionRangeOutlineVisible()) {
-            sheetWidget.setSelectionRangeOutlineVisible(true);
-            sheetWidget.clearSelectedCellStyle();
-        }
-        sheetWidget.updateSelectionOutline(col, col, row, row);
-        sheetWidget.updateSelectedCellStyles(col, col, row, row, true);
-        if (formula) {
-            formulaBarWidget.setCellFormulaValue(value);
-        } else {
-            formulaBarWidget.setCellPlainValue(value);
-        }
-        formulaBarWidget.setFormulaFieldEnabled(!locked);
-        formulaBarWidget.setSelectedCellAddress(createCellAddress(col, row));
-
-        // scroll the cell into view
-        if (!sheetWidget.isSelectedCellCompletelyVisible()) {
-            sheetWidget.scrollCellIntoView(col, row);
-        }
-        sheetWidget.focusSheet();
-    }
-
     public void invalidCellAddress() {
         formulaBarWidget.revertCellAddressValue();
-    }
-
-    public void setCellRangeSelection(int selectedCellColumn,
-            int selectedCellRow, int firstColumn, int lastColumn, int firstRow,
-            int lastRow, String value, boolean formula, boolean locked) {
-        cellLocked = locked;
-        if (formula) {
-            formulaBarWidget.setCellFormulaValue(value);
-        } else {
-            formulaBarWidget.setCellPlainValue(value);
-        }
-        formulaBarWidget.setFormulaFieldEnabled(!locked);
-        formulaBarWidget.setSelectedCellAddress(createCellAddress(firstColumn,
-                firstRow));
-        if (!sheetWidget.isCoherentSelection()) {
-            sheetWidget.setCoherentSelection(true);
-        }
-        if (!sheetWidget.isSelectionRangeOutlineVisible()) {
-            sheetWidget.setSelectionRangeOutlineVisible(true);
-            sheetWidget.clearSelectedCellStyle();
-        }
-        final int oldSelectedCellCol = sheetWidget.getSelectedCellColumn();
-        final int oldSelectedCellRow = sheetWidget.getSelectedCellRow();
-        if (oldSelectedCellCol != selectedCellColumn
-                || oldSelectedCellRow != selectedCellRow) {
-            sheetWidget.setSelectedCell(selectedCellColumn, selectedCellRow);
-            newSelectedCellSet();
-        }
-        sheetWidget.updateSelectionOutline(firstColumn, lastColumn, firstRow,
-                lastRow);
-        sheetWidget.updateSelectedCellStyles(firstColumn, lastColumn, firstRow,
-                lastRow, true);
-        if (!sheetWidget.isAreaCompletelyVisible(firstColumn, lastColumn,
-                firstRow, lastRow)) {
-            sheetWidget.scrollAreaIntoView(firstColumn, lastColumn, firstRow,
-                    lastRow);
-        }
-
-        sheetWidget.focusSheet();
     }
 
     public void focusSheet() {
@@ -402,7 +330,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             SpreadsheetCustomEditorFactory customEditorFactory) {
         this.customEditorFactory = customEditorFactory;
 
-        newSelectedCellSet();
+        selectionHandler.newSelectedCellSet();
     }
 
     /**
@@ -588,7 +516,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 sheetWidget.setSelectionRangeOutlineVisible(false);
             }
             sheetWidget.swapCellSelection(column, row);
-            newSelectedCellSet();
+            selectionHandler.newSelectedCellSet();
             // display cell data address
             formulaBarWidget.setSelectedCellAddress(createCellAddress(column,
                     row));
@@ -617,8 +545,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         cell.row1, cell.row2);
                 sheetWidget.updateSelectedCellStyles(cell.col1, cell.col2,
                         cell.row1, cell.row2, true);
-                colBeforeMergedCell = cell.col1;
-                rowBeforeMergedCell = cell.row1;
+
+                selectionHandler.setColBeforeMergedCell(cell.col1);
+                selectionHandler.setRowBeforeMergedCell(cell.row1);
             } else {
                 sheetWidget.updateSelectionOutline(column, column, row, row);
                 sheetWidget.updateSelectedCellStyles(column, column, row, row,
@@ -628,7 +557,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             formulaBarWidget.setSelectedCellAddress(createCellAddress(column,
                     row));
             if (updateToActionHandler) {
-                newSelectedCellSet();
+                selectionHandler.newSelectedCellSet();
                 if (hasSelectedCellChangedOnClick) {
                     // do not update selected cell formula value unless needed
                     formulaBarWidget.setCellPlainValue("");
@@ -681,7 +610,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             }
             // set the row first cell as the selected
             sheetWidget.swapCellSelection(firstColumnIndex, row);
-            newSelectedCellSet();
+            selectionHandler.newSelectedCellSet();
             // add the selection styles
             sheetWidget.updateSelectedCellStyles(1, cols, row, row, false);
             spreadsheetHandler.rowAddedToRangeSelection(row, firstColumnIndex);
@@ -697,7 +626,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             sheetWidget.setSelectedCell(firstColumnIndex, row);
             sheetWidget.updateSelectionOutline(1, cols, row, row);
             sheetWidget.updateSelectedCellStyles(1, cols, row, row, true);
-            newSelectedCellSet();
+            selectionHandler.newSelectedCellSet();
             spreadsheetHandler.rowSelected(row, firstColumnIndex);
         }
     }
@@ -745,7 +674,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             }
             // set the row first cell as the selected
             sheetWidget.swapCellSelection(column, firstRowIndex);
-            newSelectedCellSet();
+            selectionHandler.newSelectedCellSet();
             // add the selection styles
             sheetWidget
                     .updateSelectedCellStyles(column, column, 1, rows, false);
@@ -761,7 +690,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             sheetWidget.setSelectedCell(column, firstRowIndex);
             sheetWidget.updateSelectionOutline(column, column, 1, rows);
             sheetWidget.updateSelectedCellStyles(column, column, 1, rows, true);
-            newSelectedCellSet();
+            selectionHandler.newSelectedCellSet();
             spreadsheetHandler.columnSelected(column, firstRowIndex);
         }
     }
@@ -771,7 +700,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         spreadsheetHandler.onColumnAutofit(columnIndex);
     }
 
-    private void doCommitIfEditing() {
+    void doCommitIfEditing() {
         if (inlineEditing || formulaBarEditing) {
             cancelDeferredCommit = true;
             final String editedValue = formulaBarWidget.getFormulaFieldValue();
@@ -865,7 +794,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         formulaBarWidget.setSelectedCellAddress(createCellAddress(
                 sheetWidget.getSelectedCellColumn(),
                 sheetWidget.getSelectedCellRow()));
-        newSelectedCellSet();
+        selectionHandler.newSelectedCellSet();
     }
 
     @Override
@@ -925,9 +854,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         cellEditingDone(value);
         sheetWidget.focusSheet();
         if (shift) {
-            moveSelectedCellUp(false);
+            selectionHandler.moveSelectionUp(false);
         } else {
-            moveSelectedCellDown(false);
+            selectionHandler.moveSelectionDown(false);
         }
     }
 
@@ -938,9 +867,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         cellEditingDone(value);
         sheetWidget.focusSheet();
         if (shift) {
-            moveSelectedCellLeft(false);
+            selectionHandler.moveSelectionLeft(false);
         } else {
-            moveSelectedCellRight(false);
+            selectionHandler.moveSelectionRight(false);
         }
     }
 
@@ -960,44 +889,44 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             break;
         case KeyCodes.KEY_ENTER:
             if (event.getShiftKey()) {
-                moveSelectedCellUp(false);
+                selectionHandler.moveSelectionUp(false);
             } else {
-                moveSelectedCellDown(false);
+                selectionHandler.moveSelectionDown(false);
             }
             break;
         case KeyCodes.KEY_DOWN:
             if (event.getShiftKey()) {
-                increaseVerticalSelection(true);
+                selectionHandler.increaseVerticalSelection(true);
             } else {
-                moveSelectedCellDown(true);
+                selectionHandler.moveSelectionDown(true);
             }
             break;
         case KeyCodes.KEY_LEFT:
             if (event.getShiftKey()) {
-                increaseHorizonalSelection(false);
+                selectionHandler.increaseHorizontalSelection(false);
             } else {
-                moveSelectedCellLeft(true);
+                selectionHandler.moveSelectionLeft(true);
             }
             break;
         case KeyCodes.KEY_TAB:
             if (event.getShiftKey()) {
-                moveSelectedCellLeft(false);
+                selectionHandler.moveSelectionLeft(false);
             } else {
-                moveSelectedCellRight(false);
+                selectionHandler.moveSelectionRight(false);
             }
             break;
         case KeyCodes.KEY_RIGHT:
             if (event.getShiftKey()) {
-                increaseHorizonalSelection(true);
+                selectionHandler.increaseHorizontalSelection(true);
             } else {
-                moveSelectedCellRight(true);
+                selectionHandler.moveSelectionRight(true);
             }
             break;
         case KeyCodes.KEY_UP:
             if (event.getShiftKey()) {
-                increaseVerticalSelection(false);
+                selectionHandler.increaseVerticalSelection(false);
             } else {
-                moveSelectedCellUp(true);
+                selectionHandler.moveSelectionUp(true);
             }
             break;
         case KeyCodes.KEY_ALT:
@@ -1070,27 +999,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     SpreadsheetServerRpc.class, connector);
 
             rpc.protectedCellWriteAttempted();
-        }
-    }
-
-    private void newSelectedCellSet() {
-        if (customCellEditorDisplayed) {
-            customCellEditorDisplayed = false;
-            sheetWidget.removeCustomCellEditor();
-        }
-
-        if (!sheetWidget.isSelectedCellCustomized()
-                && !cellLocked
-                && customEditorFactory != null
-                && customEditorFactory.hasCustomEditor(sheetWidget
-                        .getSelectedCellKey())) {
-            Widget customEditor = customEditorFactory
-                    .getCustomEditor(sheetWidget.getSelectedCellKey());
-            if (customEditor != null) {
-                customCellEditorDisplayed = true;
-                formulaBarWidget.setFormulaFieldEnabled(false);
-                sheetWidget.displayCustomCellEditor(customEditor);
-            }
         }
     }
 
@@ -1204,7 +1112,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 sheetWidget.getSelectedCellRow(), value);
         cellEditingDone(value);
         sheetWidget.focusSheet();
-        moveSelectedCellDown(false);
+        selectionHandler.moveSelectionDown(false);
     }
 
     @Override
@@ -1213,7 +1121,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 sheetWidget.getSelectedCellRow(), value);
         cellEditingDone(value);
         sheetWidget.focusSheet();
-        moveSelectedCellRight(false);
+        selectionHandler.moveSelectionRight(false);
     }
 
     @Override
@@ -1329,964 +1237,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         });
     }
 
-    private void moveSelectedCellDown(boolean discardSelection) {
-        final int leftCol = sheetWidget.getSelectionLeftCol();
-        final int rightCol = sheetWidget.getSelectionRightCol();
-        final int topRow = sheetWidget.getSelectionTopRow();
-        final int bottomRow = sheetWidget.getSelectionBottomRow();
-        int col = sheetWidget.getSelectedCellColumn();
-        int row = sheetWidget.getSelectedCellRow();
-        // if the old selected cell was a merged cell, it changes the actual
-        // selected cell
-        MergedRegion oldRegion = getMergedRegion(col, row);
-        if (oldRegion != null && colBeforeMergedCell != 0) {
-            col = colBeforeMergedCell;
-            row = oldRegion.row2;
-        }
-        row++;
-
-        while (hiddenRowIndexes != null && hiddenRowIndexes.contains(row)
-                && row < rows) {
-            row++;
-        }
-
-        if (!discardSelection
-                && (leftCol != rightCol || topRow != bottomRow)
-                && (oldRegion == null || leftCol != oldRegion.col1
-                        || rightCol != oldRegion.col2
-                        || topRow != oldRegion.row1 || bottomRow != oldRegion.row2)) {
-            // move the selected cell inside the selection
-            if (row > bottomRow) {
-                // move highest and right
-                row = topRow;
-                // if the row on top is hidden, skip it
-                while (hiddenRowIndexes != null
-                        && hiddenRowIndexes.contains(row) && row < bottomRow) {
-                    row++;
-                }
-                col++;
-                // if the column on right is hidden, skip it
-                while (hiddenColumnIndexes != null
-                        && hiddenColumnIndexes.contains(col) && col <= rightCol) {
-                    col++;
-                }
-                if (col > rightCol) {
-                    // move to left
-                    col = leftCol;
-                }
-                while (hiddenColumnIndexes != null
-                        && hiddenColumnIndexes.contains(col) && col <= rightCol) {
-                    col++;
-                }
-            }
-            // if the new selected cell is a merged cell
-            MergedRegion region = getMergedRegion(col, row);
-            if (region != null) {
-                colBeforeMergedCell = col;
-                rowBeforeMergedCell = row;
-                col = region.col1;
-                row = region.row1;
-            } else {
-                colBeforeMergedCell = 0;
-                rowBeforeMergedCell = 0;
-            }
-
-            sheetWidget.swapSelectedCellInsideSelection(col, row);
-            sheetWidget.scrollCellIntoView(col, row);
-            formulaBarWidget
-                    .setSelectedCellAddress(createCellAddress(col, row));
-            formulaBarWidget.setCellPlainValue("");
-            newSelectedCellSet();
-            spreadsheetHandler.cellSelected(col, row, false);
-        } else {
-            if (row <= rows) {
-                // if the new selected cell is a merged cell
-                MergedRegion region = getMergedRegion(col, row);
-                if (region != null) {
-                    colBeforeMergedCell = col;
-                    rowBeforeMergedCell = row;
-                    col = region.col1;
-                    row = region.row1;
-                } else {
-                    colBeforeMergedCell = 0;
-                    rowBeforeMergedCell = 0;
-                }
-                sheetWidget.scrollCellIntoView(col, row);
-                onCellSelectedWithKeyboard(col, row,
-                        sheetWidget.getCellValue(col, row), region);
-            }
-        }
-    }
-
-    private void moveSelectedCellRight(boolean discardSelection) {
-        final int leftCol = sheetWidget.getSelectionLeftCol();
-        final int rightCol = sheetWidget.getSelectionRightCol();
-        final int topRow = sheetWidget.getSelectionTopRow();
-        final int bottomRow = sheetWidget.getSelectionBottomRow();
-        int col = sheetWidget.getSelectedCellColumn();
-        int row = sheetWidget.getSelectedCellRow();
-        // if the old selected cell was a merged cell, it changes the actual
-        // selected cell
-        MergedRegion oldRegion = getMergedRegion(col, row);
-        if (oldRegion != null && rowBeforeMergedCell != 0) {
-            col = oldRegion.col2;
-            row = rowBeforeMergedCell;
-        }
-        col++;
-
-        while (hiddenColumnIndexes != null && hiddenColumnIndexes.contains(col)
-                && col < cols) {
-            col++;
-        }
-        if (!discardSelection
-                && (leftCol != rightCol || topRow != bottomRow)
-                && (oldRegion == null || leftCol != oldRegion.col1
-                        || rightCol != oldRegion.col2
-                        || topRow != oldRegion.row1 || bottomRow != oldRegion.row2)) {
-            // move the selected cell inside the selection
-            if (col > rightCol) {
-                // move to leftmost and down
-                col = leftCol;
-                while (hiddenColumnIndexes != null
-                        && hiddenColumnIndexes.contains(new Integer(col))
-                        && col <= rightCol) {
-                    col++;
-                }
-                row++;
-                while (hiddenRowIndexes != null
-                        && hiddenRowIndexes.contains(row) && row <= bottomRow) {
-                    row++;
-                }
-                if (row > bottomRow) {
-                    // move to top
-                    row = topRow;
-                }
-                while (hiddenRowIndexes != null
-                        && hiddenRowIndexes.contains(row) && row <= bottomRow) {
-                    row++;
-                }
-            }
-            // if the new selected cell is a merged cell
-            MergedRegion region = getMergedRegion(col, row);
-            if (region != null) {
-                colBeforeMergedCell = col;
-                rowBeforeMergedCell = row;
-                col = region.col1;
-                row = region.row1;
-            } else {
-                colBeforeMergedCell = 0;
-                rowBeforeMergedCell = 0;
-            }
-
-            sheetWidget.swapSelectedCellInsideSelection(col, row);
-            sheetWidget.scrollCellIntoView(col, row);
-            formulaBarWidget
-                    .setSelectedCellAddress(createCellAddress(col, row));
-            formulaBarWidget.setCellPlainValue("");
-            newSelectedCellSet();
-            spreadsheetHandler.cellSelected(col, row, false);
-        } else {
-            if (col <= cols) {
-                // if the new selected cell is a merged cell
-                MergedRegion region = getMergedRegion(col, row);
-                if (region != null) {
-                    colBeforeMergedCell = col;
-                    rowBeforeMergedCell = row;
-                    col = region.col1;
-                    row = region.row1;
-                } else {
-                    colBeforeMergedCell = 0;
-                    rowBeforeMergedCell = 0;
-                }
-                sheetWidget.scrollCellIntoView(col, row);
-                onCellSelectedWithKeyboard(col, row,
-                        sheetWidget.getCellValue(col, row), region);
-            }
-        }
-    }
-
-    private void moveSelectedCellUp(boolean discardSelection) {
-        final int leftCol = sheetWidget.getSelectionLeftCol();
-        final int rightCol = sheetWidget.getSelectionRightCol();
-        final int topRow = sheetWidget.getSelectionTopRow();
-        final int bottomRow = sheetWidget.getSelectionBottomRow();
-        int col = sheetWidget.getSelectedCellColumn();
-        int row = sheetWidget.getSelectedCellRow();
-        // if the old selected cell was a merged cell, it changes the actual
-        // selected cell
-        MergedRegion oldRegion = getMergedRegion(col, row);
-        if (oldRegion != null && colBeforeMergedCell != 0) {
-            col = colBeforeMergedCell;
-            row = oldRegion.row1;
-        }
-        row--;
-
-        while (hiddenRowIndexes != null && hiddenRowIndexes.contains(row)
-                && row > 1) {
-            row--;
-        }
-        if (!discardSelection
-                && (leftCol != rightCol || topRow != bottomRow)
-                && (oldRegion == null || leftCol != oldRegion.col1
-                        || rightCol != oldRegion.col2
-                        || topRow != oldRegion.row1 || bottomRow != oldRegion.row2)) {
-            // move the selected cell inside the selection
-            if (row < topRow) {
-                // go to bottom and left
-                row = bottomRow;
-                // if row on bottom is hidden, skip it
-                while (hiddenRowIndexes != null
-                        && hiddenRowIndexes.contains(row) && row > topRow) {
-                    row--;
-                }
-                col--;
-                while (hiddenColumnIndexes != null
-                        && hiddenColumnIndexes.contains(col) && col >= leftCol) {
-                    col--;
-                }
-                if (col < leftCol) {
-                    // go to right most
-                    col = rightCol;
-                }
-                while (hiddenColumnIndexes != null
-                        && hiddenColumnIndexes.contains(col) && col >= leftCol) {
-                    col--;
-                }
-            }
-            // if the new selected cell is a merged cell
-            MergedRegion region = getMergedRegion(col, row);
-            if (region != null) {
-                colBeforeMergedCell = col;
-                rowBeforeMergedCell = row;
-                col = region.col1;
-                row = region.row1;
-            } else {
-                colBeforeMergedCell = 0;
-                rowBeforeMergedCell = 0;
-            }
-            sheetWidget.swapSelectedCellInsideSelection(col, row);
-            sheetWidget.scrollCellIntoView(col, row);
-            formulaBarWidget
-                    .setSelectedCellAddress(createCellAddress(col, row));
-            formulaBarWidget.setCellPlainValue("");
-            newSelectedCellSet();
-            spreadsheetHandler.cellSelected(col, row, false);
-        } else {
-            if (row > 0) {
-                // if the new selected cell is a merged cell
-                MergedRegion region = getMergedRegion(col, row);
-                if (region != null) {
-                    colBeforeMergedCell = col;
-                    rowBeforeMergedCell = row;
-                    col = region.col1;
-                    row = region.row1;
-                } else {
-                    colBeforeMergedCell = 0;
-                    rowBeforeMergedCell = 0;
-                }
-                sheetWidget.scrollCellIntoView(col, row);
-                onCellSelectedWithKeyboard(col, row,
-                        sheetWidget.getCellValue(col, row), region);
-            }
-        }
-    }
-
-    private void moveSelectedCellLeft(boolean discardSelection) {
-        final int leftCol = sheetWidget.getSelectionLeftCol();
-        final int rightCol = sheetWidget.getSelectionRightCol();
-        final int topRow = sheetWidget.getSelectionTopRow();
-        final int bottomRow = sheetWidget.getSelectionBottomRow();
-        int col = sheetWidget.getSelectedCellColumn();
-        int row = sheetWidget.getSelectedCellRow();
-        // if the old selected cell was a merged cell, it changes the actual
-        // selected cell
-        MergedRegion oldRegion = getMergedRegion(col, row);
-        if (oldRegion != null && rowBeforeMergedCell != 0) {
-            col = oldRegion.col1;
-            row = rowBeforeMergedCell;
-        }
-
-        col--;
-        while (hiddenColumnIndexes != null && hiddenColumnIndexes.contains(col)
-                && col > 0) {
-            col--;
-        }
-        if (!discardSelection
-                && (leftCol != rightCol || topRow != bottomRow)
-                && (oldRegion == null || leftCol != oldRegion.col1
-                        || rightCol != oldRegion.col2
-                        || topRow != oldRegion.row1 || bottomRow != oldRegion.row2)) {
-            // move the selected cell inside the selection
-            if (col < leftCol) {
-                // move to right most and up
-                col = rightCol;
-                while (hiddenColumnIndexes != null
-                        && hiddenColumnIndexes.contains(col) && col >= leftCol) {
-                    col--;
-                }
-                row--;
-                while (hiddenRowIndexes != null
-                        && hiddenRowIndexes.contains(row) && row >= topRow) {
-                    row--;
-                }
-                if (row < topRow) {
-                    // go to bottom
-                    row = bottomRow;
-                }
-                while (hiddenRowIndexes != null
-                        && hiddenRowIndexes.contains(row) && row >= topRow) {
-                    row--;
-                }
-            }
-            // if the new selected cell is a merged cell
-            MergedRegion region = getMergedRegion(col, row);
-            if (region != null) {
-                colBeforeMergedCell = col;
-                rowBeforeMergedCell = row;
-                col = region.col1;
-                row = region.row1;
-            } else {
-                colBeforeMergedCell = 0;
-                rowBeforeMergedCell = 0;
-            }
-            sheetWidget.swapSelectedCellInsideSelection(col, row);
-            sheetWidget.scrollCellIntoView(col, row);
-            formulaBarWidget
-                    .setSelectedCellAddress(createCellAddress(col, row));
-            formulaBarWidget.setCellPlainValue("");
-            newSelectedCellSet();
-            spreadsheetHandler.cellSelected(col, row, false);
-        } else {
-            if (col > 0) {
-                // if the new selected cell is a merged cell
-                MergedRegion region = getMergedRegion(col, row);
-                if (region != null) {
-                    colBeforeMergedCell = col;
-                    rowBeforeMergedCell = row;
-                    col = region.col1;
-                    row = region.row1;
-                } else {
-                    colBeforeMergedCell = 0;
-                    rowBeforeMergedCell = 0;
-                }
-                sheetWidget.scrollCellIntoView(col, row);
-                onCellSelectedWithKeyboard(col, row,
-                        sheetWidget.getCellValue(col, row), region);
-            }
-        }
-    }
-
-    /**
-     * 
-     * @param column
-     * @param row
-     * @param value
-     * @param region
-     *            null if selected cell is not a merged cell
-     */
-    private void onCellSelectedWithKeyboard(int column, int row, String value,
-            MergedRegion region) {
-        doCommitIfEditing();
-        if (!sheetWidget.isCoherentSelection()) {
-            sheetWidget.setCoherentSelection(true);
-        }
-        if (!sheetWidget.isSelectionRangeOutlineVisible()) {
-            sheetWidget.setSelectionRangeOutlineVisible(true);
-            sheetWidget.clearSelectedCellStyle();
-        }
-        sheetWidget.setSelectedCell(column, row);
-        sheetWidget.updateSelectionOutline(column, column, row, row);
-        if (region != null) {
-            sheetWidget.updateSelectedCellStyles(column, region.col2, row,
-                    region.row2, true);
-        } else {
-            sheetWidget
-                    .updateSelectedCellStyles(column, column, row, row, true);
-        }
-        // display cell data address
-        formulaBarWidget.setSelectedCellAddress(createCellAddress(column, row));
-        newSelectedCellSet();
-        formulaBarWidget.setCellPlainValue("");
-        spreadsheetHandler.cellSelected(column, row, true);
-    }
-
-    private void increaseHorizonalSelection(boolean right) {
-        int topRow = sheetWidget.getSelectionTopRow();
-        int leftCol = sheetWidget.getSelectionLeftCol();
-        final int oldLeftCol = leftCol;
-        int rightCol = sheetWidget.getSelectionRightCol();
-        final int oldRightCol = rightCol;
-        int bottomRow = sheetWidget.getSelectionBottomRow();
-        int selectedCellColumn = sheetWidget.getSelectedCellColumn();
-        final int selectedCellRow = sheetWidget.getSelectedCellRow();
-        MergedRegion region = mergedRegionContainer
-                .getMergedRegionStartingFrom(selectedCellColumn,
-                        selectedCellRow);
-
-        if (sheetWidget.isCoherentSelection()) {
-            // the selection outline is the "correct", even with merged cells,
-            // as with a merged cell the selected cell doesn't take the merged
-            // edge into account.
-            if (region != null
-                    && (right && region.col1 != leftCol || !right
-                            && region.col2 == rightCol)) {
-                selectedCellColumn = region.col2;
-            }
-            MergedRegion selection = null;
-            if (selectedCellColumn == leftCol) {
-                if (right && rightCol + 1 <= cols) { // increase to right
-                    rightCol++;
-                    while (hiddenColumnIndexes != null
-                            && hiddenColumnIndexes.contains(rightCol)
-                            && rightCol < cols) {
-                        rightCol++;
-                    }
-                    selection = MergedRegionUtil.findIncreasingSelection(
-                            mergedRegionContainer, topRow, bottomRow, leftCol,
-                            rightCol);
-                } else if (!right) {
-                    if (rightCol != leftCol) { // decrease from right
-                        rightCol--;
-                        while (hiddenColumnIndexes != null
-                                && hiddenColumnIndexes.contains(rightCol)
-                                && (rightCol) > leftCol) {
-                            rightCol--;
-                        }
-                        selection = findDecreasingSelection(topRow, bottomRow,
-                                leftCol, rightCol);
-                    } else if (leftCol - 1 > 0) { // increase to left
-                        leftCol--;
-                        while (hiddenColumnIndexes != null
-                                && hiddenColumnIndexes.contains(leftCol)
-                                && leftCol > 1) {
-                            leftCol--;
-                        }
-                        selection = MergedRegionUtil.findIncreasingSelection(
-                                mergedRegionContainer, topRow, bottomRow,
-                                leftCol, rightCol);
-                    }
-                }
-            } else if (selectedCellColumn == rightCol) {
-                if (right) {
-                    if (rightCol != leftCol) { // decrease from left
-                        leftCol++;
-                        while (hiddenColumnIndexes != null
-                                && hiddenColumnIndexes.contains(leftCol)
-                                && leftCol < rightCol) {
-                            leftCol++;
-                        }
-                        selection = findDecreasingSelection(topRow, bottomRow,
-                                leftCol, rightCol);
-                    } else if (rightCol + 1 <= cols) { // increase to right
-                        rightCol++;
-                        while (hiddenColumnIndexes != null
-                                && hiddenColumnIndexes.contains(rightCol)
-                                && rightCol < cols) {
-                            rightCol++;
-                        }
-                        selection = MergedRegionUtil.findIncreasingSelection(
-                                mergedRegionContainer, topRow, bottomRow,
-                                leftCol, rightCol);
-                    }
-                } else if (!right && leftCol - 1 > 0) { // increase to left
-                    leftCol--;
-                    while (hiddenColumnIndexes != null
-                            && hiddenColumnIndexes.contains(leftCol)
-                            && leftCol > 1) {
-                        leftCol--;
-                    }
-                    selection = MergedRegionUtil.findIncreasingSelection(
-                            mergedRegionContainer, topRow, bottomRow, leftCol,
-                            rightCol);
-                }
-            } else {
-                if (right) { // increase to right
-                    if (rightCol + 1 <= cols) {
-                        rightCol++;
-                        while (hiddenColumnIndexes != null
-                                && hiddenColumnIndexes.contains(rightCol)
-                                && rightCol < cols) {
-                            rightCol++;
-                        }
-                        selection = MergedRegionUtil.findIncreasingSelection(
-                                mergedRegionContainer, topRow, bottomRow,
-                                leftCol, rightCol);
-                    }
-                } else { // increase to left
-                    if (leftCol - 1 > 0) {
-                        leftCol--;
-                        while (hiddenColumnIndexes != null
-                                && hiddenColumnIndexes.contains(leftCol)
-                                && leftCol > 1) {
-                            leftCol--;
-                        }
-                        selection = MergedRegionUtil.findIncreasingSelection(
-                                mergedRegionContainer, topRow, bottomRow,
-                                leftCol, rightCol);
-                    }
-                }
-            }
-            if (selection == null) {
-                return;
-            }
-            sheetWidget.updateSelectionOutline(selection.col1, selection.col2,
-                    selection.row1, selection.row2);
-            sheetWidget.replaceAsSelectedCells(selection.col1, selection.col2,
-                    selection.row1, selection.row2);
-            sheetWidget.replaceHeadersAsSelected(selection.row1,
-                    selection.row2, selection.col1, selection.col2);
-            sheetWidget.scrollAreaIntoView(selection.col1, selection.col2,
-                    selection.row1, selection.row2);
-        } else { // previous selection not coherent
-            // discard the old selection and start from previously selected cell
-            int row2;
-            int col2;
-            if (region != null) {
-                row2 = region.row2;
-                col2 = region.col2;
-            } else {
-                row2 = selectedCellRow;
-                col2 = selectedCellColumn;
-            }
-            if (right) {
-                col2++;
-                while (hiddenColumnIndexes != null
-                        && hiddenColumnIndexes.contains(col2) && col2 < cols) {
-                    col2++;
-                }
-            } else {
-                selectedCellColumn--;
-                while (hiddenColumnIndexes != null
-                        && hiddenColumnIndexes.contains(selectedCellColumn)
-                        && selectedCellColumn > 1) {
-                    selectedCellColumn--;
-                }
-            }
-            if (selectedCellColumn > 0 && col2 < cols) {
-                MergedRegion selection = MergedRegionUtil
-                        .findIncreasingSelection(mergedRegionContainer,
-                                selectedCellRow, row2, selectedCellColumn, col2);
-                if (selection != null) {
-                    // sheetWidget.clearCellRangeStyles();
-                    sheetWidget.setCoherentSelection(true);
-                    sheetWidget.setSelectionRangeOutlineVisible(true);
-                    sheetWidget.clearSelectedCellStyle();
-                    sheetWidget.updateSelectionOutline(selection.col1,
-                            selection.col2, selection.row1, selection.row2);
-                    sheetWidget.updateSelectedCellStyles(selection.col1,
-                            selection.col2, selection.row1, selection.row2,
-                            true);
-                }
-            }
-            // scroll area into view
-            sheetWidget.scrollSelectionAreaIntoView();
-        }
-
-        // update action handler
-        if (oldLeftCol != sheetWidget.getSelectionLeftCol()
-                || oldRightCol != sheetWidget.getSelectionRightCol()
-                || topRow != sheetWidget.getSelectionTopRow()
-                || bottomRow != sheetWidget.getSelectionBottomRow()) {
-            spreadsheetHandler.cellRangeSelected(
-                    sheetWidget.getSelectionLeftCol(),
-                    sheetWidget.getSelectionRightCol(),
-                    sheetWidget.getSelectionTopRow(),
-                    sheetWidget.getSelectionBottomRow());
-        }
-    }
-
-    /**
-     * Goes through the given selection and checks that the cells on the edges
-     * of the selection are not in "the beginning / middle / end" of a merged
-     * cell. Returns the correct decreased selection, after taking the merged
-     * cells into account.
-     * 
-     * Parameters 1-based.
-     * 
-     * @param topRow
-     * @param bottomRow
-     * @param leftColumn
-     * @param rightColumn
-     * @return
-     */
-    private MergedRegion findDecreasingSelection(int topRow, int bottomRow,
-            int leftColumn, int rightColumn) {
-        if (topRow == bottomRow && leftColumn == rightColumn) {
-            MergedRegion mergedRegion = getMergedRegion(leftColumn, topRow);
-            if (mergedRegion == null) {
-                mergedRegion = new MergedRegion();
-                mergedRegion.col1 = leftColumn;
-                mergedRegion.col2 = rightColumn;
-                mergedRegion.row1 = topRow;
-                mergedRegion.row2 = bottomRow;
-            }
-            return mergedRegion;
-        } else {
-            MergedRegion merged = getMergedRegionStartingFrom(leftColumn,
-                    topRow);
-            if (merged != null && merged.col2 >= rightColumn
-                    && merged.row2 >= bottomRow) {
-                return merged;
-            }
-        }
-        int selectedCellColumn = sheetWidget.getSelectedCellColumn();
-        int selectedCellRow = sheetWidget.getSelectedCellRow();
-
-        if (selectedCellColumn < leftColumn || selectedCellColumn > rightColumn
-                || selectedCellRow < topRow || selectedCellRow > bottomRow) {
-            return getMergedRegion(selectedCellColumn,
-                    sheetWidget.getSelectedCellRow());
-        }
-
-        boolean trouble = false;
-        int i = leftColumn;
-        // go through top edge
-        while (i <= rightColumn) {
-            MergedRegion region = getMergedRegion(i, topRow);
-            if (region != null) {
-                i = region.col2 + 1;
-                if (topRow > region.row1) {
-                    // check if the cell in top row is in middle or end of a
-                    // merged cell -> decrease more if it is
-                    trouble = true;
-                    if (topRow < bottomRow) {
-                        if (region.row2 > bottomRow) {
-                            topRow = region.row2 + 1;
-                        } else {
-                            topRow = bottomRow;
-                        }
-                        i = leftColumn;
-                    } else {
-                        if (selectedCellColumn < region.col1) {
-                            rightColumn = region.col1 - 1;
-                        } else if (selectedCellColumn > region.col2) {
-                            leftColumn = region.col2 + 1;
-                        } else {
-                            leftColumn = region.col1;
-                            rightColumn = region.col2;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                i++;
-            }
-        }
-        if (topRow > bottomRow) {
-            topRow = bottomRow;
-        }
-        // go through right edge
-        i = topRow;
-        while (i <= bottomRow) {
-            MergedRegion region = getMergedRegion(rightColumn, i);
-            if (region != null) {
-                i = region.row2 + 1;
-                if (rightColumn < region.col2) {
-                    trouble = true;
-                    if (rightColumn > leftColumn) {
-                        if (region.col1 > leftColumn) {
-                            rightColumn = region.col1 - 1;
-                        } else {
-                            rightColumn = leftColumn;
-                        }
-                        i = topRow;
-                    } else {
-                        if (selectedCellRow < region.row1) {
-                            bottomRow = region.row1 - 1;
-                        } else if (selectedCellRow > region.row2) {
-                            topRow = region.row2 + 1;
-                        } else { // selected cell row is inside the region
-                            topRow = region.row1;
-                            bottomRow = region.row2;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                i++;
-            }
-        }
-        if (rightColumn < leftColumn) {
-            rightColumn = leftColumn;
-        }
-        // go through bottom edge
-        i = leftColumn;
-        while (i <= rightColumn) {
-            MergedRegion region = getMergedRegion(i, bottomRow);
-            if (region != null) {
-                i = region.col2 + 1;
-                if (bottomRow < region.row2) {
-                    trouble = true;
-                    if (bottomRow > topRow) {
-                        if (topRow < region.row1) {
-                            bottomRow = region.row1 - 1;
-                        } else {
-                            bottomRow = topRow;
-                        }
-                        i = leftColumn;
-                    } else {
-                        if (selectedCellColumn < region.col1) {
-                            rightColumn = region.col1 - 1;
-                        } else if (selectedCellColumn > region.col2) {
-                            leftColumn = region.col2 + 1;
-                        } else {
-                            rightColumn = region.col1;
-                            leftColumn = region.col2;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                i++;
-            }
-        }
-        if (bottomRow < topRow) {
-            bottomRow = topRow;
-        }
-        // go through left edge
-        i = topRow;
-        while (i <= bottomRow) {
-            MergedRegion region = getMergedRegion(leftColumn, i);
-            if (region != null) {
-                i = region.row2 + 1;
-                if (leftColumn > region.col1) {
-                    trouble = true;
-                    if (leftColumn < rightColumn) {
-                        if (rightColumn > region.col2) {
-                            leftColumn = region.col2 + 1;
-                        } else {
-                            leftColumn = rightColumn;
-                        }
-                        i = topRow;
-                    } else {
-                        if (selectedCellRow < region.row1) {
-                            bottomRow = region.row1 - 1;
-                        } else if (selectedCellRow > region.row2) {
-                            topRow = region.row2 + 1;
-                        } else {
-                            topRow = region.row1;
-                            bottomRow = region.row2;
-                            break;
-                        }
-                    }
-                }
-            } else {
-                i++;
-            }
-        }
-        if (leftColumn > rightColumn) {
-            leftColumn = rightColumn;
-        }
-        if (trouble) {
-            return findDecreasingSelection(topRow, bottomRow, leftColumn,
-                    rightColumn);
-        } else if (topRow == bottomRow && leftColumn == rightColumn) {
-            MergedRegion mergedRegion = getMergedRegion(leftColumn, topRow);
-            if (mergedRegion == null) {
-                mergedRegion = new MergedRegion();
-                mergedRegion.col1 = leftColumn;
-                mergedRegion.col2 = rightColumn;
-                mergedRegion.row1 = topRow;
-                mergedRegion.row2 = bottomRow;
-            }
-            return mergedRegion;
-        } else {
-            MergedRegion merged = getMergedRegionStartingFrom(leftColumn,
-                    topRow);
-            if (merged != null && merged.col2 >= rightColumn
-                    && merged.row2 >= bottomRow) {
-                return merged;
-            }
-        }
-        MergedRegion result = new MergedRegion();
-        result.col1 = leftColumn;
-        result.col2 = rightColumn;
-        result.row1 = topRow;
-        result.row2 = bottomRow;
-        return result;
-    }
-
-    private void increaseVerticalSelection(boolean down) {
-        int topRow = sheetWidget.getSelectionTopRow();
-        int oldTopRow = topRow;
-        final int leftCol = sheetWidget.getSelectionLeftCol();
-        int bottomRow = sheetWidget.getSelectionBottomRow();
-        int oldBottomRow = bottomRow;
-        final int rightCol = sheetWidget.getSelectionRightCol();
-        int selectedCellRow = sheetWidget.getSelectedCellRow();
-        final int selectedCellColumn = sheetWidget.getSelectedCellColumn();
-        MergedRegion region = getMergedRegionStartingFrom(selectedCellColumn,
-                selectedCellRow);
-
-        if (sheetWidget.isCoherentSelection()) {
-            if (region != null
-                    && (down && region.row1 != topRow || !down
-                            && region.row2 == bottomRow)) {
-                selectedCellRow = region.row2;
-            }
-            MergedRegion selection = null;
-            if (selectedCellRow == topRow) {
-                if (down && bottomRow + 1 <= rows) { // increase selection down
-                    bottomRow++;
-                    while (hiddenRowIndexes != null
-                            && hiddenRowIndexes.contains(bottomRow)
-                            && bottomRow < rows) {
-                        bottomRow++;
-                    }
-                    selection = MergedRegionUtil.findIncreasingSelection(
-                            mergedRegionContainer, topRow, bottomRow, leftCol,
-                            rightCol);
-                } else if (!down) {
-                    if (topRow != bottomRow) { // decrease selection from bottom
-                        bottomRow--;
-                        while (hiddenRowIndexes != null
-                                && hiddenRowIndexes.contains(bottomRow)
-                                && bottomRow > topRow) {
-                            bottomRow--;
-                        }
-                        selection = findDecreasingSelection(topRow, bottomRow,
-                                leftCol, rightCol);
-                    } else if (topRow - 1 > 0) { // increase selection up
-                        topRow--;
-                        while (hiddenRowIndexes != null
-                                && hiddenRowIndexes.contains(topRow)
-                                && topRow > 1) {
-                            topRow--;
-                        }
-                        selection = MergedRegionUtil.findIncreasingSelection(
-                                mergedRegionContainer, topRow, bottomRow,
-                                leftCol, rightCol);
-                    }
-                }
-            } else if (selectedCellRow == bottomRow) {
-                if (down) {
-                    if (topRow != bottomRow) { // decrease from top
-                        topRow++;
-                        while (hiddenRowIndexes != null
-                                && hiddenRowIndexes.contains(topRow)
-                                && topRow < bottomRow) {
-                            topRow++;
-                        }
-                        selection = findDecreasingSelection(topRow, bottomRow,
-                                leftCol, rightCol);
-                    } else if (bottomRow + 1 <= rows) { // increase selection
-                        // down
-                        bottomRow++;
-                        while (hiddenRowIndexes != null
-                                && hiddenRowIndexes.contains(bottomRow)
-                                && bottomRow < rows) {
-                            bottomRow++;
-                        }
-                        selection = MergedRegionUtil.findIncreasingSelection(
-                                mergedRegionContainer, topRow, bottomRow,
-                                leftCol, rightCol);
-                    }
-                } else if (!down && topRow - 1 > 0) { // increase selection up
-                    topRow--;
-                    while (hiddenRowIndexes != null
-                            && hiddenRowIndexes.contains(topRow) && topRow > 1) {
-                        topRow--;
-                    }
-                    selection = MergedRegionUtil.findIncreasingSelection(
-                            mergedRegionContainer, topRow, bottomRow, leftCol,
-                            rightCol);
-                }
-            } else {
-                // increase the selection on the desired direction
-                if (down) {
-                    if (bottomRow + 1 <= rows) {
-                        bottomRow++;
-                        while (hiddenRowIndexes != null
-                                && hiddenRowIndexes.contains(bottomRow)
-                                && bottomRow < rows) {
-                            bottomRow++;
-                        }
-                        selection = MergedRegionUtil.findIncreasingSelection(
-                                mergedRegionContainer, topRow, bottomRow,
-                                leftCol, rightCol);
-                    }
-                } else {
-                    if (topRow - 1 > 0) {
-                        topRow--;
-                        while (hiddenRowIndexes != null
-                                && hiddenRowIndexes.contains(topRow)
-                                && topRow > 1) {
-                            topRow--;
-                        }
-                        selection = MergedRegionUtil.findIncreasingSelection(
-                                mergedRegionContainer, topRow, bottomRow,
-                                leftCol, rightCol);
-                    }
-                }
-            }
-            if (selection == null) {
-                return;
-            }
-            sheetWidget.updateSelectionOutline(selection.col1, selection.col2,
-                    selection.row1, selection.row2);
-            sheetWidget.replaceAsSelectedCells(selection.col1, selection.col2,
-                    selection.row1, selection.row2);
-            sheetWidget.replaceHeadersAsSelected(selection.row1,
-                    selection.row2, selection.col1, selection.col2);
-            sheetWidget.scrollAreaIntoView(selection.col1, selection.col2,
-                    selection.row1, selection.row2);
-        } else { // previous selection not coherent
-            // discard the old selection and start from previously selected cell
-            int row2;
-            int col2;
-            if (region != null) {
-                row2 = region.row2;
-                col2 = region.col2;
-            } else {
-                row2 = selectedCellRow;
-                col2 = selectedCellColumn;
-            }
-            if (down) {
-                row2++;
-                while (hiddenRowIndexes != null
-                        && hiddenRowIndexes.contains(row2) && row2 < rows) {
-                    row2++;
-                }
-            } else {
-                selectedCellRow--;
-                while (hiddenRowIndexes != null
-                        && hiddenRowIndexes.contains(selectedCellRow)
-                        && selectedCellRow > 1) {
-                    selectedCellRow--;
-                }
-            }
-            if (selectedCellRow > 0 && row2 <= rows) {
-                MergedRegion selection = MergedRegionUtil
-                        .findIncreasingSelection(mergedRegionContainer,
-                                selectedCellRow, row2, selectedCellColumn, col2);
-                if (selection != null) {
-                    // sheetWidget.clearCellRangeStyles();
-                    sheetWidget.setCoherentSelection(true);
-                    sheetWidget.setSelectionRangeOutlineVisible(true);
-                    sheetWidget.clearSelectedCellStyle();
-                    sheetWidget.updateSelectionOutline(selection.col1,
-                            selection.col2, selection.row1, selection.row2);
-                    sheetWidget.updateSelectedCellStyles(selection.col1,
-                            selection.col2, selection.row1, selection.row2,
-                            true);
-                }
-            }
-            // scroll area into view
-            sheetWidget.scrollSelectionAreaIntoView();
-        }
-        // update action handler
-        if (leftCol != sheetWidget.getSelectionLeftCol()
-                || rightCol != sheetWidget.getSelectionRightCol()
-                || oldTopRow != sheetWidget.getSelectionTopRow()
-                || oldBottomRow != sheetWidget.getSelectionBottomRow()) {
-            spreadsheetHandler.cellRangeSelected(
-                    sheetWidget.getSelectionLeftCol(),
-                    sheetWidget.getSelectionRightCol(),
-                    sheetWidget.getSelectionTopRow(),
-                    sheetWidget.getSelectionBottomRow());
-        }
-    }
-
     protected String createRangeSelectionString(int col1, int col2, int row1,
             int row2) {
         final StringBuffer sb = new StringBuffer();
@@ -2387,7 +1337,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     }
                 } else { // might need to load the custom editor
                     cellLocked = false;
-                    newSelectedCellSet();
+                    selectionHandler.newSelectedCellSet();
                     if (customCellEditorDisplayed) {
                         // need to update the editor value on client side
                         spreadsheetHandler.cellSelected(
@@ -2616,6 +1566,19 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         conditionalFormattingStyles.clear();
         if (map != null)
             this.conditionalFormattingStyles.putAll(map);
+    }
+
+    public void selectCell(int col, int row, String value, boolean formula,
+            boolean locked) {
+        selectionHandler.selectCell(col, row, value, formula, locked);
+    }
+
+    public void selectCellRange(int selectedCellColumn, int selectedCellRow,
+            int firstColumn, int lastColumn, int firstRow, int lastRow,
+            String value, boolean formula, boolean locked) {
+        selectionHandler.selectCellRange(selectedCellColumn, selectedCellRow,
+                firstColumn, lastColumn, firstRow, lastRow, value, formula,
+                locked);
     }
 
 }
