@@ -15,6 +15,10 @@ import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
 import com.vaadin.addon.spreadsheet.client.MergedRegionUtil;
 
+/**
+ * Class that handles details of which cells are selected.
+ *
+ */
 public class CellSelectionManager {
 
     protected final Spreadsheet spreadsheet;

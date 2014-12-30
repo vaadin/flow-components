@@ -7,6 +7,10 @@ import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.command.Command;
 
+/**
+ * Utility class that remembers actions done in the Spreadsheet for undo and
+ * redo actions.
+ */
 public class SpreadsheetHistoryManager {
 
     private int historySize = 20;

@@ -16,6 +16,9 @@ import org.apache.poi.ss.util.CellReference;
 import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedCellWriteAttemptedEvent;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 
+/**
+ * Implementation of the Spreadsheet Server RPC interface.
+ */
 public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     private Spreadsheet spreadsheet;

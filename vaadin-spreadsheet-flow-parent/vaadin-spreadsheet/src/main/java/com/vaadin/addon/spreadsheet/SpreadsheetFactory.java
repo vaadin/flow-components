@@ -36,6 +36,9 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetState;
 
+/**
+ * Utility class for {@link Spreadsheet} operations.
+ */
 public class SpreadsheetFactory {
 
     public static final int DEFAULT_COLUMNS = 52;
@@ -402,7 +405,12 @@ public class SpreadsheetFactory {
         }
     }
 
+    /**
+     * Runs garbage collection and outputs current memory usage to console.
+     */
     public static void logMemoryUsage() {
+        // TODO make this a more comprehensive solution (output logging
+        // automatically if set?)
         if (LOG_MEMORY) {
             Runtime runtime = Runtime.getRuntime();
             runtime.gc();

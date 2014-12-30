@@ -44,6 +44,9 @@ import com.vaadin.addon.spreadsheet.client.CellData;
 import com.vaadin.addon.spreadsheet.command.CellValueCommand;
 import com.vaadin.ui.UI;
 
+/**
+ * Class that handles values and formatting for individual cells.
+ */
 public class CellValueManager {
 
     private static final String numericCellDetectionPattern = "[^A-Za-z]*[0-9]+[^A-Za-z]*";

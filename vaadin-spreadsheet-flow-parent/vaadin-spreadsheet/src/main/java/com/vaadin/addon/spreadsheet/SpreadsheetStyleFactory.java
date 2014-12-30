@@ -48,6 +48,9 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.STBorderStyle;
 
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
 
+/**
+ * Converts cell styles to CSS rules.
+ */
 public class SpreadsheetStyleFactory {
 
     public enum BorderStyle {

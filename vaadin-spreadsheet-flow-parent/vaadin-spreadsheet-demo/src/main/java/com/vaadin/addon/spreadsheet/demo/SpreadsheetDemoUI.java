@@ -8,13 +8,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.servlet.annotation.WebServlet;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
@@ -366,24 +363,21 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private void printSelectionChangeEventContents(SelectionChangeEvent event) {
 
-        Set<String> cells = new HashSet<String>();
+        CellReference[] allSelectedCells = event.getAllSelectedCells();
+        spreadsheet.setInfoLabelValue(allSelectedCells.length
+                + " selected cells");
 
-        for (CellReference r : event.getIndividualSelectedCells()) {
-            cells.add(r.formatAsString());
-        }
-        cells.add(event.getSelectedCellReference().formatAsString());
-
-        if (event.getCellRangeAddresses() != null) {
-            for (CellRangeAddress a : event.getCellRangeAddresses()) {
-
-                for (int x = a.getFirstColumn(); x <= a.getLastColumn(); x++)
-                    for (int y = a.getFirstRow(); y <= a.getLastRow(); y++)
-                        cells.add(new CellReference(y, x).formatAsString());
-            }
-        }
-
-        spreadsheet.setInfoLabelValue(cells.size() + " selected cell(s)");
-
+        // System.out.println(event.getSelectedCellReference().toString());
+        // System.out.println("Merged region: "
+        // + event.getSelectedCellMergedRegion());
+        // System.out.println("Ranges:");
+        // for (CellRangeAddress range : event.getCellRangeAddresses()) {
+        // System.out.println(range.toString());
+        // }
+        // System.out.println("Individual Cells:");
+        // for (CellReference cell : event.getIndividualSelectedCells()) {
+        // System.out.println(cell.toString());
+        // }
     }
 
     private void loadFile(File file) {
