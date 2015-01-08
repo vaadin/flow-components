@@ -306,7 +306,7 @@ public class XSSFColorConverter implements ColorConverter {
         CTDxf dxf = getXMLColorDataWithReflection(r);
         CTFont font = dxf.getFont();
 
-        if (font.getColorList() == null && font.getColorList().isEmpty()) {
+        if (font.getColorList() == null || font.getColorList().isEmpty()) {
             // default color
             return null;
         }

@@ -170,7 +170,7 @@ public class ConditionalFormatter {
                 for (int col = cra.getFirstColumn(); col <= cra.getLastColumn(); col++) {
 
                     Cell cell = spreadsheet.getCell(row, col);
-                    if (matches(cell, rule)) {
+                    if (cell != null && matches(cell, rule)) {
                         Set<Integer> list = cellToIndex.get(SpreadsheetUtil
                                 .toKey(cell));
                         if (list == null) {
