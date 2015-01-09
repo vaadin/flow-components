@@ -1,3 +1,5 @@
+package com.vaadin.testbench.elements;
+
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.ServerClass;
 
