@@ -10,7 +10,6 @@
 
 	<modules>
 		<module>vaadin-spreadsheet</module>
-		<module>vaadin-spreadsheet-demo</module>
 	</modules>
 
 </project>
