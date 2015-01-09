@@ -10,6 +10,7 @@
 
 	<modules>
 		<module>vaadin-spreadsheet</module>
+		<module>vaadin-spreadsheet-testbench-api</module>
 	</modules>
 
 </project>
