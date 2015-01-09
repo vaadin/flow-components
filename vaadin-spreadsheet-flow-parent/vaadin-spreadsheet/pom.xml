@@ -3,15 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>vaadin-spreadsheet</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<groupId>com.vaadin.addon</groupId>
 	<packaging>jar</packaging>
 	<name>Vaadin Spreadsheet</name>
 	<inceptionYear>2013</inceptionYear>
-
-	<parent>
-		<artifactId>vaadin-spreadsheet-root</artifactId>
-		<version>1.0-SNAPSHOT</version>
-		<groupId>com.vaadin.addon</groupId>
-	</parent>
 
 	<organization>
 		<name>Vaadin Ltd</name>
