@@ -4,6 +4,7 @@ import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderFormatting;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
@@ -24,8 +25,11 @@ public class HSSFColorConverter implements ColorConverter {
     }
 
     @Override
-    public void colorBorder(BorderSide borderSide, String attr,
-            CellStyle cellStyle, StringBuilder sb) {
+    public String getBorderColorCSS(BorderSide borderSide, String attr,
+            CellStyle cellStyle) {
+
+        StringBuilder sb = new StringBuilder();
+
         final HSSFCellStyle cs = (HSSFCellStyle) cellStyle;
         switch (borderSide) {
         case BOTTOM:
@@ -43,6 +47,8 @@ public class HSSFColorConverter implements ColorConverter {
         default:
             break;
         }
+
+        return sb.toString();
     }
 
     @Override
@@ -163,5 +169,12 @@ public class HSSFColorConverter implements ColorConverter {
         short color = rule.getPatternFormatting().getFillForegroundColor();
         String styleColor = styleColor(color);
         return styleColor;
+    }
+
+    @Override
+    public String getBorderColorCSS(BorderSide right, String attribute,
+            BorderFormatting borderFormatting) {
+        // conditional formatting is not supported for HSSF
+        return "";
     }
 }

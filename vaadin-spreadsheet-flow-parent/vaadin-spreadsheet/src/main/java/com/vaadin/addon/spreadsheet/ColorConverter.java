@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet;
 
+import org.apache.poi.ss.usermodel.BorderFormatting;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
@@ -22,11 +23,40 @@ public interface ColorConverter {
      */
     void colorStyles(CellStyle cellStyle, StringBuilder sb);
 
-    void colorBorder(BorderSide borderSide, String attribute,
-            CellStyle cellStyle, StringBuilder sb);
+    /**
+     * Returns CSS border definitions for the given cell style
+     * 
+     * @param borderSide
+     *            Which side the border should go
+     * @param attribute
+     *            What type of border style we want (solid, dashed..)
+     * @param cellStyle
+     *            Style for the cell
+     */
+    String getBorderColorCSS(BorderSide borderSide, String attribute,
+            CellStyle cellStyle);
+
+    /**
+     * Returns CSS border definitions for the given conditional formatting rule
+     * 
+     * @param borderSide
+     *            Which side the border should go
+     * @param attribute
+     *            What type of border style we want (solid, dashed..)
+     * @param format
+     *            the active formatting
+     */
+    String getBorderColorCSS(BorderSide borderSide, String attr,
+            BorderFormatting format);
 
     void defaultColorStyles(CellStyle cellStyle, StringBuilder sb);
 
+    /**
+     * 
+     * @param cs
+     * @return Whether the given cell style has a defined background color or
+     *         not.
+     */
     boolean hasBackgroundColor(CellStyle cs);
 
     /**

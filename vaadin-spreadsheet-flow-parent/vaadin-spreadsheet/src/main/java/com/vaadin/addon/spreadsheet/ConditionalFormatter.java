@@ -18,8 +18,12 @@ import org.apache.poi.ss.usermodel.PatternFormatting;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFBorderFormatting;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
+
+import com.vaadin.addon.spreadsheet.SpreadsheetStyleFactory.BorderStyle;
 
 /**
  * Class that handles all processing regarding Conditional Formatting rules.
@@ -38,6 +42,11 @@ public class ConditionalFormatter {
      */
     protected Map<String, Set<Integer>> cellToIndex = new HashMap<String, Set<Integer>>();
 
+    protected Map<ConditionalFormatting, Integer> topBorders = new HashMap<ConditionalFormatting, Integer>();
+    protected Map<ConditionalFormatting, Integer> leftBorders = new HashMap<ConditionalFormatting, Integer>();
+
+    private int borderStyleIndex = 0;
+
     protected FormulaEvaluator formulaEvaluator;
     protected ColorConverter colorConverter;
 
@@ -55,8 +64,8 @@ public class ConditionalFormatter {
     }
 
     /**
-     * Each cell can have multiple matching rules, hence a list. Order doesn't
-     * matter here, CSS applied in correct order on the client side.
+     * Each cell can have multiple matching rules, hence a collection. Order
+     * doesn't matter here, CSS is applied in correct order on the client side.
      * 
      * @param cell
      * @return indexes of the rules that match this Cell (to be used in
@@ -72,8 +81,22 @@ public class ConditionalFormatter {
      * cells.
      */
     public void createConditionalFormatterRules() {
+
+        // make sure old styles are cleared
+        if (cellToIndex != null) {
+            for (String key : cellToIndex.keySet()) {
+                int col = SpreadsheetUtil.getColFromKey(key) - 1;
+                int row = SpreadsheetUtil.getRowFromKey(key) - 1;
+                Cell cell = spreadsheet.getCell(row, col);
+                spreadsheet.markCellAsUpdated(cell, false);
+            }
+        }
+
         cellToIndex.clear();
+        topBorders.clear();
+        leftBorders.clear();
         spreadsheet.getState().conditionalFormattingStyles = new HashMap<Integer, String>();
+        borderStyleIndex = 1000000;
 
         SheetConditionalFormatting cfs = spreadsheet.getActiveSheet()
                 .getSheetConditionalFormatting();
@@ -137,6 +160,8 @@ public class ConditionalFormatter {
                     }
                 }
 
+                addBorderFormatting(cf, rule, css);
+
                 spreadsheet.getState().conditionalFormattingStyles.put(
                         cssIndex, css.toString());
 
@@ -144,6 +169,66 @@ public class ConditionalFormatter {
                 runCellMatcher(cf, rule, cssIndex);
             }
 
+        }
+    }
+
+    private void addBorderFormatting(ConditionalFormatting cf,
+            ConditionalFormattingRule rule, StringBuilder css) {
+
+        if (!(rule instanceof XSSFConditionalFormattingRule)) {
+            // HSSF not supported
+            return;
+        }
+
+        XSSFBorderFormatting borderFormatting = (XSSFBorderFormatting) rule
+                .getBorderFormatting();
+        if (borderFormatting != null) {
+
+            BorderStyle borderLeft = SpreadsheetStyleFactory.BORDER
+                    .get(borderFormatting.getBorderLeft());
+            BorderStyle borderRight = SpreadsheetStyleFactory.BORDER
+                    .get(borderFormatting.getBorderRight());
+            BorderStyle borderTop = SpreadsheetStyleFactory.BORDER
+                    .get(borderFormatting.getBorderTop());
+            BorderStyle borderBottom = SpreadsheetStyleFactory.BORDER
+                    .get(borderFormatting.getBorderBottom());
+
+            if (borderRight != BorderStyle.NONE) {
+                css.append("border-right:");
+                css.append(borderRight.getBorderAttributeValue());
+                css.append(colorConverter.getBorderColorCSS(BorderSide.RIGHT,
+                        "border-right-color", borderFormatting));
+            }
+            if (borderBottom != BorderStyle.NONE) {
+                css.append("border-bottom:");
+                css.append(borderBottom.getBorderAttributeValue());
+                css.append(colorConverter.getBorderColorCSS(BorderSide.BOTTOM,
+                        "border-bottom-color", borderFormatting));
+            }
+
+            // top and left borders might be applied to another cell, so store
+            // them with a different index
+            if (borderTop != BorderStyle.NONE) {
+                final StringBuilder sb2 = new StringBuilder("border-bottom:");
+                sb2.append(borderTop.getBorderAttributeValue());
+                sb2.append(colorConverter.getBorderColorCSS(BorderSide.TOP,
+                        "border-bottom-color", borderFormatting));
+
+                spreadsheet.getState().conditionalFormattingStyles.put(
+                        borderStyleIndex, sb2.toString());
+                topBorders.put(cf, borderStyleIndex++);
+            }
+
+            if (borderLeft != BorderStyle.NONE) {
+                final StringBuilder sb2 = new StringBuilder("border-right:");
+                sb2.append(borderLeft.getBorderAttributeValue());
+                sb2.append(colorConverter.getBorderColorCSS(BorderSide.LEFT,
+                        "border-right-color", borderFormatting));
+
+                spreadsheet.getState().conditionalFormattingStyles.put(
+                        borderStyleIndex, sb2.toString());
+                leftBorders.put(cf, borderStyleIndex++);
+            }
         }
     }
 
@@ -178,6 +263,53 @@ public class ConditionalFormatter {
                             cellToIndex.put(SpreadsheetUtil.toKey(cell), list);
                         }
                         list.add(classNameIndex);
+
+                        // if the rule contains borders, we need to add styles
+                        // to other cells too
+                        if (leftBorders.containsKey(cf)) {
+                            int ruleIndex = leftBorders.get(cf);
+
+                            // left border for col 0 isn't rendered
+                            if (col != 0) {
+                                Cell cellToLeft = spreadsheet.getCell(row,
+                                        col - 1);
+                                if (cellToLeft == null) {
+                                    cellToLeft = spreadsheet.createCell(row,
+                                            col - 1, "");
+                                }
+                                list = cellToIndex.get(SpreadsheetUtil
+                                        .toKey(cellToLeft));
+                                if (list == null) {
+                                    list = new HashSet<Integer>();
+                                    cellToIndex.put(
+                                            SpreadsheetUtil.toKey(cellToLeft),
+                                            list);
+                                }
+                                list.add(ruleIndex);
+                            }
+                        }
+                        if (topBorders.containsKey(cf)) {
+                            int ruleIndex = topBorders.get(cf);
+
+                            // top border for row 0 isn't rendered
+                            if (row != 0) {
+                                Cell cellOnTop = spreadsheet.getCell(row - 1,
+                                        col);
+                                if (cellOnTop == null) {
+                                    cellOnTop = spreadsheet.createCell(row - 1,
+                                            col, "");
+                                }
+                                list = cellToIndex.get(SpreadsheetUtil
+                                        .toKey(cellOnTop));
+                                if (list == null) {
+                                    list = new HashSet<Integer>();
+                                    cellToIndex.put(
+                                            SpreadsheetUtil.toKey(cellOnTop),
+                                            list);
+                                }
+                                list.add(ruleIndex);
+                            }
+                        }
                     }
                 }
             }

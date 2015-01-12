@@ -168,16 +168,19 @@ public class CellValueManager {
                     }
                 }
 
-                Set<Integer> cellFormattingIndexes = spreadsheet
-                        .getConditionalFormatter().getCellFormattingIndex(cell);
-                if (cellFormattingIndexes != null) {
+            }
 
-                    for (Integer i : cellFormattingIndexes) {
-                        cellData.cellStyle = cellData.cellStyle + " cf" + i;
-                    }
+            // conditional formatting might be applied even if there isn't a
+            // value (such as borders for the cell to the right)
+            Set<Integer> cellFormattingIndexes = spreadsheet
+                    .getConditionalFormatter().getCellFormattingIndex(cell);
+            if (cellFormattingIndexes != null) {
+
+                for (Integer i : cellFormattingIndexes) {
+                    cellData.cellStyle = cellData.cellStyle + " cf" + i;
                 }
 
-                return cellData;
+                markedCells.add(SpreadsheetUtil.toKey(cell));
             }
         } catch (RuntimeException rte) {
             rte.printStackTrace();

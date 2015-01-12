@@ -99,8 +99,8 @@ public class SpreadsheetStyleFactory {
             VERTICAL_BOTTOM, "flex-end", VERTICAL_CENTER, "center",
             VERTICAL_TOP, "flex-start");
 
-    private static final Map<Short, BorderStyle> BORDER = mapFor(
-            BORDER_DASH_DOT, BorderStyle.DASHED_THIN, BORDER_DASH_DOT_DOT,
+    static final Map<Short, BorderStyle> BORDER = mapFor(BORDER_DASH_DOT,
+            BorderStyle.DASHED_THIN, BORDER_DASH_DOT_DOT,
             BorderStyle.DASHED_THIN, BORDER_DASHED, BorderStyle.DASHED_THIN,
             BORDER_DOTTED, BorderStyle.DOTTED_THIN, BORDER_DOUBLE,
             BorderStyle.DOUBLE, BORDER_HAIR, BorderStyle.SOLID_THIN,
@@ -731,8 +731,8 @@ public class SpreadsheetStyleFactory {
         if (borderRight != BorderStyle.NONE) {
             sb.append("border-right:");
             sb.append(borderRight.getBorderAttributeValue());
-            colorConverter.colorBorder(BorderSide.RIGHT, "border-right-color",
-                    cellStyle, sb);
+            sb.append(colorConverter.getBorderColorCSS(BorderSide.RIGHT,
+                    "border-right-color", cellStyle));
         }
         return sb.toString();
     }
@@ -759,8 +759,8 @@ public class SpreadsheetStyleFactory {
         if (borderBottom != BorderStyle.NONE) {
             sb.append("border-bottom:");
             sb.append(borderBottom.getBorderAttributeValue());
-            colorConverter.colorBorder(BorderSide.BOTTOM,
-                    "border-bottom-color", cellStyle, sb);
+            sb.append(colorConverter.getBorderColorCSS(BorderSide.BOTTOM,
+                    "border-bottom-color", cellStyle));
         }
         return sb.toString();
     }
@@ -820,8 +820,8 @@ public class SpreadsheetStyleFactory {
         if (borderRight != BorderStyle.NONE) {
             sb.append("border-right:");
             sb.append(borderRight.getBorderAttributeValue());
-            colorConverter.colorBorder(BorderSide.RIGHT, "border-right-color",
-                    cellStyle, sb);
+            sb.append(colorConverter.getBorderColorCSS(BorderSide.RIGHT,
+                    "border-right-color", cellStyle));
         } else if (hasBackgroundColor) {
             sb.append("border-right:none;"); // if there is a bg-color,
                                              // gridlines not visible
@@ -829,8 +829,8 @@ public class SpreadsheetStyleFactory {
         if (borderBottom != BorderStyle.NONE) {
             sb.append("border-bottom:");
             sb.append(borderBottom.getBorderAttributeValue());
-            colorConverter.colorBorder(BorderSide.BOTTOM,
-                    "border-bottom-color", cellStyle, sb);
+            sb.append(colorConverter.getBorderColorCSS(BorderSide.BOTTOM,
+                    "border-bottom-color", cellStyle));
         } else if (hasBackgroundColor) {
             sb.append("border-bottom:none;"); // if there is a bg-color,
                                               // gridlines not visible
@@ -841,8 +841,8 @@ public class SpreadsheetStyleFactory {
             if (borderTop != BorderStyle.NONE) {
                 final StringBuilder sb2 = new StringBuilder("{border-bottom:");
                 sb2.append(borderTop.getBorderAttributeValue());
-                colorConverter.colorBorder(BorderSide.TOP,
-                        "border-bottom-color", cellStyle, sb2);
+                sb2.append(colorConverter.getBorderColorCSS(BorderSide.TOP,
+                        "border-bottom-color", cellStyle));
                 sb2.append("}");
                 shiftedBorderTopStyles.put((int) cellStyle.getIndex(),
                         sb2.toString());
@@ -850,8 +850,8 @@ public class SpreadsheetStyleFactory {
             if (borderLeft != BorderStyle.NONE) {
                 final StringBuilder sb2 = new StringBuilder("{border-right:");
                 sb2.append(borderLeft.getBorderAttributeValue());
-                colorConverter.colorBorder(BorderSide.LEFT,
-                        "border-right-color", cellStyle, sb2);
+                sb2.append(colorConverter.getBorderColorCSS(BorderSide.LEFT,
+                        "border-right-color", cellStyle));
                 sb2.append("}");
                 shiftedBorderLeftStyles.put((int) cellStyle.getIndex(),
                         sb2.toString());

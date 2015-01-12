@@ -85,7 +85,14 @@ public class SpreadsheetUtil {
 
     public static int getColFromKey(String key) {
         Matcher matcher = keyParser.matcher(key);
-        matcher.find();
+        matcher.find(); // find first digit (col)
+        return Integer.valueOf(matcher.group());
+    }
+
+    public static int getRowFromKey(String key) {
+        Matcher matcher = keyParser.matcher(key);
+        matcher.find(); // find first digit (col)
+        matcher.find(); // find second digit (row)
         return Integer.valueOf(matcher.group());
     }
 }

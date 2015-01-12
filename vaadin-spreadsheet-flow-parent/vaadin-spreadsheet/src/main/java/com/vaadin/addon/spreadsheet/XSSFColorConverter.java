@@ -1,11 +1,15 @@
 package com.vaadin.addon.spreadsheet;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.poi.ss.usermodel.BorderFormatting;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.xssf.model.ThemesTable;
+import org.apache.poi.xssf.usermodel.XSSFBorderFormatting;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
@@ -13,6 +17,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellFill;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBorder;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCfRule;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTColor;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDxf;
@@ -20,6 +25,8 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFont;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
 
 public class XSSFColorConverter implements ColorConverter {
+
+    private Logger LOG = Logger.getLogger(this.getClass().getName());
 
     private String defaultBackgroundColor;
     private String defaultColor;
@@ -92,8 +99,11 @@ public class XSSFColorConverter implements ColorConverter {
     }
 
     @Override
-    public void colorBorder(BorderSide borderSide, String attr,
-            CellStyle cellStyle, StringBuilder sb) {
+    public String getBorderColorCSS(BorderSide borderSide, String attr,
+            CellStyle cellStyle) {
+
+        StringBuilder sb = new StringBuilder();
+
         XSSFColor color;
         if (cellStyle instanceof XSSFCellStyle
                 && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {
@@ -108,13 +118,13 @@ public class XSSFColorConverter implements ColorConverter {
         sb.append(":");
         if (color == null || color.isAuto()) {
             sb.append("#000;");
-            return;
+            return sb.toString();
         }
 
         byte[] argb = color.getARgb();
         if (argb == null) {
             sb.append("#000;");
-            return;
+            return sb.toString();
         }
 
         final double tint = color.getTint();
@@ -132,6 +142,99 @@ public class XSSFColorConverter implements ColorConverter {
             sb.append(String
                     .format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
         }
+
+        return sb.toString();
+    }
+
+    @Override
+    public String getBorderColorCSS(BorderSide borderSide, String attr,
+            BorderFormatting format) {
+
+        XSSFBorderFormatting casted = (XSSFBorderFormatting) format;
+
+        // getXBorderColor methods are useless with XSSF, so we need to dig
+        // deeper.
+        CTColor color = getBorderColor(casted, borderSide);
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(attr);
+        sb.append(":");
+        if (color == null || color.getAuto()) {
+            sb.append("#000;");
+            return sb.toString();
+        }
+
+        byte[] argb = color.getRgb();
+        if (argb == null) {
+            sb.append("#000;");
+            return sb.toString();
+        }
+
+        final double tint = color.getTint();
+        if (tint != 0.0) {
+            argb[1] = applyTint(argb[1] & 0xFF, tint);
+            argb[2] = applyTint(argb[2] & 0xFF, tint);
+            argb[3] = applyTint(argb[3] & 0xFF, tint);
+        }
+
+        try {
+            String temp = toRGBA(argb);
+            sb.append(temp);
+        } catch (NumberFormatException nfe) {
+            System.out.println(nfe.getMessage() + " " + nfe.getCause());
+            sb.append(String
+                    .format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
+        }
+
+        return sb.toString();
+    }
+
+    private CTColor getBorderColor(XSSFBorderFormatting casted,
+            BorderSide borderSide) {
+
+        // No POI API exists for this, but the data exists in the underlying
+        // implementation.
+
+        Field declaredField = null;
+        try {
+            declaredField = casted.getClass().getDeclaredField("_border");
+            declaredField.setAccessible(true);
+            CTBorder object = (CTBorder) declaredField.get(casted);
+            switch (borderSide) {
+            case BOTTOM:
+                return object.getBottom().getColor();
+            case LEFT:
+                return object.getLeft().getColor();
+            case RIGHT:
+                return object.getRight().getColor();
+            case TOP:
+                return object.getTop().getColor();
+
+            default:
+                break;
+            }
+        } catch (IllegalArgumentException e) {
+            LOG.log(Level.SEVERE,
+                    "Incompatible POI implementation; unable to parse border color",
+                    e);
+        } catch (IllegalAccessException e) {
+            LOG.log(Level.SEVERE,
+                    "Incompatible POI implementation; unable to parse border color",
+                    e);
+        } catch (NoSuchFieldException e) {
+            LOG.log(Level.SEVERE,
+                    "Incompatible POI implementation; unable to parse border color",
+                    e);
+        } catch (SecurityException e) {
+            LOG.log(Level.SEVERE,
+                    "Incompatible POI implementation; unable to parse border color",
+                    e);
+        } finally {
+            if (declaredField != null)
+                declaredField.setAccessible(false);
+        }
+        return null;
     }
 
     private XSSFColor getBorderColor(XSSFCellStyle cs, BorderSide borderSide) {
