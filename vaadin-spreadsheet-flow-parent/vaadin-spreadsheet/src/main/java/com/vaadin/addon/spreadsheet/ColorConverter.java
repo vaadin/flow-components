@@ -9,17 +9,19 @@ import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
  * Interface for providing different color-related operations on the
  * Spreadsheet.
  * <p>
- * Is an interface because POI implementations differ quite a lot.
+ * This interface has been created because the POI implementations differ quite
+ * a lot.
  */
 public interface ColorConverter {
+
     /**
      * Creates the appropriate CSS text and background style for the given cell
      * style.
      * 
-     * @param style
+     * @param cellStyle
      *            The cell style.
      * @param sb
-     *            to write the styles
+     *            to write the styles in
      */
     void colorStyles(CellStyle cellStyle, StringBuilder sb);
 
@@ -49,9 +51,19 @@ public interface ColorConverter {
     String getBorderColorCSS(BorderSide borderSide, String attr,
             BorderFormatting format);
 
+    /**
+     * Writes the default background and foreground colors as CSS styles from
+     * the given cell style to the given string buffer.
+     * 
+     * @param cellStyle
+     *            The cell style
+     * @param sb
+     *            to write the styles in
+     */
     void defaultColorStyles(CellStyle cellStyle, StringBuilder sb);
 
     /**
+     * Returns true if the given cell style has a background color.
      * 
      * @param cs
      * @return Whether the given cell style has a defined background color or
@@ -63,6 +75,7 @@ public interface ColorConverter {
      * Create a CSS color string for the background in the given rule.
      * 
      * @param rule
+     *            Formatting rule
      * @return valid color string with semicolon or <code>null</code> if no
      *         color matches.
      */
@@ -72,6 +85,7 @@ public interface ColorConverter {
      * Create a CSS color string for the font in the given rule.
      * 
      * @param rule
+     *            Formatting rule
      * @return valid color string with semicolon or <code>null</code> if no
      *         color matches.
      */

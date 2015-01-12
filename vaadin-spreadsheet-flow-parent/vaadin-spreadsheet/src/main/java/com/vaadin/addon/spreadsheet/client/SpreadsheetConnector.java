@@ -29,6 +29,7 @@ import com.vaadin.client.ui.layout.ElementResizeListener;
 import com.vaadin.shared.ui.Connect;
 import com.vaadin.shared.ui.Connect.LoadStyle;
 
+@SuppressWarnings("serial")
 @Connect(value = Spreadsheet.class, loadStyle = LoadStyle.DEFERRED)
 public class SpreadsheetConnector extends AbstractHasComponentsConnector
         implements PostLayoutListener {

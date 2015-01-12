@@ -7,11 +7,24 @@ import org.apache.poi.ss.util.CellReference;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.SpreadsheetUtil;
 
+/**
+ * Command for shifting the value(s) of one or more cells.
+ * 
+ * @author Vaadin Ltd.
+ * @since 1.0
+ */
 public class CellShiftValuesCommand extends CellValueCommand {
 
     private boolean undone;
     private boolean decrease;
 
+    /**
+     * Creates a new CellShiftValuesCommand targeting the given spreadsheet.
+     * 
+     * @param spreadsheet
+     *            Target spreadsheet
+     * @param decrease
+     */
     public CellShiftValuesCommand(Spreadsheet spreadsheet, boolean decrease) {
         super(spreadsheet);
         this.decrease = decrease;

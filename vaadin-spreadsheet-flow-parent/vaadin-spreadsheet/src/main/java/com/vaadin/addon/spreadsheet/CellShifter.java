@@ -15,6 +15,7 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetState;
 import com.vaadin.addon.spreadsheet.command.CellShiftValuesCommand;
 import com.vaadin.addon.spreadsheet.command.CellValueCommand;
 
+@SuppressWarnings("serial")
 public class CellShifter implements Serializable {
 
     private final Spreadsheet spreadsheet;

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import com.vaadin.shared.AbstractComponentState;
 import com.vaadin.shared.annotations.DelegateToWidget;
 
+@SuppressWarnings("serial")
 public class SpreadsheetState extends AbstractComponentState {
 
     @DelegateToWidget

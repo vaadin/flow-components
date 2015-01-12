@@ -10,9 +10,11 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
 /**
- * Represents a "table" inside a spreadsheet. A table is a region (
- * {@link CellRangeAddress}), that has {@link PopupButton} on the column header
- * cells of the region.
+ * Represents a "table" inside a spreadsheet.
+ * 
+ * A table is a region ( {@link CellRangeAddress}), that has {@link PopupButton}
+ * on the column header cells of the region. In this context the column header
+ * cells refer to the cells on the first row of the region.
  */
 public class SpreadsheetTable {
 
@@ -27,7 +29,9 @@ public class SpreadsheetTable {
      * pop-up buttons for table headers (cells in the first row).
      * 
      * @param spreadsheet
+     *            Target spreadsheet
      * @param tableRegion
+     *            Cell range to build the table in
      */
     public SpreadsheetTable(Spreadsheet spreadsheet,
             CellRangeAddress tableRegion) {
@@ -40,8 +44,11 @@ public class SpreadsheetTable {
      * belongs to, pop-up buttons are added to table headers (first row cells).
      * 
      * @param spreadsheet
+     *            Target spreadsheet
      * @param sheet
-     * @param fullTableRegion
+     *            Target sheet within the spreadsheet
+     * @param tableRegion
+     *            Cell range to build the table in
      */
     public SpreadsheetTable(Spreadsheet spreadsheet, Sheet sheet,
             CellRangeAddress fullTableRegion) {
@@ -59,9 +66,9 @@ public class SpreadsheetTable {
      * Reload the table's pop-up buttons, if spreadsheet component is currently
      * presenting the sheet this table belongs to.
      * <p>
-     * If there are no popup buttons stored, when {@link #clear()} has been
-     * called, the popup-buttons are recreated. Otherwise they are just added to
-     * the spreadsheet component again.
+     * If there are no pop-up buttons stored, when {@link #clear()} has been
+     * called, the pop-up buttons are recreated. Otherwise they are just added
+     * to the spreadsheet component again.
      */
     public void reload() {
         if (isTableSheetCurrentlyActive()) {
@@ -89,12 +96,15 @@ public class SpreadsheetTable {
      * Returns true if the spreadsheet component is currently displaying the
      * sheet that this table belongs to.
      * 
-     * @return
+     * @return true if the sheet this table belongs to is active
      */
     public boolean isTableSheetCurrentlyActive() {
         return spreadsheet.getActiveSheet().equals(sheet);
     }
 
+    /**
+     * Initializes the pop-up buttons of this table.
+     */
     protected void initPopupButtons() {
         if (sheet.equals(spreadsheet.getActiveSheet())) {
             for (int c = fullTableRegion.getFirstColumn(); c <= fullTableRegion
@@ -112,7 +122,7 @@ public class SpreadsheetTable {
     /**
      * Gets the {@link Sheet} this table belongs to.
      * 
-     * @return
+     * @return Sheet this table belongs to
      */
     public Sheet getSheet() {
         return sheet;
@@ -121,7 +131,7 @@ public class SpreadsheetTable {
     /**
      * Gets the {@link Spreadsheet} component this table belongs to.
      * 
-     * @return
+     * @return Spreadsheet this table belongs to
      */
     public Spreadsheet getSpreadsheet() {
         return spreadsheet;
@@ -130,7 +140,7 @@ public class SpreadsheetTable {
     /**
      * Gets the full table region, {@link CellRangeAddress} for this table.
      * 
-     * @return
+     * @return Table region
      */
     public CellRangeAddress getFullTableRegion() {
         return fullTableRegion;
@@ -141,9 +151,9 @@ public class SpreadsheetTable {
      * outside of the table region, <code>null></code> will be returned.
      * 
      * @param col
-     *            0-based
-     * @return the {@link PopupButton} contained in the given column header for
-     *         this table.
+     *            Column index, 0-based
+     * @return the {@link PopupButton} contained in the header column of this
+     *         table.
      */
     public PopupButton getPopupButton(int col) {
         return getPopupButton(new CellReference(fullTableRegion.getFirstRow(),
@@ -158,7 +168,7 @@ public class SpreadsheetTable {
      * 
      * @param filterCellReference
      *            header cell reference
-     * @return
+     * @return Pop-up button from the given cell, or null if not found
      */
     public PopupButton getPopupButton(CellReference filterCellReference) {
         return popupButtons.get(filterCellReference);

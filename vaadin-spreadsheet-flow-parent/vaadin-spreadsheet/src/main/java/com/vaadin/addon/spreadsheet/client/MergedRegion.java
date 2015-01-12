@@ -2,6 +2,7 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class MergedRegion implements Serializable {
     public int id;
     public int col1;

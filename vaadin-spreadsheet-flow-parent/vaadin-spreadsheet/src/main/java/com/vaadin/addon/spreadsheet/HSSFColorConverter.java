@@ -9,6 +9,13 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 
+/**
+ * Color converter implementation for the older Excel file type (.xls or HSSF in
+ * POI terms).
+ * 
+ * @author Vaadin Ltd.
+ * @since 1.0
+ */
 public class HSSFColorConverter implements ColorConverter {
     private final HSSFWorkbook wb;
     private final HSSFPalette colors;
@@ -54,7 +61,7 @@ public class HSSFColorConverter implements ColorConverter {
     @Override
     public void colorStyles(final CellStyle cellStyle, final StringBuilder sb) {
         HSSFCellStyle cs = (HSSFCellStyle) cellStyle;
-        // TODO fill pattern ????
+        // TODO Fill pattern not supported
         // out.format("  /* fill pattern = %d */%n", cs.getFillPattern());
         short fillForegroundColor = cs.getFillForegroundColor();
         short fillBackgroundColor = cs.getFillBackgroundColor();
@@ -84,39 +91,6 @@ public class HSSFColorConverter implements ColorConverter {
             sb.append(color);
         }
 
-    }
-
-    private String styleColor(short index) {
-        HSSFColor color = colors.getColor(index);
-        if (index != HSSF_AUTO.getIndex() && color != null) {
-            short[] rgb = color.getTriplet();
-            return (String.format("#%02x%02x%02x;", rgb[0], rgb[1], rgb[2]));
-        }
-        return null;
-    }
-
-    private void styleBorderColor(final StringBuilder sb, String attr,
-            short index) {
-        HSSFColor color = colors.getColor(index);
-        sb.append(attr);
-        sb.append(":");
-        if (index != HSSF_AUTO.getIndex() && color != null) {
-            short[] rgb = color.getTriplet();
-            sb.append(String.format("#%02x%02x%02x;", rgb[0], rgb[1], rgb[2]));
-        } else {
-            sb.append("#000;");
-        }
-    }
-
-    @SuppressWarnings("unused")
-    private void styleColor(final StringBuilder sb, String attr, short index) {
-        HSSFColor color = colors.getColor(index);
-        if (index != HSSF_AUTO.getIndex() && color != null) {
-            short[] rgb = color.getTriplet();
-            sb.append(attr);
-            sb.append(":");
-            sb.append(String.format("#%02x%02x%02x;", rgb[0], rgb[1], rgb[2]));
-        }
     }
 
     @Override
@@ -176,5 +150,38 @@ public class HSSFColorConverter implements ColorConverter {
             BorderFormatting borderFormatting) {
         // conditional formatting is not supported for HSSF
         return "";
+    }
+
+    private String styleColor(short index) {
+        HSSFColor color = colors.getColor(index);
+        if (index != HSSF_AUTO.getIndex() && color != null) {
+            short[] rgb = color.getTriplet();
+            return (String.format("#%02x%02x%02x;", rgb[0], rgb[1], rgb[2]));
+        }
+        return null;
+    }
+
+    private void styleBorderColor(final StringBuilder sb, String attr,
+            short index) {
+        HSSFColor color = colors.getColor(index);
+        sb.append(attr);
+        sb.append(":");
+        if (index != HSSF_AUTO.getIndex() && color != null) {
+            short[] rgb = color.getTriplet();
+            sb.append(String.format("#%02x%02x%02x;", rgb[0], rgb[1], rgb[2]));
+        } else {
+            sb.append("#000;");
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private void styleColor(final StringBuilder sb, String attr, short index) {
+        HSSFColor color = colors.getColor(index);
+        if (index != HSSF_AUTO.getIndex() && color != null) {
+            short[] rgb = color.getTriplet();
+            sb.append(attr);
+            sb.append(":");
+            sb.append(String.format("#%02x%02x%02x;", rgb[0], rgb[1], rgb[2]));
+        }
     }
 }

@@ -61,6 +61,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
 import com.vaadin.util.ReflectTools;
 
+@SuppressWarnings("serial")
 public class Spreadsheet extends AbstractComponent implements HasComponents,
         Action.Container {
 
@@ -1318,7 +1319,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * {@link #setMaximumRows(int)}.
      * <p>
      * See {@link Sheet#shiftRows(int, int, int)}.
-     *
+     * 
      * @param startRow
      *            The first row to shift (0-based)
      * @param endRow
@@ -1341,7 +1342,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * {@link #setMaximumRows(int)}.
      * <p>
      * See {@link Sheet#shiftRows(int, int, int, boolean, boolean)}.
-     *
+     * 
      * @param startRow
      *            The first row to shift (0-based)
      * @param endRow
@@ -3008,9 +3009,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             if (getCellRangeAddresses() != null) {
                 for (CellRangeAddress a : getCellRangeAddresses()) {
 
-                    for (int x = a.getFirstColumn(); x <= a.getLastColumn(); x++)
-                        for (int y = a.getFirstRow(); y <= a.getLastRow(); y++)
+                    for (int x = a.getFirstColumn(); x <= a.getLastColumn(); x++) {
+                        for (int y = a.getFirstRow(); y <= a.getLastRow(); y++) {
                             cells.add(new CellReference(y, x));
+                        }
+                    }
                 }
             }
 

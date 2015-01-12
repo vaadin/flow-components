@@ -27,11 +27,11 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
+import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectedSheetChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectedSheetChangeListener;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeListener;
-import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;

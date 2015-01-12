@@ -5,6 +5,14 @@ import org.apache.poi.ss.usermodel.Hyperlink;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet.HyperlinkCellClickHandler;
 
+/**
+ * Default implementation of the {@link HyperlinkCellClickHandler} interface.
+ * Handles links to cells in either the same or some other sheet, as well as
+ * external URLs.
+ * 
+ * @author Vaadin Ltd.
+ * @since 1.0
+ */
 public class DefaultHyperlinkCellClickHandler implements
         HyperlinkCellClickHandler {
 
@@ -13,6 +21,12 @@ public class DefaultHyperlinkCellClickHandler implements
     protected DefaultHyperlinkCellClickHandler() {
     }
 
+    /**
+     * Returns the static singleton instance of
+     * DefaultHyperlinkCellClickHandler.
+     * 
+     * @return singleton instance of the handler
+     */
     public static DefaultHyperlinkCellClickHandler get() {
         return instance;
     }
@@ -42,8 +56,8 @@ public class DefaultHyperlinkCellClickHandler implements
                     // change selection to cell within the same sheet
                     String cellAddress = address
                             .substring(address.indexOf("#") + 1);
-                    spreadsheet.getCellSelectionManager().onSheetAddressChanged(
-                            cellAddress);
+                    spreadsheet.getCellSelectionManager()
+                            .onSheetAddressChanged(cellAddress);
                 }
             } else {
                 spreadsheet.getUI().getPage().open(address, "_new");
@@ -59,6 +73,7 @@ public class DefaultHyperlinkCellClickHandler implements
      * <code>HYPERLINK("address","friendly name")</code>
      * 
      * @param cell
+     *            Target cell containing a hyperlink function
      * @return the address that the hyperlink function points to
      */
     public final static String getHyperlinkFunctionCellAddress(Cell cell) {
@@ -73,7 +88,8 @@ public class DefaultHyperlinkCellClickHandler implements
      * Returns true if the cell contains a hyperlink function.
      * 
      * @param cell
-     * @return
+     *            Cell to investigate
+     * @return True if hyperlink is found
      */
     public final static boolean isHyperlinkFormulaCell(Cell cell) {
         return cell != null && cell.getCellType() == Cell.CELL_TYPE_FORMULA

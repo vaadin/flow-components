@@ -12,7 +12,7 @@ import java.util.Set;
  * and
  * {@link SpreadsheetFilterTable#unRegisterFilter(org.vaadin.spreadsheet.PopupButton, SpreadsheetFilter)}.
  * <p>
- * When a filter been has updated (by server side / user actions),
+ * When a filter been has updated (by server side or user actions),
  * {@link SpreadsheetFilterTable#onFiltersUpdated()} should be called.
  */
 public interface SpreadsheetFilter {
@@ -24,9 +24,10 @@ public interface SpreadsheetFilter {
     public void clearFilter();
 
     /**
-     * Returns the rows that should be filtered by this filter.
+     * Returns the rows that should be filtered by this filter. In other words
+     * the returned set of rows will be hidden from the table.
      * 
-     * @return 0-based filtered row indexes
+     * @return Row indexes of the filtered rows, 0-based
      */
     public Set<Integer> getFilteredRows();
 }

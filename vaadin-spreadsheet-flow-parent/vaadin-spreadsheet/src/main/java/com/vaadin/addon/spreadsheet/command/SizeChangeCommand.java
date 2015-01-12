@@ -7,8 +7,17 @@ import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 
+/**
+ * Command for changing the height of row(s) or the width of column(s).
+ * 
+ * @author Vaadin Ltd.
+ * @since 1.0
+ */
 public class SizeChangeCommand extends SpreadsheetCommand {
 
+    /**
+     * Determines whether this command applies to a row or to a column.
+     */
     public enum Type {
         COLUMN, ROW
     };
@@ -25,16 +34,18 @@ public class SizeChangeCommand extends SpreadsheetCommand {
     /**
      * Returns the type of size change this represents.
      * 
-     * @return
+     * @return size change type
      */
     public Type getType() {
         return type;
     }
 
     /**
+     * Captures the current row heights or column widths (depending on the type
+     * set to this command) for the row/column indexes given.
      * 
-     * @param indexes
-     *            1-based
+     * @param row
+     *            /column indexes, 1-based
      */
     public void captureValues(Integer[] indexes) {
         this.indexes = indexes;
@@ -47,16 +58,29 @@ public class SizeChangeCommand extends SpreadsheetCommand {
     @Override
     public void execute() {
         for (int i = 0; i < indexes.length; i++) {
-            values[i] = updateValue(indexes[i]-1, values[i]);
+            values[i] = updateValue(indexes[i] - 1, values[i]);
         }
     }
 
+    @Override
+    public CellReference getSelectedCellReference() {
+        return null;
+    }
+
+    @Override
+    public CellRangeAddress getPaintedCellRange() {
+        return null;
+    }
+
     /**
+     * Sets the height/width of the target row/column (found by the given index)
+     * to the given value.
      * 
      * @param index
-     *            0-based
+     *            row/column index, 0-based
      * @param value
-     * @return
+     *            new height/width
+     * @return Previous height/width of the row/column
      */
     private Object updateValue(int index, Object value) {
         if (type == Type.COLUMN) {
@@ -81,10 +105,11 @@ public class SizeChangeCommand extends SpreadsheetCommand {
     }
 
     /**
+     * Returns the current height/width of the target row/column.
      * 
      * @param index
-     *            0-based
-     * @return
+     *            row/column index, 0-based
+     * @return current height for row OR width for column
      */
     private Object getCurrentValue(int index) {
         if (type == Type.COLUMN) {
@@ -101,16 +126,6 @@ public class SizeChangeCommand extends SpreadsheetCommand {
             return row == null ? null : row.getZeroHeight() ? 0.0F : row
                     .getHeightInPoints();
         }
-        return null;
-    }
-
-    @Override
-    public CellReference getSelectedCellReference() {
-        return null;
-    }
-
-    @Override
-    public CellRangeAddress getPaintedCellRange() {
         return null;
     }
 

@@ -97,7 +97,7 @@ public class ConditionalFormatter {
         // make sure old styles are cleared
         if (cellToIndex != null) {
             for (String key : cellToIndex.keySet()) {
-                int col = SpreadsheetUtil.getColFromKey(key) - 1;
+                int col = SpreadsheetUtil.getColumnIndexFromKey(key) - 1;
                 int row = SpreadsheetUtil.getRowFromKey(key) - 1;
                 Cell cell = spreadsheet.getCell(row, col);
                 spreadsheet.markCellAsUpdated(cell, false);
@@ -510,8 +510,9 @@ public class ConditionalFormatter {
     protected boolean matchesFormula(ConditionalFormattingRule rule) {
         String booleanFormula = rule.getFormula1();
 
-        if (booleanFormula == null || booleanFormula.isEmpty())
+        if (booleanFormula == null || booleanFormula.isEmpty()) {
             return false;
+        }
 
         if (rule instanceof XSSFConditionalFormattingRule) {
 

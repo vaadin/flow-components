@@ -10,8 +10,17 @@ import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 
+/**
+ * Command for changing the value of one or more cells.
+ * 
+ * @author Vaadin Ltd.
+ * @since 1.0
+ */
 public class CellValueCommand extends SpreadsheetCommand {
 
+    /**
+     * Represents the coordinates and value of a single cell.
+     */
     class CellValue {
         public final int row;
         public final int col;
@@ -24,6 +33,9 @@ public class CellValueCommand extends SpreadsheetCommand {
         }
     }
 
+    /**
+     * Represents the coordinates and values of a range of cells.
+     */
     class CellRangeValue {
         public final int row1;
         public final int row2;
@@ -51,6 +63,7 @@ public class CellValueCommand extends SpreadsheetCommand {
      * and possible painted range for this command.
      * 
      * @param spreadsheet
+     *            Target spreadsheet
      */
     public CellValueCommand(Spreadsheet spreadsheet) {
         super(spreadsheet);
@@ -73,28 +86,31 @@ public class CellValueCommand extends SpreadsheetCommand {
         }
     }
 
+    /**
+     * Clears all values captured by this command.
+     */
     public void clearValues() {
         values.clear();
     }
 
+    /**
+     * Capture values from cells defined in the given CellReference(s).
+     * 
+     * @param cellReferences
+     *            cell references to process
+     */
     public void captureCellValues(CellReference... cellReferences) {
         for (CellReference cr : cellReferences) {
             values.add(new CellValue(cr.getRow(), cr.getCol(), getCellValue(cr)));
         }
     }
 
-    @Override
-    public CellReference getSelectedCellReference() {
-        return new CellReference(selectedCellRow, selectedcellCol);
-    }
-
-    @Override
-    public CellRangeAddress getPaintedCellRange() {
-        return selectedCellRange == null ? null : new CellRangeAddress(
-                selectedCellRange[0], selectedCellRange[1],
-                selectedCellRange[2], selectedCellRange[3]);
-    }
-
+    /**
+     * Capture values from cells defined in the given CellRangeAddress(es).
+     * 
+     * @param cellRanges
+     *            cell ranges to process
+     */
     public void captureCellRangeValues(CellRangeAddress... cellRanges) {
         for (CellRangeAddress cra : cellRanges) {
             if (cra != null) {
@@ -112,6 +128,18 @@ public class CellValueCommand extends SpreadsheetCommand {
                         .getLastColumn(), v));
             }
         }
+    }
+
+    @Override
+    public CellReference getSelectedCellReference() {
+        return new CellReference(selectedCellRow, selectedcellCol);
+    }
+
+    @Override
+    public CellRangeAddress getPaintedCellRange() {
+        return selectedCellRange == null ? null : new CellRangeAddress(
+                selectedCellRange[0], selectedCellRange[1],
+                selectedCellRange[2], selectedCellRange[3]);
     }
 
     @Override
@@ -142,6 +170,17 @@ public class CellValueCommand extends SpreadsheetCommand {
         }
     }
 
+    /**
+     * Sets the given value to the cell at the given coordinates.
+     * 
+     * @param r
+     *            Row index, 0-based
+     * @param c
+     *            Column index, 0-based
+     * @param value
+     *            Value to set to the cell
+     * @return Previous value of the cell or null if not available
+     */
     protected Object updateCellValue(int row, int col, Object value) {
         Cell cell = getCell(row, col);
         Object oldValue = getCellValue(cell);
@@ -191,14 +230,38 @@ public class CellValueCommand extends SpreadsheetCommand {
         return oldValue;
     }
 
+    /**
+     * Returns the current value for the cell referenced by the given cell
+     * reference
+     * 
+     * @param cell
+     *            Reference to the cell
+     * @return Current value of the cell or null if not available
+     */
     protected Object getCellValue(CellReference cell) {
         return getCellValue(cell.getRow(), cell.getCol());
     }
 
+    /**
+     * Returns the current value of the cell at the given coordinates.
+     * 
+     * @param r
+     *            Row index, 0-based
+     * @param c
+     *            Column index, 0-based
+     * @return Current value of the cell or null if not available
+     */
     protected Object getCellValue(int r, int c) {
         return getCellValue(getCell(r, c));
     }
 
+    /**
+     * Returns the current value of the given Cell
+     * 
+     * @param cell
+     *            Target cell
+     * @return Current value of the cell or null if not available
+     */
     protected Object getCellValue(Cell cell) {
         if (cell == null) {
             return null;
@@ -220,6 +283,15 @@ public class CellValueCommand extends SpreadsheetCommand {
         }
     }
 
+    /**
+     * Returns the Cell at the given row and column.
+     * 
+     * @param r
+     *            Row index, 0-based
+     * @param c
+     *            Column index, 0-based
+     * @return Cell at the given coordinates, null if not found
+     */
     protected Cell getCell(int r, int c) {
         Row row = getSheet().getRow(r);
         if (row == null) {

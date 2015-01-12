@@ -24,6 +24,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.ListSelect;
 
+@SuppressWarnings("serial")
 public class PopupButtonFixture implements SpreadsheetFixture {
 
     private DataValidationButton popupButton;

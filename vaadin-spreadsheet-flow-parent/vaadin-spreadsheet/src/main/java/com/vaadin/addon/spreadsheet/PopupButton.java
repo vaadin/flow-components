@@ -31,6 +31,7 @@ import com.vaadin.util.ReflectTools;
  * {@link Spreadsheet#addPopupButton(PopupButton)}. Remove with
  * {@link Spreadsheet#removePopup(PopupButton)}.
  */
+@SuppressWarnings("serial")
 public class PopupButton extends AbstractComponentContainer {
 
     private PopupButtonServerRpc rpc = new PopupButtonServerRpc() {

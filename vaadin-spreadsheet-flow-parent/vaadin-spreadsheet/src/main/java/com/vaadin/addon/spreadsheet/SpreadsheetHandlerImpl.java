@@ -19,6 +19,7 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 /**
  * Implementation of the Spreadsheet Server RPC interface.
  */
+@SuppressWarnings("serial")
 public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     private Spreadsheet spreadsheet;

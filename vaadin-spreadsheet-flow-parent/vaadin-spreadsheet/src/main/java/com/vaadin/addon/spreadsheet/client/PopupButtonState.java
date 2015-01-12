@@ -2,6 +2,7 @@ package com.vaadin.addon.spreadsheet.client;
 
 import com.vaadin.shared.AbstractComponentState;
 
+@SuppressWarnings("serial")
 public class PopupButtonState extends AbstractComponentState {
 
     /** 1-based */

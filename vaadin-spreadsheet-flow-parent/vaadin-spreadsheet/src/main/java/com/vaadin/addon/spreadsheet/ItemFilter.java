@@ -25,8 +25,9 @@ import com.vaadin.ui.VerticalLayout;
  * checkboxes.
  * <p>
  * Has a check box for selecting all items (cell values), and one check box per
- * unique cell value that inside the table column.
+ * unique cell value that can be found within the cells of the table column.
  */
+@SuppressWarnings("serial")
 public class ItemFilter extends Panel implements ValueChangeListener,
         SpreadsheetFilter {
 
@@ -49,9 +50,13 @@ public class ItemFilter extends Panel implements ValueChangeListener,
      * pop-up button and filtering table.
      * 
      * @param filterRange
+     *            Range of cells to filter
      * @param spreadsheet
+     *            Target Spreadsheet
      * @param popupButton
+     *            Pop-up button to insert the filter components in
      * @param filterTable
+     *            Target SpreadsheetFilterTable
      */
     public ItemFilter(CellRangeAddress filterRange, Spreadsheet spreadsheet,
             PopupButton popupButton, SpreadsheetFilterTable filterTable) {
@@ -68,7 +73,7 @@ public class ItemFilter extends Panel implements ValueChangeListener,
     }
 
     /**
-     * Create all components.
+     * Create all components of the ItemFilter.
      */
     protected void initComponents() {
         initAllItemsCheckbox();
@@ -77,6 +82,9 @@ public class ItemFilter extends Panel implements ValueChangeListener,
         initPopupButtonListeners();
     }
 
+    /**
+     * Creates the base layout for the filter components.
+     */
     protected void initLayouts() {
         layout = new VerticalLayout();
         layout.addComponent(allItems);
@@ -86,6 +94,10 @@ public class ItemFilter extends Panel implements ValueChangeListener,
         setStyleName(ITEM_FILTER_LAYOUT_CLASSNAME);
     }
 
+    /**
+     * Initializes pop-up close listener for verifying that filter selections
+     * match with what is currently shown.
+     */
     protected void initPopupButtonListeners() {
 
         popupButton.addPopupCloseListener(new PopupCloseListener() {
@@ -127,6 +139,9 @@ public class ItemFilter extends Panel implements ValueChangeListener,
         });
     }
 
+    /**
+     * Creates the "Select All" filter component.
+     */
     protected void initAllItemsCheckbox() {
         allItems = new CheckBox("(Select All)", true);
         allItems.setImmediate(true);
@@ -149,6 +164,9 @@ public class ItemFilter extends Panel implements ValueChangeListener,
         });
     }
 
+    /**
+     * Creates the filter selection component.
+     */
     protected void initOptions() {
         options = new OptionGroup();
         options.setImmediate(true);
@@ -156,6 +174,9 @@ public class ItemFilter extends Panel implements ValueChangeListener,
         options.addValueChangeListener(this);
     }
 
+    /**
+     * Updates the filtering options based on the values within the column.
+     */
     public void updateOptions() {
         Set<String> newValues = getAllValues();
         // remove changed, or update value
@@ -183,7 +204,8 @@ public class ItemFilter extends Panel implements ValueChangeListener,
     /**
      * Gets the currently NOT filtered cell values.
      * 
-     * @return
+     * @returns All unique values currently visible (= not filtered) within this
+     *          column
      */
     protected Set<String> getVisibleValues() {
         Set<String> values = new HashSet<String>();
@@ -197,9 +219,9 @@ public class ItemFilter extends Panel implements ValueChangeListener,
     }
 
     /**
-     * Gets all of the unique values for this filters column.
+     * Gets all of the unique values for this filter column.
      * 
-     * @return
+     * @return All unique values within this column
      */
     protected Set<String> getAllValues() {
         Set<String> values = new HashSet<String>();
@@ -230,8 +252,8 @@ public class ItemFilter extends Panel implements ValueChangeListener,
         filterTable.onFiltersUpdated();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings("unchecked")
     public void valueChange(ValueChangeEvent event) {
         if (firstUpdate) {
             firstUpdate = false;
@@ -240,8 +262,7 @@ public class ItemFilter extends Panel implements ValueChangeListener,
                 Collection<String> value = (Collection<String>) options
                         .getValue();
                 // value should not be updated when options are empty and all
-                // items is
-                // unchecked - just as in Excel
+                // items is unchecked - just as in Excel
                 if (!value.isEmpty()) {
                     updateFilteredItems(value);
                     cancelValueChangeUpdate = true;

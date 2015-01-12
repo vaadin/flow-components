@@ -52,24 +52,29 @@ public class SpreadsheetFactory {
     private static final float DEFAULT_ROW_HEIGHT_POINTS = 12.75f;
 
     public static final short EXCEL_COLUMN_WIDTH_FACTOR = 256;
+
     public static final int UNIT_OFFSET_LENGTH = 7;
+
     public static final int[] UNIT_OFFSET_MAP = new int[] { 0, 36, 73, 109,
             146, 182, 219 };
+
     /**
      * Column width measured as the number of characters of the maximum digit
      * width of the numbers 0, 1, 2, ..., 9 as rendered in the normal style's
      * font. There are 4 pixels of margin padding (two on each side), plus 1
      * pixel padding for the gridlines.
      * 
-     * This value is the same for default font in Office 2007 (Calibry) and
+     * This value is the same for default font in Office 2007 (Calibri) and
      * Office 2003 and earlier (Arial)
      */
     private static float DEFAULT_COLUMN_WIDTH = 9.140625f;
+
     /**
      * width of 1px in columns with default width in units of 1/256 of a
      * character width
      */
     private static final float PX_DEFAULT = 32.00f;
+
     /**
      * width of 1px in columns with overridden width in units of 1/256 of a
      * character width
@@ -78,7 +83,7 @@ public class SpreadsheetFactory {
 
     // FIXME investigate why the default column width gets a different value
     // using this compared to ExcelToHtmlUtils.getColumnWidthInPx(widthUnits).
-    public static float getColumnWidthInPixels(Sheet sheet, int columnIndex) {
+    protected static float getColumnWidthInPixels(Sheet sheet, int columnIndex) {
         if (sheet instanceof XSSFSheet) {
             CTCol col = ((XSSFSheet) sheet).getColumnHelper().getColumn(
                     columnIndex, false);
@@ -102,7 +107,7 @@ public class SpreadsheetFactory {
      * @param pxs
      * @return
      */
-    public static short pixel2WidthUnits(int pxs) {
+    protected static short pixel2WidthUnits(int pxs) {
         short widthUnits = (short) (EXCEL_COLUMN_WIDTH_FACTOR * (pxs / UNIT_OFFSET_LENGTH));
 
         widthUnits += UNIT_OFFSET_MAP[(pxs % UNIT_OFFSET_LENGTH)];

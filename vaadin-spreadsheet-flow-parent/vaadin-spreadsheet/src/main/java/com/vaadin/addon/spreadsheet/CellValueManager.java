@@ -704,7 +704,7 @@ public class CellValueManager {
                 if (key.endsWith(rowKey)) {
                     iterator.remove();
                     CellData cd = new CellData();
-                    cd.col = SpreadsheetUtil.getColFromKey(key);
+                    cd.col = SpreadsheetUtil.getColumnIndexFromKey(key);
                     cd.row = i;
                     removedCells.add(cd);
                 }
@@ -715,7 +715,7 @@ public class CellValueManager {
                 if (key.endsWith(rowKey)) {
                     iterator.remove();
                     CellData cd = new CellData();
-                    cd.col = SpreadsheetUtil.getColFromKey(key);
+                    cd.col = SpreadsheetUtil.getColumnIndexFromKey(key);
                     cd.row = i;
                     removedCells.add(cd);
                 }

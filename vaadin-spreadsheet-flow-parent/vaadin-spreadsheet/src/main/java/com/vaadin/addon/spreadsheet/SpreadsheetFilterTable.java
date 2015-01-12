@@ -25,6 +25,7 @@ import com.vaadin.ui.HasComponents;
  * Has a "Clear Filters" button inside the {@link PopupButton}s pop-up, that
  * clears all the filters for that column (contained within the same pop-up).
  */
+@SuppressWarnings("serial")
 public class SpreadsheetFilterTable extends SpreadsheetTable implements
         Button.ClickListener {
     private static final String CLEAR_FILTERS_BUTTON_CLASSNAME = "clear-filters-button";
@@ -39,10 +40,9 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
      * buttons and content (filters) are created.
      * 
      * @param spreadsheet
-     * @param sheet
+     *            Target Spreadsheet
      * @param fullTableRegion
-     * @param spreadsheet
-     * @param fullTableRegion
+     *            Cell range to include in the table
      */
     public SpreadsheetFilterTable(Spreadsheet spreadsheet,
             CellRangeAddress fullTableRegion) {
@@ -55,8 +55,11 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
      * belongs to, pop-up buttons and content (filters) are created.
      * 
      * @param spreadsheet
+     *            Target Spreadsheet
      * @param sheet
+     *            Target sheet within the Spreadsheet
      * @param fullTableRegion
+     *            Cell range to include in the table
      */
     public SpreadsheetFilterTable(Spreadsheet spreadsheet, Sheet sheet,
             CellRangeAddress fullTableRegion) {
@@ -78,10 +81,9 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
     /**
      * Reloads all the pop-up buttons and the pop-up contents (filters).
      * <p>
-     * If the pop-up buttons and filters have been cleared, when
-     * {@link #clear()} has been called, they are recreated with "empty"
-     * filters. Otherwise the pop-up buttons are just added to the component
-     * again.
+     * If the pop-up buttons and filters have been cleared ({@link #clear()} has
+     * been called) they will be recreated with "empty" filters. Otherwise the
+     * existing pop-up buttons are just added to the component again.
      */
     @Override
     public void reload() {
@@ -99,7 +101,8 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
     /**
      * Clears all the pop-up buttons and their contents (filters).
      * <p>
-     * If this Table is reloaded, the filters will have cleared their states.
+     * If this Table is reloaded after this method has been called, the filters
+     * will have cleared their states.
      */
     @Override
     public void clear() {
@@ -142,8 +145,8 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
     }
 
     /**
-     * Creates all filters for this table. override this in extending class for
-     * adding filters on class construction.
+     * Creates all filters for this table. Override this in an extending class
+     * for adding filters on class construction.
      */
     protected void initFilters() {
         initItemFilters();
@@ -169,7 +172,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
      * Creates a "Clear filters" button. It is has the
      * {@value #CLEAR_FILTERS_BUTTON_CLASSNAME} class name.
      * 
-     * @return
+     * @return Button for clearing the filters
      */
     protected Button createClearButton() {
         final Button button = new Button("Clear filters", this);
@@ -180,10 +183,9 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
     }
 
     /**
-     * Gets the filtering region for this table (the columns and rows that the
-     * filters applies to).
+     * Gets the filtering region, {@link CellRangeAddress} for this table.
      * 
-     * @return
+     * @return The filtering region
      */
     public CellRangeAddress getFilteringRegion() {
         return filteringRegion;
@@ -194,6 +196,10 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
      * updated, and the sheet ({@link #getSheet()}) and component (
      * {@link #getSpreadsheet()}) need to be updated to reflect to the filters'
      * values.
+     * <p>
+     * NOTE: The default ItemFilters will call this method automatically on
+     * change. You only need to call this method when you have implemented and
+     * added your own SpreadsheetFilter.
      */
     public void onFiltersUpdated() {
         Set<Integer> filteredRows = new HashSet<Integer>();
@@ -225,8 +231,9 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
      * rows, {@link #onFiltersUpdated()} should be called.
      * 
      * @param popupButton
-     *            the pop-up button this filter is added to
+     *            The pop-up button this filter is added to
      * @param filter
+     *            The filter to apply
      */
     public void registerFilter(PopupButton popupButton, SpreadsheetFilter filter) {
         if (getPopupButtons().contains(popupButton)) {
@@ -248,8 +255,9 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
      * given pop-up button.
      * 
      * @param popupButton
-     *            the pop-up button this filter is removed from
+     *            The pop-up button this filter is removed from
      * @param filter
+     *            The filter to remove
      */
     public void unRegisterFilter(PopupButton popupButton,
             SpreadsheetFilter filter) {

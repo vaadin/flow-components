@@ -554,8 +554,6 @@ public class SelectionWidget extends Composite {
     }
 
     private void paintCells(Event event) {
-        // System.out.println("IS INSIDE SHEET: " +
-        // isCursorInsideSheet(event));
         final int clientX = Util.getTouchOrMouseClientX(event);
         final int clientY = Util.getTouchOrMouseClientY(event);
         // position in perspective to the top left

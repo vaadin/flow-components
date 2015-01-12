@@ -24,6 +24,13 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDxf;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFont;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
 
+/**
+ * Color converter implementation for the current Excel file type (.xlsx or XSSF
+ * in POI terms).
+ * 
+ * @author Vaadin Ltd.
+ * @since 1.0
+ */
 public class XSSFColorConverter implements ColorConverter {
 
     private Logger LOG = Logger.getLogger(this.getClass().getName());
@@ -58,6 +65,7 @@ public class XSSFColorConverter implements ColorConverter {
                     backgroundColor = styleColor(themeColor);
                 }
             } catch (Exception e) {
+                LOG.log(Level.FINEST, e.getMessage(), e);
             }
         }
 
@@ -74,27 +82,6 @@ public class XSSFColorConverter implements ColorConverter {
                 sb.append("color:");
                 sb.append(color);
             }
-        }
-    }
-
-    private XSSFColor getFillColor(XSSFCellStyle cs) {
-        final CTXf _cellXf = cs.getCoreXf();
-        int fillIndex = (int) _cellXf.getFillId();
-        XSSFCellFill fg = workbook.getStylesSource().getFillAt(fillIndex);
-
-        ThemesTable _theme = workbook.getTheme();
-        XSSFColor fillForegroundColor = fg.getFillForegroundColor();
-        if (fillForegroundColor != null && _theme != null) {
-            _theme.inheritFromThemeAsRequired(fillForegroundColor);
-        }
-        XSSFColor fillBackgroundColor = fg.getFillBackgroundColor();
-        if (fillForegroundColor == null) {
-            if (fillBackgroundColor != null && _theme != null) {
-                _theme.inheritFromThemeAsRequired(fillBackgroundColor);
-            }
-            return fillBackgroundColor;
-        } else {
-            return fillForegroundColor;
         }
     }
 
@@ -182,7 +169,7 @@ public class XSSFColorConverter implements ColorConverter {
             String temp = toRGBA(argb);
             sb.append(temp);
         } catch (NumberFormatException nfe) {
-            System.out.println(nfe.getMessage() + " " + nfe.getCause());
+            LOG.log(Level.FINEST, nfe.getMessage(), nfe);
             sb.append(String
                     .format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
         }
@@ -231,10 +218,120 @@ public class XSSFColorConverter implements ColorConverter {
                     "Incompatible POI implementation; unable to parse border color",
                     e);
         } finally {
-            if (declaredField != null)
+            if (declaredField != null) {
                 declaredField.setAccessible(false);
+            }
         }
         return null;
+    }
+
+    @Override
+    public void defaultColorStyles(CellStyle cellStyle, StringBuilder sb) {
+        XSSFCellStyle cs = (XSSFCellStyle) cellStyle;
+        XSSFColor fillForegroundColorColor = cs.getFillForegroundColorColor();
+        XSSFColor fillBackgroundColorColor = cs.getFillBackgroundColorColor();
+        defaultBackgroundColor = styleColor(fillForegroundColorColor);
+        defaultBackgroundColor = styleColor(fillBackgroundColorColor);
+
+        if (defaultBackgroundColor == null) {
+            defaultBackgroundColor = "rgba(255,255,255,1.0);";
+        }
+        sb.append("background-color:");
+        sb.append(defaultBackgroundColor);
+
+        XSSFColor xssfColor = cs.getFont().getXSSFColor();
+        defaultColor = styleColor(xssfColor);
+
+        if (defaultColor == null) {
+            defaultColor = "rgba(0,0,0,1.0);";
+        }
+        sb.append("color:");
+        sb.append(defaultColor);
+
+    }
+
+    @Override
+    public boolean hasBackgroundColor(CellStyle cellStyle) {
+        XSSFCellStyle cs = (XSSFCellStyle) cellStyle;
+        XSSFColor fillBackgroundXSSFColor = cs.getFillBackgroundXSSFColor();
+        XSSFColor fillForegroundXSSFColor = cs.getFillForegroundXSSFColor();
+        if (fillForegroundXSSFColor != null
+                && !fillForegroundXSSFColor.isAuto()) {
+            return true;
+        } else if (fillBackgroundXSSFColor != null
+                && !fillBackgroundXSSFColor.isAuto()) {
+            return true;
+        } else {
+            // bypass POI API and try to get the fill ourself, because of bug:
+            // https://issues.apache.org/bugzilla/show_bug.cgi?id=53262
+            try {
+                XSSFColor themeColor = getFillColor(cs);
+                if (themeColor != null && !themeColor.isAuto()) {
+                    return true;
+                }
+            } catch (Exception e) {
+                LOG.log(Level.FINEST, e.getMessage(), e);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public String getBackgroundColorCSS(ConditionalFormattingRule rule) {
+
+        XSSFConditionalFormattingRule r = (XSSFConditionalFormattingRule) rule;
+
+        CTDxf dxf = getXMLColorDataWithReflection(r);
+
+        CTColor bgColor = dxf.getFill().getPatternFill().getBgColor();
+        byte[] rgb = bgColor.getRgb();
+
+        return rgb == null ? null : toRGBA(rgb);
+    }
+
+    @Override
+    public String getFontColorCSS(ConditionalFormattingRule rule) {
+
+        XSSFConditionalFormattingRule r = (XSSFConditionalFormattingRule) rule;
+
+        CTDxf dxf = getXMLColorDataWithReflection(r);
+        CTFont font = dxf.getFont();
+
+        if (font.getColorList() == null || font.getColorList().isEmpty()) {
+            // default color
+            return null;
+        }
+
+        CTColor ctColor = font.getColorList().get(0);
+        byte[] rgb = ctColor.getRgb();
+
+        if (rgb == null) {
+            // default color
+            return null;
+        }
+
+        return toRGBA(rgb);
+    }
+
+    private XSSFColor getFillColor(XSSFCellStyle cs) {
+        final CTXf _cellXf = cs.getCoreXf();
+        int fillIndex = (int) _cellXf.getFillId();
+        XSSFCellFill fg = workbook.getStylesSource().getFillAt(fillIndex);
+
+        ThemesTable _theme = workbook.getTheme();
+        XSSFColor fillForegroundColor = fg.getFillForegroundColor();
+        if (fillForegroundColor != null && _theme != null) {
+            _theme.inheritFromThemeAsRequired(fillForegroundColor);
+        }
+        XSSFColor fillBackgroundColor = fg.getFillBackgroundColor();
+        if (fillForegroundColor == null) {
+            if (fillBackgroundColor != null && _theme != null) {
+                _theme.inheritFromThemeAsRequired(fillBackgroundColor);
+            }
+            return fillBackgroundColor;
+        } else {
+            return fillForegroundColor;
+        }
     }
 
     private XSSFColor getBorderColor(XSSFCellStyle cs, BorderSide borderSide) {
@@ -300,7 +397,7 @@ public class XSSFColorConverter implements ColorConverter {
         return sb.toString();
     }
 
-    private static byte applyTint(int lum, double tint) {
+    private byte applyTint(int lum, double tint) {
         if (tint > 0) {
             return (byte) (lum * (1.0 - tint) + (255 - 255 * (1.0 - tint)));
         } else if (tint < 0) {
@@ -308,69 +405,6 @@ public class XSSFColorConverter implements ColorConverter {
         } else {
             return (byte) lum;
         }
-    }
-
-    @Override
-    public void defaultColorStyles(CellStyle cellStyle, StringBuilder sb) {
-        XSSFCellStyle cs = (XSSFCellStyle) cellStyle;
-        XSSFColor fillForegroundColorColor = cs.getFillForegroundColorColor();
-        XSSFColor fillBackgroundColorColor = cs.getFillBackgroundColorColor();
-        defaultBackgroundColor = styleColor(fillForegroundColorColor);
-        defaultBackgroundColor = styleColor(fillBackgroundColorColor);
-
-        if (defaultBackgroundColor == null) {
-            defaultBackgroundColor = "rgba(255,255,255,1.0);";
-        }
-        sb.append("background-color:");
-        sb.append(defaultBackgroundColor);
-
-        XSSFColor xssfColor = cs.getFont().getXSSFColor();
-        defaultColor = styleColor(xssfColor);
-
-        if (defaultColor == null) {
-            defaultColor = "rgba(0,0,0,1.0);";
-        }
-        sb.append("color:");
-        sb.append(defaultColor);
-
-    }
-
-    @Override
-    public boolean hasBackgroundColor(CellStyle cellStyle) {
-        XSSFCellStyle cs = (XSSFCellStyle) cellStyle;
-        XSSFColor fillBackgroundXSSFColor = cs.getFillBackgroundXSSFColor();
-        XSSFColor fillForegroundXSSFColor = cs.getFillForegroundXSSFColor();
-        if (fillForegroundXSSFColor != null
-                && !fillForegroundXSSFColor.isAuto()) {
-            return true;
-        } else if (fillBackgroundXSSFColor != null
-                && !fillBackgroundXSSFColor.isAuto()) {
-            return true;
-        } else {
-            // bypass POI API and try to get the fill ourself, because of bug:
-            // https://issues.apache.org/bugzilla/show_bug.cgi?id=53262
-            try {
-                XSSFColor themeColor = getFillColor(cs);
-                if (themeColor != null && !themeColor.isAuto()) {
-                    return true;
-                }
-            } catch (Exception e) {
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public String getBackgroundColorCSS(ConditionalFormattingRule rule) {
-
-        XSSFConditionalFormattingRule r = (XSSFConditionalFormattingRule) rule;
-
-        CTDxf dxf = getXMLColorDataWithReflection(r);
-
-        CTColor bgColor = dxf.getFill().getPatternFill().getBgColor();
-        byte[] rgb = bgColor.getRgb();
-
-        return rgb == null ? null : toRGBA(rgb);
     }
 
     /**
@@ -392,36 +426,14 @@ public class XSSFColorConverter implements ColorConverter {
         } catch (Exception e) {
             Logger.getLogger(getClass().getName()).fine(e.getMessage());
         } finally {
-            declaredMethod.setAccessible(false);
+            if (declaredMethod != null) {
+                declaredMethod.setAccessible(false);
+            }
         }
 
         CTDxf dxf = workbook.getStylesSource().getCTStylesheet().getDxfs()
                 .getDxfArray((int) realRule.getDxfId());
 
         return dxf;
-    }
-
-    @Override
-    public String getFontColorCSS(ConditionalFormattingRule rule) {
-
-        XSSFConditionalFormattingRule r = (XSSFConditionalFormattingRule) rule;
-
-        CTDxf dxf = getXMLColorDataWithReflection(r);
-        CTFont font = dxf.getFont();
-
-        if (font.getColorList() == null || font.getColorList().isEmpty()) {
-            // default color
-            return null;
-        }
-
-        CTColor ctColor = font.getColorList().get(0);
-        byte[] rgb = ctColor.getRgb();
-
-        if (rgb == null) {
-            // default color
-            return null;
-        }
-
-        return toRGBA(rgb);
     }
 }

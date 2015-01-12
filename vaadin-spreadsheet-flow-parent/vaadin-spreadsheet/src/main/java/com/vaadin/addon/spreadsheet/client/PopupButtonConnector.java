@@ -17,6 +17,7 @@ import com.vaadin.client.ui.AbstractHasComponentsConnector;
 import com.vaadin.shared.ui.Connect;
 import com.vaadin.shared.ui.Connect.LoadStyle;
 
+@SuppressWarnings("serial")
 @Connect(value = PopupButton.class, loadStyle = LoadStyle.DEFERRED)
 public class PopupButtonConnector extends AbstractHasComponentsConnector
         implements ClickHandler, CloseHandler<PopupPanel> {
