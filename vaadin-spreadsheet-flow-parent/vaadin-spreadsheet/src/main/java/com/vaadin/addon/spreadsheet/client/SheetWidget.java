@@ -1935,12 +1935,10 @@ public class SheetWidget extends Panel {
         if (styles != null) {
             try {
 
-                // reverse numeral order, so that rules override each other
-                // correctly
                 List<Integer> list = new ArrayList<Integer>(styles.keySet());
                 Collections.sort(list);
 
-                for (int i = list.size() - 1; i >= 0; i--) {
+                for (int i = 0; i < list.size(); i++) {
 
                     Integer key = list.get(i);
                     String val = styles.get(key);

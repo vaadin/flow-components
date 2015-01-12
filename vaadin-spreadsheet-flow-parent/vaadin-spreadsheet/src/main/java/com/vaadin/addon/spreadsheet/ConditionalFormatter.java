@@ -1,9 +1,15 @@
 package com.vaadin.addon.spreadsheet;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.poi.hssf.usermodel.HSSFSheetConditionalFormatting;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -20,8 +26,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFBorderFormatting;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
+import org.apache.poi.xssf.usermodel.XSSFFontFormatting;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBooleanProperty;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCfRule;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFont;
 
 import com.vaadin.addon.spreadsheet.SpreadsheetStyleFactory.BorderStyle;
 
@@ -34,6 +44,8 @@ import com.vaadin.addon.spreadsheet.SpreadsheetStyleFactory.BorderStyle;
  * @author Thomas Mattsson / Vaadin Ltd.
  */
 public class ConditionalFormatter {
+
+    private Logger LOG = Logger.getLogger(this.getClass().getName());
 
     protected Spreadsheet spreadsheet;
 
@@ -110,21 +122,31 @@ public class ConditionalFormatter {
         for (int i = 0; i < cfs.getNumConditionalFormattings(); i++) {
             ConditionalFormatting cf = cfs.getConditionalFormattingAt(i);
 
-            for (int ruleIndex = 0; ruleIndex < cf.getNumberOfRules(); ruleIndex++) {
+            // Excel stops processing certain rules after it finds the first
+            // match, so use a marker
+            boolean hasFontLines = false;
+            boolean hasFontStyle = false;
+
+            // rules are listen bottom up, but we want top down so that we can
+            // stop when we need to. Rule indexes follow original order, because
+            // that is the order CSS is applied on client side.
+            for (int ruleIndex = cf.getNumberOfRules() - 1; ruleIndex >= 0; ruleIndex--) {
 
                 ConditionalFormattingRule rule = cf.getRule(ruleIndex);
 
+                // first formatting object gets 0-999, second 1000-1999...
+                // should be enough.
                 int cssIndex = i * 1000 + ruleIndex;
 
                 // build style
 
-                FontFormatting fontFormatting = rule.getFontFormatting();
-
-                // FIXME: some of this code will override all old values on each
+                // TODO: some of this code will override all old values on each
                 // iteration. POI API will return the default value for nulls,
                 // which is not what we want.
 
                 StringBuilder css = new StringBuilder();
+
+                FontFormatting fontFormatting = rule.getFontFormatting();
 
                 if (fontFormatting != null) {
                     String fontColorCSS = colorConverter.getFontColorCSS(rule);
@@ -132,10 +154,20 @@ public class ConditionalFormatter {
                         css.append("color:" + fontColorCSS);
                     }
 
+                    // we can't have both underline and line-through in the same
+                    // DIV element, so use the first one that matches.
+
                     // HSSF might return 255 for 'none'...
-                    if (fontFormatting.getUnderlineType() != FontFormatting.U_NONE
-                            && fontFormatting.getUnderlineType() != 255)
+                    if (!hasFontLines
+                            && fontFormatting.getUnderlineType() != FontFormatting.U_NONE
+                            && fontFormatting.getUnderlineType() != 255) {
                         css.append("text-decoration: underline;");
+                        hasFontLines = true;
+                    }
+                    if (!hasFontLines && hasStrikeThrough(fontFormatting)) {
+                        css.append("text-decoration: line-through;");
+                        hasFontLines = true;
+                    }
 
                     if (fontFormatting.getFontHeight() != -1) {
                         // POI returns height in 1/20th points, convert
@@ -143,10 +175,23 @@ public class ConditionalFormatter {
                         css.append("font-size:" + fontHeight + "pt;");
                     }
 
-                    if (fontFormatting.isItalic())
+                    // excel has a setting for bold italic, otherwise bold
+                    // overrides
+                    // italic and vice versa
+                    if (!hasFontStyle && fontFormatting.isItalic()
+                            && fontFormatting.isBold()) {
                         css.append("font-style: italic;");
-                    if (fontFormatting.isBold())
                         css.append("font-weight: bold;");
+                        hasFontStyle = true;
+                    } else if (!hasFontStyle && fontFormatting.isItalic()) {
+                        css.append("font-style: italic;");
+                        css.append("font-weight: initial;");
+                        hasFontStyle = true;
+                    } else if (!hasFontStyle && fontFormatting.isBold()) {
+                        css.append("font-style: normal;");
+                        css.append("font-weight: bold;");
+                        hasFontStyle = true;
+                    }
                 }
 
                 PatternFormatting patternFormatting = rule
@@ -167,6 +212,11 @@ public class ConditionalFormatter {
 
                 // check actual cells
                 runCellMatcher(cf, rule, cssIndex);
+
+                // stop here if defined in rules
+                if (stopHere(rule)) {
+                    break;
+                }
             }
 
         }
@@ -230,6 +280,101 @@ public class ConditionalFormatter {
                 leftBorders.put(cf, borderStyleIndex++);
             }
         }
+    }
+
+    /**
+     * Checks if this rule has 'stop if true' defined.
+     */
+    private boolean stopHere(ConditionalFormattingRule rule) {
+        if (rule instanceof XSSFConditionalFormattingRule) {
+
+            // No POI API for this particular data, but it is present in XML.
+
+            Method declaredMethod = null;
+            try {
+                declaredMethod = XSSFConditionalFormattingRule.class
+                        .getDeclaredMethod("getCTCfRule");
+                declaredMethod.setAccessible(true);
+                CTCfRule ctRule = (CTCfRule) declaredMethod.invoke(rule);
+
+                return ctRule.getStopIfTrue();
+
+            } catch (NoSuchMethodException e) {
+                LOG.log(Level.SEVERE,
+                        "Incompatible POI implementation, unable to parse conditional formatting rule",
+                        e);
+            } catch (SecurityException e) {
+                LOG.log(Level.SEVERE,
+                        "Incompatible POI implementation, unable to parse conditional formatting rule",
+                        e);
+            } catch (IllegalAccessException e) {
+                LOG.log(Level.SEVERE,
+                        "Incompatible POI implementation, unable to parse conditional formatting rule",
+                        e);
+            } catch (IllegalArgumentException e) {
+                LOG.log(Level.SEVERE,
+                        "Incompatible POI implementation, unable to parse conditional formatting rule",
+                        e);
+            } catch (InvocationTargetException e) {
+                LOG.log(Level.SEVERE,
+                        "Incompatible POI implementation, unable to parse conditional formatting rule",
+                        e);
+            } finally {
+                if (declaredMethod != null) {
+                    declaredMethod.setAccessible(false);
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if this formatting has strikethrough enabled or not.
+     */
+    private boolean hasStrikeThrough(FontFormatting fontFormatting) {
+        if (fontFormatting instanceof XSSFFontFormatting) {
+
+            // No POI API for this particular data, but it is present in XML.
+
+            Field field = null;
+            try {
+                field = XSSFFontFormatting.class.getDeclaredField("_font");
+                field.setAccessible(true);
+                CTFont font = (CTFont) field.get(fontFormatting);
+
+                List<CTBooleanProperty> strikeList = font.getStrikeList();
+
+                if (strikeList != null) {
+                    for (CTBooleanProperty p : strikeList) {
+                        if (p.getVal()) {
+                            return true;
+                        }
+                    }
+                }
+
+            } catch (NoSuchFieldException e) {
+                LOG.log(Level.SEVERE,
+                        "Incompatible POI implementation, unable to parse conditional formatting rule",
+                        e);
+            } catch (SecurityException e) {
+                LOG.log(Level.SEVERE,
+                        "Incompatible POI implementation, unable to parse conditional formatting rule",
+                        e);
+            } catch (IllegalArgumentException e) {
+                LOG.log(Level.SEVERE,
+                        "Incompatible POI implementation, unable to parse conditional formatting rule",
+                        e);
+            } catch (IllegalAccessException e) {
+                LOG.log(Level.SEVERE,
+                        "Incompatible POI implementation, unable to parse conditional formatting rule",
+                        e);
+            } finally {
+                if (field != null) {
+                    field.setAccessible(false);
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -320,8 +465,6 @@ public class ConditionalFormatter {
      * Checks if the given cell value matches the given conditional formatting
      * rule.
      * 
-     * @param cell
-     * @param rule
      * @return Whether the given rule evaluates to <code>true</code> for the
      *         given cell.
      */
@@ -361,7 +504,6 @@ public class ConditionalFormatter {
      * TODO does not support HSSF files for now, since HSSF does not read cell
      * references in the file correctly.
      * 
-     * @param rule
      * @return whether the formula in the given rule is of boolean formula type
      *         and evaluates to <code>true</code>
      */
@@ -407,8 +549,6 @@ public class ConditionalFormatter {
      * {@link ConditionalFormattingRule} of <code>VALUE_IS</code> type. Covers
      * all cell types and comparison operations.
      * 
-     * @param cell
-     * @param rule
      * @return whether the given cells value matches the given
      *         <code>VALUE_IS</code> rule
      */
