@@ -33,7 +33,8 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
  */
 public class XSSFColorConverter implements ColorConverter {
 
-    private Logger LOG = Logger.getLogger(this.getClass().getName());
+    private static final Logger LOGGER = Logger
+            .getLogger(XSSFColorConverter.class.getName());
 
     private String defaultBackgroundColor;
     private String defaultColor;
@@ -65,7 +66,7 @@ public class XSSFColorConverter implements ColorConverter {
                     backgroundColor = styleColor(themeColor);
                 }
             } catch (Exception e) {
-                LOG.log(Level.FINEST, e.getMessage(), e);
+                LOGGER.log(Level.FINEST, e.getMessage(), e);
             }
         }
 
@@ -125,7 +126,7 @@ public class XSSFColorConverter implements ColorConverter {
             String temp = toRGBA(argb);
             sb.append(temp);
         } catch (NumberFormatException nfe) {
-            System.out.println(nfe.getMessage() + " " + nfe.getCause());
+            LOGGER.log(Level.FINE, nfe.getMessage() + " " + nfe.getCause(), nfe);
             sb.append(String
                     .format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
         }
@@ -169,7 +170,7 @@ public class XSSFColorConverter implements ColorConverter {
             String temp = toRGBA(argb);
             sb.append(temp);
         } catch (NumberFormatException nfe) {
-            LOG.log(Level.FINEST, nfe.getMessage(), nfe);
+            LOGGER.log(Level.FINE, nfe.getMessage() + " " + nfe.getCause(), nfe);
             sb.append(String
                     .format("#%02x%02x%02x;", argb[1], argb[2], argb[3]));
         }
@@ -202,19 +203,23 @@ public class XSSFColorConverter implements ColorConverter {
                 break;
             }
         } catch (IllegalArgumentException e) {
-            LOG.log(Level.SEVERE,
+            LOGGER.log(
+                    Level.SEVERE,
                     "Incompatible POI implementation; unable to parse border color",
                     e);
         } catch (IllegalAccessException e) {
-            LOG.log(Level.SEVERE,
+            LOGGER.log(
+                    Level.SEVERE,
                     "Incompatible POI implementation; unable to parse border color",
                     e);
         } catch (NoSuchFieldException e) {
-            LOG.log(Level.SEVERE,
+            LOGGER.log(
+                    Level.SEVERE,
                     "Incompatible POI implementation; unable to parse border color",
                     e);
         } catch (SecurityException e) {
-            LOG.log(Level.SEVERE,
+            LOGGER.log(
+                    Level.SEVERE,
                     "Incompatible POI implementation; unable to parse border color",
                     e);
         } finally {
@@ -270,7 +275,7 @@ public class XSSFColorConverter implements ColorConverter {
                     return true;
                 }
             } catch (Exception e) {
-                LOG.log(Level.FINEST, e.getMessage(), e);
+                LOGGER.log(Level.FINEST, e.getMessage(), e);
             }
         }
         return false;
@@ -362,7 +367,7 @@ public class XSSFColorConverter implements ColorConverter {
             String temp = toRGBA(argb);
             return temp;
         } catch (NumberFormatException nfe) {
-            System.out.println(nfe.getMessage() + " " + nfe.getCause());
+            LOGGER.log(Level.FINE, nfe.getMessage() + " " + nfe.getCause(), nfe);
             return String.format("#%02x%02x%02x;", argb[1], argb[2], argb[3]);
         }
     }
@@ -424,7 +429,7 @@ public class XSSFColorConverter implements ColorConverter {
             declaredMethod.setAccessible(true);
             realRule = (CTCfRule) declaredMethod.invoke(rule);
         } catch (Exception e) {
-            Logger.getLogger(getClass().getName()).fine(e.getMessage());
+            LOGGER.fine(e.getMessage());
         } finally {
             if (declaredMethod != null) {
                 declaredMethod.setAccessible(false);

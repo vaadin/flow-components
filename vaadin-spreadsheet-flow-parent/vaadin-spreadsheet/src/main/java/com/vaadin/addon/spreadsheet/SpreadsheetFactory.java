@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
@@ -40,6 +42,9 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetState;
  * Utility class for {@link Spreadsheet} operations.
  */
 public class SpreadsheetFactory {
+
+    private static final Logger LOGGER = Logger
+            .getLogger(SpreadsheetFactory.class.getName());
 
     public static final int DEFAULT_COLUMNS = 52;
 
@@ -226,8 +231,7 @@ public class SpreadsheetFactory {
             Workbook wb = WorkbookFactory.create(file);
             spreadsheet.setInternalWorkbook(wb);
         } catch (InvalidFormatException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
         return file;
     }
@@ -313,7 +317,7 @@ public class SpreadsheetFactory {
             loadMergedRegions(component);
             loadFreezePane(component);
         } catch (NullPointerException npe) {
-            npe.printStackTrace();
+            LOGGER.log(Level.WARNING, npe.getMessage(), npe);
         }
         logMemoryUsage();
     }
@@ -337,7 +341,7 @@ public class SpreadsheetFactory {
                     if (anchor != null) {
                         spreadsheet.sheetImages.add(image);
                     } else {
-                        System.err.println("IMAGE WITHOUT ANCHOR: "
+                        LOGGER.log(Level.FINE, "IMAGE WITHOUT ANCHOR: "
                                 + pictureData.toString());
                         // FIXME seems like there is a POI bug, images that have
                         // in Excel (XLSX) been se as a certain type (type==3)
@@ -363,7 +367,7 @@ public class SpreadsheetFactory {
                     if (anchor != null) {
                         spreadsheet.sheetImages.add(image);
                     } else {
-                        System.err.println("IMAGE WITHOUT ANCHOR: "
+                        LOGGER.log(Level.FINE, "IMAGE WITHOUT ANCHOR: "
                                 + pictureData.toString());
                     }
                 }
@@ -397,7 +401,7 @@ public class SpreadsheetFactory {
         PaneInformation paneInformation = sheet.getPaneInformation();
         // only freeze panes supported
         if (paneInformation != null && paneInformation.isFreezePane()) {
-            // XXX WTF POI? HorizontalSplitPosition means rows and
+            // Apparently in POI HorizontalSplitPosition means rows and
             // VerticalSplitPosition means columns. Changed the meaning for the
             // component internals
             component.getState().horizontalSplitPosition = paneInformation
@@ -421,7 +425,7 @@ public class SpreadsheetFactory {
             runtime.gc();
             long tot = runtime.totalMemory();
             long free = runtime.freeMemory();
-            System.out.println("Total: " + tot / 1000000 + " Free: " + free
+            LOGGER.log(Level.INFO, "Total: " + tot / 1000000 + " Free: " + free
                     / 1000000 + " Usage: " + (tot - free) / 1000000);
         }
     }

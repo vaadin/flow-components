@@ -2,6 +2,8 @@ package com.vaadin.addon.spreadsheet;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 
@@ -11,6 +13,10 @@ import com.vaadin.event.Action.Handler;
 import com.vaadin.server.KeyMapper;
 
 public class ContextMenuManager {
+
+    private static final Logger LOGGER = Logger
+            .getLogger(ContextMenuManager.class.getName());
+
     private LinkedList<Handler> actionHandlers;
 
     private KeyMapper<Action> actionMapper;
@@ -72,7 +78,7 @@ public class ContextMenuManager {
                 spreadsheet.getSpreadsheetRpcProxy().showActions(actions);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.FINE, e.getMessage(), e);
             // rather catch it than let the component crash and burn
         }
     }

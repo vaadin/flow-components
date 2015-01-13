@@ -45,7 +45,8 @@ import com.vaadin.addon.spreadsheet.SpreadsheetStyleFactory.BorderStyle;
  */
 public class ConditionalFormatter {
 
-    private Logger LOG = Logger.getLogger(this.getClass().getName());
+    private static final Logger LOGGER = Logger
+            .getLogger(ConditionalFormatter.class.getName());
 
     protected Spreadsheet spreadsheet;
 
@@ -300,23 +301,28 @@ public class ConditionalFormatter {
                 return ctRule.getStopIfTrue();
 
             } catch (NoSuchMethodException e) {
-                LOG.log(Level.SEVERE,
+                LOGGER.log(
+                        Level.SEVERE,
                         "Incompatible POI implementation, unable to parse conditional formatting rule",
                         e);
             } catch (SecurityException e) {
-                LOG.log(Level.SEVERE,
+                LOGGER.log(
+                        Level.SEVERE,
                         "Incompatible POI implementation, unable to parse conditional formatting rule",
                         e);
             } catch (IllegalAccessException e) {
-                LOG.log(Level.SEVERE,
+                LOGGER.log(
+                        Level.SEVERE,
                         "Incompatible POI implementation, unable to parse conditional formatting rule",
                         e);
             } catch (IllegalArgumentException e) {
-                LOG.log(Level.SEVERE,
+                LOGGER.log(
+                        Level.SEVERE,
                         "Incompatible POI implementation, unable to parse conditional formatting rule",
                         e);
             } catch (InvocationTargetException e) {
-                LOG.log(Level.SEVERE,
+                LOGGER.log(
+                        Level.SEVERE,
                         "Incompatible POI implementation, unable to parse conditional formatting rule",
                         e);
             } finally {
@@ -353,19 +359,23 @@ public class ConditionalFormatter {
                 }
 
             } catch (NoSuchFieldException e) {
-                LOG.log(Level.SEVERE,
+                LOGGER.log(
+                        Level.SEVERE,
                         "Incompatible POI implementation, unable to parse conditional formatting rule",
                         e);
             } catch (SecurityException e) {
-                LOG.log(Level.SEVERE,
+                LOGGER.log(
+                        Level.SEVERE,
                         "Incompatible POI implementation, unable to parse conditional formatting rule",
                         e);
             } catch (IllegalArgumentException e) {
-                LOG.log(Level.SEVERE,
+                LOGGER.log(
+                        Level.SEVERE,
                         "Incompatible POI implementation, unable to parse conditional formatting rule",
                         e);
             } catch (IllegalAccessException e) {
-                LOG.log(Level.SEVERE,
+                LOGGER.log(
+                        Level.SEVERE,
                         "Incompatible POI implementation, unable to parse conditional formatting rule",
                         e);
             } finally {

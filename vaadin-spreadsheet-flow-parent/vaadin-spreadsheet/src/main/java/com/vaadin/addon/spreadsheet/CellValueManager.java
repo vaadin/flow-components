@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +50,9 @@ import com.vaadin.ui.UI;
  * Class that handles values and formatting for individual cells.
  */
 public class CellValueManager {
+
+    private static final Logger LOGGER = Logger
+            .getLogger(CellValueManager.class.getName());
 
     private static final String numericCellDetectionPattern = "[^A-Za-z]*[0-9]+[^A-Za-z]*";
     private static final String rowShiftRegex = "[$]?[a-zA-Z]+[$]?\\d+";
@@ -183,7 +188,7 @@ public class CellValueManager {
                 markedCells.add(SpreadsheetUtil.toKey(cell));
             }
         } catch (RuntimeException rte) {
-            rte.printStackTrace();
+            LOGGER.log(Level.FINEST, rte.getMessage(), rte);
             cellData.value = "ERROR:" + rte.getMessage();
         }
 
@@ -213,9 +218,12 @@ public class CellValueManager {
                     return new DecimalFormat(format.toString()).format(cell
                             .getNumericCellValue());
                 } catch (IllegalStateException ise) {
-                    System.err.println("CellType mismatch: " + ise.getMessage()
-                            + ", on cell " + SpreadsheetUtil.toKey(cell)
-                            + " of type " + cell.getCellType());
+                    LOGGER.log(
+                            Level.FINE,
+                            "CellType mismatch: " + ise.getMessage()
+                                    + ", on cell "
+                                    + SpreadsheetUtil.toKey(cell) + " of type "
+                                    + cell.getCellType(), ise);
                 }
             }
         }
@@ -326,6 +334,7 @@ public class CellValueManager {
                 || getCustomCellValueHandler().cellValueUpdated(cell,
                         activeSheet, col - 1, row - 1, value, evaluator,
                         formatter)) {
+            Exception exception = null;
             try {
                 // handle new cell creation
                 SpreadsheetStyleFactory styler = spreadsheet
@@ -418,21 +427,27 @@ public class CellValueManager {
                 }
             } catch (FormulaParseException fpe) {
                 try {
-                    System.out.println(fpe.getMessage());
+                    exception = fpe;
                     cell.setCellFormula(value.substring(1).replace(" ", ""));
                 } catch (FormulaParseException fpe2) {
-                    System.out.println(fpe2.getMessage());
+                    exception = fpe2;
                     cell.setCellValue(value);
                 }
             } catch (NumberFormatException nfe) {
-                System.out.println(nfe.getMessage());
+                exception = nfe;
                 cell.setCellValue(value);
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                exception = e;
                 cell.setCellValue(value);
             }
             if (cell != null) {
                 markCellForUpdate(cell);
+            }
+            if (exception != null) {
+                LOGGER.log(Level.FINE,
+                        "Failed to parse cell value for cell at col " + col
+                                + " row " + row + " (" + exception.getMessage()
+                                + ")", exception);
             }
         }
 
@@ -508,20 +523,22 @@ public class CellValueManager {
                     cell.setCellValue(Double.parseDouble(value));
                 }
             } catch (ParseException pe) {
-                System.out.println("Could not parse String to format, "
+                LOGGER.log(Level.FINEST, "Could not parse String to format, "
                         + oldFormat.getClass() + ", "
                         + cell.getCellStyle().getDataFormatString() + " : "
-                        + pe.getMessage());
+                        + pe.getMessage(), pe);
                 try {
                     cell.setCellValue(Double.parseDouble(value));
                 } catch (NumberFormatException nfe) {
-                    System.out.println("Could not parse String to Double: "
-                            + nfe.getMessage());
+                    LOGGER.log(
+                            Level.FINEST,
+                            "Could not parse String to Double: "
+                                    + nfe.getMessage(), nfe);
                     cell.setCellValue(value);
                 }
             } catch (NumberFormatException nfe) {
-                System.out.println("Could not parse String to Double: "
-                        + nfe.getMessage());
+                LOGGER.log(Level.FINEST, "Could not parse String to Double: "
+                        + nfe.getMessage(), nfe);
                 cell.setCellValue(value);
             }
         }
@@ -568,7 +585,7 @@ public class CellValueManager {
                         .updateBottomRightCellValues(bottomRightData);
             }
         } catch (NullPointerException npe) {
-            npe.printStackTrace();
+            LOGGER.log(Level.FINEST, npe.getMessage(), npe);
         }
     }
 
@@ -852,13 +869,13 @@ public class CellValueManager {
                 recordField.setAccessible(false);
             }
         } catch (SecurityException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.FINEST, e.getMessage(), e);
         } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.FINEST, e.getMessage(), e);
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.FINEST, e.getMessage(), e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.FINEST, e.getMessage(), e);
         }
     }
 
@@ -937,7 +954,7 @@ public class CellValueManager {
                     newCell.setCellFormula(newFormula);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.FINE, e.getMessage(), e);
                 // TODO visialize shifting error
                 newCell.setCellFormula(shiftedCell.getCellFormula());
             }

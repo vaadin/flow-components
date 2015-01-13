@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -52,6 +54,9 @@ import com.vaadin.addon.spreadsheet.client.MergedRegion;
  * Converts cell styles to CSS rules.
  */
 public class SpreadsheetStyleFactory {
+
+    private static final Logger LOGGER = Logger
+            .getLogger(SpreadsheetStyleFactory.class.getName());
 
     public enum BorderStyle {
         SOLID_THIN("solid", 1, 1), DOTTED_THIN("dotted", 1, 1), DASHED_THIN(
@@ -663,8 +668,10 @@ public class SpreadsheetStyleFactory {
             }
         } catch (IndexOutOfBoundsException ioobe) {
             // somehow workbook doesn't have all the fonts the cells have???
-            System.out.println("Font missing, " + cellStyle.getFontIndex()
-                    + " / " + cellStyle.getClass() + ", " + ioobe.getMessage());
+            LOGGER.log(Level.WARNING,
+                    "Font missing, " + cellStyle.getFontIndex() + " / "
+                            + cellStyle.getClass() + ", " + ioobe.getMessage(),
+                    ioobe);
         }
     }
 

@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
 import org.apache.poi.hssf.record.cf.CellRangeUtil;
@@ -64,6 +66,9 @@ import com.vaadin.util.ReflectTools;
 @SuppressWarnings("serial")
 public class Spreadsheet extends AbstractComponent implements HasComponents,
         Action.Container {
+
+    private static final Logger LOGGER = Logger.getLogger(Spreadsheet.class
+            .getName());
 
     /**
      * An interface for handling the edited cell value from user input.
@@ -2394,7 +2399,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                                 }
                             }
                         } catch (XmlValueDisconnectedException exc) {
-
+                            LOGGER.log(Level.FINEST, exc.getMessage(), exc);
                         }
                     }
                 }
