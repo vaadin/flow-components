@@ -71,7 +71,6 @@
 
 /** SHEET (BOTTOM RIGHT PANE) */
 .v-spreadsheet .sheet.bottom-right-pane {
-	cursor: crosshair;
 	overflow: scroll;
 	right: 0;
 	bottom: 16px;
@@ -153,7 +152,6 @@
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
-	cursor: crosshair;
 	overflow: visible;
 	position: absolute;
 }
@@ -229,6 +227,10 @@
 .v-spreadsheet.noheaders .bottom-left-pane .sheet-selection,
 .v-spreadsheet.noheaders .bottom-left-pane .s-paint {
 	margin-left: 0;
+}
+
+.v-spreadsheet.selecting {
+	cursor:crosshair;
 }
 
 /** SHEET HEADERS */
@@ -498,7 +500,6 @@
 .v-spreadsheet .sheet-selection .s-right {
 	padding: 0;
 	background-color: #06f;
-	cursor: crosshair;
 	position: absolute;
 }
 
@@ -533,7 +534,7 @@
 .v-spreadsheet .sheet-selection .s-corner {
 	background-color: black;
 	bottom: -2px;
-	cursor: pointer;
+	cursor: crosshair;
 	height: 7px;
 	left: -2px;
 	outline: thin solid lightblue;

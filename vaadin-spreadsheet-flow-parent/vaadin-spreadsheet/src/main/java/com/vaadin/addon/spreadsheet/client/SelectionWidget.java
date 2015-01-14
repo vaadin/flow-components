@@ -518,6 +518,8 @@ public class SelectionWidget extends Composite {
         cornerY = origY + totalHeight;
         DOM.setCapture(getElement());
         event.preventDefault();
+
+        sheetWidget.getElement().addClassName("selecting");
     }
 
     private Element getTopLeftMostElement() {
@@ -551,6 +553,8 @@ public class SelectionWidget extends Composite {
             r2 = rowEdgeIndex > row2 ? rowEdgeIndex - 1 : row2;
             handler.onSelectionIncreasePainted(c1, c2, r1, r2);
         }
+
+        sheetWidget.getElement().removeClassName("selecting");
     }
 
     private void paintCells(Event event) {
