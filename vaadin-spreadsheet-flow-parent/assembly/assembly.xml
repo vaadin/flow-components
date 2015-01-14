@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly
+    xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>addon</id>
+
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <!-- Do not use because we must put META-INF/MANIFEST.MF there. -->
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <fileSets>
+        <fileSet>
+            <directory>vaadin-spreadsheet/target/directorystuff</directory>
+            <outputDirectory></outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>vaadin-spreadsheet-testbench-api/target</directory>
+            <outputDirectory>testbench-api</outputDirectory>
+             <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>target</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>*.pdf</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+
+    <files>
+        <!-- Use a MANIFEST.MF file in zip, required by vaadin.com/directory. 
+            The file draws required details automatically from pom.xml -->
+        <file>
+            <source>assembly/MANIFEST.MF</source>
+            <outputDirectory>META-INF</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>assembly/README.txt</source>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>LICENSE.txt</source>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>assembly/license.html</source>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>assembly/release-notes.html</source>
+            <filtered>true</filtered>
+        </file>
+    </files>
+</assembly>

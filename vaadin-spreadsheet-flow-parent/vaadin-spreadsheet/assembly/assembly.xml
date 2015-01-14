@@ -5,11 +5,8 @@
 	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
 	<id>addon</id>
 
-	<!-- Note: the base directory for this assembly descriptor is one of the 
-		license specific subprojects -->
-
 	<formats>
-		<format>zip</format>
+		<format>dir</format>
 	</formats>
 
 	<!-- Do not use because we must put META-INF/MANIFEST.MF there. -->
@@ -17,28 +14,23 @@
 
 	<fileSets>
 		<fileSet>
-			<directory>..</directory>
+			<directory>target</directory>
+			<outputDirectory>./</outputDirectory>
 			<includes>
-				<include>LICENSE.txt</include>
-				<include>README.md</include>
+				<include>*-${project.version}*.jar</include>
 			</includes>
 		</fileSet>
 		<fileSet>
-			<directory>target</directory>
-			<outputDirectory></outputDirectory>
+			<directory>target/libs</directory>
+			<outputDirectory>lib</outputDirectory>
 			<includes>
 				<include>*.jar</include>
-                <include>*.pdf</include>
 			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>target/apidocs</directory>
+			<outputDirectory>api</outputDirectory>
 		</fileSet>
 	</fileSets>
 
-	<files>
-		<!-- This is vaadin.com/directory related manifest needed in the zip package -->
-		<file>
-			<source>assembly/MANIFEST.MF</source>
-			<outputDirectory>META-INF</outputDirectory>
-			<filtered>true</filtered>
-		</file>
-	</files>
 </assembly>
