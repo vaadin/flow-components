@@ -1915,9 +1915,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         valueManager.clearCachedContent();
         selectionManager.clear();
-        customComponentFactory = null;
         historyManager.clear();
-        hyperlinkCellClickHandler = null;
 
         for (SheetImageWrapper image : sheetImages) {
             setResource(image.resourceKey, null);
