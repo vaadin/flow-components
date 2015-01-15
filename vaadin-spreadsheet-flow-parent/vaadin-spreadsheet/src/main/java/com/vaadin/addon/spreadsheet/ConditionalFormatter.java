@@ -3,6 +3,7 @@ package com.vaadin.addon.spreadsheet;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -95,15 +96,19 @@ public class ConditionalFormatter {
      */
     public void createConditionalFormatterRules() {
 
+        List<Cell> cellsToUpdate = new ArrayList<Cell>();
+
         // make sure old styles are cleared
         if (cellToIndex != null) {
             for (String key : cellToIndex.keySet()) {
                 int col = SpreadsheetUtil.getColumnIndexFromKey(key) - 1;
                 int row = SpreadsheetUtil.getRowFromKey(key) - 1;
                 Cell cell = spreadsheet.getCell(row, col);
-                spreadsheet.markCellAsUpdated(cell, false);
+                cellsToUpdate.add(cell);
             }
         }
+
+        spreadsheet.refreshCells(cellsToUpdate);
 
         cellToIndex.clear();
         topBorders.clear();

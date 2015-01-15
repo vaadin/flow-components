@@ -17,7 +17,7 @@ import com.vaadin.addon.spreadsheet.client.MergedRegionUtil;
 
 /**
  * Class that handles details of which cells are selected.
- *
+ * 
  */
 public class CellSelectionManager {
 
@@ -245,7 +245,8 @@ public class CellSelectionManager {
                 }
             } else {
                 spreadsheet.getSpreadsheetRpcProxy().showSelectedCell(colIndex,
-                        rowIndex, "", false, spreadsheet.isSheetProtected());
+                        rowIndex, "", false,
+                        spreadsheet.isActiveSheetProtected());
             }
         }
     }
@@ -300,7 +301,7 @@ public class CellSelectionManager {
             }
         } else {
             spreadsheet.getSpreadsheetRpcProxy().showCellValue("", columnIndex,
-                    rowIndex, false, spreadsheet.isSheetProtected());
+                    rowIndex, false, spreadsheet.isActiveSheetProtected());
         }
     }
 
@@ -339,7 +340,7 @@ public class CellSelectionManager {
         } else {
             spreadsheet.getSpreadsheetRpcProxy().showSelectedCellRange(
                     col1 + 1, col2 + 1, row1 + 1, row2 + 1, "", false,
-                    spreadsheet.isSheetProtected());
+                    spreadsheet.isActiveSheetProtected());
         }
     }
 
@@ -378,7 +379,7 @@ public class CellSelectionManager {
             spreadsheet.getSpreadsheetRpcProxy().setSelectedCellAndRange(
                     cr.getCol() + 1, cr.getRow() + 1, col1 + 1, col2 + 1,
                     row1 + 1, row2 + 1, "", false,
-                    spreadsheet.isSheetProtected());
+                    spreadsheet.isActiveSheetProtected());
         }
         selectedCellReference = cr;
         cellRangeAddresses.clear();

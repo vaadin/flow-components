@@ -53,8 +53,8 @@ public class PopupButtonFixture implements SpreadsheetFixture {
         private final CellListSelectComponent cellListSelectComponent;
         private final ValueChangeListenerImpl valueChangeListener = new ValueChangeListenerImpl();
 
-        public DataValidationButton(CellReference ref, Collection<Object> values) {
-            super(ref);
+        public DataValidationButton(Collection<Object> values) {
+            super();
             cellListSelectComponent = new CellListSelectComponent(values, this);
         }
 
@@ -63,12 +63,6 @@ public class PopupButtonFixture implements SpreadsheetFixture {
             cellListSelectComponent.setSizeFull();
             cellListSelectComponent.addValueChangeListener(valueChangeListener);
             addComponents(cellListSelectComponent);
-        }
-
-        public void reset(CellReference ref, Collection<Object> values) {
-            setRow(ref.getRow());
-            setColumn(ref.getCol());
-            cellListSelectComponent.changeValues(values);
         }
 
         private final class ValueChangeListenerImpl implements
@@ -85,8 +79,7 @@ public class PopupButtonFixture implements SpreadsheetFixture {
                 } else if (value instanceof String) {
                     cell.setCellValue((String) value);
                 }
-                ui.getSpreadsheet().markCellAsUpdated(cell, false);
-                ui.getSpreadsheet().updateMarkedCells();
+                ui.getSpreadsheet().refreshCells(cell);
             }
         }
     }
@@ -112,19 +105,15 @@ public class PopupButtonFixture implements SpreadsheetFixture {
                                     .getSelectedCellReference();
                             Spreadsheet spreadsheet2 = ui.getSpreadsheet();
                             if (popupButtonActive) {
-                                spreadsheet2.removePopup(popupButton);
+                                spreadsheet2.setPopup(ref, null);
                                 popupButtonActive = false;
                             }
-                            if (popupButton == null) {
-                                popupButton = new DataValidationButton(
-                                        new CellReference(ref.getRow(), ref
-                                                .getCol()), values);
-                                popupButton.setUp();
-                            } else {
-                                popupButton.reset(ref, values);
-                            }
+                            CellReference newRef = new CellReference(ref
+                                    .getRow(), ref.getCol());
+                            popupButton = new DataValidationButton(values);
+                            popupButton.setUp();
                             popupButtonActive = true;
-                            spreadsheet2.addPopupButton(popupButton);
+                            spreadsheet2.setPopup(newRef, popupButton);
                             popupButton.openPopup();
                         }
                     });

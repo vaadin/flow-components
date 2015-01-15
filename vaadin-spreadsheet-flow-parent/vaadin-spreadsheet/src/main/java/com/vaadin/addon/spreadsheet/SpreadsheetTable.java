@@ -76,7 +76,8 @@ public class SpreadsheetTable {
                 initPopupButtons();
             } else {
                 for (PopupButton popupButton : popupButtons.values()) {
-                    spreadsheet.addPopupButton(popupButton);
+                    spreadsheet.setPopup(popupButton.getCellReference(),
+                            popupButton);
                 }
             }
         }
@@ -111,10 +112,9 @@ public class SpreadsheetTable {
                     .getLastColumn(); c++) {
                 CellReference popupButtonCellReference = new CellReference(
                         fullTableRegion.getFirstRow(), c);
-                PopupButton popupButton = new PopupButton(
-                        popupButtonCellReference);
+                PopupButton popupButton = new PopupButton();
                 popupButtons.put(popupButtonCellReference, popupButton);
-                spreadsheet.addPopupButton(popupButton);
+                spreadsheet.setPopup(popupButtonCellReference, popupButton);
             }
         }
     }

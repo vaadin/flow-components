@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
@@ -254,11 +253,9 @@ public class TestexcelsheetUI extends UI {
                                     0, i)
                                     + ("(1)")
                                     + previousFile.getName().substring(i);
-                            previousFile = getSpreadsheet()
-                                    .writeSpreadsheetIntoFile(fileName);
+                            previousFile = getSpreadsheet().write(fileName);
                         } else {
-                            previousFile = getSpreadsheet()
-                                    .writeSpreadsheetIntoFile("workbook1");
+                            previousFile = getSpreadsheet().write("workbook1");
                         }
                         download.setEnabled(true);
                         FileResource resource = new FileResource(previousFile);
@@ -393,7 +390,7 @@ public class TestexcelsheetUI extends UI {
                 if (previousFile == null
                         || !previousFile.getAbsolutePath().equals(
                                 file.getAbsolutePath())) {
-                    getSpreadsheet().reloadSpreadsheetFrom(file);
+                    getSpreadsheet().read(file);
                 }
             }
             previousFile = file;
@@ -401,9 +398,6 @@ public class TestexcelsheetUI extends UI {
             save.setEnabled(true);
             download.setEnabled(false);
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvalidFormatException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {

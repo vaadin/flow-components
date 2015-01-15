@@ -55,7 +55,7 @@ public class ShowHideCellCommentAction extends SpreadsheetAction {
         Comment cellComment = spreadsheet.getActiveSheet().getCellComment(
                 cr.getRow(), cr.getCol());
         cellComment.setVisible(!cellComment.isVisible());
-        spreadsheet.updateMarkedCells();
+        spreadsheet.refreshCells(spreadsheet.getCell(cr.getRow(), cr.getCol()));
     }
 
     @Override

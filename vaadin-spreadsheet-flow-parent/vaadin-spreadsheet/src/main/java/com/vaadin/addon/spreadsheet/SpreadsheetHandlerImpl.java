@@ -16,7 +16,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
-import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedCellWriteAttemptedEvent;
+import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedEditEvent;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 
 /**
@@ -217,8 +217,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void protectedCellWriteAttempted() {
-        spreadsheet
-                .fireEvent(new ProtectedCellWriteAttemptedEvent(spreadsheet));
+        spreadsheet.fireEvent(new ProtectedEditEvent(spreadsheet));
     }
 
     @Override

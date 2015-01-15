@@ -1,5 +1,8 @@
 package com.vaadin.addon.spreadsheet.test.fixtures;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -20,6 +23,8 @@ public class LockCellFixture extends UIFixture {
         spreadsheet.setActiveSheetProtected("pwd");
         Cell cell = spreadsheet.createCell(0, 0, "");
         Workbook wb = cell.getSheet().getWorkbook();
+
+        List<Cell> updatedCells = new ArrayList<Cell>();
         for (CellReference cellRef : ui.currentSelection) {
             cell = spreadsheet.getCell(cellRef.getRow(), cellRef.getCol());
             if (cell == null) {
@@ -29,9 +34,9 @@ public class LockCellFixture extends UIFixture {
             CellStyle cellStyle = wb.createCellStyle();
             cellStyle.setLocked(false);
             cell.setCellStyle(cellStyle);
-            spreadsheet.markCellAsUpdated(cell, true);
+            updatedCells.add(cell);
         }
 
-        spreadsheet.updateMarkedCells();
+        spreadsheet.refreshCells(updatedCells);
     }
 }

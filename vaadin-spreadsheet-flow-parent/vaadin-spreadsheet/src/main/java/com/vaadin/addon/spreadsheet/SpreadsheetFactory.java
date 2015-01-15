@@ -1,9 +1,12 @@
 package com.vaadin.addon.spreadsheet;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -182,10 +185,23 @@ public class SpreadsheetFactory {
     }
 
     protected static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
-            final File spreadsheetFile) throws InvalidFormatException,
-            IOException {
-        reloadSpreadsheetComponent(spreadsheet,
-                WorkbookFactory.create(spreadsheetFile));
+            final File spreadsheetFile) throws IOException {
+        try {
+            reloadSpreadsheetComponent(spreadsheet,
+                    WorkbookFactory.create(spreadsheetFile));
+        } catch (InvalidFormatException e) {
+            throw new IOException("Invalid file format.", e);
+        }
+    }
+
+    protected static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
+            final InputStream inputStream) throws IOException {
+        try {
+            reloadSpreadsheetComponent(spreadsheet,
+                    WorkbookFactory.create(inputStream));
+        } catch (InvalidFormatException e) {
+            throw new IOException("Invalid file format.", e);
+        }
     }
 
     protected static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
@@ -234,6 +250,25 @@ public class SpreadsheetFactory {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
         return file;
+    }
+
+    protected static void write(Spreadsheet spreadsheet,
+            OutputStream outputStream) throws IOException {
+        final Workbook workbook = spreadsheet.getWorkbook();
+        ByteArrayOutputStream stream = null;
+        try {
+            stream = new ByteArrayOutputStream();
+            workbook.write(stream);
+            stream.close();
+            stream = null;
+            if (workbook instanceof SXSSFWorkbook) {
+                ((SXSSFWorkbook) workbook).dispose();
+            }
+        } finally {
+            if (stream != null) {
+                stream.close();
+            }
+        }
     }
 
     protected static void loadWorkbookStyles(Spreadsheet component) {

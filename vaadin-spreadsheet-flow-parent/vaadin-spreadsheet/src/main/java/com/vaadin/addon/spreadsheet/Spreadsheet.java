@@ -5,11 +5,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EventObject;
@@ -29,7 +31,6 @@ import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
 import org.apache.poi.hssf.record.cf.CellRangeUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.PaneInformation;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -38,7 +39,6 @@ import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.WorkbookUtil;
@@ -176,7 +176,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     private HashSet<Component> customComponents;
 
-    private HashSet<PopupButton> sheetPopupButtons;
+    private Map<CellReference, PopupButton> sheetPopupButtons = new HashMap<CellReference, PopupButton>();
 
     protected HashSet<SheetImageWrapper> sheetImages;
 
@@ -247,11 +247,24 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * Creates a new Spreadsheet component and loads the given Excel file.
      * 
      * @param file
-     * @throws InvalidFormatException
      * @throws IOException
      */
-    public Spreadsheet(File file) throws InvalidFormatException, IOException {
-        this(WorkbookFactory.create(file));
+    public Spreadsheet(File file) throws IOException {
+        this();
+        SpreadsheetFactory.reloadSpreadsheetComponent(this, file);
+    }
+
+    /**
+     * Creates a new Spreadsheet component based on the given input stream. The
+     * expected format is that of an Excel file.
+     * 
+     * @param inputStream
+     * @throws IOException
+     */
+    public Spreadsheet(InputStream inputStream) throws IOException {
+        this();
+        SpreadsheetFactory.reloadSpreadsheetComponent(this, inputStream);
+
     }
 
     /**
@@ -483,7 +496,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @return
      */
     protected boolean isRangeEditable(int col1, int col2, int row1, int row2) {
-        if (isSheetProtected()) {
+        if (isActiveSheetProtected()) {
             for (int r = row1; r <= row2; r++) {
                 final Row row = getActiveSheet().getRow(r);
                 if (row != null) {
@@ -972,6 +985,28 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * done, remember to call {@link #updateMarkedCells()} to make sure client
      * side is updated.
      * 
+     * @param cellAddress
+     *            Address of the target Cell, e.g. "A3"
+     * @return the cell or null if not defined
+     */
+    public Cell getCell(String cellAddress) {
+        CellReference ref = new CellReference(cellAddress);
+        Row r = workbook.getSheetAt(workbook.getActiveSheetIndex()).getRow(
+                ref.getRow());
+        if (r != null) {
+            return r.getCell(ref.getCol());
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returns Cell. If the cell is updated, call
+     * {@link #markCellAsUpdated(Cell)} AFTER ALL UPDATES (value, type,
+     * formatting or style) to mark the cell as "dirty" and when all updates are
+     * done, remember to call {@link #updateMarkedCells()} to make sure client
+     * side is updated.
+     * 
      * @param row
      *            0-based
      * @param col
@@ -1016,6 +1051,46 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
+     * Refreshes the given cell(s). Should be called when the cell
+     * value/formatting/style/etc. updating is done.
+     * 
+     * NOTE: For optimal performance temporarily collect your updated cells and
+     * call this method only once per update cycle. Calling this method
+     * repeatedly for individual cells is not a good idea.
+     * 
+     * @param cells
+     *            Cell(s) to update
+     */
+    public void refreshCells(Cell... cells) {
+        if (cells != null) {
+            for (Cell cell : cells) {
+                markCellAsUpdated(cell, true);
+            }
+            updateMarkedCells();
+        }
+    }
+
+    /**
+     * Refreshes the given cell(s). Should be called when the cell
+     * value/formatting/style/etc. updating is done.
+     * 
+     * NOTE: For optimal performance temporarily collect your updated cells and
+     * call this method only once per update cycle. Calling this method
+     * repeatedly for individual cells is not a good idea.
+     * 
+     * @param cells
+     *            A Collection of Cells to update
+     */
+    public void refreshCells(Collection<Cell> cells) {
+        if (cells != null && !cells.isEmpty()) {
+            for (Cell cell : cells) {
+                markCellAsUpdated(cell, true);
+            }
+            updateMarkedCells();
+        }
+    }
+
+    /**
      * Marks the cell as updated. Should be called when the cell
      * value/formatting/style/etc. updating is done.
      * <p>
@@ -1027,7 +1102,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * @param cell
      */
-    public void markCellAsUpdated(Cell cell, boolean cellStyleUpdated) {
+    private void markCellAsUpdated(Cell cell, boolean cellStyleUpdated) {
         valueManager.cellUpdated(cell);
         if (cellStyleUpdated) {
             styler.cellStyleUpdated(cell, true);
@@ -1062,7 +1137,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * Does NOT update custom components (editors / always visible) for the
      * cells. For that, use {@link #reloadVisibleCellContents()}
      */
-    public void updateMarkedCells() {
+    void updateMarkedCells() {
         // update conditional formatting in case styling has changed. New values
         // are fetched in ValueManager (below).
         conditionalFormatter.createConditionalFormatterRules();
@@ -1512,6 +1587,17 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /**
      * Merge cells. See {@link Sheet#addMergedRegion(CellRangeAddress)}.
      * <p>
+     * 
+     * @param selectionRange
+     *            The wanted range, e.g. "A3" or "B3:C5"
+     */
+    public void addMergedRegion(String selectionRange) {
+        addMergedRegion(CellRangeAddress.valueOf(selectionRange));
+    }
+
+    /**
+     * Merge cells. See {@link Sheet#addMergedRegion(CellRangeAddress)}.
+     * <p>
      * Parameters 0-based
      * 
      * @param col1
@@ -1762,12 +1848,21 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * Reloads the component from the given Excel file.
      * 
      * @param file
-     * @throws InvalidFormatException
      * @throws IOException
      */
-    public void reloadSpreadsheetFrom(File file) throws InvalidFormatException,
-            IOException {
+    public void read(File file) throws IOException {
         SpreadsheetFactory.reloadSpreadsheetComponent(this, file);
+    }
+
+    /**
+     * Reloads the component from the given input stream. The expected format is
+     * that of an Excel file.
+     * 
+     * @param inputStream
+     * @throws IOException
+     */
+    public void read(InputStream inputStream) throws IOException {
+        SpreadsheetFactory.reloadSpreadsheetComponent(this, inputStream);
     }
 
     /**
@@ -1791,9 +1886,23 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @throws IOException
      *             If file can't be written
      */
-    public File writeSpreadsheetIntoFile(String fileName)
-            throws FileNotFoundException, IOException {
+    public File write(String fileName) throws FileNotFoundException,
+            IOException {
         return SpreadsheetFactory.write(this, fileName);
+    }
+
+    /**
+     * Exports current spreadsheet as an output stream.
+     * 
+     * @param outputStream
+     *            The target stream
+     * @return A stream with the content of the current {@link Workbook}, In the
+     *         file format of the original {@link Workbook}.
+     * @throws IOException
+     *             If creating the stream fails
+     */
+    public void write(OutputStream outputStream) throws IOException {
+        SpreadsheetFactory.write(this, outputStream);
     }
 
     /**
@@ -1995,7 +2104,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             customComponents.clear();
         }
         if (sheetPopupButtons != null && !sheetPopupButtons.isEmpty()) {
-            for (PopupButton sf : sheetPopupButtons) {
+            for (PopupButton sf : sheetPopupButtons.values()) {
                 unRegisterCustomComponent(sf);
             }
             sheetPopupButtons.clear();
@@ -2094,10 +2203,19 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
+     * @param pOISheetIndex
+     *            0-based
+     * @return if the current {@link Sheet} is protected or not.
+     */
+    public boolean isSheetProtected(int pOISheetIndex) {
+        return workbook.getSheetAt(pOISheetIndex).getProtect();
+    }
+
+    /**
      * 
      * @return if the current {@link Sheet} is protected or not.
      */
-    public boolean isSheetProtected() {
+    public boolean isActiveSheetProtected() {
         return getState().sheetProtected;
     }
 
@@ -2106,7 +2224,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @return if the given cell is hidden or not.
      */
     public boolean isCellHidden(Cell cell) {
-        return isSheetProtected() && cell.getCellStyle().getHidden();
+        return isActiveSheetProtected() && cell.getCellStyle().getHidden();
     }
 
     /**
@@ -2114,7 +2232,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @return if the current cell is locked or not.
      */
     public boolean isCellLocked(Cell cell) {
-        return isSheetProtected()
+        return isActiveSheetProtected()
                 && (cell == null || cell.getCellStyle().getLocked());
     }
 
@@ -2717,50 +2835,72 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * Adds a pop-up button to the spreadsheet. The button is added to the cell
-     * that is defined in pop-up button settings (
-     * {@link PopupButton#getCellReference()}).
+     * Sets a pop-up button to the given cell in the currently active sheet. If
+     * there is already a pop-up button in the given cell, it will be replaced.
      * <p>
      * Note that if the active sheet is changed, all pop-up buttons are removed
      * from the spreadsheet.
      * 
+     * @param cellAddress
+     *            address to the target cell, e.g. "C3"
      * @param popupButton
-     *            the pop-up button to add
+     *            PopupButton to set for the target cell. Passing null here
+     *            removes the pop-up button for the target cell.
      */
-    public void addPopupButton(PopupButton popupButton) {
-        if (sheetPopupButtons == null) {
-            sheetPopupButtons = new HashSet<PopupButton>();
-        }
-        if (!sheetPopupButtons.contains(popupButton)) {
-            sheetPopupButtons.add(popupButton);
-        }
-        int column = popupButton.getColumn() + 1;
-        int row = popupButton.getRow() + 1;
-        if (isCellVisible(column, row)) {
-            registerCustomComponent(popupButton);
-            markAsDirty();
-        }
+    public void setPopup(String cellAddress, PopupButton popupButton) {
+        setPopup(new CellReference(cellAddress), popupButton);
     }
 
     /**
-     * Removes the pop-up button from the spreadsheet.
+     * Sets a pop-up button to the given cell in the currently active sheet. If
+     * there is already a pop-up button in the given cell, it will be replaced.
      * <p>
      * Note that if the active sheet is changed, all pop-up buttons are removed
      * from the spreadsheet.
      * 
+     * @param row
+     *            row index of target cell, 0-based
+     * @param col
+     *            column index of target cell, 0-based
      * @param popupButton
-     *            the pop-up button to remove
+     *            PopupButton to set for the target cell. Passing null here
+     *            removes the pop-up button for the target cell.
      */
-    public void removePopup(PopupButton popupButton) {
-        if (sheetPopupButtons.contains(popupButton)) {
-            sheetPopupButtons.remove(popupButton);
-            int column = popupButton.getColumn() + 1;
-            int row = popupButton.getRow() + 1;
-            if (column >= firstColumn && column <= lastColumn
-                    && row >= firstRow && row <= lastRow) {
-                unRegisterCustomComponent(popupButton);
+    public void setPopup(int row, int col, PopupButton popupButton) {
+        setPopup(new CellReference(row, col), popupButton);
+    }
+
+    /**
+     * Sets a pop-up button to the given cell in the currently active sheet. If
+     * there is already a pop-up button in the given cell, it will be replaced.
+     * <p>
+     * Note that if the active sheet is changed, all pop-up buttons are removed
+     * from the spreadsheet.
+     * 
+     * @param cellReference
+     *            reference to the target cell
+     * @param popupButton
+     *            PopupButton to set for the target cell. Passing null here
+     *            removes the pop-up button for the target cell.
+     */
+    public void setPopup(CellReference cellReference, PopupButton popupButton) {
+        removePopupButton(cellReference);
+        if (popupButton != null) {
+            popupButton.setCellReference(cellReference);
+            sheetPopupButtons.put(cellReference, popupButton);
+            if (isCellVisible(cellReference.getCol(), cellReference.getRow())) {
+                registerCustomComponent(popupButton);
                 markAsDirty();
             }
+        }
+    }
+
+    private void removePopupButton(CellReference cellReference) {
+        PopupButton oldButton = sheetPopupButtons.get(cellReference);
+        if (oldButton != null) {
+            unRegisterCustomComponent(oldButton);
+            sheetPopupButtons.remove(cellReference);
+            markAsDirty();
         }
     }
 
@@ -2770,7 +2910,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     private void loadPopupButtons() {
         if (sheetPopupButtons != null) {
-            for (PopupButton popupButton : sheetPopupButtons) {
+            for (PopupButton popupButton : sheetPopupButtons.values()) {
                 int column = popupButton.getColumn() + 1;
                 int row = popupButton.getRow() + 1;
                 if (isCellVisible(column, row)) {
@@ -2833,7 +2973,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         removeTableFromMemory(table);
         if (table.isTableSheetCurrentlyActive()) {
             for (PopupButton popupButton : table.getPopupButtons()) {
-                removePopup(popupButton);
+                removePopupButton(popupButton.getCellReference());
             }
             if (table instanceof SpreadsheetFilterTable) {
                 ((SpreadsheetFilterTable) table).clearAllFilters();
@@ -3002,32 +3142,34 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          * @return a combination of all selected cells, regardless of selection
          *         mode. Doesn't contain duplicates.
          */
-        public CellReference[] getAllSelectedCells() {
-            Set<CellReference> cells = new HashSet<CellReference>();
-            for (CellReference r : getIndividualSelectedCells()) {
-                cells.add(r);
-            }
-            cells.add(getSelectedCellReference());
+        public Set<CellReference> getAllSelectedCells() {
+            return Spreadsheet.getAllSelectedCells(selectedCellReference,
+                    individualSelectedCells, cellRangeAddresses);
 
-            if (getCellRangeAddresses() != null) {
-                for (CellRangeAddress a : getCellRangeAddresses()) {
+        }
+    }
 
-                    for (int x = a.getFirstColumn(); x <= a.getLastColumn(); x++) {
-                        for (int y = a.getFirstRow(); y <= a.getLastRow(); y++) {
-                            cells.add(new CellReference(y, x));
-                        }
+    private static Set<CellReference> getAllSelectedCells(
+            CellReference selectedCellReference,
+            CellReference[] individualSelectedCells,
+            CellRangeAddress[] cellRangeAddresses) {
+        Set<CellReference> cells = new HashSet<CellReference>();
+        for (CellReference r : individualSelectedCells) {
+            cells.add(r);
+        }
+        cells.add(selectedCellReference);
+
+        if (cellRangeAddresses != null) {
+            for (CellRangeAddress a : cellRangeAddresses) {
+
+                for (int x = a.getFirstColumn(); x <= a.getLastColumn(); x++) {
+                    for (int y = a.getFirstRow(); y <= a.getLastRow(); y++) {
+                        cells.add(new CellReference(y, x));
                     }
                 }
             }
-
-            CellReference[] refs = new CellReference[cells.size()];
-            int i = 0;
-            for (CellReference r : cells) {
-                refs[i++] = r;
-            }
-            return refs;
-
         }
+        return cells;
     }
 
     /**
@@ -3056,10 +3198,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 SelectionChangeListener.SELECTION_CHANGE_METHOD);
     }
 
-    public static class ProtectedCellWriteAttemptedEvent extends
-            Component.Event {
+    public static class ProtectedEditEvent extends Component.Event {
 
-        public ProtectedCellWriteAttemptedEvent(Component source) {
+        public ProtectedEditEvent(Component source) {
             super(source);
         }
     }
@@ -3067,11 +3208,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /**
      * A listener for when user tries to modify a locked cell.
      */
-    public interface ProtectedCellWriteAttemptedListener extends Serializable {
+    public interface ProtectedEditListener extends Serializable {
         public static final Method SELECTION_CHANGE_METHOD = ReflectTools
-                .findMethod(ProtectedCellWriteAttemptedListener.class,
-                        "writeAttempted",
-                        ProtectedCellWriteAttemptedEvent.class);
+                .findMethod(ProtectedEditListener.class, "writeAttempted",
+                        ProtectedEditEvent.class);
 
         /**
          * Called when the SpreadSheet detects that the client tried to edit a
@@ -3082,7 +3222,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          * 
          * @param event
          */
-        public void writeAttempted(ProtectedCellWriteAttemptedEvent event);
+        public void writeAttempted(ProtectedEditEvent event);
     }
 
     /**
@@ -3090,10 +3230,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * @param listener
      */
-    public void addProtectedCellWriteAttemptedListener(
-            ProtectedCellWriteAttemptedListener listener) {
-        addListener(ProtectedCellWriteAttemptedEvent.class, listener,
-                ProtectedCellWriteAttemptedListener.SELECTION_CHANGE_METHOD);
+    public void addProtectedEditListener(ProtectedEditListener listener) {
+        addListener(ProtectedEditListener.class, listener,
+                ProtectedEditListener.SELECTION_CHANGE_METHOD);
     }
 
     /**
@@ -3101,10 +3240,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * @param listener
      */
-    public void removeProtectedCellWriteAttemptedListener(
-            ProtectedCellWriteAttemptedListener listener) {
-        removeListener(ProtectedCellWriteAttemptedEvent.class, listener,
-                ProtectedCellWriteAttemptedListener.SELECTION_CHANGE_METHOD);
+    public void removeProtectedEditListener(ProtectedEditListener listener) {
+        removeListener(ProtectedEditListener.class, listener,
+                ProtectedEditListener.SELECTION_CHANGE_METHOD);
     }
 
     /**
@@ -3143,6 +3281,15 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public CellReference getSelectedCellReference() {
         return selectionManager.getSelectedCellReference();
+    }
+
+    public Set<CellReference> getSelectedCells() {
+        SelectionChangeEvent event = selectionManager.getLatestSelectionEvent();
+        if (event == null) {
+            return new HashSet<CellReference>();
+        } else {
+            return event.getAllSelectedCells();
+        }
     }
 
     public static class SelectedSheetChangeEvent extends Component.Event {
@@ -3241,11 +3388,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         private boolean currentIteratorPointer;
 
         public SpreadsheetIterator(Set<Component> customComponents,
-                Set<PopupButton> sheetPopupButtons) {
+                Map<CellReference, PopupButton> sheetPopupButtons) {
             customComponentIterator = customComponents == null ? null
                     : customComponents.iterator();
             sheetPopupButtonIterator = sheetPopupButtons == null ? null
-                    : sheetPopupButtons.iterator();
+                    : sheetPopupButtons.values().iterator();
             currentIteratorPointer = true;
         }
 
@@ -3293,7 +3440,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * Functionally same as calling {@link #setWorkbook(Workbook)} with
      * {@link #getWorkbook()} parameter.
      */
-    public void resetSpreadsheetFromData() {
+    public void reload() {
         setWorkbook(getWorkbook());
     }
 
@@ -3353,9 +3500,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *            The wanted range, e.g. "A3" or "B3:C5"
      */
     public void setSelection(String selectionRange) {
-
-        CellReference ref = new CellReference(selectionRange);
-        selectionManager.handleCellSelection(ref);
+        selectionManager.handleCellRangeSelection(CellRangeAddress
+                .valueOf(selectionRange));
     }
 
     /**

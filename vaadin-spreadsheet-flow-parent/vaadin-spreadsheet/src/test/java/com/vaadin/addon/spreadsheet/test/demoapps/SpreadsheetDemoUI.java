@@ -14,7 +14,6 @@ import java.text.Format;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
@@ -27,11 +26,11 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectedSheetChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectedSheetChangeListener;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeListener;
+import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -228,11 +227,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                                     0, i)
                                     + ("(1)")
                                     + previousFile.getName().substring(i);
-                            previousFile = spreadsheet
-                                    .writeSpreadsheetIntoFile(fileName);
+                            previousFile = spreadsheet.write(fileName);
                         } else {
-                            previousFile = spreadsheet
-                                    .writeSpreadsheetIntoFile("workbook1");
+                            previousFile = spreadsheet.write("workbook1");
                         }
                         download.setEnabled(true);
                         FileResource resource = new FileResource(previousFile);
@@ -325,8 +322,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             @Override
             public InputStream getStream() {
                 try {
-                    return new FileInputStream(spreadsheet
-                            .writeSpreadsheetIntoFile("testsheet.xlsx"));
+                    return new FileInputStream(
+                            spreadsheet.write("testsheet.xlsx"));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -408,7 +405,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 if (previousFile == null
                         || !previousFile.getAbsolutePath().equals(
                                 file.getAbsolutePath())) {
-                    spreadsheet.reloadSpreadsheetFrom(file);
+                    spreadsheet.read(file);
                 }
             }
             spreadsheet.setSpreadsheetComponentFactory(null);
@@ -418,9 +415,6 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             gridlines.setValue(spreadsheet.isDisplayGridLines());
             rowColHeadings.setValue(spreadsheet.isDisplayRowColHeadings());
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvalidFormatException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
@@ -560,8 +554,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     Cell cell = spreadsheet.getCell(cr.getRow(), cr.getCol());
                     if (cell != null) {
                         cell.setCellValue(s);
-                        spreadsheet.markCellAsUpdated(cell, false);
-                        spreadsheet.updateMarkedCells();
+                        spreadsheet.refreshCells(cell);
                     }
                 }
             });
@@ -583,8 +576,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         Date value = dateField.getValue();
                         if (oldValue != null && !oldValue.equals(value)) {
                             cell.setCellValue(value);
-                            spreadsheet.markCellAsUpdated(cell, false);
-                            spreadsheet.updateMarkedCells();
+                            spreadsheet.refreshCells(cell);
                         }
                     } catch (IllegalStateException ise) {
                         ise.printStackTrace();
@@ -608,8 +600,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         Boolean oldValue = cell.getBooleanCellValue();
                         if (value != oldValue) {
                             cell.setCellValue(value);
-                            spreadsheet.markCellAsUpdated(cell, false);
-                            spreadsheet.updateMarkedCells();
+                            spreadsheet.refreshCells(cell);
                         }
                     } catch (IllegalStateException ise) {
                         ise.printStackTrace();

@@ -182,9 +182,7 @@ class ValueToCellUpdater implements ValueChangeListener {
     public void valueChange(ValueChangeEvent event) {
         spreadsheet.createCell(rowIndex, columnIndex, event.getProperty()
                 .getValue());
-        spreadsheet.markCellAsUpdated(
-                spreadsheet.getCell(rowIndex, columnIndex), false);
-        spreadsheet.updateMarkedCells();
+        spreadsheet.refreshCells(spreadsheet.getCell(rowIndex, columnIndex));
     }
 }
 

@@ -53,15 +53,9 @@ public class PopupButton extends AbstractComponentContainer {
         registerRpc(rpc);
     }
 
-    /**
-     * Create a new pop-up button to the specific cell.
-     * 
-     * @param cellReference
-     */
-    public PopupButton(CellReference cellReference) {
+    public PopupButton(Component content) {
         this();
-        getState().col = cellReference.getCol() + 1;
-        getState().row = cellReference.getRow() + 1;
+        addComponent(content);
     }
 
     /**
@@ -74,6 +68,11 @@ public class PopupButton extends AbstractComponentContainer {
                 getState(false).col - 1);
     }
 
+    void setCellReference(CellReference cellReference) {
+        getState().col = cellReference.getCol() + 1;
+        getState().row = cellReference.getRow() + 1;
+    }
+
     /**
      * Gets the column for this pop-up button.
      * 
@@ -84,32 +83,12 @@ public class PopupButton extends AbstractComponentContainer {
     }
 
     /**
-     * Set the column for this pop-up button.
-     * 
-     * @param column
-     *            0-based
-     */
-    public void setColumn(int column) {
-        getState().col = column + 1;
-    }
-
-    /**
      * Gets the row for this pop-up button.
      * 
      * @return 0-based
      */
     public int getRow() {
         return getState(false).row - 1;
-    }
-
-    /**
-     * Set the row for this pop-up button.
-     * 
-     * @param row
-     *            0-based
-     */
-    public void setRow(int row) {
-        getState().row = row + 1;
     }
 
     /**

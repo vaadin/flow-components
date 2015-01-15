@@ -74,7 +74,9 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
                 cell.removeCellComment();
             }
         }
-        spreadsheet.updateMarkedCells();
+        if (cell != null) {
+            spreadsheet.refreshCells(cell);
+        }
     }
 
     private void createCellComment(Sheet sheet, Cell cell) {

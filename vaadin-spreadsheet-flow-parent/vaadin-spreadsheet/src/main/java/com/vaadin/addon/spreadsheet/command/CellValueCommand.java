@@ -148,25 +148,27 @@ public class CellValueCommand extends SpreadsheetCommand {
     }
 
     private void updateValues() {
+        List<Cell> cellsToUpdate = new ArrayList<Cell>();
+
         for (Object o : values) {
             if (o instanceof CellValue) {
                 CellValue cellValue = (CellValue) o;
                 cellValue.value = updateCellValue(cellValue.row, cellValue.col,
-                        cellValue.value);
+                        cellValue.value, cellsToUpdate);
             } else {
                 CellRangeValue cellRangeValue = (CellRangeValue) o;
                 int i = 0;
                 for (int r = cellRangeValue.row1; r <= cellRangeValue.row2; r++) {
                     for (int c = cellRangeValue.col1; c <= cellRangeValue.col2; c++) {
                         cellRangeValue.values[i] = updateCellValue(r, c,
-                                cellRangeValue.values[i]);
+                                cellRangeValue.values[i], cellsToUpdate);
                         i++;
                     }
                 }
             }
         }
         if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
-            spreadsheet.updateMarkedCells();
+            spreadsheet.refreshCells(cellsToUpdate);
         }
     }
 
@@ -179,9 +181,13 @@ public class CellValueCommand extends SpreadsheetCommand {
      *            Column index, 0-based
      * @param value
      *            Value to set to the cell
+     * @param cellsToUpdate
+     *            List of cells that need updating at the end. If the cell value
+     *            is modified, the cell is added to this list.
      * @return Previous value of the cell or null if not available
      */
-    protected Object updateCellValue(int row, int col, Object value) {
+    protected Object updateCellValue(int row, int col, Object value,
+            List<Cell> cellsToUpdate) {
         Cell cell = getCell(row, col);
         Object oldValue = getCellValue(cell);
         if (value == null && cell == null) {
@@ -206,7 +212,7 @@ public class CellValueCommand extends SpreadsheetCommand {
             } else {
                 cell.setCellValue((String) null);
                 if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
-                    spreadsheet.markCellAsUpdated(cell, false);
+                    cellsToUpdate.add(cell);
                 }
             }
         } else {
@@ -224,7 +230,7 @@ public class CellValueCommand extends SpreadsheetCommand {
                 cell.setCellValue((Boolean) value);
             }
             if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
-                spreadsheet.markCellAsUpdated(cell, false);
+                cellsToUpdate.add(cell);
             }
         }
         return oldValue;
