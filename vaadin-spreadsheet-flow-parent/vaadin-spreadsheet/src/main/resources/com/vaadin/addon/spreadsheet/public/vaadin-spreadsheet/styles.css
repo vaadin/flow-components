@@ -193,17 +193,21 @@
 .v-spreadsheet .top-left-pane .cell,
 .v-spreadsheet .top-left-pane .sheet-selection,
 .v-spreadsheet .top-left-pane .s-paint,
+.v-spreadsheet .top-left-pane .sheet-image,
 .v-spreadsheet .top-right-pane .cell,
 .v-spreadsheet .top-right-pane .sheet-selection,
-.v-spreadsheet .top-right-pane .s-paint {
+.v-spreadsheet .top-right-pane .s-paint,
+.v-spreadsheet .top-right-pane .sheet-image {
 	margin-top: 19px;
 }
 .v-spreadsheet.noheaders .top-left-pane .cell,
 .v-spreadsheet.noheaders .top-left-pane .sheet-selection,
 .v-spreadsheet.noheaders .top-left-pane .s-paint,
+.v-spreadsheet.noheaders .top-left-pane .sheet-image,
 .v-spreadsheet.noheaders .top-right-pane .cell,
 .v-spreadsheet.noheaders .top-right-pane .sheet-selection,
-.v-spreadsheet.noheaders .top-right-pane .s-paint {
+.v-spreadsheet.noheaders .top-right-pane .s-paint,
+.v-spreadsheet.noheaders .top-right-pane .sheet-image {
 	margin-top: 0;
 }
 .v-spreadsheet .bottom-left-pane {
@@ -215,17 +219,21 @@
 .v-spreadsheet .top-left-pane .cell,
 .v-spreadsheet .top-left-pane .sheet-selection,
 .v-spreadsheet .top-left-pane .s-paint,
+.v-spreadsheet .top-left-pane .sheet-image,
 .v-spreadsheet .bottom-left-pane .cell,
 .v-spreadsheet .bottom-left-pane .sheet-selection,
-.v-spreadsheet .bottom-left-pane .s-paint {
+.v-spreadsheet .bottom-left-pane .s-paint,
+.v-spreadsheet .bottom-left-pane .sheet-image {
 	margin-left: 50px;
 }
 .v-spreadsheet.noheaders .top-left-pane .cell,
 .v-spreadsheet.noheaders .top-left-pane .sheet-selection,
 .v-spreadsheet.noheaders .top-left-pane .s-paint,
+.v-spreadsheet.noheaders .top-left-pane .sheet-image,
 .v-spreadsheet.noheaders .bottom-left-pane .cell,
 .v-spreadsheet.noheaders .bottom-left-pane .sheet-selection,
-.v-spreadsheet.noheaders .bottom-left-pane .s-paint {
+.v-spreadsheet.noheaders .bottom-left-pane .s-paint,
+.v-spreadsheet.noheaders .bottom-left-pane .sheet-image {
 	margin-left: 0;
 }
 

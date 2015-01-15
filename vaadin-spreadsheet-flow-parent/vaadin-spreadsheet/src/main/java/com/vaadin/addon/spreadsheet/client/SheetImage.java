@@ -15,6 +15,8 @@ public class SheetImage extends Widget {
     private final ImageElement image = Document.get().createImageElement();
     private String resourceURL;
     private String location;
+    private int col;
+    private int row;
 
     public SheetImage(String resourceURL) {
         this.resourceURL = resourceURL;
@@ -46,6 +48,8 @@ public class SheetImage extends Widget {
     }
 
     public void setLocation(int col, int row) {
+        this.setCol(col);
+        this.setRow(row);
         if (location != null) {
             root.removeClassName(location);
         }
@@ -64,8 +68,24 @@ public class SheetImage extends Widget {
     }
 
     public void setPadding(float x, float y) {
-        root.getStyle().setMarginLeft(x, Unit.PX);
-        root.getStyle().setMarginTop(y, Unit.PT);
+        root.getStyle().setPaddingLeft(x, Unit.PX);
+        root.getStyle().setPaddingTop(y, Unit.PT);
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
+    public void setCol(int col) {
+        this.col = col;
     }
 
 }

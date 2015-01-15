@@ -2869,7 +2869,19 @@ public class SheetWidget extends Panel {
     }
 
     public void addSheetImage(String key, SheetImage image) {
-        sheet.appendChild(image.getElement());
+
+        // find correct pane to attach to
+        boolean inTop = topFrozenPanelHeight >= image.getRow();
+        boolean inLeft = leftFrozenPanelWidth >= image.getCol();
+
+        if (inTop && inLeft) {
+            topLeftPane.appendChild(image.getElement());
+        } else if (inTop) {
+            topRightPane.appendChild(image.getElement());
+        } else if (inLeft) {
+            bottomLeftPane.appendChild(image.getElement());
+        }
+
         adopt(image);
         sheetImages.put(key, image);
     }
