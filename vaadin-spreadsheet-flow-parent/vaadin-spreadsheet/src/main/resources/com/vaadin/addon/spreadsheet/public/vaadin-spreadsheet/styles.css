@@ -496,6 +496,8 @@
 	width: 1px;
 	height: 1px;
 	overflow: visible;
+	
+	pointer-events:none;
 }
 
 .v-spreadsheet div.sheet-selection.col0.row0 {
@@ -523,6 +525,7 @@
 	top: -2px;
 	left: -2px;
 	height: 3px;
+	pointer-events:all;
 }
 
 .v-spreadsheet .sheet-selection .s-left {
