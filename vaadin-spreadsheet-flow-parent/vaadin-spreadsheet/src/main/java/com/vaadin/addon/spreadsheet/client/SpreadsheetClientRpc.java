@@ -66,4 +66,6 @@ public interface SpreadsheetClientRpc extends ClientRpc {
             int r2, String value, boolean formula, boolean cellLocked);
 
     void cellsUpdated(ArrayList<CellData> updatedCellData);
+
+    void refreshCellStyles();
 }

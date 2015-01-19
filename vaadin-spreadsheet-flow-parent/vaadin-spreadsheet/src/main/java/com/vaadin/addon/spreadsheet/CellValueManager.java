@@ -698,6 +698,7 @@ public class CellValueManager {
         updatedCellData.addAll(removedCells);
         if (!updatedCellData.isEmpty()) {
             spreadsheet.getSpreadsheetRpcProxy().cellsUpdated(updatedCellData);
+            spreadsheet.getSpreadsheetRpcProxy().refreshCellStyles();
         }
         markedCells.clear();
         removedCells.clear();

@@ -4908,4 +4908,9 @@ public class SheetWidget extends Panel {
     public void clearSelectedCellsOnCut() {
         actionHandler.clearSelectedCellsOnCut();
     }
+
+    public void refreshCellStyles() {
+        clearBasicCellStyles();
+        updateCellStyles();
+    }
 }

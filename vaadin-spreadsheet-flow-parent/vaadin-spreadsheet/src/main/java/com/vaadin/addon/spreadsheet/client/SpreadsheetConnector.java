@@ -140,6 +140,11 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             getWidget().cellValuesUpdated(updatedCellData);
         }
 
+        @Override
+        public void refreshCellStyles() {
+            getWidget().refreshCellStyles();
+        }
+
     };
 
     private final ElementResizeListener elementResizeListener = new ElementResizeListener() {

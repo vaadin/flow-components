@@ -403,9 +403,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     private void clearMergedRegions() {
-        if (this.mergedRegions != null) {
+        if (mergedRegions != null) {
             while (0 < mergedRegions.size()) {
-                sheetWidget.removeMergedRegion(this.mergedRegions.remove(0), 0);
+                sheetWidget.removeMergedRegion(mergedRegions.remove(0), 0);
             }
         }
     }
@@ -1564,8 +1564,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void setConditionalFormattingStyles(HashMap<Integer, String> map) {
         conditionalFormattingStyles.clear();
-        if (map != null)
-            this.conditionalFormattingStyles.putAll(map);
+        if (map != null) {
+            conditionalFormattingStyles.putAll(map);
+        }
     }
 
     public void selectCell(int col, int row, String value, boolean formula,
@@ -1579,6 +1580,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         selectionHandler.selectCellRange(selectedCellColumn, selectedCellRow,
                 firstColumn, lastColumn, firstRow, lastRow, value, formula,
                 locked);
+    }
+
+    public void refreshCellStyles() {
+        getSheetWidget().refreshCellStyles();
     }
 
 }
