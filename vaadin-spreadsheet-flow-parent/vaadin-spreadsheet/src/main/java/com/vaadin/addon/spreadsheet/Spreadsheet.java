@@ -3231,7 +3231,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @param listener
      */
     public void addProtectedEditListener(ProtectedEditListener listener) {
-        addListener(ProtectedEditListener.class, listener,
+        addListener(ProtectedEditEvent.class, listener,
                 ProtectedEditListener.SELECTION_CHANGE_METHOD);
     }
 
@@ -3241,7 +3241,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @param listener
      */
     public void removeProtectedEditListener(ProtectedEditListener listener) {
-        removeListener(ProtectedEditListener.class, listener,
+        removeListener(ProtectedEditEvent.class, listener,
                 ProtectedEditListener.SELECTION_CHANGE_METHOD);
     }
 
