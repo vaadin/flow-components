@@ -285,13 +285,21 @@ public class XSSFColorConverter implements ColorConverter {
     public String getBackgroundColorCSS(ConditionalFormattingRule rule) {
 
         XSSFConditionalFormattingRule r = (XSSFConditionalFormattingRule) rule;
-
         CTDxf dxf = getXMLColorDataWithReflection(r);
 
         CTColor bgColor = dxf.getFill().getPatternFill().getBgColor();
-        byte[] rgb = bgColor.getRgb();
 
-        return rgb == null ? null : toRGBA(rgb);
+        if (bgColor.getTheme() != 0) {
+            XSSFColor themeColor = workbook.getTheme().getThemeColor(
+                    (int) bgColor.getTheme());
+
+            // CF rules have tint in bgColor but not the XSSFColor.
+            return styleColor(themeColor, bgColor.getTint());
+        } else {
+            byte[] rgb = bgColor.getRgb();
+            return rgb == null ? null : toRGBA(rgb);
+        }
+
     }
 
     @Override
@@ -347,6 +355,10 @@ public class XSSFColorConverter implements ColorConverter {
     }
 
     private String styleColor(XSSFColor color) {
+        return styleColor(color, color == null ? 0.0 : color.getTint());
+    }
+
+    private String styleColor(XSSFColor color, double tint) {
         if (color == null || color.isAuto()) {
             return null;
         }
@@ -356,7 +368,6 @@ public class XSSFColorConverter implements ColorConverter {
             return null;
         }
 
-        final double tint = color.getTint();
         if (tint != 0.0) {
             argb[1] = applyTint(argb[1] & 0xFF, tint);
             argb[2] = applyTint(argb[2] & 0xFF, tint);
