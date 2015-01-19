@@ -23,9 +23,10 @@ public interface Command {
     public int getActiveSheetIndex();
 
     /**
-     * Returns the sheet at the given index as the active sheet.
+     * Sets the sheet at the given index the currently active sheet.
      * 
-     * @return index of sheet to set active
+     * @param index
+     *            Index of sheet to set active
      */
     public void setActiveSheetIndex(int index);
 

@@ -107,7 +107,7 @@ public class FormatsFixture implements SpreadsheetFixture {
         String[] formulas = new String[] { "B1+C1", "B4+C4", "B7+C7", "B6+C6",
                 "SUM(B6:D6)", "SUM(B7:D7)", "SUM(E5:E6)", "E5+E6" };
 
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
         int row = formulaBaseRow;
         for (String formula : formulas) {
             row++;
@@ -119,6 +119,6 @@ public class FormatsFixture implements SpreadsheetFixture {
                     c.getCellType());
         }
 
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
     }
 }

@@ -18,7 +18,6 @@ import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.hssf.usermodel.HSSFPicture;
 import org.apache.poi.hssf.usermodel.HSSFPictureData;
 import org.apache.poi.hssf.usermodel.HSSFShape;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.PaneInformation;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -34,97 +33,51 @@ import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFPicture;
 import org.apache.poi.xssf.usermodel.XSSFPictureData;
 import org.apache.poi.xssf.usermodel.XSSFShape;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetState;
 
 /**
- * Utility class for {@link Spreadsheet} operations.
+ * SpreadsheetFactory is an utility class of the Spreadsheet component. It is
+ * used for operations related to loading and saving a workbook and related
+ * data.
+ * 
+ * @author Vaadin Ltd.
  */
 public class SpreadsheetFactory {
 
     private static final Logger LOGGER = Logger
             .getLogger(SpreadsheetFactory.class.getName());
 
-    public static final int DEFAULT_COLUMNS = 52;
-
-    public static final int DEFAULT_ROWS = 200;
-
-    public static boolean LOG_MEMORY = false;
-
     private static final int DEFAULT_COL_WIDTH_UNITS = 10;
 
     private static final float DEFAULT_ROW_HEIGHT_POINTS = 12.75f;
 
-    public static final short EXCEL_COLUMN_WIDTH_FACTOR = 256;
-
-    public static final int UNIT_OFFSET_LENGTH = 7;
-
-    public static final int[] UNIT_OFFSET_MAP = new int[] { 0, 36, 73, 109,
-            146, 182, 219 };
+    /**
+     * Default column count for new workbooks
+     */
+    public static final int DEFAULT_COLUMNS = 52;
 
     /**
-     * Column width measured as the number of characters of the maximum digit
-     * width of the numbers 0, 1, 2, ..., 9 as rendered in the normal style's
-     * font. There are 4 pixels of margin padding (two on each side), plus 1
-     * pixel padding for the gridlines.
+     * Default row count for new workbooks
+     */
+    public static final int DEFAULT_ROWS = 200;
+
+    /**
+     * Set to true if Spreadsheet should log its memory usage.
+     */
+    private static boolean LOG_MEMORY = false;
+
+    /**
+     * Clears the given Spreadsheet and loads the given Workbook into it.
      * 
-     * This value is the same for default font in Office 2007 (Calibri) and
-     * Office 2003 and earlier (Arial)
+     * @param spreadsheet
+     *            Target Spreadsheet
+     * @param workbook
+     *            Workbook to load
      */
-    private static float DEFAULT_COLUMN_WIDTH = 9.140625f;
-
-    /**
-     * width of 1px in columns with default width in units of 1/256 of a
-     * character width
-     */
-    private static final float PX_DEFAULT = 32.00f;
-
-    /**
-     * width of 1px in columns with overridden width in units of 1/256 of a
-     * character width
-     */
-    private static final float PX_MODIFIED = 36.56f;
-
-    // FIXME investigate why the default column width gets a different value
-    // using this compared to ExcelToHtmlUtils.getColumnWidthInPx(widthUnits).
-    protected static float getColumnWidthInPixels(Sheet sheet, int columnIndex) {
-        if (sheet instanceof XSSFSheet) {
-            CTCol col = ((XSSFSheet) sheet).getColumnHelper().getColumn(
-                    columnIndex, false);
-            double numChars = col == null || !col.isSetWidth() ? DEFAULT_COLUMN_WIDTH
-                    : col.getWidth();
-            return (float) numChars * XSSFWorkbook.DEFAULT_CHARACTER_WIDTH;
-        } else if (sheet instanceof HSSFSheet) {
-            int cw = sheet.getColumnWidth(columnIndex);
-            int def = sheet.getDefaultColumnWidth() * 256;
-            float px = cw == def ? PX_DEFAULT : PX_MODIFIED;
-            return cw / px;
-        } else {
-            return ExcelToHtmlUtils.getColumnWidthInPx(sheet
-                    .getColumnWidth(columnIndex));
-        }
-    }
-
-    /**
-     * pixel units to excel width units(units of 1/256th of a character width)
-     * 
-     * @param pxs
-     * @return
-     */
-    protected static short pixel2WidthUnits(int pxs) {
-        short widthUnits = (short) (EXCEL_COLUMN_WIDTH_FACTOR * (pxs / UNIT_OFFSET_LENGTH));
-
-        widthUnits += UNIT_OFFSET_MAP[(pxs % UNIT_OFFSET_LENGTH)];
-
-        return widthUnits;
-    }
-
-    protected static void loadSpreadsheetWith(Spreadsheet spreadsheet,
-            Workbook workbook) {
+    static void loadSpreadsheetWith(Spreadsheet spreadsheet, Workbook workbook) {
         spreadsheet.clearSheetServerSide();
         final Sheet sheet;
         if (workbook == null) {
@@ -147,7 +100,14 @@ public class SpreadsheetFactory {
         loadWorkbookStyles(spreadsheet);
     }
 
-    protected static void loadNewXLSXSpreadsheet(Spreadsheet spreadsheet) {
+    /**
+     * Clears the target Spreadsheet, creates a new XLSX Workbook and loads it
+     * in the Spreadsheet.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     */
+    static void loadNewXLSXSpreadsheet(Spreadsheet spreadsheet) {
         Workbook workbook = spreadsheet.getWorkbook();
         if (workbook != null && workbook instanceof SXSSFWorkbook) {
             ((SXSSFWorkbook) workbook).dispose();
@@ -161,7 +121,21 @@ public class SpreadsheetFactory {
         loadWorkbookStyles(spreadsheet);
     }
 
-    protected static void addNewSheet(final Spreadsheet spreadsheet,
+    /**
+     * Adds a new sheet to the given Spreadsheet and Workbook.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     * @param workbook
+     *            Target Workbook
+     * @param sheetName
+     *            Name of the new sheet
+     * @param rows
+     *            Row count for the new sheet
+     * @param columns
+     *            Column count for the new sheet
+     */
+    static void addNewSheet(final Spreadsheet spreadsheet,
             final Workbook workbook, final String sheetName, int rows,
             int columns) {
         final Sheet sheet;
@@ -184,7 +158,17 @@ public class SpreadsheetFactory {
         generateNewSpreadsheet(spreadsheet, sheet, rows, columns);
     }
 
-    protected static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
+    /**
+     * Reloads the Spreadsheet component from the given file.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     * @param spreadsheetFile
+     *            Source file. Should be of XLS or XLSX format.
+     * @throws IOException
+     *             If file has invalid format
+     */
+    static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
             final File spreadsheetFile) throws IOException {
         try {
             reloadSpreadsheetComponent(spreadsheet,
@@ -194,7 +178,17 @@ public class SpreadsheetFactory {
         }
     }
 
-    protected static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
+    /**
+     * Reloads the Spreadsheet component from the given InputStream.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     * @param inputStream
+     *            Source stream. Stream content be of XLS or XLSX format.
+     * @throws IOException
+     *             If data in the stream has invalid format
+     */
+    static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
             final InputStream inputStream) throws IOException {
         try {
             reloadSpreadsheetComponent(spreadsheet,
@@ -204,7 +198,16 @@ public class SpreadsheetFactory {
         }
     }
 
-    protected static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
+    /**
+     * Reloads the Spreadsheet component using the given Workbook as data
+     * source.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     * @param workbook
+     *            Source Workbook
+     */
+    static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
             final Workbook workbook) {
         Workbook oldWorkbook = spreadsheet.getWorkbook();
         if (oldWorkbook != null) {
@@ -219,7 +222,21 @@ public class SpreadsheetFactory {
         loadWorkbookStyles(spreadsheet);
     }
 
-    protected static File write(Spreadsheet spreadsheet, String fileName)
+    /**
+     * Writes the current Workbook state from the given Spreadsheet to the given
+     * file.
+     * 
+     * @param spreadsheet
+     *            Source Spreadsheet
+     * @param fileName
+     *            Target file name
+     * @return File handle to the written file
+     * @throws FileNotFoundException
+     *             If file was not found
+     * @throws IOException
+     *             If some other IO error happened
+     */
+    static File write(Spreadsheet spreadsheet, String fileName)
             throws FileNotFoundException, IOException {
         final Workbook workbook = spreadsheet.getWorkbook();
         if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")) {
@@ -252,10 +269,20 @@ public class SpreadsheetFactory {
         return file;
     }
 
-    protected static void write(Spreadsheet spreadsheet,
-            OutputStream outputStream) throws IOException {
+    /**
+     * Writes the current Workbook state from the given Spreadsheet to the given
+     * output stream. The stream will be closed after writing.
+     * 
+     * @param spreadsheet
+     *            Source Spreadsheet
+     * @param stream
+     *            Output stream to write to
+     * @throws IOException
+     *             If there was an error handling the stream.
+     */
+    static void write(Spreadsheet spreadsheet, OutputStream stream)
+            throws IOException {
         final Workbook workbook = spreadsheet.getWorkbook();
-        ByteArrayOutputStream stream = null;
         try {
             stream = new ByteArrayOutputStream();
             workbook.write(stream);
@@ -271,12 +298,31 @@ public class SpreadsheetFactory {
         }
     }
 
-    protected static void loadWorkbookStyles(Spreadsheet component) {
-        component.getSpreadsheetStyleFactory().reloadWorkbookStyles();
-        component.getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
+    /**
+     * Loads styles for the Workbook and the currently active sheet.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     */
+    static void loadWorkbookStyles(Spreadsheet spreadsheet) {
+        spreadsheet.getSpreadsheetStyleFactory().reloadWorkbookStyles();
+        spreadsheet.getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
-    protected static void generateNewSpreadsheet(final Spreadsheet component,
+    /**
+     * Sets the size, default row height and default column width for the given
+     * new Sheet in the target Spreadsheet. Finally loads the sheet.
+     * 
+     * @param spreadsheet
+     *            Target spreadsheet
+     * @param sheet
+     *            Target sheet
+     * @param rows
+     *            Amount of rows
+     * @param columns
+     *            Amount of columns
+     */
+    static void generateNewSpreadsheet(final Spreadsheet spreadsheet,
             final Sheet sheet, int rows, int columns) {
         sheet.createRow(rows - 1).createCell(columns - 1);
         final float defaultRowHeightInPoints = sheet
@@ -286,10 +332,18 @@ public class SpreadsheetFactory {
         }
         // use excel default column width instead of Apache POI default (8)
         sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
-        reloadSpreadsheetData(component, sheet);
+        reloadSpreadsheetData(spreadsheet, sheet);
     }
 
-    protected static void reloadSpreadsheetData(final Spreadsheet component,
+    /**
+     * Reloads all data for the given Sheet within the target Spreadsheet
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     * @param sheet
+     *            Target sheet within the Spreadsheet
+     */
+    static void reloadSpreadsheetData(final Spreadsheet spreadsheet,
             final Sheet sheet) {
         logMemoryUsage();
         try {
@@ -297,20 +351,20 @@ public class SpreadsheetFactory {
                     .getDefaultRowHeightInPoints();
             if (defaultRowHeightInPoints <= 0) {
                 sheet.setDefaultRowHeightInPoints(DEFAULT_ROW_HEIGHT_POINTS);
-                component.getState().defRowH = DEFAULT_ROW_HEIGHT_POINTS;
+                spreadsheet.getState().defRowH = DEFAULT_ROW_HEIGHT_POINTS;
             } else {
-                component.getState().defRowH = defaultRowHeightInPoints;
+                spreadsheet.getState().defRowH = defaultRowHeightInPoints;
             }
-            component.getState().rows = (sheet.getLastRowNum() + 1);
+            spreadsheet.getState().rows = (sheet.getLastRowNum() + 1);
             int charactersToPixels = ExcelToHtmlUtils.getColumnWidthInPx(sheet
                     .getDefaultColumnWidth() * 256);
             if (charactersToPixels > 0) {
-                component.getState().defColW = charactersToPixels;
+                spreadsheet.getState().defColW = charactersToPixels;
             } else {
-                component.getState().defColW = DEFAULT_COL_WIDTH_UNITS;
+                spreadsheet.getState().defColW = DEFAULT_COL_WIDTH_UNITS;
                 sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS / 8);
             }
-            final float[] rowHeights = new float[component.getRows()];
+            final float[] rowHeights = new float[spreadsheet.getRows()];
             int cols = 0;
             int tempRowIndex = -1;
             final ArrayList<Integer> hiddenRowIndexes = new ArrayList<Integer>();
@@ -318,7 +372,7 @@ public class SpreadsheetFactory {
                 int rIndex = row.getRowNum();
                 // set the empty rows to have the default row width
                 while (++tempRowIndex != rIndex) {
-                    rowHeights[tempRowIndex] = component.getState().defRowH;
+                    rowHeights[tempRowIndex] = spreadsheet.getState().defRowH;
                 }
                 if (row.getZeroHeight()) {
                     rowHeights[rIndex] = 0.0F;
@@ -331,9 +385,9 @@ public class SpreadsheetFactory {
                     cols = c;
                 }
             }
-            component.getState().hiddenRowIndexes = hiddenRowIndexes;
-            component.getState().rowH = rowHeights;
-            component.getState().cols = cols;
+            spreadsheet.getState().hiddenRowIndexes = hiddenRowIndexes;
+            spreadsheet.getState().rowH = rowHeights;
+            spreadsheet.getState().cols = cols;
             final int[] colWidths = new int[cols];
             final ArrayList<Integer> hiddenColumnIndexes = new ArrayList<Integer>();
             for (int i = 0; i < cols; i++) {
@@ -345,19 +399,26 @@ public class SpreadsheetFactory {
                             .getColumnWidth(i));
                 }
             }
-            component.getState().hiddenColumnIndexes = hiddenColumnIndexes;
-            component.getState().colW = colWidths;
+            spreadsheet.getState().hiddenColumnIndexes = hiddenColumnIndexes;
+            spreadsheet.getState().colW = colWidths;
 
-            loadSheetImages(component);
-            loadMergedRegions(component);
-            loadFreezePane(component);
+            loadSheetImages(spreadsheet);
+            loadMergedRegions(spreadsheet);
+            loadFreezePane(spreadsheet);
         } catch (NullPointerException npe) {
             LOGGER.log(Level.WARNING, npe.getMessage(), npe);
         }
         logMemoryUsage();
     }
 
-    protected static void loadSheetImages(Spreadsheet spreadsheet) {
+    /**
+     * Loads images for the currently active sheet and adds them to the target
+     * Spreadsheet.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     */
+    static void loadSheetImages(Spreadsheet spreadsheet) {
         final Sheet sheet = spreadsheet.getActiveSheet();
         Drawing drawing = sheet.createDrawingPatriarch();
         if (drawing instanceof XSSFDrawing) {
@@ -370,9 +431,9 @@ public class SpreadsheetFactory {
                     XSSFPictureData pictureData = ((XSSFPicture) shape)
                             .getPictureData();
                     SheetImageWrapper image = new SheetImageWrapper();
-                    image.anchor = anchor;
-                    image.MIMEType = pictureData.getMimeType();
-                    image.data = pictureData.getData();
+                    image.setAnchor(anchor);
+                    image.setMIMEType(pictureData.getMimeType());
+                    image.setData(pictureData.getData());
                     if (anchor != null) {
                         spreadsheet.sheetImages.add(image);
                     } else {
@@ -396,9 +457,9 @@ public class SpreadsheetFactory {
                     HSSFPictureData pictureData = ((HSSFPicture) shape)
                             .getPictureData();
                     SheetImageWrapper image = new SheetImageWrapper();
-                    image.anchor = anchor;
-                    image.MIMEType = pictureData.getMimeType();
-                    image.data = pictureData.getData();
+                    image.setAnchor(anchor);
+                    image.setMIMEType(pictureData.getMimeType());
+                    image.setData(pictureData.getData());
                     if (anchor != null) {
                         spreadsheet.sheetImages.add(image);
                     } else {
@@ -410,7 +471,14 @@ public class SpreadsheetFactory {
         }
     }
 
-    protected static void loadMergedRegions(Spreadsheet spreadsheet) {
+    /**
+     * Loads merged region(s) configuration for the currently active sheet and
+     * sets it into the shared state.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     */
+    static void loadMergedRegions(Spreadsheet spreadsheet) {
         final Sheet sheet = spreadsheet.getActiveSheet();
         spreadsheet.getState().mergedRegions = null;
         spreadsheet.mergedRegionCounter = 0;
@@ -431,21 +499,28 @@ public class SpreadsheetFactory {
         }
     }
 
-    protected static void loadFreezePane(Spreadsheet component) {
-        final Sheet sheet = component.getActiveSheet();
+    /**
+     * Loads freeze pane configuration for the currently active sheet and sets
+     * it into the shared state.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     */
+    static void loadFreezePane(Spreadsheet spreadsheet) {
+        final Sheet sheet = spreadsheet.getActiveSheet();
         PaneInformation paneInformation = sheet.getPaneInformation();
         // only freeze panes supported
         if (paneInformation != null && paneInformation.isFreezePane()) {
             // Apparently in POI HorizontalSplitPosition means rows and
             // VerticalSplitPosition means columns. Changed the meaning for the
             // component internals
-            component.getState().horizontalSplitPosition = paneInformation
+            spreadsheet.getState().horizontalSplitPosition = paneInformation
                     .getVerticalSplitPosition();
-            component.getState().verticalSplitPosition = paneInformation
+            spreadsheet.getState().verticalSplitPosition = paneInformation
                     .getHorizontalSplitPosition();
         } else {
-            component.getState().verticalSplitPosition = 0;
-            component.getState().horizontalSplitPosition = 0;
+            spreadsheet.getState().verticalSplitPosition = 0;
+            spreadsheet.getState().horizontalSplitPosition = 0;
         }
     }
 

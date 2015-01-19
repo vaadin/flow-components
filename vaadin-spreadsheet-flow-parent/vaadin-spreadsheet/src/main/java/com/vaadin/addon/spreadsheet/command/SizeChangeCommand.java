@@ -44,8 +44,8 @@ public class SizeChangeCommand extends SpreadsheetCommand {
      * Captures the current row heights or column widths (depending on the type
      * set to this command) for the row/column indexes given.
      * 
-     * @param row
-     *            /column indexes, 1-based
+     * @param indexes
+     *            Row /column indexes, 1-based
      */
     public void captureValues(Integer[] indexes) {
         this.indexes = indexes;

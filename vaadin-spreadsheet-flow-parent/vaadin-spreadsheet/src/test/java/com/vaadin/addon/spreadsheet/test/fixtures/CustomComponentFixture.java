@@ -104,7 +104,7 @@ public class CustomComponentFixture implements SpreadsheetFixture {
         factoryStack.addFactory(componentFactory);
 
         spreadsheet.setSpreadsheetComponentFactory(factoryStack);
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
     }
 
 }

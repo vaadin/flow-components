@@ -51,13 +51,21 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.STBorderStyle;
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
 
 /**
- * Converts cell styles to CSS rules.
+ * SpreadsheetStyleFactory is an utility class for the Spreadsheet component.
+ * This class handles converting Apache POI CellStyles to CSS styles.
+ * 
+ * @author Vaadin Ltd.
  */
 public class SpreadsheetStyleFactory {
 
     private static final Logger LOGGER = Logger
             .getLogger(SpreadsheetStyleFactory.class.getName());
 
+    /**
+     * Styling for cell borders
+     * 
+     * @author Vaadin Ltd.
+     */
     public enum BorderStyle {
         SOLID_THIN("solid", 1, 1), DOTTED_THIN("dotted", 1, 1), DASHED_THIN(
                 "dashed", 1, 1), SOLID_MEDIUM("solid", 2, 2), DASHED_MEDIUM(
@@ -65,31 +73,36 @@ public class SpreadsheetStyleFactory {
                 3, 4), NONE("none", 0, 0);
 
         private final int size;
-        private final int adjustment;
         private final String borderStyle;
 
         BorderStyle(String borderStyle, int size, int adjustment) {
             this.borderStyle = borderStyle;
             this.size = size;
-            this.adjustment = adjustment;
         }
 
+        /**
+         * Returns the CSS name of this border style
+         * 
+         * @return CSS name of border style
+         */
         public String getValue() {
             return borderStyle;
         }
 
+        /**
+         * Returns the thickness of this border
+         * 
+         * @return Border thickness in PT
+         */
         public int getSize() {
             return size;
         }
 
-        public int getVerticalAdjustment() {
-            return size;
-        }
-
-        public int getHorizontalAdjustment() {
-            return adjustment;
-        }
-
+        /**
+         * Returns the complete border attribute value for CSS
+         * 
+         * @return Complete border attribute value
+         */
         public String getBorderAttributeValue() {
             return borderStyle + " " + size + "pt;";
         }
@@ -129,29 +142,26 @@ public class SpreadsheetStyleFactory {
 
     private Font defaultFont;
 
-    private short defaultVerticalAlign;
-
     private short defaultTextAlign;
 
     private short defaultFontHeightInPoints;
 
     private String defaultFontFamily;
 
-    @SuppressWarnings({ "unchecked" })
-    private static <K, V> Map<K, V> mapFor(Object... mapping) {
-        Map<K, V> map = new HashMap<K, V>();
-        for (int i = 0; i < mapping.length; i += 2) {
-            map.put((K) mapping[i], (V) mapping[i + 1]);
-        }
-        return map;
-    }
-
+    /**
+     * Constructs a new SpreadsheetStyleFactory for the given Spreadsheet
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     */
     public SpreadsheetStyleFactory(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
-
         setupColorMap();
     }
 
+    /**
+     * Reloads all sheet and cell styles from the current Workbook.
+     */
     public void reloadWorkbookStyles() {
         final Workbook workbook = spreadsheet.getWorkbook();
         if (spreadsheet.getState().cellStyleToCSSStyle == null) {
@@ -167,7 +177,7 @@ public class SpreadsheetStyleFactory {
         // get default text alignments
         CellStyle cellStyle = workbook.getCellStyleAt((short) 0);
         defaultTextAlign = cellStyle.getAlignment();
-        defaultVerticalAlign = cellStyle.getVerticalAlignment();
+        // defaultVerticalAlign = cellStyle.getVerticalAlignment();
 
         // create default style (cell style 0)
         StringBuilder sb = new StringBuilder();
@@ -184,38 +194,11 @@ public class SpreadsheetStyleFactory {
         }
     }
 
-    private void addCellStyleCSS(CellStyle cellStyle) {
-        StringBuilder sb = new StringBuilder();
-
-        fontStyle(sb, cellStyle);
-        colorConverter.colorStyles(cellStyle, sb);
-        borderStyles(sb, cellStyle);
-        if (cellStyle.getAlignment() != defaultTextAlign) {
-            styleOut(sb, "text-align", cellStyle.getAlignment(), ALIGN);
-            // TODO for correct overflow, rtl should be used for right align
-            // if (cellStyle.getAlignment() == ALIGN_RIGHT) {
-            // sb.append("direction:rtl;");
-            // }
-        }
-
-        // excel default is bottom, so that is what we have in the CSS base
-        // files.
-        // TODO only works on modern (10+) IE.
-        styleOut(sb, "justify-content", cellStyle.getVerticalAlignment(),
-                VERTICAL_ALIGN);
-
-        if (cellStyle.getWrapText()) { // default is to overflow
-            sb.append("overflow:hidden;white-space:normal;");
-        }
-
-        if (cellStyle.getIndention() > 0) {
-            sb.append("padding-left: " + cellStyle.getIndention() + "em;");
-        }
-
-        spreadsheet.getState().cellStyleToCSSStyle.put(
-                (int) cellStyle.getIndex(), sb.toString());
-    }
-
+    /**
+     * Creates a CellStyle to be used with hyperlinks
+     * 
+     * @return A new hyperlink CellStyle
+     */
     public CellStyle createHyperlinkCellStyle() {
         Workbook wb = spreadsheet.getWorkbook();
         CellStyle hlink_style = wb.createCellStyle();
@@ -229,7 +212,7 @@ public class SpreadsheetStyleFactory {
     }
 
     /**
-     * Clears all styles for the given cell. Should used when i.e. a cell has
+     * Clears all styles for the given cell. Should be used when i.e. a cell has
      * been shifted (the old location is cleared of all styles).
      * 
      * @param oldColumnIndex
@@ -324,6 +307,15 @@ public class SpreadsheetStyleFactory {
         }
     }
 
+    /**
+     * This should be called when a Cell's styling has been changed. This will
+     * tell the Spreadsheet to send the change to the client side.
+     * 
+     * @param cell
+     *            Target cell
+     * @param updateCustomBorders
+     *            true to also update custom borders
+     */
     public void cellStyleUpdated(Cell cell, boolean updateCustomBorders) {
         final String cssSelector = ".col" + (cell.getColumnIndex() + 1)
                 + ".row" + (cell.getRowIndex() + 1);
@@ -399,6 +391,10 @@ public class SpreadsheetStyleFactory {
         }
     }
 
+    /**
+     * Sets the custom border styles to shared state for sending them to the
+     * client side.
+     */
     public void loadCustomBorderStylesToState() {
         if (spreadsheet.getState().shiftedCellBorderStyles != null) {
             spreadsheet.getState().shiftedCellBorderStyles.clear();
@@ -423,6 +419,9 @@ public class SpreadsheetStyleFactory {
         }
     }
 
+    /**
+     * Reloads all styles for the currently active sheet.
+     */
     public void reloadActiveSheetCellStyles() {
         // need to remove the cell identifiers (css selectors from the shifted
         // border style rules
@@ -473,6 +472,47 @@ public class SpreadsheetStyleFactory {
         // conditional formatting
         spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
 
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    private static <K, V> Map<K, V> mapFor(Object... mapping) {
+        Map<K, V> map = new HashMap<K, V>();
+        for (int i = 0; i < mapping.length; i += 2) {
+            map.put((K) mapping[i], (V) mapping[i + 1]);
+        }
+        return map;
+    }
+
+    private void addCellStyleCSS(CellStyle cellStyle) {
+        StringBuilder sb = new StringBuilder();
+
+        fontStyle(sb, cellStyle);
+        colorConverter.colorStyles(cellStyle, sb);
+        borderStyles(sb, cellStyle);
+        if (cellStyle.getAlignment() != defaultTextAlign) {
+            styleOut(sb, "text-align", cellStyle.getAlignment(), ALIGN);
+            // TODO For correct overflow, rtl should be used for right align
+            // if (cellStyle.getAlignment() == ALIGN_RIGHT) {
+            // sb.append("direction:rtl;");
+            // }
+        }
+
+        // excel default is bottom, so that is what we have in the CSS base
+        // files.
+        // TODO This only works on modern (10+) IE.
+        styleOut(sb, "justify-content", cellStyle.getVerticalAlignment(),
+                VERTICAL_ALIGN);
+
+        if (cellStyle.getWrapText()) { // default is to overflow
+            sb.append("overflow:hidden;white-space:normal;");
+        }
+
+        if (cellStyle.getIndention() > 0) {
+            sb.append("padding-left: " + cellStyle.getIndention() + "em;");
+        }
+
+        spreadsheet.getState().cellStyleToCSSStyle.put(
+                (int) cellStyle.getIndex(), sb.toString());
     }
 
     private String buildMergedCellBorderCSS(String selector, String rules) {

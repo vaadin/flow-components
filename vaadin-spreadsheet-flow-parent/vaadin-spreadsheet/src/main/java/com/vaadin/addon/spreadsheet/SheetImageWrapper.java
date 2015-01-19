@@ -11,35 +11,47 @@ import org.apache.poi.xssf.usermodel.XSSFShape;
 
 import com.vaadin.server.StreamResource;
 
+/**
+ * SheetImageWrapper is an utility class of the Spreadsheet component. In
+ * addition to the image resource, this wrapper contains the images visibility
+ * state, position and size.
+ * 
+ * @author Vaadin Ltd.
+ */
 public class SheetImageWrapper {
 
-    public StreamResource resource;
+    private StreamResource resource;
 
     private static long counter;
 
-    public ClientAnchor anchor;
-    public byte[] data;
-    public String resourceKey;
-    public boolean visible;
+    private ClientAnchor anchor;
+    private byte[] data;
+    private String resourceKey;
+    private boolean visible;
 
-    public String MIMEType;
+    private String MIMEType;
 
     public SheetImageWrapper() {
-        // FIXME probably need to use another way to give a unique resource key,
-        // otherwise restarting server will start using old keys and thus
+        // FIXME We probably need to use another way to give a unique resource
+        // key, otherwise restarting server will start using old keys and thus
         // browsers might load the wrong image from cache.
         resourceKey = "sheet-image-" + counter;
         counter++;
     }
 
     /**
-     * Parameters 1-based.
+     * Determines if this image should be visible within the given visible area.
      * 
      * @param c1
+     *            Column index of leftmost column, 1-based
      * @param c2
+     *            Column index of rightmost column, 1-based
      * @param r1
+     *            Row index of topmost row, 1-based
      * @param r2
-     * @return true if the image should be visible inside the range
+     *            Row index of bottom-most row, 1-based
+     * @return true if the image should be visible inside the range, false
+     *         otherwise
      */
     public boolean isVisible(int c1, int c2, int r1, int r2) {
         int col1 = anchor.getCol1() + 1;
@@ -51,10 +63,12 @@ public class SheetImageWrapper {
     }
 
     /**
-     * Returns the coordinate of the left edge of the image inside the col1,
-     * converted to pixels.
+     * Returns the coordinate of the left edge of the image inside the leftmost
+     * column this image occupies. Value is converted to pixels.
      * 
-     * @return
+     * @param sheet
+     *            The Sheet this image is in
+     * @return coordinate of image's left edge in PX
      */
     public float getDx1(Sheet sheet) {
         if (anchor instanceof XSSFClientAnchor) {
@@ -66,10 +80,12 @@ public class SheetImageWrapper {
     }
 
     /**
-     * Returns the coordinate of the right edge of the image inside the col2,
-     * converted to pixels.
+     * Returns the coordinate of the right edge of the image inside the
+     * rightmost column this image occupies. Value is converted to pixels.
      * 
-     * @return
+     * @param sheet
+     *            The Sheet this image is in
+     * @return coordinate of image's right edge in PX
      */
     public float getDx2(Sheet sheet) {
         if (anchor instanceof XSSFClientAnchor) {
@@ -81,10 +97,12 @@ public class SheetImageWrapper {
     }
 
     /**
-     * Returns the coordinate of the top edge of the image inside the row1,
-     * converted to points.
+     * Returns the coordinate of the top edge of the image inside the topmost
+     * row this image occupies. Value is converted to pixels.
      * 
-     * @return
+     * @param sheet
+     *            The Sheet this image is in
+     * @return coordinate of image's top edge in PX
      */
     public float getDy1(Sheet sheet) {
         if (anchor instanceof XSSFClientAnchor) {
@@ -97,10 +115,12 @@ public class SheetImageWrapper {
     }
 
     /**
-     * Returns the coordinate of the bottom edge of the image inside the row2,
-     * converted to points.
+     * Returns the coordinate of the bottom edge of the image inside the bottom
+     * row this image occupies. Value is converted to pixels.
      * 
-     * @return
+     * @param sheet
+     *            The Sheet this image is in
+     * @return coordinate of image's bottom edge in PX
      */
     public float getDy2(Sheet sheet) {
         if (anchor instanceof XSSFClientAnchor) {
@@ -114,18 +134,19 @@ public class SheetImageWrapper {
 
     /**
      * Calculates the width of the image. Might not be 100% correct because of
-     * bugs in POI (returns inconsistent values for dx & dy).
+     * bugs in POI (returns inconsistent values for Dx and Dy).
      * <p>
      * If the image doesn't have a specified width and should be sized to image
      * file size, -1 is returned.
      * 
      * @param sheet
-     *            the sheet the image belongs to
+     *            The sheet this image belongs to
      * @param colW
-     *            column widths in pixels
+     *            Array of column widths in pixels
      * @param defaultColumnWidthPX
-     *            default column width in pixels
-     * @return
+     *            Default column width in pixels
+     * @return Width of the image in pixels, or -1 if image file width should be
+     *         used
      */
     public float getWidth(Sheet sheet, int colW[], int defaultColumnWidthPX) {
         float width;
@@ -152,16 +173,17 @@ public class SheetImageWrapper {
 
     /**
      * Calculates the height of the image. Might not be 100% correct because of
-     * bugs in POI (returns inconsistent values for dx & dy).
+     * bugs in POI (returns inconsistent values for Dx and Dy).
      * <p>
      * If the image doesn't have a specified height and should be sized to image
      * file size, -1 is returned.
      * 
      * @param sheet
-     *            the sheet the image belongs to
+     *            The sheet this image belongs to
      * @param rowH
-     *            row heights in points
-     * @return
+     *            Array of row heights in points
+     * @return Image height in points, or -1 if image file height should be
+     *         used.
      */
     public float getHeight(Sheet sheet, float[] rowH) {
         float height;
@@ -187,6 +209,11 @@ public class SheetImageWrapper {
         return height;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -201,6 +228,11 @@ public class SheetImageWrapper {
         return result;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -243,6 +275,11 @@ public class SheetImageWrapper {
         return true;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         return "ImageData [resourceKey=" + resourceKey + ", col1="
@@ -253,5 +290,109 @@ public class SheetImageWrapper {
                 + anchor.getDy1() + "/" + anchor.getDy1() + ", dy2="
                 + anchor.getDy2() + "/" + anchor.getDy2() + ", MIMEType="
                 + MIMEType + ", type=" + anchor.getAnchorType() + "]";
+    }
+
+    /**
+     * Gets the resource key of this image
+     * 
+     * @return Resource key
+     */
+    public String getResourceKey() {
+        return resourceKey;
+    }
+
+    /**
+     * Gets the visibility state of this image
+     * 
+     * @return true if image is visible, false otherwise
+     */
+    public boolean isVisible() {
+        return visible;
+    }
+
+    /**
+     * Gets the resource containing this image
+     * 
+     * @return Image resource
+     */
+    public Object getResource() {
+        return resource;
+    }
+
+    /**
+     * Gets the image data as a byte array.
+     * 
+     * @return Image data
+     */
+    public byte[] getData() {
+        return data;
+    }
+
+    /**
+     * Sets this image visible or hidden
+     * 
+     * @param visible
+     *            true to set visible, false to set hidden
+     */
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+    /**
+     * Gets the MIME type of this image
+     * 
+     * @return MIME type
+     */
+    public String getMIMEType() {
+        return MIMEType;
+    }
+
+    /**
+     * Sets the resource for this image
+     * 
+     * @param resource
+     *            Image resource
+     */
+    public void setResource(StreamResource resource) {
+        this.resource = resource;
+    }
+
+    /**
+     * Gets the anchor for this image within the sheet containing this image.
+     * 
+     * @return Anchor for this image
+     */
+    public ClientAnchor getAnchor() {
+        return anchor;
+    }
+
+    /**
+     * Sets the anchor for this image within the sheet containing this image.
+     * 
+     * @param anchor
+     *            Anchor for this image
+     */
+    public void setAnchor(ClientAnchor anchor) {
+        this.anchor = anchor;
+    }
+
+    /**
+     * Sets the MIME type of this image
+     * 
+     * @param mimeType
+     *            MIME type of this image
+     */
+    public void setMIMEType(String mimeType) {
+        MIMEType = mimeType;
+    }
+
+    /**
+     * Sets the image data of this image.
+     * 
+     * @param data
+     *            Image data
+     */
+    public void setData(byte[] data) {
+        this.data = data;
     }
 }

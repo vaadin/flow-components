@@ -105,6 +105,6 @@ public class StylesFixture implements SpreadsheetFixture {
         c.setCellStyle(cellStyle);
         sssf.cellStyleUpdated(c, true);
 
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
     }
 }

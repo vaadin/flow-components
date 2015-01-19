@@ -413,7 +413,7 @@ public class TestexcelsheetUI extends UI {
                 spreadsheet.createCell(cellRef.getRow(), cellRef.getCol(),
                         "SELECTED");
             }
-            spreadsheet.updatedAndRecalculateAllCellValues();
+            spreadsheet.refreshAllCellValues();
         }
     }
 

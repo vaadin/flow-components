@@ -37,9 +37,10 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFont;
 import com.vaadin.addon.spreadsheet.SpreadsheetStyleFactory.BorderStyle;
 
 /**
- * Class that handles all processing regarding Conditional Formatting rules.
+ * ConditionalFormatter is an utility class of Spreadsheet, which handles all
+ * processing regarding Conditional Formatting rules.
  * <p>
- * Rules are parsed into CSS rules with individual class names. Classnames for
+ * Rules are parsed into CSS rules with individual class names. Class names for
  * each cell can then be fetched from this class.
  * 
  * @author Thomas Mattsson / Vaadin Ltd.
@@ -49,21 +50,27 @@ public class ConditionalFormatter {
     private static final Logger LOGGER = Logger
             .getLogger(ConditionalFormatter.class.getName());
 
-    protected Spreadsheet spreadsheet;
+    private Spreadsheet spreadsheet;
 
     /**
      * Cache of styles for each cell. One cell may have several styles.
      */
-    protected Map<String, Set<Integer>> cellToIndex = new HashMap<String, Set<Integer>>();
+    private Map<String, Set<Integer>> cellToIndex = new HashMap<String, Set<Integer>>();
 
-    protected Map<ConditionalFormatting, Integer> topBorders = new HashMap<ConditionalFormatting, Integer>();
-    protected Map<ConditionalFormatting, Integer> leftBorders = new HashMap<ConditionalFormatting, Integer>();
+    private Map<ConditionalFormatting, Integer> topBorders = new HashMap<ConditionalFormatting, Integer>();
+    private Map<ConditionalFormatting, Integer> leftBorders = new HashMap<ConditionalFormatting, Integer>();
 
     private int borderStyleIndex = 0;
 
-    protected FormulaEvaluator formulaEvaluator;
-    protected ColorConverter colorConverter;
+    private FormulaEvaluator formulaEvaluator;
+    private ColorConverter colorConverter;
 
+    /**
+     * Constructs a new ConditionalFormatter targeting the given Spreasheet.
+     * 
+     * @param spreadsheet
+     *            Target spreadsheet
+     */
     public ConditionalFormatter(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
         formulaEvaluator = spreadsheet.getWorkbook().getCreationHelper()
@@ -82,8 +89,9 @@ public class ConditionalFormatter {
      * doesn't matter here, CSS is applied in correct order on the client side.
      * 
      * @param cell
-     * @return indexes of the rules that match this Cell (to be used in
-     *         classnames)
+     *            Target cell
+     * @return indexes of the rules that match this Cell (to be used in class
+     *         names)
      */
     public Set<Integer> getCellFormattingIndex(Cell cell) {
         Set<Integer> index = cellToIndex.get(SpreadsheetUtil.toKey(cell));
@@ -340,7 +348,7 @@ public class ConditionalFormatter {
     }
 
     /**
-     * Checks if this formatting has strikethrough enabled or not.
+     * Checks if this formatting has strike-through enabled or not.
      */
     private boolean hasStrikeThrough(FontFormatting fontFormatting) {
         if (fontFormatting instanceof XSSFFontFormatting) {
@@ -401,9 +409,9 @@ public class ConditionalFormatter {
      *            {@link ConditionalFormatting} that specifies the affected
      *            cells
      * @param rule
-     *            the rule to be evaluated
+     *            The rule to be evaluated
      * @param classNameIndex
-     *            the index of the classname that was generated for this rule,
+     *            The index of the class name that was generated for this rule,
      *            to be added to {@link #cellToIndex}
      */
     protected void runCellMatcher(ConditionalFormatting cf,
@@ -480,6 +488,10 @@ public class ConditionalFormatter {
      * Checks if the given cell value matches the given conditional formatting
      * rule.
      * 
+     * @param cell
+     *            Target cell
+     * @param rule
+     *            Conditional formatting rule to check against
      * @return Whether the given rule evaluates to <code>true</code> for the
      *         given cell.
      */
@@ -514,13 +526,15 @@ public class ConditionalFormatter {
     }
 
     /**
-     * Checks if the given formula in the rule evaluates to <code>true</code>.
+     * Checks if the formula in the given rule evaluates to <code>true</code>.
      * <p>
-     * TODO does not support HSSF files for now, since HSSF does not read cell
-     * references in the file correctly.
      * 
-     * @return whether the formula in the given rule is of boolean formula type
-     *         and evaluates to <code>true</code>
+     * NOTE: Does not support HSSF files currently.
+     * 
+     * @param rule
+     *            Conditional formatting rule to get the formula from
+     * @return True if the formula in the given rule is of boolean formula type
+     *         and evaluates to <code>true</code>, false otherwise
      */
     protected boolean matchesFormula(ConditionalFormattingRule rule) {
         String booleanFormula = rule.getFormula1();
@@ -552,11 +566,10 @@ public class ConditionalFormatter {
             return match;
 
         } else {
-            // TODO since HSSF formulas are read completely wrong, that
-            // boolean formula above is useless.
-
+            // TODO Does not support HSSF files for now, since HSSF does not
+            // read cell references in the file correctly.Since HSSF formulas
+            // are read completely wrong, that boolean formula above is useless.
             return false;
-
         }
     }
 
@@ -565,8 +578,12 @@ public class ConditionalFormatter {
      * {@link ConditionalFormattingRule} of <code>VALUE_IS</code> type. Covers
      * all cell types and comparison operations.
      * 
-     * @return whether the given cells value matches the given
-     *         <code>VALUE_IS</code> rule
+     * @param cell
+     *            Target cell
+     * @param rule
+     *            Conditional formatting rule to match against.
+     * @return True if the given cells value matches the given
+     *         <code>VALUE_IS</code> rule, false otherwise
      */
     protected boolean matchesValue(Cell cell, ConditionalFormattingRule rule) {
 

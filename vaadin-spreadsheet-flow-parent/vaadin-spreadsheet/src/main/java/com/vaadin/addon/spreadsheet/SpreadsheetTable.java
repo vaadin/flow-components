@@ -15,6 +15,8 @@ import org.apache.poi.ss.util.CellReference;
  * A table is a region ( {@link CellRangeAddress}), that has {@link PopupButton}
  * on the column header cells of the region. In this context the column header
  * cells refer to the cells on the first row of the region.
+ * 
+ * @author Vaadin Ltd.
  */
 public class SpreadsheetTable {
 
@@ -25,8 +27,8 @@ public class SpreadsheetTable {
 
     /**
      * Creates a new table for the given spreadsheet component, its active sheet
-     * (returned by {@link Spreadsheet#getActiveSheet()}) and region. Adds
-     * pop-up buttons for table headers (cells in the first row).
+     * (returned by {@link Spreadsheet#getActiveSheet()}) and the given region.
+     * Adds pop-up buttons for table headers (cells in the first row).
      * 
      * @param spreadsheet
      *            Target spreadsheet
@@ -47,7 +49,7 @@ public class SpreadsheetTable {
      *            Target spreadsheet
      * @param sheet
      *            Target sheet within the spreadsheet
-     * @param tableRegion
+     * @param fullTableRegion
      *            Cell range to build the table in
      */
     public SpreadsheetTable(Spreadsheet spreadsheet, Sheet sheet,

@@ -24,11 +24,13 @@ import com.vaadin.ui.HasComponents;
  * <p>
  * Has a "Clear Filters" button inside the {@link PopupButton}s pop-up, that
  * clears all the filters for that column (contained within the same pop-up).
+ * 
+ * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
 public class SpreadsheetFilterTable extends SpreadsheetTable implements
         Button.ClickListener {
-    private static final String CLEAR_FILTERS_BUTTON_CLASSNAME = "clear-filters-button";
+    public static final String CLEAR_FILTERS_BUTTON_CLASSNAME = "clear-filters-button";
 
     protected final Map<PopupButton, HashSet<SpreadsheetFilter>> popupButtonToFiltersMap;
     protected final Map<PopupButton, Button> popupButtonToClearButtonMap;
@@ -169,7 +171,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
     }
 
     /**
-     * Creates a "Clear filters" button. It is has the
+     * Creates a "Clear filters" button. It has the
      * {@value #CLEAR_FILTERS_BUTTON_CLASSNAME} class name.
      * 
      * @return Button for clearing the filters

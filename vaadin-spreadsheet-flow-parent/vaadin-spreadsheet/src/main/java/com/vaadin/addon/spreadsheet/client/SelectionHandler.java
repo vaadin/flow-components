@@ -122,15 +122,6 @@ public class SelectionHandler {
         sheetWidget.focusSheet();
     }
 
-    /**
-     * TODO
-     * 
-     * @param col
-     * @param row
-     * @param value
-     * @param formula
-     * @param locked
-     */
     public void selectCell(int col, int row, String value, boolean formula,
             boolean locked) {
         if (spreadsheet.customCellEditorDisplayed) {

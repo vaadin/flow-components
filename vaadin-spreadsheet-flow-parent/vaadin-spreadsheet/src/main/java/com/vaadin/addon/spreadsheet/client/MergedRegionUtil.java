@@ -4,20 +4,24 @@ public class MergedRegionUtil {
 
     public interface MergedRegionContainer {
         /**
-         * indexes 1-based
+         * Gets the merged region starting at the given coordinates.
          * 
          * @param column
+         *            Column index, 1-based
          * @param row
-         * @return
+         *            Row index, 1-based
+         * @return Merged region or null if not found.
          */
         public MergedRegion getMergedRegionStartingFrom(int column, int row);
 
         /**
-         * indexes 1-based
+         * Gets the merged region overlapping the given coordinates.
          * 
          * @param column
+         *            Column index, 1-based
          * @param row
-         * @return
+         *            Row index, 1-based
+         * @return Merged region or null if not found.
          */
         public MergedRegion getMergedRegion(int column, int row);
 

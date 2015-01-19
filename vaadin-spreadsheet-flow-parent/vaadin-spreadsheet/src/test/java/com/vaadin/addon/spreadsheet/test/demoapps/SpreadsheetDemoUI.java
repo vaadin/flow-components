@@ -129,7 +129,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 Boolean display = (Boolean) event.getProperty().getValue();
 
                 if (spreadsheet != null) {
-                    spreadsheet.setDisplayGridlines(display);
+                    spreadsheet.setGridlinesVisible(display);
                 }
             }
         });
@@ -141,7 +141,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 Boolean display = (Boolean) event.getProperty().getValue();
 
                 if (spreadsheet != null) {
-                    spreadsheet.setDisplayRowColHeadings(display);
+                    spreadsheet.setRowColHeadingsVisible(display);
                 }
             }
         });
@@ -166,9 +166,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         save.setEnabled(true);
                         previousFile = null;
                         openTestSheetSelect.setValue(null);
-                        gridlines.setValue(spreadsheet.isDisplayGridLines());
+                        gridlines.setValue(spreadsheet.isGridlinesVisible());
                         rowColHeadings.setValue(spreadsheet
-                                .isDisplayRowColHeadings());
+                                .isRowColHeadingsVisible());
                     }
                 });
 
@@ -271,9 +271,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                             spreadsheet
                                     .setSpreadsheetComponentFactory(spreadsheetFieldFactory);
                         }
-                        gridlines.setValue(spreadsheet.isDisplayGridLines());
+                        gridlines.setValue(spreadsheet.isGridlinesVisible());
                         rowColHeadings.setValue(spreadsheet
-                                .isDisplayRowColHeadings());
+                                .isRowColHeadingsVisible());
                     }
                 });
 
@@ -367,8 +367,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 // + ", New Sheet: " + event.getNewSheet().getSheetName()
                 // + " index: " + event.getNewSheetVisibleIndex()
                 // + " POIIndex: " + event.getNewSheetPOIIndex());
-                gridlines.setValue(spreadsheet.isDisplayGridLines());
-                rowColHeadings.setValue(spreadsheet.isDisplayRowColHeadings());
+                gridlines.setValue(spreadsheet.isGridlinesVisible());
+                rowColHeadings.setValue(spreadsheet.isRowColHeadingsVisible());
             }
         };
 
@@ -412,8 +412,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             previousFile = file;
             save.setEnabled(true);
             download.setEnabled(false);
-            gridlines.setValue(spreadsheet.isDisplayGridLines());
-            rowColHeadings.setValue(spreadsheet.isDisplayRowColHeadings());
+            gridlines.setValue(spreadsheet.isGridlinesVisible());
+            rowColHeadings.setValue(spreadsheet.isRowColHeadingsVisible());
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

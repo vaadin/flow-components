@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.model.InternalSheet;
 import org.apache.poi.hssf.record.RecordBase;
@@ -47,7 +45,10 @@ import com.vaadin.addon.spreadsheet.command.CellValueCommand;
 import com.vaadin.ui.UI;
 
 /**
- * Class that handles values and formatting for individual cells.
+ * CellValueManager is an utility class of SpreadsheetClass, which handles
+ * values and formatting for individual cells.
+ * 
+ * @author Vaadin Ltd.
  */
 public class CellValueManager {
 
@@ -55,12 +56,12 @@ public class CellValueManager {
             .getLogger(CellValueManager.class.getName());
 
     private static final String numericCellDetectionPattern = "[^A-Za-z]*[0-9]+[^A-Za-z]*";
-    private static final String rowShiftRegex = "[$]?[a-zA-Z]+[$]?\\d+";
-    private static final Pattern rowShiftPattern = Pattern
-            .compile(rowShiftRegex);
 
     private short hyperlinkStyleIndex = -1;
 
+    /**
+     * The Spreadsheet this class is tied to.
+     */
     protected final Spreadsheet spreadsheet;
 
     private CellValueHandler customCellValueHandler;
@@ -84,6 +85,12 @@ public class CellValueManager {
     private boolean topLeftCellsLoaded;
     private HashMap<Integer, Float> cellStyleWidthRatioMap;
 
+    /**
+     * Creates a new CellValueManager and ties it to the given Spreadsheet.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     */
     public CellValueManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
         UI current = UI.getCurrent();
@@ -94,18 +101,20 @@ public class CellValueManager {
         }
     }
 
-    public SpreadsheetStyleFactory getSpreadsheetStyleFactory() {
-        return spreadsheet.getSpreadsheetStyleFactory();
-    }
-
-    public CellSelectionManager getCellSelectionManager() {
+    private CellSelectionManager getCellSelectionManager() {
         return spreadsheet.getCellSelectionManager();
     }
 
+    /**
+     * Clears all evaluated cell values from cache.
+     */
     public void clearEvaluatorCache() {
         evaluator.clearAllCachedResultValues();
     }
 
+    /**
+     * Clears all cached data.
+     */
     public void clearCachedContent() {
         markedCells.clear();
         sentCells.clear();
@@ -231,6 +240,8 @@ public class CellValueManager {
     }
 
     /**
+     * Gets the current CellValueHandler
+     * 
      * @return the customCellValueHandler
      */
     public CellValueHandler getCustomCellValueHandler() {
@@ -238,6 +249,8 @@ public class CellValueManager {
     }
 
     /**
+     * Sets the current CellValueHandler
+     * 
      * @param customCellValueHandler
      *            the customCellValueHandler to set
      */
@@ -247,10 +260,11 @@ public class CellValueManager {
     }
 
     /**
-     * Notifies evaluator and marks cell for update on next
-     * {@link #updateMarkedCellValues(int, int, int, int)}
+     * Notifies evaluator and marks cell for update on next call to
+     * {@link #updateMarkedCellValues()}
      * 
      * @param cell
+     *            Cell to mark for updates
      */
     protected void cellUpdated(Cell cell) {
         evaluator.notifyUpdateCell(cell);
@@ -258,20 +272,32 @@ public class CellValueManager {
     }
 
     /**
-     * Marks cell for update on next
-     * {@link #updateMarkedCellValues(int, int, int, int)}
+     * Marks cell for update on next call to {@link #updateMarkedCellValues()}
      * 
      * @param cell
+     *            Cell to mark for updates
      */
     protected void markCellForUpdate(Cell cell) {
         markedCells.add(SpreadsheetUtil.toKey(cell));
     }
 
+    /**
+     * Marks the given cell as deleted and notifies the evaluator
+     * 
+     * @param cell
+     *            Deleted cell
+     */
     protected void cellDeleted(Cell cell) {
         evaluator.notifyDeleteCell(cell);
         markCellForRemove(cell);
     }
 
+    /**
+     * Marks the given cell for removal.
+     * 
+     * @param cell
+     *            Cell to mark for removal
+     */
     protected void markCellForRemove(Cell cell) {
         String cellKey = SpreadsheetUtil.toKey(cell);
         CellData cd = new CellData();
@@ -281,6 +307,12 @@ public class CellValueManager {
         clearCellCache(cellKey);
     }
 
+    /**
+     * Clears the cell with the given key from the cache
+     * 
+     * @param cellKey
+     *            Key of target cell
+     */
     protected void clearCellCache(String cellKey) {
         if (!sentCells.remove(cellKey)) {
             sentFormulaCells.remove(cellKey);
@@ -308,11 +340,12 @@ public class CellValueManager {
      * cause the cell type to be BLANK.
      * 
      * @param col
-     *            1-based
+     *            Column index of target cell, 1-based
      * @param row
-     *            1-based
+     *            Row index of target cell, 1-based
      * @param value
-     *            the String value, formulas will start with an extra "="
+     *            The new value to set to the target cell, formulas will start
+     *            with an extra "="
      */
     public void onCellValueChange(int col, int row, String value) {
         Workbook workbook = spreadsheet.getWorkbook();
@@ -455,7 +488,7 @@ public class CellValueManager {
     }
 
     /**
-     * Deletes the currently selected cells' values. Does not effect styles.
+     * Deletes the currently selected cells' values. Does not affect styles.
      */
     public void onDeleteSelectedCells() {
         final Sheet activeSheet = spreadsheet.getActiveSheet();
@@ -507,6 +540,15 @@ public class CellValueManager {
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
     }
 
+    /**
+     * Attempts to parse a numeric value from the given String and set it to the
+     * given Cell.
+     * 
+     * @param cell
+     *            Target Cell
+     * @param value
+     *            Source for parsing the value
+     */
     protected void parseValueIntoNumericCell(final Cell cell, final String value) {
         // try to parse the string with the existing cell format
         Format oldFormat = formatter.createFormat(cell);
@@ -544,6 +586,19 @@ public class CellValueManager {
         }
     }
 
+    /**
+     * Sends cell data to the client. Only the data within the given bounds will
+     * be sent.
+     * 
+     * @param firstRow
+     *            Starting row index, 1-based
+     * @param lastRow
+     *            Ending row index, 1-based
+     * @param firstColumn
+     *            Starting column index, 1-based
+     * @param lastColumn
+     *            Ending column index, 1-based
+     */
     protected void loadCellData(int firstRow, int lastRow, int firstColumn,
             int lastColumn) {
         try {
@@ -556,7 +611,7 @@ public class CellValueManager {
                         1, verticalSplitPosition, 1, horizontalSplitPosition);
                 topLeftCellsLoaded = true;
                 if (!topLeftData.isEmpty()) {
-                    spreadsheet.getSpreadsheetRpcProxy()
+                    spreadsheet.getRpcProxy()
                             .updateTopLeftCellValues(topLeftData);
                 }
             }
@@ -565,7 +620,7 @@ public class CellValueManager {
                 ArrayList<CellData> topRightData = loadCellDataForRowAndColumnRange(
                         1, verticalSplitPosition, firstColumn, lastColumn);
                 if (!topRightData.isEmpty()) {
-                    spreadsheet.getSpreadsheetRpcProxy()
+                    spreadsheet.getRpcProxy()
                             .updateTopRightCellValues(topRightData);
                 }
             }
@@ -573,7 +628,7 @@ public class CellValueManager {
                 ArrayList<CellData> bottomLeftData = loadCellDataForRowAndColumnRange(
                         firstRow, lastRow, 1, horizontalSplitPosition);
                 if (!bottomLeftData.isEmpty()) {
-                    spreadsheet.getSpreadsheetRpcProxy()
+                    spreadsheet.getRpcProxy()
                             .updateBottomLeftCellValues(bottomLeftData);
                 }
             }
@@ -581,7 +636,7 @@ public class CellValueManager {
             ArrayList<CellData> bottomRightData = loadCellDataForRowAndColumnRange(
                     firstRow, lastRow, firstColumn, lastColumn);
             if (!bottomRightData.isEmpty()) {
-                spreadsheet.getSpreadsheetRpcProxy()
+                spreadsheet.getRpcProxy()
                         .updateBottomRightCellValues(bottomRightData);
             }
         } catch (NullPointerException npe) {
@@ -589,6 +644,19 @@ public class CellValueManager {
         }
     }
 
+    /**
+     * Gets cell data for cells within the given bounds.
+     * 
+     * @param firstRow
+     *            Starting row index, 1-based
+     * @param lastRow
+     *            Ending row index, 1-based
+     * @param firstColumn
+     *            Starting column index, 1-based
+     * @param lastColumn
+     *            Ending column index, 1-based
+     * @return A list of CellData for the cells in the given area.
+     */
     protected ArrayList<CellData> loadCellDataForRowAndColumnRange(
             int firstRow, int lastRow, int firstColumn, int lastColumn) {
         ArrayList<CellData> cellData = new ArrayList<CellData>();
@@ -632,8 +700,6 @@ public class CellValueManager {
     /**
      * Method for updating the spreadsheet client side visible cells and cached
      * data correctly.
-     * 
-     * Parameters 1-based.
      */
     protected void updateVisibleCellValues() {
         loadCellData(spreadsheet.getFirstRow(), spreadsheet.getLastRow(),
@@ -643,9 +709,9 @@ public class CellValueManager {
     /**
      * Method for updating cells that are marked for update and formula cells.
      * 
-     * Iterates over the whole sheet (existing rows&columns) and updates client
-     * side cache for all sent formula cells, and cells that have been marked
-     * for updating.
+     * Iterates over the whole sheet (existing rows and columns) and updates
+     * client side cache for all sent formula cells, and cells that have been
+     * marked for updating.
      * 
      */
     protected void updateMarkedCellValues() {
@@ -697,8 +763,8 @@ public class CellValueManager {
         // empty cells have cell data with just col and row
         updatedCellData.addAll(removedCells);
         if (!updatedCellData.isEmpty()) {
-            spreadsheet.getSpreadsheetRpcProxy().cellsUpdated(updatedCellData);
-            spreadsheet.getSpreadsheetRpcProxy().refreshCellStyles();
+            spreadsheet.getRpcProxy().cellsUpdated(updatedCellData);
+            spreadsheet.getRpcProxy().refreshCellStyles();
         }
         markedCells.clear();
         removedCells.clear();
@@ -709,9 +775,9 @@ public class CellValueManager {
      * clear all removed rows from client cache.
      * 
      * @param startRow
-     *            1-based
+     *            Index of the starting row, 1-based
      * @param endRow
-     *            1-based
+     *            Index of the ending row, 1-based
      */
     protected void updateDeletedRowsInClientCache(int startRow, int endRow) {
         for (int i = startRow; i <= endRow; i++) {
@@ -742,23 +808,29 @@ public class CellValueManager {
     }
 
     /**
-     * Indexes 1-based
+     * Removes all the cells within the given bounds from the Spreadsheet and
+     * the underlying POI model.
      * 
-     * @param col1
-     * @param col2
-     * @param row1
-     * @param row2
+     * @param firstColumn
+     *            Starting column index, 1-based
+     * @param lastColumn
+     *            Ending column index, 1-based
+     * @param firstRow
+     *            Starting row index, 1-based
+     * @param lastRow
+     *            Ending row index, 1-based
      * @param clearRemovedCellStyle
+     *            true to also clear styles from the removed cells
      */
-    protected void removeCells(int col1, int col2, int row1, int row2,
-            boolean clearRemovedCellStyle) {
+    protected void removeCells(int firstColumn, int lastColumn, int firstRow,
+            int lastRow, boolean clearRemovedCellStyle) {
         final Workbook workbook = spreadsheet.getWorkbook();
         final Sheet activeSheet = workbook.getSheetAt(workbook
                 .getActiveSheetIndex());
-        for (int i = row1 - 1; i < row2; i++) {
+        for (int i = firstRow - 1; i < lastRow; i++) {
             Row row = activeSheet.getRow(i);
             if (row != null) {
-                for (int j = col1 - 1; j < col2; j++) {
+                for (int j = firstColumn - 1; j < lastColumn; j++) {
                     Cell cell = row.getCell(j);
                     if (cell != null) {
                         final String key = SpreadsheetUtil.toKey(j + 1, i + 1);
@@ -797,12 +869,15 @@ public class CellValueManager {
     }
 
     /**
+     * Removes an individual cell from the Spreadsheet and the underlying POI
+     * model.
      * 
      * @param colIndex
-     *            1-based
+     *            Column index of target cell, 1-based
      * @param rowIndex
-     *            1-based
+     *            Row index of target cell, 1-based
      * @param clearRemovedCellStyle
+     *            true to also clear styles from the removed cell
      */
     protected void removeCell(int colIndex, int rowIndex,
             boolean clearRemovedCellStyle) {
@@ -844,6 +919,14 @@ public class CellValueManager {
         }
     }
 
+    /**
+     * Removes hyperlink from the given cell
+     * 
+     * @param cell
+     *            Target cell
+     * @param sheet
+     *            Sheet the target cell belongs to
+     */
     protected void removeHyperlink(Cell cell, Sheet sheet) {
         try {
             if (sheet instanceof XSSFSheet) {
@@ -880,122 +963,22 @@ public class CellValueManager {
         }
     }
 
-    protected void shiftCellValue(Cell shiftedCell, Cell newCell,
-            boolean removeShifted) {
-        // clear the new cell first because it might have errors which prevent
-        // it from being set to a new type
-        if (newCell.getCellType() != Cell.CELL_TYPE_BLANK
-                || shiftedCell.getCellType() == Cell.CELL_TYPE_BLANK) {
-            newCell.setCellType(Cell.CELL_TYPE_BLANK);
-        }
-        newCell.setCellType(shiftedCell.getCellType());
-        newCell.setCellStyle(shiftedCell.getCellStyle());
-        spreadsheet.getSpreadsheetStyleFactory()
-                .cellStyleUpdated(newCell, true);
-        if (shiftedCell.getCellType() == Cell.CELL_TYPE_FORMULA) {
-            try {
-                if (shiftedCell.getColumnIndex() != newCell.getColumnIndex()) {
-                    // shift column indexes
-                    int collDiff = newCell.getColumnIndex()
-                            - shiftedCell.getColumnIndex();
-                    Matcher matcher = rowShiftPattern.matcher(shiftedCell
-                            .getCellFormula());
-                    String originalFormula = shiftedCell.getCellFormula();
-                    String newFormula = originalFormula;
-                    while (matcher.find()) {
-                        String s = matcher.group();
-                        if (!s.startsWith("$")) {
-                            int replaceIndex = newFormula.indexOf(s);
-                            while (replaceIndex > 0
-                                    && newFormula.charAt(replaceIndex - 1) == '$') {
-                                replaceIndex = newFormula.indexOf(s,
-                                        replaceIndex + 1);
-                            }
-                            if (replaceIndex > -1) {
-                                String oldIndexString = s.replaceAll(
-                                        "[$]{0,1}\\d+", "");
-
-                                int columnIndex = SpreadsheetUtil
-                                        .getColHeaderIndex(oldIndexString);
-                                columnIndex += collDiff;
-                                String replacement = s.replace(oldIndexString,
-                                        SpreadsheetUtil
-                                                .getColHeader(columnIndex));
-                                newFormula = newFormula.substring(0,
-                                        replaceIndex)
-                                        + replacement
-                                        + newFormula.substring(replaceIndex
-                                                + s.length());
-                            }
-                        }
-                    }
-                    newCell.setCellFormula(newFormula);
-                } else { // shift row indexes
-                    int rowDiff = newCell.getRowIndex()
-                            - shiftedCell.getRowIndex();
-                    Matcher matcher = rowShiftPattern.matcher(shiftedCell
-                            .getCellFormula());
-                    String originalFormula = shiftedCell.getCellFormula();
-                    String newFormula = originalFormula;
-                    while (matcher.find()) {
-                        String s = matcher.group();
-                        String rowString = s.replaceAll(
-                                "([$][a-zA-Z]+)|([a-zA-Z]+)", "");
-                        if (!rowString.startsWith("$")) {
-                            int row = Integer.parseInt(rowString);
-                            row += rowDiff;
-                            String replacement = s.replace(rowString,
-                                    Integer.toString(row));
-                            // impossible to replace a row with $ before it
-                            // because
-                            // of the column address
-                            newFormula = newFormula.replace(s, replacement);
-                        }
-                    }
-                    newCell.setCellFormula(newFormula);
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.FINE, e.getMessage(), e);
-                // TODO visialize shifting error
-                newCell.setCellFormula(shiftedCell.getCellFormula());
-            }
-            evaluator.notifySetFormula(newCell);
-        } else {
-            switch (shiftedCell.getCellType()) {
-            case Cell.CELL_TYPE_BOOLEAN:
-                newCell.setCellValue(shiftedCell.getBooleanCellValue());
-                break;
-            case Cell.CELL_TYPE_ERROR:
-                newCell.setCellValue(shiftedCell.getErrorCellValue());
-                break;
-            case Cell.CELL_TYPE_NUMERIC:
-                newCell.setCellValue(shiftedCell.getNumericCellValue());
-                break;
-            case Cell.CELL_TYPE_STRING:
-                newCell.setCellValue(shiftedCell.getStringCellValue());
-                break;
-            case Cell.CELL_TYPE_BLANK:
-                // cell is cleared when type is set
-            default:
-                break;
-            }
-            cellUpdated(newCell);
-        }
-        if (removeShifted) {
-            shiftedCell.setCellValue((String) null);
-            cellDeleted(shiftedCell);
-        }
-    }
-
+    /**
+     * Sets the cell style width ratio map
+     * 
+     * @param cellStyleWidthRatioMap
+     *            New map
+     */
     public void onCellStyleWidthRatioUpdate(
             HashMap<Integer, Float> cellStyleWidthRatioMap) {
         this.cellStyleWidthRatioMap = cellStyleWidthRatioMap;
     }
 
     /**
+     * Clears data cache for the column at the given index
      * 
      * @param indexColumn
-     *            1-based
+     *            Index of target column, 1-based
      */
     public void clearCacheForColumn(int indexColumn) {
         final String columnKey = "col" + indexColumn + " r";

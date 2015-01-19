@@ -274,7 +274,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
         // might have impacted formulas outside of selection area, so just
         // reload all values
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
 
         // re-set selection to copied area
         spreadsheet.setSelectionRange(selectedCellReference.getRow(), rowIndex,
@@ -331,7 +331,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
      * "\t\t" - {"","",""}<br/>
      * 
      * @param line
-     * @return
+     *            input
+     * @return output string parts split at tabs
      */
     private static String[] splitOnTab(String line) {
 
@@ -404,7 +405,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             spreadsheet.markCellAsDeleted(cell, true);
         }
 
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
     }
 
 }

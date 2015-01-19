@@ -60,7 +60,7 @@ public class InsertTableAction extends SpreadsheetAction {
             SelectionChangeEvent event) {
         SpreadsheetFilterTable table = new SpreadsheetFilterTable(spreadsheet,
                 spreadsheet.getActiveSheet(), event.getCellRangeAddresses()[0]);
-        spreadsheet.addTableToMemory(table);
+        spreadsheet.registerTable(table);
     }
 
     @Override

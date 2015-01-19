@@ -48,7 +48,7 @@ public interface ColorConverter {
      * @param format
      *            the active formatting
      */
-    String getBorderColorCSS(BorderSide borderSide, String attr,
+    String getBorderColorCSS(BorderSide borderSide, String attribute,
             BorderFormatting format);
 
     /**

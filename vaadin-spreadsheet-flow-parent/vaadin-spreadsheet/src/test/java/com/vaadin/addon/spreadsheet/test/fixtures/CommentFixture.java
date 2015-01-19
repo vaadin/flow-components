@@ -35,7 +35,7 @@ public class CommentFixture implements SpreadsheetFixture {
         comment2.setVisible(true);
         spreadsheet.createCell(4, 4, "visible");
 
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
     }
 
 }

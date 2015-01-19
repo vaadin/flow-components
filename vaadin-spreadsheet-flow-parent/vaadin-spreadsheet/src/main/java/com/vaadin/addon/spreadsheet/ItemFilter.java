@@ -204,8 +204,8 @@ public class ItemFilter extends Panel implements ValueChangeListener,
     /**
      * Gets the currently NOT filtered cell values.
      * 
-     * @returns All unique values currently visible (= not filtered) within this
-     *          column
+     * @return All unique values currently visible (= not filtered) within this
+     *         column
      */
     protected Set<String> getVisibleValues() {
         Set<String> values = new HashSet<String>();

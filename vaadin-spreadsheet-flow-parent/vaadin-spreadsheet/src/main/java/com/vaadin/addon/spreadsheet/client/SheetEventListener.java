@@ -73,8 +73,9 @@ public class SheetEventListener implements EventListener {
             case Event.ONMOUSEOVER:
                 widget.onSheetMouseOverOrOut(event);
                 break;
-            case Event.ONTOUCHMOVE: // FIXME
+            case Event.ONTOUCHMOVE:
             case Event.ONMOUSEMOVE:
+                // TODO implement proper touch support
                 widget.onSheetMouseMove(event);
             default:
                 break;

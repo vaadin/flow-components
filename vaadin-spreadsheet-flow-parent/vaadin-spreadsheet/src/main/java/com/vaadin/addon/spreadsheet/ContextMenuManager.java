@@ -12,6 +12,13 @@ import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
 import com.vaadin.server.KeyMapper;
 
+/**
+ * ContextMenuManager is an utility class for the Spreadsheet component. This
+ * class handles all context menu -related tasks within the Spreadsheet it is
+ * tied to.
+ * 
+ * @author Vaadin Ltd.
+ */
 public class ContextMenuManager {
 
     private static final Logger LOGGER = Logger
@@ -25,14 +32,22 @@ public class ContextMenuManager {
 
     private int contextMenuHeaderIndex = -1;
 
+    /**
+     * Constructs a new ContextMenuManager and ties it to the given Spreadsheet.
+     * 
+     * @param spreadsheet
+     *            Target Spreadsheet
+     */
     public ContextMenuManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
     }
 
-    public CellSelectionManager getCellSelectionManager() {
-        return spreadsheet.getCellSelectionManager();
-    }
-
+    /**
+     * Adds the given context menu action handler to the target spreadsheet.
+     * 
+     * @param actionHandler
+     *            Handler to add
+     */
     public void addActionHandler(Handler actionHandler) {
         if (actionHandler != null) {
             if (actionHandlers == null) {
@@ -45,6 +60,13 @@ public class ContextMenuManager {
         }
     }
 
+    /**
+     * Removes the given context menu action handler from the target
+     * spreadsheet.
+     * 
+     * @param actionHandler
+     *            Handler to remove
+     */
     public void removeActionHandler(Handler actionHandler) {
         if (actionHandlers != null && actionHandlers.contains(actionHandler)) {
             actionHandlers.remove(actionHandler);
@@ -55,10 +77,25 @@ public class ContextMenuManager {
         }
     }
 
+    /**
+     * Determines if there are currently any action handlers attached to the
+     * target Spreadsheet.
+     * 
+     * @return true if action handlers exist, false otherwise
+     */
     public boolean hasActionHandlers() {
         return actionHandlers != null && actionHandlers.size() > 0;
     }
 
+    /**
+     * This method is called when a context menu event has happened on any cell
+     * of the target Spreadsheet.
+     * 
+     * @param column
+     *            Column index at context menu target, 1-based
+     * @param row
+     *            Row index at context menu target, 1-based
+     */
     public void onContextMenuOpenOnSelection(int column, int row) {
         try {
             // update the selection if the context menu wasn't triggered on
@@ -75,30 +112,50 @@ public class ContextMenuManager {
             }
             ArrayList<SpreadsheetActionDetails> actions = createActionsListForSelection();
             if (!actions.isEmpty()) {
-                spreadsheet.getSpreadsheetRpcProxy().showActions(actions);
+                spreadsheet.getRpcProxy().showActions(actions);
             }
         } catch (Exception e) {
             LOGGER.log(Level.FINE, e.getMessage(), e);
-            // rather catch it than let the component crash and burn
         }
     }
 
+    /**
+     * This method is called when a context menu event has happened on top of a
+     * row header.
+     * 
+     * @param rowIndex
+     *            Index of the target row, 1-based
+     */
     public void onRowHeaderContextMenuOpen(int rowIndex) {
         ArrayList<SpreadsheetActionDetails> actions = createActionsListForRow(rowIndex);
         if (!actions.isEmpty()) {
-            spreadsheet.getSpreadsheetRpcProxy().showActions(actions);
+            spreadsheet.getRpcProxy().showActions(actions);
             contextMenuHeaderIndex = rowIndex;
         }
     }
 
+    /**
+     * This method is called when a context menu event has happened on top of a
+     * column header.
+     * 
+     * @param columnIndex
+     *            Index of the target column, 1-based
+     */
     public void onColumnHeaderContextMenuOpen(int columnIndex) {
         ArrayList<SpreadsheetActionDetails> actions = createActionsListForColumn(columnIndex);
         if (!actions.isEmpty()) {
-            spreadsheet.getSpreadsheetRpcProxy().showActions(actions);
+            spreadsheet.getRpcProxy().showActions(actions);
             contextMenuHeaderIndex = columnIndex;
         }
     }
 
+    /**
+     * This method is called when an action has been selected on top of the
+     * currently selected cell(s).
+     * 
+     * @param actionKey
+     *            Key of the selected action
+     */
     public void onActionOnCurrentSelection(String actionKey) {
         Action action = actionMapper.get(actionKey);
         for (Action.Handler ah : actionHandlers) {
@@ -107,6 +164,13 @@ public class ContextMenuManager {
         }
     }
 
+    /**
+     * This method is called when an action has been selected on top of a row
+     * header.
+     * 
+     * @param actionKey
+     *            Key of the selected action
+     */
     public void onActionOnRowHeader(String actionKey) {
         Action action = actionMapper.get(actionKey);
         final CellRangeAddress row = new CellRangeAddress(
@@ -116,6 +180,13 @@ public class ContextMenuManager {
         }
     }
 
+    /**
+     * This method is called when an action has been selected on top of a column
+     * header.
+     * 
+     * @param actionKey
+     *            Key of the selected action
+     */
     public void onActionOnColumnHeader(String actionKey) {
         Action action = actionMapper.get(actionKey);
         final CellRangeAddress column = new CellRangeAddress(-1, -1,
@@ -125,11 +196,17 @@ public class ContextMenuManager {
         }
     }
 
+    /**
+     * Gets a list of available actions for the current selection.
+     * 
+     * @return List of actions
+     */
     protected ArrayList<SpreadsheetActionDetails> createActionsListForSelection() {
         ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
         for (Handler handler : actionHandlers) {
-            Action[] actions2 = handler.getActions(getCellSelectionManager()
-                    .getLatestSelectionEvent(), spreadsheet);
+            Action[] actions2 = handler.getActions(spreadsheet
+                    .getCellSelectionManager().getLatestSelectionEvent(),
+                    spreadsheet);
             if (actions2 != null) {
                 for (Action action : actions2) {
                     String key = actionMapper.key(action);
@@ -145,6 +222,13 @@ public class ContextMenuManager {
         return actions;
     }
 
+    /**
+     * Gets a list of available actions for the column at the given index.
+     * 
+     * @param columnIndex
+     *            Index of the target column, 1-based
+     * @return List of actions
+     */
     protected ArrayList<SpreadsheetActionDetails> createActionsListForColumn(
             int columnIndex) {
         ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
@@ -164,6 +248,13 @@ public class ContextMenuManager {
         return actions;
     }
 
+    /**
+     * Gets a list of available actions for the row at the given index.
+     * 
+     * @param rowIndex
+     *            Index of the target row, 1-based
+     * @return List of actions
+     */
     protected ArrayList<SpreadsheetActionDetails> createActionsListForRow(
             int rowIndex) {
         ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();

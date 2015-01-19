@@ -28,6 +28,6 @@ public class RowToggleFixture extends UIFixture {
             spreadsheet.setRowHidden(row, !spreadsheet.isRowHidden(row));
         }
 
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
     }
 }

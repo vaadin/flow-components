@@ -27,7 +27,7 @@ public class ActionFixture implements SpreadsheetFixture {
                     doubleValue(cell);
                 }
 
-                sender.getSpreadsheet().updatedAndRecalculateAllCellValues();
+                sender.getSpreadsheet().refreshAllCellValues();
 
             }
 
@@ -53,7 +53,7 @@ public class ActionFixture implements SpreadsheetFixture {
                     cell.setCellValue(42);
                 }
 
-                sender.getSpreadsheet().updatedAndRecalculateAllCellValues();
+                sender.getSpreadsheet().refreshAllCellValues();
             }
 
             @Override
@@ -73,7 +73,7 @@ public class ActionFixture implements SpreadsheetFixture {
                 helper.retrieveCell(3, sender.getFirstColumn()).setCellValue(
                         "last column");
 
-                target.updatedAndRecalculateAllCellValues();
+                target.refreshAllCellValues();
             }
 
             @Override

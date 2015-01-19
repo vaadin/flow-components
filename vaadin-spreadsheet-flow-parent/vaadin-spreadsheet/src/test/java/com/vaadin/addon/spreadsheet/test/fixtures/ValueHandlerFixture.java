@@ -82,7 +82,7 @@ public class ValueHandlerFixture implements SpreadsheetFixture {
             }
         });
 
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
     }
 
     class DoubleCellValue implements Spreadsheet.CellValueHandler {

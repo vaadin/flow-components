@@ -72,7 +72,7 @@ public class CellValueCommand extends SpreadsheetCommand {
         selectedCellRow = selectedCellReference.getRow();
         selectedcellCol = selectedCellReference.getCol();
         CellRangeAddress paintedCellRange = spreadsheet
-                .getCellSelectionManager().getPaintedCellRange();
+                .getCellSelectionManager().getSelectedCellRange();
         if (paintedCellRange.getFirstColumn() != paintedCellRange
                 .getLastColumn()
                 || paintedCellRange.getFirstRow() != paintedCellRange
@@ -167,7 +167,7 @@ public class CellValueCommand extends SpreadsheetCommand {
                 }
             }
         }
-        if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
+        if (!spreadsheet.isRerenderPending()) {
             spreadsheet.refreshCells(cellsToUpdate);
         }
     }
@@ -175,9 +175,9 @@ public class CellValueCommand extends SpreadsheetCommand {
     /**
      * Sets the given value to the cell at the given coordinates.
      * 
-     * @param r
+     * @param row
      *            Row index, 0-based
-     * @param c
+     * @param col
      *            Column index, 0-based
      * @param value
      *            Value to set to the cell
@@ -206,12 +206,12 @@ public class CellValueCommand extends SpreadsheetCommand {
         if (value == null) { // delete
             if (cell == null || cell.getCellStyle().getIndex() == 0) {
                 getSheet().getRow(row).removeCell(cell);
-                if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
+                if (!spreadsheet.isRerenderPending()) {
                     spreadsheet.markCellAsDeleted(cell, false);
                 }
             } else {
                 cell.setCellValue((String) null);
-                if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
+                if (!spreadsheet.isRerenderPending()) {
                     cellsToUpdate.add(cell);
                 }
             }
@@ -229,7 +229,7 @@ public class CellValueCommand extends SpreadsheetCommand {
             } else if (value instanceof Boolean) {
                 cell.setCellValue((Boolean) value);
             }
-            if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
+            if (!spreadsheet.isRerenderPending()) {
                 cellsToUpdate.add(cell);
             }
         }

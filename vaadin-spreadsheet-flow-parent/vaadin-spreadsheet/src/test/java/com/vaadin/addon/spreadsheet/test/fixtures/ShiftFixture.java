@@ -13,7 +13,7 @@ public class ShiftFixture {
             spreadsheet.shiftRows(spreadsheet.getSelectedCellReference()
                     .getRow(), spreadsheet.getRows() - 1, 1);
 
-            spreadsheet.updatedAndRecalculateAllCellValues();
+            spreadsheet.refreshAllCellValues();
         }
     }
 
@@ -25,7 +25,7 @@ public class ShiftFixture {
                     .getRow() + 1, spreadsheet.getRows() - 1, -1);
 
             spreadsheet.setMaximumRows(spreadsheet.getRows() - 1);
-            spreadsheet.updatedAndRecalculateAllCellValues();
+            spreadsheet.refreshAllCellValues();
         }
     }
 }

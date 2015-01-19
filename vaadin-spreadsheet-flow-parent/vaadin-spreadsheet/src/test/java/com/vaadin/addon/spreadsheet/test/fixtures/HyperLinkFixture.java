@@ -27,7 +27,7 @@ public class HyperLinkFixture implements SpreadsheetFixture {
                         if (cell.getRow().getRowNum() == 2
                                 && cell.getColumnIndex() == 2) {
                             cell.setCellValue("new value");
-                            spreadsheet.updatedAndRecalculateAllCellValues();
+                            spreadsheet.refreshAllCellValues();
                         }
                     }
                 });
@@ -49,7 +49,7 @@ public class HyperLinkFixture implements SpreadsheetFixture {
         ((XSSFHyperlink) link).setTooltip("handled hyperlink");
         cell.setHyperlink(link);
 
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
     }
 
 }

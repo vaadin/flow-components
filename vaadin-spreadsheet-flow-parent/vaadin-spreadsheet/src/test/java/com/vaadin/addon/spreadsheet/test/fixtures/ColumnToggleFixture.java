@@ -28,6 +28,6 @@ public class ColumnToggleFixture extends UIFixture {
             spreadsheet.setColumnHidden(col, !spreadsheet.isColumnHidden(col));
         }
 
-        spreadsheet.updatedAndRecalculateAllCellValues();
+        spreadsheet.refreshAllCellValues();
     }
 }

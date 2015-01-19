@@ -8,19 +8,37 @@ import org.apache.poi.ss.util.CellReference;
 import com.vaadin.addon.spreadsheet.command.Command;
 
 /**
- * Utility class that remembers actions done in the Spreadsheet for undo and
- * redo actions.
+ * SpreadsheetHistoryManager is an utility class of the Spreadsheet add-on. This
+ * class handles remembering any actions done in the Spreadsheet. The purpose is
+ * to allow the user to undo and redo any action.
+ * 
+ * @author Vaadin Ltd.
  */
 public class SpreadsheetHistoryManager {
 
     private int historySize = 20;
 
+    /**
+     * Current index within the history
+     */
     protected int historyIndex = -1;
 
+    /**
+     * All executed command in chronological order
+     */
     protected final LinkedList<Command> commands = new LinkedList<Command>();
 
+    /**
+     * Target Spreadsheet component
+     */
     protected final Spreadsheet spreadsheet;
 
+    /**
+     * Creates a new history manager for the given Spreadsheet.
+     * 
+     * @param spreadsheet
+     *            Target spreadsheet
+     */
     public SpreadsheetHistoryManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
     }
@@ -34,10 +52,11 @@ public class SpreadsheetHistoryManager {
     }
 
     /**
-     * Adds a command to the end of the line. Discards commands after current
-     * one (if any).
+     * Adds a command to the end of the command history. Discards commands after
+     * the current position (historyIndex) within the history.
      * 
      * @param command
+     *            Command to add as the latest command in history
      */
     public void addCommand(Command command) {
         SpreadsheetFactory.logMemoryUsage();
@@ -52,26 +71,31 @@ public class SpreadsheetHistoryManager {
     }
 
     /**
+     * Gets the Command at the given history index.
      * 
      * @param historyIndex
-     *            0-based
-     * @return the command at the index or {@link IndexOutOfBoundsException}
+     *            Index of Command to get, 0-based
+     * @return The command at the index or {@link IndexOutOfBoundsException}
      */
     public Command getCommand(int historyIndex) {
         return commands.get(historyIndex);
     }
 
     /**
+     * Determines if redo is possible at the moment. In practice tells if there
+     * is at least one Command available after the current history index.
      * 
-     * @return is {@link #redo()} possible
+     * @return true if {@link #redo()} possible, false otherwise.
      */
     public boolean canRedo() {
         return (historyIndex + 1) < commands.size();
     }
 
     /**
+     * Determines if undo is possible at the moment. In practice tells if there
+     * is at least one Command available before the current history index.
      * 
-     * @return is {@link #undo()} possible
+     * @return true if {@link #undo()} possible, false otherwise.
      */
     public boolean canUndo() {
         return historyIndex >= 0;
@@ -79,7 +103,7 @@ public class SpreadsheetHistoryManager {
 
     /**
      * Does redo if possible. Changes the active sheet to match the one the
-     * command belonds to, updates the selection if needed.
+     * command belongs to and updates the selection if needed.
      */
     public void redo() {
         if (canRedo()) {
@@ -92,7 +116,7 @@ public class SpreadsheetHistoryManager {
 
     /**
      * Does undo if possible. Changes the active sheet to match the one that the
-     * command belongs to, updates the selection if needed.
+     * command belongs to and updates the selection if needed.
      */
     public void undo() {
         if (canUndo()) {
@@ -108,6 +132,7 @@ public class SpreadsheetHistoryManager {
      * size anymore.
      * 
      * @param historySize
+     *            New size for Command history
      */
     public void setHistorySize(int historySize) {
         this.historySize = historySize;
@@ -115,21 +140,31 @@ public class SpreadsheetHistoryManager {
     }
 
     /**
+     * Gets the current size of the Command history. The default size is 20
+     * commands.
      * 
-     * @return size of history. default is 20
+     * @return Current size of history.
      */
     public int getHistorySize() {
-        return historyIndex;
+        return historySize;
     }
 
     /**
+     * Gets the current index within the Command history.
      * 
-     * @return 0-based
+     * @return Current history index, 0-based
      */
     public int getHistoryIndex() {
         return historyIndex;
     }
 
+    /**
+     * Ensures that the correct sheet is active, as recorded in the given
+     * Command.
+     * 
+     * @param command
+     *            Command to fetch the sheet from
+     */
     protected void makeSureCorrectSheetActive(Command command) {
         if (spreadsheet.getActiveSheetIndex() != command.getActiveSheetIndex()) {
             spreadsheet.setActiveSheetIndex(command.getActiveSheetIndex());
@@ -144,9 +179,15 @@ public class SpreadsheetHistoryManager {
         }
     }
 
+    /**
+     * Applies the cell selection from the given Command.
+     * 
+     * @param command
+     *            Command to fetch the cell selection from.
+     */
     protected void changeSelection(Command command) {
         // if the sheet has changed, the selected cell can't be set
-        if (!spreadsheet.isRealoadingOnThisRoundtrip()) {
+        if (!spreadsheet.isRerenderPending()) {
             CellReference selectedCellReference = command
                     .getSelectedCellReference();
             CellRangeAddress paintedCellRange = command.getPaintedCellRange();
@@ -160,17 +201,24 @@ public class SpreadsheetHistoryManager {
                             .handleCellRangeSelection(selectedCellReference,
                                     paintedCellRange);
                 }
-            } else { // the selected cell value might have changed, thus need to
-                     // make sure it gets updated to formula field
+            } else {
+                // the selected cell value might have changed, thus need to
+                // make sure it gets updated to formula field
                 spreadsheet.getCellSelectionManager().reSelectSelectedCell();
             }
         }
     }
 
+    /**
+     * Clears all history after the given history index NOT including the
+     * command at the given index.
+     * 
+     * @param index
+     *            History index to start the clearing from.
+     */
     protected void discardAllAfter(int index) {
         while (commands.size() > (index + 1)) {
             commands.removeLast();
         }
     }
-
 }

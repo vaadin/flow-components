@@ -8,12 +8,14 @@ import java.util.Set;
  * table's rows that are filtered.
  * <p>
  * Add / remove filters from table with
- * {@link SpreadsheetFilterTable#registerFilter(org.vaadin.spreadsheet.PopupButton, SpreadsheetFilter)}
+ * {@link SpreadsheetFilterTable#registerFilter(PopupButton, SpreadsheetFilter)}
  * and
- * {@link SpreadsheetFilterTable#unRegisterFilter(org.vaadin.spreadsheet.PopupButton, SpreadsheetFilter)}.
+ * {@link SpreadsheetFilterTable#unRegisterFilter(PopupButton, SpreadsheetFilter)}
  * <p>
  * When a filter been has updated (by server side or user actions),
  * {@link SpreadsheetFilterTable#onFiltersUpdated()} should be called.
+ * 
+ * @author Vaadin Ltd.
  */
 public interface SpreadsheetFilter {
 
