@@ -374,11 +374,10 @@ public class SpreadsheetStyleFactory {
             spreadsheet.getState().shiftedCellBorderStyles.remove(style);
         }
 
-        // if a new style was created
-        if (!spreadsheet.getState().cellStyleToCSSStyle.containsKey(key)) {
-            CellStyle cellStyle = cell.getCellStyle();
-            addCellStyleCSS(cellStyle);
-        }
+        // TODO May need optimizing since the client side might already have
+        // this cell style
+        CellStyle cellStyle = cell.getCellStyle();
+        addCellStyleCSS(cellStyle);
 
         // custom styles
         doCellCustomStyling(cell);
