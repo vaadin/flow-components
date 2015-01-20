@@ -4935,5 +4935,6 @@ public class SheetWidget extends Panel {
     public void refreshCellStyles() {
         clearBasicCellStyles();
         updateCellStyles();
+        updateConditionalFormattingStyles();
     }
 }

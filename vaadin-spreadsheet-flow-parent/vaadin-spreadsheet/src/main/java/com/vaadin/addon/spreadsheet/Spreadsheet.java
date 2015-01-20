@@ -1250,7 +1250,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @param cell
      *            The updated cell
      */
-    private void markCellAsUpdated(Cell cell, boolean cellStyleUpdated) {
+    void markCellAsUpdated(Cell cell, boolean cellStyleUpdated) {
         valueManager.cellUpdated(cell);
         if (cellStyleUpdated) {
             styler.cellStyleUpdated(cell, true);

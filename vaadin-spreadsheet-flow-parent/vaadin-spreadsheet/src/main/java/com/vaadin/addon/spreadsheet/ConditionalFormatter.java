@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +30,7 @@ import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFBorderFormatting;
+import org.apache.poi.xssf.usermodel.XSSFConditionalFormatting;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
 import org.apache.poi.xssf.usermodel.XSSFFontFormatting;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -62,10 +65,8 @@ public class ConditionalFormatter {
     private Map<ConditionalFormatting, Integer> topBorders = new HashMap<ConditionalFormatting, Integer>();
     private Map<ConditionalFormatting, Integer> leftBorders = new HashMap<ConditionalFormatting, Integer>();
 
-    private int borderStyleIndex = 0;
-
-    private FormulaEvaluator formulaEvaluator;
-    private ColorConverter colorConverter;
+    protected FormulaEvaluator formulaEvaluator;
+    protected ColorConverter colorConverter;
 
     /**
      * Constructs a new ConditionalFormatter targeting the given Spreasheet.
@@ -106,25 +107,20 @@ public class ConditionalFormatter {
      */
     public void createConditionalFormatterRules() {
 
-        List<Cell> cellsToUpdate = new ArrayList<Cell>();
-
         // make sure old styles are cleared
         if (cellToIndex != null) {
             for (String key : cellToIndex.keySet()) {
                 int col = SpreadsheetUtil.getColumnIndexFromKey(key) - 1;
                 int row = SpreadsheetUtil.getRowFromKey(key) - 1;
                 Cell cell = spreadsheet.getCell(row, col);
-                cellsToUpdate.add(cell);
+                spreadsheet.markCellAsUpdated(cell, true);
             }
         }
-
-        spreadsheet.refreshCells(cellsToUpdate);
 
         cellToIndex.clear();
         topBorders.clear();
         leftBorders.clear();
         spreadsheet.getState().conditionalFormattingStyles = new HashMap<Integer, String>();
-        borderStyleIndex = 1000000;
 
         SheetConditionalFormatting cfs = spreadsheet.getActiveSheet()
                 .getSheetConditionalFormatting();
@@ -138,21 +134,18 @@ public class ConditionalFormatter {
         for (int i = 0; i < cfs.getNumConditionalFormattings(); i++) {
             ConditionalFormatting cf = cfs.getConditionalFormattingAt(i);
 
-            // Excel stops processing certain rules after it finds the first
-            // match, so use a marker
-            boolean hasFontLines = false;
-            boolean hasFontStyle = false;
+            List<XSSFConditionalFormattingRule> cfRuleList = getOrderedRuleList(cf);
 
             // rules are listen bottom up, but we want top down so that we can
             // stop when we need to. Rule indexes follow original order, because
             // that is the order CSS is applied on client side.
             for (int ruleIndex = cf.getNumberOfRules() - 1; ruleIndex >= 0; ruleIndex--) {
 
-                ConditionalFormattingRule rule = cf.getRule(ruleIndex);
+                ConditionalFormattingRule rule = cfRuleList.get(ruleIndex);
 
                 // first formatting object gets 0-999, second 1000-1999...
                 // should be enough.
-                int cssIndex = i * 1000 + ruleIndex;
+                int cssIndex = i * 1000000 + ruleIndex * 1000;
 
                 // build style
 
@@ -174,15 +167,12 @@ public class ConditionalFormatter {
                     // DIV element, so use the first one that matches.
 
                     // HSSF might return 255 for 'none'...
-                    if (!hasFontLines
-                            && fontFormatting.getUnderlineType() != FontFormatting.U_NONE
+                    if (fontFormatting.getUnderlineType() != FontFormatting.U_NONE
                             && fontFormatting.getUnderlineType() != 255) {
                         css.append("text-decoration: underline;");
-                        hasFontLines = true;
                     }
-                    if (!hasFontLines && hasStrikeThrough(fontFormatting)) {
+                    if (hasStrikeThrough(fontFormatting)) {
                         css.append("text-decoration: line-through;");
-                        hasFontLines = true;
                     }
 
                     if (fontFormatting.getFontHeight() != -1) {
@@ -194,19 +184,15 @@ public class ConditionalFormatter {
                     // excel has a setting for bold italic, otherwise bold
                     // overrides
                     // italic and vice versa
-                    if (!hasFontStyle && fontFormatting.isItalic()
-                            && fontFormatting.isBold()) {
+                    if (fontFormatting.isItalic() && fontFormatting.isBold()) {
                         css.append("font-style: italic;");
                         css.append("font-weight: bold;");
-                        hasFontStyle = true;
-                    } else if (!hasFontStyle && fontFormatting.isItalic()) {
+                    } else if (fontFormatting.isItalic()) {
                         css.append("font-style: italic;");
                         css.append("font-weight: initial;");
-                        hasFontStyle = true;
-                    } else if (!hasFontStyle && fontFormatting.isBold()) {
+                    } else if (fontFormatting.isBold()) {
                         css.append("font-style: normal;");
                         css.append("font-weight: bold;");
-                        hasFontStyle = true;
                     }
                 }
 
@@ -221,7 +207,7 @@ public class ConditionalFormatter {
                     }
                 }
 
-                addBorderFormatting(cf, rule, css);
+                cssIndex = addBorderFormatting(cf, rule, css, cssIndex);
 
                 spreadsheet.getState().conditionalFormattingStyles.put(
                         cssIndex, css.toString());
@@ -238,12 +224,84 @@ public class ConditionalFormatter {
         }
     }
 
-    private void addBorderFormatting(ConditionalFormatting cf,
-            ConditionalFormattingRule rule, StringBuilder css) {
+    /**
+     * Excel uses a field called 'priority' to re-order rules. Just calling
+     * {@link XSSFConditionalFormatting#getRule(int)} will result in wrong
+     * order. So, instead, get the list and reorder it according to the priority
+     * field.
+     * 
+     * @return The list of conditional formatting rules in reverse order (same
+     *         order Excel processes them).
+     */
+    private List<XSSFConditionalFormattingRule> getOrderedRuleList(
+            ConditionalFormatting cf) {
+
+        // get the list
+        XSSFConditionalFormatting xcf = (XSSFConditionalFormatting) cf;
+        List<XSSFConditionalFormattingRule> rules = new ArrayList<XSSFConditionalFormattingRule>();
+        for (int i = 0; i < xcf.getNumberOfRules(); i++) {
+            rules.add(xcf.getRule(i));
+        }
+
+        // reorder with hidden field
+        Collections.sort(rules,
+                new Comparator<XSSFConditionalFormattingRule>() {
+
+                    @Override
+                    public int compare(XSSFConditionalFormattingRule o1,
+                            XSSFConditionalFormattingRule o2) {
+                        Field declaredField = null;
+                        try {
+                            declaredField = XSSFConditionalFormattingRule.class
+                                    .getDeclaredField("_cfRule");
+                            declaredField.setAccessible(true);
+
+                            CTCfRule object = (CTCfRule) declaredField.get(o1);
+                            CTCfRule object2 = (CTCfRule) declaredField.get(o2);
+
+                            // reverse order
+                            return object2.getPriority() - object.getPriority();
+
+                        } catch (NoSuchFieldException e) {
+                            LOGGER.log(
+                                    Level.SEVERE,
+                                    "Incompatible POI implementation, unable to parse conditional formatting rule",
+                                    e);
+                        } catch (SecurityException e) {
+                            LOGGER.log(
+                                    Level.SEVERE,
+                                    "Incompatible POI implementation, unable to parse conditional formatting rule",
+                                    e);
+                        } catch (IllegalArgumentException e) {
+                            LOGGER.log(
+                                    Level.SEVERE,
+                                    "Incompatible POI implementation, unable to parse conditional formatting rule",
+                                    e);
+                        } catch (IllegalAccessException e) {
+                            LOGGER.log(
+                                    Level.SEVERE,
+                                    "Incompatible POI implementation, unable to parse conditional formatting rule",
+                                    e);
+                        } finally {
+                            declaredField.setAccessible(false);
+                        }
+
+                        return 0;
+                    }
+                });
+
+        return rules;
+    }
+
+    /**
+     * @return the new cssIndex
+     */
+    private int addBorderFormatting(ConditionalFormatting cf,
+            ConditionalFormattingRule rule, StringBuilder css, int cssIndex) {
 
         if (!(rule instanceof XSSFConditionalFormattingRule)) {
             // HSSF not supported
-            return;
+            return cssIndex;
         }
 
         XSSFBorderFormatting borderFormatting = (XSSFBorderFormatting) rule
@@ -281,8 +339,8 @@ public class ConditionalFormatter {
                         "border-bottom-color", borderFormatting));
 
                 spreadsheet.getState().conditionalFormattingStyles.put(
-                        borderStyleIndex, sb2.toString());
-                topBorders.put(cf, borderStyleIndex++);
+                        cssIndex, sb2.toString());
+                topBorders.put(cf, cssIndex++);
             }
 
             if (borderLeft != BorderStyle.NONE) {
@@ -292,10 +350,12 @@ public class ConditionalFormatter {
                         "border-right-color", borderFormatting));
 
                 spreadsheet.getState().conditionalFormattingStyles.put(
-                        borderStyleIndex, sb2.toString());
-                leftBorders.put(cf, borderStyleIndex++);
+                        cssIndex, sb2.toString());
+                leftBorders.put(cf, cssIndex++);
             }
         }
+
+        return cssIndex;
     }
 
     /**
