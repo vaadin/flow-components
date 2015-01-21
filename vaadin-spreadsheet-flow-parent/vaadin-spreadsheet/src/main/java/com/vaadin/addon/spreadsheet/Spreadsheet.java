@@ -2984,6 +2984,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
     }
 
+    /**
+     * 
+     * @param col
+     *            Column, 1-based
+     * @param row
+     *            Row, 1-based
+     * @return True if the cell is visible, false otherwise
+     */
     private boolean isCellVisible(int col, int row) {
         int verticalSplitPosition = getVerticalSplitPosition();
         int horizontalSplitPosition = getHorizontalSplitPosition();
@@ -3091,7 +3099,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         if (popupButton != null) {
             popupButton.setCellReference(cellReference);
             sheetPopupButtons.put(cellReference, popupButton);
-            if (isCellVisible(cellReference.getCol(), cellReference.getRow())) {
+            if (isCellVisible(cellReference.getCol() + 1,
+                    cellReference.getRow() + 1)) {
                 registerCustomComponent(popupButton);
                 markAsDirty();
             }
