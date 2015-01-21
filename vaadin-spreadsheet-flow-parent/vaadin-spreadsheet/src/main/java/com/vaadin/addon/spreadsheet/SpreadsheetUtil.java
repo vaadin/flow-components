@@ -117,6 +117,7 @@ public class SpreadsheetUtil {
      * @return Index of column, 1-based
      */
     public static int getColHeaderIndex(String header) {
+        header = header.toUpperCase();
         int x = 0;
         for (int i = 0; i < header.length(); i++) {
             char h = header.charAt(i);

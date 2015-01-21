@@ -151,58 +151,60 @@ public class CellSelectionShifter implements Serializable {
                     Matcher matcher = rowShiftPattern.matcher(shiftedCell
                             .getCellFormula());
                     String originalFormula = shiftedCell.getCellFormula();
-                    String newFormula = originalFormula;
+                    StringBuilder newFormula = new StringBuilder();
+                    int lastEnd = 0;
                     while (matcher.find()) {
                         String s = matcher.group();
+                        String replacement;
                         if (!s.startsWith("$")) {
-                            int replaceIndex = newFormula.indexOf(s);
-                            while (replaceIndex > 0
-                                    && newFormula.charAt(replaceIndex - 1) == '$') {
-                                replaceIndex = newFormula.indexOf(s,
-                                        replaceIndex + 1);
-                            }
-                            if (replaceIndex > -1) {
-                                String oldIndexString = s.replaceAll(
-                                        "[$]{0,1}\\d+", "");
+                            String oldIndexString = s.replaceAll(
+                                    "[$]{0,1}\\d+", "");
 
-                                int columnIndex = SpreadsheetUtil
-                                        .getColHeaderIndex(oldIndexString);
-                                columnIndex += collDiff;
-                                String replacement = s.replace(oldIndexString,
-                                        SpreadsheetUtil
-                                                .getColHeader(columnIndex));
-                                newFormula = newFormula.substring(0,
-                                        replaceIndex)
-                                        + replacement
-                                        + newFormula.substring(replaceIndex
-                                                + s.length());
-                            }
+                            int columnIndex = SpreadsheetUtil
+                                    .getColHeaderIndex(oldIndexString);
+                            columnIndex += collDiff;
+                            replacement = s.replace(oldIndexString,
+                                    SpreadsheetUtil.getColHeader(columnIndex));
+                        } else {
+                            // if column has a '$' reference shouldn't change
+                            replacement = s;
                         }
+                        newFormula.append(originalFormula.substring(lastEnd,
+                                matcher.start()));
+                        newFormula.append(replacement);
+                        lastEnd = matcher.end();
                     }
-                    newCell.setCellFormula(newFormula);
+                    newFormula.append(originalFormula.substring(lastEnd));
+                    newCell.setCellFormula(newFormula.toString());
                 } else { // shift row indexes
                     int rowDiff = newCell.getRowIndex()
                             - shiftedCell.getRowIndex();
                     Matcher matcher = rowShiftPattern.matcher(shiftedCell
                             .getCellFormula());
                     String originalFormula = shiftedCell.getCellFormula();
-                    String newFormula = originalFormula;
+                    StringBuilder newFormula = new StringBuilder();
+                    int lastEnd = 0;
                     while (matcher.find()) {
                         String s = matcher.group();
-                        String rowString = s.replaceAll(
-                                "([$][a-zA-Z]+)|([a-zA-Z]+)", "");
+                        String rowString = s
+                                .replaceAll("[$]{0,1}[a-zA-Z]+", "");
+                        String replacement;
                         if (!rowString.startsWith("$")) {
                             int row = Integer.parseInt(rowString);
                             row += rowDiff;
-                            String replacement = s.replace(rowString,
+                            replacement = s.replace(rowString,
                                     Integer.toString(row));
-                            // impossible to replace a row with $ before it
-                            // because
-                            // of the column address
-                            newFormula = newFormula.replace(s, replacement);
+                        } else {
+                            // if row has a '$' reference shouldn't change
+                            replacement = s;
                         }
+                        newFormula.append(originalFormula.substring(lastEnd,
+                                matcher.start()));
+                        newFormula.append(replacement);
+                        lastEnd = matcher.end();
                     }
-                    newCell.setCellFormula(newFormula);
+                    newFormula.append(originalFormula.substring(lastEnd));
+                    newCell.setCellFormula(newFormula.toString());
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.FINE, e.getMessage(), e);
