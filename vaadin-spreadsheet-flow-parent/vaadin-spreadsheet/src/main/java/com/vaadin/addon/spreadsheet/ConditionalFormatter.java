@@ -22,6 +22,8 @@ import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.FontFormatting;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.PatternFormatting;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -551,9 +553,22 @@ public class ConditionalFormatter {
              * has issues when changing cell type back and forth, so we can't
              * use the given cell because we might not be able to recover the
              * value after our formula calculation.
+             * 
+             * Also, use POI API so that Spreadsheet won't try any magic.
              */
-            Cell cell = spreadsheet.createFormulaCell(Short.MAX_VALUE, 255,
-                    booleanFormula);
+            int tempRowIndex = Short.MAX_VALUE;
+            int tempColIndex = 255;
+            Sheet sheet = spreadsheet.getActiveSheet();
+
+            Row row = sheet.getRow(tempRowIndex);
+            if (row == null) {
+                row = sheet.createRow(tempRowIndex);
+            }
+            Cell cell = row.getCell(tempColIndex);
+            if (cell == null) {
+                cell = row.createCell(255, Cell.CELL_TYPE_FORMULA);
+            }
+            cell.setCellFormula(booleanFormula);
 
             // Since we use the same cell for all calculations, we need to clear
             // it each time. For some reason we can't clear just one cell.
@@ -561,7 +576,7 @@ public class ConditionalFormatter {
             CellValue value = formulaEvaluator.evaluate(cell);
             boolean match = value.getBooleanValue();
 
-            spreadsheet.deleteCell(Short.MAX_VALUE, 255);
+            row.removeCell(cell);
 
             return match;
 
