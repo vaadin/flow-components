@@ -544,7 +544,7 @@ public class SheetWidget extends Panel {
             ppi = ppiCounter.getOffsetWidth();
         }
         removeCustomCellEditor();
-        selectionWidget.setPosition(0, 0, 0, 0);
+        selectionWidget.setPosition(1, 1, 1, 1);
         defRowH = -1;
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 

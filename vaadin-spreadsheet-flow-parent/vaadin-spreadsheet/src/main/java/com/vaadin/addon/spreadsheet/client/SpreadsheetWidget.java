@@ -1399,7 +1399,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public int getColWidth(int col) {
         // doesn't take hidden columns into account! (but width is 0 for those)
-        if (colW.length >= col) {
+        if (col > 0 && colW.length >= col) {
             return colW[col - 1];
         } else {
             return defColW;

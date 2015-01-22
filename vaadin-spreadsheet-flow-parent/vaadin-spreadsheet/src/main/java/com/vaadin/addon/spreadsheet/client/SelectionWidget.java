@@ -525,6 +525,8 @@ public class SelectionWidget extends Composite {
     }
 
     private void beginPaintingCells(Event event) {
+        colEdgeIndex = 0;
+        rowEdgeIndex = 0;
         sheetWidget.scrollSelectionAreaIntoView();
         paint.getStyle().setVisibility(Visibility.VISIBLE);
         paintMode = true;
@@ -568,7 +570,9 @@ public class SelectionWidget extends Composite {
             c2 = colEdgeIndex > col2 ? colEdgeIndex - 1 : col2;
             r1 = rowEdgeIndex < row1 ? rowEdgeIndex : row1;
             r2 = rowEdgeIndex > row2 ? rowEdgeIndex - 1 : row2;
-            handler.onSelectionIncreasePainted(c1, c2, r1, r2);
+            if (c1 > 0 && r1 > 0) {
+                handler.onSelectionIncreasePainted(c1, c2, r1, r2);
+            }
         }
 
         sheetWidget.getElement().removeClassName("selecting");

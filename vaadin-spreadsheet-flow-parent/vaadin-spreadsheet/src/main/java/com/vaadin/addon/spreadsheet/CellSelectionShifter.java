@@ -69,6 +69,7 @@ public class CellSelectionShifter implements Serializable {
     /**
      * This method will be called when the user does a "shift" that increases
      * the amount of selected cells.
+     * 
      * @param r1
      *            Index of the starting row, 1-based
      * @param c1
@@ -259,6 +260,7 @@ public class CellSelectionShifter implements Serializable {
     /**
      * This method will be called when the user does a "shift" that decreases
      * the amount of selected cells.
+     * 
      * @param r
      *            Row index of the new last selected row, 1-based
      * @param c
@@ -274,8 +276,8 @@ public class CellSelectionShifter implements Serializable {
                 command.captureCellRangeValues(new CellRangeAddress(r - 1,
                         paintedCellRange.getLastRow(), c - 1, paintedCellRange
                                 .getLastColumn()));
-                getCellValueManager().removeCells(r,
-                        c, paintedCellRange.getLastRow() + 1,
+                getCellValueManager().removeCells(r, c,
+                        paintedCellRange.getLastRow() + 1,
                         paintedCellRange.getLastColumn() + 1, false);
                 // removedCells makes sure that removed cells are marked.
                 spreadsheet.updateMarkedCells();
@@ -285,8 +287,8 @@ public class CellSelectionShifter implements Serializable {
                     newPaintedCellRange = spreadsheet
                             .createCorrectCellRangeAddress(
                                     paintedCellRange.getFirstRow() + 1,
-                                    paintedCellRange.getFirstColumn() + 1, paintedCellRange.getLastRow() + 1,
-                                    c - 1);
+                                    paintedCellRange.getFirstColumn() + 1,
+                                    paintedCellRange.getLastRow() + 1, c - 1);
                 } else if (r != paintedCellRange.getFirstRow() + 1) {
                     newPaintedCellRange = spreadsheet
                             .createCorrectCellRangeAddress(
@@ -361,8 +363,8 @@ public class CellSelectionShifter implements Serializable {
                         }
                     }
                 } else {
-                    getCellValueManager().removeCells(newRowIndex, c1, newRowIndex,
-                            c2, true);
+                    getCellValueManager().removeCells(newRowIndex, c1,
+                            newRowIndex, c2, true);
                 }
                 newRowIndex += r2 - r1 + 1;
             }
@@ -406,8 +408,8 @@ public class CellSelectionShifter implements Serializable {
                         }
                     }
                 } else {
-                    getCellValueManager().removeCells(newRowIndex, c1, newRowIndex,
-                            c2, true);
+                    getCellValueManager().removeCells(newRowIndex, c1,
+                            newRowIndex, c2, true);
                 }
                 newRowIndex = newRowIndex - (r2 - r1) - 1;
             }
