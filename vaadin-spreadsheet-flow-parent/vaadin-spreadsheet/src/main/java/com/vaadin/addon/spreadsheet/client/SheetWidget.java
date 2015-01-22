@@ -4170,6 +4170,8 @@ public class SheetWidget extends Panel {
                     .getStyle().getHeight());
         }
 
+        updateInputParent();
+
         if (recalculate) {
             handleInputElementValueChange(false);
         }
@@ -4188,6 +4190,27 @@ public class SheetWidget extends Panel {
                     });
         }
         input.setValue(value);
+    }
+
+    private void updateInputParent() {
+        Element parent = DOM.getParent(input.getElement());
+        Element newParent;
+
+        if (selectedCellRow <= verticalSplitPosition) {
+            if (selectedCellCol <= horizontalSplitPosition) {
+                newParent = topLeftPane;
+            } else {
+                newParent = topRightPane;
+            }
+        } else if (selectedCellCol <= horizontalSplitPosition) {
+            newParent = bottomLeftPane;
+        } else {
+            newParent = sheet;
+        }
+        if (parent != newParent) {
+            parent.removeChild(input.getElement());
+            DOM.appendChild(newParent, input.getElement());
+        }
     }
 
     public void updateSelectedCellValue(String value) {
