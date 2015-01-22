@@ -1,8 +1,6 @@
 package com.vaadin.addon.spreadsheet;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,6 +34,7 @@ import org.apache.poi.xssf.usermodel.XSSFFontFormatting;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBooleanProperty;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBorder;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCfRule;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFont;
 
@@ -47,6 +46,8 @@ import com.vaadin.addon.spreadsheet.SpreadsheetStyleFactory.BorderStyle;
  * <p>
  * Rules are parsed into CSS rules with individual class names. Class names for
  * each cell can then be fetched from this class.
+ * <p>
+ * For now, only XSSF formatting rules are supported because of bugs in POI.
  * 
  * @author Thomas Mattsson / Vaadin Ltd.
  */
@@ -54,6 +55,16 @@ public class ConditionalFormatter {
 
     private static final Logger LOGGER = Logger
             .getLogger(ConditionalFormatter.class.getName());
+
+    /*
+     * Slight hack. This style is used when a CF rule defines 'no border', in
+     * which case the border should be empty. However, since we use cell DIV
+     * borders for the grid structure, empty borders are in fact grey. So, if
+     * one rule says red, and the next says no border, then we need to know what
+     * 'no border' means in CSS. Of course, if the default CSS changes, this
+     * needs to change too.
+     */
+    private static String BORDER_STYLE_DEFAULT = "1pt solid #d6d6d6;";
 
     private Spreadsheet spreadsheet;
 
@@ -113,7 +124,9 @@ public class ConditionalFormatter {
                 int col = SpreadsheetUtil.getColumnIndexFromKey(key) - 1;
                 int row = SpreadsheetUtil.getRowFromKey(key) - 1;
                 Cell cell = spreadsheet.getCell(row, col);
-                spreadsheet.markCellAsUpdated(cell, true);
+                if (cell != null) {
+                    spreadsheet.markCellAsUpdated(cell, true);
+                }
             }
         }
 
@@ -250,40 +263,15 @@ public class ConditionalFormatter {
                     @Override
                     public int compare(XSSFConditionalFormattingRule o1,
                             XSSFConditionalFormattingRule o2) {
-                        Field declaredField = null;
-                        try {
-                            declaredField = XSSFConditionalFormattingRule.class
-                                    .getDeclaredField("_cfRule");
-                            declaredField.setAccessible(true);
 
-                            CTCfRule object = (CTCfRule) declaredField.get(o1);
-                            CTCfRule object2 = (CTCfRule) declaredField.get(o2);
+                        CTCfRule object = (CTCfRule) getFieldValWithReflection(
+                                o1, "_cfRule");
+                        CTCfRule object2 = (CTCfRule) getFieldValWithReflection(
+                                o2, "_cfRule");
 
+                        if (object != null && object2 != null) {
                             // reverse order
                             return object2.getPriority() - object.getPriority();
-
-                        } catch (NoSuchFieldException e) {
-                            LOGGER.log(
-                                    Level.SEVERE,
-                                    "Incompatible POI implementation, unable to parse conditional formatting rule",
-                                    e);
-                        } catch (SecurityException e) {
-                            LOGGER.log(
-                                    Level.SEVERE,
-                                    "Incompatible POI implementation, unable to parse conditional formatting rule",
-                                    e);
-                        } catch (IllegalArgumentException e) {
-                            LOGGER.log(
-                                    Level.SEVERE,
-                                    "Incompatible POI implementation, unable to parse conditional formatting rule",
-                                    e);
-                        } catch (IllegalAccessException e) {
-                            LOGGER.log(
-                                    Level.SEVERE,
-                                    "Incompatible POI implementation, unable to parse conditional formatting rule",
-                                    e);
-                        } finally {
-                            declaredField.setAccessible(false);
                         }
 
                         return 0;
@@ -317,41 +305,70 @@ public class ConditionalFormatter {
             BorderStyle borderBottom = SpreadsheetStyleFactory.BORDER
                     .get(borderFormatting.getBorderBottom());
 
-            if (borderRight != BorderStyle.NONE) {
+            // In Excel, we can set a border to 'none', which overrides previous
+            // rules. Default is 'not set', in which case we add no CSS.
+            boolean isLeftSet = isBorderSet(borderFormatting, BorderSide.LEFT);
+            boolean isTopSet = isBorderSet(borderFormatting, BorderSide.TOP);
+            boolean isRightSet = isBorderSet(borderFormatting, BorderSide.RIGHT);
+            boolean isBottomSet = isBorderSet(borderFormatting,
+                    BorderSide.BOTTOM);
+
+            if (isRightSet) {
                 css.append("border-right:");
-                css.append(borderRight.getBorderAttributeValue());
-                css.append(colorConverter.getBorderColorCSS(BorderSide.RIGHT,
-                        "border-right-color", borderFormatting));
+                if (borderRight != BorderStyle.NONE) {
+                    css.append(borderRight.getBorderAttributeValue());
+                    css.append(colorConverter.getBorderColorCSS(
+                            BorderSide.RIGHT, "border-right-color",
+                            borderFormatting));
+                } else {
+                    css.append(BORDER_STYLE_DEFAULT);
+                }
             }
-            if (borderBottom != BorderStyle.NONE) {
+            if (isBottomSet) {
                 css.append("border-bottom:");
-                css.append(borderBottom.getBorderAttributeValue());
-                css.append(colorConverter.getBorderColorCSS(BorderSide.BOTTOM,
-                        "border-bottom-color", borderFormatting));
+                if (borderBottom != BorderStyle.NONE) {
+                    css.append(borderBottom.getBorderAttributeValue());
+                    css.append(colorConverter.getBorderColorCSS(
+                            BorderSide.BOTTOM, "border-bottom-color",
+                            borderFormatting));
+                } else {
+                    css.append(BORDER_STYLE_DEFAULT);
+                }
             }
 
             // top and left borders might be applied to another cell, so store
             // them with a different index
-            if (borderTop != BorderStyle.NONE) {
+            if (isTopSet) {
+                // bottom border for cell above
                 final StringBuilder sb2 = new StringBuilder("border-bottom:");
-                sb2.append(borderTop.getBorderAttributeValue());
-                sb2.append(colorConverter.getBorderColorCSS(BorderSide.TOP,
-                        "border-bottom-color", borderFormatting));
+                if (borderTop != BorderStyle.NONE) {
+                    sb2.append(borderTop.getBorderAttributeValue());
+                    sb2.append(colorConverter.getBorderColorCSS(BorderSide.TOP,
+                            "border-bottom-color", borderFormatting));
 
-                spreadsheet.getState().conditionalFormattingStyles.put(
-                        cssIndex, sb2.toString());
-                topBorders.put(cf, cssIndex++);
+                    spreadsheet.getState().conditionalFormattingStyles.put(
+                            cssIndex, sb2.toString());
+                    topBorders.put(cf, cssIndex++);
+                } else {
+                    css.append(BORDER_STYLE_DEFAULT);
+                }
             }
 
-            if (borderLeft != BorderStyle.NONE) {
+            if (isLeftSet) {
+                // right border for cell to the left
                 final StringBuilder sb2 = new StringBuilder("border-right:");
-                sb2.append(borderLeft.getBorderAttributeValue());
-                sb2.append(colorConverter.getBorderColorCSS(BorderSide.LEFT,
-                        "border-right-color", borderFormatting));
+                if (borderLeft != BorderStyle.NONE) {
+                    sb2.append(borderLeft.getBorderAttributeValue());
+                    sb2.append(colorConverter.getBorderColorCSS(
+                            BorderSide.LEFT, "border-right-color",
+                            borderFormatting));
 
-                spreadsheet.getState().conditionalFormattingStyles.put(
-                        cssIndex, sb2.toString());
-                leftBorders.put(cf, cssIndex++);
+                    spreadsheet.getState().conditionalFormattingStyles.put(
+                            cssIndex, sb2.toString());
+                    leftBorders.put(cf, cssIndex++);
+                } else {
+                    css.append(BORDER_STYLE_DEFAULT);
+                }
             }
         }
 
@@ -365,47 +382,82 @@ public class ConditionalFormatter {
         if (rule instanceof XSSFConditionalFormattingRule) {
 
             // No POI API for this particular data, but it is present in XML.
-
-            Method declaredMethod = null;
-            try {
-                declaredMethod = XSSFConditionalFormattingRule.class
-                        .getDeclaredMethod("getCTCfRule");
-                declaredMethod.setAccessible(true);
-                CTCfRule ctRule = (CTCfRule) declaredMethod.invoke(rule);
-
+            CTCfRule ctRule = (CTCfRule) getFieldValWithReflection(rule,
+                    "_cfRule");
+            if (ctRule != null) {
                 return ctRule.getStopIfTrue();
-
-            } catch (NoSuchMethodException e) {
-                LOGGER.log(
-                        Level.SEVERE,
-                        "Incompatible POI implementation, unable to parse conditional formatting rule",
-                        e);
-            } catch (SecurityException e) {
-                LOGGER.log(
-                        Level.SEVERE,
-                        "Incompatible POI implementation, unable to parse conditional formatting rule",
-                        e);
-            } catch (IllegalAccessException e) {
-                LOGGER.log(
-                        Level.SEVERE,
-                        "Incompatible POI implementation, unable to parse conditional formatting rule",
-                        e);
-            } catch (IllegalArgumentException e) {
-                LOGGER.log(
-                        Level.SEVERE,
-                        "Incompatible POI implementation, unable to parse conditional formatting rule",
-                        e);
-            } catch (InvocationTargetException e) {
-                LOGGER.log(
-                        Level.SEVERE,
-                        "Incompatible POI implementation, unable to parse conditional formatting rule",
-                        e);
-            } finally {
-                if (declaredMethod != null) {
-                    declaredMethod.setAccessible(false);
-                }
             }
         }
+        return false;
+    }
+
+    /**
+     * Helper for the very common case of having to get underlying XML data.
+     */
+    private Object getFieldValWithReflection(Object owner, String fieldName) {
+        Field f = null;
+        Object val = null;
+        try {
+            f = owner.getClass().getDeclaredField(fieldName);
+            f.setAccessible(true);
+
+            val = f.get(owner);
+            return val;
+
+        } catch (NoSuchFieldException e) {
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Incompatible POI implementation, unable to parse conditional formatting rule",
+                    e);
+        } catch (SecurityException e) {
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Incompatible POI implementation, unable to parse conditional formatting rule",
+                    e);
+        } catch (IllegalArgumentException e) {
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Incompatible POI implementation, unable to parse conditional formatting rule",
+                    e);
+        } catch (IllegalAccessException e) {
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Incompatible POI implementation, unable to parse conditional formatting rule",
+                    e);
+        } finally {
+            if (f != null) {
+                f.setAccessible(false);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param i
+     *            0 - left, 1 - top, 2 - right, 3 - bottom
+     */
+    private boolean isBorderSet(XSSFBorderFormatting borderFormatting,
+            BorderSide b) {
+
+        CTBorder ctBorder = (CTBorder) getFieldValWithReflection(
+                borderFormatting, "_border");
+
+        if (ctBorder == null) {
+            return false;
+        }
+
+        switch (b) {
+        case LEFT:
+            return ctBorder.isSetLeft();
+        case TOP:
+            return ctBorder.isSetTop();
+        case RIGHT:
+            return ctBorder.isSetRight();
+        case BOTTOM:
+            return ctBorder.isSetBottom();
+        }
+
         return false;
     }
 
@@ -417,47 +469,23 @@ public class ConditionalFormatter {
 
             // No POI API for this particular data, but it is present in XML.
 
-            Field field = null;
-            try {
-                field = XSSFFontFormatting.class.getDeclaredField("_font");
-                field.setAccessible(true);
-                CTFont font = (CTFont) field.get(fontFormatting);
+            CTFont font = (CTFont) getFieldValWithReflection(fontFormatting,
+                    "_font");
 
-                List<CTBooleanProperty> strikeList = font.getStrikeList();
+            if (font == null) {
+                return false;
+            }
 
-                if (strikeList != null) {
-                    for (CTBooleanProperty p : strikeList) {
-                        if (p.getVal()) {
-                            return true;
-                        }
+            List<CTBooleanProperty> strikeList = font.getStrikeList();
+
+            if (strikeList != null) {
+                for (CTBooleanProperty p : strikeList) {
+                    if (p.getVal()) {
+                        return true;
                     }
                 }
-
-            } catch (NoSuchFieldException e) {
-                LOGGER.log(
-                        Level.SEVERE,
-                        "Incompatible POI implementation, unable to parse conditional formatting rule",
-                        e);
-            } catch (SecurityException e) {
-                LOGGER.log(
-                        Level.SEVERE,
-                        "Incompatible POI implementation, unable to parse conditional formatting rule",
-                        e);
-            } catch (IllegalArgumentException e) {
-                LOGGER.log(
-                        Level.SEVERE,
-                        "Incompatible POI implementation, unable to parse conditional formatting rule",
-                        e);
-            } catch (IllegalAccessException e) {
-                LOGGER.log(
-                        Level.SEVERE,
-                        "Incompatible POI implementation, unable to parse conditional formatting rule",
-                        e);
-            } finally {
-                if (field != null) {
-                    field.setAccessible(false);
-                }
             }
+
         }
         return false;
     }
@@ -662,8 +690,16 @@ public class ConditionalFormatter {
      */
     protected boolean matchesValue(Cell cell, ConditionalFormattingRule rule) {
 
+        boolean isFormulaType = cell.getCellType() == Cell.CELL_TYPE_FORMULA;
+        boolean isFormulaStringType = isFormulaType
+                && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_STRING;
+        boolean isFormulaBooleanType = isFormulaType
+                && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_BOOLEAN;
+        boolean isFormulaNumericType = isFormulaType
+                && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_FORMULA;
+
         // other than numerical types
-        if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+        if (cell.getCellType() == Cell.CELL_TYPE_STRING || isFormulaStringType) {
 
             switch (rule.getComparisonOperation()) {
             case ComparisonOperator.EQUAL:
@@ -672,7 +708,8 @@ public class ConditionalFormatter {
                 return !cell.getStringCellValue().equals(rule.getFormula1());
             }
         }
-        if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
+        if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN
+                || isFormulaBooleanType) {
             // not sure if this is used, since no boolean option exists in
             // Excel..
 
@@ -687,7 +724,8 @@ public class ConditionalFormatter {
         }
 
         // numerical types
-        if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+        if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC
+                || isFormulaNumericType) {
 
             double formula1Val = Double.valueOf(rule.getFormula1());
 
