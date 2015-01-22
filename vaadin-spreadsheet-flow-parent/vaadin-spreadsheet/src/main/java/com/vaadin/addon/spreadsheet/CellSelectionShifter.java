@@ -69,23 +69,22 @@ public class CellSelectionShifter implements Serializable {
     /**
      * This method will be called when the user does a "shift" that increases
      * the amount of selected cells.
-     * 
-     * @param c1
-     *            Index of the starting column, 1-based
-     * @param c2
-     *            Index of the ending column, 1-based
      * @param r1
      *            Index of the starting row, 1-based
+     * @param c1
+     *            Index of the starting column, 1-based
      * @param r2
      *            Index of the ending row, 1-based
+     * @param c2
+     *            Index of the ending column, 1-based
      */
-    public void onSelectionIncreasePainted(int c1, int c2, int r1, int r2) {
+    public void onSelectionIncreasePainted(int r1, int c1, int r2, int c2) {
         final CellRangeAddress paintedCellRange = spreadsheet
                 .getCellSelectionManager().getSelectedCellRange();
         if (paintedCellRange != null) {
             if (spreadsheet.isRangeEditable(paintedCellRange)
-                    && spreadsheet.isRangeEditable(c1 - 1, c2 - 1, r1 - 1,
-                            r2 - 1)) {
+                    && spreadsheet.isRangeEditable(r1 - 1, c1 - 1, r2 - 1,
+                            c2 - 1)) {
                 // store values
                 CellValueCommand command = new CellShiftValuesCommand(
                         spreadsheet, false);
@@ -118,7 +117,7 @@ public class CellSelectionShifter implements Serializable {
                     spreadsheet.updateMarkedCells();
                 }
                 CellRangeAddress newPaintedCellRange = spreadsheet
-                        .createCorrectCellRangeAddress(c1, c2, r1, r2);
+                        .createCorrectCellRangeAddress(r1, c1, r2, c2);
                 getCellSelectionManager().handleCellRangeSelection(
                         spreadsheet.getSelectedCellReference(),
                         newPaintedCellRange);
@@ -260,13 +259,12 @@ public class CellSelectionShifter implements Serializable {
     /**
      * This method will be called when the user does a "shift" that decreases
      * the amount of selected cells.
-     * 
-     * @param c
-     *            Column index of the new last selected column, 1-based
      * @param r
      *            Row index of the new last selected row, 1-based
+     * @param c
+     *            Column index of the new last selected column, 1-based
      */
-    public void onSelectionDecreasePainted(int c, int r) {
+    public void onSelectionDecreasePainted(int r, int c) {
         final CellRangeAddress paintedCellRange = spreadsheet
                 .getCellSelectionManager().getSelectedCellRange();
         if (paintedCellRange != null) {
@@ -276,9 +274,9 @@ public class CellSelectionShifter implements Serializable {
                 command.captureCellRangeValues(new CellRangeAddress(r - 1,
                         paintedCellRange.getLastRow(), c - 1, paintedCellRange
                                 .getLastColumn()));
-                getCellValueManager().removeCells(c,
-                        paintedCellRange.getLastColumn() + 1, r,
-                        paintedCellRange.getLastRow() + 1, false);
+                getCellValueManager().removeCells(r,
+                        c, paintedCellRange.getLastRow() + 1,
+                        paintedCellRange.getLastColumn() + 1, false);
                 // removedCells makes sure that removed cells are marked.
                 spreadsheet.updateMarkedCells();
                 // range selection was updated if NOT all cells were painted
@@ -286,15 +284,15 @@ public class CellSelectionShifter implements Serializable {
                 if (c != paintedCellRange.getFirstColumn() + 1) {
                     newPaintedCellRange = spreadsheet
                             .createCorrectCellRangeAddress(
-                                    paintedCellRange.getFirstColumn() + 1,
-                                    c - 1, paintedCellRange.getFirstRow() + 1,
-                                    paintedCellRange.getLastRow() + 1);
+                                    paintedCellRange.getFirstRow() + 1,
+                                    paintedCellRange.getFirstColumn() + 1, paintedCellRange.getLastRow() + 1,
+                                    c - 1);
                 } else if (r != paintedCellRange.getFirstRow() + 1) {
                     newPaintedCellRange = spreadsheet
                             .createCorrectCellRangeAddress(
+                                    paintedCellRange.getFirstRow() + 1,
                                     paintedCellRange.getFirstColumn() + 1,
-                                    paintedCellRange.getLastColumn() + 1,
-                                    paintedCellRange.getFirstRow() + 1, r - 1);
+                                    r - 1, paintedCellRange.getLastColumn() + 1);
                 }
                 if (newPaintedCellRange != null) {
                     CellReference selectedCellReference = spreadsheet
@@ -363,8 +361,8 @@ public class CellSelectionShifter implements Serializable {
                         }
                     }
                 } else {
-                    getCellValueManager().removeCells(c1, c2, newRowIndex,
-                            newRowIndex, true);
+                    getCellValueManager().removeCells(newRowIndex, c1, newRowIndex,
+                            c2, true);
                 }
                 newRowIndex += r2 - r1 + 1;
             }
@@ -408,8 +406,8 @@ public class CellSelectionShifter implements Serializable {
                         }
                     }
                 } else {
-                    getCellValueManager().removeCells(c1, c2, newRowIndex,
-                            newRowIndex, true);
+                    getCellValueManager().removeCells(newRowIndex, c1, newRowIndex,
+                            c2, true);
                 }
                 newRowIndex = newRowIndex - (r2 - r1) - 1;
             }

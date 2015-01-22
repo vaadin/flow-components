@@ -539,17 +539,17 @@ public class CellValueManager {
         CellValueCommand command = new CellValueCommand(spreadsheet);
         if (selectedCellReference != null) {
             command.captureCellValues(selectedCellReference);
-            removeCell(selectedCellReference.getCol() + 1,
-                    selectedCellReference.getRow() + 1, false);
+            removeCell(selectedCellReference.getRow() + 1,
+                    selectedCellReference.getCol() + 1, false);
         }
         for (CellReference cr : individualSelectedCells) {
             command.captureCellValues(cr);
-            removeCell(cr.getCol() + 1, cr.getRow() + 1, false);
+            removeCell(cr.getRow() + 1, cr.getCol() + 1, false);
         }
         for (CellRangeAddress range : cellRangeAddresses) {
             command.captureCellRangeValues(range);
-            removeCells(range.getFirstColumn() + 1, range.getLastColumn() + 1,
-                    range.getFirstRow() + 1, range.getLastRow() + 1, false);
+            removeCells(range.getFirstRow() + 1, range.getFirstColumn() + 1,
+                    range.getLastRow() + 1, range.getLastColumn() + 1, false);
         }
         // removeCell and removeCells makes sure that cells are removed and
         // cleared from client side cache.
@@ -609,14 +609,14 @@ public class CellValueManager {
      * 
      * @param firstRow
      *            Starting row index, 1-based
-     * @param lastRow
-     *            Ending row index, 1-based
      * @param firstColumn
      *            Starting column index, 1-based
+     * @param lastRow
+     *            Ending row index, 1-based
      * @param lastColumn
      *            Ending column index, 1-based
      */
-    protected void loadCellData(int firstRow, int lastRow, int firstColumn,
+    protected void loadCellData(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
         try {
             int verticalSplitPosition = spreadsheet.getVerticalSplitPosition();
@@ -625,7 +625,7 @@ public class CellValueManager {
             if (verticalSplitPosition > 0 && horizontalSplitPosition > 0
                     && !topLeftCellsLoaded) { // top left pane
                 ArrayList<CellData> topLeftData = loadCellDataForRowAndColumnRange(
-                        1, verticalSplitPosition, 1, horizontalSplitPosition);
+                        1, 1, verticalSplitPosition, horizontalSplitPosition);
                 topLeftCellsLoaded = true;
                 if (!topLeftData.isEmpty()) {
                     spreadsheet.getRpcProxy()
@@ -635,7 +635,7 @@ public class CellValueManager {
 
             if (verticalSplitPosition > 0) { // top right pane
                 ArrayList<CellData> topRightData = loadCellDataForRowAndColumnRange(
-                        1, verticalSplitPosition, firstColumn, lastColumn);
+                        1, firstColumn, verticalSplitPosition, lastColumn);
                 if (!topRightData.isEmpty()) {
                     spreadsheet.getRpcProxy()
                             .updateTopRightCellValues(topRightData);
@@ -643,7 +643,7 @@ public class CellValueManager {
             }
             if (horizontalSplitPosition > 0) { // bottom left pane
                 ArrayList<CellData> bottomLeftData = loadCellDataForRowAndColumnRange(
-                        firstRow, lastRow, 1, horizontalSplitPosition);
+                        firstRow, 1, lastRow, horizontalSplitPosition);
                 if (!bottomLeftData.isEmpty()) {
                     spreadsheet.getRpcProxy()
                             .updateBottomLeftCellValues(bottomLeftData);
@@ -651,7 +651,7 @@ public class CellValueManager {
             }
 
             ArrayList<CellData> bottomRightData = loadCellDataForRowAndColumnRange(
-                    firstRow, lastRow, firstColumn, lastColumn);
+                    firstRow, firstColumn, lastRow, lastColumn);
             if (!bottomRightData.isEmpty()) {
                 spreadsheet.getRpcProxy()
                         .updateBottomRightCellValues(bottomRightData);
@@ -666,16 +666,16 @@ public class CellValueManager {
      * 
      * @param firstRow
      *            Starting row index, 1-based
-     * @param lastRow
-     *            Ending row index, 1-based
      * @param firstColumn
      *            Starting column index, 1-based
+     * @param lastRow
+     *            Ending row index, 1-based
      * @param lastColumn
      *            Ending column index, 1-based
      * @return A list of CellData for the cells in the given area.
      */
     protected ArrayList<CellData> loadCellDataForRowAndColumnRange(
-            int firstRow, int lastRow, int firstColumn, int lastColumn) {
+            int firstRow, int firstColumn, int lastRow, int lastColumn) {
         ArrayList<CellData> cellData = new ArrayList<CellData>();
         Workbook workbook = spreadsheet.getWorkbook();
         final Sheet activeSheet = workbook.getSheetAt(workbook
@@ -719,8 +719,8 @@ public class CellValueManager {
      * data correctly.
      */
     protected void updateVisibleCellValues() {
-        loadCellData(spreadsheet.getFirstRow(), spreadsheet.getLastRow(),
-                spreadsheet.getFirstColumn(), spreadsheet.getLastColumn());
+        loadCellData(spreadsheet.getFirstRow(), spreadsheet.getFirstColumn(),
+                spreadsheet.getLastRow(), spreadsheet.getLastColumn());
     }
 
     /**
@@ -827,20 +827,19 @@ public class CellValueManager {
     /**
      * Removes all the cells within the given bounds from the Spreadsheet and
      * the underlying POI model.
-     * 
-     * @param firstColumn
-     *            Starting column index, 1-based
-     * @param lastColumn
-     *            Ending column index, 1-based
      * @param firstRow
      *            Starting row index, 1-based
+     * @param firstColumn
+     *            Starting column index, 1-based
      * @param lastRow
      *            Ending row index, 1-based
+     * @param lastColumn
+     *            Ending column index, 1-based
      * @param clearRemovedCellStyle
      *            true to also clear styles from the removed cells
      */
-    protected void removeCells(int firstColumn, int lastColumn, int firstRow,
-            int lastRow, boolean clearRemovedCellStyle) {
+    protected void removeCells(int firstRow, int firstColumn, int lastRow,
+            int lastColumn, boolean clearRemovedCellStyle) {
         final Workbook workbook = spreadsheet.getWorkbook();
         final Sheet activeSheet = workbook.getSheetAt(workbook
                 .getActiveSheetIndex());
@@ -888,15 +887,14 @@ public class CellValueManager {
     /**
      * Removes an individual cell from the Spreadsheet and the underlying POI
      * model.
-     * 
-     * @param colIndex
-     *            Column index of target cell, 1-based
      * @param rowIndex
      *            Row index of target cell, 1-based
+     * @param colIndex
+     *            Column index of target cell, 1-based
      * @param clearRemovedCellStyle
      *            true to also clear styles from the removed cell
      */
-    protected void removeCell(int colIndex, int rowIndex,
+    protected void removeCell(int rowIndex, int colIndex,
             boolean clearRemovedCellStyle) {
         final Workbook workbook = spreadsheet.getWorkbook();
         final Sheet activeSheet = workbook.getSheetAt(workbook

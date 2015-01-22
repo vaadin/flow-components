@@ -58,19 +58,19 @@ public class SheetImageWrapper {
 
     /**
      * Determines if this image should be visible within the given visible area.
-     * 
-     * @param c1
-     *            Column index of leftmost column, 1-based
-     * @param c2
-     *            Column index of rightmost column, 1-based
      * @param r1
      *            Row index of topmost row, 1-based
+     * @param c1
+     *            Column index of leftmost column, 1-based
      * @param r2
      *            Row index of bottom-most row, 1-based
+     * @param c2
+     *            Column index of rightmost column, 1-based
+     * 
      * @return true if the image should be visible inside the range, false
      *         otherwise
      */
-    public boolean isVisible(int c1, int c2, int r1, int r2) {
+    public boolean isVisible(int r1, int c1, int r2, int c2) {
         int col1 = anchor.getCol1() + 1;
         int col2 = anchor.getCol2() + 1;
         int row1 = anchor.getRow1() + 1;

@@ -36,13 +36,12 @@ public interface SpreadsheetServerRpc extends ServerRpc, SpreadsheetHandler {
      * <p>
      * Selection can change if the cell at the given indexes isn't included in
      * the previous selection.
-     * 
-     * @param column
-     *            1-based
      * @param row
      *            1-based
+     * @param column
+     *            1-based
      */
-    void contextMenuOpenOnSelection(int column, int row);
+    void contextMenuOpenOnSelection(int row, int column);
 
     /**
      * The action was selected from context menu for the current selection.

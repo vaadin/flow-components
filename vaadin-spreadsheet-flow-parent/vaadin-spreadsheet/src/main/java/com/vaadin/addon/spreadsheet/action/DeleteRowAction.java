@@ -67,7 +67,7 @@ public class DeleteRowAction extends SpreadsheetAction {
         int deletedRowIndex = headerRange.getFirstRow();
         if (deletedRowIndex + 1 > rows - 1) {
             // if removed last row, just delete it and make sheet smaller
-            spreadsheet.removeRows(deletedRowIndex, deletedRowIndex);
+            spreadsheet.deleteRows(deletedRowIndex, deletedRowIndex);
         } else {
             spreadsheet.shiftRows(deletedRowIndex + 1, (rows - 1), -1, true,
                     true);

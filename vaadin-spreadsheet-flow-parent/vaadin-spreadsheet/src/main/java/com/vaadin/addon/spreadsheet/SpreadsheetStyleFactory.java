@@ -231,13 +231,12 @@ public class SpreadsheetStyleFactory {
     /**
      * Clears all styles for the given cell. Should be used when i.e. a cell has
      * been shifted (the old location is cleared of all styles).
-     * 
-     * @param oldColumnIndex
-     *            0-based
      * @param oldRowIndex
      *            0-based
+     * @param oldColumnIndex
+     *            0-based
      */
-    public void clearCellStyle(int oldColumnIndex, int oldRowIndex) {
+    public void clearCellStyle(int oldRowIndex, int oldColumnIndex) {
         final String cssSelector = ".col" + (oldColumnIndex + 1) + ".row"
                 + (oldRowIndex + 1);
         // remove/modify all possible old custom styles that the cell had (can

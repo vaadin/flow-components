@@ -4019,8 +4019,8 @@ public class SheetWidget extends Panel {
     }
 
     public int[] getSheetDisplayRange() {
-        return new int[] { firstColumnIndex, lastColumnIndex, firstRowIndex,
-                lastRowIndex };
+        return new int[] { firstRowIndex, firstColumnIndex, lastRowIndex,
+                lastColumnIndex };
     }
 
     /**

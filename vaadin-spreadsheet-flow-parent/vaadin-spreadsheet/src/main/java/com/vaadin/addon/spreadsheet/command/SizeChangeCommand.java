@@ -112,7 +112,7 @@ public class SizeChangeCommand extends SpreadsheetCommand {
 
             if (value == null && row != null) {
                 spreadsheet.setRowHeight(index,
-                        spreadsheet.getDefaultRowHeightInPoints());
+                        spreadsheet.getDefaultRowHeight());
             } else if (value != null) {
                 spreadsheet.setRowHeight(index, (Float) value);
             } // if both are null, then default is applied already (shouldn't)

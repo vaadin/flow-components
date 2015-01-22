@@ -160,7 +160,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                             layout.addComponent(spreadsheet);
                             layout.setExpandRatio(spreadsheet, 1.0f);
                         } else {
-                            spreadsheet.reloadSpreadsheetWithNewWorkbook();
+                            spreadsheet.reset();
                         }
                         spreadsheet.setSpreadsheetComponentFactory(null);
                         save.setEnabled(true);
@@ -893,9 +893,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                             try {
                                 if (spreadsheet != null) {
                                     spreadsheet.createFreezePane(
-                                            (Integer) hSplitTF
-                                                    .getConvertedValue(),
                                             (Integer) vSplitTF
+                                                    .getConvertedValue(),
+                                            (Integer) hSplitTF
                                                     .getConvertedValue());
                                 }
                             } catch (ConversionException e) {

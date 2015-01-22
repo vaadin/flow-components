@@ -118,7 +118,7 @@ public class CellSelectionManager {
         return latestSelectionEvent;
     }
 
-    boolean isCellInsideSelection(int column, int row) {
+    boolean isCellInsideSelection(int row, int column) {
         CellReference cellReference = new CellReference(row - 1, column - 1);
         boolean inside = cellReference.equals(selectedCellReference)
                 || individualSelectedCells.contains(cellReference);
@@ -149,8 +149,8 @@ public class CellSelectionManager {
                             paintedCellRange);
                 } else {
                     paintedCellRange = null;
-                    handleCellAddressChange(selectedCellReference.getCol() + 1,
-                            selectedCellReference.getRow() + 1);
+                    handleCellAddressChange(selectedCellReference.getRow() + 1,
+                            selectedCellReference.getCol() + 1);
                 }
             } else {
                 handleCellRangeSelection(
@@ -159,8 +159,8 @@ public class CellSelectionManager {
                         paintedCellRange);
             }
         } else if (selectedCellReference != null) {
-            handleCellAddressChange(selectedCellReference.getCol() + 1,
-                    selectedCellReference.getRow() + 1);
+            handleCellAddressChange(selectedCellReference.getRow() + 1,
+                    selectedCellReference.getCol() + 1);
         } else {
             handleCellAddressChange(1, 1);
         }
@@ -168,16 +168,15 @@ public class CellSelectionManager {
 
     /**
      * Sets/adds the cell at the given coordinates as/to the current selection.
-     * 
-     * @param column
-     *            Column index, 1-based
      * @param row
      *            Row index, 1-based
+     * @param column
+     *            Column index, 1-based
      * @param discardOldRangeSelection
      *            true to discard previous selections, false to add to the
      *            current selection
      */
-    protected void onCellSelected(int column, int row,
+    protected void onCellSelected(int row, int column,
             boolean discardOldRangeSelection) {
         CellReference cellReference = new CellReference(row - 1, column - 1);
         CellReference previousCellReference = selectedCellReference;
@@ -185,14 +184,14 @@ public class CellSelectionManager {
                 || discardOldRangeSelection
                 && (!cellRangeAddresses.isEmpty() || !individualSelectedCells
                         .isEmpty())) {
-            handleCellSelection(column, row);
+            handleCellSelection(row, column);
             selectedCellReference = cellReference;
             spreadsheet.loadCustomEditorOnSelectedCell();
             if (discardOldRangeSelection) {
                 cellRangeAddresses.clear();
                 individualSelectedCells.clear();
                 paintedCellRange = spreadsheet.createCorrectCellRangeAddress(
-                        column, column, row, row);
+                        row, column, row, column);
             }
             fireNewSelectionChangeEvent();
         }
@@ -234,8 +233,8 @@ public class CellSelectionManager {
                 if (region != null
                         && (region.col1 != region.col2 || region.row1 != region.row2)) {
                     CellRangeAddress cra = spreadsheet
-                            .createCorrectCellRangeAddress(region.col1,
-                                    region.col2, region.row1, region.row2);
+                            .createCorrectCellRangeAddress(region.row1,
+                                    region.col1, region.row2, region.col2);
                     handleCellRangeSelection(cra);
                     selectedCellReference = new CellReference(
                             cra.getFirstRow(), cra.getFirstColumn());
@@ -243,14 +242,14 @@ public class CellSelectionManager {
                     cellRangeAddresses.clear();
                     cellRangeAddresses.add(cra);
                 } else {
-                    handleCellAddressChange(cellReference.getCol() + 1,
-                            cellReference.getRow() + 1);
+                    handleCellAddressChange(cellReference.getRow() + 1,
+                            cellReference.getCol() + 1);
                     paintedCellRange = spreadsheet
                             .createCorrectCellRangeAddress(
-                                    cellReference.getCol() + 1,
+                                    cellReference.getRow() + 1,
                                     cellReference.getCol() + 1,
                                     cellReference.getRow() + 1,
-                                    cellReference.getRow() + 1);
+                                    cellReference.getCol() + 1);
                     selectedCellReference = cellReference;
                     cellRangeAddresses.clear();
                 }
@@ -267,13 +266,12 @@ public class CellSelectionManager {
      * Reports the correct cell selection value (formula/data) and selection.
      * This method is called when the cell selection has changed via the address
      * field.
-     * 
-     * @param columnIndex
-     *            Index of column, 1-based
      * @param rowIndex
      *            Index of row, 1-based
+     * @param columnIndex
+     *            Index of column, 1-based
      */
-    private void handleCellAddressChange(int colIndex, int rowIndex) {
+    private void handleCellAddressChange(int rowIndex, int colIndex) {
         if (rowIndex >= spreadsheet.getState().rows) {
             rowIndex = spreadsheet.getState().rows;
         }
@@ -336,8 +334,8 @@ public class CellSelectionManager {
      *            Reference to the cell to be selected
      */
     protected void handleCellSelection(CellReference cellReference) {
-        handleCellSelection(cellReference.getCol() + 1,
-                cellReference.getRow() + 1);
+        handleCellSelection(cellReference.getRow() + 1,
+                cellReference.getCol() + 1);
     }
 
     /**
@@ -347,13 +345,12 @@ public class CellSelectionManager {
      * This method can also be used when the selected cell has NOT changed but
      * the value it displays on the formula field might have changed and needs
      * to be updated.
-     * 
-     * @param columnIndex
-     *            1-based
      * @param rowIndex
      *            1-based
+     * @param columnIndex
+     *            1-based
      */
-    private void handleCellSelection(int columnIndex, int rowIndex) {
+    private void handleCellSelection(int rowIndex, int columnIndex) {
         Workbook workbook = spreadsheet.getWorkbook();
         final Row row = workbook.getSheetAt(workbook.getActiveSheetIndex())
                 .getRow(rowIndex - 1);
@@ -487,27 +484,26 @@ public class CellSelectionManager {
      *            New cell range to be selected
      */
     protected void cellRangeSelected(CellRangeAddress cra) {
-        onCellRangeSelected(cra.getFirstColumn() + 1, cra.getLastColumn() + 1,
-                cra.getFirstRow() + 1, cra.getLastRow() + 1);
+        onCellRangeSelected(cra.getFirstRow() + 1, cra.getFirstColumn() + 1,
+                cra.getLastRow() + 1, cra.getLastColumn() + 1);
     }
 
     /**
      * Sets the given range as the current selection.
-     * 
-     * @param col1
-     *            Starting column index, 1-based
-     * @param col2
-     *            Ending column index, 1-based
      * @param row1
      *            Starting row index, 1-based
+     * @param col1
+     *            Starting column index, 1-based
      * @param row2
      *            Ending row index, 1-based
+     * @param col2
+     *            Ending column index, 1-based
      */
-    protected void onCellRangeSelected(int col1, int col2, int row1, int row2) {
+    protected void onCellRangeSelected(int row1, int col1, int row2, int col2) {
         cellRangeAddresses.clear();
         individualSelectedCells.clear();
-        CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(col1,
-                col2, row1, row2);
+        CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(row1,
+                col1, row2, col2);
         paintedCellRange = cra;
         if (col1 != col2 || row1 != row2) {
             cellRangeAddresses.add(cra);
@@ -517,32 +513,31 @@ public class CellSelectionManager {
 
     /**
      * Sets the given range and starting point as the current selection.
-     * 
-     * @param selectedCellColumn
-     *            Index of the column where the paint was started, 1-based
      * @param selectedCellRow
      *            Index of the row where the paint was started, 1-based
-     * @param col1
-     *            Starting column index, 1-based
-     * @param col2
-     *            Ending column index, 1-based
+     * @param selectedCellColumn
+     *            Index of the column where the paint was started, 1-based
      * @param row1
      *            Starting row index, 1-based
+     * @param col1
+     *            Starting column index, 1-based
      * @param row2
      *            Ending row index, 1-based
+     * @param col2
+     *            Ending column index, 1-based
      */
-    protected void onCellRangePainted(int selectedCellColumn,
-            int selectedCellRow, int col1, int col2, int row1, int row2) {
+    protected void onCellRangePainted(int selectedCellRow,
+            int selectedCellColumn, int row1, int col1, int row2, int col2) {
         cellRangeAddresses.clear();
         individualSelectedCells.clear();
 
         selectedCellReference = new CellReference(selectedCellRow - 1,
                 selectedCellColumn - 1);
 
-        handleCellSelection(selectedCellColumn, selectedCellRow);
+        handleCellSelection(selectedCellRow, selectedCellColumn);
 
-        CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(col1,
-                col2, row1, row2);
+        CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(row1,
+                col1, row2, col2);
         paintedCellRange = cra;
         cellRangeAddresses.add(cra);
 
@@ -551,13 +546,12 @@ public class CellSelectionManager {
 
     /**
      * Adds the cell at the given coordinates to the current selection.
-     * 
-     * @param column
-     *            Column index, 1-based
      * @param row
      *            Row index, 1-based
+     * @param column
+     *            Column index, 1-based
      */
-    protected void onCellAddToSelectionAndSelected(int column, int row) {
+    protected void onCellAddToSelectionAndSelected(int row, int column) {
         boolean oldSelectedCellInRange = false;
         for (CellRangeAddress range : cellRangeAddresses) {
             if (range.isInRange(selectedCellReference.getRow(),
@@ -577,7 +571,7 @@ public class CellSelectionManager {
         if (!oldSelectedCellInRange && !oldSelectedCellInIndividual) {
             individualSelectedCells.add(selectedCellReference);
         }
-        handleCellSelection(column, row);
+        handleCellSelection(row, column);
         selectedCellReference = new CellReference(row - 1, column - 1);
         spreadsheet.loadCustomEditorOnSelectedCell();
         if (individualSelectedCells.contains(selectedCellReference)) {
@@ -590,20 +584,19 @@ public class CellSelectionManager {
 
     /**
      * This is called when a cell range has been added to the current selection.
-     * 
-     * @param col1
-     *            Starting column index, 1-based
-     * @param col2
-     *            Ending column index, 1-based
      * @param row1
      *            Starting row index, 1-based
+     * @param col1
+     *            Starting column index, 1-based
      * @param row2
      *            Ending row index, 1-based
+     * @param col2
+     *            Ending column index, 1-based
      */
-    protected void onCellsAddedToRangeSelection(int col1, int col2, int row1,
-            int row2) {
+    protected void onCellsAddedToRangeSelection(int row1, int col1, int row2,
+            int col2) {
         CellRangeAddress newRange = spreadsheet.createCorrectCellRangeAddress(
-                col1, col2, row1, row2);
+                row1, col1, row2, col2);
         for (Iterator<CellReference> i = individualSelectedCells.iterator(); i
                 .hasNext();) {
             CellReference cell = i.next();
@@ -626,13 +619,13 @@ public class CellSelectionManager {
      *            Index of first column, 1-based
      */
     protected void onRowSelected(int row, int firstColumnIndex) {
-        handleCellSelection(firstColumnIndex, row);
+        handleCellSelection(row, firstColumnIndex);
         selectedCellReference = new CellReference(row - 1, firstColumnIndex - 1);
         spreadsheet.loadCustomEditorOnSelectedCell();
         cellRangeAddresses.clear();
         individualSelectedCells.clear();
-        CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(1,
-                spreadsheet.getColumns(), row, row);
+        CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(row,
+                1, row, spreadsheet.getColumns());
         paintedCellRange = cra;
         cellRangeAddresses.add(cra);
         fireNewSelectionChangeEvent();
@@ -658,31 +651,30 @@ public class CellSelectionManager {
         if (!oldSelectedCellInRange) {
             individualSelectedCells.add(selectedCellReference);
         }
-        handleCellSelection(firstColumnIndex, row);
+        handleCellSelection(row, firstColumnIndex);
         selectedCellReference = new CellReference(row - 1, firstColumnIndex - 1);
         spreadsheet.loadCustomEditorOnSelectedCell();
-        cellRangeAddresses.add(spreadsheet.createCorrectCellRangeAddress(1,
-                spreadsheet.getColumns(), row, row));
+        cellRangeAddresses.add(spreadsheet.createCorrectCellRangeAddress(row,
+                1, row, spreadsheet.getColumns()));
         paintedCellRange = null;
         fireNewSelectionChangeEvent();
     }
 
     /**
      * This is called when a column has made the current selection
-     * 
-     * @param column
-     *            Index of target column, 1-based
      * @param firstRowIndex
      *            Index of first row, 1-based
+     * @param column
+     *            Index of target column, 1-based
      */
-    protected void onColumnSelected(int column, int firstRowIndex) {
-        handleCellSelection(column, firstRowIndex);
+    protected void onColumnSelected(int firstRowIndex, int column) {
+        handleCellSelection(firstRowIndex, column);
         selectedCellReference = new CellReference(firstRowIndex - 1, column - 1);
         spreadsheet.loadCustomEditorOnSelectedCell();
         cellRangeAddresses.clear();
         individualSelectedCells.clear();
-        CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(column,
-                column, 1, spreadsheet.getRows());
+        CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(1,
+                column, spreadsheet.getRows(), column);
         paintedCellRange = cra;
         cellRangeAddresses.add(cra);
         fireNewSelectionChangeEvent();
@@ -690,13 +682,12 @@ public class CellSelectionManager {
 
     /**
      * This is called when a column has been added to the current selection
-     * 
-     * @param column
-     *            Index of target column, 1-based
      * @param firstRowIndex
      *            Index of first row, 1-based
+     * @param column
+     *            Index of target column, 1-based
      */
-    protected void onColumnAddedToSelection(int column, int firstRowIndex) {
+    protected void onColumnAddedToSelection(int firstRowIndex, int column) {
         boolean oldSelectedCellInRange = false;
         for (CellRangeAddress range : cellRangeAddresses) {
             if (range.isInRange(selectedCellReference.getRow(),
@@ -708,11 +699,11 @@ public class CellSelectionManager {
         if (!oldSelectedCellInRange) {
             individualSelectedCells.add(selectedCellReference);
         }
-        handleCellSelection(column, firstRowIndex);
+        handleCellSelection(firstRowIndex, column);
         selectedCellReference = new CellReference(firstRowIndex - 1, column - 1);
         spreadsheet.loadCustomEditorOnSelectedCell();
         cellRangeAddresses.add(spreadsheet.createCorrectCellRangeAddress(
-                column, column, 1, spreadsheet.getRows()));
+                1, column, spreadsheet.getRows(), column));
         paintedCellRange = null;
         fireNewSelectionChangeEvent();
     }
@@ -730,8 +721,8 @@ public class CellSelectionManager {
                 selectedCellReference.getCol())) {
             if (selectedCellReference.getCol() != region.getFirstColumn()
                     || selectedCellReference.getRow() != region.getFirstRow()) {
-                handleCellAddressChange(region.getFirstColumn() + 1,
-                        region.getFirstRow() + 1);
+                handleCellAddressChange(region.getFirstRow() + 1,
+                        region.getFirstColumn() + 1);
             }
             selectedCellReference = new CellReference(region.getFirstRow(),
                     region.getFirstColumn());

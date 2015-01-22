@@ -107,25 +107,24 @@ public class ContextMenuManager {
     /**
      * This method is called when a context menu event has happened on any cell
      * of the target Spreadsheet.
-     * 
-     * @param column
-     *            Column index at context menu target, 1-based
      * @param row
      *            Row index at context menu target, 1-based
+     * @param column
+     *            Column index at context menu target, 1-based
      */
-    public void onContextMenuOpenOnSelection(int column, int row) {
+    public void onContextMenuOpenOnSelection(int row, int column) {
         try {
             // update the selection if the context menu wasn't triggered on
             // top of any of the cells inside the current selection.
             boolean keepSelection = spreadsheet.getCellSelectionManager()
-                    .isCellInsideSelection(column, row);
+                    .isCellInsideSelection(row, column);
 
             if (!keepSelection) {
                 // click was on top of a cell that is not the selected cell,
                 // not one of the individual cells nor part of any cell
                 // ranges -> set as the selected cell
-                spreadsheet.getCellSelectionManager().onCellSelected(column,
-                        row, true);
+                spreadsheet.getCellSelectionManager().onCellSelected(row,
+                        column, true);
             }
             ArrayList<SpreadsheetActionDetails> actions = createActionsListForSelection();
             if (!actions.isEmpty()) {

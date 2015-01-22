@@ -49,15 +49,15 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void onSheetScroll(int firstRow, int lastRow, int firstColumn,
+    public void onSheetScroll(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
-        spreadsheet.onSheetScroll(firstRow, lastRow, firstColumn, lastColumn);
+        spreadsheet.onSheetScroll(firstRow, firstColumn, lastRow, lastColumn);
     }
 
     @Override
-    public void cellSelected(int column, int row,
+    public void cellSelected(int row, int column,
             boolean discardOldRangeSelection) {
-        spreadsheet.getCellSelectionManager().onCellSelected(column, row,
+        spreadsheet.getCellSelectionManager().onCellSelected(row, column,
                 discardOldRangeSelection);
     }
 
@@ -67,30 +67,30 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void cellRangeSelected(int col1, int col2, int row1, int row2) {
-        spreadsheet.getCellSelectionManager().onCellRangeSelected(col1, col2,
-                row1, row2);
+    public void cellRangeSelected(int row1, int col1, int row2, int col2) {
+        spreadsheet.getCellSelectionManager().onCellRangeSelected(row1, col1,
+                row2, col2);
     }
 
     /* */
     @Override
-    public void cellRangePainted(int selectedCellColumn, int selectedCellRow,
-            int col1, int col2, int row1, int row2) {
+    public void cellRangePainted(int selectedCellRow, int selectedCellColumn,
+            int row1, int col1, int row2, int col2) {
         spreadsheet.getCellSelectionManager().onCellRangePainted(
-                selectedCellColumn, selectedCellRow, col1, col2, row1, row2);
+                selectedCellRow, selectedCellColumn, row1, col1, row2, col2);
     }
 
     @Override
-    public void cellAddedToSelectionAndSelected(int column, int row) {
+    public void cellAddedToSelectionAndSelected(int row, int column) {
         spreadsheet.getCellSelectionManager().onCellAddToSelectionAndSelected(
-                column, row);
+                row, column);
     }
 
     @Override
-    public void cellsAddedToRangeSelection(int col1, int col2, int row1,
-            int row2) {
+    public void cellsAddedToRangeSelection(int row1, int col1, int row2,
+            int col2) {
         spreadsheet.getCellSelectionManager().onCellsAddedToRangeSelection(
-                col1, col2, row1, row2);
+                row1, col1, row2, col2);
     }
 
     @Override
@@ -107,30 +107,30 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void columnSelected(int col, int firstRowIndex) {
-        spreadsheet.getCellSelectionManager().onColumnSelected(col,
-                firstRowIndex);
+        spreadsheet.getCellSelectionManager().onColumnSelected(firstRowIndex,
+                col);
     }
 
     @Override
-    public void columnAddedToSelection(int column, int firstRowIndex) {
-        spreadsheet.getCellSelectionManager().onColumnAddedToSelection(column,
-                firstRowIndex);
-    }
-
-    /* the actual selected cell hasn't changed */
-    @Override
-    public void selectionIncreasePainted(int c1, int c2, int r1, int r2) {
-        spreadsheet.getCellShifter().onSelectionIncreasePainted(c1, c2, r1, r2);
+    public void columnAddedToSelection(int firstRowIndex, int column) {
+        spreadsheet.getCellSelectionManager().onColumnAddedToSelection(firstRowIndex,
+                column);
     }
 
     /* the actual selected cell hasn't changed */
     @Override
-    public void selectionDecreasePainted(int c, int r) {
-        spreadsheet.getCellShifter().onSelectionDecreasePainted(c, r);
+    public void selectionIncreasePainted(int r1, int c1, int r2, int c2) {
+        spreadsheet.getCellShifter().onSelectionIncreasePainted(r1, c1, r2, c2);
+    }
+
+    /* the actual selected cell hasn't changed */
+    @Override
+    public void selectionDecreasePainted(int r, int c) {
+        spreadsheet.getCellShifter().onSelectionDecreasePainted(r, c);
     }
 
     @Override
-    public void cellValueEdited(int col, int row, String value) {
+    public void cellValueEdited(int row, int col, String value) {
         spreadsheet.getCellValueManager().onCellValueChange(col, row, value);
     }
 
@@ -155,14 +155,14 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void linkCellClicked(int column, int row) {
-        spreadsheet.onLinkCellClick(column, row);
+    public void linkCellClicked(int row, int column) {
+        spreadsheet.onLinkCellClick(row, column);
     }
 
     @Override
-    public void contextMenuOpenOnSelection(int column, int row) {
+    public void contextMenuOpenOnSelection(int row, int column) {
         spreadsheet.getContextMenuManager().onContextMenuOpenOnSelection(
-                column, row);
+                row, column);
     }
 
     @Override
@@ -194,15 +194,15 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     }
 
     @Override
-    public void rowsResized(Map<Integer, Float> newRowSizes, int col1,
-            int col2, int row1, int row2) {
-        spreadsheet.onRowResized(newRowSizes, col1, col2, row1, row2);
+    public void rowsResized(Map<Integer, Float> newRowSizes, int row1,
+            int col1, int row2, int col2) {
+        spreadsheet.onRowResized(newRowSizes, row1, col1, row2, col2);
     }
 
     @Override
-    public void columnResized(Map<Integer, Integer> newColumnSizes, int col1,
-            int col2, int row1, int row2) {
-        spreadsheet.onColumnResized(newColumnSizes, col1, col2, row1, row2);
+    public void columnResized(Map<Integer, Integer> newColumnSizes, int row1,
+            int col1, int row2, int col2) {
+        spreadsheet.onColumnResized(newColumnSizes, row1, col1, row2, col2);
     }
 
     @Override
@@ -294,8 +294,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         spreadsheet.refreshAllCellValues();
 
         // re-set selection to copied area
-        spreadsheet.setSelectionRange(selectedCellReference.getRow(), rowIndex,
-                selectedCellReference.getCol(), colIndex);
+        spreadsheet.setSelectionRange(selectedCellReference.getRow(), selectedCellReference.getCol(),
+                rowIndex, colIndex);
     }
 
     protected Double checkForNumber(String cellContent) {

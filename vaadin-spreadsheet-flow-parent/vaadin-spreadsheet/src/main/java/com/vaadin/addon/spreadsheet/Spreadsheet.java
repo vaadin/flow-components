@@ -551,14 +551,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * @param firstRow
      *            Index of first visible row after the scroll, 1-based
-     * @param lastRow
-     *            Index of last visible row after the scroll, 1-based
      * @param firstColumn
      *            Index of first visible column after the scroll, 1-based
+     * @param lastRow
+     *            Index of last visible row after the scroll, 1-based
      * @param lastColumn
      *            Index of first visible column after the scroll, 1-based
      */
-    protected void onSheetScroll(int firstRow, int lastRow, int firstColumn,
+    protected void onSheetScroll(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
         if (reloadCellDataOnNextScroll || this.firstRow != firstRow
                 || this.lastRow != lastRow || this.firstColumn != firstColumn
@@ -567,7 +567,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             this.lastRow = lastRow;
             this.firstColumn = firstColumn;
             this.lastColumn = lastColumn;
-            loadCells(firstRow, lastRow, firstColumn, lastColumn);
+            loadCells(firstRow, firstColumn, lastRow, lastColumn);
         }
         if (initialSheetSelection != null) {
             selectionManager.onSheetAddressChanged(initialSheetSelection);
@@ -586,25 +586,25 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @return True if range is editable, false otherwise.
      */
     protected boolean isRangeEditable(CellRangeAddress cellRangeAddress) {
-        return isRangeEditable(cellRangeAddress.getFirstColumn(),
-                cellRangeAddress.getLastColumn(),
-                cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow());
+        return isRangeEditable(cellRangeAddress.getFirstRow(),
+                cellRangeAddress.getFirstColumn(),
+                cellRangeAddress.getLastRow(), cellRangeAddress.getLastColumn());
     }
 
     /**
      * Determines if the given cell range is editable or not.
-     * 
-     * @param col1
-     *            Index of starting column, 0-based
-     * @param col2
-     *            Index of ending column, 0-based
      * @param row1
      *            Index of starting row, 0-based
+     * @param col1
+     *            Index of starting column, 0-based
      * @param row2
      *            Index of ending row, 0-based
+     * @param col2
+     *            Index of ending column, 0-based
+     * 
      * @return True if the whole range is editable, false otherwise.
      */
-    protected boolean isRangeEditable(int col1, int col2, int row1, int row2) {
+    protected boolean isRangeEditable(int row1, int col1, int row2, int col2) {
         if (isActiveSheetProtected()) {
             for (int r = row1; r <= row2; r++) {
                 final Row row = getActiveSheet().getRow(r);
@@ -660,19 +660,19 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * Creates a CellRangeAddress from the given start and end coordinates. Also
      * checks that the range is valid within the currently active sheet. If it
      * is not, the resulting range will be truncated to fit the active sheet.
-     * 
-     * @param col1
-     *            Index of the starting column, 1-based
-     * @param col2
-     *            Index of the ending column, 1-based
      * @param row1
      *            Index of the starting row, 1-based
+     * @param col1
+     *            Index of the starting column, 1-based
      * @param row2
      *            Index of the ending row, 1-based
+     * @param col2
+     *            Index of the ending column, 1-based
+     * 
      * @return A CellRangeAddress based on the given coordinates.
      */
-    protected CellRangeAddress createCorrectCellRangeAddress(int col1,
-            int col2, int row1, int row2) {
+    protected CellRangeAddress createCorrectCellRangeAddress(int row1,
+            int col1, int row2, int col2) {
         int r1 = row1 > row2 ? row2 : row1;
         int r2 = row1 > row2 ? row1 : row2;
         int c1 = col1 > col2 ? col2 : col1;
@@ -838,7 +838,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     "Sheet name must be unique within the workbook.");
         }
         workbook.setSheetName(sheetIndex, sheetName);
-        if (!workbook.isSheetVeryHidden(sheetIndex)) {
+        if (!workbook.isSheetVeryHidden(sheetIndex)
+                && !workbook.isSheetHidden(sheetIndex)) {
             int ourIndex = getSpreadsheetSheetIndex(sheetIndex);
             getState().sheetNames[ourIndex] = sheetName;
         }
@@ -1196,8 +1197,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * Deletes the cell from the sheet. This really deletes the cell, instead of
-     * just making it's value blank.
+     * Deletes the cell from the sheet and the underlying POI model as well.
+     * This really deletes the cell, instead of just making it's value blank.
      * 
      * @param row
      *            Row index of the cell to delete, 0-based
@@ -1411,7 +1412,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void refreshAllCellValues() {
         valueManager.clearEvaluatorCache();
         valueManager.clearCachedContent();
-        updateRowAndColumnRangeCellData(1, getRows(), 1, getColumns());
+        updateRowAndColumnRangeCellData(1, 1, getRows(), getColumns());
         // if the selected cell is of type formula, there is a change that the
         // formula has been changed.
         selectionManager.reSelectSelectedCell();
@@ -1454,13 +1455,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /**
      * Does {@link #setMaximumColumns(int)} & {@link #setMaximumRows(int)} in
      * one method.
-     * 
-     * @param cols
-     *            Maximum column count
      * @param rows
      *            Maximum row count
+     * @param cols
+     *            Maximum column count
      */
-    public void setSheetMaximumSize(int cols, int rows) {
+    public void setSheetMaximumSize(int rows, int cols) {
         getState().cols = cols;
         getState().rows = rows;
     }
@@ -1498,9 +1498,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * as {@link Sheet#getDefaultRowHeightInPoints()} for the currently active
      * sheet {@link #getActiveSheet()}.
      * 
-     * @return Default row height for the currently active sheet.
+     * @return Default row height for the currently active sheet, in points.
      */
-    public float getDefaultRowHeightInPoints() {
+    public float getDefaultRowHeight() {
         return getState().defRowH;
     }
 
@@ -1511,7 +1511,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @param heightPT
      *            New default row height in points.
      */
-    public void setDefaultRowHeightInPoints(float heightPT) {
+    public void setDefaultRowHeight(float heightPT) {
         if (heightPT <= 0.0f) {
             throw new IllegalArgumentException(
                     "Default row height must be over 0, given value: "
@@ -1553,7 +1553,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         getState().colW[columnIndex] = ExcelToHtmlUtils
                 .getColumnWidthInPx(activeSheet.getColumnWidth(columnIndex));
         getCellValueManager().clearCacheForColumn(columnIndex + 1);
-        getCellValueManager().loadCellData(firstRow, lastRow, columnIndex + 1,
+        getCellValueManager().loadCellData(firstRow, columnIndex + 1, lastRow,
                 columnIndex + 1);
         if (sheetImages != null) {
             reloadImageSizesFromPOI = true;
@@ -1657,7 +1657,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     getState().hiddenRowIndexes.remove(rowIndex);
                 }
                 for (int c = 0; c < getState().cols; c++) {
-                    styler.clearCellStyle(c, r);
+                    styler.clearCellStyle(r, c);
                 }
             } else {
                 if (row.getZeroHeight()) {
@@ -1668,7 +1668,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 for (int c = 0; c < getState().cols; c++) {
                     Cell cell = row.getCell(c);
                     if (cell == null) {
-                        styler.clearCellStyle(c, r);
+                        styler.clearCellStyle(r, c);
                     } else {
                         cellsToUpdate.add(cell);
                     }
@@ -1681,7 +1681,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         styler.loadCustomBorderStylesToState();
 
         updateMarkedCells(); // deleted and formula cells and style selectors
-        updateRowAndColumnRangeCellData(firstRow, lastRow, firstColumn,
+        updateRowAndColumnRangeCellData(firstRow, firstColumn, lastRow,
                 lastColumn); // shifted area values
 
         CellReference selectedCellReference = selectionManager
@@ -1722,8 +1722,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * Removes rows. See {@link Sheet#removeRow(Row)}. Removes all row content,
-     * deletes cell and resets size.
+     * Deletes rows. See {@link Sheet#removeRow(Row)}. Removes all row content,
+     * deletes cells and resets the sheet size.
      * 
      * Does not shift rows up (!) - use
      * {@link #shiftRows(int, int, int, boolean, boolean)} for that.
@@ -1733,7 +1733,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @param endRow
      *            Index of the ending row, 0-based
      */
-    public void removeRows(int startRow, int endRow) {
+    public void deleteRows(int startRow, int endRow) {
         Sheet sheet = getActiveSheet();
         for (int i = startRow; i <= endRow; i++) {
             Row row = sheet.getRow(i);
@@ -1770,17 +1770,16 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Merge cells. See {@link Sheet#addMergedRegion(CellRangeAddress)}.
-     * 
-     * @param col1
-     *            Index of the starting column of the merged region, 0-based
-     * @param col2
-     *            Index of the ending column of the merged region, 0-based
      * @param row1
      *            Index of the starting row of the merged region, 0-based
+     * @param col1
+     *            Index of the starting column of the merged region, 0-based
      * @param row2
      *            Index of the ending row of the merged region, 0-based
+     * @param col2
+     *            Index of the ending column of the merged region, 0-based
      */
-    public void addMergedRegion(int col1, int col2, int row1, int row2) {
+    public void addMergedRegion(int row1, int col1, int row2, int col2) {
         addMergedRegion(new CellRangeAddress(row1, row2, col1, col2));
     }
 
@@ -1909,7 +1908,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                         styler.cellStyleUpdated(cell, false);
                         valueManager.markCellForUpdate(cell);
                     } else {
-                        styler.clearCellStyle(c, r);
+                        styler.clearCellStyle(r, c);
                     }
                 }
             }
@@ -1962,8 +1961,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     .getColumnWidthInPx(getActiveSheet().getColumnWidth(
                             columnIndex));
             getCellValueManager().clearCacheForColumn(columnIndex + 1);
-            getCellValueManager().loadCellData(firstRow, lastRow,
-                    columnIndex + 1, columnIndex + 1);
+            getCellValueManager().loadCellData(firstRow, columnIndex + 1,
+                    lastRow, columnIndex + 1);
         }
         if (sheetImages != null) {
             reloadImageSizesFromPOI = true;
@@ -2051,14 +2050,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void read(InputStream inputStream) throws IOException {
         SpreadsheetFactory.reloadSpreadsheetComponent(this, inputStream);
-    }
-
-    /**
-     * Disposes the current {@link Workbook}, if any, and loads a new empty XSLX
-     * Workbook.
-     */
-    public void reloadSpreadsheetWithNewWorkbook() {
-        SpreadsheetFactory.loadNewXLSXSpreadsheet(this);
     }
 
     /**
@@ -2152,7 +2143,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * @return The default row count for new sheets.
      */
-    public int getDefaultNewSheetRows() {
+    public int getDefaultRowCount() {
         return defaultNewSheetRows;
     }
 
@@ -2163,7 +2154,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *            The number of rows to give sheets that are created with the
      *            '+' button on the client side.
      */
-    public void setDefaultNewSheetRows(int defaultRowCount) {
+    public void setDefaultRowCount(int defaultRowCount) {
         defaultNewSheetRows = defaultRowCount;
     }
 
@@ -2195,7 +2186,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void reloadVisibleCellContents() {
         loadCustomComponents();
-        updateRowAndColumnRangeCellData(firstRow, lastRow, firstColumn,
+        updateRowAndColumnRangeCellData(firstRow, firstColumn, lastRow,
                 lastColumn);
     }
 
@@ -2529,7 +2520,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * NOTE: Does not run style updates!
      */
-    private void updateRowAndColumnRangeCellData(int r1, int r2, int c1, int c2) {
+    private void updateRowAndColumnRangeCellData(int r1, int c1, int r2, int c2) {
         // FIXME should be optimized, should not go through all links, comments
         // etc. always
         loadHyperLinks();
@@ -2538,7 +2529,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         loadPopupButtons();
         // custom components not updated here on purpose
 
-        valueManager.loadCellData(r1, r2, c1, c2);
+        valueManager.loadCellData(r1, c1, r2, c2);
     }
 
     /**
@@ -2547,14 +2538,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * @param firstRow
      *            Index of the starting row, 1-based
-     * @param lastRow
-     *            Index of the ending row, 1-based
      * @param firstColumn
      *            Index of the starting column, 1-based
+     * @param lastRow
+     *            Index of the ending row, 1-based
      * @param lastColumn
      *            Index of the ending column, 1-based
      */
-    private void loadCells(int firstRow, int lastRow, int firstColumn,
+    private void loadCells(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
         loadCustomComponents();
         loadHyperLinks();
@@ -2562,10 +2553,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         loadImages();
         loadTables();
         loadPopupButtons();
-        valueManager.loadCellData(firstRow, lastRow, firstColumn, lastColumn);
+        valueManager.loadCellData(firstRow, firstColumn, lastRow, lastColumn);
     }
 
-    void onLinkCellClick(int column, int row) {
+    void onLinkCellClick(int row, int column) {
         Cell cell = getActiveSheet().getRow(row - 1).getCell(column - 1);
         if (hyperlinkCellClickHandler != null) {
             hyperlinkCellClickHandler.onHyperLinkCellClick(cell,
@@ -2576,8 +2567,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
     }
 
-    void onRowResized(Map<Integer, Float> newRowSizes, int col1, int col2,
-            int row1, int row2) {
+    void onRowResized(Map<Integer, Float> newRowSizes, int row1, int col1,
+            int row2, int col2) {
         SizeChangeCommand command = new SizeChangeCommand(this, Type.ROW);
         command.captureValues(newRowSizes.keySet().toArray(
                 new Integer[newRowSizes.size()]));
@@ -2590,7 +2581,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         if (sheetImages != null) {
             reloadImageSizesFromPOI = true;
         }
-        loadCells(row1, row2, col1, col2);
+        loadCells(row1, col1, row2, col2);
     }
 
     /**
@@ -2622,8 +2613,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
     }
 
-    void onColumnResized(Map<Integer, Integer> newColumnSizes, int col1,
-            int col2, int row1, int row2) {
+    void onColumnResized(Map<Integer, Integer> newColumnSizes, int row1,
+            int col1, int row2, int col2) {
         SizeChangeCommand command = new SizeChangeCommand(this, Type.COLUMN);
         command.captureValues(newColumnSizes.keySet().toArray(
                 new Integer[newColumnSizes.size()]));
@@ -2636,7 +2627,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         if (sheetImages != null) {
             reloadImageSizesFromPOI = true;
         }
-        loadCells(row1, row2, col1, col2);
+        loadCells(row1, col1, row2, col2);
     }
 
     /**
@@ -2664,7 +2655,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             getActiveSheet().setColumnWidth(index,
                     SpreadsheetUtil.pixel2WidthUnits(width));
             getCellValueManager().clearCacheForColumn(index + 1);
-            getCellValueManager().loadCellData(firstRow, lastRow, index + 1,
+            getCellValueManager().loadCellData(firstRow, index + 1, lastRow,
                     index + 1);
         }
     }
@@ -2677,20 +2668,20 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         if (getVerticalSplitPosition() > 0 && getHorizontalSplitPosition() > 0
                 && !topLeftCellHyperlinksLoaded) {
-            loadHyperLinks(1, getVerticalSplitPosition(), 1,
+            loadHyperLinks(1, 1, getVerticalSplitPosition(),
                     getHorizontalSplitPosition());
         }
         if (getVerticalSplitPosition() > 0) {
-            loadHyperLinks(1, getVerticalSplitPosition(), firstColumn,
+            loadHyperLinks(1, firstColumn, getVerticalSplitPosition(),
                     lastColumn);
         }
         if (getHorizontalSplitPosition() > 0) {
-            loadHyperLinks(firstRow, lastRow, 1, getHorizontalSplitPosition());
+            loadHyperLinks(firstRow, 1, lastRow, getHorizontalSplitPosition());
         }
-        loadHyperLinks(firstRow, lastRow, firstColumn, lastColumn);
+        loadHyperLinks(firstRow, firstColumn, lastRow, lastColumn);
     }
 
-    private void loadHyperLinks(int r1, int r2, int c1, int c2) {
+    private void loadHyperLinks(int r1, int c1, int r2, int c2) {
         for (int r = r1 - 1; r < r2; r++) {
             final Row row = getActiveSheet().getRow(r);
             if (row != null) {
@@ -2810,12 +2801,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         int horizontalSplitPosition = getHorizontalSplitPosition();
         int verticalSplitPosition = getVerticalSplitPosition();
         return (horizontalSplitPosition > 0 && verticalSplitPosition > 0 && image
-                .isVisible(1, horizontalSplitPosition, 1, verticalSplitPosition))
-                || (horizontalSplitPosition > 0 && image.isVisible(1,
-                        horizontalSplitPosition, firstRow, lastRow))
-                || (verticalSplitPosition > 0 && image.isVisible(firstColumn,
-                        lastColumn, 1, verticalSplitPosition))
-                || image.isVisible(firstColumn, lastColumn, firstRow, lastRow);
+                .isVisible(1, 1, verticalSplitPosition, horizontalSplitPosition))
+                || (horizontalSplitPosition > 0 && image.isVisible(firstRow,
+                        1, lastRow, horizontalSplitPosition))
+                || (verticalSplitPosition > 0 && image.isVisible(1,
+                        firstColumn, verticalSplitPosition, lastColumn))
+                || image.isVisible(firstRow, firstColumn, lastRow, lastColumn);
 
     }
 
@@ -2856,20 +2847,20 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         if (getVerticalSplitPosition() > 0 && getHorizontalSplitPosition() > 0
                 && !topLeftCellCommentsLoaded) {
-            loadCellComments(1, getVerticalSplitPosition(), 1,
+            loadCellComments(1, 1, getVerticalSplitPosition(),
                     getHorizontalSplitPosition());
         }
         if (getVerticalSplitPosition() > 0) {
-            loadCellComments(1, getVerticalSplitPosition(), firstColumn,
+            loadCellComments(1, firstColumn, getVerticalSplitPosition(),
                     lastColumn);
         }
         if (getHorizontalSplitPosition() > 0) {
-            loadCellComments(firstRow, lastRow, 1, getHorizontalSplitPosition());
+            loadCellComments(firstRow, 1, lastRow, getHorizontalSplitPosition());
         }
-        loadCellComments(firstRow, lastRow, firstColumn, lastColumn);
+        loadCellComments(firstRow, firstColumn, lastRow, lastColumn);
     }
 
-    private void loadCellComments(int r1, int r2, int c1, int c2) {
+    private void loadCellComments(int r1, int c1, int r2, int c2) {
         Sheet sheet = getActiveSheet();
         for (int r = r1 - 1; r < r2; r++) {
             Row row = sheet.getRow(r);
@@ -3002,14 +2993,16 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * 
-     * @param col
-     *            Column, 1-based
+     * Determines if the cell at the given coordinates is currently visible
+     * (rendered) in the browser.
      * @param row
-     *            Row, 1-based
+     *            Row index, 1-based
+     * @param col
+     *            Column index, 1-based
+     * 
      * @return True if the cell is visible, false otherwise
      */
-    private boolean isCellVisible(int col, int row) {
+    private boolean isCellVisible(int row, int col) {
         int verticalSplitPosition = getVerticalSplitPosition();
         int horizontalSplitPosition = getHorizontalSplitPosition();
         return (col >= firstColumn && col <= lastColumn && row >= firstRow && row <= lastRow)
@@ -3116,8 +3109,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         if (popupButton != null) {
             popupButton.setCellReference(cellReference);
             sheetPopupButtons.put(cellReference, popupButton);
-            if (isCellVisible(cellReference.getCol() + 1,
-                    cellReference.getRow() + 1)) {
+            if (isCellVisible(cellReference.getRow() + 1,
+                    cellReference.getCol() + 1)) {
                 registerCustomComponent(popupButton);
                 markAsDirty();
             }
@@ -3142,7 +3135,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             for (PopupButton popupButton : sheetPopupButtons.values()) {
                 int column = popupButton.getColumn() + 1;
                 int row = popupButton.getRow() + 1;
-                if (isCellVisible(column, row)) {
+                if (isCellVisible(row, column)) {
                     registerCustomComponent(popupButton);
                 } else {
                     unRegisterCustomComponent(popupButton);
@@ -3542,13 +3535,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * If both colSplit and rowSplit are zero then the existing freeze pane is
      * removed.
-     * 
-     * @param colSplit
-     *            Horizontal position of the split
      * @param rowSplit
      *            Vertical position of the split
+     * @param colSplit
+     *            Horizontal position of the split
      */
-    public void createFreezePane(int colSplit, int rowSplit) {
+    public void createFreezePane(int rowSplit, int colSplit) {
         getActiveSheet().createFreezePane(colSplit, rowSplit);
         SpreadsheetFactory.loadFreezePane(this);
     }
@@ -3853,14 +3845,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * @param row1
      *            Index of the first row of the area, 0-based
-     * @param row2
-     *            Index of the last row of the area, 0-based
      * @param col1
      *            Index of the first column of the area, 0-based
+     * @param row2
+     *            Index of the last row of the area, 0-based
      * @param col2
      *            Index of the last column of the area, 0-based
      */
-    public void setSelectionRange(int row1, int row2, int col1, int col2) {
+    public void setSelectionRange(int row1, int col1, int row2, int col2) {
         CellReference ref = new CellReference(row1, col1);
 
         if (row1 == row2 && col1 == col2) {
@@ -3889,5 +3881,15 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public ConditionalFormatter getConditionalFormatter() {
         return conditionalFormatter;
+    }
+
+    /**
+     * Disposes the current {@link Workbook}, if any, and loads a new empty XSLX
+     * Workbook.
+     * 
+     * Note: Discards all data. Be sure to write out the old Workbook if needed.
+     */
+    public void reset() {
+        SpreadsheetFactory.loadNewXLSXSpreadsheet(this);
     }
 }

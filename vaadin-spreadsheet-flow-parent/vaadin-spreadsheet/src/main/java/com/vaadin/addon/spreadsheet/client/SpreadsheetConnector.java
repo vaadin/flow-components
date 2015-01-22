@@ -196,7 +196,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     latestCellContextMenuEvent = event;
                     latestHeaderContextMenuEvent = null;
                     getRpcProxy(SpreadsheetServerRpc.class)
-                            .contextMenuOpenOnSelection(column, row);
+                            .contextMenuOpenOnSelection(row, column);
                 }
             }
 

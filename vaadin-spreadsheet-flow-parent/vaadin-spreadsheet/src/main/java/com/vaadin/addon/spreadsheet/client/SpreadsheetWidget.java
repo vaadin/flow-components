@@ -430,13 +430,13 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public void onScrollViewChanged(int firstRowIndex, int lastRowIndex,
             int firstColumnIndex, int lastColumnIndex) {
-        spreadsheetHandler.onSheetScroll(firstRowIndex, lastRowIndex,
-                firstColumnIndex, lastColumnIndex);
+        spreadsheetHandler.onSheetScroll(firstRowIndex, firstColumnIndex,
+                lastRowIndex, lastColumnIndex);
     }
 
     @Override
     public void onLinkCellClick(int column, int row) {
-        spreadsheetHandler.linkCellClicked(column, row);
+        spreadsheetHandler.linkCellClicked(row, column);
     }
 
     @Override
@@ -509,13 +509,13 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             }
             if (updateToActionHandler) {
                 if (sheetWidget.isSelectionRangeOutlineVisible()) {
-                    spreadsheetHandler.cellRangeSelected(selectedRegion.col1,
-                            selectedRegion.col2, selectedRegion.row1,
-                            selectedRegion.row2);
+                    spreadsheetHandler.cellRangeSelected(selectedRegion.row1,
+                            selectedRegion.col1, selectedRegion.row2,
+                            selectedRegion.col2);
                 } else {
                     spreadsheetHandler.cellsAddedToRangeSelection(
-                            selectedRegion.col1, selectedRegion.col2,
-                            selectedRegion.row1, selectedRegion.row2);
+                            selectedRegion.row1, selectedRegion.col1,
+                            selectedRegion.row2, selectedRegion.col2);
                 }
             }
         } else if (metaOrCtrlKey) {
@@ -542,7 +542,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 formulaBarWidget.setCellPlainValue("");
             }
             if (updateToActionHandler) {
-                spreadsheetHandler.cellAddedToSelectionAndSelected(column, row);
+                spreadsheetHandler.cellAddedToSelectionAndSelected(row, column);
             }
         } else {
             // select cell
@@ -579,7 +579,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     // do not update selected cell formula value unless needed
                     formulaBarWidget.setCellPlainValue("");
                 }
-                spreadsheetHandler.cellSelected(column, row, true);
+                spreadsheetHandler.cellSelected(row, column, true);
             }
         }
     }
@@ -612,9 +612,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             if (!sheetWidget.isCoherentSelection()) {
             }
             if (sheetWidget.isSelectionRangeOutlineVisible()) {
-                spreadsheetHandler.cellRangeSelected(c1, c2, r1, r2);
+                spreadsheetHandler.cellRangeSelected(r1, c1, r2, c2);
             } else {
-                spreadsheetHandler.cellsAddedToRangeSelection(c1, c2, r1, r2);
+                spreadsheetHandler.cellsAddedToRangeSelection(r1, c1, r2, c2);
             }
         } else if (metaOrCrtlPressed) {
             // change selected, add whole row to range
@@ -676,9 +676,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             // if (!sheetWidget.isCoherentSelection()) {
             // }
             if (sheetWidget.isSelectionRangeOutlineVisible()) {
-                spreadsheetHandler.cellRangeSelected(c1, c2, r1, r2);
+                spreadsheetHandler.cellRangeSelected(r1, c1, r2, c2);
             } else {
-                spreadsheetHandler.cellsAddedToRangeSelection(c1, c2, r1, r2);
+                spreadsheetHandler.cellsAddedToRangeSelection(r1, c1, r2, c2);
             }
         } else if (metaOrCrtlPressed) {
             // change selected, add whole row to range
@@ -695,7 +695,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             // add the selection styles
             sheetWidget
                     .updateSelectedCellStyles(column, column, 1, rows, false);
-            spreadsheetHandler.columnAddedToSelection(column, firstRowIndex);
+            spreadsheetHandler.columnAddedToSelection(firstRowIndex, column);
         } else {
             if (!sheetWidget.isCoherentSelection()) {
                 sheetWidget.setCoherentSelection(true);
@@ -722,8 +722,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             cancelDeferredCommit = true;
             final String editedValue = formulaBarWidget.getFormulaFieldValue();
             spreadsheetHandler.cellValueEdited(
-                    sheetWidget.getSelectedCellColumn(),
-                    sheetWidget.getSelectedCellRow(), editedValue);
+                    sheetWidget.getSelectedCellRow(),
+                    sheetWidget.getSelectedCellColumn(), editedValue);
             cellEditingDone(editedValue);
         } else if (customCellEditorDisplayed) {
             customCellEditorDisplayed = false;
@@ -804,10 +804,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
         MergedRegion selectedRegion = MergedRegionUtil.findIncreasingSelection(
                 mergedRegionContainer, row1, row2, col1, col2);
-        spreadsheetHandler.cellRangePainted(
-                sheetWidget.getSelectedCellColumn(),
-                sheetWidget.getSelectedCellRow(), selectedRegion.col1,
-                selectedRegion.col2, selectedRegion.row1, selectedRegion.row2);
+        spreadsheetHandler.cellRangePainted(sheetWidget.getSelectedCellRow(),
+                sheetWidget.getSelectedCellColumn(), selectedRegion.row1,
+                selectedRegion.col1, selectedRegion.row2, selectedRegion.col2);
         formulaBarWidget.setSelectedCellAddress(createCellAddress(
                 sheetWidget.getSelectedCellColumn(),
                 sheetWidget.getSelectedCellRow()));
@@ -866,8 +865,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public void onCellInputEnter(String value, boolean shift) {
-        spreadsheetHandler.cellValueEdited(sheetWidget.getSelectedCellColumn(),
-                sheetWidget.getSelectedCellRow(), value);
+        spreadsheetHandler.cellValueEdited(sheetWidget.getSelectedCellRow(),
+                sheetWidget.getSelectedCellColumn(), value);
         cellEditingDone(value);
         sheetWidget.focusSheet();
         if (shift) {
@@ -879,8 +878,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public void onCellInputTab(String value, boolean shift) {
-        spreadsheetHandler.cellValueEdited(sheetWidget.getSelectedCellColumn(),
-                sheetWidget.getSelectedCellRow(), value);
+        spreadsheetHandler.cellValueEdited(sheetWidget.getSelectedCellRow(),
+                sheetWidget.getSelectedCellColumn(), value);
         cellEditingDone(value);
         sheetWidget.focusSheet();
         if (shift) {
@@ -1081,7 +1080,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         // discard painted area if merged cells don't align
         if (evenedRegion.col1 == c1 && evenedRegion.col2 == c2
                 && evenedRegion.row1 == r1 && evenedRegion.row2 == r2) {
-            spreadsheetHandler.selectionIncreasePainted(c1, c2, r1, r2);
+            spreadsheetHandler.selectionIncreasePainted(r1, c1, r2, c2);
         }
     }
 
@@ -1090,7 +1089,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             int colEdgeIndex, int row1, int row2, int rowEdgeIndex) {
         // the selection widget has made sure the decreasing area is not in
         // middle of merged cells.
-        spreadsheetHandler.selectionDecreasePainted(colEdgeIndex, rowEdgeIndex);
+        spreadsheetHandler.selectionDecreasePainted(rowEdgeIndex, colEdgeIndex);
     }
 
     @Override
@@ -1125,8 +1124,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public void onFormulaEnter(String value) {
-        spreadsheetHandler.cellValueEdited(sheetWidget.getSelectedCellColumn(),
-                sheetWidget.getSelectedCellRow(), value);
+        spreadsheetHandler.cellValueEdited(sheetWidget.getSelectedCellRow(),
+                sheetWidget.getSelectedCellColumn(), value);
         cellEditingDone(value);
         sheetWidget.focusSheet();
         selectionHandler.moveSelectionDown(false);
@@ -1134,8 +1133,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public void onFormulaTab(String value) {
-        spreadsheetHandler.cellValueEdited(sheetWidget.getSelectedCellColumn(),
-                sheetWidget.getSelectedCellRow(), value);
+        spreadsheetHandler.cellValueEdited(sheetWidget.getSelectedCellRow(),
+                sheetWidget.getSelectedCellColumn(), value);
         cellEditingDone(value);
         sheetWidget.focusSheet();
         selectionHandler.moveSelectionRight(false);
@@ -1246,8 +1245,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             public void execute() {
                 if (!cancelDeferredCommit) {
                     spreadsheetHandler.cellValueEdited(
-                            sheetWidget.getSelectedCellColumn(),
-                            sheetWidget.getSelectedCellRow(), value);
+                            sheetWidget.getSelectedCellRow(),
+                            sheetWidget.getSelectedCellColumn(), value);
                     cellEditingDone(value);
                 }
             }
@@ -1358,8 +1357,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     if (customCellEditorDisplayed) {
                         // need to update the editor value on client side
                         spreadsheetHandler.cellSelected(
-                                sheetWidget.getSelectedCellColumn(),
-                                sheetWidget.getSelectedCellRow(), false);
+                                sheetWidget.getSelectedCellRow(),
+                                sheetWidget.getSelectedCellColumn(), false);
                     }
                 }
             }

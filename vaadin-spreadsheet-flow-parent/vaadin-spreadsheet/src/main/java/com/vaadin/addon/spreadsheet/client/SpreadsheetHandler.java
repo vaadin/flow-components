@@ -26,28 +26,28 @@ public interface SpreadsheetHandler {
      * These cells have become visible and possibly need the content, if has not
      * been given previously or has not changed.
      */
-    public void onSheetScroll(int firstRow, int lastRow, int firstColumn,
+    public void onSheetScroll(int firstRow, int firstColumn, int lastRow,
             int lastColumn);
 
     /** Address field value changed. */
     public void sheetAddressChanged(String value);
 
     /** Single cell selected inside sheet. */
-    public void cellSelected(int column, int row,
+    public void cellSelected(int row, int column,
             boolean oldSelectionRangeDiscarded);
 
     /** Cell range selected from scratch. Actual selected cell not changed. */
-    public void cellRangeSelected(int col1, int col2, int row1, int row2);
+    public void cellRangeSelected(int row1, int col1, int row2, int col2);
 
     /** Single cell added to selection. Selection changed to this. */
-    public void cellAddedToSelectionAndSelected(int column, int row);
+    public void cellAddedToSelectionAndSelected(int row, int column);
 
     /**
      * Multiple cells added to previous range selection. Actual selected cell
      * not changed.
      */
-    public void cellsAddedToRangeSelection(int col1, int col2, int row1,
-            int row2);
+    public void cellsAddedToRangeSelection(int row1, int col1, int row2,
+            int col2);
 
     /**
      * Complete row selected. New selected cell is at firstColumnIndex:row.
@@ -83,41 +83,38 @@ public interface SpreadsheetHandler {
     /**
      * Complete column added to previous range selection. New selected cell is
      * at column:firstRowIndex.
-     * 
-     * @param column
-     *            the column that was selected
      * @param firstRowIndex
      *            row index for the selected cell (top most)
+     * @param column
+     *            the column that was selected
      */
-    public void columnAddedToSelection(int column, int firstRowIndex);
+    public void columnAddedToSelection(int firstRowIndex, int column);
 
     /**
      * The new selection that was painted from the old. Values and formulas
      * should be painted to the new selection.
-     * 
-     * @param c1
-     *            new selection left, 1-based
-     * @param c2
-     *            new selection right, 1-based
      * @param r1
      *            new selection top, 1-based
+     * @param c1
+     *            new selection left, 1-based
      * @param r2
      *            new selection bottom, 1-based
+     * @param c2
+     *            new selection right, 1-based
      */
-    public void selectionIncreasePainted(int c1, int c2, int r1, int r2);
+    public void selectionIncreasePainted(int r1, int c1, int r2, int c2);
 
     /**
      * The existing selection has been painted inwards meaning that the painted
      * selection cells should be cleared.
-     * 
-     * @param col
-     *            leftmost cell index where the clearing starts, 1-based
      * @param row
      *            topmost cell index where the clearing starts, 1-based
+     * @param col
+     *            leftmost cell index where the clearing starts, 1-based
      */
-    public void selectionDecreasePainted(int col, int row);
+    public void selectionDecreasePainted(int row, int col);
 
-    public void cellValueEdited(int col, int row, String value);
+    public void cellValueEdited(int row, int col, String value);
 
     /**
      * 
@@ -146,16 +143,15 @@ public interface SpreadsheetHandler {
 
     /**
      * Cell range selected by painting
-     * 
-     * @param selectedCellColumn
      * @param selectedCellRow
-     * @param col1
-     * @param col2
+     * @param selectedCellColumn
      * @param row1
+     * @param col1
      * @param row2
+     * @param col2
      */
-    public void cellRangePainted(int selectedCellColumn, int selectedCellRow,
-            int col1, int col2, int row1, int row2);
+    public void cellRangePainted(int selectedCellRow, int selectedCellColumn,
+            int row1, int col1, int row2, int col2);
 
     /**
      * Delete the contents of the selected cells, do not remove
@@ -165,39 +161,37 @@ public interface SpreadsheetHandler {
 
     /**
      * A cell containing a hyperlink has been clicked.
-     * 
-     * @param column
-     *            1-based
      * @param row
      *            1-based
+     * @param column
+     *            1-based
      */
-    public void linkCellClicked(int column, int row);
+    public void linkCellClicked(int row, int column);
 
     /**
      * Rows resized with header drag and drop. Indexes 1-based.
      * 
      * @param newRowSizes
      *            row index and new size (converted pt)
-     * @param col1
-     * @param col2
      * @param row1
+     * @param col1
      * @param row2
+     * @param col2
      */
-    public void rowsResized(Map<Integer, Float> newRowSizes, int col1,
-            int col2, int row1, int row2);
+    public void rowsResized(Map<Integer, Float> newRowSizes, int row1,
+            int col1, int row2, int col2);
 
     /**
      * Columns resized with drag and drop. Indexes 1-based.
-     * 
+     * @param row1
+     * @param col1
+     * @param row2
+     * @param col2
      * @param newRowSizes
      *            column index and new size (px)
-     * @param col1
-     * @param col2
-     * @param row1
-     * @param row2
      */
-    public void columnResized(Map<Integer, Integer> newColumnSizes, int col1,
-            int col2, int row1, int row2);
+    public void columnResized(Map<Integer, Integer> newColumnSizes, int row1,
+            int col1, int row2, int col2);
 
     /**
      * Column autofit with double click on the column header resizing area.

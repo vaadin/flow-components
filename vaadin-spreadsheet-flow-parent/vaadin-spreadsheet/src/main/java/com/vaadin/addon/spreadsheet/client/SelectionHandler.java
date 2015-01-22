@@ -278,7 +278,7 @@ public class SelectionHandler {
                 .createCellAddress(column, row));
         newSelectedCellSet();
         spreadsheet.formulaBarWidget.setCellPlainValue("");
-        spreadsheet.spreadsheetHandler.cellSelected(column, row, true);
+        spreadsheet.spreadsheetHandler.cellSelected(row, column, true);
     }
 
     public void increaseHorizontalSelection(boolean right) {
@@ -474,10 +474,10 @@ public class SelectionHandler {
                 || topRow != sheetWidget.getSelectionTopRow()
                 || bottomRow != sheetWidget.getSelectionBottomRow()) {
             spreadsheet.spreadsheetHandler.cellRangeSelected(
-                    sheetWidget.getSelectionLeftCol(),
-                    sheetWidget.getSelectionRightCol(),
                     sheetWidget.getSelectionTopRow(),
-                    sheetWidget.getSelectionBottomRow());
+                    sheetWidget.getSelectionLeftCol(),
+                    sheetWidget.getSelectionBottomRow(),
+                    sheetWidget.getSelectionRightCol());
         }
     }
 
@@ -881,10 +881,10 @@ public class SelectionHandler {
                 || oldTopRow != sheetWidget.getSelectionTopRow()
                 || oldBottomRow != sheetWidget.getSelectionBottomRow()) {
             spreadsheet.spreadsheetHandler.cellRangeSelected(
-                    sheetWidget.getSelectionLeftCol(),
-                    sheetWidget.getSelectionRightCol(),
                     sheetWidget.getSelectionTopRow(),
-                    sheetWidget.getSelectionBottomRow());
+                    sheetWidget.getSelectionLeftCol(),
+                    sheetWidget.getSelectionBottomRow(),
+                    sheetWidget.getSelectionRightCol());
         }
     }
 
@@ -1030,7 +1030,7 @@ public class SelectionHandler {
                 .createCellAddress(col, row));
         spreadsheet.formulaBarWidget.setCellPlainValue("");
         newSelectedCellSet();
-        spreadsheet.spreadsheetHandler.cellSelected(col, row, false);
+        spreadsheet.spreadsheetHandler.cellSelected(row, col, false);
     }
 
     /**
