@@ -113,8 +113,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void columnAddedToSelection(int firstRowIndex, int column) {
-        spreadsheet.getCellSelectionManager().onColumnAddedToSelection(firstRowIndex,
-                column);
+        spreadsheet.getCellSelectionManager().onColumnAddedToSelection(
+                firstRowIndex, column);
     }
 
     /* the actual selected cell hasn't changed */
@@ -161,8 +161,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void contextMenuOpenOnSelection(int row, int column) {
-        spreadsheet.getContextMenuManager().onContextMenuOpenOnSelection(
-                row, column);
+        spreadsheet.getContextMenuManager().onContextMenuOpenOnSelection(row,
+                column);
     }
 
     @Override
@@ -294,8 +294,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         spreadsheet.refreshAllCellValues();
 
         // re-set selection to copied area
-        spreadsheet.setSelectionRange(selectedCellReference.getRow(), selectedCellReference.getCol(),
-                rowIndex, colIndex);
+        spreadsheet.setSelectionRange(selectedCellReference.getRow(),
+                selectedCellReference.getCol(), rowIndex, colIndex);
     }
 
     protected Double checkForNumber(String cellContent) {
@@ -321,9 +321,9 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
                 sep = symbols.getGroupingSeparator();
                 if (sep == '.') {
-                    trimmedContent = trimmedContent.replace(sep + "\\.", "");
+                    trimmedContent = trimmedContent.replaceAll(sep + "\\.", "");
                 } else {
-                    trimmedContent = trimmedContent.replace(sep + "", "");
+                    trimmedContent = trimmedContent.replaceAll(sep + "", "");
                 }
             } else {
                 // simple check

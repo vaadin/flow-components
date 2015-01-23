@@ -3645,6 +3645,10 @@ public class SheetWidget extends Panel {
             remove(i.next());
         }
         customEditorWidget = null;
+
+        for (String key : sheetImages.keySet()) {
+            removeSheetImage(key);
+        }
         sheetImages.clear();
         if (customWidgetMap != null) {
             customWidgetMap.clear();
@@ -4721,7 +4725,13 @@ public class SheetWidget extends Panel {
             com.google.gwt.dom.client.Element parentElement = element
                     .getParentElement();
             Widget widgetParent = child.getParent();
-            if (sheet.equals(parentElement)
+
+            boolean isAttachedToPanes = sheet.equals(parentElement)
+                    || topLeftPane.equals(parentElement)
+                    || topRightPane.equals(parentElement)
+                    || bottomLeftPane.equals(parentElement);
+
+            if (isAttachedToPanes
                     || child.equals(customEditorWidget)
                     || (parentElement != null
                             && parentElement.getParentNode() != null && sheet
