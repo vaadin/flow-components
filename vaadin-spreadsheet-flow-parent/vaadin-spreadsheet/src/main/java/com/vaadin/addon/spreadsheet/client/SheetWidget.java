@@ -98,7 +98,7 @@ public class SheetWidget extends Panel {
     private static final String MERGED_REGION_CELL_STYLE = "{ display: none; }";
     private static final String FREEZE_PANEL_OVERFLOW_STYLE = "{ overflow: hidden; }";
 
-    private final Logger debugConsole = Logger.getLogger("spreadsheet-logger");
+    final Logger debugConsole = Logger.getLogger("spreadsheet-logger");
 
     private final SheetHandler actionHandler;
 
@@ -256,6 +256,8 @@ public class SheetWidget extends Panel {
     private VLazyExecutor requester;
 
     private SheetJsniUtil jsniUtil = GWT.create(SheetJsniUtil.class);
+
+    private boolean touchMode;
 
     /**
      * Random id used as additional style for the widget element to connect
@@ -445,8 +447,9 @@ public class SheetWidget extends Panel {
                 }
             });
 
-    public SheetWidget(SheetHandler view) {
+    public SheetWidget(SheetHandler view, boolean touchMode) {
         actionHandler = view;
+        this.setTouchMode(touchMode);
         cachedCellData = new HashMap<String, CellData>();
         alwaysVisibleCellComments = new HashMap<String, CellComment>();
         sheetImages = new HashMap<String, SheetImage>();
@@ -972,11 +975,6 @@ public class SheetWidget extends Panel {
         }
     }
 
-    protected void onSheetMouseDown(Event event) {
-        Element target = event.getEventTarget().cast();
-        onClick(target, event);
-    }
-
     /**
      * 
      * @param target
@@ -984,7 +982,9 @@ public class SheetWidget extends Panel {
      * @param event
      *            The original event (that can be onClick or onTouchStart)
      */
-    protected void onClick(Element target, Event event) {
+    protected void onSheetMouseDown(Event event) {
+        Element target = event.getEventTarget().cast();
+
         String className = target.getClassName();
         if (className.contains("sheet") || target.getTagName().equals("input")
                 || className.equals("floater")) {
@@ -1067,17 +1067,6 @@ public class SheetWidget extends Panel {
                 }
             }
         }
-    }
-
-    protected void onSheetTouchStart(Event event) {
-
-        if (event.getTouches().length() == 0) {
-            return;
-        }
-
-        Touch touch = event.getTouches().get(0);
-        Element e = touch.getTarget().cast();
-        onClick(e, event);
     }
 
     protected void onMouseMoveWhenSelectingCells(Event event) {
@@ -1378,7 +1367,7 @@ public class SheetWidget extends Panel {
         return editingCell;
     }
 
-    protected boolean isSelectingCells() {
+    protected boolean isMouseButtonDownAndSelecting() {
         return selectingCells;
     }
 
@@ -4961,5 +4950,13 @@ public class SheetWidget extends Panel {
         clearBasicCellStyles();
         updateCellStyles();
         updateConditionalFormattingStyles();
+    }
+
+    public boolean isTouchMode() {
+        return touchMode;
+    }
+
+    public void setTouchMode(boolean touchMode) {
+        this.touchMode = touchMode;
     }
 }

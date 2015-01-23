@@ -24,9 +24,13 @@ import com.google.gwt.user.client.EventListener;
 
 public class SheetEventListener implements EventListener {
 
+    private static final int TOUCH_CLICK_TO_MOVE_RADIUS_PX = 5;
+
     private SheetWidget widget;
 
     private boolean sheetFocused;
+
+    private boolean scrolling;
 
     public SheetEventListener() {
     }
@@ -58,7 +62,14 @@ public class SheetEventListener implements EventListener {
                 PopupButtonWidget.BUTTON_CLASSNAME)) {
             return;
         }
-        if (widget.isSelectingCells()) {
+
+        if (event.getTypeInt() == Event.ONTOUCHMOVE) {
+
+            // just let the browser scroll, ONSCROLL will result in correct
+            // headers
+            event.stopPropagation();
+
+        } else if (widget.isMouseButtonDownAndSelecting()) {
             onSelectingCellsEvent(event);
         } else {
             final int typeInt = event.getTypeInt();
@@ -73,7 +84,9 @@ public class SheetEventListener implements EventListener {
                 onKeyDown(event);
                 break;
             case Event.ONTOUCHSTART:
-                widget.onSheetTouchStart(event);
+                // store pos for comparison on touchMove
+                scrolling = false;
+                break;
             case Event.ONMOUSEDOWN:
                 widget.onSheetMouseDown(event);
                 break;
@@ -90,9 +103,7 @@ public class SheetEventListener implements EventListener {
             case Event.ONMOUSEOVER:
                 widget.onSheetMouseOverOrOut(event);
                 break;
-            case Event.ONTOUCHMOVE:
             case Event.ONMOUSEMOVE:
-                // TODO implement proper touch support
                 widget.onSheetMouseMove(event);
             default:
                 break;
@@ -116,16 +127,27 @@ public class SheetEventListener implements EventListener {
 
     private void onSelectingCellsEvent(Event event) {
         switch (event.getTypeInt()) {
-        case Event.ONMOUSEUP:
         case Event.ONTOUCHEND:
         case Event.ONTOUCHCANCEL:
+            // scrolling check
+            if (scrolling) {
+                // don't click when ending scroll
+                scrolling = false;
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            }
+
+            // if not moving, select cells:
+            widget.onSheetMouseDown(event);
+        case Event.ONMOUSEUP:
         case Event.ONLOSECAPTURE:
             widget.stoppedSelectingCellsWithDrag(event);
             break;
-        case Event.ONTOUCHMOVE: // FIXME remove
         case Event.ONMOUSEMOVE:
             widget.onMouseMoveWhenSelectingCells(event);
             break;
+        case Event.ONTOUCHMOVE: // FIXME remove
         default:
             break;
         }

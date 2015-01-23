@@ -907,3 +907,35 @@
 	cursor: default;
 	opacity: 0.8;
 }
+
+/* TOUCH STYLES */
+
+.v-spreadsheet .sheet-selection.touch.fill .s-left,
+.v-spreadsheet .sheet-selection.touch.fill .s-right {
+	width: 8px;
+	background: #06f url("touch-border-vert.png") no-repeat center;
+}
+
+.v-spreadsheet .sheet-selection.touch.fill .s-top,
+.v-spreadsheet .sheet-selection.touch.fill .s-bottom {
+	height: 8px;
+	background: #06f url("touch-border-hor.png") no-repeat center;
+}
+.v-spreadsheet .sheet-selection.touch .s-corner {
+	width: 12px;
+	height: 12px;
+	bottom: 5px;
+	left: 7px;
+}
+.v-spreadsheet .sheet-selection.touch .s-corner-touch {
+	width: 30px;
+	height: 30px;
+	position: absolute;
+	left: -10px;
+	bottom: -10px;
+}
+
+.v-spreadsheet-selection-actions{
+	background-color: #CCC;
+}
+

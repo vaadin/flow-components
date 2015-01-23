@@ -17,18 +17,25 @@ package com.vaadin.addon.spreadsheet.client;
  * #L%
  */
 
+import java.util.logging.Logger;
+
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.Util;
+import com.vaadin.client.ui.VOverlay;
 
 public class SelectionWidget extends Composite {
 
@@ -43,7 +50,8 @@ public class SelectionWidget extends Composite {
         private final DivElement right = Document.get().createDivElement();
         private final DivElement bottom = Document.get().createDivElement();
         private final DivElement corner = Document.get().createDivElement();
-
+        private final DivElement cornerTouchArea = Document.get()
+                .createDivElement();
         private final DivElement root = Document.get().createDivElement();
 
         private int col1;
@@ -67,16 +75,30 @@ public class SelectionWidget extends Composite {
         private void initDOM() {
             root.setClassName("sheet-selection");
 
+            if (touchMode) {
+                // makes borders bigger with drag-symbol
+                root.addClassName("touch");
+            }
+
             top.setClassName("s-top");
             left.setClassName("s-left");
             right.setClassName("s-right");
             bottom.setClassName("s-bottom");
             corner.setClassName("s-corner");
+            cornerTouchArea.setClassName("s-corner-touch");
+
+            if (touchMode) {
+                // append a large touch area for the corner, since it's too
+                // small otherwise
+                right.appendChild(cornerTouchArea);
+                cornerTouchArea.appendChild(corner);
+            } else {
+                right.appendChild(corner);
+            }
 
             top.appendChild(left);
             top.appendChild(right);
             left.appendChild(bottom);
-            right.appendChild(corner);
             root.appendChild(top);
 
             setElement(root);
@@ -92,6 +114,12 @@ public class SelectionWidget extends Composite {
                 public void onBrowserEvent(Event event) {
                     final Element target = DOM.eventGetTarget(event);
                     final int type = event.getTypeInt();
+
+                    boolean touchEvent = type == Event.ONTOUCHSTART
+                            || type == Event.ONTOUCHEND
+                            || type == Event.ONTOUCHMOVE
+                            || type == Event.ONTOUCHCANCEL;
+
                     if (paintMode) {
                         onPaintEvent(event);
                         event.stopPropagation();
@@ -105,6 +133,31 @@ public class SelectionWidget extends Composite {
                         } else if (target.equals(bottom)) {
                         }
                         // TODO dragging the selection
+                    } else if (touchEvent) {
+
+                        if (type == Event.ONTOUCHEND
+                                || type == Event.ONTOUCHCANCEL) {
+                            Event.releaseCapture(root);
+                            selectCellsStop(event);
+                        } else if (target.equals(corner)) {
+
+                            if (type == Event.ONTOUCHSTART) {
+                                storeEventPos(event);
+                                Event.setCapture(root);
+                            } else {
+
+                                // corners, resize selection
+                                selectCells(event);
+                            }
+                        } else {
+                            // handles, fill
+                            if (fillMode) {
+                                // same as dragging the corner in normal mode
+                                onPaintEvent(event);
+                            }
+                        }
+                        event.preventDefault();
+                        event.stopPropagation();
                     }
                 }
 
@@ -112,6 +165,7 @@ public class SelectionWidget extends Composite {
         }
 
         public void setPosition(int col1, int col2, int row1, int row2) {
+
             root.removeClassName(SheetWidget.toKey(this.col1, this.row1));
             if (minColumn > 0 && col1 < minColumn) {
                 col1 = minColumn;
@@ -206,13 +260,15 @@ public class SelectionWidget extends Composite {
         }
 
         protected void setCornerHidden(boolean hidden) {
+            cornerTouchArea.getStyle().setDisplay(
+                    hidden ? Display.NONE : Display.BLOCK);
             corner.getStyle().setDisplay(hidden ? Display.NONE : Display.BLOCK);
         }
 
         private void onPaintEvent(Event event) {
-            if (!Util.isTouchEventOrLeftMouseButton(event)) {
-                return;
-            }
+            // if (event.getButton() == Event.BUTTON_LEFT) {
+            // return;
+            // }
 
             switch (DOM.eventGetType(event)) {
             case Event.ONTOUCHSTART:
@@ -230,8 +286,12 @@ public class SelectionWidget extends Composite {
                 stopPaintingCells(event);
                 break;
             case Event.ONMOUSEMOVE:
+                paintCells(event);
+                break;
             case Event.ONTOUCHMOVE:
                 paintCells(event);
+                // prevent scrolling
+                event.preventDefault();
                 break;
             default:
                 break;
@@ -252,6 +312,8 @@ public class SelectionWidget extends Composite {
         }
     }
 
+    private final Logger debugConsole = Logger.getLogger("spreadsheet-logger");
+
     private final SelectionOutlineWidget bottomRight;
     private SelectionOutlineWidget bottomLeft;
     private SelectionOutlineWidget topRight;
@@ -270,6 +332,8 @@ public class SelectionWidget extends Composite {
     private int paintedColIndex;
 
     private boolean paintMode;
+    private boolean touchMode;
+    private boolean fillMode;
     private boolean extraInsideSelection = false;
 
     private final SheetHandler handler;
@@ -289,9 +353,17 @@ public class SelectionWidget extends Composite {
     private int totalWidth;
     private String paintPaneClassName = "bottom-right";
 
+    private int tempCol;
+    private int tempRow;
+
+    private VOverlay touchActions;
+
+    private boolean dragging;
+
     public SelectionWidget(SheetHandler actionHandler, SheetWidget sheetWidget) {
         handler = actionHandler;
         this.sheetWidget = sheetWidget;
+        touchMode = sheetWidget.isTouchMode();
         bottomRight = new SelectionOutlineWidget();
         initWidget(bottomRight);
 
@@ -411,6 +483,70 @@ public class SelectionWidget extends Composite {
         }
         totalHeight = (int) countSum(handler.getRowHeights(), row1, row2 + 1);
         totalWidth = countSum(handler.getColWidths(), col1, col2 + 1);
+
+        if (fillMode) {
+            setFillMode(false);
+        }
+
+        if (!dragging) {
+            showTouchActions();
+        }
+
+    }
+
+    private void showTouchActions() {
+        if (touchMode) {
+            // show touch actions in popup
+
+            if (touchActions != null) {
+                // remove old
+                touchActions.hide();
+            }
+
+            touchActions = new VOverlay(true);
+            touchActions.addStyleName("v-spreadsheet-selection-actions");
+            final Button b = new Button("fill");
+            touchActions.setWidth("50px");
+            touchActions.setHeight("25px");
+            touchActions.add(b);
+
+            touchActions.setPopupPositionAndShow(new PositionCallback() {
+
+                @Override
+                public void setPosition(int offsetWidth, int offsetHeight) {
+                    // above top border
+                    int top = bottomRight.top.getAbsoluteTop();
+                    int left = bottomRight.top.getAbsoluteLeft();
+                    int width = bottomRight.top.getClientWidth();
+
+                    top -= offsetHeight + 5;
+                    left += (width / 2) - (offsetWidth / 2);
+
+                    Element parent = sheetWidget.getBottomRightPane();
+                    int parentTop = parent.getAbsoluteTop();
+                    debugConsole.warning(parent.getClassName() + " "
+                            + parentTop + " " + top);
+                    if (parentTop > top) {
+                        // put under instead
+                        top = bottomRight.bottom.getAbsoluteBottom() + 5;
+                    }
+
+                    touchActions.setPopupPosition(left, top);
+
+                    // TODO check for room
+                }
+            });
+            touchActions.show();
+
+            b.addClickHandler(new ClickHandler() {
+
+                @Override
+                public void onClick(ClickEvent event) {
+                    setFillMode(true);
+                    touchActions.hide();
+                }
+            });
+        }
     }
 
     @Override
@@ -495,6 +631,8 @@ public class SelectionWidget extends Composite {
      */
     public int closestCellEdgeIndexToCursor(int cellSizes[], int startIndex,
             int cursorPosition) {
+
+        // TODO completely broken when zoomed in
         int pos = 0;
         if (Math.abs(cursorPosition) > 200) {
             pos = 0;
@@ -530,15 +668,19 @@ public class SelectionWidget extends Composite {
         sheetWidget.scrollSelectionAreaIntoView();
         paint.getStyle().setVisibility(Visibility.VISIBLE);
         paintMode = true;
+        storeEventPos(event);
+        DOM.setCapture(getElement());
+        event.preventDefault();
+
+        sheetWidget.getElement().addClassName("selecting");
+    }
+
+    private void storeEventPos(Event event) {
         Element element = getTopLeftMostElement();
         origX = element.getAbsoluteLeft();
         origY = element.getAbsoluteTop();
         cornerX = origX + totalWidth;
         cornerY = origY + totalHeight;
-        DOM.setCapture(getElement());
-        event.preventDefault();
-
-        sheetWidget.getElement().addClassName("selecting");
     }
 
     private Element getTopLeftMostElement() {
@@ -576,6 +718,54 @@ public class SelectionWidget extends Composite {
         }
 
         sheetWidget.getElement().removeClassName("selecting");
+
+    }
+
+    private void selectCells(Event event) {
+
+        dragging = true;
+
+        final int clientX = Util.getTouchOrMouseClientX(event);
+        final int clientY = Util.getTouchOrMouseClientY(event);
+        // position in perspective to the top left
+        int xMousePos = clientX - origX;
+        int yMousePos = clientY - origY;
+
+        // touch offset; coords are made for mouse movement and need adjustment
+        // on touch
+        xMousePos -= 70;
+        yMousePos -= 20;
+
+        final int[] colWidths = handler.getColWidths();
+        final int colIndex = closestCellEdgeIndexToCursor(colWidths, col1,
+                xMousePos);
+        final int[] rowHeightsPX = handler.getRowHeightsPX();
+        final int rowIndex = closestCellEdgeIndexToCursor(rowHeightsPX, row1,
+                yMousePos);
+
+        tempCol = colIndex;
+        tempRow = rowIndex;
+        sheetWidget.getSheetHandler().onSelectingCellsWithDrag(colIndex,
+                rowIndex);
+    }
+
+    private void selectCellsStop(Event event) {
+        sheetWidget.getSheetHandler().onFinishedSelectingCellsWithDrag(
+                sheetWidget.getSelectedCellColumn(), tempCol,
+                sheetWidget.getSelectedCellRow(), tempRow);
+
+        dragging = false;
+        showTouchActions();
+    }
+
+    protected void setFillMode(boolean b) {
+        fillMode = b;
+        bottomRight.setCornerHidden(b);
+        if (b) {
+            bottomRight.addStyleName("fill");
+        } else {
+            bottomRight.removeStyleName("fill");
+        }
     }
 
     private void paintCells(Event event) {

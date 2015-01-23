@@ -28,6 +28,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.TouchEvent;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -107,6 +108,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private Map<Integer, String> conditionalFormattingStyles = new HashMap<Integer, String>();
 
     private boolean loaded;
+    private boolean touchMode;
     private boolean formulaBarEditing;
     private boolean inlineEditing;
     private boolean cancelDeferredCommit;
@@ -160,7 +162,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     };
 
     public SpreadsheetWidget() {
-        sheetWidget = new SheetWidget(this);
+
+        setTouchMode(TouchEvent.isSupported());
+
+        sheetWidget = new SheetWidget(this, touchMode);
         formulaBarWidget = new FormulaBarWidget(this);
         sheetTabSheet = new SheetTabSheet(this);
         selectionHandler = new SelectionHandler(this, sheetWidget);
@@ -1604,6 +1609,14 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void refreshCellStyles() {
         getSheetWidget().refreshCellStyles();
+    }
+
+    public boolean isTouchMode() {
+        return touchMode;
+    }
+
+    public void setTouchMode(boolean touchMode) {
+        this.touchMode = touchMode;
     }
 
 }
