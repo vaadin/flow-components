@@ -897,6 +897,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public void onSheetKeyPress(NativeEvent event, String enteredCharacter) {
         switch (event.getKeyCode()) {
+        case KeyCodes.KEY_BACKSPACE:
         case KeyCodes.KEY_DELETE:
             checkEditableAndNotify();
             if (!cellLocked) {
@@ -953,17 +954,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         case KeyCodes.KEY_PAGEDOWN:
         case KeyCodes.KEY_PAGEUP:
         case KeyCodes.KEY_SHIFT:
-            break;
-        case KeyCodes.KEY_BACKSPACE:
-            checkEditableAndNotify();
-            if (!cellLocked && !customCellEditorDisplayed) {
-                // cache value and start editing cell as empty
-                inlineEditing = true;
-                cachedCellValue = sheetWidget.getSelectedCellLatestValue();
-                sheetWidget.startEditingCell(true, false, false, "");
-                formulaBarWidget.cacheFormulaFieldValue();
-                formulaBarWidget.setCellPlainValue("");
-            }
             break;
         default:
 
@@ -1574,6 +1564,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         spreadsheetHandler.clearSelectedCellsOnCut();
     }
 
+    @Override
     public Map<Integer, String> getConditionalFormattingStyles() {
         return conditionalFormattingStyles;
     }
