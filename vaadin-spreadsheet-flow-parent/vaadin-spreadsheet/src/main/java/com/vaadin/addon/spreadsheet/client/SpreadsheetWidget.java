@@ -955,6 +955,18 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         case KeyCodes.KEY_PAGEUP:
         case KeyCodes.KEY_SHIFT:
             break;
+        case KeyCodes.KEY_F2:
+            checkEditableAndNotify();
+            if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
+                    && !cellLocked && !customCellEditorDisplayed) {
+                cachedCellValue = sheetWidget.getSelectedCellLatestValue();
+                formulaBarWidget.cacheFormulaFieldValue();
+                formulaBarEditing = false;
+                inlineEditing = true;
+                sheetWidget.startEditingCell(true, true, true,
+                        formulaBarWidget.getFormulaFieldValue());
+            }
+            break;
         default:
 
             checkEditableAndNotify();

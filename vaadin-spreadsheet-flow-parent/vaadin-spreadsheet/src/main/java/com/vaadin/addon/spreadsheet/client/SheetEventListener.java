@@ -146,6 +146,8 @@ public class SheetEventListener implements EventListener {
                 widget.getSheetHandler().onSheetKeyPress(event, ".");
                 event.preventDefault();
                 event.stopPropagation();
+                break;
+            case KeyCodes.KEY_F2:
             case KeyCodes.KEY_UP:
             case KeyCodes.KEY_DOWN:
             case KeyCodes.KEY_LEFT:
