@@ -338,8 +338,6 @@ public class SheetWidget extends Panel {
     private int tempCol;
     private int tempRow;
 
-    private final boolean isIE = BrowserInfo.get().isIE();
-
     private boolean displayRowColHeadings;
 
     private Event mouseOverOrOutEvent;
@@ -4203,8 +4201,8 @@ public class SheetWidget extends Panel {
                             input.setFocus(true);
                             if (value.endsWith("%")) {
                                 input.setCursorPos(value.length() - 1);
-                            } else if (isIE) { // would get wrong position on
-                                               // first inline cell edit
+                            } else {
+                                // continue editing at end pos
                                 input.setCursorPos(value.length());
                             }
                         }
