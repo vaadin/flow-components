@@ -59,7 +59,6 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
-import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.Util;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.VLazyExecutor;
@@ -834,6 +833,7 @@ public class SheetWidget extends Panel {
         input = new TextBox();
         input.setWidth("0");
         input.setValue("x");
+        input.setStyleName("cellinput");
         DOM.appendChild(sheet, input.getElement());
         adopt(input);
 

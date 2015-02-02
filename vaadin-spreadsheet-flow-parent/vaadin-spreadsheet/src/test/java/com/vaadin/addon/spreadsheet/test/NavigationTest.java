@@ -12,7 +12,7 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.addon.spreadsheet.test.pageobjects.AddressUtil;
+import com.vaadin.addon.spreadsheet.elements.AddressUtil;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 
 public class NavigationTest extends AbstractSpreadsheetTestCase {

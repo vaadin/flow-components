@@ -1,4 +1,4 @@
-package com.vaadin.addon.spreadsheet.test.pageobjects;
+package com.vaadin.addon.spreadsheet.elements;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -8,20 +8,22 @@ import java.util.regex.Pattern;
 import org.openqa.selenium.Point;
 
 /**
- * Can convert from excel type addresses to integer coordinates.
+ * An utility class that converts Excel cell addresses to integer coordinates.
+ * 
+ * @author Vaadin Ltd.
  */
 public class AddressUtil {
 
-    public static final Pattern ADDRESS_RANGE_PATTERN = Pattern
+    private static final Pattern ADDRESS_RANGE_PATTERN = Pattern
             .compile("([A-Z]+)(\\d+):([A-Z]+)(\\d+)");
-    public static final Pattern ADDRESS_PATTERN = Pattern
+    private static final Pattern ADDRESS_PATTERN = Pattern
             .compile("([A-Z]+)(\\d+)");
 
     /**
      * Converts a single cell address to its integer coordinates (Point)
      * 
      * @param address
-     *            the address of the cell
+     *            The address of the cell, e.g. A3
      * @return the coordinates of the cell
      */
     public static Point addressToPoint(String address) {
@@ -38,8 +40,8 @@ public class AddressUtil {
      * Converts an address range to a set of coordinates (Points)
      * 
      * @param addressRange
-     *            the address range, e.g. A1:B3, AA20:AZ98, etc.
-     * @return a set of integer coordinates for all cells in the specified
+     *            The address range, e.g. A1:B3, AA20:AZ98, etc.
+     * @return A set of integer coordinates for all cells in the specified
      *         range.
      */
     public static Set<Point> addressRangeToPoints(String addressRange) {
@@ -65,10 +67,11 @@ public class AddressUtil {
      * Converts a character address (like "A", "BA", "AFK") to a numeric one
      * 
      * @param address
-     *            the address
-     * @return the numeric value of the address
+     *            The character address
+     * @return The numeric value of the address
      */
     private static int charAddressToInt(String address) {
+        address = address.toUpperCase();
         int result = 0;
         String reversed = new StringBuffer(address).reverse().toString();
         for (int i = 0; i < reversed.length(); i++) {
