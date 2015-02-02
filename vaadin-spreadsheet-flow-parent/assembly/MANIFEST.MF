@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Vaadin-Package-Version: 1
-Vaadin-Addon: addon/vaadin-spreadsheet-${project.version}.jar
+Vaadin-Addon: vaadin-spreadsheet-${project.version}.jar
 Implementation-Vendor: ${Implementation-Vendor}
 Implementation-Title: ${Implementation-Title}
 Implementation-Version: ${Implementation-Version}
