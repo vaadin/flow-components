@@ -66,6 +66,6 @@ public class InsertNewRowAction extends SpreadsheetAction {
         int rows = spreadsheet.getRows();
         spreadsheet.shiftRows(headerRange.getFirstRow(), (rows - 1), 1, true,
                 true);
-        spreadsheet.setMaximumRows(rows + 1);
+        spreadsheet.setMaxRows(rows + 1);
     }
 }

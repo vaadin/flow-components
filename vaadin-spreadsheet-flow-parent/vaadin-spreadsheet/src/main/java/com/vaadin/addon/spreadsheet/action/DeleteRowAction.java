@@ -72,7 +72,7 @@ public class DeleteRowAction extends SpreadsheetAction {
             spreadsheet.shiftRows(deletedRowIndex + 1, (rows - 1), -1, true,
                     true);
         }
-        spreadsheet.setMaximumRows(rows - 1);
+        spreadsheet.setMaxRows(rows - 1);
     }
 
 }

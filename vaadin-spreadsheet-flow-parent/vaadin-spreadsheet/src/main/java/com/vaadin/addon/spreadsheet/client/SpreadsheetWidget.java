@@ -1484,12 +1484,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     @Override
-    public int getMaximumCols() {
+    public int getMaxColumns() {
         return cols;
     }
 
     @Override
-    public int getMaximumRows() {
+    public int getMaxRows() {
         return rows;
     }
 

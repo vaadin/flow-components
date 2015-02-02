@@ -1125,7 +1125,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Get the number of columns in the currently active sheet, or if
-     * {@link #setMaximumColumns(int)} has been used, the current number of
+     * {@link #setMaxColumns(int)} has been used, the current number of
      * columns the component shows (not the amount of columns in the actual
      * sheet in the POI model).
      * 
@@ -1137,7 +1137,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Get the number of rows in the currently active sheet, or if
-     * {@link #setMaximumRows(int)} has been used, the current number of rows
+     * {@link #setMaxRows(int)} has been used, the current number of rows
      * the component shows (not the amount of rows in the actual sheet in the
      * POI model).
      * 
@@ -1429,7 +1429,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @param cols
      *            New maximum column count.
      */
-    public void setMaximumColumns(int cols) {
+    public void setMaxColumns(int cols) {
         if (getState().cols != cols) {
             getState().cols = cols;
         }
@@ -1446,21 +1446,21 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @param rows
      *            New maximum row count.
      */
-    public void setMaximumRows(int rows) {
+    public void setMaxRows(int rows) {
         if (getState().rows != rows) {
             getState().rows = rows;
         }
     }
 
     /**
-     * Does {@link #setMaximumColumns(int)} & {@link #setMaximumRows(int)} in
+     * Does {@link #setMaxColumns(int)} & {@link #setMaxRows(int)} in
      * one method.
      * @param rows
      *            Maximum row count
      * @param cols
      *            Maximum column count
      */
-    public void setSheetMaximumSize(int rows, int cols) {
+    public void setSheetMaxSize(int rows, int cols) {
         getState().cols = cols;
         getState().rows = rows;
     }
@@ -1568,7 +1568,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * <p>
      * If you are adding / deleting rows, you might want to change the number of
      * visible rows rendered {@link #getRows()} with
-     * {@link #setMaximumRows(int)}.
+     * {@link #setMaxRows(int)}.
      * <p>
      * See {@link Sheet#shiftRows(int, int, int)}.
      * 
@@ -1591,7 +1591,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * <p>
      * If you are adding / deleting rows, you might want to change the number of
      * visible rows rendered {@link #getRows()} with
-     * {@link #setMaximumRows(int)}.
+     * {@link #setMaxRows(int)}.
      * <p>
      * See {@link Sheet#shiftRows(int, int, int, boolean, boolean)}.
      * 

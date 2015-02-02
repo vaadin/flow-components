@@ -573,8 +573,8 @@ public class SheetWidget extends Panel {
         int hScrollDiff = scrollLeft - previousScrollLeft;
         try {
             // in case the number of cols/rows displayed has decreased
-            if (lastRowIndex > actionHandler.getMaximumRows()) {
-                lastRowIndex = actionHandler.getMaximumRows();
+            if (lastRowIndex > actionHandler.getMaxRows()) {
+                lastRowIndex = actionHandler.getMaxRows();
                 while ((lastRowIndex - firstRowIndex + 1) < rows.size()) {
                     ArrayList<Cell> row = rows.remove(rows.size() - 1);
                     for (Cell cell : row) {
@@ -583,8 +583,8 @@ public class SheetWidget extends Panel {
                     rowHeaders.remove(rowHeaders.size() - 1).removeFromParent();
                 }
             }
-            if (lastColumnIndex > actionHandler.getMaximumCols()) {
-                lastColumnIndex = actionHandler.getMaximumCols();
+            if (lastColumnIndex > actionHandler.getMaxColumns()) {
+                lastColumnIndex = actionHandler.getMaxColumns();
                 for (ArrayList<Cell> row : rows) {
                     while ((lastColumnIndex - firstColumnIndex + 1) < row
                             .size()) {
@@ -647,7 +647,7 @@ public class SheetWidget extends Panel {
             }
             if (rightEdgeChange < 0
                     || hScrollDiff > 0
-                    || (lastColumnIndex < actionHandler.getMaximumCols() && lastColumnPosition < rightBound)) {
+                    || (lastColumnIndex < actionHandler.getMaxColumns() && lastColumnPosition < rightBound)) {
                 handleHorizontalScrollRight(scrollLeft);
                 updateCells(0, 1);
             }
@@ -658,7 +658,7 @@ public class SheetWidget extends Panel {
             }
             if (bottomEdgeChange != 0
                     || vScrollDiff > 0
-                    || (lastRowIndex < actionHandler.getMaximumRows() && lastRowPosition < bottomBound)) {
+                    || (lastRowIndex < actionHandler.getMaxRows() && lastRowPosition < bottomBound)) {
                 handleVerticalScrollDown(scrollTop);
                 updateCells(1, 0);
             }
@@ -1410,7 +1410,7 @@ public class SheetWidget extends Panel {
         spreadsheet.addClassName(ROW_RESIZING_CLASSNAME);
         resizeLineStable.addClassName("row" + rowIndex);
         rowIndex++;
-        while (rowIndex < actionHandler.getMaximumRows()
+        while (rowIndex < actionHandler.getMaxRows()
                 && actionHandler.isRowHidden(rowIndex)) {
             rowIndex++;
         }
@@ -1459,7 +1459,7 @@ public class SheetWidget extends Panel {
                 spreadsheet.addClassName(COLUMN_RESIZING_CLASSNAME);
                 resizeLineStable.addClassName("col" + tempColumnIndex);
                 tempColumnIndex++;
-                while (columnIndex <= actionHandler.getMaximumCols()
+                while (columnIndex <= actionHandler.getMaxColumns()
                         && actionHandler.isColumnHidden(tempColumnIndex)) {
                     tempColumnIndex++;
                 }
@@ -1631,7 +1631,7 @@ public class SheetWidget extends Panel {
         }
         // add extra headers if necessary
         while (spaceAfter > headersAfter
-                && index <= actionHandler.getMaximumRows()) {
+                && index <= actionHandler.getMaxRows()) {
             DivElement extraHeader = Document.get().createDivElement();
             extraHeader.setClassName("rh resize-extra row" + (index));
             extraHeader.setInnerText(actionHandler.getRowHeader(index));
@@ -1726,7 +1726,7 @@ public class SheetWidget extends Panel {
         }
         // add extra headers if necessary
         while (spaceAfter > headersAfter
-                && index <= actionHandler.getMaximumCols()) {
+                && index <= actionHandler.getMaxColumns()) {
             DivElement extraHeader = Document.get().createDivElement();
             extraHeader.setClassName("ch resize-extra col" + (index));
             extraHeader.setInnerText(actionHandler.getColHeader(index));
@@ -1843,14 +1843,14 @@ public class SheetWidget extends Panel {
     private void updateSheetStyles() {
         // styles for sizes and position
         final String[] sizeStyleRules = new String[actionHandler
-                .getMaximumRows() + actionHandler.getMaximumCols()];
+                .getMaxRows() + actionHandler.getMaxColumns()];
         // + verticalSplitPosition > 0 ? 1
         // : 0 + horizontalSplitPosition > 0 ? 1 : 0]; // add extra rule if
         // vertical split
         // panel exists
 
         // create row rules (height + top offset)
-        definedRowHeights = new int[actionHandler.getMaximumRows()];
+        definedRowHeights = new int[actionHandler.getMaxRows()];
         topFrozenPanelHeight = 0;
         float topFrozenPanelHeightPt = 0;
         if (verticalSplitPosition > 0) {
@@ -1859,18 +1859,18 @@ public class SheetWidget extends Panel {
             topFrozenPanelHeight = convertPointsToPixel(topFrozenPanelHeightPt) + 1;
         }
         float bottomPanelHeightPt = createRowStyles(sizeStyleRules,
-                verticalSplitPosition + 1, actionHandler.getMaximumRows());
+                verticalSplitPosition + 1, actionHandler.getMaxRows());
 
         // create column rules (width + left offset)
         leftFrozenPanelWidth = 0;
-        int ruleIndex = actionHandler.getMaximumRows();
+        int ruleIndex = actionHandler.getMaxRows();
         if (horizontalSplitPosition > 0) {
             leftFrozenPanelWidth = createColumnStyles(sizeStyleRules,
                     ruleIndex, 1, horizontalSplitPosition);
             ruleIndex += horizontalSplitPosition;
         }
         int bottomPanelWidth = createColumnStyles(sizeStyleRules, ruleIndex,
-                horizontalSplitPosition + 1, actionHandler.getMaximumCols());
+                horizontalSplitPosition + 1, actionHandler.getMaxColumns());
 
         resetStyleSheetRules(cellSizeAndPositionStyle, sizeStyleRules);
 
@@ -2197,7 +2197,7 @@ public class SheetWidget extends Panel {
 
         // count how many columns fit to view on first view
         while (lastColumnPosition < (scrollLeft + scrollViewWidth + columnBufferSize)
-                && lastColumnIndex < actionHandler.getMaximumCols()) {
+                && lastColumnIndex < actionHandler.getMaxColumns()) {
             lastColumnIndex++;
             lastColumnPosition += actionHandler
                     .getColWidthActual(lastColumnIndex);
@@ -2205,7 +2205,7 @@ public class SheetWidget extends Panel {
 
         // count how many rows should be displayed
         while (lastRowPosition < (scrollTop + scrollViewHeight + rowBufferSize)
-                && lastRowIndex < actionHandler.getMaximumRows()) {
+                && lastRowIndex < actionHandler.getMaxRows()) {
             lastRowIndex++;
             if (lastRowIndex >= actionHandler.getDefinedRows()) {
                 lastRowPosition += getDefaultRowHeight();
@@ -2662,7 +2662,7 @@ public class SheetWidget extends Panel {
         }
         int move = 0;
         int add = 0;
-        final int maximumCols = actionHandler.getMaximumCols();
+        final int maximumCols = actionHandler.getMaxColumns();
         while (lastColumnPosition < rightBound && lastColumnIndex < maximumCols) {
             if ((firstColumnPosition + actionHandler
                     .getColWidthActual(firstColumnIndex)) < leftBound) {
@@ -2726,7 +2726,7 @@ public class SheetWidget extends Panel {
         }
         int move = 0;
         int add = 0;
-        final int maximumRows = actionHandler.getMaximumRows();
+        final int maximumRows = actionHandler.getMaxRows();
         while (lastRowPosition < bottomBound && lastRowIndex < maximumRows) {
             if ((firstRowPosition + getRowHeight(firstRowIndex)) < topBound) {
                 // move row from top to bottom
@@ -3601,7 +3601,7 @@ public class SheetWidget extends Panel {
                 width = actionHandler.getColWidthActual(col);
             }
 
-            while (width < textWidth && col <= actionHandler.getMaximumCols()) {
+            while (width < textWidth && col <= actionHandler.getMaxColumns()) {
                 width += actionHandler.getColWidthActual(++col);
             }
             input.setWidth(width + "px");
@@ -4420,7 +4420,7 @@ public class SheetWidget extends Panel {
             if (col > rightColumnIndex) {
                 // scroll to right until column is visible (+ 1 cell extra)
                 int scroll = 0;
-                final int maximumCols = actionHandler.getMaximumCols();
+                final int maximumCols = actionHandler.getMaxColumns();
                 for (int i = rightColumnIndex + 1; i <= col + 1
                         && i <= maximumCols; i++) {
                     scroll += actionHandler.getColWidthActual(i);
@@ -4454,7 +4454,7 @@ public class SheetWidget extends Panel {
             if (row > bottomRowIndex) {
                 // scroll down until row is visible (+1 cell extra)
                 int scroll = 0;
-                final int maximumRows = actionHandler.getMaximumRows();
+                final int maximumRows = actionHandler.getMaxRows();
                 for (int i = bottomRowIndex + 1; i <= row + 1
                         && i <= maximumRows; i++) {
                     scroll += getRowHeight(i);
@@ -4516,7 +4516,7 @@ public class SheetWidget extends Panel {
             if (col2 > rightColumnIndex) {
                 // scroll right until col2 comes visible
                 int scroll = 0;
-                final int maximumCols = actionHandler.getMaximumCols();
+                final int maximumCols = actionHandler.getMaxColumns();
                 for (int i = rightColumnIndex + 1; i <= col2 + 1
                         && i <= maximumCols; i++) {
                     scroll += actionHandler.getColWidthActual(i);
@@ -4552,7 +4552,7 @@ public class SheetWidget extends Panel {
             if (row2 > bottomRowIndex) {
                 // scroll down until row2 is visible
                 int scroll = 0;
-                final int maximumRows = actionHandler.getMaximumRows();
+                final int maximumRows = actionHandler.getMaxRows();
                 for (int i = bottomRowIndex + 1; i <= row2 + 1
                         && i <= maximumRows; i++) {
                     scroll += getRowHeight(i);

@@ -127,14 +127,14 @@ public interface SheetHandler {
      * 
      * @return
      */
-    int getMaximumCols();
+    int getMaxColumns();
 
     /**
      * The maximum amount of rows that are visible
      * 
      * @return
      */
-    int getMaximumRows();
+    int getMaxRows();
 
     int[] getRowHeightsPX();
 

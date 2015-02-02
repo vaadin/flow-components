@@ -55,7 +55,7 @@ public class SelectionHandler {
 
         while (spreadsheet.hiddenRowIndexes != null
                 && spreadsheet.hiddenRowIndexes.contains(row)
-                && row < spreadsheet.getMaximumRows()) {
+                && row < spreadsheet.getMaxRows()) {
             row++;
         }
 
@@ -93,7 +93,7 @@ public class SelectionHandler {
             }
             checkNewSelectionInMergedRegion(col, row);
         } else {
-            if (row <= spreadsheet.getMaximumRows()) {
+            if (row <= spreadsheet.getMaxRows()) {
                 // if the new selected cell is a merged cell
                 checkSelectionInMergedRegion(col, row);
             }
@@ -308,14 +308,14 @@ public class SelectionHandler {
             }
             MergedRegion selection = null;
             if (selectedCellColumn == leftCol) {
-                if (right && rightCol + 1 <= spreadsheet.getMaximumCols()) { // increase
+                if (right && rightCol + 1 <= spreadsheet.getMaxColumns()) { // increase
                                                                              // to
                                                                              // right
                     rightCol++;
                     while (spreadsheet.hiddenColumnIndexes != null
                             && spreadsheet.hiddenColumnIndexes
                                     .contains(rightCol)
-                            && rightCol < spreadsheet.getMaximumCols()) {
+                            && rightCol < spreadsheet.getMaxColumns()) {
                         rightCol++;
                     }
                     selection = MergedRegionUtil.findIncreasingSelection(
@@ -356,14 +356,14 @@ public class SelectionHandler {
                         }
                         selection = findDecreasingSelection(topRow, bottomRow,
                                 leftCol, rightCol);
-                    } else if (rightCol + 1 <= spreadsheet.getMaximumCols()) { // increase
+                    } else if (rightCol + 1 <= spreadsheet.getMaxColumns()) { // increase
                                                                                // to
                                                                                // right
                         rightCol++;
                         while (spreadsheet.hiddenColumnIndexes != null
                                 && spreadsheet.hiddenColumnIndexes
                                         .contains(rightCol)
-                                && rightCol < spreadsheet.getMaximumCols()) {
+                                && rightCol < spreadsheet.getMaxColumns()) {
                             rightCol++;
                         }
                         selection = MergedRegionUtil.findIncreasingSelection(
@@ -383,12 +383,12 @@ public class SelectionHandler {
                 }
             } else {
                 if (right) { // increase to right
-                    if (rightCol + 1 <= spreadsheet.getMaximumCols()) {
+                    if (rightCol + 1 <= spreadsheet.getMaxColumns()) {
                         rightCol++;
                         while (spreadsheet.hiddenColumnIndexes != null
                                 && spreadsheet.hiddenColumnIndexes
                                         .contains(rightCol)
-                                && rightCol < spreadsheet.getMaximumCols()) {
+                                && rightCol < spreadsheet.getMaxColumns()) {
                             rightCol++;
                         }
                         selection = MergedRegionUtil.findIncreasingSelection(
@@ -435,7 +435,7 @@ public class SelectionHandler {
                 col2++;
                 while (spreadsheet.hiddenColumnIndexes != null
                         && spreadsheet.hiddenColumnIndexes.contains(col2)
-                        && col2 < spreadsheet.getMaximumCols()) {
+                        && col2 < spreadsheet.getMaxColumns()) {
                     col2++;
                 }
             } else {
@@ -447,7 +447,7 @@ public class SelectionHandler {
                     selectedCellColumn--;
                 }
             }
-            if (selectedCellColumn > 0 && col2 < spreadsheet.getMaximumCols()) {
+            if (selectedCellColumn > 0 && col2 < spreadsheet.getMaxColumns()) {
                 MergedRegion selection = MergedRegionUtil
                         .findIncreasingSelection(
                                 spreadsheet.mergedRegionContainer,
@@ -717,13 +717,13 @@ public class SelectionHandler {
             }
             MergedRegion selection = null;
             if (selectedCellRow == topRow) {
-                if (down && bottomRow + 1 <= spreadsheet.getMaximumRows()) { // increase
+                if (down && bottomRow + 1 <= spreadsheet.getMaxRows()) { // increase
                                                                              // selection
                                                                              // down
                     bottomRow++;
                     while (spreadsheet.hiddenRowIndexes != null
                             && spreadsheet.hiddenRowIndexes.contains(bottomRow)
-                            && bottomRow < spreadsheet.getMaximumRows()) {
+                            && bottomRow < spreadsheet.getMaxRows()) {
                         bottomRow++;
                     }
                     selection = MergedRegionUtil.findIncreasingSelection(
@@ -763,14 +763,14 @@ public class SelectionHandler {
                         }
                         selection = findDecreasingSelection(topRow, bottomRow,
                                 leftCol, rightCol);
-                    } else if (bottomRow + 1 <= spreadsheet.getMaximumRows()) { // increase
+                    } else if (bottomRow + 1 <= spreadsheet.getMaxRows()) { // increase
                                                                                 // selection
                         // down
                         bottomRow++;
                         while (spreadsheet.hiddenRowIndexes != null
                                 && spreadsheet.hiddenRowIndexes
                                         .contains(bottomRow)
-                                && bottomRow < spreadsheet.getMaximumRows()) {
+                                && bottomRow < spreadsheet.getMaxRows()) {
                             bottomRow++;
                         }
                         selection = MergedRegionUtil.findIncreasingSelection(
@@ -791,12 +791,12 @@ public class SelectionHandler {
             } else {
                 // increase the selection on the desired direction
                 if (down) {
-                    if (bottomRow + 1 <= spreadsheet.getMaximumRows()) {
+                    if (bottomRow + 1 <= spreadsheet.getMaxRows()) {
                         bottomRow++;
                         while (spreadsheet.hiddenRowIndexes != null
                                 && spreadsheet.hiddenRowIndexes
                                         .contains(bottomRow)
-                                && bottomRow < spreadsheet.getMaximumRows()) {
+                                && bottomRow < spreadsheet.getMaxRows()) {
                             bottomRow++;
                         }
                         selection = MergedRegionUtil.findIncreasingSelection(
@@ -843,7 +843,7 @@ public class SelectionHandler {
                 row2++;
                 while (spreadsheet.hiddenRowIndexes != null
                         && spreadsheet.hiddenRowIndexes.contains(row2)
-                        && row2 < spreadsheet.getMaximumRows()) {
+                        && row2 < spreadsheet.getMaxRows()) {
                     row2++;
                 }
             } else {
@@ -855,7 +855,7 @@ public class SelectionHandler {
                     selectedCellRow--;
                 }
             }
-            if (selectedCellRow > 0 && row2 <= spreadsheet.getMaximumRows()) {
+            if (selectedCellRow > 0 && row2 <= spreadsheet.getMaxRows()) {
                 MergedRegion selection = MergedRegionUtil
                         .findIncreasingSelection(
                                 spreadsheet.mergedRegionContainer,
@@ -906,7 +906,7 @@ public class SelectionHandler {
 
         while (spreadsheet.hiddenColumnIndexes != null
                 && spreadsheet.hiddenColumnIndexes.contains(col)
-                && col < spreadsheet.getMaximumCols()) {
+                && col < spreadsheet.getMaxColumns()) {
             col++;
         }
         if (!discardSelection
@@ -941,7 +941,7 @@ public class SelectionHandler {
             }
             checkNewSelectionInMergedRegion(col, row);
         } else {
-            if (col <= spreadsheet.getMaximumCols()) {
+            if (col <= spreadsheet.getMaxColumns()) {
                 checkSelectionInMergedRegion(col, row);
             }
         }

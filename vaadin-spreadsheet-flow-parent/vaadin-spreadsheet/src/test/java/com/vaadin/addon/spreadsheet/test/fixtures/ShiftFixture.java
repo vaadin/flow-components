@@ -8,7 +8,7 @@ public class ShiftFixture {
         @Override
         public void loadFixture(Spreadsheet spreadsheet) {
 
-            spreadsheet.setMaximumRows(spreadsheet.getRows() + 1);
+            spreadsheet.setMaxRows(spreadsheet.getRows() + 1);
 
             spreadsheet.shiftRows(spreadsheet.getSelectedCellReference()
                     .getRow(), spreadsheet.getRows() - 1, 1);
@@ -24,7 +24,7 @@ public class ShiftFixture {
             spreadsheet.shiftRows(spreadsheet.getSelectedCellReference()
                     .getRow() + 1, spreadsheet.getRows() - 1, -1);
 
-            spreadsheet.setMaximumRows(spreadsheet.getRows() - 1);
+            spreadsheet.setMaxRows(spreadsheet.getRows() - 1);
             spreadsheet.refreshAllCellValues();
         }
     }
