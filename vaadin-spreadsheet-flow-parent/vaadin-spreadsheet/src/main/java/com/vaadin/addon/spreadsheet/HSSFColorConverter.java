@@ -33,6 +33,7 @@ import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
  * @author Vaadin Ltd.
  * @since 1.0
  */
+@SuppressWarnings("serial")
 public class HSSFColorConverter implements ColorConverter {
     private final HSSFWorkbook wb;
     private final HSSFPalette colors;

@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -38,7 +39,8 @@ import com.vaadin.addon.spreadsheet.client.MergedRegionUtil;
  * 
  * @author Vaadin Ltd.
  */
-public class CellSelectionManager {
+@SuppressWarnings("serial")
+public class CellSelectionManager implements Serializable {
 
     private final Spreadsheet spreadsheet;
 
@@ -168,6 +170,7 @@ public class CellSelectionManager {
 
     /**
      * Sets/adds the cell at the given coordinates as/to the current selection.
+     * 
      * @param row
      *            Row index, 1-based
      * @param column
@@ -266,6 +269,7 @@ public class CellSelectionManager {
      * Reports the correct cell selection value (formula/data) and selection.
      * This method is called when the cell selection has changed via the address
      * field.
+     * 
      * @param rowIndex
      *            Index of row, 1-based
      * @param columnIndex
@@ -302,18 +306,17 @@ public class CellSelectionManager {
                             value = spreadsheet.getCellValue(cell);
                         }
                     }
-                    spreadsheet.getRpcProxy().showSelectedCell(
-                            colIndex, rowIndex, value, formula,
+                    spreadsheet.getRpcProxy().showSelectedCell(colIndex,
+                            rowIndex, value, formula,
                             spreadsheet.isCellLocked(cell));
                 } else {
-                    spreadsheet.getRpcProxy().showSelectedCell(
-                            colIndex, rowIndex, "", false,
-                            spreadsheet.isCellLocked(cell));
+                    spreadsheet.getRpcProxy()
+                            .showSelectedCell(colIndex, rowIndex, "", false,
+                                    spreadsheet.isCellLocked(cell));
                 }
             } else {
-                spreadsheet.getRpcProxy().showSelectedCell(colIndex,
-                        rowIndex, "", false,
-                        spreadsheet.isActiveSheetProtected());
+                spreadsheet.getRpcProxy().showSelectedCell(colIndex, rowIndex,
+                        "", false, spreadsheet.isActiveSheetProtected());
             }
         }
     }
@@ -345,6 +348,7 @@ public class CellSelectionManager {
      * This method can also be used when the selected cell has NOT changed but
      * the value it displays on the formula field might have changed and needs
      * to be updated.
+     * 
      * @param rowIndex
      *            1-based
      * @param columnIndex
@@ -366,17 +370,15 @@ public class CellSelectionManager {
                         value = spreadsheet.getCellValue(cell);
                     }
                 }
-                spreadsheet.getRpcProxy().showCellValue(value,
-                        columnIndex, rowIndex, formula,
-                        spreadsheet.isCellLocked(cell));
+                spreadsheet.getRpcProxy().showCellValue(value, columnIndex,
+                        rowIndex, formula, spreadsheet.isCellLocked(cell));
             } else {
-                spreadsheet.getRpcProxy().showCellValue("",
-                        columnIndex, rowIndex, false,
-                        spreadsheet.isCellLocked(cell));
+                spreadsheet.getRpcProxy().showCellValue("", columnIndex,
+                        rowIndex, false, spreadsheet.isCellLocked(cell));
             }
         } else {
-            spreadsheet.getRpcProxy().showCellValue("", columnIndex,
-                    rowIndex, false, spreadsheet.isActiveSheetProtected());
+            spreadsheet.getRpcProxy().showCellValue("", columnIndex, rowIndex,
+                    false, spreadsheet.isActiveSheetProtected());
         }
     }
 
@@ -407,17 +409,17 @@ public class CellSelectionManager {
                         value = spreadsheet.getCellValue(cell);
                     }
                 }
-                spreadsheet.getRpcProxy().showSelectedCellRange(
-                        col1 + 1, col2 + 1, row1 + 1, row2 + 1, value, formula,
+                spreadsheet.getRpcProxy().showSelectedCellRange(col1 + 1,
+                        col2 + 1, row1 + 1, row2 + 1, value, formula,
                         spreadsheet.isCellLocked(cell));
             } else {
-                spreadsheet.getRpcProxy().showSelectedCellRange(
-                        col1 + 1, col2 + 1, row1 + 1, row2 + 1, "", false,
+                spreadsheet.getRpcProxy().showSelectedCellRange(col1 + 1,
+                        col2 + 1, row1 + 1, row2 + 1, "", false,
                         spreadsheet.isCellLocked(cell));
             }
         } else {
-            spreadsheet.getRpcProxy().showSelectedCellRange(
-                    col1 + 1, col2 + 1, row1 + 1, row2 + 1, "", false,
+            spreadsheet.getRpcProxy().showSelectedCellRange(col1 + 1, col2 + 1,
+                    row1 + 1, row2 + 1, "", false,
                     spreadsheet.isActiveSheetProtected());
         }
     }
@@ -452,19 +454,19 @@ public class CellSelectionManager {
                     }
                 }
                 spreadsheet.getRpcProxy().setSelectedCellAndRange(
-                        startingPoint.getCol() + 1, startingPoint.getRow() + 1, col1 + 1, col2 + 1,
-                        row1 + 1, row2 + 1, value, formula,
+                        startingPoint.getCol() + 1, startingPoint.getRow() + 1,
+                        col1 + 1, col2 + 1, row1 + 1, row2 + 1, value, formula,
                         spreadsheet.isCellLocked(cell));
             } else {
                 spreadsheet.getRpcProxy().setSelectedCellAndRange(
-                        startingPoint.getCol() + 1, startingPoint.getRow() + 1, col1 + 1, col2 + 1,
-                        row1 + 1, row2 + 1, "", false,
+                        startingPoint.getCol() + 1, startingPoint.getRow() + 1,
+                        col1 + 1, col2 + 1, row1 + 1, row2 + 1, "", false,
                         spreadsheet.isCellLocked(cell));
             }
         } else {
             spreadsheet.getRpcProxy().setSelectedCellAndRange(
-                    startingPoint.getCol() + 1, startingPoint.getRow() + 1, col1 + 1, col2 + 1,
-                    row1 + 1, row2 + 1, "", false,
+                    startingPoint.getCol() + 1, startingPoint.getRow() + 1,
+                    col1 + 1, col2 + 1, row1 + 1, row2 + 1, "", false,
                     spreadsheet.isActiveSheetProtected());
         }
         selectedCellReference = startingPoint;
@@ -490,6 +492,7 @@ public class CellSelectionManager {
 
     /**
      * Sets the given range as the current selection.
+     * 
      * @param row1
      *            Starting row index, 1-based
      * @param col1
@@ -513,6 +516,7 @@ public class CellSelectionManager {
 
     /**
      * Sets the given range and starting point as the current selection.
+     * 
      * @param selectedCellRow
      *            Index of the row where the paint was started, 1-based
      * @param selectedCellColumn
@@ -546,6 +550,7 @@ public class CellSelectionManager {
 
     /**
      * Adds the cell at the given coordinates to the current selection.
+     * 
      * @param row
      *            Row index, 1-based
      * @param column
@@ -584,6 +589,7 @@ public class CellSelectionManager {
 
     /**
      * This is called when a cell range has been added to the current selection.
+     * 
      * @param row1
      *            Starting row index, 1-based
      * @param col1
@@ -662,6 +668,7 @@ public class CellSelectionManager {
 
     /**
      * This is called when a column has made the current selection
+     * 
      * @param firstRowIndex
      *            Index of first row, 1-based
      * @param column
@@ -682,6 +689,7 @@ public class CellSelectionManager {
 
     /**
      * This is called when a column has been added to the current selection
+     * 
      * @param firstRowIndex
      *            Index of first row, 1-based
      * @param column
@@ -702,8 +710,8 @@ public class CellSelectionManager {
         handleCellSelection(firstRowIndex, column);
         selectedCellReference = new CellReference(firstRowIndex - 1, column - 1);
         spreadsheet.loadCustomEditorOnSelectedCell();
-        cellRangeAddresses.add(spreadsheet.createCorrectCellRangeAddress(
-                1, column, spreadsheet.getRows(), column));
+        cellRangeAddresses.add(spreadsheet.createCorrectCellRangeAddress(1,
+                column, spreadsheet.getRows(), column));
         paintedCellRange = null;
         fireNewSelectionChangeEvent();
     }

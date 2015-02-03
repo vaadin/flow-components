@@ -17,6 +17,8 @@ package com.vaadin.addon.spreadsheet.command;
  * #L%
  */
 
+import java.io.Serializable;
+
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
@@ -26,7 +28,7 @@ import org.apache.poi.ss.util.CellReference;
  * @author Vaadin Ltd.
  * @since 1.0
  */
-public interface Command {
+public interface Command extends Serializable {
     /**
      * Executes this command.
      */

@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,7 +39,8 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
  * @author Vaadin Ltd.
  * @since 1.0
  */
-public class SpreadsheetUtil {
+@SuppressWarnings("serial")
+public class SpreadsheetUtil implements Serializable {
 
     private static final Pattern keyParser = Pattern.compile("-?\\d+");
 

@@ -30,6 +30,7 @@ import com.vaadin.addon.spreadsheet.Spreadsheet.HyperlinkCellClickHandler;
  * @author Vaadin Ltd.
  * @since 1.0
  */
+@SuppressWarnings("serial")
 public class DefaultHyperlinkCellClickHandler implements
         HyperlinkCellClickHandler {
 

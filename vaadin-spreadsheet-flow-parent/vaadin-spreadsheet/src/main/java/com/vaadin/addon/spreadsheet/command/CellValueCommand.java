@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet.command;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,12 +34,13 @@ import com.vaadin.addon.spreadsheet.Spreadsheet;
  * @author Vaadin Ltd.
  * @since 1.0
  */
+@SuppressWarnings("serial")
 public class CellValueCommand extends SpreadsheetCommand {
 
     /**
      * Represents the coordinates and value of a single cell.
      */
-    class CellValue {
+    class CellValue implements Serializable {
         public final int row;
         public final int col;
         public Object value;
@@ -53,7 +55,7 @@ public class CellValueCommand extends SpreadsheetCommand {
     /**
      * Represents the coordinates and values of a range of cells.
      */
-    class CellRangeValue {
+    class CellRangeValue implements Serializable {
         public final int row1;
         public final int row2;
         public final int col1;

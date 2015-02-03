@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -62,7 +63,8 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetState;
  * 
  * @author Vaadin Ltd.
  */
-public class SpreadsheetFactory {
+@SuppressWarnings("serial")
+public class SpreadsheetFactory implements Serializable {
 
     private static final Logger LOGGER = Logger
             .getLogger(SpreadsheetFactory.class.getName());

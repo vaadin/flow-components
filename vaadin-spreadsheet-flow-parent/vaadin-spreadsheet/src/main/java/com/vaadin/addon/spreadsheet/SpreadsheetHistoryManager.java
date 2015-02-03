@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -31,7 +32,8 @@ import com.vaadin.addon.spreadsheet.command.Command;
  * 
  * @author Vaadin Ltd.
  */
-public class SpreadsheetHistoryManager {
+@SuppressWarnings("serial")
+public class SpreadsheetHistoryManager implements Serializable {
 
     private int historySize = 20;
 

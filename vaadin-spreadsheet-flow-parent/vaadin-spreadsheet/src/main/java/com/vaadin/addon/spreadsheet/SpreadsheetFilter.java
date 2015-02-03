@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -34,7 +35,7 @@ import java.util.Set;
  * 
  * @author Vaadin Ltd.
  */
-public interface SpreadsheetFilter {
+public interface SpreadsheetFilter extends Serializable {
 
     /**
      * Clear the filtering options. After this method the

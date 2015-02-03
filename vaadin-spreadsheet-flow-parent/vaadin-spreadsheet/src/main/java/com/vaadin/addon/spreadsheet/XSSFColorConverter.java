@@ -48,6 +48,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
  * @author Vaadin Ltd.
  * @since 1.0
  */
+@SuppressWarnings("serial")
 public class XSSFColorConverter implements ColorConverter {
 
     private static final Logger LOGGER = Logger

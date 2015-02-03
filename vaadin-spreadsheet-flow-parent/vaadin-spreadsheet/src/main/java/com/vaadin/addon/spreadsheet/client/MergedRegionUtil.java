@@ -1,5 +1,7 @@
 package com.vaadin.addon.spreadsheet.client;
 
+import java.io.Serializable;
+
 /*
  * #%L
  * Vaadin Spreadsheet
@@ -19,7 +21,7 @@ package com.vaadin.addon.spreadsheet.client;
 
 public class MergedRegionUtil {
 
-    public interface MergedRegionContainer {
+    public interface MergedRegionContainer extends Serializable {
         /**
          * Gets the merged region starting at the given coordinates.
          * 

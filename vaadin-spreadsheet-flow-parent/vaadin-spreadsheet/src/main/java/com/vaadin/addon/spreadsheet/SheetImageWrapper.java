@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
@@ -35,7 +36,8 @@ import com.vaadin.server.StreamResource;
  * 
  * @author Vaadin Ltd.
  */
-public class SheetImageWrapper {
+@SuppressWarnings("serial")
+public class SheetImageWrapper implements Serializable {
 
     private StreamResource resource;
 
@@ -58,6 +60,7 @@ public class SheetImageWrapper {
 
     /**
      * Determines if this image should be visible within the given visible area.
+     * 
      * @param r1
      *            Row index of topmost row, 1-based
      * @param c1

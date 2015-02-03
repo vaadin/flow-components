@@ -17,6 +17,8 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.io.Serializable;
+
 import org.apache.poi.ss.usermodel.BorderFormatting;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
@@ -29,7 +31,7 @@ import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
  * This interface has been created because the POI implementations differ quite
  * a lot.
  */
-public interface ColorConverter {
+public interface ColorConverter extends Serializable {
 
     /**
      * Creates the appropriate CSS text and background style for the given cell

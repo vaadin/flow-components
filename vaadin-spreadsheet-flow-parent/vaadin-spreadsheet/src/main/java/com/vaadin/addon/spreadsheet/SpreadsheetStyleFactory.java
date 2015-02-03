@@ -41,6 +41,7 @@ import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_BOTTOM;
 import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_CENTER;
 import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_TOP;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -73,7 +74,8 @@ import com.vaadin.addon.spreadsheet.client.MergedRegion;
  * 
  * @author Vaadin Ltd.
  */
-public class SpreadsheetStyleFactory {
+@SuppressWarnings("serial")
+public class SpreadsheetStyleFactory implements Serializable {
 
     private static final Logger LOGGER = Logger
             .getLogger(SpreadsheetStyleFactory.class.getName());
@@ -231,6 +233,7 @@ public class SpreadsheetStyleFactory {
     /**
      * Clears all styles for the given cell. Should be used when i.e. a cell has
      * been shifted (the old location is cleared of all styles).
+     * 
      * @param oldRowIndex
      *            0-based
      * @param oldColumnIndex

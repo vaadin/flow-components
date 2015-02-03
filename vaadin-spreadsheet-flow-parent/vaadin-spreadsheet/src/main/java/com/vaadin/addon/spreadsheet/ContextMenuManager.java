@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.logging.Level;
@@ -36,7 +37,8 @@ import com.vaadin.server.KeyMapper;
  * 
  * @author Vaadin Ltd.
  */
-public class ContextMenuManager {
+@SuppressWarnings("serial")
+public class ContextMenuManager implements Serializable {
 
     private static final Logger LOGGER = Logger
             .getLogger(ContextMenuManager.class.getName());
@@ -107,6 +109,7 @@ public class ContextMenuManager {
     /**
      * This method is called when a context menu event has happened on any cell
      * of the target Spreadsheet.
+     * 
      * @param row
      *            Row index at context menu target, 1-based
      * @param column

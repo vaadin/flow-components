@@ -98,7 +98,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /**
      * An interface for handling the edited cell value from user input.
      */
-    public interface CellValueHandler {
+    public interface CellValueHandler extends Serializable {
 
         /**
          * Called if a cell value has been edited by the user by using the
@@ -136,7 +136,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * {@link Spreadsheet#setHyperlinkCellClickHandler(HyperlinkCellClickHandler)}
      * to enable it for the spreadsheet.
      */
-    public interface HyperlinkCellClickHandler {
+    public interface HyperlinkCellClickHandler extends Serializable {
 
         /**
          * Called when a hyperlink cell has been clicked.
@@ -593,6 +593,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Determines if the given cell range is editable or not.
+     * 
      * @param row1
      *            Index of starting row, 0-based
      * @param col1
@@ -660,6 +661,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * Creates a CellRangeAddress from the given start and end coordinates. Also
      * checks that the range is valid within the currently active sheet. If it
      * is not, the resulting range will be truncated to fit the active sheet.
+     * 
      * @param row1
      *            Index of the starting row, 1-based
      * @param col1
@@ -1125,9 +1127,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Get the number of columns in the currently active sheet, or if
-     * {@link #setMaxColumns(int)} has been used, the current number of
-     * columns the component shows (not the amount of columns in the actual
-     * sheet in the POI model).
+     * {@link #setMaxColumns(int)} has been used, the current number of columns
+     * the component shows (not the amount of columns in the actual sheet in the
+     * POI model).
      * 
      * @return Number of visible columns.
      */
@@ -1137,9 +1139,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Get the number of rows in the currently active sheet, or if
-     * {@link #setMaxRows(int)} has been used, the current number of rows
-     * the component shows (not the amount of rows in the actual sheet in the
-     * POI model).
+     * {@link #setMaxRows(int)} has been used, the current number of rows the
+     * component shows (not the amount of rows in the actual sheet in the POI
+     * model).
      * 
      * @return Number of visible rows.
      */
@@ -1453,8 +1455,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * Does {@link #setMaxColumns(int)} & {@link #setMaxRows(int)} in
-     * one method.
+     * Does {@link #setMaxColumns(int)} & {@link #setMaxRows(int)} in one
+     * method.
+     * 
      * @param rows
      *            Maximum row count
      * @param cols
@@ -1567,8 +1570,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * ensures that rows can't wrap around.
      * <p>
      * If you are adding / deleting rows, you might want to change the number of
-     * visible rows rendered {@link #getRows()} with
-     * {@link #setMaxRows(int)}.
+     * visible rows rendered {@link #getRows()} with {@link #setMaxRows(int)}.
      * <p>
      * See {@link Sheet#shiftRows(int, int, int)}.
      * 
@@ -1590,8 +1592,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * ensures that rows can't wrap around.
      * <p>
      * If you are adding / deleting rows, you might want to change the number of
-     * visible rows rendered {@link #getRows()} with
-     * {@link #setMaxRows(int)}.
+     * visible rows rendered {@link #getRows()} with {@link #setMaxRows(int)}.
      * <p>
      * See {@link Sheet#shiftRows(int, int, int, boolean, boolean)}.
      * 
@@ -1770,6 +1771,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Merge cells. See {@link Sheet#addMergedRegion(CellRangeAddress)}.
+     * 
      * @param row1
      *            Index of the starting row of the merged region, 0-based
      * @param col1
@@ -2802,8 +2804,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         int verticalSplitPosition = getVerticalSplitPosition();
         return (horizontalSplitPosition > 0 && verticalSplitPosition > 0 && image
                 .isVisible(1, 1, verticalSplitPosition, horizontalSplitPosition))
-                || (horizontalSplitPosition > 0 && image.isVisible(firstRow,
-                        1, lastRow, horizontalSplitPosition))
+                || (horizontalSplitPosition > 0 && image.isVisible(firstRow, 1,
+                        lastRow, horizontalSplitPosition))
                 || (verticalSplitPosition > 0 && image.isVisible(1,
                         firstColumn, verticalSplitPosition, lastColumn))
                 || image.isVisible(firstRow, firstColumn, lastRow, lastColumn);
@@ -2995,6 +2997,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /**
      * Determines if the cell at the given coordinates is currently visible
      * (rendered) in the browser.
+     * 
      * @param row
      *            Row index, 1-based
      * @param col
@@ -3535,6 +3538,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * If both colSplit and rowSplit are zero then the existing freeze pane is
      * removed.
+     * 
      * @param rowSplit
      *            Vertical position of the split
      * @param colSplit

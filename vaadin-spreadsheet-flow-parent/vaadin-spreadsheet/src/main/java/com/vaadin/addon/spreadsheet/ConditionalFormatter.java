@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,7 +69,8 @@ import com.vaadin.addon.spreadsheet.SpreadsheetStyleFactory.BorderStyle;
  * 
  * @author Thomas Mattsson / Vaadin Ltd.
  */
-public class ConditionalFormatter {
+@SuppressWarnings("serial")
+public class ConditionalFormatter implements Serializable {
 
     private static final Logger LOGGER = Logger
             .getLogger(ConditionalFormatter.class.getName());

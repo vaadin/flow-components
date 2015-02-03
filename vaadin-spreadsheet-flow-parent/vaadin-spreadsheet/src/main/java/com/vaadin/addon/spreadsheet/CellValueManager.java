@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -67,7 +68,8 @@ import com.vaadin.ui.UI;
  * 
  * @author Vaadin Ltd.
  */
-public class CellValueManager {
+@SuppressWarnings("serial")
+public class CellValueManager implements Serializable {
 
     private static final Logger LOGGER = Logger
             .getLogger(CellValueManager.class.getName());
@@ -628,8 +630,8 @@ public class CellValueManager {
                         1, 1, verticalSplitPosition, horizontalSplitPosition);
                 topLeftCellsLoaded = true;
                 if (!topLeftData.isEmpty()) {
-                    spreadsheet.getRpcProxy()
-                            .updateTopLeftCellValues(topLeftData);
+                    spreadsheet.getRpcProxy().updateTopLeftCellValues(
+                            topLeftData);
                 }
             }
 
@@ -637,24 +639,24 @@ public class CellValueManager {
                 ArrayList<CellData> topRightData = loadCellDataForRowAndColumnRange(
                         1, firstColumn, verticalSplitPosition, lastColumn);
                 if (!topRightData.isEmpty()) {
-                    spreadsheet.getRpcProxy()
-                            .updateTopRightCellValues(topRightData);
+                    spreadsheet.getRpcProxy().updateTopRightCellValues(
+                            topRightData);
                 }
             }
             if (horizontalSplitPosition > 0) { // bottom left pane
                 ArrayList<CellData> bottomLeftData = loadCellDataForRowAndColumnRange(
                         firstRow, 1, lastRow, horizontalSplitPosition);
                 if (!bottomLeftData.isEmpty()) {
-                    spreadsheet.getRpcProxy()
-                            .updateBottomLeftCellValues(bottomLeftData);
+                    spreadsheet.getRpcProxy().updateBottomLeftCellValues(
+                            bottomLeftData);
                 }
             }
 
             ArrayList<CellData> bottomRightData = loadCellDataForRowAndColumnRange(
                     firstRow, firstColumn, lastRow, lastColumn);
             if (!bottomRightData.isEmpty()) {
-                spreadsheet.getRpcProxy()
-                        .updateBottomRightCellValues(bottomRightData);
+                spreadsheet.getRpcProxy().updateBottomRightCellValues(
+                        bottomRightData);
             }
         } catch (NullPointerException npe) {
             LOGGER.log(Level.FINEST, npe.getMessage(), npe);
@@ -827,6 +829,7 @@ public class CellValueManager {
     /**
      * Removes all the cells within the given bounds from the Spreadsheet and
      * the underlying POI model.
+     * 
      * @param firstRow
      *            Starting row index, 1-based
      * @param firstColumn
@@ -887,6 +890,7 @@ public class CellValueManager {
     /**
      * Removes an individual cell from the Spreadsheet and the underlying POI
      * model.
+     * 
      * @param rowIndex
      *            Row index of target cell, 1-based
      * @param colIndex

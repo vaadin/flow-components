@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,7 +36,8 @@ import org.apache.poi.ss.util.CellReference;
  * 
  * @author Vaadin Ltd.
  */
-public class SpreadsheetTable {
+@SuppressWarnings("serial")
+public class SpreadsheetTable implements Serializable {
 
     private final CellRangeAddress fullTableRegion;
     private final Sheet sheet;
