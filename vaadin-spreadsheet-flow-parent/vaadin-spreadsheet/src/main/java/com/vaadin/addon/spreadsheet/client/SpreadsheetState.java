@@ -52,7 +52,7 @@ public class SpreadsheetState extends AbstractComponentState {
     public boolean reload;
 
     /** 1-based */
-    public int sheetIndex;
+    public int sheetIndex = 1;
 
     public String[] sheetNames = null;
 

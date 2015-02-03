@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-api</artifactId>
-            <version>7.3.0</version>
+            <version>7.4.0.beta3</version>
         </dependency>
     </dependencies>
     <build>

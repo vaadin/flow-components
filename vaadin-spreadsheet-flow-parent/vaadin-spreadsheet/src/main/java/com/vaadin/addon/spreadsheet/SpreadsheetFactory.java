@@ -69,9 +69,15 @@ public class SpreadsheetFactory implements Serializable {
     private static final Logger LOGGER = Logger
             .getLogger(SpreadsheetFactory.class.getName());
 
-    private static final int DEFAULT_COL_WIDTH_UNITS = 10;
+    /**
+     * Default column width for new sheets in characters
+     */
+    public static final int DEFAULT_COL_WIDTH_UNITS = 10;
 
-    private static final float DEFAULT_ROW_HEIGHT_POINTS = 12.75f;
+    /**
+     * Default for height for new sheets in points
+     */
+    public static final float DEFAULT_ROW_HEIGHT_POINTS = 12.75f;
 
     /**
      * Default column count for new workbooks
@@ -380,8 +386,9 @@ public class SpreadsheetFactory implements Serializable {
             if (charactersToPixels > 0) {
                 spreadsheet.getState().defColW = charactersToPixels;
             } else {
-                spreadsheet.getState().defColW = DEFAULT_COL_WIDTH_UNITS;
-                sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS / 8);
+                spreadsheet.getState().defColW = SpreadsheetUtil
+                        .getDefaultColumnWidthInPx();
+                sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
             }
             final float[] rowHeights = new float[spreadsheet.getRows()];
             int cols = 0;

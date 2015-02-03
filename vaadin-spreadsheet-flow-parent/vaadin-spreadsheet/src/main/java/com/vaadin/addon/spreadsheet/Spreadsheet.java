@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -62,6 +64,8 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.impl.values.XmlValueDisconnectedException;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Element;
 
 import com.vaadin.addon.spreadsheet.client.ImageInfo;
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
@@ -78,6 +82,8 @@ import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
+import com.vaadin.ui.declarative.DesignAttributeHandler;
+import com.vaadin.ui.declarative.DesignContext;
 import com.vaadin.util.ReflectTools;
 
 /**
@@ -211,6 +217,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     private HashSet<SpreadsheetTable> tables;
 
+    private String srcUri;
+
+    private boolean maxColsSet, maxRowsSet, defaultColWidthSet,
+            defaultRowHeightSet;
+
     /**
      * Container for merged regions for the currently active sheet.
      */
@@ -299,6 +310,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public Spreadsheet(File file) throws IOException {
         this();
         SpreadsheetFactory.reloadSpreadsheetComponent(this, file);
+        srcUri = file.toURI().toString();
     }
 
     /**
@@ -314,7 +326,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public Spreadsheet(InputStream inputStream) throws IOException {
         this();
         SpreadsheetFactory.reloadSpreadsheetComponent(this, inputStream);
-
     }
 
     /**
@@ -1073,6 +1084,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         SpreadsheetFactory.reloadSpreadsheetData(this,
                 workbook.getSheetAt(sheetIndex));
         reloadActiveSheetStyles();
+        maxColsSet = false;
+        maxRowsSet = false;
     }
 
     /**
@@ -1434,6 +1447,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void setMaxColumns(int cols) {
         if (getState().cols != cols) {
             getState().cols = cols;
+            maxColsSet = true;
         }
     }
 
@@ -1451,6 +1465,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void setMaxRows(int rows) {
         if (getState().rows != rows) {
             getState().rows = rows;
+            maxRowsSet = true;
         }
     }
 
@@ -1494,6 +1509,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                             + widthPX);
         }
         getState().defColW = widthPX;
+        defaultColWidthSet = true;
     }
 
     /**
@@ -1522,6 +1538,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         getActiveSheet().setDefaultRowHeightInPoints(heightPT);
         getState().defRowH = heightPT;
+        defaultRowHeightSet = true;
     }
 
     /**
@@ -2038,6 +2055,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void read(File file) throws IOException {
         SpreadsheetFactory.reloadSpreadsheetComponent(this, file);
+        srcUri = file.toURI().toString();
     }
 
     /**
@@ -2052,6 +2070,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void read(InputStream inputStream) throws IOException {
         SpreadsheetFactory.reloadSpreadsheetComponent(this, inputStream);
+        srcUri = null;
     }
 
     /**
@@ -3897,5 +3916,172 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void reset() {
         SpreadsheetFactory.loadNewXLSXSpreadsheet(this);
+        srcUri = null;
+    }
+
+    /* Attribute names for declarative format support. */
+    /* These are handled automatically. */
+    private static final String ATTR_ACTIVE_SHEET = "active-sheet-index";
+    private static final String ATTR_DEFAULT_COL_WIDTH = "default-column-width";
+    private static final String ATTR_DEFAULT_COL_COUNT = "default-column-count";
+    private static final String ATTR_DEFAULT_ROW_COUNT = "default-row-count";
+    private static final String ATTR_DEFAULT_ROW_HEIGHT = "default-row-height";
+    /* These need manual handling. */
+    private static final String ATTR_NO_GRIDLINES = "no-gridlines";
+    private static final String ATTR_NO_HEADINGS = "no-headings";
+    private static final String ATTR_MAX_COLS = "max-columns";
+    private static final String ATTR_MAX_ROWS = "max-rows";
+    private static final String ATTR_SRC = "src";
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.ui.AbstractComponent#readDesign(org.jsoup.nodes.Element,
+     * com.vaadin.ui.declarative.DesignContext)
+     */
+    @Override
+    public void readDesign(Element design, DesignContext designContext) {
+        super.readDesign(design, designContext);
+
+        Attributes attr = design.attributes();
+
+        if (attr.hasKey(ATTR_SRC)) {
+            String src = DesignAttributeHandler.readAttribute(ATTR_SRC, attr,
+                    String.class);
+            try {
+                URL url = new URL(src);
+                read(url.openStream());
+                srcUri = src;
+            } catch (MalformedURLException e) {
+                LOGGER.log(Level.SEVERE, "Failed to parse the provided URI.", e);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE,
+                        "Failed to read Excel file from provided URI.", e);
+            }
+        }
+        if (attr.hasKey(ATTR_DEFAULT_COL_COUNT)) {
+            Integer colCount = DesignAttributeHandler.readAttribute(
+                    ATTR_DEFAULT_COL_COUNT, attr, Integer.class);
+            setDefaultColumnCount(colCount);
+        }
+        if (attr.hasKey(ATTR_DEFAULT_COL_WIDTH)) {
+            Integer colWidth = DesignAttributeHandler.readAttribute(
+                    ATTR_DEFAULT_COL_WIDTH, attr, Integer.class);
+            setDefaultColumnWidth(colWidth);
+        }
+        if (attr.hasKey(ATTR_DEFAULT_ROW_COUNT)) {
+            Integer rowCount = DesignAttributeHandler.readAttribute(
+                    ATTR_DEFAULT_ROW_COUNT, attr, Integer.class);
+            setDefaultRowCount(rowCount);
+        }
+        if (attr.hasKey(ATTR_DEFAULT_ROW_HEIGHT)) {
+            Float rowHeight = DesignAttributeHandler.readAttribute(
+                    ATTR_DEFAULT_ROW_HEIGHT, attr, Float.class);
+            setDefaultRowHeight(rowHeight);
+        }
+        if (attr.hasKey(ATTR_ACTIVE_SHEET)) {
+            Integer activeSheet = DesignAttributeHandler.readAttribute(
+                    ATTR_ACTIVE_SHEET, attr, Integer.class);
+            setActiveSheetIndex(activeSheet);
+        }
+        if (attr.hasKey(ATTR_NO_GRIDLINES)) {
+            Boolean noGridlines = DesignAttributeHandler.readAttribute(
+                    ATTR_NO_GRIDLINES, attr, Boolean.class);
+            setGridlinesVisible(!noGridlines);
+        }
+        if (attr.hasKey(ATTR_NO_HEADINGS)) {
+            Boolean noHeadings = DesignAttributeHandler.readAttribute(
+                    ATTR_NO_HEADINGS, attr, Boolean.class);
+            setRowColHeadingsVisible(!noHeadings);
+        }
+        if (attr.hasKey(ATTR_MAX_COLS)) {
+            Integer maxColumns = DesignAttributeHandler.readAttribute(
+                    ATTR_MAX_COLS, attr, Integer.class);
+            setMaxColumns(maxColumns);
+        }
+        if (attr.hasKey(ATTR_MAX_ROWS)) {
+            Integer maxRows = DesignAttributeHandler.readAttribute(
+                    ATTR_MAX_ROWS, attr, Integer.class);
+            setMaxRows(maxRows);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.ui.AbstractComponent#getCustomAttributes()
+     */
+    @Override
+    protected Collection<String> getCustomAttributes() {
+        Collection<String> result = super.getCustomAttributes();
+        result.add(ATTR_ACTIVE_SHEET);
+        result.add(ATTR_DEFAULT_COL_COUNT);
+        result.add(ATTR_DEFAULT_COL_WIDTH);
+        result.add(ATTR_DEFAULT_ROW_COUNT);
+        result.add(ATTR_DEFAULT_ROW_HEIGHT);
+        result.add(ATTR_MAX_COLS);
+        result.add(ATTR_MAX_ROWS);
+        result.add(ATTR_NO_GRIDLINES);
+        result.add(ATTR_NO_HEADINGS);
+        result.add(ATTR_SRC);
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.ui.AbstractComponent#writeDesign(org.jsoup.nodes.Element,
+     * com.vaadin.ui.declarative.DesignContext)
+     */
+    @Override
+    public void writeDesign(Element design, DesignContext designContext) {
+        super.writeDesign(design, designContext);
+
+        Attributes attr = design.attributes();
+
+        DesignAttributeHandler.writeAttribute(ATTR_NO_GRIDLINES, attr,
+                !isGridlinesVisible(), false, Boolean.class);
+
+        DesignAttributeHandler.writeAttribute(ATTR_NO_HEADINGS, attr,
+                !isRowColHeadingsVisible(), false, Boolean.class);
+
+        if (maxColsSet) {
+            DesignAttributeHandler.writeAttribute(ATTR_MAX_COLS, attr,
+                    getColumns(), SpreadsheetFactory.DEFAULT_COLUMNS,
+                    Integer.class);
+        }
+
+        if (maxRowsSet) {
+            DesignAttributeHandler.writeAttribute(ATTR_MAX_ROWS, attr,
+                    getRows(), SpreadsheetFactory.DEFAULT_ROWS, Integer.class);
+        }
+
+        DesignAttributeHandler.writeAttribute(ATTR_ACTIVE_SHEET, attr,
+                getActiveSheetIndex(), 0, Integer.class);
+
+        DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_COL_COUNT, attr,
+                getDefaultColumnCount(), SpreadsheetFactory.DEFAULT_COLUMNS,
+                Integer.class);
+
+        DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_ROW_COUNT, attr,
+                getDefaultRowCount(), SpreadsheetFactory.DEFAULT_ROWS,
+                Integer.class);
+
+        if (defaultColWidthSet) {
+            DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_COL_WIDTH, attr,
+                    getDefaultColumnWidth(),
+                    SpreadsheetUtil.getDefaultColumnWidthInPx(), Integer.class);
+        }
+
+        if (defaultRowHeightSet) {
+            DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_ROW_HEIGHT,
+                    attr, getDefaultRowHeight(),
+                    SpreadsheetFactory.DEFAULT_ROW_HEIGHT_POINTS, Float.class);
+        }
+
+        if (srcUri != null) {
+            DesignAttributeHandler.writeAttribute(ATTR_SRC, attr, srcUri, null,
+                    String.class);
+        }
     }
 }

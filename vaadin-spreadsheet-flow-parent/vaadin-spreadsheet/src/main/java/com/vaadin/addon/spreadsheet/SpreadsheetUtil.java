@@ -269,4 +269,17 @@ public class SpreadsheetUtil implements Serializable {
 
         return widthUnits;
     }
+
+    /**
+     * Gets the default column width for new sheets in pixels. The calculation
+     * is done using POI.
+     * 
+     * @return Default column width in PX
+     */
+    static int getDefaultColumnWidthInPx() {
+        return ExcelToHtmlUtils
+                .getColumnWidthInPx(SpreadsheetFactory.DEFAULT_COL_WIDTH_UNITS
+                        * EXCEL_COLUMN_WIDTH_FACTOR);
+    }
+
 }
