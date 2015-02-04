@@ -249,8 +249,8 @@ public class CellSelectionShifter implements Serializable {
             default:
                 break;
             }
-            spreadsheet.getCellValueManager().cellUpdated(newCell);
         }
+        spreadsheet.getCellValueManager().cellUpdated(newCell);
         if (removeShifted) {
             shiftedCell.setCellValue((String) null);
             spreadsheet.getCellValueManager().cellDeleted(shiftedCell);
