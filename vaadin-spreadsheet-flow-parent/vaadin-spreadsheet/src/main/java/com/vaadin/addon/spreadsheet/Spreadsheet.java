@@ -2240,6 +2240,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         getState().horizontalScrollPositions = new int[getState().sheetNames.length];
 
         conditionalFormatter = createConditionalFormatter();
+
+        getState().workbookChangeToggle = true;
     }
 
     /**

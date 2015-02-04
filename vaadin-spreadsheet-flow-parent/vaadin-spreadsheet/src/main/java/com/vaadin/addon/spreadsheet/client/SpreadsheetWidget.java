@@ -201,14 +201,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         loadSheet(activeSheetIndex - 1);
     }
 
-    public void sheetUpdated(String[] sheetNames, int sheetIndex) {
+    public void sheetUpdated(String[] sheetNames, int sheetIndex,
+            boolean clearScrollPosition) {
         if (!loaded) { // component first load
             sheetTabSheet.addTabs(sheetNames);
             sheetTabSheet.setSelectedTab(sheetIndex);
         } else {
             if (activeSheetIndex != sheetIndex) {
                 // active sheet or whole spreadsheet has changed
-                sheetTabSheet.setTabs(sheetNames, true);
+                sheetTabSheet.setTabs(sheetNames, clearScrollPosition);
                 sheetTabSheet.setSelectedTab(sheetIndex);
             } else if (this.sheetNames == null
                     || !Arrays.equals(this.sheetNames, sheetNames)) {

@@ -119,4 +119,6 @@ public class SpreadsheetState extends AbstractComponentState {
     @DelegateToWidget
     public String infoLabelValue;
 
+    public boolean workbookChangeToggle;
+
 }

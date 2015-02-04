@@ -277,7 +277,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         } else {
             if (stateChangeEvent.hasPropertyChanged("sheetNames")
                     || stateChangeEvent.hasPropertyChanged("sheetIndex")) {
-                widget.sheetUpdated(state.sheetNames, state.sheetIndex);
+                widget.sheetUpdated(state.sheetNames, state.sheetIndex,
+                        stateChangeEvent
+                                .hasPropertyChanged("workbookChangeToggle"));
             }
             if (stateChangeEvent.hasPropertyChanged("hiddenColumnIndexes")
                     || stateChangeEvent.hasPropertyChanged("hiddenRowIndexes")
@@ -305,7 +307,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         SpreadsheetState state = getState();
         SpreadsheetWidget widget = getWidget();
         setupCustomEditors();
-        widget.sheetUpdated(state.sheetNames, state.sheetIndex);
+        widget.sheetUpdated(state.sheetNames, state.sheetIndex,
+                stateChangeEvent.hasPropertyChanged("workbookChangeToggle"));
         widget.setSheetProtected(state.sheetProtected);
         widget.load();
         getWidget().updateMergedRegions(getState().mergedRegions);
