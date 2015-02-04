@@ -83,7 +83,11 @@ public class Cell {
             element.setInnerText("");
             element.getStyle().clearZIndex();
         } else {
-            element.setInnerText(value);
+            if (value.startsWith("'")) {
+                element.setInnerText(value.substring(1, value.length()));
+            } else {
+                element.setInnerText(value);
+            }
             element.getStyle().setZIndex(ZINDEXVALUE);
         }
     }
