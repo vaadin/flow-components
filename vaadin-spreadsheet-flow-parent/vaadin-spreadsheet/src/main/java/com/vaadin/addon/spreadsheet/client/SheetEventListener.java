@@ -104,9 +104,12 @@ public class SheetEventListener implements EventListener {
         final Element target = event.getEventTarget().cast();
         if (target.getParentElement().getClassName().contains("sheet")) {
             SheetJsniUtil jsniUtil = widget.getSheetJsniUtil();
-            jsniUtil.parseColRow(target.getClassName());
-            widget.getSheetHandler().onCellDoubleClick(jsniUtil.getParsedCol(),
-                    jsniUtil.getParsedRow(), target.getInnerText());
+            if (jsniUtil.isHeader(target.getClassName()) == 0) {
+                jsniUtil.parseColRow(target.getClassName());
+                widget.getSheetHandler().onCellDoubleClick(
+                        jsniUtil.getParsedCol(), jsniUtil.getParsedRow(),
+                        target.getInnerText());
+            }
             event.stopPropagation();
         }
     }
