@@ -195,8 +195,10 @@ public class CellValueManager implements Serializable {
                 if (cellStyle.getAlignment() == CellStyle.ALIGN_GENERAL) {
                     if (SpreadsheetUtil.cellContainsDate(cell)
                             || cell.getCellType() == Cell.CELL_TYPE_NUMERIC
-                            || (cell.getCellType() == Cell.CELL_TYPE_FORMULA && !cell
-                                    .getCellFormula().startsWith("HYPERLINK"))) {
+                            || (cell.getCellType() == Cell.CELL_TYPE_FORMULA
+                                    && !cell.getCellFormula().startsWith(
+                                            "HYPERLINK") && !(cell
+                                    .getCachedFormulaResultType() == Cell.CELL_TYPE_STRING))) {
                         cellData.cellStyle = cellData.cellStyle + " r";
                     }
                 }
