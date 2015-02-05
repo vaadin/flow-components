@@ -17,6 +17,9 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
+import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
+
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,6 +56,9 @@ public class CellSelectionShifter implements Serializable {
     private static final String rowShiftRegex = "[$]?[a-zA-Z]+[$]?\\d+";
     private static final Pattern rowShiftPattern = Pattern
             .compile(rowShiftRegex);
+    private static final String stringSequenceRegex = "\\d+$";
+    private static final Pattern stringSequencePattern = Pattern
+            .compile(stringSequenceRegex);
 
     private final Spreadsheet spreadsheet;
 
@@ -146,9 +152,11 @@ public class CellSelectionShifter implements Serializable {
      *            Resulting new cell
      * @param removeShifted
      *            true to remove the source cell at the end
+     * @param sequenceIncrement
+     *            increment added to shifted cell value
      */
     protected void shiftCellValue(Cell shiftedCell, Cell newCell,
-            boolean removeShifted) {
+            boolean removeShifted, Double sequenceIncrement) {
         // clear the new cell first because it might have errors which prevent
         // it from being set to a new type
         if (newCell.getCellType() != Cell.CELL_TYPE_BLANK
@@ -159,102 +167,181 @@ public class CellSelectionShifter implements Serializable {
         newCell.setCellStyle(shiftedCell.getCellStyle());
         spreadsheet.getSpreadsheetStyleFactory()
                 .cellStyleUpdated(newCell, true);
-        if (shiftedCell.getCellType() == Cell.CELL_TYPE_FORMULA) {
-            try {
-                if (shiftedCell.getColumnIndex() != newCell.getColumnIndex()) {
-                    // shift column indexes
-                    int collDiff = newCell.getColumnIndex()
-                            - shiftedCell.getColumnIndex();
-                    Matcher matcher = rowShiftPattern.matcher(shiftedCell
-                            .getCellFormula());
-                    String originalFormula = shiftedCell.getCellFormula();
-                    StringBuilder newFormula = new StringBuilder();
-                    int lastEnd = 0;
-                    while (matcher.find()) {
-                        String s = matcher.group();
-                        String replacement;
-                        if (!s.startsWith("$")) {
-                            String oldIndexString = s.replaceAll(
-                                    "[$]{0,1}\\d+", "");
-
-                            int columnIndex = SpreadsheetUtil
-                                    .getColHeaderIndex(oldIndexString);
-                            columnIndex += collDiff;
-                            replacement = s.replace(oldIndexString,
-                                    SpreadsheetUtil.getColHeader(columnIndex));
-                        } else {
-                            // if column has a '$' reference shouldn't change
-                            replacement = s;
-                        }
-                        newFormula.append(originalFormula.substring(lastEnd,
-                                matcher.start()));
-                        newFormula.append(replacement);
-                        lastEnd = matcher.end();
-                    }
-                    newFormula.append(originalFormula.substring(lastEnd));
-                    newCell.setCellFormula(newFormula.toString());
-                } else { // shift row indexes
-                    int rowDiff = newCell.getRowIndex()
-                            - shiftedCell.getRowIndex();
-                    Matcher matcher = rowShiftPattern.matcher(shiftedCell
-                            .getCellFormula());
-                    String originalFormula = shiftedCell.getCellFormula();
-                    StringBuilder newFormula = new StringBuilder();
-                    int lastEnd = 0;
-                    while (matcher.find()) {
-                        String s = matcher.group();
-                        String rowString = s
-                                .replaceAll("[$]{0,1}[a-zA-Z]+", "");
-                        String replacement;
-                        if (!rowString.startsWith("$")) {
-                            int row = Integer.parseInt(rowString);
-                            row += rowDiff;
-                            replacement = s.replace(rowString,
-                                    Integer.toString(row));
-                        } else {
-                            // if row has a '$' reference shouldn't change
-                            replacement = s;
-                        }
-                        newFormula.append(originalFormula.substring(lastEnd,
-                                matcher.start()));
-                        newFormula.append(replacement);
-                        lastEnd = matcher.end();
-                    }
-                    newFormula.append(originalFormula.substring(lastEnd));
-                    newCell.setCellFormula(newFormula.toString());
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.FINE, e.getMessage(), e);
-                // TODO visualize shifting error
-                newCell.setCellFormula(shiftedCell.getCellFormula());
-            }
-            spreadsheet.getCellValueManager().getFormulaEvaluator()
-                    .notifySetFormula(newCell);
-        } else {
-            switch (shiftedCell.getCellType()) {
-            case Cell.CELL_TYPE_BOOLEAN:
-                newCell.setCellValue(shiftedCell.getBooleanCellValue());
-                break;
-            case Cell.CELL_TYPE_ERROR:
-                newCell.setCellValue(shiftedCell.getErrorCellValue());
-                break;
-            case Cell.CELL_TYPE_NUMERIC:
-                newCell.setCellValue(shiftedCell.getNumericCellValue());
-                break;
-            case Cell.CELL_TYPE_STRING:
-                newCell.setCellValue(shiftedCell.getStringCellValue());
-                break;
-            case Cell.CELL_TYPE_BLANK:
-                // cell is cleared when type is set
-            default:
-                break;
-            }
+        switch (shiftedCell.getCellType()) {
+        case Cell.CELL_TYPE_FORMULA:
+            shiftFormula(shiftedCell, newCell);
+            break;
+        case Cell.CELL_TYPE_BOOLEAN:
+            newCell.setCellValue(shiftedCell.getBooleanCellValue());
+            break;
+        case Cell.CELL_TYPE_ERROR:
+            newCell.setCellValue(shiftedCell.getErrorCellValue());
+            break;
+        case Cell.CELL_TYPE_NUMERIC:
+            shiftNumeric(shiftedCell, newCell, sequenceIncrement);
+            break;
+        case Cell.CELL_TYPE_STRING:
+            shiftString(shiftedCell, newCell, sequenceIncrement);
+            break;
+        case Cell.CELL_TYPE_BLANK:
+            // cell is cleared when type is set
+        default:
+            break;
         }
         spreadsheet.getCellValueManager().cellUpdated(newCell);
         if (removeShifted) {
             shiftedCell.setCellValue((String) null);
             spreadsheet.getCellValueManager().cellDeleted(shiftedCell);
         }
+    }
+
+    /**
+     * Set's cell value for the newCell. It will be the same as shiftedCell
+     * unless sequenceIncrement is not null, in that case the last digits are
+     * replaced
+     * 
+     * @param shiftedCell
+     *            Source cell
+     * @param newCell
+     *            Resulting new cell
+     * @param sequenceIncrement
+     *            not null to increase the number in source cell
+     */
+    private void shiftString(Cell shiftedCell, Cell newCell,
+            Double sequenceIncrement) {
+        if (sequenceIncrement != null) {
+            int dif;
+            if (shiftedCell.getColumnIndex() != newCell.getColumnIndex()) {
+                // shift column indexes
+                dif = newCell.getColumnIndex() - shiftedCell.getColumnIndex();
+            } else {
+                dif = newCell.getRowIndex() - shiftedCell.getRowIndex();
+            }
+
+            Matcher matcher = stringSequencePattern.matcher(shiftedCell
+                    .getStringCellValue());
+            if (matcher.find()) {
+                String base = shiftedCell.getStringCellValue().substring(0,
+                        matcher.start());
+                String currentValue = matcher.group();
+                Double currVal = Double.parseDouble(currentValue);
+                newCell.setCellValue(base
+                        + (int) Math.abs(currVal + sequenceIncrement * dif));
+            } else {
+                newCell.setCellValue(shiftedCell.getStringCellValue());
+            }
+        } else {
+            newCell.setCellValue(shiftedCell.getStringCellValue());
+        }
+    }
+
+    /**
+     * Set's cell value for the newCell. It will be the same as shiftedCell
+     * unless sequenceIncrement is not null, in that case the value changes
+     * depending on sequenceIncrement and cell distance
+     * 
+     * @param shiftedCell
+     *            Source cell
+     * @param newCell
+     *            Resulting new cell
+     * @param sequenceIncrement
+     *            not null to increase the number in source cell
+     */
+    private void shiftNumeric(Cell shiftedCell, Cell newCell,
+            Double sequenceIncrement) {
+        if (sequenceIncrement != null) {
+            int dif;
+            if (shiftedCell.getColumnIndex() != newCell.getColumnIndex()) {
+                // shift column indexes
+                dif = newCell.getColumnIndex() - shiftedCell.getColumnIndex();
+            } else {
+                dif = newCell.getRowIndex() - shiftedCell.getRowIndex();
+            }
+            newCell.setCellValue(shiftedCell.getNumericCellValue()
+                    + sequenceIncrement * dif);
+        } else {
+            newCell.setCellValue(shiftedCell.getNumericCellValue());
+        }
+    }
+
+    /**
+     * Set's cell value for the newCell. It will be the same as shiftedCell with
+     * updated references.
+     * 
+     * @param shiftedCell
+     *            Source cell
+     * @param newCell
+     *            Resulting new cell
+     */
+    private void shiftFormula(Cell shiftedCell, Cell newCell) {
+        try {
+            if (shiftedCell.getColumnIndex() != newCell.getColumnIndex()) {
+                // shift column indexes
+                int collDiff = newCell.getColumnIndex()
+                        - shiftedCell.getColumnIndex();
+                Matcher matcher = rowShiftPattern.matcher(shiftedCell
+                        .getCellFormula());
+                String originalFormula = shiftedCell.getCellFormula();
+                StringBuilder newFormula = new StringBuilder();
+                int lastEnd = 0;
+                while (matcher.find()) {
+                    String s = matcher.group();
+                    String replacement;
+                    if (!s.startsWith("$")) {
+                        String oldIndexString = s
+                                .replaceAll("[$]{0,1}\\d+", "");
+
+                        int columnIndex = SpreadsheetUtil
+                                .getColHeaderIndex(oldIndexString);
+                        columnIndex += collDiff;
+                        replacement = s.replace(oldIndexString,
+                                SpreadsheetUtil.getColHeader(columnIndex));
+                    } else {
+                        // if column has a '$' reference shouldn't change
+                        replacement = s;
+                    }
+                    newFormula.append(originalFormula.substring(lastEnd,
+                            matcher.start()));
+                    newFormula.append(replacement);
+                    lastEnd = matcher.end();
+                }
+                newFormula.append(originalFormula.substring(lastEnd));
+                newCell.setCellFormula(newFormula.toString());
+            } else { // shift row indexes
+                int rowDiff = newCell.getRowIndex() - shiftedCell.getRowIndex();
+                Matcher matcher = rowShiftPattern.matcher(shiftedCell
+                        .getCellFormula());
+                String originalFormula = shiftedCell.getCellFormula();
+                StringBuilder newFormula = new StringBuilder();
+                int lastEnd = 0;
+                while (matcher.find()) {
+                    String s = matcher.group();
+                    String rowString = s.replaceAll("[$]{0,1}[a-zA-Z]+", "");
+                    String replacement;
+                    if (!rowString.startsWith("$")) {
+                        int row = Integer.parseInt(rowString);
+                        row += rowDiff;
+                        replacement = s.replace(rowString,
+                                Integer.toString(row));
+                    } else {
+                        // if row has a '$' reference shouldn't change
+                        replacement = s;
+                    }
+                    newFormula.append(originalFormula.substring(lastEnd,
+                            matcher.start()));
+                    newFormula.append(replacement);
+                    lastEnd = matcher.end();
+                }
+                newFormula.append(originalFormula.substring(lastEnd));
+                newCell.setCellFormula(newFormula.toString());
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.FINE, e.getMessage(), e);
+            // TODO visualize shifting error
+            newCell.setCellFormula(shiftedCell.getCellFormula());
+        }
+        spreadsheet.getCellValueManager().getFormulaEvaluator()
+                .notifySetFormula(newCell);
     }
 
     /**
@@ -346,13 +433,16 @@ public class CellSelectionShifter implements Serializable {
                         newRow = activeSheet.createRow(newRowIndex - 1);
                     }
                     for (int c = c1; c <= c2; c++) {
+                        Double sequenceIncrement = getColumnSequenceIncrement(
+                                c, r1, r2);
                         Cell shiftedCell = shiftedRow.getCell(c - 1);
                         Cell newCell = newRow.getCell(c - 1);
                         if (shiftedCell != null) {
                             if (newCell == null) {
                                 newCell = newRow.createCell(c - 1);
                             }
-                            shiftCellValue(shiftedCell, newCell, false);
+                            shiftCellValue(shiftedCell, newCell, false,
+                                    sequenceIncrement);
                         } else if (newCell != null) {
                             // update style to 0
                             newCell.setCellStyle(null);
@@ -391,13 +481,16 @@ public class CellSelectionShifter implements Serializable {
                         newRow = activeSheet.createRow(newRowIndex - 1);
                     }
                     for (int c = c1; c <= c2; c++) {
+                        Double sequenceIncrement = getColumnSequenceIncrement(
+                                c, r1, r2);
                         Cell shiftedCell = shiftedRow.getCell(c - 1);
                         Cell newCell = newRow.getCell(c - 1);
                         if (shiftedCell != null) {
                             if (newCell == null) {
                                 newCell = newRow.createCell(c - 1);
                             }
-                            shiftCellValue(shiftedCell, newCell, false);
+                            shiftCellValue(shiftedCell, newCell, false,
+                                    sequenceIncrement);
                         } else if (newCell != null) {
                             // update style to 0
                             newCell.setCellStyle(null);
@@ -429,6 +522,8 @@ public class CellSelectionShifter implements Serializable {
         for (int rIndex = r1; rIndex <= r2; rIndex++) {
             final Row row = activeSheet.getRow(rIndex - 1);
             if (row != null) {
+                Double sequenceIncrement = getRowSequenceIncrement(rIndex, c1,
+                        c2);
                 for (int shiftedCellIndex = c1; shiftedCellIndex <= c2; shiftedCellIndex++) {
                     Cell shiftedCell = row.getCell(shiftedCellIndex - 1);
                     int newCellIndex = c2 + 1 + (shiftedCellIndex - c1);
@@ -438,7 +533,8 @@ public class CellSelectionShifter implements Serializable {
                             if (newCell == null) {
                                 newCell = row.createCell(newCellIndex - 1);
                             }
-                            shiftCellValue(shiftedCell, newCell, false);
+                            shiftCellValue(shiftedCell, newCell, false,
+                                    sequenceIncrement);
 
                         } else if (newCell != null) {
                             newCell.setCellValue((String) null);
@@ -468,6 +564,8 @@ public class CellSelectionShifter implements Serializable {
         for (int rIndex = r1; rIndex <= r2; rIndex++) {
             final Row row = activeSheet.getRow(rIndex - 1);
             if (row != null) {
+                Double sequenceIncrement = getRowSequenceIncrement(rIndex, c1,
+                        c2);
                 for (int shiftedCellIndex = c1; shiftedCellIndex <= c2; shiftedCellIndex++) {
                     Cell shiftedCell = row.getCell(shiftedCellIndex - 1);
                     int newCellIndex = c1 - (shiftedCellIndex - c1) - 1;
@@ -477,7 +575,8 @@ public class CellSelectionShifter implements Serializable {
                             if (newCell == null) {
                                 newCell = row.createCell(newCellIndex - 1);
                             }
-                            shiftCellValue(shiftedCell, newCell, false);
+                            shiftCellValue(shiftedCell, newCell, false,
+                                    sequenceIncrement);
                         } else if (newCell != null) {
                             newCell.setCellValue((String) null);
                             getCellValueManager().cellDeleted(newCell);
@@ -491,6 +590,279 @@ public class CellSelectionShifter implements Serializable {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the increment between all consecutive cells in row with rIndex
+     * from column c1 to column c2
+     * 
+     * @param rIndex
+     *            Row index for the sequence recognition, 1-based
+     * @param c1
+     *            First column of the row to be considered, 1-based
+     * @param c2
+     *            Last column of the row to be considered, 1-based
+     * @return common difference or null
+     */
+    private Double getRowSequenceIncrement(int rIndex, int c1, int c2) {
+        Double result = null;
+        Workbook workbook = spreadsheet.getWorkbook();
+        final Sheet activeSheet = workbook.getSheetAt(workbook
+                .getActiveSheetIndex());
+        final Row row = activeSheet.getRow(rIndex - 1);
+        if (row != null) {
+            Cell firstCell = row.getCell(c1 - 1);
+            if (firstCell != null) {
+                if (firstCell.getCellType() == CELL_TYPE_STRING) {
+                    return getSequenceIncrement(getRowStringValues(row, c1, c2));
+                } else if (firstCell.getCellType() == CELL_TYPE_NUMERIC) {
+                    return getSequenceIncrement(getRowNumericValues(row, c1, c2));
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns an array with String values in column with columnIndex from row
+     * r1 to row r2 in activeSheet until first non String cell or null value
+     * Used by
+     * {@link CellSelectionShifter#getColumnSequenceIncrement(int, int, int)}
+     * 
+     * @param activeSheet
+     *            Sheet where the cells are going to be taken from
+     * @param columnIndex
+     *            Defines the origin of the cell values to be returned, 1-based
+     * @param r1
+     *            First row of the column to be returned, 1-based
+     * @param r2
+     *            Last row of the column to be returned, 1-based
+     * @return String array with values
+     */
+    private String[] getColumnStringValues(Sheet activeSheet, int columnIndex,
+            int r1, int r2) {
+        String[] result = new String[r2 - r1 + 1];
+        Cell cell;
+        Row row;
+        for (int i = r1; i <= r2; i++) {
+            row = activeSheet.getRow(i - 1);
+            if (row != null) {
+                cell = row.getCell(columnIndex - 1);
+                if (cell != null && cell.getCellType() == CELL_TYPE_STRING) {
+                    result[i - r1] = cell.getStringCellValue();
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns an array with Double values in column with columnIndex from row
+     * r1 to row r2 in activeSheet until first non numeric cell or null value
+     * Used by
+     * {@link CellSelectionShifter#getColumnSequenceIncrement(int, int, int)}
+     * 
+     * @param activeSheet
+     *            Sheet where the cells are goint to be taken from
+     * @param columnIndex
+     *            Defines the origin of the cell values to be returned, 1-based
+     * @param r1
+     *            First row of the column to be returned, 1-based
+     * @param r2
+     *            Last row of the column to be returned, 1-based
+     * @return Double array with values
+     */
+    private Double[] getColumnNumericValues(Sheet activeSheet, int columnIndex,
+            int r1, int r2) {
+        Double[] result = new Double[r2 - r1 + 1];
+        Cell cell;
+        Row row;
+        for (int i = r1; i <= r2; i++) {
+            row = activeSheet.getRow(i - 1);
+            if (row != null) {
+                cell = row.getCell(columnIndex - 1);
+                if (cell != null && cell.getCellType() == CELL_TYPE_NUMERIC) {
+                    result[i - r1] = cell.getNumericCellValue();
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns an array with String values in row from column c1 to column c2
+     * until first non String cell or null value. Used by
+     * {@link CellSelectionShifter#getRowSequenceIncrement(int, int, int)}
+     * 
+     * @param row
+     *            Row where the cells are going to be taken from
+     * @param c1
+     *            First column of the row to be returned, 1-based
+     * @param c2
+     *            Last column of the column to be returned, 1-based
+     * @return String array with values
+     */
+    private String[] getRowStringValues(Row row, int c1, int c2) {
+        String[] result = new String[c2 - c1 + 1];
+        Cell cell;
+        for (int i = c1; i <= c2; i++) {
+            cell = row.getCell(i - 1);
+            if (cell != null && cell.getCellType() == CELL_TYPE_STRING) {
+                result[i - c1] = cell.getStringCellValue();
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns an array with Double values in row from column c1 to column c2
+     * until first non Numeric cell or null value. Used by
+     * {@link CellSelectionShifter#getRowSequenceIncrement(int, int, int)}
+     * 
+     * @param row
+     *            Row where the cells are going to be taken from
+     * @param c1
+     *            First column of the row to be returned, 1-based
+     * @param c2
+     *            Last column of the column to be returned, 1-based
+     * @return Double array with values
+     */
+    private Double[] getRowNumericValues(Row row, int c1, int c2) {
+        Double[] result = new Double[c2 - c1 + 1];
+        Cell shiftedCell;
+        for (int i = c1; i <= c2; i++) {
+            shiftedCell = row.getCell(i - 1);
+            if (shiftedCell != null
+                    && shiftedCell.getCellType() == CELL_TYPE_NUMERIC) {
+                result[i - c1] = shiftedCell.getNumericCellValue();
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the increment between all consecutive elements of values
+     * parameter or null if there isn't
+     * 
+     * @param values
+     *            Double values to be considered for the sequence recognition
+     * @return common difference or null
+     */
+    private Double getSequenceIncrement(Double[] values) {
+        Double result = null;
+        for (int i = 1; i < values.length; i++) {
+            if (values[i] != null && values[i - 1] != null) {
+                Double diff = values[i] - values[i - 1];
+                if (result == null) {
+                    result = diff;
+                } else if (!result.equals(diff)) {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the increment between all consecutive elements of values
+     * parameter or null if there isn't. Also checks that all elements have the
+     * same constant String before the digits
+     * 
+     * @param values
+     *            String values to be considered for the sequence recognition
+     * @return common difference or null
+     */
+    private Double getSequenceIncrement(String[] values) {
+        Double result = null;
+        String previousConstant = null;
+        Double previousValue = null;
+        Matcher matcher = stringSequencePattern.matcher(values[0]);
+        if (matcher.find()) {
+            previousConstant = values[0].substring(0, matcher.start());
+            previousValue = Double.parseDouble(matcher.group());
+        } else {
+            return null;
+        }
+        if (values.length > 1) {
+            for (int i = 1; i < values.length; i++) {
+                String currentValue = values[i];
+                if (currentValue != null
+                        && currentValue.startsWith(previousConstant)) {
+                    matcher = stringSequencePattern.matcher(currentValue);
+                    if (matcher.find()) {
+                        String constant = currentValue.substring(0,
+                                matcher.start());
+                        if (previousConstant.equals(constant)) {
+                            Double value = Double.parseDouble(matcher.group());
+                            Double diff = value - previousValue;
+                            if (result == null) {
+                                result = diff;
+                            } else if (!result.equals(diff)) {
+                                return null;
+                            }
+                            previousValue = value;
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            }
+        } else {
+            return 1d;
+        }
+        return result;
+    }
+
+    /**
+     * Returns the increment between all consecutive cells in column with cIndex
+     * from row r1 to row r2
+     * 
+     * @param cIndex
+     *            Column index for the sequence recognition, 1-based
+     * 
+     * @param r1
+     *            First row of the column to be considered, 1-based
+     * @param r2
+     *            Last row of the column to be considered, 1-based
+     * @return common difference or null
+     */
+    private Double getColumnSequenceIncrement(int cIndex, int r1, int r2) {
+        Double result = null;
+        Workbook workbook = spreadsheet.getWorkbook();
+        final Sheet activeSheet = workbook.getSheetAt(workbook
+                .getActiveSheetIndex());
+        final Row row = activeSheet.getRow(r1 - 1);
+        if (row != null) {
+            Cell firstCell = row.getCell(cIndex - 1);
+            if (firstCell != null) {
+                if (firstCell.getCellType() == CELL_TYPE_STRING) {
+                    return getSequenceIncrement(getColumnStringValues(
+                            activeSheet, cIndex, r1, r2));
+                } else if (firstCell.getCellType() == CELL_TYPE_NUMERIC) {
+                    return getSequenceIncrement(getColumnNumericValues(
+                            activeSheet, cIndex, r1, r2));
+                }
+            }
+        }
+        return result;
     }
 
     private CellValueManager getCellValueManager() {
