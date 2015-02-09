@@ -74,8 +74,6 @@ public class CellValueManager implements Serializable {
     private static final Logger LOGGER = Logger
             .getLogger(CellValueManager.class.getName());
 
-    private static final String numericCellDetectionPattern = "[^A-Za-z]*[0-9]+[^A-Za-z]*";
-
     private short hyperlinkStyleIndex = -1;
 
     /**
@@ -227,8 +225,16 @@ public class CellValueManager implements Serializable {
 
     protected String getScientificNotationStringForNumericCell(Cell cell,
             String formattedValue) {
-        BigDecimal ratio = new BigDecimal(cellStyleWidthRatioMap.get((int) cell
-                .getCellStyle().getIndex()));
+
+        Float r = cellStyleWidthRatioMap.get((int) cell.getCellStyle()
+                .getIndex());
+
+        if (r == null) {
+            // no col data available, return same val
+            return formattedValue;
+        }
+
+        BigDecimal ratio = new BigDecimal(r);
         BigDecimal stringPixels = ratio.multiply(new BigDecimal(formattedValue
                 .length()));
         BigDecimal columnWidth = new BigDecimal(
@@ -413,15 +419,30 @@ public class CellValueManager implements Serializable {
                             styler.cellStyleUpdated(cell, true);
                         }
                     } else {
+
+                        Double percentage = SpreadsheetUtil.parsePercentage(
+                                value, spreadsheet.getLocale());
+                        Double numVal = SpreadsheetUtil.parseNumber(value,
+                                spreadsheet.getLocale());
+
                         if (value.isEmpty()) {
                             cell = r.createCell(col - 1); // BLANK
-                        } else if (value.matches(numericCellDetectionPattern)) {
+
+                        } else if (percentage != null) {
                             cell = r.createCell(col - 1, Cell.CELL_TYPE_NUMERIC);
-                            try {
-                                cell.setCellValue(Double.parseDouble(value));
-                            } catch (NumberFormatException nfe) {
-                                cell.setCellValue(value);
-                            }
+                            CellStyle style = workbook.createCellStyle();
+                            style.setDataFormat(workbook
+                                    .createDataFormat()
+                                    .getFormat(
+                                            spreadsheet
+                                                    .getDefaultPercentageFormat()));
+                            cell.setCellStyle(style);
+                            styler.cellStyleUpdated(cell, true);
+                            cell.setCellValue(percentage);
+
+                        } else if (numVal != null) {
+                            cell = r.createCell(col - 1, Cell.CELL_TYPE_NUMERIC);
+                            cell.setCellValue(numVal);
                         } else {
                             cell = r.createCell(col - 1, Cell.CELL_TYPE_STRING);
                             cell.setCellValue(value);
@@ -455,19 +476,38 @@ public class CellValueManager implements Serializable {
                             styler.cellStyleUpdated(cell, true);
                         }
                     } else {
+
+                        Double percentage = SpreadsheetUtil.parsePercentage(
+                                value, spreadsheet.getLocale());
+                        Double numVal = SpreadsheetUtil.parseNumber(value,
+                                spreadsheet.getLocale());
+
                         if (value.isEmpty()) {
                             cell.setCellType(Cell.CELL_TYPE_BLANK);
                         } else if (cellType == Cell.CELL_TYPE_NUMERIC) {
-                            parseValueIntoNumericCell(cell, value);
-                        } else if (value.matches(numericCellDetectionPattern)) {
-                            if (cellType == Cell.CELL_TYPE_FORMULA) {
-                                cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+
+                            if (percentage != null) {
+                                CellStyle cs = cell.getCellStyle();
+                                if (cs == null) {
+                                    cs = workbook.createCellStyle();
+                                    cell.setCellStyle(cs);
+                                }
+                                cs.setDataFormat(workbook
+                                        .createDataFormat()
+                                        .getFormat(
+                                                spreadsheet
+                                                        .getDefaultPercentageFormat()));
+                                styler.cellStyleUpdated(cell, true);
+                                cell.setCellValue(percentage);
+                            } else if (numVal != null) {
+                                cell.setCellValue(numVal);
+                            } else {
+                                parseValueIntoNumericCell(cell, value);
                             }
-                            try {
-                                cell.setCellValue(Double.parseDouble(value));
-                            } catch (NumberFormatException nfe) {
-                                cell.setCellValue(value);
-                            }
+                        } else if (numVal != null
+                                && cellType == Cell.CELL_TYPE_FORMULA) {
+                            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+                            cell.setCellValue(numVal);
                         } else if (cellType == Cell.CELL_TYPE_BOOLEAN) {
                             cell.setCellValue(Boolean.parseBoolean(value));
                         } else {
@@ -1018,4 +1058,5 @@ public class CellValueManager implements Serializable {
             }
         }
     }
+
 }

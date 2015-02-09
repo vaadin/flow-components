@@ -7,73 +7,175 @@ import java.util.Locale;
 
 import org.junit.Test;
 
-import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.addon.spreadsheet.SpreadsheetHandlerImpl;
+import com.vaadin.addon.spreadsheet.SpreadsheetUtil;
 
 public class CopyPasteTest {
 
-    public static class TestHandler extends SpreadsheetHandlerImpl {
-        public TestHandler(Spreadsheet spreadsheet) {
-            super(spreadsheet);
-        }
+    @Test
+    public void testNumberParsingWithEnLocale() {
+        Locale locale = new Locale("en");
 
-        public Double checkForNumber(String cellContent) {
-            return super.checkForNumber(cellContent);
-        }
+        Double result = SpreadsheetUtil.parseNumber(null, locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("s42", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("42s", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("42", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4.2", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,3", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4 3", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4E2", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4.2E2", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,2E2", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4 002", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,002", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4.002", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4 002.42", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,002.42", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4.002,42", locale);
+        assertNull(result);
     }
 
     @Test
-    public void testNumberParsingWithLocale() {
+    public void testNumberParsingWithFiLocale() {
+        Locale locale = new Locale("fi");
 
-        Spreadsheet sheet = new Spreadsheet();
-        sheet.setLocale(new Locale("en"));
-        TestHandler handler = new TestHandler(sheet);
+        Double result = SpreadsheetUtil.parseNumber(null, locale);
+        assertNull(result);
 
-        testNumbers(handler);
+        result = SpreadsheetUtil.parseNumber("", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("s42", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("42s", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("42", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4.2", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,3", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4 3", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4E2", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4.2E2", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,2E2", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4 002", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,002", locale);
+        assertNotNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4.002", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4 002.42", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,002.42", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4.002,42", locale);
+        assertNull(result);
     }
 
     @Test
-    public void testNumberParsingWithoutLocale() {
+    public void testNumberParsingWithItLocale() {
+        Locale locale = new Locale("it");
 
-        Spreadsheet sheet = new Spreadsheet();
-        // sheet.setLocale(null); is default
-        TestHandler handler = new TestHandler(sheet);
-
-        testNumbers(handler);
-    }
-
-    private void testNumbers(TestHandler handler) {
-        Double result = handler.checkForNumber(null);
+        Double result = SpreadsheetUtil.parseNumber(null, locale);
         assertNull(result);
 
-        result = handler.checkForNumber("");
+        result = SpreadsheetUtil.parseNumber("", locale);
         assertNull(result);
 
-        result = handler.checkForNumber("s42");
+        result = SpreadsheetUtil.parseNumber("s42", locale);
         assertNull(result);
 
-        result = handler.checkForNumber("42s");
+        result = SpreadsheetUtil.parseNumber("42s", locale);
         assertNull(result);
 
-        result = handler.checkForNumber("42");
+        result = SpreadsheetUtil.parseNumber("42", locale);
         assertNotNull(result);
 
-        result = handler.checkForNumber("4.2");
+        result = SpreadsheetUtil.parseNumber("4.2", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,3", locale);
         assertNotNull(result);
 
-        result = handler.checkForNumber("4,3");
+        result = SpreadsheetUtil.parseNumber("4 3", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4E2", locale);
         assertNotNull(result);
 
-        result = handler.checkForNumber("4E2");
+        result = SpreadsheetUtil.parseNumber("4.2E2", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,2E2", locale);
         assertNotNull(result);
 
-        result = handler.checkForNumber("4.2E2");
+        result = SpreadsheetUtil.parseNumber("4 002", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,002", locale);
         assertNotNull(result);
 
-        result = handler.checkForNumber("4 002");
+        result = SpreadsheetUtil.parseNumber("4.002", locale);
         assertNotNull(result);
 
-        result = handler.checkForNumber("4 002.42");
+        result = SpreadsheetUtil.parseNumber("4 002.42", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4,002.42", locale);
+        assertNull(result);
+
+        result = SpreadsheetUtil.parseNumber("4.002,42", locale);
         assertNotNull(result);
     }
 

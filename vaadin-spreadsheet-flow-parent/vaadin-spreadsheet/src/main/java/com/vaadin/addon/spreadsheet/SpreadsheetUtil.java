@@ -18,6 +18,10 @@ package com.vaadin.addon.spreadsheet;
  */
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParsePosition;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -280,6 +284,137 @@ public class SpreadsheetUtil implements Serializable {
         return ExcelToHtmlUtils
                 .getColumnWidthInPx(SpreadsheetFactory.DEFAULT_COL_WIDTH_UNITS
                         * EXCEL_COLUMN_WIDTH_FACTOR);
+    }
+
+    /**
+     * Tries to parse the given String to a percentage. Specifically, checks if
+     * the String ends with the '%' character, and the rest can be parsed to a
+     * number.
+     * <p>
+     * 
+     * @param cellContent
+     *            The string to be parsed
+     * @param locale
+     *            The current locale, used for number parsing.
+     * @return the number as a decimal if it can be parsed; e.g. 42% returns
+     *         0.42 and 0.42% returns 0.0042. Returns <code>null</code> if the
+     *         number can't be parsed as a decimal.
+     */
+    public static Double parsePercentage(String cellContent, Locale locale) {
+
+        if (cellContent == null || cellContent.length() < 2) {
+            return null;
+        }
+
+        char last = cellContent.charAt(cellContent.length() - 1);
+        if (last == '%') {
+
+            String sub = cellContent.substring(0, cellContent.length() - 1);
+
+            Double num = parseNumber(sub, locale);
+            if (num != null) {
+                return num / 100;
+            }
+        }
+
+        return null;
+    }
+
+    public static Double parseNumber(String cellContent, Locale locale) {
+
+        if (cellContent == null) {
+            return null;
+        }
+
+        try {
+
+            String trimmedContent = cellContent.trim();
+
+            if (locale != null) {
+                DecimalFormat format = (DecimalFormat) DecimalFormat
+                        .getInstance(locale);
+                DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
+
+                // using format.parse() won't work, as it doesn't handle
+                // grouping separators correctly. If we have an Italian locale
+                // (1.234,00) and try to parse 1.1, the result is 11. So, we
+                // need to do some checking that the grouping separators are in
+                // places we would expect.
+
+                char groupSep = symbols.getGroupingSeparator();
+                char decSep = symbols.getDecimalSeparator();
+
+                int groupingIndex = trimmedContent.lastIndexOf(groupSep);
+                int decIndex = trimmedContent.indexOf(decSep);
+
+                // special case; non-breaking space
+                if ((int) groupSep == 160 && groupingIndex == -1) {
+                    // try normal space
+                    groupSep = ' ';
+                    groupingIndex = trimmedContent.lastIndexOf(groupSep);
+
+                    if (groupingIndex != -1) {
+                        // replace normal spaces with non-breaking, so that
+                        // parsing goes correctly
+                        trimmedContent = trimmedContent.replaceAll(" ", " ");
+                    }
+                }
+
+                // no decimal, grouping needs to be 3 characters from end
+                boolean noDecButCorrect = decIndex == -1
+                        && groupingIndex == trimmedContent.length() - 4;
+                // but, if we have scientific notation, the above might not work
+                // (e.g. 4.2e2 has 3 digits, but is invalid).
+                if (groupingIndex != -1) {
+                    try {
+                        String sub = trimmedContent.substring(trimmedContent
+                                .length() - 4);
+                        if (sub.toLowerCase().contains("e")) {
+                            noDecButCorrect = false;
+                        }
+                    } catch (IndexOutOfBoundsException e) {
+                        // too short for correct use of grouping separator
+                        noDecButCorrect = false;
+                    }
+                }
+
+                // decimal point; grouping needs to be 3 chars in front of
+                // decimal point
+                boolean decAndGrouping = groupingIndex + 4 == decIndex;
+
+                // again, check for scientific notation. If present, E needs to
+                // be after decimal point and not the last char.
+                if (decAndGrouping) {
+                    int indexOfE = trimmedContent.toLowerCase().indexOf('e');
+                    if (indexOfE != -1) {
+                        if (indexOfE < decIndex
+                                || indexOfE == trimmedContent.length() - 1) {
+                            decAndGrouping = false;
+                        }
+                    }
+
+                }
+
+                if (groupingIndex == -1 || noDecButCorrect || decAndGrouping) {
+                    ParsePosition pos = new ParsePosition(0);
+                    Number parse = format.parse(trimmedContent, pos);
+                    if (parse != null
+                            && pos.getIndex() == trimmedContent.length()) {
+                        return parse.doubleValue();
+                    }
+                }
+
+            } else {
+                // simple check
+                trimmedContent = trimmedContent.replace(",", ".");
+                Double d = Double.parseDouble(trimmedContent);
+                return d;
+            }
+
+        } catch (NumberFormatException e) {
+            // is OK
+        }
+        return null;
     }
 
 }

@@ -17,12 +17,9 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -273,7 +270,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 }
 
                 // check for numbers
-                Double numVal = checkForNumber(cellContent);
+                Double numVal = SpreadsheetUtil.parseNumber(cellContent,
+                        spreadsheet.getLocale());
                 if (numVal != null) {
                     cell.setCellType(Cell.CELL_TYPE_NUMERIC);
                     cell.setCellValue(numVal);
@@ -296,46 +294,6 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         // re-set selection to copied area
         spreadsheet.setSelectionRange(selectedCellReference.getRow(),
                 selectedCellReference.getCol(), rowIndex, colIndex);
-    }
-
-    protected Double checkForNumber(String cellContent) {
-
-        if (cellContent == null) {
-            return null;
-        }
-
-        try {
-
-            String trimmedContent = cellContent.replaceAll(" ", "");
-
-            Locale locale = spreadsheet.getLocale();
-            if (locale != null) {
-                DecimalFormat format = (DecimalFormat) DecimalFormat
-                        .getInstance(locale);
-                DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
-
-                char sep = symbols.getDecimalSeparator();
-                if (sep != '.') {
-                    trimmedContent = trimmedContent.replace(sep + "", ".");
-                }
-
-                sep = symbols.getGroupingSeparator();
-                if (sep == '.') {
-                    trimmedContent = trimmedContent.replaceAll(sep + "\\.", "");
-                } else {
-                    trimmedContent = trimmedContent.replaceAll(sep + "", "");
-                }
-            } else {
-                // simple check
-                trimmedContent = trimmedContent.replace(",", ".");
-            }
-            Double d = Double.parseDouble(trimmedContent);
-            return d;
-
-        } catch (NumberFormatException e) {
-            // is OK
-        }
-        return null;
     }
 
     /**

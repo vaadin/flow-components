@@ -204,6 +204,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /** image sizes need to be recalculated on column/row resizing s */
     private boolean reloadImageSizesFromPOI;
 
+    private String defaultPercentageFormat = "0.00%";
+
     protected String initialSheetSelection = null;
 
     private HashSet<Component> customComponents;
@@ -4083,5 +4085,28 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             DesignAttributeHandler.writeAttribute(ATTR_SRC, attr, srcUri, null,
                     String.class);
         }
+    }
+
+    /**
+     * Returns the formatting string that is used when a user enters percentages
+     * into the Spreadsheet.
+     * <p>
+     * Default is "0.00%".
+     * 
+     * @return The formatting applied to percentage values when entered by the
+     *         user
+     */
+    public String getDefaultPercentageFormat() {
+        return defaultPercentageFormat;
+    }
+
+    /**
+     * Sets the formatting string that is used when a user enters percentages
+     * into the Spreadsheet.
+     * <p>
+     * Default is "0.00%".
+     */
+    public void setDefaultPercentageFormat(String defaultPercentageFormat) {
+        this.defaultPercentageFormat = defaultPercentageFormat;
     }
 }
