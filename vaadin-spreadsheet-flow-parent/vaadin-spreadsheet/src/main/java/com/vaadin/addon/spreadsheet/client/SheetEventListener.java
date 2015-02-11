@@ -24,8 +24,6 @@ import com.google.gwt.user.client.EventListener;
 
 public class SheetEventListener implements EventListener {
 
-    private static final int TOUCH_CLICK_TO_MOVE_RADIUS_PX = 5;
-
     private SheetWidget widget;
 
     private boolean sheetFocused;
@@ -147,7 +145,6 @@ public class SheetEventListener implements EventListener {
         case Event.ONMOUSEMOVE:
             widget.onMouseMoveWhenSelectingCells(event);
             break;
-        case Event.ONTOUCHMOVE: // FIXME remove
         default:
             break;
         }

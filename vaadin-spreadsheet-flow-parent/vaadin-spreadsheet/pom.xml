@@ -99,6 +99,9 @@
                             <!-- Comma-separated list of widgetsets in the 
                                 package -->
                             <Vaadin-Widgetsets>com.vaadin.addon.spreadsheet.Widgetset</Vaadin-Widgetsets>
+                            
+                            <!-- Stylesheet -->
+                            <Vaadin-Stylesheets>VAADIN/addons/spreadsheet/spreadsheet.scss</Vaadin-Stylesheets>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -328,6 +331,9 @@
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/webapp</directory>
             </resource>
         </resources>
 

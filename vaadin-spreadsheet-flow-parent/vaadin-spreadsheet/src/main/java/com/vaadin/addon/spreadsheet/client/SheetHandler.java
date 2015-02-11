@@ -94,8 +94,8 @@ public interface SheetHandler {
     float getRowHeight(int row);
 
     /**
-     * Width of a row in pixels including right border. Columns are indexed from
-     * 1 to getColumns(). Returns 0 for hidden columns.
+     * Width of a column in pixels including right border. Columns are indexed
+     * from 1 to getColumns(). Returns 0 for hidden columns.
      */
     int getColWidth(int col);
 
@@ -246,4 +246,7 @@ public interface SheetHandler {
      */
     void clearSelectedCellsOnCut();
 
+    SheetTabSheet getSheetTabSheet();
+
+    FormulaBarWidget getFormulaBarWidget();
 }

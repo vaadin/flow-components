@@ -31,6 +31,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.ComputedStyle;
 
 public class SheetTabSheet extends Widget {
 
@@ -91,20 +92,16 @@ public class SheetTabSheet extends Widget {
 
         initDOM();
         initListeners();
+
+        input.setMaxLength(31);
     }
 
     private void initDOM() {
         scrollBeginning.setClassName("scroll-tabs-beginning");
-        scrollBeginning.setInnerText("<<");
         scrollEnd.setClassName("scroll-tabs-end");
-        scrollEnd.setInnerText(">>");
         scrollLeft.setClassName("scroll-tabs-left");
-        scrollLeft.setInnerText("<");
         scrollRight.setClassName("scroll-tabs-right");
-        scrollRight.setInnerText(">");
-
         addNewSheet.setClassName("add-new-tab");
-        addNewSheet.setInnerText("+");
 
         options.setClassName("sheet-tabsheet-options");
         options.appendChild(scrollBeginning);
@@ -158,9 +155,7 @@ public class SheetTabSheet extends Widget {
                                 if (tabScrollIndex == 0) {
                                     tabScrollMargin = 0;
                                 } else {
-                                    tabScrollMargin += ((Element) tabs.get(
-                                            tabScrollIndex).cast())
-                                            .getOffsetWidth();
+                                    tabScrollMargin += getTabWidth(tabScrollIndex);
                                 }
                                 container.getStyle().setMarginLeft(
                                         tabScrollMargin, Unit.PX);
@@ -169,9 +164,7 @@ public class SheetTabSheet extends Widget {
                             handler.onFirstTabIndexChange(tabScrollIndex);
                         } else if (target.equals(scrollRight)) {
                             if (tabScrollIndex < (tabs.length() - 1)) {
-                                tabScrollMargin -= ((Element) tabs.get(
-                                        tabScrollIndex).cast())
-                                        .getOffsetWidth();
+                                tabScrollMargin -= getTabWidth(tabScrollIndex);
                                 container.getStyle().setMarginLeft(
                                         tabScrollMargin, Unit.PX);
                                 tabScrollIndex++;
@@ -278,6 +271,15 @@ public class SheetTabSheet extends Widget {
         return infoLabel.getInnerText();
     }
 
+    private int getTabWidth(int index) {
+        Element tab = ((Element) tabs.get(index).cast());
+        int result = tab.getOffsetWidth();
+        ComputedStyle cs = new ComputedStyle(tab);
+        result += cs.getMargin()[1];
+        result += cs.getMargin()[3];
+        return result;
+    }
+
     private void doDeferredInputSizeUpdate() {
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
@@ -332,8 +334,8 @@ public class SheetTabSheet extends Widget {
             tabScrollIndex++;
         }
         container.getStyle().setMarginLeft(tabScrollMargin, Unit.PX);
-        input.getStyle().setWidth(textWidth, Unit.PX);
-        selectedTab.getStyle().setWidth(textWidth + 10, Unit.PX);
+        input.getStyle().setWidth(textWidth + 5, Unit.PX);
+        selectedTab.getStyle().setWidth(textWidth, Unit.PX);
     }
 
     private void commitSheetName() {
@@ -479,22 +481,20 @@ public class SheetTabSheet extends Widget {
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
         addNewSheet.getStyle().setDisplay(
-                readOnly ? Display.NONE : Display.INLINE);
+                readOnly ? Display.NONE : Display.INLINE_BLOCK);
     }
 
     public void setFirstVisibleTab(int firstVisibleTab) {
         if (tabScrollIndex < firstVisibleTab) {
             do {
-                tabScrollMargin -= ((Element) tabs.get(tabScrollIndex).cast())
-                        .getOffsetWidth();
+                tabScrollMargin -= getTabWidth(tabScrollIndex);
                 tabScrollIndex++;
             } while (tabScrollIndex < firstVisibleTab);
             container.getStyle().setMarginLeft(tabScrollMargin, Unit.PX);
         } else if (tabScrollIndex > firstVisibleTab) {
             do {
                 tabScrollIndex--;
-                tabScrollMargin += ((Element) tabs.get(tabScrollIndex).cast())
-                        .getOffsetWidth();
+                tabScrollMargin += getTabWidth(tabScrollIndex);
             } while (tabScrollIndex > firstVisibleTab);
             container.getStyle().setMarginLeft(tabScrollMargin, Unit.PX);
         }

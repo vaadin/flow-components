@@ -143,6 +143,7 @@ public class SpreadsheetFactory implements Serializable {
         spreadsheet.setInternalWorkbook(newWorkbook);
         generateNewSpreadsheet(spreadsheet, sheet, DEFAULT_ROWS,
                 DEFAULT_COLUMNS);
+        sheet.setDefaultRowHeightInPoints(DEFAULT_ROW_HEIGHT_POINTS);
         loadWorkbookStyles(spreadsheet);
     }
 

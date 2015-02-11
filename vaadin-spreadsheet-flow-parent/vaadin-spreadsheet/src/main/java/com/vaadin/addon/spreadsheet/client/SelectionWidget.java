@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.client.Util;
+import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.VOverlay;
 
 public class SelectionWidget extends Composite {
@@ -217,17 +217,20 @@ public class SelectionWidget extends Composite {
         }
 
         private void updateHeight() {
-            setHeight(countSum(handler.getRowHeights(), row1, row2 + 1));
+            int[] rowHeightsPX = handler.getRowHeightsPX();
+            if (rowHeightsPX != null && rowHeightsPX.length != 0) {
+                setHeight(countSum(handler.getRowHeightsPX(), row1, row2 + 1));
+            }
         }
 
         private void setWidth(int width) {
-            top.getStyle().setWidth(width + 2, Unit.PX);
-            bottom.getStyle().setWidth(width + 2, Unit.PX);
+            top.getStyle().setWidth(width + 1, Unit.PX);
+            bottom.getStyle().setWidth(width + 1, Unit.PX);
         }
 
-        private void setHeight(float f) {
-            left.getStyle().setHeight(f + 2, Unit.PT);
-            right.getStyle().setHeight(f + 2, Unit.PT);
+        private void setHeight(float height) {
+            left.getStyle().setHeight(height, Unit.PX);
+            right.getStyle().setHeight(height, Unit.PX);
         }
 
         public void setSheetElement(Element element) {
@@ -266,10 +269,6 @@ public class SelectionWidget extends Composite {
         }
 
         private void onPaintEvent(Event event) {
-            // if (event.getButton() == Event.BUTTON_LEFT) {
-            // return;
-            // }
-
             switch (DOM.eventGetType(event)) {
             case Event.ONTOUCHSTART:
                 if (event.getTouches().length() > 1) {
@@ -481,7 +480,7 @@ public class SelectionWidget extends Composite {
         if (horizontalSplitPosition > 0) {
             bottomLeft.setPosition(col1, col2, row1, row2);
         }
-        totalHeight = (int) countSum(handler.getRowHeights(), row1, row2 + 1);
+        totalHeight = countSum(handler.getRowHeightsPX(), row1, row2 + 1);
         totalWidth = countSum(handler.getColWidths(), col1, col2 + 1);
 
         if (fillMode) {
@@ -591,23 +590,9 @@ public class SelectionWidget extends Composite {
      * @return
      */
     public int countSum(int[] sizes, int beginIndex, int endIndex) {
-        int pos = 0;
-        for (int i = beginIndex; i < endIndex; i++) {
-            pos += sizes[i - 1];
+        if (sizes == null || sizes.length < endIndex - 1) {
+            return 0;
         }
-        return pos;
-    }
-
-    /**
-     * 
-     * @param sizes
-     * @param beginIndex
-     *            1-based inclusive
-     * @param endIndex
-     *            1-based exclusive
-     * @return
-     */
-    public float countSum(float[] sizes, int beginIndex, int endIndex) {
         int pos = 0;
         for (int i = beginIndex; i < endIndex; i++) {
             pos += sizes[i - 1];
@@ -666,7 +651,6 @@ public class SelectionWidget extends Composite {
         colEdgeIndex = 0;
         rowEdgeIndex = 0;
         sheetWidget.scrollSelectionAreaIntoView();
-        paint.getStyle().setVisibility(Visibility.VISIBLE);
         paintMode = true;
         storeEventPos(event);
         DOM.setCapture(getElement());
@@ -701,6 +685,7 @@ public class SelectionWidget extends Composite {
         paintMode = false;
         paint.getStyle().setWidth(0, Unit.PX);
         paint.getStyle().setHeight(0, Unit.PX);
+        paint.getStyle().setVisibility(Visibility.HIDDEN);
         int c1, c2, r1, r2;
         if ((colEdgeIndex >= col1 && colEdgeIndex <= col2)
                 && (rowEdgeIndex >= row1 && rowEdgeIndex <= row2)) {
@@ -725,8 +710,8 @@ public class SelectionWidget extends Composite {
 
         dragging = true;
 
-        final int clientX = Util.getTouchOrMouseClientX(event);
-        final int clientY = Util.getTouchOrMouseClientY(event);
+        final int clientX = WidgetUtil.getTouchOrMouseClientX(event);
+        final int clientY = WidgetUtil.getTouchOrMouseClientY(event);
         // position in perspective to the top left
         int xMousePos = clientX - origX;
         int yMousePos = clientY - origY;
@@ -769,8 +754,8 @@ public class SelectionWidget extends Composite {
     }
 
     private void paintCells(Event event) {
-        final int clientX = Util.getTouchOrMouseClientX(event);
-        final int clientY = Util.getTouchOrMouseClientY(event);
+        final int clientX = WidgetUtil.getTouchOrMouseClientX(event);
+        final int clientY = WidgetUtil.getTouchOrMouseClientY(event);
         // position in perspective to the top left
         int xMousePos = clientX - origX;
         int yMousePos = clientY - origY;
@@ -778,7 +763,6 @@ public class SelectionWidget extends Composite {
         final int[] colWidths = handler.getColWidths();
         final int colIndex = closestCellEdgeIndexToCursor(colWidths, col1,
                 xMousePos);
-        final float[] rowHeightsPT = handler.getRowHeights();
         final int[] rowHeightsPX = handler.getRowHeightsPX();
         final int rowIndex = closestCellEdgeIndexToCursor(rowHeightsPX, row1,
                 yMousePos);
@@ -814,7 +798,7 @@ public class SelectionWidget extends Composite {
                 colEdgeIndex = col1;
                 rowEdgeIndex = paintedRegion.row1;
                 w = totalWidth;
-                h = (int) countSum(rowHeightsPT, rowEdgeIndex, row2 + 1);
+                h = countSum(rowHeightsPX, rowEdgeIndex, row2 + 1);
             } else {
                 h = 0;
                 w = 0;
@@ -863,10 +847,10 @@ public class SelectionWidget extends Composite {
                 w = totalWidth;
                 // up or down
                 if (yMousePos < 0) {
-                    h = (int) countSum(rowHeightsPT, rowEdgeIndex, row1);
+                    h = countSum(rowHeightsPX, rowEdgeIndex, row1);
                     paintedRowIndex = rowEdgeIndex;
                 } else {
-                    h = (int) countSum(rowHeightsPT, row2 + 1, rowEdgeIndex);
+                    h = countSum(rowHeightsPX, row2 + 1, rowEdgeIndex);
                     paintedRowIndex = (row2 + 1);
                 }
             }
@@ -899,7 +883,14 @@ public class SelectionWidget extends Composite {
             paint.addClassName(paintPaneClassName);
         }
         // update size
-        paint.getStyle().setWidth(w, Unit.PX);
-        paint.getStyle().setHeight(h, Unit.PT);
+        if (w > 0 && h > 0) {
+            paint.getStyle().setVisibility(Visibility.VISIBLE);
+            paint.getStyle().setWidth(w + 1, Unit.PX);
+            paint.getStyle().setHeight(h + 1, Unit.PX);
+        } else {
+            paint.getStyle().setVisibility(Visibility.HIDDEN);
+            paint.getStyle().setWidth(0, Unit.PX);
+            paint.getStyle().setHeight(0, Unit.PX);
+        }
     }
 }

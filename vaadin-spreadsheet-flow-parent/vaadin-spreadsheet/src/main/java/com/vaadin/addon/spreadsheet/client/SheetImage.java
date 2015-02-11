@@ -57,7 +57,6 @@ public class SheetImage extends Widget {
 
             @Override
             public void onBrowserEvent(Event event) {
-                // TODO Auto-generated method stub
                 event.stopPropagation();
                 event.preventDefault();
             }
@@ -65,8 +64,8 @@ public class SheetImage extends Widget {
     }
 
     public void setLocation(int col, int row) {
-        this.setCol(col);
-        this.setRow(row);
+        setCol(col);
+        setRow(row);
         if (location != null) {
             root.removeClassName(location);
         }

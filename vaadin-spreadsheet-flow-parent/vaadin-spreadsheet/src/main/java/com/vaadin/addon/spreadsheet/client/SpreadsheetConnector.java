@@ -35,7 +35,7 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHan
 import com.vaadin.client.ApplicationConnection;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
-import com.vaadin.client.Util;
+import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
 import com.vaadin.client.ui.Action;
@@ -84,12 +84,15 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             int left;
             int top;
             if (latestCellContextMenuEvent != null) {
-                left = Util.getTouchOrMouseClientX(latestCellContextMenuEvent);
-                top = Util.getTouchOrMouseClientY(latestCellContextMenuEvent);
+                left = WidgetUtil
+                        .getTouchOrMouseClientX(latestCellContextMenuEvent);
+                top = WidgetUtil
+                        .getTouchOrMouseClientY(latestCellContextMenuEvent);
             } else {
-                left = Util
+                left = WidgetUtil
                         .getTouchOrMouseClientX(latestHeaderContextMenuEvent);
-                top = Util.getTouchOrMouseClientY(latestHeaderContextMenuEvent);
+                top = WidgetUtil
+                        .getTouchOrMouseClientY(latestHeaderContextMenuEvent);
             }
             top += Window.getScrollTop();
             left += Window.getScrollLeft();
@@ -370,6 +373,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             sheetImageKeys = resourceKeyToImage == null ? null
                     : resourceKeyToImage.keySet();
         }
+        widget.getSheetWidget().updateSheetPanePositions();
     }
 
     private void setupCustomEditors() {

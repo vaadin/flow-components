@@ -133,6 +133,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      */
     private boolean okToSendCellProtectRpc = true;
 
+    @SuppressWarnings("serial")
     MergedRegionContainer mergedRegionContainer = new MergedRegionContainer() {
 
         @Override
@@ -1619,4 +1620,13 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         this.touchMode = touchMode;
     }
 
+    @Override
+    public SheetTabSheet getSheetTabSheet() {
+        return sheetTabSheet;
+    }
+
+    @Override
+    public FormulaBarWidget getFormulaBarWidget() {
+        return formulaBarWidget;
+    }
 }
