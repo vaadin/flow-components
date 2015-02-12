@@ -477,7 +477,7 @@
     <p>Vaadin Spreadsheet is an add-on for Vaadin Framework which provides Excel spreadsheet editor functionality for any
        Vaadin application.</p>
        
-    <p>Please note that this alpha1 release is an early preview version of the software and the API can still change.</p>
+    <p>Please note that this alpha release is an early preview version of the software and the API can still change.</p>
 
     <p>List of known issues is available at the <a href="http://dev.vaadin.com/query?status=accepted&status=assigned&status=designing&status=new&status=reopened&status=reviewing&component=Spreadsheet&col=id&col=summary&col=component&col=status&col=type&col=priority&col=milestone&order=priority">Vaadin Trac</a></p>
     
@@ -514,6 +514,29 @@
             </td>
         </tr>
     </table>
+
+	<h2 id="changelog">Change log for Vaadin @version@</h3>
+	<p>This release includes the following closed issues and fixes:</p>
+	
+	<ul>
+        <li><a href="http://dev.vaadin.com/ticket/15524">#15524</a> Clicking backspace when a cell is selected should clear the contents</li>
+        <li><a href="http://dev.vaadin.com/ticket/16478">#16478</a> Images are not removed when changing workbook </li>
+        <li><a href="http://dev.vaadin.com/ticket/16531">#16531</a> Caret position jumps on first edit in FF </li>
+        <li><a href="http://dev.vaadin.com/ticket/15526">#15526</a> Support F2 key </li>
+        <li><a href="http://dev.vaadin.com/ticket/16286">#16286</a> Double click on column header should not edit first cell of column </li>
+        <li><a href="http://dev.vaadin.com/ticket/15519">#15519</a> Selecting sheets makes sheet selector scroll position jump </li>
+        <li><a href="http://dev.vaadin.com/ticket/16185">#16185</a> Calculated value is not shown when dragging formula </li>
+        <li><a href="http://dev.vaadin.com/ticket/16576">#16576</a> Formulas which result into a string value should be left-aligned </li>
+        <li><a href="http://dev.vaadin.com/ticket/16574">#16574</a> Hide single ' in front of cell value </li>
+        <li><a href="http://dev.vaadin.com/ticket/15530">#15530</a> Invalid filling of values </li>
+        <li>Number parsing was fixed to properly support locales and percentage values.</li>
+        <li>Fixed wrong location of add-on JAR in the manifest file.</li>
+        <li>Renamed setMaximum* methods to setMax*.</li>
+        <li>Ensured every server-side class is Serializable.</li> 
+        <li>Added support for Vaadin Declarative.</li>
+        <li>Added Vaadin TestBench API for Spreadsheet.</li>
+        <li>Touch device support.</li>
+    </ul>
 
     <h2 id="dependencies">Third Party Dependencies</h2>
 
