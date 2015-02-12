@@ -715,7 +715,7 @@ public class ConditionalFormatter implements Serializable {
         boolean isFormulaBooleanType = isFormulaType
                 && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_BOOLEAN;
         boolean isFormulaNumericType = isFormulaType
-                && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_FORMULA;
+                && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_NUMERIC;
 
         // other than numerical types
         if (cell.getCellType() == Cell.CELL_TYPE_STRING || isFormulaStringType) {

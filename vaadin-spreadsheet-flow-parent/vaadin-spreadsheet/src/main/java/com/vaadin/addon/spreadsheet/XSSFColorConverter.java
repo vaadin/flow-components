@@ -172,7 +172,7 @@ public class XSSFColorConverter implements ColorConverter {
         }
 
         byte[] argb;
-        if (color.getTheme() != 0) {
+        if (color.isSetTheme()) {
             XSSFColor themeColor = workbook.getTheme().getThemeColor(
                     (int) color.getTheme());
             argb = themeColor.getARgb();
@@ -315,7 +315,7 @@ public class XSSFColorConverter implements ColorConverter {
 
         CTColor bgColor = dxf.getFill().getPatternFill().getBgColor();
 
-        if (bgColor.getTheme() != 0) {
+        if (bgColor.isSetTheme()) {
             XSSFColor themeColor = workbook.getTheme().getThemeColor(
                     (int) bgColor.getTheme());
 
@@ -342,14 +342,17 @@ public class XSSFColorConverter implements ColorConverter {
         }
 
         CTColor ctColor = font.getColorList().get(0);
-        byte[] rgb = ctColor.getRgb();
 
-        if (rgb == null) {
-            // default color
-            return null;
+        if (ctColor.isSetTheme()) {
+            XSSFColor themeColor = workbook.getTheme().getThemeColor(
+                    (int) ctColor.getTheme());
+
+            return styleColor(themeColor, ctColor.getTint());
+        } else {
+            byte[] rgb = ctColor.getRgb();
+            return rgb == null ? null : toRGBA(rgb);
         }
 
-        return toRGBA(rgb);
     }
 
     private XSSFColor getFillColor(XSSFCellStyle cs) {
