@@ -221,8 +221,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     private String srcUri;
 
-    private boolean maxColsSet, maxRowsSet, defaultColWidthSet,
-            defaultRowHeightSet;
+    private boolean defaultColWidthSet, defaultRowHeightSet;
 
     /**
      * Container for merged regions for the currently active sheet.
@@ -1086,8 +1085,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         SpreadsheetFactory.reloadSpreadsheetData(this,
                 workbook.getSheetAt(sheetIndex));
         reloadActiveSheetStyles();
-        maxColsSet = false;
-        maxRowsSet = false;
     }
 
     /**
@@ -1452,7 +1449,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void setMaxColumns(int cols) {
         if (getState().cols != cols) {
             getState().cols = cols;
-            maxColsSet = true;
         }
     }
 
@@ -1470,7 +1466,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void setMaxRows(int rows) {
         if (getState().rows != rows) {
             getState().rows = rows;
-            maxRowsSet = true;
         }
     }
 
@@ -3925,17 +3920,13 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /* Attribute names for declarative format support. */
-    /* These are handled automatically. */
     private static final String ATTR_ACTIVE_SHEET = "active-sheet-index";
     private static final String ATTR_DEFAULT_COL_WIDTH = "default-column-width";
     private static final String ATTR_DEFAULT_COL_COUNT = "default-column-count";
     private static final String ATTR_DEFAULT_ROW_COUNT = "default-row-count";
     private static final String ATTR_DEFAULT_ROW_HEIGHT = "default-row-height";
-    /* These need manual handling. */
     private static final String ATTR_NO_GRIDLINES = "no-gridlines";
     private static final String ATTR_NO_HEADINGS = "no-headings";
-    private static final String ATTR_MAX_COLS = "max-columns";
-    private static final String ATTR_MAX_ROWS = "max-rows";
     private static final String ATTR_SRC = "src";
 
     /*
@@ -3999,16 +3990,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     ATTR_NO_HEADINGS, attr, Boolean.class);
             setRowColHeadingsVisible(!noHeadings);
         }
-        if (attr.hasKey(ATTR_MAX_COLS)) {
-            Integer maxColumns = DesignAttributeHandler.readAttribute(
-                    ATTR_MAX_COLS, attr, Integer.class);
-            setMaxColumns(maxColumns);
-        }
-        if (attr.hasKey(ATTR_MAX_ROWS)) {
-            Integer maxRows = DesignAttributeHandler.readAttribute(
-                    ATTR_MAX_ROWS, attr, Integer.class);
-            setMaxRows(maxRows);
-        }
     }
 
     /*
@@ -4024,8 +4005,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         result.add(ATTR_DEFAULT_COL_WIDTH);
         result.add(ATTR_DEFAULT_ROW_COUNT);
         result.add(ATTR_DEFAULT_ROW_HEIGHT);
-        result.add(ATTR_MAX_COLS);
-        result.add(ATTR_MAX_ROWS);
         result.add(ATTR_NO_GRIDLINES);
         result.add(ATTR_NO_HEADINGS);
         result.add(ATTR_SRC);
@@ -4049,17 +4028,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         DesignAttributeHandler.writeAttribute(ATTR_NO_HEADINGS, attr,
                 !isRowColHeadingsVisible(), false, Boolean.class);
-
-        if (maxColsSet) {
-            DesignAttributeHandler.writeAttribute(ATTR_MAX_COLS, attr,
-                    getColumns(), SpreadsheetFactory.DEFAULT_COLUMNS,
-                    Integer.class);
-        }
-
-        if (maxRowsSet) {
-            DesignAttributeHandler.writeAttribute(ATTR_MAX_ROWS, attr,
-                    getRows(), SpreadsheetFactory.DEFAULT_ROWS, Integer.class);
-        }
 
         DesignAttributeHandler.writeAttribute(ATTR_ACTIVE_SHEET, attr,
                 getActiveSheetIndex(), 0, Integer.class);
