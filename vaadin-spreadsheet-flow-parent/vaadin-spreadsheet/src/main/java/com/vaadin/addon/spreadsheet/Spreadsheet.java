@@ -1326,6 +1326,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         // if the selected cell is of type formula, there is a change that the
         // formula has been changed.
         selectionManager.reSelectSelectedCell();
+        // Update the cell comments as well to show them instantly after adding
+        // them
+        loadCellComments();
     }
 
     /**
