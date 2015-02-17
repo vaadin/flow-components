@@ -215,8 +215,12 @@
 				margin-top: 0 !important;
 			}
 			
-			.cell, .sheet-selection, .s-paint, .sheet-image {
+			.cell, .s-paint, .sheet-image {
 				margin-left: 50px;
+			}
+			
+			.sheet-selection {
+				margin-left: 51px;
 			}
 		}
 		
@@ -235,9 +239,14 @@
 				margin-top: 27px;
 			}
 			
-			.cell, .sheet-selection, .s-paint, .sheet-image {
+			.cell, .s-paint, .sheet-image {
 				margin-top: 27px;
 				margin-left: 50px;
+			}
+			
+			.sheet-selection {
+				margin-top: 28px;
+				margin-left: 51px;
 			}
 		}
 		
@@ -251,8 +260,12 @@
 				margin-left: 0 !important;
 			}
 			
-			.cell, .sheet-selection, .s-paint, .sheet-image {
+			.cell, .s-paint, .sheet-image {
 				margin-top: 27px;
+			}
+			
+			.sheet-selection {
+				margin-top: 28px;
 			}
 		}
 		

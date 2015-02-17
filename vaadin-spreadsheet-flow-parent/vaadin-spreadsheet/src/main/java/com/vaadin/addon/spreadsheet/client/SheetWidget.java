@@ -1837,12 +1837,12 @@ public class SheetWidget extends Panel {
         topOffset = heightIncrease + formulaBarHeight;
 
         Style style = topLeftPane.getStyle();
-        style.setWidth(leftFrozenPanelWidth + widthIncrease, Unit.PX);
+        style.setWidth(leftFrozenPanelWidth + widthIncrease + 1, Unit.PX);
         style.setHeight(topFrozenPanelHeight + heightIncrease, Unit.PX);
 
         style = topRightPane.getStyle();
         // left offset is the same as the width increase
-        style.setLeft(leftFrozenPanelWidth + widthIncrease, Unit.PX);
+        style.setLeft(leftFrozenPanelWidth + widthIncrease + 1, Unit.PX);
         style.setHeight(topFrozenPanelHeight + heightIncrease, Unit.PX);
 
         style = bottomLeftPane.getStyle();
@@ -1851,7 +1851,7 @@ public class SheetWidget extends Panel {
         style.setTop(topFrozenPanelHeight + topOffset, Unit.PX);
 
         style = sheet.getStyle();
-        style.setLeft(leftFrozenPanelWidth + widthIncrease, Unit.PX);
+        style.setLeft(leftFrozenPanelWidth + widthIncrease + 1, Unit.PX);
         style.setTop(topFrozenPanelHeight + topOffset, Unit.PX);
     }
 

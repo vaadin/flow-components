@@ -3569,13 +3569,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * removed.
      * 
      * @param rowSplit
-     *            Vertical position of the split
+     *            Vertical position of the split, 1-based row index
      * @param colSplit
-     *            Horizontal position of the split
+     *            Horizontal position of the split, 1-based column index
      */
     public void createFreezePane(int rowSplit, int colSplit) {
         getActiveSheet().createFreezePane(colSplit, rowSplit);
         SpreadsheetFactory.loadFreezePane(this);
+        reloadActiveSheetData();
     }
 
     /**
@@ -3587,6 +3588,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         if (paneInformation != null && paneInformation.isFreezePane()) {
             getActiveSheet().createFreezePane(0, 0);
             SpreadsheetFactory.loadFreezePane(this);
+            reloadActiveSheetData();
         }
     }
 
