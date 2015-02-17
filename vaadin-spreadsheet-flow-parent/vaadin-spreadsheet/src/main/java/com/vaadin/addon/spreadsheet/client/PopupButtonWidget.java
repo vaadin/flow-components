@@ -47,7 +47,6 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     protected static final String BUTTON_ACTIVE_CLASSNAME = "active";
 
     private final DivElement root = Document.get().createDivElement();
-    private final DivElement arrow = Document.get().createDivElement();
 
     private PositionCallback callback = new PositionCallback() {
 
@@ -87,8 +86,6 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
     public PopupButtonWidget() {
         root.setClassName(BUTTON_CLASSNAME);
         root.setAttribute("role", "button");
-        arrow.setClassName(BUTTON_ARROW_CLASSNAME);
-        root.appendChild(arrow);
 
         popup = new VOverlay(true, false, true);
         popup.setStyleName(POPUP_OVERLAY_CLASSNAME);

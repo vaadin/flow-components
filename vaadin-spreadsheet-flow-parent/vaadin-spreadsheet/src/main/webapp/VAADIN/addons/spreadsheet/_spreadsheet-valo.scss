@@ -531,7 +531,7 @@
 			}
 			
 			.comment-overlay-line {
-				background-color: rgb(255, 255, 16) !important;
+				background-color: $cell-comment-line-color !important;
 				border: none !important;
 				display: block !important;
 				height: 1px;
@@ -543,7 +543,6 @@
 				z-index: 21;
 			}
 		}
-		
 		
 		
 		/** SELECTION WIDGET */
@@ -797,70 +796,31 @@
 		
 		/** FILTER BUTTON */
 		.sheet div div.popupbutton {
-			background: rgb(228, 245, 252); /* Old browsers */
-			/* IE9 SVG, needs conditional override of 'filter' to 'none' */
-			background:
-				url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2U0ZjVmYyIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjU0JSIgc3RvcC1jb2xvcj0iI2JmZThmOSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjU1JSIgc3RvcC1jb2xvcj0iIzlmZDhlZiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM2N2MzZWEiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
-			background: -moz-linear-gradient(top, rgba(228, 245, 252, 1) 0%,
-				rgba(191, 232, 249, 1) 54%, rgba(159, 216, 239, 1) 55%,
-				rgba(103, 195, 234, 1) 100%); /* FF3.6+ */
-			background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(228,
-				245, 252, 1)), color-stop(54%, rgba(191, 232, 249, 1)),
-				color-stop(55%, rgba(159, 216, 239, 1)),
-				color-stop(100%, rgba(103, 195, 234, 1))); /* Chrome,Safari4+ */
-			background: -webkit-linear-gradient(top, rgba(228, 245, 252, 1) 0%,
-				rgba(191, 232, 249, 1) 54%, rgba(159, 216, 239, 1) 55%,
-				rgba(103, 195, 234, 1) 100%); /* Chrome10+,Safari5.1+ */
-			background: -o-linear-gradient(top, rgba(228, 245, 252, 1) 0%,
-				rgba(191, 232, 249, 1) 54%, rgba(159, 216, 239, 1) 55%,
-				rgba(103, 195, 234, 1) 100%); /* Opera 11.10+ */
-			background: -ms-linear-gradient(top, rgba(228, 245, 252, 1) 0%,
-				rgba(191, 232, 249, 1) 54%, rgba(159, 216, 239, 1) 55%,
-				rgba(103, 195, 234, 1) 100%); /* IE10+ */
-			background: linear-gradient(to bottom, rgba(228, 245, 252, 1) 0%,
-				rgba(191, 232, 249, 1) 54%, rgba(159, 216, 239, 1) 55%,
-				rgba(103, 195, 234, 1) 100%); /* W3C */
-			border: 1px solid #000;
+			background: -moz-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -webkit-gradient(left top, left bottom, color-stop(2%, $col-header-gradient-top-color), color-stop(98%, $col-header-gradient-bottom-color));
+			background: -webkit-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -o-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -ms-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			/* Vaadin SASS compiler can't handle the following line */
+			/* background: linear-gradient(to bottom, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%); */
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='$col-header-gradient-top-color', endColorstr='$col-header-gradient-bottom-color', GradientType=0 );
+			border: 1px solid $popup-button-border-color;
 			bottom: 1px;
-			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e4f5fc',
-				endColorstr='#67c3ea', GradientType=0); /* IE6-8 */
 			cursor: pointer;
 			height: 14px;
 			position: absolute;
 			right: 1px;
 			width: 14px;
+			font-family: FontAwesome;
+			line-height: 15px;
+			outline: none;
+			font-size: 15px;
+			border-radius: 3px;
+			color: $popup-button-arrow-color;
 			
-			&.active {
-				background: rgb(210, 255, 82); /* Old browsers */
-				/* IE9 SVG, needs conditional override of 'filter' to 'none' */
-				background:
-					url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2QyZmY1MiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM5MWU4NDIiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
-				background: -moz-linear-gradient(top, rgba(210, 255, 82, 1) 0%,
-					rgba(145, 232, 66, 1) 100%); /* FF3.6+ */
-				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(210,
-					255, 82, 1)), color-stop(100%, rgba(145, 232, 66, 1)));
-				/* Chrome,Safari4+ */
-				background: -webkit-linear-gradient(top, rgba(210, 255, 82, 1) 0%,
-					rgba(145, 232, 66, 1) 100%); /* Chrome10+,Safari5.1+ */
-				background: -o-linear-gradient(top, rgba(210, 255, 82, 1) 0%,
-					rgba(145, 232, 66, 1) 100%); /* Opera 11.10+ */
-				background: -ms-linear-gradient(top, rgba(210, 255, 82, 1) 0%,
-					rgba(145, 232, 66, 1) 100%); /* IE10+ */
-				background: linear-gradient(to bottom, rgba(210, 255, 82, 1) 0%,
-					rgba(145, 232, 66, 1) 100%); /* W3C */
-				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d2ff52',
-					endColorstr='#91e842', GradientType=0); /* IE6-8 */
-			}
-			
-			div.popupbutton-arrow {
-				height: 0;
-				border-left: 5px solid transparent;
-				border-right: 5px solid transparent;
-				border-top: 5px solid #000;
-				position: absolute;
-				left: 2px;
-				top: 5px;
-				width: 0;
+			&::before {
+				content: "\f0d7";
+				padding-left: 3px;
 			}
 		}
 		
@@ -897,9 +857,16 @@
 			}
 		}
 	}
+
+
+	/* CELL COMMENT OVERLAY STYLES */
 	.v-spreadsheet-comment-overlay {
-		background: rgb(255, 255, 16);
-		border: 1px solid rgb(225, 225, 225);
+		background: $cell-comment-bg-color;
+		border: 1px solid $cell-comment-border-color;
+		border-radius: 4px;
+		-webkit-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+		-moz-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+		box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
 		padding: 10px;
 		overflow: auto !important;
 		
@@ -927,7 +894,7 @@
 			font-size: 16px;
 			font-weight: 300;
 			outline: none;
-			background: rgb(255, 255, 16);
+			background: $cell-comment-bg-color;
 			border: none;
 		}	
 	}

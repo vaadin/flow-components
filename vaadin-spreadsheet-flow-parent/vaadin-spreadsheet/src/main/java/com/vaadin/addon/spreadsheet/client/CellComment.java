@@ -214,6 +214,9 @@ public class CellComment extends VOverlay {
             line.removeClassName(linePositionClassName);
         }
         linePositionClassName = "col" + cellCol + " row" + cellRow;
+        // Increase the target position to account for rounded corner
+        popupTop += 2;
+        popupLeft += 2;
         int a;
         int b = cellTop - popupTop;
         double deg;
@@ -227,6 +230,9 @@ public class CellComment extends VOverlay {
                 deg = 0;
             }
         } else {
+            // Decrease the left offset of target position to account for
+            // rounded corner
+            popupLeft -= 2;
             // draw the line to overlay top-right corner
             a = cellRight - (popupLeft + offsetWidth);
             if (b > 0) {
