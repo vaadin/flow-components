@@ -503,6 +503,12 @@ public class SpreadsheetStyleFactory implements Serializable {
     }
 
     private void addCellStyleCSS(CellStyle cellStyle) {
+
+        if (cellStyle.getIndex() == 0) {
+            // default cell style, do not change.
+            return;
+        }
+
         StringBuilder sb = new StringBuilder();
 
         fontStyle(sb, cellStyle);
