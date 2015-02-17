@@ -115,6 +115,7 @@
 				display: flex;
 				flex-direction: column;
 				justify-content: flex-end;
+				line-height: normal;
 				
 				&.cell-range {
 				 	background-color: $sheet-selection-range-bg-color !important;
