@@ -3345,6 +3345,24 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
+     * This event is fired when cell value changes.
+     */
+    public static class CellValueChangeEvent extends Component.Event {
+
+        private final CellRangeAddress changedCells;
+
+        public CellValueChangeEvent(Component source,
+                CellRangeAddress cellRangeAddress) {
+            super(source);
+            changedCells = cellRangeAddress;
+        }
+
+        public CellRangeAddress getChangedCells() {
+            return changedCells;
+        }
+    }
+
+    /**
      * This event is fired when cell selection changes.
      */
     public static class SelectionChangeEvent extends Component.Event {
@@ -3487,6 +3505,24 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
+     * Used for knowing when a user has changed the cell value in Spreadsheet
+     * UI.
+     */
+    public interface CellValueChangeListener extends Serializable {
+        public static final Method CELL_VALUE_CHANGE_METHOD = ReflectTools
+                .findMethod(CellValueChangeListener.class, "onCellValueChange",
+                        CellValueChangeEvent.class);
+
+        /**
+         * This is called when user changes the cell value in Spreadsheet.
+         * 
+         * @param event
+         *            CellValueChangeEvent that happened
+         */
+        public void onCellValueChange(CellValueChangeEvent event);
+    }
+
+    /**
      * Adds the given SelectionChangeListener to this Spreadsheet.
      * 
      * @param listener
@@ -3498,6 +3534,17 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
+     * Adds the given CellValueChangeListener to this Spreadsheet.
+     * 
+     * @param listener
+     *            Listener to add.
+     */
+    public void addCellValueChangeListener(CellValueChangeListener listener) {
+        addListener(CellValueChangeEvent.class, listener,
+                CellValueChangeListener.CELL_VALUE_CHANGE_METHOD);
+    }
+
+    /**
      * Removes the given SelectionChangeListener from this Spreadsheet.
      * 
      * @param listener
@@ -3506,6 +3553,17 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void removeSelectionChangeListener(SelectionChangeListener listener) {
         removeListener(SelectionChangeEvent.class, listener,
                 SelectionChangeListener.SELECTION_CHANGE_METHOD);
+    }
+
+    /**
+     * Removes the given CellValueChangeListener from this Spreadsheet.
+     * 
+     * @param listener
+     *            Listener to remove.
+     */
+    public void removeCellValueChangeListener(CellValueChangeListener listener) {
+        removeListener(CellValueChangeEvent.class, listener,
+                CellValueChangeListener.CELL_VALUE_CHANGE_METHOD);
     }
 
     /**

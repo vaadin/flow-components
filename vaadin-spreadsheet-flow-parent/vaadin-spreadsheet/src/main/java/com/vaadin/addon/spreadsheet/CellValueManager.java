@@ -57,6 +57,7 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
+import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueHandler;
 import com.vaadin.addon.spreadsheet.client.CellData;
 import com.vaadin.addon.spreadsheet.command.CellValueCommand;
@@ -384,7 +385,8 @@ public class CellValueManager implements Serializable {
             r = activeSheet.createRow(row - 1);
         }
         Cell cell = r.getCell(col - 1);
-
+        String formattedCellValue = null;
+        int cellType = -1;
         // capture cell value to history
         CellValueCommand command = new CellValueCommand(spreadsheet);
         command.captureCellValues(new CellReference(row - 1, col - 1));
@@ -450,8 +452,9 @@ public class CellValueManager implements Serializable {
                         evaluator.notifyUpdateCell(cell);
                     }
                 } else { // modify existing cell, possibly switch type
+                    formattedCellValue = getFormattedCellValue(cell);
                     final String key = SpreadsheetUtil.toKey(col, row);
-                    final int cellType = cell.getCellType();
+                    cellType = cell.getCellType();
                     if (!sentCells.remove(key)) {
                         sentFormulaCells.remove(key);
                     }
@@ -536,6 +539,12 @@ public class CellValueManager implements Serializable {
             }
             if (cell != null) {
                 markCellForUpdate(cell);
+                if (formattedCellValue == null
+                        || !formattedCellValue
+                                .equals(getFormattedCellValue(cell))
+                        || cellType != cell.getCellType()) {
+                    fireCellValueChangeEvent(cell);
+                }
             }
             if (exception != null) {
                 LOGGER.log(Level.FINE,
@@ -546,6 +555,27 @@ public class CellValueManager implements Serializable {
         }
 
         spreadsheet.updateMarkedCells();
+    }
+
+    /**
+     * Returns the formatted cell value or null if value could not be determined
+     * 
+     * @param cell
+     *            to get value from
+     * @return formattedCellValue or null if could not format
+     */
+    private String getFormattedCellValue(Cell cell) {
+        try {
+            return formatter.formatCellValue(cell, evaluator);
+        } catch (RuntimeException rte) {
+            return null;
+        }
+    }
+
+    private void fireCellValueChangeEvent(Cell cell) {
+        spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet,
+                new CellRangeAddress(cell.getRowIndex(), cell.getRowIndex(),
+                        cell.getColumnIndex(), cell.getColumnIndex())));
     }
 
     /**

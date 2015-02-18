@@ -33,6 +33,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
+import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.addon.spreadsheet.command.CellShiftValuesCommand;
 import com.vaadin.addon.spreadsheet.command.CellValueCommand;
 
@@ -92,34 +93,39 @@ public class CellSelectionShifter implements Serializable {
             if (spreadsheet.isRangeEditable(paintedCellRange)
                     && spreadsheet.isRangeEditable(r1 - 1, c1 - 1, r2 - 1,
                             c2 - 1)) {
+                CellRangeAddress changedCellRangeAddress = null;
                 // store values
                 CellValueCommand command = new CellShiftValuesCommand(
                         spreadsheet, false);
                 if (c1 != paintedCellRange.getFirstColumn() + 1) {
                     // shift left
-                    command.captureCellRangeValues(new CellRangeAddress(r1 - 1,
+                    changedCellRangeAddress = new CellRangeAddress(r1 - 1,
                             r2 - 1, c1 - 1,
-                            paintedCellRange.getFirstColumn() - 1));
+                            paintedCellRange.getFirstColumn() - 1);
+                    command.captureCellRangeValues(changedCellRangeAddress);
                     shiftColumnsLeftInSelection(c1);
                     spreadsheet.updateMarkedCells();
                 } else if (c2 != paintedCellRange.getLastColumn() + 1) {
                     // shift right
-                    command.captureCellRangeValues(new CellRangeAddress(r1 - 1,
+                    changedCellRangeAddress = new CellRangeAddress(r1 - 1,
                             r2 - 1, paintedCellRange.getLastColumn() + 1,
-                            c2 - 1));
+                            c2 - 1);
+                    command.captureCellRangeValues(changedCellRangeAddress);
                     shiftColumnsRightInSelection(c2);
                     spreadsheet.updateMarkedCells();
                 } else if (r1 != paintedCellRange.getFirstRow() + 1) {
                     // shift top
-                    command.captureCellRangeValues(new CellRangeAddress(r1 - 1,
-                            paintedCellRange.getFirstRow() - 1, c1 - 1, c2 - 1));
+                    changedCellRangeAddress = new CellRangeAddress(r1 - 1,
+                            paintedCellRange.getFirstRow() - 1, c1 - 1, c2 - 1);
+                    command.captureCellRangeValues(changedCellRangeAddress);
                     shiftRowsUpInSelection(r1);
                     spreadsheet.updateMarkedCells();
                 } else if (r2 != paintedCellRange.getLastRow() + 1) {
                     // shift bottom
-                    command.captureCellRangeValues(new CellRangeAddress(
+                    changedCellRangeAddress = new CellRangeAddress(
                             paintedCellRange.getLastRow() + 1, r2 - 1, c1 - 1,
-                            c2 - 1));
+                            c2 - 1);
+                    command.captureCellRangeValues(changedCellRangeAddress);
                     shiftRowsDownInSelection(r2);
                     spreadsheet.updateMarkedCells();
                 }
@@ -132,11 +138,19 @@ public class CellSelectionShifter implements Serializable {
                         .cellRangeSelected(newPaintedCellRange);
                 spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
 
+                if (changedCellRangeAddress != null) {
+                    fireCellValueChangeEvent(changedCellRangeAddress);
+                }
+
             } else {
                 // TODO should show some sort of error, saying that some
                 // cells are locked so cannot shift
             }
         }
+    }
+
+    private void fireCellValueChangeEvent(CellRangeAddress cell) {
+        spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cell));
     }
 
     /**
@@ -360,9 +374,10 @@ public class CellSelectionShifter implements Serializable {
             if (spreadsheet.isRangeEditable(paintedCellRange)) {
                 CellValueCommand command = new CellShiftValuesCommand(
                         spreadsheet, true);
-                command.captureCellRangeValues(new CellRangeAddress(r - 1,
-                        paintedCellRange.getLastRow(), c - 1, paintedCellRange
-                                .getLastColumn()));
+                CellRangeAddress changedCellRangeAddress = new CellRangeAddress(
+                        r - 1, paintedCellRange.getLastRow(), c - 1,
+                        paintedCellRange.getLastColumn());
+                command.captureCellRangeValues(changedCellRangeAddress);
                 getCellValueManager().removeCells(r, c,
                         paintedCellRange.getLastRow() + 1,
                         paintedCellRange.getLastColumn() + 1, false);
@@ -406,6 +421,7 @@ public class CellSelectionShifter implements Serializable {
                     spreadsheet.loadCustomEditorOnSelectedCell();
                 }
                 spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
+                fireCellValueChangeEvent(changedCellRangeAddress);
             } else {
                 // TODO should show some sort of error, saying that some
                 // cells are locked so cannot shift

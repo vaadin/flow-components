@@ -32,6 +32,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
+import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedEditEvent;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 
@@ -285,7 +286,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             rowIndex++;
         }
 
-        // remove last incrementation so that selection goes correctly
+        // remove last increment so that selection goes correctly
         rowIndex--;
         colIndex--;
 
@@ -293,9 +294,19 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         // reload all values
         spreadsheet.refreshAllCellValues();
 
+        CellRangeAddress region = new CellRangeAddress(
+                selectedCellReference.getRow(), rowIndex,
+                selectedCellReference.getCol(), colIndex);
+
         // re-set selection to copied area
         spreadsheet.setSelectionRange(selectedCellReference.getRow(),
                 selectedCellReference.getCol(), rowIndex, colIndex);
+
+        fireCellValueChangeEvent(region);
+    }
+
+    private void fireCellValueChangeEvent(CellRangeAddress cell) {
+        spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cell));
     }
 
     /**
