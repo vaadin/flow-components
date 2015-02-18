@@ -158,17 +158,6 @@ public class SheetEventListener implements EventListener {
             final int keyCode = event.getKeyCode();
             switch (keyCode) {
             case KeyCodes.KEY_BACKSPACE:
-                widget.getSheetHandler().onSheetKeyPress(event, "");
-                // prevent the default browser action, i.e. Chrome would
-                // try to navigate to previous page...
-                event.preventDefault();
-                event.stopPropagation();
-                break;
-            case 190: // period, which gives same (46) as delete in key press
-                widget.getSheetHandler().onSheetKeyPress(event, ".");
-                event.preventDefault();
-                event.stopPropagation();
-                break;
             case KeyCodes.KEY_F2:
             case KeyCodes.KEY_UP:
             case KeyCodes.KEY_DOWN:
@@ -176,11 +165,13 @@ public class SheetEventListener implements EventListener {
             case KeyCodes.KEY_RIGHT:
             case KeyCodes.KEY_TAB:
             case KeyCodes.KEY_DELETE:
-                widget.getSheetHandler().onSheetKeyPress(event, "");
-                // prevent the default browser action (scroll to key
-                // direction) or switch focus (tab)
-                event.preventDefault();
-                event.stopPropagation();
+                if (event.getCharCode() == 0) {
+                    widget.getSheetHandler().onSheetKeyPress(event, "");
+                    // prevent the default browser action (scroll to key
+                    // direction) or switch focus (tab)
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
                 break;
             case 89: // y
                 if (event.getCtrlKey() || event.getMetaKey()) {
@@ -217,20 +208,22 @@ public class SheetEventListener implements EventListener {
                 event.stopPropagation();
                 return;
             }
-            switch (keyCode) {
-            // these have been handled with onKeyDown (FF causes both
-            // for some reason!)
-            case KeyCodes.KEY_UP:
-            case KeyCodes.KEY_DOWN:
-            case KeyCodes.KEY_LEFT:
-            case KeyCodes.KEY_RIGHT:
-            case KeyCodes.KEY_TAB:
-            case KeyCodes.KEY_BACKSPACE:
-            case KeyCodes.KEY_DELETE:
-                event.preventDefault();
-                event.stopPropagation();
-                break;
-            default:
+            if (charCode == 0) {
+                switch (keyCode) {
+                // these have been handled with onKeyDown (FF causes both
+                // for some reason!)
+                case KeyCodes.KEY_UP:
+                case KeyCodes.KEY_DOWN:
+                case KeyCodes.KEY_LEFT:
+                case KeyCodes.KEY_RIGHT:
+                case KeyCodes.KEY_TAB:
+                case KeyCodes.KEY_BACKSPACE:
+                case KeyCodes.KEY_DELETE:
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                }
+            } else {
                 widget.getSheetHandler().onSheetKeyPress(
                         event,
                         widget.getSheetJsniUtil().convertUnicodeIntoCharacter(

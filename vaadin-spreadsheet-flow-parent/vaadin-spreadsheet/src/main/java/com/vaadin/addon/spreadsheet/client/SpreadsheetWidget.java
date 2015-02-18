@@ -903,79 +903,80 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public void onSheetKeyPress(NativeEvent event, String enteredCharacter) {
-        switch (event.getKeyCode()) {
-        case KeyCodes.KEY_BACKSPACE:
-        case KeyCodes.KEY_DELETE:
-            checkEditableAndNotify();
-            if (!cellLocked) {
-                spreadsheetHandler.deleteSelectedCells();
+        if (event.getCharCode() == 0) {
+            switch (event.getKeyCode()) {
+            case KeyCodes.KEY_BACKSPACE:
+            case KeyCodes.KEY_DELETE:
+                checkEditableAndNotify();
+                if (!cellLocked) {
+                    spreadsheetHandler.deleteSelectedCells();
+                }
+                break;
+            case KeyCodes.KEY_ENTER:
+                if (event.getShiftKey()) {
+                    selectionHandler.moveSelectionUp(false);
+                } else {
+                    selectionHandler.moveSelectionDown(false);
+                }
+                break;
+            case KeyCodes.KEY_DOWN:
+                if (event.getShiftKey()) {
+                    selectionHandler.increaseVerticalSelection(true);
+                } else {
+                    selectionHandler.moveSelectionDown(true);
+                }
+                break;
+            case KeyCodes.KEY_LEFT:
+                if (event.getShiftKey()) {
+                    selectionHandler.increaseHorizontalSelection(false);
+                } else {
+                    selectionHandler.moveSelectionLeft(true);
+                }
+                break;
+            case KeyCodes.KEY_TAB:
+                if (event.getShiftKey()) {
+                    selectionHandler.moveSelectionLeft(false);
+                } else {
+                    selectionHandler.moveSelectionRight(false);
+                }
+                break;
+            case KeyCodes.KEY_RIGHT:
+                if (event.getShiftKey()) {
+                    selectionHandler.increaseHorizontalSelection(true);
+                } else {
+                    selectionHandler.moveSelectionRight(true);
+                }
+                break;
+            case KeyCodes.KEY_UP:
+                if (event.getShiftKey()) {
+                    selectionHandler.increaseVerticalSelection(false);
+                } else {
+                    selectionHandler.moveSelectionUp(true);
+                }
+                break;
+            case KeyCodes.KEY_ALT:
+            case KeyCodes.KEY_CTRL:
+            case KeyCodes.KEY_END:
+            case KeyCodes.KEY_ESCAPE:
+            case KeyCodes.KEY_HOME:
+            case KeyCodes.KEY_PAGEDOWN:
+            case KeyCodes.KEY_PAGEUP:
+            case KeyCodes.KEY_SHIFT:
+                break;
+            case KeyCodes.KEY_F2:
+                checkEditableAndNotify();
+                if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
+                        && !cellLocked && !customCellEditorDisplayed) {
+                    cachedCellValue = sheetWidget.getSelectedCellLatestValue();
+                    formulaBarWidget.cacheFormulaFieldValue();
+                    formulaBarEditing = false;
+                    inlineEditing = true;
+                    sheetWidget.startEditingCell(true, true, true,
+                            formulaBarWidget.getFormulaFieldValue());
+                }
+                break;
             }
-            break;
-        case KeyCodes.KEY_ENTER:
-            if (event.getShiftKey()) {
-                selectionHandler.moveSelectionUp(false);
-            } else {
-                selectionHandler.moveSelectionDown(false);
-            }
-            break;
-        case KeyCodes.KEY_DOWN:
-            if (event.getShiftKey()) {
-                selectionHandler.increaseVerticalSelection(true);
-            } else {
-                selectionHandler.moveSelectionDown(true);
-            }
-            break;
-        case KeyCodes.KEY_LEFT:
-            if (event.getShiftKey()) {
-                selectionHandler.increaseHorizontalSelection(false);
-            } else {
-                selectionHandler.moveSelectionLeft(true);
-            }
-            break;
-        case KeyCodes.KEY_TAB:
-            if (event.getShiftKey()) {
-                selectionHandler.moveSelectionLeft(false);
-            } else {
-                selectionHandler.moveSelectionRight(false);
-            }
-            break;
-        case KeyCodes.KEY_RIGHT:
-            if (event.getShiftKey()) {
-                selectionHandler.increaseHorizontalSelection(true);
-            } else {
-                selectionHandler.moveSelectionRight(true);
-            }
-            break;
-        case KeyCodes.KEY_UP:
-            if (event.getShiftKey()) {
-                selectionHandler.increaseVerticalSelection(false);
-            } else {
-                selectionHandler.moveSelectionUp(true);
-            }
-            break;
-        case KeyCodes.KEY_ALT:
-        case KeyCodes.KEY_CTRL:
-        case KeyCodes.KEY_END:
-        case KeyCodes.KEY_ESCAPE:
-        case KeyCodes.KEY_HOME:
-        case KeyCodes.KEY_PAGEDOWN:
-        case KeyCodes.KEY_PAGEUP:
-        case KeyCodes.KEY_SHIFT:
-            break;
-        case KeyCodes.KEY_F2:
-            checkEditableAndNotify();
-            if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
-                    && !cellLocked && !customCellEditorDisplayed) {
-                cachedCellValue = sheetWidget.getSelectedCellLatestValue();
-                formulaBarWidget.cacheFormulaFieldValue();
-                formulaBarEditing = false;
-                inlineEditing = true;
-                sheetWidget.startEditingCell(true, true, true,
-                        formulaBarWidget.getFormulaFieldValue());
-            }
-            break;
-        default:
-
+        } else {
             checkEditableAndNotify();
 
             if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
