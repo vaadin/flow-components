@@ -17,7 +17,6 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -310,7 +309,6 @@ public class SpreadsheetFactory implements Serializable {
             throws IOException {
         final Workbook workbook = spreadsheet.getWorkbook();
         try {
-            stream = new ByteArrayOutputStream();
             workbook.write(stream);
             stream.close();
             stream = null;
