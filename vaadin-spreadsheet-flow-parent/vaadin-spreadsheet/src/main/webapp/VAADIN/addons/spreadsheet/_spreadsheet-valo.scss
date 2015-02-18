@@ -531,15 +531,6 @@
 			}
 		}
 		
-		.v-spreadsheet-comment-overlay {
-			background: rgb(255, 255, 16);
-			border: 1px solid rgb(225, 225, 225);
-			.comment-overlay-label {
-				max-width: 200px;
-				padding: 10px;
-				white-space: pre-wrap;
-			}
-		}
 		
 		
 		/** SELECTION WIDGET */
@@ -655,6 +646,7 @@
 					text-align: center;
 					z-index: inherit;
 					width: 26px;
+
 					padding-top: 4px;
 					color: $tab-action-button-color;
 					font-family: FontAwesome;
@@ -891,5 +883,39 @@
 				bottom: -10px;
 			}
 		}
+	}
+	.v-spreadsheet-comment-overlay {
+		background: rgb(255, 255, 16);
+		border: 1px solid rgb(225, 225, 225);
+		padding: 10px;
+		overflow: auto !important;
+		
+		.popupContent {
+			overflow: visible;
+		}
+		
+		.comment-overlay-author {
+			font-size: 12px;
+			font-weight: bold;
+			white-space: nowrap;
+			padding-bottom: 6px;
+		}
+		
+		.comment-overlay-label {
+			max-width: 200px;
+			max-height: 150px;
+			white-space: pre-wrap;
+		}
+		
+		.comment-overlay-input {
+			max-width: 200px;
+			max-height: 150px;
+			font-family: 'Open Sans', sans-serif;
+			font-size: 16px;
+			font-weight: 300;
+			outline: none;
+			background: rgb(255, 255, 16);
+			border: none;
+		}	
 	}
 }

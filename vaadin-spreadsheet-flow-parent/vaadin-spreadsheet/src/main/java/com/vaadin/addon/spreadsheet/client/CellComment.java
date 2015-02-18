@@ -20,10 +20,13 @@ package com.vaadin.addon.spreadsheet.client;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.dom.client.TextAreaElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.VOverlay;
 
@@ -31,10 +34,14 @@ public class CellComment extends VOverlay {
 
     protected static final String COMMENT_OVERLAY_LINE_CLASSNAME = "comment-overlay-line";
     private static final String COMMENT_OVERLAY_CLASSNAME = "v-spreadsheet-comment-overlay";
+    private static final String COMMENT_OVERLAY_AUTHOR_CLASSNAME = "comment-overlay-author";
     private static final String COMMENT_OVERLAY_LABEL_CLASSNAME = "comment-overlay-label";
+    private static final String COMMENT_OVERLAY_INPUT_CLASSNAME = "comment-overlay-input";
     private static final String COMMENT_OVERLAY_SHADOW_CLASSNAME = COMMENT_OVERLAY_CLASSNAME
             + "-shadow";
 
+    private final FlowPanel root;
+    private final VLabel author;
     private final VLabel label;
 
     private Element paneElement;
@@ -45,6 +52,8 @@ public class CellComment extends VOverlay {
 
     private String linePositionClassName;
 
+    private TextAreaElement input = Document.get().createTextAreaElement();
+
     private int offsetWidth;
     private int offsetHeight;
     private int cellRow;
@@ -52,8 +61,15 @@ public class CellComment extends VOverlay {
 
     public CellComment(final SheetWidget owner, Element paneElement) {
         this.paneElement = paneElement;
+
+        root = new FlowPanel();
+        add(root);
         line = Document.get().createDivElement();
         line.setClassName(COMMENT_OVERLAY_LINE_CLASSNAME);
+
+        author = new VLabel();
+        author.setStyleName(COMMENT_OVERLAY_AUTHOR_CLASSNAME);
+
         label = new VLabel();
         label.setStyleName(COMMENT_OVERLAY_LABEL_CLASSNAME);
         setStyleName(COMMENT_OVERLAY_CLASSNAME);
@@ -63,15 +79,26 @@ public class CellComment extends VOverlay {
         setShadowEnabled(true);
         setVisible(false);
         setZIndex(30);
-        add(label);
 
-        label.addClickHandler(new ClickHandler() {
+        root.add(author);
+        root.add(label);
+
+        // Comment editor
+        input.addClassName(COMMENT_OVERLAY_INPUT_CLASSNAME);
+        input.getStyle().setDisplay(Display.NONE);
+        getElement().appendChild(input);
+        input.setRows(4);
+        input.getStyle().setWidth(200, Unit.PX);
+
+        ClickHandler clickHandler = new ClickHandler() {
 
             @Override
             public void onClick(ClickEvent event) {
                 owner.onCellCommentFocus(CellComment.this);
             }
-        });
+        };
+        author.addClickHandler(clickHandler);
+        label.addClickHandler(clickHandler);
     }
 
     public void bringForward() {
@@ -223,5 +250,25 @@ public class CellComment extends VOverlay {
 
     public void setSheetElement(Element paneElement) {
         this.paneElement = paneElement;
+    }
+
+    public void setEditMode(boolean editMode) {
+        if (editMode) {
+            input.setValue(label.getText());
+            label.setVisible(false);
+            input.getStyle().setDisplay(Display.BLOCK);
+            input.focus();
+            input.select();
+        } else {
+            label.setText(input.getValue());
+            label.setVisible(true);
+            input.getStyle().setDisplay(Display.NONE);
+            ((SheetWidget) getOwner()).commitComment(label.getText(), getCol(),
+                    getRow());
+        }
+    }
+
+    public void setAuthor(String authorName) {
+        author.setText(authorName);
     }
 }

@@ -83,6 +83,7 @@ public interface SpreadsheetHandler {
     /**
      * Complete column added to previous range selection. New selected cell is
      * at column:firstRowIndex.
+     * 
      * @param firstRowIndex
      *            row index for the selected cell (top most)
      * @param column
@@ -93,6 +94,7 @@ public interface SpreadsheetHandler {
     /**
      * The new selection that was painted from the old. Values and formulas
      * should be painted to the new selection.
+     * 
      * @param r1
      *            new selection top, 1-based
      * @param c1
@@ -107,6 +109,7 @@ public interface SpreadsheetHandler {
     /**
      * The existing selection has been painted inwards meaning that the painted
      * selection cells should be cleared.
+     * 
      * @param row
      *            topmost cell index where the clearing starts, 1-based
      * @param col
@@ -143,6 +146,7 @@ public interface SpreadsheetHandler {
 
     /**
      * Cell range selected by painting
+     * 
      * @param selectedCellRow
      * @param selectedCellColumn
      * @param row1
@@ -161,6 +165,7 @@ public interface SpreadsheetHandler {
 
     /**
      * A cell containing a hyperlink has been clicked.
+     * 
      * @param row
      *            1-based
      * @param column
@@ -183,6 +188,7 @@ public interface SpreadsheetHandler {
 
     /**
      * Columns resized with drag and drop. Indexes 1-based.
+     * 
      * @param row1
      * @param col1
      * @param row2
@@ -231,4 +237,6 @@ public interface SpreadsheetHandler {
      * cleared
      */
     public void clearSelectedCellsOnCut();
+
+    public void updateCellComment(String text, int col, int row);
 }

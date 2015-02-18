@@ -1387,8 +1387,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         this.hiddenRowIndexes = new ArrayList<Integer>(hiddenRowIndexes);
     }
 
-    public void setCellComments(HashMap<String, String> cellComments) {
-        sheetWidget.setCellComments(cellComments);
+    public void setCellComments(HashMap<String, String> cellComments,
+            HashMap<String, String> cellCommentAuthors) {
+        sheetWidget.setCellComments(cellComments, cellCommentAuthors);
     }
 
     @Override
@@ -1629,5 +1630,14 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public FormulaBarWidget getFormulaBarWidget() {
         return formulaBarWidget;
+    }
+
+    public void editCellComment(int col, int row) {
+        sheetWidget.editCellComment(col, row);
+    }
+
+    @Override
+    public void updateCellComment(String text, int col, int row) {
+        spreadsheetHandler.updateCellComment(text, col, row);
     }
 }

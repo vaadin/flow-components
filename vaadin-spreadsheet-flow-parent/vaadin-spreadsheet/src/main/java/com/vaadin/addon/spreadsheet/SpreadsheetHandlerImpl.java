@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -383,4 +385,11 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         spreadsheet.refreshAllCellValues();
     }
 
+    @Override
+    public void updateCellComment(String text, int col, int row) {
+        CreationHelper factory = spreadsheet.getWorkbook().getCreationHelper();
+        RichTextString str = factory.createRichTextString(text);
+        spreadsheet.getActiveSheet().getCellComment(row - 1, col - 1)
+                .setString(str);
+    }
 }

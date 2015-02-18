@@ -47,6 +47,7 @@ public class SpreadsheetDefaultActionHandler implements Handler {
         defaultActions.add(new MergeCellsAction());
         defaultActions.add(new UnMergeCellsAction());
         defaultActions.add(new InsertDeleteCellCommentAction());
+        defaultActions.add(new EditCellCommentAction());
         defaultActions.add(new ShowHideCellCommentAction());
         defaultActions.add(new InsertNewRowAction());
         defaultActions.add(new DeleteRowAction());

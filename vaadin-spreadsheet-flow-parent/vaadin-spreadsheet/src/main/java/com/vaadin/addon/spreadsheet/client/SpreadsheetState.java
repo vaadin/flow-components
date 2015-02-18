@@ -96,6 +96,7 @@ public class SpreadsheetState extends AbstractComponentState {
     public HashMap<String, String> hyperlinksTooltips;
 
     public HashMap<String, String> cellComments;
+    public HashMap<String, String> cellCommentAuthors;
 
     public ArrayList<String> visibleCellComments;
 

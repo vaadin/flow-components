@@ -260,6 +260,8 @@ public class SheetWidget extends Panel {
 
     private HashMap<String, String> cellCommentsMap;
 
+    private HashMap<String, String> cellCommentAuthorsMap;
+
     private HashMap<String, CellComment> alwaysVisibleCellComments;
 
     private HashMap<String, SheetImage> sheetImages;
@@ -448,7 +450,8 @@ public class SheetWidget extends Panel {
                                     .containsKey(className))) {
                         updateCellCommentDisplay(mouseOverOrOutEvent, target);
                     } else {
-                        if (cellCommentOverlay.isShowing()) {
+                        if (!cellCommentEditMode
+                                && cellCommentOverlay.isShowing()) {
                             cellCommentOverlay.hide();
                             cellCommentCellClassName = null;
                             cellCommentCellColumn = -1;
@@ -473,6 +476,8 @@ public class SheetWidget extends Panel {
 
     // Width of the row headers
     private int widthIncrease;
+    private boolean cellCommentEditMode;
+    private CellComment currentlyEditedCellComment;
 
     public SheetWidget(SheetHandler view, boolean touchMode) {
         actionHandler = view;
@@ -985,6 +990,17 @@ public class SheetWidget extends Panel {
         Element target = event.getEventTarget().cast();
 
         String className = target.getClassName();
+        if (cellCommentEditMode && !className.contains("comment-overlay")) {
+            cellCommentEditMode = false;
+            currentlyEditedCellComment.setEditMode(false);
+            if (currentlyEditedCellComment.equals(cellCommentOverlay)) {
+                cellCommentOverlay.hide();
+                cellCommentCellClassName = null;
+                cellCommentCellColumn = -1;
+                cellCommentCellRow = -1;
+            }
+        }
+
         if (className.contains("sheet") || target.getTagName().equals("input")
                 || className.equals("floater")) {
             return; // event target is one of the panes or input
@@ -3120,7 +3136,8 @@ public class SheetWidget extends Panel {
         return null;
     }
 
-    public void setCellComments(HashMap<String, String> newCellCommentsMap) {
+    public void setCellComments(HashMap<String, String> newCellCommentsMap,
+            HashMap<String, String> newCellCommentAuthorsMap) {
         updateRowCellComments(topLeftCells, newCellCommentsMap);
         updateRowsCellComments(topRightRows, newCellCommentsMap);
         updateRowsCellComments(bottomLeftRows, newCellCommentsMap);
@@ -3133,6 +3150,14 @@ public class SheetWidget extends Panel {
             }
         } else {
             cellCommentsMap = newCellCommentsMap;
+        }
+        if (cellCommentAuthorsMap != null) {
+            cellCommentAuthorsMap.clear();
+            if (newCellCommentAuthorsMap != null) {
+                cellCommentAuthorsMap.putAll(newCellCommentAuthorsMap);
+            }
+        } else {
+            cellCommentAuthorsMap = newCellCommentAuthorsMap;
         }
     }
 
@@ -3186,6 +3211,7 @@ public class SheetWidget extends Panel {
             }
             final CellComment cellComment = new CellComment(this, cell
                     .getElement().getParentElement());
+            cellComment.setAuthor(cellCommentAuthorsMap.get(key));
             cellComment.setCommentText(cellCommentsMap.get(key));
             cellComment.showDependingToCellRightCorner((Element) cell
                     .getElement().cast(), parsedRow, parsedCol);
@@ -3249,6 +3275,7 @@ public class SheetWidget extends Panel {
             cellElement = getCell(column, row).getElement();
             cellCommentOverlay.setSheetElement(cellElement.getParentElement());
         }
+        cellCommentOverlay.setAuthor(cellCommentAuthorsMap.get(cellClassName));
         cellCommentOverlay.setCommentText(cellCommentsMap.get(cellClassName));
         cellCommentOverlay.show(cellElement, row, column);
         cellCommentCellClassName = cellClassName;
@@ -3287,7 +3314,7 @@ public class SheetWidget extends Panel {
                 // MOUSEOUT triangle -> hide comment unless mouse moved on top
                 // of the triangle's cell (parent)
                 Element toElement = event.getRelatedEventTarget().cast();
-                if (!toElement.equals(cellElement)) {
+                if (!cellCommentEditMode && !toElement.equals(cellElement)) {
                     cellCommentOverlay.hide();
                     cellCommentCellClassName = null;
                     cellCommentCellColumn = -1;
@@ -3317,7 +3344,8 @@ public class SheetWidget extends Panel {
                 // MOUSEOUT triangle's cell -> hide unless mouse moved back on
                 // top of the same triangle
                 Element toElement = event.getRelatedEventTarget().cast();
-                if (toElement != null && toElement.getParentElement() != null) {
+                if (!cellCommentEditMode && toElement != null
+                        && toElement.getParentElement() != null) {
                     try {
                         if (!(toElement.getClassName().equals(
                                 CELL_COMMENT_TRIANGLE_CLASSNAME) && toElement
@@ -3826,6 +3854,7 @@ public class SheetWidget extends Panel {
         }
         alwaysVisibleCellComments.clear();
         cellCommentsMap.clear();
+        cellCommentAuthorsMap.clear();
     }
 
     /**
@@ -4972,5 +5001,30 @@ public class SheetWidget extends Panel {
 
     public void setTouchMode(boolean touchMode) {
         this.touchMode = touchMode;
+    }
+
+    public void editCellComment(int col, int row) {
+        col++;
+        row++;
+        String cellClassName = toKey(col, row);
+        if (alwaysVisibleCellComments.containsKey(cellClassName)) {
+            cellCommentEditMode = true;
+            currentlyEditedCellComment = alwaysVisibleCellComments
+                    .get(cellClassName);
+            currentlyEditedCellComment.setEditMode(true);
+        } else {
+            cellCommentEditMode = true;
+            cellCommentCellColumn = col;
+            cellCommentCellRow = row;
+            showCellComment(col, row);
+            currentlyEditedCellComment = cellCommentOverlay;
+            cellCommentOverlay.setEditMode(true);
+        }
+    }
+
+    public void commitComment(String text, int col, int row) {
+        String cellClassName = toKey(col, row);
+        cellCommentsMap.put(cellClassName, text);
+        actionHandler.updateCellComment(text, col, row);
     }
 }

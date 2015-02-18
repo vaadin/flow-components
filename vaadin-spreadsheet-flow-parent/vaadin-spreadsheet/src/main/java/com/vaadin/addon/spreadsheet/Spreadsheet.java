@@ -2309,6 +2309,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         getState().resourceKeyToImage = null;
         getState().mergedRegions = null;
         getState().cellComments = null;
+        getState().cellCommentAuthors = null;
         getState().visibleCellComments = null;
         if (customComponents != null && !customComponents.isEmpty()) {
             for (Component c : customComponents) {
@@ -2863,6 +2864,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         } else {
             getState().cellComments.clear();
         }
+        if (getState(false).cellCommentAuthors == null) {
+            getState(false).cellCommentAuthors = new HashMap<String, String>();
+        } else {
+            getState().cellCommentAuthors.clear();
+        }
         if (getState(false).visibleCellComments == null) {
             getState(false).visibleCellComments = new ArrayList<String>();
         } else {
@@ -2911,6 +2917,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                         String key = SpreadsheetUtil.toKey(c + 1, r + 1);
                         getState().cellComments.put(key, comment.getString()
                                 .getString());
+                        getState().cellCommentAuthors.put(key,
+                                comment.getAuthor());
                         if (comment.isVisible()) {
                             getState().visibleCellComments.add(key);
                         }
@@ -3928,6 +3936,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private static final String ATTR_NO_GRIDLINES = "no-gridlines";
     private static final String ATTR_NO_HEADINGS = "no-headings";
     private static final String ATTR_SRC = "src";
+    private CommentAuthorProvider commentAuthorProvider;
 
     /*
      * (non-Javadoc)
@@ -4079,5 +4088,54 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void setDefaultPercentageFormat(String defaultPercentageFormat) {
         this.defaultPercentageFormat = defaultPercentageFormat;
+    }
+
+    /**
+     * This interface can be implemented to provide the comment author name set
+     * to new comments in cells.
+     */
+    public interface CommentAuthorProvider {
+
+        /**
+         * Gets the author name for a new comment about to be added to the cell
+         * at the given cell reference.
+         * 
+         * @param targetCell
+         *            Reference to the target cell
+         * @return Comment author name
+         */
+        public String getAuthorForComment(CellReference targetCell);
+    }
+
+    /**
+     * Sets the given CommentAuthorProvider to this Spreadsheet.
+     * 
+     * @param commentAuthorProvider
+     *            New provider
+     */
+    public void setCommentAuthorProvider(
+            CommentAuthorProvider commentAuthorProvider) {
+        this.commentAuthorProvider = commentAuthorProvider;
+    }
+
+    /**
+     * Gets the CommentAuthorProvider currently set to this Spreadsheet.
+     * 
+     * @return Current provider or null if not set.
+     */
+    public CommentAuthorProvider getCommentAuthorProvider() {
+        return commentAuthorProvider;
+    }
+
+    /**
+     * Triggers editing of the cell comment in the given cell reference. Note
+     * that the cell must have a previously set cell comment in order to be able
+     * to edit it.
+     * 
+     * @param cr
+     *            Reference to the cell containing the comment to edit
+     */
+    public void editCellComment(CellReference cr) {
+        getRpcProxy().editCellComment(cr.getCol(), cr.getRow());
     }
 }

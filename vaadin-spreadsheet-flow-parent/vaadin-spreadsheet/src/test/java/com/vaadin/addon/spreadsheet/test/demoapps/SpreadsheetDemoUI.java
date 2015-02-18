@@ -32,6 +32,7 @@ import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeListener;
 import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
+import com.vaadin.addon.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.annotations.Theme;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -159,6 +160,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                                     .addSelectionChangeListener(selectionChangeListener);
                             spreadsheet
                                     .addSelectedSheetChangeListener(selectedSheetChangeListener);
+                            spreadsheet
+                                    .addActionHandler(new SpreadsheetDefaultActionHandler());
                             layout.addComponent(spreadsheet);
                             layout.setExpandRatio(spreadsheet, 1.0f);
                         } else {

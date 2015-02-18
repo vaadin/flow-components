@@ -165,6 +165,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             getWidget().refreshCellStyles();
         }
 
+        @Override
+        public void editCellComment(int col, int row) {
+            getWidget().editCellComment(col, row);
+        }
     };
 
     private final ElementResizeListener elementResizeListener = new ElementResizeListener() {
@@ -340,8 +344,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         if (stateChangeEvent.hasPropertyChanged("cellKeysToEditorIdMap")) {
             setupCustomEditors();
         }
-        if (stateChangeEvent.hasPropertyChanged("cellComments")) {
-            widget.setCellComments(state.cellComments);
+        if (stateChangeEvent.hasPropertyChanged("cellComments")
+                || stateChangeEvent.hasPropertyChanged("cellCommentAuthors")) {
+            widget.setCellComments(state.cellComments, state.cellCommentAuthors);
         }
         if (stateChangeEvent.hasPropertyChanged("visibleCellComments")) {
             setupVisibleCellComments();

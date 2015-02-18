@@ -76,17 +76,20 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
         Sheet sheet = spreadsheet.getActiveSheet();
         CellReference cr = event.getSelectedCellReference();
         Cell cell = spreadsheet.getCell(cr.getRow(), cr.getCol());
+        boolean created = false;
         if (cell == null) {
             Row row = sheet.getRow(cr.getRow());
             if (row == null) {
                 row = sheet.createRow(cr.getRow());
             }
             cell = row.createCell(cr.getCol());
-            createCellComment(sheet, cell);
+            createCellComment(spreadsheet, sheet, cell, cr);
+            created = true;
         } else {
 
             if (cell.getCellComment() == null) {
-                createCellComment(sheet, cell);
+                createCellComment(spreadsheet, sheet, cell, cr);
+                created = true;
             } else {
                 cell.removeCellComment();
             }
@@ -94,9 +97,13 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
         if (cell != null) {
             spreadsheet.refreshCells(cell);
         }
+        if (created) {
+            spreadsheet.editCellComment(cr);
+        }
     }
 
-    private void createCellComment(Sheet sheet, Cell cell) {
+    private void createCellComment(Spreadsheet spreadsheet, Sheet sheet,
+            Cell cell, CellReference cellRef) {
         CreationHelper factory = sheet.getWorkbook().getCreationHelper();
         Drawing drawing = sheet.createDrawingPatriarch();
 
@@ -108,12 +115,19 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
 
         // Create the comment and set the text+author
         Comment comment = drawing.createCellComment(anchor);
-        RichTextString str = factory
-                .createRichTextString("Demo comment on cell "
-                        + CellReference.convertNumToColString(cell
-                                .getColumnIndex()) + (cell.getRowIndex() + 1));
+        RichTextString str = factory.createRichTextString("");
         comment.setString(str);
-        comment.setAuthor("Spreadsheet user");
+
+        // Fetch author from provider or fall back to default
+        String author = null;
+        if (spreadsheet.getCommentAuthorProvider() != null) {
+            author = spreadsheet.getCommentAuthorProvider()
+                    .getAuthorForComment(cellRef);
+        }
+        if (author == null || author.trim().isEmpty()) {
+            author = "Spreadsheet User";
+        }
+        comment.setAuthor(author);
 
         // Assign the comment to the cell
         cell.setCellComment(comment);

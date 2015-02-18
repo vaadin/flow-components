@@ -85,4 +85,6 @@ public interface SpreadsheetClientRpc extends ClientRpc {
     void cellsUpdated(ArrayList<CellData> updatedCellData);
 
     void refreshCellStyles();
+
+    void editCellComment(int col, int row);
 }

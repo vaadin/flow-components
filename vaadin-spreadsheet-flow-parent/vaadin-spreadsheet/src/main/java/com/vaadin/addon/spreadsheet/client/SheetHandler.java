@@ -249,4 +249,6 @@ public interface SheetHandler {
     SheetTabSheet getSheetTabSheet();
 
     FormulaBarWidget getFormulaBarWidget();
+
+    void updateCellComment(String text, int col, int row);
 }
