@@ -1806,7 +1806,10 @@ public class SheetWidget extends Panel {
      * headers are shown or not.
      */
     void updateSheetPanePositions() {
-
+        int extraSize = 1;
+        if (spreadsheet.getClassName().contains("report")) {
+            extraSize = 0;
+        }
         widthIncrease = 0;
         if (rowHeaders != null && !rowHeaders.isEmpty()) {
             MeasuredSize measuredSize = new MeasuredSize();
@@ -1842,7 +1845,7 @@ public class SheetWidget extends Panel {
 
         style = topRightPane.getStyle();
         // left offset is the same as the width increase
-        style.setLeft(leftFrozenPanelWidth + widthIncrease + 1, Unit.PX);
+        style.setLeft(leftFrozenPanelWidth + widthIncrease + extraSize, Unit.PX);
         style.setHeight(topFrozenPanelHeight + heightIncrease, Unit.PX);
 
         style = bottomLeftPane.getStyle();
@@ -1851,7 +1854,7 @@ public class SheetWidget extends Panel {
         style.setTop(topFrozenPanelHeight + topOffset, Unit.PX);
 
         style = sheet.getStyle();
-        style.setLeft(leftFrozenPanelWidth + widthIncrease + 1, Unit.PX);
+        style.setLeft(leftFrozenPanelWidth + widthIncrease + extraSize, Unit.PX);
         style.setTop(topFrozenPanelHeight + topOffset, Unit.PX);
     }
 

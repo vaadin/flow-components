@@ -89,7 +89,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private Button update;
 
-    private CheckBox gridlines;
+    private CheckBox gridlines, hideTop, hideBottom, hideBoth;
 
     private AbstractField<Boolean> rowColHeadings;
 
@@ -301,7 +301,43 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     }
                 });
 
-        checkBoxLayout.addComponents(gridlines, rowColHeadings);
+        hideTop = new CheckBox("toggle top bar visibility");
+        hideTop.setImmediate(true);
+
+        hideBottom = new CheckBox("toggle bottom bar visibility");
+        hideBottom.setImmediate(true);
+
+        hideBoth = new CheckBox("report mode");
+        hideBoth.setImmediate(true);
+
+        hideTop.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                spreadsheet.setFunctionBarVisible(!hideTop.getValue());
+                hideBoth.setValue(spreadsheet.isReportStyle());
+            }
+        });
+        hideBottom.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                spreadsheet.setSheetSelectionBarVisible(!hideBottom.getValue());
+                hideBoth.setValue(spreadsheet.isReportStyle());
+            }
+        });
+        hideBoth.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                spreadsheet.setReportStyle(hideBoth.getValue());
+                hideTop.setValue(!spreadsheet.isFunctionBarVisible());
+                hideBottom.setValue(!spreadsheet.isFunctionBarVisible());
+            }
+        });
+
+        checkBoxLayout.addComponents(gridlines, rowColHeadings, hideTop,
+                hideBottom, hideBoth);
         options.addComponent(checkBoxLayout);
         options.addComponent(newSpreadsheetButton);
         options.addComponent(freezePanesButton);

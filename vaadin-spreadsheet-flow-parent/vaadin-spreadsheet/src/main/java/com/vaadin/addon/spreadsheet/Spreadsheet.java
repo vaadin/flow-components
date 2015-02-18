@@ -98,6 +98,16 @@ import com.vaadin.util.ReflectTools;
 public class Spreadsheet extends AbstractComponent implements HasComponents,
         Action.Container {
 
+    /**
+     * This is a style which hides the top (address and formula) bar.
+     */
+    public static final String HIDE_FUNCTION_BAR_STYLE = "hidefunctionbar";
+
+    /**
+     * This is a style which hides the bottom (sheet selection) bar.
+     */
+    public static final String HIDE_TABSHEET_STYLE = "hidetabsheet";
+
     private static final Logger LOGGER = Logger.getLogger(Spreadsheet.class
             .getName());
 
@@ -3995,6 +4005,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private static final String ATTR_DEFAULT_ROW_HEIGHT = "default-row-height";
     private static final String ATTR_NO_GRIDLINES = "no-gridlines";
     private static final String ATTR_NO_HEADINGS = "no-headings";
+    private static final String ATTR_NO_FUNCTION_BAR = "no-function-bar";
+    private static final String ATTR_NO_SHEET_SELECTION_BAR = "no-sheetselection-bar";
     private static final String ATTR_SRC = "src";
     private CommentAuthorProvider commentAuthorProvider;
 
@@ -4059,6 +4071,16 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     ATTR_NO_HEADINGS, attr, Boolean.class);
             setRowColHeadingsVisible(!noHeadings);
         }
+        if (attr.hasKey(ATTR_NO_FUNCTION_BAR)) {
+            Boolean hidden = DesignAttributeHandler.readAttribute(
+                    ATTR_NO_FUNCTION_BAR, attr, Boolean.class);
+            setFunctionBarVisible(!hidden);
+        }
+        if (attr.hasKey(ATTR_NO_SHEET_SELECTION_BAR)) {
+            Boolean hidden = DesignAttributeHandler.readAttribute(
+                    ATTR_NO_SHEET_SELECTION_BAR, attr, Boolean.class);
+            setSheetSelectionBarVisible(!hidden);
+        }
     }
 
     /*
@@ -4076,6 +4098,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         result.add(ATTR_DEFAULT_ROW_HEIGHT);
         result.add(ATTR_NO_GRIDLINES);
         result.add(ATTR_NO_HEADINGS);
+        result.add(ATTR_NO_FUNCTION_BAR);
+        result.add(ATTR_NO_SHEET_SELECTION_BAR);
         result.add(ATTR_SRC);
         return result;
     }
@@ -4097,6 +4121,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         DesignAttributeHandler.writeAttribute(ATTR_NO_HEADINGS, attr,
                 !isRowColHeadingsVisible(), false, Boolean.class);
+
+        DesignAttributeHandler.writeAttribute(ATTR_NO_FUNCTION_BAR, attr,
+                !isFunctionBarVisible(), false, Boolean.class);
+
+        DesignAttributeHandler.writeAttribute(ATTR_NO_SHEET_SELECTION_BAR,
+                attr, !isSheetSelectionBarVisible(), false, Boolean.class);
 
         DesignAttributeHandler.writeAttribute(ATTR_ACTIVE_SHEET, attr,
                 getActiveSheetIndex(), 0, Integer.class);
@@ -4197,5 +4227,76 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void editCellComment(CellReference cr) {
         getRpcProxy().editCellComment(cr.getCol(), cr.getRow());
+    }
+
+    /**
+     * Sets the visibility of the top function bar. By default the bar is
+     * visible.
+     * 
+     * @param functionBarVisible
+     *            True to show the top bar, false to hide it.
+     */
+    public void setFunctionBarVisible(boolean functionBarVisible) {
+        if (functionBarVisible) {
+            removeStyleName(HIDE_FUNCTION_BAR_STYLE);
+        } else {
+            addStyleName(HIDE_FUNCTION_BAR_STYLE);
+        }
+    }
+
+    /**
+     * Gets the visibility of the top function bar. By default the bar is
+     * visible.
+     * 
+     * @return True if the function bar is visible, false otherwise.
+     */
+    public boolean isFunctionBarVisible() {
+        return !getStyleName().contains(HIDE_FUNCTION_BAR_STYLE);
+    }
+
+    /**
+     * Sets the visibility of the bottom sheet selection bar. By default the bar
+     * is visible.
+     * 
+     * @param sheetSelectionBarVisible
+     *            True to show the sheet selection bar, false to hide it.
+     */
+    public void setSheetSelectionBarVisible(boolean sheetSelectionBarVisible) {
+        if (sheetSelectionBarVisible) {
+            removeStyleName(HIDE_TABSHEET_STYLE);
+        } else {
+            addStyleName(HIDE_TABSHEET_STYLE);
+        }
+    }
+
+    /**
+     * Gets the visibility of the bottom sheet selection bar. By default the bar
+     * is visible.
+     * 
+     * @return True if the sheet selection bar is visible, false otherwise.
+     */
+    public boolean isSheetSelectionBarVisible() {
+        return !getStyleName().contains(HIDE_TABSHEET_STYLE);
+    }
+
+    /**
+     * Enables or disables the report style. When enabled, the top and bottom
+     * bars of Spreadsheet will be hidden.
+     * 
+     * @param reportStyle
+     *            True to hide both toolbars, false to show them.
+     */
+    public void setReportStyle(boolean reportStyle) {
+        setFunctionBarVisible(!reportStyle);
+        setSheetSelectionBarVisible(!reportStyle);
+    }
+
+    /**
+     * Gets the state of the report style.
+     * 
+     * @return True if report style is enabled, false otherwise.
+     */
+    public boolean isReportStyle() {
+        return !isSheetSelectionBarVisible() && !isFunctionBarVisible();
     }
 }

@@ -7,12 +7,46 @@
 		
 		padding-bottom: 29px;
 		padding-left: 50px;
-		padding-top: 60px;
+		padding-top: 57px;
 		
 		border: $spreadsheet-border;
 		font-family: $spreadsheet-base-font-family;
 		font-size: $spreadsheet-base-font-size;
 		color: $default-font-color;
+		
+		&.hidefunctionbar {
+			padding-top: 28px;
+			
+			.functionbar {
+				height: 0;
+				display: none;
+			}
+			
+			.sheet {
+				&.top-right-pane, 
+				&.top-left-pane {
+					top: 0px;
+				}
+			}
+			.corner {
+				top: 0px;
+			}
+		}
+		
+		&.hidetabsheet {
+			padding-bottom: 0px;
+			
+			.sheet-tabsheet {
+				height: 0;
+				display: none;
+			}
+			
+			.sheet {
+				&.bottom-right-pane {
+					bottom: 0px;
+				}
+			}
+		}
 		
 		> div {
 			outline: none;
