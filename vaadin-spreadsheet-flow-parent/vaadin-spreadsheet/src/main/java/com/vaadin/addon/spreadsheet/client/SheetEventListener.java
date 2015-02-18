@@ -187,6 +187,13 @@ public class SheetEventListener implements EventListener {
                     event.stopPropagation();
                 }
                 break;
+            case 65: // a
+                if (event.getCtrlKey() || event.getMetaKey()) {
+                    widget.getSheetHandler().selectAll();
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                break;
             default:
                 break;
             }

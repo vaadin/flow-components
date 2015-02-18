@@ -251,4 +251,6 @@ public interface SheetHandler {
     FormulaBarWidget getFormulaBarWidget();
 
     void updateCellComment(String text, int col, int row);
+
+    void selectAll();
 }

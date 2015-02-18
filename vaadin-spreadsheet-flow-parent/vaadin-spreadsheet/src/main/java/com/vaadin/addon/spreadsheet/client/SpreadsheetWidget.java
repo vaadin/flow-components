@@ -1640,4 +1640,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void updateCellComment(String text, int col, int row) {
         spreadsheetHandler.updateCellComment(text, col, row);
     }
+
+    @Override
+    public void selectAll() {
+        sheetWidget.setSelectedCell(1, 1);
+        onSelectingCellsWithDrag(cols, rows);
+        onFinishedSelectingCellsWithDrag(1, cols, 1, rows);
+    }
 }
