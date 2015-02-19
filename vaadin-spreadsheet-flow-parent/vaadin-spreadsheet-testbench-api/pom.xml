@@ -21,6 +21,11 @@
             <name>Vaadin snapshot repository</name>
             <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
         </snapshotRepository>
+        <repository>
+            <id>vaadin-addons</id>
+            <name>Vaadin add-ons repository</name>
+            <url>http://vaadin.com/nexus/content/repositories/vaadin-addons</url>
+        </repository>
     </distributionManagement>
 
     <dependencies>
