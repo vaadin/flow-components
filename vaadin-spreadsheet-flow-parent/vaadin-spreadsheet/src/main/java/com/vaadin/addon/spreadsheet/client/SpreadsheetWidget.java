@@ -1526,7 +1526,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public boolean canResize() {
-        return !sheetProtected;
+        return !sheetProtected && !touchMode;
     }
 
     public void setDisplayGridlines(boolean displayGridlines) {

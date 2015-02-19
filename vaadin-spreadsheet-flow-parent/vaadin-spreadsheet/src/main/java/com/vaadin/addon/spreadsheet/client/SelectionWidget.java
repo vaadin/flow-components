@@ -139,7 +139,8 @@ public class SelectionWidget extends Composite {
                                 || type == Event.ONTOUCHCANCEL) {
                             Event.releaseCapture(root);
                             selectCellsStop(event);
-                        } else if (target.equals(corner)) {
+                        } else if (target.equals(corner)
+                                || target.equals(cornerTouchArea)) {
 
                             if (type == Event.ONTOUCHSTART) {
                                 storeEventPos(event);
@@ -354,6 +355,9 @@ public class SelectionWidget extends Composite {
 
     private int tempCol;
     private int tempRow;
+
+    private int selectionStartCol;
+    private int selectionStartRow;
 
     private VOverlay touchActions;
 
@@ -619,9 +623,6 @@ public class SelectionWidget extends Composite {
 
         // TODO completely broken when zoomed in
         int pos = 0;
-        if (Math.abs(cursorPosition) > 200) {
-            pos = 0;
-        }
         if (cursorPosition < 0) {
             if (startIndex > 1) {
                 while (startIndex > 1
@@ -665,6 +666,9 @@ public class SelectionWidget extends Composite {
         origY = element.getAbsoluteTop();
         cornerX = origX + totalWidth;
         cornerY = origY + totalHeight;
+
+        selectionStartCol = col1;
+        selectionStartRow = row1;
     }
 
     private Element getTopLeftMostElement() {
@@ -722,11 +726,11 @@ public class SelectionWidget extends Composite {
         yMousePos -= 20;
 
         final int[] colWidths = handler.getColWidths();
-        final int colIndex = closestCellEdgeIndexToCursor(colWidths, col1,
-                xMousePos);
+        final int colIndex = closestCellEdgeIndexToCursor(colWidths,
+                selectionStartCol, xMousePos);
         final int[] rowHeightsPX = handler.getRowHeightsPX();
-        final int rowIndex = closestCellEdgeIndexToCursor(rowHeightsPX, row1,
-                yMousePos);
+        final int rowIndex = closestCellEdgeIndexToCursor(rowHeightsPX,
+                selectionStartRow, yMousePos);
 
         tempCol = colIndex;
         tempRow = rowIndex;

@@ -19,6 +19,8 @@ public class TestUIProviderImpl extends UIProvider {
             return SpreadsheetDemoUI.class;
         } else if (name.contains(PushTestCase.class.getSimpleName())) {
             return PushTestCase.class;
+        } else if (name.contains(TouchUI.class.getSimpleName())) {
+            return TouchUI.class;
         }
         return null;
     }

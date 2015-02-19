@@ -23,6 +23,7 @@ import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -119,13 +120,32 @@ public class FormulaBarWidget extends Composite {
     }
 
     private void scheduleForumulaValueUpdate() {
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-            @Override
-            public void execute() {
-                handler.onFormulaValueChange(formulaField.getValue());
-            }
-        });
+        if (handler.isTouchMode()) {
+
+            /*
+             * Can't be done deferred because that is apparently too fast in
+             * iPads, resulting in textfield not having new value when this is
+             * run. A timer makes sure hat the textfield actually has the
+             * entered character.
+             */
+            new Timer() {
+
+                @Override
+                public void run() {
+                    handler.onFormulaValueChange(formulaField.getValue());
+                }
+            }.schedule(100);
+
+        } else {
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+                @Override
+                public void execute() {
+                    handler.onFormulaValueChange(formulaField.getValue());
+                }
+            });
+        }
     }
 
     private void handleFunctionFieldKeyDown(Event event) {

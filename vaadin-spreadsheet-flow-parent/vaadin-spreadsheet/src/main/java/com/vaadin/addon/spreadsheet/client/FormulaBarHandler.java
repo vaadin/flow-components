@@ -17,7 +17,6 @@ package com.vaadin.addon.spreadsheet.client;
  * #L%
  */
 
-
 public interface FormulaBarHandler {
 
     void onAddressEntered(String value);
@@ -36,5 +35,7 @@ public interface FormulaBarHandler {
     void onFormulaEsc();
 
     void onFormulaValueChange(String value);
+
+    boolean isTouchMode();
 
 }
