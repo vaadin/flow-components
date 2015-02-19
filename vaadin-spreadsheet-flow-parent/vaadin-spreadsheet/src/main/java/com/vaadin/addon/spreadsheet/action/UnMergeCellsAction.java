@@ -42,8 +42,8 @@ public class UnMergeCellsAction extends SpreadsheetAction {
     public boolean isApplicableForSelection(Spreadsheet spreadsheet,
             SelectionChangeEvent event) {
         if (event.getSelectedCellMergedRegion() != null
-                && event.getIndividualSelectedCells().length == 0
-                && event.getCellRangeAddresses().length == 0) {
+                && event.getIndividualSelectedCells().size() == 0
+                && event.getCellRangeAddresses().size() == 0) {
             Sheet sheet = spreadsheet.getActiveSheet();
             if (isSheetProtected(sheet)) {
                 CellRangeAddress mergedCell = event

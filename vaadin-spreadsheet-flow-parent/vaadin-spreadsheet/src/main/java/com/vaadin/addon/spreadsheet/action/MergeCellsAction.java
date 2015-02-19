@@ -41,11 +41,12 @@ public class MergeCellsAction extends SpreadsheetAction {
     @Override
     public boolean isApplicableForSelection(Spreadsheet spreadsheet,
             SelectionChangeEvent event) {
-        if (event.getCellRangeAddresses().length == 1
-                && event.getIndividualSelectedCells().length == 0) {
+        if (event.getCellRangeAddresses().size() == 1
+                && event.getIndividualSelectedCells().size() == 0) {
             Sheet sheet = spreadsheet.getActiveSheet();
             if (isSheetProtected(sheet)) {
-                CellRangeAddress selection = event.getCellRangeAddresses()[0];
+                CellRangeAddress selection = event.getCellRangeAddresses().get(
+                        0);
                 for (int r = selection.getFirstRow(); r <= selection
                         .getLastRow(); r++) {
                     Row row = sheet.getRow(r);
@@ -76,7 +77,7 @@ public class MergeCellsAction extends SpreadsheetAction {
     @Override
     public void executeActionOnSelection(Spreadsheet spreadsheet,
             SelectionChangeEvent event) {
-        CellRangeAddress region = event.getCellRangeAddresses()[0];
+        CellRangeAddress region = event.getCellRangeAddresses().get(0);
         try {
             spreadsheet.addMergedRegion(region);
         } catch (IllegalArgumentException iae) {

@@ -46,10 +46,10 @@ public class DeleteTableAction extends SpreadsheetAction {
     public boolean isApplicableForSelection(Spreadsheet spreadsheet,
             SelectionChangeEvent event) {
         if (!spreadsheet.getActiveSheet().getProtect()
-                && (event.getIndividualSelectedCells().length == 0)) {
-            if (event.getCellRangeAddresses().length == 1) {
-                CellRangeAddress[] cras = event.getCellRangeAddresses();
-                CellRangeAddress cra = cras[0];
+                && (event.getIndividualSelectedCells().size() == 0)) {
+            if (event.getCellRangeAddresses().size() == 1) {
+                List<CellRangeAddress> cras = event.getCellRangeAddresses();
+                CellRangeAddress cra = cras.get(0);
                 List<SpreadsheetTable> tablesForActiveSheet = spreadsheet
                         .getTablesForActiveSheet();
                 for (SpreadsheetTable table : tablesForActiveSheet) {

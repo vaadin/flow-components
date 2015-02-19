@@ -45,10 +45,10 @@ public class InsertTableAction extends SpreadsheetAction {
     public boolean isApplicableForSelection(Spreadsheet spreadsheet,
             SelectionChangeEvent event) {
         if (!spreadsheet.getActiveSheet().getProtect()
-                && event.getIndividualSelectedCells().length == 0
-                && event.getCellRangeAddresses().length == 1) {
-            CellRangeAddress[] cras = event.getCellRangeAddresses();
-            CellRangeAddress cra = cras[0];
+                && event.getIndividualSelectedCells().size() == 0
+                && event.getCellRangeAddresses().size() == 1) {
+            List<CellRangeAddress> cras = event.getCellRangeAddresses();
+            CellRangeAddress cra = cras.get(0);
             List<SpreadsheetTable> tablesForActiveSheet = spreadsheet
                     .getTablesForActiveSheet();
             // check that the table doesn't contain a table that intersects with
@@ -76,7 +76,8 @@ public class InsertTableAction extends SpreadsheetAction {
     public void executeActionOnSelection(Spreadsheet spreadsheet,
             SelectionChangeEvent event) {
         SpreadsheetFilterTable table = new SpreadsheetFilterTable(spreadsheet,
-                spreadsheet.getActiveSheet(), event.getCellRangeAddresses()[0]);
+                spreadsheet.getActiveSheet(), event.getCellRangeAddresses()
+                        .get(0));
         spreadsheet.registerTable(table);
     }
 

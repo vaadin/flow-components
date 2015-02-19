@@ -798,7 +798,7 @@ public class CellSelectionManager implements Serializable {
                 changed = true;
             }
             if (!changed) {
-                if (latestSelectionEvent.getIndividualSelectedCells().length != individualSelectedCells
+                if (latestSelectionEvent.getIndividualSelectedCells().size() != individualSelectedCells
                         .size()) {
                     changed = true;
                 } else {
@@ -812,7 +812,7 @@ public class CellSelectionManager implements Serializable {
                 }
             }
             if (!changed) {
-                if (latestSelectionEvent.getCellRangeAddresses().length != cellRangeAddresses
+                if (latestSelectionEvent.getCellRangeAddresses().size() != cellRangeAddresses
                         .size()) {
                     changed = true;
                 } else {
@@ -838,13 +838,13 @@ public class CellSelectionManager implements Serializable {
                 return;
             }
         }
-        final CellReference[] individualCellsArray = individualSelectedCells
-                .toArray(new CellReference[individualSelectedCells.size()]);
-        final CellRangeAddress[] cellRangesArray = cellRangeAddresses
-                .toArray(new CellRangeAddress[cellRangeAddresses.size()]);
+        ArrayList<CellReference> cellRefCopy = new ArrayList<CellReference>(
+                individualSelectedCells);
+        ArrayList<CellRangeAddress> rangeCopy = new ArrayList<CellRangeAddress>(
+                cellRangeAddresses);
         latestSelectionEvent = new SelectionChangeEvent(spreadsheet,
-                selectedCellReference, individualCellsArray,
-                selectedCellMergedRegion, cellRangesArray);
+                selectedCellReference, cellRefCopy, selectedCellMergedRegion,
+                rangeCopy);
 
         spreadsheet.fireEvent(latestSelectionEvent);
     }

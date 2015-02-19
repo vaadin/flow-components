@@ -41,8 +41,8 @@ public class ShowHideCellCommentAction extends SpreadsheetAction {
     public boolean isApplicableForSelection(Spreadsheet spreadsheet,
             SelectionChangeEvent event) {
         if (!spreadsheet.getActiveSheet().getProtect()) {
-            if (event.getCellRangeAddresses().length == 0
-                    && event.getIndividualSelectedCells().length == 0) {
+            if (event.getCellRangeAddresses().size() == 0
+                    && event.getIndividualSelectedCells().size() == 0) {
                 CellReference cr = event.getSelectedCellReference();
                 Comment cellComment = spreadsheet.getActiveSheet()
                         .getCellComment(cr.getRow(), cr.getCol());

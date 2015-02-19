@@ -3368,9 +3368,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public static class SelectionChangeEvent extends Component.Event {
 
         private final CellReference selectedCellReference;
-        private final CellReference[] individualSelectedCells;
+        private final List<CellReference> individualSelectedCells;
         private final CellRangeAddress selectedCellMergedRegion;
-        private final CellRangeAddress[] cellRangeAddresses;
+        private final List<CellRangeAddress> cellRangeAddresses;
 
         /**
          * Creates a new selection change event.
@@ -3388,9 +3388,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          */
         public SelectionChangeEvent(Component source,
                 CellReference selectedCellReference,
-                CellReference[] individualSelectedCells,
+                List<CellReference> individualSelectedCells,
                 CellRangeAddress selectedCellMergedRegion,
-                CellRangeAddress... cellRangeAddresses) {
+                List<CellRangeAddress> cellRangeAddresses) {
             super(source);
             this.selectedCellReference = selectedCellReference;
             this.individualSelectedCells = individualSelectedCells;
@@ -3426,7 +3426,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          * @return All non-contiguously selected cells (e.g. with
          *         ctrl+mouseclick)
          */
-        public CellReference[] getIndividualSelectedCells() {
+        public List<CellReference> getIndividualSelectedCells() {
             return individualSelectedCells;
         }
 
@@ -3447,7 +3447,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          * @return All separately selected cell ranges (e.g. with
          *         ctrl+shift+mouseclick)
          */
-        public CellRangeAddress[] getCellRangeAddresses() {
+        public List<CellRangeAddress> getCellRangeAddresses() {
             return cellRangeAddresses;
         }
 
@@ -3466,8 +3466,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     private static Set<CellReference> getAllSelectedCells(
             CellReference selectedCellReference,
-            CellReference[] individualSelectedCells,
-            CellRangeAddress[] cellRangeAddresses) {
+            List<CellReference> individualSelectedCells,
+            List<CellRangeAddress> cellRangeAddresses) {
         Set<CellReference> cells = new HashSet<CellReference>();
         for (CellReference r : individualSelectedCells) {
             cells.add(r);
