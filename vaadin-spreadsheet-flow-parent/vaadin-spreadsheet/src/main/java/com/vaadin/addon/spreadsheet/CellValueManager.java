@@ -620,15 +620,21 @@ public class CellValueManager implements Serializable {
         CellValueCommand command = new CellValueCommand(spreadsheet);
         if (selectedCellReference != null) {
             command.captureCellValues(selectedCellReference);
+        }
+        for (CellReference cr : individualSelectedCells) {
+            command.captureCellValues(cr);
+        }
+        for (CellRangeAddress range : cellRangeAddresses) {
+            command.captureCellRangeValues(range);
+        }
+        if (selectedCellReference != null) {
             removeCell(selectedCellReference.getRow() + 1,
                     selectedCellReference.getCol() + 1, false);
         }
         for (CellReference cr : individualSelectedCells) {
-            command.captureCellValues(cr);
             removeCell(cr.getRow() + 1, cr.getCol() + 1, false);
         }
         for (CellRangeAddress range : cellRangeAddresses) {
-            command.captureCellRangeValues(range);
             removeCells(range.getFirstRow() + 1, range.getFirstColumn() + 1,
                     range.getLastRow() + 1, range.getLastColumn() + 1, false);
         }
