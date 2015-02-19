@@ -886,25 +886,17 @@ public class SpreadsheetStyleFactory implements Serializable {
             }
         }
 
-        boolean hasBackgroundColor = colorConverter
-                .hasBackgroundColor(cellStyle);
         if (borderRight != BorderStyle.NONE) {
             sb.append("border-right:");
             sb.append(borderRight.getBorderAttributeValue());
             sb.append(colorConverter.getBorderColorCSS(BorderSide.RIGHT,
                     "border-right-color", cellStyle));
-        } else if (hasBackgroundColor) {
-            sb.append("border-right:none;"); // if there is a bg-color,
-                                             // gridlines not visible
         }
         if (borderBottom != BorderStyle.NONE) {
             sb.append("border-bottom:");
             sb.append(borderBottom.getBorderAttributeValue());
             sb.append(colorConverter.getBorderColorCSS(BorderSide.BOTTOM,
                     "border-bottom-color", cellStyle));
-        } else if (hasBackgroundColor) {
-            sb.append("border-bottom:none;"); // if there is a bg-color,
-                                              // gridlines not visible
         }
 
         // the top and right borders are transferred to previous cells
