@@ -21,6 +21,8 @@ import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
 import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -149,8 +151,14 @@ public class CellSelectionShifter implements Serializable {
         }
     }
 
-    private void fireCellValueChangeEvent(CellRangeAddress cell) {
-        spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cell));
+    private void fireCellValueChangeEvent(CellRangeAddress region) {
+        Set<CellReference> cells = new HashSet<CellReference>();
+        for (int x = region.getFirstColumn(); x <= region.getLastColumn(); x++) {
+            for (int y = region.getFirstRow(); y <= region.getLastRow(); y++) {
+                cells.add(new CellReference(y, x));
+            }
+        }
+        spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cells));
     }
 
     /**

@@ -3359,15 +3359,15 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public static class CellValueChangeEvent extends Component.Event {
 
-        private final CellRangeAddress changedCells;
+        private final Set<CellReference> changedCells;
 
         public CellValueChangeEvent(Component source,
-                CellRangeAddress cellRangeAddress) {
+                Set<CellReference> changedCells) {
             super(source);
-            changedCells = cellRangeAddress;
+            this.changedCells = changedCells;
         }
 
-        public CellRangeAddress getChangedCells() {
+        public Set<CellReference> getChangedCells() {
             return changedCells;
         }
     }

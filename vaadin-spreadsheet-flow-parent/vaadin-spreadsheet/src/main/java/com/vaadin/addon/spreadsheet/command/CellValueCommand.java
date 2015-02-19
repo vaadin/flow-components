@@ -19,7 +19,9 @@ package com.vaadin.addon.spreadsheet.command;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -35,7 +37,8 @@ import com.vaadin.addon.spreadsheet.Spreadsheet;
  * @since 1.0
  */
 @SuppressWarnings("serial")
-public class CellValueCommand extends SpreadsheetCommand {
+public class CellValueCommand extends SpreadsheetCommand implements
+        ValueChangeCommand {
 
     /**
      * Represents the coordinates and value of a single cell.
@@ -329,6 +332,26 @@ public class CellValueCommand extends SpreadsheetCommand {
                 return cell;
             }
         }
+    }
+
+    @Override
+    public Set<CellReference> getChangedCells() {
+        Set<CellReference> changedCells = new HashSet<CellReference>();
+        for (Object o : values) {
+            if (o instanceof CellValue) {
+                CellValue cellValue = (CellValue) o;
+                changedCells
+                        .add(new CellReference(cellValue.row, cellValue.col));
+            } else {
+                CellRangeValue cellRangeValue = (CellRangeValue) o;
+                for (int r = cellRangeValue.row1; r <= cellRangeValue.row2; r++) {
+                    for (int c = cellRangeValue.col1; c <= cellRangeValue.col2; c++) {
+                        changedCells.add(new CellReference(r, c));
+                    }
+                }
+            }
+        }
+        return changedCells;
     }
 
 }

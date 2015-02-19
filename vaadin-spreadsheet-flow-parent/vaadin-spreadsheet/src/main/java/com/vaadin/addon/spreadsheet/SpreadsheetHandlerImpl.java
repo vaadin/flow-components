@@ -18,9 +18,11 @@ package com.vaadin.addon.spreadsheet;
  */
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -305,8 +307,18 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         fireCellValueChangeEvent(region);
     }
 
-    private void fireCellValueChangeEvent(CellRangeAddress cell) {
-        spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cell));
+    private void fireCellValueChangeEvent(CellRangeAddress region) {
+        Set<CellReference> cells = new HashSet<CellReference>();
+        for (int x = region.getFirstColumn(); x <= region.getLastColumn(); x++) {
+            for (int y = region.getFirstRow(); y <= region.getLastRow(); y++) {
+                cells.add(new CellReference(y, x));
+            }
+        }
+        fireCellValueChangeEvent(cells);
+    }
+
+    private void fireCellValueChangeEvent(Set<CellReference> cells) {
+        spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cells));
     }
 
     /**
@@ -392,7 +404,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             cell.setCellType(Cell.CELL_TYPE_BLANK);
             spreadsheet.markCellAsDeleted(cell, true);
         }
-
+        fireCellValueChangeEvent(spreadsheet.getSelectedCellReferences());
         spreadsheet.refreshAllCellValues();
     }
 

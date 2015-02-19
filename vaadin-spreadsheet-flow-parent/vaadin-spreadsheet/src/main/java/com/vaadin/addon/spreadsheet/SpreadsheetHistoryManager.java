@@ -23,7 +23,9 @@ import java.util.LinkedList;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
+import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.addon.spreadsheet.command.Command;
+import com.vaadin.addon.spreadsheet.command.ValueChangeCommand;
 
 /**
  * SpreadsheetHistoryManager is an utility class of the Spreadsheet add-on. This
@@ -130,6 +132,7 @@ public class SpreadsheetHistoryManager implements Serializable {
             makeSureCorrectSheetActive(command);
             command.execute();
             changeSelection(command);
+            fireCellValueChangeEvent(command);
         }
     }
 
@@ -143,6 +146,15 @@ public class SpreadsheetHistoryManager implements Serializable {
             makeSureCorrectSheetActive(command);
             command.execute();
             changeSelection(command);
+            fireCellValueChangeEvent(command);
+        }
+    }
+
+    private void fireCellValueChangeEvent(Command command) {
+        if (command instanceof ValueChangeCommand) {
+            ValueChangeCommand valueUpdaterCommand = (ValueChangeCommand) command;
+            spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet,
+                    valueUpdaterCommand.getChangedCells()));
         }
     }
 

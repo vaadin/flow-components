@@ -573,9 +573,14 @@ public class CellValueManager implements Serializable {
     }
 
     private void fireCellValueChangeEvent(Cell cell) {
+        Set<CellReference> cells = new HashSet<CellReference>();
+        cells.add(new CellReference(cell));
+        spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cells));
+    }
+
+    private void fireCellValueChangeEvent(Set<CellReference> changedCells) {
         spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet,
-                new CellRangeAddress(cell.getRowIndex(), cell.getRowIndex(),
-                        cell.getColumnIndex(), cell.getColumnIndex())));
+                changedCells));
     }
 
     /**
@@ -610,6 +615,8 @@ public class CellValueManager implements Serializable {
                 return;
             }
         }
+        fireCellValueChangeEvent(spreadsheet.getSelectedCellReferences());
+
         CellValueCommand command = new CellValueCommand(spreadsheet);
         if (selectedCellReference != null) {
             command.captureCellValues(selectedCellReference);
