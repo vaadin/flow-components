@@ -871,17 +871,22 @@ public class SelectionWidget extends Composite {
             paint.removeClassName(paintPaneClassName);
             paint.addClassName(paintColClassName);
             paint.addClassName(paintRowClassName);
+            paint.removeFromParent();
             if (sheetWidget.isCellRenderedInScrollPane(paintedColIndex,
                     paintedRowIndex)) {
+                sheetWidget.getBottomRightPane().appendChild(paint);
                 paintPaneClassName = "bottom-right";
             } else if (sheetWidget.isCellRenderedInBottomLeftPane(
                     paintedColIndex, paintedRowIndex)) {
+                sheetWidget.getBottomLeftPane().appendChild(paint);
                 paintPaneClassName = "bottom-left";
             } else if (sheetWidget.isCellRenderedInTopRightPane(
                     paintedColIndex, paintedRowIndex)) {
+                sheetWidget.getTopRightPane().appendChild(paint);
                 paintPaneClassName = "top-right";
             } else if (sheetWidget.isCellRenderedInTopLeftPane(paintedColIndex,
                     paintedRowIndex)) {
+                sheetWidget.getTopLeftPane().appendChild(paint);
                 paintPaneClassName = "top-left";
             }
             paint.addClassName(paintPaneClassName);

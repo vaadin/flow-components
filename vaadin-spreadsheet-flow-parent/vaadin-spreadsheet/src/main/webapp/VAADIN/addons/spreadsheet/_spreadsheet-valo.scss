@@ -249,8 +249,12 @@
 				margin-top: 0 !important;
 			}
 			
-			.cell, .s-paint, .sheet-image {
+			.cell, .sheet-image {
 				margin-left: 50px;
+			}
+			
+			.s-paint {
+				margin-left: 49px;
 			}
 			
 			.sheet-selection {
@@ -273,9 +277,14 @@
 				margin-top: 27px;
 			}
 			
-			.cell, .s-paint, .sheet-image {
+			.cell, .sheet-image {
 				margin-top: 27px;
 				margin-left: 50px;
+			}
+			
+			.s-paint {
+				margin-top: 26px;
+				margin-left: 49px;
 			}
 			
 			.sheet-selection {
@@ -294,8 +303,12 @@
 				margin-left: 0 !important;
 			}
 			
-			.cell, .s-paint, .sheet-image {
+			.cell, .sheet-image {
 				margin-top: 27px;
+			}
+			
+			.s-paint {
+				margin-top: 26px;
 			}
 			
 			.sheet-selection {
