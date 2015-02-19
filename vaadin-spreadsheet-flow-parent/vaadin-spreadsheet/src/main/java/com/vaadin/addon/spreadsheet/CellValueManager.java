@@ -487,36 +487,29 @@ public class CellValueManager implements Serializable {
 
                         if (value.isEmpty()) {
                             cell.setCellType(Cell.CELL_TYPE_BLANK);
-                        } else if (cellType == Cell.CELL_TYPE_NUMERIC) {
-
-                            if (percentage != null) {
-                                CellStyle cs = cell.getCellStyle();
-                                if (cs == null) {
-                                    cs = workbook.createCellStyle();
-                                    cell.setCellStyle(cs);
-                                }
-                                cs.setDataFormat(workbook
-                                        .createDataFormat()
-                                        .getFormat(
-                                                spreadsheet
-                                                        .getDefaultPercentageFormat()));
-                                styler.cellStyleUpdated(cell, true);
-                                cell.setCellValue(percentage);
-                            } else if (numVal != null) {
-                                cell.setCellValue(numVal);
-                            } else {
-                                parseValueIntoNumericCell(cell, value);
+                        } else if (percentage != null) {
+                            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+                            CellStyle cs = cell.getCellStyle();
+                            if (cs == null) {
+                                cs = workbook.createCellStyle();
+                                cell.setCellStyle(cs);
                             }
-                        } else if (numVal != null
-                                && cellType == Cell.CELL_TYPE_FORMULA) {
+                            cs.setDataFormat(workbook
+                                    .createDataFormat()
+                                    .getFormat(
+                                            spreadsheet
+                                                    .getDefaultPercentageFormat()));
+                            styler.cellStyleUpdated(cell, true);
+                            cell.setCellValue(percentage);
+                        } else if (numVal != null) {
                             cell.setCellType(Cell.CELL_TYPE_NUMERIC);
                             cell.setCellValue(numVal);
                         } else if (cellType == Cell.CELL_TYPE_BOOLEAN) {
                             cell.setCellValue(Boolean.parseBoolean(value));
+                        } else if (cellType == Cell.CELL_TYPE_NUMERIC) {
+                            parseValueIntoNumericCell(cell, value);
                         } else {
-                            if (cellType == Cell.CELL_TYPE_FORMULA) {
-                                cell.setCellType(Cell.CELL_TYPE_STRING);
-                            }
+                            cell.setCellType(Cell.CELL_TYPE_STRING);
                             cell.setCellValue(value);
                         }
                         evaluator.notifyUpdateCell(cell);
