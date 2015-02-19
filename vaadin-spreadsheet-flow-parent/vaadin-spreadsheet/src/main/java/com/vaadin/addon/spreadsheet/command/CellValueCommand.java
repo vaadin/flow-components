@@ -95,10 +95,10 @@ public class CellValueCommand extends SpreadsheetCommand implements
         selectedcellCol = selectedCellReference.getCol();
         CellRangeAddress paintedCellRange = spreadsheet
                 .getCellSelectionManager().getSelectedCellRange();
-        if (paintedCellRange.getFirstColumn() != paintedCellRange
-                .getLastColumn()
-                || paintedCellRange.getFirstRow() != paintedCellRange
-                        .getLastRow()) {
+        if (paintedCellRange != null
+                && (paintedCellRange.getFirstColumn() != paintedCellRange
+                        .getLastColumn() || paintedCellRange.getFirstRow() != paintedCellRange
+                        .getLastRow())) {
             selectedCellRange = new int[] { paintedCellRange.getFirstRow(),
                     paintedCellRange.getLastRow(),
                     paintedCellRange.getFirstColumn(),
