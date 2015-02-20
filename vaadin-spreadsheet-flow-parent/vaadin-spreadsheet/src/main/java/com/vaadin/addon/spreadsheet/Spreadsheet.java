@@ -526,22 +526,21 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * Returns the position of the vertical split (freeze pane). NOTE: this is
-     * the opposite from POI, this is the last ROW that is frozen.
+     * Returns the index the last frozen row (last row in top freeze pane).
      * 
      * @return Last frozen row or 0 if none
      */
-    public int getVerticalSplitPosition() {
+    public int getLastFrozenRow() {
         return getState(false).verticalSplitPosition;
     }
 
     /**
-     * Returns the position of the horizontal split (freeze pane). NOTE: this is
-     * the opposite from POI, this is the last COLUMN that is frozen.
+     * Returns the index the last frozen column (last column in left freeze
+     * pane).
      * 
      * @return Last frozen column or 0 if none
      */
-    public int getHorizontalSplitPosition() {
+    public int getLastFrozenColumn() {
         return getState(false).horizontalSplitPosition;
     }
 
@@ -939,7 +938,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         final Sheet previousSheet = getActiveSheet();
         SpreadsheetFactory
                 .addNewSheet(this, workbook, sheetName, rows, columns);
-        fireSelectedSheetChangeEvent(previousSheet, getActiveSheet());
+        fireSheetChangeEvent(previousSheet, getActiveSheet());
     }
 
     /**
@@ -1116,7 +1115,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         Sheet oldSheet = getActiveSheet();
         setActiveSheetIndex(tabIndex);
         Sheet newSheet = getActiveSheet();
-        fireSelectedSheetChangeEvent(oldSheet, newSheet);
+        fireSheetChangeEvent(oldSheet, newSheet);
     }
 
     /**
@@ -2700,17 +2699,15 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         } else {
             getState().hyperlinksTooltips.clear();
         }
-        if (getVerticalSplitPosition() > 0 && getHorizontalSplitPosition() > 0
+        if (getLastFrozenRow() > 0 && getLastFrozenColumn() > 0
                 && !topLeftCellHyperlinksLoaded) {
-            loadHyperLinks(1, 1, getVerticalSplitPosition(),
-                    getHorizontalSplitPosition());
+            loadHyperLinks(1, 1, getLastFrozenRow(), getLastFrozenColumn());
         }
-        if (getVerticalSplitPosition() > 0) {
-            loadHyperLinks(1, firstColumn, getVerticalSplitPosition(),
-                    lastColumn);
+        if (getLastFrozenRow() > 0) {
+            loadHyperLinks(1, firstColumn, getLastFrozenRow(), lastColumn);
         }
-        if (getHorizontalSplitPosition() > 0) {
-            loadHyperLinks(firstRow, 1, lastRow, getHorizontalSplitPosition());
+        if (getLastFrozenColumn() > 0) {
+            loadHyperLinks(firstRow, 1, lastRow, getLastFrozenColumn());
         }
         loadHyperLinks(firstRow, firstColumn, lastRow, lastColumn);
     }
@@ -2832,8 +2829,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     private boolean isImageVisible(SheetImageWrapper image) {
-        int horizontalSplitPosition = getHorizontalSplitPosition();
-        int verticalSplitPosition = getVerticalSplitPosition();
+        int horizontalSplitPosition = getLastFrozenColumn();
+        int verticalSplitPosition = getLastFrozenRow();
         return (horizontalSplitPosition > 0 && verticalSplitPosition > 0 && image
                 .isVisible(1, 1, verticalSplitPosition, horizontalSplitPosition))
                 || (horizontalSplitPosition > 0 && image.isVisible(firstRow, 1,
@@ -2884,17 +2881,15 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         } else {
             getState().visibleCellComments.clear();
         }
-        if (getVerticalSplitPosition() > 0 && getHorizontalSplitPosition() > 0
+        if (getLastFrozenRow() > 0 && getLastFrozenColumn() > 0
                 && !topLeftCellCommentsLoaded) {
-            loadCellComments(1, 1, getVerticalSplitPosition(),
-                    getHorizontalSplitPosition());
+            loadCellComments(1, 1, getLastFrozenRow(), getLastFrozenColumn());
         }
-        if (getVerticalSplitPosition() > 0) {
-            loadCellComments(1, firstColumn, getVerticalSplitPosition(),
-                    lastColumn);
+        if (getLastFrozenRow() > 0) {
+            loadCellComments(1, firstColumn, getLastFrozenRow(), lastColumn);
         }
-        if (getHorizontalSplitPosition() > 0) {
-            loadCellComments(firstRow, 1, lastRow, getHorizontalSplitPosition());
+        if (getLastFrozenColumn() > 0) {
+            loadCellComments(firstRow, 1, lastRow, getLastFrozenColumn());
         }
         loadCellComments(firstRow, firstColumn, lastRow, lastColumn);
     }
@@ -3045,8 +3040,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @return True if the cell is visible, false otherwise
      */
     private boolean isCellVisible(int row, int col) {
-        int verticalSplitPosition = getVerticalSplitPosition();
-        int horizontalSplitPosition = getHorizontalSplitPosition();
+        int verticalSplitPosition = getLastFrozenRow();
+        int horizontalSplitPosition = getLastFrozenColumn();
         return (col >= firstColumn && col <= lastColumn && row >= firstRow && row <= lastRow)
                 || (col >= 1 && col <= horizontalSplitPosition && row >= 1 && row <= verticalSplitPosition)
                 || (col >= firstColumn && col <= lastColumn && row >= 1 && row <= verticalSplitPosition)
@@ -3692,7 +3687,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * An event that is fired to registered listeners when the selected sheet
      * has been changed.
      */
-    public static class SelectedSheetChangeEvent extends Component.Event {
+    public static class SheetChangeEvent extends Component.Event {
 
         private final Sheet newSheet;
         private final Sheet previousSheet;
@@ -3700,7 +3695,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         private final int newSheetPOIIndex;
 
         /**
-         * Creates a new SelectedSheetChangeEvent.
+         * Creates a new SheetChangeEvent.
          * 
          * @param source
          *            Spreadsheet that triggered the event
@@ -3713,7 +3708,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          * @param newSheetPOIIndex
          *            New POI index of selection
          */
-        public SelectedSheetChangeEvent(Component source, Sheet newSheet,
+        public SheetChangeEvent(Component source, Sheet newSheet,
                 Sheet previousSheet, int newSheetVisibleIndex,
                 int newSheetPOIIndex) {
             super(source);
@@ -3763,10 +3758,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /**
      * A listener for when a sheet is selected.
      */
-    public interface SelectedSheetChangeListener extends Serializable {
-        public static final Method SELECTED_SHEET_CHANGE_METHOD = ReflectTools
-                .findMethod(SelectedSheetChangeListener.class,
-                        "onSelectedSheetChange", SelectedSheetChangeEvent.class);
+    public interface SheetChangeListener extends Serializable {
+        public static final Method SHEET_CHANGE_METHOD = ReflectTools
+                .findMethod(SheetChangeListener.class, "onSheetChange",
+                        SheetChangeEvent.class);
 
         /**
          * This method is called an all registered listeners when the selected
@@ -3775,38 +3770,35 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          * @param event
          *            Sheet selection event
          */
-        public void onSelectedSheetChange(SelectedSheetChangeEvent event);
+        public void onSheetChange(SheetChangeEvent event);
     }
 
     /**
-     * Adds the given SelectedSheetChangeListener to this Spreadsheet.
+     * Adds the given SheetChangeListener to this Spreadsheet.
      * 
      * @param listener
      *            Listener to add
      */
-    public void addSelectedSheetChangeListener(
-            SelectedSheetChangeListener listener) {
-        addListener(SelectedSheetChangeEvent.class, listener,
-                SelectedSheetChangeListener.SELECTED_SHEET_CHANGE_METHOD);
+    public void addSheetChangeListener(SheetChangeListener listener) {
+        addListener(SheetChangeEvent.class, listener,
+                SheetChangeListener.SHEET_CHANGE_METHOD);
     }
 
     /**
-     * Removes the given SelectedSheetChangeListener from this Spreadsheet.
+     * Removes the given SheetChangeListener from this Spreadsheet.
      * 
      * @param listener
      *            Listener to remove
      */
-    public void removeSelectedSheetChangeListener(
-            SelectedSheetChangeListener listener) {
-        removeListener(SelectedSheetChangeEvent.class, listener,
-                SelectedSheetChangeListener.SELECTED_SHEET_CHANGE_METHOD);
+    public void removeSheetChangeListener(SheetChangeListener listener) {
+        removeListener(SheetChangeEvent.class, listener,
+                SheetChangeListener.SHEET_CHANGE_METHOD);
     }
 
-    private void fireSelectedSheetChangeEvent(Sheet previousSheet,
-            Sheet newSheet) {
+    private void fireSheetChangeEvent(Sheet previousSheet, Sheet newSheet) {
         int newSheetPOIIndex = workbook.getActiveSheetIndex();
 
-        fireEvent(new SelectedSheetChangeEvent(this, newSheet, previousSheet,
+        fireEvent(new SheetChangeEvent(this, newSheet, previousSheet,
                 getSpreadsheetSheetIndex(newSheetPOIIndex), newSheetPOIIndex));
     }
 
@@ -3830,7 +3822,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * Component iterator for components contained within the Spreadsheet:
      * CustomComponents and PopupButtons.
      */
-    public static class SpreadsheetIterator<E extends Component> implements
+    private static class SpreadsheetIterator<E extends Component> implements
             Iterator<Component> {
         private final Iterator<Component> customComponentIterator;
         private final Iterator<PopupButton> sheetPopupButtonIterator;
@@ -3912,21 +3904,21 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * Sets the content of the info label.
+     * Sets the content of the status label.
      * 
      * @param value
      *            The new content. Can not be HTML.
      */
-    public void setInfoLabelValue(String value) {
+    public void setStatusLabelValue(String value) {
         getState().infoLabelValue = value;
     }
 
     /**
-     * Gets the content of the info label
+     * Gets the content of the status label
      * 
-     * @return Current content of the info label.
+     * @return Current content of the status label.
      */
-    public String getInfoLabelValue() {
+    public String getStatusLabelValue() {
         return getState().infoLabelValue;
     }
 

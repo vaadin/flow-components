@@ -700,9 +700,8 @@ public class CellValueManager implements Serializable {
     protected void loadCellData(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
         try {
-            int verticalSplitPosition = spreadsheet.getVerticalSplitPosition();
-            int horizontalSplitPosition = spreadsheet
-                    .getHorizontalSplitPosition();
+            int verticalSplitPosition = spreadsheet.getLastFrozenRow();
+            int horizontalSplitPosition = spreadsheet.getLastFrozenColumn();
             if (verticalSplitPosition > 0 && horizontalSplitPosition > 0
                     && !topLeftCellsLoaded) { // top left pane
                 ArrayList<CellData> topLeftData = loadCellDataForRowAndColumnRange(

@@ -26,10 +26,10 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.addon.spreadsheet.Spreadsheet.SelectedSheetChangeEvent;
-import com.vaadin.addon.spreadsheet.Spreadsheet.SelectedSheetChangeListener;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeListener;
+import com.vaadin.addon.spreadsheet.Spreadsheet.SheetChangeEvent;
+import com.vaadin.addon.spreadsheet.Spreadsheet.SheetChangeListener;
 import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
 import com.vaadin.addon.spreadsheet.action.SpreadsheetDefaultActionHandler;
@@ -85,7 +85,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private SpreadsheetComponentFactory spreadsheetFieldFactory;
 
-    private SelectedSheetChangeListener selectedSheetChangeListener;
+    private SheetChangeListener selectedSheetChangeListener;
 
     private Button update;
 
@@ -159,7 +159,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                             spreadsheet
                                     .addSelectionChangeListener(selectionChangeListener);
                             spreadsheet
-                                    .addSelectedSheetChangeListener(selectedSheetChangeListener);
+                                    .addSheetChangeListener(selectedSheetChangeListener);
                             spreadsheet
                                     .addActionHandler(new SpreadsheetDefaultActionHandler());
                             layout.addComponent(spreadsheet);
@@ -390,11 +390,11 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             }
         };
 
-        selectedSheetChangeListener = new SelectedSheetChangeListener() {
+        selectedSheetChangeListener = new SheetChangeListener() {
             // private int counter = 0;
 
             @Override
-            public void onSelectedSheetChange(SelectedSheetChangeEvent event) {
+            public void onSheetChange(SheetChangeEvent event) {
                 // Workbook workbook = ((Spreadsheet) event.getComponent())
                 // .getWorkbook();
                 // c.removeAllItems();
@@ -437,8 +437,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             if (spreadsheet == null) {
                 spreadsheet = new Spreadsheet(file);
                 spreadsheet.addSelectionChangeListener(selectionChangeListener);
-                spreadsheet
-                        .addSelectedSheetChangeListener(selectedSheetChangeListener);
+                spreadsheet.addSheetChangeListener(selectedSheetChangeListener);
                 // spreadsheet.addActionHandler(spreadsheetActionHandler);
                 layout.addComponent(spreadsheet);
                 layout.setExpandRatio(spreadsheet, 1.0f);
