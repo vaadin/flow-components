@@ -318,7 +318,6 @@ public class SheetWidget extends Panel {
     private boolean resizing;
     private boolean resized;
     private boolean columnResizeCancelled;
-    private final List<DivElement> resizeExtraHeaders;
 
     private int cellCommentCellColumn = -1;
     private int cellCommentCellRow = -1;
@@ -471,10 +470,10 @@ public class SheetWidget extends Panel {
                 }
             });
 
-    // Height of the formula bar and column headers
+    /** Height of the formula bar and column headers */
     private int topOffset;
 
-    // Width of the row headers
+    /** Width of the row headers */
     private int widthIncrease;
     private boolean cellCommentEditMode;
     private CellComment currentlyEditedCellComment;
@@ -486,7 +485,6 @@ public class SheetWidget extends Panel {
         alwaysVisibleCellComments = new HashMap<String, CellComment>();
         sheetImages = new HashMap<String, SheetImage>();
         mergedCells = new HashMap<Integer, MergedCell>();
-        resizeExtraHeaders = new ArrayList<DivElement>();
         overflownMergedCells = new HashMap<MergedRegion, Cell>();
         hyperlinkTooltipLabel = new VLabel();
         hyperlinkTooltipLabel.setStyleName(HYPERLINK_TOOLTIP_LABEL_CLASSNAME);
@@ -635,7 +633,7 @@ public class SheetWidget extends Panel {
             // changed -> update styles and display more columns and/or rows if
             // necessary (scroll positions may have not changed)
 
-            int newFirstRowPosition = 0;
+            int newFirstRowPosition = 1;
             for (int i = 1; i < firstRowIndex; i++) {
                 newFirstRowPosition += getRowHeight(i);
                 if (i == verticalSplitPosition) {
@@ -1292,10 +1290,6 @@ public class SheetWidget extends Panel {
                     jsniUtil.clearCSSRules(resizeStyle);
                     resizeTooltip.hide();
                     event.cancel();
-                    for (DivElement extraHeader : resizeExtraHeaders) {
-                        extraHeader.removeFromParent();
-                    }
-                    resizeExtraHeaders.clear();
                     if (resizedColumnIndex != -1) {
                         spreadsheet.removeClassName(COLUMN_RESIZING_CLASSNAME);
                         stopColumnResizeDrag(event.getNativeEvent()
@@ -1420,6 +1414,8 @@ public class SheetWidget extends Panel {
             rowIndex++;
         }
         resizeLine.addClassName("rh row" + (rowIndex));
+
+        handleRowResizeDrag(clientX, clientY);
     }
 
     private void startColumnResizeDrag(final int columnIndex,
@@ -1464,6 +1460,8 @@ public class SheetWidget extends Panel {
                     tempColumnIndex++;
                 }
                 resizeLine.addClassName("ch col" + (tempColumnIndex));
+
+                handleColumnResizeDrag(clientX, clientY);
             }
         });
     }
@@ -1501,11 +1499,13 @@ public class SheetWidget extends Panel {
             }
         }
 
+        // TODO scroll into view
         resizedColumnIndex = -1;
     }
 
     private void handleRowResizeDrag(int clientX, int clientY) {
-        if (clientX < (spreadsheet.getAbsoluteLeft())
+        if (clientX < sheet.getAbsoluteLeft() - getRowHeaderSize()
+                - leftFrozenPanelWidth
                 || clientX > sheet.getAbsoluteRight()
                 || clientY < (sheet.getAbsoluteTop() - topFrozenPanelHeight)
                 || clientY > sheet.getAbsoluteBottom()) {
@@ -1533,54 +1533,63 @@ public class SheetWidget extends Panel {
                 && headersAfter < spaceAfter; i++) {
             headersAfter += getRowHeight(i);
         }
-        int index = lastRowIndex + 1; // 1-based
-        // add extra headers that were added previously
-        if (!resizeExtraHeaders.isEmpty()) {
-            for (int i = 0; i < resizeExtraHeaders.size(); i++) {
-                headersAfter += getRowHeight(index);
-                index++;
-            }
-        }
-        // add extra headers if necessary
-        while (spaceAfter > headersAfter && index <= actionHandler.getMaxRows()) {
-            DivElement extraHeader = Document.get().createDivElement();
-            extraHeader.setClassName("rh resize-extra row" + (index));
-            extraHeader.setInnerText(actionHandler.getRowHeader(index));
-            headersAfter += getRowHeight(index);
-            spreadsheet.appendChild(extraHeader);
-            resizeExtraHeaders.add(extraHeader);
-            index++;
-        }
+
         // adjust headers after resized one with margin
         int margin = clientY - resizeLastEdgePos;
         if (margin < resizeFirstEdgePos - resizeLastEdgePos) {
             margin = resizeFirstEdgePos - resizeLastEdgePos;
         }
-        if (margin != 0) {
-            rule = "";
-            for (int i = resizedRowIndex + 1; i <= (lastRowIndex + resizeExtraHeaders
-                    .size()); i++) {
-                rule += ".v-spreadsheet > div.rh.row" + i;
-                if ((lastRowIndex + resizeExtraHeaders.size()) != i) {
-                    rule += ",";
-                }
+        rule = "";
+        for (int i = resizedRowIndex + 1; i <= lastRowIndex; i++) {
+            rule += ".v-spreadsheet > div.rh.row" + i;
+            if (lastRowIndex != i) {
+                rule += ",";
             }
-            margin = topOffset - sheet.getScrollTop() + margin;
-            if (!rule.isEmpty()) {
-                rule += "{margin-top:" + margin + "px;}";
-                jsniUtil.insertRule(resizeStyle, rule);
+        }
+
+        if (frozenRowHeaders != null
+                && resizedRowIndex >= frozenRowHeaders.size()) {
+            // need to add extra margin for the freeze pane
+            for (int i = 1; i <= frozenRowHeaders.size(); i++) {
+                margin += getRowHeight(i);
             }
-            rule = ".v-spreadsheet.row-resizing > div.resize-line.rh {margin-top:"
-                    + (margin - 1) + "px;}";
+        }
+
+        margin += topOffset;
+
+        if (frozenRowHeaders == null
+                || resizedRowIndex > frozenRowHeaders.size()) {
+            // only adjust outside freeze pane
+            margin -= sheet.getScrollTop();
+        }
+
+        if (!rule.isEmpty()) {
+            rule += "{margin-top:" + margin + "px;}";
             jsniUtil.insertRule(resizeStyle, rule);
         }
+        rule = ".v-spreadsheet.row-resizing > div.resize-line.rh {margin-top:"
+                + (margin - 1) + "px;}";
+        jsniUtil.insertRule(resizeStyle, rule);
+
         showResizeTooltipRelativeTo(clientX, clientY);
     }
 
+    private int getColHeaderSize() {
+        MeasuredSize measuredSize = new MeasuredSize();
+        measuredSize.measure(colHeaders.get(0));
+        return measuredSize.getOuterHeight();
+    }
+
+    private int getRowHeaderSize() {
+        MeasuredSize measuredSize = new MeasuredSize();
+        measuredSize.measure(rowHeaders.get(0));
+        return measuredSize.getOuterWidth();
+    }
+
     private void handleColumnResizeDrag(int clientX, int clientY) {
-        if (clientX < sheet.getAbsoluteLeft()
+        if (clientX < sheet.getAbsoluteLeft() - leftFrozenPanelWidth
                 || clientX > sheet.getAbsoluteRight()
-                || clientY < (sheet.getAbsoluteTop() - 20 - topFrozenPanelHeight)
+                || clientY < (sheet.getAbsoluteTop() - getColHeaderSize() - topFrozenPanelHeight)
                 || clientY > sheet.getAbsoluteBottom()) {
             return;
         }
@@ -1589,6 +1598,7 @@ public class SheetWidget extends Panel {
         if (delta < 0) {
             delta = 0;
         }
+
         jsniUtil.clearCSSRules(resizeStyle);
         // only the dragged header size has changed.
         resizeTooltipLabel.setText("Width: " + delta + "px");
@@ -1604,48 +1614,45 @@ public class SheetWidget extends Panel {
                 && headersAfter < spaceAfter; i++) {
             headersAfter += actionHandler.getColWidthActual(i);
         }
-        int index = lastColumnIndex + 1; // 1-based
-        // add extra headers that were added previously
-        if (!resizeExtraHeaders.isEmpty()) {
-            for (int i = 0; i < resizeExtraHeaders.size(); i++) {
-                headersAfter += actionHandler.getColWidthActual(index);
-                index++;
-            }
-        }
-        // add extra headers if necessary
-        while (spaceAfter > headersAfter
-                && index <= actionHandler.getMaxColumns()) {
-            DivElement extraHeader = Document.get().createDivElement();
-            extraHeader.setClassName("ch resize-extra col" + (index));
-            extraHeader.setInnerText(actionHandler.getColHeader(index));
-            headersAfter += actionHandler.getColWidthActual(index);
-            spreadsheet.appendChild(extraHeader);
-            resizeExtraHeaders.add(extraHeader);
-            index++;
-        }
+
         // adjust headers after resized one with margin
         int margin = clientX - resizeLastEdgePos;
         if (margin < resizeFirstEdgePos - resizeLastEdgePos) {
             margin = resizeFirstEdgePos - resizeLastEdgePos;
         }
-        if (margin != 0) {
-            rule = "";
-            for (int i = resizedColumnIndex + 1; i <= (lastColumnIndex + resizeExtraHeaders
-                    .size()); i++) {
-                rule += ".v-spreadsheet > div.ch.col" + i;
-                if ((lastColumnIndex + resizeExtraHeaders.size()) != i) {
-                    rule += ",";
-                }
+        rule = "";
+        for (int i = resizedColumnIndex + 1; i <= lastColumnIndex; i++) {
+            rule += ".v-spreadsheet > div.ch.col" + i;
+            if (lastColumnIndex != i) {
+                rule += ",";
             }
-            margin = widthIncrease - sheet.getScrollLeft() + margin;
-            if (!rule.isEmpty()) {
-                rule += "{margin-left:" + margin + "px;}";
-                jsniUtil.insertRule(resizeStyle, rule);
+        }
+
+        if (frozenColumnHeaders != null
+                && resizedColumnIndex >= frozenColumnHeaders.size()) {
+            // need to add extra margin for the freeze pane
+            for (int i = 1; i <= frozenColumnHeaders.size(); i++) {
+                margin += actionHandler.getColWidthActual(i);
             }
-            rule = ".v-spreadsheet.col-resizing > div.resize-line.ch {margin-left:"
-                    + (margin - 1) + "px;}";
+        }
+
+        margin = widthIncrease + margin;
+
+        if (frozenColumnHeaders == null
+                || resizedColumnIndex > frozenColumnHeaders.size()) {
+            // only adjust outside freeze pane
+            margin -= sheet.getScrollLeft();
+        }
+
+        if (!rule.isEmpty()) {
+            rule += "{margin-left:" + margin + "px;}";
+
             jsniUtil.insertRule(resizeStyle, rule);
         }
+        rule = ".v-spreadsheet.col-resizing > div.resize-line.ch {margin-left:"
+                + (margin - 1) + "px;}";
+        jsniUtil.insertRule(resizeStyle, rule);
+
         showResizeTooltipRelativeTo(clientX, clientY);
     }
 
