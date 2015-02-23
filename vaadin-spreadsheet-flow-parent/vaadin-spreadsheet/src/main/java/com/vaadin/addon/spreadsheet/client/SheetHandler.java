@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -21,8 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.dom.client.NativeEvent;
+import com.vaadin.addon.spreadsheet.client.GroupingWidget.GroupingHandler;
 
-public interface SheetHandler {
+public interface SheetHandler extends GroupingHandler {
 
     void onCellClick(int column, int row, String value, boolean shiftPressed,
             boolean metaOrCtrlPressed, boolean updateToActionHandler);
@@ -68,7 +69,7 @@ public interface SheetHandler {
 
     /**
      * default row height in points (?)
-     * 
+     *
      * @return
      */
     float getDefaultRowHeight();
@@ -93,7 +94,7 @@ public interface SheetHandler {
     /**
      * Returns 0 for hidden columns, otherwise same as {@link #getColWidth(int)}
      * .
-     * 
+     *
      * @param col
      *            1-based
      * @return width (px)
@@ -111,14 +112,14 @@ public interface SheetHandler {
 
     /**
      * The maximum amount of columns that are visible
-     * 
+     *
      * @return
      */
     int getMaxColumns();
 
     /**
      * The maximum amount of rows that are visible
-     * 
+     *
      * @return
      */
     int getMaxRows();
@@ -130,7 +131,7 @@ public interface SheetHandler {
     Map<Integer, String> getConditionalFormattingStyles();
 
     /**
-     * 
+     *
      * @param i
      *            1-based
      * @return true if the column is hidden
@@ -138,7 +139,7 @@ public interface SheetHandler {
     boolean isColumnHidden(int i);
 
     /**
-     * 
+     *
      * @param i
      *            1-based
      * @return true if the row is hidden
@@ -147,7 +148,7 @@ public interface SheetHandler {
 
     /**
      * Called on right mouse button click on top of some cell.
-     * 
+     *
      * @param nativeEvent
      * @param column
      *            1-based
@@ -158,7 +159,7 @@ public interface SheetHandler {
 
     /**
      * Called on right mouse button click on top of a row header
-     * 
+     *
      * @param nativeEvent
      * @param rowIndex
      *            1-based
@@ -167,7 +168,7 @@ public interface SheetHandler {
 
     /**
      * Called on right mouse button click on top of a column header
-     * 
+     *
      * @param nativeEvent
      * @param columnIndex
      *            1-based
@@ -185,7 +186,7 @@ public interface SheetHandler {
     void onColumnsResized(Map<Integer, Integer> newSizes);
 
     /**
-     * 
+     *
      * @param columnIndex
      *            1-based
      */
@@ -193,7 +194,7 @@ public interface SheetHandler {
 
     /**
      * Returns the merged region that this cell belongs to.
-     * 
+     *
      * @param col
      * @param row
      * @return
@@ -202,7 +203,7 @@ public interface SheetHandler {
 
     /**
      * Params 1-based
-     * 
+     *
      * @param col
      *            starting column of merged cell
      * @param row
@@ -219,7 +220,7 @@ public interface SheetHandler {
 
     /**
      * Called when user pastes something inside the sheet.
-     * 
+     *
      * @param text
      *            the pasted content
      */

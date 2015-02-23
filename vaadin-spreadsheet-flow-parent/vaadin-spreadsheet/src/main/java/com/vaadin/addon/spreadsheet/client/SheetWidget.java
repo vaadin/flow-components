@@ -57,6 +57,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
+import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
@@ -64,6 +65,7 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
+import com.vaadin.addon.spreadsheet.client.GroupingWidget.GroupingData;
 import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.ComputedStyle;
 import com.vaadin.client.MeasuredSize;
@@ -74,6 +76,8 @@ import com.vaadin.client.ui.VOverlay;
 
 public class SheetWidget extends Panel {
 
+    private static final int GROUPING_DEFAULT_ROW_HEIGHT_PX = 26;
+    private static final int GROUPING_DEFAULT_COL_WIDTH_PX = 76;
     private static final String SELECTED_COLUMN_HEADER_CLASSNAME = "selected-column-header";
     private static final String SELECTED_ROW_HEADER_CLASSNAME = "selected-row-header";
     private static final String FREEZE_PANE_INACTIVE_STYLENAME = "inactive";
@@ -231,6 +235,14 @@ public class SheetWidget extends Panel {
 
     private DivElement bottomLeftPane = Document.get().createDivElement();
 
+    private DivElement colGroupPane = Document.get().createDivElement();
+    private DivElement rowGroupPane = Document.get().createDivElement();
+    private DivElement colGroupFreezePane = Document.get().createDivElement();
+    private DivElement rowGroupFreezePane = Document.get().createDivElement();
+    private DivElement groupingCorner = Document.get().createDivElement();
+    private DivElement colGroupSummaryPane = Document.get().createDivElement();
+    private DivElement rowGroupSummaryPane = Document.get().createDivElement();
+
     /**
      * Hidden textfield that handles all copy and paste functions.
      */
@@ -337,6 +349,14 @@ public class SheetWidget extends Panel {
     private Event mouseOverOrOutEvent;
 
     private HashMap<MergedRegion, Cell> overflownMergedCells;
+
+    private List<GroupingData> groupingDataCol;
+    private List<GroupingData> groupingDataRow;
+
+    private int colGroupMax;
+    private int rowGroupMax;
+    private boolean colGroupInversed;
+    private boolean rowGroupInversed;
 
     /* Bookkeeping for styling */
     private Set<Cell> cellRangeStyledCells = new HashSet<Cell>();
@@ -489,7 +509,8 @@ public class SheetWidget extends Panel {
     private int topOffset;
 
     /** Width of the row headers */
-    private int widthIncrease;
+    private int leftOffset;
+
     private boolean cellCommentEditMode;
     private CellComment currentlyEditedCellComment;
     private boolean crossedDown;
@@ -614,8 +635,13 @@ public class SheetWidget extends Panel {
                 resetScrollView(scrollLeft, scrollTop);
                 actionHandler.onScrollViewChanged(firstRowIndex, lastRowIndex,
                         firstColumnIndex, lastColumnIndex);
+
                 resetColHeaders();
                 resetRowHeaders();
+
+                updateColGrouping();
+                updateRowGrouping();
+
                 resetCellContents();
                 loaded = true;
             }
@@ -743,7 +769,11 @@ public class SheetWidget extends Panel {
                     selectionWidget.getCol2(), selectionWidget.getRow1(),
                     selectionWidget.getRow2());
 
+            updateColGrouping();
+            updateRowGrouping();
+
             updateOverflows(true);
+
         } catch (Exception e) {
             debugConsole.severe("SheetWidget:relayoutSheet: " + e.toString()
                     + " while relayouting spreadsheet");
@@ -752,6 +782,8 @@ public class SheetWidget extends Panel {
                     firstColumnIndex, lastColumnIndex);
             resetColHeaders();
             resetRowHeaders();
+            updateColGrouping();
+            updateRowGrouping();
             resetCellContents();
             refreshAlwaysVisibleCellCommentOverlays();
             updateOverflownMergedCellSizes();
@@ -810,6 +842,24 @@ public class SheetWidget extends Panel {
         topLeftPane.setClassName("top-left-pane");
         topLeftPane.addClassName("sheet");
         spreadsheet.appendChild(topLeftPane);
+
+        // grouping cells
+        colGroupPane.setClassName("col-group-pane");
+        spreadsheet.appendChild(colGroupPane);
+        rowGroupPane.setClassName("row-group-pane");
+        spreadsheet.appendChild(rowGroupPane);
+
+        colGroupFreezePane.setClassName("col-group-freeze-pane");
+        spreadsheet.appendChild(colGroupFreezePane);
+        rowGroupFreezePane.setClassName("row-group-freeze-pane");
+        spreadsheet.appendChild(rowGroupFreezePane);
+
+        rowGroupSummaryPane.setClassName("row-group-summary");
+        spreadsheet.appendChild(rowGroupSummaryPane);
+        colGroupSummaryPane.setClassName("col-group-summary");
+        spreadsheet.appendChild(colGroupSummaryPane);
+        groupingCorner.setClassName("grouping-corner");
+        spreadsheet.appendChild(groupingCorner);
 
         resizeLine.setClassName(RESIZE_LINE_CLASSNAME);
         spreadsheet.appendChild(resizeLine);
@@ -1844,6 +1894,49 @@ public class SheetWidget extends Panel {
         showResizeTooltipRelativeTo(clientX, clientY);
     }
 
+    private int getColHeaderSize() {
+
+        if (colHeaders.isEmpty()) {
+            return 0;
+        }
+
+        // some headers might be hidden, find one that isn't
+
+        int index = 0;
+        while (actionHandler.isColumnHidden(index + 1)) {
+            index++;
+        }
+        MeasuredSize measuredSize = new MeasuredSize();
+        if (frozenColumnHeaders != null && frozenColumnHeaders.size() > 0
+                && index <= frozenColumnHeaders.size()) {
+            measuredSize.measure(frozenColumnHeaders.get(index));
+        } else {
+            measuredSize.measure(colHeaders.get(index));
+        }
+        return measuredSize.getOuterHeight();
+    }
+
+    private int getRowHeaderSize() {
+
+        if (rowHeaders.isEmpty()) {
+            return 0;
+        }
+
+        // some headers might be hidden, find one that isn't
+        int index = 0;
+        while (actionHandler.isRowHidden(index + 1)) {
+            index++;
+        }
+        MeasuredSize measuredSize = new MeasuredSize();
+        if (frozenRowHeaders != null && frozenRowHeaders.size() > 0
+                && index <= frozenRowHeaders.size()) {
+            measuredSize.measure(frozenRowHeaders.get(index));
+        } else {
+            measuredSize.measure(rowHeaders.get(index));
+        }
+        return measuredSize.getOuterWidth();
+    }
+
     private void handleColumnResizeDrag(int clientX, int clientY) {
         resized = true;
         int delta = clientX - resizeFirstEdgePos;
@@ -1892,7 +1985,7 @@ public class SheetWidget extends Panel {
             }
         }
 
-        margin = widthIncrease + margin;
+        margin = leftOffset + margin;
 
         if (frozenColumnHeaders == null
                 || resizedColumnIndex > frozenColumnHeaders.size()) {
@@ -1957,8 +2050,12 @@ public class SheetWidget extends Panel {
     private void moveHeadersToMatchScroll() {
         topRightPane.getStyle().setMarginLeft(0 - sheet.getScrollLeft(),
                 Unit.PX);
+        colGroupPane.getStyle().setMarginLeft(0 - sheet.getScrollLeft(),
+                Unit.PX);
+
         bottomLeftPane.getStyle().setMarginTop(0 - sheet.getScrollTop(),
                 Unit.PX);
+        rowGroupPane.getStyle().setMarginTop(0 - sheet.getScrollTop(), Unit.PX);
     }
 
     private int createRowStyles(String[] rules, int startIndex, int endIndex) {
@@ -2057,6 +2154,9 @@ public class SheetWidget extends Panel {
         // with margins. moveHeadersToMatchScroll handles updating.
         topRightPane.getStyle().setMarginLeft(0, Unit.PX);
         bottomLeftPane.getStyle().setMarginTop(0, Unit.PX);
+        colGroupPane.getStyle().setMarginLeft(0, Unit.PX);
+        rowGroupPane.getStyle().setMarginLeft(0, Unit.PX);
+
         moveHeadersToMatchScroll();
 
         // update floater size the adjust scroll bars correctly
@@ -2066,6 +2166,9 @@ public class SheetWidget extends Panel {
         // Update freeze pane styles
         bottomLeftPane.getStyle().setHeight(bottomPanelHeightPx, Unit.PX);
         topRightPane.getStyle().setWidth(bottomPanelWidth, Unit.PX);
+
+        colGroupPane.getStyle().setWidth(bottomPanelWidth, Unit.PX);
+        rowGroupPane.getStyle().setHeight(bottomPanelHeightPx, Unit.PX);
     }
 
     /**
@@ -2077,36 +2180,14 @@ public class SheetWidget extends Panel {
         if (spreadsheet.getClassName().contains("report")) {
             extraSize = 0;
         }
-        widthIncrease = 0;
+        int widthIncrease = 0;
         if (rowHeaders != null && !rowHeaders.isEmpty()) {
-            int index = 0;
-            while (actionHandler.isRowHidden(index + 1)) {
-                index++;
-            }
-            MeasuredSize measuredSize = new MeasuredSize();
-            if (frozenRowHeaders != null && frozenRowHeaders.size() > 0
-                    && index <= frozenRowHeaders.size()) {
-                measuredSize.measure(frozenRowHeaders.get(index));
-            } else {
-                measuredSize.measure(rowHeaders.get(index));
-            }
-            widthIncrease = measuredSize.getOuterWidth();
+            widthIncrease = getRowHeaderSize();
         }
 
         int heightIncrease = 0;
         if (colHeaders != null && !colHeaders.isEmpty()) {
-            int index = 0;
-            while (actionHandler.isColumnHidden(index + 1)) {
-                index++;
-            }
-            MeasuredSize measuredSize = new MeasuredSize();
-            if (frozenColumnHeaders != null && frozenColumnHeaders.size() > 0
-                    && index <= frozenColumnHeaders.size()) {
-                measuredSize.measure(frozenColumnHeaders.get(index));
-            } else {
-                measuredSize.measure(colHeaders.get(index));
-            }
-            heightIncrease = measuredSize.getOuterHeight();
+            heightIncrease = getColHeaderSize();
         }
 
         // Measure formula bar height
@@ -2118,29 +2199,45 @@ public class SheetWidget extends Panel {
             formulaBarHeight = measuredSize.getOuterHeight();
         }
 
+        int addedHeaderHeight = updateExtraColumnHeaderElements(formulaBarHeight);
+        int addedHeaderWidth = updateExtraRowHeaderElements(formulaBarHeight);
+        updateExtraCornerElements(formulaBarHeight, addedHeaderHeight,
+                addedHeaderWidth);
+
         if (!displayRowColHeadings) {
             widthIncrease = 0;
             heightIncrease = 0;
         }
-        topOffset = heightIncrease + formulaBarHeight;
+
+        topOffset = heightIncrease + formulaBarHeight + addedHeaderHeight;
+        leftOffset = widthIncrease + addedHeaderWidth;
 
         Style style = topLeftPane.getStyle();
         style.setWidth(leftFrozenPanelWidth + widthIncrease + 1, Unit.PX);
         style.setHeight(topFrozenPanelHeight + heightIncrease, Unit.PX);
+        style.setTop(formulaBarHeight + addedHeaderHeight, Unit.PX);
+        style.setLeft(addedHeaderWidth, Unit.PX);
 
         style = topRightPane.getStyle();
         // left offset is the same as the width increase
-        style.setLeft(leftFrozenPanelWidth + widthIncrease + extraSize, Unit.PX);
+        style.setLeft(leftFrozenPanelWidth + leftOffset + extraSize, Unit.PX);
         style.setHeight(topFrozenPanelHeight + heightIncrease, Unit.PX);
+        style.setTop(formulaBarHeight + addedHeaderHeight, Unit.PX);
 
         style = bottomLeftPane.getStyle();
         // The +1 is to accommodate the vertical border of the freeze pane
         style.setWidth(leftFrozenPanelWidth + widthIncrease + 1, Unit.PX);
         style.setTop(topFrozenPanelHeight + topOffset, Unit.PX);
+        style.setLeft(addedHeaderWidth, Unit.PX);
 
         style = sheet.getStyle();
-        style.setLeft(leftFrozenPanelWidth + widthIncrease + extraSize, Unit.PX);
+        style.setLeft(leftFrozenPanelWidth + leftOffset + extraSize, Unit.PX);
         style.setTop(topFrozenPanelHeight + topOffset, Unit.PX);
+
+        style = corner.getStyle();
+        style.setTop(formulaBarHeight + addedHeaderHeight, Unit.PX);
+        style.setLeft(addedHeaderWidth, Unit.PX);
+
     }
 
     private void updateConditionalFormattingStyles() {
@@ -2342,6 +2439,7 @@ public class SheetWidget extends Panel {
         while (colHeaders.size() > (lastColumnIndex - firstColumnIndex + 1)) {
             colHeaders.remove(colHeaders.size() - 1).removeFromParent();
         }
+
     }
 
     /**
@@ -2387,6 +2485,7 @@ public class SheetWidget extends Panel {
         while (rowHeaders.size() > (lastRowIndex - firstRowIndex + 1)) {
             rowHeaders.remove(rowHeaders.size() - 1).removeFromParent();
         }
+
     }
 
     private void resetScrollView(int scrollLeft, int scrollTop) {
@@ -5575,7 +5674,10 @@ public class SheetWidget extends Panel {
         } else {
             spreadsheet.addClassName(NO_GRIDLINES_CLASSNAME);
         }
-        updateSheetPanePositions();
+
+        if (loaded) {
+            updateSheetPanePositions();
+        }
     }
 
     public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
@@ -5693,4 +5795,367 @@ public class SheetWidget extends Panel {
             addStyleName("notfocused");
         }
     }
+
+    public void setColGroupingData(List<GroupingData> data) {
+        groupingDataCol = data;
+    }
+
+    public void setRowGroupingData(List<GroupingData> data) {
+        groupingDataRow = data;
+    }
+
+    public void setColGroupingMax(int max) {
+        colGroupMax = max;
+    }
+
+    public void setRowGroupingMax(int max) {
+        rowGroupMax = max;
+    }
+
+    private void updateColGrouping() {
+
+        updateGrouping(colGroupPane, colGroupFreezePane, groupingDataCol,
+                colHeaders, frozenColumnHeaders, true, colGroupMax);
+
+        if (colGroupSummaryPane.getChildCount() == colGroupMax + 1) {
+            // nothings changed; don't re-draw
+            return;
+        }
+
+        colGroupSummaryPane.removeAllChildren();
+
+        for (int i = 1; i <= colGroupMax + 1; i++) {
+            DivElement btn = Document.get().createDivElement();
+            colGroupSummaryPane.appendChild(btn);
+
+            btn.setInnerText("" + i);
+            btn.setClassName("expandbutton");
+
+            final int level = i;
+
+            Event.sinkEvents(btn, Event.ONCLICK);
+            Event.setEventListener(btn, new EventListener() {
+
+                @Override
+                public void onBrowserEvent(Event event) {
+                    actionHandler.levelHeaderClicked(true, level);
+                }
+            });
+        }
+    }
+
+    private void updateRowGrouping() {
+        updateGrouping(rowGroupPane, rowGroupFreezePane, groupingDataRow,
+                rowHeaders, frozenRowHeaders, false, rowGroupMax);
+
+        if (rowGroupSummaryPane.getChildCount() == rowGroupMax + 1) {
+            // nothings changed; don't re-draw
+            return;
+        }
+
+        rowGroupSummaryPane.removeAllChildren();
+
+        for (int i = 1; i <= rowGroupMax + 1; i++) {
+            DivElement btn = Document.get().createDivElement();
+            rowGroupSummaryPane.appendChild(btn);
+
+            btn.setInnerText("" + i);
+            btn.setClassName("expandbutton");
+
+            final int level = i;
+
+            Event.sinkEvents(btn, Event.ONCLICK);
+            Event.setEventListener(btn, new EventListener() {
+
+                @Override
+                public void onBrowserEvent(Event event) {
+                    actionHandler.levelHeaderClicked(false, level);
+                }
+            });
+        }
+    }
+
+    private void updateGrouping(DivElement groupPane,
+            DivElement groupFreezePane, List<GroupingData> data,
+            ArrayList<DivElement> normaHeaders,
+            ArrayList<DivElement> freezeHeaders, boolean useCol, int maxGrouping) {
+
+        ArrayList<DivElement> headers = new ArrayList<DivElement>();
+        if (freezeHeaders != null) {
+            headers.addAll(freezeHeaders);
+        }
+        headers.addAll(normaHeaders);
+
+        int defaultCellSize = useCol ? GROUPING_DEFAULT_COL_WIDTH_PX
+                : GROUPING_DEFAULT_ROW_HEIGHT_PX;
+
+        // starting pos offset if the other grouping pane is visible
+        int startingOffset;
+        if (useCol) {
+            startingOffset = rowGroupPane.getClientWidth() + getRowHeaderSize();
+        } else {
+            startingOffset = colGroupPane.getClientHeight()
+                    + getColHeaderSize();
+        }
+
+        // remove old
+        Iterator<Widget> iterator = iterator();
+        while (iterator.hasNext()) {
+            Widget next = iterator.next();
+            if (next instanceof GroupingWidget) {
+                orphan(next);
+            }
+        }
+        groupPane.removeAllChildren();
+        groupFreezePane.removeAllChildren();
+
+        if (maxGrouping > 0) {
+
+            // all markers start with a padding (reverse adds padding later)
+            if (useCol && !colGroupInversed) {
+                startingOffset += 5;
+            } else if (!useCol && !rowGroupInversed) {
+                startingOffset += 2;
+            }
+
+            for (GroupingData d : data) {
+                GroupingWidget marker;
+                if (useCol) {
+                    marker = new ColumnGrouping(d.uniqueIndex, actionHandler);
+                    marker.setInversed(colGroupInversed);
+                } else {
+                    marker = new RowGrouping(d.uniqueIndex, actionHandler);
+                    marker.setInversed(rowGroupInversed);
+                }
+
+                int pos = startingOffset;
+
+                // add up header sizes so far
+                for (int col = 0; col < d.startIndex; col++) {
+                    if (headers.size() > col) {
+
+                        if (useCol) {
+                            pos += headers.get(col).getClientWidth();
+                        } else {
+                            pos += headers.get(col).getClientHeight();
+                        }
+                    } else {
+                        pos += defaultCellSize;
+                    }
+                }
+
+                if (useCol && colGroupInversed) {
+                    // start is on the col to the left; reverse half a col
+                    if (d.startIndex == 0) {
+                        pos -= defaultCellSize / 2;
+                    } else {
+                        pos -= headers.get(d.startIndex - 1).getClientWidth() / 2;
+                    }
+                } else if (!useCol && rowGroupInversed) {
+                    if (d.startIndex == 0) {
+                        pos -= defaultCellSize / 2;
+                    } else {
+                        // start is on the row above; reverse half a row
+                        pos -= headers.get(d.startIndex - 1).getClientHeight() / 2;
+                    }
+                }
+
+                marker.setPos(pos, d.level - 1);
+                marker.setCollapsed(d.collapsed);
+
+                groupPane.appendChild(marker.getElement());
+                adopt(marker);
+
+                // length
+                double w = 0;
+                for (int col = d.startIndex; col <= d.endIndex; col++) {
+                    // check actual length, otherwise use default
+                    if (headers.size() > col) {
+
+                        if (useCol) {
+                            w += headers.get(col).getClientWidth();
+                        } else {
+                            w += headers.get(col).getClientHeight();
+                        }
+                    } else {
+                        w += defaultCellSize;
+                    }
+                }
+
+                // center end on on next row/col
+
+                // remove padding from beginning
+                w -= useCol ? 5 : 2;
+
+                // add half of size of cell before (for inverted) or after (for
+                // normal)
+                if (useCol && colGroupInversed || !useCol && rowGroupInversed) {
+
+                    if (d.startIndex == 0) {
+                        w += defaultCellSize / 2d;
+                    } else if (useCol) {
+                        w += headers.get(d.startIndex - 1).getClientWidth() / 2d;
+                    } else {
+                        w += headers.get(d.startIndex - 1).getClientHeight() / 2d;
+                    }
+
+                } else if (useCol && !colGroupInversed || !useCol
+                        && !rowGroupInversed) {
+
+                    if (useCol) {
+                        w += headers.get(d.endIndex + 1).getClientWidth() / 2d;
+                    } else {
+                        w += headers.get(d.endIndex + 1).getClientHeight() / 2d;
+                    }
+
+                }
+                marker.setWidthPX(w);
+
+                // do we need an element in the freeze pane too?
+                if (freezeHeaders != null
+                        && freezeHeaders.size() > d.startIndex) {
+                    GroupingWidget clone = marker.cloneWidget();
+                    groupFreezePane.appendChild(clone.getElement());
+                    adopt(clone);
+                }
+            }
+
+        }
+    }
+
+    private void updateExtraCornerElements(int formulaBarHeight,
+            int colGroupHeight, int rowGroupWidth) {
+
+        groupingCorner.getStyle().setTop(formulaBarHeight, Unit.PX);
+
+        if (rowGroupWidth == 0 || colGroupHeight == 0) {
+            groupingCorner.getStyle().setDisplay(Display.NONE);
+        } else {
+            groupingCorner.getStyle().setDisplay(Display.BLOCK);
+        }
+
+        groupingCorner.getStyle().setHeight(colGroupHeight, Unit.PX);
+        groupingCorner.getStyle().setWidth(rowGroupWidth, Unit.PX);
+
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+
+                int width = topLeftPane.getClientWidth()
+                        + rowGroupPane.getClientWidth();
+                width += 2; // TODO 1 for left border the freeze panes has, 1
+                            // for bug
+                colGroupFreezePane.getStyle().setWidth(width, Unit.PX);
+
+                int height = topLeftPane.getClientHeight()
+                        + colGroupPane.getClientHeight();
+                height += 2;// TODO 1 for left border the freeze panes has, 1
+                            // for bug
+                rowGroupFreezePane.getStyle().setHeight(height, Unit.PX);
+            }
+        });
+    }
+
+    private int updateExtraColumnHeaderElements(int formulaBarHeight) {
+
+        groupingCorner.getStyle().setTop(formulaBarHeight, Unit.PX);
+
+        // calculate grouping element sizes
+        int colGroupHeight = 0;
+        if (colGroupMax > 0) {
+            colGroupHeight = ColumnGrouping.getTotalSize(colGroupMax + 1);
+        }
+        int rowGroupWidth = 0;
+        if (rowGroupMax > 0) {
+            rowGroupWidth = ColumnGrouping.getTotalSize(rowGroupMax + 1);
+        }
+
+        // grouping element sizing
+        if (colGroupHeight == 0) {
+            colGroupPane.getStyle().setDisplay(Display.NONE);
+            colGroupSummaryPane.getStyle().setDisplay(Display.NONE);
+        } else {
+            colGroupPane.getStyle().setDisplay(Display.BLOCK);
+            colGroupSummaryPane.getStyle().setDisplay(Display.BLOCK);
+        }
+
+        if (frozenColumnHeaders != null && colGroupMax > 0) {
+            colGroupFreezePane.getStyle().setDisplay(Display.BLOCK);
+        } else {
+            colGroupFreezePane.getStyle().setDisplay(Display.NONE);
+        }
+
+        colGroupPane.getStyle().setHeight(colGroupHeight, Unit.PX);
+        colGroupPane.getStyle().setTop(formulaBarHeight, Unit.PX);
+
+        colGroupFreezePane.getStyle().setHeight(colGroupHeight, Unit.PX);
+        colGroupFreezePane.getStyle().setTop(formulaBarHeight, Unit.PX);
+
+        colGroupSummaryPane.getStyle().setTop(formulaBarHeight, Unit.PX);
+        colGroupSummaryPane.getStyle().setHeight(colGroupHeight, Unit.PX);
+        if (loaded) {
+            colGroupSummaryPane.getStyle()
+                    .setWidth(getRowHeaderSize(), Unit.PX);
+        }
+        colGroupSummaryPane.getStyle().setLeft(rowGroupWidth, Unit.PX);
+
+        return colGroupHeight;
+
+    }
+
+    private int updateExtraRowHeaderElements(int formulaBarHeight) {
+
+        // calculate grouping element sizes
+        int colGroupHeight = 0;
+        if (colGroupMax > 0) {
+            colGroupHeight = GroupingWidget.getTotalSize(colGroupMax + 1);
+        }
+        int rowGroupWidth = 0;
+        if (rowGroupMax > 0) {
+            rowGroupWidth = GroupingWidget.getTotalSize(rowGroupMax + 1);
+        }
+
+        if (rowGroupWidth == 0) {
+            rowGroupPane.getStyle().setDisplay(Display.NONE);
+            rowGroupSummaryPane.getStyle().setDisplay(Display.NONE);
+        } else {
+            rowGroupPane.getStyle().setDisplay(Display.BLOCK);
+            rowGroupSummaryPane.getStyle().setDisplay(Display.BLOCK);
+        }
+
+        if (frozenRowHeaders != null && rowGroupMax > 0) {
+            rowGroupFreezePane.getStyle().setDisplay(Display.BLOCK);
+        } else {
+            rowGroupFreezePane.getStyle().setDisplay(Display.NONE);
+        }
+
+        // grouping element sizing
+        rowGroupPane.getStyle().setWidth(rowGroupWidth, Unit.PX);
+        rowGroupPane.getStyle().setTop(formulaBarHeight, Unit.PX);
+
+        rowGroupFreezePane.getStyle().setWidth(rowGroupWidth, Unit.PX);
+        rowGroupFreezePane.getStyle().setTop(formulaBarHeight, Unit.PX);
+
+        rowGroupSummaryPane.getStyle().setTop(
+                formulaBarHeight + colGroupHeight, Unit.PX);
+        if (loaded) {
+            rowGroupSummaryPane.getStyle().setHeight(getColHeaderSize(),
+                    Unit.PX);
+            rowGroupSummaryPane.getStyle().setLineHeight(getColHeaderSize(),
+                    Unit.PX);
+        }
+        rowGroupSummaryPane.getStyle().setWidth(rowGroupWidth, Unit.PX);
+
+        return rowGroupWidth;
+    }
+
+    public void setColGroupingInversed(boolean inversed) {
+        colGroupInversed = inversed;
+    }
+
+    public void setRowGroupingInversed(boolean inversed) {
+        rowGroupInversed = inversed;
+    }
+
 }

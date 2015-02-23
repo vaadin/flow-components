@@ -36,6 +36,7 @@ $popup-overlay-bg-color: #fff !default;
 $popup-overlay-text-color: #474747 !default;
 $cell-comment-bg-color: #fff !default;
 $cell-comment-border-color: #A7A7A7 !default;
+$spreadsheet-header-grouping-color:#C7C7C7 !default;
 
 @mixin spreadsheet-legacy {
 	.v-spreadsheet {
@@ -1103,5 +1104,157 @@ $cell-comment-border-color: #A7A7A7 !default;
 	
 	.cell-range-bg-color {
 	 	background-color: $spreadsheet-sheet-selection-range-bg-color;
+	}
+	
+	/* Column group styles */
+	.col-group-pane,
+	.col-group-freeze-pane {
+		position: absolute;
+		left: 0;
+		width: 100%;
+		
+		z-index: 11;
+		background-color: $address-field-background;
+		
+		border-bottom: $header-border;
+		box-sizing: border-box;
+		
+		.grouping {
+			position: absolute;
+			height: 3px;
+			border-top: 2px solid $spreadsheet-header-grouping-color;
+			border-left: 2px solid $spreadsheet-header-grouping-color;
+			cursor: pointer;
+			
+			.expand {
+				position: relative;
+				top: -4px;
+				float: right;
+				right: -4px;
+				height: 11px;
+				width: 11px;
+				background-color: white;
+				border: 1px solid darkgray;
+				line-height: 10pt;
+				text-align: center;
+			}
+		}
+		
+		.grouping.inversed {
+			border-right: 2px solid $spreadsheet-header-grouping-color;
+			border-left: none;
+			.expand {
+				right: initial;
+				left: -4px;
+				float: none;
+			}
+		}
+		
+	}
+	.col-group-freeze-pane {
+		overflow: hidden;
+		border-right: $spreadsheet-freeze-pane-border;
+	}
+
+	.row-group-pane,
+	.row-group-freeze-pane {
+		position: absolute;
+		left: 0;
+		height: 100%;
+		
+		z-index: 11;
+		background-color: $address-field-background;
+		
+		border-right: $header-border;
+		box-sizing: border-box;
+		
+		
+		.grouping {
+			position: absolute;
+			width: 3px;
+			border-top: 2px solid $spreadsheet-header-grouping-color;
+			border-left: 2px solid $spreadsheet-header-grouping-color;
+			cursor: pointer;
+			
+			.expand {
+				position: absolute;
+				bottom: -4px;
+				right: -4px;
+				height: 11px;
+				width: 11px;
+				background-color: white;
+				border: 1px solid darkgray;
+				line-height: 10pt;
+				text-align: center;
+			}
+		}
+		.grouping.inversed {
+			border-top: none;
+			border-bottom: 2px solid $spreadsheet-header-grouping-color;
+			.expand {
+				bottom: initial;
+				top: -5px;
+			}
+		}
+	}
+	.row-group-freeze-pane {
+		overflow: hidden;
+		border-bottom: $spreadsheet-freeze-pane-border;
+	}
+	
+	.expandbutton {
+		height: 11px;
+		width: 11px;
+		background-color: white;
+		border: 1px solid darkgray;
+		line-height: 10pt;
+		font-size: 8pt;
+		text-align: center;
+		cursor: pointer;
+	}
+	
+	.expandbutton:active {
+		border-color: gray;
+	}
+	
+	.col-group-summary{
+		.expandbutton {
+			margin-left: auto;
+			margin-right: auto;
+			margin-top: 4px;
+		}
+	}
+	.row-group-summary{
+		.expandbutton {
+			display: inline-block;
+			margin-left: 4px;
+		}
+	}
+
+	.grouping-corner {
+		position: absolute;
+		left: 0;
+		z-index: 15;
+		border-right: $header-border;
+		border-bottom: $header-border;
+		box-sizing: border-box;
+		background-color: $address-field-background;
+	}
+	.col-group-summary {
+		position: absolute;
+		box-sizing: border-box;
+		border-bottom: $header-border;
+		border-right: $header-border;
+		background-color: $address-field-background;
+		z-index: 15;
+	}
+	.row-group-summary {
+		position: absolute;
+		box-sizing: border-box;
+		border-bottom: $header-border;
+		border-right: $header-border;
+		background-color: $address-field-background;
+		left: 0;
+		z-index: 15;
 	}
 }	

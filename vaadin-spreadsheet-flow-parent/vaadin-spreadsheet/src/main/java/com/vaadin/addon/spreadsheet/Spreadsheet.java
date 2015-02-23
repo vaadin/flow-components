@@ -48,6 +48,7 @@ import java.util.logging.Logger;
 
 import org.apache.poi.hssf.converter.AbstractExcelUtils;
 import org.apache.poi.hssf.record.cf.CellRangeUtil;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.PaneInformation;
 import org.apache.poi.ss.usermodel.Cell;
@@ -62,10 +63,15 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.impl.values.XmlValueDisconnectedException;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Element;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
 import com.vaadin.addon.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.addon.spreadsheet.client.ImageInfo;
@@ -2434,6 +2440,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         getState().displayGridlines = getActiveSheet().isDisplayGridlines();
         getState().displayRowColHeadings = getActiveSheet()
                 .isDisplayRowColHeadings();
+
         markAsDirty();
     }
 
@@ -2780,6 +2787,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             getState().colW[index] = width;
             getActiveSheet().setColumnWidth(index,
                     SpreadsheetUtil.pixel2WidthUnits(width));
+
+            if (getActiveSheet() instanceof XSSFSheet) {
+                ((XSSFSheet) getActiveSheet()).getColumnHelper().cleanColumns();
+            }
+
             getCellValueManager().clearCacheForColumn(index + 1);
             getCellValueManager().loadCellData(firstRow, index + 1, lastRow,
                     index + 1);
@@ -4481,4 +4493,124 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void focus() {
         super.focus();
     }
+
+    /**
+     * Controls if a column group is collapsed or not.
+     * 
+     * @param isCols
+     *            <code>true</code> when collapsing columns, <code>false</code>
+     *            when collapsing rows
+     * @param index
+     *            A column that is part of the group, 0-based
+     * @param collapsed
+     *            If the group should be collapsed or not
+     */
+    protected void setGroupingCollapsed(boolean isCols, int index,
+            boolean collapsed) {
+
+        XSSFSheet activeSheet = (XSSFSheet) getActiveSheet();
+        if (isCols) {
+            if (collapsed) {
+                GroupingUtil.collapseColumn(activeSheet, index);
+            } else {
+                GroupingUtil.expandColumn(activeSheet, index);
+            }
+        } else {
+            if (collapsed) {
+                GroupingUtil.collapseRow(activeSheet, index);
+            } else {
+                GroupingUtil.expandRow(activeSheet, index);
+            }
+        }
+        SpreadsheetFactory.reloadSpreadsheetComponent(this, workbook);
+    }
+
+    /**
+     * Called when a grouping level header is clicked
+     * 
+     * @param isCols
+     *            true if the user clicked on cols, false for row level headers
+     * @param level
+     *            which level the user clicked
+     */
+    protected void levelHeaderClicked(boolean isCols, int level) {
+
+        /*
+         * A click on a header should change groupings so that all levels above
+         * the selected are expanded, and the selected level is all collapsed
+         * (which hides any levels underneath this).
+         */
+
+        if (getActiveSheet() instanceof HSSFSheet) {
+            return;
+        }
+
+        XSSFSheet xsheet = (XSSFSheet) getActiveSheet();
+        CTWorksheet ctWorksheet = xsheet.getCTWorksheet();
+
+        if (isCols) {
+
+            CTCols ctCols = ctWorksheet.getColsList().get(0);
+            List<CTCol> colList = ctCols.getColList();
+            for (CTCol col : colList) {
+                short l = col.getOutlineLevel();
+
+                // It's a lot easier to not call expand/collapse
+
+                if (l >= 0 && l < level) {
+                    // expand
+                    if (col.isSetHidden()) {
+                        col.unsetHidden();
+                    }
+                } else {
+                    // collapse
+                    col.setHidden(true);
+                }
+            }
+
+        } else {
+
+            /*
+             * Groups are more complicated than cols, use existing
+             * collapse/expand functionality.
+             */
+
+            int lastlevel = 0;
+            for (int i = 0; i < getRows(); i++) {
+
+                XSSFRow row = xsheet.getRow(i);
+                if (row == null) {
+                    lastlevel = 0;
+                    continue;
+                }
+
+                short l = row.getCTRow().getOutlineLevel();
+                if (l != lastlevel) {
+
+                    // group starts here
+
+                    int end = (int) GroupingUtil.findEndOfRowGroup(this, i,
+                            row, l);
+                    long uniqueIndex = GroupingUtil.findUniqueRowIndex(this, i,
+                            end, l);
+
+                    if (l > 0 && l < level) {
+                        // expand
+                        GroupingUtil.expandRow(xsheet, (int) uniqueIndex);
+
+                    } else if (l >= level) {
+                        // collapse
+                        GroupingUtil.collapseRow(xsheet, (int) uniqueIndex);
+                    }
+
+                    lastlevel = l;
+                }
+
+            }
+
+        }
+
+        SpreadsheetFactory.reloadSpreadsheetComponent(this, workbook);
+    }
+
 }

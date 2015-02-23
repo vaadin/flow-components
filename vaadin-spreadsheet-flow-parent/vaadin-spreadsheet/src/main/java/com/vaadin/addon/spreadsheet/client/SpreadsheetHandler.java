@@ -20,9 +20,10 @@ package com.vaadin.addon.spreadsheet.client;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vaadin.addon.spreadsheet.client.GroupingWidget.GroupingHandler;
 import com.vaadin.shared.annotations.Delayed;
 
-public interface SpreadsheetHandler {
+public interface SpreadsheetHandler extends GroupingHandler {
 
     /**
      * These cells have become visible and possibly need the content, if has not

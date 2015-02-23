@@ -19,7 +19,9 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import com.vaadin.addon.spreadsheet.client.GroupingWidget.GroupingData;
 import com.vaadin.shared.annotations.DelegateToWidget;
 import com.vaadin.shared.ui.TabIndexState;
 
@@ -37,6 +39,21 @@ public class SpreadsheetState extends TabIndexState {
 
     @DelegateToWidget
     public int cols;
+
+    @DelegateToWidget
+    public List<GroupingData> colGroupingData;
+    @DelegateToWidget
+    public List<GroupingData> rowGroupingData;
+
+    @DelegateToWidget
+    public int colGroupingMax;
+    @DelegateToWidget
+    public int rowGroupingMax;
+
+    @DelegateToWidget
+    public boolean colGroupingInversed;
+    @DelegateToWidget
+    public boolean rowGroupingInversed;
 
     @DelegateToWidget
     public float defRowH;

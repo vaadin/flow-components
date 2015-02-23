@@ -36,6 +36,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.addon.spreadsheet.client.GroupingWidget.GroupingData;
 import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
 import com.vaadin.addon.spreadsheet.client.SheetTabSheet.SheetTabSheetHandler;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector.CommsTrigger;
@@ -1457,6 +1458,14 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         this.cols = cols;
     }
 
+    public void setColGroupingData(List<GroupingData> data) {
+        sheetWidget.setColGroupingData(data);
+    }
+
+    public void setRowGroupingData(List<GroupingData> data) {
+        sheetWidget.setRowGroupingData(data);
+    }
+
     public void setRowH(float[] rowH) {
         this.rowH = rowH;
     }
@@ -1848,5 +1857,32 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public String getActiveSheetName() {
         return sheetNames[activeSheetIndex - 1];
+    }
+
+    @Override
+    public void setGroupingCollapsed(boolean isCols, int colIndex,
+            boolean collapsed) {
+        spreadsheetHandler.setGroupingCollapsed(isCols, colIndex, collapsed);
+    }
+
+    @Override
+    public void levelHeaderClicked(boolean cols, int level) {
+        spreadsheetHandler.levelHeaderClicked(cols, level);
+    }
+
+    public void setColGroupingMax(int max) {
+        sheetWidget.setColGroupingMax(max);
+    }
+
+    public void setRowGroupingMax(int max) {
+        sheetWidget.setRowGroupingMax(max);
+    }
+
+    public void setColGroupingInversed(boolean inversed) {
+        sheetWidget.setColGroupingInversed(inversed);
+    }
+
+    public void setRowGroupingInversed(boolean inversed) {
+        sheetWidget.setRowGroupingInversed(inversed);
     }
 }

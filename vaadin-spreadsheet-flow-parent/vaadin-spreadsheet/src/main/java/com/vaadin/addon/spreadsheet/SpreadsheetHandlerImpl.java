@@ -459,4 +459,15 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         spreadsheet.getActiveSheet().getCellComment(row - 1, col - 1)
                 .setString(str);
     }
+
+    @Override
+    public void setGroupingCollapsed(boolean isCols, int colIndex,
+            boolean collapsed) {
+        spreadsheet.setGroupingCollapsed(isCols, colIndex, collapsed);
+    }
+
+    @Override
+    public void levelHeaderClicked(boolean isCols, int level) {
+        spreadsheet.levelHeaderClicked(isCols, level);
+    }
 }
