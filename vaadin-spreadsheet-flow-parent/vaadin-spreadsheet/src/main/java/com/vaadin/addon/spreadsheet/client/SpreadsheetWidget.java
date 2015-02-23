@@ -903,21 +903,19 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public void onSheetKeyPress(NativeEvent event, String enteredCharacter) {
-        if (event.getCharCode() == 0
-                && event.getKeyCode() != KeyCodes.KEY_SPACE) {
+        // Here we need to also check for char code 13 (which is code for enter)
+        // since for some reason the enter key is reported having both
+        // KeyCodes.ENTER and the char code 13, whereas other such non-character
+        // keys here have no char codes. Enter key must be detected here to
+        // start editing a cell.
+        if ((event.getCharCode() == 0 && event.getKeyCode() != KeyCodes.KEY_SPACE)
+                || event.getCharCode() == 13) {
             switch (event.getKeyCode()) {
             case KeyCodes.KEY_BACKSPACE:
             case KeyCodes.KEY_DELETE:
                 checkEditableAndNotify();
                 if (!cellLocked) {
                     spreadsheetHandler.deleteSelectedCells();
-                }
-                break;
-            case KeyCodes.KEY_ENTER:
-                if (event.getShiftKey()) {
-                    selectionHandler.moveSelectionUp(false);
-                } else {
-                    selectionHandler.moveSelectionDown(false);
                 }
                 break;
             case KeyCodes.KEY_DOWN:
@@ -965,6 +963,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             case KeyCodes.KEY_SHIFT:
                 break;
             case KeyCodes.KEY_F2:
+            case KeyCodes.KEY_ENTER:
                 checkEditableAndNotify();
                 if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
                         && !cellLocked && !customCellEditorDisplayed) {
