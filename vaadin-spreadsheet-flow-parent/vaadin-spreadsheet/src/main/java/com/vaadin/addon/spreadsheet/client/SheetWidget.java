@@ -1813,7 +1813,7 @@ public class SheetWidget extends Panel {
      * headers are shown or not.
      */
     void updateSheetPanePositions() {
-        int extraSize = 1;
+        int extraSize = horizontalSplitPosition > 0 ? 1 : 0;
         if (spreadsheet.getClassName().contains("report")) {
             extraSize = 0;
         }
