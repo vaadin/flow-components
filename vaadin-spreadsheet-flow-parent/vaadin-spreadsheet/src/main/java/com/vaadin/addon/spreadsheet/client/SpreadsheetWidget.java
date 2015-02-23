@@ -903,7 +903,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public void onSheetKeyPress(NativeEvent event, String enteredCharacter) {
-        if (event.getCharCode() == 0) {
+        if (event.getCharCode() == 0
+                && event.getKeyCode() != KeyCodes.KEY_SPACE) {
             switch (event.getKeyCode()) {
             case KeyCodes.KEY_BACKSPACE:
             case KeyCodes.KEY_DELETE:

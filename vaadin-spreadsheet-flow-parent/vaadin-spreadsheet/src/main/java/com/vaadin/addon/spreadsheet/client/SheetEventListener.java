@@ -165,6 +165,7 @@ public class SheetEventListener implements EventListener {
             case KeyCodes.KEY_RIGHT:
             case KeyCodes.KEY_TAB:
             case KeyCodes.KEY_DELETE:
+            case KeyCodes.KEY_SPACE:
                 if (event.getCharCode() == 0) {
                     widget.getSheetHandler().onSheetKeyPress(event, "");
                     // prevent the default browser action (scroll to key
@@ -226,6 +227,7 @@ public class SheetEventListener implements EventListener {
                 case KeyCodes.KEY_TAB:
                 case KeyCodes.KEY_BACKSPACE:
                 case KeyCodes.KEY_DELETE:
+                case KeyCodes.KEY_SPACE:
                     event.preventDefault();
                     event.stopPropagation();
                     break;
