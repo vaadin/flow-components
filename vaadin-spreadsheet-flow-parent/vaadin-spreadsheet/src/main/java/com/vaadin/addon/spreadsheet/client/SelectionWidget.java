@@ -363,6 +363,10 @@ public class SelectionWidget extends Composite {
 
     private boolean dragging;
 
+    private boolean decreaseSelection;
+
+    private boolean increaseSelection;
+
     public SelectionWidget(SheetHandler actionHandler, SheetWidget sheetWidget) {
         handler = actionHandler;
         this.sheetWidget = sheetWidget;
@@ -625,8 +629,7 @@ public class SelectionWidget extends Composite {
         int pos = 0;
         if (cursorPosition < 0) {
             if (startIndex > 1) {
-                while (startIndex > 1
-                        && (pos - (cellSizes[startIndex - 2] / 2) > cursorPosition)) {
+                while (startIndex > 1 && pos > cursorPosition) {
                     startIndex--;
                     pos -= cellSizes[startIndex - 1];
                 }
@@ -636,8 +639,7 @@ public class SelectionWidget extends Composite {
             }
         } else {
             if (startIndex < cellSizes.length) {
-                while (startIndex <= cellSizes.length
-                        && (pos + (cellSizes[startIndex - 1] / 2) < cursorPosition)) {
+                while (startIndex <= cellSizes.length && pos < cursorPosition) {
                     pos += cellSizes[startIndex - 1];
                     startIndex++;
                 }
@@ -691,12 +693,13 @@ public class SelectionWidget extends Composite {
         paint.getStyle().setHeight(0, Unit.PX);
         paint.getStyle().setVisibility(Visibility.HIDDEN);
         int c1, c2, r1, r2;
-        if ((colEdgeIndex >= col1 && colEdgeIndex <= col2)
+        if (decreaseSelection && (colEdgeIndex >= col1 && colEdgeIndex <= col2)
                 && (rowEdgeIndex >= row1 && rowEdgeIndex <= row2)) {
             handler.onSelectionDecreasePainted(col1, col2, colEdgeIndex, row1,
                     row2, rowEdgeIndex);
-        } else if (col2 + 1 < colEdgeIndex || colEdgeIndex < col1
-                || row2 + 1 < rowEdgeIndex || rowEdgeIndex < row1) {
+        } else if (increaseSelection
+                && (col2 + 1 < colEdgeIndex || colEdgeIndex < col1
+                        || row2 + 1 < rowEdgeIndex || rowEdgeIndex < row1)) {
             c1 = colEdgeIndex < col1 ? colEdgeIndex : col1;
             c2 = colEdgeIndex > col2 ? colEdgeIndex - 1 : col2;
             r1 = rowEdgeIndex < row1 ? rowEdgeIndex : row1;
@@ -758,6 +761,8 @@ public class SelectionWidget extends Composite {
     }
 
     private void paintCells(Event event) {
+        decreaseSelection = false;
+        increaseSelection = false;
         final int clientX = WidgetUtil.getTouchOrMouseClientX(event);
         final int clientY = WidgetUtil.getTouchOrMouseClientY(event);
         // position in perspective to the top left
@@ -765,14 +770,13 @@ public class SelectionWidget extends Composite {
         int yMousePos = clientY - origY;
 
         final int[] colWidths = handler.getColWidths();
-        final int colIndex = closestCellEdgeIndexToCursor(colWidths, col1,
-                xMousePos);
+        int colIndex = closestCellEdgeIndexToCursor(colWidths, col1, xMousePos);
         final int[] rowHeightsPX = handler.getRowHeightsPX();
-        final int rowIndex = closestCellEdgeIndexToCursor(rowHeightsPX, row1,
+        int rowIndex = closestCellEdgeIndexToCursor(rowHeightsPX, row1,
                 yMousePos);
 
-        int w;
-        int h;
+        int w = 0;
+        int h = 0;
 
         paint.removeClassName(paintColClassName);
         paint.removeClassName(paintRowClassName);
@@ -793,6 +797,7 @@ public class SelectionWidget extends Composite {
                 rowEdgeIndex = row1;
                 w = countSum(colWidths, colEdgeIndex, col2 + 1);
                 h = totalHeight;
+                decreaseSelection = true;
             } else if (yMousePos > xMousePos && (rowIndex <= row2)) {
                 // remove rows
                 MergedRegion paintedRegion = MergedRegionUtil
@@ -803,9 +808,12 @@ public class SelectionWidget extends Composite {
                 rowEdgeIndex = paintedRegion.row1;
                 w = totalWidth;
                 h = countSum(rowHeightsPX, rowEdgeIndex, row2 + 1);
+                decreaseSelection = true;
             } else {
                 h = 0;
                 w = 0;
+                colEdgeIndex = col2;
+                rowEdgeIndex = row2;
             }
             if (!extraInsideSelection) {
                 paint.addClassName("s-paint-inside");
@@ -813,8 +821,8 @@ public class SelectionWidget extends Composite {
             }
             paintedColIndex = colEdgeIndex;
             paintedRowIndex = rowEdgeIndex;
-        } else if ((rowIndex < row1 || rowIndex > (row2 + 1))
-                || (colIndex < col1 || colIndex > (col2 + 1))) {
+        } else if ((rowIndex < row1 || rowIndex > row2)
+                || (colIndex < col1 || colIndex > col2)) {
             if (extraInsideSelection) {
                 paint.removeClassName("s-paint-inside");
                 extraInsideSelection = false;
@@ -822,16 +830,16 @@ public class SelectionWidget extends Composite {
             if (rowIndex > row2) {
                 // see diff from old selection bottom
                 yMousePos = clientY - cornerY;
-            } else if (rowIndex >= row1 && yMousePos > 0) {
+            } else if (rowIndex >= row1) {
                 yMousePos = 0;
             }
             if (colIndex > col2) {
                 // see diff from old selection right
                 xMousePos = clientX - cornerX;
-            } else if (colIndex >= col1 && xMousePos > 0) {
+            } else if (colIndex >= col1) {
                 xMousePos = 0;
             }
-            if (Math.abs(xMousePos) >= Math.abs(yMousePos)) {
+            if (Math.abs(colIndex - col2) > Math.abs(rowIndex - row2)) {
                 colEdgeIndex = colIndex;
                 rowEdgeIndex = row1;
                 paintedRowIndex = rowEdgeIndex;
@@ -844,7 +852,8 @@ public class SelectionWidget extends Composite {
                     w = countSum(colWidths, col2 + 1, colEdgeIndex);
                     paintedColIndex = (col2 + 1);
                 }
-            } else {
+                increaseSelection = true;
+            } else if (Math.abs(colIndex - col2) < Math.abs(rowIndex - row2)) {
                 colEdgeIndex = col1;
                 rowEdgeIndex = rowIndex;
                 paintedColIndex = colEdgeIndex;
@@ -857,12 +866,8 @@ public class SelectionWidget extends Composite {
                     h = countSum(rowHeightsPX, row2 + 1, rowEdgeIndex);
                     paintedRowIndex = (row2 + 1);
                 }
+                increaseSelection = true;
             }
-        } else {
-            paintedColIndex = 0;
-            paintedRowIndex = 0;
-            w = 0;
-            h = 0;
         }
         // update position
         if (paintedColIndex != 0 && paintedRowIndex != 0) {
