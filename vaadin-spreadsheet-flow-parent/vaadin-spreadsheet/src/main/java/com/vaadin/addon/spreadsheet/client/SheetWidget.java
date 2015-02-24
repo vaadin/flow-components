@@ -1390,6 +1390,7 @@ public class SheetWidget extends Panel {
         if (rowIndex == 0) { // ERROR ...
             return;
         }
+        Event.setCapture(getElement());
         resizing = true;
         resized = false;
         resizedRowIndex = rowIndex;
@@ -1402,8 +1403,12 @@ public class SheetWidget extends Panel {
         }
         resizeFirstEdgePos = header.getAbsoluteTop();
         resizeLastEdgePos = header.getAbsoluteBottom();
-        resizeTooltipLabel.setText("Height: "
-                + actionHandler.getRowHeight(rowIndex) + "pt");
+        if (actionHandler.getRowHeight(rowIndex) > 0) {
+            resizeTooltipLabel.setText("Height: "
+                    + actionHandler.getRowHeight(rowIndex) + "pt");
+        } else {
+            resizeTooltipLabel.setText("Hide row");
+        }
         showResizeTooltipRelativeTo(clientX, clientY);
         resizeTooltip.show();
         spreadsheet.addClassName(ROW_RESIZING_CLASSNAME);
@@ -1437,6 +1442,7 @@ public class SheetWidget extends Panel {
                 if (tempColumnIndex < 1) { // ERROR ...
                     return;
                 }
+                Event.setCapture(getElement());
                 resizing = true;
                 resizedColumnIndex = tempColumnIndex;
                 resizedRowIndex = -1;
@@ -1448,8 +1454,12 @@ public class SheetWidget extends Panel {
                 }
                 resizeFirstEdgePos = header.getAbsoluteLeft();
                 resizeLastEdgePos = header.getAbsoluteRight();
-                resizeTooltipLabel.setText("Width: "
-                        + actionHandler.getColWidth(tempColumnIndex) + "px");
+                if (actionHandler.getColWidth(tempColumnIndex) > 0) {
+                    resizeTooltipLabel.setText("Width: "
+                            + actionHandler.getColWidth(tempColumnIndex) + "px");
+                } else {
+                    resizeTooltipLabel.setText("Hide column");
+                }
                 showResizeTooltipRelativeTo(clientX, clientY);
                 resizeTooltip.show();
                 spreadsheet.addClassName(COLUMN_RESIZING_CLASSNAME);
@@ -1467,6 +1477,7 @@ public class SheetWidget extends Panel {
     }
 
     private void stopRowResizeDrag(int clientY) {
+        Event.releaseCapture(getElement());
         resizeLine.setClassName(RESIZE_LINE_CLASSNAME);
         selectionWidget.getElement().getStyle().clearMarginTop();
         resizeLineStable.removeClassName("row" + resizedRowIndex);
@@ -1474,6 +1485,10 @@ public class SheetWidget extends Panel {
             final Map<Integer, Float> newSizesForPOI = new HashMap<Integer, Float>();
             int px = clientY - resizeFirstEdgePos;
             float pt = convertPixelsToPoint(px);
+            // Do not allow negative sizeslibre
+            if (pt < 0) {
+                pt = 0;
+            }
             if (pt != actionHandler.getRowHeight(resizedRowIndex)) {
                 newSizesForPOI.put(resizedRowIndex, pt);
             }
@@ -1485,12 +1500,17 @@ public class SheetWidget extends Panel {
     }
 
     private void stopColumnResizeDrag(int clientX) {
+        Event.releaseCapture(getElement());
         resizeLine.setClassName(RESIZE_LINE_CLASSNAME);
         resizeLineStable.removeClassName("col" + resizedColumnIndex);
         selectionWidget.getElement().getStyle().clearMarginLeft();
         if (resized) {
             final Map<Integer, Integer> newSizes = new HashMap<Integer, Integer>();
             int px = clientX - resizeFirstEdgePos;
+            // Do not allow negative sizes
+            if (px < 0) {
+                px = 0;
+            }
             if (px != actionHandler.getColWidthActual(resizedColumnIndex)) {
                 newSizes.put(resizedColumnIndex, px);
             }
@@ -1504,13 +1524,6 @@ public class SheetWidget extends Panel {
     }
 
     private void handleRowResizeDrag(int clientX, int clientY) {
-        if (clientX < sheet.getAbsoluteLeft() - getRowHeaderSize()
-                - leftFrozenPanelWidth
-                || clientX > sheet.getAbsoluteRight()
-                || clientY < (sheet.getAbsoluteTop() - topFrozenPanelHeight)
-                || clientY > sheet.getAbsoluteBottom()) {
-            return;
-        }
         resized = true;
         int delta = clientY - resizeFirstEdgePos;
         if (delta < 0) {
@@ -1519,8 +1532,12 @@ public class SheetWidget extends Panel {
         jsniUtil.clearCSSRules(resizeStyle);
         String rule;
         // only the dragged header size has changed.
-        resizeTooltipLabel.setText("Height: " + delta + "px ≈ "
-                + convertPixelsToPoint(delta) + "pt");
+        if (delta > 0) {
+            resizeTooltipLabel.setText("Height: " + delta + "px ≈ "
+                    + convertPixelsToPoint(delta) + "pt");
+        } else {
+            resizeTooltipLabel.setText("Hide row");
+        }
         // enter custom size for the resized row header
         rule = ".v-spreadsheet > div.rh.row" + resizedRowIndex + "{height:"
                 + delta + "px;}";
@@ -1574,25 +1591,7 @@ public class SheetWidget extends Panel {
         showResizeTooltipRelativeTo(clientX, clientY);
     }
 
-    private int getColHeaderSize() {
-        MeasuredSize measuredSize = new MeasuredSize();
-        measuredSize.measure(colHeaders.get(0));
-        return measuredSize.getOuterHeight();
-    }
-
-    private int getRowHeaderSize() {
-        MeasuredSize measuredSize = new MeasuredSize();
-        measuredSize.measure(rowHeaders.get(0));
-        return measuredSize.getOuterWidth();
-    }
-
     private void handleColumnResizeDrag(int clientX, int clientY) {
-        if (clientX < sheet.getAbsoluteLeft() - leftFrozenPanelWidth
-                || clientX > sheet.getAbsoluteRight()
-                || clientY < (sheet.getAbsoluteTop() - getColHeaderSize() - topFrozenPanelHeight)
-                || clientY > sheet.getAbsoluteBottom()) {
-            return;
-        }
         resized = true;
         int delta = clientX - resizeFirstEdgePos;
         if (delta < 0) {
@@ -1601,7 +1600,11 @@ public class SheetWidget extends Panel {
 
         jsniUtil.clearCSSRules(resizeStyle);
         // only the dragged header size has changed.
-        resizeTooltipLabel.setText("Width: " + delta + "px");
+        if (delta > 0) {
+            resizeTooltipLabel.setText("Width: " + delta + "px");
+        } else {
+            resizeTooltipLabel.setText("Hide column");
+        }
         // enter custom size for the resized column header
         String rule = ".v-spreadsheet > div.ch.col" + resizedColumnIndex
                 + "{width:" + delta + "px;}";
