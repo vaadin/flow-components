@@ -18,6 +18,7 @@ package com.vaadin.addon.spreadsheet.client;
  */
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -86,7 +87,16 @@ public class SheetEventListener implements EventListener {
                 scrolling = false;
                 break;
             case Event.ONMOUSEDOWN:
-                widget.onSheetMouseDown(event);
+                if (event.getButton() != NativeEvent.BUTTON_RIGHT) {
+                    widget.onSheetMouseDown(event);
+                }
+                break;
+            case Event.ONMOUSEUP:
+                if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
+                    // Context menu is displayed on mouse up to prevent
+                    // contextmenu event on VContextMenu
+                    widget.onSheetMouseDown(event);
+                }
                 break;
             case Event.ONDBLCLICK:
                 onSheetDoubleClick(event);
