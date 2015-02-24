@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -256,8 +257,28 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             lines = text.split("\r");
         }
 
+        // Check for protected cells at target
         int rowIndex = selectedCellReference.getRow();
         int colIndex = -1;
+        for (String line : lines) {
+            Row row = activesheet.getRow(rowIndex);
+            if (row != null) {
+                colIndex = selectedCellReference.getCol();
+                for (String s : splitOnTab(line)) {
+                    Cell cell = row.getCell(colIndex);
+                    if (spreadsheet.isCellLocked(cell)) {
+                        protectedCellWriteAttempted();
+                        return;
+                    }
+                    colIndex++;
+                }
+            }
+            rowIndex++;
+        }
+
+        // Paste the values
+        rowIndex = selectedCellReference.getRow();
+        colIndex = -1;
         for (String line : lines) {
 
             Row row = activesheet.getRow(rowIndex);
@@ -382,6 +403,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     @Override
     public void clearSelectedCellsOnCut() {
         // clear ranges
+        List<Cell> targetCells = new ArrayList<Cell>();
         List<CellRangeAddress> cellRangeAddresses = spreadsheet
                 .getCellSelectionManager().getCellRangeAddresses();
         for (CellRangeAddress a : cellRangeAddresses) {
@@ -389,8 +411,11 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 for (int col = a.getFirstColumn(); col <= a.getLastColumn(); col++) {
                     Cell cell = spreadsheet.getCell(row, col);
                     if (cell != null) {
-                        cell.setCellType(Cell.CELL_TYPE_BLANK);
-                        spreadsheet.markCellAsDeleted(cell, true);
+                        if (spreadsheet.isCellLocked(cell)) {
+                            protectedCellWriteAttempted();
+                            return;
+                        }
+                        targetCells.add(cell);
                     }
                 }
             }
@@ -401,9 +426,18 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 .getSelectedCellReference();
         Cell cell = spreadsheet.getCell(reference.getRow(), reference.getCol());
         if (cell != null) {
-            cell.setCellType(Cell.CELL_TYPE_BLANK);
-            spreadsheet.markCellAsDeleted(cell, true);
+            if (spreadsheet.isCellLocked(cell)) {
+                protectedCellWriteAttempted();
+                return;
+            }
+            targetCells.add(cell);
         }
+
+        for (Cell targetCell : targetCells) {
+            targetCell.setCellType(Cell.CELL_TYPE_BLANK);
+            spreadsheet.markCellAsDeleted(targetCell, true);
+        }
+
         fireCellValueChangeEvent(spreadsheet.getSelectedCellReferences());
         spreadsheet.refreshAllCellValues();
     }
