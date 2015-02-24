@@ -106,7 +106,7 @@ public class SpreadsheetFactory implements Serializable {
         final Sheet sheet;
         if (workbook == null) {
             workbook = new XSSFWorkbook();
-            sheet = workbook.createSheet();
+            sheet = createNewSheet(workbook);
             spreadsheet.setInternalWorkbook(workbook);
             generateNewSpreadsheet(spreadsheet, sheet, DEFAULT_ROWS,
                     DEFAULT_COLUMNS);
@@ -165,7 +165,7 @@ public class SpreadsheetFactory implements Serializable {
             int columns) {
         final Sheet sheet;
         if (sheetName == null) {
-            sheet = workbook.createSheet();
+            sheet = createNewSheet(workbook);
         } else {
             sheet = workbook.createSheet(sheetName);
         }
@@ -565,6 +565,16 @@ public class SpreadsheetFactory implements Serializable {
             spreadsheet.getState().verticalSplitPosition = 0;
             spreadsheet.getState().horizontalSplitPosition = 0;
         }
+    }
+
+    private static Sheet createNewSheet(Workbook workbook) {
+        int idx = workbook.getNumberOfSheets() + 1;
+        String sheetname = "Sheet" + idx;
+        while (workbook.getSheet(sheetname) != null) {
+            idx++;
+            sheetname = "Sheet" + idx;
+        }
+        return workbook.createSheet(sheetname);
     }
 
     /**

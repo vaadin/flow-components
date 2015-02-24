@@ -402,13 +402,6 @@ public class SheetTabSheet extends Widget {
         return e;
     }
 
-    public void addTab(String tabName) {
-        Element e = createTabElement(tabName);
-        container.appendChild(e);
-        tabs.push(e);
-        showHideScrollIcons();
-    }
-
     public void addTabs(String[] tabNames) {
         for (String tabName : tabNames) {
             Element e = createTabElement(tabName);
