@@ -35,6 +35,8 @@ import com.vaadin.client.ComputedStyle;
 
 public class SheetTabSheet extends Widget {
 
+    private static final String HIDDEN = "hidden";
+
     public interface SheetTabSheetHandler {
         public void onSheetTabSelected(int tabIndex);
 
@@ -141,7 +143,8 @@ public class SheetTabSheet extends Widget {
                     if (editing && !readOnly) {
                         commitSheetName();
                     }
-                    if (options.isOrHasChild(target)) {
+                    if (options.isOrHasChild(target)
+                            && !target.hasClassName(HIDDEN)) {
                         if (target.equals(scrollBeginning)) {
                             tabScrollMargin = 0;
                             tabScrollIndex = 0;
@@ -503,19 +506,19 @@ public class SheetTabSheet extends Widget {
 
     private void showHideScrollIcons() {
         if (tabScrollIndex == 0) {
-            scrollLeft.addClassName("hidden");
-            scrollBeginning.addClassName("hidden");
+            scrollLeft.addClassName(HIDDEN);
+            scrollBeginning.addClassName(HIDDEN);
         } else {
-            scrollLeft.removeClassName("hidden");
-            scrollBeginning.removeClassName("hidden");
+            scrollLeft.removeClassName(HIDDEN);
+            scrollBeginning.removeClassName(HIDDEN);
         }
         int lastTabVisibleWithScrollIndex = getLastTabVisibleWithScrollIndex();
         if (tabScrollIndex < lastTabVisibleWithScrollIndex) {
-            scrollRight.removeClassName("hidden");
-            scrollEnd.removeClassName("hidden");
+            scrollRight.removeClassName(HIDDEN);
+            scrollEnd.removeClassName(HIDDEN);
         } else {
-            scrollRight.addClassName("hidden");
-            scrollEnd.addClassName("hidden");
+            scrollRight.addClassName(HIDDEN);
+            scrollEnd.addClassName(HIDDEN);
         }
     }
 
