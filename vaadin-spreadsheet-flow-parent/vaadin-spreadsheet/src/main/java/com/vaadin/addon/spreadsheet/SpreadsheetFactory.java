@@ -379,7 +379,14 @@ public class SpreadsheetFactory implements Serializable {
             } else {
                 spreadsheet.getState().defRowH = defaultRowHeightInPoints;
             }
-            spreadsheet.getState().rows = (sheet.getLastRowNum() + 1);
+
+            // Always have at least the default amount of rows
+            int rows = sheet.getLastRowNum() + 1;
+            if (rows < spreadsheet.getDefaultRowCount()) {
+                rows = spreadsheet.getDefaultRowCount();
+            }
+            spreadsheet.getState().rows = rows;
+
             int charactersToPixels = ExcelToHtmlUtils.getColumnWidthInPx(sheet
                     .getDefaultColumnWidth() * 256);
             if (charactersToPixels > 0) {
@@ -389,7 +396,7 @@ public class SpreadsheetFactory implements Serializable {
                         .getDefaultColumnWidthInPx();
                 sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
             }
-            final float[] rowHeights = new float[spreadsheet.getRows()];
+            final float[] rowHeights = new float[rows];
             int cols = 0;
             int tempRowIndex = -1;
             final ArrayList<Integer> hiddenRowIndexes = new ArrayList<Integer>();
@@ -410,9 +417,20 @@ public class SpreadsheetFactory implements Serializable {
                     cols = c;
                 }
             }
+            if (rows > sheet.getLastRowNum() + 1) {
+                for (int i = sheet.getLastRowNum(); i < rows; i++) {
+                    rowHeights[i] = defaultRowHeightInPoints;
+                }
+            }
             spreadsheet.getState().hiddenRowIndexes = hiddenRowIndexes;
             spreadsheet.getState().rowH = rowHeights;
+
+            // Always have at least the default amount of columns
+            if (cols < spreadsheet.getDefaultColumnCount()) {
+                cols = spreadsheet.getDefaultColumnCount();
+            }
             spreadsheet.getState().cols = cols;
+
             final int[] colWidths = new int[cols];
             final ArrayList<Integer> hiddenColumnIndexes = new ArrayList<Integer>();
             for (int i = 0; i < cols; i++) {
