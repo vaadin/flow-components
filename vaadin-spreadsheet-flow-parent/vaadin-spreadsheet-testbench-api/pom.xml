@@ -33,6 +33,7 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-api</artifactId>
             <version>7.4.0.beta3</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
