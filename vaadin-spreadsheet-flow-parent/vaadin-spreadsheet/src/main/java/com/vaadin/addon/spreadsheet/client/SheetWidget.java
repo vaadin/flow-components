@@ -54,6 +54,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
@@ -1075,6 +1076,14 @@ public class SheetWidget extends Panel {
                         selectingCells = true;
                         tempCol = targetCol;
                         tempRow = targetRow;
+                        startCellTopLeft = isCellRenderedInTopLeftPane(
+                                targetCol, targetRow);
+                        startCellTopRight = isCellRenderedInTopRightPane(
+                                targetCol, targetRow);
+                        startCellBottomLeft = isCellRenderedInBottomLeftPane(
+                                targetCol, targetRow);
+                        clientX = WidgetUtil.getTouchOrMouseClientX(event);
+                        clientY = WidgetUtil.getTouchOrMouseClientY(event);
                         Event.setCapture(sheet);
                     }
                 }
@@ -1106,33 +1115,79 @@ public class SheetWidget extends Panel {
             target = event.getEventTarget().cast();
         }
 
-        final boolean sheetOrChild = target.getParentElement().getClassName()
-                .contains("sheet");
-        final String className = target.getClassName();
-        if (!sheetOrChild) { // sheet has capture, gets all events
-            if (spreadsheet.isOrHasChild(target)) {
-                // dragging on top of row/column headers
-                final int header = jsniUtil.isHeader(className);
-                if (header > 0) {
-                    int parsedHeaderIndex = jsniUtil
-                            .parseHeaderIndex(className);
-                    if (header == 1) { // row
-                        final int colIndex = getLeftVisibleColumnIndex() - 1;
-                        tempCol = colIndex < 1 ? 1 : colIndex;
-                        tempRow = parsedHeaderIndex;
-                        actionHandler.onSelectingCellsWithDrag(tempCol,
-                                parsedHeaderIndex);
-                    } else { // column
-                        final int rowIndex = getTopVisibleRowIndex() - 1;
-                        tempRow = rowIndex < 1 ? 1 : rowIndex;
-                        tempCol = parsedHeaderIndex;
-                        actionHandler.onSelectingCellsWithDrag(
-                                parsedHeaderIndex, tempRow);
-                    }
-                }
-            }
-        } else {
+        // Update scroll deltas
+        int y = WidgetUtil.getTouchOrMouseClientY(event);
+        int x = WidgetUtil.getTouchOrMouseClientX(event);
+        int scrollPaneTop = sheet.getAbsoluteTop();
+        int scrollPaneLeft = sheet.getAbsoluteLeft();
+        int scrollPaneBottom = sheet.getAbsoluteBottom();
+        int scrollPaneRight = sheet.getAbsoluteRight();
 
+        clientX = x;
+        clientY = y;
+
+        if (y < scrollPaneTop) {
+            deltaY = y - scrollPaneTop;
+        } else if (y > scrollPaneBottom) {
+            deltaY = y - scrollPaneBottom;
+        } else {
+            deltaY = 0;
+        }
+
+        if (x < scrollPaneLeft) {
+            deltaX = x - scrollPaneLeft;
+        } else if (x > scrollPaneRight) {
+            deltaX = x - scrollPaneRight;
+        } else {
+            deltaX = 0;
+        }
+
+        // If we're crossing the top freeze pane border to the scroll area, the
+        // bottom part must be scrolled all the way up.
+        boolean scrolled = false;
+        if (sheet.getScrollTop() != 0) {
+            boolean mouseOnTopSide = y < scrollPaneTop;
+            if ((startCellTopLeft || startCellTopRight)
+                    && isCellRenderedInFrozenPane(tempCol, tempRow)
+                    && !mouseOnTopSide) {
+                sheet.setScrollTop(0);
+                onSheetScroll(null);
+                scrolled = true;
+            }
+        }
+
+        // If we're crossing the left freeze pane border, the right-hand part
+        // must be scrolled all the way to the left.
+        if (sheet.getScrollLeft() != 0) {
+            boolean mouseOnLeftSide = x < scrollPaneLeft;
+            if ((startCellTopLeft || startCellBottomLeft)
+                    && isCellRenderedInFrozenPane(tempCol, tempRow)
+                    && !mouseOnLeftSide) {
+                sheet.setScrollLeft(0);
+                onSheetScroll(null);
+                scrolled = true;
+            }
+        }
+
+        if ((deltaY < 0 && sheet.getScrollTop() != 0) || deltaY > 0
+                || (deltaX < 0 && sheet.getScrollLeft() != 0) || deltaX > 0) {
+            startScrollTimer();
+            scrolled = true;
+        }
+
+        // If the sheet was scrolled due to crossing freeze pane borders during
+        // drag selection, the actual selection event will be handled on the
+        // next mouse move event.
+        if (scrolled) {
+            return;
+        } else {
+            stopScrollTimer();
+        }
+
+        int col = 0, row = 0;
+        String className = null;
+        if (target != null) {
+            className = target.getClassName();
             /*
              * Parse according to classname of target element. As said above,
              * Safari gives us the wrong target and hence we have the wrong
@@ -1142,48 +1197,44 @@ public class SheetWidget extends Panel {
              * execution past this check.
              */
             jsniUtil.parseColRow(className);
-            int col = jsniUtil.getParsedCol();
-            int row = jsniUtil.getParsedRow();
-            if (col == 0 || row == 0) {
-                return;
-            }
+            col = jsniUtil.getParsedCol();
+            row = jsniUtil.getParsedRow();
+        }
+        if (row == 0 || col == 0) {
+            return;
+        }
 
-            // skip search of actual cell if this is a merged cell
-            if (!className.endsWith(MERGED_CELL_CLASSNAME)) {
-                Cell targetCell = getRealEventTargetCell(
-                        WidgetUtil.getTouchOrMouseClientX(event),
-                        WidgetUtil.getTouchOrMouseClientY(event),
-                        getCell(col, row));
-                col = targetCell.getCol();
-                row = targetCell.getRow();
-            }
+        // skip search of actual cell if this is a merged cell
+        if (!className.endsWith(MERGED_CELL_CLASSNAME)) {
+            Cell targetCell = getRealEventTargetCell(x, y, getCell(col, row));
+            col = targetCell.getCol();
+            row = targetCell.getRow();
+        }
 
-            if (col != tempCol || row != tempRow) {
-                if (col == 0) { // on top of scroll bar
-                    if (WidgetUtil.getTouchOrMouseClientX(event) > target
-                            .getParentElement().getAbsoluteRight()) {
-                        col = getRightVisibleColumnIndex() + 1;
-                    } else {
-                        col = tempCol;
-                    }
+        if (col != tempCol || row != tempRow) {
+            if (col == 0) { // on top of scroll bar
+                if (x > target.getParentElement().getAbsoluteRight()) {
+                    col = getRightVisibleColumnIndex() + 1;
+                } else {
+                    col = tempCol;
                 }
-                if (row == 0) {
-                    if (WidgetUtil.getTouchOrMouseClientY(event) > sheet
-                            .getAbsoluteBottom()) {
-                        row = getBottomVisibleRowIndex() + 1;
-                    } else {
-                        row = tempRow;
-                    }
-                }
-                actionHandler.onSelectingCellsWithDrag(col, row);
-                tempCol = col;
-                tempRow = row;
             }
+            if (row == 0) {
+                if (y > sheet.getAbsoluteBottom()) {
+                    row = getBottomVisibleRowIndex() + 1;
+                } else {
+                    row = tempRow;
+                }
+            }
+            actionHandler.onSelectingCellsWithDrag(col, row);
+            tempCol = col;
+            tempRow = row;
         }
     }
 
     protected void stoppedSelectingCellsWithDrag(Event event) {
-        Event.releaseCapture((Element) sheet.cast());
+        stopScrollTimer();
+        Event.releaseCapture(sheet);
         if ((selectedCellCol != tempCol || selectedCellRow != tempRow)
                 && tempCol != -1 && tempRow != -1) {
             actionHandler.onFinishedSelectingCellsWithDrag(selectedCellCol,
@@ -1197,6 +1248,102 @@ public class SheetWidget extends Panel {
         selectingCells = false;
         tempCol = -1;
         tempRow = -1;
+    }
+
+    private final int TOP_LEFT_SELECTION_OFFSET = 5;
+    private final int BOTTOM_RIGHT_SELECTION_OFFSET = 25;
+
+    private boolean startCellTopLeft, startCellTopRight, startCellBottomLeft;
+    private int deltaX, deltaY, clientX, clientY;
+    private boolean scrollTimerRunning;
+
+    private Timer scrollTimer = new Timer() {
+        @Override
+        public void run() {
+            // Handle scrolling
+            sheet.setScrollTop(sheet.getScrollTop() + deltaY / 2);
+            sheet.setScrollLeft(sheet.getScrollLeft() + deltaX / 2);
+            onSheetScroll(null);
+
+            // Determine selection point
+            int selectionPointX = clientX;
+            int selectionPointY = clientY;
+            if (deltaX < 0) {
+                selectionPointX = sheet.getAbsoluteLeft()
+                        + TOP_LEFT_SELECTION_OFFSET;
+            } else if (deltaX > 0) {
+                selectionPointX = sheet.getAbsoluteRight()
+                        - BOTTOM_RIGHT_SELECTION_OFFSET;
+            }
+            if (deltaY < 0) {
+                selectionPointY = sheet.getAbsoluteTop()
+                        + TOP_LEFT_SELECTION_OFFSET;
+            } else if (deltaY > 0) {
+                selectionPointY = sheet.getAbsoluteBottom()
+                        - BOTTOM_RIGHT_SELECTION_OFFSET;
+            }
+
+            // Adjust selection point if we have reached scroll top
+            if (deltaY != 0 && sheet.getScrollTop() == 0) {
+                MeasuredSize ms = new MeasuredSize();
+                ms.measure(spreadsheet);
+                int minimumTop = spreadsheet.getAbsoluteTop()
+                        + ms.getPaddingTop() + TOP_LEFT_SELECTION_OFFSET;
+                if (clientY > minimumTop) {
+                    selectionPointY = clientY;
+                } else {
+                    selectionPointY = minimumTop;
+                }
+            }
+
+            // Adjust selection point if we have reached scroll left
+            if (deltaX != 0 && sheet.getScrollLeft() == 0) {
+                MeasuredSize ms = new MeasuredSize();
+                ms.measure(spreadsheet);
+                int minimumLeft = spreadsheet.getAbsoluteLeft()
+                        + ms.getPaddingLeft() + TOP_LEFT_SELECTION_OFFSET;
+                if (clientX > minimumLeft) {
+                    selectionPointX = clientX;
+                } else {
+                    selectionPointX = minimumLeft;
+                }
+            }
+
+            // Handle selection
+            handleSelectionOnScroll(selectionPointX, selectionPointY);
+        }
+
+    };
+
+    private void handleSelectionOnScroll(int selectionPointX,
+            int selectionPointY) {
+        Element target = WidgetUtil.getElementFromPoint(selectionPointX,
+                selectionPointY);
+        if (target != null) {
+            final String className = target.getClassName();
+            jsniUtil.parseColRow(className);
+            int col = jsniUtil.getParsedCol();
+            int row = jsniUtil.getParsedRow();
+            if (col != 0 && row != 0) {
+                actionHandler.onSelectingCellsWithDrag(col, row);
+                tempCol = col;
+                tempRow = row;
+            }
+        }
+    }
+
+    private void startScrollTimer() {
+        if (!scrollTimerRunning) {
+            scrollTimerRunning = true;
+            scrollTimer.scheduleRepeating(50);
+        }
+    }
+
+    private void stopScrollTimer() {
+        deltaX = 0;
+        deltaY = 0;
+        scrollTimer.cancel();
+        scrollTimerRunning = false;
     }
 
     private void initListeners() {
@@ -1974,8 +2121,7 @@ public class SheetWidget extends Panel {
                         .removeFromParent();
             }
         } else { // add as many as needed
-            for (int i = frozenRowHeaders.size() > 0 ? frozenRowHeaders.size()
-                    : 1; i <= verticalSplitPosition; i++) {
+            for (int i = frozenRowHeaders.size() + 1; i <= verticalSplitPosition; i++) {
                 DivElement rowHeader = Document.get().createDivElement();
                 rowHeader.setInnerHTML(actionHandler.getRowHeader(i)
                         + createHeaderDNDHTML());
@@ -3762,10 +3908,13 @@ public class SheetWidget extends Panel {
             selectedFrozenColHeaderIndexes.add(c);
             DivElement rh = frozenColumnHeaders.get(c - 1);
             rh.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-        } else if (colHeaders.size() > c - firstColumnIndex) {
+        } else {
             selectedColHeaderIndexes.add(c);
-            DivElement ch = colHeaders.get(c - firstColumnIndex);
-            ch.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
+            int targetCol = c - firstColumnIndex;
+            if (targetCol >= 0 && colHeaders.size() > targetCol) {
+                DivElement ch = colHeaders.get(targetCol);
+                ch.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
+            }
         }
     }
 
@@ -3774,10 +3923,13 @@ public class SheetWidget extends Panel {
             selectedFrozenRowHeaderIndexes.add(r);
             DivElement rh = frozenRowHeaders.get(r - 1);
             rh.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-        } else if (rowHeaders.size() > r - firstRowIndex) {
+        } else {
             selectedRowHeaderIndexes.add(r);
-            DivElement rh = rowHeaders.get(r - firstRowIndex);
-            rh.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
+            int targetRow = r - firstRowIndex;
+            if (targetRow >= 0 && rowHeaders.size() > targetRow) {
+                DivElement rh = rowHeaders.get(targetRow);
+                rh.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
+            }
         }
     }
 

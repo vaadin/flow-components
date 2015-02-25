@@ -29,8 +29,6 @@ public class SheetEventListener implements EventListener {
 
     private boolean sheetFocused;
 
-    private boolean scrolling;
-
     public SheetEventListener() {
     }
 
@@ -62,19 +60,21 @@ public class SheetEventListener implements EventListener {
             return;
         }
 
-        if (event.getTypeInt() == Event.ONFOCUS) {
+        final int typeInt = event.getTypeInt();
+        if (typeInt == Event.ONFOCUS) {
             sheetFocused = true;
-        } else if (event.getTypeInt() == Event.ONBLUR) {
+        } else if (typeInt == Event.ONBLUR) {
             sheetFocused = false;
-        } else if (event.getTypeInt() == Event.ONTOUCHMOVE) {
+        } else if (typeInt == Event.ONTOUCHMOVE) {
             // just let the browser scroll, ONSCROLL will result in correct
             // headers
             event.stopPropagation();
-
         } else if (widget.isMouseButtonDownAndSelecting()) {
+            if (Event.ONSCROLL == typeInt) {
+                widget.onSheetScroll(event);
+            }
             onSelectingCellsEvent(event);
         } else {
-            final int typeInt = event.getTypeInt();
             switch (typeInt) {
             case Event.ONSCROLL:
                 widget.onSheetScroll(event);
@@ -84,10 +84,6 @@ public class SheetEventListener implements EventListener {
                 break;
             case Event.ONKEYDOWN:
                 onKeyDown(event);
-                break;
-            case Event.ONTOUCHSTART:
-                // store pos for comparison on touchMove
-                scrolling = false;
                 break;
             case Event.ONMOUSEDOWN:
                 if (event.getButton() != NativeEvent.BUTTON_RIGHT) {
@@ -134,16 +130,6 @@ public class SheetEventListener implements EventListener {
         switch (event.getTypeInt()) {
         case Event.ONTOUCHEND:
         case Event.ONTOUCHCANCEL:
-            // scrolling check
-            if (scrolling) {
-                // don't click when ending scroll
-                scrolling = false;
-                event.stopPropagation();
-                event.preventDefault();
-                break;
-            }
-
-            // if not moving, select cells:
             widget.onSheetMouseDown(event);
         case Event.ONMOUSEUP:
         case Event.ONLOSECAPTURE:
