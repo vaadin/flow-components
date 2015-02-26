@@ -62,8 +62,11 @@ public class SheetEventListener implements EventListener {
             return;
         }
 
-        if (event.getTypeInt() == Event.ONTOUCHMOVE) {
-
+        if (event.getTypeInt() == Event.ONFOCUS) {
+            sheetFocused = true;
+        } else if (event.getTypeInt() == Event.ONBLUR) {
+            sheetFocused = false;
+        } else if (event.getTypeInt() == Event.ONTOUCHMOVE) {
             // just let the browser scroll, ONSCROLL will result in correct
             // headers
             event.stopPropagation();
@@ -100,12 +103,6 @@ public class SheetEventListener implements EventListener {
                 break;
             case Event.ONDBLCLICK:
                 onSheetDoubleClick(event);
-                break;
-            case Event.ONFOCUS:
-                sheetFocused = true;
-                break;
-            case Event.ONBLUR:
-                sheetFocused = false;
                 break;
             case Event.ONMOUSEOUT:
             case Event.ONMOUSEOVER:
