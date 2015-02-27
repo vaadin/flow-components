@@ -653,7 +653,6 @@ public class SelectionWidget extends Composite {
     private void beginPaintingCells(Event event) {
         colEdgeIndex = 0;
         rowEdgeIndex = 0;
-        sheetWidget.scrollSelectionAreaIntoView();
         paintMode = true;
         storeEventPos(event);
         DOM.setCapture(getElement());

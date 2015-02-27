@@ -4687,39 +4687,42 @@ public class SheetWidget extends Panel {
                 selectionWidget.getRow2());
     }
 
-    /**
-     * Scrolls the sheet to show the given area, or as much of it as fits into
-     * the view.
-     * 
-     * @param col1
-     *            1-based
-     * @param col2
-     *            1-based
-     * @param row1
-     *            1-based
-     * @param row2
-     *            1-based
-     */
-    public void scrollAreaIntoView(int col1, int col2, int row1, int row2) {
+    boolean scrollAreaIntoViewHorizontally(int col1, int col2,
+            boolean actOnLeftEdge) {
         boolean scrolled = false;
         // horizontal:
         if (col1 <= horizontalSplitPosition) {
             col1 = horizontalSplitPosition + 1;
         }
         final int leftColumnIndex = getLeftVisibleColumnIndex();
-        if (col1 < leftColumnIndex) {
-            // scroll to left until col1 comes visible
-            int scroll = 0;
-            for (int i = leftColumnIndex - 1; i >= col1 - 1 && i > 0; i--) {
-                scroll += actionHandler.getColWidthActual(i);
-            }
-            sheet.setScrollLeft(sheet.getScrollLeft() - scroll);
-            if (col1 <= firstColumnIndex
-                    || scroll > (actionHandler.getColumnBufferSize() / 2)) {
-                scrolled = true;
+        final int rightColumnIndex = getRightVisibleColumnIndex();
+        if (actOnLeftEdge) {
+            if (col1 < leftColumnIndex) {
+                // scroll to left until col1 comes visible
+                int scroll = 0;
+                for (int i = leftColumnIndex - 1; i >= col1 - 1 && i > 0; i--) {
+                    scroll += actionHandler.getColWidthActual(i);
+                }
+                sheet.setScrollLeft(sheet.getScrollLeft() - scroll);
+                if (col1 <= firstColumnIndex
+                        || scroll > (actionHandler.getColumnBufferSize() / 2)) {
+                    scrolled = true;
+                }
+            } else if (col1 > rightColumnIndex) {
+                // scroll to right until col1 comes visible
+                int scroll = 0;
+                final int maximumCols = actionHandler.getMaxColumns();
+                for (int i = rightColumnIndex + 1; i <= col1 + 1
+                        && i <= maximumCols; i++) {
+                    scroll += actionHandler.getColWidthActual(i);
+                }
+                sheet.setScrollLeft(sheet.getScrollLeft() + scroll);
+                if (col1 >= lastColumnIndex
+                        || scroll > (actionHandler.getColumnBufferSize() / 2)) {
+                    scrolled = true;
+                }
             }
         } else {
-            final int rightColumnIndex = getRightVisibleColumnIndex();
             if (col2 > rightColumnIndex) {
                 // scroll right until col2 comes visible
                 int scroll = 0;
@@ -4733,29 +4736,64 @@ public class SheetWidget extends Panel {
                         || scroll > (actionHandler.getColumnBufferSize() / 2)) {
                     scrolled = true;
                 }
+            } else if (col2 < leftColumnIndex) {
+                // scroll to left until col2 comes visible
+                int scroll = 0;
+                for (int i = leftColumnIndex - 1; i >= col2 - 1 && i > 0; i--) {
+                    scroll += actionHandler.getColWidthActual(i);
+                }
+                sheet.setScrollLeft(sheet.getScrollLeft() - scroll);
+                if (col2 <= firstColumnIndex
+                        || scroll > (actionHandler.getColumnBufferSize() / 2)) {
+                    scrolled = true;
+                }
             }
         }
+
+        return scrolled;
+    }
+
+    boolean scrollAreaIntoViewVertically(int row1, int row2,
+            boolean actOnTopEdge) {
+        boolean scrolled = false;
         // vertical:
         if (row1 <= verticalSplitPosition) {
             row1 = verticalSplitPosition + 1;
         }
         final int topRowIndex = getTopVisibleRowIndex();
-        if (row1 < topRowIndex) {
-            // scroll up until the row1 come visible
-            int scroll = 0;
-            for (int i = topRowIndex - 1; i >= row1 - 1 && i > 0; i--) {
-                scroll += getRowHeight(i);
-            }
-            // with horizontal need to add 1 pixel per cell because borders
-            scroll += (topRowIndex - row1);
-            final int result = sheet.getScrollTop() - scroll;
-            sheet.setScrollTop(result > 0 ? result : 0);
-            if (row1 <= firstRowIndex
-                    || scroll > (actionHandler.getRowBufferSize() / 2)) {
-                scrolled = true;
+        final int bottomRowIndex = getBottomVisibleRowIndex();
+        if (actOnTopEdge) {
+            if (row1 < topRowIndex) {
+                // scroll up until the row1 come visible
+                int scroll = 0;
+                for (int i = topRowIndex - 1; i >= row1 - 1 && i > 0; i--) {
+                    scroll += getRowHeight(i);
+                }
+                // with horizontal need to add 1 pixel per cell because borders
+                scroll += (topRowIndex - row1);
+                final int result = sheet.getScrollTop() - scroll;
+                sheet.setScrollTop(result > 0 ? result : 0);
+                if (row1 <= firstRowIndex
+                        || scroll > (actionHandler.getRowBufferSize() / 2)) {
+                    scrolled = true;
+                }
+            } else if (row1 > bottomRowIndex) {
+                // scroll down until row1 is visible
+                int scroll = 0;
+                final int maximumRows = actionHandler.getMaxRows();
+                for (int i = bottomRowIndex + 1; i <= row1 + 1
+                        && i <= maximumRows; i++) {
+                    scroll += getRowHeight(i);
+                }
+                // with horizontal need to add 1 pixel per cell because borders
+                scroll += (row1 - bottomRowIndex);
+                sheet.setScrollTop(sheet.getScrollTop() + scroll);
+                if (row1 >= lastRowIndex
+                        || scroll > (actionHandler.getRowBufferSize() / 2)) {
+                    scrolled = true;
+                }
             }
         } else {
-            final int bottomRowIndex = getBottomVisibleRowIndex();
             if (row2 > bottomRowIndex) {
                 // scroll down until row2 is visible
                 int scroll = 0;
@@ -4771,7 +4809,42 @@ public class SheetWidget extends Panel {
                         || scroll > (actionHandler.getRowBufferSize() / 2)) {
                     scrolled = true;
                 }
+            } else if (row2 < topRowIndex) {
+                // scroll up until the row2 come visible
+                int scroll = 0;
+                for (int i = topRowIndex - 1; i >= row2 - 1 && i > 0; i--) {
+                    scroll += getRowHeight(i);
+                }
+                // with horizontal need to add 1 pixel per cell because borders
+                scroll += (topRowIndex - row2);
+                final int result = sheet.getScrollTop() - scroll;
+                sheet.setScrollTop(result > 0 ? result : 0);
+                if (row2 <= firstRowIndex
+                        || scroll > (actionHandler.getRowBufferSize() / 2)) {
+                    scrolled = true;
+                }
             }
+        }
+        return scrolled;
+    }
+
+    /**
+     * Scrolls the sheet to show the given area, or as much of it as fits into
+     * the view.
+     * 
+     * @param col1
+     *            1-based
+     * @param col2
+     *            1-based
+     * @param row1
+     *            1-based
+     * @param row2
+     *            1-based
+     */
+    public void scrollAreaIntoView(int col1, int col2, int row1, int row2) {
+        boolean scrolled = scrollAreaIntoViewHorizontally(col1, col2, true);
+        if (scrollAreaIntoViewVertically(row1, row2, true)) {
+            scrolled = true;
         }
         if (scrolled) {
             onSheetScroll();
