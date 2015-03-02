@@ -66,7 +66,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void sheetAddressChanged(String value) {
-        spreadsheet.getCellSelectionManager().onSheetAddressChanged(value);
+        spreadsheet.getCellSelectionManager().onSheetAddressChanged(value,
+                false);
     }
 
     @Override

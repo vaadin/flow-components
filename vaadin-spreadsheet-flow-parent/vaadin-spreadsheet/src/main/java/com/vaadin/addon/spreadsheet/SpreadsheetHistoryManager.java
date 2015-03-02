@@ -226,7 +226,8 @@ public class SpreadsheetHistoryManager implements Serializable {
                 if (paintedCellRange == null) {
                     spreadsheet.getCellSelectionManager()
                             .onSheetAddressChanged(
-                                    selectedCellReference.formatAsString());
+                                    selectedCellReference.formatAsString(),
+                                    false);
                 } else {
                     spreadsheet.getCellSelectionManager()
                             .handleCellRangeSelection(selectedCellReference,

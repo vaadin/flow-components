@@ -133,7 +133,7 @@ public class SelectionHandler {
     }
 
     public void selectCell(int col, int row, String value, boolean formula,
-            boolean locked) {
+            boolean locked, boolean initialSelection) {
         if (spreadsheet.customCellEditorDisplayed) {
             spreadsheet.customCellEditorDisplayed = false;
             sheetWidget.removeCustomCellEditor();
@@ -141,7 +141,7 @@ public class SelectionHandler {
         spreadsheet.cellLocked = locked;
         sheetWidget.setSelectedCell(col, row);
         newSelectedCellSet();
-        sheetWidget.focusSheet();
+
         if (!sheetWidget.isCoherentSelection()) {
             sheetWidget.setCoherentSelection(true);
         }
@@ -164,7 +164,9 @@ public class SelectionHandler {
         if (!sheetWidget.isSelectedCellCompletelyVisible()) {
             sheetWidget.scrollCellIntoView(col, row);
         }
-        sheetWidget.focusSheet();
+        if (!initialSelection) {
+            sheetWidget.focusSheet();
+        }
     }
 
     public void newSelectedCellSet() {

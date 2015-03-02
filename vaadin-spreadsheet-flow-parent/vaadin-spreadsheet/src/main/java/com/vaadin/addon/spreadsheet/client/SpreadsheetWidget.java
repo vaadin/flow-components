@@ -34,12 +34,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
 import com.vaadin.addon.spreadsheet.client.SheetTabSheet.SheetTabSheetHandler;
+import com.vaadin.client.Focusable;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.Util;
 import com.vaadin.client.communication.RpcProxy;
 
 public class SpreadsheetWidget extends Composite implements SheetHandler,
-        FormulaBarHandler, SheetTabSheetHandler {
+        FormulaBarHandler, SheetTabSheetHandler, Focusable {
 
     public interface SheetContextMenuHandler {
         /**
@@ -1590,8 +1591,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     public void selectCell(int col, int row, String value, boolean formula,
-            boolean locked) {
-        selectionHandler.selectCell(col, row, value, formula, locked);
+            boolean locked, boolean initialSelection) {
+        selectionHandler.selectCell(col, row, value, formula, locked,
+                initialSelection);
     }
 
     public void selectCellRange(int selectedCellColumn, int selectedCellRow,
@@ -1640,5 +1642,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         onSelectingCellsWithDrag(cols, rows);
         onFinishedSelectingCellsWithDrag(1, cols, 1, rows);
         updateSelectedCellValues(1, 1);
+    }
+
+    @Override
+    public void focus() {
+        focusSheet();
     }
 }

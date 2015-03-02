@@ -63,8 +63,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
         @Override
         public void showSelectedCell(int col, int row, String value,
-                boolean formula, boolean locked) {
-            getWidget().selectCell(col, row, value, formula, locked);
+                boolean formula, boolean locked, boolean initialSelection) {
+            getWidget().selectCell(col, row, value, formula, locked,
+                    initialSelection);
         }
 
         @Override

@@ -152,7 +152,7 @@ public class CellSelectionManager implements Serializable {
                 } else {
                     paintedCellRange = null;
                     handleCellAddressChange(selectedCellReference.getRow() + 1,
-                            selectedCellReference.getCol() + 1);
+                            selectedCellReference.getCol() + 1, false);
                 }
             } else {
                 handleCellRangeSelection(
@@ -162,9 +162,9 @@ public class CellSelectionManager implements Serializable {
             }
         } else if (selectedCellReference != null) {
             handleCellAddressChange(selectedCellReference.getRow() + 1,
-                    selectedCellReference.getCol() + 1);
+                    selectedCellReference.getCol() + 1, false);
         } else {
-            handleCellAddressChange(1, 1);
+            handleCellAddressChange(1, 1, false);
         }
     }
 
@@ -207,7 +207,7 @@ public class CellSelectionManager implements Serializable {
      * @param value
      *            New value of the address field
      */
-    protected void onSheetAddressChanged(String value) {
+    protected void onSheetAddressChanged(String value, boolean initialSelection) {
         try {
             if (value.contains(":")) {
                 CellRangeAddress cra = spreadsheet
@@ -246,7 +246,7 @@ public class CellSelectionManager implements Serializable {
                     cellRangeAddresses.add(cra);
                 } else {
                     handleCellAddressChange(cellReference.getRow() + 1,
-                            cellReference.getCol() + 1);
+                            cellReference.getCol() + 1, initialSelection);
                     paintedCellRange = spreadsheet
                             .createCorrectCellRangeAddress(
                                     cellReference.getRow() + 1,
@@ -275,7 +275,8 @@ public class CellSelectionManager implements Serializable {
      * @param columnIndex
      *            Index of column, 1-based
      */
-    private void handleCellAddressChange(int rowIndex, int colIndex) {
+    private void handleCellAddressChange(int rowIndex, int colIndex,
+            boolean initialSelection) {
         if (rowIndex >= spreadsheet.getState().rows) {
             rowIndex = spreadsheet.getState().rows;
         }
@@ -308,15 +309,16 @@ public class CellSelectionManager implements Serializable {
                     }
                     spreadsheet.getRpcProxy().showSelectedCell(colIndex,
                             rowIndex, value, formula,
-                            spreadsheet.isCellLocked(cell));
+                            spreadsheet.isCellLocked(cell), initialSelection);
                 } else {
-                    spreadsheet.getRpcProxy()
-                            .showSelectedCell(colIndex, rowIndex, "", false,
-                                    spreadsheet.isCellLocked(cell));
+                    spreadsheet.getRpcProxy().showSelectedCell(colIndex,
+                            rowIndex, "", false,
+                            spreadsheet.isCellLocked(cell), initialSelection);
                 }
             } else {
                 spreadsheet.getRpcProxy().showSelectedCell(colIndex, rowIndex,
-                        "", false, spreadsheet.isActiveSheetProtected());
+                        "", false, spreadsheet.isActiveSheetProtected(),
+                        initialSelection);
             }
         }
     }
@@ -730,7 +732,7 @@ public class CellSelectionManager implements Serializable {
             if (selectedCellReference.getCol() != region.getFirstColumn()
                     || selectedCellReference.getRow() != region.getFirstRow()) {
                 handleCellAddressChange(region.getFirstRow() + 1,
-                        region.getFirstColumn() + 1);
+                        region.getFirstColumn() + 1, false);
             }
             selectedCellReference = new CellReference(region.getFirstRow(),
                     region.getFirstColumn());

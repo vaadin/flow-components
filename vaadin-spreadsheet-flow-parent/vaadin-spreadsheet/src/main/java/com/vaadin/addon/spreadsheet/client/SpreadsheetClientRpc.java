@@ -47,7 +47,7 @@ public interface SpreadsheetClientRpc extends ClientRpc {
     void invalidCellAddress();
 
     void showSelectedCell(int col, int row, String cellValue, boolean function,
-            boolean locked);
+            boolean locked, boolean initialSelection);
 
     void showSelectedCellRange(int firstColumn, int lastColumn, int firstRow,
             int lastRow, String value, boolean formula, boolean locked);

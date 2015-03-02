@@ -20,11 +20,11 @@ package com.vaadin.addon.spreadsheet.client;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.vaadin.shared.AbstractComponentState;
 import com.vaadin.shared.annotations.DelegateToWidget;
+import com.vaadin.shared.ui.TabIndexState;
 
 @SuppressWarnings("serial")
-public class SpreadsheetState extends AbstractComponentState {
+public class SpreadsheetState extends TabIndexState {
 
     @DelegateToWidget
     public int rowBufferSize = 200;

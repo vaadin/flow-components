@@ -81,6 +81,7 @@ import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Component.Focusable;
 import com.vaadin.ui.HasComponents;
 import com.vaadin.ui.declarative.DesignAttributeHandler;
 import com.vaadin.ui.declarative.DesignContext;
@@ -96,7 +97,7 @@ import com.vaadin.util.ReflectTools;
  */
 @SuppressWarnings("serial")
 public class Spreadsheet extends AbstractComponent implements HasComponents,
-        Action.Container {
+        Action.Container, Focusable {
 
     /**
      * This is a style which hides the top (address and formula) bar.
@@ -591,7 +592,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             loadCells(firstRow, firstColumn, lastRow, lastColumn);
         }
         if (initialSheetSelection != null) {
-            selectionManager.onSheetAddressChanged(initialSheetSelection);
+            selectionManager.onSheetAddressChanged(initialSheetSelection, true);
             initialSheetSelection = null;
         } else if (reloadCellDataOnNextScroll) {
             selectionManager.reloadCurrentSelection();
@@ -1715,8 +1716,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 .getSelectedCellReference();
         if (selectedCellReference.getRow() >= firstEffectedRow
                 && selectedCellReference.getRow() <= lastEffectedRow) {
-            selectionManager.onSheetAddressChanged(selectedCellReference
-                    .formatAsString());
+            selectionManager.onSheetAddressChanged(
+                    selectedCellReference.formatAsString(), false);
         }
     }
 
@@ -4290,5 +4291,35 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public boolean isReportStyle() {
         return !isSheetSelectionBarVisible() && !isFunctionBarVisible();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.ui.Component.Focusable#getTabIndex()
+     */
+    @Override
+    public int getTabIndex() {
+        return getState(false).tabIndex;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.ui.Component.Focusable#setTabIndex(int)
+     */
+    @Override
+    public void setTabIndex(int tabIndex) {
+        getState().tabIndex = tabIndex;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.vaadin.ui.AbstractComponent#focus()
+     */
+    @Override
+    public void focus() {
+        super.focus();
     }
 }

@@ -75,7 +75,7 @@ public class DefaultHyperlinkCellClickHandler implements
                     String cellAddress = address
                             .substring(address.indexOf("#") + 1);
                     spreadsheet.getCellSelectionManager()
-                            .onSheetAddressChanged(cellAddress);
+                            .onSheetAddressChanged(cellAddress, false);
                 }
             } else {
                 spreadsheet.getUI().getPage().open(address, "_new");
