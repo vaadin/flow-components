@@ -196,6 +196,14 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     protected void init() {
         super.init();
         registerRpc(SpreadsheetClientRpc.class, clientRPC);
+        getWidget().setCommsTrigger(new CommsTrigger() {
+
+            @Override
+            public void sendUpdates() {
+                getConnection().sendPendingVariableChanges();
+            }
+        });
+
         getWidget().setSpreadsheetHandler(
                 getRpcProxy(SpreadsheetServerRpc.class));
         getWidget().setSheetContextMenuHandler(new SheetContextMenuHandler() {
@@ -480,5 +488,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     @Override
     public void postLayout() {
         getWidget().refreshOverlayPositions();
+    }
+
+    public interface CommsTrigger {
+        void sendUpdates();
     }
 }

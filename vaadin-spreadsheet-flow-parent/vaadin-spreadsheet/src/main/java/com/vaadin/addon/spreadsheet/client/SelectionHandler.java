@@ -271,6 +271,7 @@ public class SelectionHandler {
         newSelectedCellSet();
         spreadsheet.updateSelectedCellValues(column, row);
         spreadsheet.spreadsheetHandler.cellSelected(row, column, true);
+        spreadsheet.startDelayedSendingTimer();
     }
 
     public void increaseHorizontalSelection(boolean right) {
@@ -480,6 +481,7 @@ public class SelectionHandler {
                     sheetWidget.getSelectionLeftCol(),
                     sheetWidget.getSelectionBottomRow(),
                     sheetWidget.getSelectionRightCol());
+            spreadsheet.startDelayedSendingTimer();
         }
     }
 
@@ -895,6 +897,7 @@ public class SelectionHandler {
                     sheetWidget.getSelectionLeftCol(),
                     sheetWidget.getSelectionBottomRow(),
                     sheetWidget.getSelectionRightCol());
+            spreadsheet.startDelayedSendingTimer();
         }
     }
 
@@ -1039,6 +1042,7 @@ public class SelectionHandler {
         spreadsheet.updateSelectedCellValues(col, row);
         newSelectedCellSet();
         spreadsheet.spreadsheetHandler.cellSelected(row, col, false);
+        spreadsheet.startDelayedSendingTimer();
     }
 
     /**

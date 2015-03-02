@@ -20,12 +20,15 @@ package com.vaadin.addon.spreadsheet.client;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vaadin.shared.annotations.Delayed;
+
 public interface SpreadsheetHandler {
 
     /**
      * These cells have become visible and possibly need the content, if has not
      * been given previously or has not changed.
      */
+    @Delayed(lastOnly = true)
     public void onSheetScroll(int firstRow, int firstColumn, int lastRow,
             int lastColumn);
 
@@ -33,19 +36,23 @@ public interface SpreadsheetHandler {
     public void sheetAddressChanged(String value);
 
     /** Single cell selected inside sheet. */
+    @Delayed
     public void cellSelected(int row, int column,
             boolean oldSelectionRangeDiscarded);
 
     /** Cell range selected from scratch. Actual selected cell not changed. */
+    @Delayed
     public void cellRangeSelected(int row1, int col1, int row2, int col2);
 
     /** Single cell added to selection. Selection changed to this. */
+    @Delayed
     public void cellAddedToSelectionAndSelected(int row, int column);
 
     /**
      * Multiple cells added to previous range selection. Actual selected cell
      * not changed.
      */
+    @Delayed
     public void cellsAddedToRangeSelection(int row1, int col1, int row2,
             int col2);
 
@@ -57,6 +64,7 @@ public interface SpreadsheetHandler {
      * @param firstColumnIndex
      *            column index for the selected cell (left most visible)
      */
+    @Delayed
     public void rowSelected(int row, int firstColumnIndex);
 
     /**
@@ -68,6 +76,7 @@ public interface SpreadsheetHandler {
      * @param firstColumnIndex
      *            column index for the selected cell (left most visible)
      */
+    @Delayed
     public void rowAddedToRangeSelection(int row, int firstColumnIndex);
 
     /**
@@ -78,6 +87,7 @@ public interface SpreadsheetHandler {
      * @param firstRowIndex
      *            row index for the selected cell (top most visible)
      */
+    @Delayed
     public void columnSelected(int column, int firstRowIndex);
 
     /**
@@ -89,6 +99,7 @@ public interface SpreadsheetHandler {
      * @param column
      *            the column that was selected
      */
+    @Delayed
     public void columnAddedToSelection(int firstRowIndex, int column);
 
     /**
@@ -104,6 +115,7 @@ public interface SpreadsheetHandler {
      * @param c2
      *            new selection right, 1-based
      */
+    @Delayed
     public void selectionIncreasePainted(int r1, int c1, int r2, int c2);
 
     /**
@@ -115,6 +127,7 @@ public interface SpreadsheetHandler {
      * @param col
      *            leftmost cell index where the clearing starts, 1-based
      */
+    @Delayed
     public void selectionDecreasePainted(int row, int col);
 
     public void cellValueEdited(int row, int col, String value);
@@ -154,6 +167,7 @@ public interface SpreadsheetHandler {
      * @param row2
      * @param col2
      */
+    @Delayed(lastOnly = true)
     public void cellRangePainted(int selectedCellRow, int selectedCellColumn,
             int row1, int col1, int row2, int col2);
 

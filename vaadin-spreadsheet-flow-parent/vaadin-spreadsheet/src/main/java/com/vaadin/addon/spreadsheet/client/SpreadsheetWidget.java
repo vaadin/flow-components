@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
 import com.vaadin.addon.spreadsheet.client.SheetTabSheet.SheetTabSheetHandler;
+import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector.CommsTrigger;
 import com.vaadin.client.Focusable;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.Util;
@@ -74,6 +75,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         public void columnHeaderContextMenu(NativeEvent nativeEvent,
                 int columnIndex);
     }
+
+    private static final int DELAYED_SERVER_REQUEST_DELAY = 200; // ms
 
     private final SheetWidget sheetWidget;
     final FormulaBarWidget formulaBarWidget;
@@ -161,6 +164,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             return null;
         }
     };
+    private CommsTrigger commsTrigger;
 
     public SpreadsheetWidget() {
 
@@ -427,6 +431,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             int firstColumnIndex, int lastColumnIndex) {
         spreadsheetHandler.onSheetScroll(firstRowIndex, firstColumnIndex,
                 lastRowIndex, lastColumnIndex);
+        startDelayedSendingTimer();
     }
 
     @Override
@@ -513,6 +518,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                             selectedRegion.row1, selectedRegion.col1,
                             selectedRegion.row2, selectedRegion.col2);
                 }
+                startDelayedSendingTimer();
             }
         } else if (metaOrCtrlKey) {
             // add the selected cell into the selection, set it as the selected
@@ -535,6 +541,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             }
             if (updateToActionHandler) {
                 spreadsheetHandler.cellAddedToSelectionAndSelected(row, column);
+                startDelayedSendingTimer();
             }
         } else {
             // select cell
@@ -568,6 +575,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             if (updateToActionHandler) {
                 selectionHandler.newSelectedCellSet();
                 spreadsheetHandler.cellSelected(row, column, true);
+                startDelayedSendingTimer();
             }
         }
     }
@@ -648,6 +656,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             selectionHandler.newSelectedCellSet();
             spreadsheetHandler.rowSelected(row, firstColumnIndex);
         }
+        startDelayedSendingTimer();
     }
 
     @Override
@@ -710,6 +719,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             selectionHandler.newSelectedCellSet();
             spreadsheetHandler.columnSelected(column, firstRowIndex);
         }
+        startDelayedSendingTimer();
     }
 
     @Override
@@ -1084,6 +1094,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         if (evenedRegion.col1 == c1 && evenedRegion.col2 == c2
                 && evenedRegion.row1 == r1 && evenedRegion.row2 == r2) {
             spreadsheetHandler.selectionIncreasePainted(r1, c1, r2, c2);
+            startDelayedSendingTimer();
         }
     }
 
@@ -1093,6 +1104,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         // the selection widget has made sure the decreasing area is not in
         // middle of merged cells.
         spreadsheetHandler.selectionDecreasePainted(rowEdgeIndex, colEdgeIndex);
+        startDelayedSendingTimer();
     }
 
     @Override
@@ -1362,6 +1374,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         spreadsheetHandler.cellSelected(
                                 sheetWidget.getSelectedCellRow(),
                                 sheetWidget.getSelectedCellColumn(), false);
+                        startDelayedSendingTimer();
                     }
                 }
             }
@@ -1647,5 +1660,21 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public void focus() {
         focusSheet();
+    }
+
+    public void setCommsTrigger(CommsTrigger commsTrigger) {
+        this.commsTrigger = commsTrigger;
+    }
+
+    private Timer delayedSending = new Timer() {
+
+        @Override
+        public void run() {
+            commsTrigger.sendUpdates();
+        }
+    };
+
+    void startDelayedSendingTimer() {
+        delayedSending.schedule(DELAYED_SERVER_REQUEST_DELAY);
     }
 }
