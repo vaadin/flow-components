@@ -318,14 +318,26 @@
 		
 		&.noheaders {
 			.top-left-pane, .top-right-pane {
-				.cell, .sheet-selection, .s-paint, .sheet-image {
+				.cell, .sheet-image {
 					margin-top: 0;
+				}
+				.sheet-selection {
+					margin-top: 1px;
+				}
+				.s-paint {
+					margin-top: -1px;
 				}
 			}
 			
 			.top-left-pane, .bottom-left-pane {
-				.cell, .sheet-selection, .s-paint, .sheet-image {
+				.cell, .sheet-image {
 					margin-left: 0;
+				}
+				.sheet-selection {
+					margin-left: 1px;
+				}
+				.s-paint {
+					margin-left: -1px;
 				}
 			}
 		}
