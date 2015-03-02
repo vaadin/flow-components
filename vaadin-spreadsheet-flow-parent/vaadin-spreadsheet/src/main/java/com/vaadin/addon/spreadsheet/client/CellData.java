@@ -25,8 +25,10 @@ public class CellData implements Serializable {
     public int row;
     public int col;
     public String value;
+    public String formulaValue;
     public String cellStyle = "cs0";
     public boolean rightAlign = false;
+    public boolean locked = false;
 
     @Override
     public int hashCode() {

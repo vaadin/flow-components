@@ -173,9 +173,15 @@ public class CellValueManager implements Serializable {
         cellData.col = cell.getColumnIndex() + 1;
         CellStyle cellStyle = cell.getCellStyle();
         cellData.cellStyle = "cs" + cellStyle.getIndex();
+        cellData.locked = spreadsheet.isCellLocked(cell);
         try {
             String formattedCellValue = formatter.formatCellValue(cell,
                     evaluator);
+            if (!spreadsheet.isCellHidden(cell)) {
+                if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+                    cellData.formulaValue = cell.getCellFormula();
+                }
+            }
             if (formattedCellValue != null && !formattedCellValue.isEmpty()
                     || cellStyle.getIndex() != 0) {
                 // if the cell is not wrapping text, and is of type numeric or

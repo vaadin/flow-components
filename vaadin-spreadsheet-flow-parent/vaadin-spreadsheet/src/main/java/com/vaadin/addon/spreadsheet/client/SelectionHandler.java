@@ -103,15 +103,8 @@ public class SelectionHandler {
     public void selectCellRange(int selectedCellColumn, int selectedCellRow,
             int firstColumn, int lastColumn, int firstRow, int lastRow,
             String value, boolean formula, boolean locked) {
-        spreadsheet.cellLocked = locked;
-        if (formula) {
-            spreadsheet.formulaBarWidget.setCellFormulaValue(value);
-        } else {
-            spreadsheet.formulaBarWidget.setCellPlainValue(value);
-        }
-        spreadsheet.formulaBarWidget.setFormulaFieldEnabled(!locked);
-        spreadsheet.formulaBarWidget.setSelectedCellAddress(spreadsheet
-                .createCellAddress(firstColumn, firstRow));
+        spreadsheet.updateSelectedCellValues(selectedCellColumn,
+                selectedCellRow);
         if (!sheetWidget.isCoherentSelection()) {
             sheetWidget.setCoherentSelection(true);
         }
@@ -273,11 +266,8 @@ public class SelectionHandler {
             sheetWidget
                     .updateSelectedCellStyles(column, column, row, row, true);
         }
-        // display cell data address
-        spreadsheet.formulaBarWidget.setSelectedCellAddress(spreadsheet
-                .createCellAddress(column, row));
         newSelectedCellSet();
-        spreadsheet.formulaBarWidget.setCellPlainValue("");
+        spreadsheet.updateSelectedCellValues(column, row);
         spreadsheet.spreadsheetHandler.cellSelected(row, column, true);
     }
 
@@ -308,9 +298,8 @@ public class SelectionHandler {
             }
             MergedRegion selection = null;
             if (selectedCellColumn == leftCol) {
-                if (right && rightCol + 1 <= spreadsheet.getMaxColumns()) { // increase
-                                                                             // to
-                                                                             // right
+                if (right && rightCol + 1 <= spreadsheet.getMaxColumns()) {
+                    // increase to right
                     rightCol++;
                     while (spreadsheet.hiddenColumnIndexes != null
                             && spreadsheet.hiddenColumnIndexes
@@ -356,9 +345,8 @@ public class SelectionHandler {
                         }
                         selection = findDecreasingSelection(topRow, bottomRow,
                                 leftCol, rightCol);
-                    } else if (rightCol + 1 <= spreadsheet.getMaxColumns()) { // increase
-                                                                               // to
-                                                                               // right
+                    } else if (rightCol + 1 <= spreadsheet.getMaxColumns()) {
+                        // increase to right
                         rightCol++;
                         while (spreadsheet.hiddenColumnIndexes != null
                                 && spreadsheet.hiddenColumnIndexes
@@ -717,9 +705,8 @@ public class SelectionHandler {
             }
             MergedRegion selection = null;
             if (selectedCellRow == topRow) {
-                if (down && bottomRow + 1 <= spreadsheet.getMaxRows()) { // increase
-                                                                             // selection
-                                                                             // down
+                if (down && bottomRow + 1 <= spreadsheet.getMaxRows()) {
+                    // increase selection down
                     bottomRow++;
                     while (spreadsheet.hiddenRowIndexes != null
                             && spreadsheet.hiddenRowIndexes.contains(bottomRow)
@@ -763,9 +750,8 @@ public class SelectionHandler {
                         }
                         selection = findDecreasingSelection(topRow, bottomRow,
                                 leftCol, rightCol);
-                    } else if (bottomRow + 1 <= spreadsheet.getMaxRows()) { // increase
-                                                                                // selection
-                        // down
+                    } else if (bottomRow + 1 <= spreadsheet.getMaxRows()) {
+                        // increase selection down
                         bottomRow++;
                         while (spreadsheet.hiddenRowIndexes != null
                                 && spreadsheet.hiddenRowIndexes
@@ -1026,9 +1012,7 @@ public class SelectionHandler {
         // version and just run the extra methods after?
         sheetWidget.swapSelectedCellInsideSelection(col, row);
         sheetWidget.scrollCellIntoView(col, row);
-        spreadsheet.formulaBarWidget.setSelectedCellAddress(spreadsheet
-                .createCellAddress(col, row));
-        spreadsheet.formulaBarWidget.setCellPlainValue("");
+        spreadsheet.updateSelectedCellValues(col, row);
         newSelectedCellSet();
         spreadsheet.spreadsheetHandler.cellSelected(row, col, false);
     }

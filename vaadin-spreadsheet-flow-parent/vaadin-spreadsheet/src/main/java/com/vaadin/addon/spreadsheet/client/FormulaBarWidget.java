@@ -109,7 +109,7 @@ public class FormulaBarWidget extends Composite {
                     break;
                 case Event.ONPASTE:
                 case Event.ONKEYPRESS:
-                    scheduleForumulaValueUpdate();
+                    scheduleFormulaValueUpdate();
                     break;
                 default:
                     break;
@@ -119,7 +119,7 @@ public class FormulaBarWidget extends Composite {
         });
     }
 
-    private void scheduleForumulaValueUpdate() {
+    private void scheduleFormulaValueUpdate() {
 
         if (handler.isTouchMode()) {
 
@@ -151,7 +151,7 @@ public class FormulaBarWidget extends Composite {
     private void handleFunctionFieldKeyDown(Event event) {
         switch (event.getKeyCode()) {
         case KeyCodes.KEY_BACKSPACE:
-            scheduleForumulaValueUpdate();
+            scheduleFormulaValueUpdate();
             break;
         case KeyCodes.KEY_ENTER:
             handler.onFormulaEnter(formulaField.getValue());

@@ -1825,8 +1825,18 @@ public class SheetWidget extends Panel {
     }
 
     public String getCellValue(int column, int row) {
-        CellData cd = cachedCellData.get(toKey(column, row));
+        CellData cd = getCellData(column, row);
         return cd == null ? "" : cd.value;
+    }
+
+    public boolean isCellLocked(int column, int row) {
+        CellData cd = getCellData(column, row);
+        return cd == null ? false : cd.locked;
+    }
+
+    public String getCellFormulaValue(int column, int row) {
+        CellData cd = getCellData(column, row);
+        return cd == null ? "" : cd.formulaValue;
     }
 
     private String createHeaderDNDHTML() {
