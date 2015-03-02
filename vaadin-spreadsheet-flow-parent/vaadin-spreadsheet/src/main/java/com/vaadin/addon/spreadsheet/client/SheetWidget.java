@@ -3791,10 +3791,14 @@ public class SheetWidget extends Panel {
         }
         customEditorWidget = null;
 
-        for (String key : sheetImages.keySet()) {
-            removeSheetImage(key);
+        Iterator<Entry<String, SheetImage>> it = sheetImages.entrySet()
+                .iterator();
+        while (it.hasNext()) {
+            Entry<String, SheetImage> item = it.next();
+            remove(item.getValue());
         }
         sheetImages.clear();
+
         if (customWidgetMap != null) {
             customWidgetMap.clear();
             customWidgetMap = null;
