@@ -1,79 +1,15 @@
-@import "spreadsheet-valo";
+@import "_spreadsheet-valo.scss";
+@import "_spreadsheet-legacy.scss";
+
+$v-color-keywords: non-valo-theme !default;
 
 @mixin spreadsheet {
-	@include spreadsheet-valo;
-
-	/** COLUMN / ROW RESIZING TOOLTIP */
-	.v-tooltip .v-spreadsheet-resize-tooltip-label {
-		padding: 2px 5px;
-	}
 	
-	/** HYPERLINK TOOLTIP */
-	.v-tooltip .v-spreadsheet-hyperlink-tooltip-label {
-		padding: 2px 5px;
-	}
+	// Very nice workaround for missing variable-exists function
+	@if $v-color-keywords == non-valo-theme {
+	    @include spreadsheet-legacy;
+	} @else {
+		@include spreadsheet-valo;
+	} 
 	
-	/** FILTER OVERLAY */
-	.v-spreadsheet-popupbutton-overlay {
-		background-color: $popup-overlay-bg-color;
-		color: $popup-overlay-text-color;
-		border-radius: 4px;
-		-webkit-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
-		-moz-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
-		box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
-		padding: 5px;
-		
-		.v-panel.spreadsheet-item-filter-layout {
-			background-color: transparent;
-			border: none;
-			color: $popup-overlay-text-color;
-			
-			.v-panel-captionwrap, 
-			.v-panel-content, 
-			.v-panel-deco {
-				background-color: transparent;
-				border: none;
-				color: $popup-overlay-text-color;
-			}
-		}
-	}
-	
-	.v-spreadsheet-popupbutton-overlay-header {
-		background: $popup-overlay-bg-color;
-		height: 20px;
-		position: relative;
-		width: 100%;
-		padding-bottom: 8px;
-		
-		.v-window-closebox {
-			position: absolute;
-			left: 2px;
-			top: 0px;
-			width: 16px;
-			height: 16px;
-			line-height: 16px;
-			font-size: 16px;
-			color: $popup-overlay-text-color;
-		}
-		
-		.header-caption {
-			color: $popup-overlay-text-color;
-			font-size: 16px;
-			margin: 0 30px;
-			text-align: center;
-			height: 20px;
-			line-height: 20px;
-		}
-	}
-	
-	.v-spreadsheet-selection-actions{
-		background-color: $popup-overlay-bg-color;
-	}
-	
-	/* TODO move these to a separate file ? */
-	.v-ie .v-spreadsheet {
-		.ch, .rh {
-			cursor: pointer;
-		}
-	}
 }

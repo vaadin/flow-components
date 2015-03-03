@@ -1,21 +1,105 @@
-@import "variables_valo";
-
 @mixin spreadsheet-valo {
+	$spreadsheet-default-font-color: valo-font-color($v-background-color) !default;
+	$spreadsheet-base-font-family: $v-font-family !default;
+	$spreadsheet-base-font-size: $v-font-size !default;
+	
+	$spreadsheet-border: valo-border($strength: 0.8) !default;
+	
+	$spreadsheet-header-bg-color: $v-background-color !default;
+	$spreadsheet-header-border: $spreadsheet-border !default;
+	
+	// Fixed size due to row/column sizing from POI model
+	$spreadsheet-header-font-size: 13px !default;
+	
+	$spreadsheet-functionbar-background-color: valo-table-background-color() !default;
+	$spreadsheet-functionbar-font-color: valo-font-color($spreadsheet-functionbar-background-color) !default;
+	
+	$spreadsheet-cell-background-color: valo-table-background-color() !default;
+	
+	$spreadsheet-sheet-selection-border-color: $v-selection-color !default;
+	$spreadsheet-sheet-selection-corner-color: $v-selection-color !default;
+	
+	$spreadsheet-freeze-pane-border: 1px solid $spreadsheet-default-font-color !default;
+	
+	$spreadsheet-popupbutton-header-sizing: $spreadsheet-base-font-size + 4 !default;
+	
+	$spreadsheet-resize-line-color: $v-selection-color !default;
+	
+	$spreadsheet-cell-comment-triangle-color: $v-error-indicator-color !default;
+	
+	// These colors should be derived from valo theme colors. 
+	// Unfortunately due to a bug in the sass compiler,
+	// we can not call any sass color functions (like scale-color,
+	// lighten etc.) using valo variables as function parameters. 
+	// Until the compiler is fixed we must just define the colors here.
+	
+	$spreadsheet-address-field-background: #fafafa !default;
+	$spreadsheet-sheet-selector-background: #fafafa !default;
+	$spreadsheet-inactive-tab-background: #fafafa !default;
+	$spreadsheet-active-tab-background: #ffffff !default;
+	$spreadsheet-inactive-tab-text-color: #6a6a6a !default;
+	$spreadsheet-active-tab-text-color: #2584e2 !default;
+	$spreadsheet-tab-action-button-color: #464646 !default;
+	$spreadsheet-tab-action-button-inactive-color: #d6d6d6 !default; 
+	$spreadsheet-selected-header-bg-color: #e6edf4 !default;
+	$spreadsheet-selected-header-border-color: #63b1ff !default;
+	$spreadsheet-sheet-selection-extend-corner-color: #6a44d9 !default;
+	$spreadsheet-sheet-selection-extend-inside-bg-color: #c8c6f6 !default;
+	$spreadsheet-sheet-selection-highlight-outline-color: #222222 !default;
+	$spreadsheet-sheet-selection-range-bg-color: #e8f2fc !default;
+	$spreadsheet-popup-button-arrow-color: #676767 !default;
+	$spreadsheet-cell-comment-line-color: #A7A7A7 !default;
+	
+	// Sizing of Spreadsheet parts
+	// Fixed sizes due to row/column sizing from POI model
+	$spreadsheet-col-header-height: 27px;
+	$spreadsheet-row-header-width: 50px;
+	$spreadsheet-toolbar-height: round(0.78 * $v-unit-size) !default; // 29px
+	$spreadsheet-bottom-bar-height: round(0.76 * $v-unit-size) !default; // 28px
+	$spreadsheet-address-input-width: round(11 * $v-font-size) !default; // 176px
+	$spreadsheet-field-padding: floor($v-font-size / 3) !default; // 5px
+	$spreadsheet-tab-action-button-width: round(0.70 * $v-unit-size) !default; // 26px
+	$spreadsheet-status-label-width: round(5.40 * $v-unit-size) !default; // 200px
+	$spreadsheet-tab-height: round(0.54 * $v-unit-size) !default; // 20px
+	$spreadsheet-tab-min-width: round(1.35 * $v-unit-size) !default; // 50px
+	$spreadsheet-tab-max-width: round(5.40 * $v-unit-size) !default; // 200px
+	$spreadsheet-tab-padding-vertical: round(0.05 * $v-unit-size) !default; // 2px
+	$spreadsheet-tab-padding-horizontal: round(0.16 * $v-unit-size) !default; // 6px
+	$spreadsheet-status-label-font-size: 11px !default;
+	$spreadsheet-border-width: max(1px, first-number($v-border)) !default; // at least 1px
+	$spreadsheet-tab-font-size: round(0.38 * $v-unit-size) !default; // 14px
+
+	// Fixed sizes (do not depend on valo unit/font sizing)	
+	$spreadsheet-selection-widget-border-width: 2px !default;
+	$spreadsheet-selection-widget-corner-size: 7px !default;
+	$spreadsheet-resize-handle-size: 3px !default;
+	$spreadsheet-tab-border-radius: 5px !default;
+	$spreadsheet-popup-button-size: 14px !default;
+	$spreadsheet-popup-button-margin: 1px !default;
+	$spreadsheet-popup-button-content-padding: 3px !default;
+	$spreadsheet-touch-fill-size: 8px !default;
+	$spreadsheet-touch-corner-size: 12px !default;
+	$spreadsheet-touch-corner-left-offset: 7px !default;
+	$spreadsheet-touch-corner-bottom-offset: 5px !default;
+	$spreadsheet-toucharea-corner-size: 30px !default;
+	$spreadsheet-toucharea-corner-left-offset: -10px !default;
+	$spreadsheet-toucharea-corner-bottom-offset: -10px !default;
+	
 	.v-spreadsheet {
 		overflow: hidden;
 		position: relative;
 		
-		padding-bottom: 29px;
-		padding-left: 50px;
-		padding-top: 57px;
+		padding-bottom: $spreadsheet-toolbar-height;
+		padding-left: $spreadsheet-row-header-width;
+		padding-top: $spreadsheet-toolbar-height + $spreadsheet-bottom-bar-height;
 		
 		border: $spreadsheet-border;
 		font-family: $spreadsheet-base-font-family;
 		font-size: $spreadsheet-base-font-size;
-		color: $default-font-color;
+		color: $spreadsheet-default-font-color;
 		
 		&.hidefunctionbar {
-			padding-top: 28px;
+			padding-top: $spreadsheet-col-header-height + $spreadsheet-border-width;
 			
 			.functionbar {
 				height: 0;
@@ -55,11 +139,7 @@
 		> div, 
 		.sheet > div {
 			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
+			@include user-select(none);
 		}
 		
 		&.row-resizing,
@@ -77,11 +157,11 @@
 		}
 		
 		
-		/** FUNCTION BAR */
+		// FUNCTION BAR 
 		.functionbar {
-			background-color: $functionbar-background-color;
+			background-color: $spreadsheet-functionbar-background-color;
 			border-bottom: $spreadsheet-border;
-			height: 29px;
+			height: $spreadsheet-toolbar-height;
 			left: 0;
 			position: absolute;
 			top: 0;
@@ -90,58 +170,54 @@
 		
 			.functionfield,
 			.addressfield {
+				@include box-sizing(border-box);
 				font-size: $spreadsheet-base-font-size;
-				height: 18px;
+				height: 100%;
 				width: 100%;
 				padding: 0;
-				padding-left: 5px;
+				padding-left: $spreadsheet-field-padding;
 				border: none;
-				box-sizing: border-box;
-				color: $functionbar-font-color;
+				color: $spreadsheet-functionbar-font-color;
 				outline: none;
 			}
 			
 			.fixed-left-panel {
+				@include box-sizing(border-box);
 				float: left;
-				width: 180px;
+				width: $spreadsheet-address-input-width;
 				height: 100%;
 				border-right: $spreadsheet-border;
-				padding-top: 6px;
-				box-sizing: border-box;
-				background: $address-field-background; 
+				background: $spreadsheet-address-field-background; 
 			}
 			
 			.adjusting-right-panel {
+				@include box-sizing(border-box);
 				overflow: hidden;
-				padding-right: 10px;
+				padding-right: $spreadsheet-field-padding;
 				height: 100%;
-				padding-top: 6px;
-				box-sizing: border-box;
 			}
 			
 			.addressfield {
 				text-align: center;
-				background: $address-field-background;
+				background: $spreadsheet-address-field-background;
 			}
 		}
 		
 		
-		/** SHEET (BOTTOM RIGHT PANE) */
+		// SHEET (BOTTOM RIGHT PANE) 
 		.sheet {
 			&.bottom-right-pane {
 				overflow: scroll;
 				right: 0;
-				bottom: 28px;
+				bottom: $spreadsheet-bottom-bar-height;
 				position: absolute;
 			}
 			
 			.cell {
-				background-color: $cell-background-color;
+				@include box-sizing(border-box);
+				background-color: $spreadsheet-cell-background-color;
 				border-right: $spreadsheet-border;
 				border-bottom: $spreadsheet-border;
-				-webkit-box-sizing: border-box;
-				-moz-box-sizing: border-box;
-				box-sizing: border-box;
 				overflow: visible;
 				padding: 0 2px;
 				position: absolute;
@@ -151,11 +227,11 @@
 				line-height: normal;
 				
 				&.cell-range {
-				 	background-color: $sheet-selection-range-bg-color !important;
+				 	background-color: $spreadsheet-sheet-selection-range-bg-color !important;
 				}
 				
 				&.selected-cell-highlight {
-					outline: solid $sheet-selection-highlight-outline-color 1px;
+					outline: solid $spreadsheet-sheet-selection-highlight-outline-color 1px;
 					-moz-outline-offset: -2px;
 					outline-offset: -2px; 
 					z-index: 3;
@@ -185,7 +261,6 @@
 			> input[type="text"] {
 				border: 0 !important;
 				-webkit-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
-				-moz-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
 				box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
 				cursor: text;
 				display: block !important;
@@ -219,15 +294,13 @@
 		}
 		
 		
-		/** SHEET FREEZE PANES */
+		// SHEET FREEZE PANES 
 		.top-left-pane,
 		.top-right-pane,
 		.bottom-left-pane {
-			border-right: $freeze-pane-border;
-			border-bottom: $freeze-pane-border;
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
+			@include box-sizing(border-box);
+			border-right: $spreadsheet-freeze-pane-border;
+			border-bottom: $spreadsheet-freeze-pane-border;
 			overflow: visible;
 			position: absolute;
 			
@@ -240,7 +313,7 @@
 		.bottom-left-pane {
 			height: 100%;
 			left: 0;
-			padding-bottom: 28px;
+			padding-bottom: $spreadsheet-bottom-bar-height;
 			z-index: 10;
 			
 			.rh {
@@ -249,15 +322,15 @@
 			}
 			
 			.cell, .sheet-image {
-				margin-left: 50px;
+				margin-left: $spreadsheet-row-header-width;
 			}
 			
 			.s-paint {
-				margin-left: 49px;
+				margin-left: $spreadsheet-row-header-width - $spreadsheet-border-width;
 			}
 			
 			.sheet-selection {
-				margin-left: 51px;
+				margin-left: $spreadsheet-row-header-width + $spreadsheet-border-width;
 			}
 		}
 		
@@ -268,32 +341,32 @@
 			
 			.ch {
 				top: 0;
-				margin-left: 50px;
+				margin-left: $spreadsheet-row-header-width;
 			}
 			
 			.rh {
 				left: 0;
-				margin-top: 27px;
+				margin-top: $spreadsheet-col-header-height;
 			}
 			
 			.cell, .sheet-image {
-				margin-top: 27px;
-				margin-left: 50px;
+				margin-top: $spreadsheet-col-header-height;
+				margin-left: $spreadsheet-row-header-width;
 			}
 			
 			.s-paint {
-				margin-top: 26px;
-				margin-left: 49px;
+				margin-top: $spreadsheet-col-header-height - $spreadsheet-border-width;
+				margin-left: $spreadsheet-row-header-width - $spreadsheet-border-width;
 			}
 			
 			.sheet-selection {
-				margin-top: 28px;
-				margin-left: 51px;
+				margin-top: $spreadsheet-col-header-height + $spreadsheet-border-width;
+				margin-left: $spreadsheet-row-header-width + $spreadsheet-border-width;
 			}
 		}
 		
 		.top-right-pane {
-			top: 30px;
+			top: $spreadsheet-toolbar-height + $spreadsheet-border-width; 
 			width: 100%;
 			z-index: 11;
 			
@@ -303,15 +376,15 @@
 			}
 			
 			.cell, .sheet-image {
-				margin-top: 27px;
+				margin-top: $spreadsheet-col-header-height;
 			}
 			
 			.s-paint {
-				margin-top: 26px;
+				margin-top: $spreadsheet-col-header-height - $spreadsheet-border-width;
 			}
 			
 			.sheet-selection {
-				margin-top: 28px;
+				margin-top: $spreadsheet-col-header-height + $spreadsheet-border-width;
 			}
 		}
 		
@@ -321,10 +394,10 @@
 					margin-top: 0;
 				}
 				.sheet-selection {
-					margin-top: 1px;
+					margin-top: $spreadsheet-border-width;
 				}
 				.s-paint {
-					margin-top: -1px;
+					margin-top: -$spreadsheet-border-width;
 				}
 			}
 			
@@ -333,18 +406,18 @@
 					margin-left: 0;
 				}
 				.sheet-selection {
-					margin-left: 1px;
+					margin-left: $spreadsheet-border-width;
 				}
 				.s-paint {
-					margin-left: -1px;
+					margin-left: -$spreadsheet-border-width;
 				}
 			}
 		}
 		
 		
-		/** SHEET HEADERS */
+		// SHEET HEADERS 
 		.ch, .rh, .corner {
-			background-color: $header-bg-color;
+			background-color: $spreadsheet-header-bg-color;
 			font-family: Helvetica;
 			font-size: $spreadsheet-header-font-size;
 			overflow: hidden;
@@ -353,38 +426,32 @@
 		}
 		
 		.rh {
-			border-right: $header-border;
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
+			@include box-sizing(border-box);
+			@include user-select(none);
+			border-right: $spreadsheet-header-border;
 			cursor: e-resize;
 			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
-			width: 50px;
+			width: $spreadsheet-row-header-width;
 			z-index: 29;
 			display: flex;
 			justify-content: center;
 			vertical-align: middle;
 			flex-direction: column;
-			padding-top: 3px;
+			line-height: 100%;
 			
 			&.selected-row-header {
-				background: $selected-header-bg-color !important;
-				border-right: 2px solid $selected-header-border-color;
+				background: $spreadsheet-selected-header-bg-color !important;
+				border-right: $spreadsheet-border-width * 2 solid $spreadsheet-selected-header-border-color;
 			}
 			
 			.header-resize-dnd-first, 
 			.header-resize-dnd-second {
 				background: transparent;
 				cursor: row-resize;
-				height: 3px;
+				height: $spreadsheet-resize-handle-size;
 				position: absolute;
 				left: 0;
-				width: 49px;
+				width: $spreadsheet-row-header-width - $spreadsheet-border-width;
 				z-index: 30;
 			}
 			
@@ -393,52 +460,39 @@
 			}
 			
 			.header-resize-dnd-second {
-				border-bottom: $header-border;
+				border-bottom: $spreadsheet-header-border;
 				bottom: 0;
 			}
 			
 			&.resize-extra {
-				border-bottom: $header-border;
+				border-bottom: $spreadsheet-header-border;
 			}
 		}
 		
 		.ch {
-			background: -moz-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			background: -webkit-gradient(left top, left bottom, color-stop(2%, $col-header-gradient-top-color), color-stop(98%, $col-header-gradient-bottom-color));
-			background: -webkit-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			background: -o-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			background: -ms-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			/* Vaadin SASS compiler can't handle the following line */
-			/* background: linear-gradient(to bottom, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%); */
-			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='$col-header-gradient-top-color', endColorstr='$col-header-gradient-bottom-color', GradientType=0 );
-			border-bottom: $header-border;
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
+			@include valo-gradient($color: $spreadsheet-header-bg-color);
+			@include box-sizing(border-box);
+			@include user-select(none);
+			border-bottom: $spreadsheet-header-border;
 			cursor: s-resize;
-			height: 27px;
-			padding-top: 4px;
+			height: $spreadsheet-col-header-height;
+			line-height: $spreadsheet-col-header-height;
 			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
 			z-index: 29;
 			
 			&.selected-column-header {
-				background: $selected-header-bg-color !important;
-				border-bottom: 2px solid $selected-header-border-color;
+				background: $spreadsheet-selected-header-bg-color !important;
+				border-bottom: $spreadsheet-border-width * 2  solid $spreadsheet-selected-header-border-color;
 			}
 			
 			.header-resize-dnd-first, 
 			.header-resize-dnd-second {
 				background: transparent;
 				cursor: col-resize;
-				height: 27px;
+				height: $spreadsheet-col-header-height;
 				position: absolute;
 				top: 0;
-				width: 3px;
+				width: $spreadsheet-resize-handle-size;
 				z-index: 30;
 			}
 			
@@ -447,18 +501,18 @@
 			}
 			
 			.header-resize-dnd-second {
-				border-right: $header-border;
+				border-right: $spreadsheet-header-border;
 				right: 0;
 			}
 			
 			&.resize-extra {
-				border-right: $header-border;
+				border-right: $spreadsheet-header-border;
 			}
 		}
 		
 		&.noheaders {
 			padding-left: 0px;
-			padding-top: 30px; /* functionbar height + 1*/
+			padding-top: $spreadsheet-toolbar-height + $spreadsheet-border-width;
 			.ch, .rh, .corner {
 				display: none;
 			}
@@ -470,11 +524,7 @@
 		}
 		
 		> div.resize-line {
-			background: $resize-line-color;
-		}
-		 
-		.sheet > div.resize-line {
-			background: $inactive-resize-line-color;
+			background: $spreadsheet-resize-line-color;
 		}
 		 
 		.resize-line, 
@@ -493,60 +543,51 @@
 			.sheet > div.resize-line {
 				height: 100%;
 				visibility: visible;
-				width: 1px;
+				width: $spreadsheet-border-width;
 			}
 			
 			> .resize-line {
-				margin-left: 49px;
-				margin-top: -30px;
+				margin-left: $spreadsheet-row-header-width - $spreadsheet-border-width;
+				margin-top: -($spreadsheet-col-header-height + $spreadsheet-border-width);
 			}
 			
 			.sheet > div.resize-line {
-				margin-left: -1px;
+				margin-left: -$spreadsheet-border-width;
 			}
 		}
 		
 		&.row-resizing {
 			.resize-line, .sheet > div.resize-line {
-				height: 1px;
+				height: $spreadsheet-border-width;
 				visibility: visible;
 				width: 100%;
 			}
 			
 			>.resize-line {
-				margin-top: 56px;
-				margin-left: -50px;
+				margin-top: $spreadsheet-toolbar-height + $spreadsheet-bottom-bar-height - $spreadsheet-border-width;
+				margin-left: -$spreadsheet-row-header-width;
 			}
 			
 			.sheet>div.resize-line {
-				margin-top: -1px;
+				margin-top: -$spreadsheet-border-width;;
 			}
 		}
 		
 		.corner {
+			@include valo-gradient($color: $spreadsheet-header-bg-color);
+			@include box-sizing(border-box);
 			cursor: default;
-			top: 30px;
+			top: $spreadsheet-toolbar-height + $spreadsheet-border-width;
 			left: 0;
-			width: 50px;
-			height: 27px;
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
-			border-bottom: $header-border;
-			border-right: $header-border;
+			width: $spreadsheet-row-header-width;
+			height: $spreadsheet-col-header-height;
+			border-bottom: $spreadsheet-header-border;
+			border-right: $spreadsheet-header-border;
 			z-index: 100;
-			background: -moz-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			background: -webkit-gradient(left top, left bottom, color-stop(2%, $col-header-gradient-top-color), color-stop(98%, $col-header-gradient-bottom-color));
-			background: -webkit-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			background: -o-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			background: -ms-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			/* Vaadin SASS compiler can't handle the following line */
-			/* background: linear-gradient(to bottom, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%); */
-			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='$col-header-gradient-top-color', endColorstr='$col-header-gradient-bottom-color', GradientType=0 );
 		}
 		
 		
-		/** SHEET IMAGES */
+		// SHEET IMAGES 
 		.sheet > div.sheet-image {
 			background: transparent;
 			border: none;
@@ -572,10 +613,10 @@
 		}
 		
 		
-		/** CELL COMMENT */
+		// CELL COMMENT 
 		.sheet {
 			.cell-comment-triangle {
-				border-color: transparent $cell-comment-triangle-color transparent transparent;
+				border-color: transparent $spreadsheet-cell-comment-triangle-color transparent transparent;
 				border-style: solid;
 				border-width: 0 9px 9px 0;
 				height: 0;
@@ -589,7 +630,7 @@
 			}
 			
 			.comment-overlay-line {
-				background-color: $cell-comment-line-color !important;
+				background-color: $spreadsheet-cell-comment-line-color !important;
 				border: none !important;
 				display: block !important;
 				height: 1px;
@@ -603,7 +644,7 @@
 		}
 		
 		
-		/** SELECTION WIDGET */
+		// SELECTION WIDGET 
 		div.sheet-selection {
 			background-color: transparent !important;
 			border: none !important;
@@ -613,8 +654,8 @@
 			height: 0px;
 			overflow: visible;
 			pointer-events:none;
-			margin-left: 1px;
-			margin-top: 1px;
+			margin-left: $spreadsheet-border-width;
+			margin-top: $spreadsheet-border-width;
 			
 			&.col0.row0 {
 				display: none;
@@ -624,46 +665,46 @@
 		.sheet-selection {
 			.s-top, .s-left, .s-bottom, .s-right {
 				padding: 0;	
-				background-color: $sheet-selection-border-color;
+				background-color: $spreadsheet-sheet-selection-border-color;
 				position: absolute;
 				
 				&.extend {
-					background-color: $sheet-selection-extend-corner-color !important;
+					background-color: $spreadsheet-sheet-selection-extend-corner-color !important;
 				}
 			}
 			
 			.s-top {
-				top: -2px;
-				left: -2px;
-				height: 2px;
+				top: -$spreadsheet-selection-widget-border-width;
+				left: -$spreadsheet-selection-widget-border-width;
+				height: $spreadsheet-selection-widget-border-width;
 				pointer-events:all;
 			}
 			
 			.s-left {
-				width: 2px;
+				width: $spreadsheet-selection-widget-border-width;
 				padding-bottom: 1px;
 			}
 			
 			.s-bottom {
-				height: 2px;
+				height: $spreadsheet-selection-widget-border-width;
 				bottom: 0;
 			}
 			
 			.s-right {
 				right: 0;
-				width: 2px;
+				width: $spreadsheet-selection-widget-border-width;
 			}
 			
 			.s-corner {
-				background-color: $sheet-selection-corner-color;
-				border-radius: 2px;
-				bottom: -2px;
-				cursor: crosshair;
-				height: 7px;
-				left: -2px;
-				outline: 2px solid white;
+				background-color: $spreadsheet-sheet-selection-corner-color;
 				position: absolute;
-				width: 7px;
+				bottom: -2px;
+				left: -2px;
+				height: $spreadsheet-selection-widget-corner-size;
+				width: $spreadsheet-selection-widget-corner-size;
+				outline: 2px solid white;
+				cursor: crosshair;
+				border-radius: 2px;
 			}
 		}
 		
@@ -671,8 +712,8 @@
 			background: transparent;
 			border: none !important;
 			cursor: crosshair;
-			outline: 2px solid $sheet-selection-extend-corner-color;
-			outline-offset: -2px;
+			outline: $spreadsheet-selection-widget-border-width solid $spreadsheet-sheet-selection-extend-corner-color;
+			outline-offset: -$spreadsheet-selection-widget-border-width;
 			padding: 0;
 			position: absolute;
 			z-index: 20;
@@ -680,45 +721,45 @@
 			margin-left: -1px;
 			
 			&.s-paint-inside {
-				background: $sheet-selection-extend-inside-bg-color !important;
+				background: $spreadsheet-sheet-selection-extend-inside-bg-color !important;
 				cursor: crosshair;
 			}
 		}
 		
 		
-		/** SHEET TABSHEET */
+		// SHEET TABSHEET 
 		.sheet-tabsheet {
-			background: $sheet-selector-background;
+			background: $spreadsheet-sheet-selector-background;
 			border-top: $spreadsheet-border;
-			bottom: 0;
+			height: $spreadsheet-bottom-bar-height;
+			width: 100%;
 			cursor: default;
-			height: 28px;
+			position: absolute;
+			bottom: 0;
 			left: 0;
 			overflow: hidden;
-			position: absolute;
-			width: 100%;
 			z-index: 50;
 			
 			.sheet-tabsheet-options {
-				background: $sheet-selector-background;
+				background: $spreadsheet-sheet-selector-background;
 				cursor: pointer;
 				display: inline-block;
-				height: 28px;
+				height: $spreadsheet-bottom-bar-height;
 				position: relative;
-				width: 140px;
+				width: $spreadsheet-tab-action-button-width * 5;
 				z-index: 60;
 				
 				div {
+					line-height: $spreadsheet-bottom-bar-height + $spreadsheet-border-width;
+					width: $spreadsheet-tab-action-button-width;
 					cursor: pointer;
 					display: inline-block;
 					font-weight: bold;
 					position: relative;
 					text-align: center;
 					z-index: inherit;
-					width: 26px;
 
-					padding-top: 4px;
-					color: $tab-action-button-color;
+					color: $spreadsheet-tab-action-button-color;
 					font-family: FontAwesome;
 					
 					&.scroll-tabs-beginning::before {
@@ -741,17 +782,12 @@
 						content: "\f067";
 					}
 					
-					&.scroll-tabs-beginning, 
-					&.scroll-tabs-end {
-						padding: 0 2px;
-					}
-					
 					&:hover {
-						color: $sheet-selection-border-color;
+						color: $spreadsheet-sheet-selection-border-color;
 					}
 					
 					&.hidden {
-						color: $tab-action-button-inactive-color;
+						color: $spreadsheet-tab-action-button-inactive-color;
 						cursor: default;
 					}
 				}
@@ -759,52 +795,51 @@
 
 			.sheet-tabsheet-container {
 				display: inline-block;
-				left: 140px;
+				left: $spreadsheet-tab-action-button-width * 5;
 				position: absolute;
 				z-index: inherit;
-				margin-right: 206px;
+				margin-right: $spreadsheet-status-label-width + $spreadsheet-field-padding + $spreadsheet-border-width;
 				
 				.sheet-tabsheet-tab {
 					font-family: $spreadsheet-base-font-family;
-					background: $inactive-tab-background;
+					font-size: $spreadsheet-tab-font-size;
+					font-weight: 300;
+					background: $spreadsheet-inactive-tab-background;
+					color: $spreadsheet-inactive-tab-text-color;
 					border: $spreadsheet-border;
 					border-top: none;
-					border-bottom-right-radius: 5px;
-					border-bottom-left-radius: 5px;
+					border-bottom-right-radius: $spreadsheet-tab-border-radius;
+					border-bottom-left-radius: $spreadsheet-tab-border-radius;
 					cursor: pointer;
 					display: inline-block;
-					font-size: 14px;
-					font-weight: 300;
-					color: $inactive-tab-text-color;
-					height: 20px;
-					margin-bottom: 5px;
-					margin-left: 5px;
-					max-width: 200px;
-					min-width: 50px;
+					height: $spreadsheet-tab-height;
+					margin-left: $spreadsheet-field-padding;
+					max-width: $spreadsheet-tab-max-width;
+					min-width: $spreadsheet-tab-min-width;
 					overflow: hidden;
-					padding: 4px 8px 0;
+					padding: $spreadsheet-tab-padding-vertical $spreadsheet-tab-padding-horizontal;
 					position: relative;
 					text-align: center;
 					text-overflow: ellipsis;
-					top: -1px;
+					top: -$spreadsheet-border-width;
 					z-index: inherit;
 					
 					&.selected-tab {
-						background: $active-tab-background;
+						background: $spreadsheet-active-tab-background;
 						cursor: default;
-						color: $active-tab-text-color;
+						color: $spreadsheet-active-tab-text-color;
 						max-width: none;
 						position: relative;
 						
 						input[type="text"] {
 							font-family: $spreadsheet-base-font-family;
-							color: $active-tab-text-color;
+							font-size: $spreadsheet-tab-font-size;
+							color: $spreadsheet-active-tab-text-color;
 							border: none !important;
-							font-size: 14px;
 							font-weight: 300;
-							height: 20px;
-							margin-top: 4px;
-							margin-left: 10px;
+							height: $spreadsheet-tab-height;
+							margin-top: $spreadsheet-tab-padding-vertical;
+							margin-left: $spreadsheet-tab-padding-horizontal + 2 * $spreadsheet-border-width;
 							outline: none !important;
 							padding: 0 !important;
 							position: absolute;
@@ -818,7 +853,7 @@
 			
 			.sheet-tabsheet-temp {
 				font-family: $spreadsheet-base-font-family;
-				font-size: 14px;
+				font-size: $spreadsheet-tab-font-size;
 				display: inline;
 				left: -5000px;
 				position: fixed;
@@ -830,12 +865,12 @@
 				position: absolute;
 				right: 0;
 				font-weight: bold;
-				font-size: 8pt;
-				border-left: 1px solid rgb(169, 169, 169);
-				padding-left: 5px;
-				padding-top: 2px;
-				width: 200px;
-				height: 16px;
+				font-size: $spreadsheet-status-label-font-size;
+				border-left: $spreadsheet-border;
+				padding-left: $spreadsheet-field-padding;
+				width: $spreadsheet-status-label-width;
+				height: 100%;
+				line-height: $spreadsheet-bottom-bar-height + $spreadsheet-border-width;
 				display: inline;
 				text-overflow: ellipsis;
 			}
@@ -844,116 +879,142 @@
 		.sheet-tabsheet,
 		.sheet-tabsheet div {
 			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
+			@include user-select(none);
 		}
 		
-		
-		/** FILTER BUTTON */
+		// FILTER BUTTON 
 		.sheet div div.popupbutton {
-			background: -moz-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			background: -webkit-gradient(left top, left bottom, color-stop(2%, $col-header-gradient-top-color), color-stop(98%, $col-header-gradient-bottom-color));
-			background: -webkit-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			background: -o-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			background: -ms-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
-			/* Vaadin SASS compiler can't handle the following line */
-			/* background: linear-gradient(to bottom, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%); */
-			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='$col-header-gradient-top-color', endColorstr='$col-header-gradient-bottom-color', GradientType=0 );
-			border: 1px solid $popup-button-border-color;
-			bottom: 1px;
-			cursor: pointer;
-			height: 14px;
+			@include valo-button-style($padding: 0);
+			@include valo-button-static-style();
+			
 			position: absolute;
-			right: 1px;
-			width: 14px;
+			bottom: $spreadsheet-popup-button-margin;
+			right: $spreadsheet-popup-button-margin;
+			cursor: pointer;
+			height: $spreadsheet-popup-button-size;
+			width: $spreadsheet-popup-button-size;
 			font-family: FontAwesome;
-			line-height: 15px;
 			outline: none;
-			font-size: 15px;
-			border-radius: 3px;
-			color: $popup-button-arrow-color;
 			
 			&::before {
 				content: "\f0d7";
-				padding-left: 3px;
+				display: block;
+				padding-left: $spreadsheet-popup-button-content-padding;
+			}
+			
+			&::after {
+				border: none;
 			}
 		}
 		
-		
-		/* TOUCH STYLES */
+		// TOUCH STYLES 
 		.sheet-selection.touch {
 			&.fill {
 				.s-left,
 				.s-right {
-					width: 8px;
-					background: $sheet-selection-border-color url("touch-border-vert.png") no-repeat center;
+					width: $spreadsheet-touch-fill-size;
+					background: $spreadsheet-sheet-selection-border-color url("touch-border-vert.png") no-repeat center;
 				}
 				
 				.s-top,
 				.s-bottom {
-					height: 8px;
-					background: $sheet-selection-border-color url("touch-border-hor.png") no-repeat center;
+					height: $spreadsheet-touch-fill-size;
+					background: $spreadsheet-sheet-selection-border-color url("touch-border-hor.png") no-repeat center;
 				}
 			}
 			
 			.s-corner {
-				width: 12px;
-				height: 12px;
-				bottom: 5px;
-				left: 7px;
+				width: $spreadsheet-touch-corner-size;
+				height: $spreadsheet-touch-corner-size;
+				left: $spreadsheet-touch-corner-left-offset;
+				bottom: $spreadsheet-touch-corner-bottom-offset;
 			}
 			
 			.s-corner-touch {
-				width: 30px;
-				height: 30px;
+				width: $spreadsheet-toucharea-corner-size;
+				height: $spreadsheet-toucharea-corner-size;
 				position: absolute;
-				left: -10px;
-				bottom: -10px;
+				left: -$spreadsheet-toucharea-corner-left-offset;
+				bottom: -$spreadsheet-toucharea-corner-bottom-offset;
 			}
 		}
 	}
 
 
-	/* CELL COMMENT OVERLAY STYLES */
+	// CELL COMMENT OVERLAY STYLES 
 	.v-spreadsheet-comment-overlay {
-		background: $cell-comment-bg-color;
-		border: 1px solid $cell-comment-border-color;
-		border-radius: 4px;
-		-webkit-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
-		-moz-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
-		box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
-		padding: 10px;
-		overflow: auto !important;
+		@include valo-overlay-style;
+		padding: round($spreadsheet-base-font-size / 2);
+		overflow-y: auto !important;
+		overflow-x: hidden;
 		
 		.popupContent {
 			overflow: visible;
 		}
 		
 		.comment-overlay-author {
-			font-size: 12px;
+			padding-bottom: round($spreadsheet-base-font-size / 2);
+			font-size: round($spreadsheet-base-font-size * 0.75);
 			font-weight: bold;
 			white-space: nowrap;
-			padding-bottom: 6px;
 		}
 		
 		.comment-overlay-label {
-			max-width: 200px;
-			max-height: 150px;
+			max-width: 12 * $spreadsheet-base-font-size;
+			max-height: 10 * $spreadsheet-base-font-size;
 			white-space: pre-wrap;
+			word-wrap: break-word;
 		}
 		
 		.comment-overlay-input {
-			max-width: 200px;
-			max-height: 150px;
-			font-family: 'Open Sans', sans-serif;
-			font-size: 16px;
+			max-width: 12 * $spreadsheet-base-font-size;
+			max-height: 10 * $spreadsheet-base-font-size;
+			font-family: $spreadsheet-base-font-family;
+			font-size: $spreadsheet-base-font-size;
 			font-weight: 300;
 			outline: none;
-			background: $cell-comment-bg-color;
 			border: none;
 		}	
+	}
+	
+	// FILTER OVERLAY STYLES
+	.v-spreadsheet-popupbutton-overlay {
+		@include valo-overlay-style;
+		
+		.v-panel.spreadsheet-item-filter-layout {
+			background-color: transparent;
+			border: none;
+			
+			.v-panel-captionwrap, 
+			.v-panel-content, 
+			.v-panel-deco {
+				background-color: transparent;
+				border: none;
+			}
+		}
+	}
+
+	.v-spreadsheet-popupbutton-overlay-header {
+		background: $spreadsheet-popup-overlay-bg-color;
+		height: $spreadsheet-popupbutton-header-sizing;
+		position: relative;
+		width: 100%;
+		padding-bottom: round($spreadsheet-base-font-size / 2);
+		
+		.v-window-closebox {
+			position: absolute;
+			left: 0px;
+			top: 0px;
+			width: $spreadsheet-popupbutton-header-sizing;
+			height: $spreadsheet-popupbutton-header-sizing;
+			line-height: $spreadsheet-popupbutton-header-sizing;
+		}
+		
+		.header-caption {
+			margin: 0 $spreadsheet-popupbutton-header-sizing;
+			height: $spreadsheet-popupbutton-header-sizing;
+			line-height: $spreadsheet-popupbutton-header-sizing;
+			text-align: center;
+		}
 	}
 }

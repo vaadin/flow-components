@@ -1,0 +1,1049 @@
+$spreadsheet-border: 1px solid #C7C7C7 !default;
+$spreadsheet-base-font-family: Helvetica !default;
+$spreadsheet-base-font-size: 14px !default;
+$spreadsheet-header-font-size: 13px !default;
+$default-font-color: #6a6a6a !default;
+$functionbar-background-color: #ffffff !default;
+$functionbar-font-color: #6a6a6a !default;
+$address-field-background: #fafafa !default;
+$sheet-selector-background: #fafafa !default;
+$inactive-tab-background: #fafafa !default;
+$active-tab-background: #ffffff !default;
+$inactive-tab-text-color: #6a6a6a !default;
+$active-tab-text-color: #2584e2 !default;
+$tab-action-button-color: #464646 !default;
+$tab-action-button-inactive-color: #d6d6d6 !default;
+$header-border: 1px solid #C7C7C7 !default;
+$header-bg-color: #f5f5f5 !default;
+$selected-header-bg-color: #e6edf4 !default;
+$selected-header-border-color: #63b1ff !default;
+$col-header-gradient-top-color: #fcfcfc !default;
+$col-header-gradient-bottom-color: #ededed !default;
+$resize-line-color: #b8b8ff !default;
+$inactive-resize-line-color: #c7c7c7 !default;
+$cell-background-color: #ffffff !default;
+$cell-comment-triangle-color: #f00 !default;
+$freeze-pane-border: 1px solid black !default;
+$sheet-selection-border-color: #197de0 !default;
+$sheet-selection-corner-color: #197de1 !default;
+$sheet-selection-extend-corner-color: #6a44d9 !default;
+$sheet-selection-extend-inside-bg-color: #c8c6f6 !default;
+$sheet-selection-range-bg-color: #e8f2fc !default;
+$sheet-selection-highlight-outline-color: #222222 !default;
+$popup-button-border-color: #A7A7A7 !default;
+$popup-button-arrow-color: #676767 !default;
+$popup-overlay-bg-color: #fff !default;
+$popup-overlay-text-color: #474747 !default;
+$cell-comment-bg-color: #fff !default;
+$cell-comment-border-color: #A7A7A7 !default;
+
+@mixin spreadsheet-legacy {
+	.v-spreadsheet {
+		overflow: hidden;
+		position: relative;
+		
+		padding-bottom: 29px;
+		padding-left: 50px;
+		padding-top: 57px;
+		
+		border: $spreadsheet-border;
+		font-family: $spreadsheet-base-font-family;
+		font-size: $spreadsheet-base-font-size;
+		color: $default-font-color;
+		
+		&.hidefunctionbar {
+			padding-top: 28px;
+			
+			.functionbar {
+				height: 0;
+				display: none;
+			}
+			
+			.sheet {
+				&.top-right-pane, 
+				&.top-left-pane {
+					top: 0px;
+				}
+			}
+			.corner {
+				top: 0px;
+			}
+		}
+		
+		&.hidetabsheet {
+			padding-bottom: 0px;
+			
+			.sheet-tabsheet {
+				height: 0;
+				display: none;
+			}
+			
+			.sheet {
+				&.bottom-right-pane {
+					bottom: 0px;
+				}
+			}
+		}
+		
+		> div {
+			outline: none;
+		}
+		
+		> div, 
+		.sheet > div {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+		
+		&.row-resizing,
+		&.row-resizing div {
+			cursor: row-resize;
+		}	
+		
+		&.col-resizing,
+		&.col-resizing div {
+			cursor: col-resize;
+		}
+		
+		&.selecting {
+			cursor:crosshair;
+		}
+		
+		
+		/** FUNCTION BAR */
+		.functionbar {
+			background-color: $functionbar-background-color;
+			border-bottom: $spreadsheet-border;
+			height: 29px;
+			left: 0;
+			position: absolute;
+			top: 0;
+			width: 100%;
+			z-index: 200;
+		
+			.functionfield,
+			.addressfield {
+				font-size: $spreadsheet-base-font-size;
+				height: 18px;
+				width: 100%;
+				padding: 0;
+				padding-left: 5px;
+				border: none;
+				box-sizing: border-box;
+				color: $functionbar-font-color;
+				outline: none;
+			}
+			
+			.fixed-left-panel {
+				float: left;
+				width: 180px;
+				height: 100%;
+				border-right: $spreadsheet-border;
+				padding-top: 6px;
+				box-sizing: border-box;
+				background: $address-field-background; 
+			}
+			
+			.adjusting-right-panel {
+				overflow: hidden;
+				padding-right: 10px;
+				height: 100%;
+				padding-top: 6px;
+				box-sizing: border-box;
+			}
+			
+			.addressfield {
+				text-align: center;
+				background: $address-field-background;
+			}
+		}
+		
+		
+		/** SHEET (BOTTOM RIGHT PANE) */
+		.sheet {
+			&.bottom-right-pane {
+				overflow: scroll;
+				right: 0;
+				bottom: 28px;
+				position: absolute;
+			}
+			
+			.cell {
+				background-color: $cell-background-color;
+				border-right: $spreadsheet-border;
+				border-bottom: $spreadsheet-border;
+				-webkit-box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				box-sizing: border-box;
+				overflow: visible;
+				padding: 0 2px;
+				position: absolute;
+				white-space: nowrap;
+				flex-direction: column;
+				justify-content: flex-end;
+				line-height: normal;
+				
+				&.cell-range {
+				 	background-color: $sheet-selection-range-bg-color !important;
+				}
+				
+				&.selected-cell-highlight {
+					outline: solid $sheet-selection-highlight-outline-color 1px;
+					-moz-outline-offset: -2px;
+					outline-offset: -2px; 
+					z-index: 3;
+				}
+			}
+			
+			div{
+				&.cell.r {
+					text-align: right;
+				}
+				
+				&.merged-cell {
+					display: block;
+					overflow: hidden;
+					z-index: 5 !important;
+				}
+				
+				&.custom-editor-cell {
+					padding: 2px;
+				}
+			}
+			
+			&.bottom-right-pane div.merged-cell {
+				z-index: 5 !important;
+			}
+			
+			> input[type="text"] {
+				border: 0 !important;
+				-webkit-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+				-moz-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+				box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+				cursor: text;
+				display: block !important;
+				outline: none !important;
+				overflow: hidden;
+				padding: 0 !important;
+				position: absolute;
+				z-index: 26 !important;
+			}
+			
+			.floater {
+				border-right: 0;
+				border-bottom: 0;
+				z-index: -1;
+				background-color: white;
+			}
+		}
+		
+		&.nogrid .sheet .cell {
+			border-right: 0px;
+			border-bottom: 0px;
+		}
+		
+		.top-left-pane div.merged-cell {
+			z-index: 25 !important;
+		}
+		
+		.top-right-pane div.merged-cell,
+		.bottom-left-pane div.merged-cell {
+			z-index: 15 !important;
+		}
+		
+		
+		/** SHEET FREEZE PANES */
+		.top-left-pane,
+		.top-right-pane,
+		.bottom-left-pane {
+			border-right: $freeze-pane-border;
+			border-bottom: $freeze-pane-border;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+			overflow: visible;
+			position: absolute;
+			
+			&.inactive {
+				border-right: 0;
+				border-bottom: 0;
+			}
+		}
+		
+		.bottom-left-pane {
+			height: 100%;
+			left: 0;
+			padding-bottom: 28px;
+			z-index: 10;
+			
+			.rh {
+				left: 0;
+				margin-top: 0 !important;
+			}
+			
+			.cell, .sheet-image {
+				margin-left: 50px;
+			}
+			
+			.s-paint {
+				margin-left: 49px;
+			}
+			
+			.sheet-selection {
+				margin-left: 51px;
+			}
+		}
+		
+		.top-left-pane {
+			left: 0;
+			top: 30px;
+			z-index: 20;
+			
+			.ch {
+				top: 0;
+				margin-left: 50px;
+			}
+			
+			.rh {
+				left: 0;
+				margin-top: 27px;
+			}
+			
+			.cell, .sheet-image {
+				margin-top: 27px;
+				margin-left: 50px;
+			}
+			
+			.s-paint {
+				margin-top: 26px;
+				margin-left: 49px;
+			}
+			
+			.sheet-selection {
+				margin-top: 28px;
+				margin-left: 51px;
+			}
+		}
+		
+		.top-right-pane {
+			top: 30px;
+			width: 100%;
+			z-index: 11;
+			
+			.ch {
+				top: 0;
+				margin-left: 0 !important;
+			}
+			
+			.cell, .sheet-image {
+				margin-top: 27px;
+			}
+			
+			.s-paint {
+				margin-top: 26px;
+			}
+			
+			.sheet-selection {
+				margin-top: 28px;
+			}
+		}
+		
+		&.noheaders {
+			.top-left-pane, .top-right-pane {
+				.cell, .sheet-image {
+					margin-top: 0;
+				}
+				.sheet-selection {
+					margin-top: 1px;
+				}
+				.s-paint {
+					margin-top: -1px;
+				}
+			}
+			
+			.top-left-pane, .bottom-left-pane {
+				.cell, .sheet-image {
+					margin-left: 0;
+				}
+				.sheet-selection {
+					margin-left: 1px;
+				}
+				.s-paint {
+					margin-left: -1px;
+				}
+			}
+		}
+		
+		
+		/** SHEET HEADERS */
+		.ch, .rh, .corner {
+			background-color: $header-bg-color;
+			font-family: Helvetica;
+			font-size: $spreadsheet-header-font-size;
+			overflow: hidden;
+			position: absolute;
+			text-align: center;
+		}
+		
+		.rh {
+			border-right: $header-border;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+			cursor: e-resize;
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			width: 50px;
+			z-index: 29;
+			display: flex;
+			justify-content: center;
+			vertical-align: middle;
+			flex-direction: column;
+			padding-top: 3px;
+			
+			&.selected-row-header {
+				background: $selected-header-bg-color !important;
+				border-right: 2px solid $selected-header-border-color;
+			}
+			
+			.header-resize-dnd-first, 
+			.header-resize-dnd-second {
+				background: transparent;
+				cursor: row-resize;
+				height: 3px;
+				position: absolute;
+				left: 0;
+				width: 49px;
+				z-index: 30;
+			}
+			
+			.header-resize-dnd-first {
+				top: 0;
+			}
+			
+			.header-resize-dnd-second {
+				border-bottom: $header-border;
+				bottom: 0;
+			}
+			
+			&.resize-extra {
+				border-bottom: $header-border;
+			}
+		}
+		
+		.ch {
+			background: -moz-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -webkit-gradient(left top, left bottom, color-stop(2%, $col-header-gradient-top-color), color-stop(98%, $col-header-gradient-bottom-color));
+			background: -webkit-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -o-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -ms-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			/* Vaadin SASS compiler can't handle the following line */
+			/* background: linear-gradient(to bottom, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%); */
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='$col-header-gradient-top-color', endColorstr='$col-header-gradient-bottom-color', GradientType=0 );
+			border-bottom: $header-border;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+			cursor: s-resize;
+			height: 27px;
+			padding-top: 4px;
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			z-index: 29;
+			
+			&.selected-column-header {
+				background: $selected-header-bg-color !important;
+				border-bottom: 2px solid $selected-header-border-color;
+			}
+			
+			.header-resize-dnd-first, 
+			.header-resize-dnd-second {
+				background: transparent;
+				cursor: col-resize;
+				height: 27px;
+				position: absolute;
+				top: 0;
+				width: 3px;
+				z-index: 30;
+			}
+			
+			.header-resize-dnd-first {
+				left: 0;
+			}
+			
+			.header-resize-dnd-second {
+				border-right: $header-border;
+				right: 0;
+			}
+			
+			&.resize-extra {
+				border-right: $header-border;
+			}
+		}
+		
+		&.noheaders {
+			padding-left: 0px;
+			padding-top: 30px; /* functionbar height + 1*/
+			.ch, .rh, .corner {
+				display: none;
+			}
+		}
+		
+		.ch.col1 .header-resize-dnd-first,
+		.rh.row1 .header-resize-dnd-first {
+			display: none;
+		}
+		
+		> div.resize-line {
+			background: $resize-line-color;
+		}
+		 
+		.sheet > div.resize-line {
+			background: $inactive-resize-line-color;
+		}
+		 
+		.resize-line, 
+		.sheet > div.resize-line {
+			border: none;
+			height: 0;
+			padding: 0;
+			visibility: hidden;
+			width: 0;
+			z-index: 25;
+			position: absolute;
+		}
+		
+		&.col-resizing {
+			.resize-line, 
+			.sheet > div.resize-line {
+				height: 100%;
+				visibility: visible;
+				width: 1px;
+			}
+			
+			> .resize-line {
+				margin-left: 49px;
+				margin-top: -30px;
+			}
+			
+			.sheet > div.resize-line {
+				margin-left: -1px;
+			}
+		}
+		
+		&.row-resizing {
+			.resize-line, .sheet > div.resize-line {
+				height: 1px;
+				visibility: visible;
+				width: 100%;
+			}
+			
+			>.resize-line {
+				margin-top: 56px;
+				margin-left: -50px;
+			}
+			
+			.sheet>div.resize-line {
+				margin-top: -1px;
+			}
+		}
+		
+		.corner {
+			cursor: default;
+			top: 30px;
+			left: 0;
+			width: 50px;
+			height: 27px;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+			border-bottom: $header-border;
+			border-right: $header-border;
+			z-index: 100;
+			background: -moz-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -webkit-gradient(left top, left bottom, color-stop(2%, $col-header-gradient-top-color), color-stop(98%, $col-header-gradient-bottom-color));
+			background: -webkit-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -o-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -ms-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			/* Vaadin SASS compiler can't handle the following line */
+			/* background: linear-gradient(to bottom, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%); */
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='$col-header-gradient-top-color', endColorstr='$col-header-gradient-bottom-color', GradientType=0 );
+		}
+		
+		
+		/** SHEET IMAGES */
+		.sheet > div.sheet-image {
+			background: transparent;
+			border: none;
+			cursor: default;
+			height: auto;
+			width: auto;
+			position: absolute;
+		}
+		
+		.bottom-right-pane.sheet > div.sheet-image {
+			z-index: 5;
+		}
+		
+		.top-left-pane > div.sheet-image {
+			z-index: 25;
+		}
+		
+		.top-right-pane, 
+		.bottom-left-pane {
+			> div.sheet-image {
+				z-index: 15;
+			}
+		}
+		
+		
+		/** CELL COMMENT */
+		.sheet {
+			.cell-comment-triangle {
+				border-color: transparent $cell-comment-triangle-color transparent transparent;
+				border-style: solid;
+				border-width: 0 9px 9px 0;
+				height: 0;
+				line-height: 0;
+				margin: 0;
+				padding: 0;
+				position: absolute;
+				right: 0;
+				top: 0;
+				width: 0;
+			}
+			
+			.comment-overlay-line {
+				background-color: $cell-comment-line-color !important;
+				border: none !important;
+				display: block !important;
+				height: 1px;
+				padding: 0;
+				position: absolute;
+				-webkit-transform-origin: 0% 50%;
+				-ms-transform-origin: 0% 50%;
+				transform-origin: 0% 50%;
+				z-index: 21;
+			}
+		}
+		
+		
+		/** SELECTION WIDGET */
+		div.sheet-selection {
+			background-color: transparent !important;
+			border: none !important;
+			display: block;
+			position: absolute;
+			width: 0px;
+			height: 0px;
+			overflow: visible;
+			pointer-events:none;
+			margin-left: 1px;
+			margin-top: 1px;
+			
+			&.col0.row0 {
+				display: none;
+			}
+		}
+		
+		.sheet-selection {
+			.s-top, .s-left, .s-bottom, .s-right {
+				padding: 0;	
+				background-color: $sheet-selection-border-color;
+				position: absolute;
+				
+				&.extend {
+					background-color: $sheet-selection-extend-corner-color !important;
+				}
+			}
+			
+			.s-top {
+				top: -2px;
+				left: -2px;
+				height: 2px;
+				pointer-events:all;
+			}
+			
+			.s-left {
+				width: 2px;
+				padding-bottom: 1px;
+			}
+			
+			.s-bottom {
+				height: 2px;
+				bottom: 0;
+			}
+			
+			.s-right {
+				right: 0;
+				width: 2px;
+			}
+			
+			.s-corner {
+				background-color: $sheet-selection-corner-color;
+				border-radius: 2px;
+				bottom: -2px;
+				cursor: crosshair;
+				height: 7px;
+				left: -2px;
+				outline: 2px solid white;
+				position: absolute;
+				width: 7px;
+			}
+		}
+		
+		.s-paint {
+			background: transparent;
+			border: none !important;
+			cursor: crosshair;
+			outline: 2px solid $sheet-selection-extend-corner-color;
+			outline-offset: -2px;
+			padding: 0;
+			position: absolute;
+			z-index: 20;
+			margin-top: -1px;
+			margin-left: -1px;
+			
+			&.s-paint-inside {
+				background: $sheet-selection-extend-inside-bg-color !important;
+				cursor: crosshair;
+			}
+		}
+		
+		
+		/** SHEET TABSHEET */
+		.sheet-tabsheet {
+			background: $sheet-selector-background;
+			border-top: $spreadsheet-border;
+			bottom: 0;
+			cursor: default;
+			height: 28px;
+			left: 0;
+			overflow: hidden;
+			position: absolute;
+			width: 100%;
+			z-index: 50;
+			
+			.sheet-tabsheet-options {
+				background: $sheet-selector-background;
+				cursor: pointer;
+				display: inline-block;
+				height: 28px;
+				position: relative;
+				width: 140px;
+				z-index: 60;
+				
+				div {
+					cursor: pointer;
+					display: inline-block;
+					font-weight: bold;
+					position: relative;
+					text-align: center;
+					z-index: inherit;
+					width: 26px;
+
+					padding-top: 4px;
+					color: $tab-action-button-color;
+					font-family: FontAwesome;
+					
+					&.scroll-tabs-beginning::before {
+						content: "\f053\f053";
+					}
+					
+					&.scroll-tabs-end::before {
+						content: "\f054\f054";
+					}
+					
+					&.scroll-tabs-left::before {
+						content: "\f053";
+					}
+					
+					&.scroll-tabs-right::before {
+						content: "\f054";
+					}
+					
+					&.add-new-tab::before {
+						content: "\f067";
+					}
+					
+					&.scroll-tabs-beginning, 
+					&.scroll-tabs-end {
+						padding: 0 2px;
+					}
+					
+					&:hover {
+						color: $sheet-selection-border-color;
+					}
+					
+					&.hidden {
+						color: $tab-action-button-inactive-color;
+						cursor: default;
+					}
+				}
+			}
+
+			.sheet-tabsheet-container {
+				display: inline-block;
+				left: 140px;
+				position: absolute;
+				z-index: inherit;
+				margin-right: 206px;
+				
+				.sheet-tabsheet-tab {
+					font-family: $spreadsheet-base-font-family;
+					background: $inactive-tab-background;
+					border: $spreadsheet-border;
+					border-top: none;
+					border-bottom-right-radius: 5px;
+					border-bottom-left-radius: 5px;
+					cursor: pointer;
+					display: inline-block;
+					font-size: 14px;
+					font-weight: 300;
+					color: $inactive-tab-text-color;
+					height: 20px;
+					margin-bottom: 5px;
+					margin-left: 5px;
+					max-width: 200px;
+					min-width: 50px;
+					overflow: hidden;
+					padding: 4px 8px 0;
+					position: relative;
+					text-align: center;
+					text-overflow: ellipsis;
+					top: -1px;
+					z-index: inherit;
+					
+					&.selected-tab {
+						background: $active-tab-background;
+						cursor: default;
+						color: $active-tab-text-color;
+						max-width: none;
+						position: relative;
+						
+						input[type="text"] {
+							font-family: $spreadsheet-base-font-family;
+							color: $active-tab-text-color;
+							border: none !important;
+							font-size: 14px;
+							font-weight: 300;
+							height: 20px;
+							margin-top: 4px;
+							margin-left: 10px;
+							outline: none !important;
+							padding: 0 !important;
+							position: absolute;
+							top: 0;
+							left: 0;
+							width: inherit;
+						}
+					}
+				}
+			}
+			
+			.sheet-tabsheet-temp {
+				font-family: $spreadsheet-base-font-family;
+				font-size: 14px;
+				display: inline;
+				left: -5000px;
+				position: fixed;
+				white-space-collapse: preserve;
+			}
+			
+			.sheet-tabsheet-infolabel  {
+				z-index: inherit;
+				position: absolute;
+				right: 0;
+				font-weight: bold;
+				font-size: 8pt;
+				border-left: 1px solid rgb(169, 169, 169);
+				padding-left: 5px;
+				padding-top: 2px;
+				width: 200px;
+				height: 16px;
+				display: inline;
+				text-overflow: ellipsis;
+			}
+		}
+		
+		.sheet-tabsheet,
+		.sheet-tabsheet div {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+		
+		
+		/** FILTER BUTTON */
+		.sheet div div.popupbutton {
+			background: -moz-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -webkit-gradient(left top, left bottom, color-stop(2%, $col-header-gradient-top-color), color-stop(98%, $col-header-gradient-bottom-color));
+			background: -webkit-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -o-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			background: -ms-linear-gradient(top, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%);
+			/* Vaadin SASS compiler can't handle the following line */
+			/* background: linear-gradient(to bottom, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%); */
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='$col-header-gradient-top-color', endColorstr='$col-header-gradient-bottom-color', GradientType=0 );
+			border: 1px solid $popup-button-border-color;
+			bottom: 1px;
+			cursor: pointer;
+			height: 14px;
+			position: absolute;
+			right: 1px;
+			width: 14px;
+			font-family: FontAwesome;
+			line-height: 15px;
+			outline: none;
+			font-size: 15px;
+			border-radius: 3px;
+			color: $popup-button-arrow-color;
+			
+			&::before {
+				content: "\f0d7";
+				padding-left: 3px;
+			}
+		}
+		
+		
+		/* TOUCH STYLES */
+		.sheet-selection.touch {
+			&.fill {
+				.s-left,
+				.s-right {
+					width: 8px;
+					background: $sheet-selection-border-color url("touch-border-vert.png") no-repeat center;
+				}
+				
+				.s-top,
+				.s-bottom {
+					height: 8px;
+					background: $sheet-selection-border-color url("touch-border-hor.png") no-repeat center;
+				}
+			}
+			
+			.s-corner {
+				width: 12px;
+				height: 12px;
+				bottom: 5px;
+				left: 7px;
+			}
+			
+			.s-corner-touch {
+				width: 30px;
+				height: 30px;
+				position: absolute;
+				left: -10px;
+				bottom: -10px;
+			}
+		}
+	}
+
+
+	/* CELL COMMENT OVERLAY STYLES */
+	.v-spreadsheet-comment-overlay {
+		background: $cell-comment-bg-color;
+		border: 1px solid $cell-comment-border-color;
+		border-radius: 4px;
+		-webkit-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+		-moz-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+		box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
+		padding: 10px;
+		overflow: auto !important;
+		
+		.popupContent {
+			overflow: visible;
+		}
+		
+		.comment-overlay-author {
+			font-size: 12px;
+			font-weight: bold;
+			white-space: nowrap;
+			padding-bottom: 6px;
+		}
+		
+		.comment-overlay-label {
+			max-width: 200px;
+			max-height: 150px;
+			white-space: pre-wrap;
+		}
+		
+		.comment-overlay-input {
+			max-width: 200px;
+			max-height: 150px;
+			font-family: 'Open Sans', sans-serif;
+			font-size: 16px;
+			font-weight: 300;
+			outline: none;
+			background: $cell-comment-bg-color;
+			border: none;
+		}	
+	}
+	
+	// FILTER OVERLAY STYLES
+	.v-spreadsheet-popupbutton-overlay {
+		background-color: $popup-overlay-bg-color;
+		color: $popup-overlay-text-color;
+		border-radius: 4px;
+		-webkit-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
+		-moz-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
+		box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
+		padding: 5px; 
+		
+		.v-panel .spreadsheet-item-filter-layout {
+			background-color : transparent;
+			border: none;
+			color: $popup-overlay-text-color; 
+			.v-panel-captionwrap,
+			.v-panel-content, 
+			.v-panel-deco { 
+				background-color : transparent;
+				border: none;
+				color: $popup-overlay-text-color;
+			}
+		}
+	}
+	
+	.v-spreadsheet-popupbutton-overlay-header {
+		background: $popup-overlay-bg-color;
+		height: 20px;
+		position: relative;
+		width: 100%;
+		padding-bottom: 8px; 
+		
+		.v-window-closebox { 
+			position : absolute;
+			left: 2px;
+			top: 0px;
+			width: 16px;
+			height: 16px;
+			line-height: 16px;
+			font-size: 16px;
+			color: $popup-overlay-text-color;
+		}
+
+		.header-caption {
+			color: $popup-overlay-text-color;
+			font-size: 16px;
+			margin: 0 30px;
+			text-align: center;
+			height: 20px;
+			line-height: 20px;
+		}
+	}	
+}
+	

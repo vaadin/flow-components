@@ -27,10 +27,12 @@
 // For more information, see: https://vaadin.com/book/-/page/themes.valo.html
 // Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples
 
+//@import "../reindeer/reindeer.scss";
 @import "../valo/valo.scss";
 
 @mixin demo {
+  //@include reindeer;
   @include valo;
-
+  
   // Insert your own theme rules here
 }
