@@ -29,6 +29,7 @@ public class CellData implements Serializable {
     public String cellStyle = "cs0";
     public boolean rightAlign = false;
     public boolean locked = false;
+    public boolean needsMeasure;
 
     @Override
     public int hashCode() {

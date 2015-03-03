@@ -187,15 +187,21 @@ public class CellValueManager implements Serializable {
                 // if the cell is not wrapping text, and is of type numeric or
                 // formula (but not date), calculate if formatted cell value
                 // fits the column width and possibly use scientific notation.
+                cellData.value = formattedCellValue;
+                cellData.needsMeasure = false;
                 if (!cellStyle.getWrapText()
                         && (!SpreadsheetUtil.cellContainsDate(cell)
                                 && cell.getCellType() == Cell.CELL_TYPE_NUMERIC || (cell
                                 .getCellType() == Cell.CELL_TYPE_FORMULA && !cell
                                 .getCellFormula().startsWith("HYPERLINK")))) {
-                    cellData.value = getScientificNotationStringForNumericCell(
-                            cell, formattedCellValue);
-                } else {
-                    cellData.value = formattedCellValue;
+                    if (!doesValueFit(cell, formattedCellValue)) {
+                        if (valueContainsOnlyNumbers(formattedCellValue)) {
+                            cellData.value = getScientificNotationStringForNumericCell(
+                                    cell, formattedCellValue);
+                        } else {
+                            cellData.needsMeasure = true;
+                        }
+                    }
                 }
                 if (cellStyle.getAlignment() == CellStyle.ALIGN_GENERAL) {
                     if (SpreadsheetUtil.cellContainsDate(cell)
@@ -230,44 +236,48 @@ public class CellValueManager implements Serializable {
         return cellData;
     }
 
-    protected String getScientificNotationStringForNumericCell(Cell cell,
-            String formattedValue) {
+    private boolean valueContainsOnlyNumbers(String value) {
+        return value.split("\\D").length == 1;
+    }
 
+    private boolean doesValueFit(Cell cell, String value) {
         Float r = cellStyleWidthRatioMap.get((int) cell.getCellStyle()
                 .getIndex());
-
         if (r == null) {
-            // no col data available, return same val
-            return formattedValue;
+            return true;
         }
-
         BigDecimal ratio = new BigDecimal(r);
-        BigDecimal stringPixels = ratio.multiply(new BigDecimal(formattedValue
-                .length()));
+        BigDecimal stringPixels = ratio
+                .multiply(new BigDecimal(value.length()));
         BigDecimal columnWidth = new BigDecimal(
                 spreadsheet.getState(false).colW[cell.getColumnIndex()] - 10);
-        if (stringPixels.compareTo(columnWidth) == 1) {
-            int numberOfDigits = columnWidth.divide(ratio, RoundingMode.DOWN)
-                    .intValue() - 4; // 0.#E10
-            if (numberOfDigits < 1) {
-                return "###";
-            } else {
-                StringBuilder format = new StringBuilder("0.");
-                for (int i = 0; i < numberOfDigits; i++) {
-                    format.append('#');
-                }
-                format.append("E0");
-                try {
-                    return new DecimalFormat(format.toString()).format(cell
-                            .getNumericCellValue());
-                } catch (IllegalStateException ise) {
-                    LOGGER.log(
-                            Level.FINE,
-                            "CellType mismatch: " + ise.getMessage()
-                                    + ", on cell "
-                                    + SpreadsheetUtil.toKey(cell) + " of type "
-                                    + cell.getCellType(), ise);
-                }
+        return stringPixels.compareTo(columnWidth) <= 0;
+    }
+
+    protected String getScientificNotationStringForNumericCell(Cell cell,
+            String formattedValue) {
+        Float r = cellStyleWidthRatioMap.get((int) cell.getCellStyle()
+                .getIndex());
+        BigDecimal ratio = new BigDecimal(r);
+        BigDecimal columnWidth = new BigDecimal(
+                spreadsheet.getState(false).colW[cell.getColumnIndex()] - 10);
+        int numberOfDigits = columnWidth.divide(ratio, RoundingMode.DOWN)
+                .intValue() - 4; // 0.#E10
+        if (numberOfDigits < 1) {
+            return "###";
+        } else {
+            StringBuilder format = new StringBuilder("0.");
+            for (int i = 0; i < numberOfDigits; i++) {
+                format.append('#');
+            }
+            format.append("E0");
+            try {
+                return new DecimalFormat(format.toString()).format(cell
+                        .getNumericCellValue());
+            } catch (IllegalStateException ise) {
+                LOGGER.log(Level.FINE, "CellType mismatch: " + ise.getMessage()
+                        + ", on cell " + SpreadsheetUtil.toKey(cell)
+                        + " of type " + cell.getCellType(), ise);
             }
         }
         return formattedValue;

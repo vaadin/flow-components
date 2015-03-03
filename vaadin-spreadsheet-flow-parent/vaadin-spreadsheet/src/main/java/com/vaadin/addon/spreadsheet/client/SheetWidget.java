@@ -2080,6 +2080,7 @@ public class SheetWidget extends Panel {
         Set<Integer> keys = actionHandler.getCellStyleToCSSStyle().keySet();
         HashMap<Integer, Float> cellStyleWidthRatioMap = new HashMap<Integer, Float>();
         sheet.appendChild(fontWidthDummyElement);
+        fontWidthDummyElement.setInnerText("5555555555");
         for (Integer key : keys) {
             fontWidthDummyElement.setClassName("cell cs" + key);
             int clientWidth = fontWidthDummyElement.getClientWidth();
@@ -2089,6 +2090,15 @@ public class SheetWidget extends Panel {
         }
         fontWidthDummyElement.removeFromParent();
         actionHandler.setCellStyleWidthRatios(cellStyleWidthRatioMap);
+    }
+
+    int measureValueWidth(String cellStyle, String value) {
+        sheet.appendChild(fontWidthDummyElement);
+        fontWidthDummyElement.setClassName("cell " + cellStyle);
+        fontWidthDummyElement.setInnerText(value);
+        int clientWidth = fontWidthDummyElement.getClientWidth();
+        fontWidthDummyElement.removeFromParent();
+        return clientWidth;
     }
 
     private void removeFrozenHeaders(ArrayList<DivElement> headers) {
@@ -2324,7 +2334,7 @@ public class SheetWidget extends Panel {
         for (int i = firstRowIndex; i <= lastRowIndex; i++) {
             ArrayList<Cell> row = new ArrayList<Cell>(lastColumnIndex);
             for (int j = firstColumnIndex; j <= lastColumnIndex; j++) {
-                Cell cell = new Cell(j, i);
+                Cell cell = new Cell(this, j, i);
                 sheet.appendChild(cell.getElement());
                 row.add(cell);
             }
@@ -2336,7 +2346,7 @@ public class SheetWidget extends Panel {
         for (int v = verticalSplitPosition > 0 ? verticalSplitPosition + 1 : 1; v <= lastRowIndex; v++) {
             ArrayList<Cell> row = new ArrayList<Cell>();
             for (int h = 1; h <= horizontalSplitPosition; h++) {
-                Cell cell = new Cell(h, v);
+                Cell cell = new Cell(this, h, v);
                 bottomLeftPane.appendChild(cell.getElement());
                 row.add(cell);
             }
@@ -2349,7 +2359,7 @@ public class SheetWidget extends Panel {
             ArrayList<Cell> row = new ArrayList<Cell>();
             for (int h = horizontalSplitPosition > 0 ? horizontalSplitPosition + 1
                     : 1; h <= lastColumnIndex; h++) {
-                Cell cell = new Cell(h, v);
+                Cell cell = new Cell(this, h, v);
                 topRightPane.appendChild(cell.getElement());
                 row.add(cell);
             }
@@ -2360,7 +2370,7 @@ public class SheetWidget extends Panel {
     private void createTopLeftPaneCells() {
         for (int v = 1; v <= verticalSplitPosition; v++) {
             for (int h = 1; h <= horizontalSplitPosition; h++) {
-                Cell cell = new Cell(h, v);
+                Cell cell = new Cell(this, h, v);
                 topLeftPane.appendChild(cell.getElement());
                 topLeftCells.add(cell);
             }
@@ -2459,7 +2469,7 @@ public class SheetWidget extends Panel {
                     cell = row.get(c - c1);
                     cell.update(c, r, getCellData(c, r));
                 } else {
-                    cell = new Cell(c, r, getCellData(c, r));
+                    cell = new Cell(this, c, r, getCellData(c, r));
                     paneElement.appendChild(cell.getElement());
                     row.add(c - c1, cell);
                 }
@@ -2579,8 +2589,8 @@ public class SheetWidget extends Panel {
                 // add new cells if required
                 while (lastC < c2) {
                     lastC++;
-                    Cell cell = new Cell(lastC, rIndex, getCellData(lastC,
-                            rIndex));
+                    Cell cell = new Cell(this, lastC, rIndex, getCellData(
+                            lastC, rIndex));
                     paneElement.appendChild(cell.getElement());
                     row.add(cell);
                 }
@@ -2592,8 +2602,8 @@ public class SheetWidget extends Panel {
                 // add new cells if required
                 while (firstC > c1) {
                     firstC--;
-                    Cell cell = new Cell(firstC, rIndex, getCellData(firstC,
-                            rIndex));
+                    Cell cell = new Cell(this, firstC, rIndex, getCellData(
+                            firstC, rIndex));
                     paneElement.appendChild(cell.getElement());
                     row.add(0, cell);
                 }
@@ -2616,7 +2626,7 @@ public class SheetWidget extends Panel {
                 ArrayList<Cell> row = new ArrayList<Cell>(c2 - c1 + 1);
                 lastR++;
                 for (int i = c1; i <= c2; i++) {
-                    Cell cell = new Cell(i, lastR, getCellData(i, lastR));
+                    Cell cell = new Cell(this, i, lastR, getCellData(i, lastR));
                     row.add(cell);
                     paneElement.appendChild(cell.getElement());
                 }
@@ -2628,7 +2638,8 @@ public class SheetWidget extends Panel {
                 row.ensureCapacity(c2 - c1 + 1);
                 firstR--;
                 for (int i = c1; i <= c2; i++) {
-                    Cell cell = new Cell(i, firstR, getCellData(i, firstR));
+                    Cell cell = new Cell(this, i, firstR,
+                            getCellData(i, firstR));
                     row.add(cell);
                     paneElement.appendChild(cell.getElement());
                 }
@@ -3054,7 +3065,7 @@ public class SheetWidget extends Panel {
             jsniUtil.insertRule(mergedRegionStyle, sb.toString());
         }
         String key = toKey(region.col1, region.row1);
-        MergedCell mergedCell = new MergedCell(region.col1, region.row1);
+        MergedCell mergedCell = new MergedCell(this, region.col1, region.row1);
         DivElement element = mergedCell.getElement();
         element.addClassName(MERGED_CELL_CLASSNAME);
         updateMergedRegionRegionSize(region, mergedCell);
@@ -3576,10 +3587,11 @@ public class SheetWidget extends Panel {
             CellData cd = i.next();
             topLeftCells.get(
                     (cd.row - 1) * horizontalSplitPosition + cd.col - 1)
-                    .setValue(cd.value, cd.cellStyle);
+                    .setValue(cd.value, cd.cellStyle, cd.needsMeasure);
             String key = toKey(cd.col, cd.row);
             if (isMergedCell(key)) {
-                getMergedCell(key).setValue(cd.value, cd.cellStyle);
+                getMergedCell(key).setValue(cd.value, cd.cellStyle,
+                        cd.needsMeasure);
             }
             if (cd.value == null) {
                 cachedCellData.remove(key);
@@ -3611,11 +3623,13 @@ public class SheetWidget extends Panel {
                     row = rows.get(cd.row - r1);
                     rowIndex = cd.row;
                 }
-                row.get(cd.col - c1).setValue(cd.value, cd.cellStyle);
+                row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
+                        cd.needsMeasure);
             }
             String key = toKey(cd.col, cd.row);
             if (isMergedCell(key)) {
-                getMergedCell(key).setValue(cd.value, cd.cellStyle);
+                getMergedCell(key).setValue(cd.value, cd.cellStyle,
+                        cd.needsMeasure);
             }
             if (cd.value == null) {
                 cachedCellData.remove(key);
@@ -3636,7 +3650,8 @@ public class SheetWidget extends Panel {
                 cachedCellData.put(key, cd);
             }
             if (isMergedCell(key)) {
-                getMergedCell(key).setValue(cd.value, cd.cellStyle);
+                getMergedCell(key).setValue(cd.value, cd.cellStyle,
+                        cd.needsMeasure);
             } else {
                 Cell cell = null;
                 if (isCellRenderedInScrollPane(cd.col, cd.row)) {
@@ -3647,7 +3662,7 @@ public class SheetWidget extends Panel {
                 }
 
                 if (cell != null) {
-                    cell.setValue(cd.value, cd.cellStyle);
+                    cell.setValue(cd.value, cd.cellStyle, cd.needsMeasure);
                 }
             }
         }
@@ -4356,7 +4371,7 @@ public class SheetWidget extends Panel {
      * @param row
      * @return
      */
-    private Cell getCell(int col, int row) {
+    Cell getCell(int col, int row) {
         if (isCellRenderedInFrozenPane(col, row)) {
             return getFrozenCell(col, row);
         } else {

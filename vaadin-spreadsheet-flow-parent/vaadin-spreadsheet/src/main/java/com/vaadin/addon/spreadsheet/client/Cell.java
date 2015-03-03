@@ -31,9 +31,13 @@ public class Cell {
     private int row;
     private Element popupButtonElement;
     private String value;
-    private String cellStyle = "cs0";
 
-    public Cell(int col, int row) {
+    private String cellStyle = "cs0";
+    private boolean needsMeasure;
+    private SheetWidget sheetWidget;
+
+    public Cell(SheetWidget sheetWidget, int col, int row) {
+        this.sheetWidget = sheetWidget;
         this.col = col;
         this.row = row;
 
@@ -41,13 +45,15 @@ public class Cell {
         updateCellValues();
     }
 
-    public Cell(int col, int row, CellData cellData) {
+    public Cell(SheetWidget sheetWidget, int col, int row, CellData cellData) {
+        this.sheetWidget = sheetWidget;
         this.col = col;
         this.row = row;
         element = Document.get().createDivElement();
         if (cellData == null) {
             value = null;
         } else {
+            needsMeasure = cellData.needsMeasure;
             value = cellData.value;
             cellStyle = cellData.cellStyle;
         }
@@ -83,12 +89,16 @@ public class Cell {
             element.setInnerText("");
             element.getStyle().clearZIndex();
         } else {
-            if (value.startsWith("'")) {
+            element.getStyle().setZIndex(ZINDEXVALUE);
+            if (needsMeasure
+                    && sheetWidget.measureValueWidth(cellStyle, value) > getElement()
+                            .getClientWidth()) {
+                element.setInnerText("###");
+            } else if (value.startsWith("'")) {
                 element.setInnerText(value.substring(1, value.length()));
             } else {
                 element.setInnerText(value);
             }
-            element.getStyle().setZIndex(ZINDEXVALUE);
         }
     }
 
@@ -118,11 +128,12 @@ public class Cell {
         return value;
     }
 
-    public void setValue(String value, String cellStyle) {
+    public void setValue(String value, String cellStyle, boolean needsMeasure) {
         if (!this.cellStyle.equals(cellStyle)) {
             this.cellStyle = cellStyle;
             updateClassName();
         }
+        this.needsMeasure = needsMeasure;
         setValue(value);
     }
 
@@ -165,4 +176,7 @@ public class Cell {
         }
     }
 
+    public boolean isNeedsMeasure() {
+        return needsMeasure;
+    }
 }

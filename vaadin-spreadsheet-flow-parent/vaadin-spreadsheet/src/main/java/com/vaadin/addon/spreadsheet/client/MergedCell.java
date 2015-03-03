@@ -19,8 +19,8 @@ package com.vaadin.addon.spreadsheet.client;
 
 public class MergedCell extends Cell {
 
-    public MergedCell(int col, int row) {
-        super(col, row);
+    public MergedCell(SheetWidget sheetWidget, int col, int row) {
+        super(sheetWidget, col, row);
     }
 
     @Override

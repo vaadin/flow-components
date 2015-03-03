@@ -832,6 +832,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 && sheetWidget.getSelectedCellColumn() != column) {
             onCellClick(column, row, value, false, false, true);
         } else {
+            Cell cell = sheetWidget.getCell(column, row);
+            value = cell.getValue();
             cachedCellValue = value;
             formulaBarWidget.cacheFormulaFieldValue();
             value = formulaBarWidget.getFormulaFieldValue();
