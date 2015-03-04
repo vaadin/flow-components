@@ -821,6 +821,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 sheetWidget.getSelectedCellColumn(),
                 sheetWidget.getSelectedCellRow()));
         selectionHandler.newSelectedCellSet();
+        startDelayedSendingTimer();
     }
 
     @Override
