@@ -1494,27 +1494,20 @@ public class SheetWidget extends Panel {
                 if (actionHandler.hasCustomContextMenu()) {
                     Element target = event.getNativeEvent().getEventTarget()
                             .cast();
-                    if (sheet.isOrHasChild(target)
-                            || sheet.isOrHasChild(target.getParentNode())) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    } else {
-                        String className = target.getClassName();
-                        int i = jsniUtil.isHeader(className);
-                        if (i == 1 || i == 2) {
-                            int index = jsniUtil.parseHeaderIndex(className);
-                            if (i == 1) {
-                                actionHandler.onRowHeaderRightClick(
-                                        event.getNativeEvent(), index);
-                            } else {
-                                actionHandler.onColumnHeaderRightClick(
-                                        event.getNativeEvent(), index);
-                            }
-                            event.preventDefault();
-                            event.stopPropagation();
-
+                    String className = target.getClassName();
+                    int i = jsniUtil.isHeader(className);
+                    if (i == 1 || i == 2) {
+                        int index = jsniUtil.parseHeaderIndex(className);
+                        if (i == 1) {
+                            actionHandler.onRowHeaderRightClick(
+                                    event.getNativeEvent(), index);
+                        } else {
+                            actionHandler.onColumnHeaderRightClick(
+                                    event.getNativeEvent(), index);
                         }
                     }
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
             }
         }, ContextMenuEvent.getType());
