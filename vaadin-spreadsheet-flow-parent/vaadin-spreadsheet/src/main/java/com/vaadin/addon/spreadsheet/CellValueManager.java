@@ -614,7 +614,6 @@ public class CellValueManager implements Serializable {
                 return;
             }
         }
-        fireCellValueChangeEvent(spreadsheet.getSelectedCellReferences());
 
         CellValueCommand command = new CellValueCommand(spreadsheet);
         if (selectedCellReference != null) {
@@ -641,6 +640,7 @@ public class CellValueManager implements Serializable {
         // cleared from client side cache.
         updateMarkedCellValues();
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
+        fireCellValueChangeEvent(spreadsheet.getSelectedCellReferences());
     }
 
     /**
