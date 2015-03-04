@@ -1887,7 +1887,8 @@ public class SheetWidget extends Panel {
     }
 
     private String getRowDisplayString(int rowIndex) {
-        return actionHandler.isRowHidden(rowIndex) ? "display:none;" : "";
+        return actionHandler.isRowHidden(rowIndex) ? "display:none;"
+                : "display: flex;";
     }
 
     private String getColumnDisplayString(int columnIndex) {
