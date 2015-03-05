@@ -599,7 +599,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public void onRowHeaderClick(int row, boolean shiftPressed,
             boolean metaOrCrtlPressed) {
-        int firstColumnIndex = sheetWidget.getLeftVisibleColumnIndex();
+        int firstColumnIndex = sheetWidget.hasFrozenColumns() ? 1 : sheetWidget
+                .getLeftVisibleColumnIndex();
         doCommitIfEditing();
         if (!shiftPressed) {
             updateSelectedCellValues(firstColumnIndex, row);
@@ -663,7 +664,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void onColumnHeaderClick(int column, boolean shiftPressed,
             boolean metaOrCrtlPressed) {
         doCommitIfEditing();
-        int firstRowIndex = sheetWidget.getTopVisibleRowIndex();
+        int firstRowIndex = sheetWidget.hasFrozenRows() ? 1 : sheetWidget
+                .getTopVisibleRowIndex();
         if (!shiftPressed) {
             updateSelectedCellValues(column, firstRowIndex);
         }

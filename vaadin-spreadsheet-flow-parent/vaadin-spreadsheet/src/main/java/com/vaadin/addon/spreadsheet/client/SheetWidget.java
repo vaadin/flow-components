@@ -4181,6 +4181,14 @@ public class SheetWidget extends Panel {
                 lastColumnIndex };
     }
 
+    public boolean hasFrozenColumns() {
+        return horizontalSplitPosition > 0;
+    }
+
+    public boolean hasFrozenRows() {
+        return verticalSplitPosition > 0;
+    }
+
     /**
      * 
      * @return the first column index that is completely visible on the left
