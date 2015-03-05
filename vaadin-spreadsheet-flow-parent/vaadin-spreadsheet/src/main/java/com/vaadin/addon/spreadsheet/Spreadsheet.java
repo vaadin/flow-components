@@ -1638,16 +1638,17 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void shiftRows(int startRow, int endRow, int n,
             boolean copyRowHeight, boolean resetOriginalRowHeight) {
         Sheet sheet = getActiveSheet();
+        int lastNonBlankRow = getLastNonBlankRow(sheet);
         sheet.shiftRows(startRow, endRow, n, copyRowHeight,
                 resetOriginalRowHeight);
         // need to re-send the cell values to client
         // remove all cached cell data that is now empty
-        int start = n < 0 ? endRow + n + 1 : startRow;
+        int start = n < 0 ? lastNonBlankRow + 1 : startRow;
         int end = n < 0 ? endRow : startRow + n - 1;
         valueManager.updateDeletedRowsInClientCache(start, end);
         // updateDeletedRowsInClientCache(start + 1, end + 1); this was a bug?
-        int firstEffectedRow = n < 0 ? startRow + n : startRow;
-        int lastEffectedRow = n < 0 ? endRow : endRow + n;
+        int firstAffectedRow = n < 0 ? startRow + n : startRow;
+        int lastAffectedRow = n < 0 ? endRow : endRow + n;
         if (copyRowHeight || resetOriginalRowHeight) {
             // might need to increase the size of the row heights array
             int oldLength = getState(false).rowH.length;
@@ -1655,7 +1656,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             if (n > 0 && oldLength < neededLength) {
                 getState().rowH = Arrays.copyOf(getState().rowH, neededLength);
             }
-            for (int i = firstEffectedRow; i <= lastEffectedRow; i++) {
+            for (int i = firstAffectedRow; i <= lastAffectedRow; i++) {
                 Row row = sheet.getRow(i);
                 if (row != null) {
                     if (row.getZeroHeight()) {
@@ -1674,7 +1675,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         // need to shift the cell styles, clear and update
         // need to go -1 and +1 because of shifted borders..
         final ArrayList<Cell> cellsToUpdate = new ArrayList<Cell>();
-        for (int r = (firstEffectedRow - 1); r <= (lastEffectedRow + 1); r++) {
+        for (int r = (firstAffectedRow - 1); r <= (lastAffectedRow + 1); r++) {
             if (r < 0) {
                 r = 0;
             }
@@ -1705,6 +1706,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         for (Cell cell : cellsToUpdate) {
             styler.cellStyleUpdated(cell, false);
+            markCellAsUpdated(cell, false);
         }
         styler.loadCustomBorderStylesToState();
 
@@ -1714,11 +1716,29 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         CellReference selectedCellReference = selectionManager
                 .getSelectedCellReference();
-        if (selectedCellReference.getRow() >= firstEffectedRow
-                && selectedCellReference.getRow() <= lastEffectedRow) {
-            selectionManager.onSheetAddressChanged(
-                    selectedCellReference.formatAsString(), false);
+        if (selectedCellReference != null) {
+            if (selectedCellReference.getRow() >= firstAffectedRow
+                    && selectedCellReference.getRow() <= lastAffectedRow) {
+                selectionManager.onSheetAddressChanged(
+                        selectedCellReference.formatAsString(), false);
+            }
         }
+    }
+
+    private int getLastNonBlankRow(Sheet sheet) {
+        for (int r = sheet.getLastRowNum(); r >= 0; r--) {
+            Row row = sheet.getRow(r);
+            if (row != null) {
+                for (short c = row.getFirstCellNum(); c < row.getLastCellNum(); c++) {
+                    Cell cell = row.getCell(c);
+                    if (cell != null
+                            && cell.getCellType() != Cell.CELL_TYPE_BLANK) {
+                        return r;
+                    }
+                }
+            }
+        }
+        return 0;
     }
 
     private void updateMergedRegions() {
