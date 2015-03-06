@@ -924,6 +924,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 checkEditableAndNotify();
                 if (!cellLocked) {
                     spreadsheetHandler.deleteSelectedCells();
+                    formulaBarWidget.setCellPlainValue("");
                 }
                 break;
             case KeyCodes.KEY_DOWN:
