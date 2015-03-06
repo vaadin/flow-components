@@ -187,6 +187,9 @@ public class CellComment extends VOverlay {
         // cell if possible, move it up/down if necessary. if there is not
         // enough space on the right side, move it to the left.
         int cellRight = cellElement.getAbsoluteRight();
+        int cellOffsetLeft = cellElement.getOffsetLeft();
+        int cellOffsetWidth = cellElement.getOffsetWidth();
+        int cellOffsetTop = cellElement.getOffsetTop();
         int cellTop = cellElement.getAbsoluteTop();
         int popupLeft = cellRight + 15;
         if (popupLeft + offsetWidth > paneElement.getAbsoluteRight()) {
@@ -244,7 +247,8 @@ public class CellComment extends VOverlay {
         }
         double c = Math.sqrt(a * a + b * b) + 1;
         line.getStyle().setWidth(c, Unit.PX);
-        line.getStyle().setMarginLeft(cellElement.getOffsetWidth(), Unit.PX);
+        line.getStyle().setTop(cellOffsetTop, Unit.PX);
+        line.getStyle().setLeft(cellOffsetLeft + cellOffsetWidth, Unit.PX);
         line.getStyle().setProperty("transform", "rotate(" + deg + "deg)");
         line.getStyle().setProperty("msTransform", "rotate(" + deg + "deg)");
         line.getStyle()
