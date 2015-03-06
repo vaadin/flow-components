@@ -23,6 +23,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -30,10 +31,12 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.MeasuredSize;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.VOverlay;
 
@@ -357,10 +360,8 @@ public class SelectionWidget extends Composite {
 
     private int colEdgeIndex;
     private int rowEdgeIndex;
-    private String paintColClassName = "s-paint-empty";
-    private String paintRowClassName = "s-paint-empty";
-    private int paintedRowIndex;
-    private int paintedColIndex;
+    private int paintedRowIndex, prevPaintedRowIndex;
+    private int paintedColIndex, prevPaintedColIndex;
 
     private boolean paintMode;
     private boolean touchMode;
@@ -397,6 +398,30 @@ public class SelectionWidget extends Composite {
     private boolean decreaseSelection;
 
     private boolean increaseSelection;
+
+    private boolean startCellTopLeft;
+
+    private boolean startCellTopRight;
+
+    private boolean startCellBottomLeft;
+
+    private int clientX;
+
+    private int clientY;
+
+    private int deltaY;
+
+    private int deltaX;
+
+    private int shiftTempCol;
+
+    private int shiftTempRow;
+
+    private boolean scrollTimerRunning;
+
+    private int initialScrollTop;
+
+    private int initialScrollLeft;
 
     public SelectionWidget(SheetHandler actionHandler, SheetWidget sheetWidget) {
         handler = actionHandler;
@@ -698,6 +723,17 @@ public class SelectionWidget extends Composite {
     }
 
     private void beginPaintingCells(Event event) {
+        initialScrollTop = sheetWidget.sheet.getScrollTop();
+        initialScrollLeft = sheetWidget.sheet.getScrollLeft();
+        startCellTopLeft = sheetWidget.isCellRenderedInTopLeftPane(col2, row2);
+        startCellTopRight = sheetWidget
+                .isCellRenderedInTopRightPane(col2, row2);
+        startCellBottomLeft = sheetWidget.isCellRenderedInBottomLeftPane(col2,
+                row2);
+        clientX = WidgetUtil.getTouchOrMouseClientX(event);
+        clientY = WidgetUtil.getTouchOrMouseClientY(event);
+        shiftTempCol = col2;
+        shiftTempRow = row2;
         colEdgeIndex = 0;
         rowEdgeIndex = 0;
         paintMode = true;
@@ -810,32 +846,218 @@ public class SelectionWidget extends Composite {
         }
     }
 
+    private boolean checkScrollWhileSelecting(int y, int x) {
+        int scrollPaneTop = sheetWidget.sheet.getAbsoluteTop();
+        int scrollPaneLeft = sheetWidget.sheet.getAbsoluteLeft();
+        int scrollPaneBottom = sheetWidget.sheet.getAbsoluteBottom();
+        int scrollPaneRight = sheetWidget.sheet.getAbsoluteRight();
+
+        clientX = x;
+        clientY = y;
+
+        if (y < scrollPaneTop) {
+            deltaY = y - scrollPaneTop;
+        } else if (y > scrollPaneBottom) {
+            deltaY = y - scrollPaneBottom;
+        } else {
+            deltaY = 0;
+        }
+
+        if (x < scrollPaneLeft) {
+            deltaX = x - scrollPaneLeft;
+        } else if (x > scrollPaneRight) {
+            deltaX = x - scrollPaneRight;
+        } else {
+            deltaX = 0;
+        }
+
+        // If we're crossing the top freeze pane border to the scroll area, the
+        // bottom part must be scrolled all the way up.
+        boolean scrolled = false;
+        if (sheetWidget.sheet.getScrollTop() != 0) {
+            boolean mouseOnTopSide = y < scrollPaneTop;
+            if ((startCellTopLeft || startCellTopRight)
+                    && sheetWidget.isCellRenderedInFrozenPane(shiftTempCol,
+                            shiftTempRow) && !mouseOnTopSide) {
+                sheetWidget.sheet.setScrollTop(0);
+                sheetWidget.onSheetScroll(null);
+                scrolled = true;
+            }
+        }
+
+        // If we're crossing the left freeze pane border, the right-hand part
+        // must be scrolled all the way to the left.
+        if (sheetWidget.sheet.getScrollLeft() != 0) {
+            boolean mouseOnLeftSide = x < scrollPaneLeft;
+            if ((startCellTopLeft || startCellBottomLeft)
+                    && sheetWidget.isCellRenderedInFrozenPane(shiftTempCol,
+                            shiftTempRow) && !mouseOnLeftSide) {
+                sheetWidget.sheet.setScrollLeft(0);
+                sheetWidget.onSheetScroll(null);
+                scrolled = true;
+            }
+        }
+
+        if ((deltaY < 0 && sheetWidget.sheet.getScrollTop() != 0) || deltaY > 0
+                || (deltaX < 0 && sheetWidget.sheet.getScrollLeft() != 0)
+                || deltaX > 0) {
+            startScrollTimer();
+            scrolled = true;
+        }
+
+        // If the sheet was scrolled due to crossing freeze pane borders during
+        // drag selection, the actual selection event will be handled on the
+        // next mouse move event.
+        if (scrolled) {
+            return true;
+        } else {
+            stopScrollTimer();
+            return false;
+        }
+    }
+
+    private void startScrollTimer() {
+        if (!scrollTimerRunning) {
+            scrollTimerRunning = true;
+            scrollTimer.scheduleRepeating(50);
+        }
+    }
+
+    private void stopScrollTimer() {
+        deltaX = 0;
+        deltaY = 0;
+        scrollTimer.cancel();
+        scrollTimerRunning = false;
+    }
+
+    private void handleCellShiftOnScroll(int selectionPointX,
+            int selectionPointY) {
+        Element target = WidgetUtil.getElementFromPoint(selectionPointX,
+                selectionPointY);
+        if (target != null) {
+            final String className = target.getClassName();
+            sheetWidget.jsniUtil.parseColRow(className);
+            int col = sheetWidget.jsniUtil.getParsedCol();
+            int row = sheetWidget.jsniUtil.getParsedRow();
+            if (col != 0 && row != 0) {
+                int xMousePos = clientX - origX
+                        + sheetWidget.sheet.getScrollLeft() - initialScrollLeft;
+                int yMousePos = clientY - origY
+                        + sheetWidget.sheet.getScrollTop() - initialScrollTop;
+                final int[] colWidths = handler.getColWidths();
+                final int[] rowHeightsPX = handler.getRowHeightsPX();
+
+                updatePaintRectangle(selectionPointX, selectionPointY,
+                        xMousePos, yMousePos, colWidths, rowHeightsPX, col, row);
+            }
+        }
+    }
+
+    private Timer scrollTimer = new Timer() {
+        @Override
+        public void run() {
+            // Handle scrolling
+            sheetWidget.sheet.setScrollTop(sheetWidget.sheet.getScrollTop()
+                    + deltaY / 2);
+            sheetWidget.sheet.setScrollLeft(sheetWidget.sheet.getScrollLeft()
+                    + deltaX / 2);
+            sheetWidget.onSheetScroll(null);
+
+            // Determine selection point
+            int selectionPointX = clientX;
+            int selectionPointY = clientY;
+            if (deltaX < 0) {
+                selectionPointX = sheetWidget.sheet.getAbsoluteLeft()
+                        + sheetWidget.TOP_LEFT_SELECTION_OFFSET;
+            } else if (deltaX > 0) {
+                selectionPointX = sheetWidget.sheet.getAbsoluteRight()
+                        - sheetWidget.BOTTOM_RIGHT_SELECTION_OFFSET;
+            }
+            if (deltaY < 0) {
+                selectionPointY = sheetWidget.sheet.getAbsoluteTop()
+                        + sheetWidget.TOP_LEFT_SELECTION_OFFSET;
+            } else if (deltaY > 0) {
+                selectionPointY = sheetWidget.sheet.getAbsoluteBottom()
+                        - sheetWidget.BOTTOM_RIGHT_SELECTION_OFFSET;
+            }
+
+            // Adjust selection point if we have reached scroll top
+            if (deltaY != 0 && sheetWidget.sheet.getScrollTop() == 0) {
+                MeasuredSize ms = new MeasuredSize();
+                ms.measure(sheetWidget.spreadsheet);
+                int minimumTop = sheetWidget.spreadsheet.getAbsoluteTop()
+                        + ms.getPaddingTop()
+                        + sheetWidget.TOP_LEFT_SELECTION_OFFSET;
+                if (clientY > minimumTop) {
+                    selectionPointY = clientY;
+                } else {
+                    selectionPointY = minimumTop;
+                }
+            }
+
+            // Adjust selection point if we have reached scroll left
+            if (deltaX != 0 && sheetWidget.sheet.getScrollLeft() == 0) {
+                MeasuredSize ms = new MeasuredSize();
+                ms.measure(sheetWidget.spreadsheet);
+                int minimumLeft = sheetWidget.spreadsheet.getAbsoluteLeft()
+                        + ms.getPaddingLeft()
+                        + sheetWidget.TOP_LEFT_SELECTION_OFFSET;
+                if (clientX > minimumLeft) {
+                    selectionPointX = clientX;
+                } else {
+                    selectionPointX = minimumLeft;
+                }
+            }
+
+            // Handle selection
+            handleCellShiftOnScroll(selectionPointX, selectionPointY);
+        }
+
+    };
+
     private void paintCells(Event event) {
+        paintedColIndex = 0;
+        paintedRowIndex = 0;
         decreaseSelection = false;
         increaseSelection = false;
         final int clientX = WidgetUtil.getTouchOrMouseClientX(event);
         final int clientY = WidgetUtil.getTouchOrMouseClientY(event);
+
         // position in perspective to the top left
-        int xMousePos = clientX - origX;
-        int yMousePos = clientY - origY;
+        int xMousePos = clientX - origX + sheetWidget.sheet.getScrollLeft()
+                - initialScrollLeft;
+        int yMousePos = clientY - origY + sheetWidget.sheet.getScrollTop()
+                - initialScrollTop;
 
         final int[] colWidths = handler.getColWidths();
-        int colIndex = closestCellEdgeIndexToCursor(colWidths, col1, xMousePos);
         final int[] rowHeightsPX = handler.getRowHeightsPX();
+        int colIndex = closestCellEdgeIndexToCursor(colWidths, col1, xMousePos);
         int rowIndex = closestCellEdgeIndexToCursor(rowHeightsPX, row1,
                 yMousePos);
 
+        // If we're scrolling, do not paint anything
+        if (checkScrollWhileSelecting(clientY, clientX)) {
+            return;
+        }
+
+        updatePaintRectangle(clientX, clientY, xMousePos, yMousePos, colWidths,
+                rowHeightsPX, colIndex, rowIndex);
+    }
+
+    private void updatePaintRectangle(final int clientX, final int clientY,
+            int xMousePos, int yMousePos, final int[] colWidths,
+            final int[] rowHeightsPX, int colIndex, int rowIndex) {
         int w = 0;
         int h = 0;
 
-        paint.removeClassName(paintColClassName);
-        paint.removeClassName(paintRowClassName);
         // case 1: "removing"
         if ((colIndex >= col1 && colIndex <= col2 + 1)
                 && (rowIndex >= row1 && rowIndex <= row2 + 1)) {
             // the depending point is the right bottom corner
-            xMousePos = Math.abs(cornerX - clientX);
-            yMousePos = Math.abs(cornerY - clientY);
+            xMousePos = Math.abs(cornerX - clientX
+                    + sheetWidget.sheet.getScrollLeft() - initialScrollLeft);
+            yMousePos = Math.abs(cornerY - clientY
+                    + sheetWidget.sheet.getScrollTop() - initialScrollTop);
             // the axis with larger delta is used
             if (xMousePos >= yMousePos && (colIndex <= col2)) {
                 // remove columns
@@ -879,13 +1101,15 @@ public class SelectionWidget extends Composite {
             }
             if (rowIndex > row2) {
                 // see diff from old selection bottom
-                yMousePos = clientY - cornerY;
+                yMousePos = clientY - cornerY
+                        + sheetWidget.sheet.getScrollTop() - initialScrollTop;
             } else if (rowIndex >= row1) {
                 yMousePos = 0;
             }
             if (colIndex > col2) {
                 // see diff from old selection right
-                xMousePos = clientX - cornerX;
+                xMousePos = clientX - cornerX
+                        + sheetWidget.sheet.getScrollLeft() - initialScrollLeft;
             } else if (colIndex >= col1) {
                 xMousePos = 0;
             }
@@ -920,12 +1144,17 @@ public class SelectionWidget extends Composite {
             }
         }
         // update position
-        if (paintedColIndex != 0 && paintedRowIndex != 0) {
-            paintColClassName = "col" + paintedColIndex;
-            paintRowClassName = "row" + paintedRowIndex;
+        Style style = paint.getStyle();
+        if (paintedColIndex != 0
+                && paintedRowIndex != 0
+                && (prevPaintedColIndex != paintedColIndex || prevPaintedRowIndex != paintedRowIndex)
+                && sheetWidget.isCellRendered(paintedColIndex, paintedRowIndex)) {
+            Cell cell = sheetWidget.getCell(paintedColIndex, paintedRowIndex);
+            int left = cell.getElement().getOffsetLeft();
+            int top = cell.getElement().getOffsetTop();
+            style.setLeft(left, Unit.PX);
+            style.setTop(top, Unit.PX);
             paint.removeClassName(paintPaneClassName);
-            paint.addClassName(paintColClassName);
-            paint.addClassName(paintRowClassName);
             paint.removeFromParent();
             if (sheetWidget.isCellRenderedInScrollPane(paintedColIndex,
                     paintedRowIndex)) {
@@ -945,17 +1174,19 @@ public class SelectionWidget extends Composite {
                 paintPaneClassName = "top-left";
             }
             paint.addClassName(paintPaneClassName);
+            prevPaintedColIndex = paintedColIndex;
+            prevPaintedRowIndex = paintedRowIndex;
         }
         // update size
         if (w > 0 && h > 0) {
-            paint.getStyle().setVisibility(Visibility.VISIBLE);
-            paint.getStyle().setWidth(w + 1, Unit.PX);
-            paint.getStyle().setHeight(h + 1, Unit.PX);
+            style.setVisibility(Visibility.VISIBLE);
+            style.setWidth(w + 1, Unit.PX);
+            style.setHeight(h + 1, Unit.PX);
             setSelectionWidgetSquaresVisible(false);
         } else {
-            paint.getStyle().setVisibility(Visibility.HIDDEN);
-            paint.getStyle().setWidth(0, Unit.PX);
-            paint.getStyle().setHeight(0, Unit.PX);
+            style.setVisibility(Visibility.HIDDEN);
+            style.setWidth(0, Unit.PX);
+            style.setHeight(0, Unit.PX);
             setSelectionWidgetSquaresVisible(true);
         }
     }

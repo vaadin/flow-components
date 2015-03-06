@@ -121,10 +121,10 @@ public class SheetWidget extends Panel {
     private final VLabel resizeTooltipLabel;
 
     /** Spreadsheet main (outmost) element */
-    private DivElement spreadsheet = Document.get().createDivElement();
+    DivElement spreadsheet = Document.get().createDivElement();
 
     /** Sheet that will contain all the cells */
-    private DivElement sheet = Document.get().createDivElement();
+    DivElement sheet = Document.get().createDivElement();
 
     private SheetInputEventListener sheetInputEventListener;
 
@@ -241,7 +241,7 @@ public class SheetWidget extends Panel {
 
     private VLazyExecutor requester;
 
-    private SheetJsniUtil jsniUtil = GWT.create(SheetJsniUtil.class);
+    SheetJsniUtil jsniUtil = GWT.create(SheetJsniUtil.class);
 
     private boolean touchMode;
 
@@ -1118,6 +1118,60 @@ public class SheetWidget extends Panel {
         // Update scroll deltas
         int y = WidgetUtil.getTouchOrMouseClientY(event);
         int x = WidgetUtil.getTouchOrMouseClientX(event);
+
+        if (checkScrollWhileSelecting(y, x)) {
+            return;
+        }
+
+        int col = 0, row = 0;
+        String className = null;
+        if (target != null) {
+            className = target.getClassName();
+            /*
+             * Parse according to classname of target element. As said above,
+             * Safari gives us the wrong target and hence we have the wrong
+             * style name here.
+             * 
+             * This also means that if we move outside the sheet, we continue
+             * execution past this check.
+             */
+            jsniUtil.parseColRow(className);
+            col = jsniUtil.getParsedCol();
+            row = jsniUtil.getParsedRow();
+        }
+        if (row == 0 || col == 0) {
+            return;
+        }
+
+        // skip search of actual cell if this is a merged cell
+        if (!className.endsWith(MERGED_CELL_CLASSNAME)) {
+            Cell targetCell = getRealEventTargetCell(x, y, getCell(col, row));
+            col = targetCell.getCol();
+            row = targetCell.getRow();
+        }
+
+        if (col != tempCol || row != tempRow) {
+            if (col == 0) { // on top of scroll bar
+                if (x > target.getParentElement().getAbsoluteRight()) {
+                    col = getRightVisibleColumnIndex() + 1;
+                } else {
+                    col = tempCol;
+                }
+            }
+            if (row == 0) {
+                if (y > sheet.getAbsoluteBottom()) {
+                    row = getBottomVisibleRowIndex() + 1;
+                } else {
+                    row = tempRow;
+                }
+            }
+            actionHandler.onSelectingCellsWithDrag(col, row);
+            tempCol = col;
+            tempRow = row;
+        }
+    }
+
+    private boolean checkScrollWhileSelecting(int y, int x) {
         int scrollPaneTop = sheet.getAbsoluteTop();
         int scrollPaneLeft = sheet.getAbsoluteLeft();
         int scrollPaneBottom = sheet.getAbsoluteBottom();
@@ -1179,56 +1233,10 @@ public class SheetWidget extends Panel {
         // drag selection, the actual selection event will be handled on the
         // next mouse move event.
         if (scrolled) {
-            return;
+            return true;
         } else {
             stopScrollTimer();
-        }
-
-        int col = 0, row = 0;
-        String className = null;
-        if (target != null) {
-            className = target.getClassName();
-            /*
-             * Parse according to classname of target element. As said above,
-             * Safari gives us the wrong target and hence we have the wrong
-             * style name here.
-             * 
-             * This also means that if we move outside the sheet, we continue
-             * execution past this check.
-             */
-            jsniUtil.parseColRow(className);
-            col = jsniUtil.getParsedCol();
-            row = jsniUtil.getParsedRow();
-        }
-        if (row == 0 || col == 0) {
-            return;
-        }
-
-        // skip search of actual cell if this is a merged cell
-        if (!className.endsWith(MERGED_CELL_CLASSNAME)) {
-            Cell targetCell = getRealEventTargetCell(x, y, getCell(col, row));
-            col = targetCell.getCol();
-            row = targetCell.getRow();
-        }
-
-        if (col != tempCol || row != tempRow) {
-            if (col == 0) { // on top of scroll bar
-                if (x > target.getParentElement().getAbsoluteRight()) {
-                    col = getRightVisibleColumnIndex() + 1;
-                } else {
-                    col = tempCol;
-                }
-            }
-            if (row == 0) {
-                if (y > sheet.getAbsoluteBottom()) {
-                    row = getBottomVisibleRowIndex() + 1;
-                } else {
-                    row = tempRow;
-                }
-            }
-            actionHandler.onSelectingCellsWithDrag(col, row);
-            tempCol = col;
-            tempRow = row;
+            return false;
         }
     }
 
@@ -1250,8 +1258,8 @@ public class SheetWidget extends Panel {
         tempRow = -1;
     }
 
-    private final int TOP_LEFT_SELECTION_OFFSET = 5;
-    private final int BOTTOM_RIGHT_SELECTION_OFFSET = 25;
+    final int TOP_LEFT_SELECTION_OFFSET = 5;
+    final int BOTTOM_RIGHT_SELECTION_OFFSET = 25;
 
     private boolean startCellTopLeft, startCellTopRight, startCellBottomLeft;
     private int deltaX, deltaY, clientX, clientY;
@@ -4325,7 +4333,7 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private boolean isCellRenderedInFrozenPane(int col, int row) {
+    boolean isCellRenderedInFrozenPane(int col, int row) {
         return (row <= verticalSplitPosition && (col >= firstColumnIndex
                 && col <= lastColumnIndex || col <= horizontalSplitPosition))
                 || (col <= horizontalSplitPosition && (row >= firstRowIndex
