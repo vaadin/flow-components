@@ -104,7 +104,7 @@ public class SheetWidget extends Panel {
 
     final Logger debugConsole = Logger.getLogger("spreadsheet-logger");
 
-    private final SheetHandler actionHandler;
+    final SheetHandler actionHandler;
 
     private final SelectionWidget selectionWidget;
 

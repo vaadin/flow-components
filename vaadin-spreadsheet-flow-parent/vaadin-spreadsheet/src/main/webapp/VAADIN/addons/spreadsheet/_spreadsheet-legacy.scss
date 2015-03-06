@@ -26,8 +26,8 @@ $cell-comment-triangle-color: #f00 !default;
 $freeze-pane-border: 1px solid black !default;
 $sheet-selection-border-color: #197de0 !default;
 $sheet-selection-corner-color: #197de1 !default;
-$sheet-selection-extend-corner-color: #6a44d9 !default;
-$sheet-selection-extend-inside-bg-color: #c8c6f6 !default;
+$sheet-selection-extend-corner-color: #40b527 !default;
+$sheet-selection-extend-inside-bg-color: #ebf7e9 !default;
 $sheet-selection-range-bg-color: #e8f2fc !default;
 $sheet-selection-highlight-outline-color: #222222 !default;
 $popup-button-border-color: #A7A7A7 !default;
@@ -692,15 +692,14 @@ $cell-comment-border-color: #A7A7A7 !default;
 			}
 			
 			.s-corner {
-				background-color: $sheet-selection-corner-color;
-				border-radius: 2px;
+				background-color: $sheet-selection-extend-corner-color;
 				bottom: -2px;
 				cursor: crosshair;
-				height: 7px;
+				height: 6px;
 				left: -2px;
 				outline: 2px solid white;
 				position: absolute;
-				width: 7px;
+				width: 6px;
 			}
 		}
 		
@@ -715,11 +714,7 @@ $cell-comment-border-color: #A7A7A7 !default;
 			z-index: 20;
 			margin-top: -1px;
 			margin-left: -1px;
-			
-			&.s-paint-inside {
-				background: $sheet-selection-extend-inside-bg-color !important;
-				cursor: crosshair;
-			}
+			background: $sheet-selection-extend-inside-bg-color !important;
 		}
 		
 		
@@ -923,24 +918,35 @@ $cell-comment-border-color: #A7A7A7 !default;
 		/* TOUCH STYLES */
 		.sheet-selection.touch {
 			&.fill {
-				.s-left,
-				.s-right {
-					width: 8px;
-					background: $sheet-selection-border-color url("touch-border-vert.png") no-repeat center;
+				.square {
+					background-color: $spreadsheet-sheet-selection-extend-corner-color;
+					width: 6px;
+					height: 6px;
+					position: relative;
+					border: 2px solid white;
+					top: -4px;
+					margin-left: -4px;
 				}
-				
-				.s-top,
-				.s-bottom {
-					height: 8px;
-					background: $sheet-selection-border-color url("touch-border-hor.png") no-repeat center;
+				.s-right, .s-left {
+					> .square {
+						top: 50%;
+						margin-top: -5px;
+					}
+				} 
+				.s-top, .s-bottom {
+					 > .square {
+						left: 50%;
+					}
 				}
 			}
 			
 			.s-corner {
-				width: 12px;
-				height: 12px;
-				bottom: 5px;
+				width: 7px;
+				height: 7px;
+				bottom: 7px;
 				left: 7px;
+				border-radius: 5px;
+				background-color: $spreadsheet-sheet-selection-corner-color;
 			}
 			
 			.s-corner-touch {
@@ -1044,6 +1050,5 @@ $cell-comment-border-color: #A7A7A7 !default;
 			height: 20px;
 			line-height: 20px;
 		}
-	}	
-}
-	
+	}
+}	

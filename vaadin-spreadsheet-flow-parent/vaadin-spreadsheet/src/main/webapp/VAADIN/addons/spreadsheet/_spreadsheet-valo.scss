@@ -43,12 +43,13 @@
 	$spreadsheet-tab-action-button-inactive-color: #d6d6d6 !default; 
 	$spreadsheet-selected-header-bg-color: #e6edf4 !default;
 	$spreadsheet-selected-header-border-color: #63b1ff !default;
-	$spreadsheet-sheet-selection-extend-corner-color: #6a44d9 !default;
-	$spreadsheet-sheet-selection-extend-inside-bg-color: #c8c6f6 !default;
+	$spreadsheet-sheet-selection-extend-corner-color: #40b527 !default;
+	$spreadsheet-sheet-selection-extend-inside-bg-color: #ebf7e9 !default;
 	$spreadsheet-sheet-selection-highlight-outline-color: #222222 !default;
 	$spreadsheet-sheet-selection-range-bg-color: #e8f2fc !default;
 	$spreadsheet-popup-button-arrow-color: #676767 !default;
 	$spreadsheet-cell-comment-line-color: #A7A7A7 !default;
+	$spreadsheet-fill-square-border: 2px solid $spreadsheet-cell-background-color;
 	
 	// Sizing of Spreadsheet parts
 	// Fixed sizes due to row/column sizing from POI model
@@ -71,19 +72,22 @@
 
 	// Fixed sizes (do not depend on valo unit/font sizing)	
 	$spreadsheet-selection-widget-border-width: 2px !default;
-	$spreadsheet-selection-widget-corner-size: 7px !default;
+	$spreadsheet-selection-widget-corner-size: 6px !default;
 	$spreadsheet-resize-handle-size: 3px !default;
 	$spreadsheet-tab-border-radius: 5px !default;
 	$spreadsheet-popup-button-size: 14px !default;
 	$spreadsheet-popup-button-margin: 1px !default;
 	$spreadsheet-popup-button-content-padding: 3px !default;
-	$spreadsheet-touch-fill-size: 8px !default;
-	$spreadsheet-touch-corner-size: 12px !default;
+	$spreadsheet-touch-corner-size: 7px !default;
 	$spreadsheet-touch-corner-left-offset: 7px !default;
-	$spreadsheet-touch-corner-bottom-offset: 5px !default;
+	$spreadsheet-touch-corner-bottom-offset: 7px !default;
+	$spreadsheet-touch-corner-border-radius: 5px !default;
 	$spreadsheet-toucharea-corner-size: 30px !default;
 	$spreadsheet-toucharea-corner-left-offset: -10px !default;
 	$spreadsheet-toucharea-corner-bottom-offset: -10px !default;
+	$spreadsheet-fill-square-size: 6px;
+	$spreadsheet-fill-square-offset: -4px;
+	$spreadsheet-fill-square-lr-offset: -5px;
 	
 	.v-spreadsheet {
 		overflow: hidden;
@@ -696,7 +700,7 @@
 			}
 			
 			.s-corner {
-				background-color: $spreadsheet-sheet-selection-corner-color;
+				background-color: $spreadsheet-sheet-selection-extend-corner-color;
 				position: absolute;
 				bottom: -2px;
 				left: -2px;
@@ -704,7 +708,6 @@
 				width: $spreadsheet-selection-widget-corner-size;
 				outline: 2px solid white;
 				cursor: crosshair;
-				border-radius: 2px;
 			}
 		}
 		
@@ -719,11 +722,7 @@
 			z-index: 20;
 			margin-top: -1px;
 			margin-left: -1px;
-			
-			&.s-paint-inside {
-				background: $spreadsheet-sheet-selection-extend-inside-bg-color !important;
-				cursor: crosshair;
-			}
+			background: $spreadsheet-sheet-selection-extend-inside-bg-color !important;
 		}
 		
 		
@@ -906,20 +905,29 @@
 				border: none;
 			}
 		}
-		
+
 		// TOUCH STYLES 
 		.sheet-selection.touch {
 			&.fill {
-				.s-left,
-				.s-right {
-					width: $spreadsheet-touch-fill-size;
-					background: $spreadsheet-sheet-selection-border-color url("touch-border-vert.png") no-repeat center;
+				.square {
+					background-color: $spreadsheet-sheet-selection-extend-corner-color;
+					width: $spreadsheet-fill-square-size;
+					height: $spreadsheet-fill-square-size;
+					position: relative;
+					border: $spreadsheet-fill-square-border;
+					top: $spreadsheet-fill-square-offset;
+					margin-left: $spreadsheet-fill-square-offset;
 				}
-				
-				.s-top,
-				.s-bottom {
-					height: $spreadsheet-touch-fill-size;
-					background: $spreadsheet-sheet-selection-border-color url("touch-border-hor.png") no-repeat center;
+				.s-right, .s-left {
+					> .square {
+						top: 50%;
+						margin-top: $spreadsheet-fill-square-lr-offset;
+					}
+				} 
+				.s-top, .s-bottom {
+					 > .square {
+						left: 50%;
+					}
 				}
 			}
 			
@@ -928,14 +936,16 @@
 				height: $spreadsheet-touch-corner-size;
 				left: $spreadsheet-touch-corner-left-offset;
 				bottom: $spreadsheet-touch-corner-bottom-offset;
+				background-color: $spreadsheet-sheet-selection-corner-color; 
+				border-radius: $spreadsheet-touch-corner-border-radius;
 			}
 			
 			.s-corner-touch {
 				width: $spreadsheet-toucharea-corner-size;
 				height: $spreadsheet-toucharea-corner-size;
 				position: absolute;
-				left: -$spreadsheet-toucharea-corner-left-offset;
-				bottom: -$spreadsheet-toucharea-corner-bottom-offset;
+				left: $spreadsheet-toucharea-corner-left-offset;
+				bottom: $spreadsheet-toucharea-corner-bottom-offset;
 			}
 		}
 	}

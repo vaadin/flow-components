@@ -19,19 +19,19 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.WidgetUtil;
@@ -49,6 +49,14 @@ public class SelectionWidget extends Composite {
         private final DivElement left = Document.get().createDivElement();
         private final DivElement right = Document.get().createDivElement();
         private final DivElement bottom = Document.get().createDivElement();
+
+        private final DivElement topSquare = Document.get().createDivElement();
+        private final DivElement leftSquare = Document.get().createDivElement();
+        private final DivElement rightSquare = Document.get()
+                .createDivElement();
+        private final DivElement bottomSquare = Document.get()
+                .createDivElement();
+
         private final DivElement corner = Document.get().createDivElement();
         private final DivElement cornerTouchArea = Document.get()
                 .createDivElement();
@@ -72,6 +80,17 @@ public class SelectionWidget extends Composite {
             initListeners();
         }
 
+        void setSquaresVisible(boolean visible) {
+            topSquare.getStyle().setVisibility(
+                    visible ? Visibility.VISIBLE : Visibility.HIDDEN);
+            leftSquare.getStyle().setVisibility(
+                    visible ? Visibility.VISIBLE : Visibility.HIDDEN);
+            rightSquare.getStyle().setVisibility(
+                    visible ? Visibility.VISIBLE : Visibility.HIDDEN);
+            bottomSquare.getStyle().setVisibility(
+                    visible ? Visibility.VISIBLE : Visibility.HIDDEN);
+        }
+
         private void initDOM() {
             root.setClassName("sheet-selection");
 
@@ -87,6 +106,11 @@ public class SelectionWidget extends Composite {
             corner.setClassName("s-corner");
             cornerTouchArea.setClassName("s-corner-touch");
 
+            topSquare.setClassName("square");
+            leftSquare.setClassName("square");
+            rightSquare.setClassName("square");
+            bottomSquare.setClassName("square");
+
             if (touchMode) {
                 // append a large touch area for the corner, since it's too
                 // small otherwise
@@ -100,6 +124,13 @@ public class SelectionWidget extends Composite {
             top.appendChild(right);
             left.appendChild(bottom);
             root.appendChild(top);
+
+            if (touchMode) {
+                top.appendChild(topSquare);
+                left.appendChild(leftSquare);
+                right.appendChild(rightSquare);
+                bottom.appendChild(bottomSquare);
+            }
 
             setElement(root);
         }
@@ -457,6 +488,21 @@ public class SelectionWidget extends Composite {
         }
     }
 
+    private void setSelectionWidgetSquaresVisible(boolean visible) {
+        if (touchMode) {
+            bottomRight.setSquaresVisible(visible);
+            if (bottomLeft != null) {
+                bottomLeft.setSquaresVisible(visible);
+            }
+            if (topRight != null) {
+                topRight.setSquaresVisible(visible);
+            }
+            if (topLeft != null) {
+                topLeft.setSquaresVisible(visible);
+            }
+        }
+    }
+
     public int getRow1() {
         return row1;
     }
@@ -511,11 +557,21 @@ public class SelectionWidget extends Composite {
             }
 
             touchActions = new VOverlay(true);
-            touchActions.addStyleName("v-spreadsheet-selection-actions");
-            final Button b = new Button("fill");
-            touchActions.setWidth("50px");
-            touchActions.setHeight("25px");
-            touchActions.add(b);
+            touchActions.setOwner((Widget) sheetWidget.actionHandler);
+            touchActions.addStyleName("v-contextmenu");
+
+            final MenuBar m = new MenuBar();
+            m.addItem(new SafeHtmlBuilder().appendEscaped("Fill").toSafeHtml(),
+                    new ScheduledCommand() {
+
+                        @Override
+                        public void execute() {
+                            setFillMode(true);
+                            touchActions.hide();
+                        }
+                    });
+
+            touchActions.add(m);
 
             touchActions.setPopupPositionAndShow(new PositionCallback() {
 
@@ -544,15 +600,6 @@ public class SelectionWidget extends Composite {
                 }
             });
             touchActions.show();
-
-            b.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(ClickEvent event) {
-                    setFillMode(true);
-                    touchActions.hide();
-                }
-            });
         }
     }
 
@@ -659,6 +706,7 @@ public class SelectionWidget extends Composite {
         event.preventDefault();
 
         sheetWidget.getElement().addClassName("selecting");
+        setSelectionWidgetSquaresVisible(true);
     }
 
     private void storeEventPos(Event event) {
@@ -709,6 +757,7 @@ public class SelectionWidget extends Composite {
         }
 
         sheetWidget.getElement().removeClassName("selecting");
+        setSelectionWidgetSquaresVisible(false);
 
     }
 
@@ -754,8 +803,10 @@ public class SelectionWidget extends Composite {
         bottomRight.setCornerHidden(b);
         if (b) {
             bottomRight.addStyleName("fill");
+            setSelectionWidgetSquaresVisible(true);
         } else {
             bottomRight.removeStyleName("fill");
+            setSelectionWidgetSquaresVisible(false);
         }
     }
 
@@ -900,10 +951,12 @@ public class SelectionWidget extends Composite {
             paint.getStyle().setVisibility(Visibility.VISIBLE);
             paint.getStyle().setWidth(w + 1, Unit.PX);
             paint.getStyle().setHeight(h + 1, Unit.PX);
+            setSelectionWidgetSquaresVisible(false);
         } else {
             paint.getStyle().setVisibility(Visibility.HIDDEN);
             paint.getStyle().setWidth(0, Unit.PX);
             paint.getStyle().setHeight(0, Unit.PX);
+            setSelectionWidgetSquaresVisible(true);
         }
     }
 }
