@@ -99,17 +99,24 @@ public class SpreadsheetFactory implements Serializable {
      * @param spreadsheet
      *            Target Spreadsheet
      * @param workbook
-     *            Workbook to load
+     *            Workbook to load or null to generate a new workbook with one
+     *            sheet.
+     * @param rowCount
+     *            Number of rows to generate in the first sheet. Only applies
+     *            when the workbook parameter is null.
+     * @param columnCount
+     *            Number of columns to generate in the first sheet. Only applies
+     *            when the workbook parameter is null.
      */
-    static void loadSpreadsheetWith(Spreadsheet spreadsheet, Workbook workbook) {
+    static void loadSpreadsheetWith(Spreadsheet spreadsheet, Workbook workbook,
+            int rowCount, int columnCount) {
         spreadsheet.clearSheetServerSide();
         final Sheet sheet;
         if (workbook == null) {
             workbook = new XSSFWorkbook();
             sheet = createNewSheet(workbook);
             spreadsheet.setInternalWorkbook(workbook);
-            generateNewSpreadsheet(spreadsheet, sheet, DEFAULT_ROWS,
-                    DEFAULT_COLUMNS);
+            generateNewSpreadsheet(spreadsheet, sheet, rowCount, columnCount);
         } else {
             int activeSheetIndex = workbook.getActiveSheetIndex();
             if (workbook.isSheetHidden(activeSheetIndex)

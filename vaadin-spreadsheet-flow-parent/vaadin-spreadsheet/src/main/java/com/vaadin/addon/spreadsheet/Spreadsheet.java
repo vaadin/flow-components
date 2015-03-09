@@ -281,18 +281,32 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Creates a new Spreadsheet component using the newer Excel version format
-     * {@link XSSFWorkbook} and default row
+     * {@link XSSFWorkbook}. Also creates one sheet using the default row
      * {@link SpreadsheetFactory#DEFAULT_ROWS} and column
      * {@link SpreadsheetFactory#DEFAULT_COLUMNS} counts.
      */
     public Spreadsheet() {
-        sheetImages = new HashSet<SheetImageWrapper>();
-        tables = new HashSet<SpreadsheetTable>();
+        this(SpreadsheetFactory.DEFAULT_ROWS,
+                SpreadsheetFactory.DEFAULT_COLUMNS);
+    }
 
-        registerRpc(new SpreadsheetHandlerImpl(this));
-        setSizeFull(); // Default to full size
-
-        SpreadsheetFactory.loadSpreadsheetWith(this, null);
+    /**
+     * Creates a new Spreadsheet component using the newer Excel version format
+     * {@link XSSFWorkbook}. Also creates one sheet using the given row and
+     * column counts. These counts will also be set as default for any new
+     * sheets created later.
+     * 
+     * @param defaultRowCount
+     *            Default row count for new sheets
+     * @param defaultColumnCount
+     *            Default column count for new sheets
+     */
+    public Spreadsheet(int defaultRowCount, int defaultColumnCount) {
+        init();
+        setDefaultRowCount(defaultRowCount);
+        setDefaultColumnCount(defaultColumnCount);
+        SpreadsheetFactory.loadSpreadsheetWith(this, null,
+                getDefaultRowCount(), getDefaultColumnCount());
     }
 
     /**
@@ -302,13 +316,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *            Workbook to load
      */
     public Spreadsheet(Workbook workbook) {
-        sheetImages = new HashSet<SheetImageWrapper>();
-        tables = new HashSet<SpreadsheetTable>();
-
-        registerRpc(new SpreadsheetHandlerImpl(this));
-        setSizeFull(); // Default to full size
-
-        SpreadsheetFactory.loadSpreadsheetWith(this, workbook);
+        init();
+        SpreadsheetFactory.loadSpreadsheetWith(this, workbook,
+                getDefaultRowCount(), getDefaultColumnCount());
     }
 
     /**
@@ -320,7 +330,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *             If file has invalid format or there is no access to the file
      */
     public Spreadsheet(File file) throws IOException {
-        this();
+        init();
         SpreadsheetFactory.reloadSpreadsheetComponent(this, file);
         srcUri = file.toURI().toString();
     }
@@ -336,8 +346,15 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *             in an invalid format.
      */
     public Spreadsheet(InputStream inputStream) throws IOException {
-        this();
+        init();
         SpreadsheetFactory.reloadSpreadsheetComponent(this, inputStream);
+    }
+
+    private void init() {
+        sheetImages = new HashSet<SheetImageWrapper>();
+        tables = new HashSet<SpreadsheetTable>();
+        registerRpc(new SpreadsheetHandlerImpl(this));
+        setSizeFull(); // Default to full size
     }
 
     /**
