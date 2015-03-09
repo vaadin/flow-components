@@ -5262,6 +5262,7 @@ public class SheetWidget extends Panel {
         clearBasicCellStyles();
         updateCellStyles();
         updateConditionalFormattingStyles();
+        ensureCellSelectionStyles();
     }
 
     public boolean isTouchMode() {
