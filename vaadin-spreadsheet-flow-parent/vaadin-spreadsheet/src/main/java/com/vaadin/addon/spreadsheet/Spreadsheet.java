@@ -3969,8 +3969,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *            Column index, 0-based
      */
     public void setSelection(int row, int col) {
-        CellReference ref = new CellReference(row, col);
-        selectionManager.handleCellSelection(ref);
+        setSelectionRange(row, col, row, col);
     }
 
     /**
@@ -3987,13 +3986,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void setSelectionRange(int row1, int col1, int row2, int col2) {
         CellReference ref = new CellReference(row1, col1);
-
-        if (row1 == row2 && col1 == col2) {
-            selectionManager.handleCellSelection(ref);
-        } else {
-            CellRangeAddress cra = new CellRangeAddress(row1, row2, col1, col2);
-            selectionManager.handleCellRangeSelection(ref, cra);
-        }
+        CellRangeAddress cra = new CellRangeAddress(row1, row2, col1, col2);
+        selectionManager.handleCellRangeSelection(ref, cra);
     }
 
     /**
@@ -4003,8 +3997,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *            The wanted range, e.g. "A3" or "B3:C5"
      */
     public void setSelection(String selectionRange) {
-        selectionManager.handleCellRangeSelection(CellRangeAddress
-                .valueOf(selectionRange));
+        CellRangeAddress cra = CellRangeAddress.valueOf(selectionRange);
+        setSelectionRange(cra.getFirstRow(), cra.getFirstColumn(),
+                cra.getLastRow(), cra.getLastColumn());
     }
 
     /**
