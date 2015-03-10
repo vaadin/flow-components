@@ -85,9 +85,13 @@
 	$spreadsheet-toucharea-corner-size: 30px !default;
 	$spreadsheet-toucharea-corner-left-offset: -10px !default;
 	$spreadsheet-toucharea-corner-bottom-offset: -10px !default;
+	$spreadsheet-fill-square-toucharea-size: 30px;
+	$spreadsheet-fill-square-toucharea-offset: -15px;
 	$spreadsheet-fill-square-size: 6px;
 	$spreadsheet-fill-square-offset: -4px;
-	$spreadsheet-fill-square-lr-offset: -5px;
+	$spreadsheet-fill-square-lr-offset: 11px;
+	$spreadsheet-fill-square-top-offset: 20px;
+	$spreadsheet-fill-square-bottom-offset: 8px;
 	
 	.v-spreadsheet {
 		overflow: hidden;
@@ -897,24 +901,51 @@
 		// TOUCH STYLES 
 		.sheet-selection.touch {
 			&.fill {
-				.square {
-					background-color: $spreadsheet-sheet-selection-extend-corner-color;
-					width: $spreadsheet-fill-square-size;
-					height: $spreadsheet-fill-square-size;
+				.fill-touch-square {
 					position: relative;
-					border: $spreadsheet-fill-square-border;
-					top: $spreadsheet-fill-square-offset;
-					margin-left: $spreadsheet-fill-square-offset;
+					width: $spreadsheet-fill-square-toucharea-size;
+					height: $spreadsheet-fill-square-toucharea-size;
+					margin-left: $spreadsheet-fill-square-toucharea-offset;
+					top: $spreadsheet-fill-square-toucharea-offset;
+					> .square {
+						position: absolute;
+						background-color: $spreadsheet-sheet-selection-extend-corner-color;
+						width: $spreadsheet-fill-square-size;
+						height: $spreadsheet-fill-square-size;
+						border: $spreadsheet-fill-square-border;
+						top: $spreadsheet-fill-square-offset;
+					}
 				}
 				.s-right, .s-left {
-					> .square {
+					> .fill-touch-square {
 						top: 50%;
-						margin-top: $spreadsheet-fill-square-lr-offset;
+						margin-top: $spreadsheet-fill-square-toucharea-offset;
+						> .square {
+							top: $spreadsheet-fill-square-lr-offset;
+							left: $spreadsheet-fill-square-lr-offset;
+						}
 					}
 				} 
-				.s-top, .s-bottom {
-					 > .square {
+				.s-top {
+					> .fill-touch-square {
+						top: -$spreadsheet-fill-square-top-offset;
 						left: 50%;
+						> .square {
+							left: 50%;
+							margin-top: $spreadsheet-fill-square-top-offset;
+							margin-left: $spreadsheet-fill-square-offset;
+						}
+					}
+				}
+				.s-bottom {
+					> .fill-touch-square {
+						top: -$spreadsheet-fill-square-bottom-offset;
+						left: 50%;
+						> .square {
+							left: 50%;
+							margin-top: $spreadsheet-fill-square-bottom-offset;
+							margin-left: $spreadsheet-fill-square-offset;
+						}
 					}
 				}
 			}

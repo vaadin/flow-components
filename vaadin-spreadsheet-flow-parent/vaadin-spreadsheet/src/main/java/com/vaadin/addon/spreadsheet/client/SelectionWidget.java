@@ -48,10 +48,16 @@ public class SelectionWidget extends Composite {
                 | Event.ONMOUSEMOVE | Event.ONMOUSEUP | Event.TOUCHEVENTS
                 | Event.ONLOSECAPTURE;
 
+        private final DivElement root = Document.get().createDivElement();
+
         private final DivElement top = Document.get().createDivElement();
         private final DivElement left = Document.get().createDivElement();
         private final DivElement right = Document.get().createDivElement();
         private final DivElement bottom = Document.get().createDivElement();
+
+        private final DivElement corner = Document.get().createDivElement();
+        private final DivElement cornerTouchArea = Document.get()
+                .createDivElement();
 
         private final DivElement topSquare = Document.get().createDivElement();
         private final DivElement leftSquare = Document.get().createDivElement();
@@ -59,11 +65,14 @@ public class SelectionWidget extends Composite {
                 .createDivElement();
         private final DivElement bottomSquare = Document.get()
                 .createDivElement();
-
-        private final DivElement corner = Document.get().createDivElement();
-        private final DivElement cornerTouchArea = Document.get()
+        private final DivElement topSquareTouchArea = Document.get()
                 .createDivElement();
-        private final DivElement root = Document.get().createDivElement();
+        private final DivElement leftSquareTouchArea = Document.get()
+                .createDivElement();
+        private final DivElement rightSquareTouchArea = Document.get()
+                .createDivElement();
+        private final DivElement bottomSquareTouchArea = Document.get()
+                .createDivElement();
 
         private int col1;
         private int row1;
@@ -84,13 +93,13 @@ public class SelectionWidget extends Composite {
         }
 
         void setSquaresVisible(boolean visible) {
-            topSquare.getStyle().setVisibility(
+            topSquareTouchArea.getStyle().setVisibility(
                     visible ? Visibility.VISIBLE : Visibility.HIDDEN);
-            leftSquare.getStyle().setVisibility(
+            leftSquareTouchArea.getStyle().setVisibility(
                     visible ? Visibility.VISIBLE : Visibility.HIDDEN);
-            rightSquare.getStyle().setVisibility(
+            rightSquareTouchArea.getStyle().setVisibility(
                     visible ? Visibility.VISIBLE : Visibility.HIDDEN);
-            bottomSquare.getStyle().setVisibility(
+            bottomSquareTouchArea.getStyle().setVisibility(
                     visible ? Visibility.VISIBLE : Visibility.HIDDEN);
         }
 
@@ -114,6 +123,11 @@ public class SelectionWidget extends Composite {
             rightSquare.setClassName("square");
             bottomSquare.setClassName("square");
 
+            topSquareTouchArea.setClassName("fill-touch-square");
+            leftSquareTouchArea.setClassName("fill-touch-square");
+            rightSquareTouchArea.setClassName("fill-touch-square");
+            bottomSquareTouchArea.setClassName("fill-touch-square");
+
             if (touchMode) {
                 // append a large touch area for the corner, since it's too
                 // small otherwise
@@ -129,10 +143,14 @@ public class SelectionWidget extends Composite {
             root.appendChild(top);
 
             if (touchMode) {
-                top.appendChild(topSquare);
-                left.appendChild(leftSquare);
-                right.appendChild(rightSquare);
-                bottom.appendChild(bottomSquare);
+                top.appendChild(topSquareTouchArea);
+                left.appendChild(leftSquareTouchArea);
+                right.appendChild(rightSquareTouchArea);
+                bottom.appendChild(bottomSquareTouchArea);
+                topSquareTouchArea.appendChild(topSquare);
+                leftSquareTouchArea.appendChild(leftSquare);
+                rightSquareTouchArea.appendChild(rightSquare);
+                bottomSquareTouchArea.appendChild(bottomSquare);
             }
 
             setElement(root);
@@ -844,10 +862,10 @@ public class SelectionWidget extends Composite {
         showTouchActions();
     }
 
-    protected void setFillMode(boolean b) {
-        fillMode = b;
-        bottomRight.setCornerHidden(b);
-        if (b) {
+    protected void setFillMode(boolean fillMode) {
+        this.fillMode = fillMode;
+        bottomRight.setCornerHidden(fillMode);
+        if (fillMode) {
             bottomRight.addStyleName("fill");
             setSelectionWidgetSquaresVisible(true);
         } else {

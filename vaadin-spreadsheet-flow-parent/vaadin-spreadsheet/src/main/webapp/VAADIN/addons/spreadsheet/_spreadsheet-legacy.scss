@@ -906,24 +906,52 @@ $cell-comment-border-color: #A7A7A7 !default;
 		/* TOUCH STYLES */
 		.sheet-selection.touch {
 			&.fill {
-				.square {
-					background-color: $spreadsheet-sheet-selection-extend-corner-color;
-					width: 6px;
-					height: 6px;
+				.fill-touch-square {
 					position: relative;
-					border: 2px solid white;
-					top: -4px;
-					margin-left: -4px;
+					width: 30px;
+					height: 30px;
+					margin-left: -15px;
+					top: -15px;
+					> .square {
+						background-color: $spreadsheet-sheet-selection-extend-corner-color;
+						position: absolute;
+						background-color: #40b527;
+						width: 6px;
+						height: 6px;
+						border: 2px solid white;
+						top: -4px;
+					}
 				}
 				.s-right, .s-left {
-					> .square {
+					> .fill-touch-square {
 						top: 50%;
-						margin-top: -5px;
+						margin-top: -15px;
+						> .square {
+							top: 11px;
+							left: 11px;
+						}
 					}
 				} 
-				.s-top, .s-bottom {
-					 > .square {
+				.s-top {
+					> .fill-touch-square {
+						top: -20px;
 						left: 50%;
+						> .square {
+							left: 50%;
+							margin-top: 20px;
+							margin-left: -4px;
+						}
+					}
+				}
+				.s-bottom {
+					> .fill-touch-square {
+						top: -8px;
+						left: 50%;
+						> .square {
+							left: 50%;
+							margin-top: 8px;
+							margin-left: -4px;
+						}
 					}
 				}
 			}
