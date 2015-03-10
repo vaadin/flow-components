@@ -423,8 +423,8 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench</artifactId>
-            <version>3.1.1</version>
+            <artifactId>vaadin-testbench-api</artifactId>
+            <version>${vaadin.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

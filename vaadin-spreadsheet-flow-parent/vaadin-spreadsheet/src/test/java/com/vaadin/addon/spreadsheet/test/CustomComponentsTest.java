@@ -3,7 +3,7 @@ package com.vaadin.addon.spreadsheet.test;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.browserlaunchers.Sleeper;
+import org.openqa.selenium.server.browserlaunchers.Sleeper;
 import org.openqa.selenium.support.ui.Select;
 
 public class CustomComponentsTest extends Test1 {
