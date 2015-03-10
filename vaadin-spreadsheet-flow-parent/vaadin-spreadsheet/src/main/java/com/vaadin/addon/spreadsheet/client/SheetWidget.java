@@ -1359,130 +1359,142 @@ public class SheetWidget extends Panel {
 
             @Override
             public void onPreviewNativeEvent(NativePreviewEvent event) {
-                int eventTypeInt = event.getTypeInt();
                 final NativeEvent nativeEvent = event.getNativeEvent();
-                if (eventTypeInt == Event.ONCLICK) {
-                    Element target = nativeEvent.getEventTarget().cast();
-                    String className = target.getClassName();
-                    int i = jsniUtil.isHeader(className);
-                    if (i == 1 || i == 2) {
-                        int index = jsniUtil.parseHeaderIndex(className);
-                        if (i == 1) {
-                            actionHandler.onRowHeaderClick(
-                                    index,
-                                    nativeEvent.getShiftKey(),
-                                    nativeEvent.getMetaKey()
-                                            || nativeEvent.getCtrlKey());
+                Element target = nativeEvent.getEventTarget().cast();
+                if (spreadsheet.isOrHasChild(target)) {
+                    int eventTypeInt = event.getTypeInt();
+                    if (eventTypeInt == Event.ONCLICK) {
+                        String className = target.getClassName();
+                        int i = jsniUtil.isHeader(className);
+                        if (i == 1 || i == 2) {
+                            int index = jsniUtil.parseHeaderIndex(className);
+                            if (i == 1) {
+                                actionHandler.onRowHeaderClick(
+                                        index,
+                                        nativeEvent.getShiftKey(),
+                                        nativeEvent.getMetaKey()
+                                                || nativeEvent.getCtrlKey());
+                            } else {
+                                actionHandler.onColumnHeaderClick(
+                                        index,
+                                        nativeEvent.getShiftKey(),
+                                        nativeEvent.getMetaKey()
+                                                || nativeEvent.getCtrlKey());
+                            }
+                            event.cancel();
+                            sheet.focus();
+                        }
+                    } else if (eventTypeInt == Event.ONMOUSEDOWN
+                            && actionHandler.canResize()) {
+                        String className = target.getClassName();
+                        if (className.equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)) {
+                            className = target.getParentElement()
+                                    .getClassName();
+                            int i = jsniUtil.isHeader(className);
+                            if (i == 1) { // row
+                                i = jsniUtil.parseHeaderIndex(className);
+                                startRowResizeDrag(i - 1,
+                                        nativeEvent.getClientX(),
+                                        nativeEvent.getClientY());
+                            } else if (i == 2) { // col
+                                i = jsniUtil.parseHeaderIndex(className);
+                                columnResizeCancelled = false;
+                                startColumnResizeDrag(i - 1,
+                                        nativeEvent.getClientX(),
+                                        nativeEvent.getClientY());
+                            }
+                            event.cancel();
+                        } else if (className
+                                .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
+                            className = target.getParentElement()
+                                    .getClassName();
+                            int i = jsniUtil.isHeader(className);
+                            if (i == 1) { // row
+                                i = jsniUtil.parseHeaderIndex(className);
+                                startRowResizeDrag(i, nativeEvent.getClientX(),
+                                        nativeEvent.getClientY());
+                            } else if (i == 2) { // col
+                                i = jsniUtil.parseHeaderIndex(className);
+                                columnResizeCancelled = false;
+                                startColumnResizeDrag(i,
+                                        nativeEvent.getClientX(),
+                                        nativeEvent.getClientY());
+                            }
+                            event.cancel();
+                        }
+                    } else if (resizing && eventTypeInt == Event.ONMOUSEMOVE) {
+                        if (resizedColumnIndex != -1) {
+                            handleColumnResizeDrag(
+                                    WidgetUtil
+                                            .getTouchOrMouseClientX(nativeEvent),
+                                    WidgetUtil
+                                            .getTouchOrMouseClientY(nativeEvent));
+                        } else if (resizedRowIndex != -1) {
+                            handleRowResizeDrag(
+                                    WidgetUtil
+                                            .getTouchOrMouseClientX(nativeEvent),
+                                    WidgetUtil
+                                            .getTouchOrMouseClientY(nativeEvent));
                         } else {
-                            actionHandler.onColumnHeaderClick(
-                                    index,
-                                    nativeEvent.getShiftKey(),
-                                    nativeEvent.getMetaKey()
-                                            || nativeEvent.getCtrlKey());
+                            resizing = false;
                         }
                         event.cancel();
-                        sheet.focus();
-                    }
-                } else if (eventTypeInt == Event.ONMOUSEDOWN
-                        && actionHandler.canResize()) {
-                    Element target = nativeEvent.getEventTarget().cast();
-                    String className = target.getClassName();
-                    if (className.equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)) {
-                        className = target.getParentElement().getClassName();
-                        int i = jsniUtil.isHeader(className);
-                        if (i == 1) { // row
-                            i = jsniUtil.parseHeaderIndex(className);
-                            startRowResizeDrag(i - 1, nativeEvent.getClientX(),
-                                    nativeEvent.getClientY());
-                        } else if (i == 2) { // col
-                            i = jsniUtil.parseHeaderIndex(className);
-                            columnResizeCancelled = false;
-                            startColumnResizeDrag(i - 1,
-                                    nativeEvent.getClientX(),
-                                    nativeEvent.getClientY());
-                        }
-                        event.cancel();
-                    } else if (className
-                            .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
-                        className = target.getParentElement().getClassName();
-                        int i = jsniUtil.isHeader(className);
-                        if (i == 1) { // row
-                            i = jsniUtil.parseHeaderIndex(className);
-                            startRowResizeDrag(i, nativeEvent.getClientX(),
-                                    nativeEvent.getClientY());
-                        } else if (i == 2) { // col
-                            i = jsniUtil.parseHeaderIndex(className);
-                            columnResizeCancelled = false;
-                            startColumnResizeDrag(i, nativeEvent.getClientX(),
-                                    nativeEvent.getClientY());
-                        }
-                        event.cancel();
-                    }
-                } else if (resizing && eventTypeInt == Event.ONMOUSEMOVE) {
-                    if (resizedColumnIndex != -1) {
-                        handleColumnResizeDrag(
-                                WidgetUtil.getTouchOrMouseClientX(nativeEvent),
-                                WidgetUtil.getTouchOrMouseClientY(nativeEvent));
-                    } else if (resizedRowIndex != -1) {
-                        handleRowResizeDrag(
-                                WidgetUtil.getTouchOrMouseClientX(nativeEvent),
-                                WidgetUtil.getTouchOrMouseClientY(nativeEvent));
-                    } else {
+                    } else if (resizing && eventTypeInt == Event.ONMOUSEUP) {
+                        columnResizeCancelled = true;
                         resizing = false;
-                    }
-                    event.cancel();
-                } else if (resizing && eventTypeInt == Event.ONMOUSEUP) {
-                    columnResizeCancelled = true;
-                    resizing = false;
-                    jsniUtil.clearCSSRules(resizeStyle);
-                    resizeTooltip.hide();
-                    event.cancel();
-                    if (resizedColumnIndex != -1) {
-                        spreadsheet.removeClassName(COLUMN_RESIZING_CLASSNAME);
-                        stopColumnResizeDrag(event.getNativeEvent()
-                                .getClientX());
-                    } else {
-                        spreadsheet.removeClassName(ROW_RESIZING_CLASSNAME);
-                        stopRowResizeDrag(WidgetUtil
-                                .getTouchOrMouseClientY(event.getNativeEvent()));
-                    }
-                } else if (eventTypeInt == Event.ONDBLCLICK
-                        && actionHandler.canResize()) {
-                    Element target = nativeEvent.getEventTarget().cast();
-                    String className = target.getClassName();
-                    if (className.equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)) {
-                        className = target.getParentElement().getClassName();
-                        int i = jsniUtil.isHeader(className);
-                        if (i == 1) { // row
-                            // autofit row ???
-                        } else if (i == 2) { // col
-                            i = jsniUtil.parseHeaderIndex(className) - 1;
-                            while (actionHandler.isColumnHidden(i) && i > 0) {
-                                i--;
-                            }
-                            if (i > 0) {
-                                actionHandler
-                                        .onColumnHeaderResizeDoubleClick(i);
-                            }
-                        }
+                        jsniUtil.clearCSSRules(resizeStyle);
+                        resizeTooltip.hide();
                         event.cancel();
-                    } else if (className
-                            .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
-                        className = target.getParentElement().getClassName();
-                        int i = jsniUtil.isHeader(className);
-                        if (i == 1) { // row
-                            // autofit row ???
-                        } else if (i == 2) { // col
-                            i = jsniUtil.parseHeaderIndex(className);
-                            while (actionHandler.isColumnHidden(i) && i > 0) {
-                                i--;
-                            }
-                            if (i > 0) {
-                                actionHandler
-                                        .onColumnHeaderResizeDoubleClick(i);
-                            }
+                        if (resizedColumnIndex != -1) {
+                            spreadsheet
+                                    .removeClassName(COLUMN_RESIZING_CLASSNAME);
+                            stopColumnResizeDrag(event.getNativeEvent()
+                                    .getClientX());
+                        } else {
+                            spreadsheet.removeClassName(ROW_RESIZING_CLASSNAME);
+                            stopRowResizeDrag(WidgetUtil
+                                    .getTouchOrMouseClientY(event
+                                            .getNativeEvent()));
                         }
-                        event.cancel();
+                    } else if (eventTypeInt == Event.ONDBLCLICK
+                            && actionHandler.canResize()) {
+                        String className = target.getClassName();
+                        if (className.equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)) {
+                            className = target.getParentElement()
+                                    .getClassName();
+                            int i = jsniUtil.isHeader(className);
+                            if (i == 1) { // row
+                                // autofit row ???
+                            } else if (i == 2) { // col
+                                i = jsniUtil.parseHeaderIndex(className) - 1;
+                                while (actionHandler.isColumnHidden(i) && i > 0) {
+                                    i--;
+                                }
+                                if (i > 0) {
+                                    actionHandler
+                                            .onColumnHeaderResizeDoubleClick(i);
+                                }
+                            }
+                            event.cancel();
+                        } else if (className
+                                .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
+                            className = target.getParentElement()
+                                    .getClassName();
+                            int i = jsniUtil.isHeader(className);
+                            if (i == 1) { // row
+                                // autofit row ???
+                            } else if (i == 2) { // col
+                                i = jsniUtil.parseHeaderIndex(className);
+                                while (actionHandler.isColumnHidden(i) && i > 0) {
+                                    i--;
+                                }
+                                if (i > 0) {
+                                    actionHandler
+                                            .onColumnHeaderResizeDoubleClick(i);
+                                }
+                            }
+                            event.cancel();
+                        }
                     }
                 }
             }
