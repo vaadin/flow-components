@@ -329,10 +329,6 @@
 				margin-left: $spreadsheet-row-header-width;
 			}
 			
-			.s-paint {
-				margin-left: $spreadsheet-row-header-width - $spreadsheet-border-width;
-			}
-			
 			.sheet-selection {
 				margin-left: $spreadsheet-row-header-width + $spreadsheet-border-width;
 			}
@@ -358,11 +354,6 @@
 				margin-left: $spreadsheet-row-header-width;
 			}
 			
-			.s-paint {
-				margin-top: $spreadsheet-col-header-height - $spreadsheet-border-width;
-				margin-left: $spreadsheet-row-header-width - $spreadsheet-border-width;
-			}
-			
 			.sheet-selection {
 				margin-top: $spreadsheet-col-header-height + $spreadsheet-border-width;
 				margin-left: $spreadsheet-row-header-width + $spreadsheet-border-width;
@@ -381,10 +372,6 @@
 			
 			.cell, .sheet-image {
 				margin-top: $spreadsheet-col-header-height;
-			}
-			
-			.s-paint {
-				margin-top: $spreadsheet-col-header-height - $spreadsheet-border-width;
 			}
 			
 			.sheet-selection {
