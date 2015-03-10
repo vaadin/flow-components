@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2013 Vaadin Ltd.
+ * Copyright 2000-2014 Vaadin Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,10 +17,17 @@
 package com.vaadin.addon.spreadsheet.test.tb3;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Calendar;
 import java.util.List;
 
+import org.junit.Rule;
+import org.junit.rules.TestName;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
+
+import com.vaadin.testbench.annotations.BrowserConfiguration;
+import com.vaadin.testbench.parallel.Browser;
+import com.vaadin.testbench.parallel.BrowserUtil;
 
 /**
  * Base class for tests which should be run on all supported browsers. The test
@@ -40,37 +47,47 @@ import org.openqa.selenium.remote.DesiredCapabilities;
  */
 public abstract class MultiBrowserTest extends PrivateTB3Configuration {
 
-    public static final int TESTED_SAFARI_VERSION = 6;
-    public static final int TESTED_CHROME_VERSION = 29;
-    public static final int TESTED_FIREFOX_VERSION = 24;
-
-    static List<DesiredCapabilities> allBrowsers = new ArrayList<DesiredCapabilities>();
-    static {
-        // allBrowsers.add(BrowserUtil.ie(8));
-        // allBrowsers.add(BrowserUtil.ie(9));
-        allBrowsers.add(BrowserUtil.ie(10));
-        // allBrowsers.add(BrowserUtil.ie(11));
-        allBrowsers.add(BrowserUtil.firefox(TESTED_FIREFOX_VERSION));
-        // Uncomment once we have the capability to run on Safari 6
-        // allBrowsers.add(safari(TESTED_SAFARI_VERSION));
-        allBrowsers.add(BrowserUtil.chrome(TESTED_CHROME_VERSION));
-        // Re-enable this when it is possible to run on a modern Opera version
-        // (15+)
-        // allBrowsers.add(BrowserUtil.opera(15));
-    }
-
-    /**
-     * @return all supported browsers which are actively tested
-     */
-    public static List<DesiredCapabilities> getAllBrowsers() {
-        return Collections.unmodifiableList(allBrowsers);
-    }
+    @Rule
+    public TestName testName = new TestName();
 
     @Override
-    public List<DesiredCapabilities> getBrowsersToTest() {
-        // Return a copy so sub classes can do
-        // super.getBrowseresToTest().remove(something)
-        return new ArrayList<DesiredCapabilities>(getAllBrowsers());
+    public void setDesiredCapabilities(DesiredCapabilities desiredCapabilities) {
+        if (BrowserUtil.isIE(desiredCapabilities)) {
+            desiredCapabilities.setCapability(
+                    InternetExplorerDriver.REQUIRE_WINDOW_FOCUS, true);
+            desiredCapabilities.setCapability(
+                    InternetExplorerDriver.ENABLE_PERSISTENT_HOVERING, false);
+        }
+
+        desiredCapabilities.setCapability("project", "Vaadin Spreadsheet");
+        desiredCapabilities.setCapability("build", String.format("%s / %s",
+                getDeploymentHostname(), Calendar.getInstance().getTime()));
+        desiredCapabilities.setCapability(
+                "name",
+                String.format("%s.%s", getClass().getCanonicalName(),
+                        testName.getMethodName()));
+
+        super.setDesiredCapabilities(desiredCapabilities);
     }
 
+    @BrowserConfiguration
+    public List<DesiredCapabilities> getBrowsersToTest() {
+        // Uncomment Safari and Opera if those become tested browsers again.
+        return getBrowserCapabilities(Browser.IE9, Browser.IE10, Browser.IE11,
+                Browser.FIREFOX, Browser.CHROME, Browser.PHANTOMJS);
+    }
+
+    protected List<DesiredCapabilities> getBrowsersExcludingPhantomJS() {
+        return getBrowserCapabilities(Browser.IE9, Browser.IE10, Browser.IE11,
+                Browser.CHROME, Browser.FIREFOX);
+    }
+
+    protected List<DesiredCapabilities> getBrowserCapabilities(
+            Browser... browsers) {
+        List<DesiredCapabilities> capabilities = new ArrayList<DesiredCapabilities>();
+        for (Browser browser : browsers) {
+            capabilities.add(browser.getDesiredCapabilities());
+        }
+        return capabilities;
+    }
 }

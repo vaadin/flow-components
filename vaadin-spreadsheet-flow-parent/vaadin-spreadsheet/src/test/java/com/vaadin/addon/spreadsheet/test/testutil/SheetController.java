@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet.test.testutil;
 
+import com.vaadin.testbench.parallel.BrowserUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Platform;
@@ -9,7 +10,6 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.addon.spreadsheet.test.SheetClicker;
-import com.vaadin.addon.spreadsheet.test.tb3.AbstractTB3Test.BrowserUtil;
 import com.vaadin.testbench.commands.CanWaitForVaadin;
 
 public class SheetController implements SheetClicker {
@@ -35,7 +35,7 @@ public class SheetController implements SheetClicker {
         return !((platform.is(Platform.MAC) || platform.is(Platform.XP))
                 && desiredCapabilities.getBrowserName().equalsIgnoreCase(
                         "chrome") || desiredCapabilities.getBrowserName()
-                .equalsIgnoreCase((BrowserUtil.ie(9).getBrowserName())));
+                .equalsIgnoreCase((BrowserUtil.ie9().getBrowserName())));
     }
 
     public SheetController action(CharSequence k) {

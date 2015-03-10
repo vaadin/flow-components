@@ -30,7 +30,6 @@ public abstract class UITest extends MultiBrowserTest {
         page = new PageHelper(driver);
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         driver.quit();

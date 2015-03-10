@@ -38,6 +38,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.testbench.Parameters;
 import com.vaadin.testbench.commands.TestBenchCommands;
+import com.vaadin.testbench.parallel.BrowserUtil;
 
 /**
  * Base class which provides functionality for tests which use the automatic
@@ -90,6 +91,8 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
         Parameters.setScreenshotErrorDirectory(getScreenshotErrorDirectory());
         Parameters
                 .setScreenshotReferenceDirectory(getScreenshotReferenceDirectory());
+        testBench(getDriver()).resizeViewPortTo(SCREENSHOT_WIDTH,
+                SCREENSHOT_HEIGHT);
     }
 
     /**
@@ -104,6 +107,7 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
      * reference.
      * 
      * @param identifier
+     *            The identifier of the image
      * @throws IOException
      */
     protected void compareScreen(String identifier) throws IOException {
@@ -170,6 +174,7 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
      * Finds alternative references for the given files
      * 
      * @param reference
+     *            The reference file
      * @return all references which should be considered when comparing with the
      *         given files, including the given reference
      */
@@ -194,7 +199,8 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
     }
 
     /**
-     * @param testName
+     * @param identifier
+     *            the identifier of the screenshot reference file
      * @return the reference file name to use for the given browser, as
      *         described by {@literal capabilities}, and identifier
      */
@@ -316,9 +322,8 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
     /**
      * Returns the name of the reference file based on the given parameters.
      * 
-     * @param testName
-     * @param capabilities
      * @param identifier
+     *            The identifier of the reference image
      * @return the full path of the reference
      */
     private String getScreenshotReferenceName(String identifier) {
@@ -330,9 +335,10 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
      * version given in {@literal capabilities} is used unless it is overridden
      * by the {@literal versionOverride} parameter.
      * 
-     * @param testName
-     * @param capabilities
      * @param identifier
+     *            The identifier of the reference image
+     * @param versionOverride
+     *            null, or set to the version you wish to force
      * @return the full path of the reference
      */
     private String getScreenshotReferenceName(String identifier,
@@ -340,10 +346,11 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
         String uniqueBrowserIdentifier;
         if (versionOverride == null) {
             uniqueBrowserIdentifier = BrowserUtil
-                    .getUniqueIdentifier(getDesiredCapabilities());
+                    .getBrowserIdentifier(getDesiredCapabilities());
         } else {
-            uniqueBrowserIdentifier = BrowserUtil.getUniqueIdentifier(
-                    getDesiredCapabilities(), "" + versionOverride);
+            DesiredCapabilities caps = getDesiredCapabilities();
+            caps.setVersion("" + versionOverride);
+            uniqueBrowserIdentifier = BrowserUtil.getBrowserIdentifier(caps);
         }
 
         // WindowMaximizeRestoreTest_Windows_InternetExplorer_8_window-1-moved-maximized-restored.png
@@ -354,8 +361,8 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
 
     /**
      * Returns the base name of the screenshot in the error directory. This is a
-     * name so that all files matching {@link #getScreenshotErrorBaseName()}*
-     * are owned by this test instance (taking into account
+     * name so that all files matching {@code getScreenshotErrorBaseName()*} are
+     * owned by this test instance (taking into account
      * {@link #getDesiredCapabilities()}) and can safely be removed before
      * running this test.
      */
