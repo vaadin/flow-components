@@ -398,24 +398,31 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         sheetWidget.removeSheetImage(key);
     }
 
-    public void updateMergedRegions(ArrayList<MergedRegion> mergedRegions) {
-        // remove old, add new
-        clearMergedRegions();
-        if (mergedRegions != null) {
-            int i = 0;
-            while (i < mergedRegions.size()) {
-                MergedRegion newMergedRegion = mergedRegions.get(i);
-                sheetWidget.addMergedRegion(newMergedRegion);
-                i++;
-            }
-        }
+    public void updateMergedRegions(final ArrayList<MergedRegion> mergedRegions) {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-        // copy list for later
-        if (mergedRegions == null) {
-            this.mergedRegions = null;
-        } else {
-            this.mergedRegions = new ArrayList<MergedRegion>(mergedRegions);
-        }
+            @Override
+            public void execute() {
+                // remove old, add new
+                clearMergedRegions();
+                if (mergedRegions != null) {
+                    int i = 0;
+                    while (i < mergedRegions.size()) {
+                        MergedRegion newMergedRegion = mergedRegions.get(i);
+                        sheetWidget.addMergedRegion(newMergedRegion);
+                        i++;
+                    }
+                }
+
+                // copy list for later
+                if (mergedRegions == null) {
+                    SpreadsheetWidget.this.mergedRegions = null;
+                } else {
+                    SpreadsheetWidget.this.mergedRegions = new ArrayList<MergedRegion>(
+                            mergedRegions);
+                }
+            }
+        });
     }
 
     private void clearMergedRegions() {
