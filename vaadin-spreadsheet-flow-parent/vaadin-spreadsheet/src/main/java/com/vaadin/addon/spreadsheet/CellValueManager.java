@@ -498,9 +498,8 @@ public class CellValueManager implements Serializable {
 
                         Double percentage = SpreadsheetUtil.parsePercentage(
                                 value, spreadsheet.getLocale());
-                        Double numVal = SpreadsheetUtil.parseNumber(value,
-                                spreadsheet.getLocale());
-
+                        Double numVal = SpreadsheetUtil.parseNumber(cell,
+                                value, spreadsheet.getLocale());
                         if (value.isEmpty()) {
                             cell.setCellType(Cell.CELL_TYPE_BLANK);
                         } else if (percentage != null) {

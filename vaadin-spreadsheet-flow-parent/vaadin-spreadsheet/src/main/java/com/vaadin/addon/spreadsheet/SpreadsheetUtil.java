@@ -18,8 +18,11 @@ package com.vaadin.addon.spreadsheet;
  */
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.Format;
 import java.text.ParsePosition;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -28,6 +31,7 @@ import java.util.regex.Pattern;
 import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -320,6 +324,34 @@ public class SpreadsheetUtil implements Serializable {
         return null;
     }
 
+    public static Double parseNumber(Cell cell, String value, Locale locale) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        if (cell.getCellStyle().getDataFormatString() != null) {
+            DataFormatter df = new DataFormatter(locale);
+            try {
+                Method formatter = df.getClass().getDeclaredMethod("getFormat",
+                        Cell.class);
+                formatter.setAccessible(true);
+                Format format = (Format) formatter.invoke(df, cell);
+                ParsePosition parsePosition = new ParsePosition(0);
+                Object parsed = format.parseObject(value, parsePosition);
+                if (parsePosition.getIndex() == value.length()) {
+                    if (parsed instanceof Double) {
+                        return (Double) parsed;
+                    } else if (parsed instanceof Number) {
+                        return ((Number) parsed).doubleValue();
+                    }
+                }
+            } catch (NoSuchMethodException e) {
+            } catch (InvocationTargetException e) {
+            } catch (IllegalAccessException e) {
+            }
+        }
+        return parseNumber(value, locale);
+    }
+
     public static Double parseNumber(String cellContent, Locale locale) {
 
         if (cellContent == null) {
@@ -348,7 +380,7 @@ public class SpreadsheetUtil implements Serializable {
                 int decIndex = trimmedContent.indexOf(decSep);
 
                 // special case; non-breaking space
-                if ((int) groupSep == 160 && groupingIndex == -1) {
+                if (groupSep == 160 && groupingIndex == -1) {
                     // try normal space
                     groupSep = ' ';
                     groupingIndex = trimmedContent.lastIndexOf(groupSep);

@@ -297,7 +297,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 }
 
                 // check for numbers
-                Double numVal = SpreadsheetUtil.parseNumber(cellContent,
+                Double numVal = SpreadsheetUtil.parseNumber(cell, cellContent,
                         spreadsheet.getLocale());
                 if (numVal != null) {
                     cell.setCellType(Cell.CELL_TYPE_NUMERIC);
