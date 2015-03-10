@@ -74,17 +74,20 @@ public class SheetJsniUtil {
     /** returns 1 for row 2 for column 0 for not header */
     public final native int isHeader(String str)
     /*-{
-        var c = str.charAt(0);
-        if (c === 'r' ) {
-            c = str.charAt(1);
-            if (c === 'h') {
-                return 1;
+        try {
+            var c = str.charAt(0);
+            if (c === 'r' ) {
+                c = str.charAt(1);
+                if (c === 'h') {
+                    return 1;
+                }
+            } else if (c === 'c') {
+                c = str.charAt(1);
+                if (c === 'h') {
+                return 2;
+                }
             }
-        } else if (c === 'c') {
-            c = str.charAt(1);
-            if (c === 'h') {
-            return 2;
-            }
+        } catch (e) {
         }
         return 0;
      }-*/;
