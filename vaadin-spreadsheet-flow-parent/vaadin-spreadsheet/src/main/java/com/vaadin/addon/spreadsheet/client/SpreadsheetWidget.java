@@ -950,9 +950,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 break;
             case KeyCodes.KEY_TAB:
                 if (event.getShiftKey()) {
-                    selectionHandler.moveSelectionLeft(false);
+                    selectionHandler.moveSelectionLeft(isSelectedCellHidden());
                 } else {
-                    selectionHandler.moveSelectionRight(false);
+                    selectionHandler.moveSelectionRight(isSelectedCellHidden());
                 }
                 break;
             case KeyCodes.KEY_RIGHT:
@@ -980,6 +980,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 break;
             case KeyCodes.KEY_F2:
             case KeyCodes.KEY_ENTER:
+                if (isSelectedCellHidden()) {
+                    if (KeyCodes.KEY_ENTER == event.getKeyCode()) {
+                        selectionHandler.moveSelectionDown(true);
+                    }
+                    break;
+                }
                 checkEditableAndNotify();
                 if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
                         && !cellLocked && !customCellEditorDisplayed) {
@@ -993,26 +999,34 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 break;
             }
         } else {
-            checkEditableAndNotify();
+            if (!isSelectedCellHidden()) {
+                checkEditableAndNotify();
 
-            if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
-                    && !cellLocked && !customCellEditorDisplayed) {
-                // cache value and start editing cell as empty
-                inlineEditing = true;
-                cachedCellValue = sheetWidget.getSelectedCellLatestValue();
-                if (cachedCellValue.endsWith("%")) {
-                    enteredCharacter = enteredCharacter + "%";
-                    sheetWidget.startEditingCell(true, false, true,
-                            enteredCharacter);
-                    formulaBarWidget.setCellPlainValue(enteredCharacter);
-                } else {
-                    sheetWidget.startEditingCell(true, false, true,
-                            enteredCharacter);
-                    formulaBarWidget.cacheFormulaFieldValue();
-                    formulaBarWidget.setCellPlainValue(enteredCharacter);
+                if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
+                        && !cellLocked && !customCellEditorDisplayed) {
+                    // cache value and start editing cell as empty
+                    inlineEditing = true;
+                    cachedCellValue = sheetWidget.getSelectedCellLatestValue();
+                    if (cachedCellValue.endsWith("%")) {
+                        enteredCharacter = enteredCharacter + "%";
+                        sheetWidget.startEditingCell(true, false, true,
+                                enteredCharacter);
+                        formulaBarWidget.setCellPlainValue(enteredCharacter);
+                    } else {
+                        sheetWidget.startEditingCell(true, false, true,
+                                enteredCharacter);
+                        formulaBarWidget.cacheFormulaFieldValue();
+                        formulaBarWidget.setCellPlainValue(enteredCharacter);
+                    }
                 }
             }
         }
+    }
+
+    private boolean isSelectedCellHidden() {
+        return hiddenColumnIndexes
+                .contains(sheetWidget.getSelectedCellColumn())
+                || hiddenRowIndexes.contains(sheetWidget.getSelectedCellRow());
     }
 
     /**
@@ -1136,7 +1150,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 cachedCellValue = "";
             } else {
                 cachedCellValue = sheetWidget.getSelectedCellLatestValue();
-                sheetWidget.startEditingCell(false, false, true, value);
             }
         }
     }

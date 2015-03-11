@@ -548,18 +548,26 @@ public class SelectionWidget extends Composite {
         this.row1 = row1;
         this.col2 = col2;
         this.row2 = row2;
+
+        totalHeight = countSum(handler.getRowHeightsPX(), row1, row2 + 1);
+        totalWidth = countSum(handler.getColWidths(), col1, col2 + 1);
+
+        boolean hideCorner = totalWidth == 0 || totalHeight == 0;
+
         bottomRight.setPosition(col1, col2, row1, row2);
+        bottomRight.setCornerHidden(hideCorner);
         if (verticalSplitPosition > 0 & horizontalSplitPosition > 0) {
             topLeft.setPosition(col1, col2, row1, row2);
+            topLeft.setCornerHidden(hideCorner);
         }
         if (verticalSplitPosition > 0) {
             topRight.setPosition(col1, col2, row1, row2);
+            topRight.setCornerHidden(hideCorner);
         }
         if (horizontalSplitPosition > 0) {
             bottomLeft.setPosition(col1, col2, row1, row2);
+            bottomLeft.setCornerHidden(hideCorner);
         }
-        totalHeight = countSum(handler.getRowHeightsPX(), row1, row2 + 1);
-        totalWidth = countSum(handler.getColWidths(), col1, col2 + 1);
 
         if (fillMode) {
             setFillMode(false);
