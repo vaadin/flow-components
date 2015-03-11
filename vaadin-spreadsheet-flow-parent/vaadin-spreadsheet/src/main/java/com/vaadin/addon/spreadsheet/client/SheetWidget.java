@@ -482,7 +482,6 @@ public class SheetWidget extends Panel {
     private CellComment currentlyEditedCellComment;
 
     public SheetWidget(SheetHandler view, boolean touchMode) {
-
         actionHandler = view;
         setTouchMode(touchMode);
         cachedCellData = new HashMap<String, CellData>();
@@ -1910,10 +1909,6 @@ public class SheetWidget extends Panel {
         // styles for sizes and position
         final String[] sizeStyleRules = new String[actionHandler.getMaxRows()
                 + actionHandler.getMaxColumns()];
-        // + verticalSplitPosition > 0 ? 1
-        // : 0 + horizontalSplitPosition > 0 ? 1 : 0]; // add extra rule if
-        // vertical split
-        // panel exists
 
         // create row rules (height + top offset)
         definedRowHeights = new int[actionHandler.getMaxRows()];
@@ -1984,15 +1979,23 @@ public class SheetWidget extends Panel {
         }
         widthIncrease = 0;
         if (rowHeaders != null && !rowHeaders.isEmpty()) {
+            int index = 1;
+            while (actionHandler.isRowHidden(index)) {
+                index++;
+            }
             MeasuredSize measuredSize = new MeasuredSize();
-            measuredSize.measure(rowHeaders.get(0));
+            measuredSize.measure(rowHeaders.get(index));
             widthIncrease = measuredSize.getOuterWidth();
         }
 
         int heightIncrease = 0;
         if (colHeaders != null && !colHeaders.isEmpty()) {
+            int index = 1;
+            while (actionHandler.isColumnHidden(index)) {
+                index++;
+            }
             MeasuredSize measuredSize = new MeasuredSize();
-            measuredSize.measure(colHeaders.get(0));
+            measuredSize.measure(colHeaders.get(index));
             heightIncrease = measuredSize.getOuterHeight();
         }
 
