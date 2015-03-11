@@ -1381,7 +1381,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @param col
      *            Column index of the new cell, 0-based
      * @param formula
-     *            The formula to set to the new cell (should NOT start with "=")
+     *            The formula to set to the new cell (should NOT start with "="
+     *            nor "+")
      * @return The newly created cell
      * @throws IllegalArgumentException
      *             If columnIndex < 0 or greater than the maximum number of

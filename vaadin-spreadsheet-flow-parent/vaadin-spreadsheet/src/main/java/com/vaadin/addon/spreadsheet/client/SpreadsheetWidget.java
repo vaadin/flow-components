@@ -1251,7 +1251,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             if (value == null) {
                 value = "";
             }
-            selectedCellIsFormulaType = value.startsWith("=");
+            selectedCellIsFormulaType = value.startsWith("=")
+                    || value.startsWith("+");
             sheetWidget.stopEditingCell();
             if (!selectedCellIsFormulaType) {
                 // this could be removed because the formatted value is always

@@ -369,7 +369,7 @@ public class CellValueManager implements Serializable {
      * 
      * If there is a {@link CellValueHandler} defined, then it is used.
      * 
-     * Cells starting with "=" will be created/changed into FORMULA type.
+     * Cells starting with "=" or "+" will be created/changed into FORMULA type.
      * 
      * Cells that are existing and are NUMERIC type will be parsed according to
      * their existing format, or if that fails, as Double.
@@ -389,7 +389,7 @@ public class CellValueManager implements Serializable {
      *            Row index of target cell, 1-based
      * @param value
      *            The new value to set to the target cell, formulas will start
-     *            with an extra "="
+     *            with an extra "=" or "+"
      */
     public void onCellValueChange(int col, int row, String value) {
         Workbook workbook = spreadsheet.getWorkbook();
@@ -418,7 +418,7 @@ public class CellValueManager implements Serializable {
                 SpreadsheetStyleFactory styler = spreadsheet
                         .getSpreadsheetStyleFactory();
                 if (cell == null) {
-                    if (value.startsWith("=")) {
+                    if (value.startsWith("=") || value.startsWith("+")) {
                         cell = r.createCell(col - 1, Cell.CELL_TYPE_FORMULA);
                         cell.setCellFormula(value.substring(1));
                         evaluator.notifySetFormula(cell);
@@ -474,7 +474,7 @@ public class CellValueManager implements Serializable {
                     if (!sentCells.remove(key)) {
                         sentFormulaCells.remove(key);
                     }
-                    if (value.startsWith("=")) {
+                    if (value.startsWith("=") || value.startsWith("+")) {
                         evaluator.notifyUpdateCell(cell);
                         cell.setCellType(Cell.CELL_TYPE_FORMULA);
                         cell.setCellFormula(value.substring(1));
