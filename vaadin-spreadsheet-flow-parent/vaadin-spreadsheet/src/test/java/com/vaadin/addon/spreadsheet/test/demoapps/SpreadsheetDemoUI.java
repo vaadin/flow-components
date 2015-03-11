@@ -269,6 +269,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                                     .setSpreadsheetComponentFactory(spreadsheetFieldFactory);
                             layout.addComponent(spreadsheet);
                             layout.setExpandRatio(spreadsheet, 1.0F);
+                            spreadsheet
+                                    .addActionHandler(new SpreadsheetDefaultActionHandler());
                         } else {
                             spreadsheet
                                     .setWorkbook(((SpreadsheetEditorComponentFactoryTest) spreadsheetFieldFactory)
@@ -687,7 +689,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 if (rowIndex == 3) {
                     customEditor.setWidth("100%");
                 } else {
-                    customEditor.setWidth("100px");
+                    customEditor.setWidth("110px");
                     customEditor.setCaption("Col " + columnIndex + " Row "
                             + rowIndex);
                 }
@@ -698,6 +700,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 String stringCellValue = cell != null ? cell
                         .getStringCellValue() : null;
                 comboBox.setValue(stringCellValue);
+                comboBox.setWidth("100%");
             }
 
             if (cell != null) {
@@ -727,6 +730,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     }
                     ((DateField) customEditor)
                             .setValue(cell.getDateCellValue());
+                    ((DateField) customEditor).setWidth("100%");
                     Format format = spreadsheet.getDataFormatter()
                             .createFormat(cell);
                     String pattern = null;

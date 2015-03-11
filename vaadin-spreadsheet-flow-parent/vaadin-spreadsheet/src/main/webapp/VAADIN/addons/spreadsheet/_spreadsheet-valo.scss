@@ -236,6 +236,11 @@
 					outline-offset: -2px; 
 					z-index: 3;
 				}
+				
+				> .v-button {
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
 			}
 			
 			div{

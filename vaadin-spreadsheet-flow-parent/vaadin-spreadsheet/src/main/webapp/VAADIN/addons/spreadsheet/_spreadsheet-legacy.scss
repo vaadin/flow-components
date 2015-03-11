@@ -193,6 +193,11 @@ $cell-comment-border-color: #A7A7A7 !default;
 					outline-offset: -2px; 
 					z-index: 3;
 				}
+				
+				> .v-button {
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
 			}
 			
 			div{

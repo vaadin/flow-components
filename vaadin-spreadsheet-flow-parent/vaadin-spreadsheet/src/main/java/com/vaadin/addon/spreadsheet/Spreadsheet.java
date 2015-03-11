@@ -100,6 +100,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         Action.Container, Focusable {
 
     /**
+     * Minimum row height for rows containing components (in points).
+     */
+    private static final int MINIMUM_ROW_HEIGHT_FOR_COMPONENTS = 30;
+
+    /**
      * This is a style which hides the top (address and formula) bar.
      */
     public static final String HIDE_FUNCTION_BAR_STYLE = "hidefunctionbar";
@@ -278,6 +283,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             return null;
         }
     };
+
+    private Set<Integer> rowsWithComponents;
 
     /**
      * Creates a new Spreadsheet component using the newer Excel version format
@@ -3009,6 +3016,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 customComponents = new HashSet<Component>();
             }
             HashSet<Component> newCustomComponents = new HashSet<Component>();
+            Set<Integer> rowsWithComponents = new HashSet<Integer>();
             // iteration indexes 0-based
             for (int r = firstRow - 1; r < lastRow; r++) {
                 final Row row = getActiveSheet().getRow(r);
@@ -3035,6 +3043,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                             getState().componentIDtoCellKeysMap.put(
                                     customComponent.getConnectorId(), key);
                             newCustomComponents.add(customComponent);
+                            rowsWithComponents.add(r);
                         } else if (!isCellLocked(cell)) {
                             // no custom component and not locked, check if
                             // the cell has a custom editor
@@ -3052,6 +3061,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                                 getState().cellKeysToEditorIdMap.put(key,
                                         customEditor.getConnectorId());
                                 newCustomComponents.add(customEditor);
+                                rowsWithComponents.add(r);
                             }
                         }
                     }
@@ -3070,6 +3080,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 }
             }
             customComponents = newCustomComponents;
+
+            if (!rowsWithComponents.isEmpty()) {
+                handleRowSizes(rowsWithComponents);
+            }
+
         } else {
             getState().cellKeysToEditorIdMap = null;
             getState().componentIDtoCellKeysMap = null;
@@ -3079,7 +3094,42 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 }
                 customComponents.clear();
             }
+            handleRowSizes(new HashSet<Integer>());
         }
+    }
+
+    private void handleRowSizes(Set<Integer> rowsWithComponents) {
+        // Set larger height for new rows with components
+        for (Integer row : rowsWithComponents) {
+            if (isRowHidden(row)) {
+                continue;
+            }
+            float currentHeight = getState(false).rowH[row];
+            if (currentHeight < MINIMUM_ROW_HEIGHT_FOR_COMPONENTS) {
+                getState().rowH[row] = MINIMUM_ROW_HEIGHT_FOR_COMPONENTS;
+            }
+        }
+        // Reset row height for rows which no longer have components
+        if (this.rowsWithComponents != null) {
+            Sheet activeSheet = getActiveSheet();
+            for (Integer row : this.rowsWithComponents) {
+                if (!rowsWithComponents.contains(row)) {
+                    if (isRowHidden(row)) {
+                        getState().rowH[row] = 0;
+                    } else {
+                        Row r = activeSheet.getRow(row);
+                        if (r == null) {
+                            getState().rowH[row] = activeSheet
+                                    .getDefaultRowHeightInPoints();
+                        } else {
+                            getState().rowH[row] = r.getHeightInPoints();
+                        }
+                    }
+                }
+            }
+        }
+
+        this.rowsWithComponents = rowsWithComponents;
     }
 
     /**
