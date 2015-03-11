@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JsArray;
@@ -61,6 +62,7 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
+import com.vaadin.client.ComputedStyle;
 import com.vaadin.client.MeasuredSize;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.VLabel;
@@ -480,6 +482,7 @@ public class SheetWidget extends Panel {
     private CellComment currentlyEditedCellComment;
 
     public SheetWidget(SheetHandler view, boolean touchMode) {
+
         actionHandler = view;
         setTouchMode(touchMode);
         cachedCellData = new HashMap<String, CellData>();
@@ -2079,6 +2082,40 @@ public class SheetWidget extends Panel {
             }
         }
         recalculateCellStyleWidthValues();
+        createCellRangeRule();
+    }
+
+    private void createCellRangeRule() {
+        DivElement tempDiv = Document.get().createDivElement();
+        tempDiv.addClassName("cell-range-bg-color");
+        tempDiv.getStyle().setWidth(0, Unit.PX);
+        tempDiv.getStyle().setHeight(0, Unit.PX);
+        sheet.appendChild(tempDiv);
+        ComputedStyle cs = new ComputedStyle(tempDiv);
+        String bgCol = cs.getProperty("backgroundColor");
+        bgCol = bgCol.replace("!important", "");
+        sheet.removeChild(tempDiv);
+
+        if (bgCol != null && !bgCol.trim().isEmpty()) {
+            Canvas c = Canvas.createIfSupported();
+            c.setCoordinateSpaceHeight(1);
+            c.setCoordinateSpaceWidth(1);
+            c.getContext2d().setFillStyle(bgCol);
+            c.getContext2d().fillRect(0, 0, 1, 1);
+            String bgImage = "url(\"" + c.toDataUrl() + "\")";
+
+            jsniUtil.insertRule(sheetStyle,
+                    ".v-spreadsheet .sheet .cell.cell-range {"
+                            + "background-image: " + bgImage + " !important;"
+                            + "}");
+        } else {
+            // Fall back to the default color
+            jsniUtil.insertRule(
+                    sheetStyle,
+                    ".v-spreadsheet .sheet .cell.cell-range {"
+                            + "background-color: rgba(232, 242, 252, 0.8) !important;"
+                            + "}");
+        }
     }
 
     /**

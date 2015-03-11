@@ -46,7 +46,7 @@
 	$spreadsheet-sheet-selection-extend-corner-color: #40b527 !default;
 	$spreadsheet-sheet-selection-extend-inside-bg-color: rgba(235,247,233,0.8) !default;
 	$spreadsheet-sheet-selection-highlight-outline-color: #222222 !default;
-	$spreadsheet-sheet-selection-range-bg-color: #e8f2fc !default;
+	$spreadsheet-sheet-selection-range-bg-color: rgba(232, 242, 252, 0.8) !default;
 	$spreadsheet-popup-button-arrow-color: #676767 !default;
 	$spreadsheet-cell-comment-line-color: #A7A7A7 !default;
 	$spreadsheet-fill-square-border: 2px solid $spreadsheet-cell-background-color;
@@ -229,10 +229,6 @@
 				flex-direction: column;
 				justify-content: flex-end;
 				line-height: normal;
-				
-				&.cell-range {
-				 	background-color: $spreadsheet-sheet-selection-range-bg-color !important;
-				}
 				
 				&.selected-cell-highlight {
 					outline: solid $spreadsheet-sheet-selection-highlight-outline-color 1px;
@@ -1013,5 +1009,9 @@
 			line-height: $spreadsheet-popupbutton-header-sizing;
 			text-align: center;
 		}
+	}
+	
+	.cell-range-bg-color {
+	 	background-color: $spreadsheet-sheet-selection-range-bg-color;
 	}
 }
