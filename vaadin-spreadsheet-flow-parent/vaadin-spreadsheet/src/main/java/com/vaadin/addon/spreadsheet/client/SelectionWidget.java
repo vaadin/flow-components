@@ -324,7 +324,6 @@ public class SelectionWidget extends Composite {
                 break;
             case Event.ONTOUCHMOVE:
                 paintCells(event);
-                // prevent scrolling
                 event.preventDefault();
                 break;
             default:
@@ -770,6 +769,10 @@ public class SelectionWidget extends Composite {
     }
 
     private void stopPaintingCells(Event event) {
+        if (scrollTimerRunning) {
+            stopScrollTimer();
+        }
+
         paint.getStyle().setVisibility(Visibility.HIDDEN);
         paintMode = false;
         paint.getStyle().setWidth(0, Unit.PX);
@@ -794,7 +797,6 @@ public class SelectionWidget extends Composite {
 
         sheetWidget.getElement().removeClassName("selecting");
         setSelectionWidgetSquaresVisible(false);
-
     }
 
     private void selectCells(Event event) {
