@@ -1198,12 +1198,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * Gets the Cell at the given address. If the cell is updated in outside
+     * Returns the Cell at the given address. If the cell is updated in outside
      * code, call {@link #refreshCells(Cell...)} AFTER ALL UPDATES (value, type,
      * formatting or style) to mark the cell as "dirty".
      * 
      * @param cellAddress
-     *            Address of the target Cell, e.g. "A3"
+     *            Address of the Cell to return, e.g. "A3"
      * @return The cell at the given address, or null if not defined
      */
     public Cell getCell(String cellAddress) {
@@ -1218,14 +1218,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * Gets the Cell at the given coordinated. If the cell is updated in outside
-     * code, call {@link #refreshCells(Cell...)} AFTER ALL UPDATES (value, type,
-     * formatting or style) to mark the cell as "dirty".
+     * Returns the Cell at the given coordinates. If the cell is updated in
+     * outside code, call {@link #refreshCells(Cell...)} AFTER ALL UPDATES
+     * (value, type, formatting or style) to mark the cell as "dirty".
      * 
      * @param row
-     *            Row index of the cell to update, 0-based
+     *            Row index of the cell to return, 0-based
      * @param col
-     *            Column index of the cell to update, 0-based
+     *            Column index of the cell to return, 0-based
      * @return The cell at the given coordinates, or null if not defined
      */
     public Cell getCell(int row, int col) {
@@ -1235,6 +1235,21 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         } else {
             return null;
         }
+    }
+
+    /**
+     * Returns the Cell corresponding to the given reference. If the cell is
+     * updated in outside code, call {@link #refreshCells(Cell...)} AFTER ALL
+     * UPDATES (value, type, formatting or style) to mark the cell as "dirty".
+     * 
+     * @param cellReference
+     *            Reference to the cell to return
+     * @return The cell corresponding to the given reference, or null if not
+     *         defined
+     */
+    public Cell getCell(CellReference cellReference) {
+        return cellReference == null ? null : getCell(cellReference.getRow(),
+                cellReference.getCol());
     }
 
     /**
