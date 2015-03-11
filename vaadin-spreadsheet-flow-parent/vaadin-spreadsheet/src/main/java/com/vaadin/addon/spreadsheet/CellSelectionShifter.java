@@ -136,8 +136,6 @@ public class CellSelectionShifter implements Serializable {
                 getCellSelectionManager().handleCellRangeSelection(
                         spreadsheet.getSelectedCellReference(),
                         newPaintedCellRange);
-                getCellSelectionManager()
-                        .cellRangeSelected(newPaintedCellRange);
                 spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
 
                 if (changedCellRangeAddress != null) {
