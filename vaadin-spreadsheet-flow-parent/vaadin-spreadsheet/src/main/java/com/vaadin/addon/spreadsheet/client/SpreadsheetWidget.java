@@ -588,13 +588,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     public void updateSelectedCellValues(int column, int row) {
-        String formulaValue = sheetWidget.getCellFormulaValue(column, row);
-        if (formulaValue != null && !formulaValue.isEmpty()) {
-            formulaBarWidget.setCellFormulaValue(formulaValue);
-            sheetWidget.updateInputValue("=" + formulaValue);
-        } else {
-            formulaBarWidget.setCellPlainValue(sheetWidget.getCellValue(column,
-                    row));
+        if (!sheetWidget.isEditingCell()) {
+            String formulaValue = sheetWidget.getCellFormulaValue(column, row);
+            if (formulaValue != null && !formulaValue.isEmpty()) {
+                formulaBarWidget.setCellFormulaValue(formulaValue);
+                sheetWidget.updateInputValue("=" + formulaValue);
+            } else {
+                formulaBarWidget.setCellPlainValue(sheetWidget.getCellValue(
+                        column, row));
+            }
         }
         cellLocked = sheetWidget.isCellLocked(column, row);
         if (!customCellEditorDisplayed) {
