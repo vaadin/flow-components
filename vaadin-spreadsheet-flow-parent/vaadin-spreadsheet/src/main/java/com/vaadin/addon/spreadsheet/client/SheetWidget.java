@@ -1979,23 +1979,33 @@ public class SheetWidget extends Panel {
         }
         widthIncrease = 0;
         if (rowHeaders != null && !rowHeaders.isEmpty()) {
-            int index = 1;
-            while (actionHandler.isRowHidden(index)) {
+            int index = 0;
+            while (actionHandler.isRowHidden(index + 1)) {
                 index++;
             }
             MeasuredSize measuredSize = new MeasuredSize();
-            measuredSize.measure(rowHeaders.get(index));
+            if (frozenRowHeaders != null && frozenRowHeaders.size() > 0
+                    && index <= frozenRowHeaders.size()) {
+                measuredSize.measure(frozenRowHeaders.get(index));
+            } else {
+                measuredSize.measure(rowHeaders.get(index));
+            }
             widthIncrease = measuredSize.getOuterWidth();
         }
 
         int heightIncrease = 0;
         if (colHeaders != null && !colHeaders.isEmpty()) {
-            int index = 1;
-            while (actionHandler.isColumnHidden(index)) {
+            int index = 0;
+            while (actionHandler.isColumnHidden(index + 1)) {
                 index++;
             }
             MeasuredSize measuredSize = new MeasuredSize();
-            measuredSize.measure(colHeaders.get(index));
+            if (frozenColumnHeaders != null && frozenColumnHeaders.size() > 0
+                    && index <= frozenColumnHeaders.size()) {
+                measuredSize.measure(frozenColumnHeaders.get(index));
+            } else {
+                measuredSize.measure(colHeaders.get(index));
+            }
             heightIncrease = measuredSize.getOuterHeight();
         }
 
