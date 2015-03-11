@@ -1183,7 +1183,9 @@ public class SheetWidget extends Panel {
         clientY = y;
 
         if (y < scrollPaneTop) {
-            deltaY = y - scrollPaneTop;
+            if (!startCellTopRight && !startCellTopLeft) {
+                deltaY = y - scrollPaneTop;
+            }
         } else if (y > scrollPaneBottom) {
             deltaY = y - scrollPaneBottom;
         } else {
@@ -1191,7 +1193,9 @@ public class SheetWidget extends Panel {
         }
 
         if (x < scrollPaneLeft) {
-            deltaX = x - scrollPaneLeft;
+            if (!startCellBottomLeft && !startCellTopLeft) {
+                deltaX = x - scrollPaneLeft;
+            }
         } else if (x > scrollPaneRight) {
             deltaX = x - scrollPaneRight;
         } else {
