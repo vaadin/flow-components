@@ -17,8 +17,7 @@ package com.vaadin.addon.spreadsheet.client;
  * #L%
  */
 
-import java.util.logging.Logger;
-
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
@@ -363,8 +362,6 @@ public class SelectionWidget extends Composite {
         }
     }
 
-    private final Logger debugConsole = Logger.getLogger("spreadsheet-logger");
-
     private final SelectionOutlineWidget bottomRight;
     private SelectionOutlineWidget bottomLeft;
     private SelectionOutlineWidget topRight;
@@ -602,7 +599,6 @@ public class SelectionWidget extends Composite {
         if (!dragging) {
             showTouchActions();
         }
-
     }
 
     private void showTouchActions() {
@@ -631,33 +627,42 @@ public class SelectionWidget extends Composite {
 
             touchActions.add(m);
 
-            touchActions.setPopupPositionAndShow(new PositionCallback() {
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
                 @Override
-                public void setPosition(int offsetWidth, int offsetHeight) {
-                    // above top border
-                    int top = bottomRight.top.getAbsoluteTop();
-                    int left = bottomRight.top.getAbsoluteLeft();
-                    int width = bottomRight.top.getClientWidth();
+                public void execute() {
+                    touchActions
+                            .setPopupPositionAndShow(new PositionCallback() {
 
-                    top -= offsetHeight + 5;
-                    left += (width / 2) - (offsetWidth / 2);
+                                @Override
+                                public void setPosition(int offsetWidth,
+                                        int offsetHeight) {
+                                    // above top border
+                                    int top = bottomRight.top.getAbsoluteTop();
+                                    int left = bottomRight.top
+                                            .getAbsoluteLeft();
+                                    int width = bottomRight.top
+                                            .getClientWidth();
 
-                    Element parent = sheetWidget.getBottomRightPane();
-                    int parentTop = parent.getAbsoluteTop();
-                    debugConsole.warning(parent.getClassName() + " "
-                            + parentTop + " " + top);
-                    if (parentTop > top) {
-                        // put under instead
-                        top = bottomRight.bottom.getAbsoluteBottom() + 5;
-                    }
+                                    top -= offsetHeight + 5;
+                                    left += (width / 2) - (offsetWidth / 2);
 
-                    touchActions.setPopupPosition(left, top);
+                                    Element parent = sheetWidget
+                                            .getBottomRightPane();
+                                    int parentTop = parent.getAbsoluteTop();
+                                    if (parentTop > top) {
+                                        // put under instead
+                                        top = bottomRight.bottom
+                                                .getAbsoluteBottom() + 5;
+                                    }
+                                    touchActions.setPopupPosition(left, top);
 
-                    // TODO check for room
+                                    // TODO check for room
+                                }
+                            });
+                    touchActions.show();
                 }
             });
-            touchActions.show();
         }
     }
 
