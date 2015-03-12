@@ -22,7 +22,6 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
@@ -86,20 +85,37 @@ public class SelectionWidget extends Composite {
 
         private int minColumn;
 
+        private boolean leftEdgeHidden;
+
+        private boolean topEdgeHidden;
+
+        private boolean rightEdgeHidden;
+
+        private boolean bottomEdgeHidden;
+
+        private int width;
+
+        private int height;
+
         public SelectionOutlineWidget() {
             initDOM();
             initListeners();
         }
 
-        void setSquaresVisible(boolean visible) {
+        void setSquaresVisible(boolean top, boolean right, boolean bottom,
+                boolean left) {
             topSquareTouchArea.getStyle().setVisibility(
-                    visible ? Visibility.VISIBLE : Visibility.HIDDEN);
+                    top && !topEdgeHidden ? Visibility.VISIBLE
+                            : Visibility.HIDDEN);
             leftSquareTouchArea.getStyle().setVisibility(
-                    visible ? Visibility.VISIBLE : Visibility.HIDDEN);
+                    left && !leftEdgeHidden ? Visibility.VISIBLE
+                            : Visibility.HIDDEN);
             rightSquareTouchArea.getStyle().setVisibility(
-                    visible ? Visibility.VISIBLE : Visibility.HIDDEN);
+                    right && !rightEdgeHidden ? Visibility.VISIBLE
+                            : Visibility.HIDDEN);
             bottomSquareTouchArea.getStyle().setVisibility(
-                    visible ? Visibility.VISIBLE : Visibility.HIDDEN);
+                    bottom && !bottomEdgeHidden ? Visibility.VISIBLE
+                            : Visibility.HIDDEN);
         }
 
         private void initDOM() {
@@ -183,21 +199,20 @@ public class SelectionWidget extends Composite {
                         } else if (target.equals(right)) {
                         } else if (target.equals(bottom)) {
                         }
-                        // TODO dragging the selection
+                        // TODO Implement dragging the selection
                     } else if (touchEvent) {
 
                         if (type == Event.ONTOUCHEND
                                 || type == Event.ONTOUCHCANCEL) {
                             Event.releaseCapture(root);
-                            selectCellsStop(event);
+                            stopSelectingCells(event);
                         } else if (target.equals(corner)
                                 || target.equals(cornerTouchArea)) {
 
                             if (type == Event.ONTOUCHSTART) {
-                                storeEventPos(event);
                                 Event.setCapture(root);
+                                beginSelectingCells(event);
                             } else {
-
                                 // corners, resize selection
                                 selectCells(event);
                             }
@@ -212,7 +227,6 @@ public class SelectionWidget extends Composite {
                         event.stopPropagation();
                     }
                 }
-
             });
         }
 
@@ -250,6 +264,8 @@ public class SelectionWidget extends Composite {
             this.row1 = row1;
             this.col2 = col2;
             this.row2 = row2;
+            width = col2 - col1;
+            height = row2 - row1;
             if (col1 <= col2 && row1 <= row2) {
                 root.addClassName(SheetWidget.toKey(this.col1, this.row1));
                 setVisible(true);
@@ -287,7 +303,6 @@ public class SelectionWidget extends Composite {
 
         public void setSheetElement(Element element) {
             element.appendChild(root);
-            element.appendChild(paint);
         }
 
         public void setZIndex(int zIndex) {
@@ -295,22 +310,34 @@ public class SelectionWidget extends Composite {
         }
 
         protected void setLeftEdgeHidden(boolean hidden) {
+            leftEdgeHidden = hidden;
             left.getStyle().setVisibility(
+                    hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
+            leftSquareTouchArea.getStyle().setVisibility(
                     hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
         }
 
         protected void setTopEdgeHidden(boolean hidden) {
+            topEdgeHidden = hidden;
             top.getStyle().setVisibility(
+                    hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
+            topSquareTouchArea.getStyle().setVisibility(
                     hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
         }
 
         protected void setRightEdgeHidden(boolean hidden) {
+            rightEdgeHidden = hidden;
             right.getStyle().setVisibility(
+                    hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
+            rightSquareTouchArea.getStyle().setVisibility(
                     hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
         }
 
         protected void setBottomEdgeHidden(boolean hidden) {
+            bottomEdgeHidden = hidden;
             bottom.getStyle().setVisibility(
+                    hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
+            bottomSquareTouchArea.getStyle().setVisibility(
                     hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
         }
 
@@ -362,6 +389,152 @@ public class SelectionWidget extends Composite {
         }
     }
 
+    private class PaintOutlineWidget extends Widget {
+
+        private final DivElement root = Document.get().createDivElement();
+
+        private final DivElement top = Document.get().createDivElement();
+        private final DivElement left = Document.get().createDivElement();
+        private final DivElement right = Document.get().createDivElement();
+        private final DivElement bottom = Document.get().createDivElement();
+
+        private int col1;
+        private int row1;
+        private int col2;
+        private int row2;
+
+        private int maxColumn;
+
+        private int minRow;
+
+        private int maxRow;
+
+        private int minColumn;
+
+        public PaintOutlineWidget() {
+            root.setClassName("sheet-selection");
+            root.addClassName("paintmode");
+            top.setClassName("s-top");
+            left.setClassName("s-left");
+            right.setClassName("s-right");
+            bottom.setClassName("s-bottom");
+            top.appendChild(left);
+            top.appendChild(right);
+            left.appendChild(bottom);
+            root.appendChild(top);
+            setElement(root);
+        }
+
+        public void setPosition(int col1, int col2, int row1, int row2) {
+
+            root.removeClassName(SheetWidget.toKey(this.col1, this.row1));
+            if (minColumn > 0 && col1 < minColumn) {
+                col1 = minColumn;
+                setLeftEdgeHidden(true);
+            } else {
+                setLeftEdgeHidden(false);
+            }
+            if (minRow > 0 && row1 < minRow) {
+                row1 = minRow;
+                setTopEdgeHidden(true);
+            } else {
+                setTopEdgeHidden(false);
+            }
+            if (maxRow > 0 && row2 > maxRow) {
+                row2 = maxRow;
+                setBottomEdgeHidden(true);
+            } else {
+                setBottomEdgeHidden(false);
+            }
+            if (maxColumn > 0 && maxColumn < col2) {
+                col2 = maxColumn;
+                setRightEdgeHidden(true);
+            } else {
+                setRightEdgeHidden(false);
+            }
+            this.col1 = col1;
+            this.row1 = row1;
+            this.col2 = col2;
+            this.row2 = row2;
+            if (col1 <= col2 && row1 <= row2) {
+                root.addClassName(SheetWidget.toKey(this.col1, this.row1));
+                setVisible(true);
+                updateWidth();
+                updateHeight();
+            } else {
+                setVisible(false);
+            }
+        }
+
+        private void updateWidth() {
+            int w = handler.getColWidthActual(col1);
+            for (int i = col1 + 1; i <= col2; i++) {
+                w += handler.getColWidthActual(i);
+            }
+            setWidth(w);
+        }
+
+        private void updateHeight() {
+            int[] rowHeightsPX = handler.getRowHeightsPX();
+            if (rowHeightsPX != null && rowHeightsPX.length != 0) {
+                setHeight(countSum(handler.getRowHeightsPX(), row1, row2 + 1));
+            }
+        }
+
+        private void setWidth(int width) {
+            root.getStyle().setWidth(width + 1, Unit.PX);
+            top.getStyle().setWidth(width + 1, Unit.PX);
+            bottom.getStyle().setWidth(width + 1, Unit.PX);
+        }
+
+        private void setHeight(float height) {
+            root.getStyle().setHeight(height, Unit.PX);
+            left.getStyle().setHeight(height, Unit.PX);
+            right.getStyle().setHeight(height, Unit.PX);
+        }
+
+        public void setSheetElement(Element element) {
+            element.appendChild(root);
+        }
+
+        public void setZIndex(int zIndex) {
+            getElement().getStyle().setZIndex(zIndex);
+        }
+
+        protected void setLeftEdgeHidden(boolean hidden) {
+            left.getStyle().setVisibility(
+                    hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
+
+        }
+
+        protected void setTopEdgeHidden(boolean hidden) {
+            top.getStyle().setVisibility(
+                    hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
+        }
+
+        protected void setRightEdgeHidden(boolean hidden) {
+            right.getStyle().setVisibility(
+                    hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
+        }
+
+        protected void setBottomEdgeHidden(boolean hidden) {
+            bottom.getStyle().setVisibility(
+                    hidden ? Visibility.HIDDEN : Visibility.VISIBLE);
+        }
+
+        public void remove() {
+            root.removeFromParent();
+        }
+
+        public void setLimits(int minRow, int maxRow, int minColumn,
+                int maxColumn) {
+            this.minRow = minRow;
+            this.maxRow = maxRow;
+            this.minColumn = minColumn;
+            this.maxColumn = maxColumn;
+        }
+    }
+
     private final SelectionOutlineWidget bottomRight;
     private SelectionOutlineWidget bottomLeft;
     private SelectionOutlineWidget topRight;
@@ -372,32 +545,26 @@ public class SelectionWidget extends Composite {
     private int col2;
     private int row2;
 
-    private int colEdgeIndex;
-    private int rowEdgeIndex;
-    private int paintedRowIndex, prevPaintedRowIndex;
-    private int paintedColIndex, prevPaintedColIndex;
+    private final PaintOutlineWidget paintBottomRight;
+    private PaintOutlineWidget paintBottomLeft;
+    private PaintOutlineWidget paintTopRight;
+    private PaintOutlineWidget paintTopLeft;
 
     private boolean paintMode;
     private boolean touchMode;
     private boolean fillMode;
-    private boolean extraInsideSelection = false;
 
     private final SheetHandler handler;
-    private int cornerX;
-    private int cornerY;
     private int origX;
     private int origY;
 
     private SheetWidget sheetWidget;
 
     private int horizontalSplitPosition;
-
     private int verticalSplitPosition;
 
-    private final DivElement paint = Document.get().createDivElement();
     private int totalHeight;
     private int totalWidth;
-    private String paintPaneClassName = "bottom-right";
 
     private int tempCol;
     private int tempRow;
@@ -410,32 +577,30 @@ public class SelectionWidget extends Composite {
     private boolean dragging;
 
     private boolean decreaseSelection;
-
     private boolean increaseSelection;
 
     private boolean startCellTopLeft;
-
     private boolean startCellTopRight;
-
     private boolean startCellBottomLeft;
 
     private int clientX;
-
     private int clientY;
 
     private int deltaY;
-
     private int deltaX;
 
     private int shiftTempCol;
-
     private int shiftTempRow;
 
     private boolean scrollTimerRunning;
 
-    private int initialScrollTop;
+    private int paintcol1;
+    private int paintrow1;
+    private int paintcol2;
+    private int paintrow2;
 
-    private int initialScrollLeft;
+    private boolean crossedLeft;
+    private boolean crossedDown;
 
     public SelectionWidget(SheetHandler actionHandler, SheetWidget sheetWidget) {
         handler = actionHandler;
@@ -448,16 +613,13 @@ public class SelectionWidget extends Composite {
         bottomRight.addStyleName("bottom-right");
         setVisible(false);
 
-        paint.setClassName("s-paint");
-        paint.addClassName(paintPaneClassName);
-
-        paint.getStyle().setVisibility(Visibility.HIDDEN);
-        paint.getStyle().setWidth(0, Unit.PX);
-        paint.getStyle().setHeight(0, Unit.PX);
+        paintBottomRight = new PaintOutlineWidget();
+        paintBottomRight.addStyleName("bottom-right");
+        paintBottomRight.setZIndex(9);
 
         Element bottomRightPane = sheetWidget.getBottomRightPane();
         bottomRight.setSheetElement(bottomRightPane);
-        bottomRightPane.appendChild(paint);
+        paintBottomRight.setSheetElement(bottomRightPane);
     }
 
     public void setHorizontalSplitPosition(int horizontalSplitPosition) {
@@ -468,9 +630,16 @@ public class SelectionWidget extends Composite {
             bottomLeft.setVisible(false);
             bottomLeft.setZIndex(18);
             bottomLeft.addStyleName("bottom-left");
+            paintBottomLeft = new PaintOutlineWidget();
+            paintBottomLeft.setSheetElement(sheetWidget.getBottomLeftPane());
+            paintBottomLeft.setVisible(false);
+            paintBottomLeft.setZIndex(19);
+            paintBottomLeft.addStyleName("bottom-left");
         } else if (horizontalSplitPosition == 0 && bottomLeft != null) {
             bottomLeft.remove();
             bottomLeft = null;
+            paintBottomLeft.remove();
+            paintBottomLeft = null;
         }
         updateTopLeft();
         updateLimits();
@@ -484,9 +653,16 @@ public class SelectionWidget extends Composite {
             topRight.setVisible(false);
             topRight.setZIndex(18);
             topRight.addStyleName("top-right");
+            paintTopRight = new PaintOutlineWidget();
+            paintTopRight.setSheetElement(sheetWidget.getTopRightPane());
+            paintTopRight.setVisible(false);
+            paintTopRight.setZIndex(19);
+            paintTopRight.addStyleName("top-left");
         } else if (verticalSplitPosition == 0 && topRight != null) {
             topRight.remove();
             topRight = null;
+            paintTopRight.remove();
+            paintTopRight = null;
         }
         updateTopLeft();
         updateLimits();
@@ -500,10 +676,17 @@ public class SelectionWidget extends Composite {
             topLeft.setVisible(false);
             topLeft.setZIndex(28);
             topLeft.addStyleName("top-left");
+            paintTopLeft = new PaintOutlineWidget();
+            paintTopLeft.setSheetElement(sheetWidget.getTopLeftPane());
+            paintTopLeft.setVisible(false);
+            paintTopLeft.setZIndex(29);
+            paintTopLeft.addStyleName("top-left");
         } else if (topLeft != null
                 && (verticalSplitPosition == 0 || horizontalSplitPosition == 0)) {
             topLeft.remove();
             topLeft = null;
+            paintTopLeft.remove();
+            paintTopLeft = null;
         }
     }
 
@@ -525,19 +708,56 @@ public class SelectionWidget extends Composite {
             topLeft.setLimits(0, verticalSplitPosition, 0,
                     horizontalSplitPosition);
         }
+        paintBottomRight.setLimits(verticalSplitPosition == 0 ? 0
+                : verticalSplitPosition + 1, 0,
+                horizontalSplitPosition == 0 ? 0 : horizontalSplitPosition + 1,
+                0);
+        if (paintBottomLeft != null) {
+            paintBottomLeft.setLimits(verticalSplitPosition == 0 ? 0
+                    : verticalSplitPosition + 1, 0, 0, horizontalSplitPosition);
+        }
+        if (paintTopRight != null) {
+            paintTopRight.setLimits(0, verticalSplitPosition,
+                    horizontalSplitPosition == 0 ? 0
+                            : horizontalSplitPosition + 1, 0);
+        }
+        if (paintTopLeft != null) {
+            paintTopLeft.setLimits(0, verticalSplitPosition, 0,
+                    horizontalSplitPosition);
+        }
     }
 
     private void setSelectionWidgetSquaresVisible(boolean visible) {
         if (touchMode) {
-            bottomRight.setSquaresVisible(visible);
+            boolean top, right, bottom, left;
+            bottom = bottomLeft != null && bottomLeft.width > bottomRight.width ? false
+                    : visible;
+            right = topRight != null && topRight.height > bottomRight.height ? false
+                    : visible;
+            bottomRight.setSquaresVisible(bottom, right, bottom, right);
             if (bottomLeft != null) {
-                bottomLeft.setSquaresVisible(visible);
+                bottom = bottomRight != null
+                        && bottomRight.width >= bottomLeft.width ? false
+                        : visible;
+                left = topLeft != null && topLeft.height > bottomLeft.height ? false
+                        : visible;
+                bottomLeft.setSquaresVisible(bottom, left, bottom, left);
             }
             if (topRight != null) {
-                topRight.setSquaresVisible(visible);
+                top = topLeft != null && topLeft.width > topRight.width ? false
+                        : visible;
+                right = bottomRight != null
+                        && bottomRight.height >= topRight.height ? false
+                        : visible;
+                topRight.setSquaresVisible(top, right, top, right);
             }
             if (topLeft != null) {
-                topLeft.setSquaresVisible(visible);
+                top = topRight != null && topRight.width >= topLeft.width ? false
+                        : visible;
+                left = bottomLeft != null
+                        && bottomLeft.height >= topLeft.height ? false
+                        : visible;
+                topLeft.setSquaresVisible(top, left, top, left);
             }
         }
     }
@@ -598,6 +818,24 @@ public class SelectionWidget extends Composite {
 
         if (!dragging) {
             showTouchActions();
+        }
+    }
+
+    public void setPaintPosition(int col1, int col2, int row1, int row2) {
+        paintcol1 = col1;
+        paintrow1 = row1;
+        paintcol2 = col2;
+        paintrow2 = row2;
+
+        paintBottomRight.setPosition(col1, col2, row1, row2);
+        if (verticalSplitPosition > 0 & horizontalSplitPosition > 0) {
+            paintTopLeft.setPosition(col1, col2, row1, row2);
+        }
+        if (verticalSplitPosition > 0) {
+            paintTopRight.setPosition(col1, col2, row1, row2);
+        }
+        if (horizontalSplitPosition > 0) {
+            paintBottomLeft.setPosition(col1, col2, row1, row2);
         }
     }
 
@@ -690,6 +928,20 @@ public class SelectionWidget extends Composite {
         }
     }
 
+    public void setPaintVisible(boolean visible) {
+        paintBottomRight.setVisible(visible);
+        if (paintTopLeft != null) {
+            paintTopLeft.setVisible(visible);
+        }
+        if (paintTopRight != null) {
+            paintTopRight.setVisible(visible);
+        }
+        if (paintBottomLeft != null) {
+            paintBottomLeft.setVisible(visible);
+        }
+        setSelectionWidgetSquaresVisible(!visible);
+    }
+
     @Override
     public boolean isVisible() {
         return super.isVisible() || bottomLeft != null
@@ -720,7 +972,7 @@ public class SelectionWidget extends Composite {
 
     /**
      * Returns index of the cell that has the left edge closest to the given
-     * cursor position. Used for determinating how many rows/columns should be
+     * cursor position. Used for determining how many rows/columns should be
      * painted when the mouse cursor is dragged somewhere.
      * 
      * @param cellSizes
@@ -735,7 +987,8 @@ public class SelectionWidget extends Composite {
     public int closestCellEdgeIndexToCursor(int cellSizes[], int startIndex,
             int cursorPosition) {
 
-        // TODO completely broken when zoomed in
+        // TODO Completely broken when zoomed in on touch device
+        // See http://dev.vaadin.com/ticket/16820
         int pos = 0;
         if (cursorPosition < 0) {
             if (startIndex > 1) {
@@ -761,19 +1014,19 @@ public class SelectionWidget extends Composite {
     }
 
     private void beginPaintingCells(Event event) {
-        initialScrollTop = sheetWidget.sheet.getScrollTop();
-        initialScrollLeft = sheetWidget.sheet.getScrollLeft();
         startCellTopLeft = sheetWidget.isCellRenderedInTopLeftPane(col2, row2);
         startCellTopRight = sheetWidget
                 .isCellRenderedInTopRightPane(col2, row2);
         startCellBottomLeft = sheetWidget.isCellRenderedInBottomLeftPane(col2,
                 row2);
+        crossedDown = !startCellTopLeft && !startCellTopRight;
+        crossedLeft = !startCellTopLeft && !startCellBottomLeft;
+        initialScrollLeft = sheetWidget.sheet.getScrollLeft();
+        initialScrollTop = sheetWidget.sheet.getScrollTop();
         clientX = WidgetUtil.getTouchOrMouseClientX(event);
         clientY = WidgetUtil.getTouchOrMouseClientY(event);
         shiftTempCol = col2;
         shiftTempRow = row2;
-        colEdgeIndex = 0;
-        rowEdgeIndex = 0;
         paintMode = true;
         storeEventPos(event);
         DOM.setCapture(getElement());
@@ -787,9 +1040,6 @@ public class SelectionWidget extends Composite {
         Element element = getTopLeftMostElement();
         origX = element.getAbsoluteLeft();
         origY = element.getAbsoluteTop();
-        cornerX = origX + totalWidth;
-        cornerY = origY + totalHeight;
-
         selectionStartCol = col1;
         selectionStartRow = row1;
     }
@@ -808,45 +1058,56 @@ public class SelectionWidget extends Composite {
     }
 
     private void stopPaintingCells(Event event) {
+        paintMode = false;
+        setPaintVisible(false);
+
         if (scrollTimerRunning) {
             stopScrollTimer();
         }
 
-        paint.getStyle().setVisibility(Visibility.HIDDEN);
-        paintMode = false;
-        paint.getStyle().setWidth(0, Unit.PX);
-        paint.getStyle().setHeight(0, Unit.PX);
-        paint.getStyle().setVisibility(Visibility.HIDDEN);
-        int c1, c2, r1, r2;
-        if (decreaseSelection && (colEdgeIndex >= col1 && colEdgeIndex <= col2)
-                && (rowEdgeIndex >= row1 && rowEdgeIndex <= row2)) {
-            handler.onSelectionDecreasePainted(col1, col2, colEdgeIndex, row1,
-                    row2, rowEdgeIndex);
-        } else if (increaseSelection
-                && (col2 + 1 < colEdgeIndex || colEdgeIndex < col1
-                        || row2 + 1 < rowEdgeIndex || rowEdgeIndex < row1)) {
-            c1 = colEdgeIndex < col1 ? colEdgeIndex : col1;
-            c2 = colEdgeIndex > col2 ? colEdgeIndex - 1 : col2;
-            r1 = rowEdgeIndex < row1 ? rowEdgeIndex : row1;
-            r2 = rowEdgeIndex > row2 ? rowEdgeIndex - 1 : row2;
-            if (c1 > 0 && r1 > 0) {
-                handler.onSelectionIncreasePainted(c1, c2, r1, r2);
-            }
+        if (decreaseSelection) {
+            handler.onSelectionDecreasePainted(paintcol1, paintrow1);
+        } else if (increaseSelection) {
+            handler.onSelectionIncreasePainted(Math.min(col1, paintcol1),
+                    Math.max(col2, paintcol2), Math.min(row1, paintrow1),
+                    Math.max(row2, paintrow2));
         }
 
         sheetWidget.getElement().removeClassName("selecting");
         setSelectionWidgetSquaresVisible(false);
     }
 
-    private void selectCells(Event event) {
+    private void beginSelectingCells(Event event) {
+        startCellTopLeft = sheetWidget.isCellRenderedInTopLeftPane(col2, row2);
+        startCellTopRight = sheetWidget
+                .isCellRenderedInTopRightPane(col2, row2);
+        startCellBottomLeft = sheetWidget.isCellRenderedInBottomLeftPane(col2,
+                row2);
+        crossedDown = !startCellTopLeft && !startCellTopRight;
+        crossedLeft = !startCellTopLeft && !startCellBottomLeft;
+        initialScrollLeft = sheetWidget.sheet.getScrollLeft();
+        initialScrollTop = sheetWidget.sheet.getScrollTop();
+        clientX = WidgetUtil.getTouchOrMouseClientX(event);
+        clientY = WidgetUtil.getTouchOrMouseClientY(event);
+        storeEventPos(event);
+    }
 
+    private void selectCells(Event event) {
         dragging = true;
 
         final int clientX = WidgetUtil.getTouchOrMouseClientX(event);
         final int clientY = WidgetUtil.getTouchOrMouseClientY(event);
+
+        // If we're scrolling, do not paint anything
+        if (checkScrollWhilePainting(clientY, clientX)) {
+            return;
+        }
+
         // position in perspective to the top left
-        int xMousePos = clientX - origX;
-        int yMousePos = clientY - origY;
+        int xMousePos = clientX - origX + sheetWidget.sheet.getScrollLeft()
+                - initialScrollLeft;
+        int yMousePos = clientY - origY + sheetWidget.sheet.getScrollTop()
+                - initialScrollTop;
 
         // touch offset; coords are made for mouse movement and need adjustment
         // on touch
@@ -854,19 +1115,21 @@ public class SelectionWidget extends Composite {
         yMousePos -= 20;
 
         final int[] colWidths = handler.getColWidths();
+        final int[] rowHeightsPX = handler.getRowHeightsPX();
         final int colIndex = closestCellEdgeIndexToCursor(colWidths,
                 selectionStartCol, xMousePos);
-        final int[] rowHeightsPX = handler.getRowHeightsPX();
         final int rowIndex = closestCellEdgeIndexToCursor(rowHeightsPX,
                 selectionStartRow, yMousePos);
-
         tempCol = colIndex;
         tempRow = rowIndex;
         sheetWidget.getSheetHandler().onSelectingCellsWithDrag(colIndex,
                 rowIndex);
     }
 
-    private void selectCellsStop(Event event) {
+    private void stopSelectingCells(Event event) {
+        if (scrollTimerRunning) {
+            stopScrollTimer();
+        }
         sheetWidget.getSheetHandler().onFinishedSelectingCellsWithDrag(
                 sheetWidget.getSelectedCellColumn(), tempCol,
                 sheetWidget.getSelectedCellRow(), tempRow);
@@ -877,17 +1140,38 @@ public class SelectionWidget extends Composite {
 
     protected void setFillMode(boolean fillMode) {
         this.fillMode = fillMode;
-        bottomRight.setCornerHidden(fillMode);
         if (fillMode) {
             bottomRight.addStyleName("fill");
+            bottomRight.setCornerHidden(fillMode);
+            if (topLeft != null) {
+                topLeft.setCornerHidden(fillMode);
+                topLeft.addStyleName("fill");
+            }
+            if (topRight != null) {
+                topRight.setCornerHidden(fillMode);
+                topRight.addStyleName("fill");
+            }
+            if (bottomLeft != null) {
+                bottomLeft.setCornerHidden(fillMode);
+                bottomLeft.addStyleName("fill");
+            }
             setSelectionWidgetSquaresVisible(true);
         } else {
             bottomRight.removeStyleName("fill");
+            if (topLeft != null) {
+                topLeft.removeStyleName("fill");
+            }
+            if (topRight != null) {
+                topRight.removeStyleName("fill");
+            }
+            if (bottomLeft != null) {
+                bottomLeft.removeStyleName("fill");
+            }
             setSelectionWidgetSquaresVisible(false);
         }
     }
 
-    private boolean checkScrollWhileSelecting(int y, int x) {
+    private boolean checkScrollWhilePainting(int y, int x) {
         int scrollPaneTop = sheetWidget.sheet.getAbsoluteTop();
         int scrollPaneLeft = sheetWidget.sheet.getAbsoluteLeft();
         int scrollPaneBottom = sheetWidget.sheet.getAbsoluteBottom();
@@ -897,7 +1181,9 @@ public class SelectionWidget extends Composite {
         clientY = y;
 
         if (y < scrollPaneTop) {
-            deltaY = y - scrollPaneTop;
+            if (crossedDown || (!startCellTopRight && !startCellTopLeft)) {
+                deltaY = y - scrollPaneTop;
+            }
         } else if (y > scrollPaneBottom) {
             deltaY = y - scrollPaneBottom;
         } else {
@@ -905,7 +1191,9 @@ public class SelectionWidget extends Composite {
         }
 
         if (x < scrollPaneLeft) {
-            deltaX = x - scrollPaneLeft;
+            if (crossedLeft || (!startCellBottomLeft && !startCellTopLeft)) {
+                deltaX = x - scrollPaneLeft;
+            }
         } else if (x > scrollPaneRight) {
             deltaX = x - scrollPaneRight;
         } else {
@@ -917,11 +1205,14 @@ public class SelectionWidget extends Composite {
         boolean scrolled = false;
         if (sheetWidget.sheet.getScrollTop() != 0) {
             boolean mouseOnTopSide = y < scrollPaneTop;
-            if ((startCellTopLeft || startCellTopRight)
+            if (!crossedDown
+                    && (startCellTopLeft || startCellTopRight)
                     && sheetWidget.isCellRenderedInFrozenPane(shiftTempCol,
                             shiftTempRow) && !mouseOnTopSide) {
                 sheetWidget.sheet.setScrollTop(0);
                 sheetWidget.onSheetScroll(null);
+                initialScrollTop = 0;
+                crossedDown = true;
                 scrolled = true;
             }
         }
@@ -930,11 +1221,14 @@ public class SelectionWidget extends Composite {
         // must be scrolled all the way to the left.
         if (sheetWidget.sheet.getScrollLeft() != 0) {
             boolean mouseOnLeftSide = x < scrollPaneLeft;
-            if ((startCellTopLeft || startCellBottomLeft)
+            if (!crossedLeft
+                    && (startCellTopLeft || startCellBottomLeft)
                     && sheetWidget.isCellRenderedInFrozenPane(shiftTempCol,
                             shiftTempRow) && !mouseOnLeftSide) {
                 sheetWidget.sheet.setScrollLeft(0);
                 sheetWidget.onSheetScroll(null);
+                initialScrollLeft = 0;
+                crossedLeft = true;
                 scrolled = true;
             }
         }
@@ -981,15 +1275,7 @@ public class SelectionWidget extends Composite {
             int col = sheetWidget.jsniUtil.getParsedCol();
             int row = sheetWidget.jsniUtil.getParsedRow();
             if (col != 0 && row != 0) {
-                int xMousePos = clientX - origX
-                        + sheetWidget.sheet.getScrollLeft() - initialScrollLeft;
-                int yMousePos = clientY - origY
-                        + sheetWidget.sheet.getScrollTop() - initialScrollTop;
-                final int[] colWidths = handler.getColWidths();
-                final int[] rowHeightsPX = handler.getRowHeightsPX();
-
-                updatePaintRectangle(selectionPointX, selectionPointY,
-                        xMousePos, yMousePos, colWidths, rowHeightsPX, col, row);
+                updatePaintRectangle(clientX, clientY, col, row);
             }
         }
     }
@@ -1050,19 +1336,39 @@ public class SelectionWidget extends Composite {
                 }
             }
 
-            // Handle selection
-            handleCellShiftOnScroll(selectionPointX, selectionPointY);
+            // Handle painting or selection
+            if (paintMode) {
+                handleCellShiftOnScroll(selectionPointX, selectionPointY);
+            } else {
+                Element target = WidgetUtil.getElementFromPoint(
+                        selectionPointX, selectionPointY);
+                if (target != null) {
+                    final String className = target.getClassName();
+                    sheetWidget.jsniUtil.parseColRow(className);
+                    int col = sheetWidget.jsniUtil.getParsedCol();
+                    int row = sheetWidget.jsniUtil.getParsedRow();
+                    if (col != 0 && row != 0) {
+                        sheetWidget.getSheetHandler().onSelectingCellsWithDrag(
+                                col, row);
+                    }
+                }
+            }
         }
 
     };
+    private int initialScrollLeft;
+    private int initialScrollTop;
 
     private void paintCells(Event event) {
-        paintedColIndex = 0;
-        paintedRowIndex = 0;
         decreaseSelection = false;
         increaseSelection = false;
         final int clientX = WidgetUtil.getTouchOrMouseClientX(event);
         final int clientY = WidgetUtil.getTouchOrMouseClientY(event);
+
+        // If we're scrolling, do not paint anything
+        if (checkScrollWhilePainting(clientY, clientX)) {
+            return;
+        }
 
         // position in perspective to the top left
         int xMousePos = clientX - origX + sheetWidget.sheet.getScrollLeft()
@@ -1072,163 +1378,61 @@ public class SelectionWidget extends Composite {
 
         final int[] colWidths = handler.getColWidths();
         final int[] rowHeightsPX = handler.getRowHeightsPX();
-        int colIndex = closestCellEdgeIndexToCursor(colWidths, col1, xMousePos);
-        int rowIndex = closestCellEdgeIndexToCursor(rowHeightsPX, row1,
-                yMousePos);
+        int col = closestCellEdgeIndexToCursor(colWidths, col1, xMousePos) - 1;
+        int row = closestCellEdgeIndexToCursor(rowHeightsPX, row1, yMousePos) - 1;
 
-        // If we're scrolling, do not paint anything
-        if (checkScrollWhileSelecting(clientY, clientX)) {
-            return;
+        if (col >= 0 && row >= 0) {
+            updatePaintRectangle(clientX, clientY, col, row);
         }
-
-        updatePaintRectangle(clientX, clientY, xMousePos, yMousePos, colWidths,
-                rowHeightsPX, colIndex, rowIndex);
     }
 
     private void updatePaintRectangle(final int clientX, final int clientY,
-            int xMousePos, int yMousePos, final int[] colWidths,
-            final int[] rowHeightsPX, int colIndex, int rowIndex) {
-        int w = 0;
-        int h = 0;
-
-        // case 1: "removing"
-        if ((colIndex >= col1 && colIndex <= col2 + 1)
-                && (rowIndex >= row1 && rowIndex <= row2 + 1)) {
-            // the depending point is the right bottom corner
-            xMousePos = Math.abs(cornerX - clientX
-                    + sheetWidget.sheet.getScrollLeft() - initialScrollLeft);
-            yMousePos = Math.abs(cornerY - clientY
-                    + sheetWidget.sheet.getScrollTop() - initialScrollTop);
-            // the axis with larger delta is used
-            if (xMousePos >= yMousePos && (colIndex <= col2)) {
-                // remove columns
-                MergedRegion paintedRegion = MergedRegionUtil
-                        .findIncreasingSelection(
-                                handler.getMergedRegionContainer(), row1, row2,
-                                colIndex, col2);
-                colEdgeIndex = paintedRegion.col1;
-                rowEdgeIndex = row1;
-                w = countSum(colWidths, colEdgeIndex, col2 + 1);
-                h = totalHeight;
-                decreaseSelection = true;
-            } else if (yMousePos > xMousePos && (rowIndex <= row2)) {
-                // remove rows
-                MergedRegion paintedRegion = MergedRegionUtil
-                        .findIncreasingSelection(
-                                handler.getMergedRegionContainer(), rowIndex,
-                                row2, col1, col2);
-                colEdgeIndex = col1;
-                rowEdgeIndex = paintedRegion.row1;
-                w = totalWidth;
-                h = countSum(rowHeightsPX, rowEdgeIndex, row2 + 1);
-                decreaseSelection = true;
+            int colIndex, int rowIndex) {
+        // TODO This might need to handle merged cells
+        // See http://dev.vaadin.com/ticket/17134
+        if ((colIndex >= col1 && colIndex <= col2)
+                && (rowIndex >= row1 && rowIndex <= row2)) {
+            // case 1: shifting inside the selection
+            int vDiff = Math.abs(row2 - rowIndex);
+            int hDiff = Math.abs(col2 - colIndex);
+            if (vDiff == 0 && hDiff == 0) {
+                setPaintPosition(0, 0, 0, 0);
+                setPaintVisible(false);
+                return;
+            }
+            setPaintVisible(true);
+            decreaseSelection = true;
+            if (vDiff > hDiff) {
+                int pos = Math.max(row1 + 1, row2 - vDiff + 1);
+                setPaintPosition(col1, col2, pos, row2);
             } else {
-                h = 0;
-                w = 0;
-                colEdgeIndex = col2;
-                rowEdgeIndex = row2;
+                int pos = Math.max(col1 + 1, col2 - hDiff + 1);
+                setPaintPosition(pos, col2, row1, row2);
             }
-            if (!extraInsideSelection) {
-                paint.addClassName("s-paint-inside");
-                extraInsideSelection = true;
-            }
-            paintedColIndex = colEdgeIndex;
-            paintedRowIndex = rowEdgeIndex;
         } else if ((rowIndex < row1 || rowIndex > row2)
                 || (colIndex < col1 || colIndex > col2)) {
-            if (extraInsideSelection) {
-                paint.removeClassName("s-paint-inside");
-                extraInsideSelection = false;
-            }
-            if (rowIndex > row2) {
-                // see diff from old selection bottom
-                yMousePos = clientY - cornerY
-                        + sheetWidget.sheet.getScrollTop() - initialScrollTop;
-            } else if (rowIndex >= row1) {
-                yMousePos = 0;
-            }
-            if (colIndex > col2) {
-                // see diff from old selection right
-                xMousePos = clientX - cornerX
-                        + sheetWidget.sheet.getScrollLeft() - initialScrollLeft;
-            } else if (colIndex >= col1) {
-                xMousePos = 0;
-            }
-            if (Math.abs(colIndex - col2) > Math.abs(rowIndex - row2)) {
-                colEdgeIndex = colIndex;
-                rowEdgeIndex = row1;
-                paintedRowIndex = rowEdgeIndex;
-                h = totalHeight;
-                // left or right
-                if (xMousePos < 0) {
-                    w = countSum(colWidths, colEdgeIndex, col1);
-                    paintedColIndex = colEdgeIndex;
+            // case 2: shifting outside the selection
+            setPaintVisible(true);
+            increaseSelection = true;
+            int diffDown = rowIndex - row2;
+            int diffUp = row1 - rowIndex;
+            int diffLeft = col1 - colIndex;
+            int diffRight = colIndex - col2;
+            if (Math.max(diffDown, diffUp) > Math.max(diffLeft, diffRight)) {
+                // Shift up or down
+                if (diffDown > diffUp) {
+                    setPaintPosition(col1, col2, row2 + 1, rowIndex);
                 } else {
-                    w = countSum(colWidths, col2 + 1, colEdgeIndex);
-                    paintedColIndex = (col2 + 1);
+                    setPaintPosition(col1, col2, rowIndex + 1, row1 - 1);
                 }
-                increaseSelection = true;
-            } else if (Math.abs(colIndex - col2) < Math.abs(rowIndex - row2)) {
-                colEdgeIndex = col1;
-                rowEdgeIndex = rowIndex;
-                paintedColIndex = colEdgeIndex;
-                w = totalWidth;
-                // up or down
-                if (yMousePos < 0) {
-                    h = countSum(rowHeightsPX, rowEdgeIndex, row1);
-                    paintedRowIndex = rowEdgeIndex;
+            } else {
+                // Shift left or right
+                if (diffRight > diffLeft) {
+                    setPaintPosition(col2 + 1, colIndex, row1, row2);
                 } else {
-                    h = countSum(rowHeightsPX, row2 + 1, rowEdgeIndex);
-                    paintedRowIndex = (row2 + 1);
+                    setPaintPosition(colIndex + 1, col1 - 1, row1, row2);
                 }
-                increaseSelection = true;
             }
-        }
-        // update position
-        Style style = paint.getStyle();
-        if (paintedColIndex != 0
-                && paintedRowIndex != 0
-                && (prevPaintedColIndex != paintedColIndex || prevPaintedRowIndex != paintedRowIndex)
-                && sheetWidget.isCellRendered(paintedColIndex, paintedRowIndex)) {
-            Cell cell = sheetWidget.getCell(paintedColIndex, paintedRowIndex);
-            int left = cell.getElement().getOffsetLeft();
-            int top = cell.getElement().getOffsetTop();
-            style.setLeft(left, Unit.PX);
-            style.setTop(top, Unit.PX);
-            paint.removeClassName(paintPaneClassName);
-            paint.removeFromParent();
-            if (sheetWidget.isCellRenderedInScrollPane(paintedColIndex,
-                    paintedRowIndex)) {
-                sheetWidget.getBottomRightPane().appendChild(paint);
-                paintPaneClassName = "bottom-right";
-            } else if (sheetWidget.isCellRenderedInBottomLeftPane(
-                    paintedColIndex, paintedRowIndex)) {
-                sheetWidget.getBottomLeftPane().appendChild(paint);
-                paintPaneClassName = "bottom-left";
-            } else if (sheetWidget.isCellRenderedInTopRightPane(
-                    paintedColIndex, paintedRowIndex)) {
-                sheetWidget.getTopRightPane().appendChild(paint);
-                paintPaneClassName = "top-right";
-            } else if (sheetWidget.isCellRenderedInTopLeftPane(paintedColIndex,
-                    paintedRowIndex)) {
-                sheetWidget.getTopLeftPane().appendChild(paint);
-                paintPaneClassName = "top-left";
-            }
-            paint.addClassName(paintPaneClassName);
-            prevPaintedColIndex = paintedColIndex;
-            prevPaintedRowIndex = paintedRowIndex;
-        }
-        // update size
-        if (w > 0 && h > 0) {
-            style.setVisibility(Visibility.VISIBLE);
-            style.setWidth(w + 1, Unit.PX);
-            style.setHeight(h + 1, Unit.PX);
-            setSelectionWidgetSquaresVisible(false);
-        } else {
-            style.setVisibility(Visibility.HIDDEN);
-            style.setWidth(0, Unit.PX);
-            style.setHeight(0, Unit.PX);
-            setSelectionWidgetSquaresVisible(true);
         }
     }
 }

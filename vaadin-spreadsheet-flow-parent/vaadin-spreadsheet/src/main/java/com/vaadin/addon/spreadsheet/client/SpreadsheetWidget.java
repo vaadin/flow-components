@@ -1153,8 +1153,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     @Override
-    public void onSelectionDecreasePainted(int col1, int col2,
-            int colEdgeIndex, int row1, int row2, int rowEdgeIndex) {
+    public void onSelectionDecreasePainted(int colEdgeIndex, int rowEdgeIndex) {
         // the selection widget has made sure the decreasing area is not in
         // middle of merged cells.
         spreadsheetHandler.selectionDecreasePainted(rowEdgeIndex, colEdgeIndex);

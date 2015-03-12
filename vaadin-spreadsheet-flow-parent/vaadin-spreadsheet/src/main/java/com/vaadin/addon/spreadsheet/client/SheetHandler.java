@@ -43,8 +43,7 @@ public interface SheetHandler {
 
     void onSelectionIncreasePainted(int c1, int c2, int r1, int r2);
 
-    void onSelectionDecreasePainted(int col1, int col2, int colEdgeIndex,
-            int row1, int row2, int rowEdgeIndex);
+    void onSelectionDecreasePainted(int colEdgeIndex, int rowEdgeIndex);
 
     void onFinishedSelectingCellsWithDrag(int col1, int col2, int row1, int row2);
 

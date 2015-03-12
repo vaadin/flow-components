@@ -348,9 +348,6 @@ $cell-comment-border-color: #A7A7A7 !default;
 				.sheet-selection {
 					margin-top: 1px;
 				}
-				.s-paint {
-					margin-top: -1px;
-				}
 			}
 			
 			.top-left-pane, .bottom-left-pane {
@@ -359,9 +356,6 @@ $cell-comment-border-color: #A7A7A7 !default;
 				}
 				.sheet-selection {
 					margin-left: 1px;
-				}
-				.s-paint {
-					margin-left: -1px;
 				}
 			}
 		}
@@ -689,20 +683,13 @@ $cell-comment-border-color: #A7A7A7 !default;
 				position: absolute;
 				width: 6px;
 			}
-		}
-		
-		.s-paint {
-			background: transparent;
-			border: none !important;
-			cursor: crosshair;
-			outline: 2px solid $sheet-selection-extend-corner-color;
-			outline-offset: -2px;
-			padding: 0;
-			position: absolute;
-			z-index: 20;
-			margin-top: -1px;
-			margin-left: -1px;
-			background: $sheet-selection-extend-inside-bg-color !important;
+			
+			&.paintmode {
+				background-color: $sheet-selection-extend-inside-bg-color !important;
+				.s-top, .s-left, .s-bottom, .s-right {
+					background-color: $sheet-selection-extend-corner-color;	
+				}
+			}
 		}
 		
 		

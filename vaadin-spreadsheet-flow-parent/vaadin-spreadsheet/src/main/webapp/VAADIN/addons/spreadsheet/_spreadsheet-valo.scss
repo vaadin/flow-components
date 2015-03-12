@@ -392,9 +392,6 @@
 				.sheet-selection {
 					margin-top: $spreadsheet-border-width;
 				}
-				.s-paint {
-					margin-top: -$spreadsheet-border-width;
-				}
 			}
 			
 			.top-left-pane, .bottom-left-pane {
@@ -403,9 +400,6 @@
 				}
 				.sheet-selection {
 					margin-left: $spreadsheet-border-width;
-				}
-				.s-paint {
-					margin-left: -$spreadsheet-border-width;
 				}
 			}
 		}
@@ -701,23 +695,16 @@
 				outline: 2px solid white;
 				cursor: crosshair;
 			}
+			
+			&.paintmode {
+				background-color: $spreadsheet-sheet-selection-extend-inside-bg-color !important;
+				.s-top, .s-left, .s-bottom, .s-right {
+					background-color: $spreadsheet-sheet-selection-extend-corner-color;	
+				}
+			}
 		}
 		
-		.s-paint {
-			background: transparent;
-			border: none !important;
-			cursor: crosshair;
-			outline: $spreadsheet-selection-widget-border-width solid $spreadsheet-sheet-selection-extend-corner-color;
-			outline-offset: -$spreadsheet-selection-widget-border-width;
-			padding: 0;
-			position: absolute;
-			z-index: 20;
-			margin-top: -1px;
-			margin-left: -1px;
-			background: $spreadsheet-sheet-selection-extend-inside-bg-color !important;
-		}
-		
-		
+
 		// SHEET TABSHEET 
 		.sheet-tabsheet {
 			background: $spreadsheet-sheet-selector-background;

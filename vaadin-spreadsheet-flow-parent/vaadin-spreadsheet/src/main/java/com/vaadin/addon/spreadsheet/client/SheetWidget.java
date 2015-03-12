@@ -480,6 +480,8 @@ public class SheetWidget extends Panel {
     private int widthIncrease;
     private boolean cellCommentEditMode;
     private CellComment currentlyEditedCellComment;
+    private boolean crossedDown;
+    private boolean crossedLeft;
 
     public SheetWidget(SheetHandler view, boolean touchMode) {
         actionHandler = view;
@@ -1084,6 +1086,8 @@ public class SheetWidget extends Panel {
                                 targetCol, targetRow);
                         startCellBottomLeft = isCellRenderedInBottomLeftPane(
                                 targetCol, targetRow);
+                        crossedDown = !startCellTopLeft && !startCellTopRight;
+                        crossedLeft = !startCellTopLeft && !startCellBottomLeft;
                         clientX = WidgetUtil.getTouchOrMouseClientX(event);
                         clientY = WidgetUtil.getTouchOrMouseClientY(event);
                         Event.setCapture(sheet);
@@ -1183,7 +1187,7 @@ public class SheetWidget extends Panel {
         clientY = y;
 
         if (y < scrollPaneTop) {
-            if (!startCellTopRight && !startCellTopLeft) {
+            if (crossedDown || (!startCellTopRight && !startCellTopLeft)) {
                 deltaY = y - scrollPaneTop;
             }
         } else if (y > scrollPaneBottom) {
@@ -1193,7 +1197,7 @@ public class SheetWidget extends Panel {
         }
 
         if (x < scrollPaneLeft) {
-            if (!startCellBottomLeft && !startCellTopLeft) {
+            if (crossedLeft || (!startCellBottomLeft && !startCellTopLeft)) {
                 deltaX = x - scrollPaneLeft;
             }
         } else if (x > scrollPaneRight) {
@@ -1207,11 +1211,12 @@ public class SheetWidget extends Panel {
         boolean scrolled = false;
         if (sheet.getScrollTop() != 0) {
             boolean mouseOnTopSide = y < scrollPaneTop;
-            if ((startCellTopLeft || startCellTopRight)
+            if (!crossedDown && (startCellTopLeft || startCellTopRight)
                     && isCellRenderedInFrozenPane(tempCol, tempRow)
                     && !mouseOnTopSide) {
                 sheet.setScrollTop(0);
                 onSheetScroll(null);
+                crossedDown = true;
                 scrolled = true;
             }
         }
@@ -1220,11 +1225,12 @@ public class SheetWidget extends Panel {
         // must be scrolled all the way to the left.
         if (sheet.getScrollLeft() != 0) {
             boolean mouseOnLeftSide = x < scrollPaneLeft;
-            if ((startCellTopLeft || startCellBottomLeft)
+            if (!crossedLeft && (startCellTopLeft || startCellBottomLeft)
                     && isCellRenderedInFrozenPane(tempCol, tempRow)
                     && !mouseOnLeftSide) {
                 sheet.setScrollLeft(0);
                 onSheetScroll(null);
+                crossedLeft = true;
                 scrolled = true;
             }
         }
