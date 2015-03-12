@@ -570,21 +570,29 @@ public class SelectionWidget extends Composite {
         totalHeight = countSum(handler.getRowHeightsPX(), row1, row2 + 1);
         totalWidth = countSum(handler.getColWidths(), col1, col2 + 1);
 
-        boolean hideCorner = totalWidth == 0 || totalHeight == 0;
+        boolean hiddenCellSelected = totalWidth == 0 || totalHeight == 0;
 
         bottomRight.setPosition(col1, col2, row1, row2);
-        bottomRight.setCornerHidden(hideCorner);
+        if (hiddenCellSelected) {
+            bottomRight.setCornerHidden(true);
+        }
         if (verticalSplitPosition > 0 & horizontalSplitPosition > 0) {
             topLeft.setPosition(col1, col2, row1, row2);
-            topLeft.setCornerHidden(hideCorner);
+            if (hiddenCellSelected) {
+                topLeft.setCornerHidden(true);
+            }
         }
         if (verticalSplitPosition > 0) {
             topRight.setPosition(col1, col2, row1, row2);
-            topRight.setCornerHidden(hideCorner);
+            if (hiddenCellSelected) {
+                topRight.setCornerHidden(true);
+            }
         }
         if (horizontalSplitPosition > 0) {
             bottomLeft.setPosition(col1, col2, row1, row2);
-            bottomLeft.setCornerHidden(hideCorner);
+            if (hiddenCellSelected) {
+                bottomLeft.setCornerHidden(true);
+            }
         }
 
         if (fillMode) {
