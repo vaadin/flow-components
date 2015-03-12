@@ -3088,8 +3088,8 @@ public class SheetWidget extends Panel {
     public void addSheetImage(String key, SheetImage image) {
 
         // find correct pane to attach to
-        boolean inTop = topFrozenPanelHeight >= image.getRow();
-        boolean inLeft = leftFrozenPanelWidth >= image.getCol();
+        boolean inTop = verticalSplitPosition >= image.getRow();
+        boolean inLeft = horizontalSplitPosition >= image.getCol();
 
         if (inTop && inLeft) {
             topLeftPane.appendChild(image.getElement());
@@ -3097,6 +3097,8 @@ public class SheetWidget extends Panel {
             topRightPane.appendChild(image.getElement());
         } else if (inLeft) {
             bottomLeftPane.appendChild(image.getElement());
+        } else {
+            sheet.appendChild(image.getElement());
         }
 
         adopt(image);
