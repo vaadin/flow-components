@@ -3018,58 +3018,25 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             HashSet<Component> newCustomComponents = new HashSet<Component>();
             Set<Integer> rowsWithComponents = new HashSet<Integer>();
             // iteration indexes 0-based
-            for (int r = firstRow - 1; r < lastRow; r++) {
-                final Row row = getActiveSheet().getRow(r);
-                for (int c = firstColumn - 1; c < lastColumn; c++) {
-                    // Cells that are inside a merged region are skipped:
-                    MergedRegion region = mergedRegionContainer
-                            .getMergedRegion(c + 1, r + 1);
-                    if (region == null
-                            || (region.col1 == (c + 1) && region.row1 == (r + 1))) {
-                        Cell cell = null;
-                        if (row != null) {
-                            cell = row.getCell(c);
-                        }
-                        // check if the cell has a custom component
-                        Component customComponent = customComponentFactory
-                                .getCustomComponentForCell(cell, r, c, this,
-                                        getActiveSheet());
-                        if (customComponent != null) {
-                            final String key = SpreadsheetUtil.toKey(c + 1,
-                                    r + 1);
-                            if (!customComponents.contains(customComponent)) {
-                                registerCustomComponent(customComponent);
-                            }
-                            getState().componentIDtoCellKeysMap.put(
-                                    customComponent.getConnectorId(), key);
-                            newCustomComponents.add(customComponent);
-                            rowsWithComponents.add(r);
-                        } else if (!isCellLocked(cell)) {
-                            // no custom component and not locked, check if
-                            // the cell has a custom editor
-                            Component customEditor = customComponentFactory
-                                    .getCustomEditorForCell(cell, r, c, this,
-                                            getActiveSheet());
-                            if (customEditor != null) {
-                                final String key = SpreadsheetUtil.toKey(c + 1,
-                                        r + 1);
-                                if (!newCustomComponents.contains(customEditor)
-                                        && !customComponents
-                                                .contains(customEditor)) {
-                                    registerCustomComponent(customEditor);
-                                }
-                                getState().cellKeysToEditorIdMap.put(key,
-                                        customEditor.getConnectorId());
-                                newCustomComponents.add(customEditor);
-                                rowsWithComponents.add(r);
-                            }
-                        }
-                    }
-                    if (region != null) {
-                        c = region.col2;
-                    }
-                }
+            int verticalSplitPosition = getLastFrozenRow();
+            int horizontalSplitPosition = getLastFrozenColumn();
+            if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
+                // top left pane
+                loadRangeComponents(newCustomComponents, rowsWithComponents, 1,
+                        1, verticalSplitPosition, horizontalSplitPosition);
             }
+            if (verticalSplitPosition > 0) {
+                // top right pane
+                loadRangeComponents(newCustomComponents, rowsWithComponents, 1,
+                        firstColumn, verticalSplitPosition, lastColumn);
+            }
+            if (horizontalSplitPosition > 0) {
+                // bottom left pane
+                loadRangeComponents(newCustomComponents, rowsWithComponents,
+                        firstRow, 1, lastRow, horizontalSplitPosition);
+            }
+            loadRangeComponents(newCustomComponents, rowsWithComponents,
+                    firstRow, firstColumn, lastRow, lastColumn);
             // unregister old
             for (Iterator<Component> i = customComponents.iterator(); i
                     .hasNext();) {
@@ -3095,6 +3062,61 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 customComponents.clear();
             }
             handleRowSizes(new HashSet<Integer>());
+        }
+    }
+
+    private void loadRangeComponents(HashSet<Component> newCustomComponents,
+            Set<Integer> rowsWithComponents, int row1, int col1, int row2,
+            int col2) {
+        for (int r = row1 - 1; r < row2; r++) {
+            final Row row = getActiveSheet().getRow(r);
+            for (int c = col1 - 1; c < col2; c++) {
+                // Cells that are inside a merged region are skipped:
+                MergedRegion region = mergedRegionContainer.getMergedRegion(
+                        c + 1, r + 1);
+                if (region == null
+                        || (region.col1 == (c + 1) && region.row1 == (r + 1))) {
+                    Cell cell = null;
+                    if (row != null) {
+                        cell = row.getCell(c);
+                    }
+                    // check if the cell has a custom component
+                    Component customComponent = customComponentFactory
+                            .getCustomComponentForCell(cell, r, c, this,
+                                    getActiveSheet());
+                    if (customComponent != null) {
+                        final String key = SpreadsheetUtil.toKey(c + 1, r + 1);
+                        if (!customComponents.contains(customComponent)) {
+                            registerCustomComponent(customComponent);
+                        }
+                        getState().componentIDtoCellKeysMap.put(
+                                customComponent.getConnectorId(), key);
+                        newCustomComponents.add(customComponent);
+                        rowsWithComponents.add(r);
+                    } else if (!isCellLocked(cell)) {
+                        // no custom component and not locked, check if
+                        // the cell has a custom editor
+                        Component customEditor = customComponentFactory
+                                .getCustomEditorForCell(cell, r, c, this,
+                                        getActiveSheet());
+                        if (customEditor != null) {
+                            final String key = SpreadsheetUtil.toKey(c + 1,
+                                    r + 1);
+                            if (!newCustomComponents.contains(customEditor)
+                                    && !customComponents.contains(customEditor)) {
+                                registerCustomComponent(customEditor);
+                            }
+                            getState().cellKeysToEditorIdMap.put(key,
+                                    customEditor.getConnectorId());
+                            newCustomComponents.add(customEditor);
+                            rowsWithComponents.add(r);
+                        }
+                    }
+                }
+                if (region != null) {
+                    c = region.col2;
+                }
+            }
         }
     }
 

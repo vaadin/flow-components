@@ -3046,25 +3046,45 @@ public class SheetWidget extends Panel {
                 && customWidgetMap.containsKey(getSelectedCellKey());
     }
 
-    public void showCustomWidgets(HashMap<String, Widget> customWidgetMap) {
-        for (int r = firstRowIndex; r <= lastRowIndex; r++) {
-            ArrayList<Cell> row = rows.get(r - firstRowIndex);
-            for (int c = firstColumnIndex; c <= lastColumnIndex; c++) {
+    public void showCustomWidgets(HashMap<String, Widget> newWidgetMap) {
+        if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
+            // top left pane
+            showRegionWidgets(newWidgetMap, 1, verticalSplitPosition, 1,
+                    horizontalSplitPosition);
+        }
+        if (verticalSplitPosition > 0) {
+            // top right pane
+            showRegionWidgets(newWidgetMap, 1, verticalSplitPosition,
+                    firstColumnIndex, lastColumnIndex);
+        }
+        if (horizontalSplitPosition > 0) {
+            // bottom left pane
+            showRegionWidgets(newWidgetMap, 1, firstRowIndex, lastRowIndex,
+                    horizontalSplitPosition);
+        }
+
+        showRegionWidgets(newWidgetMap, firstColumnIndex, lastColumnIndex,
+                firstRowIndex, lastRowIndex);
+        customWidgetMap = newWidgetMap;
+    }
+
+    private void showRegionWidgets(HashMap<String, Widget> newWidgets,
+            int col1, int col2, int row1, int row2) {
+        for (int r = row1; r <= row2; r++) {
+            for (int c = col1; c <= col2; c++) {
                 final String key = toKey(c, r);
-                if (customWidgetMap.containsKey(key)) {
+                if (newWidgets.containsKey(key)) {
                     Cell cell;
                     if (isMergedCell(key)) {
                         cell = getMergedCell(key);
-
                     } else {
-                        cell = row.get(c - firstColumnIndex);
+                        cell = getCell(c, r);
                     }
-                    Widget customWidget = customWidgetMap.get(key);
+                    Widget customWidget = newWidgets.get(key);
                     addCustomWidgetToCell(cell, customWidget);
                 }
             }
         }
-        this.customWidgetMap = customWidgetMap;
     }
 
     private void addCustomWidgetToCell(Cell cell, Widget customWidget) {
