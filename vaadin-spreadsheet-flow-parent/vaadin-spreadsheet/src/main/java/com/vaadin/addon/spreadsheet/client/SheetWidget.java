@@ -2492,14 +2492,13 @@ public class SheetWidget extends Panel {
 
     private void ensureCellSelectionStyles() {
         for (CellCoord coord : cellRangeStyledCoords) {
-            if (coord.getCol() < firstColumnIndex
-                    || coord.getRow() < firstRowIndex) {
-
-            }
-            Cell cell = getCell(coord.getCol(), coord.getRow());
-            if (cell != null) {
-                cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
-                cellRangeStyledCells.add(cell);
+            if (coord.getCol() != selectedCellCol
+                    || coord.getRow() != selectedCellRow) {
+                Cell cell = getCell(coord.getCol(), coord.getRow());
+                if (cell != null) {
+                    cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
+                    cellRangeStyledCells.add(cell);
+                }
             }
         }
         if (highlightedCellCoord != null) {
