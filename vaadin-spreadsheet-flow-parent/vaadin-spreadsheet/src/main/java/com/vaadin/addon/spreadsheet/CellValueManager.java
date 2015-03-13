@@ -182,6 +182,10 @@ public class CellValueManager implements Serializable {
                     cellData.formulaValue = cell.getCellFormula();
                 }
             }
+
+            if (cell.getCellStyle().getDataFormatString().contains("%")) {
+                cellData.isPercentage = true;
+            }
             if (formattedCellValue != null && !formattedCellValue.isEmpty()
                     || cellStyle.getIndex() != 0) {
                 // if the cell is not wrapping text, and is of type numeric or

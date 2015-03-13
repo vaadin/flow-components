@@ -20,9 +20,11 @@ package com.vaadin.addon.spreadsheet.client;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -1009,8 +1011,13 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     // cache value and start editing cell as empty
                     inlineEditing = true;
                     cachedCellValue = sheetWidget.getSelectedCellLatestValue();
-                    if (cachedCellValue.endsWith("%")) {
-                        enteredCharacter = enteredCharacter + "%";
+
+                    if (cachedCellValue.endsWith("%")
+                            || sheetWidget.isSelectedCellPergentage()) {
+
+                        if (isNumericChar(enteredCharacter)) {
+                            enteredCharacter = enteredCharacter + "%";
+                        }
                         sheetWidget.startEditingCell(true, false, true,
                                 enteredCharacter);
                         formulaBarWidget.setCellPlainValue(enteredCharacter);
@@ -1023,6 +1030,24 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 }
             }
         }
+    }
+
+    private static boolean isNumericChar(String input) {
+        Set<String> allowedChars = new HashSet<String>();
+        allowedChars.add("0");
+        allowedChars.add("1");
+        allowedChars.add("2");
+        allowedChars.add("3");
+        allowedChars.add("4");
+        allowedChars.add("5");
+        allowedChars.add("6");
+        allowedChars.add("7");
+        allowedChars.add("8");
+        allowedChars.add("9");
+        allowedChars.add("-");
+        allowedChars.add("+");
+
+        return allowedChars.contains(input);
     }
 
     private boolean isSelectedCellHidden() {

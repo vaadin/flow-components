@@ -30,6 +30,7 @@ public class CellData implements Serializable {
     public boolean rightAlign = false;
     public boolean locked = false;
     public boolean needsMeasure;
+    public boolean isPercentage;
 
     @Override
     public int hashCode() {

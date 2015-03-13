@@ -5360,4 +5360,10 @@ public class SheetWidget extends Panel {
         cellCommentsMap.put(cellClassName, text);
         actionHandler.updateCellComment(text, col, row);
     }
+
+    public boolean isSelectedCellPergentage() {
+        CellData data = getCellData(getSelectedCellColumn(),
+                getSelectedCellRow());
+        return data != null && data.isPercentage;
+    }
 }
