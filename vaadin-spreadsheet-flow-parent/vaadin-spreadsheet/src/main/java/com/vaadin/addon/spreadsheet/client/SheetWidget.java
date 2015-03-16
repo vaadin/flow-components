@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -912,7 +912,7 @@ public class SheetWidget extends Panel {
     /**
      * This is using a delayed execution because we don't want to try to do
      * stuff when it is unnecessary.
-     * 
+     *
      * @param event
      * @param sheetPaneElement
      */
@@ -983,7 +983,7 @@ public class SheetWidget extends Panel {
     }
 
     /**
-     * 
+     *
      * @param target
      *            The clicked element
      * @param event
@@ -2835,7 +2835,7 @@ public class SheetWidget extends Panel {
     /**
      * Calculates viewed cells after a scroll to right. Runs the escalator for
      * column headers.
-     * 
+     *
      * @param scrollLeft
      */
     private void handleHorizontalScrollRight(int scrollLeft) {
@@ -3053,6 +3053,13 @@ public class SheetWidget extends Panel {
     }
 
     public void showCustomWidgets(HashMap<String, Widget> newWidgetMap) {
+        if (customWidgetMap != null) {
+            for (Widget w : customWidgetMap.values()) {
+                if (!newWidgetMap.values().contains(w)) {
+                    w.removeFromParent();
+                }
+            }
+        }
         if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
             // top left pane
             showRegionWidgets(newWidgetMap, 1, verticalSplitPosition, 1,
@@ -3547,7 +3554,7 @@ public class SheetWidget extends Panel {
     /**
      * Called when there is a MOUSEOVER or MOUSEOUT on a cell (cell element or
      * the triangle) that has a cell comment.
-     * 
+     *
      * @param event
      */
     private void updateCellCommentDisplay(Event event, Element target) {
@@ -3629,7 +3636,7 @@ public class SheetWidget extends Panel {
     }
 
     /**
-     * 
+     *
      * @param col
      *            1-based
      * @param row
@@ -3758,7 +3765,7 @@ public class SheetWidget extends Panel {
     }
 
     /**
-     * 
+     *
      * @param row
      *            1-based row index
      * @return height in pixels
@@ -3778,7 +3785,7 @@ public class SheetWidget extends Panel {
     }
 
     /**
-     * 
+     *
      * @return sheet default row height in pixels, converted from points
      */
     private int getDefaultRowHeight() {
@@ -3798,7 +3805,7 @@ public class SheetWidget extends Panel {
 
     /**
      * Converts the point value to pixels using the ppi for this client
-     * 
+     *
      * @param points
      *            to convert
      * @return pixels
@@ -3859,7 +3866,7 @@ public class SheetWidget extends Panel {
     }
 
     /**
-     * 
+     *
      * @param col
      *            1 based
      * @param row
@@ -3878,7 +3885,7 @@ public class SheetWidget extends Panel {
      * Clears the sheet. After this no headers or cells are visible. A
      * {@link #resetModel(SpreadsheetSettings)} call will make sheet visible
      * again.
-     * 
+     *
      * @param removed
      *            if the widget is completely removed from DOM after this
      */
@@ -4137,13 +4144,13 @@ public class SheetWidget extends Panel {
     /**
      * swaps the selected cell to the new one, which is the selected cell after
      * this call.
-     * 
+     *
      * the old cell is "highlighted" and the new one gets the selected cell
      * outline (when selection range outline is hidden).
-     * 
+     *
      * takes care of swapping into a merged cell (highlights correct all cell
      * headers).
-     * 
+     *
      * @param column
      * @param row
      */
@@ -4205,13 +4212,13 @@ public class SheetWidget extends Panel {
     /**
      * Swaps the selected cell to the new one, which is the selected cell after
      * this call.
-     * 
+     *
      * The old cell is "highlighted" and the new selected cell will be marked as
      * selected. This method is different to
      * {@link #swapCellSelection(int, int)} because the selected cell should be
      * inside the old selection, instead of adding a new cell into the
      * selection. No need to modify highlighted headers.
-     * 
+     *
      * @param col
      * @param row
      */
@@ -4237,7 +4244,7 @@ public class SheetWidget extends Panel {
     /**
      * Marks the given interval as selected (highlighted background), replaces
      * old selected cells. Ignores the currently selected cell.
-     * 
+     *
      * @param col1
      * @param col2
      * @param row1
@@ -4262,7 +4269,7 @@ public class SheetWidget extends Panel {
     /**
      * Replaces the currently marked selected headers (highlighted) with the
      * given intervals.
-     * 
+     *
      * @param row1
      * @param row2
      * @param col1
@@ -4294,7 +4301,7 @@ public class SheetWidget extends Panel {
     }
 
     /**
-     * 
+     *
      * @return the first column index that is completely visible on the left
      */
     public int getLeftVisibleColumnIndex() {
@@ -4325,7 +4332,7 @@ public class SheetWidget extends Panel {
     }
 
     /**
-     * 
+     *
      * @return the first row index that is completely visible on the top
      */
     public int getTopVisibleRowIndex() {
@@ -4455,7 +4462,7 @@ public class SheetWidget extends Panel {
 
     /**
      * Returns the cell. Checks for it from a freeze pane.
-     * 
+     *
      * @param col
      * @param row
      * @return
@@ -4617,7 +4624,7 @@ public class SheetWidget extends Panel {
 
     /**
      * Is the cell currently rendered in any of the frozen panes.
-     * 
+     *
      * @param col
      * @param row
      * @return
@@ -4630,7 +4637,7 @@ public class SheetWidget extends Panel {
 
     /**
      * Is the cell currently rendered in top left pane.
-     * 
+     *
      * @param col
      * @param row
      * @return
@@ -4641,7 +4648,7 @@ public class SheetWidget extends Panel {
 
     /**
      * Is the cell currently rendered in top right pane.
-     * 
+     *
      * @param col
      * @param row
      * @return
@@ -4653,7 +4660,7 @@ public class SheetWidget extends Panel {
 
     /**
      * Is the cell currently rendered in bottom left pane.
-     * 
+     *
      * @param col
      * @param row
      * @return
@@ -4665,7 +4672,7 @@ public class SheetWidget extends Panel {
 
     /**
      * Is the given cell currently rendered. Checks freeze panes too.
-     * 
+     *
      * @param col
      * @param row
      * @return
@@ -4677,7 +4684,7 @@ public class SheetWidget extends Panel {
 
     /**
      * Is the given cell currently visible completely. Checks freeze panes too.
-     * 
+     *
      * @param col
      * @param row
      * @return
@@ -4703,14 +4710,14 @@ public class SheetWidget extends Panel {
     /**
      * Scrolls the sheet to show the given cell, then triggers escalator for
      * updating cells if necessary.
-     * 
+     *
      * This method does the {@link #isCellRenderedInScrollPane(int, int)} in
      * itself, so no need to do the check before calling this. Nothing is done
      * if the cell is already visible.
-     * 
+     *
      * Scrolls one cell extra to all directions to cut the scrolls to half when
      * using keyboard navigation.
-     * 
+     *
      * @param col
      *            1-based
      * @param row
@@ -4941,7 +4948,7 @@ public class SheetWidget extends Panel {
     /**
      * Scrolls the sheet to show the given area, or as much of it as fits into
      * the view.
-     * 
+     *
      * @param col1
      *            1-based
      * @param col2

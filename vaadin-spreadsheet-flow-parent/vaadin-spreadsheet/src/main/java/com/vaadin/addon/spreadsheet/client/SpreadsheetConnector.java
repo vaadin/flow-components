@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -347,10 +347,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         SpreadsheetState state = getState();
         if (stateChangeEvent.hasPropertyChanged("componentIDtoCellKeysMap")) {
             HashMap<String, String> cellKeysToComponentIdMap = state.componentIDtoCellKeysMap;
+            HashMap<String, Widget> customWidgetMap = new HashMap<String, Widget>();
             if (cellKeysToComponentIdMap != null
                     && !cellKeysToComponentIdMap.isEmpty()) {
                 List<ComponentConnector> childComponents = getChildComponents();
-                HashMap<String, Widget> customWidgetMap = new HashMap<String, Widget>();
                 for (ComponentConnector cc : childComponents) {
                     String connectorId = cc.getConnectorId();
                     if (cellKeysToComponentIdMap.containsKey(connectorId)) {
@@ -359,8 +359,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                                 cc.getWidget());
                     }
                 }
-                widget.showCellCustomComponents(customWidgetMap);
             }
+            widget.showCellCustomComponents(customWidgetMap);
         }
         if (stateChangeEvent.hasPropertyChanged("cellKeysToEditorIdMap")) {
             setupCustomEditors();
