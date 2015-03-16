@@ -113,7 +113,7 @@ public class FormatsFixture implements SpreadsheetFixture {
             row++;
             c = spreadsheet.createCell(row, formulaBaseColumn, formula);
             c = spreadsheet.createCell(row, formulaBaseColumn + 1, "");
-            // c.setCellType(Cell.CELL_TYPE_FORMULA);
+            // sheetController.setCellType(Cell.CELL_TYPE_FORMULA);
             c.setCellFormula(formula);
             c = spreadsheet.createCell(row, formulaBaseColumn + 2,
                     c.getCellType());

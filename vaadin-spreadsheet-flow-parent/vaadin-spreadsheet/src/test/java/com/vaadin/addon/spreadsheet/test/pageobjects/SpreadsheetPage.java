@@ -1,6 +1,5 @@
 package com.vaadin.addon.spreadsheet.test.pageobjects;
 
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
@@ -8,6 +7,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.addon.spreadsheet.elements.AddressUtil;
+import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.testbench.By;
 
 public class SpreadsheetPage extends Page {
@@ -36,8 +37,8 @@ public class SpreadsheetPage extends Page {
     }
 
     public boolean isCellSelected(int col, int row) {
-        WebElement cell = getCellAt(col, row);
-        return selection.isElementSelected(cell);
+        return $(SpreadsheetElement.class).first().getCellAt(row, col)
+                .isCellSelected();
     }
 
     public boolean isCellSelected(String address) {
@@ -45,9 +46,8 @@ public class SpreadsheetPage extends Page {
         return isCellSelected(point.getX(), point.getY());
     }
 
-    public WebElement getCellAt(int col, int row) {
-        return driver.findElement(By.cssSelector(String.format(".col%d.row%d",
-                col, row)));
+    public SheetCellElement getCellAt(int col, int row) {
+        return $(SpreadsheetElement.class).first().getCellAt(row, col);
     }
 
     public void clickOnCell(int col, int row) {
@@ -55,8 +55,7 @@ public class SpreadsheetPage extends Page {
     }
 
     public void clickOnCell(String address) {
-        Point point = AddressUtil.addressToPoint(address);
-        getCellAt(point.getX(), point.getY()).click();
+        $(SpreadsheetElement.class).first().getCellAt(address).click();
     }
 
     public void clickOnCell(String address, Keys... modifiers) {
@@ -103,20 +102,6 @@ public class SpreadsheetPage extends Page {
         new Actions(driver).dragAndDrop(fromCell, toCell).build().perform();
     }
 
-    public int getScrollLeft() {
-        WebElement sheet = driver.findElement(By.className("sheet"));
-        Number scrollLeft = (Number) ((JavascriptExecutor) driver)
-                .executeScript("return arguments[0].scrollLeft", sheet);
-        return scrollLeft.intValue();
-    }
-
-    public int getScrollTop() {
-        WebElement sheet = driver.findElement(By.className("sheet"));
-        Number scrollLeft = (Number) ((JavascriptExecutor) driver)
-                .executeScript("return arguments[0].scrollTop", sheet);
-        return scrollLeft.intValue();
-    }
-
     public void clickOnFormulaField() {
         getFormulaField().click();
     }
@@ -142,8 +127,9 @@ public class SpreadsheetPage extends Page {
 
     public boolean isCellActiveWithinSelection(String address) {
         Point point = AddressUtil.addressToPoint(address);
-        return "rgba(255,255,255,1)".equals(getCellAt(point.getX(),
-                point.getY()).getCssValue("background-color").replace(" ", ""));
+        SheetCellElement cell = getCellAt(point.getX(), point.getY());
+        return cell.isCellSelected()
+                && !cell.getAttribute("class").contains("cell-range");
     }
 
     public void clickOnColumnHeader(String columnAddress, Keys... modifiers) {

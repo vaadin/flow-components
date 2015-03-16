@@ -1,58 +1,68 @@
 package com.vaadin.addon.spreadsheet.test;
 
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.interactions.Actions;
+
+import com.vaadin.addon.spreadsheet.elements.SheetHeaderElement;
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.testbench.TestBenchElement;
 
 public class ResizeTest extends Test1 {
 
-    final String resizerDetail = "/div[@class='header-resize-dnd-second']";
-    final By columnResizer = By
-            .xpath("//div[@class='ch col3']" + resizerDetail);
-    final By rowResizer = By.xpath("//div[@class='rh row3']" + resizerDetail);
-
     @Test
     public void testColumnResize() {
-        // not working every time
-        // new Actions(driver).clickAndHold(driver.findElement(columnResizer))
-        // .moveByOffset(100, 0).release().perform();
-        new Actions(driver).dragAndDrop(driver.findElement(columnResizer),
-                driver.findElement(By.xpath("//div[@class='ch col5']")))
-                .perform();
-        assertInRange(370, getSize(c.getCellStyle("C1", "width")), 400);
+
+        double originalWidth = getSize(sheetController.getCellStyle("C1",
+                "width"));
+
+        TestBenchElement resizeHandle = $(SpreadsheetElement.class).first()
+                .getColumnHeader(3).getResizeHandle();
+        SheetHeaderElement target = $(SpreadsheetElement.class).first()
+                .getColumnHeader(5);
+
+        new Actions(driver).dragAndDrop(resizeHandle, target).perform();
+
+        double newWidth = getSize(sheetController.getCellStyle("C1", "width"));
+
+        assertInRange(2.5 * originalWidth, newWidth, 3.5 * originalWidth);
     }
 
     @Test
     public void testRowResize() {
-        c.selectCell("A1");
-        new Actions(driver).dragAndDrop(driver.findElement(rowResizer),
-                driver.findElement(By.xpath("//div[@class='rh row5']")))
+        sheetController.selectCell("A2");
+        sheetController.selectCell("A1");
 
-        .perform();
+        double originalHeight = getSize(sheetController.getCellStyle("A3",
+                "height"));
 
-        assertInRange(90, getSize(c.getCellStyle("A3", "height")), 110);
+        new Actions(driver).dragAndDrop(
+                $(SpreadsheetElement.class).first().getRowHeader(3)
+                        .getResizeHandle(),
+                $(SpreadsheetElement.class).first().getRowHeader(5)).perform();
+
+        double newHeight = getSize(sheetController.getCellStyle("A3", "height"));
+
+        assertInRange(2.5 * originalHeight, newHeight, 3.5 * originalHeight);
     }
 
     @Test
     public void testColumnAutoResize() {
-        c.selectCell("B2");
-        c.insertAndRet("text");
+        sheetController.selectCell("B2");
+        sheetController.insertAndRet("text");
 
-        new Actions(driver).doubleClick(
-                driver.findElement(By.xpath("//div[@class='ch col2']"
-                        + resizerDetail))).perform();
-        testBench(driver).waitForVaadin();
+        $(SpreadsheetElement.class).first().getColumnHeader(2)
+                .getResizeHandle().doubleClick();
 
-        assertInRange(25, getSize(c.getCellStyle("B2", "width")), 35);
+        assertInRange(25, getSize(sheetController.getCellStyle("B2", "width")),
+                35);
 
-        c.selectCell("D2");
-        c.insertAndRet("very long text inserted in D2.");
+        sheetController.selectCell("D2");
+        sheetController.insertAndRet("very long text inserted in D2.");
 
-        new Actions(driver).doubleClick(
-                driver.findElement(By.xpath("//div[@class='ch col4']"
-                        + resizerDetail))).perform();
-        testBench(driver).waitForVaadin();
+        $(SpreadsheetElement.class).first().getColumnHeader(4)
+                .getResizeHandle().doubleClick();
 
-        assertInRange(180, getSize(c.getCellStyle("D2", "width")), 220);
+        assertInRange(50, getSize(sheetController.getCellStyle("D2", "width")),
+                100);
     }
 }

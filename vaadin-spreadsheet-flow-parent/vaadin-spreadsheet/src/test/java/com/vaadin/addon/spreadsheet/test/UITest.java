@@ -32,7 +32,7 @@ public abstract class UITest extends MultiBrowserTest {
 
     @After
     public void tearDown() throws Exception {
-        driver.quit();
+        // driver.quit();
         String verificationErrorString = verificationErrors.toString();
         if (!"".equals(verificationErrorString)) {
             fail(verificationErrorString);

@@ -34,6 +34,7 @@ import com.vaadin.addon.spreadsheet.test.fixtures.SpreadsheetFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.SpreadsheetFixtureFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.StylesFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.ValueHandlerFixture;
+import com.vaadin.annotations.Theme;
 import com.vaadin.data.util.FilesystemContainer;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
@@ -50,6 +51,7 @@ import com.vaadin.ui.VerticalLayout;
  * Main UI class
  */
 @SuppressWarnings("serial")
+@Theme("demo")
 public class TestexcelsheetUI extends UI {
 
     private Spreadsheet spreadsheet;
@@ -185,14 +187,14 @@ public class TestexcelsheetUI extends UI {
                                             // System
                                             // .out.println("<<<<<<<<<<<<<<<<<<<<<");
                                             //
-                                            // Cell c =
+                                            // Cell sheetController =
                                             // spreadsheet.getCell(event.getSelectedCellReference().getRow(),
                                             // event.getSelectedCellReference().getCol());
-                                            // if (c == null)
+                                            // if (sheetController == null)
                                             // return;
                                             //
                                             // System
-                                            // .out.println(c.getCellType());
+                                            // .out.println(sheetController.getCellType());
 
                                         }
                                     });

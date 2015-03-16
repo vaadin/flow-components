@@ -25,7 +25,7 @@ public class ModifierController extends SheetController {
     }
 
     @Override
-    public void clickRow(String row) {
+    public void clickRow(int row) {
         new Actions(getDriver()).keyDown(modifier).build().perform();
         super.clickRow(row);
         new Actions(getDriver()).keyUp(modifier).build().perform();

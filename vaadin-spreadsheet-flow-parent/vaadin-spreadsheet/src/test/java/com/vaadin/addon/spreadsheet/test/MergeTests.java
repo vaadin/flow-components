@@ -8,10 +8,10 @@ public class MergeTests extends Test1 {
     @Test
     public void testSelectionBug() {
 
-        c.selectRegion("B2", "C3");
+        sheetController.selectRegion("B2", "C3");
         loadServerFixture("MERGE_CELLS");
 
-        c.selectRegion("C4", "D3");
+        sheetController.selectRegion("C4", "D3");
         loadServerFixture("SELECTION");
 
         assertCellValue("D4", "SELECTED");
@@ -21,23 +21,25 @@ public class MergeTests extends Test1 {
 
     @Test
     public void testBasic() {
+        sheetController.selectCell("A2");
+        sheetController.selectCell("A1");
+        sheetController.insertAndRet("1");
+        sheetController.insertAndRet("2");
 
-        c.selectCell("A1");
-        c.insertAndRet("1");
-        c.insertAndRet("2");
+        sheetController.selectCell("B1");
+        sheetController.insertAndRet("=A1+1");
+        sheetController.insertAndRet("=A2+1");
 
-        c.selectCell("B1");
-        c.insertAndRet("=A1+1");
-        c.insertAndRet("=A2+1");
-
-        c.selectRegion("A1", "A2");
+        sheetController.selectRegion("A1", "A2");
         loadServerFixture("MERGE_CELLS");
 
         assertCellValue("B1", "2");
         assertCellValue("B2", "3");
 
-        c.clickElement(c.mergedCell("A1"));
-        c.insertAndRet("10");
+        sheetController.selectCell("F2");
+        // sheetController.selectCell("A1");
+        sheetController.clickElement(sheetController.mergedCell("A1"));
+        sheetController.insertAndRet("10");
 
         assertCellValue("B1", "11");
         assertCellValue("B2", "3");
@@ -45,13 +47,14 @@ public class MergeTests extends Test1 {
 
     @Test
     public void testContents() {
+        sheetController.selectCell("A2");
+        sheetController.putCellContent("A1", "A1 text");
+        sheetController.putCellContent("B1", "B1 text");
 
-        c.putCellContent("A1", "A1 text");
-        c.putCellContent("B1", "B1 text");
-
-        c.selectRegion("A1", "B1");
+        sheetController.selectRegion("A1", "B1");
         loadServerFixture("MERGE_CELLS");
 
-        Assert.assertTrue("A1 text".equals(c.getMergedCellContent("A1")));
+        Assert.assertTrue("A1 text".equals(sheetController
+                .getMergedCellContent("A1")));
     }
 }

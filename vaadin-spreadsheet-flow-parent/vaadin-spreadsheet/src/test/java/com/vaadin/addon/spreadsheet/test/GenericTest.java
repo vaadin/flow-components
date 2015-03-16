@@ -5,11 +5,17 @@ import java.util.GregorianCalendar;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
-import com.vaadin.testbench.By;
+import com.vaadin.testbench.annotations.RunLocally;
+import com.vaadin.testbench.parallel.Browser;
 
+@RunLocally(Browser.PHANTOMJS)
 public class GenericTest extends Test1 {
 
     @Test
@@ -17,27 +23,32 @@ public class GenericTest extends Test1 {
 
         SheetController c = keyboardSetup();
 
-        c.action("start").action(Keys.RETURN).action(Keys.ARROW_UP)
+        c.selectCell("A2");
+        c.selectCell("A1");
+
+        c.insertAndRet("start").action(Keys.ARROW_UP)
                 .action(Keys.ARROW_RIGHT).action(Keys.ARROW_RIGHT)
                 .action(Keys.ARROW_RIGHT).action(Keys.ARROW_DOWN)
                 .action(Keys.ARROW_DOWN).action(Keys.ARROW_LEFT)
-                .action(Keys.ARROW_UP).action("end").action(Keys.RETURN);
+.action(Keys.ARROW_UP)
+                .insertAndRet("end");
 
-        testBench(driver).waitForVaadin();
-
-        Assert.assertEquals("start",
-                driver.findElement(By.xpath("//*[@class='col1 row1']"))
-                        .getText());
-        Assert.assertEquals("end",
-                driver.findElement(By.xpath("//*[@class='col3 row2']"))
-                        .getText());
+        Assert.assertEquals("start", $(SpreadsheetElement.class).first()
+                .getCellAt("A1").getValue());
+        Assert.assertEquals("end", $(SpreadsheetElement.class).first()
+                .getCellAt("C2").getValue());
     }
 
     @Test
     public void testDates() {
 
         SheetController c = keyboardSetup();
-        c.insertColumn(new String[] { "=TODAY()", "6/7/2009" });
+        new WebDriverWait(getDriver(), 20).until(ExpectedConditions
+                .presenceOfElementLocated(By.className("sheet")));
+        c.selectCell("A2");
+        c.selectCell("A1");
+        c.insertAndRet("=TODAY()");
+        c.insertAndRet("6/7/2009");
         c.selectCell("B1");
         c.insertAndRet("=A1+3");
 
@@ -47,6 +58,7 @@ public class GenericTest extends Test1 {
         now.add(Calendar.DAY_OF_YEAR, 1);
         Long today = new Long((now.getTime().getTime() - start.getTime()
                 .getTime()) / (1000 * 60 * 60 * 24));
+        c.selectCell("C1");
         Assert.assertEquals(today.toString(), c.getCellContent("A1"));
         Assert.assertEquals(today + 3, Long.parseLong(c.getCellContent("B1")));
     }
@@ -71,11 +83,15 @@ public class GenericTest extends Test1 {
         Assert.assertEquals("3.82E04", c.getCellContent("F3"));
 
         // These values are taken from LibreOffice
-        // Assert.assertEquals("38247.0810185185", c.getCellContent("B3"));
-        // Assert.assertEquals("38247.08", c.getCellContent("C3"));
-        // Assert.assertEquals("3824708.10%", c.getCellContent("D3"));
-        // Assert.assertEquals("17-Sep-04", c.getCellContent("E3"));
-        // Assert.assertEquals("3.82E04", c.getCellContent("F3"));
+        // Assert.assertEquals("38247.0810185185",
+        // sheetController.getCellContent("B3"));
+        // Assert.assertEquals("38247.08",
+        // sheetController.getCellContent("C3"));
+        // Assert.assertEquals("3824708.10%",
+        // sheetController.getCellContent("D3"));
+        // Assert.assertEquals("17-Sep-04",
+        // sheetController.getCellContent("E3"));
+        // Assert.assertEquals("3.82E04", sheetController.getCellContent("F3"));
 
         Assert.assertEquals("3.1415", c.getCellContent("B6"));
         Assert.assertEquals("3.14", c.getCellContent("C6"));

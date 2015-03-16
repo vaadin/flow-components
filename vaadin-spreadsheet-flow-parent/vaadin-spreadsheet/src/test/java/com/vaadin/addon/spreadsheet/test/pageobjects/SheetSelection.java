@@ -2,10 +2,11 @@ package com.vaadin.addon.spreadsheet.test.pageobjects;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class SheetSelection extends Page {
 
@@ -26,15 +27,9 @@ public class SheetSelection extends Page {
     public void findSelectionOutline() {
         // sometimes the spreadsheet takes so long to load that the selection
         // widget elements are not found
-        try {
-            sTop = driver.findElement(By.className("s-top"));
-        } catch (NoSuchElementException nsee) {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-            }
-            sTop = driver.findElement(By.className("s-top"));
-        }
+        new WebDriverWait(getDriver(), 10).until(ExpectedConditions
+                .presenceOfElementLocated(By.className("s-top")));
+        sTop = driver.findElement(By.className("s-top"));
         sBottom = driver.findElement(By.className("s-bottom"));
         sLeft = driver.findElement(By.className("s-left"));
         sRight = driver.findElement(By.className("s-right"));
@@ -42,8 +37,10 @@ public class SheetSelection extends Page {
 
     public boolean isElementSelected(WebElement element) {
         updateSelectionLocationAndSize();
-        return intersectsSelection(element.getLocation(), element.getSize())
-                || isNonCoherentlySelected(element);
+        Point location = element.getLocation();
+        location.x += element.getSize().getWidth() / 2;
+        location.y += element.getSize().getHeight() / 2;
+        return isInSelection(location) || isNonCoherentlySelected(element);
     }
 
     private boolean isNonCoherentlySelected(WebElement element) {
@@ -84,4 +81,18 @@ public class SheetSelection extends Page {
         // Everything is inside the selection
         return true;
     }
+
+    private boolean isInSelection(Point location) {
+        if (location.getX() < sLocation.getX()
+                || location.getY() < sLocation.getY()) {
+            return false;
+        }
+        if (location.getX() - sLocation.getX() > sSize.getWidth()
+                || location.getY() - sLocation.getY() > sSize.getHeight()) {
+            return false;
+        }
+        // Everything is inside the selection
+        return true;
+    }
+
 }

@@ -7,6 +7,8 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.AbstractElement;
@@ -37,7 +39,9 @@ public class SpreadsheetElement extends AbstractElement {
     public SheetCellElement getCellAt(int row, int column) {
         TestBenchElement cell = (TestBenchElement) findElement(By
                 .cssSelector(String.format(".col%d.row%d", column, row)));
-        return cell.wrap(SheetCellElement.class);
+        SheetCellElement cellElement = cell.wrap(SheetCellElement.class);
+        cellElement.setParent(this);
+        return cellElement;
     }
 
     /**
@@ -235,22 +239,18 @@ public class SpreadsheetElement extends AbstractElement {
 
     boolean isElementSelected(WebElement element) {
         updateSelectionLocationAndSize();
-        return intersectsSelection(element.getLocation(), element.getSize())
-                || isNonCoherentlySelected(element);
+        Point location = element.getLocation();
+        location.x += element.getSize().getWidth() / 2;
+        location.y += element.getSize().getHeight() / 2;
+        return isInSelection(location) || isNonCoherentlySelected(element);
     }
 
     private void findSelectionOutline() {
         // sometimes the spreadsheet takes so long to load that the selection
         // widget elements are not found
-        try {
-            sTop = findElement(By.className("s-top"));
-        } catch (NoSuchElementException nsee) {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-            }
-            sTop = findElement(By.className("s-top"));
-        }
+        new WebDriverWait(getDriver(), 10).until(ExpectedConditions
+                .presenceOfElementLocated(By.className("s-top")));
+        sTop = findElement(By.className("s-top"));
         sBottom = findElement(By.className("s-bottom"));
         // Just to make sure the left element is present
         findElement(By.className("s-left"));
@@ -258,10 +258,9 @@ public class SpreadsheetElement extends AbstractElement {
     }
 
     private boolean isNonCoherentlySelected(WebElement element) {
-        // an element is non-coherently selected if the background color is
-        // rgba(224, 245, 255, 0.8) or if it has a solid outline style
-        return "rgba(224, 245, 255, 0.8)".equals(element
-                .getCssValue("background-color"))
+        // an element is non-coherently selected if the class attribute
+        // contains "cell-range"
+        return element.getAttribute("class").contains("cell-range")
                 || "solid".equals(element.getCssValue("outline-style"));
     }
 
@@ -289,6 +288,21 @@ public class SpreadsheetElement extends AbstractElement {
                 + sSize.getWidth()
                 || location.getY() + size.getHeight() > sLocation.getY()
                         + sSize.getHeight()) {
+            return false;
+        }
+        // Everything is inside the selection
+        return true;
+    }
+
+    private boolean isInSelection(Point location) {
+        // Test top left corner
+        if (location.getX() < sLocation.getX()
+                || location.getY() < sLocation.getY()) {
+            return false;
+        }
+        // Test lower right corner
+        if (location.getX() - sLocation.getX() > sSize.getWidth()
+                || location.getY() - sLocation.getY() > sSize.getHeight()) {
             return false;
         }
         // Everything is inside the selection

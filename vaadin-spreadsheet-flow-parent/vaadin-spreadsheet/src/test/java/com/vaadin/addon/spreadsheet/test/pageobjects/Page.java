@@ -1,17 +1,17 @@
 package com.vaadin.addon.spreadsheet.test.pageobjects;
 
-import com.vaadin.testbench.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-public class Page {
-    protected WebDriver driver;
+import com.vaadin.testbench.TestBenchTestCase;
+import com.vaadin.testbench.elements.ButtonElement;
 
+public class Page extends TestBenchTestCase {
     public Page(WebDriver driver) {
-        this.driver = driver;
+        setDriver(driver);
     }
 
     protected WebElement buttonWithCaption(String caption) {
-        return driver.findElement(By.xpath(String.format("//span[@class='v-button-caption' and contains(text(), '%s')]", caption)));
+        return $(ButtonElement.class).caption(caption).first();
     }
 }

@@ -19,8 +19,8 @@ public class ImageTests extends Test1 {
     }
 
     public double imageWidth(String cell) {
-        c.waitForVaadin();
-        return driver.findElement(By.xpath(c.cellToXPath(cell) + "/img"))
-                .getSize().width;
+        sheetController.waitForVaadin();
+        return driver.findElement(
+                By.xpath(sheetController.cellToXPath(cell) + "/img")).getSize().width;
     }
 }

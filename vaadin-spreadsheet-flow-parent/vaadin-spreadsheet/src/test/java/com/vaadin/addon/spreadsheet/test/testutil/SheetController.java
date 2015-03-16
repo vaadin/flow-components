@@ -1,16 +1,20 @@
 package com.vaadin.addon.spreadsheet.test.testutil;
 
-import com.vaadin.testbench.parallel.BrowserUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.addon.spreadsheet.test.SheetClicker;
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.commands.CanWaitForVaadin;
+import com.vaadin.testbench.commands.TestBenchCommandExecutor;
+import com.vaadin.testbench.elementsbase.AbstractElement;
+import com.vaadin.testbench.parallel.BrowserUtil;
 
 public class SheetController implements SheetClicker {
 
@@ -26,22 +30,20 @@ public class SheetController implements SheetClicker {
     }
 
     public SheetController insertAndRet(CharSequence k) {
-        action(k).action(Keys.RETURN);
+        action(k).action(Keys.RETURN).action(Keys.ENTER);
+        ((TestBenchCommandExecutor) driver).waitForVaadin();
         return this;
     }
 
-    protected boolean fixLeftParenthis() {
-        Platform platform = desiredCapabilities.getPlatform();
-        return !((platform.is(Platform.MAC) || platform.is(Platform.XP))
-                && desiredCapabilities.getBrowserName().equalsIgnoreCase(
-                        "chrome") || desiredCapabilities.getBrowserName()
-                .equalsIgnoreCase((BrowserUtil.ie9().getBrowserName())));
+    protected boolean needsFixLeftParenthesis() {
+        // TODO: where is this really needed?
+        return BrowserUtil.isIE(desiredCapabilities, 9);
     }
 
     public SheetController action(CharSequence k) {
         waitForVaadin();
         // Fix left parentheses with SHIFT+9
-        if (k instanceof String && fixLeftParenthis()) {
+        if (k instanceof String && needsFixLeftParenthesis()) {
             k = ((String) k).replace("(", Keys.chord(Keys.SHIFT, "9"));
         }
 
@@ -67,7 +69,6 @@ public class SheetController implements SheetClicker {
     private int[] numericCoordinates(String cell) {
         String alpha = "A";
         String number = "1";
-        ;
         for (int i = 0; i < cell.length(); i++) {
             if (cell.charAt(i) < 65) {
                 alpha = cell.substring(0, i);
@@ -89,8 +90,8 @@ public class SheetController implements SheetClicker {
 
     public By mergedCell(String topLeftCell) {
         int[] coordinates = numericCoordinates(topLeftCell);
-        return By.xpath("//*[contains(@class,'col" + coordinates[0] + " row"
-                + coordinates[1] + " merged-cell')]");
+        return By.xpath("//div[contains(@class,'col" + coordinates[0] + " row"
+                + coordinates[1] + "') and contains(@class, 'merged-cell')]");
     }
 
     public By columnToXPath(String column) {
@@ -103,7 +104,7 @@ public class SheetController implements SheetClicker {
     }
 
     public String getCellContent(String cell) {
-        return getCellElement(cell).getText();
+        return $(SpreadsheetElement.class).first().getCellAt(cell).getValue();
     }
 
     public String getMergedCellContent(String topLeftCell) {
@@ -139,28 +140,31 @@ public class SheetController implements SheetClicker {
         return driver;
     }
 
+    public <T extends AbstractElement> ElementQuery<T> $(Class<T> clazz) {
+        return new ElementQuery<T>(clazz).context(getDriver());
+    }
+
     public void selectCell(String cell) {
-        waitForVaadin();
         clickCell(cell);
-        // TODO - This will not work with multiple spreadsheets
-        driver.findElement(By.xpath("//*[@class='sheet']")).sendKeys("");
-        waitForVaadin();
     }
 
     @Override
     public void clickCell(String cell) {
-        driver.findElement(By.xpath(cellToXPath(cell))).click();
-        sleeper.waitForVaadin();
+        SheetCellElement cellElement = $(SpreadsheetElement.class).first()
+                .getCellAt(cell);
+        new Actions(getDriver()).moveToElement(cellElement).click().build()
+                .perform();
     }
 
     @Override
     public void clickColumn(String column) {
-        clickElement(columnToXPath(column));
+        $(SpreadsheetElement.class).first()
+                .getColumnHeader(column.charAt(0) - 'A' + 1).click();
     }
 
     @Override
-    public void clickRow(String row) {
-        clickElement(rowToXPath(row));
+    public void clickRow(int row) {
+        $(SpreadsheetElement.class).first().getRowHeader(row).click();
     }
 
     public SheetController clickElement(org.openqa.selenium.By by) {

@@ -17,7 +17,7 @@ public class HyperlinkTest extends Test1 {
         }
         loadServerFixture("HYPERLINKS");
 
-        c.clickCell("B3");
+        sheetController.clickCell("B3");
         try {
             popup.switchToPopup();
         } catch (UnhandledAlertException uae) {
@@ -26,9 +26,9 @@ public class HyperlinkTest extends Test1 {
                 "HTTP ERROR 404" });
         popup.backToMainWindow();
 
-        c.selectCell("B2");
-        c.clickCell("C3");
-        Assert.assertEquals(c.getCellContent("C3"), "new value");
+        sheetController.selectCell("B2");
+        sheetController.clickCell("C3");
+        Assert.assertEquals(sheetController.getCellContent("C3"), "new value");
 
     }
 
@@ -37,8 +37,8 @@ public class HyperlinkTest extends Test1 {
 
         loadSheetFile("spreadsheet_hyperlinks.xlsx");
 
-        c.clickCell("A4");
-        Assert.assertEquals(c.getSelectedCell(), "B4");
+        sheetController.clickCell("A4");
+        Assert.assertEquals(sheetController.getSelectedCell(), "B4");
 
         // FIXME on IE
         // "org.openqa.selenium.UnhandledAlertException: Modal dialog present:"
@@ -47,7 +47,7 @@ public class HyperlinkTest extends Test1 {
                 DesiredCapabilities.internetExplorer().getBrowserName())) {
             return;
         }
-        c.clickCell("A3");
+        sheetController.clickCell("A3");
         try {
             popup.switchToPopup();
         } catch (UnhandledAlertException uae) {
@@ -55,12 +55,12 @@ public class HyperlinkTest extends Test1 {
         page.assertUrlContains("google");
         popup.backToMainWindow();
 
-        // c.clickCell("A2");
+        // sheetController.clickCell("A2");
         // switchToPopup();
         // assertCurrentUrlContains("google");
         // backToMainWindow();
 
-        // c.clickCell("A4");
-        // Assert.assertEquals("B4", c.getSelectedCell());
+        // sheetController.clickCell("A4");
+        // Assert.assertEquals("B4", sheetController.getSelectedCell());
     }
 }

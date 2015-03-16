@@ -1,53 +1,77 @@
 package com.vaadin.addon.spreadsheet.test;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.DesiredCapabilities;
+
+import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.testbench.annotations.BrowserConfiguration;
 
 public class ContextMenuTest extends Test1 {
+
+    @BrowserConfiguration
+    public List<DesiredCapabilities> getBrowsersToTest() {
+        // PhantomJS doesn't support right-click
+        return getBrowsersExcludingPhantomJS();
+    }
 
     @Test
     public void testSingleCell() {
         loadServerFixture("ACTIONS");
 
-        c.selectCell("B2");
+        SheetCellElement b2 = $(SpreadsheetElement.class).first().getCellAt(
+                "B2");
+        b2.click();
 
-        mouse.rightClick(c.getCellElement("B2"));
+        b2.contextClick();
         contextMenu.clickItem("Number");
 
-        Assert.assertEquals("42", c.getCellContent("B2"));
+        Assert.assertEquals("42", b2.getValue());
     }
 
     @Test
     public void testMultipleCells() {
         loadServerFixture("ACTIONS");
 
-        c.selectCell("B2");
+        sheetController.selectCell("B2");
         ctrl.selectCell("C3");
         shift.selectCell("D4");
 
-        mouse.rightClick(c.getCellElement("C3"));
+        $(SpreadsheetElement.class).first().getCellAt("C3").contextClick();
         contextMenu.clickItem("Number");
 
-        c.selectCell("B2");
-        ctrl.selectCell("C3");
-        mouse.rightClick(c.getCellElement("C3"));
+        sheetController.selectCell("A1");
+
+        sheetController.selectCell("B2");
+        SheetCellElement c3 = $(SpreadsheetElement.class).first().getCellAt(
+                "C3");
+        new Actions(getDriver()).keyDown(Keys.CONTROL).click(c3)
+                .keyUp(Keys.CONTROL).contextClick(c3).build().perform();
         contextMenu.clickItem("Double cell values");
 
-        Assert.assertEquals("84", c.getCellContent("B2"));
-        Assert.assertEquals("84", c.getCellContent("C3"));
-        Assert.assertEquals("42", c.getCellContent("C4"));
-        Assert.assertEquals("42", c.getCellContent("D3"));
-        Assert.assertEquals("42", c.getCellContent("D4"));
+        sheetController.selectCell("A1");
+
+        Assert.assertEquals("84", sheetController.getCellContent("B2"));
+        Assert.assertEquals("84", sheetController.getCellContent("C3"));
+        Assert.assertEquals("42", sheetController.getCellContent("C4"));
+        Assert.assertEquals("42", sheetController.getCellContent("D3"));
+        Assert.assertEquals("42", sheetController.getCellContent("D4"));
     }
 
     @Test
-    public void testHeaders() {
+    public void testHeaders() throws InterruptedException {
         loadServerFixture("ACTIONS");
 
-        mouse.rightClick(driver.findElement(c.columnToXPath("C")));
+        $(SpreadsheetElement.class).first().getColumnHeader(3).contextClick();
         contextMenu.clickItem("Column action");
 
-        Assert.assertEquals("first column", c.getCellContent("C3"));
-        Assert.assertEquals("last column", c.getCellContent("C4"));
+        Assert.assertEquals("first column",
+                sheetController.getCellContent("C3"));
+        Assert.assertEquals("last column", sheetController.getCellContent("C4"));
     }
 }

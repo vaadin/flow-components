@@ -5,24 +5,27 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.ErrorCollector;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.addon.spreadsheet.test.testutil.ModifierController;
 import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 import com.vaadin.testbench.By;
+import com.vaadin.testbench.elements.ButtonElement;
+import com.vaadin.testbench.elements.ComboBoxElement;
 
 public abstract class Test1 extends UITest {
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
 
-    protected SheetController c;
+    protected SheetController sheetController;
     protected SheetController ctrl;
     protected ModifierController shift;
 
     @Before
     public void setUpController() {
-        c = keyboardSetup();
+        sheetController = keyboardSetup();
         ctrl = new ModifierController(driver, Keys.CONTROL,
                 testBench(getDriver()), getDesiredCapabilities());
         shift = new ModifierController(driver, Keys.SHIFT,
@@ -38,33 +41,24 @@ public abstract class Test1 extends UITest {
     }
 
     protected void createNewSheet() {
-        testBench(driver).waitForVaadin();
-        driver.findElement(By.xpath("//*[@id='newSpreadsheetButton']")).click();
-        driver.findElement(By.xpath("//*[@class='sheet']")).sendKeys("");
-        testBench(driver).waitForVaadin();
+        org.openqa.selenium.By newSpreadsheetButton = By
+                .id("newSpreadsheetButton");
+        new WebDriverWait(getDriver(), 20).until(ExpectedConditions
+                .presenceOfElementLocated(newSpreadsheetButton));
+        driver.findElement(newSpreadsheetButton).click();
+        testBench().waitForVaadin();
     }
 
     protected void newSheetAndLoadServerFixture(String fixtureName) {
-        driver.findElement(By.xpath("//*[@id='newSpreadsheetButton']")).click();
+        driver.findElement(By.id("newSpreadsheetButton")).click();
         loadServerFixture(fixtureName);
     }
 
     protected void loadServerFixture(String fixtureName) {
-        testBenchElement(
-                driver.findElement(By.xpath("//*[@id='fixtureNameCmb']/input")))
-                .click(10, 10);
-
-        testBench(driver).waitForVaadin();
-        driver.findElement(By.xpath("//*[@id='fixtureNameCmb']/input")).clear();
-        driver.findElement(By.xpath("//*[@id='fixtureNameCmb']/input"))
-                .sendKeys(fixtureName);
-        testBench(driver).waitForVaadin();
-
-        new Actions(driver).sendKeys(Keys.RETURN).perform();
-        testBench(driver).waitForVaadin();
-
-        driver.findElement(By.xpath("//*[@id='loadFixtureBtn']")).click();
-        testBench(driver).waitForVaadin();
+        new WebDriverWait(getDriver(), 20).until(ExpectedConditions
+                .presenceOfElementLocated(By.id("fixtureNameCmb")));
+        $(ComboBoxElement.class).id("fixtureNameCmb").selectByText(fixtureName);
+        $(ButtonElement.class).id("loadFixtureBtn").click();
     }
 
     protected void loadSheetFile(String filename) {
@@ -95,7 +89,7 @@ public abstract class Test1 extends UITest {
     }
 
     protected void assertCellValue(String cell, String text) {
-        String actual = c.getCellContent(cell);
+        String actual = sheetController.getCellContent(cell);
         Assert.assertTrue("Failed asserting that cell [" + cell
                 + "] contains [" + text + "]. Actual value [" + actual + "]",
                 actual.equals(text));

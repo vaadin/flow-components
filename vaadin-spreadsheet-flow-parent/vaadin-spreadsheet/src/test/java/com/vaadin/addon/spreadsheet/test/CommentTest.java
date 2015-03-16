@@ -25,7 +25,7 @@ public class CommentTest extends Test1 {
         assertCommentPresent("Always Visible Comment.");
 
         assertCommentNotPresent("first cell comment");
-        mouse.toolTip(c.getCellElement("A1"));
+        mouse.toolTip(sheetController.getCellElement("A1"));
         assertCommentPresent("first cell comment");
     }
 
@@ -46,6 +46,6 @@ public class CommentTest extends Test1 {
     }
 
     private List<WebElement> findAllByXPath(String xpath) {
-        return driver.findElements(By.xpath(xpath));
+        return getDriver().findElements(By.xpath(xpath));
     }
 }

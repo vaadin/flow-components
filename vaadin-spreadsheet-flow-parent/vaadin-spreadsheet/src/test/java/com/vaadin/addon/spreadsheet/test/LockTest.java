@@ -7,19 +7,19 @@ public class LockTest extends Test1 {
 
     @Test
     public void testLockedCells() {
-        c.putCellContent("B2", "value");
+        sheetController.putCellContent("B2", "value");
 
-        c.selectCell("C3");
+        sheetController.selectCell("C3");
         shift.clickCell("D4");
 
         loadServerFixture("LOCK_SELECTED_CELLS");
 
-        Assert.assertEquals("value", c.getCellContent("B2"));
-        c.putCellContent("B2", "new value on locked cell");
-        Assert.assertEquals("value", c.getCellContent("B2"));
+        Assert.assertEquals("value", sheetController.getCellContent("B2"));
+        sheetController.putCellContent("B2", "new value on locked cell");
+        Assert.assertEquals("value", sheetController.getCellContent("B2"));
 
-        Assert.assertEquals("unlocked", c.getCellContent("C3"));
-        c.putCellContent("C3", "value");
-        Assert.assertEquals("value", c.getCellContent("C3"));
+        Assert.assertEquals("unlocked", sheetController.getCellContent("C3"));
+        sheetController.putCellContent("C3", "value");
+        Assert.assertEquals("value", sheetController.getCellContent("C3"));
     }
 }

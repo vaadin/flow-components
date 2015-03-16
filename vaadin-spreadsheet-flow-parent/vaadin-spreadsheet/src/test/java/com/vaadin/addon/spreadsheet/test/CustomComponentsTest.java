@@ -3,8 +3,13 @@ package com.vaadin.addon.spreadsheet.test;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.server.browserlaunchers.Sleeper;
 import org.openqa.selenium.support.ui.Select;
+
+import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 
 public class CustomComponentsTest extends Test1 {
 
@@ -15,95 +20,104 @@ public class CustomComponentsTest extends Test1 {
     public void testTextField() {
         loadServerFixture("CUSTOM_COMPONENTS");
 
-        c.selectCell("B2");
-        driver.findElement(By.xpath(c.cellToXPath("B2") + "/input")).click();
-        testBench(driver).waitForVaadin();
-        c.insertAndRet(TEXT_PROXY);
+        SheetCellElement b2 = $(SpreadsheetElement.class).first().getCellAt(
+                "B2");
+        typeInTextFieldEditor(b2, TEXT_PROXY);
 
-        c.selectCell("B3");
-        c.insertAndRet("=B2");
+        sheetController.selectCell("B3");
+        sheetController.insertAndRet("=B2");
 
-        Assert.assertEquals(c.getCellContent("B2"), TEXT_PROXY);
-        Assert.assertEquals(c.getCellContent("B3"), TEXT_PROXY);
+        Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B2"));
+        Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B3"));
 
-        c.selectCell("B2");
-        driver.findElement(By.xpath(c.cellToXPath("B2") + "/input")).clear();
-        driver.findElement(By.xpath(c.cellToXPath("B2") + "/input")).click();
-        testBench(driver).waitForVaadin();
-        c.insertAndRet(NUM_PROXY.toString());
+        typeInTextFieldEditor(b2, NUM_PROXY.toString());
 
-        c.selectCell("B3");
-        c.insertAndRet("=B2*2");
+        sheetController.selectCell("B3");
+        sheetController.insertAndRet("=B2*2");
 
-        Assert.assertEquals(c.getCellContent("B2"), NUM_PROXY.toString());
-        Assert.assertEquals(c.getCellContent("B3"), (NUM_PROXY * 2) + "");
+        Assert.assertEquals(NUM_PROXY.toString(),
+                sheetController.getCellContent("B2"));
+        Assert.assertEquals((NUM_PROXY * 2) + "",
+                sheetController.getCellContent("B3"));
+    }
+
+    private void typeInTextFieldEditor(SheetCellElement cell, String text) {
+        activateEditorInCell(cell);
+        cell.findElement(By.xpath("./input")).clear();
+        activateEditorInCell(cell);
+        cell.findElement(By.xpath("./input")).sendKeys(text, Keys.RETURN);
+    }
+
+    private void activateEditorInCell(SheetCellElement cell) {
+        cell.click();
+        new Actions(getDriver()).moveToElement(cell).moveByOffset(7, 7)
+                .doubleClick().build().perform();
     }
 
     @Test
-    public void testCheckBox() {
+    public void testCheckBox() throws InterruptedException {
         loadServerFixture("CUSTOM_COMPONENTS");
 
-        c.selectCell("C3");
-        c.insertAndRet("=C2*2");
-        c.insertAndRet("=IF(C2,1,0)");
+        sheetController.selectCell("C3");
+        sheetController.insertAndRet("=C2*2");
+        sheetController.insertAndRet("=IF(C2,1,0)");
 
-        Assert.assertEquals(c.getCellContent("C3"), "0");
-        Assert.assertEquals(c.getCellContent("C4"), "0");
+        sheetController.selectCell("A1");
 
-        c.selectCell("C2");
-        driver.findElement(By.xpath(c.cellToXPath("C2") + "//input")).click();
-        testBench(driver).waitForVaadin();
+        Assert.assertEquals("0", sheetController.getCellContent("C3"));
+        Assert.assertEquals("0", sheetController.getCellContent("C4"));
 
-        Assert.assertEquals(c.getCellContent("C3"), "2");
-        Assert.assertEquals(c.getCellContent("C4"), "1");
+        SheetCellElement c2 = $(SpreadsheetElement.class).first().getCellAt(
+                "C2");
+        c2.click();
+        new Actions(getDriver())
+                .moveToElement(c2.findElement(By.xpath(".//input"))).click()
+                .build().perform();
+
+        Assert.assertEquals("2", sheetController.getCellContent("C3"));
+        Assert.assertEquals("1", sheetController.getCellContent("C4"));
     }
 
     @Test
     public void testNativeSelect() {
         loadServerFixture("CUSTOM_COMPONENTS");
 
-        c.selectCell("I3");
-        c.insertAndRet("=I2*3");
+        sheetController.selectCell("I3");
+        sheetController.insertAndRet("=I2*3");
 
-        c.selectCell("I2");
-        Select select = new Select(driver.findElement(By.xpath(c
+        sheetController.selectCell("I2");
+        Select select = new Select(driver.findElement(By.xpath(sheetController
                 .cellToXPath("I2") + "//select")));
         select.getOptions().get(3).click();
         testBench(driver).waitForVaadin();
 
-        Assert.assertEquals(c.getCellContent("I3"), "90");
+        Assert.assertEquals("90", sheetController.getCellContent("I3"));
     }
 
     @Test
-    public void testScrollingBug() {
+    public void testScrollingBug() throws InterruptedException {
         loadServerFixture("CUSTOM_COMPONENTS");
 
-        c.selectCell("B2");
-        driver.findElement(By.xpath(c.cellToXPath("B2") + "/input")).click();
-        testBench(driver).waitForVaadin();
-        c.insertAndRet(TEXT_PROXY);
-        c.selectCell("B3");
-        c.selectCell("B2");
+        SheetCellElement b2 = $(SpreadsheetElement.class).first().getCellAt(
+                "B2");
+        typeInTextFieldEditor(b2, TEXT_PROXY);
+        sheetController.selectCell("B3");
+        sheetController.selectCell("B2");
 
-        Assert.assertEquals(
-                driver.findElement(By.xpath(c.cellToXPath("B2") + "/input"))
-                        .getAttribute("value"), TEXT_PROXY);
-        testBench(driver).waitForVaadin();
-        c.selectCell("B5");
-        testBench(driver).waitForVaadin();
-        c.navigateToCell("B100");
-        testBench(driver).waitForVaadin();
+        Assert.assertEquals(TEXT_PROXY, b2.findElement(By.xpath("./input"))
+                .getAttribute("value"));
+        sheetController.selectCell("B5");
+        sheetController.navigateToCell("B100");
 
         Sleeper.sleepTightInSeconds(1);
-        c.navigateToCell("B1");
+        sheetController.navigateToCell("B1");
         Sleeper.sleepTightInSeconds(3);
-        testBench(driver).waitForVaadin();
-        c.selectCell("B2");
 
-        testBench(driver).waitForVaadin();
-        Assert.assertEquals(
-                driver.findElement(By.xpath(c.cellToXPath("B2") + "/input"))
-                        .getAttribute("value"), TEXT_PROXY);
+        b2 = $(SpreadsheetElement.class).first().getCellAt("B2");
+        activateEditorInCell(b2);
+
+        Assert.assertEquals(TEXT_PROXY, b2.findElement(By.xpath("./input"))
+                .getAttribute("value"));
     }
 
     @Test
@@ -112,9 +126,9 @@ public class CustomComponentsTest extends Test1 {
 
         driver.findElement(By.id("b10-btn")).click();
         testBench(driver).waitForVaadin();
-        Assert.assertEquals(c.getCellContent("B11"), "42");
-        Assert.assertEquals(driver.findElement(By.id("b12-label")).getText(),
-                "b12");
+        Assert.assertEquals("42", sheetController.getCellContent("B11"));
+        Assert.assertEquals("b12", driver.findElement(By.id("b12-label"))
+                .getText());
     }
 
 }

@@ -3,7 +3,6 @@ package com.vaadin.addon.spreadsheet.test;
 import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.Test;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 
@@ -50,46 +49,26 @@ public class StyleTest extends Test1 {
         collector.checkThat(c.getCellStyle("C4", "font-style"),
                 equalTo("italic"));
 
-        if (getDesiredCapabilities().getBrowserName()
-                .equalsIgnoreCase("chrome")) {
-            collector.checkThat(c.getCellStyle("B4", "font-weight"),
-                    equalTo("bold"));
-            collector.checkThat(c.getCellStyle("A5", "font-size"),
-                    equalTo("11px"));
-            collector.checkThat(c.getCellStyle("B5", "font-size"),
-                    equalTo("13px"));
-            collector.checkThat(c.getCellStyle("C5", "font-size"),
-                    equalTo("16px"));
-            collector.checkThat(c.getCellStyle("D5", "font-size"),
-                    equalTo("19px"));
-        } else if (getDesiredCapabilities().getBrowserName().equalsIgnoreCase(
-                DesiredCapabilities.internetExplorer().getBrowserName())) {
-            collector.checkThat(c.getCellStyle("B4", "font-weight"),
-                    equalTo("700"));
-            collector.checkThat(c.getCellStyle("A5", "font-size"),
-                    equalTo("10.66px"));
-            collector.checkThat(c.getCellStyle("B5", "font-size"),
-                    equalTo("13.33px"));
-            collector.checkThat(c.getCellStyle("C5", "font-size"),
-                    equalTo("16px"));
-            collector.checkThat(c.getCellStyle("D5", "font-size"),
-                    equalTo("18.66px"));
-        } else {
-            collector.checkThat(c.getCellStyle("B4", "font-weight"),
-                    equalTo("700"));
-            // Pixel to point conversion pixel = points * (16/12), firefox
-            // rounds to
-            // the 4th decimal digit
-            collector.checkThat(c.getCellStyle("A5", "font-size"),
-                    equalTo("10.6667px"));
-            collector.checkThat(c.getCellStyle("B5", "font-size"),
-                    equalTo("13.3333px"));
-            // Assert.assertTrue(Pattern.matches("(13.3333|12)px",
-            // c.getCellStyle("B5", "font-size")));
-            collector.checkThat(c.getCellStyle("C5", "font-size"),
-                    equalTo("16px"));
-            collector.checkThat(c.getCellStyle("D5", "font-size"),
-                    equalTo("18.6667px"));
-        }
+        collector.checkThat(
+                (int) Math.ceil(getSize(c.getCellStyle("A5", "font-size"))),
+                equalTo(11));
+        collector.checkThat(
+                (int) Math.ceil(getSize(c.getCellStyle("B5", "font-size"))),
+                equalTo(14));
+        collector.checkThat(
+                (int) Math.ceil(getSize(c.getCellStyle("C5", "font-size"))),
+                equalTo(16));
+        collector.checkThat(
+                (int) Math.ceil(getSize(c.getCellStyle("D5", "font-size"))),
+                equalTo(19));
+
+        // if (getDesiredCapabilities().getBrowserName()
+        // .equalsIgnoreCase("chrome")) {
+        // collector.checkThat(c.getCellStyle("B4", "font-weight"),
+        // equalTo("300"));
+        // } else {
+        collector
+                .checkThat(c.getCellStyle("B4", "font-weight"), equalTo("700"));
+        // }
     }
 }

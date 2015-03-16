@@ -15,13 +15,16 @@ public class MultipleSheetTest extends Test1 {
     @Test
     public void testMultipleSheet() {
 
-        driver.findElement(By.xpath("//*[@class='col4 row4']")).click();
+        driver.findElement(By.xpath("//div[contains(@class,'col4 row4')]"))
+                .click();
         testBenchElement(
-                driver.findElement(By.xpath("//*[@class='col6 row6']"))).click(
+                driver.findElement(By
+                        .xpath("//div[contains(@class, 'col6 row6')]"))).click(
                 8, 8, Keys.CONTROL);
         testBench(driver).waitForVaadin();
-        c.putCellContent("B2", "sheet0 value");
-        Assert.assertEquals("sheet0 value", c.getCellContent("B2"));
+        sheetController.putCellContent("B2", "sheet0 value");
+        Assert.assertEquals("sheet0 value",
+                sheetController.getCellContent("B2"));
 
         driver.findElement(
                 By.xpath("//*[@id='spreadsheetId']//*[@class='add-new-tab']"))
@@ -30,17 +33,19 @@ public class MultipleSheetTest extends Test1 {
         driver.findElement(By
                 .xpath("//*[@id='spreadsheetId']//*[text()='Sheet1']"));
         testBench(driver).waitForVaadin();
-        Assert.assertEquals("", c.getCellContent("B2"));
+        Assert.assertEquals("", sheetController.getCellContent("B2"));
 
-        c.putCellContent("C3", "sheet1 value");
-        Assert.assertEquals("sheet1 value", c.getCellContent("C3"));
+        sheetController.putCellContent("C3", "sheet1 value");
+        Assert.assertEquals("sheet1 value",
+                sheetController.getCellContent("C3"));
 
         driver.findElement(
-                By.xpath("//*[@id='spreadsheetId']//*[text()='Sheet0']"))
+                By.xpath("//*[@id='spreadsheetId']//*[text()='Sheet1']"))
                 .click();
         testBench(driver).waitForVaadin();
-        Assert.assertEquals("", c.getCellContent("C3"));
-        Assert.assertEquals("sheet0 value", c.getCellContent("B2"));
+        Assert.assertEquals("", sheetController.getCellContent("C3"));
+        Assert.assertEquals("sheet0 value",
+                sheetController.getCellContent("B2"));
     }
 
     @Test
@@ -48,7 +53,7 @@ public class MultipleSheetTest extends Test1 {
         createNewSheet();
         Actions actions = new Actions(driver);
         actions.doubleClick(driver.findElement(By
-                .xpath("//*[@class='sheet-tabsheet-container']//*[text()='Sheet0']")));
+                .xpath("//div[@class='sheet-tabsheet-container']//div[text()='Sheet1']")));
         actions.perform();
         testBench(driver).waitForVaadin();
         driver.findElement(
