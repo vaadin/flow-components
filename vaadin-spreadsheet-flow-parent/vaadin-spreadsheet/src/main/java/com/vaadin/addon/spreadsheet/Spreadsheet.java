@@ -4297,7 +4297,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * This interface can be implemented to provide the comment author name set
      * to new comments in cells.
      */
-    public interface CommentAuthorProvider {
+    public interface CommentAuthorProvider extends Serializable {
 
         /**
          * Gets the author name for a new comment about to be added to the cell

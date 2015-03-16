@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet.elements;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -12,7 +13,7 @@ import org.openqa.selenium.Point;
  * 
  * @author Vaadin Ltd.
  */
-public class AddressUtil {
+public class AddressUtil implements Serializable {
 
     private static final Pattern ADDRESS_RANGE_PATTERN = Pattern
             .compile("([A-Z]+)(\\d+):([A-Z]+)(\\d+)");

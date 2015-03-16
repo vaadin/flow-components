@@ -32,6 +32,7 @@ public class ClassesSerializableTest extends TestCase {
             "com\\.vaadin\\.addon\\.spreadsheet\\.client\\..*", //
             "com\\.vaadin\\.addon\\.spreadsheet\\.test\\..*", //
             "com\\.vaadin\\.addon\\.spreadsheet\\.Spreadsheet\\$SpreadsheetIterator", //
+            "com\\.vaadin\\.addon\\.spreadsheet\\.elements\\..*", //
     };
 
     /**
