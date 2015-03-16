@@ -144,7 +144,7 @@ public class SpreadsheetFactory implements Serializable {
             ((SXSSFWorkbook) workbook).dispose();
         }
         final XSSFWorkbook newWorkbook = new XSSFWorkbook();
-        final Sheet sheet = newWorkbook.createSheet();
+        final Sheet sheet = createNewSheet(newWorkbook);
         spreadsheet.clearSheetServerSide();
         spreadsheet.setInternalWorkbook(newWorkbook);
         generateNewSpreadsheet(spreadsheet, sheet, DEFAULT_ROWS,
