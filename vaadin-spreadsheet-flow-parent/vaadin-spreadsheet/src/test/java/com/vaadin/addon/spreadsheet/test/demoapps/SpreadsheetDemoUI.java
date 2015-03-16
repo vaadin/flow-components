@@ -174,6 +174,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         gridlines.setValue(spreadsheet.isGridlinesVisible());
                         rowColHeadings.setValue(spreadsheet
                                 .isRowColHeadingsVisible());
+                        spreadsheet.createFreezePane(3, 3);
                     }
                 });
 

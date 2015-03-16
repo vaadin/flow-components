@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -589,9 +589,6 @@ public class SelectionWidget extends Composite {
     private int deltaY;
     private int deltaX;
 
-    private int shiftTempCol;
-    private int shiftTempRow;
-
     private boolean scrollTimerRunning;
 
     private int paintcol1;
@@ -951,7 +948,7 @@ public class SelectionWidget extends Composite {
     }
 
     /**
-     * 
+     *
      * @param sizes
      * @param beginIndex
      *            1-based inclusive
@@ -974,7 +971,7 @@ public class SelectionWidget extends Composite {
      * Returns index of the cell that has the left edge closest to the given
      * cursor position. Used for determining how many rows/columns should be
      * painted when the mouse cursor is dragged somewhere.
-     * 
+     *
      * @param cellSizes
      *            the sizes used to calculate
      * @param startIndex
@@ -1025,8 +1022,8 @@ public class SelectionWidget extends Composite {
         initialScrollTop = sheetWidget.sheet.getScrollTop();
         clientX = WidgetUtil.getTouchOrMouseClientX(event);
         clientY = WidgetUtil.getTouchOrMouseClientY(event);
-        shiftTempCol = col2;
-        shiftTempRow = row2;
+        tempCol = col2;
+        tempRow = row2;
         paintMode = true;
         storeEventPos(event);
         DOM.setCapture(getElement());
@@ -1068,9 +1065,13 @@ public class SelectionWidget extends Composite {
         if (decreaseSelection) {
             handler.onSelectionDecreasePainted(paintcol1, paintrow1);
         } else if (increaseSelection) {
-            handler.onSelectionIncreasePainted(Math.min(col1, paintcol1),
-                    Math.max(col2, paintcol2), Math.min(row1, paintrow1),
-                    Math.max(row2, paintrow2));
+            int c1 = Math.min(col1, paintcol1);
+            int c2 = Math.max(col2, paintcol2);
+            int r1 = Math.min(row1, paintrow1);
+            int r2 = Math.max(row2, paintrow2);
+            if (c1 <= c2 && r1 <= r2) {
+                handler.onSelectionIncreasePainted(c1, c2, r1, r2);
+            }
         }
 
         sheetWidget.getElement().removeClassName("selecting");
@@ -1089,6 +1090,8 @@ public class SelectionWidget extends Composite {
         initialScrollTop = sheetWidget.sheet.getScrollTop();
         clientX = WidgetUtil.getTouchOrMouseClientX(event);
         clientY = WidgetUtil.getTouchOrMouseClientY(event);
+        tempCol = col2;
+        tempRow = row2;
         storeEventPos(event);
     }
 
@@ -1205,10 +1208,9 @@ public class SelectionWidget extends Composite {
         boolean scrolled = false;
         if (sheetWidget.sheet.getScrollTop() != 0) {
             boolean mouseOnTopSide = y < scrollPaneTop;
-            if (!crossedDown
-                    && (startCellTopLeft || startCellTopRight)
-                    && sheetWidget.isCellRenderedInFrozenPane(shiftTempCol,
-                            shiftTempRow) && !mouseOnTopSide) {
+            if (!crossedDown && (startCellTopLeft || startCellTopRight)
+                    && sheetWidget.isCellRenderedInFrozenPane(tempCol, tempRow)
+                    && !mouseOnTopSide) {
                 sheetWidget.sheet.setScrollTop(0);
                 sheetWidget.onSheetScroll(null);
                 initialScrollTop = 0;
@@ -1221,10 +1223,9 @@ public class SelectionWidget extends Composite {
         // must be scrolled all the way to the left.
         if (sheetWidget.sheet.getScrollLeft() != 0) {
             boolean mouseOnLeftSide = x < scrollPaneLeft;
-            if (!crossedLeft
-                    && (startCellTopLeft || startCellBottomLeft)
-                    && sheetWidget.isCellRenderedInFrozenPane(shiftTempCol,
-                            shiftTempRow) && !mouseOnLeftSide) {
+            if (!crossedLeft && (startCellTopLeft || startCellBottomLeft)
+                    && sheetWidget.isCellRenderedInFrozenPane(tempCol, tempRow)
+                    && !mouseOnLeftSide) {
                 sheetWidget.sheet.setScrollLeft(0);
                 sheetWidget.onSheetScroll(null);
                 initialScrollLeft = 0;
@@ -1395,7 +1396,8 @@ public class SelectionWidget extends Composite {
             // case 1: shifting inside the selection
             int vDiff = Math.abs(row2 - rowIndex);
             int hDiff = Math.abs(col2 - colIndex);
-            if (vDiff == 0 && hDiff == 0) {
+            // Shifting inside the selection is prohibited in touch mode!
+            if (touchMode || (vDiff == 0 && hDiff == 0)) {
                 setPaintPosition(0, 0, 0, 0);
                 setPaintVisible(false);
                 return;
