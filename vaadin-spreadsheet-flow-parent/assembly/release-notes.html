@@ -477,8 +477,6 @@
     <p>Vaadin Spreadsheet is an add-on for Vaadin Framework which provides Excel spreadsheet editor functionality for any
        Vaadin application.</p>
        
-    <p>Please note that this beta release is a pre-release version of the software. The API should be quite stable, but minor changes are still possible before the final release.</p>
-
     <p>List of known issues is available at the <a href="http://dev.vaadin.com/query?status=accepted&status=assigned&status=designing&status=new&status=reopened&status=reviewing&component=Spreadsheet&col=id&col=summary&col=component&col=status&col=type&col=priority&col=milestone&order=priority">Vaadin Trac</a></p>
     
     <h2 id="package_contents">Package Contents</h2>
@@ -515,44 +513,147 @@
         </tr>
     </table>
 
-	<h2 id="changelog">Change log for Vaadin Spreadsheet @version@</h3>
-	<p>This release includes the following closed issues and fixes:</p>
-	
-	<ul>
-		<li><a href="http://dev.vaadin.com/ticket/17041">#17041</a>Fix selection styles</li>
-		<li><a href="http://dev.vaadin.com/ticket/17005">#17005</a>Selection is not immediately sent</li>
-		<li><a href="http://dev.vaadin.com/ticket/17003">#17003</a>Selected cell is not the first one when selecting whole column or row and using freeze panes</li>
-		<li><a href="http://dev.vaadin.com/ticket/17000">#17000</a>Connector between comment and cell is misplaced</li>
-		<li><a href="http://dev.vaadin.com/ticket/16977">#16977</a>double click on top of cell selection widget open empty input</li>
-		<li><a href="http://dev.vaadin.com/ticket/16956">#16956</a>Deleting rows does not work</li>
-		<li><a href="http://dev.vaadin.com/ticket/16899">#16899</a>Formatted cells should not get scientific notation</li>
-		<li><a href="http://dev.vaadin.com/ticket/16999">#16999</a>ValueChangeEvent not sent immediately when deleting cell content</li>
-		<li><a href="http://dev.vaadin.com/ticket/16928">#16928</a>hidden cells are visible after scrolling</li>
-		<li><a href="http://dev.vaadin.com/ticket/17001">#17001</a>Default context menu shown in freeze panes</li>
-		<li><a href="http://dev.vaadin.com/ticket/16877">#16877</a>Demo: The first screen should contain an editable spreadsheet</li>
-		<li><a href="http://dev.vaadin.com/ticket/16730">#16730</a>Test theme on IE 9-11</li>
-		<li><a href="http://dev.vaadin.com/ticket/16898">#16898</a>The first sheet should be sheet1, not sheet0</li>
-		<li><a href="http://dev.vaadin.com/ticket/16891">#16891</a>Holding the down arrow pressed a while causes a lot of server requests</li>
-		<li><a href="http://dev.vaadin.com/ticket/16980">#16980</a>Spreadsheet cannot be reset if previous contains images</li>
-		<li><a href="http://dev.vaadin.com/ticket/15528">#15528</a>Scroll position jumps while selecting</li>
-		<li><a href="http://dev.vaadin.com/ticket/16779">#16779</a>Control behaviour of autofocus of spreadsheet</li>
-		<li><a href="http://dev.vaadin.com/ticket/16859">#16859</a>Selection widget offset when col/row headers are hidden</li>
-		<li><a href="http://dev.vaadin.com/ticket/16892">#16892</a>Double clicking on one cell and then another causes the value to disappear</li>
-		<li><a href="http://dev.vaadin.com/ticket/16894">#16894</a>Protected cells can be modified</li>
-		<li><a href="http://dev.vaadin.com/ticket/16854">#16854</a>Allow scroll while selecting</li>
-		<li><a href="http://dev.vaadin.com/ticket/15531">#15531</a>Value input broken on IE11</li>
-		<li><a href="http://dev.vaadin.com/ticket/16895">#16895</a>Pressing Enter in a cell to edit it removes the value</li>
-		<li><a href="http://dev.vaadin.com/ticket/16881">#16881</a>cells has 1 px offset to the left</li>
-		<li><a href="http://dev.vaadin.com/ticket/16466">#16466</a>Comment triangle is barely visible when cell is selected or popup button is present</li>
-		<li><a href="http://dev.vaadin.com/ticket/16897">#16897</a>The buttons to scroll the sheet selectors is not really disabled</li>
-		<li><a href="http://dev.vaadin.com/ticket/16883">#16883</a>Pressing space scrolls the spreadsheet</li>
-		<li><a href="http://dev.vaadin.com/ticket/16906">#16906</a>Spreadsheet only renders the cells that are stored in the XLSX file</li>
-		<li><a href="http://dev.vaadin.com/ticket/16791">#16791</a>Cut and Paste is enabled in protected cells</li>
-		<li><a href="http://dev.vaadin.com/ticket/16477">#16477</a>Cell shifting works a bit wrong</li>
-		<li><a href="http://dev.vaadin.com/ticket/16890">#16890</a>Column / row resize should capture mouse events</li>
-		<li><a href="http://dev.vaadin.com/ticket/16778">#16778</a>Context menu not blocking native context menu in Win8.1</li>
-		<li><a href="http://dev.vaadin.com/ticket/16878">#16878</a>Merged cells have display: none;</li>
-		<li><a href="http://dev.vaadin.com/ticket/16755">#16755</a>Col/row resize indicator positions flawed in some cases</li>
+    <h2 id="changelog">Change log for Vaadin Spreadsheet @version@</h3>
+    <p>This release includes the following enhancements and fixes. Please see <a href="http://dev.vaadin.com/query?status=closed&milestone=Spreadsheet+1.0&group=type&max=200&col=id&col=summary&col=milestone&col=status&col=type&col=priority&col=component&order=priority">dev.vaadin.com</a> for a detailed listing.</p>
+
+    <ul>
+      <li><a href="http://dev.vaadin.com/ticket/15221">#15221</a> Support vertical text alignment in spreadsheet cells</li>
+      <li><a href="http://dev.vaadin.com/ticket/15222">#15222</a> Enable support for text indentation inside Spreadsheet cells</li>
+      <li><a href="http://dev.vaadin.com/ticket/15223">#15223</a> Add listener for when user tries to edit locked cell</li>
+      <li><a href="http://dev.vaadin.com/ticket/15224">#15224</a> Selecting cells does not work on touch devices</li>
+      <li><a href="http://dev.vaadin.com/ticket/15249">#15249</a> Reseting spreadsheet with setWorkbook loses cell merge information</li>
+      <li><a href="http://dev.vaadin.com/ticket/15250">#15250</a> Spreadsheet tab row doesn't follow component resizing</li>
+      <li><a href="http://dev.vaadin.com/ticket/15252">#15252</a> Spreadsheet should support copy and paste from and to itself</li>
+      <li><a href="http://dev.vaadin.com/ticket/15292">#15292</a> Add information label for spreadsheet</li>
+      <li><a href="http://dev.vaadin.com/ticket/15429">#15429</a> Add support for Conditional Formatting in XSSF files.</li>
+      <li><a href="http://dev.vaadin.com/ticket/15455">#15455</a> Hidden rows are not handled properly</li>
+      <li><a href="http://dev.vaadin.com/ticket/15518">#15518</a> Invalid col/row resize indicator</li>
+      <li><a href="http://dev.vaadin.com/ticket/15519">#15519</a> Selecting sheets makes sheet selector scroll position jump</li>
+      <li><a href="http://dev.vaadin.com/ticket/15522">#15522</a> Wrong cursor over cells</li>
+      <li><a href="http://dev.vaadin.com/ticket/15523">#15523</a> Clicking bottom square of cell should do nothing</li>
+      <li><a href="http://dev.vaadin.com/ticket/15524">#15524</a> Clicking backspace when a cell is selected should clear the contents</li>
+      <li><a href="http://dev.vaadin.com/ticket/15525">#15525</a> Support select all</li>
+      <li><a href="http://dev.vaadin.com/ticket/15526">#15526</a> Support F2 key</li>
+      <li><a href="http://dev.vaadin.com/ticket/15527">#15527</a> Selection performance is poor</li>
+      <li><a href="http://dev.vaadin.com/ticket/15528">#15528</a> Scroll position jumps while selecting</li>
+      <li><a href="http://dev.vaadin.com/ticket/15530">#15530</a> Invalid filling of values</li>
+      <li><a href="http://dev.vaadin.com/ticket/15531">#15531</a> Value input broken on IE11</li>
+      <li><a href="http://dev.vaadin.com/ticket/15541">#15541</a> Add border support to conditional formatting</li>
+      <li><a href="http://dev.vaadin.com/ticket/15542">#15542</a> Freeze panel borders are not rendered correctly</li>
+      <li><a href="http://dev.vaadin.com/ticket/15543">#15543</a> Images inside freeze panels are rendered incorrectly</li>
+      <li><a href="http://dev.vaadin.com/ticket/16185">#16185</a> calculated value is not shown when dragging formula</li>
+      <li><a href="http://dev.vaadin.com/ticket/16186">#16186</a> wrong formula when dragging a formula value</li>
+      <li><a href="http://dev.vaadin.com/ticket/16213">#16213</a> Ensure a proper directory package is built</li>
+      <li><a href="http://dev.vaadin.com/ticket/16224">#16224</a> API changes based on PO's design</li>
+      <li><a href="http://dev.vaadin.com/ticket/16251">#16251</a> Can't open Popup on single-selected cell</li>
+      <li><a href="http://dev.vaadin.com/ticket/16253">#16253</a> Impossible to reload styles</li>
+      <li><a href="http://dev.vaadin.com/ticket/16254">#16254</a> misplaced input when editing value of cell in frozen row/column</li>
+      <li><a href="http://dev.vaadin.com/ticket/16285">#16285</a> Images are shown in incorrect sheets</li>
+      <li><a href="http://dev.vaadin.com/ticket/16286">#16286</a> Double click on column header should not edit first cell of column</li>
+      <li><a href="http://dev.vaadin.com/ticket/16318">#16318</a> Colors are not updated after calling Spreadsheet.refreshCells</li>
+      <li><a href="http://dev.vaadin.com/ticket/16344">#16344</a> Upgrade to Apache POI 3.11</li>
+      <li><a href="http://dev.vaadin.com/ticket/16400">#16400</a> Review API for row/col parameter ordering</li>
+      <li><a href="http://dev.vaadin.com/ticket/16406">#16406</a> Performance on Firefox unacceptable</li>
+      <li><a href="http://dev.vaadin.com/ticket/16466">#16466</a> Comment triangle is barely visible when cell is selected or popup button is present</li>
+      <li><a href="http://dev.vaadin.com/ticket/16467">#16467</a> Most components do not fit inside standard cell size</li>
+      <li><a href="http://dev.vaadin.com/ticket/16469">#16469</a> selection incorrectly displayed when resizing selected column</li>
+      <li><a href="http://dev.vaadin.com/ticket/16477">#16477</a> Cell shifting works a bit wrong</li>
+      <li><a href="http://dev.vaadin.com/ticket/16478">#16478</a> Images are not removed when changing workbook</li>
+      <li><a href="http://dev.vaadin.com/ticket/16531">#16531</a> Caret position jumps on first edit in FF</li>
+      <li><a href="http://dev.vaadin.com/ticket/16546">#16546</a> Selection hides bg colors and borders</li>
+      <li><a href="http://dev.vaadin.com/ticket/16569">#16569</a> Inserting comment does nothing</li>
+      <li><a href="http://dev.vaadin.com/ticket/16570">#16570</a> Cell shifting changes font size</li>
+      <li><a href="http://dev.vaadin.com/ticket/16574">#16574</a> Hide single ' in front of cell value</li>
+      <li><a href="http://dev.vaadin.com/ticket/16576">#16576</a> Formulas which result into a string value should be left-aligned</li>
+      <li><a href="http://dev.vaadin.com/ticket/16633">#16633</a> Remove setMaxColumns and setMaxRows</li>
+      <li><a href="http://dev.vaadin.com/ticket/16637">#16637</a> add CellValueChangedEvent to spreadsheet</li>
+      <li><a href="http://dev.vaadin.com/ticket/16654">#16654</a> Add callback to cell comment action</li>
+      <li><a href="http://dev.vaadin.com/ticket/16679">#16679</a> Cell style should set line-height in addition to font size</li>
+      <li><a href="http://dev.vaadin.com/ticket/16729">#16729</a> Implement Valo theme for comment and filter popups</li>
+      <li><a href="http://dev.vaadin.com/ticket/16730">#16730</a> Test theme on IE 9-11</li>
+      <li><a href="http://dev.vaadin.com/ticket/16755">#16755</a> Col/row resize indicator positions flawed in some cases</li>
+      <li><a href="http://dev.vaadin.com/ticket/16759">#16759</a> Resetting freeze panes messes up rendering</li>
+      <li><a href="http://dev.vaadin.com/ticket/16761">#16761</a> Cell shifting indicator is at wrong location with freeze panes</li>
+      <li><a href="http://dev.vaadin.com/ticket/16770">#16770</a> Can't start input with q key</li>
+      <li><a href="http://dev.vaadin.com/ticket/16778">#16778</a> Context menu not blocking native context menu in Win8.1</li>
+      <li><a href="http://dev.vaadin.com/ticket/16779">#16779</a> Control behaviour of autofocus of spreadsheet</li>
+      <li><a href="http://dev.vaadin.com/ticket/16783">#16783</a> Spreadheet write to output stream not using the given output stream</li>
+      <li><a href="http://dev.vaadin.com/ticket/16785">#16785</a> Add API to hide spreadsheet tabselector (sheet selector) and formula editors</li>
+      <li><a href="http://dev.vaadin.com/ticket/16791">#16791</a> Cut and Paste is enabled in protected cells</li>
+      <li><a href="http://dev.vaadin.com/ticket/16799">#16799</a> number saved as text</li>
+      <li><a href="http://dev.vaadin.com/ticket/16817">#16817</a> Exception when deleting a multiple selection</li>
+      <li><a href="http://dev.vaadin.com/ticket/16835">#16835</a> CellStyle with no borders breaks the gridlines</li>
+      <li><a href="http://dev.vaadin.com/ticket/16847">#16847</a> Undo delete fails with areas</li>
+      <li><a href="http://dev.vaadin.com/ticket/16854">#16854</a> Allow scroll while selecting</li>
+      <li><a href="http://dev.vaadin.com/ticket/16859">#16859</a> Selection widget offset when col/row headers are hidden</li>
+      <li><a href="http://dev.vaadin.com/ticket/16866">#16866</a> Uncaught client side exception on spreadsheet demo</li>
+      <li><a href="http://dev.vaadin.com/ticket/16877">#16877</a> Demo: The first screen should contain an editable spreadsheet</li>
+      <li><a href="http://dev.vaadin.com/ticket/16881">#16881</a> cells has 1 px offset to the left</li>
+      <li><a href="http://dev.vaadin.com/ticket/16883">#16883</a> Pressing space scrolls the spreadsheet</li>
+      <li><a href="http://dev.vaadin.com/ticket/16890">#16890</a> Column / row resize should capture mouse events</li>
+      <li><a href="http://dev.vaadin.com/ticket/16891">#16891</a> Holding the down arrow pressed a while causes a lot of server requests</li>
+      <li><a href="http://dev.vaadin.com/ticket/16892">#16892</a> Double clicking on one cell and then another causes the value to disappear</li>
+      <li><a href="http://dev.vaadin.com/ticket/16894">#16894</a> Protected cells can be modified</li>
+      <li><a href="http://dev.vaadin.com/ticket/16895">#16895</a> Pressing Enter in a cell to edit it removes the value</li>
+      <li><a href="http://dev.vaadin.com/ticket/16897">#16897</a> The buttons to scroll the sheet selectors is not really disabled</li>
+      <li><a href="http://dev.vaadin.com/ticket/16898">#16898</a> The first sheet should be sheet1, not sheet0</li>
+      <li><a href="http://dev.vaadin.com/ticket/16899">#16899</a> Formatted cells should not get scientific notation</li>
+      <li><a href="http://dev.vaadin.com/ticket/16906">#16906</a> Spreadsheet only renders the cells that are stored in the XLSX file</li>
+      <li><a href="http://dev.vaadin.com/ticket/16907">#16907</a> Use the cell's formatter to parse input, if present</li>
+      <li><a href="http://dev.vaadin.com/ticket/16928">#16928</a> hidden cells are visible after scrolling</li>
+      <li><a href="http://dev.vaadin.com/ticket/16941">#16941</a> Allow scroll while cell shifting</li>
+      <li><a href="http://dev.vaadin.com/ticket/16956">#16956</a> Deleting rows does not work</li>
+      <li><a href="http://dev.vaadin.com/ticket/16966">#16966</a> Server side selection is not working</li>
+      <li><a href="http://dev.vaadin.com/ticket/16977">#16977</a> double click on top of cell selection widget open empty input</li>
+      <li><a href="http://dev.vaadin.com/ticket/16980">#16980</a> Spreadsheet cannot be reset if previous contains images</li>
+      <li><a href="http://dev.vaadin.com/ticket/16999">#16999</a> ValueChangeEvent not sent immediately when deleting cell content</li>
+      <li><a href="http://dev.vaadin.com/ticket/17000">#17000</a> Connector between comment and cell is misplaced</li>
+      <li><a href="http://dev.vaadin.com/ticket/17001">#17001</a> Default context menu shown in freeze panes</li>
+      <li><a href="http://dev.vaadin.com/ticket/17003">#17003</a> Selected cell is not the first one when selecting whole column or row and using freeze panes</li>
+      <li><a href="http://dev.vaadin.com/ticket/17004">#17004</a> Selected cell not shown in current selection</li>
+      <li><a href="http://dev.vaadin.com/ticket/17005">#17005</a> Selection is not immediately sent</li>
+      <li><a href="http://dev.vaadin.com/ticket/17010">#17010</a> Selection cannot be noticeable after style change</li>
+      <li><a href="http://dev.vaadin.com/ticket/17017">#17017</a> There is no way to set the first sheet column and row count</li>
+      <li><a href="http://dev.vaadin.com/ticket/17041">#17041</a> Fix selection styles</li>
+      <li><a href="http://dev.vaadin.com/ticket/17046">#17046</a> Set the cell shifting square bg color translucent</li>
+      <li><a href="http://dev.vaadin.com/ticket/17047">#17047</a> Value is not cleared properly</li>
+      <li><a href="http://dev.vaadin.com/ticket/17048">#17048</a> Make touch areas for cell shift squares larger</li>
+      <li><a href="http://dev.vaadin.com/ticket/17049">#17049</a> In touch mode the initial position of Fill menu is wrong</li>
+      <li><a href="http://dev.vaadin.com/ticket/17083">#17083</a> Merged cells get wrong height</li>
+      <li><a href="http://dev.vaadin.com/ticket/17088">#17088</a> Cell shifting indicator is at wrong location with freeze panes</li>
+      <li><a href="http://dev.vaadin.com/ticket/17097">#17097</a> Cell shifting fails when mouse up is done outside spreadsheet</li>
+      <li><a href="http://dev.vaadin.com/ticket/17099">#17099</a> get cell using CellReference</li>
+      <li><a href="http://dev.vaadin.com/ticket/17104">#17104</a> setSelection* methods allow selecting cells in hidden cols/rows</li>
+      <li><a href="http://dev.vaadin.com/ticket/17105">#17105</a> Editing sheet names in Safari makes makes all other tabs fall down a few pixels</li>
+      <li><a href="http://dev.vaadin.com/ticket/17106">#17106</a> I should be able to start formulas with + instead of =</li>
+      <li><a href="http://dev.vaadin.com/ticket/17107">#17107</a> sheet div scrolls back to top left when selecting in a freeze pane</li>
+      <li><a href="http://dev.vaadin.com/ticket/17109">#17109</a> Cell shifting indicator is at wrong location when current selection is scrolled</li>
+      <li><a href="http://dev.vaadin.com/ticket/17110">#17110</a> Formula bar is cleared sometimes</li>
+      <li><a href="http://dev.vaadin.com/ticket/17111">#17111</a> Hiding first row/column messes up layout</li>
+      <li><a href="http://dev.vaadin.com/ticket/17112">#17112</a> #17111 does not consider freeze panes</li>
+      <li><a href="http://dev.vaadin.com/ticket/17117">#17117</a> duplicate corner square when selecting with freeze pane</li>
+      <li><a href="http://dev.vaadin.com/ticket/17119">#17119</a> Mobile: Can't see selection when selecting with freeze panes and scrolled</li>
+      <li><a href="http://dev.vaadin.com/ticket/17121">#17121</a> Images in sheets are broken</li>
+      <li><a href="http://dev.vaadin.com/ticket/17129">#17129</a> Custom components/editors not rendered in freeze pane</li>
+      <li><a href="http://dev.vaadin.com/ticket/17139">#17139</a> Percentage parsing works wrong on empty cell</li>
+      <li><a href="http://dev.vaadin.com/ticket/17145">#17145</a> Error logged when scrolling with custom components</li>
+      <li><a href="http://dev.vaadin.com/ticket/17157">#17157</a> Touch mode issues</li>
+      <li><a href="http://dev.vaadin.com/ticket/17168">#17168</a> Clientside exception in demo when resizing columns</li>
+      <li><a href="http://dev.vaadin.com/ticket/17175">#17175</a> Resize gets stuck after double click on IE</li>
+      <li><a href="http://dev.vaadin.com/ticket/17177">#17177</a> Safari shows "overflowing" sheet tabs below the visible tabs</li>
+      <li><a href="http://dev.vaadin.com/ticket/17187">#17187</a> Sheet tab container offsets calculated wrong</li>
+  </ul>
+    
+    <h2 id="limitations">Limitations</h2>
+    <p>Vaadin Spreadsheet ${project.version} has the following limitations:</p>
+    
+    <ul>
+      <li>There is no direct support for charts. You can, however, bind data in a spreadsheet to a chart using Vaadin Charts. See <a href="http://demo.vaadin.com/spreadsheet">the demo</a> for an example.</li>
+      <li>There are no provided toolbars or menus for formatting cells.</li>
+      <li>Vaadin Spreadsheet is hevily based on Apache POI and, as such, inherits all limitations of this library. See <a href="http://poi.apache.org/spreadsheet/limitations.html">Apache POI - HSSF and XSSF Limitations</a> for a partial list of these.</li>
+      <li>There is only limited support for the older XLS format. Please use XLSX for a better experience.</li>
+      <li>As Apache POI is used on the server-side, you should be aware that loading XLSX files will eat memory for each session where loaded. Normal cases are no problem, but make sure to take this into account if you allow users to upload Excel files.</li>
+      <li>Rendering performance is not too great on Mozilla Firefox.</li>
     </ul>
     
     <h2 id="dependencies">Third Party Dependencies</h2>
@@ -578,6 +679,12 @@
         <li>Internet Explorer 9, 10, 11</li>
         <li>Latest Mozilla Firefox</li>
         <li>Latest Opera</li>
+        <li>Touch devices, some features missing</li>
+        <ul>
+          <li>Android 4.3+</li>
+          <li>iOS 8+</li>
+          <li>Windows Surface (no touch support, only mouse)</li>
+        </ul>
     </ul>
 </div>
 
