@@ -1473,23 +1473,34 @@ public class SheetWidget extends Panel {
                                 resizing = false;
                             }
                             event.cancel();
-                        } else if (resizing && eventTypeInt == Event.ONMOUSEUP) {
-                            columnResizeCancelled = true;
-                            resizing = false;
-                            jsniUtil.clearCSSRules(resizeStyle);
-                            resizeTooltip.hide();
-                            event.cancel();
-                            if (resizedColumnIndex != -1) {
-                                spreadsheet
-                                        .removeClassName(COLUMN_RESIZING_CLASSNAME);
-                                stopColumnResizeDrag(event.getNativeEvent()
-                                        .getClientX());
-                            } else {
-                                spreadsheet
-                                        .removeClassName(ROW_RESIZING_CLASSNAME);
-                                stopRowResizeDrag(WidgetUtil
-                                        .getTouchOrMouseClientY(event
-                                                .getNativeEvent()));
+                        } else if (eventTypeInt == Event.ONMOUSEUP
+                                && actionHandler.canResize()) {
+                            Element target = nativeEvent.getEventTarget()
+                                    .cast();
+
+                            String className = target.getClassName();
+                            if (resizing
+                                    || className
+                                            .equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)
+                                    || className
+                                            .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
+                                columnResizeCancelled = true;
+                                resizing = false;
+                                jsniUtil.clearCSSRules(resizeStyle);
+                                resizeTooltip.hide();
+                                event.cancel();
+                                if (resizedColumnIndex != -1) {
+                                    spreadsheet
+                                            .removeClassName(COLUMN_RESIZING_CLASSNAME);
+                                    stopColumnResizeDrag(event.getNativeEvent()
+                                            .getClientX());
+                                } else if (resizedRowIndex != -1) {
+                                    spreadsheet
+                                            .removeClassName(ROW_RESIZING_CLASSNAME);
+                                    stopRowResizeDrag(WidgetUtil
+                                            .getTouchOrMouseClientY(event
+                                                    .getNativeEvent()));
+                                }
                             }
                         } else if (eventTypeInt == Event.ONDBLCLICK
                                 && actionHandler.canResize()) {
