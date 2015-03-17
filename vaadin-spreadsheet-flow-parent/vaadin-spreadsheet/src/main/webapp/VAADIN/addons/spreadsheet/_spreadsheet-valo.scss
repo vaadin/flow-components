@@ -723,9 +723,11 @@
 				cursor: pointer;
 				display: inline-block;
 				height: $spreadsheet-bottom-bar-height;
-				position: relative;
+				position: absolute;
 				width: $spreadsheet-tab-action-button-width * 5;
 				z-index: 60;
+				left: 0;
+				top: 0;
 				
 				div {
 					line-height: $spreadsheet-bottom-bar-height + $spreadsheet-border-width;
@@ -780,6 +782,7 @@
 				margin-right: $spreadsheet-status-label-width + $spreadsheet-field-padding + $spreadsheet-border-width;
 				height: $spreadsheet-tab-height + 2 * $spreadsheet-tab-padding-vertical + $spreadsheet-border-width;
 				overflow: hidden;
+				white-space: nowrap;
 				
 				.sheet-tabsheet-tab {
 					font-family: $spreadsheet-base-font-family;

@@ -711,9 +711,11 @@ $cell-comment-border-color: #A7A7A7 !default;
 				cursor: pointer;
 				display: inline-block;
 				height: 28px;
-				position: relative;
-				width: 140px;
+				position: absolute;
+				width: 130px;
 				z-index: 60;
+				left: 0;
+				top: 0;
 				
 				div {
 					cursor: pointer;
@@ -775,6 +777,7 @@ $cell-comment-border-color: #A7A7A7 !default;
 				-webkit-transition: margin-left 200ms;
 				-moz-transition: margin-left 200ms;
 				transition: margin-left 200ms;
+				white-space: nowrap;
 				
 				.sheet-tabsheet-tab {
 					font-family: $spreadsheet-base-font-family;

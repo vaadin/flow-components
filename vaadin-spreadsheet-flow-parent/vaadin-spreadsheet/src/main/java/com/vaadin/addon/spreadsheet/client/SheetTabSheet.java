@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -252,7 +252,7 @@ public class SheetTabSheet extends Widget {
 
     /**
      * Sets the content of the info label.
-     * 
+     *
      * @param value
      *            the new content. Can not be HTML.
      */
@@ -298,17 +298,16 @@ public class SheetTabSheet extends Widget {
     }
 
     private int getTabVisibleWithScrollIndex(int tabIndex) {
-        int tempWidth = root.getOffsetWidth() - 86; // left margin
+        int tempWidth = root.getOffsetWidth()
+                - ((Element) options.cast()).getOffsetWidth();
         if (!infoLabel.getStyle().getDisplay().equals("none")) {
-            tempWidth -= 206; // right margin
+            tempWidth -= ((Element) infoLabel.cast()).getOffsetWidth();
         }
-        tempWidth -= ((Element) tabs.get(tabIndex).cast()).getOffsetWidth();
+        tempWidth -= getTabWidth(tabIndex);
 
-        while (tabIndex > 0
-                && (tempWidth - ((Element) tabs.get(tabIndex - 1).cast())
-                        .getOffsetWidth()) > 0) {
+        while (tabIndex > 0 && tempWidth - getTabWidth(tabIndex - 1) > 0) {
             tabIndex--;
-            tempWidth -= ((Element) tabs.get(tabIndex).cast()).getOffsetWidth();
+            tempWidth -= getTabWidth(tabIndex);
         }
         return tabIndex;
     }
@@ -330,8 +329,7 @@ public class SheetTabSheet extends Widget {
         int selectedTabAbsoluteRight = selectedTab.getAbsoluteRight() + 10;
         while (selectedTabAbsoluteRight > rootAbsoluteRight
                 && tabScrollIndex < (tabs.length() - 1)) {
-            int width = ((Element) tabs.get(tabScrollIndex).cast())
-                    .getOffsetWidth();
+            int width = getTabWidth(tabScrollIndex);
             selectedTabAbsoluteRight -= width;
             tabScrollMargin -= width;
             tabScrollIndex++;
@@ -451,7 +449,7 @@ public class SheetTabSheet extends Widget {
     }
 
     /**
-     * 
+     *
      * @param sheetIndex
      *            1-based
      */
