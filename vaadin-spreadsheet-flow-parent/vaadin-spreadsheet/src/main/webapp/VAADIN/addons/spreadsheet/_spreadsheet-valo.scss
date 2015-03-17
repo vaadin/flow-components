@@ -772,11 +772,14 @@
 			}
 
 			.sheet-tabsheet-container {
+				@include transition(margin-left 200ms);
 				display: inline-block;
 				left: $spreadsheet-tab-action-button-width * 5;
 				position: absolute;
 				z-index: inherit;
 				margin-right: $spreadsheet-status-label-width + $spreadsheet-field-padding + $spreadsheet-border-width;
+				height: $spreadsheet-tab-height + 2 * $spreadsheet-tab-padding-vertical + $spreadsheet-border-width;
+				overflow: hidden;
 				
 				.sheet-tabsheet-tab {
 					font-family: $spreadsheet-base-font-family;

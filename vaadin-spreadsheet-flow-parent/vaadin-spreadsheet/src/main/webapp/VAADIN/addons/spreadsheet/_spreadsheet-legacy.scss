@@ -770,6 +770,11 @@ $cell-comment-border-color: #A7A7A7 !default;
 				position: absolute;
 				z-index: inherit;
 				margin-right: 206px;
+				height: 25px;
+				overflow: hidden;
+				-webkit-transition: margin-left 200ms;
+				-moz-transition: margin-left 200ms;
+				transition: margin-left 200ms;
 				
 				.sheet-tabsheet-tab {
 					font-family: $spreadsheet-base-font-family;
