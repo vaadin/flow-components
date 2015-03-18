@@ -463,12 +463,10 @@ public class SheetTabSheet extends Widget {
         selectedTab.addClassName(SELECTED_TAB_CLASSNAME);
         if (tabScrollIndex > selectedTabIndex) {
             setFirstVisibleTab(selectedTabIndex);
-        } else {
-            if (root.getAbsoluteBottom() < selectedTab.getAbsoluteBottom()
-                    && !editing) {
-                int tempIndex = getTabVisibleWithScrollIndex(selectedTabIndex);
-                setFirstVisibleTab(tempIndex);
-            }
+        } else if (root.getAbsoluteRight() < selectedTab.getAbsoluteRight()
+                && !editing) {
+            int tempIndex = getTabVisibleWithScrollIndex(selectedTabIndex);
+            setFirstVisibleTab(tempIndex);
         }
     }
 
