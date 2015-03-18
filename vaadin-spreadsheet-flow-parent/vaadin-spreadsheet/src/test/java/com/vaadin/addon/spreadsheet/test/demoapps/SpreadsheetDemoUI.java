@@ -491,6 +491,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         private final ComboBox comboBox;
 
+        private boolean initializingComboBoxValue;
+
         private Button button;
 
         private Button button2;
@@ -592,17 +594,20 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
                 @Override
                 public void valueChange(ValueChangeEvent event) {
-                    String s = (String) comboBox.getValue();
-                    CellReference cr = spreadsheet.getSelectedCellReference();
-                    Cell cell = spreadsheet.getCell(cr.getRow(), cr.getCol());
-                    if (cell != null) {
-                        cell.setCellValue(s);
-                        spreadsheet.refreshCells(cell);
+                    if (!initializingComboBoxValue) {
+                        String s = (String) comboBox.getValue();
+                        CellReference cr = spreadsheet
+                                .getSelectedCellReference();
+                        Cell cell = spreadsheet.getCell(cr.getRow(),
+                                cr.getCol());
+                        if (cell != null) {
+                            cell.setCellValue(s);
+                            spreadsheet.refreshCells(cell);
+                        }
                     }
                 }
             });
             comboBox.setWidth("100%");
-            // comboBox.setWidth("100px");
 
             dateField.setImmediate(true);
             dateField.addValueChangeListener(new ValueChangeListener() {
@@ -697,11 +702,12 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 return;
             }
             if (customEditor.equals(comboBox)) {
-
+                initializingComboBoxValue = true;
                 String stringCellValue = cell != null ? cell
                         .getStringCellValue() : null;
                 comboBox.setValue(stringCellValue);
                 comboBox.setWidth("100%");
+                initializingComboBoxValue = false;
             }
 
             if (cell != null) {

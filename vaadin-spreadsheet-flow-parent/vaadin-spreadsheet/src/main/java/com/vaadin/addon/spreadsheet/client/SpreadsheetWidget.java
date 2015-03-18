@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -48,7 +48,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public interface SheetContextMenuHandler {
         /**
          * Right click (event) on top of the cell at the indexes.
-         * 
+         *
          * @param event
          *            the browser event related (right mouse button click)
          * @param column
@@ -60,7 +60,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
         /**
          * Right click (event) on top of row header at the index
-         * 
+         *
          * @param nativeEvent
          * @param rowIndex
          *            1-based
@@ -69,7 +69,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
         /**
          * Right click (event) on top of column header at the index
-         * 
+         *
          * @param nativeEvent
          * @param columnIndex
          *            1-based
@@ -185,7 +185,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     /**
      * Sets the content of the info label.
-     * 
+     *
      * @param value
      *            the new content. Can not be HTML.
      */
@@ -250,7 +250,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     /**
-     * 
+     *
      * @param sheetIndex
      *            0-based index of the sheet to load
      */
@@ -603,6 +603,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         cellLocked = sheetWidget.isCellLocked(column, row);
         if (!customCellEditorDisplayed) {
             formulaBarWidget.setFormulaFieldEnabled(!cellLocked);
+        } else {
+            sheetWidget.displayCustomCellEditor(customEditorFactory
+                    .getCustomEditor(sheetWidget.getSelectedCellKey()));
         }
         formulaBarWidget.setSelectedCellAddress(createCellAddress(column, row));
     }
@@ -1302,7 +1305,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     /**
-     * 
+     *
      * @param value
      */
     private void doDeferredCellValueCommit(final String value) {
@@ -1621,7 +1624,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /**
      * This can contain values for any of the panes or values that are just in
      * the client side cache, but the cell is not actually visible.
-     * 
+     *
      * @param updatedCellData
      */
     public void cellValuesUpdated(ArrayList<CellData> updatedCellData) {
