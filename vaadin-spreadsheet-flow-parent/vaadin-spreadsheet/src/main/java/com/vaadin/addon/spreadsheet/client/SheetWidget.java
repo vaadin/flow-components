@@ -3204,6 +3204,8 @@ public class SheetWidget extends Panel {
         }
         String key = toKey(region.col1, region.row1);
         MergedCell mergedCell = new MergedCell(this, region.col1, region.row1);
+        mergedCell.setValue(getCellValue(region.col1, region.row1),
+                getCell(region.col1, region.row1).getCellStyle(), false);
         DivElement element = mergedCell.getElement();
         element.addClassName(MERGED_CELL_CLASSNAME);
         updateMergedRegionRegionSize(region, mergedCell);
@@ -3350,6 +3352,9 @@ public class SheetWidget extends Panel {
     public void removeMergedRegion(MergedRegion region, int ruleIndex) {
         String key = toKey(region.col1, region.row1);
         jsniUtil.deleteRule(mergedRegionStyle, ruleIndex);
+        MergedCell mCell = mergedCells.get(region.id);
+        getCell(region.col1, region.row1).setValue(mCell.getValue(),
+                mCell.getCellStyle(), false);
         mergedCells.remove(region.id).getElement().removeFromParent();
         overflownMergedCells.remove(region);
         // paint new "released cells" as selected
