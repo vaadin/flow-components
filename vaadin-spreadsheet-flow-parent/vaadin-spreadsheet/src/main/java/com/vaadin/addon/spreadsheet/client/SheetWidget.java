@@ -3353,8 +3353,11 @@ public class SheetWidget extends Panel {
         String key = toKey(region.col1, region.row1);
         jsniUtil.deleteRule(mergedRegionStyle, ruleIndex);
         MergedCell mCell = mergedCells.get(region.id);
-        getCell(region.col1, region.row1).setValue(mCell.getValue(),
-                mCell.getCellStyle(), false);
+        Cell originalCell = getCell(region.col1, region.row1);
+        if (originalCell != null) {
+            originalCell
+                    .setValue(mCell.getValue(), mCell.getCellStyle(), false);
+        }
         mergedCells.remove(region.id).getElement().removeFromParent();
         overflownMergedCells.remove(region);
         // paint new "released cells" as selected
@@ -4471,7 +4474,6 @@ public class SheetWidget extends Panel {
     private Cell getFrozenCell(int col, int row) {
         int colArrayIndex = col - 1;
         int rowArrayIndex = row - 1;
-
         if (rowArrayIndex < 0 || colArrayIndex < 0) {
             return null;
         }
