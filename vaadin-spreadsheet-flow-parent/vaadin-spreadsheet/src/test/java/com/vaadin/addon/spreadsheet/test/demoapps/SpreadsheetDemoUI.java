@@ -21,7 +21,6 @@ import org.apache.poi.ss.usermodel.ExcelStyleDateFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -415,18 +414,18 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     }
 
     private void printSelectionChangeEventContents(SelectionChangeEvent event) {
-        System.out.println("Selected cell: "
-                + event.getSelectedCellReference().toString());
-        System.out.println("Merged region: "
-                + event.getSelectedCellMergedRegion());
-        System.out.println("Ranges:");
-        for (CellRangeAddress range : event.getCellRangeAddresses()) {
-            System.out.println(range.toString());
-        }
-        System.out.println("Individual Cells:");
-        for (CellReference cell : event.getIndividualSelectedCells()) {
-            System.out.println(cell.toString());
-        }
+        // System.out.println("Selected cell: "
+        // + event.getSelectedCellReference().toString());
+        // System.out.println("Merged region: "
+        // + event.getSelectedCellMergedRegion());
+        // System.out.println("Ranges:");
+        // for (CellRangeAddress range : event.getCellRangeAddresses()) {
+        // System.out.println(range.toString());
+        // }
+        // System.out.println("Individual Cells:");
+        // for (CellReference cell : event.getIndividualSelectedCells()) {
+        // System.out.println(cell.toString());
+        // }
     }
 
     private void loadFile(File file) {

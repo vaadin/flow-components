@@ -209,6 +209,29 @@
 				text-align: center;
 				background: $spreadsheet-address-field-background;
 			}
+			
+			.functionfield {
+				font: 400 14px/1.55 Helvetica;
+			}
+			
+			.formulaoverlay {
+			
+				// Replicate input style
+				
+				font: 400 14px/1.55 Helvetica;
+				position: absolute;
+				top: 3px;
+				left: 181px;
+				pointer-events: none;
+				
+				//transparent
+				color: rgba(0,0,0,0);
+					
+				span {
+					border-radius: 2px;
+				}
+			}
+			
 		}
 		
 		

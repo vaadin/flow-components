@@ -160,6 +160,32 @@ $cell-comment-border-color: #A7A7A7 !default;
 				text-align: center;
 				background: $address-field-background;
 			}
+			
+			
+			.functionfield {
+				font: normal normal normal 11px/normal Arial;
+				font-size: 14px;
+			}
+			
+			.formulaoverlay {
+				
+				// Replicate input style
+				
+				font: normal normal normal 11px/normal Arial;
+				position: absolute;
+				top: 6px;
+				left: 181px;
+				font-size: 14px;
+				pointer-events: none;
+				padding-left: 4px;
+				
+				//transparent 
+				color: rgba(0,0,0,0);
+					
+				span {
+					border-radius: 2px;
+				}
+			}
 		}
 		
 		

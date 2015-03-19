@@ -8,38 +8,134 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.vaadin.addon.spreadsheet.client.SheetWidget.CellCoord;
 
 public class FormulaBarWidget extends Composite {
 
+    private static final List<String> formulaColors;
+
+    static {
+
+        formulaColors = new ArrayList<String>();
+
+        formulaColors.add("rgba(48, 144, 240,0.4)");
+        formulaColors.add("rgba(236, 100, 100,0.4)");
+        formulaColors.add("rgba(152, 223, 88,0.4)");
+        formulaColors.add("rgba(249, 221, 81,0.4)");
+        formulaColors.add("rgba(36, 220, 212,0.4)");
+        formulaColors.add("rgba(236, 100, 165,0.4)");
+        formulaColors.add("rgba(104, 92, 176,0.4)");
+        formulaColors.add("rgba(255, 125, 66,0.4)");
+        formulaColors.add("rgba(51, 97, 144,0.4)");
+        formulaColors.add("rgba(170, 81, 77,0.4)");
+        formulaColors.add("rgba(127, 176, 83,0.4)");
+        formulaColors.add("rgba(187, 168, 91,0.4)");
+        formulaColors.add("rgba(36, 121, 129,0.4)");
+        formulaColors.add("rgba(150, 57, 112,0.4)");
+        formulaColors.add("rgba(75, 86, 168,0.4)");
+        formulaColors.add("rgba(154, 89, 61,0.4)");
+    }
+
     private final TextBox formulaField;
     private final TextBox addressField;
+    private final Element formulaOverlay = DOM.createDiv();
 
     private String cachedAddressFieldValue;
     private String cachedFunctionFieldValue;
 
     private final FormulaBarHandler handler;
 
-    public FormulaBarWidget(FormulaBarHandler selectionManager) {
+    // editing control
+    private boolean editingFormula;
+    private boolean enableKeyboardNavigation;
+    private TextBox currentEditor;
+
+    private SheetInputEventListener sheetInputEventListener;
+
+    /**
+     * Caret position where the formula starts
+     */
+    private int formulaStartPos = -1;
+
+    /**
+     * Last known position of the caret
+     */
+    private int formulaLastKnownPos = -1;
+
+    /**
+     * the index that moves on keypress
+     */
+    private int formulaKeyboardSelectionEndCol = -1;
+    /**
+     * the index that moves on keypress
+     */
+    private int formulaKeyboardSelectionEndRow = -1;
+
+    /**
+     * the index that anchors shift-selected ranges
+     */
+    private int formulaKeyboardSelectionStartCol = -1;
+    /**
+     * the index that anchors shift-selected ranges
+     */
+    private int formulaKeyboardSelectionStartRow = -1;
+
+    private List<MergedRegion> formulaCellReferences = new ArrayList<MergedRegion>();
+    /**
+     * Holder for cells that are being selected for a formula.
+     */
+    private HashSet<Cell> paintedFormulaCells = new HashSet<Cell>();
+
+    private Map<CellCoord, String> paintedFormulaCellCoords = new HashMap<CellCoord, String>();
+
+    /**
+     * SheetWidget owns this widget.
+     */
+    private TextBox inlineEditor;
+
+    private SheetWidget widget;
+
+    public FormulaBarWidget(FormulaBarHandler selectionManager,
+            SheetWidget widget) {
         handler = selectionManager;
+        this.widget = widget;
+
+        inlineEditor = widget.getInlineEditor();
+
+        sheetInputEventListener = GWT.create(SheetInputEventListener.class);
+        sheetInputEventListener.setSheetWidget(widget, this);
+
         formulaField = new TextBox();
         formulaField.setTabIndex(2);
         addressField = new TextBox();
@@ -62,6 +158,75 @@ public class FormulaBarWidget extends Composite {
         setStyleName("functionbar");
 
         initListeners();
+
+        formulaOverlay.setClassName("formulaoverlay");
+        getElement().appendChild(formulaOverlay);
+    }
+
+    /**
+     * Removes all keyboard selection variables, clears paint
+     */
+    public void clearFormulaSelection() {
+        formulaKeyboardSelectionEndCol = -1;
+        formulaKeyboardSelectionEndRow = -1;
+        formulaKeyboardSelectionStartCol = -1;
+        formulaKeyboardSelectionStartRow = -1;
+        clearFormulaSelectedCells();
+    }
+
+    public void moveFormulaCellSelection(boolean shiftPressed, boolean up,
+            boolean right, boolean down) {
+
+        if (!isEditingFormula()) {
+            return;
+        }
+
+        // starting point, use old if available
+        if (formulaKeyboardSelectionEndCol == -1) {
+            formulaKeyboardSelectionEndCol = widget.getSelectedCellColumn();
+            formulaKeyboardSelectionEndRow = widget.getSelectedCellRow();
+        }
+
+        if (up) {
+            formulaKeyboardSelectionEndRow--;
+        } else if (right) {
+            formulaKeyboardSelectionEndCol++;
+        } else if (down) {
+            formulaKeyboardSelectionEndRow++;
+        } else {
+            formulaKeyboardSelectionEndCol--;
+        }
+
+        // sheet bounds
+        if (formulaKeyboardSelectionEndRow == 0) {
+            formulaKeyboardSelectionEndRow = 1;
+        }
+        if (formulaKeyboardSelectionEndCol == 0) {
+            formulaKeyboardSelectionEndCol = 1;
+        }
+        int[] range = widget.getSheetDisplayRange();
+        if (formulaKeyboardSelectionEndRow > range[2] - 1) {
+            formulaKeyboardSelectionEndRow = range[2] - 1;
+        }
+        if (formulaKeyboardSelectionEndCol > range[3] - 1) {
+            formulaKeyboardSelectionEndCol = range[3] - 1;
+        }
+
+        // check for single or range selection
+        if (shiftPressed && formulaKeyboardSelectionStartCol != -1) {
+            // keep start, unless its empty
+        } else {
+            formulaKeyboardSelectionStartCol = formulaKeyboardSelectionEndCol;
+            formulaKeyboardSelectionStartRow = formulaKeyboardSelectionEndRow;
+        }
+
+        setFormulaCellRange(formulaKeyboardSelectionStartCol,
+                formulaKeyboardSelectionStartRow,
+                formulaKeyboardSelectionEndCol, formulaKeyboardSelectionEndRow);
+
+        // make sure current selection is visible
+        widget.scrollCellIntoView(formulaKeyboardSelectionEndCol,
+                formulaKeyboardSelectionEndRow);
     }
 
     private void initListeners() {
@@ -93,28 +258,51 @@ public class FormulaBarWidget extends Composite {
             }
         });
         Event.sinkEvents(formulaField.getElement(), Event.KEYEVENTS
-                | Event.FOCUSEVENTS);
+                | Event.FOCUSEVENTS | Event.ONMOUSEUP);
         Event.setEventListener(formulaField.getElement(), new EventListener() {
 
             @Override
             public void onBrowserEvent(Event event) {
                 switch (event.getTypeInt()) {
                 case Event.ONFOCUS:
-                    handler.setSheetFocused(true);
-                    cachedFunctionFieldValue = formulaField.getValue();
-                    handler.onFormulaFieldFocus(cachedFunctionFieldValue);
+
+                    // if we move focus from inline editor to here, swap the
+                    // editor
+                    if (editingFormula && currentEditor == inlineEditor) {
+                        editingFormula = false;
+                        checkFormulaEdit(formulaField);
+
+                    } else {
+                        handler.setSheetFocused(true);
+                        cachedFunctionFieldValue = formulaField.getValue();
+                        handler.onFormulaFieldFocus(cachedFunctionFieldValue);
+                        checkFormulaEdit(formulaField);
+                    }
                     break;
                 case Event.ONBLUR:
-                    handler.setSheetFocused(false);
-                    handler.onFormulaFieldBlur(formulaField.getValue());
+
+                    // temporary blur (cell selection)?
+                    if (!editingFormula) {
+                        handler.setSheetFocused(false);
+                        handler.onFormulaFieldBlur(formulaField.getValue());
+                    }
                     break;
                 case Event.ONKEYDOWN:
                     handleFunctionFieldKeyDown(event);
                     break;
                 case Event.ONPASTE:
                 case Event.ONKEYPRESS:
+
+                    checkKeyboardNavigation();
+                    updateEditorCaretPos(true);
+
                     scheduleFormulaValueUpdate();
+
                     break;
+                case Event.ONMOUSEUP:
+                    if (editingFormula) {
+                        updateEditorCaretPos(true);
+                    }
                 default:
                     break;
                 }
@@ -122,6 +310,155 @@ public class FormulaBarWidget extends Composite {
 
         });
     }
+
+    /**
+     * Checks the char before the current caret pos, and enables or disables
+     * keyboard selection of cells accordingly.
+     */
+    public void checkKeyboardNavigation() {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+
+                if (!isEditingFormula()) {
+                    return;
+                }
+
+                String value = currentEditor.getValue();
+                int cursorPos = currentEditor.getCursorPos();
+                char c = value.charAt(cursorPos - 1);
+
+                enableKeyboardNavigation = false;
+
+                if (c == '(' || c == '+' || c == '-' || c == '/' || c == '*') {
+                    enableKeyboardNavigation = true;
+
+                } else if (c == '=') {
+                    // better UX: check if user forgot to add '=' and now adds
+                    // it to the beginning of the val
+                    if (value.length() == 1) {
+                        enableKeyboardNavigation = true;
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Adds a selection range to the current formula
+     */
+    public void addFormulaCellRange(int col1, int row1, int col2, int row2) {
+        setFormulaCellRange(col1, row1, col2, row2, true);
+    }
+
+    /**
+     * Set a cell range in the formula. If the user hasn't moved the caret after
+     * last call, replace the value instead.
+     */
+    public void setFormulaCellRange(int col1, int row1, int col2, int row2) {
+        setFormulaCellRange(col1, row1, col2, row2, false);
+    }
+
+    /**
+     * Set a cell range in the formula. If the user hasn't moved the caret after
+     * last call, replace the value instead.
+     */
+    private void setFormulaCellRange(int col1, int row1, int col2, int row2,
+            boolean add) {
+
+        String cellRange;
+        if (col1 == col2 && row1 == row2) {
+            cellRange = handler.createCellAddress(col1, row1);
+        } else {
+
+            // swap so that smaller indexes are first
+            int temp;
+            if (col1 > col2) {
+                temp = col1;
+                col1 = col2;
+                col2 = temp;
+            }
+            if (row1 > row2) {
+                temp = row1;
+                row1 = row2;
+                row2 = temp;
+            }
+
+            cellRange = handler.createCellAddress(col1, row1) + ":"
+                    + handler.createCellAddress(col2, row2);
+        }
+
+        if (add && formulaStartPos >= 0) {
+
+            // POI always uses comma, http://dev.vaadin.com/ticket/17223
+            cellRange = "," + cellRange;
+            formulaLastKnownPos++;
+        }
+
+        final int startPos;
+        int endPos;
+
+        int selectionLength = currentEditor.getSelectionLength();
+        boolean rangeSelected = selectionLength > 0;
+
+        if (rangeSelected) {
+            // replace whatever was selected
+            startPos = currentEditor.getCursorPos();
+            endPos = startPos + selectionLength;
+
+            formulaStartPos = startPos;
+            formulaLastKnownPos = endPos;
+        } else if (add || formulaStartPos < 0) {
+            // not editing cell range, or ctrl key pressed. Insert.
+            startPos = formulaLastKnownPos;
+            endPos = formulaLastKnownPos;
+
+            formulaStartPos = formulaLastKnownPos;
+        } else {
+            // currently editing cell range, replace old reference
+            startPos = formulaStartPos;
+            endPos = formulaLastKnownPos;
+        }
+
+        String val = currentEditor.getValue();
+        String sub1 = val.substring(0, startPos);
+        String sub2 = val.substring(endPos, val.length());
+        val = sub1 + cellRange + sub2;
+
+        formulaLastKnownPos = (sub1 + cellRange).length();
+
+        currentEditor.setValue(val);
+
+        // synchronize to other editor too
+        if (currentEditor == inlineEditor) {
+            formulaField.setValue(val);
+        }
+
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                currentEditor.setFocus(true);
+
+                // not GWT attached, use JSNI
+                setSelectionRange(currentEditor.getElement(),
+                        formulaLastKnownPos, 0);
+
+                parseAndPaintCellRefs(currentEditor.getValue());
+            }
+        });
+
+    }
+
+    private native void setSelectionRange(Element elem, int pos, int length)
+    /*-{
+        try {
+          elem.setSelectionRange(pos, pos + length);
+        } catch (e) {
+          // Firefox throws exception if TextBox is not visible, even if attached
+        }
+    }-*/;
 
     private void scheduleFormulaValueUpdate() {
 
@@ -157,23 +494,302 @@ public class FormulaBarWidget extends Composite {
         case KeyCodes.KEY_BACKSPACE:
             scheduleFormulaValueUpdate();
             break;
+        case KeyCodes.KEY_ESCAPE:
+            formulaField.setValue(cachedFunctionFieldValue);
+            handler.onFormulaEsc();
+            stopEditing();
+            event.stopPropagation();
+            event.preventDefault();
+            break;
         case KeyCodes.KEY_ENTER:
             handler.onFormulaEnter(formulaField.getValue());
+            stopEditing();
             event.stopPropagation();
             event.preventDefault();
             break;
         case KeyCodes.KEY_TAB:
             handler.onFormulaTab(formulaField.getValue(), !event.getShiftKey());
+            stopEditing();
             event.stopPropagation();
             break;
-        case KeyCodes.KEY_ESCAPE:
-            formulaField.setValue(cachedFunctionFieldValue);
-            handler.onFormulaEsc();
-            event.stopPropagation();
-            event.preventDefault();
+
+        case KeyCodes.KEY_UP:
+            if (isEditingFormula() && enableKeyboardNavigation) {
+                moveFormulaCellSelection(event.getShiftKey(), true, false,
+                        false);
+                event.preventDefault();
+            }
+            break;
+        case KeyCodes.KEY_RIGHT:
+            if (isEditingFormula() && enableKeyboardNavigation) {
+                moveFormulaCellSelection(event.getShiftKey(), false, true,
+                        false);
+                event.preventDefault();
+            }
+            break;
+        case KeyCodes.KEY_DOWN:
+            if (isEditingFormula() && enableKeyboardNavigation) {
+                moveFormulaCellSelection(event.getShiftKey(), false, false,
+                        true);
+                event.preventDefault();
+            }
+            break;
+        case KeyCodes.KEY_LEFT:
+            if (isEditingFormula() && enableKeyboardNavigation) {
+                moveFormulaCellSelection(event.getShiftKey(), false, false,
+                        false);
+                event.preventDefault();
+            }
+            break;
+
         default:
+            checkFormulaEdit(formulaField);
             break;
         }
+
+        if (currentEditor != null) {
+            updateEditorCaretPos(false);
+            updateFormulaSelectionStyles();
+        }
+    }
+
+    private void stopEditing() {
+        editingFormula = false;
+        currentEditor = null;
+        formulaLastKnownPos = -1;
+        formulaStartPos = -1;
+        clearFormulaSelection();
+
+    }
+
+    private void checkFormulaEdit(final TextBox editor) {
+
+        // give text box time to fill value
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+
+                if (!editingFormula) {
+
+                    String val = editor.getValue();
+                    if (val.startsWith("=") || val.startsWith("+")) {
+                        editingFormula = true;
+                        currentEditor = editor;
+
+                        parseAndPaintCellRefs(val);
+                        checkForCoordsAtCaret();
+
+                    }
+
+                }
+            }
+        });
+    }
+
+    /**
+     * Parses formula to see if the caret has landed on a cell reference. Sets
+     * {@link #formulaLastKnownPos} and {@link #formulaStartPos} if it has.
+     */
+    private void checkForCoordsAtCaret() {
+
+        String val = currentEditor.getValue();
+
+        // count unescaped quote chars to see if caret is inside string literal
+        int caretPos = currentEditor.getCursorPos();
+        // scan backward
+        int numQuotes = 0;
+        while (caretPos >= 0) {
+            caretPos--;
+
+            char c = val.charAt(caretPos);
+            char d = val.charAt(caretPos - 1);
+
+            if (c == '"' && d != '\\') {
+                numQuotes++;
+            }
+        }
+
+        if (numQuotes % 2 == 1) {
+            // caret is inside a quoted string, no cell refs here.
+            return;
+        }
+
+        // Find next not-matching char before and after caret, and try to match
+        // section inbetween.
+
+        int start = -1, end = -1;
+
+        caretPos = currentEditor.getCursorPos();
+        // scan back
+        boolean run = true;
+        while (run || caretPos <= 0) {
+            caretPos--;
+            char c = val.charAt(caretPos);
+            if (String.valueOf(c).matches("[^A-z0-9:]")) {
+                start = caretPos + 1;
+                run = false;
+                break;
+            }
+        }
+
+        caretPos = currentEditor.getCursorPos();
+        // scan forward
+        run = true;
+        while (run || caretPos > val.length()) {
+            char c = val.charAt(caretPos);
+            if (String.valueOf(c).matches("[^A-z0-9:]")) {
+                end = caretPos;
+                run = false;
+                break;
+            }
+            caretPos++;
+        }
+
+        String sub = val.substring(start, end);
+
+        if (isCell(sub)) {
+            formulaStartPos = start;
+            formulaLastKnownPos = end;
+        }
+
+    }
+
+    /**
+     * Parse formula for cell references, and paint each with a unique color.
+     */
+    private void parseAndPaintCellRefs(String val) {
+
+        // clear old paint, but leave keyboard indexes as is
+        clearFormulaSelectedCells();
+
+        List<String> references = parseCellReferences(val);
+
+        int currentIndex = 0;
+        int currentColor = 0;
+        for (String ref : references) {
+
+            MergedRegion range = new MergedRegion();
+            if (ref.contains(":")) {
+                String[] refs = ref.split(":");
+                CellCoord c1 = parseSingleCell(refs[0]);
+                range.col1 = c1.getCol();
+                range.row1 = c1.getRow();
+                CellCoord c2 = parseSingleCell(refs[1]);
+                range.col2 = c2.getCol();
+                range.row2 = c2.getRow();
+            } else {
+                CellCoord cc = parseSingleCell(ref);
+                range.col1 = cc.getCol();
+                range.row1 = cc.getRow();
+                range.col2 = range.col1;
+                range.row2 = range.row1;
+            }
+
+            currentColor = currentColor % formulaColors.size();
+            String color = formulaColors.get(currentColor);
+
+            // paint sheet cells
+            paintFormulaSelectedCells(range, color);
+
+            // Add paint on top of formula field with overlay spans.
+            int i = val.indexOf(ref, currentIndex);
+            Element e = DOM.createSpan();
+            String text = val.substring(currentIndex, i);
+            text = text.replaceAll(" ", "&nbsp;");
+            e.setInnerHTML(text);
+            formulaOverlay.appendChild(e);
+
+            currentIndex = i + ref.length();
+
+            e = DOM.createSpan();
+            e.setInnerText(ref);
+            e.getStyle().setBackgroundColor(color);
+            formulaOverlay.appendChild(e);
+
+            currentColor++;
+        }
+
+    }
+
+    /**
+     * Parses single
+     *
+     * @param cellRef
+     * @return
+     */
+    private static CellCoord parseSingleCell(String cellRef) {
+        String c = cellRef.split("[0-9]")[0].toUpperCase();
+
+        String[] split = cellRef.split("[A-z]");
+        String r = split[split.length - 1];
+
+        int row = Integer.valueOf(r);
+        int col = 0;
+        for (int i = 0; i < c.length(); i++) {
+            char current = c.charAt(i);
+            if (current >= 65 && current <= 90) {
+                col = (current - 64) + col * 24;
+            } else if (current >= 97 && current <= 122) {
+                col = (current - 96) + col * 24;
+            }
+        }
+
+        return new CellCoord(col, row);
+
+    }
+
+    /**
+     * Clears all selection paint from the sheet
+     */
+    private void clearFormulaSelectedCells() {
+        for (Cell e : paintedFormulaCells) {
+            e.getElement().getStyle().clearBackgroundColor();
+        }
+        paintedFormulaCells.clear();
+        formulaCellReferences.clear();
+        paintedFormulaCellCoords.clear();
+
+        formulaOverlay.removeAllChildren();
+    }
+
+    /**
+     * Paints the given cell region with the given color.
+     */
+    private void paintFormulaSelectedCells(MergedRegion region, String color) {
+
+        // we might drag upward too, so sort indexes
+
+        int colStart, colEnd;
+        colStart = Math.min(region.col1, region.col2);
+        colEnd = Math.max(region.col1, region.col2);
+        int rowStart, rowEnd;
+        rowStart = Math.min(region.row1, region.row2);
+        rowEnd = Math.max(region.row1, region.row2);
+
+        if (colEnd > 20000) {
+            Logger.getLogger(getClass().getSimpleName()).warning(
+                    "invalid column index, halting parse");
+            return;
+        }
+
+        for (int c = colStart; c <= colEnd; c++) {
+            for (int r = rowStart; r <= rowEnd; r++) {
+
+                Cell cell = widget.getCell(c, r);
+                if (cell != null) {
+                    DivElement elem = cell.getElement();
+
+                    elem.getStyle().setBackgroundColor(color);
+
+                    paintedFormulaCells.add(cell);
+                    paintedFormulaCellCoords.put(new CellCoord(c, r), color);
+                }
+            }
+
+        }
+
+        formulaCellReferences.add(region);
     }
 
     public void revertCellAddressValue() {
@@ -223,4 +839,158 @@ public class FormulaBarWidget extends Composite {
         cachedFunctionFieldValue = formulaField.getValue();
     }
 
+    /**
+     * If the user has focused an editor field, and the editor field contains a
+     * formula.
+     */
+    public boolean isEditingFormula() {
+        return editingFormula;
+    }
+
+    /**
+     * If arrow key events should be processed normally, or as cell selection
+     * for the formula.
+     */
+    public boolean isKeyboardNavigationEnabled() {
+        return enableKeyboardNavigation;
+    }
+
+    public void startInlineEdit(boolean inputFullFocus) {
+
+        sheetInputEventListener.setInputFullFocus(inputFullFocus);
+        checkFormulaEdit(inlineEditor);
+        updateEditorCaretPos(true);
+        checkKeyboardNavigation();
+    }
+
+    public void stopInlineEdit() {
+        sheetInputEventListener.cellEditingStopped();
+        stopEditing();
+    }
+
+    /**
+     * Stores the current position if the editor caret (e.g. when focus is
+     * temporarily moved somewhere else)
+     */
+    public void updateEditorCaretPos(boolean doAsDeferred) {
+
+        if (doAsDeferred) {
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+                @Override
+                public void execute() {
+
+                    if (isEditingFormula()) {
+
+                        formulaStartPos = -1;
+                        formulaLastKnownPos = currentEditor.getCursorPos();
+
+                        checkForCoordsAtCaret();
+                    }
+                }
+            });
+        } else if (isEditingFormula()) {
+            formulaLastKnownPos = currentEditor.getCursorPos();
+            checkForCoordsAtCaret();
+        }
+    }
+
+    /**
+     * Parses all cell references from the given formula for painting. Ranges
+     * (A1:A3) are returned as single string instead of two separate ones.
+     */
+    private static List<String> parseCellReferences(String formula) {
+        List<String> cells = new ArrayList<String>();
+
+        for (String c : formula.split("[^A-z0-9:]+")) {
+            if (isCell(c)) {
+                cells.add(c);
+            }
+        }
+
+        return cells;
+    }
+
+    /**
+     * Checks if given string is a cell reference.
+     * <p>
+     * Very simplistic; assumes that anything with both a number and a
+     * character.
+     *
+     * TODO improve logic. Sheet references?
+     */
+    private static boolean isCell(String current) {
+        boolean hasLetter = false;
+        boolean hasNumber = false;
+
+        boolean lastIsNumber = false;
+
+        int numChars = 0;
+        for (int i = 0; i < current.length(); i++) {
+            lastIsNumber = false;
+            // A-Z, a-z
+            char c = current.charAt(i);
+            if (c >= 65 && c <= 90 || c >= 97 && c <= 122) {
+                hasLetter = true;
+                numChars++;
+            } else if (c >= '0' && c <= '9') {
+                hasNumber = true;
+                lastIsNumber = true;
+            } else if (c == ':') {
+                // fine
+            } else {
+                // not allowed
+                return false;
+            }
+        }
+
+        // max col index is 'ZZZ'
+
+        boolean isCell = hasLetter && hasNumber && lastIsNumber && numChars < 4;
+        return isCell;
+    }
+
+    /**
+     * Sheet has scrolled, and cell elements are not in the same position they
+     * were. Re-paint background colors.
+     */
+    public void ensureSelectionStylesAfterScroll() {
+
+        // clear cells that moved
+        for (Cell c : paintedFormulaCells) {
+            CellCoord cc = new CellCoord(c.getCol(), c.getRow());
+            if (!paintedFormulaCellCoords.containsKey(cc)) {
+                c.getElement().getStyle().clearBackgroundColor();
+            }
+        }
+        paintedFormulaCells.clear();
+
+        // re-paint all cells
+        for (Entry<CellCoord, String> e : paintedFormulaCellCoords.entrySet()) {
+            Cell c = widget.getCell(e.getKey().getCol(), e.getKey().getRow());
+            if (c != null) {
+                c.getElement().getStyle().setBackgroundColor(e.getValue());
+                paintedFormulaCells.add(c);
+            }
+        }
+
+    }
+
+    /**
+     * Re-parses and paints the cell references in the current formula.
+     */
+    public void updateFormulaSelectionStyles() {
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+
+                if (!isEditingFormula()) {
+                    return;
+                }
+
+                parseAndPaintCellRefs(currentEditor.getValue());
+            }
+        });
+    }
 }

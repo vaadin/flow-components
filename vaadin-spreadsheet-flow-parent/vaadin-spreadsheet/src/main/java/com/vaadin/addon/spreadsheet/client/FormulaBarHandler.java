@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -39,5 +39,7 @@ public interface FormulaBarHandler {
     boolean isTouchMode();
 
     void setSheetFocused(boolean focused);
+
+    String createCellAddress(int column, int row);
 
 }

@@ -61,6 +61,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
 import com.vaadin.client.BrowserInfo;
@@ -100,7 +101,7 @@ public class SheetWidget extends Panel {
             + HEADER_RESIZE_DND_SECOND_CLASSNAME + "\" ></div>";
 
     private static final String EDITING_CELL_STYLE = "{ display: inline !important;"
-            + " outline: none !important; width: auto !important; z-index: -10; }";
+            + " outline: none !important; width: auto !important; min-width: 70px; z-index: -10; }";
     private static final String HYPERLINK_CELL_STYLE = "{ cursor: pointer !important; }";
     private static final String MERGED_REGION_CELL_STYLE = "{ display: none; }";
     private static final String FREEZE_PANEL_OVERFLOW_STYLE = "{ overflow: hidden; }";
@@ -130,8 +131,6 @@ public class SheetWidget extends Panel {
 
     /** Sheet that will contain all the cells */
     DivElement sheet = Document.get().createDivElement();
-
-    private SheetInputEventListener sheetInputEventListener;
 
     private HandlerRegistration previewHandlerRegistration;
 
@@ -348,7 +347,7 @@ public class SheetWidget extends Panel {
     private Set<Integer> selectedFrozenColHeaderIndexes = new HashSet<Integer>();
     private CellCoord highlightedCellCoord = null;
 
-    class CellCoord {
+    static class CellCoord {
         private int col;
         private int row;
 
@@ -1397,8 +1396,6 @@ public class SheetWidget extends Panel {
     }
 
     private void initListeners() {
-        sheetInputEventListener = GWT.create(SheetInputEventListener.class);
-        sheetInputEventListener.setSheetWidget(this, input);
 
         SheetEventListener listener = GWT.create(SheetEventListener.class);
         listener.setSheetWidget(this);
@@ -2610,6 +2607,8 @@ public class SheetWidget extends Panel {
                 cell.getElement().addClassName(CELL_SELECTION_CLASSNAME);
             }
         }
+
+        actionHandler.getFormulaBarWidget().ensureSelectionStylesAfterScroll();
     }
 
     private void runEscalatorOnAllCells(int r1, int r2, int c1, int c2,
@@ -3077,6 +3076,11 @@ public class SheetWidget extends Panel {
                 rowHeaders.remove(0).removeFromParent();
             }
         }
+    }
+
+    public TextBox getInlineEditor() {
+        // FIXME setter for operations instead?
+        return input;
     }
 
     private void handleVerticalScrollUp(int scrollTop) {
@@ -3959,7 +3963,7 @@ public class SheetWidget extends Panel {
         try {
             final Cell selectedCell = getSelectedCell();
             selectedCell.setValue(value);
-            int textWidth = selectedCell.getElement().getOffsetWidth() + 5;
+            int textWidth = selectedCell.getElement().getOffsetWidth();
             int col = selectedCell.getCol();
             int width;
             if (editingMergedCell) {
@@ -4674,10 +4678,9 @@ public class SheetWidget extends Panel {
         return cellData == null ? "cs0" : cellData.cellStyle;
     }
 
-    public void startEditingCell(boolean focus, boolean inputFullFocus,
-            boolean recalculate, final String value) {
+    public void startEditingCell(boolean focus, boolean recalculate,
+            final String value) {
         editingCell = true;
-        sheetInputEventListener.setInputFullFocus(inputFullFocus);
         jsniUtil.replaceSelector(editedCellFreezeColumnStyle, "." + sheetId
                 + " .sheet div" + toCssKey(selectedCellCol, selectedCellRow), 0);
 
@@ -4855,7 +4858,6 @@ public class SheetWidget extends Panel {
     public void stopEditingCell(boolean focusSheet) {
         editingCell = false;
         editingMergedCell = false;
-        sheetInputEventListener.cellEditingStopped();
 
         jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
                 ".notusedselector", 0);
