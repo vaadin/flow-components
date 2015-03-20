@@ -228,6 +228,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     private Map<CellReference, PopupButton> sheetPopupButtons = new HashMap<CellReference, PopupButton>();
 
+    private HashSet<PopupButton> attachedPopupButtons = new HashSet<PopupButton>();
+
     /**
      * Set of images contained in the currently active sheet.
      */
@@ -2387,12 +2389,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             }
             customComponents.clear();
         }
-        if (sheetPopupButtons != null && !sheetPopupButtons.isEmpty()) {
-            for (PopupButton sf : sheetPopupButtons.values()) {
-                unRegisterCustomComponent(sf);
+        if (attachedPopupButtons != null && !attachedPopupButtons.isEmpty()) {
+            for (PopupButton sf : new ArrayList<PopupButton>(
+                    attachedPopupButtons)) {
+                unRegisterPopupButton(sf);
             }
-            sheetPopupButtons.clear();
+            attachedPopupButtons.clear();
         }
+        sheetPopupButtons.clear();
         // clear all tables, possible tables for new/changed sheet are added
         // after first round trip.
         tablesLoaded = false;
@@ -3176,6 +3180,16 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                         && row >= firstRow && row <= lastRow);
     }
 
+    private void registerPopupButton(PopupButton button) {
+        attachedPopupButtons.add(button);
+        registerCustomComponent(button);
+    }
+
+    private void unRegisterPopupButton(PopupButton button) {
+        attachedPopupButtons.remove(button);
+        unRegisterCustomComponent(button);
+    }
+
     private void registerCustomComponent(Component component) {
         if (!equals(component.getParent())) {
             component.setParent(this);
@@ -3275,7 +3289,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             sheetPopupButtons.put(cellReference, popupButton);
             if (isCellVisible(cellReference.getRow() + 1,
                     cellReference.getCol() + 1)) {
-                registerCustomComponent(popupButton);
+                registerPopupButton(popupButton);
                 markAsDirty();
             }
         }
@@ -3284,7 +3298,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private void removePopupButton(CellReference cellReference) {
         PopupButton oldButton = sheetPopupButtons.get(cellReference);
         if (oldButton != null) {
-            unRegisterCustomComponent(oldButton);
+            unRegisterPopupButton(oldButton);
             sheetPopupButtons.remove(cellReference);
             markAsDirty();
         }
@@ -3300,9 +3314,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 int column = popupButton.getColumn() + 1;
                 int row = popupButton.getRow() + 1;
                 if (isCellVisible(row, column)) {
-                    registerCustomComponent(popupButton);
+                    registerPopupButton(popupButton);
                 } else {
-                    unRegisterCustomComponent(popupButton);
+                    unRegisterPopupButton(popupButton);
                 }
             }
         }
@@ -3936,12 +3950,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     @Override
     public Iterator<Component> iterator() {
-        if (customComponents == null && sheetPopupButtons == null) {
+        if (customComponents == null && attachedPopupButtons.isEmpty()) {
             List<Component> emptyList = Collections.emptyList();
             return emptyList.iterator();
         } else {
             return new SpreadsheetIterator<Component>(customComponents,
-                    sheetPopupButtons);
+                    attachedPopupButtons);
         }
     }
 
@@ -3957,11 +3971,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         private boolean currentIteratorPointer;
 
         public SpreadsheetIterator(Set<Component> customComponents,
-                Map<CellReference, PopupButton> sheetPopupButtons) {
+                Set<PopupButton> sheetPopupButtons) {
             customComponentIterator = customComponents == null ? null
                     : customComponents.iterator();
             sheetPopupButtonIterator = sheetPopupButtons == null ? null
-                    : sheetPopupButtons.values().iterator();
+                    : sheetPopupButtons.iterator();
             currentIteratorPointer = true;
         }
 
