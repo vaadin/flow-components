@@ -38,6 +38,7 @@ import org.apache.poi.ss.util.CellReference;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedEditEvent;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
+import com.vaadin.addon.spreadsheet.command.CellValueCommand;
 
 /**
  * Implementation of the Spreadsheet Server RPC interface.
@@ -277,6 +278,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             rowIndex++;
         }
 
+        CellValueCommand command = new CellValueCommand(spreadsheet);
+
         // Paste the values
         rowIndex = selectedCellReference.getRow();
         colIndex = -1;
@@ -295,6 +298,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 if (cell == null) {
                     cell = row.createCell(colIndex);
                 }
+                command.captureCellValues(new CellReference(rowIndex, colIndex));
 
                 // check for numbers
                 Double numVal = SpreadsheetUtil.parseNumber(cell, cellContent,
@@ -309,6 +313,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             }
             rowIndex++;
         }
+        spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
 
         // remove last increment so that selection goes correctly
         rowIndex--;
@@ -433,6 +438,14 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             }
             targetCells.add(cell);
         }
+        CellValueCommand command = new CellValueCommand(spreadsheet);
+        if (reference != null) {
+            command.captureCellValues(reference);
+        }
+        for (CellRangeAddress range : cellRangeAddresses) {
+            command.captureCellRangeValues(range);
+        }
+        spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
 
         for (Cell targetCell : targetCells) {
             targetCell.setCellType(Cell.CELL_TYPE_BLANK);
