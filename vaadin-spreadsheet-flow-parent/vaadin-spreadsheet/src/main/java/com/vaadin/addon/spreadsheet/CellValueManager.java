@@ -513,12 +513,16 @@ public class CellValueManager implements Serializable {
                                 cs = workbook.createCellStyle();
                                 cell.setCellStyle(cs);
                             }
-                            cs.setDataFormat(workbook
-                                    .createDataFormat()
-                                    .getFormat(
-                                            spreadsheet
-                                                    .getDefaultPercentageFormat()));
-                            styler.cellStyleUpdated(cell, true);
+
+                            if (cs.getDataFormatString() != null
+                                    && !cs.getDataFormatString().contains("%")) {
+                                cs.setDataFormat(workbook
+                                        .createDataFormat()
+                                        .getFormat(
+                                                spreadsheet
+                                                        .getDefaultPercentageFormat()));
+                                styler.cellStyleUpdated(cell, true);
+                            }
                             cell.setCellValue(percentage);
                         } else if (numVal != null) {
                             cell.setCellType(Cell.CELL_TYPE_NUMERIC);
