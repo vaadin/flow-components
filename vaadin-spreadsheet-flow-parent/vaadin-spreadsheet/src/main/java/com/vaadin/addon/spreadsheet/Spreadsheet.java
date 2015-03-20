@@ -2398,6 +2398,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         tablesLoaded = false;
 
         reloadSheetNames();
+        updateMergedRegions();
 
         getState().displayGridlines = getActiveSheet().isDisplayGridlines();
         getState().displayRowColHeadings = getActiveSheet()
