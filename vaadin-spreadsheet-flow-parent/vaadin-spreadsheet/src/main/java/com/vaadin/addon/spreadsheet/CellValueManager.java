@@ -253,8 +253,11 @@ public class CellValueManager implements Serializable {
         BigDecimal ratio = new BigDecimal(r);
         BigDecimal stringPixels = ratio
                 .multiply(new BigDecimal(value.length()));
+        // The -4 here is for 2px cell left/right padding
+        // FIXME We should probably measure this from the actual value since it
+        // might be changed in the style
         BigDecimal columnWidth = new BigDecimal(
-                spreadsheet.getState(false).colW[cell.getColumnIndex()] - 10);
+                spreadsheet.getState(false).colW[cell.getColumnIndex()] - 4);
         return stringPixels.compareTo(columnWidth) <= 0;
     }
 

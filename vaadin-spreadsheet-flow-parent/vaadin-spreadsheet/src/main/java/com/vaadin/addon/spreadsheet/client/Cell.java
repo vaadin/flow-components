@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet.client;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -20,6 +20,7 @@ package com.vaadin.addon.spreadsheet.client;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Overflow;
 
 public class Cell {
 
@@ -35,6 +36,8 @@ public class Cell {
     private String cellStyle = "cs0";
     private boolean needsMeasure;
     private SheetWidget sheetWidget;
+    private boolean overflowDirty = true;
+    private boolean overflowing;
 
     public Cell(SheetWidget sheetWidget, int col, int row) {
         this.sheetWidget = sheetWidget;
@@ -65,26 +68,20 @@ public class Cell {
         return element;
     }
 
-    public void update(int col, int row, String html, String cellStyle) {
+    public void update(int col, int row, CellData cellData) {
         this.col = col;
         this.row = row;
-        this.cellStyle = cellStyle;
-        value = html;
+        cellStyle = cellData == null ? "cs0" : cellData.cellStyle;
+        value = cellData == null ? null : cellData.value;
 
         updateInnerText();
-
         updateCellValues();
-    }
 
-    public void update(int col, int row, CellData cellData) {
-        if (cellData == null) {
-            update(col, row, null, "cs0");
-        } else {
-            update(col, row, cellData.value, cellData.cellStyle);
-        }
+        markAsOverflowDirty();
     }
 
     private void updateInnerText() {
+        element.getStyle().setOverflow(Overflow.HIDDEN);
         if (value == null || value.isEmpty()) {
             element.setInnerText("");
             element.getStyle().clearZIndex();
@@ -100,6 +97,56 @@ public class Cell {
                 element.setInnerText(value);
             }
         }
+    }
+
+    void updateOverflow() {
+        int columnWidth = sheetWidget.actionHandler.getColWidth(col);
+        Integer scrollW = sheetWidget.scrollWidthCache.get(getUniqueKey());
+        if (scrollW == null) {
+            scrollW = measureOverflow();
+        }
+        int overflowPx = scrollW - columnWidth;
+        if (overflowPx > 0) {
+            // Increase overflow by cell left padding (2px)
+            overflowPx += 2;
+            int colIndex = col;
+            int width = 0;
+            int[] colW = sheetWidget.actionHandler.getColWidths();
+            boolean inFreezePane = col <= sheetWidget.verticalSplitPosition;
+            while (colIndex < colW.length && width < overflowPx) {
+                if (inFreezePane
+                        && colIndex >= sheetWidget.verticalSplitPosition) {
+                    break;
+                }
+                Cell nextCell = sheetWidget.getCell(colIndex + 1, row);
+                if (nextCell != null && nextCell.hasValue()) {
+                    break;
+                }
+                width += colW[colIndex];
+                colIndex++;
+            }
+            width += columnWidth;
+            element.setInnerHTML("<div style=\"pointer-events:none;width:"
+                    + width + "px;overflow:hidden;text-overflow:ellipsis;\">"
+                    + element.getInnerText() + "</div>");
+            overflowing = true;
+        } else {
+            overflowing = false;
+        }
+        element.getStyle().setOverflow(Overflow.VISIBLE);
+        overflowDirty = false;
+    }
+
+    int measureOverflow() {
+        if (overflowing) {
+            updateInnerText();
+        }
+        Integer scrollW = sheetWidget.scrollWidthCache.get(getUniqueKey());
+        if (scrollW == null) {
+            scrollW = element.getScrollWidth();
+            sheetWidget.scrollWidthCache.put(getUniqueKey(), scrollW);
+        }
+        return scrollW;
     }
 
     protected void updateCellValues() {
@@ -147,6 +194,8 @@ public class Cell {
         if (popupButtonElement != null) {
             element.appendChild(popupButtonElement);
         }
+
+        markAsOverflowDirty();
     }
 
     public void showPopupButton(Element popupButtonElement) {
@@ -178,5 +227,41 @@ public class Cell {
 
     public boolean isNeedsMeasure() {
         return needsMeasure;
+    }
+
+    /**
+     *
+     * @param sizes
+     * @param beginIndex
+     *            1-based inclusive
+     * @param endIndex
+     *            1-based exclusive
+     * @return
+     */
+    public int countSum(int[] sizes, int beginIndex, int endIndex) {
+        if (sizes == null || sizes.length < endIndex - 1) {
+            return 0;
+        }
+        int pos = 0;
+        for (int i = beginIndex; i < endIndex; i++) {
+            pos += sizes[i - 1];
+        }
+        return pos;
+    }
+
+    public boolean isOverflowDirty() {
+        return value != null && !value.isEmpty() && overflowDirty;
+    }
+
+    public void markAsOverflowDirty() {
+        overflowDirty = true;
+    }
+
+    public boolean hasValue() {
+        return value != null && !value.isEmpty();
+    }
+
+    private int getUniqueKey() {
+        return 31 * (value.hashCode() + cellStyle.hashCode());
     }
 }
