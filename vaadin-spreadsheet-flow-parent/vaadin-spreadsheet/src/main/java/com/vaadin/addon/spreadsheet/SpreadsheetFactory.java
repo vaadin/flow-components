@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -59,7 +59,7 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetState;
  * SpreadsheetFactory is an utility class of the Spreadsheet component. It is
  * used for operations related to loading and saving a workbook and related
  * data.
- * 
+ *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
@@ -95,7 +95,7 @@ public class SpreadsheetFactory implements Serializable {
 
     /**
      * Clears the given Spreadsheet and loads the given Workbook into it.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      * @param workbook
@@ -134,7 +134,7 @@ public class SpreadsheetFactory implements Serializable {
     /**
      * Clears the target Spreadsheet, creates a new XLSX Workbook and loads it
      * in the Spreadsheet.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      */
@@ -149,13 +149,13 @@ public class SpreadsheetFactory implements Serializable {
         spreadsheet.setInternalWorkbook(newWorkbook);
         generateNewSpreadsheet(spreadsheet, sheet, DEFAULT_ROWS,
                 DEFAULT_COLUMNS);
-        sheet.setDefaultRowHeightInPoints(DEFAULT_ROW_HEIGHT_POINTS);
+        setDefaultRowHeight(spreadsheet, sheet);
         loadWorkbookStyles(spreadsheet);
     }
 
     /**
      * Adds a new sheet to the given Spreadsheet and Workbook.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      * @param workbook
@@ -192,7 +192,7 @@ public class SpreadsheetFactory implements Serializable {
 
     /**
      * Reloads the Spreadsheet component from the given file.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      * @param spreadsheetFile
@@ -212,7 +212,7 @@ public class SpreadsheetFactory implements Serializable {
 
     /**
      * Reloads the Spreadsheet component from the given InputStream.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      * @param inputStream
@@ -233,7 +233,7 @@ public class SpreadsheetFactory implements Serializable {
     /**
      * Reloads the Spreadsheet component using the given Workbook as data
      * source.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      * @param workbook
@@ -257,7 +257,7 @@ public class SpreadsheetFactory implements Serializable {
     /**
      * Writes the current Workbook state from the given Spreadsheet to the given
      * file.
-     * 
+     *
      * @param spreadsheet
      *            Source Spreadsheet
      * @param fileName
@@ -304,7 +304,7 @@ public class SpreadsheetFactory implements Serializable {
     /**
      * Writes the current Workbook state from the given Spreadsheet to the given
      * output stream. The stream will be closed after writing.
-     * 
+     *
      * @param spreadsheet
      *            Source Spreadsheet
      * @param stream
@@ -331,7 +331,7 @@ public class SpreadsheetFactory implements Serializable {
 
     /**
      * Loads styles for the Workbook and the currently active sheet.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      */
@@ -343,7 +343,7 @@ public class SpreadsheetFactory implements Serializable {
     /**
      * Sets the size, default row height and default column width for the given
      * new Sheet in the target Spreadsheet. Finally loads the sheet.
-     * 
+     *
      * @param spreadsheet
      *            Target spreadsheet
      * @param sheet
@@ -356,11 +356,7 @@ public class SpreadsheetFactory implements Serializable {
     static void generateNewSpreadsheet(final Spreadsheet spreadsheet,
             final Sheet sheet, int rows, int columns) {
         sheet.createRow(rows - 1).createCell(columns - 1);
-        final float defaultRowHeightInPoints = sheet
-                .getDefaultRowHeightInPoints();
-        if (defaultRowHeightInPoints <= 0) {
-            sheet.setDefaultRowHeightInPoints(DEFAULT_ROW_HEIGHT_POINTS);
-        }
+        setDefaultRowHeight(spreadsheet, sheet);
         // use excel default column width instead of Apache POI default (8)
         sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
         reloadSpreadsheetData(spreadsheet, sheet);
@@ -368,7 +364,7 @@ public class SpreadsheetFactory implements Serializable {
 
     /**
      * Reloads all data for the given Sheet within the target Spreadsheet
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      * @param sheet
@@ -378,14 +374,7 @@ public class SpreadsheetFactory implements Serializable {
             final Sheet sheet) {
         logMemoryUsage();
         try {
-            float defaultRowHeightInPoints = sheet
-                    .getDefaultRowHeightInPoints();
-            if (defaultRowHeightInPoints <= 0) {
-                sheet.setDefaultRowHeightInPoints(DEFAULT_ROW_HEIGHT_POINTS);
-                spreadsheet.getState().defRowH = DEFAULT_ROW_HEIGHT_POINTS;
-            } else {
-                spreadsheet.getState().defRowH = defaultRowHeightInPoints;
-            }
+            setDefaultRowHeight(spreadsheet, sheet);
 
             // Always have at least the default amount of rows
             int rows = sheet.getLastRowNum() + 1;
@@ -425,6 +414,8 @@ public class SpreadsheetFactory implements Serializable {
                 }
             }
             if (rows > sheet.getLastRowNum() + 1) {
+                float defaultRowHeightInPoints = sheet
+                        .getDefaultRowHeightInPoints();
                 for (int i = sheet.getLastRowNum(); i < rows; i++) {
                     rowHeights[i] = defaultRowHeightInPoints;
                 }
@@ -464,7 +455,7 @@ public class SpreadsheetFactory implements Serializable {
     /**
      * Loads images for the currently active sheet and adds them to the target
      * Spreadsheet.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      */
@@ -524,7 +515,7 @@ public class SpreadsheetFactory implements Serializable {
     /**
      * Loads merged region(s) configuration for the currently active sheet and
      * sets it into the shared state.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      */
@@ -552,7 +543,7 @@ public class SpreadsheetFactory implements Serializable {
     /**
      * Loads freeze pane configuration for the currently active sheet and sets
      * it into the shared state.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      */
@@ -582,6 +573,17 @@ public class SpreadsheetFactory implements Serializable {
             sheetname = "Sheet" + idx;
         }
         return workbook.createSheet(sheetname);
+    }
+
+    private static void setDefaultRowHeight(Spreadsheet spreadsheet,
+            final Sheet sheet) {
+        float defaultRowHeightInPoints = sheet.getDefaultRowHeightInPoints();
+        if (defaultRowHeightInPoints <= 0) {
+            sheet.setDefaultRowHeightInPoints(DEFAULT_ROW_HEIGHT_POINTS);
+            spreadsheet.getState().defRowH = DEFAULT_ROW_HEIGHT_POINTS;
+        } else {
+            spreadsheet.getState().defRowH = defaultRowHeightInPoints;
+        }
     }
 
     /**
