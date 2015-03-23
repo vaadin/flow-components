@@ -1685,10 +1685,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 resetOriginalRowHeight);
         // need to re-send the cell values to client
         // remove all cached cell data that is now empty
-        int start = n < 0 ? lastNonBlankRow + 1 : startRow;
+        int start = n < 0 ? Math.max(lastNonBlankRow, startRow) : startRow;
         int end = n < 0 ? endRow : startRow + n - 1;
-        valueManager.updateDeletedRowsInClientCache(start, end);
-        // updateDeletedRowsInClientCache(start + 1, end + 1); this was a bug?
+        valueManager.updateDeletedRowsInClientCache(start + 1, end + 1);
         int firstAffectedRow = n < 0 ? startRow + n : startRow;
         int lastAffectedRow = n < 0 ? endRow : endRow + n;
         if (copyRowHeight || resetOriginalRowHeight) {
@@ -1724,6 +1723,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             Row row = sheet.getRow(r);
             final Integer rowIndex = new Integer(r + 1);
             if (row == null) {
+                valueManager.updateDeletedRowsInClientCache(rowIndex, rowIndex);
                 if (getState(false).hiddenRowIndexes.contains(rowIndex)) {
                     getState().hiddenRowIndexes.remove(rowIndex);
                 }
@@ -1740,6 +1740,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     Cell cell = row.getCell(c);
                     if (cell == null) {
                         styler.clearCellStyle(r, c);
+                        if (r <= lastNonBlankRow + n) {
+                            // There might be a pre-shift value for this cell in
+                            // client-side and should be overwritten
+                            cell = row.createCell(c);
+                            cellsToUpdate.add(cell);
+                        }
                     } else {
                         cellsToUpdate.add(cell);
                     }
