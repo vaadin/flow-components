@@ -1755,6 +1755,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         updateMarkedCells(); // deleted and formula cells and style selectors
         updateRowAndColumnRangeCellData(firstRow, firstColumn, lastRow,
                 lastColumn); // shifted area values
+        updateMergedRegions();
 
         CellReference selectedCellReference = selectionManager
                 .getSelectedCellReference();
