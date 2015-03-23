@@ -148,7 +148,7 @@ public class CellSelectionManager implements Serializable {
                 if (paintedCellRange.isInRange(selectedCellReference.getRow(),
                         selectedCellReference.getCol())) {
                     handleCellRangeSelection(selectedCellReference,
-                            paintedCellRange);
+                            paintedCellRange, true);
                 } else {
                     paintedCellRange = null;
                     handleCellAddressChange(selectedCellReference.getRow() + 1,
@@ -158,7 +158,7 @@ public class CellSelectionManager implements Serializable {
                 handleCellRangeSelection(
                         new CellReference(paintedCellRange.getFirstRow(),
                                 paintedCellRange.getFirstColumn()),
-                        paintedCellRange);
+                        paintedCellRange, true);
             }
         } else if (selectedCellReference != null) {
             handleCellAddressChange(selectedCellReference.getRow() + 1,
@@ -435,7 +435,7 @@ public class CellSelectionManager implements Serializable {
      *            Selection area
      */
     protected void handleCellRangeSelection(CellReference startingPoint,
-            CellRangeAddress cellsToSelect) {
+            CellRangeAddress cellsToSelect, boolean scroll) {
         int row1 = cellsToSelect.getFirstRow();
         int row2 = cellsToSelect.getLastRow();
         int col1 = cellsToSelect.getFirstColumn();
@@ -458,18 +458,18 @@ public class CellSelectionManager implements Serializable {
                 spreadsheet.getRpcProxy().setSelectedCellAndRange(
                         startingPoint.getCol() + 1, startingPoint.getRow() + 1,
                         col1 + 1, col2 + 1, row1 + 1, row2 + 1, value, formula,
-                        spreadsheet.isCellLocked(cell));
+                        spreadsheet.isCellLocked(cell), scroll);
             } else {
                 spreadsheet.getRpcProxy().setSelectedCellAndRange(
                         startingPoint.getCol() + 1, startingPoint.getRow() + 1,
                         col1 + 1, col2 + 1, row1 + 1, row2 + 1, "", false,
-                        spreadsheet.isCellLocked(cell));
+                        spreadsheet.isCellLocked(cell), scroll);
             }
         } else {
             spreadsheet.getRpcProxy().setSelectedCellAndRange(
                     startingPoint.getCol() + 1, startingPoint.getRow() + 1,
                     col1 + 1, col2 + 1, row1 + 1, row2 + 1, "", false,
-                    spreadsheet.isActiveSheetProtected());
+                    spreadsheet.isActiveSheetProtected(), scroll);
         }
         selectedCellReference = startingPoint;
         cellRangeAddresses.clear();

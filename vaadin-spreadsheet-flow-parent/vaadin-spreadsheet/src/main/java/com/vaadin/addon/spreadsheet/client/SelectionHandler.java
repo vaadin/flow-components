@@ -102,7 +102,7 @@ public class SelectionHandler {
 
     public void selectCellRange(int selectedCellColumn, int selectedCellRow,
             int firstColumn, int lastColumn, int firstRow, int lastRow,
-            String value, boolean formula, boolean locked) {
+            String value, boolean formula, boolean locked, boolean scroll) {
         spreadsheet.updateSelectedCellValues(selectedCellColumn,
                 selectedCellRow);
         if (!sheetWidget.isCoherentSelection()) {
@@ -123,8 +123,9 @@ public class SelectionHandler {
                 lastRow);
         sheetWidget.updateSelectedCellStyles(firstColumn, lastColumn, firstRow,
                 lastRow, true);
-        if (!sheetWidget.isAreaCompletelyVisible(firstColumn, lastColumn,
-                firstRow, lastRow)) {
+        if (scroll
+                && !sheetWidget.isAreaCompletelyVisible(firstColumn,
+                        lastColumn, firstRow, lastRow)) {
             sheetWidget.scrollAreaIntoView(firstColumn, lastColumn, firstRow,
                     lastRow);
         }

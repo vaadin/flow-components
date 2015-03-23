@@ -1672,10 +1672,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void selectCellRange(int selectedCellColumn, int selectedCellRow,
             int firstColumn, int lastColumn, int firstRow, int lastRow,
-            String value, boolean formula, boolean locked) {
+            String value, boolean formula, boolean locked, boolean scroll) {
         selectionHandler.selectCellRange(selectedCellColumn, selectedCellRow,
                 firstColumn, lastColumn, firstRow, lastRow, value, formula,
-                locked);
+                locked, scroll);
     }
 
     public void refreshCellStyles() {

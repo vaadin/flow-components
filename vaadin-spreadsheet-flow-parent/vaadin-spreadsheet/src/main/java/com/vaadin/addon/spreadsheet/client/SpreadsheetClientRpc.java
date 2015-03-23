@@ -80,7 +80,8 @@ public interface SpreadsheetClientRpc extends ClientRpc {
      * @param cellLocked
      */
     void setSelectedCellAndRange(int col, int row, int c1, int c2, int r1,
-            int r2, String value, boolean formula, boolean cellLocked);
+            int r2, String value, boolean formula, boolean cellLocked,
+            boolean scroll);
 
     void cellsUpdated(ArrayList<CellData> updatedCellData);
 

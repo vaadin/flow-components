@@ -135,7 +135,7 @@ public class CellSelectionShifter implements Serializable {
                         .createCorrectCellRangeAddress(r1, c1, r2, c2);
                 getCellSelectionManager().handleCellRangeSelection(
                         spreadsheet.getSelectedCellReference(),
-                        newPaintedCellRange);
+                        newPaintedCellRange, false);
                 spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
 
                 if (changedCellRangeAddress != null) {
@@ -416,7 +416,7 @@ public class CellSelectionShifter implements Serializable {
                                 newPaintedCellRange.getFirstColumn());
                     }
                     getCellSelectionManager().handleCellRangeSelection(
-                            selectedCellReference, newPaintedCellRange);
+                            selectedCellReference, newPaintedCellRange, false);
                 }
                 // the selected cell might or might not have changed.. need to
                 // call this so user can update possible custom editor value

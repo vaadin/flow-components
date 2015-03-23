@@ -231,7 +231,7 @@ public class SpreadsheetHistoryManager implements Serializable {
                 } else {
                     spreadsheet.getCellSelectionManager()
                             .handleCellRangeSelection(selectedCellReference,
-                                    paintedCellRange);
+                                    paintedCellRange, true);
                 }
             } else {
                 // the selected cell value might have changed, thus need to

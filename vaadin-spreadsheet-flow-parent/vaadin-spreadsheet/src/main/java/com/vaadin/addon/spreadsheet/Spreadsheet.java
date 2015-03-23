@@ -4097,7 +4097,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void setSelectionRange(int row1, int col1, int row2, int col2) {
         CellReference ref = new CellReference(row1, col1);
         CellRangeAddress cra = new CellRangeAddress(row1, row2, col1, col2);
-        selectionManager.handleCellRangeSelection(ref, cra);
+        selectionManager.handleCellRangeSelection(ref, cra, true);
     }
 
     /**
