@@ -1040,9 +1040,6 @@ public class SelectionWidget extends Composite {
      */
     public int closestCellEdgeIndexToCursor(int cellSizes[], int startIndex,
             int cursorPosition) {
-
-        // TODO Completely broken when zoomed in on touch device
-        // See http://dev.vaadin.com/ticket/16820
         int pos = 0;
         if (cursorPosition < 0) {
             if (startIndex > 1) {
@@ -1077,8 +1074,8 @@ public class SelectionWidget extends Composite {
         crossedLeft = !startCellTopLeft && !startCellBottomLeft;
         initialScrollLeft = sheetWidget.sheet.getScrollLeft();
         initialScrollTop = sheetWidget.sheet.getScrollTop();
-        clientX = WidgetUtil.getTouchOrMouseClientX(event);
-        clientY = WidgetUtil.getTouchOrMouseClientY(event);
+        clientX = SpreadsheetWidget.getTouchOrMouseClientX(event);
+        clientY = SpreadsheetWidget.getTouchOrMouseClientY(event);
         tempCol = col2;
         tempRow = row2;
         paintMode = true;
@@ -1145,8 +1142,8 @@ public class SelectionWidget extends Composite {
         crossedLeft = !startCellTopLeft && !startCellBottomLeft;
         initialScrollLeft = sheetWidget.sheet.getScrollLeft();
         initialScrollTop = sheetWidget.sheet.getScrollTop();
-        clientX = WidgetUtil.getTouchOrMouseClientX(event);
-        clientY = WidgetUtil.getTouchOrMouseClientY(event);
+        clientX = SpreadsheetWidget.getTouchOrMouseClientX(event);
+        clientY = SpreadsheetWidget.getTouchOrMouseClientY(event);
         tempCol = col2;
         tempRow = row2;
         storeEventPos(event);
@@ -1155,8 +1152,8 @@ public class SelectionWidget extends Composite {
     private void selectCells(Event event) {
         dragging = true;
 
-        final int clientX = WidgetUtil.getTouchOrMouseClientX(event);
-        final int clientY = WidgetUtil.getTouchOrMouseClientY(event);
+        final int clientX = SpreadsheetWidget.getTouchOrMouseClientX(event);
+        final int clientY = SpreadsheetWidget.getTouchOrMouseClientY(event);
 
         // If we're scrolling, do not paint anything
         if (checkScrollWhilePainting(clientY, clientX)) {
@@ -1420,8 +1417,8 @@ public class SelectionWidget extends Composite {
     private void paintCells(Event event) {
         decreaseSelection = false;
         increaseSelection = false;
-        final int clientX = WidgetUtil.getTouchOrMouseClientX(event);
-        final int clientY = WidgetUtil.getTouchOrMouseClientY(event);
+        final int clientX = SpreadsheetWidget.getTouchOrMouseClientX(event);
+        final int clientY = SpreadsheetWidget.getTouchOrMouseClientY(event);
 
         // If we're scrolling, do not paint anything
         if (checkScrollWhilePainting(clientY, clientX)) {

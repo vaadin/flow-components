@@ -28,9 +28,11 @@ import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.TouchEvent;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -40,6 +42,7 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector.CommsTrigger;
 import com.vaadin.client.Focusable;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.Util;
+import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.communication.RpcProxy;
 
 public class SpreadsheetWidget extends Composite implements SheetHandler,
@@ -1737,5 +1740,31 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     void startDelayedSendingTimer() {
         delayedSending.schedule(DELAYED_SERVER_REQUEST_DELAY);
+    }
+
+    static int getTouchOrMouseClientX(Event event) {
+        int scrollLeft = Document.get().getScrollLeft();
+        if (WidgetUtil.isTouchEvent(event)) {
+            return event.getChangedTouches().get(0).getClientX() + scrollLeft;
+        } else {
+            return event.getClientX() + scrollLeft;
+        }
+    }
+
+    static int getTouchOrMouseClientY(Event event) {
+        int scrollTop = Document.get().getScrollTop();
+        if (WidgetUtil.isTouchEvent(event)) {
+            return event.getChangedTouches().get(0).getClientY() + scrollTop;
+        } else {
+            return event.getClientY() + scrollTop;
+        }
+    }
+
+    static int getTouchOrMouseClientY(NativeEvent currentGwtEvent) {
+        return getTouchOrMouseClientY(Event.as(currentGwtEvent));
+    }
+
+    static int getTouchOrMouseClientX(NativeEvent event) {
+        return getTouchOrMouseClientX(Event.as(event));
     }
 }

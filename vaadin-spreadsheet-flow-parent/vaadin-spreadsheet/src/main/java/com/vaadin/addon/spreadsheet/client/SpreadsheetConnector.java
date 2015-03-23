@@ -37,7 +37,6 @@ import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHan
 import com.vaadin.client.ApplicationConnection;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
-import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
 import com.vaadin.client.ui.Action;
@@ -89,14 +88,14 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             int left;
             int top;
             if (latestCellContextMenuEvent != null) {
-                left = WidgetUtil
+                left = SpreadsheetWidget
                         .getTouchOrMouseClientX(latestCellContextMenuEvent);
-                top = WidgetUtil
+                top = SpreadsheetWidget
                         .getTouchOrMouseClientY(latestCellContextMenuEvent);
             } else {
-                left = WidgetUtil
+                left = SpreadsheetWidget
                         .getTouchOrMouseClientX(latestHeaderContextMenuEvent);
-                top = WidgetUtil
+                top = SpreadsheetWidget
                         .getTouchOrMouseClientY(latestHeaderContextMenuEvent);
             }
             top += Window.getScrollTop();

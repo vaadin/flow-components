@@ -427,8 +427,10 @@ public class SheetWidget extends Panel {
                                 return;
                             }
                             target = getRealEventTargetCell(
-                                    mouseOverOrOutEvent.getClientX(),
-                                    mouseOverOrOutEvent.getClientY(),
+                                    SpreadsheetWidget
+                                            .getTouchOrMouseClientX(mouseOverOrOutEvent),
+                                    SpreadsheetWidget
+                                            .getTouchOrMouseClientY(mouseOverOrOutEvent),
                                     getCell(parsedCol, parsedRow)).getElement();
                             className = target.getClassName();
                             if (className.contains("cell")) {
@@ -1029,8 +1031,10 @@ public class SheetWidget extends Panel {
             // merged cells are a special case, text won't overflow -> skip
             try {
                 if (!className.endsWith(MERGED_CELL_CLASSNAME)) {
-                    int clientX = WidgetUtil.getTouchOrMouseClientX(event);
-                    int clientY = WidgetUtil.getTouchOrMouseClientY(event);
+                    int clientX = SpreadsheetWidget
+                            .getTouchOrMouseClientX(event);
+                    int clientY = SpreadsheetWidget
+                            .getTouchOrMouseClientY(event);
 
                     Cell targetCell = getRealEventTargetCell(clientX, clientY,
                             getCell(targetCol, targetRow));
@@ -1091,8 +1095,10 @@ public class SheetWidget extends Panel {
                                 targetCol, targetRow);
                         crossedDown = !startCellTopLeft && !startCellTopRight;
                         crossedLeft = !startCellTopLeft && !startCellBottomLeft;
-                        clientX = WidgetUtil.getTouchOrMouseClientX(event);
-                        clientY = WidgetUtil.getTouchOrMouseClientY(event);
+                        clientX = SpreadsheetWidget
+                                .getTouchOrMouseClientX(event);
+                        clientY = SpreadsheetWidget
+                                .getTouchOrMouseClientY(event);
                         Event.setCapture(sheet);
                     }
                 }
@@ -1125,8 +1131,8 @@ public class SheetWidget extends Panel {
         }
 
         // Update scroll deltas
-        int y = WidgetUtil.getTouchOrMouseClientY(event);
-        int x = WidgetUtil.getTouchOrMouseClientX(event);
+        int y = SpreadsheetWidget.getTouchOrMouseClientY(event);
+        int x = SpreadsheetWidget.getTouchOrMouseClientX(event);
 
         if (checkScrollWhileSelecting(y, x)) {
             return;
@@ -1425,15 +1431,21 @@ public class SheetWidget extends Panel {
                                 int i = jsniUtil.isHeader(className);
                                 if (i == 1) { // row
                                     i = jsniUtil.parseHeaderIndex(className);
-                                    startRowResizeDrag(i - 1,
-                                            nativeEvent.getClientX(),
-                                            nativeEvent.getClientY());
+                                    startRowResizeDrag(
+                                            i - 1,
+                                            SpreadsheetWidget
+                                                    .getTouchOrMouseClientX(nativeEvent),
+                                            SpreadsheetWidget
+                                                    .getTouchOrMouseClientY(nativeEvent));
                                 } else if (i == 2) { // col
                                     i = jsniUtil.parseHeaderIndex(className);
                                     columnResizeCancelled = false;
-                                    startColumnResizeDrag(i - 1,
-                                            nativeEvent.getClientX(),
-                                            nativeEvent.getClientY());
+                                    startColumnResizeDrag(
+                                            i - 1,
+                                            SpreadsheetWidget
+                                                    .getTouchOrMouseClientX(nativeEvent),
+                                            SpreadsheetWidget
+                                                    .getTouchOrMouseClientY(nativeEvent));
                                 }
                                 event.cancel();
                             } else if (className
@@ -1443,15 +1455,21 @@ public class SheetWidget extends Panel {
                                 int i = jsniUtil.isHeader(className);
                                 if (i == 1) { // row
                                     i = jsniUtil.parseHeaderIndex(className);
-                                    startRowResizeDrag(i,
-                                            nativeEvent.getClientX(),
-                                            nativeEvent.getClientY());
+                                    startRowResizeDrag(
+                                            i,
+                                            SpreadsheetWidget
+                                                    .getTouchOrMouseClientX(nativeEvent),
+                                            SpreadsheetWidget
+                                                    .getTouchOrMouseClientY(nativeEvent));
                                 } else if (i == 2) { // col
                                     i = jsniUtil.parseHeaderIndex(className);
                                     columnResizeCancelled = false;
-                                    startColumnResizeDrag(i,
-                                            nativeEvent.getClientX(),
-                                            nativeEvent.getClientY());
+                                    startColumnResizeDrag(
+                                            i,
+                                            SpreadsheetWidget
+                                                    .getTouchOrMouseClientX(nativeEvent),
+                                            SpreadsheetWidget
+                                                    .getTouchOrMouseClientY(nativeEvent));
                                 }
                                 event.cancel();
                             }
@@ -1459,15 +1477,15 @@ public class SheetWidget extends Panel {
                                 && eventTypeInt == Event.ONMOUSEMOVE) {
                             if (resizedColumnIndex != -1) {
                                 handleColumnResizeDrag(
-                                        WidgetUtil
+                                        SpreadsheetWidget
                                                 .getTouchOrMouseClientX(nativeEvent),
-                                        WidgetUtil
+                                        SpreadsheetWidget
                                                 .getTouchOrMouseClientY(nativeEvent));
                             } else if (resizedRowIndex != -1) {
                                 handleRowResizeDrag(
-                                        WidgetUtil
+                                        SpreadsheetWidget
                                                 .getTouchOrMouseClientX(nativeEvent),
-                                        WidgetUtil
+                                        SpreadsheetWidget
                                                 .getTouchOrMouseClientY(nativeEvent));
                             } else {
                                 resizing = false;
@@ -1492,12 +1510,13 @@ public class SheetWidget extends Panel {
                                 if (resizedColumnIndex != -1) {
                                     spreadsheet
                                             .removeClassName(COLUMN_RESIZING_CLASSNAME);
-                                    stopColumnResizeDrag(event.getNativeEvent()
-                                            .getClientX());
+                                    stopColumnResizeDrag(SpreadsheetWidget
+                                            .getTouchOrMouseClientX(event
+                                                    .getNativeEvent()));
                                 } else if (resizedRowIndex != -1) {
                                     spreadsheet
                                             .removeClassName(ROW_RESIZING_CLASSNAME);
-                                    stopRowResizeDrag(WidgetUtil
+                                    stopRowResizeDrag(SpreadsheetWidget
                                             .getTouchOrMouseClientY(event
                                                     .getNativeEvent()));
                                 }
