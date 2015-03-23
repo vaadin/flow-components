@@ -46,7 +46,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
+import org.apache.poi.hssf.converter.AbstractExcelUtils;
 import org.apache.poi.hssf.record.cf.CellRangeUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.PaneInformation;
@@ -1622,7 +1622,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void autofitColumn(int columnIndex) {
         final Sheet activeSheet = getActiveSheet();
         activeSheet.autoSizeColumn(columnIndex);
-        getState().colW[columnIndex] = ExcelToHtmlUtils
+        getState().colW[columnIndex] = AbstractExcelUtils
                 .getColumnWidthInPx(activeSheet.getColumnWidth(columnIndex));
         getCellValueManager().clearCacheForColumn(columnIndex + 1);
         getCellValueManager().loadCellData(firstRow, columnIndex + 1, lastRow,
@@ -2048,7 +2048,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             getState().hiddenColumnIndexes
                     .remove(getState().hiddenColumnIndexes
                             .indexOf(columnIndex + 1));
-            getState().colW[columnIndex] = ExcelToHtmlUtils
+            getState().colW[columnIndex] = AbstractExcelUtils
                     .getColumnWidthInPx(getActiveSheet().getColumnWidth(
                             columnIndex));
             getCellValueManager().clearCacheForColumn(columnIndex + 1);
@@ -2932,6 +2932,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     private void loadCellComments() {
+
+        if (firstColumn == -1) {
+            // Spreadsheet not loaded. This method will be called again.
+            return;
+        }
+
         if (getState(false).cellComments == null) {
             getState(false).cellComments = new HashMap<String, String>();
         } else {
