@@ -1416,6 +1416,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void setSheetProtected(boolean sheetProtected) {
         if (this.sheetProtected != sheetProtected) {
             this.sheetProtected = sheetProtected;
+            if (sheetProtected) {
+                addStyleName("protected");
+            } else {
+                removeStyleName("protected");
+            }
             if (loaded) {
                 if (sheetProtected) {
                     if (customCellEditorDisplayed) {

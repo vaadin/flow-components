@@ -500,6 +500,15 @@
 			}
 		}
 		
+		&.protected {
+			.rh, .ch {
+				.header-resize-dnd-first, 
+				.header-resize-dnd-second {
+					cursor: default;
+				}
+			}
+		}
+		
 		&.noheaders {
 			padding-left: 0px;
 			padding-top: $spreadsheet-toolbar-height + $spreadsheet-border-width;

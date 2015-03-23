@@ -475,6 +475,15 @@ $cell-comment-border-color: #A7A7A7 !default;
 			}
 		}
 		
+		&.protected {
+			.rh, .ch {
+				.header-resize-dnd-first, 
+				.header-resize-dnd-second {
+					cursor: default;
+				}
+			}
+		}
+		
 		&.noheaders {
 			padding-left: 0px;
 			padding-top: 30px; /* functionbar height + 1*/
