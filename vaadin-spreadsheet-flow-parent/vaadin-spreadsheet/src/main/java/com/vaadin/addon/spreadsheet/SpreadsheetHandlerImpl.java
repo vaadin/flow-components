@@ -259,79 +259,75 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             lines = text.split("\r");
         }
 
-        // Check for protected cells at target
-        int rowIndex = selectedCellReference.getRow();
-        int colIndex = -1;
+        int pasteHeight = lines.length;
+        int pasteWidth = 0;
         for (String line : lines) {
-            Row row = activesheet.getRow(rowIndex);
+            String[] tokens = splitOnTab(line);
+            pasteWidth = Math.max(pasteWidth, tokens.length);
+        }
+
+        int rowIndex = selectedCellReference.getRow();
+        int colIndex = selectedCellReference.getCol();
+
+        // Check for protected cells at target
+        for (int i = 0; i < pasteHeight; i++) {
+            Row row = activesheet.getRow(rowIndex + i);
             if (row != null) {
-                colIndex = selectedCellReference.getCol();
-                for (String s : splitOnTab(line)) {
-                    Cell cell = row.getCell(colIndex);
+                for (int j = 0; j < pasteWidth; j++) {
+                    Cell cell = row.getCell(colIndex + j);
                     if (spreadsheet.isCellLocked(cell)) {
                         protectedCellWriteAttempted();
                         return;
                     }
-                    colIndex++;
                 }
             }
-            rowIndex++;
         }
 
         CellValueCommand command = new CellValueCommand(spreadsheet);
+        CellRangeAddress affectedRange = new CellRangeAddress(rowIndex,
+                rowIndex + pasteHeight - 1, colIndex, colIndex + pasteWidth - 1);
+        command.captureCellRangeValues(affectedRange);
 
-        // Paste the values
-        rowIndex = selectedCellReference.getRow();
-        colIndex = -1;
-        for (String line : lines) {
-
-            Row row = activesheet.getRow(rowIndex);
+        for (int i = 0; i < pasteHeight; i++) {
+            String line = lines[i];
+            Row row = activesheet.getRow(rowIndex + i);
             if (row == null) {
-                row = activesheet.createRow(rowIndex);
+                row = activesheet.createRow(rowIndex + i);
             }
-
-            colIndex = selectedCellReference.getCol();
-
-            for (String cellContent : splitOnTab(line)) {
-
-                Cell cell = row.getCell(colIndex);
+            String[] tokens = splitOnTab(line);
+            for (int j = 0; j < pasteWidth; j++) {
+                Cell cell = row.getCell(colIndex + j);
                 if (cell == null) {
-                    cell = row.createCell(colIndex);
+                    cell = row.createCell(colIndex + j);
                 }
-                command.captureCellValues(new CellReference(rowIndex, colIndex));
-
-                // check for numbers
-                Double numVal = SpreadsheetUtil.parseNumber(cell, cellContent,
-                        spreadsheet.getLocale());
-                if (numVal != null) {
-                    cell.setCellType(Cell.CELL_TYPE_NUMERIC);
-                    cell.setCellValue(numVal);
+                if (j < tokens.length) {
+                    String cellContent = tokens[j];
+                    Double numVal = SpreadsheetUtil.parseNumber(cell,
+                            cellContent, spreadsheet.getLocale());
+                    if (numVal != null) {
+                        cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+                        cell.setCellValue(numVal);
+                    } else {
+                        cell.setCellValue(cellContent);
+                    }
                 } else {
-                    cell.setCellValue(cellContent);
+                    cell.setCellType(Cell.CELL_TYPE_BLANK);
+                    spreadsheet.markCellAsDeleted(cell, true);
                 }
-                colIndex++;
             }
-            rowIndex++;
         }
-        spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
 
-        // remove last increment so that selection goes correctly
-        rowIndex--;
-        colIndex--;
+        spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
 
         // might have impacted formulas outside of selection area, so just
         // reload all values
         spreadsheet.refreshAllCellValues();
 
-        CellRangeAddress region = new CellRangeAddress(
-                selectedCellReference.getRow(), rowIndex,
-                selectedCellReference.getCol(), colIndex);
-
         // re-set selection to copied area
-        spreadsheet.setSelectionRange(selectedCellReference.getRow(),
-                selectedCellReference.getCol(), rowIndex, colIndex);
+        spreadsheet.setSelectionRange(rowIndex, colIndex, rowIndex
+                + pasteHeight - 1, colIndex + pasteWidth - 1);
 
-        fireCellValueChangeEvent(region);
+        fireCellValueChangeEvent(affectedRange);
     }
 
     private void fireCellValueChangeEvent(CellRangeAddress region) {
