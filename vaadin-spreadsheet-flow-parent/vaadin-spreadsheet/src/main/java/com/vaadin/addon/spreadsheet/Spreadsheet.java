@@ -2339,7 +2339,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         conditionalFormatter = createConditionalFormatter();
 
-        getState().workbookChangeToggle = true;
+        getState().workbookChangeToggle = !getState().workbookChangeToggle;
     }
 
     /**
