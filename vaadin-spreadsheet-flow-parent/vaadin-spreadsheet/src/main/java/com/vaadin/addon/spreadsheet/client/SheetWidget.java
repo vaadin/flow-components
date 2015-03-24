@@ -3747,21 +3747,23 @@ public class SheetWidget extends Panel {
     }
 
     public void updateTopLeftCellValues(List<CellData> cellData2) {
-        Iterator<CellData> i = cellData2.iterator();
-        while (i.hasNext()) {
-            CellData cd = i.next();
-            topLeftCells.get(
-                    (cd.row - 1) * horizontalSplitPosition + cd.col - 1)
-                    .setValue(cd.value, cd.cellStyle, cd.needsMeasure);
-            String key = toKey(cd.col, cd.row);
-            if (isMergedCell(key)) {
-                getMergedCell(key).setValue(cd.value, cd.cellStyle,
-                        cd.needsMeasure);
-            }
-            if (cd.value == null) {
-                cachedCellData.remove(key);
-            } else {
-                cachedCellData.put(key, cd);
+        if (topLeftCells != null && !topLeftCells.isEmpty()) {
+            Iterator<CellData> i = cellData2.iterator();
+            while (i.hasNext()) {
+                CellData cd = i.next();
+                topLeftCells.get(
+                        (cd.row - 1) * horizontalSplitPosition + cd.col - 1)
+                        .setValue(cd.value, cd.cellStyle, cd.needsMeasure);
+                String key = toKey(cd.col, cd.row);
+                if (isMergedCell(key)) {
+                    getMergedCell(key).setValue(cd.value, cd.cellStyle,
+                            cd.needsMeasure);
+                }
+                if (cd.value == null) {
+                    cachedCellData.remove(key);
+                } else {
+                    cachedCellData.put(key, cd);
+                }
             }
         }
     }
@@ -3778,6 +3780,9 @@ public class SheetWidget extends Panel {
 
     private void updateCellData(int r1, int r2, int c1, int c2,
             ArrayList<ArrayList<Cell>> rows, List<CellData> cellData2) {
+        if (rows == null || rows.isEmpty()) {
+            return;
+        }
         Iterator<CellData> i = cellData2.iterator();
         ArrayList<Cell> row = null;
         int rowIndex = -1;
