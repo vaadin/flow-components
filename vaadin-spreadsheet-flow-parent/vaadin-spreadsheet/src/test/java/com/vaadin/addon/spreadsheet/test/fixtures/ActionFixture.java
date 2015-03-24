@@ -83,6 +83,7 @@ public class ActionFixture implements SpreadsheetFixture {
             }
         });
 
+        spreadsheet.removeDefaultActionHandler();
         spreadsheet.addActionHandler(handler);
     }
 

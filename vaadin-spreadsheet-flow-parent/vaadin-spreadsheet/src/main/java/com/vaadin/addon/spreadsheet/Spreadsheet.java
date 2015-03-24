@@ -67,6 +67,7 @@ import org.apache.xmlbeans.impl.values.XmlValueDisconnectedException;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Element;
 
+import com.vaadin.addon.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.addon.spreadsheet.client.ImageInfo;
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
 import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
@@ -206,6 +207,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     private boolean topLeftCellCommentsLoaded;
     private boolean topLeftCellHyperlinksLoaded;
+
+    private SpreadsheetDefaultActionHandler defaultActionHandler;
 
     protected int mergedRegionCounter;
 
@@ -364,6 +367,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         tables = new HashSet<SpreadsheetTable>();
         registerRpc(new SpreadsheetHandlerImpl(this));
         setSizeFull(); // Default to full size
+        defaultActionHandler = new SpreadsheetDefaultActionHandler();
+        addActionHandler(defaultActionHandler);
     }
 
     /**
@@ -395,6 +400,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void addActionHandler(Handler actionHandler) {
         contextMenuManager.addActionHandler(actionHandler);
         getState().hasActions = contextMenuManager.hasActionHandlers();
+    }
+
+    /**
+     * Removes the spreadsheet's {@link SpreadsheetDefaultActionHandler} added
+     * on {@link Spreadsheet#init()}
+     */
+    public void removeDefaultActionHandler() {
+        removeActionHandler(defaultActionHandler);
     }
 
     /*
