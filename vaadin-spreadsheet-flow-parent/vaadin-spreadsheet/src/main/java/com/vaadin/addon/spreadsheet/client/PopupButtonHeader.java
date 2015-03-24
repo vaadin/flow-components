@@ -29,7 +29,6 @@ public class PopupButtonHeader extends Widget {
 
     protected final static String CLASSNAME = PopupButtonWidget.POPUP_OVERLAY_CLASSNAME
             + "-header";
-    protected final static String CAPTION_CLASSNAME = "header-caption";
 
     private DivElement root = Document.get().createDivElement();
     private DivElement close = Document.get().createDivElement();

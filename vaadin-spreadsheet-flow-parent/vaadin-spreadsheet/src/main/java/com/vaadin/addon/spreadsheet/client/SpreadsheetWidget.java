@@ -109,7 +109,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private float[] rowH;
     private int[] colW;
 
-    private int sheets;
     /** 1-based */
     private int activeSheetIndex;
 
@@ -1167,11 +1166,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     @Override
-    public MergedRegionContainer getMergedRegionContainer() {
-        return mergedRegionContainer;
-    }
-
-    @Override
     public void onFormulaFieldFocus(String value) {
         formulaBarEditing = true;
         cancelDeferredCommit = true;
@@ -1507,15 +1501,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         return h;
     }
 
-    public final int getColHeaderIndex(String header) {
-        int x = 0;
-        for (int i = 0; i < header.length(); i++) {
-            char h = header.charAt(i);
-            x = (h - 'A' + 1) + (x * 26);
-        }
-        return x;
-    }
-
     /** Get row header for rows indexed 1.. */
     @Override
     public String getRowHeader(int row) {
@@ -1528,16 +1513,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     @Override
-    public int getDefinedCols() {
-        return colW.length;
-    }
-
-    @Override
-    public float[] getRowHeights() {
-        return rowH;
-    }
-
-    @Override
     public int[] getColWidths() {
         return colW;
     }
@@ -1545,11 +1520,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public float getDefaultRowHeight() {
         return defRowH;
-    }
-
-    @Override
-    public int getDefaultColumnWidth() {
-        return defColW;
     }
 
     @Override
@@ -1570,16 +1540,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public int getMaxRows() {
         return rows;
-    }
-
-    @Override
-    public int getActiveSheetIndex() {
-        return activeSheetIndex;
-    }
-
-    @Override
-    public int getNumberOfSheets() {
-        return sheets;
     }
 
     @Override
@@ -1692,11 +1652,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void setTouchMode(boolean touchMode) {
         this.touchMode = touchMode;
-    }
-
-    @Override
-    public SheetTabSheet getSheetTabSheet() {
-        return sheetTabSheet;
     }
 
     @Override

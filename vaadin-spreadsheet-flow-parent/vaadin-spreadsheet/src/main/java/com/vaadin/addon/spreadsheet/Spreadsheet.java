@@ -2845,15 +2845,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
     }
 
-    /**
-     * Triggers image reload from POI model (only if there are images present).
-     */
-    void triggerImageReload() {
-        if (sheetImages != null) {
-            reloadImageSizesFromPOI = true;
-        }
-    }
-
     private void loadImages() {
         if (sheetImages.isEmpty()) {
             getState().resourceKeyToImage = null;

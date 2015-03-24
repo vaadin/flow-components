@@ -3704,19 +3704,6 @@ public class SheetWidget extends Panel {
         }
     }
 
-    /**
-     *
-     * @param col
-     *            1-based
-     * @param row
-     *            1-based
-     * @return
-     */
-    public boolean isLinkCell(int col, int row) {
-        return cellLinksMap != null
-                && cellLinksMap.containsKey(toKey(col, row));
-    }
-
     private void updateCellLinkTooltip(int eventTypeInt, int col, int row,
             String tooltip) {
         if (eventTypeInt == Event.ONMOUSEOVER) {

@@ -17,22 +17,12 @@ package com.vaadin.addon.spreadsheet.client;
  * #L%
  */
 
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.StyleElement;
 
 public class SheetJsniUtil {
 
     private int parsedCol;
     private int parsedRow;
-
-    public native void setSelectionRange(Element elem, int pos, int length)
-    /*-{
-        try {
-            elem.setSelectionRange(pos, pos + length);
-        } catch (e) {
-            // Firefox throws exception if TextBox is not visible, even if attached
-        }
-    }-*/;
 
     public final native void parseColRow(String str)
     /*-{
@@ -132,58 +122,6 @@ public class SheetJsniUtil {
         var cssText = stylesheet.sheet.cssRules[ruleindex].cssText.replace(oldSelector, selector);
         stylesheet.sheet.deleteRule(ruleindex);
         return stylesheet.sheet.insertRule(cssText, ruleindex);
-    }-*/;
-
-    /**
-     * Adds the given selector into the specific rule in the stylesheet. The
-     * selector should be a single selector or a list of selectors, but should
-     * NOT end in a comma (",").
-     * 
-     * @param stylesheet
-     * @param selector
-     * @param ruleindex
-     */
-    public native int addSelector(StyleElement stylesheet, String selector,
-            int ruleindex)
-    /*-{
-        var cssText = selector + ","+stylesheet.sheet.cssRules[ruleindex].cssText;
-        stylesheet.sheet.deleteRule(ruleindex);
-        return stylesheet.sheet.insertRule(cssText, ruleindex);
-     }-*/;
-
-    public native String getSelector(StyleElement stylesheet, int ruleindex)
-    /*-{
-        var classes = stylesheet.sheet.cssRules;
-        if (ruleindex < classes.length) {
-            var x = classes[ruleindex].selectorText;
-            return x;
-        }
-        return null;
-    }-*/;
-
-    /** Search and update a given CSS rule in a stylesheet */
-    public native void updateCSSRule(StyleElement stylesheet, String selector,
-            String property, String value)
-    /*-{
-            var classes = stylesheet.sheet.cssRules;
-            for(var x=0;x<classes.length;x++) {
-                    if(classes[x].selectorText.toLowerCase()==selector) {
-                            classes[x].style[property]=value;
-                    }
-            }       
-    }-*/;
-
-    public native void updateCSSRuleWithIndex(StyleElement stylesheet,
-            int index, String property, String value)
-    /*-{
-            stylesheet.sheet.cssRules[index].style[property]=value;
-    }-*/;
-
-    public native int replaceCssRule(StyleElement stylesheet, String css,
-            int ruleindex)
-    /*-{
-        stylesheet.sheet.deleteRule(ruleindex);
-        return stylesheet.sheet.insertRule(css, ruleindex);
     }-*/;
 
     /** Clears the rules starting from the given index */

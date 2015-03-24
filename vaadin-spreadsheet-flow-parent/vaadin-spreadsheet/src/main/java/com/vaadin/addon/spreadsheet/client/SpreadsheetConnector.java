@@ -340,7 +340,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                 stateChangeEvent.hasPropertyChanged("workbookChangeToggle"));
         widget.setSheetProtected(state.sheetProtected);
         widget.load();
-        getWidget().updateMergedRegions(getState().mergedRegions);
+        widget.updateMergedRegions(state.mergedRegions);
+
     }
 
     private void loadStateChangeDataToWidget(StateChangeEvent stateChangeEvent) {

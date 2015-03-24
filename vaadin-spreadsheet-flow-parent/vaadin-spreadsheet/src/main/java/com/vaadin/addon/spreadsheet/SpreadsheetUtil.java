@@ -29,17 +29,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 
 /**
  * Utility class for miscellaneous Spreadsheet operations.
@@ -58,29 +53,6 @@ public class SpreadsheetUtil implements Serializable {
 
     private static final int[] UNIT_OFFSET_MAP = new int[] { 0, 36, 73, 109,
             146, 182, 219 };
-
-    /**
-     * Column width measured as the number of characters of the maximum digit
-     * width of the numbers 0, 1, 2, ..., 9 as rendered in the normal style's
-     * font. There are 4 pixels of margin padding (two on each side), plus 1
-     * pixel padding for the grid lines.
-     * 
-     * This value is the same for default font in Office 2007 (Calibri) and
-     * Office 2003 and earlier (Arial)
-     */
-    private static float DEFAULT_COLUMN_WIDTH = 9.140625f;
-
-    /**
-     * The width of 1px in columns with default width in units of 1/256 of a
-     * character width.
-     */
-    private static final float PX_DEFAULT = 32.00f;
-
-    /**
-     * The width of 1px in columns with overridden width in units of 1/256 of a
-     * character width
-     */
-    private static final float PX_MODIFIED = 36.56f;
 
     /**
      * Translates cell coordinates to a cell key used to identify cells in the
@@ -229,37 +201,6 @@ public class SpreadsheetUtil implements Serializable {
         matcher.find(); // find first digit (col)
         matcher.find(); // find second digit (row)
         return Integer.valueOf(matcher.group());
-    }
-
-    /**
-     * Gets the width of the column at the given index. Value is returned as
-     * pixels.
-     * 
-     * @param sheet
-     *            Target sheet
-     * @param columnIndex
-     *            Column index, 0-based
-     * @return Width of the column in PX
-     */
-    static float getColumnWidthInPixels(Sheet sheet, int columnIndex) {
-        // TODO investigate why the default column width gets a different value
-        // using this compared to
-        // ExcelToHtmlUtils.getColumnWidthInPx(widthUnits).
-        if (sheet instanceof XSSFSheet) {
-            CTCol col = ((XSSFSheet) sheet).getColumnHelper().getColumn(
-                    columnIndex, false);
-            double numChars = col == null || !col.isSetWidth() ? DEFAULT_COLUMN_WIDTH
-                    : col.getWidth();
-            return (float) numChars * XSSFWorkbook.DEFAULT_CHARACTER_WIDTH;
-        } else if (sheet instanceof HSSFSheet) {
-            int cw = sheet.getColumnWidth(columnIndex);
-            int def = sheet.getDefaultColumnWidth() * 256;
-            float px = cw == def ? PX_DEFAULT : PX_MODIFIED;
-            return cw / px;
-        } else {
-            return ExcelToHtmlUtils.getColumnWidthInPx(sheet
-                    .getColumnWidth(columnIndex));
-        }
     }
 
     /**

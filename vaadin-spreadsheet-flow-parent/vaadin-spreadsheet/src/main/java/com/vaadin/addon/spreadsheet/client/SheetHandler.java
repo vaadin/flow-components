@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.dom.client.NativeEvent;
-import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
 
 public interface SheetHandler {
 
@@ -74,15 +73,8 @@ public interface SheetHandler {
      */
     float getDefaultRowHeight();
 
-    int getDefaultColumnWidth();
-
     /** Number of defined rows in the spreadsheet */
     int getDefinedRows();
-
-    /** Number of defined columns in the spreadsheet */
-    int getDefinedCols();
-
-    float[] getRowHeights();
 
     int[] getColWidths();
 
@@ -116,10 +108,6 @@ public interface SheetHandler {
 
     /** Get header of a row as HTML. Rows are indexed from 1 to getRows(). */
     String getRowHeader(int row);
-
-    int getActiveSheetIndex();
-
-    int getNumberOfSheets();
 
     /**
      * The maximum amount of columns that are visible
@@ -223,8 +211,6 @@ public interface SheetHandler {
      */
     MergedRegion getMergedRegionStartingFrom(int col, int row);
 
-    MergedRegionContainer getMergedRegionContainer();
-
     void onRedoPress();
 
     void onUndoPress();
@@ -244,8 +230,6 @@ public interface SheetHandler {
      * cleared
      */
     void clearSelectedCellsOnCut();
-
-    SheetTabSheet getSheetTabSheet();
 
     FormulaBarWidget getFormulaBarWidget();
 
