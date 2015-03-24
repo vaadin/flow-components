@@ -57,13 +57,15 @@ public class SheetEventListener implements EventListener {
     public void onBrowserEvent(Event event) {
         if (((Element) event.getEventTarget().cast()).getClassName().contains(
                 PopupButtonWidget.BUTTON_CLASSNAME)) {
+            widget.setFocused(true);
             return;
         }
-
         final int typeInt = event.getTypeInt();
         if (typeInt == Event.ONFOCUS) {
+            widget.setFocused(true);
             sheetFocused = true;
         } else if (typeInt == Event.ONBLUR) {
+            widget.setFocused(false);
             sheetFocused = false;
         } else if (typeInt == Event.ONTOUCHMOVE) {
             // just let the browser scroll, ONSCROLL will result in correct

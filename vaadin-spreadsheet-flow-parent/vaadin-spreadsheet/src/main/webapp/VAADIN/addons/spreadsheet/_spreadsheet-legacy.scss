@@ -649,6 +649,10 @@ $cell-comment-border-color: #A7A7A7 !default;
 			}
 		}
 		
+		&.notfocused .sheet-selection {
+			opacity: 0.6;
+		}
+		
 		.sheet-selection {
 			.s-top, .s-left, .s-bottom, .s-right {
 				padding: 0;	
@@ -987,7 +991,8 @@ $cell-comment-border-color: #A7A7A7 !default;
 		-moz-box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
 		box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.75);
 		padding: 10px;
-		overflow: auto !important;
+		overflow-y: auto !important;
+		overflow-x: hidden !important;
 		
 		.popupContent {
 			overflow: visible;

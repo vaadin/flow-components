@@ -30,12 +30,14 @@ public interface FormulaBarHandler {
 
     void onFormulaEnter(String value);
 
-    void onFormulaTab(String value);
+    void onFormulaTab(String value, boolean focusSheet);
 
     void onFormulaEsc();
 
     void onFormulaValueChange(String value);
 
     boolean isTouchMode();
+
+    void setSheetFocused(boolean focused);
 
 }

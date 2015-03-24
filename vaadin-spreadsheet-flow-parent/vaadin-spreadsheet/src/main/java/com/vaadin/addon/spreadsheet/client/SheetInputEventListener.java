@@ -157,12 +157,14 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
 
     @Override
     public void onFocus(FocusEvent event) {
+        widget.setFocused(true);
         widget.getSheetHandler().onCellInputFocus();
         event.stopPropagation();
     }
 
     @Override
     public void onBlur(BlurEvent event) {
+        widget.setFocused(false);
         if (widget.isEditingCell()) {
             widget.getSheetHandler().onCellInputBlur(input.getValue());
         }

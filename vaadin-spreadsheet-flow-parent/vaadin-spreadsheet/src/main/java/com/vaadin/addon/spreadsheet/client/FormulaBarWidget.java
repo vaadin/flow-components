@@ -83,9 +83,11 @@ public class FormulaBarWidget extends Composite {
                         handler.onAddressFieldEsc();
                     }
                 } else if (type == Event.ONFOCUS) {
+                    handler.setSheetFocused(true);
                     addressField.getElement().getStyle()
                             .setTextAlign(TextAlign.LEFT);
                 } else {
+                    handler.setSheetFocused(false);
                     addressField.getElement().getStyle().clearTextAlign();
                 }
             }
@@ -98,10 +100,12 @@ public class FormulaBarWidget extends Composite {
             public void onBrowserEvent(Event event) {
                 switch (event.getTypeInt()) {
                 case Event.ONFOCUS:
+                    handler.setSheetFocused(true);
                     cachedFunctionFieldValue = formulaField.getValue();
                     handler.onFormulaFieldFocus(cachedFunctionFieldValue);
                     break;
                 case Event.ONBLUR:
+                    handler.setSheetFocused(false);
                     handler.onFormulaFieldBlur(formulaField.getValue());
                     break;
                 case Event.ONKEYDOWN:
@@ -159,7 +163,7 @@ public class FormulaBarWidget extends Composite {
             event.preventDefault();
             break;
         case KeyCodes.KEY_TAB:
-            handler.onFormulaTab(formulaField.getValue());
+            handler.onFormulaTab(formulaField.getValue(), !event.getShiftKey());
             event.stopPropagation();
             break;
         case KeyCodes.KEY_ESCAPE:

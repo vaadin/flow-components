@@ -40,6 +40,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Display;
@@ -525,6 +526,7 @@ public class SheetWidget extends Panel {
         cellCommentOverlay = new CellComment(this, sheet);
         cellCommentOverlay.bringForward();
         initDOM();
+        addStyleName("notfocused");
 
         selectionWidget = new SelectionWidget(view, this);
         copyPasteBox = new CopyPasteTextBox(this, getCopyPasteHandler());
@@ -1408,6 +1410,16 @@ public class SheetWidget extends Panel {
                     public void onPreviewNativeEvent(NativePreviewEvent event) {
                         int eventTypeInt = event.getTypeInt();
                         final NativeEvent nativeEvent = event.getNativeEvent();
+                        if (getElement().isOrHasChild(
+                                (Node) nativeEvent.getEventTarget().cast())) {
+                            if (Event.ONTOUCHSTART == eventTypeInt
+                                    || Event.ONMOUSEDOWN == eventTypeInt
+                                    || Event.ONMOUSEUP == eventTypeInt
+                                    || Event.ONDBLCLICK == eventTypeInt
+                                    || Event.ONCLICK == eventTypeInt) {
+                                setFocused(true);
+                            }
+                        }
                         if (resizing && eventTypeInt == Event.ONMOUSEMOVE) {
                             if (resizedColumnIndex != -1) {
                                 handleColumnResizeDrag(
@@ -4771,7 +4783,7 @@ public class SheetWidget extends Panel {
         }
     }
 
-    public void stopEditingCell() {
+    public void stopEditingCell(boolean focusSheet) {
         editingCell = false;
         editingMergedCell = false;
         sheetInputEventListener.cellEditingStopped();
@@ -4782,7 +4794,9 @@ public class SheetWidget extends Panel {
         input.setWidth("0");
         input.setHeight("");
         input.setStyleName("");
-        focusSheet();
+        if (focusSheet) {
+            focusSheet();
+        }
     }
 
     public void focusSheet() {
@@ -5594,5 +5608,13 @@ public class SheetWidget extends Panel {
 
     boolean isMac() {
         return isMac;
+    }
+
+    public void setFocused(final boolean focused) {
+        if (focused) {
+            removeStyleName("notfocused");
+        } else {
+            addStyleName("notfocused");
+        }
     }
 }

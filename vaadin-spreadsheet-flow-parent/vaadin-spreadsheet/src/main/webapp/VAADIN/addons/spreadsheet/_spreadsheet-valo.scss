@@ -661,6 +661,10 @@
 			}
 		}
 		
+		&.notfocused .sheet-selection {
+			opacity: 0.6;
+		}
+		
 		.sheet-selection {
 			.s-top, .s-left, .s-bottom, .s-right {
 				padding: 0;	
@@ -975,7 +979,7 @@
 		@include valo-overlay-style;
 		padding: round($spreadsheet-base-font-size / 2);
 		overflow-y: auto !important;
-		overflow-x: hidden;
+		overflow-x: hidden !important;
 		
 		.popupContent {
 			overflow: visible;
