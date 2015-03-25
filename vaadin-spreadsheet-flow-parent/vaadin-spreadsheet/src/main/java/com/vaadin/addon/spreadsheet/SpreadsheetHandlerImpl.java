@@ -260,7 +260,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         }
 
         int pasteHeight = lines.length;
-        int pasteWidth = 0;
+        int pasteWidth = 1;
         for (String line : lines) {
             String[] tokens = splitOnTab(line);
             pasteWidth = Math.max(pasteWidth, tokens.length);
