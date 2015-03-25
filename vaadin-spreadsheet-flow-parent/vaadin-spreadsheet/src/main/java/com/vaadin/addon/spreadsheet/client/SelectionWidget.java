@@ -1036,10 +1036,14 @@ public class SelectionWidget extends Composite {
      * @param cursorPosition
      *            the position of the cursor relative to startIndex. Can be
      *            negative
+     * @param forSelection
+     *            true if the result is used for touch selection, false if it's
+     *            used for painting cells
      * @return
      */
     public int closestCellEdgeIndexToCursor(int cellSizes[], int startIndex,
-            int cursorPosition) {
+            int cursorPosition, boolean forSelection) {
+        int result = 0;
         int pos = 0;
         if (cursorPosition < 0) {
             if (startIndex > 1) {
@@ -1047,9 +1051,12 @@ public class SelectionWidget extends Composite {
                     startIndex--;
                     pos -= cellSizes[startIndex - 1];
                 }
-                return startIndex;
+                if (forSelection && pos < cursorPosition) {
+                    startIndex++;
+                }
+                result = startIndex;
             } else {
-                return 1;
+                result = 1;
             }
         } else {
             if (startIndex < cellSizes.length) {
@@ -1057,11 +1064,12 @@ public class SelectionWidget extends Composite {
                     pos += cellSizes[startIndex - 1];
                     startIndex++;
                 }
-                return startIndex;
+                result = startIndex;
             } else {
-                return cellSizes.length;
+                result = cellSizes.length;
             }
         }
+        return forSelection ? result : result - 1;
     }
 
     private void beginPaintingCells(Event event) {
@@ -1173,14 +1181,12 @@ public class SelectionWidget extends Composite {
 
         final int[] colWidths = handler.getColWidths();
         final int[] rowHeightsPX = handler.getRowHeightsPX();
-        final int colIndex = closestCellEdgeIndexToCursor(colWidths,
-                selectionStartCol, xMousePos);
-        final int rowIndex = closestCellEdgeIndexToCursor(rowHeightsPX,
-                selectionStartRow, yMousePos);
-        tempCol = colIndex;
-        tempRow = rowIndex;
-        sheetWidget.getSheetHandler().onSelectingCellsWithDrag(colIndex,
-                rowIndex);
+        tempCol = closestCellEdgeIndexToCursor(colWidths, selectionStartCol,
+                xMousePos, true);
+        tempRow = closestCellEdgeIndexToCursor(rowHeightsPX, selectionStartRow,
+                yMousePos, true);
+        sheetWidget.getSheetHandler()
+                .onSelectingCellsWithDrag(tempCol, tempRow);
     }
 
     private void stopSelectingCells(Event event) {
@@ -1433,8 +1439,10 @@ public class SelectionWidget extends Composite {
 
         final int[] colWidths = handler.getColWidths();
         final int[] rowHeightsPX = handler.getRowHeightsPX();
-        int col = closestCellEdgeIndexToCursor(colWidths, col1, xMousePos) - 1;
-        int row = closestCellEdgeIndexToCursor(rowHeightsPX, row1, yMousePos) - 1;
+        int col = closestCellEdgeIndexToCursor(colWidths, col1, xMousePos,
+                false);
+        int row = closestCellEdgeIndexToCursor(rowHeightsPX, row1, yMousePos,
+                false);
 
         if (col >= 0 && row >= 0) {
             updatePaintRectangle(clientX, clientY, col, row);
