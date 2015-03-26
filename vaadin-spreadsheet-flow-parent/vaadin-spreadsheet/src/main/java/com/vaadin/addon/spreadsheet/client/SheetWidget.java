@@ -63,6 +63,7 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
+import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.ComputedStyle;
 import com.vaadin.client.MeasuredSize;
 import com.vaadin.client.WidgetUtil;
@@ -495,7 +496,13 @@ public class SheetWidget extends Panel {
     private boolean crossedDown;
     private boolean crossedLeft;
 
+    private boolean isMac;
+
     public SheetWidget(SheetHandler view, boolean touchMode) {
+        String ua = BrowserInfo.getBrowserString().toLowerCase();
+        isMac = ua.contains("macintosh") || ua.contains("mac osx")
+                || ua.contains("mac os x");
+
         actionHandler = view;
         setTouchMode(touchMode);
         cachedCellData = new HashMap<String, CellData>();
@@ -5581,5 +5588,9 @@ public class SheetWidget extends Panel {
         CellData data = getCellData(getSelectedCellColumn(),
                 getSelectedCellRow());
         return data != null && data.isPercentage;
+    }
+
+    boolean isMac() {
+        return isMac;
     }
 }

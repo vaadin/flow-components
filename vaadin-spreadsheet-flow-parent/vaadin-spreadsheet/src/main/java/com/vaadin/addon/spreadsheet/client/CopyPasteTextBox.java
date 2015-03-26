@@ -106,7 +106,8 @@ public class CopyPasteTextBox extends TextArea implements NativePreviewHandler {
     }
 
     private void onKeyDown(final NativeEvent event) {
-        boolean metaOrCtrlPressed = event.getCtrlKey() || event.getMetaKey();
+        boolean metaOrCtrlPressed = (!widget.isMac() && event.getCtrlKey())
+                || event.getMetaKey();
         Element cast = event.getEventTarget().cast();
         boolean sheetFocused = widget.isSheetElement(cast);
         if (!metaOrCtrlPressed || !sheetFocused) {

@@ -29,11 +29,11 @@ public class SheetEventListener implements EventListener {
 
     private boolean sheetFocused;
 
-    public SheetEventListener() {
-    }
+    private boolean isMac;
 
     public void setSheetWidget(SheetWidget sheetWidget) {
         widget = sheetWidget;
+        isMac = sheetWidget.isMac();
     }
 
     public void setSheetPaneElement(Element topLeftPane, Element topRightPane,
@@ -170,21 +170,21 @@ public class SheetEventListener implements EventListener {
                 }
                 break;
             case 89: // y
-                if (event.getCtrlKey() || event.getMetaKey()) {
+                if ((!isMac && event.getCtrlKey()) || event.getMetaKey()) {
                     widget.getSheetHandler().onRedoPress();
                     event.preventDefault();
                     event.stopPropagation();
                 }
                 break;
             case 90: // z
-                if (event.getCtrlKey() || event.getMetaKey()) {
+                if ((!isMac && event.getCtrlKey()) || event.getMetaKey()) {
                     widget.getSheetHandler().onUndoPress();
                     event.preventDefault();
                     event.stopPropagation();
                 }
                 break;
             case 65: // a
-                if (event.getCtrlKey() || event.getMetaKey()) {
+                if ((!isMac && event.getCtrlKey()) || event.getMetaKey()) {
                     widget.getSheetHandler().selectAll();
                     event.preventDefault();
                     event.stopPropagation();
@@ -227,7 +227,7 @@ public class SheetEventListener implements EventListener {
                     event.stopPropagation();
                     break;
                 }
-            } else {
+            } else if (!event.getCtrlKey() && !event.getMetaKey()) {
                 widget.getSheetHandler().onSheetKeyPress(
                         event,
                         widget.getSheetJsniUtil().convertUnicodeIntoCharacter(
