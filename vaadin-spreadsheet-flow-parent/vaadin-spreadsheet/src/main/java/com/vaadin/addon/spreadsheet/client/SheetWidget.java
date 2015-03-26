@@ -1941,17 +1941,15 @@ public class SheetWidget extends Panel {
 
     private int createRowStyles(String[] rules, int startIndex, int endIndex) {
         int top = 0;
-        String stylePrimaryName = getStylePrimaryName();
         for (int i = startIndex; i <= endIndex; i++) {
             StringBuilder sb = new StringBuilder();
             float rowHeight = actionHandler.getRowHeight(i);
             int rowHeightPX = convertPointsToPixel(rowHeight);
-            sb.append(".").append(stylePrimaryName).append(" .sheet .row")
-                    .append(i).append(", .").append(stylePrimaryName)
-                    .append(">.resize-line.row").append(i).append(" { ")
-                    .append(getRowDisplayString(i)).append("height: ")
-                    .append(rowHeightPX).append("px; top:").append(top)
-                    .append("px; }\n");
+            sb.append(".").append(sheetId).append(" .sheet .row").append(i)
+                    .append(", .").append(sheetId).append(">.resize-line.row")
+                    .append(i).append(" { ").append(getRowDisplayString(i))
+                    .append("height: ").append(rowHeightPX).append("px; top:")
+                    .append(top).append("px; }\n");
             top += rowHeightPX;
             definedRowHeights[i - 1] = rowHeightPX;
             rules[i - 1] = sb.toString();
@@ -1962,16 +1960,14 @@ public class SheetWidget extends Panel {
     private int createColumnStyles(String[] rules, int ruleIndex,
             int startIndex, int endIndex) {
         int left = 0;
-        String stylePrimaryName = getStylePrimaryName();
         for (int i = startIndex; i <= endIndex; i++) {
             StringBuilder sb = new StringBuilder();
             int colWidth = actionHandler.getColWidth(i);
-            sb.append(".").append(stylePrimaryName).append(" .sheet .col")
-                    .append(i).append(", .").append(stylePrimaryName)
-                    .append(">.resize-line.col").append(i).append(" { ")
-                    .append(getColumnDisplayString(i)).append("width: ")
-                    .append(colWidth).append("px; left:").append(left)
-                    .append("px; }\n");
+            sb.append(".").append(sheetId).append(" .sheet .col").append(i)
+                    .append(", .").append(sheetId).append(">.resize-line.col")
+                    .append(i).append(" { ").append(getColumnDisplayString(i))
+                    .append("width: ").append(colWidth).append("px; left:")
+                    .append(left).append("px; }\n");
             left += colWidth;
             rules[ruleIndex++] = sb.toString();
         }

@@ -61,7 +61,20 @@ public class MultipleSpreadsheetUI extends UI {
                 });
 
         layout.addComponent(button);
-
+        layout.addComponent(new Button("change freeze panes",
+                new Button.ClickListener() {
+                    @Override
+                    public void buttonClick(ClickEvent event) {
+                        spreadsheet.createFreezePane(6, 6);
+                    }
+                }));
+        layout.addComponent(new Button("remove freeze panes",
+                new Button.ClickListener() {
+                    @Override
+                    public void buttonClick(ClickEvent event) {
+                        spreadsheet.createFreezePane(0, 0);
+                    }
+                }));
         spreadsheet = new Spreadsheet(createWorkbook());
         spreadsheet.setSizeFull();
         verticalSplitPanel.addComponent(spreadsheet);
