@@ -21,6 +21,8 @@ public class TestUIProviderImpl extends UIProvider {
             return PushTestCase.class;
         } else if (name.contains(TouchUI.class.getSimpleName())) {
             return TouchUI.class;
+        } else if (name.contains(MultipleSpreadsheetUI.class.getSimpleName())) {
+            return MultipleSpreadsheetUI.class;
         }
         return null;
     }

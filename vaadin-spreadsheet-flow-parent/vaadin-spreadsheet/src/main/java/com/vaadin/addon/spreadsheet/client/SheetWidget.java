@@ -2159,16 +2159,12 @@ public class SheetWidget extends Panel {
             try {
                 for (Entry<Integer, String> entry : styles.entrySet()) {
                     if (entry.getKey() == 0) {
-                        jsniUtil.insertRule(
-                                sheetStyle,
-                                ".v-spreadsheet .sheet .cell {"
-                                        + entry.getValue() + "}");
+                        jsniUtil.insertRule(sheetStyle, "." + sheetId
+                                + " .sheet .cell {" + entry.getValue() + "}");
                     } else {
-                        jsniUtil.insertRule(
-                                sheetStyle,
-                                ".v-spreadsheet .sheet .cell.cs"
-                                        + entry.getKey() + " {"
-                                        + entry.getValue() + "}");
+                        jsniUtil.insertRule(sheetStyle, "." + sheetId
+                                + " .sheet .cell." + "cs" + entry.getKey()
+                                + " {" + entry.getValue() + "}");
                     }
                 }
             } catch (Exception e) {
