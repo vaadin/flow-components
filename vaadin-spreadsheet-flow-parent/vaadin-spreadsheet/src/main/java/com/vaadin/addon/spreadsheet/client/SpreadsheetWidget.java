@@ -989,11 +989,23 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 break;
             case KeyCodes.KEY_F2:
             case KeyCodes.KEY_ENTER:
-                if (isSelectedCellHidden()) {
-                    if (KeyCodes.KEY_ENTER == event.getKeyCode()) {
+                if (KeyCodes.KEY_ENTER == event.getKeyCode()) {
+                    if (isSelectedCellHidden()) {
                         selectionHandler.moveSelectionDown(true);
+                        break;
+                    } else {
+                        if (sheetWidget.getSelectionLeftCol() != sheetWidget
+                                .getSelectionRightCol()
+                                || sheetWidget.getSelectionTopRow() != sheetWidget
+                                        .getSelectionBottomRow()) {
+                            if (event.getShiftKey()) {
+                                selectionHandler.moveSelectionUp(false);
+                            } else {
+                                selectionHandler.moveSelectionDown(false);
+                            }
+                            break;
+                        }
                     }
-                    break;
                 }
                 checkEditableAndNotify();
                 if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
