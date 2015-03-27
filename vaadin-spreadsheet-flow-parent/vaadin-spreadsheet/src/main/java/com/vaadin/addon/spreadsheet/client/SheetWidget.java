@@ -4473,7 +4473,9 @@ public class SheetWidget extends Panel {
         DivElement element = selectedCell.getElement();
         element.addClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
         element.appendChild(customEditorWidget.getElement());
-        adopt(customEditorWidget);
+        if (parent != null && !equals(parent)) {
+            adopt(customEditorWidget);
+        }
 
         focusSheet();
     }
