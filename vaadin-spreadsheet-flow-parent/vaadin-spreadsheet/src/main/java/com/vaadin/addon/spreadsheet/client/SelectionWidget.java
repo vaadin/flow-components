@@ -1087,6 +1087,8 @@ public class SelectionWidget extends Composite {
         tempCol = col2;
         tempRow = row2;
         paintMode = true;
+        decreaseSelection = false;
+        increaseSelection = false;
         storeEventPos(event);
         DOM.setCapture(getElement());
         event.preventDefault();
