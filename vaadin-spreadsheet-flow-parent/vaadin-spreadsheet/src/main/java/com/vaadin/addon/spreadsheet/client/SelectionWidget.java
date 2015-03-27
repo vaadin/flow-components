@@ -23,6 +23,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -533,6 +534,16 @@ public class SelectionWidget extends Composite {
             this.minColumn = minColumn;
             this.maxColumn = maxColumn;
         }
+
+        @Override
+        public void setVisible(boolean visible) {
+            super.setVisible(visible);
+            if (visible) {
+                getElement().getStyle().clearOverflow();
+            } else {
+                getElement().getStyle().setOverflow(Overflow.HIDDEN);
+            }
+        }
     }
 
     private final SelectionOutlineWidget bottomRight;
@@ -970,6 +981,9 @@ public class SelectionWidget extends Composite {
 
     @Override
     public void setVisible(boolean visible) {
+        if (visible == isVisible()) {
+            return;
+        }
         super.setVisible(visible);
         if (topLeft != null) {
             topLeft.setVisible(visible);
@@ -983,6 +997,9 @@ public class SelectionWidget extends Composite {
     }
 
     public void setPaintVisible(boolean visible) {
+        if (visible == isPaintVisible()) {
+            return;
+        }
         paintBottomRight.setVisible(visible);
         if (paintTopLeft != null) {
             paintTopLeft.setVisible(visible);
@@ -994,6 +1011,13 @@ public class SelectionWidget extends Composite {
             paintBottomLeft.setVisible(visible);
         }
         setSelectionWidgetSquaresVisible(!visible);
+    }
+
+    private boolean isPaintVisible() {
+        return paintBottomRight.isVisible() || paintBottomLeft != null
+                && paintBottomLeft.isVisible() || paintTopRight != null
+                && paintTopRight.isVisible() || paintTopLeft != null
+                && paintTopLeft.isVisible();
     }
 
     @Override
