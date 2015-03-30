@@ -32,6 +32,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ComputedStyle;
+import com.vaadin.client.WidgetUtil;
 
 public class SheetTabSheet extends Widget {
 
@@ -79,7 +80,7 @@ public class SheetTabSheet extends Widget {
 
     private int tabScrollIndex;
 
-    private int tabScrollMargin;
+    private double tabScrollMargin;
 
     private boolean readOnly;
 
@@ -274,9 +275,10 @@ public class SheetTabSheet extends Widget {
         return infoLabel.getInnerText();
     }
 
-    private int getTabWidth(int index) {
+    private double getTabWidth(int index) {
         Element tab = ((Element) tabs.get(index).cast());
-        int result = tab.getOffsetWidth();
+        double result = WidgetUtil
+                .getRequiredWidthBoundingClientRectDouble(tab);
         ComputedStyle cs = new ComputedStyle(tab);
         result += cs.getMargin()[1];
         result += cs.getMargin()[3];
@@ -329,7 +331,7 @@ public class SheetTabSheet extends Widget {
         int selectedTabAbsoluteRight = selectedTab.getAbsoluteRight() + 10;
         while (selectedTabAbsoluteRight > rootAbsoluteRight
                 && tabScrollIndex < (tabs.length() - 1)) {
-            int width = getTabWidth(tabScrollIndex);
+            double width = getTabWidth(tabScrollIndex);
             selectedTabAbsoluteRight -= width;
             tabScrollMargin -= width;
             tabScrollIndex++;
