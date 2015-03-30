@@ -53,10 +53,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
             Element parentElement = root.getParentElement();
             final int absoluteBottom = parentElement.getAbsoluteBottom();
             final int absoluteRight = parentElement.getAbsoluteRight();
-            int left = absoluteRight;
-            if ((absoluteRight + offsetWidth) > sheet.getAbsoluteRight()) {
-                left = parentElement.getAbsoluteLeft() - offsetWidth;
-            }
+            int left = absoluteRight - offsetWidth;
             if (left < sheet.getAbsoluteLeft()) {
                 left = absoluteRight;
             }
