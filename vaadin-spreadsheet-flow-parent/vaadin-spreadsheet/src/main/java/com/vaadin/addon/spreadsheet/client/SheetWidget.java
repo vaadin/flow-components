@@ -1133,7 +1133,7 @@ public class SheetWidget extends Panel {
          * Touch.getTarget() is the equivalent of event.getTarget(). Of course,
          * Safari doesn't follow the specifications; all target references are
          * to the element where we started the drag.
-         * 
+         *
          * We need to manually parse x/y coords in #getRealEventTargetCell() to
          * find the correct cell.
          */
@@ -1165,7 +1165,7 @@ public class SheetWidget extends Panel {
              * Parse according to classname of target element. As said above,
              * Safari gives us the wrong target and hence we have the wrong
              * style name here.
-             * 
+             *
              * This also means that if we move outside the sheet, we continue
              * execution past this check.
              */
@@ -2158,7 +2158,7 @@ public class SheetWidget extends Panel {
                     Integer key = list.get(i);
                     String val = styles.get(key);
 
-                    jsniUtil.insertRule(sheetStyle, "." + sheetId
+                    jsniUtil.insertRule(sheetStyle, ".v-spreadsheet." + sheetId
                             + " .sheet .cell.cf" + key + " {" + val + "}");
                 }
             } catch (Exception e) {
@@ -2177,12 +2177,15 @@ public class SheetWidget extends Panel {
             try {
                 for (Entry<Integer, String> entry : styles.entrySet()) {
                     if (entry.getKey() == 0) {
-                        jsniUtil.insertRule(sheetStyle, "." + sheetId
-                                + " .sheet .cell {" + entry.getValue() + "}");
+                        jsniUtil.insertRule(sheetStyle,
+                                ".v-spreadsheet." + sheetId + " .sheet .cell {"
+                                        + entry.getValue() + "}");
                     } else {
-                        jsniUtil.insertRule(sheetStyle, "." + sheetId
-                                + " .sheet .cell." + "cs" + entry.getKey()
-                                + " {" + entry.getValue() + "}");
+                        jsniUtil.insertRule(
+                                sheetStyle,
+                                ".v-spreadsheet." + sheetId + " .sheet .cell."
+                                        + "cs" + entry.getKey() + " {"
+                                        + entry.getValue() + "}");
                     }
                 }
             } catch (Exception e) {
