@@ -175,8 +175,6 @@ public class CellValueManager implements Serializable {
         cellData.cellStyle = "cs" + cellStyle.getIndex();
         cellData.locked = spreadsheet.isCellLocked(cell);
         try {
-            String formattedCellValue = formatter.formatCellValue(cell,
-                    evaluator);
             if (!spreadsheet.isCellHidden(cell)) {
                 if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
                     cellData.formulaValue = cell.getCellFormula();
@@ -186,6 +184,10 @@ public class CellValueManager implements Serializable {
             if (cell.getCellStyle().getDataFormatString().contains("%")) {
                 cellData.isPercentage = true;
             }
+
+            String formattedCellValue = formatter.formatCellValue(cell,
+                    evaluator);
+
             if (formattedCellValue != null && !formattedCellValue.isEmpty()
                     || cellStyle.getIndex() != 0) {
                 // if the cell is not wrapping text, and is of type numeric or
@@ -234,7 +236,7 @@ public class CellValueManager implements Serializable {
             }
         } catch (RuntimeException rte) {
             LOGGER.log(Level.FINEST, rte.getMessage(), rte);
-            cellData.value = "ERROR:" + rte.getMessage();
+            cellData.value = "#VALUE!";
         }
 
         return cellData;
@@ -544,9 +546,17 @@ public class CellValueManager implements Serializable {
             } catch (FormulaParseException fpe) {
                 try {
                     exception = fpe;
+
+                    // parses formula
                     cell.setCellFormula(value.substring(1).replace(" ", ""));
                 } catch (FormulaParseException fpe2) {
                     exception = fpe2;
+                    /*
+                     * We could force storing the formula even if it is invalid.
+                     * Instead, just store it as the value. Clearing the formula
+                     * makes sure the value is displayed as-is.
+                     */
+                    cell.setCellFormula(null);
                     cell.setCellValue(value);
                 }
             } catch (NumberFormatException nfe) {
