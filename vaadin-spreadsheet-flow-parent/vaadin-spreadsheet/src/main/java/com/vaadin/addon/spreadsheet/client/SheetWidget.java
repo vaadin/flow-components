@@ -1939,7 +1939,7 @@ public class SheetWidget extends Panel {
 
     public boolean isCellLocked(int column, int row) {
         CellData cd = getCellData(column, row);
-        return cd == null ? false : cd.locked;
+        return cd == null ? actionHandler.isSheetProtected() : cd.locked;
     }
 
     public String getCellFormulaValue(int column, int row) {

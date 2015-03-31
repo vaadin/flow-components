@@ -236,4 +236,6 @@ public interface SheetHandler {
     void updateCellComment(String text, int col, int row);
 
     void selectAll();
+
+    boolean isSheetProtected();
 }

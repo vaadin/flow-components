@@ -1461,6 +1461,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
     }
 
+    public boolean isSheetProtected() {
+        return sheetProtected;
+    }
+
     public void setWorkbookProtected(boolean workbookProtected) {
         sheetTabSheet.setReadOnly(workbookProtected);
     }
