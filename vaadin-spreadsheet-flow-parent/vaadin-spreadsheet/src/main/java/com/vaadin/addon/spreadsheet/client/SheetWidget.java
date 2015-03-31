@@ -791,9 +791,7 @@ public class SheetWidget extends Panel {
         // other parts
         setElement(spreadsheet);
         spreadsheet.appendChild(sheet);
-        sheetId = "spreadsheet-" + ((int) (Math.random() * 100000));
         spreadsheet.addClassName("v-spreadsheet");
-        spreadsheet.addClassName(sheetId);
 
         // bottom-right-pane, always used
         sheet.setClassName("bottom-right-pane");
@@ -820,6 +818,39 @@ public class SheetWidget extends Panel {
 
         resizeLineStable.setClassName(RESIZE_LINE_CLASSNAME);
         sheet.appendChild(resizeLineStable);
+
+        // Corner div
+        corner.setClassName("corner");
+        spreadsheet.appendChild(corner);
+
+        // floater, extra element for adjusting scroll bars correctly
+        floater.setClassName("floater");
+
+        // input
+        input = new TextBox();
+        input.setWidth("0");
+        input.setValue("x");
+        input.setStyleName("cellinput");
+        DOM.appendChild(sheet, input.getElement());
+        adopt(input);
+
+        // extra element for counting the pixels per inch so points can be
+        // converted to pixels
+        ppiCounter.getStyle().setWidth(1, Unit.IN);
+        ppiCounter.getStyle().setPosition(Position.ABSOLUTE);
+        ppiCounter.getStyle().setVisibility(Visibility.HIDDEN);
+        ppiCounter.getStyle().setPadding(0, Unit.PX);
+        spreadsheet.appendChild(ppiCounter);
+
+        // extra element for counting the width in pixels each cell style needs
+        // for showing numbers and applying scientific notation.
+        fontWidthDummyElement.getStyle().setVisibility(Visibility.HIDDEN);
+        fontWidthDummyElement.setInnerText("5555555555");
+    }
+
+    void postInit(String connectorId) {
+        sheetId = "spreadsheet-" + connectorId;
+        spreadsheet.addClassName(sheetId);
 
         // Dynamic position & size styles for this spreadsheet
         cellSizeAndPositionStyle.setType("text/css");
@@ -857,34 +888,6 @@ public class SheetWidget extends Panel {
         resizeStyle.setType("text/css");
         resizeStyle.setId(sheetId + "-resizeStyle");
         cellSizeAndPositionStyle.getParentElement().appendChild(resizeStyle);
-
-        // Corner div
-        corner.setClassName("corner");
-        spreadsheet.appendChild(corner);
-
-        // floater, extra element for adjusting scroll bars correctly
-        floater.setClassName("floater");
-
-        // input
-        input = new TextBox();
-        input.setWidth("0");
-        input.setValue("x");
-        input.setStyleName("cellinput");
-        DOM.appendChild(sheet, input.getElement());
-        adopt(input);
-
-        // extra element for counting the pixels per inch so points can be
-        // converted to pixels
-        ppiCounter.getStyle().setWidth(1, Unit.IN);
-        ppiCounter.getStyle().setPosition(Position.ABSOLUTE);
-        ppiCounter.getStyle().setVisibility(Visibility.HIDDEN);
-        ppiCounter.getStyle().setPadding(0, Unit.PX);
-        spreadsheet.appendChild(ppiCounter);
-
-        // extra element for counting the width in pixels each cell style needs
-        // for showing numbers and applying scientific notation.
-        fontWidthDummyElement.getStyle().setVisibility(Visibility.HIDDEN);
-        fontWidthDummyElement.setInnerText("5555555555");
     }
 
     /**

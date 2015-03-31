@@ -1753,4 +1753,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void setSheetFocused(boolean focused) {
         sheetWidget.setFocused(focused);
     }
+
+    public void setId(String connectorId) {
+        sheetWidget.postInit(connectorId);
+    }
 }

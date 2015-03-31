@@ -196,6 +196,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     @Override
     protected void init() {
         super.init();
+        getWidget().setId(getConnectorId());
         registerRpc(SpreadsheetClientRpc.class, clientRPC);
         getWidget().setCommsTrigger(new CommsTrigger() {
 
