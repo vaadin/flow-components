@@ -4490,7 +4490,7 @@ public class SheetWidget extends Panel {
         DivElement element = selectedCell.getElement();
         element.addClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
         element.appendChild(customEditorWidget.getElement());
-        if (parent != null && !equals(parent)) {
+        if (parent == null || (parent != null && !equals(parent))) {
             adopt(customEditorWidget);
         }
 
