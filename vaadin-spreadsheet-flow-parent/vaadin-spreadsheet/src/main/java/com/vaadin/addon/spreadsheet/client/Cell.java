@@ -100,13 +100,17 @@ public class Cell {
     }
 
     void updateOverflow() {
+
+        boolean rightAligned = element.getClassName().contains(" r ")
+                || element.getClassName().endsWith(" r");
+
         int columnWidth = sheetWidget.actionHandler.getColWidth(col);
         Integer scrollW = sheetWidget.scrollWidthCache.get(getUniqueKey());
         if (scrollW == null) {
             scrollW = measureOverflow();
         }
         int overflowPx = scrollW - columnWidth;
-        if (overflowPx > 0) {
+        if (!rightAligned && overflowPx > 0) {
             // Increase overflow by cell left padding (2px)
             overflowPx += 2;
             int colIndex = col;
