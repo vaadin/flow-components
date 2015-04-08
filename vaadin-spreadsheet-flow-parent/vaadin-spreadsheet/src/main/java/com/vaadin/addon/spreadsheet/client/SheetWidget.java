@@ -2816,6 +2816,11 @@ public class SheetWidget extends Panel {
         int lastR = lastCell.getRow();
         int firstC = firstCell.getCol();
         int lastC = lastCell.getCol();
+
+        // orphan custom editor if visible (it is outside of visible range, and
+        // cell may be re-purposed)
+        removeCustomCellEditor();
+
         if (firstR > lastRowIndex || lastR < firstRowIndex
                 || firstC > lastColumnIndex || lastC < firstColumnIndex) {
             // big scroll
@@ -4502,9 +4507,11 @@ public class SheetWidget extends Panel {
             customCellEditorDisplayed = false;
             customEditorWidget.getElement().removeClassName(
                     CUSTOM_EDITOR_CELL_CLASSNAME);
+            orphan(customEditorWidget);
             customEditorWidget.removeFromParent();
+
             // the cell value should have been updated
-            if (loaded) {
+            if (loaded && getSelectedCell() != null) {
                 CellData cd = cachedCellData.get(getSelectedCellKey());
                 if (cd == null) {
                     getSelectedCell().setValue(null);
