@@ -61,7 +61,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
 import com.vaadin.client.BrowserInfo;
@@ -139,7 +138,7 @@ public class SheetWidget extends Panel {
     /** Header corner element that covers crossing headers */
     private DivElement corner = Document.get().createDivElement();
 
-    private TextBox input;
+    private PasteAwareTextBox input;
 
     /** Invisible element for adjusting the scrollbars */
     private final DivElement floater = Document.get().createDivElement();
@@ -827,7 +826,7 @@ public class SheetWidget extends Panel {
         floater.setClassName("floater");
 
         // input
-        input = new TextBox();
+        input = new PasteAwareTextBox(this);
         input.setWidth("0");
         input.setValue("x");
         input.setStyleName("cellinput");
