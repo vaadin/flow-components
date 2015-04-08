@@ -2594,6 +2594,13 @@ public class SheetWidget extends Panel {
                     cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
                     cellRangeStyledCells.add(cell);
                 }
+
+                Cell mergedCell = getMergedCell(toKey(coord.getCol(),
+                        coord.getRow()));
+                if (mergedCell != null) {
+                    cellRangeStyledCells.add(mergedCell);
+                    mergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
+                }
             }
         }
         if (highlightedCellCoord != null) {
@@ -4127,6 +4134,13 @@ public class SheetWidget extends Panel {
                         cellRangeStyledCells.add(cell);
                         cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
                     }
+
+                    Cell mergedCell = getMergedCell(toKey(c, r));
+                    if (mergedCell != null) {
+                        cellRangeStyledCells.add(mergedCell);
+                        mergedCell.getElement().addClassName(
+                                CELL_RANGE_CLASSNAME);
+                    }
                 }
             }
         }
@@ -4277,8 +4291,11 @@ public class SheetWidget extends Panel {
         // the headers for it are already highlighted
         // also remove the new selected cell from the highlighted cells (if it
         // is there).
-        Cell newSelectionCell = getCell(column, row);
         Cell oldSelectionCell = getCell(selectedCellCol, selectedCellRow);
+
+        Cell oldMergedCell = getMergedCell(toKey(selectedCellCol,
+                selectedCellRow));
+
         if (cellRangeStylesCleared) {
             cellRangeStyledCoords.add(new CellCoord(selectedCellCol,
                     selectedCellRow));
@@ -4286,6 +4303,10 @@ public class SheetWidget extends Panel {
                 cellRangeStyledCells.add(oldSelectionCell);
                 oldSelectionCell.getElement()
                         .addClassName(CELL_RANGE_CLASSNAME);
+            }
+            if (oldMergedCell != null) {
+                cellRangeStyledCells.add(oldMergedCell);
+                oldMergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
             }
             cellRangeStylesCleared = false;
         } else {
@@ -4295,6 +4316,10 @@ public class SheetWidget extends Panel {
                 cellRangeStyledCells.add(oldSelectionCell);
                 oldSelectionCell.getElement()
                         .addClassName(CELL_RANGE_CLASSNAME);
+            }
+            if (oldMergedCell != null) {
+                cellRangeStyledCells.add(oldMergedCell);
+                oldMergedCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
             }
             // highlight the new selected cell headers
             MergedRegion region = actionHandler.getMergedRegionStartingFrom(
@@ -4318,11 +4343,22 @@ public class SheetWidget extends Panel {
             oldSelectionCell.getElement().removeClassName(
                     CELL_SELECTION_CLASSNAME);
         }
+        if (oldMergedCell != null) {
+            oldMergedCell.getElement()
+                    .removeClassName(CELL_SELECTION_CLASSNAME);
+        }
+
+        Cell newSelectionCell = getCell(column, row);
         if (newSelectionCell != null) {
             highlightedCellCoord = new CellCoord(newSelectionCell.getCol(),
                     newSelectionCell.getRow());
             newSelectionCell.getElement()
                     .addClassName(CELL_SELECTION_CLASSNAME);
+        }
+        Cell newMergedSelectionCell = getMergedCell(toKey(column, row));
+        if (newMergedSelectionCell != null) {
+            newMergedSelectionCell.getElement().addClassName(
+                    CELL_SELECTION_CLASSNAME);
         }
         setSelectedCell(column, row);
     }
@@ -4342,7 +4378,10 @@ public class SheetWidget extends Panel {
      */
     public void swapSelectedCellInsideSelection(int col, int row) {
         Cell newSelectionCell = getCell(col, row);
+        Cell newMergedSelectionCell = getMergedCell(toKey(col, row));
         Cell oldSelectionCell = getCell(selectedCellCol, selectedCellRow);
+        Cell oldMergedSelectionCell = getMergedCell(toKey(selectedCellCol,
+                selectedCellRow));
         cellRangeStyledCoords.add(new CellCoord(selectedCellCol,
                 selectedCellRow));
         if (oldSelectionCell != null) {
@@ -4351,10 +4390,22 @@ public class SheetWidget extends Panel {
                     CELL_SELECTION_CLASSNAME);
             oldSelectionCell.getElement().addClassName(CELL_RANGE_CLASSNAME);
         }
+        if (oldMergedSelectionCell != null) {
+            cellRangeStyledCells.add(oldMergedSelectionCell);
+            oldMergedSelectionCell.getElement().removeClassName(
+                    CELL_SELECTION_CLASSNAME);
+            oldMergedSelectionCell.getElement().addClassName(
+                    CELL_RANGE_CLASSNAME);
+        }
         cellRangeStyledCoords.remove(new CellCoord(col, row));
         if (newSelectionCell != null) {
             cellRangeStyledCells.remove(newSelectionCell);
             newSelectionCell.getElement().removeClassName(CELL_RANGE_CLASSNAME);
+        }
+        if (newMergedSelectionCell != null) {
+            cellRangeStyledCells.remove(newMergedSelectionCell);
+            newMergedSelectionCell.getElement().removeClassName(
+                    CELL_RANGE_CLASSNAME);
         }
         setSelectedCell(col, row);
     }
@@ -4378,6 +4429,13 @@ public class SheetWidget extends Panel {
                     if (cell != null) {
                         cellRangeStyledCells.add(cell);
                         cell.getElement().addClassName(CELL_RANGE_CLASSNAME);
+                    }
+
+                    Cell mergedCell = getMergedCell(toKey(c, r));
+                    if (mergedCell != null) {
+                        cellRangeStyledCells.add(mergedCell);
+                        mergedCell.getElement().addClassName(
+                                CELL_RANGE_CLASSNAME);
                     }
                 }
             }
