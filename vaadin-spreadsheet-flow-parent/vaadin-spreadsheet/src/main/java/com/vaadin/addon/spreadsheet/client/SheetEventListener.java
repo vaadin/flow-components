@@ -228,6 +228,14 @@ public class SheetEventListener implements EventListener {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+
+                case KeyCodes.KEY_ENTER:
+                    // happens on FF (other browsers have charcode as 13)
+                    widget.getSheetHandler().onSheetKeyPress(
+                            event,
+                            widget.getSheetJsniUtil()
+                                    .convertUnicodeIntoCharacter(charCode));
+                    break;
                 }
             } else if (!event.getCtrlKey() && !event.getMetaKey()) {
                 widget.getSheetHandler().onSheetKeyPress(
