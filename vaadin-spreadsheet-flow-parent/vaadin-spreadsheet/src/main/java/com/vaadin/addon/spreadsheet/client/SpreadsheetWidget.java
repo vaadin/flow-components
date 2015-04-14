@@ -1542,6 +1542,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
     }
 
+    @Override
     public boolean isSheetProtected() {
         return sheetProtected;
     }
@@ -1837,5 +1838,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void setId(String connectorId) {
         sheetWidget.postInit(connectorId);
+    }
+
+    @Override
+    public String[] getSheetNames() {
+        return sheetNames;
+    }
+
+    @Override
+    public String getActiveSheetName() {
+        return sheetNames[activeSheetIndex - 1];
     }
 }

@@ -42,4 +42,8 @@ public interface FormulaBarHandler {
 
     String createCellAddress(int column, int row);
 
+    String[] getSheetNames();
+
+    String getActiveSheetName();
+
 }

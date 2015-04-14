@@ -32,6 +32,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -125,6 +126,7 @@ public class FormulaBarWidget extends Composite {
     private TextBox inlineEditor;
 
     private SheetWidget widget;
+    private RegExp cachedRegex;
 
     public FormulaBarWidget(FormulaBarHandler selectionManager,
             SheetWidget widget) {
@@ -626,7 +628,7 @@ public class FormulaBarWidget extends Composite {
         while (run || caretPos <= 0) {
             caretPos--;
             char c = val.charAt(caretPos);
-            if (String.valueOf(c).matches("[^A-z0-9:]")) {
+            if (String.valueOf(c).matches("[^A-z0-9:!]")) {
                 start = caretPos + 1;
                 run = false;
                 break;
@@ -638,7 +640,7 @@ public class FormulaBarWidget extends Composite {
         run = true;
         while (run || caretPos > val.length()) {
             char c = val.charAt(caretPos);
-            if (String.valueOf(c).matches("[^A-z0-9:]")) {
+            if (String.valueOf(c).matches("[^A-z0-9:!]")) {
                 end = caretPos;
                 run = false;
                 break;
@@ -648,11 +650,42 @@ public class FormulaBarWidget extends Composite {
 
         String sub = val.substring(start, end);
 
-        if (isCell(sub)) {
+        if (isCellRef(sub)) {
             formulaStartPos = start;
             formulaLastKnownPos = end;
         }
 
+    }
+
+    private MergedRegion parseSingleCellRef(String ref) {
+        MergedRegion range = new MergedRegion();
+        if (ref.contains("!")) {
+            // Sheet ref; only parse if on this sheet
+            String sheetname = ref.split("!")[0];
+
+            if (handler.getActiveSheetName().equals(sheetname)) {
+                return parseSingleCellRef(ref.split("!")[1]);
+            } else {
+                return null;
+            }
+
+        } else if (ref.contains(":")) {
+            String[] refs = ref.split(":");
+            CellCoord c1 = parseSingleCell(refs[0]);
+            range.col1 = c1.getCol();
+            range.row1 = c1.getRow();
+            CellCoord c2 = parseSingleCell(refs[1]);
+            range.col2 = c2.getCol();
+            range.row2 = c2.getRow();
+        } else {
+            CellCoord cc = parseSingleCell(ref);
+            range.col1 = cc.getCol();
+            range.row1 = cc.getRow();
+            range.col2 = range.col1;
+            range.row2 = range.row1;
+        }
+
+        return range;
     }
 
     /**
@@ -669,21 +702,11 @@ public class FormulaBarWidget extends Composite {
         int currentColor = 0;
         for (String ref : references) {
 
-            MergedRegion range = new MergedRegion();
-            if (ref.contains(":")) {
-                String[] refs = ref.split(":");
-                CellCoord c1 = parseSingleCell(refs[0]);
-                range.col1 = c1.getCol();
-                range.row1 = c1.getRow();
-                CellCoord c2 = parseSingleCell(refs[1]);
-                range.col2 = c2.getCol();
-                range.row2 = c2.getRow();
-            } else {
-                CellCoord cc = parseSingleCell(ref);
-                range.col1 = cc.getCol();
-                range.row1 = cc.getRow();
-                range.col2 = range.col1;
-                range.row2 = range.row1;
+            MergedRegion range = parseSingleCellRef(ref);
+
+            if (range == null) {
+                // couldn't parse, probably sheet ref
+                continue;
             }
 
             currentColor = currentColor % formulaColors.size();
@@ -768,7 +791,7 @@ public class FormulaBarWidget extends Composite {
         rowEnd = Math.max(region.row1, region.row2);
 
         if (colEnd > 20000) {
-            Logger.getLogger(getClass().getSimpleName()).warning(
+            Logger.getLogger(getClass().getSimpleName()).fine(
                     "invalid column index, halting parse");
             return;
         }
@@ -825,6 +848,8 @@ public class FormulaBarWidget extends Composite {
     public void clear() {
         setCellPlainValue("");
         setSelectedCellAddress("");
+
+        clearFormulaSelection();
     }
 
     public String getFormulaFieldValue() {
@@ -899,11 +924,11 @@ public class FormulaBarWidget extends Composite {
      * Parses all cell references from the given formula for painting. Ranges
      * (A1:A3) are returned as single string instead of two separate ones.
      */
-    private static List<String> parseCellReferences(String formula) {
+    private List<String> parseCellReferences(String formula) {
         List<String> cells = new ArrayList<String>();
 
-        for (String c : formula.split("[^A-z0-9:]+")) {
-            if (isCell(c)) {
+        for (String c : formula.split("[^A-z0-9:!]+")) {
+            if (isCellRef(c)) {
                 cells.add(c);
             }
         }
@@ -913,41 +938,41 @@ public class FormulaBarWidget extends Composite {
 
     /**
      * Checks if given string is a cell reference.
-     * <p>
-     * Very simplistic; assumes that anything with both a number and a
-     * character.
-     *
-     * TODO improve logic. Sheet references?
      */
-    private static boolean isCell(String current) {
-        boolean hasLetter = false;
-        boolean hasNumber = false;
+    private boolean isCellRef(String current) {
 
-        boolean lastIsNumber = false;
+        RegExp regex = cachedRegex;
 
-        int numChars = 0;
-        for (int i = 0; i < current.length(); i++) {
-            lastIsNumber = false;
-            // A-Z, a-z
-            char c = current.charAt(i);
-            if (c >= 65 && c <= 90 || c >= 97 && c <= 122) {
-                hasLetter = true;
-                numChars++;
-            } else if (c >= '0' && c <= '9') {
-                hasNumber = true;
-                lastIsNumber = true;
-            } else if (c == ':') {
-                // fine
-            } else {
-                // not allowed
-                return false;
+        if (regex == null) {
+            String singleCellRef = "([A-Za-z]{1,3}[0-9]{1,7})";
+
+            String sheetNames = "";
+            for (String s : handler.getSheetNames()) {
+                sheetNames += s + "|";
             }
+            sheetNames = sheetNames.substring(0, sheetNames.length() - 1);
+
+            // beginning of string + optional sheetname
+            String regexp = "^((" + sheetNames + ")!){0,1}";
+            // cell ref
+            regexp += singleCellRef;
+            // optional range
+            regexp += "(:" + singleCellRef + "){0,1}";
+
+            cachedRegex = regex = RegExp.compile(regexp);
+
+            // forget after a while
+            new Timer() {
+
+                @Override
+                public void run() {
+                    cachedRegex = null;
+                }
+
+            }.schedule(2000);
         }
 
-        // max col index is 'ZZZ'
-
-        boolean isCell = hasLetter && hasNumber && lastIsNumber && numChars < 4;
-        return isCell;
+        return regex.test(current);
     }
 
     /**
