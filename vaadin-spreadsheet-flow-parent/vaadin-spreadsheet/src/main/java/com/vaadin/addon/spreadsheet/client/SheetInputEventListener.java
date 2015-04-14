@@ -157,6 +157,12 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
                     formulaBarWidget.moveFormulaCellSelection(
                             event.isShiftKeyDown(), false, false, false);
                     event.preventDefault();
+                } else if (inputFullFocus) {
+
+                    // prevent scrolling
+                    if (widget.getInlineEditor().getCursorPos() == 0) {
+                        event.preventDefault();
+                    }
                 }
                 break;
             case KeyCodes.KEY_RIGHT:
@@ -168,6 +174,13 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
                     formulaBarWidget.moveFormulaCellSelection(
                             event.isShiftKeyDown(), false, true, false);
                     event.preventDefault();
+                } else if (inputFullFocus) {
+                    // prevent scrolling
+                    int cursorPos = widget.getInlineEditor().getCursorPos();
+                    int length = widget.getInlineEditor().getValue().length();
+                    if (cursorPos == length) {
+                        event.preventDefault();
+                    }
                 }
                 break;
             default:
