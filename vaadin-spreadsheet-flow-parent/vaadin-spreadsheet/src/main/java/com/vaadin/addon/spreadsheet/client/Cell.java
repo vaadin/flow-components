@@ -105,6 +105,10 @@ public class Cell {
                 || element.getClassName().endsWith(" r");
 
         int columnWidth = sheetWidget.actionHandler.getColWidth(col);
+
+        // cols have 4px padding
+        columnWidth -= 4;
+
         Integer scrollW = sheetWidget.scrollWidthCache.get(getUniqueKey());
         if (scrollW == null) {
             scrollW = measureOverflow();
