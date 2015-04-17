@@ -773,11 +773,15 @@ public class FormulaBarWidget extends Composite {
         int col = 0;
         for (int i = 0; i < c.length(); i++) {
             char current = c.charAt(i);
-            if (current >= 65 && current <= 90) {
-                col = (current - 64) + col * 24;
-            } else if (current >= 97 && current <= 122) {
-                col = (current - 96) + col * 24;
+
+            int charNum = 0;
+            if (current >= 'A' && current <= 'Z') {
+                charNum = (current - 64);
+            } else if (current >= 'a' && current <= 'z') {
+                charNum = (current - 96);
             }
+            col = col * 26 + charNum;
+
         }
 
         return new CellCoord(col, row);
