@@ -109,10 +109,14 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
         if (widget.isEditingCell()) {
             switch (keyCode) {
             case KeyCodes.KEY_BACKSPACE:
+            case KeyCodes.KEY_DELETE:
                 widget.handleInputElementValueChange(true);
                 formulaBarWidget.updateFormulaSelectionStyles();
                 formulaBarWidget.updateEditorCaretPos(true);
                 formulaBarWidget.checkKeyboardNavigation();
+
+                formulaBarWidget.checkEmptyValue();
+
                 break;
             case KeyCodes.KEY_ESCAPE:
                 handler.onCellInputCancel();

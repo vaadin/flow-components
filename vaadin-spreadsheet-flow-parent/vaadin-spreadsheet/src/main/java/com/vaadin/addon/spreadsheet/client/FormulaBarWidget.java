@@ -491,10 +491,32 @@ public class FormulaBarWidget extends Composite {
         }
     }
 
+    public void checkEmptyValue() {
+
+        // if value is empty, stop editing formula
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+            @Override
+            public void execute() {
+                if (currentEditor.getValue().isEmpty()) {
+
+                    if (currentEditor == inlineEditor) {
+                        stopInlineEdit();
+                    } else {
+                        stopEditing();
+                    }
+                }
+            }
+        });
+    }
+
     private void handleFunctionFieldKeyDown(Event event) {
         switch (event.getKeyCode()) {
         case KeyCodes.KEY_BACKSPACE:
+        case KeyCodes.KEY_DELETE:
             scheduleFormulaValueUpdate();
+            checkEmptyValue();
+
             break;
         case KeyCodes.KEY_ESCAPE:
             formulaField.setValue(cachedFunctionFieldValue);
