@@ -9,3 +9,4 @@
 *.classpath
 /vaadin-spreadsheet-demo/src/main/webapp/VAADIN/widgetsets/
 /target/
+vaadin-spreadsheet/errors

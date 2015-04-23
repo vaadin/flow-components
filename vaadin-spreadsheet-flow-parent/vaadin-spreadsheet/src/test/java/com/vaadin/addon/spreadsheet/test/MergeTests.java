@@ -1,5 +1,7 @@
 package com.vaadin.addon.spreadsheet.test;
 
+import java.io.IOException;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -56,5 +58,15 @@ public class MergeTests extends Test1 {
 
         Assert.assertTrue("A1 text".equals(sheetController
                 .getMergedCellContent("A1")));
+    }
+
+    /**
+     * Ticket #17601
+     */
+    @Test
+    public void testColumnAlignments() throws IOException {
+        loadSheetFile("column_alignment_style.xlsx");
+
+        compareScreen("column_alignments");
     }
 }

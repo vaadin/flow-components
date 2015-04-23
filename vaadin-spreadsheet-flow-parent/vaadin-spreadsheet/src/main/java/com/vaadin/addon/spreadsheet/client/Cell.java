@@ -28,7 +28,13 @@ public class Cell {
     private static final int ZINDEXVALUE = 2;
     private final DivElement element;
     private DivElement cellCommentTriangle;
+    /**
+     * 1-based
+     */
     private int col;
+    /**
+     * 1-based
+     */
     private int row;
     private Element popupButtonElement;
     private String value;
@@ -121,6 +127,8 @@ public class Cell {
             int width = 0;
             int[] colW = sheetWidget.actionHandler.getColWidths();
             boolean inFreezePane = col <= sheetWidget.verticalSplitPosition;
+
+            width += columnWidth;
             while (colIndex < colW.length && width < overflowPx) {
                 if (inFreezePane
                         && colIndex >= sheetWidget.verticalSplitPosition) {
@@ -133,7 +141,6 @@ public class Cell {
                 width += colW[colIndex];
                 colIndex++;
             }
-            width += columnWidth;
             element.setInnerHTML("<div style=\"pointer-events:none;width:"
                     + width + "px;overflow:hidden;text-overflow:ellipsis;\">"
                     + element.getInnerText() + "</div>");

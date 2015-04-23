@@ -3269,8 +3269,13 @@ public class SheetWidget extends Panel {
         }
         String key = toKey(region.col1, region.row1);
         MergedCell mergedCell = new MergedCell(this, region.col1, region.row1);
-        mergedCell.setValue(getCellValue(region.col1, region.row1),
-                getCell(region.col1, region.row1).getCellStyle(), false);
+        String cellStyle = "cs0";
+        Cell cell = getCell(region.col1, region.row1);
+        if (cell != null) {
+            cellStyle = cell.getCellStyle();
+        }
+        mergedCell.setValue(getCellValue(region.col1, region.row1), cellStyle,
+                false);
         DivElement element = mergedCell.getElement();
         element.addClassName(MERGED_CELL_CLASSNAME);
         updateMergedRegionRegionSize(region, mergedCell);
