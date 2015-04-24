@@ -746,7 +746,14 @@ public class ConditionalFormatter implements Serializable {
         if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC
                 || isFormulaNumericType) {
 
-            double formula1Val = Double.valueOf(rule.getFormula1());
+            double formula1Val = -1;
+            try {
+                formula1Val = Double.valueOf(rule.getFormula1());
+
+            } catch (NumberFormatException w) {
+                // non-numeric formatting rules cannot match
+                return false;
+            }
 
             switch (rule.getComparisonOperation()) {
 
@@ -777,6 +784,7 @@ public class ConditionalFormatter implements Serializable {
                 return lt && gt;
             }
         }
+
         return false;
     }
 }
