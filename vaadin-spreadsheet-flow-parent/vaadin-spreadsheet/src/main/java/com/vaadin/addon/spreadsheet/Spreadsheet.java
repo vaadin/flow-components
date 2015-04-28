@@ -1492,8 +1492,15 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * cell styles change.
      */
     public void refreshAllCellValues() {
+
         valueManager.clearEvaluatorCache();
         valueManager.clearCachedContent();
+
+        // only reload if the cells have been loaded once previously
+        if (firstColumn == -1) {
+            // client will request cells soon, no need for reload now
+            return;
+        }
         updateRowAndColumnRangeCellData(1, 1, getRows(), getColumns());
         // if the selected cell is of type formula, there is a change that the
         // formula has been changed.

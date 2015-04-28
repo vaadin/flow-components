@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet.test.demoapps;
 
+import com.vaadin.addon.spreadsheet.test.FreezePaneLocaleUI;
 import com.vaadin.server.UIClassSelectionEvent;
 import com.vaadin.server.UIProvider;
 import com.vaadin.ui.UI;
@@ -23,6 +24,8 @@ public class TestUIProviderImpl extends UIProvider {
             return TouchUI.class;
         } else if (name.contains(MultipleSpreadsheetUI.class.getSimpleName())) {
             return MultipleSpreadsheetUI.class;
+        } else if (name.contains(FreezePaneLocaleUI.class.getSimpleName())) {
+            return FreezePaneLocaleUI.class;
         }
         return null;
     }
