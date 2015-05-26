@@ -32,9 +32,10 @@ public class SheetCellElement extends AbstractElement {
     public void setValue(String newValue) {
         if (isNormalCell()) {
             click();
-            WebElement cellValueInput = parent.getCellValueInput();
-            cellValueInput.sendKeys(newValue);
-            cellValueInput.sendKeys(Keys.RETURN);
+            WebElement functionFieldInput = parent.getFunctionFieldInput();
+            functionFieldInput.clear();
+            functionFieldInput.sendKeys(newValue);
+            functionFieldInput.sendKeys(Keys.RETURN);
         }
     }
 

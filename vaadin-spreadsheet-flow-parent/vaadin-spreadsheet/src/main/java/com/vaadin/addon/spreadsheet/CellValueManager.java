@@ -86,8 +86,6 @@ public class CellValueManager implements Serializable {
 
     private DataFormatter formatter;
 
-    private FormulaEvaluator evaluator;
-
     /** Cell keys that have values sent to client side and are cached there. */
     private final HashSet<String> sentCells = new HashSet<String>();
     /**
@@ -124,13 +122,6 @@ public class CellValueManager implements Serializable {
     }
 
     /**
-     * Clears all evaluated cell values from cache.
-     */
-    public void clearEvaluatorCache() {
-        evaluator.clearAllCachedResultValues();
-    }
-
-    /**
      * Clears all cached data.
      */
     public void clearCachedContent() {
@@ -154,17 +145,11 @@ public class CellValueManager implements Serializable {
         formatter = new DataFormatter(locale);
     }
 
-    public FormulaEvaluator getFormulaEvaluator() {
-        return evaluator;
-    }
-
-    public void setFormulaEvaluator(FormulaEvaluator formulaEvaluator) {
-        evaluator = formulaEvaluator;
-    }
-
-    public void updateEvaluator() {
-        evaluator = spreadsheet.getWorkbook().getCreationHelper()
-                .createFormulaEvaluator();
+    /**
+     * Get the common {@link FormulaEvaluator} instance from {@link Spreadsheet}
+     */
+    protected FormulaEvaluator getFormulaEvaluator() {
+        return spreadsheet.getFormulaEvaluator();
     }
 
     protected CellData createCellDataForCell(Cell cell) {
@@ -186,7 +171,7 @@ public class CellValueManager implements Serializable {
             }
 
             String formattedCellValue = formatter.formatCellValue(cell,
-                    evaluator);
+                    getFormulaEvaluator());
 
             if (formattedCellValue != null && !formattedCellValue.isEmpty()
                     || cellStyle.getIndex() != 0) {
@@ -323,7 +308,7 @@ public class CellValueManager implements Serializable {
      *            Cell to mark for updates
      */
     protected void cellUpdated(Cell cell) {
-        evaluator.notifyUpdateCell(cell);
+        getFormulaEvaluator().notifyUpdateCell(cell);
         markCellForUpdate(cell);
     }
 
@@ -344,7 +329,7 @@ public class CellValueManager implements Serializable {
      *            Deleted cell
      */
     protected void cellDeleted(Cell cell) {
-        evaluator.notifyDeleteCell(cell);
+        getFormulaEvaluator().notifyDeleteCell(cell);
         markCellForRemove(cell);
     }
 
@@ -422,8 +407,8 @@ public class CellValueManager implements Serializable {
 
         if (getCustomCellValueHandler() == null
                 || getCustomCellValueHandler().cellValueUpdated(cell,
-                        activeSheet, col - 1, row - 1, value, evaluator,
-                        formatter)) {
+                        activeSheet, col - 1, row - 1, value,
+                        getFormulaEvaluator(), formatter)) {
             Exception exception = null;
             try {
                 // handle new cell creation
@@ -433,7 +418,7 @@ public class CellValueManager implements Serializable {
                     if (value.startsWith("=") || value.startsWith("+")) {
                         cell = r.createCell(col - 1, Cell.CELL_TYPE_FORMULA);
                         cell.setCellFormula(value.substring(1));
-                        evaluator.notifySetFormula(cell);
+                        getFormulaEvaluator().notifySetFormula(cell);
                         if (value.startsWith("=HYPERLINK(")) {
                             // set the cell style to link cell
                             CellStyle hyperlinkCellStyle;
@@ -477,7 +462,7 @@ public class CellValueManager implements Serializable {
                             cell = r.createCell(col - 1, Cell.CELL_TYPE_STRING);
                             cell.setCellValue(value);
                         }
-                        evaluator.notifyUpdateCell(cell);
+                        getFormulaEvaluator().notifyUpdateCell(cell);
                     }
                 } else { // modify existing cell, possibly switch type
                     formattedCellValue = getFormattedCellValue(cell);
@@ -487,10 +472,10 @@ public class CellValueManager implements Serializable {
                         sentFormulaCells.remove(key);
                     }
                     if (value.startsWith("=") || value.startsWith("+")) {
-                        evaluator.notifyUpdateCell(cell);
+                        getFormulaEvaluator().notifyUpdateCell(cell);
                         cell.setCellType(Cell.CELL_TYPE_FORMULA);
                         cell.setCellFormula(value.substring(1));
-                        evaluator.notifySetFormula(cell);
+                        getFormulaEvaluator().notifySetFormula(cell);
                         if (value.startsWith("=HYPERLINK(")
                                 && cell.getCellStyle().getIndex() != hyperlinkStyleIndex) {
                             // set the cell style to link cell
@@ -543,7 +528,7 @@ public class CellValueManager implements Serializable {
                             cell.setCellType(Cell.CELL_TYPE_STRING);
                             cell.setCellValue(value);
                         }
-                        evaluator.notifyUpdateCell(cell);
+                        getFormulaEvaluator().notifyUpdateCell(cell);
                     }
                 }
             } catch (FormulaParseException fpe) {
@@ -591,14 +576,14 @@ public class CellValueManager implements Serializable {
 
     /**
      * Returns the formatted cell value or null if value could not be determined
-     * 
+     *
      * @param cell
      *            to get value from
      * @return formattedCellValue or null if could not format
      */
     private String getFormattedCellValue(Cell cell) {
         try {
-            return formatter.formatCellValue(cell, evaluator);
+            return formatter.formatCellValue(cell, getFormulaEvaluator());
         } catch (RuntimeException rte) {
             return null;
         }
@@ -996,7 +981,7 @@ public class CellValueManager implements Serializable {
                             markedCells.add(key);
                         }
                         cell.setCellValue((String) null);
-                        evaluator.notifyUpdateCell(cell);
+                        getFormulaEvaluator().notifyUpdateCell(cell);
                     }
                 }
             }
@@ -1006,7 +991,7 @@ public class CellValueManager implements Serializable {
     /**
      * Removes an individual cell from the Spreadsheet and the underlying POI
      * model.
-     * 
+     *
      * @param rowIndex
      *            Row index of target cell, 1-based
      * @param colIndex
@@ -1049,14 +1034,14 @@ public class CellValueManager implements Serializable {
                             cell, true);
                 }
                 cell.setCellValue((String) null);
-                evaluator.notifyUpdateCell(cell);
+                getFormulaEvaluator().notifyUpdateCell(cell);
             }
         }
     }
 
     /**
      * Removes hyperlink from the given cell
-     * 
+     *
      * @param cell
      *            Target cell
      * @param sheet

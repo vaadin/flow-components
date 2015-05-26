@@ -95,19 +95,16 @@ public class ConditionalFormatter implements Serializable {
     private Map<ConditionalFormatting, Integer> topBorders = new HashMap<ConditionalFormatting, Integer>();
     private Map<ConditionalFormatting, Integer> leftBorders = new HashMap<ConditionalFormatting, Integer>();
 
-    protected FormulaEvaluator formulaEvaluator;
     protected ColorConverter colorConverter;
 
     /**
-     * Constructs a new ConditionalFormatter targeting the given Spreasheet.
-     * 
+     * Constructs a new ConditionalFormatter targeting the given Spreadsheet.
+     *
      * @param spreadsheet
      *            Target spreadsheet
      */
     public ConditionalFormatter(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
-        formulaEvaluator = spreadsheet.getWorkbook().getCreationHelper()
-                .createFormulaEvaluator();
 
         final Workbook workbook = spreadsheet.getWorkbook();
         if (workbook instanceof HSSFWorkbook) {
@@ -120,7 +117,7 @@ public class ConditionalFormatter implements Serializable {
     /**
      * Each cell can have multiple matching rules, hence a collection. Order
      * doesn't matter here, CSS is applied in correct order on the client side.
-     * 
+     *
      * @param cell
      *            Target cell
      * @return indexes of the rules that match this Cell (to be used in class
@@ -257,11 +254,18 @@ public class ConditionalFormatter implements Serializable {
     }
 
     /**
+     * Get the common {@link FormulaEvaluator} instance from {@link Spreadsheet}
+     */
+    protected FormulaEvaluator getFormulaEvaluator() {
+        return spreadsheet.getFormulaEvaluator();
+    }
+
+    /**
      * Excel uses a field called 'priority' to re-order rules. Just calling
      * {@link XSSFConditionalFormatting#getRule(int)} will result in wrong
      * order. So, instead, get the list and reorder it according to the priority
      * field.
-     * 
+     *
      * @return The list of conditional formatting rules in reverse order (same
      *         order Excel processes them).
      */
@@ -679,8 +683,8 @@ public class ConditionalFormatter implements Serializable {
 
             // Since we use the same cell for all calculations, we need to clear
             // it each time. For some reason we can't clear just one cell.
-            formulaEvaluator.clearAllCachedResultValues();
-            CellValue value = formulaEvaluator.evaluate(cell);
+            getFormulaEvaluator().clearAllCachedResultValues();
+            CellValue value = getFormulaEvaluator().evaluate(cell);
             boolean match = value.getBooleanValue();
 
             row.removeCell(cell);
@@ -716,6 +720,11 @@ public class ConditionalFormatter implements Serializable {
                 && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_BOOLEAN;
         boolean isFormulaNumericType = isFormulaType
                 && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_NUMERIC;
+
+        if (isFormulaType) {
+            // make sure we have the latest value for formula cells
+            getFormulaEvaluator().evaluateFormulaCell(cell);
+        }
 
         // other than numerical types
         if (cell.getCellType() == Cell.CELL_TYPE_STRING || isFormulaStringType) {
