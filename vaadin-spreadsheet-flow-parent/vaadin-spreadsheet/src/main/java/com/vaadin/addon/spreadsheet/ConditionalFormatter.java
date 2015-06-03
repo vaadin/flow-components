@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -66,7 +66,7 @@ import com.vaadin.addon.spreadsheet.SpreadsheetStyleFactory.BorderStyle;
  * each cell can then be fetched from this class.
  * <p>
  * For now, only XSSF formatting rules are supported because of bugs in POI.
- * 
+ *
  * @author Thomas Mattsson / Vaadin Ltd.
  */
 @SuppressWarnings("serial")
@@ -517,7 +517,7 @@ public class ConditionalFormatter implements Serializable {
      * Goes through the cells specified in the given formatting, and checks if
      * each rule matches. Style ids from resulting matches are put in
      * {@link #cellToIndex}.
-     * 
+     *
      * @param cf
      *            {@link ConditionalFormatting} that specifies the affected
      *            cells
@@ -600,7 +600,7 @@ public class ConditionalFormatter implements Serializable {
     /**
      * Checks if the given cell value matches the given conditional formatting
      * rule.
-     * 
+     *
      * @param cell
      *            Target cell
      * @param rule
@@ -641,9 +641,9 @@ public class ConditionalFormatter implements Serializable {
     /**
      * Checks if the formula in the given rule evaluates to <code>true</code>.
      * <p>
-     * 
+     *
      * NOTE: Does not support HSSF files currently.
-     * 
+     *
      * @param rule
      *            Conditional formatting rule to get the formula from
      * @return True if the formula in the given rule is of boolean formula type
@@ -703,7 +703,7 @@ public class ConditionalFormatter implements Serializable {
      * Checks if the given cell value matches a
      * {@link ConditionalFormattingRule} of <code>VALUE_IS</code> type. Covers
      * all cell types and comparison operations.
-     * 
+     *
      * @param cell
      *            Target cell
      * @param rule
@@ -729,11 +729,18 @@ public class ConditionalFormatter implements Serializable {
         // other than numerical types
         if (cell.getCellType() == Cell.CELL_TYPE_STRING || isFormulaStringType) {
 
+            // Excel stores conditional formatting strings surrounded with ", so
+            // we must surround the cell value. String cell value from POI is
+            // never null.
+            String quotedStringValue = String.format("\"%s\"",
+                    cell.getStringCellValue());
+
+            // Excel string comparison ignores case
             switch (rule.getComparisonOperation()) {
             case ComparisonOperator.EQUAL:
-                return cell.getStringCellValue().equals(rule.getFormula1());
+                return quotedStringValue.equalsIgnoreCase(rule.getFormula1());
             case ComparisonOperator.NOT_EQUAL:
-                return !cell.getStringCellValue().equals(rule.getFormula1());
+                return !quotedStringValue.equalsIgnoreCase(rule.getFormula1());
             }
         }
         if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN

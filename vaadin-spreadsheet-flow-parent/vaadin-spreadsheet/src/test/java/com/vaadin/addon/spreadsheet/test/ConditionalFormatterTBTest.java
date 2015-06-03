@@ -2,25 +2,28 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
-
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
-import com.vaadin.testbench.annotations.RunLocally;
-import com.vaadin.testbench.parallel.Browser;
+import org.junit.Test;
 
-@RunLocally(Browser.FIREFOX)
 public class ConditionalFormatterTBTest extends AbstractSpreadsheetTestCase {
+
+    private SpreadsheetElement spreadSheet;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        headerPage.loadFile("conditional_formatting.xlsx", this);
+
+        spreadSheet = $(SpreadsheetElement.class).first();
+    }
 
     @Test
     public void conditionalFormattingForFormulaCell_updateFormulaReference_formattingApplied()
             throws Exception {
-        headerPage.loadFile("conditional_formatting.xlsx", this);
-
-        SpreadsheetElement element = $(SpreadsheetElement.class).first();
-
-        SheetCellElement formulaCell = element.getCellAt("A3");
-        SheetCellElement referedCell = element.getCellAt("B3");
+        SheetCellElement formulaCell = spreadSheet.getCellAt("A3");
+        SheetCellElement referedCell = spreadSheet.getCellAt("B3");
 
         // formula cell is white to start with
         assertEquals("rgba(255, 255, 255, 1)",
@@ -31,5 +34,21 @@ public class ConditionalFormatterTBTest extends AbstractSpreadsheetTestCase {
         // after formula is updated the background is red
         assertEquals("rgba(255, 199, 206, 1)",
                 formulaCell.getCssValue("background-color"));
+    }
+
+    @Test
+    public void conditionalFormattingForStringCell_equalsWithQuotationMarks_formattingMatches() {
+        SheetCellElement targetCell = spreadSheet.getCellAt("A5");
+
+        // formula cell is white to start with
+        assertEquals("rgba(255, 255, 255, 1)",
+                targetCell.getCssValue("background-color"));
+
+        // wrong capitalisation, but comparison should ignore
+        targetCell.setValue("o");
+
+        // after formula is updated the background is red
+        assertEquals("rgba(255, 199, 206, 1)",
+                targetCell.getCssValue("background-color"));
     }
 }
