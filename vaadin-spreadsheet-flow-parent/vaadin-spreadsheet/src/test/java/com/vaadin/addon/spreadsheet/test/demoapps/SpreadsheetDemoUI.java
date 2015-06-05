@@ -13,6 +13,7 @@ import java.net.URL;
 import java.text.Format;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -97,6 +98,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private HorizontalLayout options;
 
+    private ComboBox localeSelect;
+
     public SpreadsheetDemoUI() {
         super();
         SpreadsheetFactory.logMemoryUsage();
@@ -154,6 +157,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     public void buttonClick(ClickEvent event) {
                         if (spreadsheet == null) {
                             spreadsheet = new Spreadsheet();
+                            updateLocale();
                             spreadsheet
                                     .addSelectionChangeListener(selectionChangeListener);
                             spreadsheet
@@ -261,6 +265,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                             spreadsheet = new Spreadsheet(
                                     ((SpreadsheetEditorComponentFactoryTest) spreadsheetFieldFactory)
                                             .getTestWorkbook());
+                            updateLocale();
                             spreadsheet
                                     .setSpreadsheetComponentFactory(spreadsheetFieldFactory);
                             layout.addComponent(spreadsheet);
@@ -364,7 +369,22 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 return null;
             }
         }, "testsheet.xlsx")).extend(downloadButton);
-        ;
+
+        localeSelect = new ComboBox();
+        localeSelect.setNewItemsAllowed(false);
+        localeSelect.setInputPrompt("Select locale");
+        localeSelect.setId("localeSelect");
+        for (Locale locale : Locale.getAvailableLocales()) {
+            localeSelect.addItem(locale);
+            localeSelect.setItemCaption(locale, locale.getDisplayName());
+        }
+        localeSelect.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                updateLocale();
+            }
+        });
 
         HorizontalLayout sheetOptions = new HorizontalLayout();
         sheetOptions.setSpacing(true);
@@ -415,7 +435,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         updateLayout.addComponents(openTestSheetSelect, updateButton);
         VerticalLayout updateUpload = new VerticalLayout();
         updateUpload.setSpacing(true);
-        updateUpload.addComponents(updateLayout, upload);
+        updateUpload.addComponents(updateLayout, upload, localeSelect);
 
         VerticalLayout closeDownload = new VerticalLayout();
         closeDownload.setSpacing(true);
@@ -458,6 +478,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     spreadsheet.read(file);
                 }
             }
+            updateLocale();
             spreadsheet.setSpreadsheetComponentFactory(null);
             previousFile = file;
             save.setEnabled(true);
@@ -470,6 +491,12 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        }
+    }
+
+    private void updateLocale() {
+        if (spreadsheet != null && localeSelect.getValue() instanceof Locale) {
+            spreadsheet.setLocale((Locale) localeSelect.getValue());
         }
     }
 

@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -66,7 +66,7 @@ import com.vaadin.ui.UI;
 /**
  * CellValueManager is an utility class of SpreadsheetClass, which handles
  * values and formatting for individual cells.
- * 
+ *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
@@ -103,7 +103,7 @@ public class CellValueManager implements Serializable {
 
     /**
      * Creates a new CellValueManager and ties it to the given Spreadsheet.
-     * 
+     *
      * @param spreadsheet
      *            Target Spreadsheet
      */
@@ -282,7 +282,7 @@ public class CellValueManager implements Serializable {
 
     /**
      * Gets the current CellValueHandler
-     * 
+     *
      * @return the customCellValueHandler
      */
     public CellValueHandler getCustomCellValueHandler() {
@@ -291,7 +291,7 @@ public class CellValueManager implements Serializable {
 
     /**
      * Sets the current CellValueHandler
-     * 
+     *
      * @param customCellValueHandler
      *            the customCellValueHandler to set
      */
@@ -303,7 +303,7 @@ public class CellValueManager implements Serializable {
     /**
      * Notifies evaluator and marks cell for update on next call to
      * {@link #updateMarkedCellValues()}
-     * 
+     *
      * @param cell
      *            Cell to mark for updates
      */
@@ -314,7 +314,7 @@ public class CellValueManager implements Serializable {
 
     /**
      * Marks cell for update on next call to {@link #updateMarkedCellValues()}
-     * 
+     *
      * @param cell
      *            Cell to mark for updates
      */
@@ -324,7 +324,7 @@ public class CellValueManager implements Serializable {
 
     /**
      * Marks the given cell as deleted and notifies the evaluator
-     * 
+     *
      * @param cell
      *            Deleted cell
      */
@@ -335,7 +335,7 @@ public class CellValueManager implements Serializable {
 
     /**
      * Marks the given cell for removal.
-     * 
+     *
      * @param cell
      *            Cell to mark for removal
      */
@@ -350,7 +350,7 @@ public class CellValueManager implements Serializable {
 
     /**
      * Clears the cell with the given key from the cache
-     * 
+     *
      * @param cellKey
      *            Key of target cell
      */
@@ -363,23 +363,23 @@ public class CellValueManager implements Serializable {
     /**
      * Updates the cell value and type, causes a recalculation of all the values
      * in the cell.
-     * 
+     *
      * If there is a {@link CellValueHandler} defined, then it is used.
-     * 
+     *
      * Cells starting with "=" or "+" will be created/changed into FORMULA type.
-     * 
+     *
      * Cells that are existing and are NUMERIC type will be parsed according to
      * their existing format, or if that fails, as Double.
-     * 
+     *
      * Cells not containing any letters and containing at least one number will
      * be created/changed into NUMERIC type (formatting is not changed).
-     * 
+     *
      * Existing Boolean cells will be parsed as Boolean.
-     * 
+     *
      * For everything else and if any of the above fail, the cell will get the
      * STRING type and the value will just be a string, except empty values will
      * cause the cell type to be BLANK.
-     * 
+     *
      * @param col
      *            Column index of target cell, 1-based
      * @param row
@@ -522,8 +522,6 @@ public class CellValueManager implements Serializable {
                             cell.setCellValue(numVal);
                         } else if (cellType == Cell.CELL_TYPE_BOOLEAN) {
                             cell.setCellValue(Boolean.parseBoolean(value));
-                        } else if (cellType == Cell.CELL_TYPE_NUMERIC) {
-                            parseValueIntoNumericCell(cell, value);
                         } else {
                             cell.setCellType(Cell.CELL_TYPE_STRING);
                             cell.setCellValue(value);
@@ -664,7 +662,7 @@ public class CellValueManager implements Serializable {
     /**
      * Attempts to parse a numeric value from the given String and set it to the
      * given Cell.
-     * 
+     *
      * @param cell
      *            Target Cell
      * @param value
@@ -710,7 +708,7 @@ public class CellValueManager implements Serializable {
     /**
      * Sends cell data to the client. Only the data within the given bounds will
      * be sent.
-     * 
+     *
      * @param firstRow
      *            Starting row index, 1-based
      * @param firstColumn
@@ -766,7 +764,7 @@ public class CellValueManager implements Serializable {
 
     /**
      * Gets cell data for cells within the given bounds.
-     * 
+     *
      * @param firstRow
      *            Starting row index, 1-based
      * @param firstColumn
@@ -828,11 +826,11 @@ public class CellValueManager implements Serializable {
 
     /**
      * Method for updating cells that are marked for update and formula cells.
-     * 
+     *
      * Iterates over the whole sheet (existing rows and columns) and updates
      * client side cache for all sent formula cells, and cells that have been
      * marked for updating.
-     * 
+     *
      */
     protected void updateMarkedCellValues() {
         final ArrayList<CellData> updatedCellData = new ArrayList<CellData>();
@@ -893,7 +891,7 @@ public class CellValueManager implements Serializable {
     /**
      * Makes sure the next {@link Spreadsheet#updateMarkedCells()} call will
      * clear all removed rows from client cache.
-     * 
+     *
      * @param startRow
      *            Index of the starting row, 1-based
      * @param endRow
@@ -930,7 +928,7 @@ public class CellValueManager implements Serializable {
     /**
      * Removes all the cells within the given bounds from the Spreadsheet and
      * the underlying POI model.
-     * 
+     *
      * @param firstRow
      *            Starting row index, 1-based
      * @param firstColumn
@@ -1085,7 +1083,7 @@ public class CellValueManager implements Serializable {
 
     /**
      * Sets the cell style width ratio map
-     * 
+     *
      * @param cellStyleWidthRatioMap
      *            New map
      */
@@ -1096,7 +1094,7 @@ public class CellValueManager implements Serializable {
 
     /**
      * Clears data cache for the column at the given index
-     * 
+     *
      * @param indexColumn
      *            Index of target column, 1-based
      */
