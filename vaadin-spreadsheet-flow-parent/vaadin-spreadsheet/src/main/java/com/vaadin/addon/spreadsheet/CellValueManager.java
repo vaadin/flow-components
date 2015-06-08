@@ -173,6 +173,14 @@ public class CellValueManager implements Serializable {
             String formattedCellValue = formatter.formatCellValue(cell,
                     getFormulaEvaluator());
 
+            if (!spreadsheet.isCellHidden(cell)) {
+                if (cell.getCellType() == Cell.CELL_TYPE_FORMULA
+                        || cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                    formattedCellValue = formattedCellValue.replaceAll(
+                            "^-(?=0(.0*)?$)", "");
+                }
+            }
+
             if (formattedCellValue != null && !formattedCellValue.isEmpty()
                     || cellStyle.getIndex() != 0) {
                 // if the cell is not wrapping text, and is of type numeric or
