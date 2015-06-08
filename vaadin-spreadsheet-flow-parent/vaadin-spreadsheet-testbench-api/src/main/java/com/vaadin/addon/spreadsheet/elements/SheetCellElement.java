@@ -2,6 +2,7 @@ package com.vaadin.addon.spreadsheet.elements;
 
 import java.util.List;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
@@ -32,7 +33,7 @@ public class SheetCellElement extends AbstractElement {
     public void setValue(String newValue) {
         if (isNormalCell()) {
             click();
-            WebElement functionFieldInput = parent.getFunctionFieldInput();
+            TestBenchElement functionFieldInput = parent.getFormulaField();
             functionFieldInput.clear();
             functionFieldInput.sendKeys(newValue);
             functionFieldInput.sendKeys(Keys.RETURN);

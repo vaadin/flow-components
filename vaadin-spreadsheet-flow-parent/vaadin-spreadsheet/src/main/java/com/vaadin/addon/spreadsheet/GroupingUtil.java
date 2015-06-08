@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -16,7 +17,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRow;
  * 
  * @author Thomas Mattsson / Vaadin Ltd.
  */
-class GroupingUtil {
+class GroupingUtil implements Serializable{
 
     private GroupingUtil() {
     }

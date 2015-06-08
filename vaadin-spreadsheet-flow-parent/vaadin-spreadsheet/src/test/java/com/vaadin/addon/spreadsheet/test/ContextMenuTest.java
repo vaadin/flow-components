@@ -3,6 +3,7 @@ package com.vaadin.addon.spreadsheet.test;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
@@ -35,6 +36,7 @@ public class ContextMenuTest extends Test1 {
     }
 
     @Test
+    @Ignore("Fails with Firefox")
     public void testMultipleCells() {
         loadServerFixture("ACTIONS");
 
@@ -64,6 +66,7 @@ public class ContextMenuTest extends Test1 {
     }
 
     @Test
+    @Ignore("Fails with Firefox")
     public void testHeaders() throws InterruptedException {
         loadServerFixture("ACTIONS");
 

@@ -309,8 +309,8 @@ public class SpreadsheetElement extends AbstractElement {
         return true;
     }
 
-    WebElement getFunctionFieldInput() {
-        return findElement(By.className("functionfield"));
+    public WebElement getCellValueInput() {
+        return findElement(By.className("cellinput"));
     }
 
     private TestBenchElement getBottomRightPane() {

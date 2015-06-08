@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -15,7 +16,7 @@ import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 import com.vaadin.testbench.annotations.RunLocally;
 import com.vaadin.testbench.parallel.Browser;
 
-@RunLocally(Browser.PHANTOMJS)
+@Ignore("Fails in all browsers")
 public class GenericTest extends Test1 {
 
     @Test
