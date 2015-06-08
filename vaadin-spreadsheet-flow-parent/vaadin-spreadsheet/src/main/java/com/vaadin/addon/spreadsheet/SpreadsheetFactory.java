@@ -730,7 +730,7 @@ public class SpreadsheetFactory implements Serializable {
      */
     static void loadSheetImages(Spreadsheet spreadsheet) {
         final Sheet sheet = spreadsheet.getActiveSheet();
-        Drawing drawing = sheet.createDrawingPatriarch();
+        Drawing drawing = getDrawing(sheet);
         if (drawing instanceof XSSFDrawing) {
             for (XSSFShape shape : ((XSSFDrawing) drawing).getShapes()) {
                 if (shape instanceof XSSFPicture) {
@@ -778,6 +778,20 @@ public class SpreadsheetFactory implements Serializable {
                     }
                 }
             }
+        }
+    }
+
+    /*
+     * The getDrawingPatriarch() method is missing from the interface, so we
+     * have to check each implementation. SXSSFSheet is unsupported.
+     */
+    private static Drawing getDrawing(Sheet sheet) {
+        if (sheet instanceof XSSFSheet) {
+            return ((XSSFSheet) sheet).getDrawingPatriarch();
+        } else if (sheet instanceof HSSFSheet) {
+            return ((HSSFSheet) sheet).getDrawingPatriarch();
+        } else {
+            return null;
         }
     }
 

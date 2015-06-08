@@ -22,7 +22,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vaadin.version>7.4.0</vaadin.version>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
-        <poi.version>3.11</poi.version>
+        <poi.version>3.12</poi.version>
         <tb.hub>testbench-hub.intra.itmill.com</tb.hub>
 
         <!-- Build anyway if tests fail -->
