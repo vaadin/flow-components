@@ -27,7 +27,7 @@ public class SheetSelection extends Page {
     public void findSelectionOutline() {
         // sometimes the spreadsheet takes so long to load that the selection
         // widget elements are not found
-        new WebDriverWait(getDriver(), 10).until(ExpectedConditions
+        new WebDriverWait(getDriver(), 15).until(ExpectedConditions
                 .presenceOfElementLocated(By.className("s-top")));
         sTop = driver.findElement(By.className("s-top"));
         sBottom = driver.findElement(By.className("s-bottom"));

@@ -577,6 +577,54 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
+     * Converts the given index to take into account any hidden columns at the
+     * beginning of the sheet and then saves the resulting horizontal split
+     * position into state.
+     *
+     * @param horizontalSplitPosition
+     */
+    void setHorizontalSplitPosition(short horizontalSplitPosition) {
+        ArrayList<Integer> hidden = new ArrayList<Integer>(
+                getState(false).hiddenColumnIndexes);
+        if (hidden.contains(1)) {
+            int atBeginning = 1;
+            Collections.sort(hidden);
+            for (Integer i : hidden) {
+                if (atBeginning != i || i > horizontalSplitPosition) {
+                    break;
+                }
+                ++atBeginning;
+                ++horizontalSplitPosition;
+            }
+        }
+        getState().horizontalSplitPosition = horizontalSplitPosition;
+    }
+
+    /**
+     * Converts the given index to take into account any hidden rows at the
+     * beginning of the sheet and then saves the resulting vertical split
+     * position into state.
+     *
+     * @param verticalSplitPosition
+     */
+    void setVerticalSplitPosition(short verticalSplitPosition) {
+        ArrayList<Integer> hidden = new ArrayList<Integer>(
+                getState(false).hiddenRowIndexes);
+        if (hidden.contains(1)) {
+            int atBeginning = 1;
+            Collections.sort(hidden);
+            for (Integer i : hidden) {
+                if (atBeginning != i || i > verticalSplitPosition) {
+                    break;
+                }
+                ++atBeginning;
+                ++verticalSplitPosition;
+            }
+        }
+        getState().verticalSplitPosition = verticalSplitPosition;
+    }
+
+    /**
      * Returns the index the last frozen row (last row in top freeze pane).
      * 
      * @return Last frozen row or 0 if none

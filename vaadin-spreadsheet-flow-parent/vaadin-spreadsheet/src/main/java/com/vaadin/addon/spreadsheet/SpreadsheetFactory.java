@@ -838,10 +838,10 @@ public class SpreadsheetFactory implements Serializable {
             // Apparently in POI HorizontalSplitPosition means rows and
             // VerticalSplitPosition means columns. Changed the meaning for the
             // component internals
-            spreadsheet.getState().horizontalSplitPosition = paneInformation
-                    .getVerticalSplitPosition();
-            spreadsheet.getState().verticalSplitPosition = paneInformation
-                    .getHorizontalSplitPosition();
+            spreadsheet.setHorizontalSplitPosition(paneInformation
+                    .getVerticalSplitPosition());
+            spreadsheet.setVerticalSplitPosition(paneInformation
+                    .getHorizontalSplitPosition());
         } else {
             spreadsheet.getState().verticalSplitPosition = 0;
             spreadsheet.getState().horizontalSplitPosition = 0;
