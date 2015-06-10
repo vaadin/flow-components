@@ -2166,9 +2166,6 @@ public class SheetWidget extends Panel {
         // Update freeze pane styles
         bottomLeftPane.getStyle().setHeight(bottomPanelHeightPx, Unit.PX);
         topRightPane.getStyle().setWidth(bottomPanelWidth, Unit.PX);
-
-        colGroupPane.getStyle().setWidth(bottomPanelWidth, Unit.PX);
-        rowGroupPane.getStyle().setHeight(bottomPanelHeightPx, Unit.PX);
     }
 
     /**
@@ -6042,17 +6039,44 @@ public class SheetWidget extends Panel {
             @Override
             public void execute() {
 
-                int width = topLeftPane.getClientWidth()
-                        + rowGroupPane.getClientWidth();
-                width += 2; // TODO 1 for left border the freeze panes has, 1
-                            // for bug
+                int topLeftPaneClientWidth = topLeftPane.getClientWidth();
+                int rowGroupPaneClientWidth = rowGroupPane.getClientWidth();
+                int width = topLeftPaneClientWidth + rowGroupPaneClientWidth;
+
+                // 1 pixel for the freeze panes border
+                // 1 pixel for row grouping border
+                if (rowGroupPaneClientWidth == 0) {
+                    width += 1;
+                } else {
+                    width += 2;
+                }
+
                 colGroupFreezePane.getStyle().setWidth(width, Unit.PX);
 
-                int height = topLeftPane.getClientHeight()
-                        + colGroupPane.getClientHeight();
-                height += 2;// TODO 1 for left border the freeze panes has, 1
-                            // for bug
+                int topLeftPaneClientHeight = topLeftPane.getClientHeight();
+                int colGroupPaneClientHeight = colGroupPane.getClientHeight();
+                int height = topLeftPaneClientHeight + colGroupPaneClientHeight;
+
+                // 1 pixel for the freeze panes border
+                // 1 pixel for column grouping border
+                if (colGroupPaneClientHeight == 0) {
+                    height += 1;
+                } else {
+                    height += 2;
+                }
+
                 rowGroupFreezePane.getStyle().setHeight(height, Unit.PX);
+
+                // update grouping pane widths and heights
+                // needs to be here since we need to know the frozen pane sizes
+                // 1 pixel added to connect with the other side border
+                int bottomLeftPaneClientHeight = bottomLeftPane
+                        .getClientHeight();
+                int topRightPaneClientWidth = topRightPane.getClientWidth();
+                colGroupPane.getStyle().setWidth(
+                        topRightPaneClientWidth + width + 1, Unit.PX);
+                rowGroupPane.getStyle().setHeight(
+                        bottomLeftPaneClientHeight + height + 1, Unit.PX);
             }
         });
     }

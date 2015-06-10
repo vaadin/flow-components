@@ -181,6 +181,8 @@ public abstract class GroupingWidget extends FlowPanel {
         newWidget.index = index;
         newWidget.inversed = inversed;
 
+        newWidget.btn.setInnerText(btn.getInnerText());
+
         Style style = newWidget.getElement().getStyle();
 
         if (marginLeft > -1) {
