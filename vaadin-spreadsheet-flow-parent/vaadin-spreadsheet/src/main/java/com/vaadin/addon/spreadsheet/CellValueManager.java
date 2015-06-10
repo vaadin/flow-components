@@ -24,6 +24,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -48,6 +49,7 @@ import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -230,12 +232,49 @@ public class CellValueManager implements Serializable {
 
                 markedCells.add(SpreadsheetUtil.toKey(cell));
             }
+
+            if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC
+                    && DateUtil.isCellDateFormatted(cell)) {
+                cellData.originalValue = cellData.value;
+            } else {
+                cellData.originalValue = getOriginalCellValue(cell);
+            }
         } catch (RuntimeException rte) {
             LOGGER.log(Level.FINEST, rte.getMessage(), rte);
             cellData.value = "#VALUE!";
         }
 
         return cellData;
+    }
+
+    public String getOriginalCellValue(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+
+        int cellType = cell.getCellType();
+        switch (cellType) {
+        case Cell.CELL_TYPE_FORMULA:
+            return cell.getCellFormula();
+        case Cell.CELL_TYPE_NUMERIC:
+            if (DateUtil.isCellDateFormatted(cell)) {
+                Date dateCellValue = cell.getDateCellValue();
+                if (dateCellValue != null) {
+                    return new SimpleDateFormat().format(dateCellValue);
+                }
+                return "";
+            }
+            return String.valueOf(cell.getNumericCellValue());
+        case Cell.CELL_TYPE_STRING:
+            return cell.getStringCellValue();
+        case Cell.CELL_TYPE_BOOLEAN:
+            return String.valueOf(cell.getBooleanCellValue());
+        case Cell.CELL_TYPE_BLANK:
+            return "";
+        case Cell.CELL_TYPE_ERROR:
+            return String.valueOf(cell.getErrorCellValue());
+        }
+        return "";
     }
 
     private boolean valueContainsOnlyNumbers(String value) {

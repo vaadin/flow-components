@@ -1184,7 +1184,7 @@ public class SheetWidget extends Panel {
          * Touch.getTarget() is the equivalent of event.getTarget(). Of course,
          * Safari doesn't follow the specifications; all target references are
          * to the element where we started the drag.
-         * 
+         *
          * We need to manually parse x/y coords in #getRealEventTargetCell() to
          * find the correct cell.
          */
@@ -1216,7 +1216,7 @@ public class SheetWidget extends Panel {
              * Parse according to classname of target element. As said above,
              * Safari gives us the wrong target and hence we have the wrong
              * style name here.
-             * 
+             *
              * This also means that if we move outside the sheet, we continue
              * execution past this check.
              */
@@ -2037,6 +2037,11 @@ public class SheetWidget extends Panel {
     public String getCellFormulaValue(int column, int row) {
         CellData cd = getCellData(column, row);
         return cd == null ? "" : cd.formulaValue;
+    }
+
+    public String getOriginalCellValue(int column, int row) {
+        CellData cd = getCellData(column, row);
+        return cd == null ? "" : cd.originalValue;
     }
 
     private String createHeaderDNDHTML() {

@@ -636,8 +636,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 formulaBarWidget.setCellFormulaValue(formulaValue);
                 sheetWidget.updateInputValue("=" + formulaValue);
             } else {
-                formulaBarWidget.setCellPlainValue(sheetWidget.getCellValue(
-                        column, row));
+                formulaBarWidget.setCellPlainValue(sheetWidget
+                        .getOriginalCellValue(column, row));
             }
         }
         cellLocked = sheetWidget.isCellLocked(column, row);

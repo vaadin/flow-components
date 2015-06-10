@@ -26,6 +26,7 @@ public class CellData implements Serializable {
     public int col;
     public String value;
     public String formulaValue;
+    public String originalValue;
     public String cellStyle = "cs0";
     public boolean locked = false;
     public boolean needsMeasure;
