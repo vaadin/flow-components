@@ -522,7 +522,6 @@ public class SheetWidget extends Panel {
         String ua = BrowserInfo.getBrowserString().toLowerCase();
         isMac = ua.contains("macintosh") || ua.contains("mac osx")
                 || ua.contains("mac os x");
-
         actionHandler = view;
         setTouchMode(touchMode);
         cachedCellData = new HashMap<String, CellData>();
@@ -1068,6 +1067,16 @@ public class SheetWidget extends Panel {
         Element target = event.getEventTarget().cast();
 
         String className = target.getClassName();
+
+        // click target is the inner div because IE10 and 9 are not compatible
+        // with 'pointer-events: none'
+        if ((BrowserInfo.get().isIE9() || BrowserInfo.get().isIE10())
+                && (className == null || className.isEmpty())) {
+            String parentClassName = target.getParentElement().getClassName();
+            if (parentClassName.contains("cell")) {
+                className = parentClassName;
+            }
+        }
         if (cellCommentEditMode && !className.contains("comment-overlay")) {
             cellCommentEditMode = false;
             currentlyEditedCellComment.setEditMode(false);
@@ -1184,7 +1193,7 @@ public class SheetWidget extends Panel {
          * Touch.getTarget() is the equivalent of event.getTarget(). Of course,
          * Safari doesn't follow the specifications; all target references are
          * to the element where we started the drag.
-         *
+         * 
          * We need to manually parse x/y coords in #getRealEventTargetCell() to
          * find the correct cell.
          */
@@ -1216,7 +1225,7 @@ public class SheetWidget extends Panel {
              * Parse according to classname of target element. As said above,
              * Safari gives us the wrong target and hence we have the wrong
              * style name here.
-             *
+             * 
              * This also means that if we move outside the sheet, we continue
              * execution past this check.
              */

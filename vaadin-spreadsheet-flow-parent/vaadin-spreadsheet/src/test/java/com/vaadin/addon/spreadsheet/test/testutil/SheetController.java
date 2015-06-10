@@ -167,6 +167,12 @@ public class SheetController implements SheetClicker {
         $(SpreadsheetElement.class).first().getRowHeader(row).click();
     }
 
+    public void setCellVallue(String cell, String value) {
+        SheetCellElement cellElement = $(SpreadsheetElement.class).first()
+                .getCellAt(cell);
+        cellElement.setValue(value);
+    }
+
     public SheetController clickElement(org.openqa.selenium.By by) {
         driver.findElement(by).click();
         return this;

@@ -22,6 +22,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import com.vaadin.client.BrowserInfo;
 
 public class SheetEventListener implements EventListener {
 
@@ -115,8 +116,21 @@ public class SheetEventListener implements EventListener {
     }
 
     private void onSheetDoubleClick(Event event) {
-        final Element target = event.getEventTarget().cast();
+        Element target = event.getEventTarget().cast();
         String targetClassName = target.getClassName();
+
+        // click target is the inner div because IE10 and 9 are not compatible
+        // with 'pointer-events: none'
+        if ((BrowserInfo.get().isIE9() || BrowserInfo.get().isIE10())
+                && (targetClassName == null || targetClassName.isEmpty())) {
+            Element parentElement = target.getParentElement();
+            String parentClassName = parentElement.getClassName();
+            if (parentClassName.contains("cell")) {
+                target = parentElement;
+                targetClassName = parentClassName;
+            }
+        }
+
         if (target.getParentElement().getClassName().contains("sheet")
                 && targetClassName.contains("cell")) {
             SheetJsniUtil jsniUtil = widget.getSheetJsniUtil();

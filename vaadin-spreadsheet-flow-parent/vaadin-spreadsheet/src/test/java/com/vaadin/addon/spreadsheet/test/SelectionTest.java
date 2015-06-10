@@ -160,6 +160,20 @@ public class SelectionTest extends Test1 {
         assertCellSelected("F2");
     }
 
+    @Ignore("Value setting is not working")
+    @Test
+    public void mouseSelection_cellWithStringValue_cellIsSelected() {
+        sheetController.clickCell("B2");
+        assertCellSelected("B2");
+        sheetController.setCellVallue("B2", "value");
+
+        sheetController.clickCell("C5");
+        assertCellSelected("C5");
+
+        sheetController.clickCell("B2");
+        assertCellSelected("B2");
+    }
+
     private void assertCellSelected(String cell) {
         assertTrue($(SpreadsheetElement.class).first().getCellAt(cell)
                 .isCellSelected());
