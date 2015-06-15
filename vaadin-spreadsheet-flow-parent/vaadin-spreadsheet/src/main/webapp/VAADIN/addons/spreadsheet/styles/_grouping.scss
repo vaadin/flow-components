@@ -1,0 +1,208 @@
+@mixin grouping {
+  .col-group-pane,
+  .col-group-freeze-pane {
+    position: absolute;
+    left: 0;
+    width: 100%;
+
+    z-index: 11;
+    background-color: $address-field-background;
+
+    border-bottom: $header-border;
+    box-sizing: border-box;
+
+    .grouping {
+      position: absolute;
+      height: 7px;
+      border-top: 2px solid $spreadsheet-header-grouping-color;
+      border-left: 2px solid $spreadsheet-header-grouping-color;
+      cursor: pointer;
+
+      .expand {
+        position: relative;
+        top: -7px;
+        float: right;
+        right: -4px;
+        height: 12px;
+        width: 12px;
+        background-color: $spreadsheet-header-grouping-color;
+        color: white;
+        border: none;
+        line-height: 11px;
+        text-align: center;
+        vertical-align: middle;
+        border-radius: 50%;
+        font-size: 12px;
+      }
+
+      &.plus {
+        border: none;
+
+        .expand {
+          top: -5px;
+        }
+      }
+    }
+
+    .grouping.inversed {
+      border-right: 2px solid $spreadsheet-header-grouping-color;
+      border-left: none;
+      .expand {
+        right: initial;
+        left: -4px;
+        float: none;
+      }
+    }
+
+  }
+  .col-group-freeze-pane {
+    overflow: hidden;
+    border-right: $spreadsheet-freeze-pane-border;
+  }
+
+  .col-group-border {
+    position: absolute;
+
+    .border {
+      position: absolute;
+      width: 100%;
+      z-index: 15;
+      border-bottom: 1px dotted $spreadsheet-header-grouping-color;
+      margin-top: 20px;
+    }
+  }
+
+  .row-group-pane,
+  .row-group-freeze-pane {
+    position: absolute;
+    left: 0;
+    height: 100%;
+
+    z-index: 11;
+    background-color: $address-field-background;
+
+    border-right: $header-border;
+    box-sizing: border-box;
+
+    .grouping {
+      position: absolute;
+      width: 8px;
+      border-top: 2px solid $spreadsheet-header-grouping-color;
+      border-left: 2px solid $spreadsheet-header-grouping-color;
+      cursor: pointer;
+
+      &.plus {
+        border: none;
+      }
+
+      .expand {
+        position: absolute;
+        bottom: -4px;
+        right: 2px;
+        height: 12px;
+        width: 12px;
+        background-color: $spreadsheet-header-grouping-color;
+        color: white;
+        border: none;
+        line-height: 11px;
+        text-align: center;
+        vertical-align: middle;
+        border-radius: 50%;
+        font-size: 12px;
+      }
+
+      &.plus {
+        .expand {
+          right: 0;
+        }
+      }
+    }
+    .grouping.inversed {
+      border-top: none;
+      border-bottom: 2px solid $spreadsheet-header-grouping-color;
+      .expand {
+        bottom: initial;
+        top: -5px;
+      }
+    }
+  }
+  .row-group-freeze-pane {
+    overflow: hidden;
+    border-bottom: $spreadsheet-freeze-pane-border;
+  }
+
+  .row-group-border {
+    position: absolute;
+
+    .border {
+      position: absolute;
+      height: 100%;
+      z-index: 15;
+      border-right: 1px dotted $spreadsheet-header-grouping-color;
+      /*margin-top: 20px;*/
+    }
+  }
+
+  .expandbutton {
+    height: 18px;
+    width: 11px;
+    line-height: 18px;
+    font-size: 11px;
+    text-align: center;
+    cursor: pointer;
+    color: darken($spreadsheet-header-grouping-color, 50%);
+
+    span {
+      vertical-align: text-top;
+    }
+  }
+
+  .expandbutton:active {
+    border-color: gray;
+  }
+
+  .col-group-summary {
+    .expandbutton {
+      margin-left: auto;
+      margin-right: 4px;
+      /*margin-top: 7px;*/
+    }
+  }
+  .row-group-summary {
+    .expandbutton {
+      display: inline-block;
+      margin-left: 4px;
+    }
+  }
+
+  .grouping-corner {
+    position: absolute;
+    left: 0;
+    z-index: 15;
+    border-right: $header-border;
+    border-bottom: $header-border;
+    box-sizing: border-box;
+    background-color: $address-field-background;
+  }
+  .col-group-summary {
+    position: absolute;
+    box-sizing: border-box;
+    border-bottom: $header-border;
+    border-right: $header-border;
+    background-color: $address-field-background;
+    z-index: 15;
+  }
+  .row-group-summary {
+    position: absolute;
+    box-sizing: border-box;
+    border-bottom: $header-border;
+    border-right: $header-border;
+    background-color: $address-field-background;
+    left: 0;
+    z-index: 15;
+  }
+
+  .v-ie & .grouping .expand {
+    line-height: 13px;
+  }
+}

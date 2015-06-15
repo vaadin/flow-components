@@ -39,6 +39,7 @@ import com.vaadin.data.util.FilesystemContainer;
 import com.vaadin.data.util.converter.Converter.ConversionException;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
+import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
@@ -445,6 +446,53 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         options.addComponent(createAndFreeze);
         options.addComponent(updateUpload);
         options.addComponent(closeDownload);
+
+        getPage().addUriFragmentChangedListener(
+                new Page.UriFragmentChangedListener() {
+                    @Override
+                    public void uriFragmentChanged(
+                            Page.UriFragmentChangedEvent event) {
+                        updateFromFragment();
+                    }
+                });
+
+        updateFromFragment();
+    }
+
+    /*
+     * Rudimentary fragment handling to make developing&testing faster
+     */
+    private void updateFromFragment() {
+        String uriFragment = getPage().getUriFragment();
+        if (uriFragment != null && uriFragment.startsWith("file/")) {
+            String filename = uriFragment.substring("file/".length(),
+                    uriFragment.indexOf(".xlsx") + ".xlsx".length());
+
+            Integer sheetIndex = null;
+            if (uriFragment.contains("/sheet/")) {
+                sheetIndex = Integer.valueOf(uriFragment.substring(uriFragment
+                        .indexOf("/sheet/") + "/sheet/".length())) - 1;
+            }
+
+            System.out.println("Opening file " + filename + " with sheet "
+                    + (sheetIndex == null ? "default" : sheetIndex));
+
+            for (Object id : openTestSheetSelect.getItemIds()) {
+                File file = (File) id;
+                if (filename.equals(file.getName())) {
+                    openTestSheetSelect.select(file);
+                    updateButton.click();
+                    if (sheetIndex != null) {
+                        spreadsheet.setActiveSheetIndex(sheetIndex);
+                    }
+
+                    return;
+                }
+            }
+
+            Notification.show("File not found: " + filename,
+                    Notification.Type.WARNING_MESSAGE);
+        }
     }
 
     private void printSelectionChangeEventContents(SelectionChangeEvent event) {

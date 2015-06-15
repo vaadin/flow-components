@@ -240,8 +240,12 @@ public class SheetWidget extends Panel {
     private DivElement colGroupFreezePane = Document.get().createDivElement();
     private DivElement rowGroupFreezePane = Document.get().createDivElement();
     private DivElement groupingCorner = Document.get().createDivElement();
+
     private DivElement colGroupSummaryPane = Document.get().createDivElement();
     private DivElement rowGroupSummaryPane = Document.get().createDivElement();
+
+    private DivElement colGroupBorderPane = Document.get().createDivElement();
+    private DivElement rowGroupBorderPane = Document.get().createDivElement();
 
     /**
      * Hidden textfield that handles all copy and paste functions.
@@ -366,6 +370,8 @@ public class SheetWidget extends Panel {
     private Set<Integer> selectedFrozenRowHeaderIndexes = new HashSet<Integer>();
     private Set<Integer> selectedFrozenColHeaderIndexes = new HashSet<Integer>();
     private CellCoord highlightedCellCoord = null;
+    private int calculatedRowGroupWidth;
+    private int calculatedColGroupHeight;
 
     static class CellCoord {
         private int col;
@@ -855,8 +861,16 @@ public class SheetWidget extends Panel {
 
         rowGroupSummaryPane.setClassName("row-group-summary");
         spreadsheet.appendChild(rowGroupSummaryPane);
+
         colGroupSummaryPane.setClassName("col-group-summary");
         spreadsheet.appendChild(colGroupSummaryPane);
+
+        colGroupBorderPane.setClassName("col-group-border");
+        spreadsheet.appendChild(colGroupBorderPane);
+
+        rowGroupBorderPane.setClassName("row-group-border");
+        spreadsheet.appendChild(rowGroupBorderPane);
+
         groupingCorner.setClassName("grouping-corner");
         spreadsheet.appendChild(groupingCorner);
 
@@ -2062,14 +2076,19 @@ public class SheetWidget extends Panel {
      * the spreadsheet contents. Also effects the selection widget.
      */
     private void moveHeadersToMatchScroll() {
-        topRightPane.getStyle().setMarginLeft(0 - sheet.getScrollLeft(),
-                Unit.PX);
-        colGroupPane.getStyle().setMarginLeft(0 - sheet.getScrollLeft(),
-                Unit.PX);
+        int negativeLeftMargin = 0 - sheet.getScrollLeft();
+        int negativeTopMargin = 0 - sheet.getScrollTop();
 
-        bottomLeftPane.getStyle().setMarginTop(0 - sheet.getScrollTop(),
-                Unit.PX);
-        rowGroupPane.getStyle().setMarginTop(0 - sheet.getScrollTop(), Unit.PX);
+        topRightPane.getStyle().setMarginLeft(negativeLeftMargin, Unit.PX);
+        colGroupPane.getStyle().setMarginLeft(negativeLeftMargin, Unit.PX);
+
+        bottomLeftPane.getStyle().setMarginTop(negativeTopMargin, Unit.PX);
+        rowGroupPane.getStyle().setMarginTop(negativeTopMargin, Unit.PX);
+
+        colGroupBorderPane.getStyle().setMarginLeft(
+                negativeLeftMargin - calculatedRowGroupWidth, Unit.PX);
+        rowGroupBorderPane.getStyle().setMarginTop(
+                negativeTopMargin - calculatedColGroupHeight, Unit.PX);
     }
 
     private int createRowStyles(String[] rules, int startIndex, int endIndex) {
@@ -5836,10 +5855,13 @@ public class SheetWidget extends Panel {
         colGroupSummaryPane.removeAllChildren();
 
         for (int i = 1; i <= colGroupMax + 1; i++) {
+            SpanElement text = Document.get().createSpanElement();
             DivElement btn = Document.get().createDivElement();
             colGroupSummaryPane.appendChild(btn);
 
-            btn.setInnerText("" + i);
+            btn.appendChild(text);
+
+            text.setInnerText(Integer.toString(i));
             btn.setClassName("expandbutton");
 
             final int level = i;
@@ -5852,6 +5874,16 @@ public class SheetWidget extends Panel {
                     actionHandler.levelHeaderClicked(true, level);
                 }
             });
+        }
+
+        colGroupBorderPane.removeAllChildren();
+
+        for (int i = 1; i <= colGroupMax; i++) {
+            DivElement border = Document.get().createDivElement();
+            colGroupBorderPane.appendChild(border);
+
+            border.setClassName("border");
+            border.getStyle().setMarginTop(18 * i, Unit.PX);
         }
     }
 
@@ -5883,6 +5915,16 @@ public class SheetWidget extends Panel {
                     actionHandler.levelHeaderClicked(false, level);
                 }
             });
+        }
+
+        rowGroupBorderPane.removeAllChildren();
+
+        for (int i = 1; i <= rowGroupMax; i++) {
+            DivElement border = Document.get().createDivElement();
+            rowGroupBorderPane.appendChild(border);
+
+            border.setClassName("border");
+            border.getStyle().setMarginLeft(15 * i, Unit.PX);
         }
     }
 
@@ -6057,11 +6099,14 @@ public class SheetWidget extends Panel {
                 int rowGroupPaneClientWidth = rowGroupPane.getClientWidth();
                 int width = topLeftPaneClientWidth + rowGroupPaneClientWidth;
 
-                // 1 pixel for the freeze panes border
-                // 1 pixel for row grouping border
-                if (rowGroupPaneClientWidth == 0) {
-                    width += 1;
-                } else {
+                if (rowGroupPaneClientWidth == 0
+                        && !isDisplayed(colGroupFreezePane)) {
+                    width -= 1;
+                } else if (rowGroupPaneClientWidth != 0
+                        && !isDisplayed(colGroupFreezePane)) {
+                    // NOOP
+                } else if (rowGroupPaneClientWidth != 0
+                        && isDisplayed(colGroupFreezePane)) {
                     width += 2;
                 }
 
@@ -6071,11 +6116,14 @@ public class SheetWidget extends Panel {
                 int colGroupPaneClientHeight = colGroupPane.getClientHeight();
                 int height = topLeftPaneClientHeight + colGroupPaneClientHeight;
 
-                // 1 pixel for the freeze panes border
-                // 1 pixel for column grouping border
-                if (colGroupPaneClientHeight == 0) {
+                if (colGroupPaneClientHeight == 0
+                        && !isDisplayed(rowGroupFreezePane)) {
+                    // NOOP
+                } else if (colGroupPaneClientHeight != 0
+                        && !isDisplayed(rowGroupFreezePane)) {
                     height += 1;
-                } else {
+                } else if (colGroupPaneClientHeight != 0
+                        && isDisplayed(rowGroupFreezePane)) {
                     height += 2;
                 }
 
@@ -6083,16 +6131,36 @@ public class SheetWidget extends Panel {
 
                 // update grouping pane widths and heights
                 // needs to be here since we need to know the frozen pane sizes
-                // 1 pixel added to connect with the other side border
                 int bottomLeftPaneClientHeight = bottomLeftPane
                         .getClientHeight();
                 int topRightPaneClientWidth = topRightPane.getClientWidth();
-                colGroupPane.getStyle().setWidth(
-                        topRightPaneClientWidth + width + 1, Unit.PX);
-                rowGroupPane.getStyle().setHeight(
-                        bottomLeftPaneClientHeight + height + 1, Unit.PX);
+
+                int topPaneWidth = topRightPaneClientWidth + width;
+
+                int leftPaneHeight = bottomLeftPaneClientHeight + height;
+
+                if (isDisplayed(colGroupFreezePane)) {
+                    topPaneWidth += 1;
+                }
+
+                if (isDisplayed(rowGroupFreezePane)) {
+                    leftPaneHeight += 1;
+                }
+
+                colGroupPane.getStyle().setWidth(topPaneWidth, Unit.PX);
+                colGroupBorderPane.getStyle().setWidth(topPaneWidth, Unit.PX);
+
+                rowGroupPane.getStyle().setHeight(leftPaneHeight, Unit.PX);
+
+                rowGroupBorderPane.getStyle()
+                        .setHeight(leftPaneHeight, Unit.PX);
             }
         });
+    }
+
+    private boolean isDisplayed(Element element) {
+        return !Display.NONE.getCssName().equals(
+                element.getStyle().getDisplay());
     }
 
     private int updateExtraColumnHeaderElements(int formulaBarHeight) {
@@ -6102,11 +6170,11 @@ public class SheetWidget extends Panel {
         // calculate grouping element sizes
         int colGroupHeight = 0;
         if (colGroupMax > 0) {
-            colGroupHeight = ColumnGrouping.getTotalSize(colGroupMax + 1);
+            colGroupHeight = ColumnGrouping.getTotalHeight(colGroupMax + 1);
         }
         int rowGroupWidth = 0;
         if (rowGroupMax > 0) {
-            rowGroupWidth = ColumnGrouping.getTotalSize(rowGroupMax + 1);
+            rowGroupWidth = ColumnGrouping.getTotalWidth(rowGroupMax + 1);
         }
 
         // grouping element sizing
@@ -6138,6 +6206,18 @@ public class SheetWidget extends Panel {
         }
         colGroupSummaryPane.getStyle().setLeft(rowGroupWidth, Unit.PX);
 
+        colGroupBorderPane.getStyle().setTop(formulaBarHeight, Unit.PX);
+        colGroupBorderPane.getStyle().setLeft(rowGroupWidth, Unit.PX);
+        colGroupBorderPane.getStyle().setHeight(colGroupHeight, Unit.PX);
+
+        rowGroupBorderPane.getStyle().setTop(formulaBarHeight + colGroupHeight,
+                Unit.PX);
+        rowGroupBorderPane.getStyle().setLeft(0, Unit.PX);
+        rowGroupBorderPane.getStyle().setWidth(rowGroupWidth, Unit.PX);
+
+        calculatedRowGroupWidth = rowGroupWidth;
+        calculatedColGroupHeight = colGroupHeight;
+
         return colGroupHeight;
 
     }
@@ -6147,11 +6227,11 @@ public class SheetWidget extends Panel {
         // calculate grouping element sizes
         int colGroupHeight = 0;
         if (colGroupMax > 0) {
-            colGroupHeight = GroupingWidget.getTotalSize(colGroupMax + 1);
+            colGroupHeight = GroupingWidget.getTotalHeight(colGroupMax + 1);
         }
         int rowGroupWidth = 0;
         if (rowGroupMax > 0) {
-            rowGroupWidth = GroupingWidget.getTotalSize(rowGroupMax + 1);
+            rowGroupWidth = GroupingWidget.getTotalWidth(rowGroupMax + 1);
         }
 
         if (rowGroupWidth == 0) {

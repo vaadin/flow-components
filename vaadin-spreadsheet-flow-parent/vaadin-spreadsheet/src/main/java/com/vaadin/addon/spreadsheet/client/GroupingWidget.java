@@ -1,5 +1,21 @@
 package com.vaadin.addon.spreadsheet.client;
 
+/*
+ * #%L
+ * Vaadin Spreadsheet
+ * %%
+ * Copyright (C) 2013 - 2015 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Add-On License 3.0
+ * (CVALv3).
+ *
+ * See the file license.html distributed with this software for more
+ * information about licensing.
+ *
+ * You should have received a copy of the CVALv3 along with this program.
+ * If not, see <http://vaadin.com/license/cval-3>.
+ * #L%
+ */
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.NativeEvent;
@@ -10,13 +26,16 @@ import com.google.gwt.user.client.ui.FlowPanel;
 
 /**
  * Class that represents a single column grouping indicator.
- * 
+ *
  * @author Thomas Mattsson / Vaadin LTD
  *
  */
 public abstract class GroupingWidget extends FlowPanel {
 
-    private static final int SINGLE_ITEM_SIZE = 17;
+    protected static final int SINGLE_ITEM_SIZE_HEIGHT = 18;
+    protected static final int SINGLE_ITEM_SIZE_WIDTH = 15;
+    public static final String EXPAND_CHAR = "+";
+    public static final String CONTRACT_SIGN = "&#x2212;";
 
     public interface GroupingHandler {
         void setGroupingCollapsed(boolean cols, int colIndex, boolean collapsed);
@@ -80,8 +99,9 @@ public abstract class GroupingWidget extends FlowPanel {
         this.handler = handler;
 
         setStyleName("grouping");
+        addStyleName("minus");
 
-        btn.setInnerText("-");
+        btn.setInnerHTML(CONTRACT_SIGN);
         btn.setClassName("expand");
         getElement().appendChild(btn);
 
@@ -110,9 +130,13 @@ public abstract class GroupingWidget extends FlowPanel {
         }
 
         if (collapsed) {
-            btn.setInnerText("+");
+            btn.setInnerHTML(EXPAND_CHAR);
+            removeStyleName("minus");
+            addStyleName("plus");
         } else {
-            btn.setInnerText("-");
+            btn.setInnerHTML(CONTRACT_SIGN);
+            removeStyleName("plus");
+            addStyleName("minus");
         }
         this.collapsed = collapsed;
     }
@@ -137,7 +161,7 @@ public abstract class GroupingWidget extends FlowPanel {
 
     /**
      * Where this marker should be positioned.
-     * 
+     *
      * @param offset
      *            The number of pixels from 0 (top or left) this group should be
      *            positioned.
@@ -149,8 +173,15 @@ public abstract class GroupingWidget extends FlowPanel {
     /**
      * @return The total height of a panel with the given amount of groups
      */
-    public static int getTotalSize(int maxGrouping) {
-        return 6 + maxGrouping * SINGLE_ITEM_SIZE;
+    public static int getTotalHeight(int maxGrouping) {
+        return 3 + maxGrouping * SINGLE_ITEM_SIZE_HEIGHT;
+    }
+
+    /**
+     * @return The total width of a panel with the given amount of groups
+     */
+    public static int getTotalWidth(int maxGrouping) {
+        return 1 + maxGrouping * SINGLE_ITEM_SIZE_WIDTH;
     }
 
     public void setIndex(int i) {
@@ -184,6 +215,8 @@ public abstract class GroupingWidget extends FlowPanel {
         newWidget.btn.setInnerText(btn.getInnerText());
 
         Style style = newWidget.getElement().getStyle();
+
+        newWidget.setStyleName(getStyleName());
 
         if (marginLeft > -1) {
             style.setMarginLeft(marginLeft, Unit.PX);
