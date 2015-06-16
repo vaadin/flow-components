@@ -162,7 +162,7 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
                             event.isShiftKeyDown(), false, false, false);
                     event.preventDefault();
                 } else if (inputFullFocus) {
-
+                    formulaBarWidget.updateEditorCaretPos(true);
                     // prevent scrolling
                     if (widget.getInlineEditor().getCursorPos() == 0) {
                         event.preventDefault();
@@ -179,6 +179,7 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
                             event.isShiftKeyDown(), false, true, false);
                     event.preventDefault();
                 } else if (inputFullFocus) {
+                    formulaBarWidget.updateEditorCaretPos(true);
                     // prevent scrolling
                     int cursorPos = widget.getInlineEditor().getCursorPos();
                     int length = widget.getInlineEditor().getValue().length();

@@ -45,27 +45,31 @@ import com.vaadin.addon.spreadsheet.client.SheetWidget.CellCoord;
 public class FormulaBarWidget extends Composite {
 
     private static final List<String> formulaColors;
+    private static final String BACKGROUND_OPACITY = "0.25";
+    private static final String BORDER_OPACITY = "0.75";
+    private static final String BORDER_BASE = "2px solid ";
 
     static {
 
         formulaColors = new ArrayList<String>();
 
-        formulaColors.add("rgba(48, 144, 240,0.4)");
-        formulaColors.add("rgba(236, 100, 100,0.4)");
-        formulaColors.add("rgba(152, 223, 88,0.4)");
-        formulaColors.add("rgba(249, 221, 81,0.4)");
-        formulaColors.add("rgba(36, 220, 212,0.4)");
-        formulaColors.add("rgba(236, 100, 165,0.4)");
-        formulaColors.add("rgba(104, 92, 176,0.4)");
-        formulaColors.add("rgba(255, 125, 66,0.4)");
-        formulaColors.add("rgba(51, 97, 144,0.4)");
-        formulaColors.add("rgba(170, 81, 77,0.4)");
-        formulaColors.add("rgba(127, 176, 83,0.4)");
-        formulaColors.add("rgba(187, 168, 91,0.4)");
-        formulaColors.add("rgba(36, 121, 129,0.4)");
-        formulaColors.add("rgba(150, 57, 112,0.4)");
-        formulaColors.add("rgba(75, 86, 168,0.4)");
-        formulaColors.add("rgba(154, 89, 61,0.4)");
+        formulaColors.add("rgba(48, 144, 240, %s)");
+        formulaColors.add("rgba(236, 100, 100, %s)");
+        formulaColors.add("rgba(152, 223, 88, %s)");
+        formulaColors.add("rgba(249, 221, 81, %s)");
+        formulaColors.add("rgba(36, 220, 212, %s)");
+        formulaColors.add("rgba(236, 100, 165, %s)");
+        formulaColors.add("rgba(104, 92, 176, %s)");
+        formulaColors.add("rgba(255, 125, 66, %s)");
+        formulaColors.add("rgba(51, 97, 144, %s)");
+        formulaColors.add("rgba(170, 81, 77, %s)");
+        formulaColors.add("rgba(127, 176, 83, %s)");
+        formulaColors.add("rgba(187, 168, 91, %s)");
+        formulaColors.add("rgba(36, 121, 129, %s)");
+        formulaColors.add("rgba(150, 57, 112, %s)");
+        formulaColors.add("rgba(75, 86, 168, %s)");
+        formulaColors.add("rgba(154, 89, 61, %s)");
+
     }
 
     private final TextBox formulaField;
@@ -119,6 +123,8 @@ public class FormulaBarWidget extends Composite {
     private HashSet<Cell> paintedFormulaCells = new HashSet<Cell>();
 
     private Map<CellCoord, String> paintedFormulaCellCoords = new HashMap<CellCoord, String>();
+    private Map<String, String> refColors = new HashMap<String, String>();
+    private String lastCaretReference = null;
 
     /**
      * SheetWidget owns this widget.
@@ -448,6 +454,7 @@ public class FormulaBarWidget extends Composite {
                         formulaLastKnownPos, 0);
 
                 parseAndPaintCellRefs(currentEditor.getValue());
+                checkForCoordsAtCaret();
             }
         });
 
@@ -671,12 +678,78 @@ public class FormulaBarWidget extends Composite {
         }
 
         String sub = val.substring(start, end);
-
+        clearPreviousCaretRefBorder();
         if (isCellRef(sub)) {
             formulaStartPos = start;
             formulaLastKnownPos = end;
+            updateCaretRefBorder(sub);
         }
 
+    }
+
+    private void clearPreviousCaretRefBorder() {
+        if (lastCaretReference != null) {
+            MergedRegion region = parseSingleCellRef(lastCaretReference);
+            int colStart = Math.min(region.col1, region.col2);
+            int colEnd = Math.max(region.col1, region.col2);
+            int rowStart = Math.min(region.row1, region.row2);
+            int rowEnd = Math.max(region.row1, region.row2);
+            for (int c = colStart; c <= colEnd; c++) {
+                for (int r = rowStart; r <= rowEnd; r++) {
+                    Cell cell = widget.getCell(c, r);
+                    if (cell != null) {
+                        cell.getElement().getStyle().clearProperty("border");
+                    }
+                }
+            }
+        }
+        lastCaretReference = null;
+    }
+
+    private void updateCaretRefBorder(String ref) {
+        if (refColors.containsKey(ref)) {
+            MergedRegion region = parseSingleCellRef(ref);
+            int colStart = Math.min(region.col1, region.col2);
+            int colEnd = Math.max(region.col1, region.col2);
+            int rowStart = Math.min(region.row1, region.row2);
+            int rowEnd = Math.max(region.row1, region.row2);
+
+            if (colEnd > 20000) {
+                Logger.getLogger(getClass().getSimpleName()).fine(
+                        "invalid column index, halting parse");
+                return;
+            }
+
+            for (int c = colStart; c <= colEnd; c++) {
+                for (int r = rowStart; r <= rowEnd; r++) {
+                    Cell cell = widget.getCell(c, r);
+                    if (cell != null) {
+                        DivElement elem = cell.getElement();
+                        String color = refColors.get(ref).replace("%s",
+                                BORDER_OPACITY);
+
+                        if (c == colStart) {
+                            elem.getStyle().setProperty("borderLeft",
+                                    BORDER_BASE + color);
+                        }
+                        if (c == colEnd) {
+                            elem.getStyle().setProperty("borderRight",
+                                    BORDER_BASE + color);
+                        }
+                        if (r == rowStart) {
+                            elem.getStyle().setProperty("borderTop",
+                                    BORDER_BASE + color);
+                        }
+                        if (r == rowEnd) {
+                            elem.getStyle().setProperty("borderBottom",
+                                    BORDER_BASE + color);
+                        }
+
+                    }
+                }
+            }
+            lastCaretReference = ref;
+        }
     }
 
     private MergedRegion parseSingleCellRef(String ref) {
@@ -719,7 +792,7 @@ public class FormulaBarWidget extends Composite {
         clearFormulaSelectedCells();
 
         List<String> references = parseCellReferences(val);
-
+        refColors.clear();
         int currentIndex = 0;
         int currentColor = 0;
         for (String ref : references) {
@@ -731,9 +804,19 @@ public class FormulaBarWidget extends Composite {
                 continue;
             }
 
-            currentColor = currentColor % formulaColors.size();
-            String color = formulaColors.get(currentColor);
+            String color;
+            // color should be reused if reference is for same cell or region
+            if (refColors.containsKey(ref)) {
+                color = refColors.get(ref);
+            } else {
+                currentColor = currentColor % formulaColors.size();
+                color = formulaColors.get(currentColor);
+                refColors.put(ref, color);
+                currentColor++;
+            }
 
+            // Set the opacity
+            color = color.replace("%s", BACKGROUND_OPACITY);
             // paint sheet cells
             paintFormulaSelectedCells(range, color);
 
@@ -752,7 +835,6 @@ public class FormulaBarWidget extends Composite {
             e.getStyle().setBackgroundColor(color);
             formulaOverlay.appendChild(e);
 
-            currentColor++;
         }
 
     }
@@ -792,8 +874,9 @@ public class FormulaBarWidget extends Composite {
      * Clears all selection paint from the sheet
      */
     private void clearFormulaSelectedCells() {
-        for (Cell e : paintedFormulaCells) {
-            e.getElement().getStyle().clearBackgroundColor();
+        for (Cell c : paintedFormulaCells) {
+            c.getElement().getStyle().clearBackgroundColor();
+            c.getElement().getStyle().clearProperty("border");
         }
         paintedFormulaCells.clear();
         formulaCellReferences.clear();
@@ -1012,10 +1095,13 @@ public class FormulaBarWidget extends Composite {
             CellCoord cc = new CellCoord(c.getCol(), c.getRow());
             if (!paintedFormulaCellCoords.containsKey(cc)) {
                 c.getElement().getStyle().clearBackgroundColor();
+                c.getElement().getStyle().clearProperty("border");
             }
         }
         paintedFormulaCells.clear();
-
+        if (editingFormula) {
+            checkForCoordsAtCaret();
+        }
         // re-paint all cells
         for (Entry<CellCoord, String> e : paintedFormulaCellCoords.entrySet()) {
             Cell c = widget.getCell(e.getKey().getCol(), e.getKey().getRow());
@@ -1041,6 +1127,7 @@ public class FormulaBarWidget extends Composite {
                 }
 
                 parseAndPaintCellRefs(currentEditor.getValue());
+                checkForCoordsAtCaret();
             }
         });
     }
