@@ -23,7 +23,7 @@ public class MergeTests extends Test1 {
     }
 
     @Test
-    @Ignore("Screenshot failures")
+    @Ignore("Fails in IE")
     public void testBasic() {
         sheetController.selectCell("A2");
         sheetController.selectCell("A1");
@@ -67,7 +67,7 @@ public class MergeTests extends Test1 {
      * Ticket #17601
      */
     @Test
-    @Ignore("Screenshot failures")
+    @Ignore("Fails in Phantom")
     public void testColumnAlignments() throws IOException {
         loadSheetFile("column_alignment_style.xlsx");
 

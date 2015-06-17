@@ -199,34 +199,24 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
     }
 
     /**
-     * @param identifier
+     * @param testIdentifier
      *            the identifier of the screenshot reference file
      * @return the reference file name to use for the given browser, as
      *         described by {@literal capabilities}, and identifier
      */
-    private File getScreenshotReferenceFile(String identifier) {
+    private File getScreenshotReferenceFile(String testIdentifier) {
         DesiredCapabilities capabilities = getDesiredCapabilities();
 
-        String originalName = getScreenshotReferenceName(identifier);
-        File exactVersionFile = new File(originalName);
-        if (exactVersionFile.exists()) {
-            return exactVersionFile;
+        String referenceName = null;
+        if (!BrowserUtil.isIE(capabilities)) {
+            referenceName = getScreenshotReferenceName(testIdentifier,
+                    getBrowserIdentifierWithoutVersion());
+        } else {
+            referenceName = getScreenshotReferenceName(testIdentifier,
+                    getBrowserIdentifierWithVersion());
         }
 
-        String browserVersion = capabilities.getVersion();
-
-        if (browserVersion.matches("\\d+")) {
-            for (int version = Integer.parseInt(browserVersion); version > 0; version--) {
-                String fileName = getScreenshotReferenceName(identifier,
-                        version);
-                File oldVersionFile = new File(fileName);
-                if (oldVersionFile.exists()) {
-                    return oldVersionFile;
-                }
-            }
-        }
-
-        return exactVersionFile;
+        return new File(referenceName);
     }
 
     /**
@@ -331,31 +321,35 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
     }
 
     /**
-     * Returns the name of the reference file based on the given parameters. The
-     * version given in {@literal capabilities} is used unless it is overridden
-     * by the {@literal versionOverride} parameter.
+     * @return screenshot browser identifier with the version appended
+     */
+    private String getBrowserIdentifierWithVersion() {
+        return getBrowserIdentifierWithoutVersion() + "_"
+                + getDesiredCapabilities().getVersion();
+
+    }
+
+    /**
+     * @return screenshot browser identifier without the version appended
+     */
+    private String getBrowserIdentifierWithoutVersion() {
+        return BrowserUtil.getBrowserIdentifier(getDesiredCapabilities());
+    }
+
+    /**
+     * Returns the name of the reference file based on the given parameters.
      * 
      * @param identifier
      *            The identifier of the reference image
-     * @param versionOverride
-     *            null, or set to the version you wish to force
+     * @param browserIdentifier
+     *            the full identifier for the browser
      * @return the full path of the reference
      */
     private String getScreenshotReferenceName(String identifier,
-            Integer versionOverride) {
-        String uniqueBrowserIdentifier;
-        if (versionOverride == null) {
-            uniqueBrowserIdentifier = BrowserUtil
-                    .getBrowserIdentifier(getDesiredCapabilities());
-        } else {
-            DesiredCapabilities caps = getDesiredCapabilities();
-            caps.setVersion("" + versionOverride);
-            uniqueBrowserIdentifier = BrowserUtil.getBrowserIdentifier(caps);
-        }
-
+            String browserIdentifier) {
         // WindowMaximizeRestoreTest_Windows_InternetExplorer_8_window-1-moved-maximized-restored.png
         return getScreenshotReferenceDirectory() + "/"
-                + getScreenshotBaseName() + "_" + uniqueBrowserIdentifier + "_"
+                + getScreenshotBaseName() + "_" + browserIdentifier + "_"
                 + identifier + ".png";
     }
 
@@ -367,7 +361,7 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
      * running this test.
      */
     private String getScreenshotErrorBaseName() {
-        return getScreenshotReferenceName("dummy", null).replace(
+        return getScreenshotReferenceName("dummy").replace(
                 getScreenshotReferenceDirectory(),
                 getScreenshotErrorDirectory()).replace("_dummy.png", "");
     }
