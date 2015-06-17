@@ -505,7 +505,7 @@ public class FormulaBarWidget extends Composite {
 
             @Override
             public void execute() {
-                if (currentEditor.getValue().isEmpty()) {
+                if (currentEditor != null && currentEditor.getValue().isEmpty()) {
 
                     if (currentEditor == inlineEditor) {
                         stopInlineEdit();
