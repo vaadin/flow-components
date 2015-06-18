@@ -29,6 +29,12 @@ public class SheetController implements SheetClicker {
         this.desiredCapabilities = desiredCapabilities;
     }
 
+    private SheetController insertAndTab(CharSequence k) {
+        action(k).action(Keys.TAB);
+        ((TestBenchCommandExecutor) driver).waitForVaadin();
+        return this;
+    }
+
     public SheetController insertAndRet(CharSequence k) {
         action(k).action(Keys.RETURN).action(Keys.ENTER);
         ((TestBenchCommandExecutor) driver).waitForVaadin();
@@ -42,11 +48,6 @@ public class SheetController implements SheetClicker {
 
     public SheetController action(CharSequence k) {
         waitForVaadin();
-        // Fix left parentheses with SHIFT+9
-        if (k instanceof String && needsFixLeftParenthesis()) {
-            k = ((String) k).replace("(", Keys.chord(Keys.SHIFT, "9"));
-        }
-
         new Actions(driver).sendKeys(k).build().perform();
         waitForVaadin();
 
@@ -120,9 +121,23 @@ public class SheetController implements SheetClicker {
     }
 
     public SheetController putCellContent(String cell, CharSequence value) {
-        selectCell(cell);
-        insertAndRet(value);
+        openInlineEditor(cell);
+        waitForVaadin();
+        clearInput();
+        waitForVaadin();
+        insertAndTab(value);
         return this;
+    }
+
+    private void openInlineEditor(String cell) {
+        SheetCellElement cellElement = $(SpreadsheetElement.class).first()
+                .getCellAt(cell);
+        new Actions(getDriver()).doubleClick(cellElement).build().perform();
+    }
+
+    private void clearInput() {
+        WebElement inlineInput = driver.findElement(By.id("cellinput"));
+        inlineInput.clear();
     }
 
     public SheetController insertColumn(String[] values) {
@@ -154,6 +169,13 @@ public class SheetController implements SheetClicker {
                 .getCellAt(cell);
         new Actions(getDriver()).moveToElement(cellElement).click().build()
                 .perform();
+    }
+
+    public void doubleClickCell(String cell) {
+        SheetCellElement cellElement = $(SpreadsheetElement.class).first()
+                .getCellAt(cell);
+        new Actions(getDriver()).moveToElement(cellElement).doubleClick()
+                .build().perform();
     }
 
     @Override

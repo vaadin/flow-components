@@ -36,6 +36,7 @@ public class ValueHandlerFixture implements SpreadsheetFixture {
                 }
                 try {
                     cell.setCellValue(Double.parseDouble(newValue) * 2);
+                    spreadsheet.refreshCells(cell);
                 } catch (NumberFormatException exception) {
                     return true;
                 } finally {

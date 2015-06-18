@@ -43,12 +43,12 @@ public abstract class AbstractTB3Test extends ParallelTest {
     /**
      * Height of the screenshots we want to capture
      */
-    protected static final int SCREENSHOT_HEIGHT = 850;
+    protected static final int SCREENSHOT_HEIGHT = 700;
 
     /**
      * Width of the screenshots we want to capture
      */
-    protected static final int SCREENSHOT_WIDTH = 1500;
+    protected static final int SCREENSHOT_WIDTH = 1000;
 
     private boolean debug = false;
 
@@ -82,6 +82,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
      * 
      * @return the host name of the TestBench hub
      */
+    @Override
     protected abstract String getHubHostname();
 
     /**

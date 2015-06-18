@@ -2,13 +2,11 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 
-@Ignore("Value setting fails on Phantom and Firefox")
 public class ConditionalFormatterTBTest extends AbstractSpreadsheetTestCase {
 
     private SpreadsheetElement spreadSheet;
@@ -48,7 +46,7 @@ public class ConditionalFormatterTBTest extends AbstractSpreadsheetTestCase {
         assertEquals("rgba(255, 255, 255, 1)",
                 targetCell.getCssValue("background-color"));
 
-        // wrong capitalisation, but comparison should ignore
+        // wrong capitalization, but comparison should ignore
         targetCell.setValue("o");
         assertEquals("o", targetCell.getValue());
 

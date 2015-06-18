@@ -310,7 +310,7 @@ public class SpreadsheetElement extends AbstractElement {
     }
 
     public WebElement getCellValueInput() {
-        return findElement(By.className("cellinput"));
+        return findElement(By.id("cellinput"));
     }
 
     private TestBenchElement getBottomRightPane() {

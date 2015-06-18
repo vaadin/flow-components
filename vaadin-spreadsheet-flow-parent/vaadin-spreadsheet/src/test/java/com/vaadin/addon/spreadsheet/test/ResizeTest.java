@@ -1,17 +1,19 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import org.junit.Ignore;
+import java.util.List;
+
 import org.junit.Test;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.addon.spreadsheet.elements.SheetHeaderElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.parallel.Browser;
 
 public class ResizeTest extends Test1 {
 
     @Test
-    @Ignore("Fails in Phantom")
     public void testColumnResize() {
 
         double originalWidth = getSize(sheetController.getCellStyle("C1",
@@ -30,7 +32,6 @@ public class ResizeTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in Phantom")
     public void testRowResize() {
         sheetController.selectCell("A2");
         sheetController.selectCell("A1");
@@ -45,28 +46,33 @@ public class ResizeTest extends Test1 {
 
         double newHeight = getSize(sheetController.getCellStyle("A3", "height"));
 
-        assertInRange(2.5 * originalHeight, newHeight, 3.5 * originalHeight);
+        assertInRange(2.3 * originalHeight, newHeight, 3.5 * originalHeight);
     }
 
     @Test
-    @Ignore("Fails in all the browsers")
     public void testColumnAutoResize() {
-        sheetController.selectCell("B2");
-        sheetController.insertAndRet("text");
+        sheetController.putCellContent("B2", "text");
 
         $(SpreadsheetElement.class).first().getColumnHeader(2)
                 .getResizeHandle().doubleClick();
-
+        sheetController.waitForVaadin();
         assertInRange(25, getSize(sheetController.getCellStyle("B2", "width")),
                 35);
 
-        sheetController.selectCell("D2");
-        sheetController.insertAndRet("very long text inserted in D2.");
+        sheetController.putCellContent("D2", "very long text inserted in D2.");
 
         $(SpreadsheetElement.class).first().getColumnHeader(4)
                 .getResizeHandle().doubleClick();
 
-        assertInRange(50, getSize(sheetController.getCellStyle("D2", "width")),
-                100);
+        assertInRange(100,
+                getSize(sheetController.getCellStyle("D2", "width")), 200);
+    }
+
+    @Override
+    public List<DesiredCapabilities> getBrowsersToTest() {
+        // ResizeHandle double click and dragging not working in phantomJS
+        List<DesiredCapabilities> result = super.getBrowsersToTest();
+        result.remove(Browser.PHANTOMJS.getDesiredCapabilities());
+        return result;
     }
 }

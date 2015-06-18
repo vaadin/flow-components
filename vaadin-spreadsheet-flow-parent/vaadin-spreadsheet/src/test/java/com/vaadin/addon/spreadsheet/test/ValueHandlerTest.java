@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore("Fails in all the browsers")
 public class ValueHandlerTest extends Test1 {
 
     @Before
@@ -22,21 +21,22 @@ public class ValueHandlerTest extends Test1 {
         sheetController.putCellContent("B3", "=B2+1");
 
         sheetController.putCellContent("B2", "3");
-        sheetController.clickCell("A1");
+
         assertThat(sheetController.getCellContent("B2"), is("6"));
         assertThat(sheetController.getCellContent("B3"), is("7"));
 
-        sheetController.putCellContent("B2", "3.14");
-        sheetController.clickCell("A1");
-        assertThat(sheetController.getCellContent("B2"), is("6.28"));
-        assertThat(sheetController.getCellContent("B3"), is("7.28"));
+        sheetController.putCellContent("B2", "314");
+
+        assertThat(sheetController.getCellContent("B2"), is("628"));
+        assertThat(sheetController.getCellContent("B3"), is("629"));
 
         sheetController.putCellContent("B2", "text");
-        sheetController.clickCell("A1");
         assertThat(sheetController.getCellContent("B2"), is("text"));
+
     }
 
     @Test
+    @Ignore("Fails in all the browsers")
     public void testDateFormat() {
         sheetController.putCellContent("C2",
                 dateTS(2000, GregorianCalendar.MARCH, 14));

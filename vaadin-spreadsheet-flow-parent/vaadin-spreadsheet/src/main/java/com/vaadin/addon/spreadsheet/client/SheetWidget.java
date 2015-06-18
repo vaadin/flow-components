@@ -891,7 +891,7 @@ public class SheetWidget extends Panel {
         input = new PasteAwareTextBox(this);
         input.setWidth("0");
         input.setValue("x");
-        input.setStyleName("cellinput");
+        input.getElement().setId("cellinput");
         DOM.appendChild(sheet, input.getElement());
         adopt(input);
 

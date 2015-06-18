@@ -18,7 +18,6 @@ public class CustomComponentsTest extends Test1 {
     final static Integer NUM_PROXY = 42;
 
     @Test
-    @Ignore("Fails with all IE")
     public void testTextField() {
         loadServerFixture("CUSTOM_COMPONENTS");
 
@@ -26,16 +25,14 @@ public class CustomComponentsTest extends Test1 {
                 "B2");
         typeInTextFieldEditor(b2, TEXT_PROXY);
 
-        sheetController.selectCell("B3");
-        sheetController.insertAndRet("=B2");
+        sheetController.putCellContent("B3", "=B2");
 
         Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B2"));
         Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B3"));
 
         typeInTextFieldEditor(b2, NUM_PROXY.toString());
 
-        sheetController.selectCell("B3");
-        sheetController.insertAndRet("=B2*2");
+        sheetController.putCellContent("B3", "=B2*2");
 
         Assert.assertEquals(NUM_PROXY.toString(),
                 sheetController.getCellContent("B2"));
@@ -57,13 +54,11 @@ public class CustomComponentsTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails with IE 9 and 10")
     public void testCheckBox() throws InterruptedException {
         loadServerFixture("CUSTOM_COMPONENTS");
 
-        sheetController.selectCell("C3");
-        sheetController.insertAndRet("=C2*2");
-        sheetController.insertAndRet("=IF(C2,1,0)");
+        sheetController.putCellContent("C3", "=C2*2");
+        sheetController.putCellContent("C4", "=IF(C2,1,0)");
 
         sheetController.selectCell("A1");
 
@@ -77,23 +72,25 @@ public class CustomComponentsTest extends Test1 {
                 .moveToElement(c2.findElement(By.xpath(".//input"))).click()
                 .build().perform();
 
+        sheetController.selectCell("A1");
+
         Assert.assertEquals("2", sheetController.getCellContent("C3"));
         Assert.assertEquals("1", sheetController.getCellContent("C4"));
     }
 
     @Test
-    @Ignore("Fails with all IE and Phantom")
     public void testNativeSelect() {
         loadServerFixture("CUSTOM_COMPONENTS");
 
-        sheetController.selectCell("I3");
-        sheetController.insertAndRet("=I2*3");
+        sheetController.putCellContent("I3", "=I2*3");
 
         sheetController.selectCell("I2");
         Select select = new Select(driver.findElement(By.xpath(sheetController
                 .cellToXPath("I2") + "//select")));
         select.getOptions().get(3).click();
         testBench(driver).waitForVaadin();
+
+        sheetController.selectCell("G1");
 
         Assert.assertEquals("90", sheetController.getCellContent("I3"));
     }
@@ -126,7 +123,6 @@ public class CustomComponentsTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails with IE 11")
     public void testButtonHandling() {
         loadServerFixture("CUSTOM_COMPONENTS");
 
