@@ -33,6 +33,11 @@ public class HiddenAndFrozenTest extends AbstractSpreadsheetTestCase {
         assertFreezePanePositionedCorrectly("randomly_hidden_and_frozen.xlsx",
                 5, 3, "H15");
     }
+    
+    @Test
+    public void freezePane_sheetWithImplicitlyHiddenFrozenRowsAndColumns_freezePanePositionedCorrectly() {
+        assertFreezePanePositionedCorrectly("scrolled_frozen.xlsx", 2, 4, "G5");
+    }
 
     private void assertFreezePanePositionedCorrectly(String filename,
             int frozenRows, int frozenColumns, String regularCell) {

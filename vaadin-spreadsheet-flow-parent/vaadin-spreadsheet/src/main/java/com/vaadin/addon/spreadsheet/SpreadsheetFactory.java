@@ -835,13 +835,32 @@ public class SpreadsheetFactory implements Serializable {
         PaneInformation paneInformation = sheet.getPaneInformation();
         // only freeze panes supported
         if (paneInformation != null && paneInformation.isFreezePane()) {
-            // Apparently in POI HorizontalSplitPosition means rows and
-            // VerticalSplitPosition means columns. Changed the meaning for the
-            // component internals
-            spreadsheet.setHorizontalSplitPosition(paneInformation
-                    .getVerticalSplitPosition());
-            spreadsheet.setVerticalSplitPosition(paneInformation
-                    .getHorizontalSplitPosition());
+            /*
+             * In POI, HorizontalSplitPosition means rows and
+             * VerticalSplitPosition means columns. Changed the meaning for the
+             * component internals. The left split column / top split row is the
+             * *absolute* index of the first unfrozen column / row.
+             */
+            spreadsheet.getState().horizontalSplitPosition = paneInformation
+                    .getVerticalSplitLeftColumn();
+            spreadsheet.getState().verticalSplitPosition = paneInformation
+                    .getHorizontalSplitTopRow();
+
+            /*
+             * If the view was scrolled down / right when panes were frozen, the
+             * invisible frozen rows/columns are effectively hidden in Excel. We
+             * mimic this behavior here.
+             */
+            for (int col = 0; col < Math.max(0,
+                    paneInformation.getVerticalSplitLeftColumn()
+                            - paneInformation.getVerticalSplitPosition()); col++) {
+                spreadsheet.setColumnHidden(col, true);
+            }
+            for (int row = 0; row < Math.max(0,
+                    paneInformation.getHorizontalSplitTopRow()
+                            - paneInformation.getHorizontalSplitPosition()); row++) {
+                spreadsheet.setRowHidden(row, true);
+            }
         } else {
             spreadsheet.getState().verticalSplitPosition = 0;
             spreadsheet.getState().horizontalSplitPosition = 0;
