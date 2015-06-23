@@ -46,7 +46,6 @@ public class NavigationTest extends AbstractSpreadsheetTestCase {
         spreadsheetPage.clickOnCell("Q15");
         assertAddressFieldValue("Q15", spreadsheetPage.getAddressFieldValue());
         assertSelectedCell("Q15", spreadsheetPage.isCellSelected("Q15"));
-        assertNotSelectedCell("D7", spreadsheetPage.isCellSelected("D7"));
     }
 
     @Test
