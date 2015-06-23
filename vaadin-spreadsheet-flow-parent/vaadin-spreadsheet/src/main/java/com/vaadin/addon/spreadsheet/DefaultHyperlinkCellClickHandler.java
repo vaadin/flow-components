@@ -17,6 +17,8 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import static org.apache.poi.common.usermodel.Hyperlink.LINK_DOCUMENT;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Hyperlink;
 
@@ -53,33 +55,42 @@ public class DefaultHyperlinkCellClickHandler implements
     public void onHyperLinkCellClick(Cell cell, Hyperlink hyperlink,
             Spreadsheet spreadsheet) {
         if (hyperlink != null) {
-            spreadsheet.getUI().getPage()
-                    .open(cell.getHyperlink().getAddress(), "_new");
+            if (hyperlink.getType() == LINK_DOCUMENT) { // internal
+                navigateTo(cell, spreadsheet, hyperlink.getAddress());
+            } else {
+                spreadsheet.getUI().getPage()
+                        .open(cell.getHyperlink().getAddress(), "_new");
+            }
         } else if (isHyperlinkFormulaCell(cell)) {
             String address = getHyperlinkFunctionCellAddress(cell);
             if (address.startsWith("#")) { // inter-sheet address
-                if (address.contains("!")) { // has sheet name -> change
-                    String currentSheetName = cell.getSheet().getSheetName();
-                    String sheetName = address.substring(
-                            address.indexOf("#") + 1, address.indexOf("!"));
-                    if (!currentSheetName.equals(sheetName)) {
-                        int sheetPOIIndex = cell.getSheet().getWorkbook()
-                                .getSheetIndex(sheetName);
-                        spreadsheet.setActiveSheetWithPOIIndex(sheetPOIIndex);
-                    }
-                    String cellAddress = address
-                            .substring(address.indexOf("#") + 1);
-                    spreadsheet.initialSheetSelection = cellAddress;
-                } else {
-                    // change selection to cell within the same sheet
-                    String cellAddress = address
-                            .substring(address.indexOf("#") + 1);
-                    spreadsheet.getCellSelectionManager()
-                            .onSheetAddressChanged(cellAddress, false);
-                }
+                navigateTo(cell, spreadsheet, address.substring(1));
+            } else if (address.startsWith("[") && address.contains("]")) {
+                // FIXME: for now we assume that the hyperlink points to the
+                // current file. Should check file name against
+                // address.substring(1, address.indexOf("]"));
+                navigateTo(cell, spreadsheet,
+                        address.substring(address.indexOf("]") + 1));
             } else {
                 spreadsheet.getUI().getPage().open(address, "_new");
             }
+        }
+    }
+
+    private void navigateTo(Cell cell, Spreadsheet spreadsheet, String address) {
+        if (address.contains("!")) { // has sheet name -> change
+            String currentSheetName = cell.getSheet().getSheetName();
+            String sheetName = address.substring(0, address.indexOf("!"));
+            if (!currentSheetName.equals(sheetName)) {
+                int sheetPOIIndex = cell.getSheet().getWorkbook()
+                        .getSheetIndex(sheetName);
+                spreadsheet.setActiveSheetWithPOIIndex(sheetPOIIndex);
+            }
+            spreadsheet.initialSheetSelection = address;
+        } else {
+            // change selection to cell within the same sheet
+            spreadsheet.getCellSelectionManager().onSheetAddressChanged(
+                    address, false);
         }
     }
 

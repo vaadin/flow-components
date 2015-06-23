@@ -37,8 +37,13 @@ public class SpreadsheetElement extends AbstractElement {
      *             if the cell at (row, column) is not found.
      */
     public SheetCellElement getCellAt(int row, int column) {
+        String cellSelector = String.format(".col%d.row%d.cell", column, row);
+        // If there are multiple cells return the merged cell
+        if (findElements(By.cssSelector(cellSelector)).size() > 1) {
+            cellSelector += ".merged-cell";
+        }
         TestBenchElement cell = (TestBenchElement) findElement(By
-                .cssSelector(String.format(".col%d.row%d", column, row)));
+                .cssSelector(cellSelector));
         SheetCellElement cellElement = cell.wrap(SheetCellElement.class);
         cellElement.setParent(this);
         return cellElement;

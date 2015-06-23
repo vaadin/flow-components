@@ -9,10 +9,14 @@ import java.net.URISyntaxException;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.addon.spreadsheet.test.demoapps.SpreadsheetDemoUI;
 import com.vaadin.addon.spreadsheet.test.pageobjects.HeaderPage;
 import com.vaadin.addon.spreadsheet.test.tb3.MultiBrowserTest;
+import com.vaadin.testbench.By;
 
 public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
 
@@ -57,5 +61,14 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
 
     protected void assertSelectedCell(String cell, boolean selected) {
         assertTrue("Cell " + cell + " should be the selected cell", selected);
+    }
+
+    protected void waitUntil(ExpectedCondition<?> condition) {
+        new WebDriverWait(getDriver(), 20).until(condition);
+    }
+
+    protected void waitForElementPresent(By locator) {
+        new WebDriverWait(getDriver(), 20).until(ExpectedConditions
+                .presenceOfElementLocated(locator));
     }
 }
