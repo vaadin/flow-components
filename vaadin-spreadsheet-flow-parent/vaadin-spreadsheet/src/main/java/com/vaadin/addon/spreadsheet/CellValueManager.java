@@ -264,7 +264,8 @@ public class CellValueManager implements Serializable {
                 }
                 return "";
             }
-            return String.valueOf(cell.getNumericCellValue());
+            return new DecimalFormat("###.################").format(cell
+                    .getNumericCellValue());
         case Cell.CELL_TYPE_STRING:
             return cell.getStringCellValue();
         case Cell.CELL_TYPE_BOOLEAN:

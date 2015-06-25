@@ -6,12 +6,10 @@ import java.util.Locale;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
-import com.vaadin.testbench.By;
 import com.vaadin.testbench.elements.ComboBoxElement;
+import com.vaadin.testbench.parallel.BrowserUtil;
 
 /**
  * Test for formula field formatting.
@@ -44,14 +42,17 @@ public class FormulaFieldFormatTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
-    @Ignore("fails in phantomjs")
     public void rounding_sheetWithGeneralFormatRuleForNumericCells_formulaFieldContentsUnformattedExceptForLocale() {
         spreadsheetPage = headerPage.loadFile("general_round.xlsx", this);
-        // Note: these might change with #18175 and #17012
-        assertFormat("A3", "###", "1.23456789199999E11");
+        // Note: these might change with #18175
+        assertFormat("A3", "###", "123456789199.999");
         assertFormat("A10", "###", "12345.6789199999");
-        assertFormat("A15", "0.1234567892", "0.123456789199999");
-        assertFormat("E3", "999999999999", "9.99999999999E11");
+        if (!BrowserUtil.isPhantomJS(getDesiredCapabilities())) {
+            assertFormat("A15", "0.1234567892", "0.123456789199999");
+        } else {
+            assertFormat("A15", "###", "0.123456789199999");
+        }
+        assertFormat("E3", "999999999999", "999999999999");
         assertFormat("E10", "99999.9999999", "99999.9999999");
         assertFormat("E14", "10", "9.99999999999");
     }
@@ -75,19 +76,13 @@ public class FormulaFieldFormatTest extends AbstractSpreadsheetTestCase {
     }
 
     private void assertLocale(Locale locale) {
-        assertEquals(
-                locale.getDisplayName(),
-                $(ComboBoxElement.class).id("localeSelect")
-                        .findElement(By.tagName("input")).getAttribute("value"));
+        assertEquals(locale.getDisplayName(),
+                $(ComboBoxElement.class).id("localeSelect").getValue());
     }
 
     private void setDefaultLocale() {
-        WebElement localeSelect = $(ComboBoxElement.class).id("localeSelect")
-                .findElement(By.tagName("input"));
-        localeSelect.click();
-        localeSelect.sendKeys(Locale.US.getDisplayName());
-        localeSelect.sendKeys(Keys.ARROW_DOWN);
-        localeSelect.sendKeys(Keys.RETURN);
+        $(ComboBoxElement.class).id("localeSelect").selectByText(
+                Locale.US.getDisplayName());
     }
 
 }

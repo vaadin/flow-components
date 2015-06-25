@@ -54,6 +54,20 @@ public class NumberFormatTest extends AbstractSpreadsheetTestCase {
                 Expected.STRING_3TH_PLACE, Expected.STRING_3_DL);
     }
 
+    @Test
+    public void numberFormat_sheetWithNumberFormatRuleForNumericCells_formulaFieldHasNoDecimalsForIntegers() {
+        spreadsheetPage.clickOnCell(Expected.INTEGER_INTEGER.getCell());
+        assertEquals(Expected.INTEGER_INTEGER.getValue(),
+                spreadsheetPage.getFormulaFieldValue());
+    }
+
+    @Test
+    public void numberFormat_sheetWithNumberFormatRuleForNumericCells_formulaFieldHasDecimalsForRoundedDoubles() {
+        spreadsheetPage.clickOnCell(Expected.INTEGER_DECIMAL_FORMAT1.getCell());
+        assertEquals(Expected.INTEGER_DECIMAL.getValue(),
+                spreadsheetPage.getFormulaFieldValue());
+    }
+
     private void assertTest(Type type, Expected... expected) {
         List<AssertionError> errors = new ArrayList<AssertionError>();
         for (Expected e : expected) {
