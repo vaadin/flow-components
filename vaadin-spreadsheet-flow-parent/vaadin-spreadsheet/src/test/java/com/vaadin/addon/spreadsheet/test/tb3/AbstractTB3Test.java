@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2013 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -18,15 +18,19 @@ package com.vaadin.addon.spreadsheet.test.tb3;
 
 import java.util.logging.Logger;
 
+import org.openqa.selenium.WebDriver;
+
 import com.vaadin.server.LegacyApplication;
 import com.vaadin.server.UIProvider;
+import com.vaadin.testbench.parallel.Browser;
 import com.vaadin.testbench.parallel.ParallelTest;
+import com.vaadin.testbench.parallel.setup.SetupDriver;
 import com.vaadin.ui.UI;
 
 /**
  * Base class for TestBench 3+ tests. All TB3+ tests in the project should
  * extend this class.
- * 
+ *
  * Provides:
  * <ul>
  * <li>Helpers for browser selection</li>
@@ -36,7 +40,7 @@ import com.vaadin.ui.UI;
  * and based on requested features, e.g. {@link #isDebug()}, {@link #isPush()}</li>
  * <li>Generic helpers for creating TB3+ tests</li>
  * </ul>
- * 
+ *
  * @author Vaadin Ltd
  */
 public abstract class AbstractTB3Test extends ParallelTest {
@@ -54,6 +58,24 @@ public abstract class AbstractTB3Test extends ParallelTest {
 
     private boolean push = false;
 
+    @Override
+    public void setup() throws Exception {
+        // override local driver behaviour, so we can easily specify local
+        // PhantomJS
+        // with a system property
+        if (getBooleanProperty("localPhantom")) {
+            WebDriver driver = new SetupDriver()
+                    .setupLocalDriver(Browser.PHANTOMJS);
+            setDriver(driver);
+        } else {
+            super.setup();
+        }
+    }
+
+    protected boolean getBooleanProperty(String key) {
+        return Boolean.parseBoolean(System.getProperty(key));
+    }
+
     /**
      * Opens the given test (defined by {@link #getTestUrl()}, optionally with
      * debug window and/or push (depending on {@link #isDebug()} and
@@ -65,7 +87,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
 
     /**
      * Returns the full URL to be used for the test
-     * 
+     *
      * @return the full URL for the test
      */
     protected String getTestUrl() {
@@ -79,7 +101,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
 
     /**
      * Used for building the hub URL to use for the test
-     * 
+     *
      * @return the host name of the TestBench hub
      */
     @Override
@@ -87,21 +109,21 @@ public abstract class AbstractTB3Test extends ParallelTest {
 
     /**
      * Used to determine what URL to initially open for the test
-     * 
+     *
      * @return the host name of development server
      */
     protected abstract String getDeploymentHostname();
 
     /**
      * Used to determine what port the test is running on
-     * 
+     *
      * @return The port teh test is running on, by default 8888
      */
     protected abstract String getDeploymentPort();
 
     /**
      * Asserts that {@literal a} is &gt;= {@literal b}
-     * 
+     *
      * @param message
      *            The message to include in the {@link AssertionError}
      * @param a
@@ -120,7 +142,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
 
     /**
      * Asserts that {@literal a} is &gt; {@literal b}
-     * 
+     *
      * @param message
      *            The message to include in the {@link AssertionError}
      * @param a
@@ -138,7 +160,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
 
     /**
      * Asserts that {@literal a} is &lt;= {@literal b}
-     * 
+     *
      * @param message
      *            The message to include in the {@link AssertionError}
      * @param a
@@ -157,7 +179,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
 
     /**
      * Asserts that {@literal a} is &lt; {@literal b}
-     * 
+     *
      * @param message
      *            The message to include in the {@link AssertionError}
      * @param a
@@ -182,7 +204,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
     /**
      * Returns the path that should be used for the test. The path contains the
      * full path (appended to hostname+port) and must start with a slash.
-     * 
+     *
      * @return The URL path to the UI class to test
      */
     protected String getDeploymentPath() {
@@ -199,13 +221,13 @@ public abstract class AbstractTB3Test extends ParallelTest {
      * Returns the UI class the current test is connected to (or in special
      * cases UIProvider or LegacyApplication). Uses the enclosing class if the
      * test class is a static inner class to a UI class.
-     * 
+     *
      * Test which are not enclosed by a UI class must implement this method and
      * return the UI class they want to test.
-     * 
+     *
      * Note that this method will update the test name to the enclosing class to
      * be compatible with TB2 screenshot naming
-     * 
+     *
      * @return the UI class the current test is connected to
      */
     protected Class<?> getUIClass() {
@@ -251,7 +273,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
     /**
      * Returns whether to run the test in debug mode (with the debug console
      * open) or not
-     * 
+     *
      * @return true to run with the debug window open, false by default
      */
     protected final boolean isDebug() {
@@ -261,7 +283,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
     /**
      * Sets whether to run the test in debug mode (with the debug console open)
      * or not.
-     * 
+     *
      * @param debug
      *            true to open debug window, false otherwise
      */
@@ -273,7 +295,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
      * Returns whether to run the test with push enabled (using /run-push) or
      * not. Note that push tests can and should typically be created using @Push
      * on the UI instead of overriding this method
-     * 
+     *
      * @return true if /run-push is used, false otherwise
      */
     protected final boolean isPush() {
@@ -284,7 +306,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
      * Sets whether to run the test with push enabled (using /run-push) or not.
      * Note that push tests can and should typically be created using @Push on
      * the UI instead of overriding this method
-     * 
+     *
      * @param push
      *            true to use /run-push in the test, false otherwise
      */
@@ -296,10 +318,10 @@ public abstract class AbstractTB3Test extends ParallelTest {
      * Returns the path for the given UI class when deployed on the test server.
      * The path contains the full path (appended to hostname+port) and must
      * start with a slash.
-     * 
+     *
      * This method takes into account {@link #isPush()} and {@link #isDebug()}
      * when the path is generated.
-     * 
+     *
      * @param uiClass
      * @return The path to the given UI class
      */
@@ -321,7 +343,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
 
     /**
      * Used to determine what URL to initially open for the test
-     * 
+     *
      * @return The base URL for the test. Does not include a trailing slash.
      */
     protected String getBaseURL() {
@@ -331,7 +353,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
     /**
      * Generates the application id based on the URL in a way compatible with
      * VaadinServletService.
-     * 
+     *
      * @param pathWithQueryParameters
      *            The path part of the URL, possibly still containing query
      *            parameters
@@ -352,7 +374,7 @@ public abstract class AbstractTB3Test extends ParallelTest {
     /**
      * Called by the test runner whenever there is an exception in the test that
      * will cause termination of the test
-     * 
+     *
      * @param t
      *            the throwable which caused the termination
      */
