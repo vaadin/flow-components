@@ -7,14 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
-import com.vaadin.testbench.By;
 import com.vaadin.testbench.elements.ComboBoxElement;
 
 /**
@@ -30,24 +26,13 @@ public class NumberFormatTest extends AbstractSpreadsheetTestCase {
         super.setUp();
         spreadsheetPage = headerPage.loadFile("number_format.xlsx", this);
         setDefaultLocale();
-        assertLocale(Locale.US);
-    }
-
-    private void assertLocale(Locale locale) {
-        assertEquals(
-                locale.getDisplayName(),
-                $(ComboBoxElement.class).id("localeSelect")
-                        .findElement(By.tagName("input")).getAttribute("value"));
     }
 
     @Test
-    @Ignore("Fails in PHantom")
     public void numberFormat_sheetWithNumberFormatRuleForNumericCells_contentsFormattedAccordingToLocale() {
         assertTest(Type.CHECK_DEFAULTS, Expected.values());
     }
 
-    // TODO: remove @Ignore when clearing text works
-    @Ignore
     @Test
     public void onCellValueChange_sheetWithNumberFormatRuleForNumericCells_noNumberFormatWhenNumberReplacedWithStringThatStartsWithNumber() {
         assertTest(Type.REPLACE_NUMBER_WITH_STRING, Expected.STRING_3RD,
@@ -57,14 +42,26 @@ public class NumberFormatTest extends AbstractSpreadsheetTestCase {
     @Test
     public void numberFormat_sheetWithNumberFormatRuleForNumericCells_formulaFieldHasNoDecimalsForIntegers() {
         spreadsheetPage.clickOnCell(Expected.INTEGER_INTEGER.getCell());
-        assertEquals(Expected.INTEGER_INTEGER.getValue(),
+        assertEquals("Unexpected formula field value,",
+                Expected.INTEGER_INTEGER.getValue(),
                 spreadsheetPage.getFormulaFieldValue());
     }
 
     @Test
     public void numberFormat_sheetWithNumberFormatRuleForNumericCells_formulaFieldHasDecimalsForRoundedDoubles() {
         spreadsheetPage.clickOnCell(Expected.INTEGER_DECIMAL_FORMAT1.getCell());
-        assertEquals(Expected.INTEGER_DECIMAL.getValue(),
+        assertEquals("Unexpected formula field value,",
+                Expected.INTEGER_DECIMAL.getValue(),
+                spreadsheetPage.getFormulaFieldValue());
+    }
+
+    @Test
+    public void numberFormat_sheetWithNumberFormatRuleForNumericCells_formulaFieldHasLocalizedDecimalSeparatorForDoubles() {
+        Locale locale = new Locale("fi", "FI");
+        setLocale(locale);
+        spreadsheetPage.clickOnCell(Expected.INTEGER_DECIMAL_FORMAT1.getCell());
+        assertEquals("Unexpected formula field value for Finnish locale,",
+                Expected.INTEGER_DECIMAL.getValue().replace(".", ","),
                 spreadsheetPage.getFormulaFieldValue());
     }
 
@@ -119,12 +116,14 @@ public class NumberFormatTest extends AbstractSpreadsheetTestCase {
     }
 
     private void setDefaultLocale() {
-        WebElement localeSelect = $(ComboBoxElement.class).id("localeSelect")
-                .findElement(By.tagName("input"));
-        localeSelect.click();
-        localeSelect.sendKeys(Locale.US.getDisplayName());
-        localeSelect.sendKeys(Keys.ARROW_DOWN);
-        localeSelect.sendKeys(Keys.RETURN);
+        setLocale(Locale.US);
+    }
+
+    private void setLocale(Locale locale) {
+        $(ComboBoxElement.class).id("localeSelect").selectByText(
+                locale.getDisplayName());
+        assertEquals("Unexpected locale,", locale.getDisplayName(),
+                $(ComboBoxElement.class).id("localeSelect").getValue());
     }
 
     public enum Type {

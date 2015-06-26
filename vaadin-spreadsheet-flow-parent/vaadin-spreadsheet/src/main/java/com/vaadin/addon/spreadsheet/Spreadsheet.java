@@ -794,7 +794,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     @Override
     public void setLocale(Locale locale) {
         super.setLocale(locale);
-        valueManager.updateFormatter(locale);
+        valueManager.updateLocale(locale);
         refreshAllCellValues();
     }
 

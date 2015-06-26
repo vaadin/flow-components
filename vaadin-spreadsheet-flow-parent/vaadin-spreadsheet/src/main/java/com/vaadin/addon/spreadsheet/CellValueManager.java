@@ -22,6 +22,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -77,6 +78,11 @@ public class CellValueManager implements Serializable {
     private static final Logger LOGGER = Logger
             .getLogger(CellValueManager.class.getName());
 
+    /**
+     * Pattern to be used to show original values in formula bar
+     */
+    private static final String EXCEL_FORMULA_BAR_DECIMAL_FORMAT = "###.################";
+
     private short hyperlinkStyleIndex = -1;
 
     /**
@@ -104,6 +110,9 @@ public class CellValueManager implements Serializable {
     private HashMap<Integer, Float> cellStyleWidthRatioMap;
 
     private FormulaFormatter formulaFormatter = new FormulaFormatter();
+
+    private DecimalFormat originalValueDecimalFormat = new DecimalFormat(
+            EXCEL_FORMULA_BAR_DECIMAL_FORMAT);
 
     /**
      * Creates a new CellValueManager and ties it to the given Spreadsheet.
@@ -145,8 +154,15 @@ public class CellValueManager implements Serializable {
         formatter = dataFormatter;
     }
 
-    public void updateFormatter(Locale locale) {
+    public DecimalFormat getOriginalValueDecimalFormat() {
+        return originalValueDecimalFormat;
+    }
+
+    protected void updateLocale(Locale locale) {
         formatter = new DataFormatter(locale);
+        originalValueDecimalFormat = new DecimalFormat(
+                EXCEL_FORMULA_BAR_DECIMAL_FORMAT,
+                DecimalFormatSymbols.getInstance(locale));
     }
 
     /**
@@ -268,8 +284,8 @@ public class CellValueManager implements Serializable {
                 }
                 return "";
             }
-            return new DecimalFormat("###.################").format(cell
-                    .getNumericCellValue());
+            return originalValueDecimalFormat
+                    .format(cell.getNumericCellValue());
         case Cell.CELL_TYPE_STRING:
             return cell.getStringCellValue();
         case Cell.CELL_TYPE_BOOLEAN:
