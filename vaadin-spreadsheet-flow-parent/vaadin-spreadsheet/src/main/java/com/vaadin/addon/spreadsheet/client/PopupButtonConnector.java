@@ -20,6 +20,8 @@ package com.vaadin.addon.spreadsheet.client;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
@@ -78,11 +80,16 @@ public class PopupButtonConnector extends AbstractHasComponentsConnector
 
     @Override
     public void onStateChanged(StateChangeEvent stateChangeEvent) {
-        PopupButtonWidget widget = getWidget();
-        PopupButtonState state = getState();
+        final PopupButtonWidget widget = getWidget();
+        final PopupButtonState state = getState();
         if (stateChangeEvent.hasPropertyChanged("col")
                 || stateChangeEvent.hasPropertyChanged("row")) {
-            widget.setRowCol(state.row, state.col);
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    widget.setRowCol(state.row, state.col);
+                }
+            });
         }
         if (stateChangeEvent.hasPropertyChanged("active")) {
             widget.markActive(state.active);

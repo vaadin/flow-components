@@ -26,6 +26,8 @@ public class TestUIProviderImpl extends UIProvider {
             return MultipleSpreadsheetUI.class;
         } else if (name.contains(FreezePaneLocaleUI.class.getSimpleName())) {
             return FreezePaneLocaleUI.class;
+        } else if (name.contains(TabsheetTestUI.class.getSimpleName())) {
+            return TabsheetTestUI.class;
         }
         return null;
     }
