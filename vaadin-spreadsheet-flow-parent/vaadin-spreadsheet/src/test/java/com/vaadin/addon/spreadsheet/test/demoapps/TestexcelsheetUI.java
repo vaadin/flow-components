@@ -1,5 +1,7 @@
 package com.vaadin.addon.spreadsheet.test.demoapps;
 
+import static com.vaadin.ui.Alignment.BOTTOM_CENTER;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
@@ -7,7 +9,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -103,6 +104,7 @@ public class TestexcelsheetUI extends UI {
     public TestexcelsheetUI() {
         super();
         layout.setId("layout");
+        layout.setSpacing(true);
     }
 
     /**
@@ -116,9 +118,12 @@ public class TestexcelsheetUI extends UI {
     protected void init(VaadinRequest request) {
         setContent(layout);
 
-        HorizontalLayout options = new HorizontalLayout();
-        options.setId("options");
-        options.setSpacing(true);
+        HorizontalLayout optionsTop = new HorizontalLayout();
+        optionsTop.setId("optionsTop");
+        optionsTop.setSpacing(true);
+        HorizontalLayout optionsBottom = new HorizontalLayout();
+        optionsBottom.setId("optionsBottom");
+        optionsBottom.setSpacing(true);
 
         layout.setMargin(true);
         layout.setSizeFull();
@@ -167,35 +172,6 @@ public class TestexcelsheetUI extends UI {
                                                     }
                                                 }
                                             }
-
-                                            // System
-                                            // .out.println(">>>>>>>>>>>>>>>>>>>>>");
-                                            // System
-                                            // .out.println("Cell reference:"+event.getSelectedCellReference().formatAsString());
-                                            // for (CellReference cra :
-                                            // event.getIndividualSelectedCells())
-                                            // System
-                                            // .out.println("Individual selection:"+
-                                            // cra.formatAsString());
-                                            //
-                                            // for (CellRangeAddress cra :
-                                            // event.getCellRangeAddresses())
-                                            // System
-                                            // .out.println("Selection addresses:"+
-                                            // cra.formatAsString());
-                                            //
-                                            // System
-                                            // .out.println("<<<<<<<<<<<<<<<<<<<<<");
-                                            //
-                                            // Cell sheetController =
-                                            // spreadsheet.getCell(event.getSelectedCellReference().getRow(),
-                                            // event.getSelectedCellReference().getCol());
-                                            // if (sheetController == null)
-                                            // return;
-                                            //
-                                            // System
-                                            // .out.println(sheetController.getCellType());
-
                                         }
                                     });
                             layout.addComponent(getSpreadsheet(), 1);
@@ -277,34 +253,11 @@ public class TestexcelsheetUI extends UI {
         });
         save.setId("save");
         save.setEnabled(false);
-        download = new Button("Downloada");
+        download = new Button("Download");
         download.setEnabled(false);
         download.setId("download");
-        final ComboBox cb = new ComboBox("Type", Arrays.asList("Number",
-                "String", "Date"));
-        final Button changeTypeButton = new Button("Change type",
-                new Button.ClickListener() {
 
-                    @Override
-                    public void buttonClick(ClickEvent event) {
-                        if (selectedCells == null) {
-                            return;
-                        }
-
-                        System.out.println("Celle selezionate: "
-                                + selectedCells);
-                        System.out.println("Row: " + selectedCells.getRow());
-                        System.out.println("Col: " + selectedCells.getCol());
-                        System.out.println("Sheet name: "
-                                + selectedCells.getSheetName());
-                        System.out.println("Cell ref parts: "
-                                + Arrays.asList(selectedCells.getCellRefParts()));
-                        System.out.println("Format as string: "
-                                + selectedCells.formatAsString());
-                    }
-                });
-
-        final ComboBox fixtureCombo = new ComboBox();
+        final ComboBox fixtureCombo = new ComboBox("Test Fixtures");
         fixtureCombo.setId("fixtureNameCmb");
         for (String key : fixtureFactories.keySet()) {
             fixtureCombo.addItem(key);
@@ -357,24 +310,30 @@ public class TestexcelsheetUI extends UI {
             }
         });
 
-        openTestSheetSelect = new ComboBox(null, testSheetContainer);
+        openTestSheetSelect = new ComboBox("Test files", testSheetContainer);
         openTestSheetSelect.setId("testSheetSelect");
         openTestSheetSelect.setImmediate(true);
         openTestSheetSelect.setItemCaptionPropertyId("Name");
 
-        cb.setId("cb");
-        options.addComponent(newSpreadsheetButton);
-        options.addComponent(fixtureCombo);
-        options.addComponent(loadFixtureBtn);
-        options.addComponent(openTestSheetSelect);
-        options.addComponent(rowBufferSizeField);
-        options.addComponent(columnBufferSizeField);
-        options.addComponent(update);
-        options.addComponent(save);
-        options.addComponent(download);
-        options.addComponent(changeTypeButton);
-        options.addComponent(cb);
+        optionsTop.addComponent(newSpreadsheetButton);
+        optionsTop.setComponentAlignment(newSpreadsheetButton, BOTTOM_CENTER);
+        optionsTop.addComponent(fixtureCombo);
+        optionsTop.addComponent(loadFixtureBtn);
+        optionsTop.setComponentAlignment(loadFixtureBtn, BOTTOM_CENTER);
+        optionsTop.addComponent(rowBufferSizeField);
+        optionsTop.addComponent(columnBufferSizeField);
+        optionsTop.addComponent(save);
+        optionsTop.setComponentAlignment(save, BOTTOM_CENTER);
+        optionsBottom.addComponent(openTestSheetSelect);
+        optionsBottom.addComponent(update);
+        optionsBottom.setComponentAlignment(update, BOTTOM_CENTER);
+        optionsBottom.addComponent(download);
+        optionsBottom.setComponentAlignment(download, BOTTOM_CENTER);
+
+        VerticalLayout options = new VerticalLayout(optionsTop, optionsBottom);
+
         layout.addComponent(options);
+
     }
 
     protected void loadFile(File file) {

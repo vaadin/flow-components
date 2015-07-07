@@ -112,9 +112,6 @@ public class Cell {
 
         int columnWidth = sheetWidget.actionHandler.getColWidth(col);
 
-        // cols have 4px padding
-        columnWidth -= 4;
-
         Integer scrollW = sheetWidget.scrollWidthCache.get(getUniqueKey());
         if (scrollW == null) {
             scrollW = measureOverflow();
@@ -128,7 +125,6 @@ public class Cell {
             int[] colW = sheetWidget.actionHandler.getColWidths();
             boolean inFreezePane = col <= sheetWidget.verticalSplitPosition;
 
-            width += columnWidth;
             while (colIndex < colW.length && width < overflowPx) {
                 if (inFreezePane
                         && colIndex >= sheetWidget.verticalSplitPosition) {
@@ -141,6 +137,8 @@ public class Cell {
                 width += colW[colIndex];
                 colIndex++;
             }
+            // columnWidth is added after calculating the overflowing width
+            width += columnWidth;
             element.setInnerHTML("<div style=\"pointer-events:none;width:"
                     + width + "px;overflow:hidden;text-overflow:ellipsis;\">"
                     + element.getInnerText() + "</div>");

@@ -67,7 +67,6 @@ public class MergeTests extends Test1 {
      * Ticket #17601
      */
     @Test
-    @Ignore("Fails in Phantom")
     public void testColumnAlignments() throws IOException {
         loadSheetFile("column_alignment_style.xlsx");
 

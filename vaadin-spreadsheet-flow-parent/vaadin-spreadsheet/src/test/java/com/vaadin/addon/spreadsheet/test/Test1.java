@@ -62,25 +62,8 @@ public abstract class Test1 extends UITest {
     }
 
     protected void loadSheetFile(String filename) {
-        testBenchElement(
-                driver.findElement(By.xpath("//*[@id='testSheetSelect']/input")))
-                .click(10, 10);
-        testBench(driver).waitForVaadin();
-        driver.findElement(By.xpath("//*[@id='testSheetSelect']/input"))
-                .clear();
-        driver.findElement(By.xpath("//*[@id='testSheetSelect']/input"))
-                .sendKeys(filename);
-        testBench(driver).waitForVaadin();
-
-        driver.findElement(By.xpath("//*[@id='testSheetSelect']/input"))
-                .sendKeys(Keys.RETURN);
-        testBench(driver).waitForVaadin();
-
-        driver.findElement(By.xpath("//*[@id='update']")).click();
-        // driver.findElement(
-        // By.xpath(String
-        // .format("//span[@class='v-button-caption' and contains(text(), '%s')]",
-        // "Update"))).click();
+        $(ComboBoxElement.class).id("testSheetSelect").selectByText(filename);
+        $(ButtonElement.class).id("update").click();
     }
 
     protected void assertInRange(double from, double value, double to) {
