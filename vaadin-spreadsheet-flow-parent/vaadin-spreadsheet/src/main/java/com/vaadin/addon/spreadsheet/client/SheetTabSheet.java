@@ -48,6 +48,8 @@ public class SheetTabSheet extends Widget {
         public void onSheetRenameCancel();
 
         public void onFirstTabIndexChange(int tabScrollIndex);
+
+        public void onSheetTabSheetFocus();
     }
 
     private static final String SELECTED_TAB_CLASSNAME = "selected-tab";
@@ -144,6 +146,7 @@ public class SheetTabSheet extends Widget {
                     if (editing && !readOnly) {
                         commitSheetName();
                     }
+                    handler.onSheetTabSheetFocus();
                     if (options.isOrHasChild(target)
                             && !target.hasClassName(HIDDEN)) {
                         if (target.equals(scrollBeginning)) {

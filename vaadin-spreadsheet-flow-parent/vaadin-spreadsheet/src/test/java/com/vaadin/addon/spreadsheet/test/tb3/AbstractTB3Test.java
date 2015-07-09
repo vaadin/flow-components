@@ -18,7 +18,9 @@ package com.vaadin.addon.spreadsheet.test.tb3;
 
 import java.util.logging.Logger;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.server.LegacyApplication;
 import com.vaadin.server.UIProvider;
@@ -383,4 +385,30 @@ public abstract class AbstractTB3Test extends ParallelTest {
 
     }
 
+    /**
+     * Uses JavaScript to determine the currently focused element.
+     * 
+     * @return Focused element or null
+     */
+    protected WebElement getFocusedElement() {
+        Object focusedElement = executeScript("return document.activeElement");
+        if (null != focusedElement) {
+            return (WebElement) focusedElement;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Executes the given Javascript
+     * 
+     * @param script
+     *            the script to execute
+     * @return whatever
+     *         {@link org.openqa.selenium.JavascriptExecutor#executeScript(String, Object...)}
+     *         returns
+     */
+    protected Object executeScript(String script) {
+        return ((JavascriptExecutor) getDriver()).executeScript(script);
+    }
 }

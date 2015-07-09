@@ -1184,9 +1184,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public void onSheetTabSelected(int sheetIndex) {
-
         if (formulaBarWidget.isEditingFormula()) {
-
             // TODO commit or ignore value? this ignores. Excel remembers that
             // editor was open. If editing from formula bar, value is stored..
             formulaBarWidget.stopInlineEdit();
@@ -1219,6 +1217,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public void onSheetRenameCancel() {
         sheetWidget.focusSheet();
+    }
+
+    @Override
+    public void onSheetTabSheetFocus() {
+        sheetWidget.focusSheet(false);
     }
 
     @Override

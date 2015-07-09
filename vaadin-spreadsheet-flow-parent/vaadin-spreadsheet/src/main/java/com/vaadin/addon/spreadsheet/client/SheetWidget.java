@@ -5005,13 +5005,20 @@ public class SheetWidget extends Panel {
     }
 
     public void focusSheet() {
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+        focusSheet(true);
+    }
 
-            @Override
-            public void execute() {
-                sheet.focus();
-            }
-        });
+    public void focusSheet(boolean doAsDeferred) {
+        if (doAsDeferred) {
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    sheet.focus();
+                }
+            });
+        } else {
+            sheet.focus();
+        }
     }
 
     public boolean isSelectedCellRendered() {
