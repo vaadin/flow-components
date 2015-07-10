@@ -4874,11 +4874,6 @@ public class SheetWidget extends Panel {
         if (isSelectedCellRendered()) {
             getSelectedCell().setValue(value);
         }
-        CellData cd = new CellData();
-        cd.value = value;
-        cd.cellStyle = getSelectedCell().getCellStyle();
-        cachedCellData.put(
-                toKey(getSelectedCellColumn(), getSelectedCellRow()), cd);
 
         int j = verticalSplitPosition > 0 ? 0 : firstColumnIndex;
         for (; j < getSelectedCellColumn(); j++) {

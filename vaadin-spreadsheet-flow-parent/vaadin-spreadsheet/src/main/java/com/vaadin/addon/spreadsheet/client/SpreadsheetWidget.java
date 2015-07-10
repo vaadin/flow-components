@@ -1398,8 +1398,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             sheetWidget.stopEditingCell(focusSheet);
 
             if (!selectedCellIsFormulaType) {
-                // this could be removed because the formatted value is always
-                // returned after the server side round trip
                 sheetWidget.updateSelectedCellValue(value);
             }
         }
