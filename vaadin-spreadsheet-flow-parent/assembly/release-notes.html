@@ -523,6 +523,9 @@
       <li>Implement the new graphical design for point-to-cell</li>
       <li><a href="http://dev.vaadin.com/ticket/18330">#18330</a> Certain types of hyperlinks that point within the same file fail</li>
       <li><a href="http://dev.vaadin.com/ticket/18188">#18188</a> Freeze pane should prevent scrolling up/left to hidden rows</li>
+      <li><a href="http://dev.vaadin.com/ticket/18308">#18308</a> Spreadsheet with SpreadSheetTable in TabSheet</li>
+      <li><a href="http://dev.vaadin.com/ticket/18360">#18360</a> Spreadsheet: formula field shouldn't add decimals to integers</li>
+      <li><a href="http://dev.vaadin.com/ticket/18361">#18361</a> Spreadsheet: formula field shouldn't use scientific notation</li>
   </ul>
 
     <h2 id="limitations">Limitations</h2>
@@ -531,7 +534,7 @@
     <ul>
       <li>There is no direct support for charts. You can, however, bind data in a spreadsheet to a chart using Vaadin Charts. See <a href="http://demo.vaadin.com/spreadsheet">the demo</a> for an example.</li>
       <li>There are no provided toolbars or menus for formatting cells.</li>
-      <li>Vaadin Spreadsheet is hevily based on Apache POI and, as such, inherits all limitations of this library. See <a href="http://poi.apache.org/spreadsheet/limitations.html">Apache POI - HSSF and XSSF Limitations</a> for a partial list of these.</li>
+      <li>Vaadin Spreadsheet is heavily based on Apache POI and, as such, inherits all limitations of this library. See <a href="http://poi.apache.org/spreadsheet/limitations.html">Apache POI - HSSF and XSSF Limitations</a> for a partial list of these.</li>
       <li>There is only limited support for the older XLS format. Please use XLSX for a better experience.</li>
       <li>As Apache POI is used on the server-side, you should be aware that loading XLSX files will eat memory for each session where loaded. Normal cases are no problem, but make sure to take this into account if you allow users to upload Excel files.</li>
       <li>Rendering performance is not too great on Mozilla Firefox.</li>
