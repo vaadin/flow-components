@@ -65,7 +65,7 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
-import com.vaadin.addon.spreadsheet.client.GroupingWidget.GroupingData;
+import com.vaadin.addon.spreadsheet.shared.GroupingData;
 import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.ComputedStyle;
 import com.vaadin.client.MeasuredSize;

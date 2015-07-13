@@ -63,9 +63,9 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTOutlinePr;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
-import com.vaadin.addon.spreadsheet.client.GroupingWidget.GroupingData;
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
-import com.vaadin.addon.spreadsheet.client.SpreadsheetState;
+import com.vaadin.addon.spreadsheet.shared.GroupingData;
+import com.vaadin.addon.spreadsheet.shared.SpreadsheetState;
 
 /**
  * SpreadsheetFactory is an utility class of the Spreadsheet component. It is
