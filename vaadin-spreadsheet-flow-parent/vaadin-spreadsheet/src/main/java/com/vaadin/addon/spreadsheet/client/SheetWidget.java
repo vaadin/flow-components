@@ -105,7 +105,7 @@ public class SheetWidget extends Panel {
             + HEADER_RESIZE_DND_SECOND_CLASSNAME + "\" ></div>";
 
     private static final String EDITING_CELL_STYLE = "{ display: inline !important;"
-            + " outline: none !important; width: auto !important; min-width: 70px; z-index: -10; }";
+            + " outline: none !important; width: auto !important; z-index: -10; }";
     private static final String HYPERLINK_CELL_STYLE = "{ cursor: pointer !important; }";
     private static final String MERGED_REGION_CELL_STYLE = "{ display: none; }";
     private static final String FREEZE_PANEL_OVERFLOW_STYLE = "{ overflow: hidden; }";
@@ -4097,7 +4097,8 @@ public class SheetWidget extends Panel {
         try {
             final Cell selectedCell = getSelectedCell();
             selectedCell.setValue(value);
-            int textWidth = selectedCell.getElement().getOffsetWidth();
+            int textWidth = measureValueWidth(selectedCell.getCellStyle(),
+                    value);
             int col = selectedCell.getCol();
             int width;
             if (editingMergedCell) {
