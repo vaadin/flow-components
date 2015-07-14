@@ -1936,7 +1936,7 @@ public class SheetWidget extends Panel {
         } else {
             measuredSize.measure(colHeaders.get(index));
         }
-        return measuredSize.getOuterHeight();
+        return (int) measuredSize.getOuterHeight();
     }
 
     private int getRowHeaderSize() {
@@ -1957,7 +1957,7 @@ public class SheetWidget extends Panel {
         } else {
             measuredSize.measure(rowHeaders.get(index));
         }
-        return measuredSize.getOuterWidth();
+        return (int) measuredSize.getOuterWidth();
     }
 
     private void handleColumnResizeDrag(int clientX, int clientY) {
@@ -2226,7 +2226,7 @@ public class SheetWidget extends Panel {
             MeasuredSize measuredSize = new MeasuredSize();
             measuredSize.measure(actionHandler.getFormulaBarWidget()
                     .getElement());
-            formulaBarHeight = measuredSize.getOuterHeight();
+            formulaBarHeight = (int) measuredSize.getOuterHeight();
         }
 
         int addedHeaderHeight = updateExtraColumnHeaderElements(formulaBarHeight);
