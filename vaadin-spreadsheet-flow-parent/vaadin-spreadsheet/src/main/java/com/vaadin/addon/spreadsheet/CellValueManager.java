@@ -103,6 +103,8 @@ public class CellValueManager implements Serializable {
     private boolean topLeftCellsLoaded;
     private HashMap<Integer, Float> cellStyleWidthRatioMap;
 
+    private FormulaFormatter formulaFormatter = new FormulaFormatter();
+
     /**
      * Creates a new CellValueManager and ties it to the given Spreadsheet.
      *
@@ -164,7 +166,9 @@ public class CellValueManager implements Serializable {
         try {
             if (!spreadsheet.isCellHidden(cell)) {
                 if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
-                    cellData.formulaValue = cell.getCellFormula();
+                    cellData.formulaValue = formulaFormatter
+                            .reFormatFormulaValue(cell.getCellFormula(),
+                                    spreadsheet.getLocale());
                 }
             }
 
@@ -465,7 +469,9 @@ public class CellValueManager implements Serializable {
                 if (cell == null) {
                     if (value.startsWith("=") || value.startsWith("+")) {
                         cell = r.createCell(col - 1, Cell.CELL_TYPE_FORMULA);
-                        cell.setCellFormula(value.substring(1));
+                        cell.setCellFormula(formulaFormatter
+                                .unFormatFormulaValue(value.substring(1),
+                                        spreadsheet.getLocale()));
                         getFormulaEvaluator().notifySetFormula(cell);
                         if (value.startsWith("=HYPERLINK(")) {
                             // set the cell style to link cell
@@ -522,7 +528,9 @@ public class CellValueManager implements Serializable {
                     if (value.startsWith("=") || value.startsWith("+")) {
                         getFormulaEvaluator().notifyUpdateCell(cell);
                         cell.setCellType(Cell.CELL_TYPE_FORMULA);
-                        cell.setCellFormula(value.substring(1));
+                        cell.setCellFormula(formulaFormatter
+                                .unFormatFormulaValue(value.substring(1),
+                                        spreadsheet.getLocale()));
                         getFormulaEvaluator().notifySetFormula(cell);
                         if (value.startsWith("=HYPERLINK(")
                                 && cell.getCellStyle().getIndex() != hyperlinkStyleIndex) {
