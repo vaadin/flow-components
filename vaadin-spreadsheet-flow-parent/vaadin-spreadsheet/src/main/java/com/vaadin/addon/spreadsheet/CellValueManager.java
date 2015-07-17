@@ -20,7 +20,6 @@ package com.vaadin.addon.spreadsheet;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.Format;
@@ -111,8 +110,12 @@ public class CellValueManager implements Serializable {
 
     private FormulaFormatter formulaFormatter = new FormulaFormatter();
 
+    private CellValueFormatter cellValueFormatter = new CellValueFormatter();
+
     private DecimalFormat originalValueDecimalFormat = new DecimalFormat(
             EXCEL_FORMULA_BAR_DECIMAL_FORMAT);
+    private DecimalFormatSymbols localeDecimalSymbols = DecimalFormatSymbols
+            .getInstance();
 
     /**
      * Creates a new CellValueManager and ties it to the given Spreadsheet.
@@ -160,9 +163,10 @@ public class CellValueManager implements Serializable {
 
     protected void updateLocale(Locale locale) {
         formatter = new DataFormatter(locale);
+        localeDecimalSymbols = DecimalFormatSymbols.getInstance(locale);
         originalValueDecimalFormat = new DecimalFormat(
-                EXCEL_FORMULA_BAR_DECIMAL_FORMAT,
-                DecimalFormatSymbols.getInstance(locale));
+                EXCEL_FORMULA_BAR_DECIMAL_FORMAT, localeDecimalSymbols);
+        cellValueFormatter.setLocaleDecimalSymbols(localeDecimalSymbols);
     }
 
     /**
@@ -212,14 +216,24 @@ public class CellValueManager implements Serializable {
                 cellData.needsMeasure = false;
                 if (!cellStyle.getWrapText()
                         && (!SpreadsheetUtil.cellContainsDate(cell)
-                                && cell.getCellType() == Cell.CELL_TYPE_NUMERIC || (cell
+                                && cell.getCellType() == Cell.CELL_TYPE_NUMERIC
+                                || cell.getCellType() == Cell.CELL_TYPE_STRING || (cell
                                 .getCellType() == Cell.CELL_TYPE_FORMULA && !cell
                                 .getCellFormula().startsWith("HYPERLINK")))) {
                     if (!doesValueFit(cell, formattedCellValue)) {
-                        if (valueContainsOnlyNumbers(formattedCellValue)) {
-                            cellData.value = getScientificNotationStringForNumericCell(
-                                    cell, formattedCellValue);
-                        } else {
+                        if (valueContainsOnlyNumbers(formattedCellValue)
+                                && isGenerallCell(cell)) {
+                            cellData.value = cellValueFormatter
+                                    .getScientificNotationStringForNumericCell(
+                                            cell.getNumericCellValue(),
+                                            formattedCellValue,
+                                            cellStyleWidthRatioMap
+                                                    .get((int) cell
+                                                            .getCellStyle()
+                                                            .getIndex()),
+                                            spreadsheet.getState(false).colW[cell
+                                                    .getColumnIndex()] - 10);
+                        } else if (cell.getCellType() != Cell.CELL_TYPE_STRING) {
                             cellData.needsMeasure = true;
                         }
                     }
@@ -267,6 +281,17 @@ public class CellValueManager implements Serializable {
         return cellData;
     }
 
+    /**
+     * Check if the given cell is a numeric cell, and specifically the data
+     * format is "General". In Excel and Spreadsheet this is the default type
+     * for cells.
+     */
+    private boolean isGenerallCell(Cell cell) {
+        return cell.getCellType() == Cell.CELL_TYPE_NUMERIC
+                && cell.getCellStyle().getDataFormatString()
+                        .contains("General");
+    }
+
     public String getOriginalCellValue(Cell cell) {
         if (cell == null) {
             return "";
@@ -299,7 +324,8 @@ public class CellValueManager implements Serializable {
     }
 
     private boolean valueContainsOnlyNumbers(String value) {
-        return value.split("\\D").length == 1;
+        return value.matches("^-?\\d+("
+                + localeDecimalSymbols.getDecimalSeparator() + "\\d+)?$");
     }
 
     private boolean doesValueFit(Cell cell, String value) {
@@ -317,35 +343,6 @@ public class CellValueManager implements Serializable {
         BigDecimal columnWidth = new BigDecimal(
                 spreadsheet.getState(false).colW[cell.getColumnIndex()] - 4);
         return stringPixels.compareTo(columnWidth) <= 0;
-    }
-
-    protected String getScientificNotationStringForNumericCell(Cell cell,
-            String formattedValue) {
-        Float r = cellStyleWidthRatioMap.get((int) cell.getCellStyle()
-                .getIndex());
-        BigDecimal ratio = new BigDecimal(r);
-        BigDecimal columnWidth = new BigDecimal(
-                spreadsheet.getState(false).colW[cell.getColumnIndex()] - 10);
-        int numberOfDigits = columnWidth.divide(ratio, RoundingMode.DOWN)
-                .intValue() - 4; // 0.#E10
-        if (numberOfDigits < 1) {
-            return "###";
-        } else {
-            StringBuilder format = new StringBuilder("0.");
-            for (int i = 0; i < numberOfDigits; i++) {
-                format.append('#');
-            }
-            format.append("E0");
-            try {
-                return new DecimalFormat(format.toString()).format(cell
-                        .getNumericCellValue());
-            } catch (IllegalStateException ise) {
-                LOGGER.log(Level.FINE, "CellType mismatch: " + ise.getMessage()
-                        + ", on cell " + SpreadsheetUtil.toKey(cell)
-                        + " of type " + cell.getCellType(), ise);
-            }
-        }
-        return formattedValue;
     }
 
     /**

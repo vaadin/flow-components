@@ -53,6 +53,8 @@ import com.vaadin.ui.VerticalLayout;
  */
 @SuppressWarnings("serial")
 @Theme("demo")
+@Deprecated
+// Should be removed at some point in favor of SpreadsheetDemoUI
 public class TestexcelsheetUI extends UI {
 
     private Spreadsheet spreadsheet;

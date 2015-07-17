@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,6 +18,7 @@ import com.vaadin.addon.spreadsheet.test.demoapps.SpreadsheetDemoUI;
 import com.vaadin.addon.spreadsheet.test.pageobjects.HeaderPage;
 import com.vaadin.addon.spreadsheet.test.tb3.MultiBrowserTest;
 import com.vaadin.testbench.By;
+import com.vaadin.testbench.elements.NativeSelectElement;
 
 public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
 
@@ -70,5 +72,12 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
     protected void waitForElementPresent(By locator) {
         new WebDriverWait(getDriver(), 20).until(ExpectedConditions
                 .presenceOfElementLocated(locator));
+    }
+
+    protected void setLocale(Locale locale) {
+        $(NativeSelectElement.class).id("localeSelect").selectByText(
+                locale.getDisplayName());
+        assertEquals("Unexpected locale,", locale.getDisplayName(),
+                $(NativeSelectElement.class).id("localeSelect").getValue());
     }
 }

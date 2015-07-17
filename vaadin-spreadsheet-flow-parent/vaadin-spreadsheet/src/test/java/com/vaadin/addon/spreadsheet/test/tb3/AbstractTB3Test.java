@@ -49,12 +49,12 @@ public abstract class AbstractTB3Test extends ParallelTest {
     /**
      * Height of the screenshots we want to capture
      */
-    protected static final int SCREENSHOT_HEIGHT = 700;
+    protected static final int SCREENSHOT_HEIGHT = 768;
 
     /**
      * Width of the screenshots we want to capture
      */
-    protected static final int SCREENSHOT_WIDTH = 1000;
+    protected static final int SCREENSHOT_WIDTH = 1280;
 
     private boolean debug = false;
 

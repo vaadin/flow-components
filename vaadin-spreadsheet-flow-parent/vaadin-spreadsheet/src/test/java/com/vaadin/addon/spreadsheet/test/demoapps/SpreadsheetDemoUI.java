@@ -32,6 +32,7 @@ import com.vaadin.addon.spreadsheet.Spreadsheet.SheetChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SheetChangeListener;
 import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.annotations.Theme;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -46,6 +47,8 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractField;
+import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
@@ -99,7 +102,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private HorizontalLayout options;
 
-    private ComboBox localeSelect;
+    private AbstractSelect localeSelect;
 
     public SpreadsheetDemoUI() {
         super();
@@ -371,9 +374,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             }
         }, "testsheet.xlsx")).extend(downloadButton);
 
-        localeSelect = new ComboBox();
-        localeSelect.setNewItemsAllowed(false);
-        localeSelect.setInputPrompt("Select locale");
+        localeSelect = new NativeSelect();
+        localeSelect.setWidth("200px");
         localeSelect.setId("localeSelect");
         for (Locale locale : Locale.getAvailableLocales()) {
             localeSelect.addItem(locale);
@@ -426,13 +428,41 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         spreadsheetFieldFactory = new SpreadsheetEditorComponentFactoryTest();
 
+        final ComboBox fixtureCombo = new ComboBox();
+        fixtureCombo.setInputPrompt("Test Fixtures");
+        fixtureCombo.setId("fixtureNameCmb");
+        fixtureCombo.setItemCaptionMode(AbstractSelect.ItemCaptionMode.ID);
+        for (TestFixtures fixture : TestFixtures.values()) {
+            fixtureCombo.addItems(fixture.toString());
+        }
+
+        Button loadFixtureBtn = new Button("Load", new Button.ClickListener() {
+
+            @Override
+            public void buttonClick(ClickEvent event) {
+                if (spreadsheet == null) {
+                    return;
+                }
+
+                String fixtureName = (String) fixtureCombo.getValue();
+                TestFixtures fixture = TestFixtures.valueOf(fixtureName);
+                fixture.factory.create().loadFixture(spreadsheet);
+            }
+        });
+
+        loadFixtureBtn.setId("loadFixtureBtn");
+
+        HorizontalLayout loadFixture = new HorizontalLayout(fixtureCombo,
+                loadFixtureBtn);
+        loadFixture.setComponentAlignment(loadFixtureBtn,
+                Alignment.BOTTOM_CENTER);
+
         VerticalLayout createAndFreeze = new VerticalLayout();
         createAndFreeze.setSpacing(true);
         createAndFreeze.addComponents(newSpreadsheetButton,
                 customComponentTest, freezePanesButton);
 
         HorizontalLayout updateLayout = new HorizontalLayout();
-        updateLayout.setSpacing(true);
         updateLayout.addComponents(openTestSheetSelect, updateButton);
         VerticalLayout updateUpload = new VerticalLayout();
         updateUpload.setSpacing(true);
@@ -440,7 +470,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         VerticalLayout closeDownload = new VerticalLayout();
         closeDownload.setSpacing(true);
-        closeDownload.addComponents(closeButton, downloadButton);
+        closeDownload.addComponents(closeButton, downloadButton, loadFixture);
 
         options.addComponent(checkBoxLayout);
         options.addComponent(createAndFreeze);

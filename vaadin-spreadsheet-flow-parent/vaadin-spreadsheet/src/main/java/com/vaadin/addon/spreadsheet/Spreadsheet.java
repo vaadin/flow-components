@@ -798,6 +798,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         refreshAllCellValues();
     }
 
+    @Override
+    public void attach() {
+        super.attach();
+        valueManager.updateLocale(getLocale());
+    }
+
     /**
      * See {@link Workbook#setSheetHidden(int, int)}.
      * <p>

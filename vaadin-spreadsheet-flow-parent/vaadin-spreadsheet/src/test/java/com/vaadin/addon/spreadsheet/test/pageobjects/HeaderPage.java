@@ -1,7 +1,10 @@
 package com.vaadin.addon.spreadsheet.test.pageobjects;
 
+import static org.junit.Assert.assertEquals;
+
 import org.openqa.selenium.WebDriver;
 
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.testbench.TestBenchTestCase;
 import com.vaadin.testbench.elements.ButtonElement;
 import com.vaadin.testbench.elements.ComboBoxElement;
@@ -24,4 +27,15 @@ public class HeaderPage extends Page {
         $(ButtonElement.class).id("update").click();
         return new SpreadsheetPage(driver);
     }
+
+    public void loadTestFixture(TestFixtures fixture) {
+        $(ComboBoxElement.class).id("fixtureNameCmb").selectByText(
+                fixture.toString());
+        $(ButtonElement.class).id("loadFixtureBtn").click();
+
+        // sanity check
+        assertEquals("Fixture not loaded correctly", fixture.toString(),
+                $(ComboBoxElement.class).id("fixtureNameCmb").getValue());
+    }
+
 }

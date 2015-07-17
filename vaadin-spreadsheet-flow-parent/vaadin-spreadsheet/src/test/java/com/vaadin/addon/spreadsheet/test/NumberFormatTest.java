@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
-import com.vaadin.testbench.elements.ComboBoxElement;
 
 /**
  * Tests for number formatting
@@ -117,13 +116,6 @@ public class NumberFormatTest extends AbstractSpreadsheetTestCase {
 
     private void setDefaultLocale() {
         setLocale(Locale.US);
-    }
-
-    private void setLocale(Locale locale) {
-        $(ComboBoxElement.class).id("localeSelect").selectByText(
-                locale.getDisplayName());
-        assertEquals("Unexpected locale,", locale.getDisplayName(),
-                $(ComboBoxElement.class).id("localeSelect").getValue());
     }
 
     public enum Type {
