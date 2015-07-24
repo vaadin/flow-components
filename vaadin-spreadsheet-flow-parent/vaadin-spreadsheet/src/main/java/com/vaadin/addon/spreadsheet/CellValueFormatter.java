@@ -38,7 +38,11 @@ public class CellValueFormatter implements Serializable {
                 return createFillString(numberOfDigits);
             }
 
-            boolean needsScientific = integerPartLength > numberOfDigits;
+            // Needs scientific if integer part doesn't fit or if it's only
+            // decimals and all decimal don't fit
+            boolean needsScientific = integerPartLength > numberOfDigits
+                    || (Math.abs(numericValue) < 1
+                            && formattedValue.length() > numberOfDigits && numberOfDigits > 4);
             int numberOfDecimals = 0;
             if (needsScientific) {
                 // 0.#E10

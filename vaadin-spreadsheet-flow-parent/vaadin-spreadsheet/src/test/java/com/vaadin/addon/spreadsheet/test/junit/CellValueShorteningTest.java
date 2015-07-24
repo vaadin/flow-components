@@ -35,6 +35,11 @@ public class CellValueShorteningTest {
         assertCorrectRounding("####", "19999", 4);
         assertCorrectRounding("19999", "19999", 5);
 
+        assertCorrectRounding("0.0000345", "0.0000345", 9);
+        assertCorrectRounding("3.45E-5", "0.0000345", 7);
+        assertCorrectRounding("3.4E-5", "0.0000345", 6);
+        assertCorrectRounding("3E-5", "0.0000345", 5);
+
         assertCorrectRounding("0.1", "0.10", 3);
         assertCorrectRounding("0", "0.10", 2);
 
