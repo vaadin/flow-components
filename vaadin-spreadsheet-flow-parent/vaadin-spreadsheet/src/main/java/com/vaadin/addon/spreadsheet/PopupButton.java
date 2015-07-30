@@ -19,9 +19,8 @@ package com.vaadin.addon.spreadsheet;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.poi.ss.util.CellReference;
 
@@ -29,8 +28,10 @@ import com.vaadin.addon.spreadsheet.client.PopupButtonClientRpc;
 import com.vaadin.addon.spreadsheet.client.PopupButtonServerRpc;
 import com.vaadin.addon.spreadsheet.client.PopupButtonState;
 import com.vaadin.addon.spreadsheet.client.PopupButtonWidget;
-import com.vaadin.ui.AbstractComponentContainer;
+import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.AbstractSingleComponentContainer;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.HasComponents;
 import com.vaadin.util.ReflectTools;
 
 /**
@@ -54,22 +55,26 @@ import com.vaadin.util.ReflectTools;
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
-public class PopupButton extends AbstractComponentContainer {
+public class PopupButton extends AbstractComponent implements HasComponents {
 
     private PopupButtonServerRpc rpc = new PopupButtonServerRpc() {
 
         @Override
         public void onPopupClose() {
+            setPopupVisible(false);
             fireClose();
         }
 
         @Override
         public void onPopupButtonClick() {
+            setPopupVisible(true);
             fireOpen();
         }
     };
 
-    private List<Component> children = new ArrayList<Component>();
+    private Component child;
+
+    private boolean popupVisible = false;
 
     /**
      * Constructs a new PopupButton.
@@ -86,7 +91,7 @@ public class PopupButton extends AbstractComponentContainer {
      */
     public PopupButton(Component content) {
         this();
-        addComponent(content);
+        child = content;
     }
 
     /**
@@ -127,6 +132,7 @@ public class PopupButton extends AbstractComponentContainer {
      * of the Spreadsheet.
      */
     public void openPopup() {
+        setPopupVisible(true);
         getRpcProxy(PopupButtonClientRpc.class).openPopup();
     }
 
@@ -134,6 +140,7 @@ public class PopupButton extends AbstractComponentContainer {
      * Closes the pop-up if it is open.
      */
     public void closePopup() {
+        setPopupVisible(false);
         getRpcProxy(PopupButtonClientRpc.class).closePopup();
     }
 
@@ -206,68 +213,28 @@ public class PopupButton extends AbstractComponentContainer {
         return (PopupButtonState) super.getState(markAsDirty);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.ui.AbstractComponentContainer#addComponent(com.vaadin.ui.Component
-     * )
+    /**
+     * Set the contents of the popup.
+     *
      */
-    @Override
-    public void addComponent(Component c) {
-        children.add(c);
-        super.addComponent(c);
-        markAsDirty();
+    public void setContent(Component content) {
+        child = content;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.ui.AbstractComponentContainer#removeComponent(com.vaadin.ui
-     * .Component)
+    /**
+     * Get the contents of the popup.
      */
-    @Override
-    public void removeComponent(Component c) {
-        children.remove(c);
-        super.removeComponent(c);
-        markAsDirty();
+    public Component getContent() {
+        return child;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.vaadin.ui.ComponentContainer#replaceComponent(com.vaadin.ui.Component
-     * , com.vaadin.ui.Component)
-     */
-    @Override
-    public void replaceComponent(Component oldComponent, Component newComponent) {
-        int oldIndex = children.indexOf(oldComponent);
-        removeComponent(oldComponent);
-        children.add(oldIndex, newComponent);
-        super.addComponent(newComponent);
-        markAsDirty();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.ui.ComponentContainer#getComponentCount()
-     */
-    @Override
-    public int getComponentCount() {
-        return children.size();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.vaadin.ui.HasComponents#iterator()
-     */
     @Override
     public Iterator<Component> iterator() {
-        return children.iterator();
+        if (child != null && popupVisible) {
+            return Collections.singleton(child).iterator();
+        } else {
+            return Collections.<Component> emptyList().iterator();
+        }
     }
 
     /**
@@ -321,6 +288,16 @@ public class PopupButton extends AbstractComponentContainer {
     public void removePopupCloseListener(PopupCloseListener listener) {
         removeListener(PopupCloseEvent.class, listener,
                 PopupCloseListener.POPUP_CLOSE_METHOD);
+    }
+
+    @Override
+    public void detach() {
+        // this order needs to be maintained so that
+        // 1) iterator returns empty
+        // 2) child -> parent is cleared properly
+        popupVisible = false;
+        child.setParent(null);
+        super.detach();
     }
 
     private void fireOpen() {
@@ -422,4 +399,24 @@ public class PopupButton extends AbstractComponentContainer {
         public void onPopupClose(PopupCloseEvent event);
     }
 
+    private void setPopupVisible(boolean visible) {
+        popupVisible = visible;
+
+        if (child != null) {
+            if (visible) {
+                if (child.getParent() != null && !equals(child.getParent())) {
+                    // If the component already has a parent, try to remove it
+                    AbstractSingleComponentContainer.removeFromParent(child);
+                }
+                child.setParent(this);
+
+            } else {
+                if (equals(child.getParent())) {
+                    child.setParent(null);
+                }
+            }
+        }
+
+        markAsDirty();
+    }
 }

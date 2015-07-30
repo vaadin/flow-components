@@ -5454,9 +5454,9 @@ public class SheetWidget extends Panel {
         int col = popupButton.getCol();
         int row = popupButton.getRow();
         sheetPopupButtons.remove(toKey(col, row));
+        remove(popupButton);
         if (col >= firstColumnIndex && col <= lastColumnIndex
                 && row >= firstRowIndex && row <= lastRowIndex) {
-            remove(popupButton);
             // need to remove the possible reference from the cell too
             getCell(col, row).removePopupButton();
         }

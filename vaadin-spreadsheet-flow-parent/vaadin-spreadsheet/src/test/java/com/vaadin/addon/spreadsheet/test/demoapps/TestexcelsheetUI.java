@@ -24,6 +24,7 @@ import com.vaadin.addon.spreadsheet.test.fixtures.ClassFixtureFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.ColumnToggleFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.CommentFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.CustomComponentFixture;
+import com.vaadin.addon.spreadsheet.test.fixtures.EagerFixtureFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.FormatsFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.HyperLinkFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.LockCellFixture;
@@ -96,8 +97,8 @@ public class TestexcelsheetUI extends UI {
                     ShiftFixture.DeleteRow.class));
             put("MERGE_CELLS", new EagerFixtureFactory(new CellMergeFixture(
                     TestexcelsheetUI.this)));
-            put("POPUPBUTTON", new EagerFixtureFactory(new PopupButtonFixture(
-                    TestexcelsheetUI.this)));
+            put("POPUPBUTTON",
+                    new EagerFixtureFactory(new PopupButtonFixture()));
         }
     };
 
@@ -387,19 +388,4 @@ public class TestexcelsheetUI extends UI {
         }
     }
 
-    public static class EagerFixtureFactory implements
-            SpreadsheetFixtureFactory {
-
-        private SpreadsheetFixture fixture;
-
-        public EagerFixtureFactory(SpreadsheetFixture fixture) {
-            this.fixture = fixture;
-        }
-
-        @Override
-        public SpreadsheetFixture create() {
-            return fixture;
-        }
-
-    }
 }

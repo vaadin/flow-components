@@ -109,7 +109,7 @@ public class SpreadsheetTable implements Serializable {
      */
     public void clear() {
         for (PopupButton popupButton : popupButtons.values()) {
-            popupButton.removeAllComponents();
+            popupButton.setContent(null);
         }
         popupButtons.clear();
     }

@@ -5,11 +5,19 @@ package com.vaadin.addon.spreadsheet.test.fixtures;
  *
  */
 public enum TestFixtures {
-    FirstColumnWidth(new ClassFixtureFactory(FirstColumnWidthFixture.class));
+    FirstColumnWidth(FirstColumnWidthFixture.class), PopupButton(
+            PopupButtonFixture.class), TabsheetPopupButton(
+            TabsheetPopupButtonFixture.class), TablePopupButton(
+            TablePopupButtonFixture.class), SpreadsheetTable(
+            SpreadsheetTableFixture.class);
 
     public final SpreadsheetFixtureFactory factory;
 
     TestFixtures(SpreadsheetFixtureFactory factory) {
         this.factory = factory;
+    }
+
+    TestFixtures(Class<? extends SpreadsheetFixture> fixtureClass) {
+        this(new ClassFixtureFactory(fixtureClass));
     }
 }

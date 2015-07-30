@@ -69,6 +69,31 @@ public class SheetCellElement extends AbstractElement {
         return children.isEmpty();
     }
 
+    /**
+     * Determines if this cell has a PopupButton set.
+     *
+     * @return true if this cell has a pop-up button, false otherwise
+     */
+    public boolean hasPopupButton() {
+        List<WebElement> buttons = findElements(By.className("popupbutton"));
+        return !buttons.isEmpty();
+    }
+
+    /**
+     * Click the PopupButton in the cell.
+     *
+     * @throws IllegalArgumentException
+     *             if the cell doesn't contain a PopupButton
+     */
+    public void popupButtonClick() {
+        if (!hasPopupButton()) {
+            throw new IllegalStateException(
+                    "This cell doesn't have a PopupuButton");
+        }
+
+        findElement(By.className("popupbutton")).click();
+    }
+
     void setParent(SpreadsheetElement parent) {
         this.parent = parent;
     }

@@ -527,7 +527,12 @@
       <li><a href="http://dev.vaadin.com/ticket/18308">#18308</a> Spreadsheet with SpreadSheetTable in TabSheet</li>
       <li><a href="http://dev.vaadin.com/ticket/18360">#18360</a> Spreadsheet: formula field shouldn't add decimals to integers</li>
       <li><a href="http://dev.vaadin.com/ticket/18361">#18361</a> Spreadsheet: formula field shouldn't use scientific notation</li>
-  </ul>
+    </ul>
+
+    <h2 id="api-changes">API changes</h2>
+    <ul>
+        <li>PopupButton is no longer an AbstractComponentContainer, and has only one child component. Use a layout if multiple components are needed.</li>
+    </ul>
 
     <h2 id="limitations">Limitations</h2>
     <p>Vaadin Spreadsheet ${project.version} has the following limitations:</p>

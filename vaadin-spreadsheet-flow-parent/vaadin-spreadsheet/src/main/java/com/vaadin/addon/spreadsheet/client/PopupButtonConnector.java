@@ -130,7 +130,9 @@ public class PopupButtonConnector extends AbstractHasComponentsConnector
 
     @Override
     public void onClose(CloseEvent<PopupPanel> event) {
-        getRpcProxy(PopupButtonServerRpc.class).onPopupClose();
+        if (getWidget().isAttached()) {
+            getRpcProxy(PopupButtonServerRpc.class).onPopupClose();
+        }
     }
 
     @Override

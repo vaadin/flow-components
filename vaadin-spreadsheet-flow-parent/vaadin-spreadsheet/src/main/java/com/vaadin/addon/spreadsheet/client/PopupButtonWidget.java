@@ -20,6 +20,7 @@ package com.vaadin.addon.spreadsheet.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -170,7 +171,12 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
         if (parentElement != null) {
             popup.setPopupPositionAndShow(callback);
         } else {
-            popup.showRelativeTo(this);
+            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                @Override
+                public void execute() {
+                    popup.setPopupPositionAndShow(callback);
+                }
+            });
         }
         if (owner != null) {
             popupHeader.setCaption(owner.getCellValue(col, row));
@@ -265,4 +271,9 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
         }
     }
 
+    @Override
+    protected void onDetach() {
+        closePopup();
+        super.onDetach();
+    }
 }

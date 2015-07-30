@@ -9,29 +9,8 @@ public class ClassFixtureFactory extends Instantiator<SpreadsheetFixture>
 
     @Override
     public SpreadsheetFixture create() {
-        // TODO Auto-generated method stub
         return getIt();
     }
-
-    // private Class<? extends SpreadsheetFixture> clazz;
-    //
-    // public ClassFixtureFactory(Class<? extends SpreadsheetFixture> clazz) {
-    // this.clazz = clazz;
-    // }
-    //
-    // @Override
-    // public SpreadsheetFixture create() {
-    // try {
-    // return clazz.newInstance();
-    // } catch (InstantiationException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // } catch (IllegalAccessException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    //
-    // return null;
 }
 
 class Instantiator<T> {
@@ -45,10 +24,8 @@ class Instantiator<T> {
         try {
             return clazz.newInstance();
         } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

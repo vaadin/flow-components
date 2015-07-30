@@ -28,7 +28,9 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * Represents a "table" inside a spreadsheet, that has filters (
@@ -158,7 +160,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
     protected void initClearAllButtons() {
         for (PopupButton popupButton : getPopupButtons()) {
             Button clearButton = createClearButton();
-            popupButton.addComponent(clearButton);
+            addComponentToPopup(popupButton, clearButton);
             popupButtonToClearButtonMap.put(popupButton, clearButton);
         }
     }
@@ -182,9 +184,18 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
             ItemFilter itemFilter = new ItemFilter(new CellRangeAddress(
                     firstRow, lastRow, column, column), getSpreadsheet(),
                     popupButton, this);
-            popupButton.addComponent(itemFilter);
+            addComponentToPopup(popupButton, itemFilter);
             registerFilter(popupButton, itemFilter);
         }
+    }
+
+    private void addComponentToPopup(PopupButton popupButton,
+            Component component) {
+        if (popupButton.getContent() == null) {
+            popupButton.setContent(new VerticalLayout());
+        }
+
+        ((VerticalLayout) popupButton.getContent()).addComponent(component);
     }
 
     /**

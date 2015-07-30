@@ -482,17 +482,15 @@ public class SpreadsheetFactory implements Serializable {
         spreadsheet.getState().colGroupingMax = 0;
         spreadsheet.getState().rowGroupingMax = 0;
 
-        try {
+        if(ctWorksheet.getSheetPr() != null && ctWorksheet.getSheetPr().getOutlinePr() != null) {
             CTOutlinePr outlinePr = ctWorksheet.getSheetPr().getOutlinePr();
             spreadsheet.getState().colGroupingInversed = !outlinePr
                     .getSummaryRight();
             spreadsheet.getState().rowGroupingInversed = !outlinePr
                     .getSummaryBelow();
-        } catch (NullPointerException e) {
+        }else {
             spreadsheet.getState().colGroupingInversed = false;
             spreadsheet.getState().rowGroupingInversed = false;
-            // fine
-
         }
 
         // COLS

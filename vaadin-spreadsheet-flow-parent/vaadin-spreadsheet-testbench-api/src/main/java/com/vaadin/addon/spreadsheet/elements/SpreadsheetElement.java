@@ -318,6 +318,15 @@ public class SpreadsheetElement extends AbstractElement {
         return findElement(By.id("cellinput"));
     }
 
+    /**
+     * Determine if the pop-up of PopupuButton is currently visible
+     */
+    public boolean isPopupButtonPopupVisible() {
+        List<WebElement> elements = getDriver().findElements(
+                By.className("v-spreadsheet-popupbutton-overlay"));
+        return !elements.isEmpty();
+    }
+
     private TestBenchElement getBottomRightPane() {
         return wrapElement(findElement(By.className("bottom-right-pane")),
                 getCommandExecutor());

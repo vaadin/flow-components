@@ -103,6 +103,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     private HorizontalLayout options;
 
     private AbstractSelect localeSelect;
+    private Button loadFixtureBtn;
+    private NativeSelect fixtureSelect;
 
     public SpreadsheetDemoUI() {
         super();
@@ -428,15 +430,14 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         spreadsheetFieldFactory = new SpreadsheetEditorComponentFactoryTest();
 
-        final ComboBox fixtureCombo = new ComboBox();
-        fixtureCombo.setInputPrompt("Test Fixtures");
-        fixtureCombo.setId("fixtureNameCmb");
-        fixtureCombo.setItemCaptionMode(AbstractSelect.ItemCaptionMode.ID);
+        fixtureSelect = new NativeSelect();
+        fixtureSelect.setId("fixtureSelect");
+        fixtureSelect.setItemCaptionMode(AbstractSelect.ItemCaptionMode.ID);
         for (TestFixtures fixture : TestFixtures.values()) {
-            fixtureCombo.addItems(fixture.toString());
+            fixtureSelect.addItems(fixture.toString());
         }
 
-        Button loadFixtureBtn = new Button("Load", new Button.ClickListener() {
+        loadFixtureBtn = new Button("Load", new Button.ClickListener() {
 
             @Override
             public void buttonClick(ClickEvent event) {
@@ -444,7 +445,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     return;
                 }
 
-                String fixtureName = (String) fixtureCombo.getValue();
+                String fixtureName = (String) fixtureSelect.getValue();
                 TestFixtures fixture = TestFixtures.valueOf(fixtureName);
                 fixture.factory.create().loadFixture(spreadsheet);
             }
@@ -452,7 +453,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         loadFixtureBtn.setId("loadFixtureBtn");
 
-        HorizontalLayout loadFixture = new HorizontalLayout(fixtureCombo,
+        HorizontalLayout loadFixture = new HorizontalLayout(fixtureSelect,
                 loadFixtureBtn);
         loadFixture.setComponentAlignment(loadFixtureBtn,
                 Alignment.BOTTOM_CENTER);
@@ -495,25 +496,38 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     private void updateFromFragment() {
         String uriFragment = getPage().getUriFragment();
         if (uriFragment != null && uriFragment.startsWith("file/")) {
-            String filename = uriFragment.substring("file/".length(),
-                    uriFragment.indexOf(".xlsx") + ".xlsx".length());
-
+            String filename = null;
             Integer sheetIndex = null;
-            if (uriFragment.contains("/sheet/")) {
-                sheetIndex = Integer.valueOf(uriFragment.substring(uriFragment
-                        .indexOf("/sheet/") + "/sheet/".length())) - 1;
+            TestFixtures fixture = null;
+
+            // #file/<filename>/sheet/<sheetIndex>/fixture/<fixturename>
+
+            String[] tokens = uriFragment.split("/");
+            for (int i = 0; i < tokens.length; i++) {
+                if ("file".equals(tokens[i])) {
+                    filename = tokens[i + 1];
+                    System.out.println("Opening file " + filename);
+                } else if ("sheet".equals(tokens[i])) {
+                    sheetIndex = Integer.valueOf(tokens[i + 1]) - 1;
+                    System.out.println("Opening sheet " + sheetIndex);
+                } else if ("fixture".equals(tokens[i])) {
+                    fixture = TestFixtures.valueOf(tokens[i + 1]);
+                    System.out.println("Opening fixture " + fixture);
+                }
             }
-
-            System.out.println("Opening file " + filename + " with sheet "
-                    + (sheetIndex == null ? "default" : sheetIndex));
-
             for (Object id : openTestSheetSelect.getItemIds()) {
                 File file = (File) id;
                 if (filename.equals(file.getName())) {
                     openTestSheetSelect.select(file);
                     updateButton.click();
+
                     if (sheetIndex != null) {
                         spreadsheet.setActiveSheetIndex(sheetIndex);
+                    }
+
+                    if (fixture != null) {
+                        fixtureSelect.setValue(fixture.toString());
+                        loadFixtureBtn.click();
                     }
 
                     return;
