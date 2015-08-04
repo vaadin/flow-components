@@ -213,6 +213,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         openTestSheetSelect.setImmediate(true);
         openTestSheetSelect.setItemCaptionPropertyId("Name");
         openTestSheetSelect.setPageLength(30);
+        openTestSheetSelect.setWidth("250px");
 
         updateButton = new Button("Update", new Button.ClickListener() {
 

@@ -998,6 +998,8 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
         bottom: -10px;
       }
     }
+
+    @include grouping;
   }
 
   /* CELL COMMENT OVERLAY STYLES */
@@ -1063,8 +1065,6 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
         color: $popup-overlay-text-color;
       }
     }
-
-    @include grouping;
   }
 
   .v-spreadsheet-popupbutton-overlay-header {

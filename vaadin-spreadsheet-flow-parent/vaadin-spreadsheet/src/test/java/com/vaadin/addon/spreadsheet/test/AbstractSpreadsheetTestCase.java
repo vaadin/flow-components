@@ -80,4 +80,17 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
         assertEquals("Unexpected locale,", locale.getDisplayName(),
                 $(NativeSelectElement.class).id("localeSelect").getValue());
     }
+
+    /**
+     * Navigates with theme parameter to spread sheet file. This way is
+     * necessary to change the theme.
+     *
+     * @param theme
+     *            theme to load
+     */
+    protected void loadPage(String theme, String spreadsheetFile) throws Exception {
+        driver.get(getTestUrl() + "?theme=" + theme);
+        headerPage.loadFile(spreadsheetFile, this);
+        testBench(driver).waitForVaadin();
+    }
 }
