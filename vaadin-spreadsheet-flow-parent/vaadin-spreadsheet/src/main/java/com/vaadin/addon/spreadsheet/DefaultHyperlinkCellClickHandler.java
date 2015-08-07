@@ -87,6 +87,8 @@ public class DefaultHyperlinkCellClickHandler implements
                 spreadsheet.setActiveSheetWithPOIIndex(sheetPOIIndex);
             }
             spreadsheet.initialSheetSelection = address;
+            spreadsheet.getCellSelectionManager().onSheetAddressChanged(
+                    address, true);
         } else {
             // change selection to cell within the same sheet
             spreadsheet.getCellSelectionManager().onSheetAddressChanged(

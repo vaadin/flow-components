@@ -33,6 +33,15 @@ public class HyperlinkTest extends AbstractSpreadsheetTestCase {
         testBench(driver).waitForVaadin();
     }
 
+    /**
+     * Test for #18564 where hyperlink to same sheet caused no selection if the
+     * sheet was defined in the hyperlink.
+     */
+    @Test
+    public void hyperlink_sheetWithLinkToSameSheet_selectionIsMoved() {
+        testInternal("A6", "B6");
+    }
+
     @Test
     public void hyperlink_sheetWithHyperLinks_internalFromFormulaMovesToCorrectCell() {
         testInternal("A4", "B4");
