@@ -428,7 +428,16 @@ public class SpreadsheetFactory implements Serializable {
             if (rows > sheet.getLastRowNum() + 1) {
                 float defaultRowHeightInPoints = sheet
                         .getDefaultRowHeightInPoints();
-                for (int i = sheet.getLastRowNum() + 1; i < rows; i++) {
+
+                int lastRowNum = sheet.getLastRowNum();
+                // if sheet is empty, also set height for 'last row' (index
+                // zero)
+                if (lastRowNum == 0) {
+                    rowHeights[0] = defaultRowHeightInPoints;
+                }
+
+                // set default height for the rest
+                for (int i = lastRowNum + 1; i < rows; i++) {
                     rowHeights[i] = defaultRowHeightInPoints;
                 }
             }
@@ -482,13 +491,14 @@ public class SpreadsheetFactory implements Serializable {
         spreadsheet.getState().colGroupingMax = 0;
         spreadsheet.getState().rowGroupingMax = 0;
 
-        if(ctWorksheet.getSheetPr() != null && ctWorksheet.getSheetPr().getOutlinePr() != null) {
+        if (ctWorksheet.getSheetPr() != null
+                && ctWorksheet.getSheetPr().getOutlinePr() != null) {
             CTOutlinePr outlinePr = ctWorksheet.getSheetPr().getOutlinePr();
             spreadsheet.getState().colGroupingInversed = !outlinePr
                     .getSummaryRight();
             spreadsheet.getState().rowGroupingInversed = !outlinePr
                     .getSummaryBelow();
-        }else {
+        } else {
             spreadsheet.getState().colGroupingInversed = false;
             spreadsheet.getState().rowGroupingInversed = false;
         }
