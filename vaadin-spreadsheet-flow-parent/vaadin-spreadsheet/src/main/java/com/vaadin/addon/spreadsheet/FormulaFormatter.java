@@ -107,6 +107,44 @@ public class FormulaFormatter implements Serializable {
         return formulaValue;
     }
 
+    /**
+     * Rudimentary checks if the given string could be a valid formula
+     *
+     * @param value
+     *            whole formula as a string, must start with '=' or '+'
+     * @param locale
+     *            the current locale
+     * @return true if the formula could be valid
+     */
+    public boolean isValidFormulaFormat(String value, Locale locale) {
+        if (value.startsWith("=") || value.startsWith("+")) {
+            String formulaValue = value.substring(1);
+
+            final List<FormulaToken> formulaTokens = tokenizeFormula(
+                    formulaValue, locale);
+
+            // check for unparsed '.' characters after numbers
+            // e.g. "1.1" with decimal separator ',' should fail
+            for (int i = 0; i < formulaTokens.size(); i++) {
+                FormulaToken token = formulaTokens.get(i);
+                if (token instanceof NumberToken
+                        && i + 1 < formulaTokens.size()) {
+                    FormulaToken nextToken = formulaTokens.get(i + 1);
+                    if (".".equals(nextToken.toString())) {
+                        return false;
+                    }
+                }
+            }
+
+            // no problems found in formula, pass
+            return true;
+
+        } else {
+            // this isn't a valid formula to start with
+            return false;
+        }
+    }
+
     /*
      * Loop through tokens and localize them as needed.
      */

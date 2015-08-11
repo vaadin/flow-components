@@ -11,8 +11,12 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.Format;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -380,7 +384,17 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         localeSelect = new NativeSelect();
         localeSelect.setWidth("200px");
         localeSelect.setId("localeSelect");
-        for (Locale locale : Locale.getAvailableLocales()) {
+
+        final List<Locale> locales = Arrays
+                .asList(Locale.getAvailableLocales());
+        Collections.sort(locales, new Comparator<Locale>() {
+            @Override
+            public int compare(Locale o1, Locale o2) {
+                return o1.getDisplayName().compareTo(o2.getDisplayName());
+            }
+        });
+
+        for (Locale locale : locales) {
             localeSelect.addItem(locale);
             localeSelect.setItemCaption(locale, locale.getDisplayName());
         }

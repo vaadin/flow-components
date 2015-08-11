@@ -479,12 +479,14 @@ public class CellValueManager implements Serializable {
                 // handle new cell creation
                 SpreadsheetStyleFactory styler = spreadsheet
                         .getSpreadsheetStyleFactory();
+                final Locale spreadsheetLocale = spreadsheet.getLocale();
                 if (cell == null) {
-                    if (value.startsWith("=") || value.startsWith("+")) {
+                    if (formulaFormatter.isValidFormulaFormat(value,
+                            spreadsheetLocale)) {
                         cell = r.createCell(col - 1, Cell.CELL_TYPE_FORMULA);
                         cell.setCellFormula(formulaFormatter
                                 .unFormatFormulaValue(value.substring(1),
-                                        spreadsheet.getLocale()));
+                                        spreadsheetLocale));
                         getFormulaEvaluator().notifySetFormula(cell);
                         if (value.startsWith("=HYPERLINK(")) {
                             // set the cell style to link cell
@@ -503,9 +505,9 @@ public class CellValueManager implements Serializable {
                     } else {
 
                         Double percentage = SpreadsheetUtil.parsePercentage(
-                                value, spreadsheet.getLocale());
+                                value, spreadsheetLocale);
                         Double numVal = SpreadsheetUtil.parseNumber(value,
-                                spreadsheet.getLocale());
+                                spreadsheetLocale);
 
                         if (value.isEmpty()) {
                             cell = r.createCell(col - 1); // BLANK
@@ -538,12 +540,13 @@ public class CellValueManager implements Serializable {
                     if (!sentCells.remove(key)) {
                         sentFormulaCells.remove(key);
                     }
-                    if (value.startsWith("=") || value.startsWith("+")) {
+                    if (formulaFormatter.isValidFormulaFormat(value,
+                            spreadsheetLocale)) {
                         getFormulaEvaluator().notifyUpdateCell(cell);
                         cell.setCellType(Cell.CELL_TYPE_FORMULA);
                         cell.setCellFormula(formulaFormatter
                                 .unFormatFormulaValue(value.substring(1),
-                                        spreadsheet.getLocale()));
+                                        spreadsheetLocale));
                         getFormulaEvaluator().notifySetFormula(cell);
                         if (value.startsWith("=HYPERLINK(")
                                 && cell.getCellStyle().getIndex() != hyperlinkStyleIndex) {
@@ -563,9 +566,9 @@ public class CellValueManager implements Serializable {
                     } else {
 
                         Double percentage = SpreadsheetUtil.parsePercentage(
-                                value, spreadsheet.getLocale());
+                                value, spreadsheetLocale);
                         Double numVal = SpreadsheetUtil.parseNumber(cell,
-                                value, spreadsheet.getLocale());
+                                value, spreadsheetLocale);
                         if (value.isEmpty()) {
                             cell.setCellType(Cell.CELL_TYPE_BLANK);
                         } else if (percentage != null) {

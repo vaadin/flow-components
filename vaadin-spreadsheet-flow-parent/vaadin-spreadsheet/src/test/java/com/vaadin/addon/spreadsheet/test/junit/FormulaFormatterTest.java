@@ -1,6 +1,8 @@
 package com.vaadin.addon.spreadsheet.test.junit;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Locale;
 
@@ -102,5 +104,45 @@ public class FormulaFormatterTest {
 
         assertEquals("1000.20 + 2000.10",
                 manager.reFormatFormulaValue("1000.20 + 2000.10", locale));
+    }
+
+    @Test
+    public void cellFormulationValidation_validInputFormulasWithFinnishLocale_formulaValid() {
+        final FormulaFormatter formulaFormatter = new FormulaFormatter();
+        Locale locale = new Locale("fi", "FI");
+
+        assertTrue(formulaFormatter.isValidFormulaFormat("=SUM(C4;E4)", locale));
+        assertTrue(formulaFormatter.isValidFormulaFormat("=1,1 + 2", locale));
+        assertTrue(formulaFormatter.isValidFormulaFormat("=IF(B2=3,2;1;0)",
+                locale));
+        assertTrue(formulaFormatter.isValidFormulaFormat("=1 + 2", locale));
+        assertTrue(formulaFormatter.isValidFormulaFormat("=1000,20 + 2000,10",
+                locale));
+        assertTrue(formulaFormatter.isValidFormulaFormat(
+                "=HYPERLINK(\"http://www.vaadin,com\";  \"ups\")", locale));
+    }
+
+    @Test
+    public void cellFormulationValidation_validInputFormulasWithItalianLocale_formulaValid() {
+        final FormulaFormatter formulaFormatter = new FormulaFormatter();
+        Locale locale = new Locale("it", "IT");
+
+        assertTrue(formulaFormatter.isValidFormulaFormat("=SUM(C4;E4)", locale));
+        assertTrue(formulaFormatter.isValidFormulaFormat("=1,1 + 2", locale));
+        assertTrue(formulaFormatter.isValidFormulaFormat("=IF(B2=3,2;1;0)",
+                locale));
+        assertTrue(formulaFormatter.isValidFormulaFormat("=1 + 2", locale));
+        assertTrue(formulaFormatter.isValidFormulaFormat("=1000,20 + 2000,10",
+                locale));
+        assertTrue(formulaFormatter.isValidFormulaFormat(
+                "=HYPERLINK(\"http://www.vaadin,com\";  \"ups\")", locale));
+    }
+
+    @Test
+    public void cellFormulationValidation_inputWithInvalidDecimalSeparator_formulaNotValid() {
+        final FormulaFormatter formulaFormatter = new FormulaFormatter();
+        Locale locale = new Locale("it", "IT");
+
+        assertFalse(formulaFormatter.isValidFormulaFormat("=1.1 + 1", locale));
     }
 }
