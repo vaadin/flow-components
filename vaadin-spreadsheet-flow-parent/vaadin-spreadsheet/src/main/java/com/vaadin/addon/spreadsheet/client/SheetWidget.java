@@ -76,7 +76,7 @@ import com.vaadin.client.ui.VOverlay;
 
 public class SheetWidget extends Panel {
 
-    private static final int GROUPING_DEFAULT_ROW_HEIGHT_PX = 26;
+    private static final int GROUPING_DEFAULT_ROW_HEIGHT_PX = 17;
     private static final int GROUPING_DEFAULT_COL_WIDTH_PX = 76;
     private static final String SELECTED_COLUMN_HEADER_CLASSNAME = "selected-column-header";
     private static final String SELECTED_ROW_HEADER_CLASSNAME = "selected-row-header";
@@ -5933,26 +5933,24 @@ public class SheetWidget extends Panel {
 
     private void updateGrouping(DivElement groupPane,
             DivElement groupFreezePane, List<GroupingData> data,
-            ArrayList<DivElement> normaHeaders,
+            ArrayList<DivElement> normalHeaders,
             ArrayList<DivElement> freezeHeaders, boolean useCol, int maxGrouping) {
 
         ArrayList<DivElement> headers = new ArrayList<DivElement>();
         if (freezeHeaders != null) {
             headers.addAll(freezeHeaders);
         }
-        headers.addAll(normaHeaders);
+        headers.addAll(normalHeaders);
+
+        /*
+         * Side note: headers only contains the currently visible header
+         * elements. It might begin with nulls, end with nulls, or not be as
+         * long as the actual number of headers in the document. All of those
+         * change during scroll.
+         */
 
         int defaultCellSize = useCol ? GROUPING_DEFAULT_COL_WIDTH_PX
                 : GROUPING_DEFAULT_ROW_HEIGHT_PX;
-
-        // starting pos offset if the other grouping pane is visible
-        int startingOffset;
-        if (useCol) {
-            startingOffset = rowGroupPane.getClientWidth() + getRowHeaderSize();
-        } else {
-            startingOffset = colGroupPane.getClientHeight()
-                    + getColHeaderSize();
-        }
 
         // remove old
         Iterator<Widget> iterator = iterator();
@@ -5965,16 +5963,47 @@ public class SheetWidget extends Panel {
         groupPane.removeAllChildren();
         groupFreezePane.removeAllChildren();
 
+        int START_PADDING = 0;
+        // all markers start with a padding (inversed groups adds padding later)
+        if (useCol && !colGroupInversed) {
+            START_PADDING = 5;
+        } else if (!useCol && !rowGroupInversed) {
+            START_PADDING = 2;
+        }
+
         if (maxGrouping > 0) {
 
-            // all markers start with a padding (reverse adds padding later)
-            if (useCol && !colGroupInversed) {
-                startingOffset += 5;
-            } else if (!useCol && !rowGroupInversed) {
-                startingOffset += 2;
+            /*
+             * Normal (non-inversed) groupings start at the 'startIndex' header
+             * and continue to the 'endIndex' header, ending with an
+             * expand/collapse button. The button is centered on the header
+             * AFTER 'endIndex'. Additionally, the grouping has a small padding
+             * (few pixels) in the start for visual purposes; it doesn't start
+             * exactly between 'startindex-1' and 'startindex', but a couple of
+             * pixels after.
+             * 
+             * Inversed grouping do the same thing, but in reverse; the button
+             * is in the middle of the cell BEFORE 'startIndex', from where the
+             * grouping continues to 'endIndex', stopping a few pixels short of
+             * the next cell.
+             */
+
+            // starting pos offset if the other grouping pane is visible
+            int startingOffset;
+            if (useCol) {
+                startingOffset = rowGroupPane.getClientWidth()
+                        + getRowHeaderSize();
+            } else {
+                startingOffset = colGroupPane.getClientHeight()
+                        + getColHeaderSize();
             }
 
+            // all markers start with a padding (reverse adds padding later)
+            startingOffset += START_PADDING;
+
+            // For each grouping
             for (GroupingData d : data) {
+
                 GroupingWidget marker;
                 if (useCol) {
                     marker = new ColumnGrouping(d.uniqueIndex, actionHandler);
@@ -5984,35 +6013,51 @@ public class SheetWidget extends Panel {
                     marker.setInversed(rowGroupInversed);
                 }
 
+                /* find starting position */
+
+                // offset from left
                 int pos = startingOffset;
 
-                // add up header sizes so far
-                for (int col = 0; col < d.startIndex; col++) {
-                    if (headers.size() > col) {
+                // add up header sizes before start index
+                for (int index = 0; index < d.startIndex; index++) {
+                    if (headers.size() > index) {
 
-                        if (useCol) {
-                            pos += headers.get(col).getClientWidth();
-                        } else {
-                            pos += headers.get(col).getClientHeight();
+                        DivElement header = headers.get(index);
+                        // null header elements are because of escalator: size
+                        // is 0 for these
+                        if (header != null) {
+                            if (useCol) {
+                                pos += header.getClientWidth();
+                            } else {
+                                pos += header.getClientHeight();
+                            }
                         }
                     } else {
+                        // header not loaded yet, use default size as an
+                        // approximation
                         pos += defaultCellSize;
                     }
                 }
 
-                if (useCol && colGroupInversed) {
-                    // start is on the col to the left; reverse half a col
-                    if (d.startIndex == 0) {
+                // inversed markers begin BEFORE the start index, so remove half
+                // of the previous header
+                if (marker.isInversed()) {
+
+                    if (d.startIndex == 0 || headers.size() <= d.startIndex - 1
+                            || headers.get(d.startIndex - 1) == null) {
+
+                        // cell isn't rendered yet or is scrolled outside view.
+                        // Use default.
                         pos -= defaultCellSize / 2;
                     } else {
-                        pos -= headers.get(d.startIndex - 1).getClientWidth() / 2;
-                    }
-                } else if (!useCol && rowGroupInversed) {
-                    if (d.startIndex == 0) {
-                        pos -= defaultCellSize / 2;
-                    } else {
-                        // start is on the row above; reverse half a row
-                        pos -= headers.get(d.startIndex - 1).getClientHeight() / 2;
+
+                        if (useCol) {
+                            pos -= headers.get(d.startIndex - 1)
+                                    .getClientWidth() / 2;
+                        } else {
+                            pos -= headers.get(d.startIndex - 1)
+                                    .getClientHeight() / 2;
+                        }
                     }
                 }
 
@@ -6022,54 +6067,76 @@ public class SheetWidget extends Panel {
                 groupPane.appendChild(marker.getElement());
                 adopt(marker);
 
-                // length
-                double w = 0;
+                /* calculate marker length */
+
+                double length = 0;
+                // add each header between start and end index
                 for (int col = d.startIndex; col <= d.endIndex; col++) {
-                    // check actual length, otherwise use default
-                    if (headers.size() > col) {
+
+                    if (headers.size() > col && headers.get(col) != null) {
 
                         if (useCol) {
-                            w += headers.get(col).getClientWidth();
+                            length += headers.get(col).getClientWidth();
                         } else {
-                            w += headers.get(col).getClientHeight();
+                            length += headers.get(col).getClientHeight();
                         }
                     } else {
-                        w += defaultCellSize;
+                        // header scrolled outside view
+                        length += defaultCellSize;
                     }
                 }
 
-                // center end on on next row/col
+                /* calculate end position; center of next row/col */
 
-                // remove padding from beginning
-                w -= useCol ? 5 : 2;
+                // remove padding from beginning from the width. Also acts as
+                // padding for inverted markers
+                length -= START_PADDING;
 
                 // add half of size of cell before (for inverted) or after (for
                 // normal)
-                if (useCol && colGroupInversed || !useCol && rowGroupInversed) {
+                if (marker.isInversed()) {
 
                     if (d.startIndex == 0) {
-                        w += defaultCellSize / 2d;
+                        // special case; there are no headers before this, use
+                        // default
+                        length += defaultCellSize / 2d;
+                    } else if (headers.size() <= (d.startIndex - 1)
+                            || headers.get(d.startIndex - 1) == null) {
+                        // scrolled outside view
+                        length += defaultCellSize / 2d;
+
                     } else if (useCol) {
-                        w += headers.get(d.startIndex - 1).getClientWidth() / 2d;
+                        length += headers.get(d.startIndex - 1)
+                                .getClientWidth() / 2d;
                     } else {
-                        w += headers.get(d.startIndex - 1).getClientHeight() / 2d;
+                        length += headers.get(d.startIndex - 1)
+                                .getClientHeight() / 2d;
                     }
 
-                } else if (useCol && !colGroupInversed || !useCol
-                        && !rowGroupInversed) {
+                } else {
 
-                    if (useCol) {
-                        w += headers.get(d.endIndex + 1).getClientWidth() / 2d;
+                    if (headers.size() <= (d.endIndex + 1)
+                            || headers.get(d.endIndex + 1) == null) {
+                        // scrolled outside view (or last header)
+                        length += defaultCellSize / 2d;
+
+                    } else if (useCol) {
+                        length += headers.get(d.endIndex + 1).getClientWidth() / 2d;
                     } else {
-                        w += headers.get(d.endIndex + 1).getClientHeight() / 2d;
+                        length += headers.get(d.endIndex + 1).getClientHeight() / 2d;
                     }
 
                 }
-                marker.setWidthPX(w);
+                marker.setWidthPX(length);
 
-                // do we need an element in the freeze pane too?
+                /*
+                 * If we have freeze panes, the marker needs to be present there
+                 * too. Easy fix; clone current marker and add it to freeze
+                 * pane. Positioning, length, etc. are already correct.
+                 */
                 if (freezeHeaders != null
                         && freezeHeaders.size() > d.startIndex) {
+
                     GroupingWidget clone = marker.cloneWidget();
                     groupFreezePane.appendChild(clone.getElement());
                     adopt(clone);
