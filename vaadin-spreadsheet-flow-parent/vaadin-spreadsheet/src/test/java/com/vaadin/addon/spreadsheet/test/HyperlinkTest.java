@@ -2,13 +2,17 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
+import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 import com.vaadin.addon.spreadsheet.test.testutil.PopupHelper;
 import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
@@ -78,6 +82,28 @@ public class HyperlinkTest extends AbstractSpreadsheetTestCase {
         testInternal("A3", "A3");
         assertEquals("Unexpected formula for cell A3, ", "=5000",
                 spreadsheetPage.getFormulaFieldValue());
+    }
+
+    /**
+     * SHEET-86. Test that hyperlinks are immediately updated.
+     */
+    @Test
+    public void hyperlinkState_hyperlinkModified_hyperlinkUpdated()
+            throws IOException {
+        SpreadsheetElement sheet = $(SpreadsheetElement.class).first();
+        SheetCellElement cell = sheet.getCellAt("A9");
+
+        // Enter hyperlink and check that it is followed
+        cell.setValue("=HYPERLINK(\"#Sheet1!B9\")");
+        cell.click();
+        waitUntilSelected("B9");
+
+        // Clear hyperlink and check that no link is followed
+        sheetController.action(Keys.LEFT);
+        sheetController.action(Keys.DELETE);
+        sheetController.action(Keys.DOWN);
+        cell.click();
+        waitUntilSelected("A9");
     }
 
     private void testInternal(String initial, String expected) {

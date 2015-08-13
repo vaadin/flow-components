@@ -469,6 +469,7 @@ public class CellValueManager implements Serializable {
         CellValueCommand command = new CellValueCommand(spreadsheet);
         command.captureCellValues(new CellReference(row - 1, col - 1));
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
+        boolean updateHyperlinks = false;
 
         if (getCustomCellValueHandler() == null
                 || getCustomCellValueHandler().cellValueUpdated(cell,
@@ -501,6 +502,7 @@ public class CellValueManager implements Serializable {
                             }
                             cell.setCellStyle(hyperlinkCellStyle);
                             styler.cellStyleUpdated(cell, true);
+                            updateHyperlinks = true;
                         }
                     } else {
 
@@ -540,6 +542,13 @@ public class CellValueManager implements Serializable {
                     if (!sentCells.remove(key)) {
                         sentFormulaCells.remove(key);
                     }
+
+                    // Old value was hyperlink => needs refresh
+                    if (cell.getCellType() == Cell.CELL_TYPE_FORMULA
+                            && cell.getCellFormula().startsWith("HYPERLINK")) {
+                        updateHyperlinks = true;
+                    }
+
                     if (formulaFormatter.isValidFormulaFormat(value,
                             spreadsheetLocale)) {
                         getFormulaEvaluator().notifyUpdateCell(cell);
@@ -562,6 +571,7 @@ public class CellValueManager implements Serializable {
                             }
                             cell.setCellStyle(hyperlinkCellStyle);
                             styler.cellStyleUpdated(cell, true);
+                            updateHyperlinks = true;
                         }
                     } else {
 
@@ -642,6 +652,10 @@ public class CellValueManager implements Serializable {
         }
 
         spreadsheet.updateMarkedCells();
+
+        if (updateHyperlinks) {
+            spreadsheet.loadHyperLinks();
+        }
     }
 
     /**
@@ -729,6 +743,7 @@ public class CellValueManager implements Serializable {
         updateMarkedCellValues();
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
         fireCellValueChangeEvent(spreadsheet.getSelectedCellReferences());
+        spreadsheet.loadHyperLinks();
     }
 
     /**

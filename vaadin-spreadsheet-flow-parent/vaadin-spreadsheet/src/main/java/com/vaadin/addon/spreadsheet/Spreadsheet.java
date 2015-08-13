@@ -2817,7 +2817,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
     }
 
-    private void loadHyperLinks() {
+    void loadHyperLinks() {
         if (getState(false).hyperlinksTooltips == null) {
             getState(false).hyperlinksTooltips = new HashMap<String, String>();
         } else {
