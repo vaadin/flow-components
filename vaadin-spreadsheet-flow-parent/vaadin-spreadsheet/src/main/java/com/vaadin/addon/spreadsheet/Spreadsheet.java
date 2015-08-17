@@ -1407,6 +1407,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         // Update the cell comments as well to show them instantly after adding
         // them
         loadCellComments();
+
+        // update custom components, editors
+        reloadVisibleCellContents();
     }
 
     /**
@@ -2706,6 +2709,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         loadTables();
         loadPopupButtons();
         valueManager.loadCellData(firstRow, firstColumn, lastRow, lastColumn);
+
+        loadCustomEditorOnSelectedCell();
     }
 
     void onLinkCellClick(int row, int column) {

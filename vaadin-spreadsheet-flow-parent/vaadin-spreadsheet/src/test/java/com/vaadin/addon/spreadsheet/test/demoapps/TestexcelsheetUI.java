@@ -32,6 +32,7 @@ import com.vaadin.addon.spreadsheet.test.fixtures.PopupButtonFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.RowToggleFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.SheetsFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.ShiftFixture;
+import com.vaadin.addon.spreadsheet.test.fixtures.SimpleCustomEditorFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.SpreadsheetFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.SpreadsheetFixtureFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.StylesFixture;
@@ -99,6 +100,8 @@ public class TestexcelsheetUI extends UI {
                     TestexcelsheetUI.this)));
             put("POPUPBUTTON",
                     new EagerFixtureFactory(new PopupButtonFixture()));
+            put("SIMPLE_CUSTOM_EDITOR", new ClassFixtureFactory(
+                    SimpleCustomEditorFixture.class));
         }
     };
 
