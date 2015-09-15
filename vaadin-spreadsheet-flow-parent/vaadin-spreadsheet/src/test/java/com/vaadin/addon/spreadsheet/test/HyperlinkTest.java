@@ -16,7 +16,6 @@ import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 import com.vaadin.addon.spreadsheet.test.testutil.PopupHelper;
 import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
-import com.vaadin.testbench.parallel.Browser;
 
 /**
  * Tests for hyperlinks.
@@ -81,6 +80,32 @@ public class HyperlinkTest extends AbstractSpreadsheetTestCase {
         // ensure correct sheet
         testInternal("A3", "A3");
         assertEquals("Unexpected formula for cell A3, ", "=5000",
+                spreadsheetPage.getFormulaFieldValue());
+    }
+
+    @Test
+    public void hyperlink_sheetWithNumericSheetName_internalFromFileNameFormulaMovesToCorrectSheetAndCell() {
+        SpreadsheetPage spreadsheetPage = headerPage.loadFile(
+                "hyper_links.xlsx", this);
+        testBench(driver).waitForVaadin();
+        // ensure hyperlink switches to correct cell
+        testInternal("B9", "B3");
+        // ensure correct sheet
+        testInternal("B3", "B3");
+        assertEquals("Unexpected formula for cell B3, ", "300",
+                spreadsheetPage.getFormulaFieldValue());
+    }
+
+    @Test
+    public void hyperlink_sheetWithSpacesInSheetName_internalFromFileNameFormulaMovesToCorrectSheetAndCell() {
+        SpreadsheetPage spreadsheetPage = headerPage.loadFile(
+                "hyper_links.xlsx", this);
+        testBench(driver).waitForVaadin();
+        // ensure hyperlink switches to correct cell
+        testInternal("C9", "C3");
+        // ensure correct sheet
+        testInternal("C3", "C3");
+        assertEquals("Unexpected formula for cell C3, ", "125",
                 spreadsheetPage.getFormulaFieldValue());
     }
 
@@ -152,11 +177,9 @@ public class HyperlinkTest extends AbstractSpreadsheetTestCase {
 
     @Override
     public List<DesiredCapabilities> getBrowsersToTest() {
-        List<DesiredCapabilities> result = super.getBrowsersToTest();
         // Fails in phantomJS, probably because of being considered a touch
         // device. Enable PhantomJS after (SHEET-54)
-        result.remove(Browser.PHANTOMJS.getDesiredCapabilities());
-        return result;
+        return getBrowsersExcludingPhantomJS();
     }
 
 }

@@ -82,8 +82,7 @@ public class DefaultHyperlinkCellClickHandler implements
             String currentSheetName = cell.getSheet().getSheetName();
             String sheetName = address.substring(0, address.indexOf("!"));
             if (!currentSheetName.equals(sheetName)) {
-                int sheetPOIIndex = cell.getSheet().getWorkbook()
-                        .getSheetIndex(sheetName);
+                int sheetPOIIndex = getSheetIndex(cell, sheetName);
                 spreadsheet.setActiveSheetWithPOIIndex(sheetPOIIndex);
             }
             spreadsheet.initialSheetSelection = address;
@@ -94,6 +93,17 @@ public class DefaultHyperlinkCellClickHandler implements
             spreadsheet.getCellSelectionManager().onSheetAddressChanged(
                     address, false);
         }
+    }
+
+    private int getSheetIndex(Cell cell, String sheetName) {
+        // if name contains only numbers or contains spaces it's enclosed in
+        // single quotes
+        if (sheetName.charAt(0) == '\''
+                && sheetName.charAt(sheetName.length() - 1) == '\'') {
+            sheetName = sheetName.substring(1, sheetName.length() - 1);
+        }
+        return cell.getSheet().getWorkbook().getSheetIndex(sheetName);
+
     }
 
     /**
