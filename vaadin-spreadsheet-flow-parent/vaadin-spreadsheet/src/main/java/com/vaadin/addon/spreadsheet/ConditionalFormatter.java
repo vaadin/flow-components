@@ -662,6 +662,10 @@ public class ConditionalFormatter implements Serializable {
             int deltaColumn, int deltaRow) {
         String booleanFormula = rule.getFormula1();
 
+        if (booleanFormula == null || booleanFormula.isEmpty()) {
+            return false;
+        }
+
         // Parse formula and use deltas to get relative cell references to work
         // (#18702)
         XSSFEvaluationWorkbook workbookWrapper = XSSFEvaluationWorkbook
@@ -685,10 +689,6 @@ public class ConditionalFormatter implements Serializable {
         // booleanFormula has now its relative rows and cols updated
         booleanFormula = FormulaRenderer.toFormulaString(workbookWrapper, ptgs);
 
-        if (booleanFormula == null || booleanFormula.isEmpty()) {
-            return false;
-        }
-
         if (rule instanceof XSSFConditionalFormattingRule) {
 
             /*
@@ -703,10 +703,12 @@ public class ConditionalFormatter implements Serializable {
             int tempRowIndex = Short.MAX_VALUE;
             int tempColIndex = 255;
             Sheet sheet = spreadsheet.getActiveSheet();
+            boolean tempRowCreated = false;
 
             Row row = sheet.getRow(tempRowIndex);
             if (row == null) {
                 row = sheet.createRow(tempRowIndex);
+                tempRowCreated = true;
             }
             Cell cell = row.getCell(tempColIndex);
             if (cell == null) {
@@ -722,6 +724,10 @@ public class ConditionalFormatter implements Serializable {
 
             row.removeCell(cell);
 
+            if (tempRowCreated) {
+                // Remove row after use because #18705
+                sheet.removeRow(row);
+            }
             return match;
 
         } else {
