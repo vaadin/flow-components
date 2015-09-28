@@ -2,6 +2,8 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
@@ -53,5 +55,15 @@ public class ConditionalFormatterTBTest extends AbstractSpreadsheetTestCase {
         // after formula is updated the background is red
         assertEquals("rgba(255, 199, 206, 1)",
                 targetCell.getCssValue("background-color"));
+    }
+
+    /**
+     * Ticket #18702
+     */
+    @Test
+    public void conditionalFormatting_formulaWithRelativeRowCol_formattingApplied()
+            throws IOException {
+        headerPage.loadFile("test_conditional_formatting.xlsx", this);
+        compareScreen("relative_formula");
     }
 }

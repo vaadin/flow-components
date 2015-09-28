@@ -32,6 +32,11 @@ import java.util.logging.Logger;
 
 import org.apache.poi.hssf.usermodel.HSSFSheetConditionalFormatting;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.formula.FormulaParser;
+import org.apache.poi.ss.formula.FormulaRenderer;
+import org.apache.poi.ss.formula.FormulaType;
+import org.apache.poi.ss.formula.ptg.Ptg;
+import org.apache.poi.ss.formula.ptg.RefPtgBase;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.ComparisonOperator;
@@ -48,6 +53,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFBorderFormatting;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormatting;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
+import org.apache.poi.xssf.usermodel.XSSFEvaluationWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFontFormatting;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
@@ -529,14 +535,17 @@ public class ConditionalFormatter implements Serializable {
      */
     protected void runCellMatcher(ConditionalFormatting cf,
             ConditionalFormattingRule rule, int classNameIndex) {
-
+        final int firstColumn = cf.getFormattingRanges()[0].getFirstColumn();
+        final int firstRow = cf.getFormattingRanges()[0].getFirstRow();
         for (CellRangeAddress cra : cf.getFormattingRanges()) {
 
             for (int row = cra.getFirstRow(); row <= cra.getLastRow(); row++) {
                 for (int col = cra.getFirstColumn(); col <= cra.getLastColumn(); col++) {
 
                     Cell cell = spreadsheet.getCell(row, col);
-                    if (cell != null && matches(cell, rule)) {
+                    if (cell != null
+                            && matches(cell, rule, col - firstColumn, row
+                                    - firstRow)) {
                         Set<Integer> list = cellToIndex.get(SpreadsheetUtil
                                 .toKey(cell));
                         if (list == null) {
@@ -608,8 +617,8 @@ public class ConditionalFormatter implements Serializable {
      * @return Whether the given rule evaluates to <code>true</code> for the
      *         given cell.
      */
-    protected boolean matches(Cell cell, ConditionalFormattingRule rule) {
-
+    protected boolean matches(Cell cell, ConditionalFormattingRule rule,
+            int deltaColumn, int deltaRow) {
         /*
          * Formula type is the default for most rules in modern excel files.
          * 
@@ -631,10 +640,10 @@ public class ConditionalFormatter implements Serializable {
         case ConditionalFormattingRule.CONDITION_TYPE_CELL_VALUE_IS:
             return matchesValue(cell, rule);
         case ConditionalFormattingRule.CONDITION_TYPE_FORMULA:
-            return matchesFormula(rule);
+            return matchesFormula(rule, deltaColumn, deltaRow);
 
         default:
-            return matchesFormula(rule);
+            return matchesFormula(rule, deltaColumn, deltaRow);
         }
     }
 
@@ -649,8 +658,32 @@ public class ConditionalFormatter implements Serializable {
      * @return True if the formula in the given rule is of boolean formula type
      *         and evaluates to <code>true</code>, false otherwise
      */
-    protected boolean matchesFormula(ConditionalFormattingRule rule) {
+    protected boolean matchesFormula(ConditionalFormattingRule rule,
+            int deltaColumn, int deltaRow) {
         String booleanFormula = rule.getFormula1();
+
+        // Parse formula and use deltas to get relative cell references to work
+        // (#18702)
+        XSSFEvaluationWorkbook workbookWrapper = XSSFEvaluationWorkbook
+                .create((XSSFWorkbook) spreadsheet.getWorkbook());
+        Ptg[] ptgs = FormulaParser.parse(booleanFormula, workbookWrapper,
+                FormulaType.CELL, spreadsheet.getActiveSheetIndex());
+        for (Ptg ptg : ptgs) {
+            // base class for cell reference "things"
+            if (ptg instanceof RefPtgBase) {
+                RefPtgBase ref = (RefPtgBase) ptg;
+                // re-calculate cell references
+                if (ref.isColRelative()) {
+                    ref.setColumn(ref.getColumn() + deltaColumn);
+                }
+                if (ref.isRowRelative()) {
+                    ref.setRow(ref.getRow() + deltaRow);
+                }
+            }
+        }
+
+        // booleanFormula has now its relative rows and cols updated
+        booleanFormula = FormulaRenderer.toFormulaString(workbookWrapper, ptgs);
 
         if (booleanFormula == null || booleanFormula.isEmpty()) {
             return false;
