@@ -20,6 +20,7 @@ package com.vaadin.addon.spreadsheet.client;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Overflow;
 
 public class Cell {
@@ -139,9 +140,18 @@ public class Cell {
             }
             // columnWidth is added after calculating the overflowing width
             width += columnWidth;
-            element.setInnerHTML("<div style=\"pointer-events:none;width:"
-                    + width + "px;overflow:hidden;text-overflow:ellipsis;\">"
-                    + element.getInnerText() + "</div>");
+
+            // create element to contain the text, so we can apply overflow
+            // rules
+            DivElement overflowDiv = Document.get().createDivElement();
+            overflowDiv.getStyle().setProperty("pointerEvents", "none");
+            overflowDiv.getStyle().setWidth(width, Style.Unit.PX);
+            overflowDiv.getStyle().setOverflow(Overflow.HIDDEN);
+            overflowDiv.getStyle().setTextOverflow(Style.TextOverflow.ELLIPSIS);
+            overflowDiv.setInnerText(element.getInnerText());
+            element.setInnerText(null);
+            element.appendChild(overflowDiv);
+
             overflowing = true;
         } else {
             overflowing = false;
@@ -243,7 +253,6 @@ public class Cell {
     }
 
     /**
-     *
      * @param sizes
      * @param beginIndex
      *            1-based inclusive
