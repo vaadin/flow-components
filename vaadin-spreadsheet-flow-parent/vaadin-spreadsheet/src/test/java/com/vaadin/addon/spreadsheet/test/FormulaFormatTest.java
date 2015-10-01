@@ -32,7 +32,15 @@ public class FormulaFormatTest extends AbstractSpreadsheetTestCase {
         waitUntil(new ExpectedCondition<Object>() {
             @Override
             public Object apply(WebDriver webDriver) {
-                return "=1.1+1".equals(a1.getValue());
+                return "#VALUE!".equals(a1.getValue());
+            }
+        });
+
+        a1.setValue("=a+1");
+        waitUntil(new ExpectedCondition<Object>() {
+            @Override
+            public Object apply(WebDriver webDriver) {
+                return "#VALUE!".equals(a1.getValue());
             }
         });
 
@@ -43,5 +51,77 @@ public class FormulaFormatTest extends AbstractSpreadsheetTestCase {
                 return "2,123".equals(a1.getValue());
             }
         });
+    }
+
+    @Test
+    public void formulaLocaleFormatting_englishLocale_formulaHandledCorrectly()
+            throws InterruptedException {
+        setLocale(Locale.ENGLISH);
+        headerPage.createNewSpreadsheet();
+
+        final SheetCellElement a1 = $(SpreadsheetElement.class).first()
+                .getCellAt("A1");
+
+        a1.setValue("=1.1+1");
+        waitUntil(new ExpectedCondition<Object>() {
+            @Override
+            public Object apply(WebDriver webDriver) {
+                return "2.1".equals(a1.getValue());
+            }
+        });
+
+        a1.setValue("=1,1+1");
+        waitUntil(new ExpectedCondition<Object>() {
+            @Override
+            public Object apply(WebDriver webDriver) {
+                return "#VALUE!".equals(a1.getValue());
+            }
+        });
+
+        a1.setValue("=a+1");
+        waitUntil(new ExpectedCondition<Object>() {
+            @Override
+            public Object apply(WebDriver webDriver) {
+                return "#VALUE!".equals(a1.getValue());
+            }
+        });
+
+        a1.setValue("=1.123+1");
+        waitUntil(new ExpectedCondition<Object>() {
+            @Override
+            public Object apply(WebDriver webDriver) {
+                return "2.123".equals(a1.getValue());
+            }
+        });
+    }
+
+    @Test
+    public void formulaLocaleFormatting_changeLocale_formulaHandledCorrectly()
+            throws InterruptedException {
+
+        setLocale(Locale.ITALY);
+        headerPage.createNewSpreadsheet();
+
+        final SheetCellElement a1 = $(SpreadsheetElement.class).first()
+                .getCellAt("A1");
+
+        a1.setValue("=1.1+1");
+        waitUntil(new ExpectedCondition<Object>() {
+            @Override
+            public Object apply(WebDriver webDriver) {
+                return "#VALUE!".equals(a1.getValue());
+            }
+        });
+
+        setLocale(Locale.ENGLISH);
+
+        a1.setValue("=1.1+1");
+        waitUntil(new ExpectedCondition<Object>() {
+            @Override
+            public Object apply(WebDriver webDriver) {
+                return "2.1".equals(a1.getValue());
+            }
+        });
+
     }
 }

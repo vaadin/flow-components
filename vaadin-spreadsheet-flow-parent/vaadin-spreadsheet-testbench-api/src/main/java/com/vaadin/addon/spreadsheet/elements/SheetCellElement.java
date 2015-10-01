@@ -66,7 +66,10 @@ public class SheetCellElement extends AbstractElement {
      */
     public boolean isNormalCell() {
         List<WebElement> children = findElements(By.xpath(".//*"));
-        return children.isEmpty();
+        // might have one inner div without class if content is overflowing
+        return children.isEmpty()
+                || (children.size() == 1 && children.get(0)
+                        .getAttribute("class").isEmpty());
     }
 
     /**

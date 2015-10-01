@@ -251,6 +251,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     private HashSet<SpreadsheetTable> tables;
 
+    private final Map<Integer, HashSet<String>> invalidFormulas = new HashMap<Integer, HashSet<String>>();
+
     private String srcUri;
 
     private boolean defaultColWidthSet, defaultRowHeightSet;
@@ -2358,7 +2360,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         valueManager.clearCachedContent();
         selectionManager.clear();
         historyManager.clear();
-
+        invalidFormulas.clear();
         for (SheetImageWrapper image : sheetImages) {
             setResource(image.getResourceKey(), null);
         }
@@ -4635,6 +4637,33 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
 
         SpreadsheetFactory.reloadSpreadsheetComponent(this, workbook);
+    }
+
+    void markInvalidFormula(int col, int row) {
+        int activeSheetIndex = workbook.getActiveSheetIndex();
+        if (!invalidFormulas.containsKey(activeSheetIndex)) {
+            invalidFormulas.put(activeSheetIndex, new HashSet<String>());
+        }
+        invalidFormulas.get(activeSheetIndex).add(
+                SpreadsheetUtil.toKey(col, row));
+
+    }
+
+    boolean isMarkedAsInvalidFormula(int col, int row) {
+        int activeSheetIndex = workbook.getActiveSheetIndex();
+        if (invalidFormulas.containsKey(activeSheetIndex)) {
+            return invalidFormulas.get(activeSheetIndex).contains(
+                    SpreadsheetUtil.toKey(col, row));
+        }
+        return false;
+    }
+
+    void removeInvalidFormulaMark(int col, int row) {
+        int activeSheetIndex = workbook.getActiveSheetIndex();
+        if (invalidFormulas.containsKey(activeSheetIndex)) {
+            invalidFormulas.get(activeSheetIndex).remove(
+                    SpreadsheetUtil.toKey(col, row));
+        }
     }
 
 }

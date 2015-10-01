@@ -107,6 +107,10 @@ public class FormulaFormatter implements Serializable {
         return formulaValue;
     }
 
+    public boolean isFormulaFormat(String value) {
+        return value.startsWith("=") || value.startsWith("+");
+    }
+
     /**
      * Rudimentary checks if the given string could be a valid formula
      *
@@ -117,7 +121,7 @@ public class FormulaFormatter implements Serializable {
      * @return true if the formula could be valid
      */
     public boolean isValidFormulaFormat(String value, Locale locale) {
-        if (value.startsWith("=") || value.startsWith("+")) {
+        if (isFormulaFormat(value)) {
             String formulaValue = value.substring(1);
 
             final List<FormulaToken> formulaTokens = tokenizeFormula(

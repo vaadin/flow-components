@@ -189,6 +189,19 @@ public class CellValueManager implements Serializable {
                     cellData.formulaValue = formulaFormatter
                             .reFormatFormulaValue(cell.getCellFormula(),
                                     spreadsheet.getLocale());
+                    try {
+                        formatter.formatCellValue(cell, getFormulaEvaluator());
+                    } catch (RuntimeException rte) {
+                        // Apache POI throws RuntimeExceptions for an invalid
+                        // formula from POI model
+                        String formulaValue = cell.getCellFormula();
+                        cell.setCellType(Cell.CELL_TYPE_STRING);
+                        cell.setCellValue(formulaValue);
+                        spreadsheet.markInvalidFormula(
+                                cell.getColumnIndex() + 1,
+                                cell.getRowIndex() + 1);
+                    }
+
                 }
             }
 
@@ -205,6 +218,11 @@ public class CellValueManager implements Serializable {
                     formattedCellValue = formattedCellValue.replaceAll(
                             "^-(?=0(.0*)?$)", "");
                 }
+            }
+            if (spreadsheet
+                    .isMarkedAsInvalidFormula(cellData.col, cellData.row)) {
+                cellData.formulaValue = cell.getStringCellValue();
+                formattedCellValue = "#VALUE!";
             }
 
             if (formattedCellValue != null && !formattedCellValue.isEmpty()
@@ -374,6 +392,8 @@ public class CellValueManager implements Serializable {
      */
     protected void cellUpdated(Cell cell) {
         getFormulaEvaluator().notifyUpdateCell(cell);
+        spreadsheet.removeInvalidFormulaMark(cell.getColumnIndex() + 1,
+                cell.getRowIndex() + 1);
         markCellForUpdate(cell);
     }
 
@@ -395,6 +415,8 @@ public class CellValueManager implements Serializable {
      */
     protected void cellDeleted(Cell cell) {
         getFormulaEvaluator().notifyDeleteCell(cell);
+        spreadsheet.removeInvalidFormulaMark(cell.getColumnIndex() + 1,
+                cell.getRowIndex() + 1);
         markCellForRemove(cell);
     }
 
@@ -464,7 +486,7 @@ public class CellValueManager implements Serializable {
         }
         Cell cell = r.getCell(col - 1);
         String formattedCellValue = null;
-        int cellType = -1;
+        int oldCellType = -1;
         // capture cell value to history
         CellValueCommand command = new CellValueCommand(spreadsheet);
         command.captureCellValues(new CellReference(row - 1, col - 1));
@@ -482,63 +504,12 @@ public class CellValueManager implements Serializable {
                         .getSpreadsheetStyleFactory();
                 final Locale spreadsheetLocale = spreadsheet.getLocale();
                 if (cell == null) {
-                    if (formulaFormatter.isValidFormulaFormat(value,
-                            spreadsheetLocale)) {
-                        cell = r.createCell(col - 1, Cell.CELL_TYPE_FORMULA);
-                        cell.setCellFormula(formulaFormatter
-                                .unFormatFormulaValue(value.substring(1),
-                                        spreadsheetLocale));
-                        getFormulaEvaluator().notifySetFormula(cell);
-                        if (value.startsWith("=HYPERLINK(")) {
-                            // set the cell style to link cell
-                            CellStyle hyperlinkCellStyle;
-                            if (hyperlinkStyleIndex == -1) {
-                                hyperlinkCellStyle = styler
-                                        .createHyperlinkCellStyle();
-                                hyperlinkStyleIndex = -1;
-                            } else {
-                                hyperlinkCellStyle = workbook
-                                        .getCellStyleAt(hyperlinkStyleIndex);
-                            }
-                            cell.setCellStyle(hyperlinkCellStyle);
-                            styler.cellStyleUpdated(cell, true);
-                            updateHyperlinks = true;
-                        }
-                    } else {
-
-                        Double percentage = SpreadsheetUtil.parsePercentage(
-                                value, spreadsheetLocale);
-                        Double numVal = SpreadsheetUtil.parseNumber(value,
-                                spreadsheetLocale);
-
-                        if (value.isEmpty()) {
-                            cell = r.createCell(col - 1); // BLANK
-
-                        } else if (percentage != null) {
-                            cell = r.createCell(col - 1, Cell.CELL_TYPE_NUMERIC);
-                            CellStyle style = workbook.createCellStyle();
-                            style.setDataFormat(workbook
-                                    .createDataFormat()
-                                    .getFormat(
-                                            spreadsheet
-                                                    .getDefaultPercentageFormat()));
-                            cell.setCellStyle(style);
-                            styler.cellStyleUpdated(cell, true);
-                            cell.setCellValue(percentage);
-
-                        } else if (numVal != null) {
-                            cell = r.createCell(col - 1, Cell.CELL_TYPE_NUMERIC);
-                            cell.setCellValue(numVal);
-                        } else {
-                            cell = r.createCell(col - 1, Cell.CELL_TYPE_STRING);
-                            cell.setCellValue(value);
-                        }
-                        getFormulaEvaluator().notifyUpdateCell(cell);
-                    }
-                } else { // modify existing cell, possibly switch type
+                    cell = r.createCell(col - 1);
+                } else {
+                    // modify existing cell, possibly switch type
                     formattedCellValue = getFormattedCellValue(cell);
                     final String key = SpreadsheetUtil.toKey(col, row);
-                    cellType = cell.getCellType();
+                    oldCellType = cell.getCellType();
                     if (!sentCells.remove(key)) {
                         sentFormulaCells.remove(key);
                     }
@@ -548,9 +519,11 @@ public class CellValueManager implements Serializable {
                             && cell.getCellFormula().startsWith("HYPERLINK")) {
                         updateHyperlinks = true;
                     }
-
+                }
+                if (formulaFormatter.isFormulaFormat(value)) {
                     if (formulaFormatter.isValidFormulaFormat(value,
                             spreadsheetLocale)) {
+                        spreadsheet.removeInvalidFormulaMark(col, row);
                         getFormulaEvaluator().notifyUpdateCell(cell);
                         cell.setCellType(Cell.CELL_TYPE_FORMULA);
                         cell.setCellFormula(formulaFormatter
@@ -574,43 +547,49 @@ public class CellValueManager implements Serializable {
                             updateHyperlinks = true;
                         }
                     } else {
-
-                        Double percentage = SpreadsheetUtil.parsePercentage(
-                                value, spreadsheetLocale);
-                        Double numVal = SpreadsheetUtil.parseNumber(cell,
-                                value, spreadsheetLocale);
-                        if (value.isEmpty()) {
-                            cell.setCellType(Cell.CELL_TYPE_BLANK);
-                        } else if (percentage != null) {
-                            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
-                            CellStyle cs = cell.getCellStyle();
-                            if (cs == null) {
-                                cs = workbook.createCellStyle();
-                                cell.setCellStyle(cs);
-                            }
-
-                            if (cs.getDataFormatString() != null
-                                    && !cs.getDataFormatString().contains("%")) {
-                                cs.setDataFormat(workbook
-                                        .createDataFormat()
-                                        .getFormat(
-                                                spreadsheet
-                                                        .getDefaultPercentageFormat()));
-                                styler.cellStyleUpdated(cell, true);
-                            }
-                            cell.setCellValue(percentage);
-                        } else if (numVal != null) {
-                            cell.setCellType(Cell.CELL_TYPE_NUMERIC);
-                            cell.setCellValue(numVal);
-                        } else if (cellType == Cell.CELL_TYPE_BOOLEAN) {
-                            cell.setCellValue(Boolean.parseBoolean(value));
-                        } else {
-                            cell.setCellType(Cell.CELL_TYPE_STRING);
-                            cell.setCellValue(value);
-                        }
-                        getFormulaEvaluator().notifyUpdateCell(cell);
+                        // it's formula but invalid
+                        cell.setCellType(Cell.CELL_TYPE_STRING);
+                        cell.setCellValue(value.substring(1));
+                        spreadsheet.markInvalidFormula(col, row);
                     }
+                } else {
+                    spreadsheet.removeInvalidFormulaMark(col, row);
+                    Double percentage = SpreadsheetUtil.parsePercentage(value,
+                            spreadsheetLocale);
+                    Double numVal = SpreadsheetUtil.parseNumber(cell, value,
+                            spreadsheetLocale);
+                    if (value.isEmpty()) {
+                        cell.setCellType(Cell.CELL_TYPE_BLANK);
+                    } else if (percentage != null) {
+                        cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+                        CellStyle cs = cell.getCellStyle();
+                        if (cs == null) {
+                            cs = workbook.createCellStyle();
+                            cell.setCellStyle(cs);
+                        }
+
+                        if (cs.getDataFormatString() != null
+                                && !cs.getDataFormatString().contains("%")) {
+                            cs.setDataFormat(workbook
+                                    .createDataFormat()
+                                    .getFormat(
+                                            spreadsheet
+                                                    .getDefaultPercentageFormat()));
+                            styler.cellStyleUpdated(cell, true);
+                        }
+                        cell.setCellValue(percentage);
+                    } else if (numVal != null) {
+                        cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+                        cell.setCellValue(numVal);
+                    } else if (oldCellType == Cell.CELL_TYPE_BOOLEAN) {
+                        cell.setCellValue(Boolean.parseBoolean(value));
+                    } else {
+                        cell.setCellType(Cell.CELL_TYPE_STRING);
+                        cell.setCellValue(value);
+                    }
+                    getFormulaEvaluator().notifyUpdateCell(cell);
                 }
+
             } catch (FormulaParseException fpe) {
                 try {
                     exception = fpe;
@@ -624,8 +603,9 @@ public class CellValueManager implements Serializable {
                      * Instead, just store it as the value. Clearing the formula
                      * makes sure the value is displayed as-is.
                      */
-                    cell.setCellFormula(null);
-                    cell.setCellValue(value);
+                    cell.setCellType(Cell.CELL_TYPE_STRING);
+                    cell.setCellValue(value.substring(1));
+                    spreadsheet.markInvalidFormula(col, row);
                 }
             } catch (NumberFormatException nfe) {
                 exception = nfe;
@@ -639,7 +619,7 @@ public class CellValueManager implements Serializable {
                 if (formattedCellValue == null
                         || !formattedCellValue
                                 .equals(getFormattedCellValue(cell))
-                        || cellType != cell.getCellType()) {
+                        || oldCellType != cell.getCellType()) {
                     fireCellValueChangeEvent(cell);
                 }
             }
