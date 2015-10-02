@@ -1,0 +1,158 @@
+---
+title: Overview
+order: 1
+layout: page
+---
+
+[[spreadsheet.overview]]
+= Overview
+
+Spreadsheet applications have been the sonic screwdriver of business computation
+and data collection for decades. In recent years, spreadsheet web services have
+become popular with cloud-based services that offer better collaboration,
+require no installation, and some are even free to use. However, both desktop
+and third-party cloud-based services are difficult to integrate well with web
+applications. Being a Vaadin UI component, Vaadin Spreadsheet allows complete
+integration with Vaadin applications and further with the overall system. The
+ability to work on Excel spreadsheets allows desktop interoperability and
+integration with document management.
+
+By eliminating the dependency on third-party cloud-based services, Vaadin
+Spreadsheet also gives control over the privacy of documents. Growing security
+concerns over cloud-based information storage have increased privacy
+requirements, with lowering trust in global third-party providers. Vaadin
+applications can run on private application servers, and also in a cloud if
+necessary, allowing you to prioritize between privacy and local and global
+availability.
+
+[[figure.spreadsheet.overview.demo]]
+.Demo for Vaadin Spreadsheet
+image::img/spreadsheet-demo.png[]
+
+Vaadin Spreadsheet is a UI component that you use much like any other component.
+It has full size by default, to use all the available space in the containing
+layout. You can directly modify the cell data in the active worksheet by
+entering textual and numerical values, as well as using Excel formulas for
+spreadsheet calculations.
+
+
+----
+Spreadsheet sheet = new Spreadsheet();
+sheet.setWidth("400px"); // Full size by default
+sheet.setHeight("250px");
+
+// Put customary greeting in a cell
+sheet.createCell(0, 0, "Hello, world");
+
+// Have some numerical data
+sheet.createCell(1, 0, 6);
+sheet.createCell(1, 1, 7);
+
+// Perform a spreadsheet calculation
+sheet.createCell(1, 2, ""); // Set a dummy value
+sheet.getCell(1, 2).setCellFormula("A2*B2");
+
+// Resize a column to fit the cell data
+sheet.autofitColumn(0);
+
+layout.addComponent(sheet);
+layout.setSizeFull(); // Typically
+----
+
+The result is shown in <<figure.spreadsheet.overview.example>>.
+
+[[figure.spreadsheet.overview.example]]
+.Simple Spreadsheet
+image::img/spreadsheet-basic.png[]
+
+Cell values and formulas can be set, read, and styled through the server-side
+API, so you can easily implement custom editing features through menus or
+toolbars.
+
+Full integration with a Vaadin application is reached through the server-side
+access to the spreadsheet data as well as visual styling. Changes in cell values
+can be handled in the Vaadin application and you can use almost any Vaadin
+components within a spreadsheet. Field components can be bound to cell data.
+
+Vaadin Spreadsheet uses Apache POI to work on Microsoft Excel documents. You can
+access the Apache POI data model to perform low-level tasks, although you should
+note that if you make modifications to the data model, you have the
+responsibility to notify the spreadsheet to update itself.
+
+[[spreadsheet.overview.features]]
+== Features
+
+The basic features of Vaadin Spreadsheet are as follows:
+
+* Support for touch devices
+* Excel XLSX files, limited support for XLS files
+* Support for Excel formulas
+* Excel-like editing with keyboard support
+* Lazy loading of cell data from server to browser in large spreadsheets
+* Protected cells and sheets
+
+The following features support integration with Vaadin Framework and add-ons:
+
+* Handle changes in cell data
+* Vaadin components in spreadsheet cells
+* Support for Vaadin declarative format
+* Vaadin TestBench element API for UI testing
+
+
+[[spreadsheet.overview.demo]]
+== Spreadsheet Demo
+
+The Vaadin Spreadsheet Demo showcases the most important Spreadsheet features.
+You can try it out at http://demo.vaadin.com/spreadsheet.
+
+ifdef::web[]
+See
+<<dummy/../../spreadsheet/spreadsheet-installation#spreadsheet.installation.demo,"Importing
+the Demo">> for instructions for importing the project in
+Eclipse.
+endif::web[]
+
+
+ifdef::web[]
+The link:https://github.com/vaadin/spreadsheet-demo[source code is available and
+browseable at
+Github].
+endif::web[]
+
+
+[[spreadsheet.overview.limitations]]
+== Requirements
+
+* Vaadin 7.4 or later
+* Same browser requirements as Vaadin Framework, except Internet Explorer 9 or later is required
+
+
+[[spreadsheet.overview.limitations]]
+== Limitations
+
+Vaadin Spreadsheet 1.0 has the following limitations:
+
+* No provided toolbars, menus, or other controls for formatting cells
+* Vaadin Charts component can not be used inside Spreadsheet
+* Limited support for the older XSL format
+* link:http://poi.apache.org/spreadsheet/limitations.html[Limitations of Apache POI]
+
+
+[[spreadsheet.overview.license]]
+== Licensing
+
+Vaadin Spreadsheet is a commercial product licensed under the CVAL license (
+link:https://vaadin.com/license/cval-3[Commercial Vaadin Add-On License]).
+Development licenses need to be purchased for each developer working with Vaadin
+Spreadsheet, regardless of whether the resulting applications using it are
+deployed publicly or privately in an intranet.
+
+A link:https://vaadin.com/pro/[Vaadin Pro Tools] subscription includes a
+subscription license for Vaadin Spreadsheet. Perpetual licenses can be purchased
+from the link:https://vaadin.com/spreadsheet[Vaadin Spreadsheet product page],
+where you can also find the licensing details. For evaluation purposes, a free
+trial key allows using Vaadin Spreadsheet for a 30-day evaluation period.
+
+
+
+

@@ -1,0 +1,63 @@
+---
+title: Spreadsheet Configuration
+order: 4
+layout: page
+---
+
+[[spreadsheet.configuration]]
+= Spreadsheet Configuration
+
+Spreadsheet has a number of configuration parameters and sections that affect
+the overall appearance and function of the entire spreadsheet. The most
+important ones are mentioned in the following and further configuration is
+provided through the Apache POI API.
+
+[[spreadsheet.configuration.elements]]
+== Spreadsheet Elements
+
+The [classname]#Spreadsheet# object provides the following configuration of
+various UI elements:
+
+Grid lines:: Cells are by default separated by grid lines. You can control their visibility
+with [methodname]#setGridlinesVisible()#.
+
+Column and row headings:: Headings for rows and columns display the row and column indexes, and allow
+selecting and resizing the rows and columns. You can control their visibility
+with [methodname]#setRowColHeadingsVisible()#.
+
+Top bar:: The top bar displays the address of the currently selected cell and an editor
+for cell content. You can control its visibility with
+[methodname]#setFunctionBarVisible()#.
+
+Bottom bar:: The bottom bar displays the address of the currently selected cell and an editor
+for cell content. You can control its visibility with
+[methodname]#setSheetSelectionBarVisible()#.
+
+Report mode:: In the report mode, both the top and bottom bars are hidden. You can enable the
+mode with [methodname]#setReportStyle()#.
+
+
+
+
+[[spreadsheet.configuration.frozen]]
+== Frozen Row and Column Panes
+
+You can define panes of rows and columns that are frozen in respect to
+scrolling. You can create the pane for the current worksheet with
+[methodname]#createFreezePane()#, which takes the number of frozen rows and
+columns as parameters.
+
+
+----
+sheet.createFreezePane(1, 2);
+----
+
+The result is shown in <<figure.spreadsheet.configuration.frozen>>.
+
+[[figure.spreadsheet.configuration.frozen]]
+.Frozen Row and Column Panes
+image::img/spreadsheet-config-frozenpane.png[]
+
+
+
+

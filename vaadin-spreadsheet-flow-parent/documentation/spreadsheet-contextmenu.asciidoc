@@ -1,0 +1,44 @@
+---
+title: Context Menus
+order: 6
+layout: page
+---
+
+[[spreadsheet.contextmenu]]
+= Context Menus
+
+Grid has a context menu, which can be used for various editing functions. The
+context menu uses the standard Vaadin action handler mechanism.
+
+[[spreadsheet.contextmenu.default]]
+== Default Context Menu
+
+The [classname]#SpreadsheetDefaultActionHandler# provides a ready set of common
+spreadsheet editing operations.
+
+* Add, delete, hide, and show rows and columns
+* Insert, edit, and delete cell comments
+* Merge and unmerge cells
+* Add filter table to selected range
+
+The default context menu is not enabled by default; to enable it, you need to
+create and set it as the action handler explicitly.
+
+
+----
+sheet.addActionHandler(new SpreadsheetDefaultActionHandler());
+----
+
+
+[[spreadsheet.contextmenu.custom]]
+== Custom Context Menus
+
+You can implement custom context menus either by implementing an
+[interfacename]#ActionHandler# or extending the
+[classname]#SpreadsheetDefaultActionHandler#. The source code of the default
+handler should serve as a good example of implementing context menu items for
+different purposes.
+
+
+
+

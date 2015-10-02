@@ -1,0 +1,83 @@
+---
+title: Basic Use
+order: 3
+layout: page
+---
+
+[[spreadsheet.using]]
+= Basic Use
+
+[classname]#Spreadsheet# is a Vaadin component, which you can use as you would
+any component. You can create it, or load from an Excel file, create cells and
+new sheets, define formulas, and so forth. In the following, we go through these
+basic steps.
+
+[[spreadsheet.using.creating]]
+== Creating a Spreadsheet
+
+The default constructor for [classname]#Spreadsheet# creates an empty
+spreadsheet with a default sheet. The spreadsheet component has full size by
+default, so the containing layout must have defined size in both dimensions; a
+spreadsheet may not have undefined size.
+
+In the following example, we create an empty spreadsheet with a fixed size and
+add it to a layout.
+
+
+----
+Spreadsheet sheet = new Spreadsheet();
+sheet.setWidth("400px");
+sheet.setHeight("300px");
+
+layout.addComponent(sheet);
+----
+
+An empty spreadsheet automatically gets an initial worksheet with some default
+size and settings.
+
+[[spreadsheet.using.creating.loading]]
+=== Loading an Excel Spreadsheet
+
+You can load an Excel file from the local filesystem with a [classname]#File#
+reference or from memory or other source with an [classname]#InputStream#.
+
+
+[[spreadsheet.using.creating.poi]]
+=== Working with an Apache POI Workbook
+
+If you have an Apache POI workbook created otherwise, you can wrap it to
+[classname]#Spreadsheet# with the respective constructor.
+
+You can access the underlying workbook with [methodname]#getWorkbook()#.
+However, if you make modifications to the workbook, you must allow the
+spreadsheet update itself by calling appropriate update methods for the modified
+element or elements.
+
+
+
+[[spreadsheet.using.sheets]]
+== Working with Sheets
+
+A "spreadsheet" in reality works on a __workbook__, which contains one or more
+__worksheets__. You can create new sheets and delete existing ones with
+[methodname]#createNewSheet()# and [methodname]#deleteSheet()#, respectively.
+
+
+----
+// Recreate the initial sheet to configure it
+Spreadsheet sheet = new Spreadsheet();
+sheet.createNewSheet("New Sheet", 10, 5);
+sheet.deleteSheet(0);
+----
+
+When a sheet is deleted, the index of the sheets with a higher index is
+decremented by one. When the active worksheet is deleted, the next one by index
+is set as active, or if there are none, the previous one.
+
+All operations on the spreadsheet content are done through the currently active
+worksheet. You can set an existing sheet as active with
+[methodname]#setActiveSheetIndex()#.
+
+
+
+

@@ -1,0 +1,24 @@
+[[spreadsheet]]
+== Vaadin Spreadsheet
+
+((("Spreadsheet", id="term.spreadsheet", range="startofrange")))
+
+
+This chapter describes how to use Vaadin Spreadsheet, a Vaadin add-on component
+for displaying and editing Excel spreadsheets within any Vaadin application.
+
+
+include::spreadsheet-overview.asciidoc[leveloffset=+2]
+
+include::spreadsheet-installation.asciidoc[leveloffset=+2]
+
+include::spreadsheet-using.asciidoc[leveloffset=+2]
+
+include::spreadsheet-configuration.asciidoc[leveloffset=+2]
+
+include::spreadsheet-cells.asciidoc[leveloffset=+2]
+
+include::spreadsheet-contextmenu.asciidoc[leveloffset=+2]
+
+include::spreadsheet-table.asciidoc[leveloffset=+2]
+(((range="endofrange", startref="term.spreadsheet")))
