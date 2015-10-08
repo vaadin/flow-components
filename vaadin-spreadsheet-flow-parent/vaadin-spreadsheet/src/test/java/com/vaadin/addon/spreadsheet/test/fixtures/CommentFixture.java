@@ -23,7 +23,7 @@ public class CommentFixture implements SpreadsheetFixture {
         anchor1.setRow2(4);
         Comment comment1 = drawing.createCellComment(anchor1);
         comment1.setString(new XSSFRichTextString("first cell comment"));
-        spreadsheet.createCell(0, 0, "commented cell").setCellComment(comment1);
+        spreadsheet.createCell(0, 0, "cell").setCellComment(comment1);
 
         ClientAnchor anchor2 = factory.createClientAnchor();
         anchor2.setCol1(4);
@@ -33,7 +33,7 @@ public class CommentFixture implements SpreadsheetFixture {
         Comment comment2 = drawing.createCellComment(anchor2);
         comment2.setString(new XSSFRichTextString("Always Visible Comment."));
         comment2.setVisible(true);
-        spreadsheet.createCell(4, 4, "visible");
+        spreadsheet.createCell(4, 4, "visible").setCellComment(comment2);
 
         spreadsheet.refreshAllCellValues();
     }

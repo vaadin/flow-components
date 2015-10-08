@@ -2440,6 +2440,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         getState().cellComments = null;
         getState().cellCommentAuthors = null;
         getState().visibleCellComments = null;
+        getState().invalidFormulaCells = null;
         if (customComponents != null && !customComponents.isEmpty()) {
             for (Component c : customComponents) {
                 unRegisterCustomComponent(c);
@@ -3009,6 +3010,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         } else {
             getState().visibleCellComments.clear();
         }
+        if (getState(false).invalidFormulaCells == null) {
+            getState(false).invalidFormulaCells = new HashSet<String>();
+        } else {
+            getState().invalidFormulaCells.clear();
+        }
+
         if (getLastFrozenRow() > 0 && getLastFrozenColumn() > 0
                 && !topLeftCellCommentsLoaded) {
             loadCellComments(1, 1, getLastFrozenRow(), getLastFrozenColumn());
@@ -3033,21 +3040,25 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 if (sheet.isColumnHidden(c)) {
                     continue;
                 }
+
+                int c_one_based = c + 1;
+                int row_one_based = r + 1;
+
                 MergedRegion region = mergedRegionContainer.getMergedRegion(
-                        c + 1, r + 1);
+                        c_one_based, row_one_based);
                 // do not add comments that are "below" merged regions.
                 // client side handles cases where comment "moves" (because
                 // shifting etc.) from merged cell into basic or vice versa.
-                if (region == null || region.col1 == (c + 1)
-                        && region.row1 == (r + 1)) {
+                if (region == null || region.col1 == c_one_based
+                        && region.row1 == row_one_based) {
                     Comment comment = sheet.getCellComment(r, c);
+                    String key = SpreadsheetUtil.toKey(c_one_based, row_one_based);
                     if (comment != null) {
                         // by default comments are shown when mouse is over the
                         // red
                         // triangle on the cell's top right corner. the comment
                         // position is calculated so that it is completely
                         // visible.
-                        String key = SpreadsheetUtil.toKey(c + 1, r + 1);
                         getState().cellComments.put(key, comment.getString()
                                 .getString());
                         getState().cellCommentAuthors.put(key,
@@ -3056,6 +3067,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                             getState().visibleCellComments.add(key);
                         }
                     }
+                    if(isMarkedAsInvalidFormula(c_one_based, row_one_based)) {
+                        getState().invalidFormulaCells.add(key);
+                    }
+
+
                 } else {
                     c = region.col2 - 1;
                 }
@@ -4490,6 +4506,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         return !isSheetSelectionBarVisible() && !isFunctionBarVisible();
     }
 
+    public void setInvalidFormulaErrorMessage(String invalidFormulaErrorMessage) {
+        getState().invalidFormulaErrorMessage = invalidFormulaErrorMessage;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -4519,6 +4539,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void focus() {
         super.focus();
     }
+
 
     /**
      * Controls if a column group is collapsed or not.

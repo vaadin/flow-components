@@ -2,11 +2,13 @@ package com.vaadin.addon.spreadsheet.elements;
 
 import java.util.List;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.By;
 import com.vaadin.testbench.elementsbase.AbstractElement;
+import org.openqa.selenium.interactions.Actions;
 
 /**
  * This class represents one cell within the currently active sheet of a
@@ -66,10 +68,18 @@ public class SheetCellElement extends AbstractElement {
      */
     public boolean isNormalCell() {
         List<WebElement> children = findElements(By.xpath(".//*"));
-        // might have one inner div without class if content is overflowing
-        return children.isEmpty()
-                || (children.size() == 1 && children.get(0)
-                        .getAttribute("class").isEmpty());
+        // might have an inner div for example when content is overflowing, cell has a comment
+        // or cell contains an invalid formula
+        return noneOfTheElementsIsWidget(children);
+    }
+
+    private boolean noneOfTheElementsIsWidget(List<WebElement> children) {
+        for(WebElement e : children) {
+            if(e.getAttribute("class").contains("v-widget")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -100,4 +110,15 @@ public class SheetCellElement extends AbstractElement {
     void setParent(SpreadsheetElement parent) {
         this.parent = parent;
     }
+
+    /**
+     * Determines if the cell has invalid formula indicator
+     *
+     * @return true if this cell has a invalid formula indicator
+     */
+    public boolean hasInvalidFormulaIndicator() {
+        List<WebElement> indicators = findElements(By.className("cell-invalidformula-triangle"));
+        return !indicators.isEmpty();
+    }
+
 }

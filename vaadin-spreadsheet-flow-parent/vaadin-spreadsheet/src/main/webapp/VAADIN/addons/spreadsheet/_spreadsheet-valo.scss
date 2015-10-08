@@ -28,7 +28,9 @@
 
   $spreadsheet-resize-line-color: $v-selection-color !default;
 
-  $spreadsheet-cell-comment-triangle-color: $v-error-indicator-color !default;
+  $spreadsheet-cell-comment-triangle-color: #FFCF16 !default;
+
+  $spreadsheet-cell-invalidformula-triangle-color: $v-error-indicator-color !default;
 
   // These colors should be derived from valo theme colors.
   // Unfortunately due to a bug in the sass compiler,
@@ -646,6 +648,22 @@
         right: 0;
         top: 0;
         width: 0;
+        z-index: 1;
+      }
+
+      .cell-invalidformula-triangle {
+        border-color: transparent $spreadsheet-cell-invalidformula-triangle-color transparent transparent;
+        border-style: solid;
+        border-width: 0 9px 9px 0;
+        height: 0;
+        line-height: 0;
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 0;
+        z-index: 2;
       }
 
       .comment-overlay-line {
@@ -1011,6 +1029,14 @@
       white-space: nowrap;
     }
 
+    .comment-overlay-invalidformula {
+      color: $v-error-indicator-color;
+      max-width: 12 * $spreadsheet-base-font-size;
+      max-height: 10 * $spreadsheet-base-font-size;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
     .comment-overlay-label {
       max-width: 12 * $spreadsheet-base-font-size;
       max-height: 10 * $spreadsheet-base-font-size;
@@ -1026,6 +1052,11 @@
       font-weight: 300;
       outline: none;
       border: none;
+    }
+
+    .comment-overlay-separator {
+      border-bottom: $spreadsheet-border;
+      margin-bottom: 7px;
     }
   }
 

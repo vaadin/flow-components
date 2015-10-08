@@ -221,7 +221,8 @@ public class CellValueManager implements Serializable {
             }
             if (spreadsheet
                     .isMarkedAsInvalidFormula(cellData.col, cellData.row)) {
-                cellData.formulaValue = cell.getStringCellValue();
+                // The prefix '=' or '+' should not be included in formula value
+                cellData.formulaValue = cell.getStringCellValue().substring(1);
                 formattedCellValue = "#VALUE!";
             }
 
@@ -392,8 +393,6 @@ public class CellValueManager implements Serializable {
      */
     protected void cellUpdated(Cell cell) {
         getFormulaEvaluator().notifyUpdateCell(cell);
-        spreadsheet.removeInvalidFormulaMark(cell.getColumnIndex() + 1,
-                cell.getRowIndex() + 1);
         markCellForUpdate(cell);
     }
 
@@ -549,7 +548,7 @@ public class CellValueManager implements Serializable {
                     } else {
                         // it's formula but invalid
                         cell.setCellType(Cell.CELL_TYPE_STRING);
-                        cell.setCellValue(value.substring(1));
+                        cell.setCellValue(value);
                         spreadsheet.markInvalidFormula(col, row);
                     }
                 } else {
@@ -604,7 +603,7 @@ public class CellValueManager implements Serializable {
                      * makes sure the value is displayed as-is.
                      */
                     cell.setCellType(Cell.CELL_TYPE_STRING);
-                    cell.setCellValue(value.substring(1));
+                    cell.setCellValue(value);
                     spreadsheet.markInvalidFormula(col, row);
                 }
             } catch (NumberFormatException nfe) {

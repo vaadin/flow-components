@@ -35,6 +35,8 @@ public class CellComment extends VOverlay {
     protected static final String COMMENT_OVERLAY_LINE_CLASSNAME = "comment-overlay-line";
     private static final String COMMENT_OVERLAY_CLASSNAME = "v-spreadsheet-comment-overlay";
     private static final String COMMENT_OVERLAY_AUTHOR_CLASSNAME = "comment-overlay-author";
+    private static final String COMMENT_OVERLAY_INVALIDFORMULA_CLASSNAME = "comment-overlay-invalidformula";
+    private static final String COMMENT_OVERLAY_SEPARATOR_CLASSNAME = "comment-overlay-separator";
     private static final String COMMENT_OVERLAY_LABEL_CLASSNAME = "comment-overlay-label";
     private static final String COMMENT_OVERLAY_INPUT_CLASSNAME = "comment-overlay-input";
     private static final String COMMENT_OVERLAY_SHADOW_CLASSNAME = COMMENT_OVERLAY_CLASSNAME
@@ -43,6 +45,7 @@ public class CellComment extends VOverlay {
     private final FlowPanel root;
     private final VLabel author;
     private final VLabel label;
+    private final VLabel invalidFormula;
 
     private Element paneElement;
 
@@ -68,9 +71,11 @@ public class CellComment extends VOverlay {
         line.setClassName(COMMENT_OVERLAY_LINE_CLASSNAME);
 
         author = new VLabel();
+        author.setVisible(false);
         author.setStyleName(COMMENT_OVERLAY_AUTHOR_CLASSNAME);
 
         label = new VLabel();
+        label.setVisible(false);
         label.setStyleName(COMMENT_OVERLAY_LABEL_CLASSNAME);
         setStyleName(COMMENT_OVERLAY_CLASSNAME);
         setShadowStyle(COMMENT_OVERLAY_SHADOW_CLASSNAME);
@@ -80,6 +85,11 @@ public class CellComment extends VOverlay {
         setVisible(false);
         setZIndex(30);
 
+        invalidFormula = new VLabel();
+        invalidFormula.setVisible(false);
+        invalidFormula.setStyleName(COMMENT_OVERLAY_INVALIDFORMULA_CLASSNAME);
+
+        root.add(invalidFormula);
         root.add(author);
         root.add(label);
 
@@ -117,6 +127,8 @@ public class CellComment extends VOverlay {
 
     public void setCommentText(String text) {
         label.setText(text);
+        hideIfNoContent(label);
+        showOrHideSeparator();
     }
 
     public int getCol() {
@@ -276,9 +288,39 @@ public class CellComment extends VOverlay {
             ((SheetWidget) getOwner()).commitComment(label.getText(), getCol(),
                     getRow());
         }
+        showOrHideSeparator();
     }
 
     public void setAuthor(String authorName) {
         author.setText(authorName);
+        hideIfNoContent(author);
+        showOrHideSeparator();
+    }
+
+    public void setInvalidFormulaMessage(String invalidFormulaMessage) {
+        invalidFormula.setText(invalidFormulaMessage);
+        hideIfNoContent(invalidFormula);
+        showOrHideSeparator();
+    }
+
+    private void hideIfNoContent(VLabel label) {
+        if(label.getText().isEmpty()) {
+            label.setVisible(false);
+        } else {
+            label.setVisible(true);
+        }
+    }
+
+    private void showOrHideSeparator() {
+        if(invalidFormula.isVisible() && (author.isVisible() || label.isVisible()
+                        || Display.BLOCK.equals(input.getStyle().getDisplay()) )) {
+            if(!invalidFormula.getStyleName().contains(COMMENT_OVERLAY_SEPARATOR_CLASSNAME)) {
+                invalidFormula.addStyleName(COMMENT_OVERLAY_SEPARATOR_CLASSNAME);
+            }
+        } else {
+            if(invalidFormula.getStyleName().contains(COMMENT_OVERLAY_SEPARATOR_CLASSNAME)) {
+                invalidFormula.removeStyleName(COMMENT_OVERLAY_SEPARATOR_CLASSNAME);
+            }
+        }
     }
 }

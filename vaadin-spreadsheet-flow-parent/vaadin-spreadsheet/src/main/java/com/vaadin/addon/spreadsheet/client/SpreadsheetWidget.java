@@ -1574,6 +1574,14 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         sheetWidget.setCellComments(cellComments, cellCommentAuthors);
     }
 
+    public void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
+        sheetWidget.setInvalidFormulaCells(invalidFormulaCells);
+    }
+
+    public void setInvalidFormulaErrorMessage(String invalidFormulaMessage) {
+        sheetWidget.setInvalidFormulaMessage(invalidFormulaMessage);
+    }
+
     @Override
     public Map<Integer, String> getCellStyleToCSSStyle() {
         return cellStyleToCSSStyle;

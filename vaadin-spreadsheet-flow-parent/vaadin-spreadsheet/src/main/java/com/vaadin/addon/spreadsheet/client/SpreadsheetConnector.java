@@ -376,6 +376,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         if (stateChangeEvent.hasPropertyChanged("visibleCellComments")) {
             setupVisibleCellComments();
         }
+        if (stateChangeEvent.hasPropertyChanged("invalidFormulaCells")) {
+            widget.setInvalidFormulaCells(state.invalidFormulaCells);
+        }
 
         if (stateChangeEvent.hasPropertyChanged("resourceKeyToImage")) {
             Map<String, ImageInfo> resourceKeyToImage = getState().resourceKeyToImage;

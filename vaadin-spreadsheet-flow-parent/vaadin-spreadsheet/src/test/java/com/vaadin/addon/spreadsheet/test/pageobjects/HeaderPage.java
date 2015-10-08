@@ -39,4 +39,9 @@ public class HeaderPage extends Page {
                 $(NativeSelectElement.class).id("fixtureSelect").getValue());
     }
 
+    public void addFreezePane() {
+        $(ButtonElement.class).caption("Freeze Pane").first().click();
+        $(ButtonElement.class).caption("Submit values").first().click();
+    }
+
 }

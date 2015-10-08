@@ -24,7 +24,8 @@ $col-header-gradient-bottom-color: #ededed !default;
 $resize-line-color: #b8b8ff !default;
 $inactive-resize-line-color: #c7c7c7 !default;
 $cell-background-color: #ffffff !default;
-$cell-comment-triangle-color: #f00 !default;
+$cell-comment-triangle-color: #FFCF16 !default;
+$cell-invalidformula-triangle-color: #f00 !default;
 $freeze-pane-border: 1px solid black !default;
 $sheet-selection-border-color: #197de0 !default;
 $sheet-selection-corner-color: #197de1 !default;
@@ -637,6 +638,22 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
         right: 0;
         top: 0;
         width: 0;
+        z-index: 1;
+      }
+
+      .cell-invalidformula-triangle {
+        border-color: transparent $cell-invalidformula-triangle-color transparent transparent;
+        border-style: solid;
+        border-width: 0 9px 9px 0;
+        height: 0;
+        line-height: 0;
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 0;
+        z-index: 2;
       }
 
       .comment-overlay-line {
@@ -1025,6 +1042,13 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
       padding-bottom: 6px;
     }
 
+    .comment-overlay-invalidformula {
+      color: $v-error-indicator-color;
+      max-width: 200px;
+      max-height: 150px;
+      white-space: pre-wrap;
+    }
+
     .comment-overlay-label {
       max-width: 200px;
       max-height: 150px;
@@ -1040,6 +1064,11 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
       outline: none;
       background: $cell-comment-bg-color;
       border: none;
+    }
+
+    .comment-overlay-separator {
+      border-bottom: $spreadsheet-border;
+      margin-bottom: 7px;
     }
   }
 

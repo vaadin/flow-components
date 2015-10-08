@@ -2,15 +2,12 @@ package com.vaadin.addon.spreadsheet.elements;
 
 import java.util.List;
 
+import com.vaadin.testbench.*;
+import org.openqa.selenium.*;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.AbstractElement;
 import com.vaadin.testbench.elementsbase.ServerClass;
 
@@ -223,6 +220,30 @@ public class SpreadsheetElement extends AbstractElement {
      */
     public void addSheet(String sheetName) {
         findElement(By.className("add-new-tab")).click();
+    }
+
+    /**
+     * Fetches the context menu for the spreadsheet
+     *
+     * @return {@link com.vaadin.addon.spreadsheet.elements.SpreadsheetElement.ContextMenuElement}
+     * @throws java.util.NoSuchElementException if the menu isn't open
+     */
+    public ContextMenuElement getContextMenu() {
+        try {
+            WebElement cm = getDriver().findElement(By.className("v-contextmenu"));
+            return wrapElement(cm, getCommandExecutor()).wrap(
+                    ContextMenuElement.class);
+        } catch (WebDriverException e) {
+            throw new NoSuchElementException("Context menu not found", e);
+        }
+    }
+
+    public static class ContextMenuElement extends AbstractElement {
+
+        public WebElement getItem(String text) {
+            return findElement(By.xpath(".//table//tr[*]//td//div[contains(text(), \""+text+"\")]"));
+        }
+
     }
 
     private void scrollSheetVisible(WebElement targetSheet) {

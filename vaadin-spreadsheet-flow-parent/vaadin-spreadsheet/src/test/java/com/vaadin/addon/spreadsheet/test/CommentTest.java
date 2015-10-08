@@ -1,53 +1,91 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Ignore;
+import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
-@Ignore("Failed with all browsers")
-public class CommentTest extends Test1 {
 
-    @Test
-    public void testFromUpload() {
-        loadSheetFile("cell_comments.xlsx");
-        commonAssertions();
-    }
+public class CommentTest extends AbstractSpreadsheetTestCase {
 
     @Test
-    public void testFromAPI() {
-        loadServerFixture("COMMENTS");
-        commonAssertions();
-    }
+    public void commentOverlay_sheetWithCommentsIsLoaded_overlayIsShownForVisibleComments() {
+        headerPage.createNewSpreadsheet();
 
-    private void commonAssertions() {
+        headerPage.loadFile("cell_comments.xlsx", this);
+
         assertCommentPresent("Always Visible Comment.");
-
-        assertCommentNotPresent("first cell comment");
-        mouse.toolTip(sheetController.getCellElement("A1"));
-        assertCommentPresent("first cell comment");
+        assertCommentOverlayIsShownOnHover("first cell comment");
     }
 
-    private void assertCommentPresent(String text) {
-        Assert.assertTrue(
-                "Comment not present",
-                findAllByXPath(
-                        "//div[@class='comment-overlay-label' and contains(text(), '"
-                                + text + "')]").size() > 0);
+    @Test
+    public void commentOverlay_commentsAreSetFromServerSide_overlayIsShownForVisibleComments() {
+        headerPage.createNewSpreadsheet();
+
+        headerPage.loadTestFixture(TestFixtures.Comments);
+
+        assertCommentPresent("Always Visible Comment.");
+        assertCommentOverlayIsShownOnHover("first cell comment");
     }
 
-    private void assertCommentNotPresent(String text) {
-        Assert.assertTrue(
-                "Comment found while expecting not",
-                findAllByXPath(
-                        "//div[@class='comment-overlay-label' and contains(text(), '"
-                                + text + "')]").size() == 0);
+    @Test
+    public void commentOverlay_userHoversInvalidFormula_overlayIsShown() {
+        headerPage.createNewSpreadsheet();
+        final SheetCellElement a1 = $(SpreadsheetElement.class).first()
+                .getCellAt("A1");
+
+        a1.setValue("=a");
+
+        assertCommentOverlayIsShownOnHover("Invalid formula");
     }
 
-    private List<WebElement> findAllByXPath(String xpath) {
-        return getDriver().findElements(By.xpath(xpath));
+
+    private void assertCommentOverlayIsShownOnHover(String commentContains) {
+        moveMouseOverCell("A2");
+        assertCommentNotPresent(commentContains);
+
+        moveMouseOverCell("A1");
+
+        assertCommentPresent(commentContains);
     }
+
+    public void moveMouseOverCell(String cellAddress) {
+        SheetCellElement cell = $(SpreadsheetElement.class).first()
+                .getCellAt(cellAddress);
+        WebElement cornerElement = driver.findElement(By.cssSelector(".v-spreadsheet > .corner"));
+
+        new Actions(driver).moveToElement(cornerElement)
+                .moveToElement(cell.getWrappedElement()).build().perform();
+    }
+
+    private void assertCommentPresent(final String text) {
+        waitUntil(new ExpectedCondition<Object>() {
+            @Override
+            public Object apply(WebDriver webDriver) {
+                return webDriver.findElements(By.xpath(
+                        "//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')" +
+                                " and contains(text(), '" + text + "')]"
+                )).size() > 0;
+            }
+        });
+    }
+
+    private void assertCommentNotPresent(final String text) {
+        waitUntil(new ExpectedCondition<Object>() {
+            @Override
+            public Object apply(WebDriver webDriver) {
+                return webDriver.findElements(By.xpath(
+                        "//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')" +
+                                " and contains(text(), '" + text + "')]"
+                )).size() == 0;
+            }
+        });
+    }
+
 }

@@ -26,9 +26,11 @@ import com.google.gwt.dom.client.Style.Overflow;
 public class Cell {
 
     public static final String CELL_COMMENT_TRIANGLE_CLASSNAME = "cell-comment-triangle";
+    public static final String CELL_INVALID_FORMULA_CLASSNAME = "cell-invalidformula-triangle";
     private static final int ZINDEXVALUE = 2;
     private final DivElement element;
     private DivElement cellCommentTriangle;
+    private DivElement invalidFormulaTriangle;
     /**
      * 1-based
      */
@@ -213,6 +215,8 @@ public class Cell {
 
         if (cellCommentTriangle != null) {
             element.appendChild(cellCommentTriangle);
+        } if (invalidFormulaTriangle != null) {
+            element.appendChild(invalidFormulaTriangle);
         }
         if (popupButtonElement != null) {
             element.appendChild(popupButtonElement);
@@ -245,6 +249,21 @@ public class Cell {
         if (cellCommentTriangle != null) {
             cellCommentTriangle.removeFromParent();
             cellCommentTriangle = null;
+        }
+    }
+
+    public void showInvalidFormulaIndicator() {
+        if (invalidFormulaTriangle == null) {
+            invalidFormulaTriangle = Document.get().createDivElement();
+            invalidFormulaTriangle.setClassName(CELL_INVALID_FORMULA_CLASSNAME);
+            element.appendChild(invalidFormulaTriangle);
+        }
+    }
+
+    public void removeInvalidFormulaIndicator() {
+        if (invalidFormulaTriangle != null) {
+            invalidFormulaTriangle.removeFromParent();
+            invalidFormulaTriangle = null;
         }
     }
 
@@ -286,4 +305,5 @@ public class Cell {
     private int getUniqueKey() {
         return 31 * (value.hashCode() + cellStyle.hashCode());
     }
+
 }

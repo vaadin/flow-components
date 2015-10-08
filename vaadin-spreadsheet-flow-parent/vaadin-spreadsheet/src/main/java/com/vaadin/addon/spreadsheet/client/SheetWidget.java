@@ -18,15 +18,8 @@ package com.vaadin.addon.spreadsheet.client;
  */
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -88,7 +81,6 @@ public class SheetWidget extends Panel {
     private static final String HEADER_RESIZE_DND_FIRST_CLASSNAME = "header-resize-dnd-first";
     private static final String HEADER_RESIZE_DND_SECOND_CLASSNAME = "header-resize-dnd-second";
     private static final String HYPERLINK_TOOLTIP_LABEL_CLASSNAME = "v-spreadsheet-hyperlink-tooltip-label";
-    private static final String CELL_COMMENT_TRIANGLE_CLASSNAME = Cell.CELL_COMMENT_TRIANGLE_CLASSNAME;
     private static final String NO_GRIDLINES_CLASSNAME = "nogrid";
     private static final String NO_ROWCOLHEADINGS_CLASSNAME = "noheaders";
     private static final String CUSTOM_EDITOR_CELL_CLASSNAME = "custom-editor-cell";
@@ -281,6 +273,8 @@ public class SheetWidget extends Panel {
 
     private HashMap<String, String> cellLinksMap;
 
+    private Set<String> invalidFormulaCells;
+
     private HashMap<String, String> cellCommentsMap;
 
     private HashMap<String, String> cellCommentAuthorsMap;
@@ -372,6 +366,8 @@ public class SheetWidget extends Panel {
     private CellCoord highlightedCellCoord = null;
     private int calculatedRowGroupWidth;
     private int calculatedColGroupHeight;
+
+    private String invalidFormulaMessage = null;
 
     static class CellCoord {
         private int col;
@@ -484,10 +480,10 @@ public class SheetWidget extends Panel {
 
                     // if mouse moved to/from a comment mark triangle, or the
                     // latest cell comment's cell, show/hide cell comment
-                    if (className.equals(CELL_COMMENT_TRIANGLE_CLASSNAME)
+                    if (overlayShouldBeShownFor(className)
                             || className.equals(cellCommentCellClassName)
-                            || (cellCommentsMap != null && cellCommentsMap
-                                    .containsKey(className))) {
+                            || cellHasComment(className)
+                            || cellHasInvalidFormula(className)) {
                         updateCellCommentDisplay(mouseOverOrOutEvent, target);
                     } else {
                         if (!cellCommentEditMode
@@ -510,6 +506,11 @@ public class SheetWidget extends Panel {
                     }
                 }
             });
+
+    private boolean overlayShouldBeShownFor(String className) {
+        return className.equals(Cell.CELL_COMMENT_TRIANGLE_CLASSNAME) ||
+                className.equals(Cell.CELL_INVALID_FORMULA_CLASSNAME);
+    }
 
     /** Height of the formula bar and column headers */
     private int topOffset;
@@ -3413,8 +3414,11 @@ public class SheetWidget extends Panel {
         mergedCells.put(region.id, mergedCell);
 
         // need to update the possible cell comment for the merged cell
-        if (cellCommentsMap != null && cellCommentsMap.containsKey(key)) {
+        if (cellHasComment(key)) {
             mergedCell.showCellCommentMark();
+        }
+        if(cellHasInvalidFormula(key)) {
+            mergedCell.showInvalidFormulaIndicator();
         }
         if (alwaysVisibleCellComments.containsKey(key)) {
             CellComment cellComment = alwaysVisibleCellComments.get(key);
@@ -3569,11 +3573,21 @@ public class SheetWidget extends Panel {
         }
         DivElement cellCommentReplacementElement = null;
         // move the possible cell comment to the correct cell
-        if (cellCommentsMap != null && cellCommentsMap.containsKey(key)) {
+        if (cellHasComment(key)) {
             try {
                 Cell cell = rows.get(region.row1 - firstRowIndex).get(
                         region.col1 - firstColumnIndex);
                 cell.showCellCommentMark();
+                cellCommentReplacementElement = cell.getElement();
+            } catch (Exception e) {
+                // the cell just isn't visible, no problem.
+            }
+        }
+        if (cellHasInvalidFormula(key)) {
+            try {
+                Cell cell = rows.get(region.row1 - firstRowIndex).get(
+                        region.col1 - firstColumnIndex);
+                cell.showInvalidFormulaIndicator();
                 cellCommentReplacementElement = cell.getElement();
             } catch (Exception e) {
                 // the cell just isn't visible, no problem.
@@ -3596,6 +3610,14 @@ public class SheetWidget extends Panel {
                 // the cell just isn't visible, no problem.
             }
         }
+    }
+
+    private boolean cellHasComment(String key) {
+        return cellCommentsMap != null && cellCommentsMap.containsKey(key);
+    }
+
+    private boolean cellHasInvalidFormula(String key) {
+        return invalidFormulaCells != null && invalidFormulaCells.contains(key);
     }
 
     public void setCellLinks(HashMap<String, String> cellLinksMap) {
@@ -3655,29 +3677,105 @@ public class SheetWidget extends Panel {
         return null;
     }
 
+    public void setInvalidFormulaCells(Set<String> newInvalidFormulaCells) {
+        udpateInvalidFormulaCells(getAllCells(), newInvalidFormulaCells);
+        updateMergedInvalidFormulaCells(newInvalidFormulaCells);
+        invalidFormulaCells = (Set<String>) putNewValuesToCollectionField(newInvalidFormulaCells, invalidFormulaCells);
+        updateAllVisibleComments();
+    }
+
+    private void updateAllVisibleComments() {
+        if(invalidFormulaCells == null) {
+            return;
+        }
+
+        if(alwaysVisibleCellComments != null) {
+            for (Entry<String, CellComment> entry : alwaysVisibleCellComments.entrySet()) {
+                String key = entry.getKey();
+                CellComment cellComment = entry.getValue();
+                String errorMessage = invalidFormulaCells.contains(key) ? invalidFormulaMessage : null;
+                cellComment.setInvalidFormulaMessage(errorMessage);
+            }
+        }
+        if(cellCommentOverlay != null) {
+            String errorMessage = invalidFormulaCells.contains(cellCommentCellClassName) ? invalidFormulaMessage : null;
+            cellCommentOverlay.setInvalidFormulaMessage(errorMessage);
+        }
+    }
+
+    private void udpateInvalidFormulaCells(Collection<Cell> allCells, Collection<String> newInvalidFormulaCells) {
+        for (Cell cell : allCells) {
+            String key = toKey(cell.getCol(), cell.getRow());
+            if (newInvalidFormulaCells != null
+                    && newInvalidFormulaCells.contains(key)) {
+                cell.showInvalidFormulaIndicator();
+            } else if (invalidFormulaCells != null
+                    && invalidFormulaCells.contains(key)) {
+                // remove
+                cell.removeInvalidFormulaIndicator();
+            }
+        }
+    }
+
     public void setCellComments(HashMap<String, String> newCellCommentsMap,
             HashMap<String, String> newCellCommentAuthorsMap) {
-        updateRowCellComments(topLeftCells, newCellCommentsMap);
-        updateRowsCellComments(topRightRows, newCellCommentsMap);
-        updateRowsCellComments(bottomLeftRows, newCellCommentsMap);
-        updateRowsCellComments(rows, newCellCommentsMap);
+        updateRowCellComments(getAllCells(), newCellCommentsMap);
         updateMergedCellCommentsMap(newCellCommentsMap);
-        if (cellCommentsMap != null) {
-            cellCommentsMap.clear();
-            if (newCellCommentsMap != null) {
-                cellCommentsMap.putAll(newCellCommentsMap);
+
+        cellCommentsMap = putValuesToMapField(newCellCommentsMap, cellCommentsMap);
+        cellCommentAuthorsMap = putValuesToMapField(newCellCommentAuthorsMap, cellCommentAuthorsMap);
+    }
+
+    private List<Cell> getAllCells() {
+        ArrayList<Cell> cells = new ArrayList<Cell>(topLeftCells);
+        for(List<Cell> row : topRightRows) {
+            cells.addAll(row);
+        }
+        for(List<Cell> row : bottomLeftRows) {
+            cells.addAll(row);
+        }
+        for(List<Cell> row : rows) {
+            cells.addAll(row);
+        }
+        return cells;
+    }
+
+    private void updateRowCellComments(List<Cell> row,
+            HashMap<String, String> newCellCommentsMap) {
+        for (Cell cell : row) {
+            String key = toKey(cell.getCol(), cell.getRow());
+            if (newCellCommentsMap != null
+                    && newCellCommentsMap.containsKey(key)) {
+                cell.showCellCommentMark();
+            } else if (cellHasComment(key)) {
+                // remove
+                cell.removeCellCommentMark();
+            }
+        }
+    }
+
+    private HashMap<String, String> putValuesToMapField(HashMap<String, String> newValuesMap, HashMap<String, String> cachedMap) {
+        if (cachedMap != null) {
+            cachedMap.clear();
+            if (newValuesMap != null) {
+                cachedMap.putAll(newValuesMap);
             }
         } else {
-            cellCommentsMap = newCellCommentsMap;
+            cachedMap = newValuesMap;
         }
-        if (cellCommentAuthorsMap != null) {
-            cellCommentAuthorsMap.clear();
-            if (newCellCommentAuthorsMap != null) {
-                cellCommentAuthorsMap.putAll(newCellCommentAuthorsMap);
+        return cachedMap;
+    }
+
+    private <T> Collection<T> putNewValuesToCollectionField(Collection<T> newValues, Collection<T> cachedValues) {
+        if (cachedValues != null) {
+            cachedValues.clear();
+            if (newValues != null) {
+                cachedValues.addAll(newValues);
             }
         } else {
-            cellCommentAuthorsMap = newCellCommentAuthorsMap;
+            cachedValues = newValues;
         }
+        return cachedValues;
     }
 
     private void updateMergedCellCommentsMap(
@@ -3687,35 +3785,27 @@ public class SheetWidget extends Panel {
             if (newCellCommentsMap != null
                     && newCellCommentsMap.containsKey(key)) {
                 mc.showCellCommentMark();
-            } else if (cellCommentsMap != null
-                    && cellCommentsMap.containsKey(key)) {
+            } else if (cellHasComment(key)) {
                 // remove
                 mc.removeCellCommentMark();
             }
         }
     }
 
-    private void updateRowCellComments(ArrayList<Cell> row,
-            HashMap<String, String> newCellCommentsMap) {
-        for (Cell cell : row) {
-            String key = toKey(cell.getCol(), cell.getRow());
-            if (newCellCommentsMap != null
-                    && newCellCommentsMap.containsKey(key)) {
-                cell.showCellCommentMark();
-            } else if (cellCommentsMap != null
-                    && cellCommentsMap.containsKey(key)) {
+    private void updateMergedInvalidFormulaCells(
+            Set<String> newInvalidFormulas) {
+        for (Cell mc : mergedCells.values()) {
+            String key = toKey(mc.getCol(), mc.getRow());
+            if (newInvalidFormulas != null
+                    && newInvalidFormulas.contains(key)) {
+                mc.showInvalidFormulaIndicator();
+            } else if (cellHasInvalidFormula(key)) {
                 // remove
-                cell.removeCellCommentMark();
+                mc.removeInvalidFormulaIndicator();
             }
         }
     }
 
-    private void updateRowsCellComments(ArrayList<ArrayList<Cell>> rows,
-            HashMap<String, String> newCellCommentsMap) {
-        for (ArrayList<Cell> row : rows) {
-            updateRowCellComments(row, newCellCommentsMap);
-        }
-    }
 
     public void setCellCommentVisible(boolean visible, String key) {
         if (visible) {
@@ -3732,6 +3822,8 @@ public class SheetWidget extends Panel {
                     .getElement().getParentElement());
             cellComment.setAuthor(cellCommentAuthorsMap.get(key));
             cellComment.setCommentText(cellCommentsMap.get(key));
+            String errorMessage = invalidFormulaCells.contains(key) ? invalidFormulaMessage : null;
+            cellComment.setInvalidFormulaMessage(errorMessage);
             cellComment.showDependingToCellRightCorner((Element) cell
                     .getElement().cast(), parsedRow, parsedCol);
             alwaysVisibleCellComments.put(key, cellComment);
@@ -3796,6 +3888,8 @@ public class SheetWidget extends Panel {
         }
         cellCommentOverlay.setAuthor(cellCommentAuthorsMap.get(cellClassName));
         cellCommentOverlay.setCommentText(cellCommentsMap.get(cellClassName));
+        String errorMessage = invalidFormulaCells.contains(cellClassName) ? invalidFormulaMessage : null;
+        cellCommentOverlay.setInvalidFormulaMessage(errorMessage);
         cellCommentOverlay.show(cellElement, row, column);
         cellCommentCellClassName = cellClassName;
     }
@@ -3809,7 +3903,7 @@ public class SheetWidget extends Panel {
     private void updateCellCommentDisplay(Event event, Element target) {
         int eventTypeInt = event.getTypeInt();
         String targetClassName = target.getClassName();
-        if (targetClassName.equals(CELL_COMMENT_TRIANGLE_CLASSNAME)) {
+        if (overlayShouldBeShownFor(targetClassName)) {
             Element cellElement = target.getParentElement().cast();
             String cellElementClassName = cellElement.getClassName();
             if (cellElementClassName.endsWith(MERGED_CELL_CLASSNAME)) {
@@ -3866,8 +3960,7 @@ public class SheetWidget extends Panel {
                 if (!cellCommentEditMode && toElement != null
                         && toElement.getParentElement() != null) {
                     try {
-                        if (!(toElement.getClassName().equals(
-                                CELL_COMMENT_TRIANGLE_CLASSNAME) && toElement
+                        if (!(overlayShouldBeShownFor(toElement.getClassName()) && toElement
                                 .getParentElement().equals(target))) {
                             cellCommentOverlay.hide();
                             cellCommentCellClassName = null;
@@ -4176,7 +4269,7 @@ public class SheetWidget extends Panel {
         clearSelectedCellStyle();
         clearBasicCellStyles();
         clearMergedCells();
-        clearCellComments();
+        clearCellCommentsAndInvalidFormulas();
         if (removed) {
             clearShiftedBorderCellStyles();
             removeStyles();
@@ -4402,7 +4495,7 @@ public class SheetWidget extends Panel {
         mergedCells.clear();
     }
 
-    protected void clearCellComments() {
+    protected void clearCellCommentsAndInvalidFormulas() {
         cellCommentOverlay.hide();
         for (CellComment cc : alwaysVisibleCellComments.values()) {
             cc.hide();
@@ -4410,6 +4503,7 @@ public class SheetWidget extends Panel {
         alwaysVisibleCellComments.clear();
         cellCommentsMap.clear();
         cellCommentAuthorsMap.clear();
+        invalidFormulaCells.clear();
     }
 
     /**
@@ -6346,4 +6440,8 @@ public class SheetWidget extends Panel {
         rowGroupInversed = inversed;
     }
 
+    public void setInvalidFormulaMessage(String invalidFormulaMessage) {
+        this.invalidFormulaMessage = invalidFormulaMessage;
+        updateAllVisibleComments();
+    }
 }

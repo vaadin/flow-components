@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.vaadin.data.Property;
+import com.vaadin.ui.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
@@ -50,27 +52,10 @@ import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.AbstractSelect;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")
 @Theme("demo")
@@ -488,6 +473,10 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         closeDownload.setSpacing(true);
         closeDownload.addComponents(closeButton, downloadButton, loadFixture);
 
+        checkBoxLayout.setWidth(null);
+        createAndFreeze.setWidth(null);
+        updateUpload.setWidth(null);
+        closeDownload.setWidth(null);
         options.addComponent(checkBoxLayout);
         options.addComponent(createAndFreeze);
         options.addComponent(updateUpload);

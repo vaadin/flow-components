@@ -17,9 +17,7 @@ package com.vaadin.addon.spreadsheet.shared;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import com.vaadin.addon.spreadsheet.client.ImageInfo;
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
@@ -118,6 +116,8 @@ public class SpreadsheetState extends TabIndexState {
 
     public ArrayList<String> visibleCellComments;
 
+    public Set<String> invalidFormulaCells;
+
     public boolean hasActions;
 
     public HashMap<String, ImageInfo> resourceKeyToImage;
@@ -140,4 +140,6 @@ public class SpreadsheetState extends TabIndexState {
 
     public boolean workbookChangeToggle;
 
+    @DelegateToWidget
+    public String invalidFormulaErrorMessage = "Invalid formula";
 }
