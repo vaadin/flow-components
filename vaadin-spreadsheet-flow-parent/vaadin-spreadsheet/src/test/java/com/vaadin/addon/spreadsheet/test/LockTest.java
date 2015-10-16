@@ -7,7 +7,7 @@ import org.junit.Test;
 public class LockTest extends Test1 {
 
     @Test
-    @Ignore("Fails with all browsers")
+    @Ignore("Fails with all browsers, user can still add content to B2 after lock fixture is run")
     public void testLockedCells() {
         sheetController.putCellContent("B2", "value");
 

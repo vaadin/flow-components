@@ -18,7 +18,6 @@ public class CustomComponentsTest extends Test1 {
     final static Integer NUM_PROXY = 42;
 
     @Test
-    @Ignore("Fails in Phantom")
     public void testTextField() {
         loadServerFixture("CUSTOM_COMPONENTS");
 
@@ -97,18 +96,15 @@ public class CustomComponentsTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails with Phantom")
     public void testScrollingBug() throws InterruptedException {
         loadServerFixture("CUSTOM_COMPONENTS");
 
         SheetCellElement b2 = $(SpreadsheetElement.class).first().getCellAt(
                 "B2");
         typeInTextFieldEditor(b2, TEXT_PROXY);
-        sheetController.selectCell("B3");
-        sheetController.selectCell("B2");
+        sheetController.selectCell("B5");
 
-        Assert.assertEquals(TEXT_PROXY, b2.findElement(By.xpath("./input"))
-                .getAttribute("value"));
+        Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B2"));
         sheetController.selectCell("B5");
         sheetController.navigateToCell("B100");
 
@@ -116,11 +112,7 @@ public class CustomComponentsTest extends Test1 {
         sheetController.navigateToCell("B1");
         Sleeper.sleepTightInSeconds(3);
 
-        b2 = $(SpreadsheetElement.class).first().getCellAt("B2");
-        activateEditorInCell(b2);
-
-        Assert.assertEquals(TEXT_PROXY, b2.findElement(By.xpath("./input"))
-                .getAttribute("value"));
+        Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B2"));
     }
 
     @Test

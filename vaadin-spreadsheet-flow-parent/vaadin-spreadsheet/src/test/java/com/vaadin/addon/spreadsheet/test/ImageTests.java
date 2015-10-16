@@ -1,13 +1,11 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
 public class ImageTests extends Test1 {
 
     @Test
-    @Ignore("Fails with Phantom")
     public void testFromUpload() {
         loadSheetFile("picture_sheet.xlsx");
 

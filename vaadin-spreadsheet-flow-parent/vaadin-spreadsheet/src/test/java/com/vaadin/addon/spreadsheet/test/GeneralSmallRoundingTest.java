@@ -16,12 +16,6 @@ public class GeneralSmallRoundingTest extends AbstractSpreadsheetTestCase {
 
     public static final String TARGET_CELL = "A6";
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        headerPage.loadFile("small_general_round.xlsx", this);
-    }
-
     @Test
     public void generalFormat_spreadsheetWithGeneralFormatAndLocaleFI_smallNmbersRoundedCorrectly() {
         setLocale(new Locale("fi", "FI"));

@@ -2,6 +2,7 @@ package com.vaadin.addon.spreadsheet.test;
 
 import java.io.IOException;
 
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -23,8 +24,9 @@ public class MergeTests extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in IE")
     public void testBasic() {
+        skipBrowser("insertAndRet() does not work correctly in IE", Browser.IE9, Browser.IE10, Browser.IE11);
+
         sheetController.selectCell("A2");
         sheetController.selectCell("A1");
         sheetController.insertAndRet("1");
@@ -50,7 +52,6 @@ public class MergeTests extends Test1 {
     }
 
     @Test
-    @Ignore
     public void testContents() {
         sheetController.selectCell("A2");
         sheetController.putCellContent("A1", "A1 text");

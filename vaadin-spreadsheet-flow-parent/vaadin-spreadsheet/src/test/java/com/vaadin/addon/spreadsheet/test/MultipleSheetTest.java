@@ -2,6 +2,7 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.fail;
 
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -14,7 +15,6 @@ import com.vaadin.testbench.By;
 public class MultipleSheetTest extends Test1 {
 
     @Test
-    @Ignore("Fails with Phantom and IE")
     public void testMultipleSheet() {
 
         driver.findElement(By.xpath("//div[contains(@class,'col4 row4')]"))
@@ -51,8 +51,9 @@ public class MultipleSheetTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in phantom")
     public void testRenameSheet() {
+        skipBrowser("Cannot find the 'new sheet name' element on PhantomJS", Browser.PHANTOMJS);
+
         createNewSheet();
         Actions actions = new Actions(driver);
         actions.doubleClick(driver.findElement(By
@@ -82,8 +83,8 @@ public class MultipleSheetTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails with Phantom")
     public void testMultipleSheetByAPI() {
+        skipBrowser("Cannot find the 'dontSee' element on PhantomJS", Browser.PHANTOMJS);
         newSheetAndLoadServerFixture("SHEETS");
 
         driver.findElement(By

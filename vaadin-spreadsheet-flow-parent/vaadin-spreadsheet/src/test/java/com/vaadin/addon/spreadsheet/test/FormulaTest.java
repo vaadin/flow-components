@@ -10,7 +10,6 @@ import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 public class FormulaTest extends AbstractSpreadsheetTestCase {
 
     @Test
-    @Ignore("Fails in IE11")
     public void testSimpleFormulaSheet() throws Exception {
         SpreadsheetPage spreadsheetPage = headerPage.loadFile(
                 "formulasheet.xlsx", this);

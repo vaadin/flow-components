@@ -2,6 +2,7 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.hamcrest.Matchers.equalTo;
 
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -10,7 +11,7 @@ import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 public class StyleTest extends Test1 {
 
     @Test
-    @Ignore("Fails in all browsers")
+    @Ignore("Fails in all browsers, Are POI CellStyles even supported?")
     public void testCssStyleFromFixture() {
         SheetController c = keyboardSetup();
         newSheetAndLoadServerFixture("STYLES");
@@ -21,8 +22,8 @@ public class StyleTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in Chrome, Phantom")
     public void testCssFromUpload() {
+        skipBrowser("Fails in Phantom", Browser.PHANTOMJS);
         SheetController c = keyboardSetup();
         loadSheetFile("spreadsheet_styles.xlsx");
         assertCorrectCss(c); // TODO - Fails with rev 18
@@ -65,13 +66,12 @@ public class StyleTest extends Test1 {
                 (int) Math.ceil(getSize(c.getCellStyle("D5", "font-size"))),
                 equalTo(19));
 
-        // if (getDesiredCapabilities().getBrowserName()
-        // .equalsIgnoreCase("chrome")) {
-        // collector.checkThat(c.getCellStyle("B4", "font-weight"),
-        // equalTo("300"));
-        // } else {
-        collector
-                .checkThat(c.getCellStyle("B4", "font-weight"), equalTo("700"));
-        // }
+         if (getDesiredCapabilities().getBrowserName()
+         .equalsIgnoreCase("chrome")) {
+             collector.checkThat(c.getCellStyle("B4", "font-weight"), equalTo("bold"));
+         } else {
+            collector
+                    .checkThat(c.getCellStyle("B4", "font-weight"), equalTo("700"));
+         }
     }
 }

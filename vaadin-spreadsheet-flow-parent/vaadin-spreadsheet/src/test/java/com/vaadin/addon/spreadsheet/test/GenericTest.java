@@ -1,57 +1,52 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
+import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
+import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
-import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
-import com.vaadin.testbench.annotations.RunLocally;
-import com.vaadin.testbench.parallel.Browser;
 
-@Ignore("Fails in all browsers")
-public class GenericTest extends Test1 {
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+
+public class GenericTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testKeyboardNavigation() {
+        headerPage.createNewSpreadsheet();
+        final SheetCellElement a1 = $(SpreadsheetElement.class).first()
+                .getCellAt("A1");
+        a1.setValue("X");
 
-        SheetController c = keyboardSetup();
+        new Actions(getDriver())
+                .sendKeys(Keys.ARROW_RIGHT).sendKeys(Keys.ARROW_RIGHT).sendKeys(Keys.ARROW_DOWN)
+                .sendKeys(Keys.ARROW_DOWN).sendKeys(Keys.ARROW_LEFT)
+                .sendKeys(Keys.ARROW_UP).sendKeys("Y").sendKeys(Keys.RETURN).sendKeys(Keys.ENTER).build().perform();
 
-        c.selectCell("A2");
-        c.selectCell("A1");
-
-        c.insertAndRet("start").action(Keys.ARROW_UP)
-                .action(Keys.ARROW_RIGHT).action(Keys.ARROW_RIGHT)
-                .action(Keys.ARROW_RIGHT).action(Keys.ARROW_DOWN)
-                .action(Keys.ARROW_DOWN).action(Keys.ARROW_LEFT)
-.action(Keys.ARROW_UP)
-                .insertAndRet("end");
-
-        Assert.assertEquals("start", $(SpreadsheetElement.class).first()
-                .getCellAt("A1").getValue());
-        Assert.assertEquals("end", $(SpreadsheetElement.class).first()
-                .getCellAt("C2").getValue());
+        final SheetCellElement c2 = $(SpreadsheetElement.class).first()
+                .getCellAt("C2");
+        Assert.assertEquals("X", a1.getValue());
+        Assert.assertEquals("Y", c2.getValue());
     }
 
     @Test
     public void testDates() {
-
-        SheetController c = keyboardSetup();
-        new WebDriverWait(getDriver(), 20).until(ExpectedConditions
-                .presenceOfElementLocated(By.className("sheet")));
-        c.selectCell("A2");
-        c.selectCell("A1");
-        c.insertAndRet("=TODAY()");
-        c.insertAndRet("6/7/2009");
-        c.selectCell("B1");
-        c.insertAndRet("=A1+3");
+        setLocale(Locale.US);
+        headerPage.createNewSpreadsheet();
+        final SheetCellElement a1 = $(SpreadsheetElement.class).first()
+                .getCellAt("A1");
+        final SheetCellElement a2 = $(SpreadsheetElement.class).first()
+                .getCellAt("A2");
+        final SheetCellElement b1 = $(SpreadsheetElement.class).first()
+                .getCellAt("B1");
+        a1.setValue("=TODAY()");
+        a2.setValue("6/7/2009");
+        b1.setValue("=A1+3");
 
         testBench(driver).waitForVaadin();
         Calendar start = new GregorianCalendar(1900, Calendar.JANUARY, 0);
@@ -59,64 +54,52 @@ public class GenericTest extends Test1 {
         now.add(Calendar.DAY_OF_YEAR, 1);
         Long today = new Long((now.getTime().getTime() - start.getTime()
                 .getTime()) / (1000 * 60 * 60 * 24));
-        c.selectCell("C1");
-        Assert.assertEquals(today.toString(), c.getCellContent("A1"));
-        Assert.assertEquals(today + 3, Long.parseLong(c.getCellContent("B1")));
+
+        Assert.assertEquals(today.toString(), a1.getValue());
+        Assert.assertEquals(today + 3, Long.parseLong(b1.getValue()));
     }
 
     @Test
     public void testFormats() {
-        SheetController c = new SheetController(driver, testBench(driver),
-                getDesiredCapabilities());
+        setLocale(Locale.US);
+        SpreadsheetPage spreadsheet = headerPage.createNewSpreadsheet();
+        headerPage.loadTestFixture(TestFixtures.Formats);
+        final SheetCellElement a1 = $(SpreadsheetElement.class).first()
+                .getCellAt("A1");
 
-        newSheetAndLoadServerFixture("FORMATS");
+        Assert.assertEquals("example", spreadsheet.getCellValue("B2"));
+        Assert.assertEquals("example", spreadsheet.getCellValue("C2"));
+        Assert.assertEquals("example", spreadsheet.getCellValue("D2"));
+        Assert.assertEquals("example", spreadsheet.getCellValue("E2"));
+        Assert.assertEquals("example", spreadsheet.getCellValue("F2"));
 
-        Assert.assertEquals("example", c.getCellContent("B2"));
-        Assert.assertEquals("example", c.getCellContent("C2"));
-        Assert.assertEquals("example", c.getCellContent("D2"));
-        Assert.assertEquals("example", c.getCellContent("E2"));
-        Assert.assertEquals("example", c.getCellContent("F2"));
+        Assert.assertEquals("38247.1226851852", spreadsheet.getCellValue("B3"));
+        Assert.assertEquals("38247.12", spreadsheet.getCellValue("C3"));
+        Assert.assertEquals("3824712.27%", spreadsheet.getCellValue("D3"));
+        Assert.assertEquals("17-Sep-04", spreadsheet.getCellValue("E3"));
+        Assert.assertEquals("3.82E04", spreadsheet.getCellValue("F3"));
 
-        Assert.assertEquals("38247.1226851852", c.getCellContent("B3"));
-        Assert.assertEquals("38247.12", c.getCellContent("C3"));
-        Assert.assertEquals("3824712.27%", c.getCellContent("D3"));
-        Assert.assertEquals("17-Sep-04", c.getCellContent("E3"));
-        Assert.assertEquals("3.82E04", c.getCellContent("F3"));
-
-        // These values are taken from LibreOffice
-        // Assert.assertEquals("38247.0810185185",
-        // sheetController.getCellContent("B3"));
-        // Assert.assertEquals("38247.08",
-        // sheetController.getCellContent("C3"));
-        // Assert.assertEquals("3824708.10%",
-        // sheetController.getCellContent("D3"));
-        // Assert.assertEquals("17-Sep-04",
-        // sheetController.getCellContent("E3"));
-        // Assert.assertEquals("3.82E04", sheetController.getCellContent("F3"));
-
-        Assert.assertEquals("3.1415", c.getCellContent("B6"));
-        Assert.assertEquals("3.14", c.getCellContent("C6"));
-        Assert.assertEquals("314.15%", c.getCellContent("D6"));
-        Assert.assertEquals("3-Jan-00", c.getCellContent("E6"));
-        Assert.assertEquals("3.14E00", c.getCellContent("F6"));
+        Assert.assertEquals("3.1415", spreadsheet.getCellValue("B6"));
+        Assert.assertEquals("3.14", spreadsheet.getCellValue("C6"));
+        Assert.assertEquals("314.15%", spreadsheet.getCellValue("D6"));
+        Assert.assertEquals("3-Jan-00", spreadsheet.getCellValue("E6"));
+        Assert.assertEquals("3.14E00", spreadsheet.getCellValue("F6"));
     }
 
     @Test
     public void testStringCellType() {
-        SheetController c = keyboardSetup();
+        SpreadsheetPage spreadsheet = headerPage.createNewSpreadsheet();
+        headerPage.loadTestFixture(TestFixtures.Formats);
+        final SheetCellElement b2 = $(SpreadsheetElement.class).first()
+                .getCellAt("B2");
 
-        c.selectCell("B2");
-        c.insertAndRet("example");
-        Assert.assertEquals("example", c.getCellContent("B2"));
+        b2.setValue("example");
+        Assert.assertEquals("example", spreadsheet.getCellValue("B2"));
 
-        c.selectCell("B2");
-        c.insertAndRet("12");
-        Assert.assertEquals("12", c.getCellContent("B2"));
+        b2.setValue("12");
+        Assert.assertEquals("12", spreadsheet.getCellValue("B2"));
 
-        c.selectCell("B2");
-        c.insertAndRet("example 2");
-        Assert.assertEquals("example 2", c.getCellContent("B2")); // TODO -
-                                                                  // Fails with
-                                                                  // rev 18
+        b2.setValue("example 2");
+        Assert.assertEquals("example 2", spreadsheet.getCellValue("B2"));
     }
 }

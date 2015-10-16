@@ -45,12 +45,16 @@ public class FormulaFieldFormatTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
-    @Ignore("test is locale dependent")
     public void dateFormat_sheetWithDateFormatRuleForDateCells_formulaFieldContentsSimpleDateFormat() {
         spreadsheetPage = headerPage.loadFile("date_format.xlsx", this);
-        assertFormat("A5", "14-Mar-14", "14/03/14 00:00");
-        assertFormat("A10", "3/14/14 12:00 AM", "14/03/14 00:00");
-        assertFormat("A1", "3/14", "14/03/14 00:00");
+//        assertFormat("A5", "14-Mar-14", "14/03/14 00:00");
+//        assertFormat("A10", "3/14/14 12:00 AM", "14/03/14 00:00");
+//        assertFormat("A1", "3/14", "14/03/14 00:00");
+
+        // Cell values and formula field values equals with dates
+        assertFormat("A5", "14-Mar-14", "14-Mar-14");
+        assertFormat("A10", "3/14/14 12:00 AM", "3/14/14 12:00 AM");
+        assertFormat("A1", "3/14", "3/14");
     }
 
     private void assertFormat(String cell, String cellValue,

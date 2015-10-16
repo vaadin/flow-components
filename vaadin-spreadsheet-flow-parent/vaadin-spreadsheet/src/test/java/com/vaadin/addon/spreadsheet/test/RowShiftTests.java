@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet.test;
 
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -33,8 +34,8 @@ public class RowShiftTests extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in IE")
     public void testFormula() {
+        skipBrowser("Sending multiple keys fails with IE", Browser.IE9, Browser.IE10, Browser.IE11);
         sheetController.selectCell("A2");
         sheetController.selectCell("A1");
         sheetController.insertColumn(getFixture(10));
@@ -55,9 +56,8 @@ public class RowShiftTests extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in Phantom")
     public void testDeleteFormulaReference() {
-
+        skipBrowser("sheetController.putCellContent() fails with PhantomJS", Browser.PHANTOMJS);
         sheetController.putCellContent("A3", "42");
         sheetController.putCellContent("C1", "=A3");
 

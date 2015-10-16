@@ -2,6 +2,7 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertTrue;
 
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -10,8 +11,8 @@ import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 public class SelectionTest extends Test1 {
 
     @Test
-    @Ignore("Fails in Firefox, Phantom")
     public void testSelectionSingleCell() {
+        skipBrowser("Shift/Ctrl select fails with Firefox and PhantomJS", Browser.FIREFOX, Browser.PHANTOMJS);
         sheetController.selectCell("B2");
         ctrl.selectCell("C3");
         ctrl.selectCell("D4");
@@ -22,8 +23,8 @@ public class SelectionTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in Firefox, Phantom")
     public void testMultipleRectSelection() {
+        skipBrowser("Shift/Ctrl select fails with Firefox and PhantomJS", Browser.FIREFOX, Browser.PHANTOMJS);
         sheetController.selectCell("B1");
         shift.selectCell("B3");
         ctrl.selectCell("D3");
@@ -37,8 +38,8 @@ public class SelectionTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in Firefox, Phantom")
     public void testComplicatedCellSelection() {
+        skipBrowser("Shift/Ctrl select fails with Firefox and PhantomJS", Browser.FIREFOX, Browser.PHANTOMJS);
         sheetController.selectCell("B2");
         ctrl.clickCell("E2");
         ctrl.clickCell("C3");
@@ -57,8 +58,8 @@ public class SelectionTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in Firefox, Phantom")
     public void testRowSelection() {
+        skipBrowser("Shift/Ctrl select fails with Firefox and PhantomJS", Browser.FIREFOX, Browser.PHANTOMJS);
         sheetController.clickRow(3);
         ctrl.clickRow(5);
         shift.clickRow(7);
@@ -70,8 +71,8 @@ public class SelectionTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in Firefox, Phantom")
     public void testColumnSelection() {
+        skipBrowser("Shift/Ctrl select fails with Firefox and PhantomJS", Browser.FIREFOX, Browser.PHANTOMJS);
         sheetController.clickColumn("B");
         ctrl.clickColumn("D");
         shift.clickColumn("F");
@@ -83,8 +84,8 @@ public class SelectionTest extends Test1 {
     }
 
     @Test
-    @Ignore("Something's wrong with this test – the functionality is OK")
     public void testRowColumnMixed() {
+        skipBrowser("Shift/Ctrl select fails with Firefox and PhantomJS", Browser.FIREFOX, Browser.PHANTOMJS);
         sheetController.clickColumn("C");
         ctrl.clickColumn("E");
         ctrl.clickRow(3);
@@ -100,8 +101,9 @@ public class SelectionTest extends Test1 {
     }
 
     @Test
-    @Ignore("Navigating to cell clears the selection, so this can't work")
+    @Ignore("Navigating to cell clears the selection, so this can't work -> Figure out another way to scroll")
     public void testColumnRowWithPagination() {
+        skipBrowser("Shift/Ctrl select fails with Firefox and PhantomJS", Browser.FIREFOX, Browser.PHANTOMJS);
         sheetController.clickColumn("C");
         ctrl.clickColumn("E");
         ctrl.clickRow(3);
@@ -118,8 +120,8 @@ public class SelectionTest extends Test1 {
     }
 
     @Test
-    @Ignore("Fails in Firefox, Phantom")
     public void testShiftClick() {
+        skipBrowser("Shift/Ctrl select fails with Firefox and PhantomJS", Browser.FIREFOX, Browser.PHANTOMJS);
         sheetController.clickCell("B2");
         shift.clickCell("C3");
         assertCellSelected("B2");
@@ -160,7 +162,6 @@ public class SelectionTest extends Test1 {
         assertCellSelected("F2");
     }
 
-    @Ignore("Value setting is not working")
     @Test
     public void mouseSelection_cellWithStringValue_cellIsSelected() {
         sheetController.clickCell("B2");
