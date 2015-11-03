@@ -23,8 +23,9 @@ public class HeaderPage extends Page {
 
     public SpreadsheetPage loadFile(String testSheetFilename,
             TestBenchTestCase tbtc) {
-        $(ComboBoxElement.class).id("testSheetSelect").selectByText(
-                testSheetFilename);
+        ComboBoxElement testSheetSelect = $(ComboBoxElement.class).id("testSheetSelect");
+        testSheetSelect.selectByText(testSheetFilename);
+        testSheetSelect.waitForVaadin();
         $(ButtonElement.class).id("update").click();
         return new SpreadsheetPage(driver);
     }

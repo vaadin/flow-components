@@ -2361,6 +2361,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         selectionManager.clear();
         historyManager.clear();
         invalidFormulas.clear();
+        sheetPopupButtons.clear();
         for (SheetImageWrapper image : sheetImages) {
             setResource(image.getResourceKey(), null);
         }
@@ -2454,7 +2455,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             }
             attachedPopupButtons.clear();
         }
-        sheetPopupButtons.clear();
+
         // clear all tables, possible tables for new/changed sheet are added
         // after first round trip.
         tablesLoaded = false;

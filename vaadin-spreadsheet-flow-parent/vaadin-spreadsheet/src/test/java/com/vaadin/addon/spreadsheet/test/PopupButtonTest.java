@@ -110,4 +110,23 @@ public class PopupButtonTest extends AbstractSpreadsheetTestCase {
             }
         });
     }
+
+    @Test
+    public void popupButton_cellHasAPopupButtonAndFreezePaneIsAdded_theCellStillHasAPopupButton() {
+        headerPage.loadTestFixture(TestFixtures.PopupButton);
+        SpreadsheetElement spreadsheetElement = $(SpreadsheetElement.class)
+                .first();
+        final SheetCellElement d1 = spreadsheetElement.getCellAt("D1");
+        d1.click();
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver webDriver) {
+                return d1.hasPopupButton();
+            }
+        });
+
+        headerPage.addFreezePane();
+
+        assertTrue(spreadsheetElement.getCellAt("D1").hasPopupButton());
+    }
 }
