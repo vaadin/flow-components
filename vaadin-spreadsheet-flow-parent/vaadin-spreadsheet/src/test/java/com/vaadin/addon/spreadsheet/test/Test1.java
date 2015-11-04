@@ -57,12 +57,16 @@ public abstract class Test1 extends UITest {
     protected void loadServerFixture(String fixtureName) {
         new WebDriverWait(getDriver(), 20).until(ExpectedConditions
                 .presenceOfElementLocated(By.id("fixtureNameCmb")));
-        $(ComboBoxElement.class).id("fixtureNameCmb").selectByText(fixtureName);
+        ComboBoxElement fixtureNameCmb = $(ComboBoxElement.class).id("fixtureNameCmb");
+        fixtureNameCmb.selectByText(fixtureName);
+        fixtureNameCmb.waitForVaadin();
         $(ButtonElement.class).id("loadFixtureBtn").click();
     }
 
     protected void loadSheetFile(String filename) {
-        $(ComboBoxElement.class).id("testSheetSelect").selectByText(filename);
+        ComboBoxElement testSheetSelect = $(ComboBoxElement.class).id("testSheetSelect");
+        testSheetSelect.selectByText(filename);
+        testSheetSelect.waitForVaadin();
         $(ButtonElement.class).id("update").click();
     }
 
