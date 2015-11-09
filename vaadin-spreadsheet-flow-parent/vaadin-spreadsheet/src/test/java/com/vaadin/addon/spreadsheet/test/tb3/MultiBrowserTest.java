@@ -58,7 +58,6 @@ public abstract class MultiBrowserTest extends PrivateTB3Configuration {
                     InternetExplorerDriver.REQUIRE_WINDOW_FOCUS, true);
             desiredCapabilities.setCapability(
                     InternetExplorerDriver.ENABLE_PERSISTENT_HOVERING, false);
-            desiredCapabilities.setCapability(InternetExplorerDriver.NATIVE_EVENTS, false);
         }
 
         desiredCapabilities.setCapability("project", "Vaadin Spreadsheet");
