@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -240,7 +241,11 @@ public class CellValueCommand extends SpreadsheetCommand implements
         } else {
             if (value instanceof String) {
                 if (((String) value).startsWith("=")) {
-                    cell.setCellFormula(((String) value).substring(1));
+                    try {
+                        cell.setCellFormula(((String) value).substring(1));
+                    } catch (FormulaParseException fpe) {
+                        cell.setCellValue((String) value);
+                    }
                 } else {
                     cell.setCellValue((String) value);
                 }

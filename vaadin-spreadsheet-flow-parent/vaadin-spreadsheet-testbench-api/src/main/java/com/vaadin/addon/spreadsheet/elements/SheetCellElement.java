@@ -121,4 +121,14 @@ public class SheetCellElement extends AbstractElement {
         return !indicators.isEmpty();
     }
 
+    /**
+     * Determines if the cell has comment indicator
+     *
+     * @return true if this cell has a comment indicator
+     */
+    public boolean hasCommentIndicator() {
+        List<WebElement> indicators = findElements(By.className("cell-comment-triangle"));
+        return !indicators.isEmpty();
+    }
+
 }

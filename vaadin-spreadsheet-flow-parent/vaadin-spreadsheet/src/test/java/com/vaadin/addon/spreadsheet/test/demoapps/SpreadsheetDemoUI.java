@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.ui.*;
 import org.apache.poi.ss.usermodel.Cell;
@@ -146,31 +147,33 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         });
 
         Button newSpreadsheetButton = new Button("Create new",
-                new Button.ClickListener() {
+            new Button.ClickListener() {
 
-                    @Override
-                    public void buttonClick(ClickEvent event) {
-                        if (spreadsheet == null) {
-                            spreadsheet = new Spreadsheet();
-                            updateLocale();
-                            spreadsheet
-                                    .addSelectionChangeListener(selectionChangeListener);
-                            spreadsheet
-                                    .addSheetChangeListener(selectedSheetChangeListener);
-                            layout.addComponent(spreadsheet);
-                            layout.setExpandRatio(spreadsheet, 1.0f);
-                        } else {
-                            spreadsheet.reset();
-                        }
-                        spreadsheet.setSpreadsheetComponentFactory(null);
-                        save.setEnabled(true);
-                        previousFile = null;
-                        openTestSheetSelect.setValue(null);
-                        gridlines.setValue(spreadsheet.isGridlinesVisible());
-                        rowColHeadings.setValue(spreadsheet
-                                .isRowColHeadingsVisible());
+                @Override
+                public void buttonClick(ClickEvent event) {
+                    if (spreadsheet == null) {
+                        spreadsheet = new Spreadsheet();
+                        updateLocale();
+                        spreadsheet
+                                .addSelectionChangeListener(selectionChangeListener);
+                        spreadsheet
+                                .addSheetChangeListener(selectedSheetChangeListener);
+                        layout.addComponent(spreadsheet);
+                        layout.setExpandRatio(spreadsheet, 1.0f);
+                    } else {
+                        spreadsheet.reset();
                     }
-                });
+                    spreadsheet.setSpreadsheetComponentFactory(null);
+                    save.setEnabled(true);
+                    previousFile = null;
+                    openTestSheetSelect.setValue(null);
+                    gridlines.setValue(spreadsheet.isGridlinesVisible());
+                    rowColHeadings.setValue(spreadsheet
+                            .isRowColHeadingsVisible());
+
+                    Page.getCurrent().setUriFragment(null, false);
+                }
+            });
 
         File file = null;
         try {
@@ -182,7 +185,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             e.printStackTrace();
         }
 
-        FilesystemContainer testSheetContainer = new FilesystemContainer(file);
+        final FilesystemContainer testSheetContainer = new FilesystemContainer(file);
         testSheetContainer.setRecursive(false);
         testSheetContainer.setFilter(new FilenameFilter() {
 
@@ -211,6 +214,10 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 Object value = openTestSheetSelect.getValue();
                 if (value != null && value instanceof File) {
                     loadFile((File) value);
+                }
+                Object caption = testSheetContainer.getItem(value).getItemProperty("Name").getValue();
+                if(caption != null) {
+                    Page.getCurrent().setUriFragment("file/" + caption.toString(), false);
                 }
             }
         });
@@ -492,6 +499,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 });
 
         updateFromFragment();
+
     }
 
     /*

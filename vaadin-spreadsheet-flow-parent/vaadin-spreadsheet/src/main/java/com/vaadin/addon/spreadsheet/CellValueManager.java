@@ -8,10 +8,10 @@ package com.vaadin.addon.spreadsheet;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- *
+ * 
  * See the file license.html distributed with this software for more
  * information about licensing.
- *
+ * 
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -697,7 +697,7 @@ public class CellValueManager implements Serializable {
         }
 
         CellValueCommand command = new CellValueCommand(spreadsheet);
-        if (selectedCellReference != null) {
+        if (selectedCellReference != null && selectedIsNotInTheRange(selectedCellReference, cellRangeAddresses)) {
             command.captureCellValues(selectedCellReference);
         }
         for (CellReference cr : individualSelectedCells) {
@@ -723,6 +723,15 @@ public class CellValueManager implements Serializable {
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
         fireCellValueChangeEvent(spreadsheet.getSelectedCellReferences());
         spreadsheet.loadHyperLinks();
+    }
+
+    private boolean selectedIsNotInTheRange(CellReference selected, List<CellRangeAddress> cellRangeAddresses) {
+        for (CellRangeAddress range : cellRangeAddresses) {
+            if(range.isInRange(selected.getRow(), selected.getCol())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

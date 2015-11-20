@@ -30,6 +30,9 @@ public class PopupButtonFixture implements SpreadsheetFixture {
         spreadsheet.addSelectionChangeListener(new SelectionChangeListener() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
+                if(event.getAllSelectedCells().size() != 1) {
+                    return;
+                }
                 List<String> values = new ArrayList<String>(VALUES);
                 CellReference ref = event.getSelectedCellReference();
                 CellReference newRef = new CellReference(ref.getRow(), ref

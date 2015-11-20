@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet.action;
  * #L%
  */
 
+import com.vaadin.addon.spreadsheet.command.RowInsertOrDeleteCommand;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
@@ -63,9 +64,8 @@ public class InsertNewRowAction extends SpreadsheetAction {
     @Override
     public void executeActionOnHeader(Spreadsheet spreadsheet,
             CellRangeAddress headerRange) {
-        int rows = spreadsheet.getRows();
-        spreadsheet.shiftRows(headerRange.getFirstRow(), (rows - 1), 1, true,
-                true);
-        spreadsheet.setMaxRows(rows + 1);
+        RowInsertOrDeleteCommand command = new RowInsertOrDeleteCommand(spreadsheet, headerRange);
+        command.insertNewRow();
+        spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
     }
 }

@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet.action;
  * #L%
  */
 
+import com.vaadin.addon.spreadsheet.command.RowInsertOrDeleteCommand;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
@@ -63,16 +64,9 @@ public class DeleteRowAction extends SpreadsheetAction {
     @Override
     public void executeActionOnHeader(Spreadsheet spreadsheet,
             CellRangeAddress headerRange) {
-        int rows = spreadsheet.getRows();
-        int deletedRowIndex = headerRange.getFirstRow();
-        if (deletedRowIndex + 1 > rows - 1) {
-            // if removed last row, just delete it and make sheet smaller
-            spreadsheet.deleteRows(deletedRowIndex, deletedRowIndex);
-        } else {
-            spreadsheet.shiftRows(deletedRowIndex + 1, (rows - 1), -1, true,
-                    true);
-        }
-        spreadsheet.setMaxRows(rows - 1);
+        RowInsertOrDeleteCommand command = new RowInsertOrDeleteCommand(spreadsheet, headerRange);
+        command.deleteRow();
+        spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
     }
 
 }

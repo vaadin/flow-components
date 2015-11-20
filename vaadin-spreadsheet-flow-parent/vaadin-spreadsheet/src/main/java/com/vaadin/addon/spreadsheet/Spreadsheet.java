@@ -1669,7 +1669,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         getCellValueManager().clearCacheForColumn(columnIndex + 1);
         getCellValueManager().loadCellData(firstRow, columnIndex + 1, lastRow,
                 columnIndex + 1);
-        if (sheetImages != null) {
+        if (hasSheetImages()) {
             reloadImageSizesFromPOI = true;
             loadImages();
         }
@@ -1752,7 +1752,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 }
             }
         }
-        if (sheetImages != null) {
+        if (hasSheetImages()) {
             reloadImageSizesFromPOI = true;
         }
         // need to shift the cell styles, clear and update
@@ -1794,6 +1794,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 }
             }
         }
+        rowsMoved(firstAffectedRow, lastAffectedRow, n);
+
+
         for (Cell cell : cellsToUpdate) {
             styler.cellStyleUpdated(cell, false);
             markCellAsUpdated(cell, false);
@@ -1814,6 +1817,89 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                         selectedCellReference.formatAsString(), false);
             }
         }
+    }
+
+    private boolean hasSheetImages() {
+        return sheetImages != null && sheetImages.size() > 0;
+    }
+
+    /**
+     * Called when number of rows has moved. Spreadsheet needs to update its internal state.
+     *
+     * Note: If n is negative it would mean the rows has moved up. Positive value
+     * indicates that new rows are moved below.
+     *
+     * @param first the first row that has changed, 0-based
+     * @param last the last row that has changed, 0-based
+     * @param n the amount of lines that rows has been moved
+     */
+    private void rowsMoved(int first, int last, int n) {
+        // Merged regions
+        if(n < 0) {
+            // Remove merged cells from deleted rows. POI will handle the other updated values.
+            for(int row = (first+n); row <= first; ++row) {
+                Sheet sheet = getActiveSheet();
+                for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
+                    CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
+                    if (mergedRegion.getFirstRow() == row) {
+                        removeMergedRegion(i);
+                    }
+                }
+            }
+        }
+
+        // PopupButtons
+        if(!sheetPopupButtons.isEmpty()) {
+            Map<CellReference, PopupButton> updated = new HashMap<CellReference, PopupButton>();
+
+            for (Entry<CellReference, PopupButton> entry : sheetPopupButtons.entrySet()) {
+                CellReference cell = entry.getKey();
+                PopupButton pbutton = entry.getValue();
+                unRegisterPopupButton(pbutton);
+                int row = cell.getRow();
+                if (rowWasRemoved(row, first, n)) {
+                    // do nothing -> will be removed
+                } else if (numberOfRowsAboveWasChanged(row, last, first, n)) {
+                    int newRow = cell.getRow() + n;
+                    int col = cell.getCol();
+                    CellReference newCell = new CellReference(newRow, col);
+                    pbutton.setCellReference(newCell);
+                    updated.put(newCell, pbutton);
+                } else {
+                    updated.put(cell, entry.getValue());
+                }
+            }
+            sheetPopupButtons = updated;
+        }
+
+        // Invalid formula indicators
+        int activeSheetIndex = workbook.getActiveSheetIndex();
+        HashSet<String> original = invalidFormulas.get(activeSheetIndex);
+        if (original != null) {
+            HashSet<String> updated = new HashSet<String>();
+            for(String key : original) {
+                int row = SpreadsheetUtil.getRowFromKey(key) - 1;
+                int col = SpreadsheetUtil.getColumnIndexFromKey(key) - 1;
+                if(rowWasRemoved(row, first, n)) {
+                    // do nothing -> will be removed
+                } else if(numberOfRowsAboveWasChanged(row, last, first, n)) {
+                    // the number of the rows above has changed -> update the row index
+                    updated.add(SpreadsheetUtil.toKey(col+1,row+n+1));
+                } else {
+                    updated.add(key);
+                }
+            }
+            original.clear();
+            invalidFormulas.put(activeSheetIndex, updated);
+        }
+    }
+
+    private boolean numberOfRowsAboveWasChanged(int row, int last, int first, int n) {
+        return first <= row && row <= last;
+    }
+
+    private boolean rowWasRemoved(int row, int first, int n) {
+        return n < 0 && first + n < row && row <= first;
     }
 
     /**
@@ -1892,7 +1978,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         updateMergedRegions();
         valueManager.updateDeletedRowsInClientCache(startRow + 1, endRow + 1);
-        if (sheetImages != null) {
+        if (hasSheetImages()) {
             reloadImageSizesFromPOI = true;
         }
         updateMarkedCells();
@@ -2111,7 +2197,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             getCellValueManager().loadCellData(firstRow, columnIndex + 1,
                     lastRow, columnIndex + 1);
         }
-        if (sheetImages != null) {
+        if (hasSheetImages()) {
             reloadImageSizesFromPOI = true;
             loadImages();
         }
@@ -2153,7 +2239,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     .indexOf(rowIndex + 1));
             getState().rowH[rowIndex] = row.getHeightInPoints();
         }
-        if (sheetImages != null) {
+        if (hasSheetImages()) {
             reloadImageSizesFromPOI = true;
             loadImages();
         }
@@ -2739,7 +2825,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             float height = entry.getValue();
             setRowHeight(index - 1, height);
         }
-        if (sheetImages != null) {
+        if (hasSheetImages()) {
             reloadImageSizesFromPOI = true;
         }
         loadCells(row1, col1, row2, col2);
@@ -2785,7 +2871,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             int width = entry.getValue();
             setColumnWidth(index - 1, width);
         }
-        if (sheetImages != null) {
+        if (hasSheetImages()) {
             reloadImageSizesFromPOI = true;
         }
         loadCells(row1, col1, row2, col2);

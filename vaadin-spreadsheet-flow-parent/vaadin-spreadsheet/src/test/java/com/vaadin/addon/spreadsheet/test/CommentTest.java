@@ -4,6 +4,7 @@ package com.vaadin.addon.spreadsheet.test;
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -43,6 +44,25 @@ public class CommentTest extends AbstractSpreadsheetTestCase {
         a1.setValue("=a");
 
         assertCommentOverlayIsShownOnHover("Invalid formula");
+    }
+
+
+    @Test
+    public void removeRow_removeRowWithComment_commentIsRemoved() {
+        skipBrowser("Context click does not work with PhantomJS and Firefox", Browser.PHANTOMJS, Browser.FIREFOX);
+        headerPage.createNewSpreadsheet();
+        headerPage.loadFile("cell_comments.xlsx", this); // A1 has a comment
+        final SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+
+        spreadsheet.getRowHeader(1).contextClick();
+        spreadsheet.getContextMenu().getItem("Delete row").click();
+
+        waitUntil(new ExpectedCondition<Object>() {
+            @Override
+            public Object apply(WebDriver webDriver) {
+                return !spreadsheet.getCellAt("A1").hasCommentIndicator();
+            }
+        });
     }
 
 
