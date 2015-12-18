@@ -639,6 +639,7 @@ public class SheetWidget extends Panel {
                 updateCellStyles();
                 updateConditionalFormattingStyles();
                 resetScrollView(scrollLeft, scrollTop);
+                resetRowAndColumnStyles();
                 actionHandler.onScrollViewChanged(firstRowIndex, lastRowIndex,
                         firstColumnIndex, lastColumnIndex);
 
@@ -751,6 +752,7 @@ public class SheetWidget extends Panel {
                 handleVerticalScrollDown(scrollTop);
                 updateCells(1, 0);
             }
+            resetRowAndColumnStyles();
 
             previousScrollLeft = scrollLeft;
             previousScrollTop = scrollTop;
@@ -784,6 +786,7 @@ public class SheetWidget extends Panel {
             debugConsole.severe("SheetWidget:relayoutSheet: " + e.toString()
                     + " while relayouting spreadsheet");
             resetScrollView(scrollLeft, scrollTop);
+            resetRowAndColumnStyles();
             actionHandler.onScrollViewChanged(firstRowIndex, lastRowIndex,
                     firstColumnIndex, lastColumnIndex);
             resetColHeaders();
@@ -2037,10 +2040,10 @@ public class SheetWidget extends Panel {
     }
 
     /** Replace stylesheet with the array of rules given */
-    private void resetStyleSheetRules(StyleElement stylesheet, String[] rules) {
+    private void resetStyleSheetRules(StyleElement stylesheet, List<String> rules) {
         jsniUtil.clearCSSRules(stylesheet);
-        for (int i = 0; i < rules.length; i++) {
-            jsniUtil.insertRule(stylesheet, rules[i]);
+        for (int i = 0; i < rules.size(); i++) {
+            jsniUtil.insertRule(stylesheet, rules.get(i));
         }
     }
 
@@ -2092,37 +2095,22 @@ public class SheetWidget extends Panel {
                 negativeTopMargin - calculatedColGroupHeight, Unit.PX);
     }
 
-    private int createRowStyles(String[] rules, int startIndex, int endIndex) {
+    private int calculateHeightForRows(int startIndex, int endIndex) {
         int top = 0;
         for (int i = startIndex; i <= endIndex; i++) {
-            StringBuilder sb = new StringBuilder();
             float rowHeight = actionHandler.getRowHeight(i);
             int rowHeightPX = convertPointsToPixel(rowHeight);
-            sb.append(".").append(sheetId).append(" .sheet .row").append(i)
-                    .append(", .").append(sheetId).append(">.resize-line.row")
-                    .append(i).append(" { ").append(getRowDisplayString(i))
-                    .append("height: ").append(rowHeightPX).append("px; top:")
-                    .append(top).append("px; }\n");
             top += rowHeightPX;
             definedRowHeights[i - 1] = rowHeightPX;
-            rules[i - 1] = sb.toString();
         }
         return top;
     }
 
-    private int createColumnStyles(String[] rules, int ruleIndex,
-            int startIndex, int endIndex) {
+    private int calculateWidthForColumns(int startIndex, int endIndex) {
         int left = 0;
         for (int i = startIndex; i <= endIndex; i++) {
-            StringBuilder sb = new StringBuilder();
             int colWidth = actionHandler.getColWidth(i);
-            sb.append(".").append(sheetId).append(" .sheet .col").append(i)
-                    .append(", .").append(sheetId).append(">.resize-line.col")
-                    .append(i).append(" { ").append(getColumnDisplayString(i))
-                    .append("width: ").append(colWidth).append("px; left:")
-                    .append(left).append("px; }\n");
             left += colWidth;
-            rules[ruleIndex++] = sb.toString();
         }
         return left;
     }
@@ -2136,35 +2124,94 @@ public class SheetWidget extends Panel {
         return actionHandler.isColumnHidden(columnIndex) ? "display:none;" : "";
     }
 
-    private void updateSheetStyles() {
-        // styles for sizes and position
-        final String[] sizeStyleRules = new String[actionHandler.getMaxRows()
-                + actionHandler.getMaxColumns()];
+    private void resetRowAndColumnStyles() {
+        final List<String> sizeStyleRules = new ArrayList<String>();
 
+        int initialTop = calculateTopValueOfScrolledRows();
+        int initialLeft = calculateLeftValueOfScrolledColumns();
+
+        createRowStyles(sizeStyleRules, firstRowIndex, lastRowIndex, initialTop);
+        createColumnStyles(sizeStyleRules, firstColumnIndex, lastColumnIndex, initialLeft);
+
+        // Create styles for freezed columns and rows if needed
+        if (horizontalSplitPosition > 0) {
+            createColumnStyles(sizeStyleRules, 1, horizontalSplitPosition, 0);
+        }
+        if (verticalSplitPosition > 0) {
+            createRowStyles(sizeStyleRules, 1, verticalSplitPosition, 0);
+        }
+
+        resetStyleSheetRules(cellSizeAndPositionStyle, sizeStyleRules);
+    }
+
+    private int calculateLeftValueOfScrolledColumns() {
+        int left = 0;
+        for(int i = 1; i < (firstColumnIndex - horizontalSplitPosition); i++) {
+            left += actionHandler.getColWidth(i);
+        }
+        return left;
+    }
+
+    private int calculateTopValueOfScrolledRows() {
+        int top = 0;
+        for(int i = 1; i < (firstRowIndex - verticalSplitPosition); i++) {
+            top += definedRowHeights[i-1];
+        }
+        return top;
+    }
+
+    private void createRowStyles(List<String> rules, int startIndex, int endIndex, int initialTop) {
+        int top = initialTop;
+
+        for (int i = startIndex; i <= endIndex; i++) {
+            StringBuilder sb = new StringBuilder();
+            int rowHeightPX = definedRowHeights[i-1];
+            sb.append(".").append(sheetId).append(" .sheet .row").append(i)
+                .append(", .").append(sheetId).append(">.resize-line.row")
+                .append(i).append(" { ").append(getRowDisplayString(i))
+                .append("height: ").append(rowHeightPX).append("px; top:")
+                .append(top).append("px; }\n");
+            top += rowHeightPX;
+            rules.add(sb.toString());
+        }
+    }
+
+    private void createColumnStyles(List<String> rules, int startIndex, int endIndex, int initialLeft) {
+        int left = initialLeft;
+        for (int i = startIndex; i <= endIndex; i++) {
+            StringBuilder sb = new StringBuilder();
+            int colWidth = actionHandler.getColWidth(i);
+            sb.append(".").append(sheetId).append(" .sheet .col").append(i)
+                .append(", .").append(sheetId).append(">.resize-line.col")
+                .append(i).append(" { ").append(getColumnDisplayString(i))
+                .append("width: ").append(colWidth).append("px; left:")
+                .append(left).append("px; }\n");
+            left += colWidth;
+            rules.add(sb.toString());
+        }
+    }
+
+    private void updateSheetStyles() {
         // create row rules (height + top offset)
         definedRowHeights = new int[actionHandler.getMaxRows()];
         topFrozenPanelHeight = 0;
         float topFrozenPanelHeightPx = 0;
         if (verticalSplitPosition > 0) {
-            topFrozenPanelHeightPx = createRowStyles(sizeStyleRules, 1,
-                    verticalSplitPosition);
+            topFrozenPanelHeightPx = calculateHeightForRows(
+                1, verticalSplitPosition);
             topFrozenPanelHeight = (int) (topFrozenPanelHeightPx + 1);
         }
-        float bottomPanelHeightPx = createRowStyles(sizeStyleRules,
-                verticalSplitPosition + 1, actionHandler.getMaxRows());
+        float bottomPanelHeightPx = calculateHeightForRows(
+            verticalSplitPosition + 1, actionHandler.getMaxRows());
 
         // create column rules (width + left offset)
         leftFrozenPanelWidth = 0;
-        int ruleIndex = actionHandler.getMaxRows();
         if (horizontalSplitPosition > 0) {
-            leftFrozenPanelWidth = createColumnStyles(sizeStyleRules,
-                    ruleIndex, 1, horizontalSplitPosition);
-            ruleIndex += horizontalSplitPosition;
+            leftFrozenPanelWidth = calculateWidthForColumns(
+                1, horizontalSplitPosition);
         }
-        int bottomPanelWidth = createColumnStyles(sizeStyleRules, ruleIndex,
-                horizontalSplitPosition + 1, actionHandler.getMaxColumns());
-
-        resetStyleSheetRules(cellSizeAndPositionStyle, sizeStyleRules);
+        int bottomPanelWidth = calculateWidthForColumns(
+            horizontalSplitPosition + 1, actionHandler.getMaxColumns());
 
         updateSheetPanePositions();
 
@@ -2708,6 +2755,7 @@ public class SheetWidget extends Panel {
                     + t.toString());
         }
         // update cells
+        resetRowAndColumnStyles();
         updateCells(vScrollDiff, hScrollDiff);
         ensureCellSelectionStyles();
     }
