@@ -69,8 +69,6 @@ import com.vaadin.client.ui.VOverlay;
 
 public class SheetWidget extends Panel {
 
-    private static final int GROUPING_DEFAULT_ROW_HEIGHT_PX = 17;
-    private static final int GROUPING_DEFAULT_COL_WIDTH_PX = 76;
     private static final String SELECTED_COLUMN_HEADER_CLASSNAME = "selected-column-header";
     private static final String SELECTED_ROW_HEADER_CLASSNAME = "selected-row-header";
     private static final String FREEZE_PANE_INACTIVE_STYLENAME = "inactive";
@@ -5866,6 +5864,8 @@ public class SheetWidget extends Panel {
         if (loaded) {
             moveHeadersToMatchScroll();
             updateSheetPanePositions();
+            updateColGrouping();
+            updateRowGrouping();
         }
     }
 
@@ -5990,16 +5990,17 @@ public class SheetWidget extends Panel {
     private void updateColGrouping() {
 
         updateGrouping(colGroupPane, colGroupFreezePane, groupingDataCol,
-                colHeaders, frozenColumnHeaders, true, colGroupMax);
+            frozenColumnHeaders, true, colGroupMax);
 
-        if (colGroupSummaryPane.getChildCount() == colGroupMax + 1) {
+        int numberOfColGroups = displayRowColHeadings ? colGroupMax + 1 : colGroupMax;
+        if (colGroupSummaryPane.getChildCount() == numberOfColGroups) {
             // nothings changed; don't re-draw
             return;
         }
 
         colGroupSummaryPane.removeAllChildren();
 
-        for (int i = 1; i <= colGroupMax + 1; i++) {
+        for (int i = 1; i <= numberOfColGroups; i++) {
             SpanElement text = Document.get().createSpanElement();
             DivElement btn = Document.get().createDivElement();
             colGroupSummaryPane.appendChild(btn);
@@ -6023,7 +6024,7 @@ public class SheetWidget extends Panel {
 
         colGroupBorderPane.removeAllChildren();
 
-        for (int i = 1; i <= colGroupMax; i++) {
+        for (int i = 1; i <= numberOfColGroups - 1; i++) {
             DivElement border = Document.get().createDivElement();
             colGroupBorderPane.appendChild(border);
 
@@ -6034,16 +6035,17 @@ public class SheetWidget extends Panel {
 
     private void updateRowGrouping() {
         updateGrouping(rowGroupPane, rowGroupFreezePane, groupingDataRow,
-                rowHeaders, frozenRowHeaders, false, rowGroupMax);
+            frozenRowHeaders, false, rowGroupMax);
 
-        if (rowGroupSummaryPane.getChildCount() == rowGroupMax + 1) {
+        int numberOfRowGroups = displayRowColHeadings ? rowGroupMax + 1 : rowGroupMax;
+        if (rowGroupSummaryPane.getChildCount() == numberOfRowGroups) {
             // nothings changed; don't re-draw
             return;
         }
 
         rowGroupSummaryPane.removeAllChildren();
 
-        for (int i = 1; i <= rowGroupMax + 1; i++) {
+        for (int i = 1; i <= numberOfRowGroups; i++) {
             DivElement btn = Document.get().createDivElement();
             rowGroupSummaryPane.appendChild(btn);
 
@@ -6064,7 +6066,7 @@ public class SheetWidget extends Panel {
 
         rowGroupBorderPane.removeAllChildren();
 
-        for (int i = 1; i <= rowGroupMax; i++) {
+        for (int i = 1; i <= numberOfRowGroups - 1; i++) {
             DivElement border = Document.get().createDivElement();
             rowGroupBorderPane.appendChild(border);
 
@@ -6073,26 +6075,8 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private void updateGrouping(DivElement groupPane,
-            DivElement groupFreezePane, List<GroupingData> data,
-            ArrayList<DivElement> normalHeaders,
-            ArrayList<DivElement> freezeHeaders, boolean useCol, int maxGrouping) {
-
-        ArrayList<DivElement> headers = new ArrayList<DivElement>();
-        if (freezeHeaders != null) {
-            headers.addAll(freezeHeaders);
-        }
-        headers.addAll(normalHeaders);
-
-        /*
-         * Side note: headers only contains the currently visible header
-         * elements. It might begin with nulls, end with nulls, or not be as
-         * long as the actual number of headers in the document. All of those
-         * change during scroll.
-         */
-
-        int defaultCellSize = useCol ? GROUPING_DEFAULT_COL_WIDTH_PX
-                : GROUPING_DEFAULT_ROW_HEIGHT_PX;
+    private void updateGrouping(DivElement groupPane, DivElement groupFreezePane, List<GroupingData> groupingDatas,
+        ArrayList<DivElement> freezeHeaders, boolean useCol, int maxGrouping) {
 
         // remove old
         Iterator<Widget> iterator = iterator();
@@ -6133,25 +6117,29 @@ public class SheetWidget extends Panel {
             // starting pos offset if the other grouping pane is visible
             int startingOffset;
             if (useCol) {
-                startingOffset = rowGroupPane.getClientWidth()
-                        + getRowHeaderSize();
+                startingOffset = rowGroupPane.getClientWidth();
+                if(displayRowColHeadings) {
+                    startingOffset += getRowHeaderSize();
+                }
             } else {
-                startingOffset = colGroupPane.getClientHeight()
-                        + getColHeaderSize();
+                startingOffset = colGroupPane.getClientHeight();
+                if(displayRowColHeadings) {
+                    startingOffset += getColHeaderSize();
+                }
             }
 
             // all markers start with a padding (reverse adds padding later)
             startingOffset += START_PADDING;
 
             // For each grouping
-            for (GroupingData d : data) {
+            for (GroupingData data : groupingDatas) {
 
                 GroupingWidget marker;
                 if (useCol) {
-                    marker = new ColumnGrouping(d.uniqueIndex, actionHandler);
+                    marker = new ColumnGrouping(data.uniqueIndex, actionHandler);
                     marker.setInversed(colGroupInversed);
                 } else {
-                    marker = new RowGrouping(d.uniqueIndex, actionHandler);
+                    marker = new RowGrouping(data.uniqueIndex, actionHandler);
                     marker.setInversed(rowGroupInversed);
                 }
 
@@ -6161,50 +6149,26 @@ public class SheetWidget extends Panel {
                 int pos = startingOffset;
 
                 // add up header sizes before start index
-                for (int index = 0; index < d.startIndex; index++) {
-                    if (headers.size() > index) {
-
-                        DivElement header = headers.get(index);
-                        // null header elements are because of escalator: size
-                        // is 0 for these
-                        if (header != null) {
-                            if (useCol) {
-                                pos += header.getClientWidth();
-                            } else {
-                                pos += header.getClientHeight();
-                            }
-                        }
+                for (int index = 0; index < data.startIndex; index++) {
+                    if (useCol) {
+                        pos += getColumnWidth(index + 1);
                     } else {
-                        // header not loaded yet, use default size as an
-                        // approximation
-                        pos += defaultCellSize;
+                        pos += getRowHeight(index + 1);
                     }
                 }
 
                 // inversed markers begin BEFORE the start index, so remove half
                 // of the previous header
                 if (marker.isInversed()) {
-
-                    if (d.startIndex == 0 || headers.size() <= d.startIndex - 1
-                            || headers.get(d.startIndex - 1) == null) {
-
-                        // cell isn't rendered yet or is scrolled outside view.
-                        // Use default.
-                        pos -= defaultCellSize / 2;
-                    } else {
-
                         if (useCol) {
-                            pos -= headers.get(d.startIndex - 1)
-                                    .getClientWidth() / 2;
+                            pos -= getColumnWidth(data.startIndex) / 2;
                         } else {
-                            pos -= headers.get(d.startIndex - 1)
-                                    .getClientHeight() / 2;
+                            pos -= getRowHeight(data.startIndex) / 2;
                         }
-                    }
                 }
 
-                marker.setPos(pos, d.level - 1);
-                marker.setCollapsed(d.collapsed);
+                marker.setPos(pos, data.level - 1);
+                marker.setCollapsed(data.collapsed);
 
                 groupPane.appendChild(marker.getElement());
                 adopt(marker);
@@ -6213,18 +6177,11 @@ public class SheetWidget extends Panel {
 
                 double length = 0;
                 // add each header between start and end index
-                for (int col = d.startIndex; col <= d.endIndex; col++) {
-
-                    if (headers.size() > col && headers.get(col) != null) {
-
-                        if (useCol) {
-                            length += headers.get(col).getClientWidth();
-                        } else {
-                            length += headers.get(col).getClientHeight();
-                        }
+                for (int col = data.startIndex; col <= data.endIndex; col++) {
+                    if (useCol) {
+                        length += getColumnWidth(col + 1);
                     } else {
-                        // header scrolled outside view
-                        length += defaultCellSize;
+                        length += getRowHeight(col  + 1);
                     }
                 }
 
@@ -6234,38 +6191,20 @@ public class SheetWidget extends Panel {
                 // padding for inverted markers
                 length -= START_PADDING;
 
-                // add half of size of cell before (for inverted) or after (for
-                // normal)
                 if (marker.isInversed()) {
 
-                    if (d.startIndex == 0) {
-                        // special case; there are no headers before this, use
-                        // default
-                        length += defaultCellSize / 2d;
-                    } else if (headers.size() <= (d.startIndex - 1)
-                            || headers.get(d.startIndex - 1) == null) {
-                        // scrolled outside view
-                        length += defaultCellSize / 2d;
-
-                    } else if (useCol) {
-                        length += headers.get(d.startIndex - 1)
-                                .getClientWidth() / 2d;
+                    if (useCol) {
+                        length += getColumnWidth(data.startIndex) / 2d;
                     } else {
-                        length += headers.get(d.startIndex - 1)
-                                .getClientHeight() / 2d;
+                        length += getRowHeight(data.startIndex) / 2d;
                     }
 
                 } else {
 
-                    if (headers.size() <= (d.endIndex + 1)
-                            || headers.get(d.endIndex + 1) == null) {
-                        // scrolled outside view (or last header)
-                        length += defaultCellSize / 2d;
-
-                    } else if (useCol) {
-                        length += headers.get(d.endIndex + 1).getClientWidth() / 2d;
+                    if (useCol) {
+                        length += getColumnWidth(data.endIndex + 2) / 2d;
                     } else {
-                        length += headers.get(d.endIndex + 1).getClientHeight() / 2d;
+                        length += getRowHeight(data.endIndex + 2) / 2d;
                     }
 
                 }
@@ -6277,7 +6216,7 @@ public class SheetWidget extends Panel {
                  * pane. Positioning, length, etc. are already correct.
                  */
                 if (freezeHeaders != null
-                        && freezeHeaders.size() > d.startIndex) {
+                        && freezeHeaders.size() > data.startIndex) {
 
                     GroupingWidget clone = marker.cloneWidget();
                     groupFreezePane.appendChild(clone.getElement());
@@ -6286,6 +6225,15 @@ public class SheetWidget extends Panel {
             }
 
         }
+    }
+
+    /**
+     *
+     * @param index 1 based column index
+     * @return
+     */
+    private int getColumnWidth(int index) {
+        return actionHandler.getColWidthActual(index);
     }
 
     private void updateExtraCornerElements(int formulaBarHeight,
@@ -6382,7 +6330,8 @@ public class SheetWidget extends Panel {
         // calculate grouping element sizes
         int colGroupHeight = 0;
         if (colGroupMax > 0) {
-            colGroupHeight = ColumnGrouping.getTotalHeight(colGroupMax + 1);
+            int numberOfColGroups = displayRowColHeadings ? colGroupMax + 1 : colGroupMax;
+            colGroupHeight = ColumnGrouping.getTotalHeight(numberOfColGroups);
         }
         int rowGroupWidth = 0;
         if (rowGroupMax > 0) {
@@ -6397,6 +6346,10 @@ public class SheetWidget extends Panel {
             colGroupPane.getStyle().setDisplay(Display.BLOCK);
             colGroupSummaryPane.getStyle().setDisplay(Display.BLOCK);
         }
+        if(!displayRowColHeadings) {
+            colGroupSummaryPane.getStyle().setDisplay(Display.NONE);
+        }
+
 
         if (frozenColumnHeaders != null && colGroupMax > 0) {
             colGroupFreezePane.getStyle().setDisplay(Display.BLOCK);
@@ -6439,11 +6392,13 @@ public class SheetWidget extends Panel {
         // calculate grouping element sizes
         int colGroupHeight = 0;
         if (colGroupMax > 0) {
-            colGroupHeight = GroupingWidget.getTotalHeight(colGroupMax + 1);
+            int numberOfColGroups = displayRowColHeadings ? colGroupMax + 1 : colGroupMax;
+            colGroupHeight = GroupingWidget.getTotalHeight(numberOfColGroups);
         }
         int rowGroupWidth = 0;
         if (rowGroupMax > 0) {
-            rowGroupWidth = GroupingWidget.getTotalWidth(rowGroupMax + 1);
+            int numberOfRowGroups = displayRowColHeadings ? rowGroupMax + 1 : rowGroupMax;
+            rowGroupWidth = GroupingWidget.getTotalWidth(numberOfRowGroups);
         }
 
         if (rowGroupWidth == 0) {
@@ -6452,6 +6407,9 @@ public class SheetWidget extends Panel {
         } else {
             rowGroupPane.getStyle().setDisplay(Display.BLOCK);
             rowGroupSummaryPane.getStyle().setDisplay(Display.BLOCK);
+        }
+        if(!displayRowColHeadings) {
+            rowGroupSummaryPane.getStyle().setDisplay(Display.NONE);
         }
 
         if (frozenRowHeaders != null && rowGroupMax > 0) {
