@@ -1,14 +1,11 @@
 package com.vaadin.addon.spreadsheet.elements;
 
-import java.util.List;
-
-import org.openqa.selenium.JavascriptExecutor;
+import com.vaadin.testbench.By;
+import com.vaadin.testbench.elementsbase.AbstractElement;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.testbench.By;
-import com.vaadin.testbench.elementsbase.AbstractElement;
-import org.openqa.selenium.interactions.Actions;
+import java.util.List;
 
 /**
  * This class represents one cell within the currently active sheet of a
@@ -38,6 +35,7 @@ public class SheetCellElement extends AbstractElement {
             cellValueInput.clear();
             cellValueInput.sendKeys(newValue);
             cellValueInput.sendKeys(Keys.TAB);
+            getCommandExecutor().waitForVaadin();
         }
     }
 

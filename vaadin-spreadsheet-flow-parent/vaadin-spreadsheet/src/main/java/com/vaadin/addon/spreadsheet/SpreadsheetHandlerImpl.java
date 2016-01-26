@@ -17,15 +17,10 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
-
+import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
+import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedEditEvent;
+import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
+import com.vaadin.addon.spreadsheet.command.CellValueCommand;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.RichTextString;
@@ -35,10 +30,14 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
-import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
-import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedEditEvent;
-import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
-import com.vaadin.addon.spreadsheet.command.CellValueCommand;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /**
  * Implementation of the Spreadsheet Server RPC interface.
@@ -314,15 +313,14 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                     cell.setCellType(Cell.CELL_TYPE_BLANK);
                     spreadsheet.markCellAsDeleted(cell, true);
                 }
+
+                spreadsheet.getCellValueManager().markCellForUpdate(cell);
+                spreadsheet.getCellValueManager().getFormulaEvaluator().notifyUpdateCell(cell);
             }
         }
 
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
-
-        // might have impacted formulas outside of selection area, so just
-        // reload all values
-        spreadsheet.refreshAllCellValues();
-
+        spreadsheet.updateMarkedCells();
         // re-set selection to copied area
         spreadsheet.setSelectionRange(rowIndex, colIndex, rowIndex
                 + pasteHeight - 1, colIndex + pasteWidth - 1);

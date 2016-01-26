@@ -1,12 +1,10 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-
+import com.google.common.base.Predicate;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 import com.vaadin.testbench.By;
 import com.vaadin.testbench.parallel.Browser;
-
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,10 +14,21 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+
 public class UndoRedoTest extends AbstractSpreadsheetTestCase {
 
     @Rule
     public ErrorCollector collector = new ErrorCollector();
+    private SheetController sheetController;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        sheetController = new SheetController(driver, testBench(driver),
+                getDesiredCapabilities());
+    }
 
     @Test
     public void undo_cellValueIsSetAndUndone_cellHasNoValue() {
@@ -55,7 +64,7 @@ public class UndoRedoTest extends AbstractSpreadsheetTestCase {
         undo();
 
         String selectionValue = String.format("A1=%s, A2=%s", spreadsheet.getCellAt("A1").getValue(),
-                                                              spreadsheet.getCellAt("A2").getValue());
+                spreadsheet.getCellAt("A2").getValue());
         assertEquals("A1=a, A2=b", selectionValue);
     }
 
@@ -271,7 +280,7 @@ public class UndoRedoTest extends AbstractSpreadsheetTestCase {
     public void undo_conditionalFormattedCellsRemovedAndUndo_cellsAreStillConditionallyFormatted() {
         skipBrowser("Context click does not work with PhantomJS and Firefox", Browser.PHANTOMJS, Browser.FIREFOX);
         headerPage.createNewSpreadsheet();
-        headerPage.loadFile("conditional_formatting.xlsx",this);
+        headerPage.loadFile("conditional_formatting.xlsx", this);
         final SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
         deleteRow(spreadsheet, 1);
 
@@ -285,10 +294,80 @@ public class UndoRedoTest extends AbstractSpreadsheetTestCase {
         });
     }
 
+    @Test
+    public void undo_pasteRegionThenUndo_cellsHaveInitialValues() {
+        final SpreadsheetElement spreadsheet = setupSpreadSheetForRegionCopyPasteTest();
+        copy();
+        sheetController.clickCell("D1");
+
+        paste();
+        waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver webDriver) {
+                return spreadsheet.getCellAt("E1").getValue().equals("2");
+            }
+        });
+        undo();
+        waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver webDriver) {
+                return spreadsheet.getCellAt("E1").getValue().equals("4");
+            }
+        });
+
+        String selectionValue = String.format("D1=%s, E1=%s", spreadsheet.getCellAt("D1").getValue(),
+                spreadsheet.getCellAt("E1").getValue());
+        assertEquals("D1=3, E1=4", selectionValue);
+    }
+
+    @Test
+    public void undo_pasteRegionThenUndoAndRedo_cellsHavePastedValues() {
+        final SpreadsheetElement spreadsheet = setupSpreadSheetForRegionCopyPasteTest();
+        copy();
+        sheetController.clickCell("D1");
+
+        paste();
+        waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver webDriver) {
+                return spreadsheet.getCellAt("E1").getValue().equals("2");
+            }
+        });
+        undo();
+        waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver webDriver) {
+                return spreadsheet.getCellAt("E1").getValue().equals("4");
+            }
+        });
+        redo();
+        waitUntil(new Predicate<WebDriver>() {
+            @Override
+            public boolean apply(WebDriver webDriver) {
+                return spreadsheet.getCellAt("E1").getValue().equals("2");
+            }
+        });
+
+        String selectionValue = String.format("D1=%s, E1=%s", spreadsheet.getCellAt("D1").getValue(),
+                spreadsheet.getCellAt("E1").getValue());
+        assertEquals("D1=1, E1=2", selectionValue);
+    }
+
+    private SpreadsheetElement setupSpreadSheetForRegionCopyPasteTest() {
+        headerPage.createNewSpreadsheet();
+        final SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        spreadsheet.getCellAt("A1").setValue("1");
+        spreadsheet.getCellAt("B1").setValue("2");
+        spreadsheet.getCellAt("D1").setValue("3");
+        spreadsheet.getCellAt("E1").setValue("4");
+        sheetController.selectRegion("A1", "B1");
+        return spreadsheet;
+    }
+
     /**
      * Deletes the row from spreadsheet using 'Delete row' action in context menu
-     *
-     *  Does not work with PhantomJS or Firefox
+     * <p/>
+     * Does not work with PhantomJS or Firefox
      *
      * @param spreadsheet
      * @param row
@@ -316,8 +395,19 @@ public class UndoRedoTest extends AbstractSpreadsheetTestCase {
                 .sendKeys(Keys.chord(Keys.CONTROL, "z")).build().perform();
     }
 
+    private void paste() {
+        new Actions(getDriver())
+                .sendKeys(Keys.chord(Keys.CONTROL, "v")).build().perform();
+        getTestBenchCommandExecutor().waitForVaadin();
+    }
+
+    private void copy() {
+        new Actions(getDriver())
+                .sendKeys(Keys.chord(Keys.CONTROL, "c")).build().perform();
+    }
+
     private void assertCorrectCss(SpreadsheetElement c) {
-        collector.checkThat( c.getCellAt("A2").getCssValue("text-align"),
+        collector.checkThat(c.getCellAt("A2").getCssValue("text-align"),
                 equalTo("center"));
 
         collector.checkThat(c.getCellAt("B2").getCssValue("text-align"),

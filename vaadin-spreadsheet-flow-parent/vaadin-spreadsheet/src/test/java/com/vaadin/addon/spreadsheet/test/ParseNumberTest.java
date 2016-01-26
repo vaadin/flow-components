@@ -1,15 +1,14 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import com.vaadin.addon.spreadsheet.SpreadsheetUtil;
+import org.junit.Test;
 
 import java.util.Locale;
 
-import org.junit.Test;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
-import com.vaadin.addon.spreadsheet.SpreadsheetUtil;
-
-public class CopyPasteTest {
+public class ParseNumberTest {
 
     @Test
     public void testNumberParsingWithEnLocale() {

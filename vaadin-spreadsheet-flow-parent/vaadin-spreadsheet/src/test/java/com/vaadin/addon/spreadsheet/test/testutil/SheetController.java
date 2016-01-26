@@ -257,6 +257,7 @@ public class SheetController implements SheetClicker {
     public void selectRegion(String from, String to) {
         new Actions(driver).clickAndHold(getCellElement(from))
                 .release(getCellElement(to)).perform();
+        waitForVaadin();
     }
 
 }
