@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.addon.spreadsheet.client.ImageInfo;
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
+import com.vaadin.addon.spreadsheet.client.OverlayInfo;
 import com.vaadin.shared.annotations.DelegateToWidget;
 import com.vaadin.shared.ui.TabIndexState;
 
@@ -127,7 +127,7 @@ public class SpreadsheetState extends TabIndexState {
 
     public boolean hasActions;
 
-    public HashMap<String, ImageInfo> resourceKeyToImage;
+    public HashMap<String, OverlayInfo> overlays;
 
     public ArrayList<MergedRegion> mergedRegions;
 

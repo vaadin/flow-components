@@ -1,0 +1,139 @@
+package com.vaadin.addon.spreadsheet;
+
+/*
+ * #%L
+ * Vaadin Spreadsheet
+ * %%
+ * Copyright (C) 2013 - 2015 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Add-On License 3.0
+ * (CVALv3).
+ * 
+ * See the file license.html distributed with this software for more
+ * information about licensing.
+ * 
+ * You should have received a copy of the CVALv3 along with this program.
+ * If not, see <http://vaadin.com/license/cval-3>.
+ * #L%
+ */
+
+import java.io.Serializable;
+
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
+
+import com.vaadin.addon.spreadsheet.client.OverlayInfo;
+import com.vaadin.addon.spreadsheet.client.OverlayInfo.Type;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
+
+/**
+ * SheetChartWrapper is an utility class of the Spreadsheet component. In
+ * addition to the chart resource, this wrapper contains the chart's visibility
+ * state, position and size.
+ * 
+ * @author Vaadin Ltd.
+ */
+@SuppressWarnings("serial")
+public class SheetChartWrapper extends SheetOverlayWrapper implements
+        Serializable {
+
+    public interface ChartCreator extends Serializable {
+        Component createChart(XSSFChart chartXml, Spreadsheet spreadsheet);
+    }
+
+    private MinimizableComponentContainer wrapper;
+    private String connectorId;
+
+    private static ChartCreator chartCreator;
+    private final XSSFChart chartXml;
+    private final Spreadsheet spreadsheet;
+
+    static {
+        try {
+            // loads the class to trigger the static block inside it
+            Class.forName("com.vaadin.addon.spreadsheet.charts.converter.ChartConverter");
+        } catch (ClassNotFoundException e) {
+            System.err
+                    .println("Vaadin Spreadsheet: To display charts you need to add the chart "
+                            + "integration package and Vaadin Charts to the project");
+        }
+    }
+
+    public SheetChartWrapper(XSSFClientAnchor anchor, XSSFChart chartXml,
+            Spreadsheet spreadsheet) {
+        super(anchor);
+
+        this.chartXml = chartXml;
+        this.spreadsheet = spreadsheet;
+
+        wrapper = new MinimizableComponentContainer();
+        wrapper.setSizeFull();
+    }
+
+    private void initContent(XSSFChart chartXml, Spreadsheet spreadsheet) {
+        if (wrapper.getContent() == null) {
+            Component content;
+
+            if (chartCreator != null) {
+                content = chartCreator.createChart(chartXml, spreadsheet);
+            } else {
+                content = new Panel(
+                        new Label(
+                                "Chart placeholder. Add chart integration package and "
+                                        + "Vaadin Charts to the project to see the chart."));
+            }
+
+            wrapper.setContent(content);
+            content.setSizeFull();
+        }
+    }
+
+    @Override
+    public void setOverlayChangeListener(OverlayChangeListener listener) {
+        wrapper.setMinimizeListener(listener);
+    }
+
+    public static void setChartCreator(ChartCreator newChartCreator) {
+        chartCreator = newChartCreator;
+    }
+
+    @Override
+    public String getId() {
+        if (wrapper != null && wrapper.isAttached())
+            connectorId = wrapper.getConnectorId();
+
+        return connectorId;
+    }
+
+    @Override
+    public Component getComponent(final boolean init) {
+        if (init)
+            initContent(chartXml, spreadsheet);
+
+        return wrapper;
+    }
+
+    @Override
+    public Type getType() {
+        return OverlayInfo.Type.COMPONENT;
+    }
+
+    @Override
+    public float getHeight(Sheet sheet, float[] rowH) {
+        if (wrapper.isMinimized())
+            return 0;
+
+        return super.getHeight(sheet, rowH);
+    }
+
+    @Override
+    public float getWidth(Sheet sheet, int[] colW, int defaultColumnWidthPX) {
+        if (wrapper.isMinimized())
+            return 0;
+
+        return super.getWidth(sheet, colW, defaultColumnWidthPX);
+    }
+}

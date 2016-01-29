@@ -56,12 +56,13 @@ public class SheetEventListener implements EventListener {
 
     @Override
     public void onBrowserEvent(Event event) {
-        if (((Element) event.getEventTarget().cast()).getClassName().contains(
-                PopupButtonWidget.BUTTON_CLASSNAME)) {
+        if (((Element) event.getEventTarget().cast()).getAttribute("class")
+                .contains(PopupButtonWidget.BUTTON_CLASSNAME)) {
             widget.setFocused(true);
             return;
         }
         final int typeInt = event.getTypeInt();
+
         if (typeInt == Event.ONFOCUS) {
             widget.setFocused(true);
             sheetFocused = true;
@@ -117,21 +118,21 @@ public class SheetEventListener implements EventListener {
 
     private void onSheetDoubleClick(Event event) {
         Element target = event.getEventTarget().cast();
-        String targetClassName = target.getClassName();
+        String targetClassName = target.getAttribute("class");
 
         // click target is the inner div because IE10 and 9 are not compatible
         // with 'pointer-events: none'
         if ((BrowserInfo.get().isIE9() || BrowserInfo.get().isIE10())
                 && (targetClassName == null || targetClassName.isEmpty())) {
             Element parentElement = target.getParentElement();
-            String parentClassName = parentElement.getClassName();
+            String parentClassName = parentElement.getAttribute("class");
             if (parentClassName.contains("cell")) {
                 target = parentElement;
                 targetClassName = parentClassName;
             }
         }
 
-        if (target.getParentElement().getClassName().contains("sheet")
+        if (target.getParentElement().getAttribute("class").contains("sheet")
                 && targetClassName.contains("cell")) {
             SheetJsniUtil jsniUtil = widget.getSheetJsniUtil();
             if (jsniUtil.isHeader(targetClassName) == 0) {

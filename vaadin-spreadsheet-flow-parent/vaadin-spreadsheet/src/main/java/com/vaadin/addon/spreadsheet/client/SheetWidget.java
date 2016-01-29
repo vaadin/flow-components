@@ -288,7 +288,7 @@ public class SheetWidget extends Panel {
 
     private HashMap<String, CellComment> alwaysVisibleCellComments;
 
-    private HashMap<String, SheetImage> sheetImages;
+    private HashMap<String, SheetOverlay> sheetOverlays;
 
     private HashMap<String, PopupButtonWidget> sheetPopupButtons;
 
@@ -434,9 +434,9 @@ public class SheetWidget extends Panel {
                     Element target = mouseOverOrOutEvent.getEventTarget()
                             .cast();
                     boolean targetParentIsPaneElement = target
-                            .getParentElement().getClassName()
+                            .getParentElement().getAttribute("class")
                             .contains("sheet");
-                    String className = target.getClassName();
+                    String className = target.getAttribute("class");
                     // cell comment lines are shown inside the sheet - skip
                     // those
                     if (className
@@ -447,10 +447,10 @@ public class SheetWidget extends Panel {
                         className = className.substring(0,
                                 className.indexOf(" cell"));
                     }
-                    if (className.equals(SheetImage.SHEET_IMAGE_CLASSNAME)) {
+                    if (className.equals(SheetOverlay.SHEET_IMAGE_CLASSNAME)) {
                         target = mouseOverOrOutEvent.getCurrentEventTarget()
                                 .cast();
-                        className = target.getClassName();
+                        className = target.getAttribute("class");
                     } else if (mouseOverOrOutEvent.getTypeInt() == Event.ONMOUSEOVER
                             && targetParentIsPaneElement) {
                         // because of cell overflow, the mouseover target might
@@ -469,7 +469,7 @@ public class SheetWidget extends Panel {
                                     SpreadsheetWidget
                                             .getTouchOrMouseClientY(mouseOverOrOutEvent),
                                     getCell(parsedCol, parsedRow)).getElement();
-                            className = target.getClassName();
+                            className = target.getAttribute("class");
                             if (className.contains("cell")) {
                                 className = className.substring(0,
                                         className.indexOf(" cell"));
@@ -541,7 +541,7 @@ public class SheetWidget extends Panel {
         setTouchMode(touchMode);
         cachedCellData = new HashMap<String, CellData>();
         alwaysVisibleCellComments = new HashMap<String, CellComment>();
-        sheetImages = new HashMap<String, SheetImage>();
+        sheetOverlays = new HashMap<String, SheetOverlay>();
         mergedCells = new HashMap<Integer, MergedCell>();
         overflownMergedCells = new HashMap<MergedRegion, Cell>();
         hyperlinkTooltipLabel = new VLabel();
@@ -1092,13 +1092,14 @@ public class SheetWidget extends Panel {
     protected void onSheetMouseDown(Event event) {
         Element target = event.getEventTarget().cast();
 
-        String className = target.getClassName();
+        String className = target.getAttribute("class");
 
         // click target is the inner div because IE10 and 9 are not compatible
         // with 'pointer-events: none'
         if ((BrowserInfo.get().isIE9() || BrowserInfo.get().isIE10())
                 && (className == null || className.isEmpty())) {
-            String parentClassName = target.getParentElement().getClassName();
+            String parentClassName = target.getParentElement().getAttribute(
+                    "class");
             if (parentClassName.contains("cell")) {
                 className = parentClassName;
             }
@@ -1246,7 +1247,7 @@ public class SheetWidget extends Panel {
         int col = 0, row = 0;
         String className = null;
         if (target != null) {
-            className = target.getClassName();
+            className = target.getAttribute("class");
             /*
              * Parse according to classname of target element. As said above,
              * Safari gives us the wrong target and hence we have the wrong
@@ -1454,7 +1455,7 @@ public class SheetWidget extends Panel {
         Element target = WidgetUtil.getElementFromPoint(selectionPointX,
                 selectionPointY);
         if (target != null) {
-            final String className = target.getClassName();
+            final String className = target.getAttribute("class");
             jsniUtil.parseColRow(className);
             int col = jsniUtil.getParsedCol();
             int row = jsniUtil.getParsedRow();
@@ -1495,7 +1496,7 @@ public class SheetWidget extends Panel {
                         int eventTypeInt = event.getTypeInt();
                         final NativeEvent nativeEvent = event.getNativeEvent();
                         Element target = nativeEvent.getEventTarget().cast();
-                        String className = target.getClassName();
+                        String className = target.getAttribute("class");
 
                         if (getElement().isOrHasChild(
                                 (Node) nativeEvent.getEventTarget().cast())) {
@@ -1556,7 +1557,6 @@ public class SheetWidget extends Panel {
                                 }
                             }
                         } else {
-
                             if (getElement().isOrHasChild(target)) {
 
                                 if (eventTypeInt == Event.ONCLICK) {
@@ -1587,7 +1587,7 @@ public class SheetWidget extends Panel {
                                     if (className
                                             .equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)) {
                                         className = target.getParentElement()
-                                                .getClassName();
+                                                .getAttribute("class");
                                         int i = jsniUtil.isHeader(className);
                                         if (i == 1) { // row
                                             i = jsniUtil
@@ -1613,7 +1613,7 @@ public class SheetWidget extends Panel {
                                     } else if (className
                                             .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
                                         className = target.getParentElement()
-                                                .getClassName();
+                                                .getAttribute("class");
                                         int i = jsniUtil.isHeader(className);
                                         if (i == 1) { // row
                                             i = jsniUtil
@@ -1642,7 +1642,7 @@ public class SheetWidget extends Panel {
                                     if (className
                                             .equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)) {
                                         className = target.getParentElement()
-                                                .getClassName();
+                                                .getAttribute("class");
                                         int i = jsniUtil.isHeader(className);
                                         if (i == 1) { // row
                                             // autofit row ???
@@ -1662,7 +1662,7 @@ public class SheetWidget extends Panel {
                                     } else if (className
                                             .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
                                         className = target.getParentElement()
-                                                .getClassName();
+                                                .getAttribute("class");
                                         int i = jsniUtil.isHeader(className);
                                         if (i == 1) { // row
                                             // autofit row ???
@@ -1702,7 +1702,7 @@ public class SheetWidget extends Panel {
                      */
                     private int isHeader(Element target) {
                         String className = target.getParentElement()
-                                .getClassName();
+                                .getAttribute("class");
                         return jsniUtil.isHeader(className);
                     }
                 });
@@ -1713,7 +1713,7 @@ public class SheetWidget extends Panel {
                 if (actionHandler.hasCustomContextMenu()) {
                     Element target = event.getNativeEvent().getEventTarget()
                             .cast();
-                    String className = target.getClassName();
+                    String className = target.getAttribute("class");
                     int i = jsniUtil.isHeader(className);
                     if (i == 1 || i == 2) {
                         int index = jsniUtil.parseHeaderIndex(className);
@@ -2289,7 +2289,7 @@ public class SheetWidget extends Panel {
      */
     void updateSheetPanePositions() {
         int extraSize = horizontalSplitPosition > 0 ? 1 : 0;
-        if (spreadsheet.getClassName().contains("report")) {
+        if (spreadsheet.getAttribute("class").contains("report")) {
             extraSize = 0;
         }
         int widthIncrease = 0;
@@ -3492,33 +3492,36 @@ public class SheetWidget extends Panel {
         }
     }
 
-    public void addSheetImage(String key, SheetImage image) {
-
-        // find correct pane to attach to
-        boolean inTop = verticalSplitPosition >= image.getRow();
-        boolean inLeft = horizontalSplitPosition >= image.getCol();
+    public void addSheetOverlay(String key, SheetOverlay overlay) {
+        boolean inTop = verticalSplitPosition >= overlay.getRow();
+        boolean inLeft = horizontalSplitPosition >= overlay.getCol();
 
         if (inTop && inLeft) {
-            topLeftPane.appendChild(image.getElement());
+            topLeftPane.appendChild(overlay.getElement());
         } else if (inTop) {
-            topRightPane.appendChild(image.getElement());
+            topRightPane.appendChild(overlay.getElement());
         } else if (inLeft) {
-            bottomLeftPane.appendChild(image.getElement());
+            bottomLeftPane.appendChild(overlay.getElement());
         } else {
-            sheet.appendChild(image.getElement());
+            sheet.appendChild(overlay.getElement());
         }
 
-        adopt(image);
-        sheetImages.put(key, image);
+        adopt(overlay);
+        sheetOverlays.put(key, overlay);
     }
 
-    public SheetImage getSheetImage(String key) {
-        return sheetImages.get(key);
+    public void updateOverlayInfo(String key, OverlayInfo overlayInfo) {
+        sheetOverlays.get(key).updateSizeLocationPadding(overlayInfo);
     }
 
-    public void removeSheetImage(String key) {
-        SheetImage image = sheetImages.remove(key);
-        remove(image);
+    public void removeSheetOverlay(String key) {
+        SheetOverlay overlay = sheetOverlays.remove(key);
+
+        // because of a bug in SpreadsheetConnector, this method sometimes
+        // called too late, when the overlays were already removed (after
+        // switching a tab)
+        if (overlay != null)
+            remove(overlay);
     }
 
     public void addMergedRegion(MergedRegion region) {
@@ -4050,10 +4053,10 @@ public class SheetWidget extends Panel {
      */
     private void updateCellCommentDisplay(Event event, Element target) {
         int eventTypeInt = event.getTypeInt();
-        String targetClassName = target.getClassName();
+        String targetClassName = target.getAttribute("class");
         if (overlayShouldBeShownFor(targetClassName)) {
             Element cellElement = target.getParentElement().cast();
-            String cellElementClassName = cellElement.getClassName();
+            String cellElementClassName = cellElement.getAttribute("class");
             if (cellElementClassName.endsWith(MERGED_CELL_CLASSNAME)) {
                 cellElementClassName = cellElementClassName.replace(" "
                         + MERGED_CELL_CLASSNAME, "");
@@ -4108,7 +4111,8 @@ public class SheetWidget extends Panel {
                 if (!cellCommentEditMode && toElement != null
                         && toElement.getParentElement() != null) {
                     try {
-                        if (!(overlayShouldBeShownFor(toElement.getClassName()) && toElement
+                        if (!(overlayShouldBeShownFor(toElement
+                                .getAttribute("class")) && toElement
                                 .getParentElement().equals(target))) {
                             cellCommentOverlay.hide();
                             cellCommentCellClassName = null;
@@ -4391,18 +4395,16 @@ public class SheetWidget extends Panel {
     public void clearAll(boolean removed) {
         loaded = false;
 
-        for (Iterator<Widget> i = getCustomWidgetIterator(); i.hasNext();) {
-            remove(i.next());
+        for (Widget i : getCustomWidgetIterator()) {
+            remove(i);
         }
         customEditorWidget = null;
 
-        Iterator<Entry<String, SheetImage>> it = sheetImages.entrySet()
-                .iterator();
-        while (it.hasNext()) {
-            Entry<String, SheetImage> item = it.next();
-            remove(item.getValue());
+        for (SheetOverlay overlay : sheetOverlays.values()) {
+            remove(overlay);
         }
-        sheetImages.clear();
+
+        sheetOverlays.clear();
 
         if (customWidgetMap != null) {
             customWidgetMap.clear();
@@ -5745,35 +5747,26 @@ public class SheetWidget extends Panel {
     // This is for GWT
     @Override
     public Iterator<Widget> iterator() {
-        final List<Widget> emptyList = new ArrayList<Widget>();
-        emptyList.add(input);
-        if (customEditorWidget != null) {
-            emptyList.add(customEditorWidget);
-        }
-        emptyList.addAll(sheetImages.values());
-        if (customWidgetMap != null) {
-            emptyList.addAll(customWidgetMap.values());
-        }
-        if (sheetPopupButtons != null) {
-            emptyList.addAll(sheetPopupButtons.values());
-        }
-        return emptyList.iterator();
+        final List<Widget> resultList = new ArrayList<Widget>();
+        resultList.add(input);
+        resultList.addAll(getCustomWidgetIterator());
+        return resultList.iterator();
     }
 
     // This is for clearing of sheet from custom widgets
-    protected Iterator<Widget> getCustomWidgetIterator() {
+    protected Collection<Widget> getCustomWidgetIterator() {
         final List<Widget> emptyList = new ArrayList<Widget>();
         if (customEditorWidget != null) {
             emptyList.add(customEditorWidget);
         }
-        emptyList.addAll(sheetImages.values());
+        emptyList.addAll(sheetOverlays.values());
         if (customWidgetMap != null) {
             emptyList.addAll(customWidgetMap.values());
         }
         if (sheetPopupButtons != null) {
             emptyList.addAll(sheetPopupButtons.values());
         }
-        return emptyList.iterator();
+        return emptyList;
     }
 
     @Override
@@ -5804,7 +5797,6 @@ public class SheetWidget extends Panel {
                 return false;
             }
         } catch (Exception e) {
-
             debugConsole.log(Level.WARNING,
                     "Exception while removing child widget from SheetWidget");
         }

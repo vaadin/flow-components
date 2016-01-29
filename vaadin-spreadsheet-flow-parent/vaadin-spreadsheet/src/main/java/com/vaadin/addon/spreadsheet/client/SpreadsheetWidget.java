@@ -428,26 +428,21 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void removeVisibleCellComment(String key) {
         sheetWidget.setCellCommentVisible(false, key);
     }
-
-    public void addImage(String key, String resourceURL, ImageInfo imageInfo) {
-        SheetImage image = new SheetImage(resourceURL);
-        updateSheetImageInfo(image, imageInfo);
-        sheetWidget.addSheetImage(key, image);
+    
+    /**
+     * Handles overlays, currently images and charts.
+     */
+    void addOverlay(String key, Widget widget, OverlayInfo overlayInfo) {
+        SheetOverlay overlay = new SheetOverlay(widget, overlayInfo);
+        sheetWidget.addSheetOverlay(key, overlay);
     }
 
-    public void updateImage(String key, ImageInfo imageInfo) {
-        updateSheetImageInfo(sheetWidget.getSheetImage(key), imageInfo);
+    void updateOverlay(String key, OverlayInfo overlayInfo) {
+        sheetWidget.updateOverlayInfo(key, overlayInfo);
     }
 
-    private void updateSheetImageInfo(SheetImage image, ImageInfo imageInfo) {
-        image.setLocation(imageInfo.col, imageInfo.row);
-        image.setHeight(imageInfo.height);
-        image.setWidth(imageInfo.width);
-        image.setPadding(imageInfo.dx, imageInfo.dy);
-    }
-
-    public void removeImage(String key) {
-        sheetWidget.removeSheetImage(key);
+    void removeOverlay(String key) {
+        sheetWidget.removeSheetOverlay(key);
     }
 
     public void updateMergedRegions(final ArrayList<MergedRegion> mergedRegions) {

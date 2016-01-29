@@ -12,4 +12,26 @@ $v-color-keywords: non-valo-theme !default;
 		@include spreadsheet-valo;
 	} 
 	
+  .sheet-image > .v-csslayout {
+    overflow: visible;
+    position: relative;
+    
+    .v-button-minimize-button {
+      top: -14px;
+      position: absolute;
+      height: auto;
+      padding: 0;
+      
+      &::after {
+        -webkit-box-shadow: none;
+        -moz-shadow: none;
+        -ms-shadow: none;
+        box-shadow: none;
+      }
+            
+      .v-button-caption {
+        display: none;
+      }
+    }
+  }
 }

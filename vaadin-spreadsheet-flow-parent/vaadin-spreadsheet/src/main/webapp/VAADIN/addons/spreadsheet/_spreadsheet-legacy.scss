@@ -226,6 +226,10 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
           overflow: hidden;
           text-overflow: ellipsis;
         }
+        
+        &.cell-range {
+          background-color: rgba(232, 242, 252, 0.8);
+        }
       }
 
       div {
@@ -609,7 +613,7 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
     }
 
     .bottom-right-pane.sheet > div.sheet-image {
-      z-index: 5;
+      z-index: 10;
     }
 
     .top-left-pane > div.sheet-image {
@@ -761,8 +765,9 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
         cursor: pointer;
         display: inline-block;
         height: 28px;
+        line-height: 20px;
         position: absolute;
-        width: 130px;
+        width: 140px;
         z-index: 60;
         left: 0;
         top: 0;
@@ -889,6 +894,7 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
       }
 
       .sheet-tabsheet-infolabel {
+        background: $sheet-selector-background;
         z-index: inherit;
         position: absolute;
         right: 0;
@@ -896,11 +902,15 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
         font-size: 8pt;
         border-left: 1px solid rgb(169, 169, 169);
         padding-left: 5px;
+        padding-right: 5px;
         padding-top: 2px;
         width: 200px;
-        height: 16px;
+        height: 26px;
+        line-height: 24px;
         display: inline;
         text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
       }
     }
 

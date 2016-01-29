@@ -619,7 +619,7 @@
     }
 
     .bottom-right-pane.sheet > div.sheet-image {
-      z-index: 5;
+      z-index: 10;
     }
 
     .top-left-pane > div.sheet-image {
@@ -891,6 +891,7 @@
       }
 
       .sheet-tabsheet-infolabel {
+        background: $spreadsheet-sheet-selector-background;
         z-index: inherit;
         position: absolute;
         right: 0;
@@ -898,11 +899,14 @@
         font-size: $spreadsheet-status-label-font-size;
         border-left: $spreadsheet-border;
         padding-left: $spreadsheet-field-padding;
+        padding-right: $spreadsheet-field-padding;
         width: $spreadsheet-status-label-width;
         height: 100%;
         line-height: $spreadsheet-bottom-bar-height + $spreadsheet-border-width;
         display: inline;
         text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
       }
     }
 

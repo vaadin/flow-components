@@ -18,10 +18,11 @@ package com.vaadin.addon.spreadsheet.client;
  */
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -31,6 +32,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHandler;
@@ -192,7 +194,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private List<String> visibleCellCommentKeys = new ArrayList<String>();
 
-    private Set<String> sheetImageKeys;
+    private Set<String> currentOverlays = new HashSet<String>();
 
     @Override
     protected void init() {
@@ -264,8 +266,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         getWidget().clearSpreadsheet(true);
         getLayoutManager().removeElementResizeListener(
                 getWidget().getElement(), elementResizeListener);
-        if (sheetImageKeys != null) {
-            sheetImageKeys.clear();
+        if (currentOverlays != null) {
+            currentOverlays.clear();
         }
         visibleCellCommentKeys.clear();
     }
@@ -380,33 +382,55 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             widget.setInvalidFormulaCells(state.invalidFormulaCells);
         }
 
-        if (stateChangeEvent.hasPropertyChanged("resourceKeyToImage")) {
-            Map<String, ImageInfo> resourceKeyToImage = getState().resourceKeyToImage;
-            // remove old:
-            if (sheetImageKeys != null) {
-                for (String key : sheetImageKeys) {
-                    if (resourceKeyToImage != null
-                            && !resourceKeyToImage.containsKey(key)) {
-                        widget.removeImage(key);
-                    }
-                }
-            }
-            if (resourceKeyToImage != null) {
-                for (Entry<String, ImageInfo> entry : resourceKeyToImage
-                        .entrySet()) {
-                    String key = entry.getKey();
-                    ImageInfo imageInfo = entry.getValue();
-                    if (sheetImageKeys != null && sheetImageKeys.contains(key)) {
-                        widget.updateImage(key, imageInfo);
-                    } else {
-                        widget.addImage(key, getResourceUrl(key), imageInfo);
-                    }
-                }
-            }
-            sheetImageKeys = resourceKeyToImage == null ? null
-                    : resourceKeyToImage.keySet();
+        if (stateChangeEvent.hasPropertyChanged("overlays")) {
+            overlaysChange();
         }
+
         widget.getSheetWidget().updateSheetPanePositions();
+    }
+
+    private void overlaysChange() {
+        Map<String, OverlayInfo> overlayInfos = getState().overlays == null ? Collections
+                .<String, OverlayInfo> emptyMap() : getState().overlays;
+
+        removeOldOverlays(overlayInfos.keySet());
+
+        addOrUpdateOverlays(overlayInfos);
+
+        currentOverlays = overlayInfos.keySet();
+    }
+
+    private void addOrUpdateOverlays(Map<String, OverlayInfo> overlayInfos) {
+        for (String key : overlayInfos.keySet()) {
+            if (currentOverlays.contains(key)) {
+                getWidget().updateOverlay(key, overlayInfos.get(key));
+            } else {
+                addOverlay(key, overlayInfos.get(key));
+            }
+        }
+    }
+
+    private void addOverlay(String id, OverlayInfo overlayInfo) {
+        switch (overlayInfo.type) {
+        case IMAGE:
+            getWidget().addOverlay(id, new Image(getResourceUrl(id)), overlayInfo);
+            break;
+        case COMPONENT:
+            for (ComponentConnector c : getChildComponents()) {
+                if (c.getConnectorId().equals(id)) {
+                    getWidget().addOverlay(id, c.getWidget(), overlayInfo);
+                }
+            }
+            break;
+        }
+    }
+
+    private void removeOldOverlays(Set<String> newOverlayKeys) {
+        for (String key : currentOverlays) {
+            if (!newOverlayKeys.contains(key)) {
+                getWidget().removeOverlay(key);
+            }
+        }
     }
 
     private void setupCustomEditors() {
@@ -475,6 +499,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     public void onConnectorHierarchyChange(ConnectorHierarchyChangeEvent event) {
         // remove old popup buttons
         List<ComponentConnector> oldChildren = event.getOldChildren();
+
         for (ComponentConnector child : oldChildren) {
             if (child instanceof PopupButtonConnector
                     && child.getParent() != this) {

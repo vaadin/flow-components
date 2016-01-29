@@ -110,8 +110,8 @@ public class Cell {
 
     void updateOverflow() {
 
-        boolean rightAligned = element.getClassName().contains(" r ")
-                || element.getClassName().endsWith(" r");
+        boolean rightAligned = element.getAttribute("class").contains(" r ")
+                || element.getAttribute("class").endsWith(" r");
 
         int columnWidth = sheetWidget.actionHandler.getColWidth(col);
 

@@ -1357,7 +1357,7 @@ public class SelectionWidget extends Composite {
         Element target = WidgetUtil.getElementFromPoint(selectionPointX,
                 selectionPointY);
         if (target != null) {
-            final String className = target.getClassName();
+            final String className = target.getAttribute("class");
             sheetWidget.jsniUtil.parseColRow(className);
             int col = sheetWidget.jsniUtil.getParsedCol();
             int row = sheetWidget.jsniUtil.getParsedRow();
@@ -1430,7 +1430,7 @@ public class SelectionWidget extends Composite {
                 Element target = WidgetUtil.getElementFromPoint(
                         selectionPointX, selectionPointY);
                 if (target != null) {
-                    final String className = target.getClassName();
+                    final String className = target.getAttribute("class");
                     sheetWidget.jsniUtil.parseColRow(className);
                     int col = sheetWidget.jsniUtil.getParsedCol();
                     int row = sheetWidget.jsniUtil.getParsedRow();
