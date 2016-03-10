@@ -142,4 +142,10 @@ public class SpreadsheetState extends TabIndexState {
 
     @DelegateToWidget
     public String invalidFormulaErrorMessage = "Invalid formula";
+
+    @DelegateToWidget
+    public boolean lockFormatColumns = true;
+
+    @DelegateToWidget
+    public boolean lockFormatRows = true;
 }

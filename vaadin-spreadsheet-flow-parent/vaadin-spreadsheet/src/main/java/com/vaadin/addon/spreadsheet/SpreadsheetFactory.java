@@ -61,6 +61,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTOutlinePr;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
@@ -487,6 +488,13 @@ public class SpreadsheetFactory implements Serializable {
 
         CTWorksheet ctWorksheet = ((XSSFSheet) spreadsheet.getActiveSheet())
                 .getCTWorksheet();
+        CTSheetProtection sheetProtection = ctWorksheet.getSheetProtection();
+        if (sheetProtection != null) {
+            spreadsheet.getState().lockFormatColumns = sheetProtection
+                    .getFormatColumns();
+            spreadsheet.getState().lockFormatRows = sheetProtection
+                    .getFormatRows();
+        }
 
         spreadsheet.getState().colGroupingMax = 0;
         spreadsheet.getState().rowGroupingMax = 0;

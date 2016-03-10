@@ -134,6 +134,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     List<Integer> hiddenColumnIndexes;
     List<Integer> hiddenRowIndexes;
     private List<MergedRegion> mergedRegions;
+    private boolean lockFormatColumns = true;
+    private boolean lockFormatRows = true;
 
     /**
      * Timer flag for sending lazy RPCs to server. Used so that we don't send an
@@ -194,6 +196,38 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         sheetWidget.getElement().appendChild(sheetTabSheet.getElement());
 
         initWidget(sheetWidget);
+    }
+
+    /**
+     * Enable or disable Formatting columns locking.
+     *
+     * @param value
+     *            the new content. Can not be HTML.
+     */
+    public void setLockFormatColumns(boolean enabled) {
+        lockFormatColumns = enabled;
+        if (lockFormatColumns) {
+            if (!getStyleName().contains("lock-format-columns")) {
+                addStyleName("lock-format-columns");
+            }
+        } else {
+            removeStyleName("lock-format-columns");
+        }
+    }
+
+    /**
+     * Enable or disable Formatting rows locking.
+     *
+     * @param value
+     *            the new content. Can not be HTML.
+     */
+    public void setLockFormatRows(boolean enabled) {
+        lockFormatRows = enabled;
+        if (lockFormatRows) {
+            addStyleName("lock-format-rows");
+        } else {
+            removeStyleName("lock-format-rows");
+        }
     }
 
     /**
@@ -1681,8 +1715,13 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     @Override
-    public boolean canResize() {
-        return !sheetProtected && !touchMode;
+    public boolean canResizeColumn() {
+        return (!sheetProtected || !lockFormatColumns) && !touchMode;
+    }
+
+    @Override
+    public boolean canResizeRow() {
+        return (!sheetProtected || !lockFormatRows) && !touchMode;
     }
 
     public void setDisplayGridlines(boolean displayGridlines) {

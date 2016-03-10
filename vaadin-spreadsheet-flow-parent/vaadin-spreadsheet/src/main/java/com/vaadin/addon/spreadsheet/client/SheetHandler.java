@@ -177,7 +177,9 @@ public interface SheetHandler extends GroupingHandler {
 
     boolean hasCustomContextMenu();
 
-    boolean canResize();
+    boolean canResizeColumn();
+
+    boolean canResizeRow();
 
     /** Map containing 1-based row indexes and new sizes as pt */
     void onRowsResized(Map<Integer, Float> newSizes);

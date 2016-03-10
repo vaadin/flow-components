@@ -330,7 +330,8 @@ public class SheetWidget extends Panel {
     private int resizedColumnIndex = -1;
     private int resizeFirstEdgePos;
     private int resizeLastEdgePos;
-    private boolean resizing;
+    private boolean resizingColumn;
+    private boolean resizingRow;
     private boolean resized;
     private boolean columnResizeCancelled;
 
@@ -506,8 +507,8 @@ public class SheetWidget extends Panel {
             });
 
     private boolean overlayShouldBeShownFor(String className) {
-        return className.equals(Cell.CELL_COMMENT_TRIANGLE_CLASSNAME) ||
-                className.equals(Cell.CELL_INVALID_FORMULA_CLASSNAME);
+        return className.equals(Cell.CELL_COMMENT_TRIANGLE_CLASSNAME)
+                || className.equals(Cell.CELL_INVALID_FORMULA_CLASSNAME);
     }
 
     /** Height of the formula bar and column headers */
@@ -1484,6 +1485,9 @@ public class SheetWidget extends Panel {
                     public void onPreviewNativeEvent(NativePreviewEvent event) {
                         int eventTypeInt = event.getTypeInt();
                         final NativeEvent nativeEvent = event.getNativeEvent();
+                        Element target = nativeEvent.getEventTarget().cast();
+                        String className = target.getClassName();
+
                         if (getElement().isOrHasChild(
                                 (Node) nativeEvent.getEventTarget().cast())) {
                             if (Event.ONTOUCHSTART == eventTypeInt
@@ -1494,7 +1498,8 @@ public class SheetWidget extends Panel {
                                 setFocused(true);
                             }
                         }
-                        if (resizing && eventTypeInt == Event.ONMOUSEMOVE) {
+                        if ((resizingColumn || resizingRow)
+                                && eventTypeInt == Event.ONMOUSEMOVE) {
                             if (resizedColumnIndex != -1) {
                                 handleColumnResizeDrag(
                                         SpreadsheetWidget
@@ -1508,22 +1513,22 @@ public class SheetWidget extends Panel {
                                         SpreadsheetWidget
                                                 .getTouchOrMouseClientY(nativeEvent));
                             } else {
-                                resizing = false;
+                                resizingColumn = false;
+                                resizingRow = false;
                             }
                             event.cancel();
                         } else if (eventTypeInt == Event.ONMOUSEUP
-                                && actionHandler.canResize()) {
-                            Element target = nativeEvent.getEventTarget()
-                                    .cast();
-                            String className = target.getClassName();
+                                && canResize(target)) {
 
-                            if (resizing
+                            if (resizingColumn
+                                    || resizingRow
                                     || className
                                             .equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)
                                     || className
                                             .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
                                 columnResizeCancelled = true;
-                                resizing = false;
+                                resizingColumn = false;
+                                resizingRow = false;
                                 jsniUtil.clearCSSRules(resizeStyle);
                                 resizeTooltip.hide();
                                 event.cancel();
@@ -1542,9 +1547,6 @@ public class SheetWidget extends Panel {
                                 }
                             }
                         } else {
-                            Element target = nativeEvent.getEventTarget()
-                                    .cast();
-                            String className = target.getClassName();
 
                             if (getElement().isOrHasChild(target)) {
 
@@ -1572,7 +1574,7 @@ public class SheetWidget extends Panel {
                                         sheet.focus();
                                     }
                                 } else if (eventTypeInt == Event.ONMOUSEDOWN
-                                        && actionHandler.canResize()) {
+                                        && canResize(target)) {
                                     if (className
                                             .equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)) {
                                         className = target.getParentElement()
@@ -1627,7 +1629,7 @@ public class SheetWidget extends Panel {
                                         event.cancel();
                                     }
                                 } else if (eventTypeInt == Event.ONDBLCLICK
-                                        && actionHandler.canResize()) {
+                                        && canResize(target)) {
                                     if (className
                                             .equals(HEADER_RESIZE_DND_FIRST_CLASSNAME)) {
                                         className = target.getParentElement()
@@ -1672,6 +1674,27 @@ public class SheetWidget extends Panel {
                                 }
                             }
                         }
+                    }
+
+                    private boolean canResize(Element target) {
+                        int i = isHeader(target);
+                        if (resizingRow || i == 1) {
+                            return actionHandler.canResizeRow();
+                        } else if (resizingColumn || i == 2) {
+                            return actionHandler.canResizeColumn();
+                        }
+                        return false;
+                    }
+
+                    /**
+                     * returns 1 for row 2 for column 0 for not header
+                     * 
+                     * @see {@link SheetJsniUtil.isHeader(String)}
+                     */
+                    private int isHeader(Element target) {
+                        String className = target.getParentElement()
+                                .getClassName();
+                        return jsniUtil.isHeader(className);
                     }
                 });
         addDomHandler(new ContextMenuHandler() {
@@ -1718,7 +1741,7 @@ public class SheetWidget extends Panel {
             return;
         }
         Event.setCapture(getElement());
-        resizing = true;
+        resizingRow = true;
         resized = false;
         resizedRowIndex = rowIndex;
         resizedColumnIndex = -1;
@@ -1770,7 +1793,7 @@ public class SheetWidget extends Panel {
                     return;
                 }
                 Event.setCapture(getElement());
-                resizing = true;
+                resizingColumn = true;
                 resizedColumnIndex = tempColumnIndex;
                 resizedRowIndex = -1;
                 DivElement header;
@@ -3851,7 +3874,6 @@ public class SheetWidget extends Panel {
             }
         }
     }
-
 
     public void setCellCommentVisible(boolean visible, String key) {
         if (visible) {
@@ -6349,7 +6371,6 @@ public class SheetWidget extends Panel {
         if(!displayRowColHeadings) {
             colGroupSummaryPane.getStyle().setDisplay(Display.NONE);
         }
-
 
         if (frozenColumnHeaders != null && colGroupMax > 0) {
             colGroupFreezePane.getStyle().setDisplay(Display.BLOCK);
