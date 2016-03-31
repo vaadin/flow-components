@@ -1,14 +1,10 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SheetHeaderElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
-import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class FreezePaneTest extends AbstractSpreadsheetTestCase {
 

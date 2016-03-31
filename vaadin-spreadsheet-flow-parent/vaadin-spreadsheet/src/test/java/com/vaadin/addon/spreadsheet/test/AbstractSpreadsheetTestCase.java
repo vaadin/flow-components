@@ -9,12 +9,14 @@ import com.vaadin.testbench.elements.NativeSelectElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Locale;
 
 import static org.junit.Assert.*;
@@ -99,5 +101,18 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
         driver.get(getTestUrl() + "?theme=" + theme);
         headerPage.loadFile(spreadsheetFile, this);
         testBench(driver).waitForVaadin();
+    }
+
+    protected void clearLog() {
+        List<WebElement> buttons = findElements(By.className("v-debugwindow-button"));
+        for (int i = 0; i < buttons.size(); i++) {
+            WebElement button = buttons.get(i);
+            String title = button.getAttribute("title");
+            if (title != null && title.startsWith("Clear log")) {
+                testBench().waitForVaadin();
+                button.click();
+                break;
+            }
+        }
     }
 }

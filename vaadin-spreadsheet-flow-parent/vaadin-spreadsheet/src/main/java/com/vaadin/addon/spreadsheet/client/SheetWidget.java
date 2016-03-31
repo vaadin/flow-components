@@ -17,12 +17,6 @@ package com.vaadin.addon.spreadsheet.client;
  * #L%
  */
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
@@ -59,6 +53,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
 import com.vaadin.addon.spreadsheet.shared.GroupingData;
+import com.vaadin.client.ApplicationConfiguration;
 import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.ComputedStyle;
 import com.vaadin.client.MeasuredSize;
@@ -66,6 +61,20 @@ import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.VLazyExecutor;
 import com.vaadin.client.ui.VOverlay;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SheetWidget extends Panel {
 
@@ -2348,14 +2357,16 @@ public class SheetWidget extends Panel {
                 List<Integer> list = new ArrayList<Integer>(styles.keySet());
                 Collections.sort(list);
 
-                for (int i = 0; i < list.size(); i++) {
-
+                final int listSize = list.size();
+                final StringBuilder sb = new StringBuilder(getRules(sheetStyle));
+                
+                for (int i = 0; i < listSize; i++) {
                     Integer key = list.get(i);
                     String val = styles.get(key);
-
-                    jsniUtil.insertRule(sheetStyle, ".v-spreadsheet." + sheetId
-                            + " .sheet .cell.cf" + key + " {" + val + "}");
+                    sb.append(".v-spreadsheet." + sheetId + " .sheet .cell.cf" + key + " {" + val + "}");
                 }
+                sheetStyle.removeAllChildren();
+                sheetStyle.appendChild(Document.get().createTextNode(sb.toString()));
             } catch (Exception e) {
                 debugConsole
                         .severe("SheetWidget:updateConditionalFormattingStyles: "
@@ -2364,29 +2375,46 @@ public class SheetWidget extends Panel {
             }
         }
     }
+    
+    /** Clears the rules starting from the given index */
+    public native String getRules(StyleElement stylesheet)
+    /*-{
+        var cssRules = stylesheet.sheet.cssRules? stylesheet.sheet.cssRules : stylesheet.sheet.rules;
+        var rules = [];
+		for (i=0; i<cssRules.length; i++){
+			rules.push(cssRules[i].cssText);
+		}
+		return rules.join(' ');
+    }-*/;
 
     private void updateCellStyles() {
+        boolean isDebugMode=ApplicationConfiguration.isDebugMode();
         // styles for individual cells
         Map<Integer, String> styles = actionHandler.getCellStyleToCSSStyle();
+        long started=0;
+        if(isDebugMode) {
+            started = System.currentTimeMillis();
+        }
         if (styles != null) {
             try {
+            	final StringBuilder sb = new StringBuilder(getRules(sheetStyle));
                 for (Entry<Integer, String> entry : styles.entrySet()) {
                     if (entry.getKey() == 0) {
-                        jsniUtil.insertRule(sheetStyle,
-                                ".v-spreadsheet." + sheetId + " .sheet .cell {"
-                                        + entry.getValue() + "}");
+                    	sb.append(".v-spreadsheet." + sheetId + " .sheet .cell {" + entry.getValue() + "}");
                     } else {
-                        jsniUtil.insertRule(
-                                sheetStyle,
-                                ".v-spreadsheet." + sheetId + " .sheet .cell."
-                                        + "cs" + entry.getKey() + " {"
-                                        + entry.getValue() + "}");
+                    	sb.append(".v-spreadsheet." + sheetId + " .sheet .cell." + "cs" + entry.getKey() + " {" + entry.getValue() + "}");
                     }
                 }
+                sheetStyle.removeAllChildren();
+                sheetStyle.appendChild(Document.get().createTextNode(sb.toString()));
             } catch (Exception e) {
                 debugConsole.severe("SheetWidget:updateStyles: " + e.toString()
                         + " while creating the cell styles");
             }
+        }
+        if(isDebugMode) {
+            long ended = System.currentTimeMillis();
+            debugConsole.info("Style update took:" + (ended - started) + "ms");
         }
         recalculateCellStyleWidthValues();
         createCellRangeRule();
@@ -2441,7 +2469,7 @@ public class SheetWidget extends Panel {
         fontWidthDummyElement.removeFromParent();
         actionHandler.setCellStyleWidthRatios(cellStyleWidthRatioMap);
     }
-
+    
     int measureValueWidth(String cellStyle, String value) {
         sheet.appendChild(fontWidthDummyElement);
         fontWidthDummyElement.setClassName("cell " + cellStyle);
@@ -4795,11 +4823,11 @@ public class SheetWidget extends Panel {
     }
 
     public int getRightVisibleColumnIndex() {
-        int index = lastColumnIndex;
-        final int bound = sheet.getAbsoluteRight();
-        final ArrayList<Cell> cells = rows.get(0);
-        for (int i = cells.size() - 1; i > 0; i--) {
-            if (cells.get(i).getElement().getAbsoluteRight() <= bound) {
+    	int index = lastColumnIndex;
+        final List<Cell> cells = rows.get(0);
+        int size = cells.size();
+        for (int i = size - 1; i > 0; i--) {
+            if (isVisible(cells.get(i).getElement())) {
                 return index;
             } else {
                 index--;
@@ -5547,17 +5575,21 @@ public class SheetWidget extends Panel {
     }
 
     public void addShiftedCellBorderStyles(List<String> styles) {
-        for (String style : styles) {
-            try {
-                jsniUtil.insertRule(shiftedBorderCellStyle,
-                        style.replace(".col", "." + sheetId + " .cell.col"));
-            } catch (Exception e) {
-                debugConsole.log(
-                        Level.SEVERE,
-                        "Invalid custom cell border style: " + style + ", "
-                                + e.getMessage());
-            }
-        }
+    	if(styles.size() > 0) {
+	    	StringBuilder sb = new StringBuilder(getRules(shiftedBorderCellStyle));
+	        for (String style : styles) {
+	            try {
+	            	sb.append(style.replace(".col", "." + sheetId + " .cell.col"));
+	            } catch (Exception e) {
+	                debugConsole.log(
+	                        Level.SEVERE,
+	                        "Invalid custom cell border style: " + style + ", "
+	                                + e.getMessage());
+	            }
+	        }
+	        shiftedBorderCellStyle.removeAllChildren();
+	        shiftedBorderCellStyle.appendChild(Document.get().createTextNode(sb.toString()));
+    	}
     }
 
     public void removeShiftedCellBorderStyles() {

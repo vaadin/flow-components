@@ -114,18 +114,6 @@ public class CopyPasteCellsTest extends AbstractSpreadsheetTestCase {
         return json.startsWith(RPC_START_SUBSTRING) && json.toLowerCase().contains(UPDATE_SUBSTRING);
     }
 
-    private void clearLog() {
-        List<WebElement> buttons = findElements(By.className("v-debugwindow-button"));
-        for (int i = 0; i < buttons.size(); i++) {
-            WebElement button = buttons.get(i);
-            String title = button.getAttribute("title");
-            if (title != null && title.startsWith("Clear log")) {
-                testBench().waitForVaadin();
-                button.click();
-                break;
-            }
-        }
-    }
 
     private void paste() {
         new Actions(getDriver())
