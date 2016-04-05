@@ -70,7 +70,7 @@ public class CellShiftValuesCommand extends CellValueCommand {
     @Override
     public CellRangeAddress getPaintedCellRange() {
         CellRangeAddress paintedCellRange = super.getPaintedCellRange();
-        if (undone) {
+        if (undone || paintedCellRange == null) {
             return paintedCellRange;
         } else {
             CellRangeValue crv = (CellRangeValue) values.get(0);
