@@ -17,6 +17,20 @@ package com.vaadin.addon.spreadsheet.client;
  * #L%
  */
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
@@ -61,20 +75,6 @@ import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.VLazyExecutor;
 import com.vaadin.client.ui.VOverlay;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class SheetWidget extends Panel {
 
@@ -2070,7 +2070,8 @@ public class SheetWidget extends Panel {
     }
 
     /** Replace stylesheet with the array of rules given */
-    private void resetStyleSheetRules(StyleElement stylesheet, List<String> rules) {
+    private void resetStyleSheetRules(StyleElement stylesheet,
+            List<String> rules) {
         jsniUtil.clearCSSRules(stylesheet);
         for (int i = 0; i < rules.size(); i++) {
             jsniUtil.insertRule(stylesheet, rules.get(i));
@@ -2161,7 +2162,8 @@ public class SheetWidget extends Panel {
         int initialLeft = calculateLeftValueOfScrolledColumns();
 
         createRowStyles(sizeStyleRules, firstRowIndex, lastRowIndex, initialTop);
-        createColumnStyles(sizeStyleRules, firstColumnIndex, lastColumnIndex, initialLeft);
+        createColumnStyles(sizeStyleRules, firstColumnIndex, lastColumnIndex,
+                initialLeft);
 
         // Create styles for freezed columns and rows if needed
         if (horizontalSplitPosition > 0) {
@@ -2176,7 +2178,7 @@ public class SheetWidget extends Panel {
 
     private int calculateLeftValueOfScrolledColumns() {
         int left = 0;
-        for(int i = 1; i < (firstColumnIndex - horizontalSplitPosition); i++) {
+        for (int i = 1; i < (firstColumnIndex - horizontalSplitPosition); i++) {
             left += actionHandler.getColWidth(i);
         }
         return left;
@@ -2184,38 +2186,40 @@ public class SheetWidget extends Panel {
 
     private int calculateTopValueOfScrolledRows() {
         int top = 0;
-        for(int i = 1; i < (firstRowIndex - verticalSplitPosition); i++) {
-            top += definedRowHeights[i-1];
+        for (int i = 1; i < (firstRowIndex - verticalSplitPosition); i++) {
+            top += definedRowHeights[i - 1];
         }
         return top;
     }
 
-    private void createRowStyles(List<String> rules, int startIndex, int endIndex, int initialTop) {
+    private void createRowStyles(List<String> rules, int startIndex,
+            int endIndex, int initialTop) {
         int top = initialTop;
 
         for (int i = startIndex; i <= endIndex; i++) {
             StringBuilder sb = new StringBuilder();
-            int rowHeightPX = definedRowHeights[i-1];
+            int rowHeightPX = definedRowHeights[i - 1];
             sb.append(".").append(sheetId).append(" .sheet .row").append(i)
-                .append(", .").append(sheetId).append(">.resize-line.row")
-                .append(i).append(" { ").append(getRowDisplayString(i))
-                .append("height: ").append(rowHeightPX).append("px; top:")
-                .append(top).append("px; }\n");
+                    .append(", .").append(sheetId).append(">.resize-line.row")
+                    .append(i).append(" { ").append(getRowDisplayString(i))
+                    .append("height: ").append(rowHeightPX).append("px; top:")
+                    .append(top).append("px; }\n");
             top += rowHeightPX;
             rules.add(sb.toString());
         }
     }
 
-    private void createColumnStyles(List<String> rules, int startIndex, int endIndex, int initialLeft) {
+    private void createColumnStyles(List<String> rules, int startIndex,
+            int endIndex, int initialLeft) {
         int left = initialLeft;
         for (int i = startIndex; i <= endIndex; i++) {
             StringBuilder sb = new StringBuilder();
             int colWidth = actionHandler.getColWidth(i);
             sb.append(".").append(sheetId).append(" .sheet .col").append(i)
-                .append(", .").append(sheetId).append(">.resize-line.col")
-                .append(i).append(" { ").append(getColumnDisplayString(i))
-                .append("width: ").append(colWidth).append("px; left:")
-                .append(left).append("px; }\n");
+                    .append(", .").append(sheetId).append(">.resize-line.col")
+                    .append(i).append(" { ").append(getColumnDisplayString(i))
+                    .append("width: ").append(colWidth).append("px; left:")
+                    .append(left).append("px; }\n");
             left += colWidth;
             rules.add(sb.toString());
         }
@@ -2227,21 +2231,21 @@ public class SheetWidget extends Panel {
         topFrozenPanelHeight = 0;
         float topFrozenPanelHeightPx = 0;
         if (verticalSplitPosition > 0) {
-            topFrozenPanelHeightPx = calculateHeightForRows(
-                1, verticalSplitPosition);
+            topFrozenPanelHeightPx = calculateHeightForRows(1,
+                    verticalSplitPosition);
             topFrozenPanelHeight = (int) (topFrozenPanelHeightPx + 1);
         }
         float bottomPanelHeightPx = calculateHeightForRows(
-            verticalSplitPosition + 1, actionHandler.getMaxRows());
+                verticalSplitPosition + 1, actionHandler.getMaxRows());
 
         // create column rules (width + left offset)
         leftFrozenPanelWidth = 0;
         if (horizontalSplitPosition > 0) {
-            leftFrozenPanelWidth = calculateWidthForColumns(
-                1, horizontalSplitPosition);
+            leftFrozenPanelWidth = calculateWidthForColumns(1,
+                    horizontalSplitPosition);
         }
         int bottomPanelWidth = calculateWidthForColumns(
-            horizontalSplitPosition + 1, actionHandler.getMaxColumns());
+                horizontalSplitPosition + 1, actionHandler.getMaxColumns());
 
         updateSheetPanePositions();
 
@@ -2359,14 +2363,16 @@ public class SheetWidget extends Panel {
 
                 final int listSize = list.size();
                 final StringBuilder sb = new StringBuilder(getRules(sheetStyle));
-                
+
                 for (int i = 0; i < listSize; i++) {
                     Integer key = list.get(i);
                     String val = styles.get(key);
-                    sb.append(".v-spreadsheet." + sheetId + " .sheet .cell.cf" + key + " {" + val + "}");
+                    sb.append(".v-spreadsheet." + sheetId + " .sheet .cell.cf"
+                            + key + " {" + val + "}");
                 }
                 sheetStyle.removeAllChildren();
-                sheetStyle.appendChild(Document.get().createTextNode(sb.toString()));
+                sheetStyle.appendChild(Document.get().createTextNode(
+                        sb.toString()));
             } catch (Exception e) {
                 debugConsole
                         .severe("SheetWidget:updateConditionalFormattingStyles: "
@@ -2375,49 +2381,84 @@ public class SheetWidget extends Panel {
             }
         }
     }
-    
+
     /** Clears the rules starting from the given index */
     public native String getRules(StyleElement stylesheet)
     /*-{
         var cssRules = stylesheet.sheet.cssRules? stylesheet.sheet.cssRules : stylesheet.sheet.rules;
         var rules = [];
-		for (i=0; i<cssRules.length; i++){
-			rules.push(cssRules[i].cssText);
-		}
-		return rules.join(' ');
+    	for (i=0; i<cssRules.length; i++){
+    		rules.push(cssRules[i].cssText);
+    	}
+    	return rules.join(' ');
     }-*/;
 
     private void updateCellStyles() {
-        boolean isDebugMode=ApplicationConfiguration.isDebugMode();
+        boolean isDebugMode = ApplicationConfiguration.isDebugMode();
         // styles for individual cells
         Map<Integer, String> styles = actionHandler.getCellStyleToCSSStyle();
-        long started=0;
-        if(isDebugMode) {
+        long started = 0;
+        if (isDebugMode) {
             started = System.currentTimeMillis();
         }
+        Map<Integer, Integer> rowIndexToStyleIndex = actionHandler
+                .getRowIndexToStyleIndex();
+        Map<Integer, Integer> columnIndexToStyleIndex = actionHandler
+                .getColumnIndexToStyleIndex();
+
         if (styles != null) {
             try {
-            	final StringBuilder sb = new StringBuilder(getRules(sheetStyle));
+                final StringBuilder sb = new StringBuilder(getRules(sheetStyle));
                 for (Entry<Integer, String> entry : styles.entrySet()) {
                     if (entry.getKey() == 0) {
-                    	sb.append(".v-spreadsheet." + sheetId + " .sheet .cell {" + entry.getValue() + "}");
+                        sb.append(".v-spreadsheet." + sheetId
+                                + " .sheet .cell {" + entry.getValue() + "}");
                     } else {
-                    	sb.append(".v-spreadsheet." + sheetId + " .sheet .cell." + "cs" + entry.getKey() + " {" + entry.getValue() + "}");
+                        sb.append(getSelectorsForStyle(entry.getKey(),
+                                rowIndexToStyleIndex, columnIndexToStyleIndex)
+                                + " {" + entry.getValue() + "}");
                     }
                 }
                 sheetStyle.removeAllChildren();
-                sheetStyle.appendChild(Document.get().createTextNode(sb.toString()));
+                sheetStyle.appendChild(Document.get().createTextNode(
+                        sb.toString()));
             } catch (Exception e) {
                 debugConsole.severe("SheetWidget:updateStyles: " + e.toString()
                         + " while creating the cell styles");
             }
         }
-        if(isDebugMode) {
+        if (isDebugMode) {
             long ended = System.currentTimeMillis();
             debugConsole.info("Style update took:" + (ended - started) + "ms");
         }
         recalculateCellStyleWidthValues();
         createCellRangeRule();
+    }
+
+    private String getSelectorsForStyle(Integer index,
+            Map<Integer, Integer> rowIndexToStyleIndex,
+            Map<Integer, Integer> columnIndexToStyleIndex) {
+        StringBuilder sb = new StringBuilder(".v-spreadsheet.");
+        sb.append(sheetId).append(" .sheet .cell.cs").append(index);
+
+        for (Map.Entry<Integer, Integer> entry : rowIndexToStyleIndex
+                .entrySet()) {
+            if (entry.getValue() == index) {
+                sb.append(", .v-spreadsheet.").append(sheetId)
+                        .append(" .sheet .row").append(entry.getKey())
+                        .append(".cell.cs0");
+            }
+        }
+
+        for (Map.Entry<Integer, Integer> entry : columnIndexToStyleIndex
+                .entrySet()) {
+            if (entry.getValue() == index) {
+                sb.append(", .v-spreadsheet.").append(sheetId)
+                        .append(" .sheet .col").append(entry.getKey())
+                        .append(".cell.cs0");
+            }
+        }
+        return sb.toString();
     }
 
     private void createCellRangeRule() {
@@ -2469,7 +2510,7 @@ public class SheetWidget extends Panel {
         fontWidthDummyElement.removeFromParent();
         actionHandler.setCellStyleWidthRatios(cellStyleWidthRatioMap);
     }
-    
+
     int measureValueWidth(String cellStyle, String value) {
         sheet.appendChild(fontWidthDummyElement);
         fontWidthDummyElement.setClassName("cell " + cellStyle);
@@ -3514,7 +3555,7 @@ public class SheetWidget extends Panel {
         if (cellHasComment(key)) {
             mergedCell.showCellCommentMark();
         }
-        if(cellHasInvalidFormula(key)) {
+        if (cellHasInvalidFormula(key)) {
             mergedCell.showInvalidFormulaIndicator();
         }
         if (alwaysVisibleCellComments.containsKey(key)) {
@@ -3777,30 +3818,36 @@ public class SheetWidget extends Panel {
     public void setInvalidFormulaCells(Set<String> newInvalidFormulaCells) {
         udpateInvalidFormulaCells(getAllCells(), newInvalidFormulaCells);
         updateMergedInvalidFormulaCells(newInvalidFormulaCells);
-        invalidFormulaCells = (Set<String>) putNewValuesToCollectionField(newInvalidFormulaCells, invalidFormulaCells);
+        invalidFormulaCells = (Set<String>) putNewValuesToCollectionField(
+                newInvalidFormulaCells, invalidFormulaCells);
         updateAllVisibleComments();
     }
 
     private void updateAllVisibleComments() {
-        if(invalidFormulaCells == null) {
+        if (invalidFormulaCells == null) {
             return;
         }
 
-        if(alwaysVisibleCellComments != null) {
-            for (Entry<String, CellComment> entry : alwaysVisibleCellComments.entrySet()) {
+        if (alwaysVisibleCellComments != null) {
+            for (Entry<String, CellComment> entry : alwaysVisibleCellComments
+                    .entrySet()) {
                 String key = entry.getKey();
                 CellComment cellComment = entry.getValue();
-                String errorMessage = invalidFormulaCells.contains(key) ? invalidFormulaMessage : null;
+                String errorMessage = invalidFormulaCells.contains(key) ? invalidFormulaMessage
+                        : null;
                 cellComment.setInvalidFormulaMessage(errorMessage);
             }
         }
-        if(cellCommentOverlay != null) {
-            String errorMessage = invalidFormulaCells.contains(cellCommentCellClassName) ? invalidFormulaMessage : null;
+        if (cellCommentOverlay != null) {
+            String errorMessage = invalidFormulaCells
+                    .contains(cellCommentCellClassName) ? invalidFormulaMessage
+                    : null;
             cellCommentOverlay.setInvalidFormulaMessage(errorMessage);
         }
     }
 
-    private void udpateInvalidFormulaCells(Collection<Cell> allCells, Collection<String> newInvalidFormulaCells) {
+    private void udpateInvalidFormulaCells(Collection<Cell> allCells,
+            Collection<String> newInvalidFormulaCells) {
         for (Cell cell : allCells) {
             String key = toKey(cell.getCol(), cell.getRow());
             if (newInvalidFormulaCells != null
@@ -3819,19 +3866,21 @@ public class SheetWidget extends Panel {
         updateRowCellComments(getAllCells(), newCellCommentsMap);
         updateMergedCellCommentsMap(newCellCommentsMap);
 
-        cellCommentsMap = putValuesToMapField(newCellCommentsMap, cellCommentsMap);
-        cellCommentAuthorsMap = putValuesToMapField(newCellCommentAuthorsMap, cellCommentAuthorsMap);
+        cellCommentsMap = putValuesToMapField(newCellCommentsMap,
+                cellCommentsMap);
+        cellCommentAuthorsMap = putValuesToMapField(newCellCommentAuthorsMap,
+                cellCommentAuthorsMap);
     }
 
     private List<Cell> getAllCells() {
         ArrayList<Cell> cells = new ArrayList<Cell>(topLeftCells);
-        for(List<Cell> row : topRightRows) {
+        for (List<Cell> row : topRightRows) {
             cells.addAll(row);
         }
-        for(List<Cell> row : bottomLeftRows) {
+        for (List<Cell> row : bottomLeftRows) {
             cells.addAll(row);
         }
-        for(List<Cell> row : rows) {
+        for (List<Cell> row : rows) {
             cells.addAll(row);
         }
         return cells;
@@ -3851,7 +3900,9 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private HashMap<String, String> putValuesToMapField(HashMap<String, String> newValuesMap, HashMap<String, String> cachedMap) {
+    private HashMap<String, String> putValuesToMapField(
+            HashMap<String, String> newValuesMap,
+            HashMap<String, String> cachedMap) {
         if (cachedMap != null) {
             cachedMap.clear();
             if (newValuesMap != null) {
@@ -3863,7 +3914,8 @@ public class SheetWidget extends Panel {
         return cachedMap;
     }
 
-    private <T> Collection<T> putNewValuesToCollectionField(Collection<T> newValues, Collection<T> cachedValues) {
+    private <T> Collection<T> putNewValuesToCollectionField(
+            Collection<T> newValues, Collection<T> cachedValues) {
         if (cachedValues != null) {
             cachedValues.clear();
             if (newValues != null) {
@@ -3889,12 +3941,10 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private void updateMergedInvalidFormulaCells(
-            Set<String> newInvalidFormulas) {
+    private void updateMergedInvalidFormulaCells(Set<String> newInvalidFormulas) {
         for (Cell mc : mergedCells.values()) {
             String key = toKey(mc.getCol(), mc.getRow());
-            if (newInvalidFormulas != null
-                    && newInvalidFormulas.contains(key)) {
+            if (newInvalidFormulas != null && newInvalidFormulas.contains(key)) {
                 mc.showInvalidFormulaIndicator();
             } else if (cellHasInvalidFormula(key)) {
                 // remove
@@ -3918,7 +3968,8 @@ public class SheetWidget extends Panel {
                     .getElement().getParentElement());
             cellComment.setAuthor(cellCommentAuthorsMap.get(key));
             cellComment.setCommentText(cellCommentsMap.get(key));
-            String errorMessage = invalidFormulaCells.contains(key) ? invalidFormulaMessage : null;
+            String errorMessage = invalidFormulaCells.contains(key) ? invalidFormulaMessage
+                    : null;
             cellComment.setInvalidFormulaMessage(errorMessage);
             cellComment.showDependingToCellRightCorner((Element) cell
                     .getElement().cast(), parsedRow, parsedCol);
@@ -3984,7 +4035,8 @@ public class SheetWidget extends Panel {
         }
         cellCommentOverlay.setAuthor(cellCommentAuthorsMap.get(cellClassName));
         cellCommentOverlay.setCommentText(cellCommentsMap.get(cellClassName));
-        String errorMessage = invalidFormulaCells.contains(cellClassName) ? invalidFormulaMessage : null;
+        String errorMessage = invalidFormulaCells.contains(cellClassName) ? invalidFormulaMessage
+                : null;
         cellCommentOverlay.setInvalidFormulaMessage(errorMessage);
         cellCommentOverlay.show(cellElement, row, column);
         cellCommentCellClassName = cellClassName;
@@ -4823,7 +4875,7 @@ public class SheetWidget extends Panel {
     }
 
     public int getRightVisibleColumnIndex() {
-    	int index = lastColumnIndex;
+        int index = lastColumnIndex;
         final List<Cell> cells = rows.get(0);
         int size = cells.size();
         for (int i = size - 1; i > 0; i--) {
@@ -5575,21 +5627,23 @@ public class SheetWidget extends Panel {
     }
 
     public void addShiftedCellBorderStyles(List<String> styles) {
-    	if(styles.size() > 0) {
-	    	StringBuilder sb = new StringBuilder(getRules(shiftedBorderCellStyle));
-	        for (String style : styles) {
-	            try {
-	            	sb.append(style.replace(".col", "." + sheetId + " .cell.col"));
-	            } catch (Exception e) {
-	                debugConsole.log(
-	                        Level.SEVERE,
-	                        "Invalid custom cell border style: " + style + ", "
-	                                + e.getMessage());
-	            }
-	        }
-	        shiftedBorderCellStyle.removeAllChildren();
-	        shiftedBorderCellStyle.appendChild(Document.get().createTextNode(sb.toString()));
-    	}
+        if (styles.size() > 0) {
+            StringBuilder sb = new StringBuilder(
+                    getRules(shiftedBorderCellStyle));
+            for (String style : styles) {
+                try {
+                    sb.append(style.replace(".col", "." + sheetId
+                            + " .cell.col"));
+                } catch (Exception e) {
+                    debugConsole.log(Level.SEVERE,
+                            "Invalid custom cell border style: " + style + ", "
+                                    + e.getMessage());
+                }
+            }
+            shiftedBorderCellStyle.removeAllChildren();
+            shiftedBorderCellStyle.appendChild(Document.get().createTextNode(
+                    sb.toString()));
+        }
     }
 
     public void removeShiftedCellBorderStyles() {
@@ -6044,9 +6098,10 @@ public class SheetWidget extends Panel {
     private void updateColGrouping() {
 
         updateGrouping(colGroupPane, colGroupFreezePane, groupingDataCol,
-            frozenColumnHeaders, true, colGroupMax);
+                frozenColumnHeaders, true, colGroupMax);
 
-        int numberOfColGroups = displayRowColHeadings ? colGroupMax + 1 : colGroupMax;
+        int numberOfColGroups = displayRowColHeadings ? colGroupMax + 1
+                : colGroupMax;
         if (colGroupSummaryPane.getChildCount() == numberOfColGroups) {
             // nothings changed; don't re-draw
             return;
@@ -6089,9 +6144,10 @@ public class SheetWidget extends Panel {
 
     private void updateRowGrouping() {
         updateGrouping(rowGroupPane, rowGroupFreezePane, groupingDataRow,
-            frozenRowHeaders, false, rowGroupMax);
+                frozenRowHeaders, false, rowGroupMax);
 
-        int numberOfRowGroups = displayRowColHeadings ? rowGroupMax + 1 : rowGroupMax;
+        int numberOfRowGroups = displayRowColHeadings ? rowGroupMax + 1
+                : rowGroupMax;
         if (rowGroupSummaryPane.getChildCount() == numberOfRowGroups) {
             // nothings changed; don't re-draw
             return;
@@ -6129,8 +6185,9 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private void updateGrouping(DivElement groupPane, DivElement groupFreezePane, List<GroupingData> groupingDatas,
-        ArrayList<DivElement> freezeHeaders, boolean useCol, int maxGrouping) {
+    private void updateGrouping(DivElement groupPane,
+            DivElement groupFreezePane, List<GroupingData> groupingDatas,
+            ArrayList<DivElement> freezeHeaders, boolean useCol, int maxGrouping) {
 
         // remove old
         Iterator<Widget> iterator = iterator();
@@ -6172,12 +6229,12 @@ public class SheetWidget extends Panel {
             int startingOffset;
             if (useCol) {
                 startingOffset = rowGroupPane.getClientWidth();
-                if(displayRowColHeadings) {
+                if (displayRowColHeadings) {
                     startingOffset += getRowHeaderSize();
                 }
             } else {
                 startingOffset = colGroupPane.getClientHeight();
-                if(displayRowColHeadings) {
+                if (displayRowColHeadings) {
                     startingOffset += getColHeaderSize();
                 }
             }
@@ -6214,11 +6271,11 @@ public class SheetWidget extends Panel {
                 // inversed markers begin BEFORE the start index, so remove half
                 // of the previous header
                 if (marker.isInversed()) {
-                        if (useCol) {
-                            pos -= getColumnWidth(data.startIndex) / 2;
-                        } else {
-                            pos -= getRowHeight(data.startIndex) / 2;
-                        }
+                    if (useCol) {
+                        pos -= getColumnWidth(data.startIndex) / 2;
+                    } else {
+                        pos -= getRowHeight(data.startIndex) / 2;
+                    }
                 }
 
                 marker.setPos(pos, data.level - 1);
@@ -6235,7 +6292,7 @@ public class SheetWidget extends Panel {
                     if (useCol) {
                         length += getColumnWidth(col + 1);
                     } else {
-                        length += getRowHeight(col  + 1);
+                        length += getRowHeight(col + 1);
                     }
                 }
 
@@ -6283,7 +6340,8 @@ public class SheetWidget extends Panel {
 
     /**
      *
-     * @param index 1 based column index
+     * @param index
+     *            1 based column index
      * @return
      */
     private int getColumnWidth(int index) {
@@ -6384,7 +6442,8 @@ public class SheetWidget extends Panel {
         // calculate grouping element sizes
         int colGroupHeight = 0;
         if (colGroupMax > 0) {
-            int numberOfColGroups = displayRowColHeadings ? colGroupMax + 1 : colGroupMax;
+            int numberOfColGroups = displayRowColHeadings ? colGroupMax + 1
+                    : colGroupMax;
             colGroupHeight = ColumnGrouping.getTotalHeight(numberOfColGroups);
         }
         int rowGroupWidth = 0;
@@ -6400,7 +6459,7 @@ public class SheetWidget extends Panel {
             colGroupPane.getStyle().setDisplay(Display.BLOCK);
             colGroupSummaryPane.getStyle().setDisplay(Display.BLOCK);
         }
-        if(!displayRowColHeadings) {
+        if (!displayRowColHeadings) {
             colGroupSummaryPane.getStyle().setDisplay(Display.NONE);
         }
 
@@ -6445,12 +6504,14 @@ public class SheetWidget extends Panel {
         // calculate grouping element sizes
         int colGroupHeight = 0;
         if (colGroupMax > 0) {
-            int numberOfColGroups = displayRowColHeadings ? colGroupMax + 1 : colGroupMax;
+            int numberOfColGroups = displayRowColHeadings ? colGroupMax + 1
+                    : colGroupMax;
             colGroupHeight = GroupingWidget.getTotalHeight(numberOfColGroups);
         }
         int rowGroupWidth = 0;
         if (rowGroupMax > 0) {
-            int numberOfRowGroups = displayRowColHeadings ? rowGroupMax + 1 : rowGroupMax;
+            int numberOfRowGroups = displayRowColHeadings ? rowGroupMax + 1
+                    : rowGroupMax;
             rowGroupWidth = GroupingWidget.getTotalWidth(numberOfRowGroups);
         }
 
@@ -6461,7 +6522,7 @@ public class SheetWidget extends Panel {
             rowGroupPane.getStyle().setDisplay(Display.BLOCK);
             rowGroupSummaryPane.getStyle().setDisplay(Display.BLOCK);
         }
-        if(!displayRowColHeadings) {
+        if (!displayRowColHeadings) {
             rowGroupSummaryPane.getStyle().setDisplay(Display.NONE);
         }
 

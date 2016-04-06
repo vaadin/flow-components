@@ -57,6 +57,7 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FontFamily;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -210,6 +211,42 @@ public class SpreadsheetStyleFactory implements Serializable {
         for (short i = 1; i < workbook.getNumCellStyles(); i++) {
             cellStyle = workbook.getCellStyleAt(i);
             addCellStyleCSS(cellStyle);
+        }
+        reloadActiveSheetColumnRowStyles();
+    }
+
+    public void reloadActiveSheetColumnRowStyles() {
+        final Workbook workbook = spreadsheet.getWorkbook();
+
+        if (spreadsheet.getState().rowIndexToStyleIndex == null) {
+            spreadsheet.getState().rowIndexToStyleIndex = new HashMap<Integer, Integer>(
+                    workbook.getNumCellStyles());
+        } else {
+            spreadsheet.getState().rowIndexToStyleIndex.clear();
+        }
+        if (spreadsheet.getState().columnIndexToStyleIndex == null) {
+            spreadsheet.getState().columnIndexToStyleIndex = new HashMap<Integer, Integer>(
+                    workbook.getNumCellStyles());
+        } else {
+            spreadsheet.getState().columnIndexToStyleIndex.clear();
+        }
+
+        Sheet activeSheet = spreadsheet.getActiveSheet();
+        for (int i = 0; i < spreadsheet.getRows(); i++) {
+            Row row = activeSheet.getRow(i);
+            if (row != null && row.getRowStyle() != null) {
+                int styleIndex = row.getRowStyle().getIndex();
+                spreadsheet.getState().rowIndexToStyleIndex.put(i + 1,
+                        styleIndex);
+            }
+        }
+
+        for (int i = 0; i < spreadsheet.getColumns(); i++) {
+            if (activeSheet.getColumnStyle(i) != null) {
+                int styleIndex = activeSheet.getColumnStyle(i).getIndex();
+                spreadsheet.getState().columnIndexToStyleIndex.put(i + 1,
+                        styleIndex);
+            }
         }
     }
 

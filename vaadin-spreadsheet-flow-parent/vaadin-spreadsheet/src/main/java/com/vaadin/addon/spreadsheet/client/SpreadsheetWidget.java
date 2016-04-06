@@ -114,6 +114,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private int activeSheetIndex;
 
     private Map<Integer, String> cellStyleToCSSStyle;
+    public Map<Integer, Integer> rowIndexToStyleIndex;
+    public Map<Integer, Integer> columnIndexToStyleIndex;
+
     private Map<Integer, String> conditionalFormattingStyles = new HashMap<Integer, String>();
 
     private boolean loaded;
@@ -1545,6 +1548,30 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
     }
 
+    public void setRowIndexToStyleIndex(
+            HashMap<Integer, Integer> rowIndexToStyleIndex) {
+        if (this.rowIndexToStyleIndex == null) {
+            this.rowIndexToStyleIndex = rowIndexToStyleIndex;
+        } else {
+            this.rowIndexToStyleIndex.clear();
+            if (rowIndexToStyleIndex != null) {
+                this.rowIndexToStyleIndex.putAll(rowIndexToStyleIndex);
+            }
+        }
+    }
+
+    public void setColumnIndexToStyleIndex(
+            HashMap<Integer, Integer> columnIndexToStyleIndex) {
+        if (this.columnIndexToStyleIndex == null) {
+            this.columnIndexToStyleIndex = columnIndexToStyleIndex;
+        } else {
+            this.columnIndexToStyleIndex.clear();
+            if (columnIndexToStyleIndex != null) {
+                this.columnIndexToStyleIndex.putAll(columnIndexToStyleIndex);
+            }
+        }
+    }
+
     public void setShiftedCellBorderStyles(
             ArrayList<String> shiftedCellBorderStyles) {
         sheetWidget.removeShiftedCellBorderStyles();
@@ -1619,6 +1646,16 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public Map<Integer, String> getCellStyleToCSSStyle() {
         return cellStyleToCSSStyle;
+    }
+
+    @Override
+    public Map<Integer, Integer> getRowIndexToStyleIndex() {
+        return rowIndexToStyleIndex;
+    }
+
+    @Override
+    public Map<Integer, Integer> getColumnIndexToStyleIndex() {
+        return columnIndexToStyleIndex;
     }
 
     @Override

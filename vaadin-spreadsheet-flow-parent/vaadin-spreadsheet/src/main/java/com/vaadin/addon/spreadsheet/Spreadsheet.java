@@ -2548,7 +2548,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         reloadSheetNames();
         updateMergedRegions();
-
+        styler.reloadActiveSheetColumnRowStyles();
         getState().displayGridlines = getActiveSheet().isDisplayGridlines();
         getState().displayRowColHeadings = getActiveSheet()
                 .isDisplayRowColHeadings();
