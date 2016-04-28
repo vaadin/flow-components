@@ -4656,7 +4656,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 GroupingUtil.expandRow(activeSheet, index);
             }
         }
-        SpreadsheetFactory.reloadSpreadsheetComponent(this, workbook);
+        SpreadsheetFactory.calculateSheetSizes(this, activeSheet);
+        SpreadsheetFactory.loadGrouping(this);
+        reloadActiveSheetStyles();
     }
 
     /**

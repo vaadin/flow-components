@@ -388,83 +388,8 @@ public class SpreadsheetFactory implements Serializable {
         logMemoryUsage();
         try {
             setDefaultRowHeight(spreadsheet, sheet);
-
-            // Always have at least the default amount of rows
-            int rows = sheet.getLastRowNum() + 1;
-            if (rows < spreadsheet.getDefaultRowCount()) {
-                rows = spreadsheet.getDefaultRowCount();
-            }
-            spreadsheet.getState().rows = rows;
-
-            int charactersToPixels = ExcelToHtmlUtils.getColumnWidthInPx(sheet
-                    .getDefaultColumnWidth() * 256);
-            if (charactersToPixels > 0) {
-                spreadsheet.getState().defColW = charactersToPixels;
-            } else {
-                spreadsheet.getState().defColW = SpreadsheetUtil
-                        .getDefaultColumnWidthInPx();
-                sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
-            }
-            final float[] rowHeights = new float[rows];
-            int cols = 0;
-            int tempRowIndex = -1;
-            final ArrayList<Integer> hiddenRowIndexes = new ArrayList<Integer>();
-            for (Row row : sheet) {
-                int rIndex = row.getRowNum();
-                // set the empty rows to have the default row width
-                while (++tempRowIndex != rIndex) {
-                    rowHeights[tempRowIndex] = spreadsheet.getState().defRowH;
-                }
-                if (row.getZeroHeight()) {
-                    rowHeights[rIndex] = 0.0F;
-                    hiddenRowIndexes.add(rIndex + 1);
-                } else {
-                    rowHeights[rIndex] = row.getHeightInPoints();
-                }
-                int c = row.getLastCellNum();
-                if (c > cols) {
-                    cols = c;
-                }
-            }
-            if (rows > sheet.getLastRowNum() + 1) {
-                float defaultRowHeightInPoints = sheet
-                        .getDefaultRowHeightInPoints();
-
-                int lastRowNum = sheet.getLastRowNum();
-                // if sheet is empty, also set height for 'last row' (index
-                // zero)
-                if (lastRowNum == 0) {
-                    rowHeights[0] = defaultRowHeightInPoints;
-                }
-
-                // set default height for the rest
-                for (int i = lastRowNum + 1; i < rows; i++) {
-                    rowHeights[i] = defaultRowHeightInPoints;
-                }
-            }
-            spreadsheet.getState().hiddenRowIndexes = hiddenRowIndexes;
-            spreadsheet.getState().rowH = rowHeights;
-
-            // Always have at least the default amount of columns
-            if (cols < spreadsheet.getDefaultColumnCount()) {
-                cols = spreadsheet.getDefaultColumnCount();
-            }
-            spreadsheet.getState().cols = cols;
-
-            final int[] colWidths = new int[cols];
-            final ArrayList<Integer> hiddenColumnIndexes = new ArrayList<Integer>();
-            for (int i = 0; i < cols; i++) {
-                if (sheet.isColumnHidden(i)) {
-                    colWidths[i] = 0;
-                    hiddenColumnIndexes.add(i + 1);
-                } else {
-                    colWidths[i] = ExcelToHtmlUtils.getColumnWidthInPx(sheet
-                            .getColumnWidth(i));
-                }
-            }
-            spreadsheet.getState().hiddenColumnIndexes = hiddenColumnIndexes;
-            spreadsheet.getState().colW = colWidths;
-
+            setDefaultColumnWidth(spreadsheet, sheet);
+            calculateSheetSizes(spreadsheet, sheet);
             loadSheetImages(spreadsheet);
             loadMergedRegions(spreadsheet);
             loadFreezePane(spreadsheet);
@@ -476,10 +401,88 @@ public class SpreadsheetFactory implements Serializable {
     }
 
     /**
+     * Calculate size-related values for the sheet. Includes row and column
+     * counts, actual row heights and column widths, and hidden row and column
+     * indexes.
+     * 
+     * @param spreadsheet
+     * @param sheet
+     */
+    static void calculateSheetSizes(final Spreadsheet spreadsheet,
+            final Sheet sheet) {
+        // Always have at least the default amount of rows
+        int rows = sheet.getLastRowNum() + 1;
+        if (rows < spreadsheet.getDefaultRowCount()) {
+            rows = spreadsheet.getDefaultRowCount();
+        }
+        spreadsheet.getState().rows = rows;
+
+        final float[] rowHeights = new float[rows];
+        int cols = 0;
+        int tempRowIndex = -1;
+        final ArrayList<Integer> hiddenRowIndexes = new ArrayList<Integer>();
+        for (Row row : sheet) {
+            int rIndex = row.getRowNum();
+            // set the empty rows to have the default row width
+            while (++tempRowIndex != rIndex) {
+                rowHeights[tempRowIndex] = spreadsheet.getState().defRowH;
+            }
+            if (row.getZeroHeight()) {
+                rowHeights[rIndex] = 0.0F;
+                hiddenRowIndexes.add(rIndex + 1);
+            } else {
+                rowHeights[rIndex] = row.getHeightInPoints();
+            }
+            int c = row.getLastCellNum();
+            if (c > cols) {
+                cols = c;
+            }
+        }
+        if (rows > sheet.getLastRowNum() + 1) {
+            float defaultRowHeightInPoints = sheet
+                    .getDefaultRowHeightInPoints();
+
+            int lastRowNum = sheet.getLastRowNum();
+            // if sheet is empty, also set height for 'last row' (index
+            // zero)
+            if (lastRowNum == 0) {
+                rowHeights[0] = defaultRowHeightInPoints;
+            }
+
+            // set default height for the rest
+            for (int i = lastRowNum + 1; i < rows; i++) {
+                rowHeights[i] = defaultRowHeightInPoints;
+            }
+        }
+        spreadsheet.getState().hiddenRowIndexes = hiddenRowIndexes;
+        spreadsheet.getState().rowH = rowHeights;
+
+        // Always have at least the default amount of columns
+        if (cols < spreadsheet.getDefaultColumnCount()) {
+            cols = spreadsheet.getDefaultColumnCount();
+        }
+        spreadsheet.getState().cols = cols;
+
+        final int[] colWidths = new int[cols];
+        final ArrayList<Integer> hiddenColumnIndexes = new ArrayList<Integer>();
+        for (int i = 0; i < cols; i++) {
+            if (sheet.isColumnHidden(i)) {
+                colWidths[i] = 0;
+                hiddenColumnIndexes.add(i + 1);
+            } else {
+                colWidths[i] = ExcelToHtmlUtils.getColumnWidthInPx(sheet
+                        .getColumnWidth(i));
+            }
+        }
+        spreadsheet.getState().hiddenColumnIndexes = hiddenColumnIndexes;
+        spreadsheet.getState().colW = colWidths;
+    }
+
+    /**
      * Loads all data relating to grouping if the current sheet is a
      * {@link XSSFSheet}.
      */
-    private static void loadGrouping(Spreadsheet spreadsheet) {
+    static void loadGrouping(Spreadsheet spreadsheet) {
 
         if (spreadsheet.getActiveSheet() instanceof HSSFSheet) {
             // API not available
@@ -901,6 +904,19 @@ public class SpreadsheetFactory implements Serializable {
             spreadsheet.getState().defRowH = DEFAULT_ROW_HEIGHT_POINTS;
         } else {
             spreadsheet.getState().defRowH = defaultRowHeightInPoints;
+        }
+    }
+
+    private static void setDefaultColumnWidth(Spreadsheet spreadsheet,
+            final Sheet sheet) {
+        int charactersToPixels = ExcelToHtmlUtils.getColumnWidthInPx(sheet
+                .getDefaultColumnWidth() * 256);
+        if (charactersToPixels > 0) {
+            spreadsheet.getState().defColW = charactersToPixels;
+        } else {
+            spreadsheet.getState().defColW = SpreadsheetUtil
+                    .getDefaultColumnWidthInPx();
+            sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
         }
     }
 
