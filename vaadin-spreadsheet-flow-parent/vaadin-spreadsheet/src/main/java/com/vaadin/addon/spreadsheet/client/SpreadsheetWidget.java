@@ -459,6 +459,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         sheetWidget.addMergedRegion(newMergedRegion);
                         i++;
                     }
+                    sheetWidget.checkMergedRegionPositions();
                 }
 
                 // copy list for later

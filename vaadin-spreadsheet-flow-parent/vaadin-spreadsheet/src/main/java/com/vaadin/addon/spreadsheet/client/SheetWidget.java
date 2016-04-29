@@ -2196,6 +2196,7 @@ public class SheetWidget extends Panel {
             int endIndex, int initialTop) {
         int top = initialTop;
 
+        Map<Integer, Integer> topMap = new HashMap<Integer, Integer>();
         for (int i = startIndex; i <= endIndex; i++) {
             StringBuilder sb = new StringBuilder();
             int rowHeightPX = definedRowHeights[i - 1];
@@ -2205,13 +2206,28 @@ public class SheetWidget extends Panel {
                     .append("height: ").append(rowHeightPX).append("px; top:")
                     .append(top).append("px; }\n");
             top += rowHeightPX;
+            topMap.put(i, top);
             rules.add(sb.toString());
+        }
+
+        // update merged cell top styles, otherwise they might reappear at the
+        // end when their rows are no longer rendered
+        for (Entry<Integer, MergedCell> entry : mergedCells.entrySet()) {
+            int row = entry.getValue().getRow() - 1;
+            if (topMap.containsKey(row)) {
+                entry.getValue().getElement().getStyle()
+                        .setTop(topMap.get(row), Unit.PX);
+            } else if (row < startIndex) {
+                entry.getValue().getElement().getStyle().setTop(0, Unit.PX);
+            }
         }
     }
 
     private void createColumnStyles(List<String> rules, int startIndex,
             int endIndex, int initialLeft) {
         int left = initialLeft;
+
+        Map<Integer, Integer> leftMap = new HashMap<Integer, Integer>();
         for (int i = startIndex; i <= endIndex; i++) {
             StringBuilder sb = new StringBuilder();
             int colWidth = actionHandler.getColWidth(i);
@@ -2221,7 +2237,22 @@ public class SheetWidget extends Panel {
                     .append("width: ").append(colWidth).append("px; left:")
                     .append(left).append("px; }\n");
             left += colWidth;
+            leftMap.put(i, left);
             rules.add(sb.toString());
+        }
+
+        // update merged cell left styles, otherwise they might reappear at the
+        // beginning when their columns are no longer rendered
+        int absoluteRight = getElement().getAbsoluteRight();
+        for (Entry<Integer, MergedCell> entry : mergedCells.entrySet()) {
+            int col = entry.getValue().getCol() - 1;
+            if (leftMap.containsKey(col)) {
+                entry.getValue().getElement().getStyle()
+                        .setLeft(leftMap.get(col), Unit.PX);
+            } else if (col > endIndex) {
+                entry.getValue().getElement().getStyle()
+                        .setLeft(absoluteRight, Unit.PX);
+            }
         }
     }
 
@@ -3571,6 +3602,15 @@ public class SheetWidget extends Panel {
             Widget customWidget = customWidgetMap.get(key);
             addCustomWidgetToCell(mergedCell, customWidget);
         }
+    }
+
+    /**
+     * For internal use only! May be removed in the future.
+     */
+    void checkMergedRegionPositions() {
+        int initialLeft = calculateLeftValueOfScrolledColumns();
+        createColumnStyles(new ArrayList<String>(), firstColumnIndex,
+                lastColumnIndex, initialLeft);
     }
 
     private void updateOverflownMergedCellSizes() {
