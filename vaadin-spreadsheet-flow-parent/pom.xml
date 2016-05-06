@@ -20,6 +20,7 @@
     <modules>
         <module>vaadin-spreadsheet</module>
         <module>vaadin-spreadsheet-testbench-api</module>
+        <module>spreadsheet-charts-integration</module>
     </modules>
 
     <organization>

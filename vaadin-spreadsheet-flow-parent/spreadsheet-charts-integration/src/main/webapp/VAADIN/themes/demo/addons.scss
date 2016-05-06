@@ -1,0 +1,12 @@
+/* This file is automatically managed and will be overwritten from time to time. */
+/* Do not manually edit this file. */
+
+/* Provided by vaadin-spreadsheet-1.1-SNAPSHOT.jar */
+@import "../../../VAADIN/addons/spreadsheet/spreadsheet.scss";
+
+
+/* Import and include this mixin into your project theme to include the addon themes */
+@mixin addons {
+	@include spreadsheet;
+}
+

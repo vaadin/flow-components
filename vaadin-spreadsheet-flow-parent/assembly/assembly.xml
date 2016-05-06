@@ -18,6 +18,13 @@
             <outputDirectory></outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>spreadsheet-charts-integration/target</directory>
+            <outputDirectory>spreadsheet-charts-integration</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
             <directory>vaadin-spreadsheet-testbench-api/target</directory>
             <outputDirectory>testbench-api</outputDirectory>
              <includes>

@@ -1,0 +1,98 @@
+package com.vaadin.addon.spreadsheet.charts.converter.confwriter;
+
+import com.vaadin.addon.charts.model.AbstractPlotOptions;
+import com.vaadin.addon.charts.model.Configuration;
+import com.vaadin.addon.charts.model.DataSeries;
+import com.vaadin.addon.charts.model.DataSeriesItem;
+import com.vaadin.addon.charts.model.Series;
+import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesData;
+import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesData.DataUpdateListener;
+import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesData.SeriesPoint;
+import com.vaadin.addon.spreadsheet.charts.converter.confwriter.SelectListeningDataSeries.SelectListener;
+
+public abstract class AbstractSeriesDataWriter {
+    private final AbstractSeriesData series;
+    private AbstractPlotOptions plotOptions;
+
+    public AbstractSeriesDataWriter(AbstractSeriesData series) {
+        this.series = series;
+    }
+
+    public Series convertSeries(final boolean blanksAsZeros) {
+        /*
+         * We use SelectListeningDataSeries to notify the spreadsheet component
+         * when series is selected. ChartConverter adds a the listener to the
+         * chart object, AbstractSeriesDataReader passes it to the spreadsheet.
+         * another option would be to pass the chart object from ChartConverter
+         * all the way down here and eliminate the need of ChartConverter
+         * setting the listener, but it would require modifying a lot of
+         * intermediate classes, TODO think about a better way of doing this
+         */
+        final DataSeries dataSeries = new SelectListeningDataSeries(
+                series.name, new SelectListener() {
+                    @Override
+                    public void selected() {
+                        series.dataSelectListener.dataSelected();
+                    }
+                });
+
+        configureDataSeries(dataSeries);
+
+        dataSeries.setyAxis(series.yAxis);
+
+        for (SeriesPoint point : series.seriesData) {
+            dataSeries.add(createDataSeriesItem(point, blanksAsZeros));
+        }
+
+        series.dataUpdateListener = new DataUpdateListener() {
+            @Override
+            public void dataModified(int i, Double cellValue) {
+                DataSeriesItem item = dataSeries.get(i);
+
+                if (blanksAsZeros && cellValue == null)
+                    item.setY(0);
+                else
+                    item.setY(cellValue);
+                
+                dataSeries.update(item);
+            }
+        };
+
+        return dataSeries;
+    }
+
+    protected AbstractSeriesData getSeriesData() {
+        return series;
+    }
+
+    protected AbstractPlotOptions getPlotOptions() {
+        if (plotOptions == null) {
+            plotOptions = createPlotOptions();
+        }
+
+        return plotOptions;
+    }
+
+    protected DataSeriesItem createDataSeriesItem(SeriesPoint point,
+            boolean blanksAsZeros) {
+
+        if (point.yValue == null && blanksAsZeros)
+            return new DataSeriesItem(point.xValue, 0);
+        else
+            return new DataSeriesItem(point.xValue, point.yValue);
+    }
+
+    protected void configureDataSeries(DataSeries dataSeriesForWriting) {
+        dataSeriesForWriting.setPlotOptions(getPlotOptions());
+    }
+
+    /**
+     * This should only instantiate the object, configuration is done in
+     * configureDataSeries.
+     */
+    protected abstract AbstractPlotOptions createPlotOptions();
+
+    protected void configureChart(Configuration conf) {
+        // default NOP
+    }
+}
