@@ -50,7 +50,7 @@ public abstract class AbstractSeriesDataWriter {
                 DataSeriesItem item = dataSeries.get(i);
 
                 if (blanksAsZeros && cellValue == null)
-                    item.setY(0);
+                    item.setY(0d);
                 else
                     item.setY(cellValue);
                 
@@ -77,7 +77,7 @@ public abstract class AbstractSeriesDataWriter {
             boolean blanksAsZeros) {
 
         if (point.yValue == null && blanksAsZeros)
-            return new DataSeriesItem(point.xValue, 0);
+            return new DataSeriesItem(point.xValue, 0d);
         else
             return new DataSeriesItem(point.xValue, point.yValue);
     }

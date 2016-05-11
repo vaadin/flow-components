@@ -1,15 +1,13 @@
-package com.vaadin.spreadsheet.charts.unit;
+package com.vaadin.spreadsheet.charts.typetests;
 
-import com.vaadin.testbench.annotations.RunLocally;
-import com.vaadin.testbench.parallel.Browser;
 import org.junit.Test;
 
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.model.Stacking;
+import com.vaadin.spreadsheet.charts.ChartTestBase;
 
-@RunLocally(Browser.FIREFOX)
-public class ColumnAndBarTest extends ChartBaseTest {
+public class ColumnAndBarTest extends ChartTestBase {
 
     protected Integer[][] columnAndBarData = { { 100, 200 }, { 200, 300 },
             { 400, 400 }, { 800, 500 }, { 1600, 600 } };
@@ -141,7 +139,7 @@ public class ColumnAndBarTest extends ChartBaseTest {
     }
 
     @Test
-    public void pyramidCylinderCodeCharts() throws Exception {
+    public void pyramidCylinderConeCharts() throws Exception {
         testColumnChart("E2");
         testColumnChart("M2");
         testColumnChart("E19");

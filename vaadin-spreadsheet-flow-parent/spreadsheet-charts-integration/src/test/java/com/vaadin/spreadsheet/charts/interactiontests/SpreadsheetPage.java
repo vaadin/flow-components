@@ -1,4 +1,4 @@
-package com.vaadin.spreadsheet.charts.integration;
+package com.vaadin.spreadsheet.charts.interactiontests;
 
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
@@ -11,6 +11,9 @@ import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.testbench.By;
 
+/**
+ * FIXME copy-pasted from the spreadsheet, please find a way to reuse the same code.
+ */
 public class SpreadsheetPage extends Page {
 
     public SpreadsheetPage(WebDriver driver) {

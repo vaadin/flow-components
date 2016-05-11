@@ -1,4 +1,16 @@
-package com.vaadin.spreadsheet.charts.unit;
+package com.vaadin.spreadsheet.charts;
+
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.poi.ss.util.CellReference;
+import org.junit.Assert;
+import org.junit.BeforeClass;
 
 import com.vaadin.addon.charts.Chart;
 import com.vaadin.addon.charts.model.AbstractPlotOptions;
@@ -14,19 +26,8 @@ import com.vaadin.addon.spreadsheet.SheetChartWrapper;
 import com.vaadin.addon.spreadsheet.SheetOverlayWrapper;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.spreadsheet.charts.ui.SpreadsheetChartsDemoUI;
-import org.apache.poi.ss.util.CellReference;
-import org.junit.Assert;
-import org.junit.BeforeClass;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.List;
-import java.util.Set;
-
-public class ChartBaseTest {
+public class ChartTestBase {
     private static String sampleFileDiretory = "";
 
     protected Double[][] data = { { 100d, 200d, 2000d, 800d, 99d },
@@ -54,7 +55,7 @@ public class ChartBaseTest {
         CellReference cellRef = new CellReference(cell);
 
         Set<SheetOverlayWrapper> sheetOverlays = getSheetOverlays(spreadsheet);
-        
+
         for (SheetOverlayWrapper wrapper : sheetOverlays) {
             if (wrapper instanceof SheetChartWrapper) {
                 SheetChartWrapper chartWrapper = (SheetChartWrapper) wrapper;
@@ -65,13 +66,13 @@ public class ChartBaseTest {
                 }
             }
         }
-        
+
         throw new Exception("Chart not found in file");
     }
 
-    private Chart getChart(SheetChartWrapper chartWrapper)
-            throws Exception {
-        Method getComponent = chartWrapper.getClass().getMethod("getComponent", boolean.class);
+    private Chart getChart(SheetChartWrapper chartWrapper) throws Exception {
+        Method getComponent = chartWrapper.getClass().getMethod("getComponent",
+                boolean.class);
 
         Object minimizableWrapper = getComponent.invoke(chartWrapper, true);
 
@@ -79,7 +80,7 @@ public class ChartBaseTest {
         method.setAccessible(true);
 
         Chart chart = (Chart) method.invoke(minimizableWrapper);
-        
+
         return chart;
     }
 
@@ -99,7 +100,26 @@ public class ChartBaseTest {
             for (int j = 0; j < data[i].length; j++) {
                 final Number y = ((DataSeries) seriesList.get(i)).getData()
                         .get(j).getY();
-                Assert.assertEquals((Double) y, data[i][j].doubleValue(), 0.1);
+
+                if (data[i][j] != null)
+                    Assert.assertEquals((Double) y, data[i][j].doubleValue(),
+                            0.1);
+                else
+                    Assert.assertNull(y);
+            }
+        }
+    }
+
+    protected void assertDataXY(DataSeries series, Number[][] data) {
+        for (int i = 0; i < data.length; i++) {
+            final Number y = series.getData().get(i).getY();
+            final Number x = series.getData().get(i).getX();
+
+            if (data[i] != null) {
+                Assert.assertEquals((Double) x, data[0][i].doubleValue(), 0.1);
+                Assert.assertEquals((Double) y, data[1][i].doubleValue(), 0.1);
+            } else {
+                Assert.assertNull(y);
             }
         }
     }

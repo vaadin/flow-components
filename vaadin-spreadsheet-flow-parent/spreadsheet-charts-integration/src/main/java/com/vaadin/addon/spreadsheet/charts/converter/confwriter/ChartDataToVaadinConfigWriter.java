@@ -36,7 +36,7 @@ import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ChartData.View3dD
 @SuppressWarnings("serial")
 public class ChartDataToVaadinConfigWriter {
 
-    private static final int DEFAULT_LEGEND_Y_OFFSET = 10;
+    private static final int DEFAULT_LEGEND_Y_OFFSET = 30;
 
     private Logger logger = Logger
             .getLogger(ChartDataToVaadinConfigWriter.class.getSimpleName());

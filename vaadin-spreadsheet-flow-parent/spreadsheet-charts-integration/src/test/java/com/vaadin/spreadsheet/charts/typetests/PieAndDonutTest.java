@@ -1,16 +1,18 @@
-package com.vaadin.spreadsheet.charts.unit;
+package com.vaadin.spreadsheet.charts.typetests;
+
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.model.DataSeries;
 import com.vaadin.addon.charts.model.DataSeriesItem;
 import com.vaadin.addon.charts.model.Series;
-import org.junit.Assert;
-import org.junit.Test;
+import com.vaadin.spreadsheet.charts.ChartTestBase;
 
-import java.util.List;
-
-public class PieAndDonutTest extends ChartBaseTest {
+public class PieAndDonutTest extends ChartTestBase {
 
     protected Double[][] pieData = { { 100d, 200d, 2000d, 800d, 99d } };
 

@@ -1,14 +1,15 @@
 package com.vaadin.addon.spreadsheet.charts.converter;
 
-import com.vaadin.addon.spreadsheet.Spreadsheet;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.util.AreaReference;
-import org.apache.poi.ss.util.CellReference;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
+
+import com.vaadin.addon.spreadsheet.Spreadsheet;
 
 public class Utils {
     @SuppressWarnings("unchecked")

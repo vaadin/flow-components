@@ -1,16 +1,17 @@
-package com.vaadin.spreadsheet.charts.unit;
+package com.vaadin.spreadsheet.charts.typetests;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
+import com.vaadin.spreadsheet.charts.ChartTestBase;
 
-public class CombinationChartTest extends ChartBaseTest {
+public class CombinationChartTest extends ChartTestBase {
     @Test
     public void columnAndLineTest() throws Exception {
         Configuration conf = getChartFromSampleFile(
-                "TypeSample - Combination (Column + Line).xlsx", "A6")
+                "TypeSample - Combination (Column + Line + Dual Axis).xlsx", "A6")
                 .getConfiguration();
 
         assertCombinationChartSeriesType(conf);
@@ -34,16 +35,15 @@ public class CombinationChartTest extends ChartBaseTest {
     @Test
     public void columnAndLineWithAxisTitlesTest() throws Exception {
         Configuration conf = getChartFromSampleFile(
-                "TypeSample - Combination (Column + Line).xlsx", "A24")
+                "TypeSample - Combination (Column + Line + Dual Axis).xlsx", "A24")
                 .getConfiguration();
 
         assertCombinationChartSeriesType(conf);
 
         Assert.assertEquals("Title on the left",
-                conf.getyAxes().getAxes().get(0).getTitle()
-                .getText());
+                conf.getyAxes().getAxes().get(0).getTitle().getText());
+        
         Assert.assertEquals("Title on the right", conf.getyAxes().getAxes()
-                .get(1).getTitle()
-                .getText());
+                .get(1).getTitle().getText());
     }
 }
