@@ -6,7 +6,7 @@
 
     <groupId>com.vaadin.addon</groupId>
     <artifactId>vaadin-spreadsheet-testbench-api</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
 
     <repositories>
         <repository>
@@ -32,7 +32,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-api</artifactId>
-            <version>7.5.10</version>
+            <version>7.5.7</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

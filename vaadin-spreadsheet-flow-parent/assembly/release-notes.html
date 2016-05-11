@@ -511,31 +511,28 @@
             <td>API for creating Vaadin TestBench tests for Spreadsheet.
             </td>
         </tr>
+        <tr>
+            <td>
+                <pre>spreadsheet-charts-integration/</pre>
+            </td>
+            <td>A dependency for using Vaadin Spreadsheet with Vaadin Charts.
+            </td>
+        </tr>
     </table>
 
     <h2 id="changelog">Change log for Vaadin Spreadsheet ${project.version}</h2>
-    <p>This release includes the following enhancements and fixes. Please see <a href="http://dev.vaadin.com/query?status=closed&milestone=Spreadsheet+${project.version}&group=type&max=200&col=id&col=summary&col=milestone&col=status&col=type&col=priority&col=component&order=priority">dev.vaadin.com</a> for a detailed listing.</p>
-
-    <ul>
-      <li>Add support for cell grouping</li>
-      <li>Support mouse selection when editing cell formulas</li>
-      <li>Improved rounding rules and rounding for general-type cells</li>
-      <li>Improved hyperlink handling</li>
-      <li>Improved invalid formula handling</li>
-      <li>Improved conditional formatting</li>
-    </ul>
+    <p>This release introduces the Vaadin Charts support. To enable charts support add spreadsheet-charts-integration dependency.</p>
 
     <h2 id="api-changes">API changes</h2>
     <ul>
-        <li>PopupButton is no longer an AbstractComponentContainer, and has only one child component. Use a layout if multiple components are needed.</li>
+        <li>No API changes.</li>
     </ul>
 
     <h2 id="limitations">Limitations</h2>
     <p>Vaadin Spreadsheet ${project.version} has the following limitations:</p>
 
     <ul>
-      <li>There is no direct support for charts. You can, however, bind data in a spreadsheet to a chart using Vaadin Charts. See <a href="http://demo.vaadin.com/spreadsheet">the demo</a> for an example.</li>
-      <li>There are no provided toolbars or menus for formatting cells.</li>
+       <li>There are no provided toolbars or menus for formatting cells.</li>
       <li>Vaadin Spreadsheet is heavily based on Apache POI and, as such, inherits all limitations of this library. See <a href="http://poi.apache.org/spreadsheet/limitations.html">Apache POI - HSSF and XSSF Limitations</a> for a partial list of these.</li>
       <li>There is only limited support for the older XLS format. Please use XLSX for a better experience.</li>
       <li>As Apache POI is used on the server-side, you should be aware that loading XLSX files will eat memory for each session where loaded. Normal cases are no problem, but make sure to take this into account if you allow users to upload Excel files.</li>
