@@ -17,6 +17,13 @@
     <groupId>com.vaadin.addon</groupId>
     <artifactId>spreadsheet-charts-integration</artifactId>
     <version>1.2-SNAPSHOT</version>
+    <name>Vaadin Spreadsheet Charts Integration</name>
+    <inceptionYear>2016</inceptionYear>
+
+    <organization>
+        <name>Vaadin Ltd</name>
+        <url>https://vaadin.com</url>
+    </organization>
     <repositories>
         <repository>
             <id>vaadin-addons</id>
@@ -104,6 +111,17 @@
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <licenseName>cval3</licenseName>
+                    <licenseResolver>file://${basedir}/src/license</licenseResolver>
+                    <includes>
+                        <include>**/main/**/*.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

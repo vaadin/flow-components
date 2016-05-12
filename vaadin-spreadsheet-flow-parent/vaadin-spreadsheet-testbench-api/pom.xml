@@ -7,6 +7,14 @@
     <groupId>com.vaadin.addon</groupId>
     <artifactId>vaadin-spreadsheet-testbench-api</artifactId>
     <version>1.2-SNAPSHOT</version>
+    <name>Vaadin Spreadsheet Testbench API</name>
+    <inceptionYear>2013</inceptionYear>
+
+    <organization>
+        <name>Vaadin Ltd</name>
+        <url>https://vaadin.com</url>
+    </organization>
+    
 
     <repositories>
         <repository>
@@ -38,6 +46,17 @@
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <licenseName>cval3</licenseName>
+                    <licenseResolver>file://${basedir}/src/license</licenseResolver>
+                    <includes>
+                        <include>**/main/**/*.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
