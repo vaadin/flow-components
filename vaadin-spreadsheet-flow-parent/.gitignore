@@ -11,5 +11,6 @@
 /charts-integration/src/main/webapp/VAADIN/widgetsets/
 /target/
 vaadin-spreadsheet/errors
+spreadsheet-charts-integration/errors
 */styles.css
 

@@ -1,11 +1,10 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import java.io.IOException;
-
-import org.junit.Test;
-
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import org.junit.Test;
+
+import java.io.IOException;
 
 public class CellOverflowTest extends AbstractSpreadsheetTestCase {
 
