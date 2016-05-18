@@ -120,7 +120,7 @@ Github].
 endif::web[]
 
 
-[[spreadsheet.overview.limitations]]
+[[spreadsheet.overview.requirements]]
 == Requirements
 
 * Vaadin 7.4 or later
@@ -152,7 +152,3 @@ subscription license for Vaadin Spreadsheet. Perpetual licenses can be purchased
 from the link:https://vaadin.com/spreadsheet[Vaadin Spreadsheet product page],
 where you can also find the licensing details. For evaluation purposes, a free
 trial key allows using Vaadin Spreadsheet for a 30-day evaluation period.
-
-
-
-

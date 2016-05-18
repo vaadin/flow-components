@@ -32,7 +32,7 @@ in the [filename]#ivy.xml#:
 &lt;dependency org="com.vaadin.addon"
             name="vaadin-spreadsheet"
             rev="**latest.release**"
-            conf="default-&gt;default" /&gt;
+            conf="default-+++&gt;+++default" /&gt;
 ----
 You can use [literal]#++latest.release++# revision tag to always use the latest
 release or (preferably) specify a version by its version number. IvyDE should
@@ -192,7 +192,3 @@ another Git tool and then import it in Eclipse as a Maven project.
 . Compile the widget set either by clicking [guibutton]#Compile Widgetset# in the Eclipse toolbar or by running the [literal]#++vaadin:compile++# goal with Maven.
 . Deploy the application to a server. See <<dummy/../../framework/getting-started/getting-started-first-project#getting-started.first-project.server,"Setting Up and Starting the Web Server">> for instructions for deploying in Eclipse.
 . Open the URL [uri]#http://localhost:8080/spreadsheet# with a browser.
-
-
-
-
