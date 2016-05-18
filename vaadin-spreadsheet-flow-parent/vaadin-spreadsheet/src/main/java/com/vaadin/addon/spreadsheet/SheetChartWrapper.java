@@ -18,6 +18,8 @@ package com.vaadin.addon.spreadsheet;
  */
 
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFChart;
@@ -40,9 +42,13 @@ import com.vaadin.ui.Panel;
 public class SheetChartWrapper extends SheetOverlayWrapper implements
         Serializable {
 
-    public interface ChartCreator extends Serializable {
-        Component createChart(XSSFChart chartXml, Spreadsheet spreadsheet);
-    }
+    private static final Logger LOGGER = Logger
+            .getLogger(SheetChartWrapper.class.getName());
+
+    // System property used to override the default ChartCreator implementation
+    private static final String CHART_CREATOR_IMPL = "spreadsheet.chart.creator.implementation";
+    // Default ChartCreator implementation
+    private static final String DEFAULT_CHART_CREATOR = "com.vaadin.addon.spreadsheet.charts.converter.DefaultChartCreator";
 
     private MinimizableComponentContainer wrapper;
     private String connectorId;
@@ -52,13 +58,26 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
     private final Spreadsheet spreadsheet;
 
     static {
-        try {
-            // loads the class to trigger the static block inside it
-            Class.forName("com.vaadin.addon.spreadsheet.charts.converter.ChartConverter");
-        } catch (ClassNotFoundException e) {
-            System.err
-                    .println("Vaadin Spreadsheet: To display charts you need to add the chart "
-                            + "integration package and Vaadin Charts to the project");
+        String implementation = System.getProperty(CHART_CREATOR_IMPL);
+
+        if (implementation == null) {
+            // if property is not set use default implementation
+            implementation = DEFAULT_CHART_CREATOR;
+        }
+        // if property is set without value then getProperty returns "true"
+        // and ChartCreator should not be set
+        if (implementation.length() > 0 && !implementation.equals("true")) {
+            try {
+                Class<?> clazz = Class.forName(implementation);
+                if (ChartCreator.class.isAssignableFrom(clazz)) {
+                    setChartCreator((ChartCreator) clazz.newInstance());
+                }
+            } catch (Exception e) {
+                LOGGER.log(
+                        Level.WARNING,
+                        "Vaadin Spreadsheet: To display charts you need to add the chart integration package and Vaadin Charts to the project");
+                LOGGER.log(Level.WARNING, e.getMessage(), e);
+            }
         }
     }
 
@@ -102,16 +121,18 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
 
     @Override
     public String getId() {
-        if (wrapper != null && wrapper.isAttached())
+        if (wrapper != null && wrapper.isAttached()) {
             connectorId = wrapper.getConnectorId();
+        }
 
         return connectorId;
     }
 
     @Override
     public Component getComponent(final boolean init) {
-        if (init)
+        if (init) {
             initContent(chartXml, spreadsheet);
+        }
 
         return wrapper;
     }
@@ -123,16 +144,18 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
 
     @Override
     public float getHeight(Sheet sheet, float[] rowH) {
-        if (wrapper.isMinimized())
+        if (wrapper.isMinimized()) {
             return 0;
+        }
 
         return super.getHeight(sheet, rowH);
     }
 
     @Override
     public float getWidth(Sheet sheet, int[] colW, int defaultColumnWidthPX) {
-        if (wrapper.isMinimized())
+        if (wrapper.isMinimized()) {
             return 0;
+        }
 
         return super.getWidth(sheet, colW, defaultColumnWidthPX);
     }
