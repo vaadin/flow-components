@@ -17,20 +17,6 @@ package com.vaadin.addon.spreadsheet.client;
  * #L%
  */
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
@@ -75,6 +61,20 @@ import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.VLazyExecutor;
 import com.vaadin.client.ui.VOverlay;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SheetWidget extends Panel {
 
@@ -4866,7 +4866,14 @@ public class SheetWidget extends Panel {
     public int getLeftVisibleColumnIndex() {
         int index = firstColumnIndex;
         final int bound = sheet.getAbsoluteLeft();
-        for (Cell cell : rows.get(0)) {
+        ArrayList<Cell> firstVisibleRow = new ArrayList<Cell>();
+        int firstVisibleRowIndex = 0;
+        for (firstVisibleRowIndex = 0; firstVisibleRowIndex < rows.size(); firstVisibleRowIndex++) {
+            if (!actionHandler.isRowHidden(firstVisibleRowIndex + 1)) {
+                firstVisibleRow = rows.get(firstVisibleRowIndex);
+            }
+        }
+        for (Cell cell : firstVisibleRow) {
             if (cell.getElement().getAbsoluteLeft() >= bound) {
                 return index;
             } else {
@@ -4890,6 +4897,18 @@ public class SheetWidget extends Panel {
         return lastColumnIndex;
     }
 
+    private Cell getFirstVisibleCellInRow(ArrayList<Cell> row) {
+        //column indexing starts from 1
+        int columnIndex = 0;
+        for (Cell cell : row) {
+            if (!actionHandler.isColumnHidden(columnIndex + 1)) {
+                return row.get(columnIndex);
+            }
+            columnIndex++;
+        }
+        return null;
+    }
+
     /**
      *
      * @return the first row index that is completely visible on the top
@@ -4898,7 +4917,8 @@ public class SheetWidget extends Panel {
         int index = firstRowIndex;
         final int bound = sheet.getAbsoluteTop();
         for (ArrayList<Cell> row : rows) {
-            if (row.get(0).getElement().getAbsoluteTop() >= bound) {
+            Cell cell=getFirstVisibleCellInRow(row);
+            if (cell!=null && cell.getElement().getAbsoluteTop() >= bound) {
                 return index;
             } else {
                 index++;
