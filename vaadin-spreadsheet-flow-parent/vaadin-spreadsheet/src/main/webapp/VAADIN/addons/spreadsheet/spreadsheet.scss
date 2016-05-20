@@ -12,6 +12,14 @@ $v-color-keywords: non-valo-theme !default;
 		@include spreadsheet-valo;
 	} 
 	
+	span.code-snippet {
+		font-family: "Courier New",Courier,monospace;
+	}
+
+	.v-label-overlay-content {
+		padding: 10px;
+	}
+
   .sheet-image > .v-csslayout {
     overflow: visible;
     position: relative;

@@ -9,9 +9,9 @@ public enum TestFixtures {
             PopupButtonFixture.class), TabsheetPopupButton(
             TabsheetPopupButtonFixture.class), TablePopupButton(
             TablePopupButtonFixture.class), SpreadsheetTable(
-            SpreadsheetTableFixture.class), Comments(CommentFixture.class),
-            AddOrRemoveComment(AddOrRemoveCommentFixture.class),
-            Formats(FormatsFixture.class);
+            SpreadsheetTableFixture.class), Comments(CommentFixture.class), AddOrRemoveComment(
+            AddOrRemoveCommentFixture.class), Formats(FormatsFixture.class), DisableChartOverlays(
+            DisableChartsFixture.class);
 
     public final SpreadsheetFixtureFactory factory;
 

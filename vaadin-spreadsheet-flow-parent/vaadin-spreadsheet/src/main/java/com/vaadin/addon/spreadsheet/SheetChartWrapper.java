@@ -17,6 +17,8 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import static com.vaadin.shared.ui.label.ContentMode.HTML;
+
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,6 +51,9 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
     private static final String CHART_CREATOR_IMPL = "spreadsheet.chart.creator.implementation";
     // Default ChartCreator implementation
     private static final String DEFAULT_CHART_CREATOR = "com.vaadin.addon.spreadsheet.charts.converter.DefaultChartCreator";
+    private static final String INTEGRATION_MISSING_TEXT = "<b>CHART PLACEHOLDER</b><br/>"
+            + "To see charts in your spreadsheet, you need to add the <span class=\"code-snippet\">spreadsheet-charts-integration</span> dependency to your project. Alternatively, you can call <span class=\"code-snippet\">Spreadsheet.setChartsEnabled(false)</span> to "
+            + "disable them. Visit <a href=\"https://vaadin.com/spreadsheet\">vaadin.com/spreadsheet</a> for more info.";
 
     private MinimizableComponentContainer wrapper;
     private String connectorId;
@@ -99,10 +104,9 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
             if (chartCreator != null) {
                 content = chartCreator.createChart(chartXml, spreadsheet);
             } else {
-                content = new Panel(
-                        new Label(
-                                "Chart placeholder. Add chart integration package and "
-                                        + "Vaadin Charts to the project to see the chart."));
+                Label label = new Label(INTEGRATION_MISSING_TEXT, HTML);
+                label.addStyleName("overlay-content");
+                content = new Panel(label);
             }
 
             wrapper.setContent(content);

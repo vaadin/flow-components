@@ -206,6 +206,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /** The last visible column in the scroll area **/
     private int lastColumn;
 
+    private boolean chartsEnabled = true;
     /**
      * This is used for making sure the cells are sent to client side in when
      * the next cell data request comes. This is triggered when the client side
@@ -597,6 +598,28 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public int getLastFrozenColumn() {
         return getState(false).horizontalSplitPosition;
+    }
+
+    /**
+     * Returns true if embedded charts are displayed
+     * 
+     * @see #setChartsEnabled(boolean)
+     * @return
+     */
+    public boolean areChartsEnabled() {
+        return chartsEnabled;
+    }
+
+    /**
+     * Use this method to define whether embedded charts should be displayed in
+     * the spreadsheet or not.
+     * 
+     * @param chartsEnabled
+     */
+    public void setChartsEnabled(boolean chartsEnabled) {
+        this.chartsEnabled = chartsEnabled;
+        clearSheetOverlays();
+        loadOrUpdateOverlays();
     }
 
     /**
@@ -3088,8 +3111,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         if (!isType2) {
             // to ensure compatibility with grouping/hidden columns
-            if (isColumnRangeHidden(col1, col2) || isRowRangeHidden(row1, row2))
+            if (isColumnRangeHidden(col1, col2) || isRowRangeHidden(row1, row2)) {
                 return false;
+            }
         }
 
         int horizontalSplitPosition = getLastFrozenColumn();
@@ -3121,9 +3145,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * Return true if all the rows in the range are hidden (including row2).
      */
     private boolean isRowRangeHidden(int row1, int row2) {
-        for (int row = row1; row <= row2; row++)
-            if (!isRowHidden(row))
+        for (int row = row1; row <= row2; row++) {
+            if (!isRowHidden(row)) {
                 return false;
+            }
+        }
 
         return true;
     }
@@ -3132,9 +3158,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * Return true if all the columns in the range are hidden (including col2).
      */
     private boolean isColumnRangeHidden(int col1, int col2) {
-        for (int col = col1; col <= col2; col++)
-            if (!isColumnHidden(col))
+        for (int col = col1; col <= col2; col++) {
+            if (!isColumnHidden(col)) {
                 return false;
+            }
+        }
 
         return true;
     }
@@ -3164,11 +3192,13 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         // FIXME: height and width can be -1, it is never handled anywhere
 
         // if original start row/column is hidden, use 0 dy/dx
-        if (col == overlayWrapper.getAnchor().getCol1())
+        if (col == overlayWrapper.getAnchor().getCol1()) {
             info.dx = overlayWrapper.getDx1(sheet);
+        }
 
-        if (row == overlayWrapper.getAnchor().getRow1())
+        if (row == overlayWrapper.getAnchor().getRow1()) {
             info.dy = overlayWrapper.getDy1(sheet);
+        }
 
         return info;
     }

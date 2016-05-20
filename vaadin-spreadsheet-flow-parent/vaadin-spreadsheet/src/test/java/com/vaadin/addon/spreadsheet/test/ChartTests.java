@@ -1,13 +1,17 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import com.vaadin.addon.spreadsheet.test.testutil.OverlayHelper;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.io.IOException;
-
-import static org.junit.Assert.assertEquals;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
+import com.vaadin.addon.spreadsheet.test.testutil.OverlayHelper;
 
 public class ChartTests extends AbstractSpreadsheetTestCase {
 
@@ -18,12 +22,12 @@ public class ChartTests extends AbstractSpreadsheetTestCase {
     private static final int CHART_MINIMIZED_WIDTH = 28;
     private static final int CHART_MINIMIZED_HIGHT = 16;
 
-    private OverlayHelper overlayHelper=null;
+    private OverlayHelper overlayHelper = null;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        overlayHelper=new OverlayHelper(driver);
+        overlayHelper = new OverlayHelper(driver);
     }
 
     @Test
@@ -39,6 +43,22 @@ public class ChartTests extends AbstractSpreadsheetTestCase {
     }
 
     @Test
+    public void sampleWith1overlay_disableOverlay_overlayIsNotPresent()
+            throws IOException {
+        String cell = "A5";
+
+        headerPage.loadFile("chart.xlsx", this);
+
+        assertTrue("Overlay should be visible",
+                overlayHelper.isOverlayPresent(cell));
+
+        headerPage.loadTestFixture(TestFixtures.DisableChartOverlays);
+
+        assertFalse("Overlay shouldn't be visible",
+                overlayHelper.isOverlayPresent(cell));
+    }
+
+    @Test
     public void sampleWith3overlays_minimizeAndRestore_success()
             throws IOException {
         headerPage.loadFile("charts.xlsx", this);
@@ -46,7 +66,8 @@ public class ChartTests extends AbstractSpreadsheetTestCase {
         assertOverlayProperties(CHART1_CELL, CHART1_WIDTH, CHART1_HEIGHT,
                 CHART1_PADDING_LEFT);
 
-        WebElement chartWrapperElement = overlayHelper.getOverlayElement(CHART1_CELL);
+        WebElement chartWrapperElement = overlayHelper
+                .getOverlayElement(CHART1_CELL);
         WebElement minimizeButton = chartWrapperElement.findElement(By
                 .className("minimize-button"));
 
@@ -70,6 +91,5 @@ public class ChartTests extends AbstractSpreadsheetTestCase {
         // could not compare padding top as it is set in pt and the browsers
         // report it in px
     }
-
 
 }
