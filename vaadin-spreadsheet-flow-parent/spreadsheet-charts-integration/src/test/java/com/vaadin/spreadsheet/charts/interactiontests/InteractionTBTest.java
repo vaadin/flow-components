@@ -29,6 +29,7 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     public void userChangesInSpreadsheet_chartsUpdated() throws Exception {
         SpreadsheetPage spreadsheetPage = headerPage.loadFile("InteractionSample.xlsx", this);
         spreadsheetPage.getCellAt(1,14).setValue("10");
+        Thread.sleep(1000);
         compareScreen("chartsUpdatedOnDataChange");
     }
 
@@ -44,6 +45,14 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
         assertNotCellInSelectionRange("A17");
     }
 
+    @Test
+    public void userInputStringInCell_spreadsheetIgnoreStringValue() throws Exception {
+        SpreadsheetPage spreadsheetPage = headerPage.loadFile("InteractionSample.xlsx", this);
+        spreadsheetPage.getCellAt(1,12).setValue("test");
+        spreadsheetPage.getCellAt(1,13).setValue("");
+        Thread.sleep(1000);
+        compareScreen("chartIgnoreStringInput");
+    }
     private void assertCellInSelectionRange(String cell) {
         Assert.assertTrue("Cell " + cell + " is not selected",
                 cellHasCellRangeClass(cell) || cellIsSpecialSelected(cell));
