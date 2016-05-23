@@ -63,14 +63,6 @@
             <artifactId>vaadin-spreadsheet</artifactId>
             <version>${version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.vaadin.addon</groupId>
-            <artifactId>vaadin-spreadsheet</artifactId>
-            <version>${version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>com.vaadin.addon</groupId>
             <artifactId>vaadin-charts</artifactId>
@@ -145,6 +137,18 @@
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -220,14 +224,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.0</version>
-            </plugin>
-
-
 
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
@@ -432,6 +428,15 @@
                     <value>!true</value>
                 </property>
             </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.vaadin.addon</groupId>
+                    <artifactId>vaadin-spreadsheet</artifactId>
+                    <version>${version}</version>
+                    <type>test-jar</type>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -458,6 +463,22 @@
                                 <goals>
                                     <goal>stop</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-testCompile</id>
+                                <phase>test-compile</phase>
+                                <goals>
+                                    <goal>testCompile</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>false</skip>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
