@@ -66,6 +66,13 @@
 
         <dependency>
             <groupId>com.vaadin.addon</groupId>
+            <artifactId>vaadin-spreadsheet</artifactId>
+            <version>${version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin.addon</groupId>
             <artifactId>vaadin-charts</artifactId>
             <version>3.0.0</version>
         </dependency>
@@ -425,15 +432,6 @@
                     <value>!true</value>
                 </property>
             </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>com.vaadin.addon</groupId>
-                    <artifactId>vaadin-spreadsheet</artifactId>
-                    <version>${version}</version>
-                    <type>test-jar</type>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>
