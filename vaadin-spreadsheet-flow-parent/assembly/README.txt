@@ -69,6 +69,14 @@ Register your copy of Vaadin Spreadsheet by creating a file named
 directory or by setting the vaadin.spreadsheet.developer.license=license_key
 system property to disable the license warning message.
 
+Vaadin Spreadsheet (version 1.2.0 or later) supports Vaadin Charts, making it
+possible to open Excel files with charts in it. To enable this feature, you
+need to add a vaadin-spreadsheet-charts dependency to your project. Vaadin
+Charts is distributed under the terms of Commercial Vaadin Add-On License
+version 3.0("CVALv3"), see https://vaadin.com/license/cval-3 for details. To
+use the vaadin-spreadsheet-charts package, you need to have valid Vaadin
+Spreadsheet and Vaadin Charts licenses.
+
 Third Party Licensing
 =====================
 
