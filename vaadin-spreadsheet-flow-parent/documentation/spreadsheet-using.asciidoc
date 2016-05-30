@@ -23,13 +23,21 @@ spreadsheet may not have undefined size.
 In the following example, we create an empty spreadsheet with a fixed size and
 add it to a layout.
 
-
+[source, java]
 ----
-Spreadsheet sheet = new Spreadsheet();
-sheet.setWidth("400px");
-sheet.setHeight("300px");
+import com.vaadin.addon.spreadsheet.Spreadsheet;
+...
+private Spreadsheet spreadsheet = null;
 
-layout.addComponent(sheet);
+@Override
+protected void init(VaadinRequest request) {
+   VerticalLayout layout = new VerticalLayout();
+   layout.setSizeFull();
+   setContent(layout);
+
+   spreadsheet = new Spreadsheet();
+   layout.addComponent(spreadsheet);
+}
 ----
 
 An empty spreadsheet automatically gets an initial worksheet with some default
@@ -37,10 +45,34 @@ size and settings.
 
 [[spreadsheet.using.creating.loading]]
 === Loading an Excel Spreadsheet
+To open an existing Excel file in Spreadsheet, you need to pass an Excel file
+to the [classname]#Spreadsheet# constructor.
+
+[source, java]
+----
+import com.vaadin.addon.spreadsheet.Spreadsheet;
+...
+private Spreadsheet spreadsheet;
+
+@Override
+protected void init(VaadinRequest request) {
+   final VerticalLayout layout = new VerticalLayout();
+   layout.setSizeFull();
+   setContent(layout);
+
+   File sampleFile = new File("C:/Users/John/Calculator.xlsx");
+   try {
+       spreadsheet = new Spreadsheet(sampleFile);
+   } catch (IOException e) {
+       e.printStackTrace();
+       return;
+   }
+   layout.addComponent(spreadsheet);
+}
+----
 
 You can load an Excel file from the local filesystem with a [classname]#File#
 reference or from memory or other source with an [classname]#InputStream#.
-
 
 [[spreadsheet.using.creating.poi]]
 === Working with an Apache POI Workbook
@@ -77,7 +109,3 @@ is set as active, or if there are none, the previous one.
 All operations on the spreadsheet content are done through the currently active
 worksheet. You can set an existing sheet as active with
 [methodname]#setActiveSheetIndex()#.
-
-
-
-

@@ -1,0 +1,145 @@
+---
+title: Charts Within Spreadsheets
+order: 8
+layout: page
+---
+
+[[spreadsheet.charts.integration.overview]]
+= Overview
+
+Vaadin Spreadsheet (version 1.2.0 or later) supports Vaadin Charts, making it possible to open Excel files with charts in them.
+To enable this feature, you need to add a `vaadin-spreadsheet-charts` dependency to your project.
+Here we assume that you have added Vaadin Spreadsheet add-on to your project.
+If you are using a dependency manager (Ivy or Maven), the  Vaadin Charts dependency is added automatically.
+You also need to have both Vaadin Spreadsheet and Vaadin Charts licenses.
+
+[[spreadsheet.charts.integration.installation]]
+== Installing Vaadin Spreadsheet Charts
+You can add Spreadsheet Charts integration package in three different ways: using Maven, Ivy, or download a ZIP  package from the Vaadin directory.
+The version of the `vaadin-spreadsheet` and `vaadin-spreadsheet-charts` dependencies should be the same.
+
+ifdef::web[]
+[[spreadsheet.charts.integration.maven]]
+=== For Maven Users
+
+To add Vaadin Spreadsheet Charts integration in a Maven project, you need to include the following dependency in the POM.
+The [literal]#++artifactId++# should be [literal]#++vaadin-spreadsheet-charts++#.
+
+[subs="normal"]
+----
+&lt;dependency&gt;
+    &lt;groupId&gt;com.vaadin.addon&lt;/groupId&gt;
+    &lt;artifactId&gt;vaadin-spreadsheet-charts&lt;/artifactId&gt;
+    &lt;version&gt;[replaceable]#LATEST#&lt;/version&gt;
+&lt;/dependency&gt;
+----
+You can use the [parameter]#LATEST# version as shown above or (preferably) a
+specific version by its version number.
+
+You also need to define the repository for the Vaadin add-ons under the
+[literal]#++<repositories>++# element:
+
+----
+<repository>
+    <id>vaadin-addons</id>
+    <url>http://maven.vaadin.com/vaadin-addons</url>
+</repository>
+----
+
+Finally, you need to enable the widget set compilation in the POM, as described
+in <<dummy/../../framework/addons/addons-maven#addons.maven.widgetset,"Enabling
+Widget Set Compilation">>, and compile it.
+
+endif::web[]
+
+
+ifdef::web[]
+[[spreadsheet.charts.integration.ivy]]
+=== For Ivy Users
+
+To add Vaadin Spreadsheet Charts integration in an Ivy project, you need to
+include the following declaration inside the [literal]#++dependencies++# section
+in the [filename]#ivy.xml#:
+
+[subs="normal"]
+----
+&lt;dependency org="com.vaadin.addon"
+            name="vaadin-spreadsheet-charts"
+            rev="[replaceable]#latest.release#"
+            conf="default-+++&gt;+++default" /&gt;
+----
+You can use the [literal]#++latest.release++# revision tag to always use the latest
+release or (preferably) specify a version by its version number. IvyDE should
+resolve the dependency immediately as you save the file. See
+<<dummy/../../framework/addons/addons-eclipse#addons.eclipse,"Installing Add-ons
+in Eclipse with Ivy">> for further details.
+
+endif::web[]
+
+
+
+ifdef::web[]
+[[spreadsheet.charts.integration.downloading]]
+=== For Users Without Dependency Management Tools
+
+Vaadin Spreadsheet is distributed as a Zip package that contains the Spreadsheet
+Vaadin Spreadsheet Charts JAR, a JavaDoc JAR, license texts, and other documentation. You can download the
+Zip package from Vaadin Directory. Vaadin Charts Zip package should be also downloaded.
+
+The [filename]#vaadin-spreadsheet-charts-&lt;version&gt;.jar#, [filename]#vaadin-charts-&lt;version&gt;.jar#,
+as well as all the dependency libraries in the [filename]#lib# folder, should be put in the
+[filename]#WEB-INF/lib# folder of the web application.
+
+The [filename]#vaadin-spreadsheet-charts-&lt;version&gt;-sources.jar# and
+[filename]#vaadin-spreadsheet-charts-&lt;version&gt;-javadoc.jar# are development libraries
+that should not normally be deployed with the web application, so you should put
+them to a separate non-deployment folder. In Eclipse projects, this is usually a
+[filename]#lib# sub-folder in the project folder.
+
+endif::web[]
+
+[[spreadsheet.charts.integration.installing.license]]
+== Installing a License Key
+
+You need to install a license key for Vaadin Charts before compiling the widget set.
+The license key is checked during widget set compilation, so you do not need it when deploying the application.
+
+You can purchase Vaadin Charts or obtain a free trial key from the
+link:https://vaadin.com/directory#addon/vaadin-charts[Vaadin Charts
+download page] in Vaadin Directory. You need to register in Vaadin Directory to
+obtain the key.
+
+See <<dummy/../../framework/addons/addons-cval#addons.cval,"Installing
+Commercial Vaadin Add-on Licence">> for detailed instructions on obtaining and
+installing the license key.
+
+
+[[spreadsheet.charts.integration.widgetset]]
+== Compiling the Widget Set
+
+Compile the widget set as instructed in <<dummy/../../framework/addons/addons-maven#addons.maven.compiling,"Compiling the Project Widget Set">>.
+Widget set compilation should automatically update your project widget set to include the Spreadsheet widget set:
+
+
+----
+<inherits name="com.vaadin.addon.spreadsheet.charts.AppWidgetSet"/>
+----
+
+[[spreadsheet.charts.integration.limitations]]
+== Limitations
+
+The Vaadin Spreadsheet Charts integration package does not allow editing the chart.
+To change chart parameters such as type, categories, or legend inside the spreadsheet, you need to edit the original Excel file.
+Vaadin Charts integration allows changing the values of the data points in a chart.
+However, it does not allow changing the range of cells that are used for rendering the chart.
+Changing the position of charts within a spreadsheet is not supported.
+Vaadin charts are shown in the spreadsheet by default; you can disable showing them by using [methodname]#setChartsEnabled()#.
+
+----
+Spreadsheet spreadsheet = new Spreadsheet();
+spreadsheet.setChartsEnabled(false);
+----
+
+
+
+

@@ -19,8 +19,10 @@ Vaadin Add-ons">>. The add-on includes both a widget set and a theme, so you
 need to compile the widget sets and themes in your project.
 
 ifdef::web[]
+[[spreadsheet.installation]]
+== Installing Dependencies
 [[spreadsheet.installation.ivy]]
-== Installing as Ivy Dependency
+=== For Ivy Users
 
 If you use the add-on in an Eclipse project created with the Vaadin Plugin for
 Eclipse, you can define an Ivy dependency to automatically download the library.
@@ -31,10 +33,10 @@ in the [filename]#ivy.xml#:
 ----
 &lt;dependency org="com.vaadin.addon"
             name="vaadin-spreadsheet"
-            rev="**latest.release**"
+            rev="[replaceable]#latest.release#"
             conf="default-+++&gt;+++default" /&gt;
 ----
-You can use [literal]#++latest.release++# revision tag to always use the latest
+You can use the [literal]#++latest.release++# revision tag to always use the latest
 release or (preferably) specify a version by its version number. IvyDE should
 resolve the dependency immediately as you save the file. See
 <<dummy/../../framework/addons/addons-eclipse#addons.eclipse,"Installing Add-ons
@@ -44,7 +46,7 @@ endif::web[]
 
 ifdef::web[]
 [[spreadsheet.installation.maven]]
-== Defining the Maven Dependency
+=== For Maven Users
 
 You can install Vaadin Spreadsheet in a Maven project by adding it as a
 dependency, you need to include the following dependency in the POM. The
@@ -55,7 +57,7 @@ dependency, you need to include the following dependency in the POM. The
 &lt;dependency&gt;
     &lt;groupId&gt;com.vaadin.addon&lt;/groupId&gt;
     &lt;artifactId&gt;vaadin-spreadsheet&lt;/artifactId&gt;
-    &lt;version&gt;**LATEST**&lt;/version&gt;
+    &lt;version&gt;[replaceable]#LATEST#&lt;/version&gt;
 &lt;/dependency&gt;
 ----
 You can use the [parameter]#LATEST# version as shown above or (preferably) a
@@ -63,7 +65,6 @@ specific version by its version number.
 
 You also need to define the repository for the Vaadin add-ons under the
 [literal]#++<repositories>++# element:
-
 
 ----
 <repository>
@@ -80,7 +81,7 @@ endif::web[]
 
 ifdef::web[]
 [[spreadsheet.installation.downloading]]
-== Installing the Zip Package
+=== For Users Without Dependency Management Tools
 
 Vaadin Spreadsheet is distributed as a Zip package that contains the Spreadsheet
 JAR, a JavaDoc JAR, license texts, and other documentation. You can download the
@@ -107,7 +108,7 @@ contents.
 endif::web[]
 
 [[spreadsheet.installing.license]]
-== Installing License Key
+== Installing a License Key
 
 You need to install a license key before compiling the widget set. The license
 key is checked during widget set compilation, so you do not need it when
@@ -124,7 +125,7 @@ installing the license key.
 
 
 [[spreadsheet.installation.widgetset]]
-== Compiling Widget Set
+== Compiling the Widget Set
 
 Compile the widget set as instructed in
 <<dummy/../../framework/addons/addons-maven#addons.maven.compiling,"Compiling
@@ -168,27 +169,5 @@ The Demo, illustrated in
 <<dummy/../../spreadsheet/spreadsheet-overview#figure.spreadsheet.overview.demo,"Demo
 for Vaadin Spreadsheet">> in the overview, showcases most of the functionality
 in Vaadin Spreadsheet. You can try out the demo online at
-link:http://demo.vaadin.com/spreadsheet[demo.vaadin.com/spreadsheet].
-
-You can browse the sources on-line or, more conveniently, import the project in
-Eclipse (or other IDE). As the project is Maven-based, Eclipse users need to
-install the m2e plugin to be able to import Maven projects, as well as EGit to
-be able to import Git repositories. Once they are installed, you should be able
-to import demo as follows.
-
-. Select "File > Import"
-. Select "Maven > Check out Maven Project from SCM", and click [guibutton]#Next#.
-. You may need to install the EGit SCM connector if you have not done so
-previously. If Git is not available in the SCM list, click [guibutton]#m2e
-marketplace#, select the EGit connector, and click [guibutton]#Finish#. You need
-to restart Eclipse and redo the earlier steps above.
-
-+
-Instead of using m2e EGit connector, you can also check out the project with
-another Git tool and then import it in Eclipse as a Maven project.
-
-. In [guilabel]#SCM URL#, select [guilabel]#git# and enter the repository URL [uri]#https://github.com/vaadin/spreadsheet-demo#.
-. Click [guibutton]#Finish#.
-. Compile the widget set either by clicking [guibutton]#Compile Widgetset# in the Eclipse toolbar or by running the [literal]#++vaadin:compile++# goal with Maven.
-. Deploy the application to a server. See <<dummy/../../framework/getting-started/getting-started-first-project#getting-started.first-project.server,"Setting Up and Starting the Web Server">> for instructions for deploying in Eclipse.
-. Open the URL [uri]#http://localhost:8080/spreadsheet# with a browser.
+link:http://demo.vaadin.com/spreadsheet[demo.vaadin.com/spreadsheet] or check the sources
+from the link:http://https://github.com/vaadin/spreadsheet[GitHub page].
