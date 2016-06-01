@@ -7,10 +7,8 @@
 *.settings/
 *rebel.xml
 *.classpath
-/vaadin-spreadsheet-demo/src/main/webapp/VAADIN/widgetsets/
-/charts-integration/src/main/webapp/VAADIN/widgetsets/
 /target/
 vaadin-spreadsheet/errors
-spreadsheet-charts-integration/errors
+vaadin-spreadsheet-charts/errors
 */styles.css
 

@@ -1,0 +1,10 @@
+@import "addons.scss";
+@import "demo.scss";
+
+// Prefix all selectors in your theme with .demo
+.demo {
+
+  @include addons;
+  @include demo;
+
+}

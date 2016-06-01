@@ -18,8 +18,8 @@
             <outputDirectory></outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>spreadsheet-charts-integration/target</directory>
-            <outputDirectory>spreadsheet-charts-integration</outputDirectory>
+            <directory>vaadin-spreadsheet-charts/target</directory>
+            <outputDirectory>vaadin-spreadsheet-charts</outputDirectory>
             <includes>
                 <include>*.jar</include>
             </includes>

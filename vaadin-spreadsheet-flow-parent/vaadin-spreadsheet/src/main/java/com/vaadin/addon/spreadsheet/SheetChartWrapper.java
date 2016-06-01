@@ -52,7 +52,7 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
     // Default ChartCreator implementation
     private static final String DEFAULT_CHART_CREATOR = "com.vaadin.addon.spreadsheet.charts.converter.DefaultChartCreator";
     private static final String INTEGRATION_MISSING_TEXT = "<b>CHART PLACEHOLDER</b><br/>"
-            + "To see charts in your spreadsheet, you need to add the <span class=\"code-snippet\">spreadsheet-charts-integration</span> dependency to your project. Alternatively, you can call <span class=\"code-snippet\">Spreadsheet.setChartsEnabled(false)</span> to "
+            + "To see charts in your spreadsheet, you need to add the <span class=\"code-snippet\">vaadin-spreadsheet-charts</span> dependency to your project. Alternatively, you can call <span class=\"code-snippet\">Spreadsheet.setChartsEnabled(false)</span> to "
             + "disable them. Visit <a href=\"https://vaadin.com/spreadsheet\">vaadin.com/spreadsheet</a> for more info.";
 
     private MinimizableComponentContainer wrapper;
