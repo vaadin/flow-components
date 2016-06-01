@@ -83,6 +83,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     private static final int DELAYED_SERVER_REQUEST_DELAY = 200; // ms
+    private static final String DEFAULT_WIDTH = "500.0px";
+    private static final String DEFAULT_HEIGHT = "400.0px";
 
     private final SheetWidget sheetWidget;
     final FormulaBarWidget formulaBarWidget;
@@ -201,6 +203,23 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         initWidget(sheetWidget);
     }
 
+    @Override
+    public void setHeight(final String height) {
+        if (height != null && !height.isEmpty()) {
+            super.setHeight(height);
+        } else {
+            super.setHeight(DEFAULT_HEIGHT);
+        }
+    }
+
+    @Override
+    public void setWidth(final String width) {
+        if (width != null && !width.isEmpty()) {
+            super.setWidth(width);
+        } else {
+            super.setWidth(DEFAULT_WIDTH);
+        }
+    }
     /**
      * Enable or disable Formatting columns locking.
      *
