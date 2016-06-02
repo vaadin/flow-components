@@ -21,7 +21,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
+import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellReference;
@@ -29,6 +31,8 @@ import org.apache.poi.ss.util.CellReference;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 
 public class Utils {
+    private static final Logger LOGGER = Logger
+            .getLogger(Utils.class.getName());
     @SuppressWarnings("unchecked")
     public static <T> T callMethodUsingReflection(Object o, String name) {
         try {
@@ -39,9 +43,9 @@ public class Utils {
             e.printStackTrace();
         }
         return null;
-    };
+    }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static <E extends Enum> E getEnumValueOrDefault(
             Class<? extends E> eClass, String value, E defaultValue) {
         try {
@@ -52,7 +56,7 @@ public class Utils {
     }
 
     public static String getStringValueFromFormula(String formula,
-            Spreadsheet spreadsheet) {
+                                                   Spreadsheet spreadsheet) {
         List<String> strings = new ArrayList<String>();
 
         for (CellReference ref : getAllReferencedCells(formula)) {
@@ -86,12 +90,11 @@ public class Utils {
     }
 
     public static String getStringValue(CellReference ref,
-            Spreadsheet spreadsheet) {
+                                        Spreadsheet spreadsheet) {
         return spreadsheet.getCellValue(spreadsheet.getCell(ref));
     }
 
-    public static Double getNumericValue(CellReference ref,
-            Spreadsheet spreadsheet) {
+    public static Double getNumericValue(CellReference ref, Spreadsheet spreadsheet) {
         try {
             spreadsheet.getFormulaEvaluator().evaluateFormulaCell(
                     spreadsheet.getCell(ref));
@@ -102,7 +105,18 @@ public class Utils {
         } catch (NullPointerException e) {
         } catch (IllegalStateException e) {
         } catch (NumberFormatException e) {
+
+        } catch (FormulaParseException e) {
+            logError();
         }
         return null;
+    }
+
+    private static void logError() {
+        final String ERROR_TEXT =
+                        "The format of this data series is not supported by Vaadin Spreadsheet. "+
+                        "Please see our list " +
+                        "of known limitations: https://vaadin.com/docs/-/part/spreadsheet/spreadsheet-overview.html limitations.";
+        LOGGER.warning(ERROR_TEXT);
     }
 }

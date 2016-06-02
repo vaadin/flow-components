@@ -1,15 +1,16 @@
 package com.vaadin.spreadsheet.charts.interactiontests;
 
-import com.vaadin.addon.spreadsheet.test.AbstractSpreadsheetTestCase;
-import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
-import com.vaadin.addon.spreadsheet.test.testutil.OverlayHelper;
+import java.util.Arrays;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.Arrays;
+import com.vaadin.addon.spreadsheet.test.AbstractSpreadsheetTestCase;
+import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
+import com.vaadin.addon.spreadsheet.test.testutil.OverlayHelper;
 
 public class InteractionTBTest extends AbstractSpreadsheetTestCase {
 
@@ -46,13 +47,20 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
-    public void userInputStringInCell_spreadsheetIgnoreStringValue() throws Exception {
+    public void openFileWithNotSuportedForumla_noExceptionRaised() throws Exception {
         SpreadsheetPage spreadsheetPage = headerPage.loadFile("InteractionSample.xlsx", this);
         spreadsheetPage.getCellAt(1,12).setValue("test");
         spreadsheetPage.getCellAt(1,13).setValue("");
         Thread.sleep(1000);
         compareScreen("chartIgnoreStringInput");
     }
+
+    @Test
+    public void openFileWithNotSuportedForumla_noExceptionRaised_noChart() throws Exception {
+        SpreadsheetPage spreadsheetPage = headerPage.loadFile("unparsed_formula.xlsx", this);
+        compareScreen("unparsedFormula");
+    }
+
     private void assertCellInSelectionRange(String cell) {
         Assert.assertTrue("Cell " + cell + " is not selected",
                 cellHasCellRangeClass(cell) || cellIsSpecialSelected(cell));
