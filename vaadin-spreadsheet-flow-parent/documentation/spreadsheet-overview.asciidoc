@@ -130,12 +130,13 @@ endif::web[]
 [[spreadsheet.overview.limitations]]
 == Limitations
 
-Vaadin Spreadsheet 1.0 has the following limitations:
+Vaadin Spreadsheet 1.2 has the following limitations:
 
 * No provided toolbars, menus, or other controls for formatting cells
-* Vaadin Charts component can not be used inside Spreadsheet
 * Limited support for the older XSL format
 * link:http://poi.apache.org/spreadsheet/limitations.html[Limitations of Apache POI]
+* Using a table as a named range in formulas is not supported. As a workaround, you can manually convert tables to ranges. Open the spreadsheet in Excel, right-click on the table, select the [guilabel]#Convert to Range# action, and save the spreadsheet.
+* The `SUBTOTAL` formula is limited to aggregate functions that do not ignore hidden values (function codes from 1 to 7, as well as 9), because they are https://poi.apache.org/apidocs/org/apache/poi/ss/formula/functions/Subtotal.html[not implemented in Apache POI]
 
 
 [[spreadsheet.overview.license]]
