@@ -222,7 +222,11 @@ public class CellValueManager implements Serializable {
             if (spreadsheet
                     .isMarkedAsInvalidFormula(cellData.col, cellData.row)) {
                 // The prefix '=' or '+' should not be included in formula value
-                cellData.formulaValue = cell.getStringCellValue().substring(1);
+                if (cell.getStringCellValue().charAt(0) == '+'
+                        || cell.getStringCellValue().charAt(0) == '=') {
+                    cellData.formulaValue = cell.getStringCellValue()
+                            .substring(1);
+                }
                 formattedCellValue = "#VALUE!";
             }
 

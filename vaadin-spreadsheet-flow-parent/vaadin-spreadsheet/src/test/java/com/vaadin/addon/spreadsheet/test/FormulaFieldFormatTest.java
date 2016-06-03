@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Locale;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
@@ -55,6 +54,13 @@ public class FormulaFieldFormatTest extends AbstractSpreadsheetTestCase {
         assertFormat("A5", "14-Mar-14", "14-Mar-14");
         assertFormat("A10", "3/14/14 12:00 AM", "3/14/14 12:00 AM");
         assertFormat("A1", "3/14", "3/14");
+    }
+
+    @Test
+    public void formulaTrimming_invalidPOIFormula_formulaIsNotTrimmed() {
+        spreadsheetPage = headerPage.loadFile("table-subtotals-ranges.xlsx",
+                this);
+        assertFormat("C4", "#VALUE!", "=SUBTOTAL(109,Sheet1!$C$2:$C$3)");
     }
 
     private void assertFormat(String cell, String cellValue,
