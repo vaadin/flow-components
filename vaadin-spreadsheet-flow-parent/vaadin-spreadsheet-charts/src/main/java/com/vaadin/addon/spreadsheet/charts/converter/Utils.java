@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellReference;
 
@@ -96,12 +97,13 @@ public class Utils {
 
     public static Double getNumericValue(CellReference ref, Spreadsheet spreadsheet) {
         try {
-            spreadsheet.getFormulaEvaluator().evaluateFormulaCell(
-                    spreadsheet.getCell(ref));
+            Sheet sheet = spreadsheet.getWorkbook().getSheet(ref.getSheetName());
+            Cell cell = spreadsheet.getCell(ref, sheet);
+            spreadsheet.getFormulaEvaluator().evaluateFormulaCell(cell);
 
-            if (spreadsheet.getCell(ref).getCellType() == Cell.CELL_TYPE_NUMERIC
-                    || spreadsheet.getCell(ref).getCellType() == Cell.CELL_TYPE_FORMULA)
-                return spreadsheet.getCell(ref).getNumericCellValue();
+            if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC ||
+                    cell.getCellType() == Cell.CELL_TYPE_FORMULA)
+                return cell.getNumericCellValue();
         } catch (NullPointerException e) {
         } catch (IllegalStateException e) {
         } catch (NumberFormatException e) {

@@ -93,6 +93,18 @@ public class ChartTestBase {
         return (Set<SheetOverlayWrapper>) f.get(spreadsheet);
     }
 
+    protected void assertData(List<Series> seriesList, Number[] data) {
+        Assert.assertEquals("The number of series is not correct", data.length,
+                ((DataSeries) seriesList.get(0)).getData().size());
+        for (int i = 0; i < data.length; i++) {
+                final Number y = ((DataSeries) seriesList.get(0)).getData().get(i).getY();
+                if (data[i] != null)
+                    Assert.assertEquals((Double) y, data[i].doubleValue(), 0.1);
+                else
+                    Assert.assertNull(y);
+        }
+    }
+
     protected void assertData(List<Series> seriesList, Number[][] data) {
         Assert.assertEquals("The number of series is not correct", data.length,
                 seriesList.size());

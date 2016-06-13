@@ -1295,14 +1295,31 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @return The cell at the given coordinates, or null if not defined
      */
     public Cell getCell(int row, int col) {
-        Row r = workbook.getSheetAt(workbook.getActiveSheetIndex()).getRow(row);
+        Sheet sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
+        return getCell(row, col, sheet);
+    }
+
+    /**
+     * Returns the Cell at the given coordinates. If the cell is updated in
+     * outside code, call {@link #refreshCells(Cell...)} AFTER ALL UPDATES
+     * (value, type, formatting or style) to mark the cell as "dirty".
+     *
+     * @param row
+     *            Row index of the cell to return, 0-based
+     * @param col
+     *            Column index of the cell to return, 0-based
+     * @param sheet
+     *            Sheet of the cell
+     * @return The cell at the given coordinates, or null if not defined
+     */
+    public Cell getCell(int row, int col, Sheet sheet) {
+        Row r = sheet.getRow(row);
         if (r != null) {
             return r.getCell(col);
         } else {
             return null;
         }
     }
-
     /**
      * Returns the Cell corresponding to the given reference. If the cell is
      * updated in outside code, call {@link #refreshCells(Cell...)} AFTER ALL
@@ -1317,7 +1334,22 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         return cellReference == null ? null : getCell(cellReference.getRow(),
                 cellReference.getCol());
     }
-
+    /**
+     * Returns the Cell corresponding to the given reference. If the cell is
+     * updated in outside code, call {@link #refreshCells(Cell...)} AFTER ALL
+     * UPDATES (value, type, formatting or style) to mark the cell as "dirty".
+     *
+     * @param cellReference
+     *            Reference to the cell to return
+     * @param sheet
+     *            Sheet of the cell
+     * @return The cell corresponding to the given reference, or null if not
+     *         defined
+     */
+    public Cell getCell(CellReference cellReference, Sheet sheet) {
+        return cellReference == null ? null : getCell(cellReference.getRow(),
+                cellReference.getCol(),sheet);
+    }
     /**
      * Deletes the cell from the sheet and the underlying POI model as well.
      * This really deletes the cell, instead of just making it's value blank.

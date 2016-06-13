@@ -228,4 +228,12 @@ public class ChartFeatureTest extends ChartTestBase {
         Assert.assertEquals(new Integer(1), ((DataSeries)conf.getSeries().get(4)).getyAxis());
     }
 
+    @Test
+    public void chartAndDataSeriesOnDifferentSheets_loadSample_chartHasSeries()
+            throws Exception {
+        Configuration conf = getChartFromSampleFile("Chart_and_data_on_different_sheets.xlsx", "D5")
+                .getConfiguration();
+        final Double[] dataSeries = { 1d, 2d, 3d, 4d, 5d, 6d, 7d, 8d, 9d };
+        assertData(conf.getSeries(), dataSeries);
+    }
 }
