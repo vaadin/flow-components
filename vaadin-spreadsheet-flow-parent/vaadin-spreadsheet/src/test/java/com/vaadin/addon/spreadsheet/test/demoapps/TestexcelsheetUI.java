@@ -24,6 +24,7 @@ import com.vaadin.addon.spreadsheet.test.fixtures.ClassFixtureFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.ColumnToggleFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.CommentFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.CustomComponentFixture;
+import com.vaadin.addon.spreadsheet.test.fixtures.DeletionHandlerFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.EagerFixtureFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.FormatsFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.HyperLinkFixture;
@@ -87,6 +88,8 @@ public class TestexcelsheetUI extends UI {
                     SheetsFixture.Rename1.class));
             put("CELL_VALUE_HANDLER", new ClassFixtureFactory(
                     ValueHandlerFixture.class));
+            put("CELL_DELETION_HANDLER", new ClassFixtureFactory(
+                    DeletionHandlerFixture.class));
             put("CUSTOM_COMPONENTS", new ClassFixtureFactory(
                     CustomComponentFixture.class));
             put("HYPERLINKS", new ClassFixtureFactory(HyperLinkFixture.class));

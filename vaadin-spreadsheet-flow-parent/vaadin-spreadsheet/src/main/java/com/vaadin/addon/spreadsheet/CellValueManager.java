@@ -59,6 +59,7 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
+import com.vaadin.addon.spreadsheet.Spreadsheet.CellDeletionHandler;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueHandler;
 import com.vaadin.addon.spreadsheet.client.CellData;
@@ -90,6 +91,7 @@ public class CellValueManager implements Serializable {
     protected final Spreadsheet spreadsheet;
 
     private CellValueHandler customCellValueHandler;
+    private CellDeletionHandler customCellDeletionHandler;
 
     private DataFormatter formatter;
 
@@ -389,6 +391,26 @@ public class CellValueManager implements Serializable {
     }
 
     /**
+     * Gets the current CellDeletionHandler
+     *
+     * @return the customCellDeletionHandler
+     */
+    public CellDeletionHandler getCustomCellDeletionHandler() {
+        return customCellDeletionHandler;
+    }
+
+    /**
+     * Sets the current CellDeletionHandler
+     *
+     * @param customCellDeletionHandler
+     *            the customCellDeletionHandler to set
+     */
+    public void setCustomCellDeletionHandler(
+            CellDeletionHandler customCellDeletionHandler) {
+        this.customCellDeletionHandler = customCellDeletionHandler;
+    }
+
+    /**
      * Notifies evaluator and marks cell for update on next call to
      * {@link #updateMarkedCellValues()}
      *
@@ -672,7 +694,7 @@ public class CellValueManager implements Serializable {
      */
     public void onDeleteSelectedCells() {
         final Sheet activeSheet = spreadsheet.getActiveSheet();
-        final CellReference selectedCellReference = getCellSelectionManager()
+        CellReference selectedCellReference = getCellSelectionManager()
                 .getSelectedCellReference();
         // TODO show error on locked cells instead
         if (selectedCellReference != null) {
@@ -700,8 +722,44 @@ public class CellValueManager implements Serializable {
             }
         }
 
+        boolean selectedIsInRange = selectedIsInRange(selectedCellReference,
+                cellRangeAddresses);
+        boolean cellDeletionCheckPassed = !selectedIsInRange
+                && individualSelectedCells.isEmpty()
+                && passesDeletionCheck(selectedCellReference);
+        boolean individualCellsDeletionCheckPassed;
+        if (selectedCellReference == null) {
+            individualCellsDeletionCheckPassed = passesDeletionCheck(individualSelectedCells);
+        } else if (!selectedIsInRange && !individualSelectedCells.isEmpty()) {
+            List<CellReference> individualSelectedCellsIncludingCurrentSelection = new ArrayList<CellReference>(
+                    individualSelectedCells);
+            individualSelectedCellsIncludingCurrentSelection
+                    .add(selectedCellReference);
+            individualCellsDeletionCheckPassed = passesDeletionCheck(individualSelectedCellsIncludingCurrentSelection);
+            cellDeletionCheckPassed = individualCellsDeletionCheckPassed;
+        } else {
+            individualCellsDeletionCheckPassed = passesDeletionCheck(individualSelectedCells);
+        }
+        boolean cellRangeDeletionCheckPassed = passesRangeDeletionCheck(cellRangeAddresses);
+        // at least one of the selection types must pass the check and have
+        // contents
+        if ((selectedCellReference == null || !cellDeletionCheckPassed)
+                && (individualSelectedCells.isEmpty() || !individualCellsDeletionCheckPassed)
+                && (cellRangeAddresses.isEmpty() || !cellRangeDeletionCheckPassed)) {
+            return;
+        }
+        if (!cellDeletionCheckPassed) {
+            selectedCellReference = null;
+        }
+        if (!individualCellsDeletionCheckPassed) {
+            individualSelectedCells.clear();
+        }
+        if (!cellRangeDeletionCheckPassed) {
+            cellRangeAddresses.clear();
+        }
+
         CellValueCommand command = new CellValueCommand(spreadsheet);
-        if (selectedCellReference != null && selectedIsNotInTheRange(selectedCellReference, cellRangeAddresses)) {
+        if (selectedCellReference != null && !selectedIsInRange) {
             command.captureCellValues(selectedCellReference);
         }
         for (CellReference cr : individualSelectedCells) {
@@ -710,7 +768,7 @@ public class CellValueManager implements Serializable {
         for (CellRangeAddress range : cellRangeAddresses) {
             command.captureCellRangeValues(range);
         }
-        if (selectedCellReference != null) {
+        if (selectedCellReference != null && !selectedIsInRange) {
             removeCell(selectedCellReference.getRow() + 1,
                     selectedCellReference.getCol() + 1, false);
         }
@@ -729,13 +787,93 @@ public class CellValueManager implements Serializable {
         spreadsheet.loadHyperLinks();
     }
 
-    private boolean selectedIsNotInTheRange(CellReference selected, List<CellRangeAddress> cellRangeAddresses) {
+    /**
+     * Checks whether the given cell belongs to any given range.
+     * 
+     * @param cell
+     * @param cellRangeAddresses
+     * @return {@code true} if in range, {@code false} otherwise
+     */
+    private boolean selectedIsInRange(CellReference cell,
+            List<CellRangeAddress> cellRangeAddresses) {
         for (CellRangeAddress range : cellRangeAddresses) {
-            if(range.isInRange(selected.getRow(), selected.getCol())) {
-                return false;
+            if (range.isInRange(cell.getRow(), cell.getCol())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether the default deletion handling should be performed for the
+     * selected cell or whether a custom deletion handler takes care of
+     * everything.
+     * 
+     * @param selectedCellReference
+     * @return {@code true} if the default handling should be performed,
+     *         {@code false} otherwise
+     */
+    private boolean passesDeletionCheck(CellReference selectedCellReference) {
+        if (selectedCellReference == null || customCellDeletionHandler == null) {
+            return true;
+        }
+        final Workbook workbook = spreadsheet.getWorkbook();
+        final Sheet activeSheet = workbook.getSheetAt(workbook
+                .getActiveSheetIndex());
+        int rowIndex = selectedCellReference.getRow();
+        final Row row = activeSheet.getRow(rowIndex);
+        if (row != null) {
+            short colIndex = selectedCellReference.getCol();
+            final Cell cell = row.getCell(colIndex);
+            if (cell != null) {
+                return customCellDeletionHandler.cellDeleted(cell, activeSheet,
+                        colIndex, rowIndex, getFormulaEvaluator(), formatter);
             }
         }
         return true;
+    }
+
+    /**
+     * Checks whether the default deletion handling should be performed for the
+     * individually selected cells or whether a custom deletion handler takes
+     * care of everything.
+     * 
+     * @param individualSelectedCells
+     * @return {@code true} if the default handling should be performed,
+     *         {@code false} otherwise
+     */
+    private boolean passesDeletionCheck(
+            List<CellReference> individualSelectedCells) {
+        if (individualSelectedCells.isEmpty()
+                || customCellDeletionHandler == null) {
+            return true;
+        }
+        final Workbook workbook = spreadsheet.getWorkbook();
+        final Sheet activeSheet = workbook.getSheetAt(workbook
+                .getActiveSheetIndex());
+        return customCellDeletionHandler.individualSelectedCellsDeleted(
+                individualSelectedCells, activeSheet, getFormulaEvaluator(),
+                formatter);
+    }
+
+    /**
+     * Checks whether the default deletion handling should be performed for the
+     * cell range or whether a custom deletion handler takes care of everything.
+     * 
+     * @param cellRangeAddresses
+     * @return {@code true} if the default handling should be performed,
+     *         {@code false} otherwise
+     */
+    private boolean passesRangeDeletionCheck(
+            List<CellRangeAddress> cellRangeAddresses) {
+        if (cellRangeAddresses.isEmpty() || customCellDeletionHandler == null) {
+            return true;
+        }
+        final Workbook workbook = spreadsheet.getWorkbook();
+        final Sheet activeSheet = workbook.getSheetAt(workbook
+                .getActiveSheetIndex());
+        return customCellDeletionHandler.cellRangeDeleted(cellRangeAddresses,
+                activeSheet, getFormulaEvaluator(), formatter);
     }
 
     /**

@@ -160,6 +160,77 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
+     * An interface for handling cell deletion from user input.
+     */
+    public interface CellDeletionHandler extends Serializable {
+
+        /**
+         * Called if a cell value has been deleted by the user. Use
+         * {@link Spreadsheet#setCellDeletionHandler(CellDeletionHandler)} to
+         * enable it for the spreadsheet.
+         *
+         * @param cell
+         *            The cell that has been deleted
+         * @param sheet
+         *            The sheet the cell belongs to, the currently active sheet
+         * @param colIndex
+         *            Cell column index, 0-based
+         * @param rowIndex
+         *            Cell row index, 0-based
+         * @param formulaEvaluator
+         *            The {@link FormulaEvaluator} for this sheet
+         * @param formatter
+         *            The {@link DataFormatter} for this workbook
+         * @return <code>true</code> if component default deletion should still
+         *         be done, <code>false</code> if not
+         */
+        public boolean cellDeleted(Cell cell, Sheet sheet, int colIndex,
+                int rowIndex, FormulaEvaluator formulaEvaluator,
+                DataFormatter formatter);
+
+        /**
+         * Called if individually selected cell values have been deleted by the
+         * user. Use
+         * {@link Spreadsheet#setCellDeletionHandler(CellDeletionHandler)} to
+         * enable it for the spreadsheet.
+         *
+         * @param individualSelectedCells
+         *            The cells that have been deleted
+         * @param sheet
+         *            The sheet the cells belong to, the currently active sheet
+         * @param formulaEvaluator
+         *            The {@link FormulaEvaluator} for this sheet
+         * @param formatter
+         *            The {@link DataFormatter} for this workbook
+         * @return <code>true</code> if component default deletion should still
+         *         be done, <code>false</code> if not
+         */
+        public boolean individualSelectedCellsDeleted(
+                List<CellReference> individualSelectedCells, Sheet sheet,
+                FormulaEvaluator formulaEvaluator, DataFormatter formatter);
+
+        /**
+         * Called if a cell range has been deleted by the user. Use
+         * {@link Spreadsheet#setCellDeletionHandler(CellDeletionHandler)} to
+         * enable it for the spreadsheet.
+         *
+         * @param cellRangeAddresses
+         *            The range of cells that has been deleted
+         * @param sheet
+         *            The sheet the cells belongs to, the currently active sheet
+         * @param formulaEvaluator
+         *            The {@link FormulaEvaluator} for this sheet
+         * @param formatter
+         *            The {@link DataFormatter} for this workbook
+         * @return <code>true</code> if component default deletion should still
+         *         be done, <code>false</code> if not
+         */
+        public boolean cellRangeDeleted(
+                List<CellRangeAddress> cellRangeAddresses, Sheet sheet,
+                FormulaEvaluator formulaEvaluator, DataFormatter formatter);
+    }
+
+    /**
      * An interface for handling clicks on cells that contain a hyperlink.
      * <p>
      * Implement this interface and use
@@ -459,6 +530,30 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public CellValueHandler getCellValueHandler() {
         return getCellValueManager().getCustomCellValueHandler();
+    }
+
+    /**
+     * Sets the {@link CellDeletionHandler} for this component (not
+     * workbook/sheet specific). It is called when a cell has been deleted by
+     * the user.
+     * 
+     * @param customCellDeletionHandler
+     *            New handler or <code>null</code> if none should be used
+     */
+    public void setCellDeletionHandler(
+            CellDeletionHandler customCellDeletionHandler) {
+        getCellValueManager().setCustomCellDeletionHandler(
+                customCellDeletionHandler);
+    }
+
+    /**
+     * See {@link CellDeletionHandler}.
+     * 
+     * @return the current {@link CellDeletionHandler} for this component or
+     *         <code>null</code> if none has been set
+     */
+    public CellDeletionHandler getCellDeletionHandler() {
+        return getCellValueManager().getCustomCellDeletionHandler();
     }
 
     /**
