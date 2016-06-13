@@ -606,7 +606,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @see #setChartsEnabled(boolean)
      * @return
      */
-    public boolean areChartsEnabled() {
+    public boolean isChartsEnabled() {
         return chartsEnabled;
     }
 

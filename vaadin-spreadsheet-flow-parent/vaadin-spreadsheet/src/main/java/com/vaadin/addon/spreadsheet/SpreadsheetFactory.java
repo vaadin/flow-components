@@ -761,7 +761,7 @@ public class SpreadsheetFactory implements Serializable {
             for (XSSFShape shape : ((XSSFDrawing) drawing).getShapes()) {
                 SheetOverlayWrapper overlayWrapper = null;
 
-                if (spreadsheet.areChartsEnabled()
+                if (spreadsheet.isChartsEnabled()
                         && shape instanceof XSSFGraphicFrame) {
                         overlayWrapper = tryLoadChart(spreadsheet, drawing,
                                 (XSSFGraphicFrame) shape);
