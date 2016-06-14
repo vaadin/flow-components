@@ -1,5 +1,17 @@
 package com.vaadin.addon.spreadsheet.charts.converter.xssfreader;
 
+import org.openxmlformats.schemas.drawingml.x2006.main.CTColorScheme;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTGradientFillProperties;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTGradientStop;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTPercentage;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTPositiveFixedPercentage;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTSRgbColor;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTSchemeColor;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTSolidColorFillProperties;
+
+import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ChartData.ColorProperties;
+import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ChartData.GradientProperties;
+
 /*
  * #%L
  * Vaadin Spreadsheet Charts Integration
@@ -22,18 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.openxmlformats.schemas.drawingml.x2006.main.CTColorScheme;
-import org.openxmlformats.schemas.drawingml.x2006.main.CTGradientFillProperties;
-import org.openxmlformats.schemas.drawingml.x2006.main.CTGradientStop;
-import org.openxmlformats.schemas.drawingml.x2006.main.CTPercentage;
-import org.openxmlformats.schemas.drawingml.x2006.main.CTPositiveFixedPercentage;
-import org.openxmlformats.schemas.drawingml.x2006.main.CTSRgbColor;
-import org.openxmlformats.schemas.drawingml.x2006.main.CTSchemeColor;
-import org.openxmlformats.schemas.drawingml.x2006.main.CTSolidColorFillProperties;
-
-import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ChartData.ColorProperties;
-import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ChartData.GradientProperties;
-
 class ColorUtils {
 
     private static Logger logger = Logger.getLogger(ColorUtils.class.getName());
@@ -53,8 +53,10 @@ class ColorUtils {
     public static Map<String, byte[]> createColorMap(CTColorScheme clrScheme) {
         Map<String, byte[]> colorMap = new HashMap<String, byte[]>();
 
-        colorMap.put("tx1", clrScheme.getDk1().getSysClr().getLastClr());
-        colorMap.put("bg1", clrScheme.getLt1().getSysClr().getLastClr());
+        if (clrScheme.getDk1().getSysClr() != null) {
+            colorMap.put("tx1", clrScheme.getDk1().getSysClr().getLastClr());
+            colorMap.put("bg1", clrScheme.getLt1().getSysClr().getLastClr());
+        }
         colorMap.put("tx2", clrScheme.getDk2().getSrgbClr().getVal());
         colorMap.put("bg2", clrScheme.getLt2().getSrgbClr().getVal());
         colorMap.put("accent1", clrScheme.getAccent1().getSrgbClr().getVal());
@@ -80,8 +82,8 @@ class ColorUtils {
             ColorProperties stopClrProp = createColorPropertiesFromGradientStop(
                     stop, colorMap);
 
-            gradientProp.colorStops.put(stop.getPos()
-                    / (double) PERCENTAGE_FACTOR, stopClrProp);
+            gradientProp.colorStops.put(
+                    stop.getPos() / (double) PERCENTAGE_FACTOR, stopClrProp);
         }
 
         if (gradFill.isSetLin() && gradFill.getLin().isSetAng())
@@ -91,14 +93,16 @@ class ColorUtils {
     }
 
     public static ColorProperties createColorPropertiesFromFill(
-            CTSolidColorFillProperties solidFill, Map<String, byte[]> colorMap) {
+            CTSolidColorFillProperties solidFill,
+            Map<String, byte[]> colorMap) {
         if (solidFill == null)
             return null;
 
         ColorParameters clr = null;
 
         if (solidFill.isSetSchemeClr()) {
-            clr = getParametersFromSchemeClr(solidFill.getSchemeClr(), colorMap);
+            clr = getParametersFromSchemeClr(solidFill.getSchemeClr(),
+                    colorMap);
         } else if (solidFill.isSetSrgbClr()) {
             clr = getColorParametersFromSrgb(solidFill.getSrgbClr());
         } else {
@@ -179,8 +183,8 @@ class ColorUtils {
         if (par == null)
             return null;
 
-        byte[] rgbWithLum = ColorUtils
-                .applyLum(par.rgb, par.lumMod, par.lumOff);
+        byte[] rgbWithLum = ColorUtils.applyLum(par.rgb, par.lumMod,
+                par.lumOff);
         int[] rgbUnsignedWithLum = ColorUtils
                 .convertToUnsignedRange(rgbWithLum);
 

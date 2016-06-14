@@ -37,9 +37,7 @@ public class CellShiftValuesUndoRedoTest extends AbstractSpreadsheetTestCase {
         redo();
         ensureValueEquals(spreadsheet, "A9", "1");
 
-        Assert.assertTrue(
-                "Error indicator detected when there should be none.",
-                findElements(By.className("v-errorindicator")).isEmpty());
+        assertNoErrorIndicatorDetected();
     }
 
     private void ensureValueEquals(final SpreadsheetElement spreadsheet,

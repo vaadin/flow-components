@@ -5,12 +5,12 @@ import java.util.Arrays;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.addon.spreadsheet.test.AbstractSpreadsheetTestCase;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 import com.vaadin.addon.spreadsheet.test.testutil.OverlayHelper;
+import com.vaadin.testbench.By;
 
 public class InteractionTBTest extends AbstractSpreadsheetTestCase {
 
@@ -73,6 +73,13 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     public void openFileWithNotSuportedForumla_noExceptionRaised_noChart() throws Exception {
         SpreadsheetPage spreadsheetPage = headerPage.loadFile("unparsed_formula.xlsx", this);
         compareScreen("unparsedFormula");
+    }
+
+
+    @Test
+    public void openNumbersCreatedExcelFile_noExceptionsRaised_withCharts() {
+        headerPage.loadFile("NumbersCreatedExcelFile.xlsx", this);
+        assertNoErrorIndicatorDetected();
     }
 
     private void assertCellInSelectionRange(String cell) {

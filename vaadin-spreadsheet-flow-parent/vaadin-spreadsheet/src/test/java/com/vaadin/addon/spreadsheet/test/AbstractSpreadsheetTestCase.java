@@ -53,6 +53,12 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
         return file;
     }
 
+    protected void assertNoErrorIndicatorDetected() {
+        Assert.assertTrue(
+                "Error indicator detected when there should be none.",
+                findElements(By.className("v-errorindicator")).isEmpty());
+    }
+
     protected void assertAddressFieldValue(String expected, String actual) {
         assertEquals("Expected " + expected + " on addressField, actual:"
                 + actual, expected, actual);
