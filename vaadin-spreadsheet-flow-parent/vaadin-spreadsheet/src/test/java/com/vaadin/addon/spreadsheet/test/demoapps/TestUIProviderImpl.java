@@ -30,6 +30,8 @@ public class TestUIProviderImpl extends UIProvider {
             return TabsheetTestUI.class;
         } else if (name.contains(EmptySpreadsheetUI.class.getSimpleName())) {
             return EmptySpreadsheetUI.class;
+        } else if (name.contains(LayoutSpreadsheetUI.class.getSimpleName())) {
+            return LayoutSpreadsheetUI.class;
         }
         return null;
     }

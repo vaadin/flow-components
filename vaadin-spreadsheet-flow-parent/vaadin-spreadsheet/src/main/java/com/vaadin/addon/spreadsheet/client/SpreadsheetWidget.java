@@ -32,6 +32,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.TouchEvent;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
@@ -201,6 +202,27 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         sheetWidget.getElement().appendChild(sheetTabSheet.getElement());
 
         initWidget(sheetWidget);
+
+        //There is a bug in CssLayout/VerticalLayout.
+        //If a component calls setVisible(false) another component in the layout
+        //next to it is detached and then attached to the layout and the scroll
+        //position is reset. We need to store the scroll position on detach and
+        //then set on attach event.
+        sheetWidget.addAttachHandler(new AttachEvent.Handler() {
+            int leftScrollPosition = 0;
+            int topScrollPosition = 0;
+
+            @Override
+            public void onAttachOrDetach(AttachEvent attachEvent) {
+                if (attachEvent.isAttached()) {
+                    sheetWidget.setScrollPosition(leftScrollPosition, topScrollPosition);
+                } else {
+                    leftScrollPosition = sheetWidget.getSheetScrollLeft();
+                    topScrollPosition = sheetWidget.getSheetScrollTop();
+                }
+
+            }
+        });
     }
 
     @Override
