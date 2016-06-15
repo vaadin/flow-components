@@ -35,10 +35,12 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.FormulaParser;
 import org.apache.poi.ss.formula.FormulaRenderer;
 import org.apache.poi.ss.formula.FormulaType;
+import org.apache.poi.ss.formula.WorkbookEvaluatorUtil;
+import org.apache.poi.ss.formula.eval.BoolEval;
+import org.apache.poi.ss.formula.eval.ValueEval;
 import org.apache.poi.ss.formula.ptg.Ptg;
 import org.apache.poi.ss.formula.ptg.RefPtgBase;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.ComparisonOperator;
 import org.apache.poi.ss.usermodel.ConditionType;
 import org.apache.poi.ss.usermodel.ConditionalFormatting;
@@ -46,15 +48,12 @@ import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.FontFormatting;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.PatternFormatting;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFBorderFormatting;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormatting;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
-import org.apache.poi.xssf.usermodel.XSSFEvaluationWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFontFormatting;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
@@ -641,6 +640,7 @@ public class ConditionalFormatter implements Serializable {
         } else {
             return matchesFormula(rule, deltaColumn, deltaRow);
         }
+
     }
 
     /**
@@ -654,8 +654,13 @@ public class ConditionalFormatter implements Serializable {
      * @return True if the formula in the given rule is of boolean formula type
      *         and evaluates to <code>true</code>, false otherwise
      */
-    protected boolean matchesFormula(ConditionalFormattingRule rule,
-            int deltaColumn, int deltaRow) {
+    protected boolean matchesFormula(ConditionalFormattingRule rule, int deltaColumn, int deltaRow) {
+        if ( ! (rule instanceof XSSFConditionalFormattingRule)) {
+            // TODO Does not support HSSF files for now, since HSSF does not
+            // read cell references in the file correctly.Since HSSF formulas
+            // are read completely wrong, that boolean formula above is useless.
+            return false;
+        }
         String booleanFormula = rule.getFormula1();
 
         if (booleanFormula == null || booleanFormula.isEmpty()) {
@@ -664,10 +669,9 @@ public class ConditionalFormatter implements Serializable {
 
         // Parse formula and use deltas to get relative cell references to work
         // (#18702)
-        XSSFEvaluationWorkbook workbookWrapper = XSSFEvaluationWorkbook
-                .create((XSSFWorkbook) spreadsheet.getWorkbook());
-        Ptg[] ptgs = FormulaParser.parse(booleanFormula, workbookWrapper,
+        Ptg[] ptgs = FormulaParser.parse(booleanFormula, WorkbookEvaluatorUtil.getEvaluationWorkbook(spreadsheet),
                 FormulaType.CELL, spreadsheet.getActiveSheetIndex());
+
         for (Ptg ptg : ptgs) {
             // base class for cell reference "things"
             if (ptg instanceof RefPtgBase) {
@@ -682,56 +686,13 @@ public class ConditionalFormatter implements Serializable {
             }
         }
 
-        // booleanFormula has now its relative rows and cols updated
-        booleanFormula = FormulaRenderer.toFormulaString(workbookWrapper, ptgs);
-
-        if (rule instanceof XSSFConditionalFormattingRule) {
-
-            /*
-             * Use a temporary cell (hopefully) far away of any actual content,
-             * so that we don't override any values. Done like this because POI
-             * has issues when changing cell type back and forth, so we can't
-             * use the given cell because we might not be able to recover the
-             * value after our formula calculation.
-             * 
-             * Also, use POI API so that Spreadsheet won't try any magic.
-             */
-            int tempRowIndex = Short.MAX_VALUE;
-            int tempColIndex = 255;
-            Sheet sheet = spreadsheet.getActiveSheet();
-            boolean tempRowCreated = false;
-
-            Row row = sheet.getRow(tempRowIndex);
-            if (row == null) {
-                row = sheet.createRow(tempRowIndex);
-                tempRowCreated = true;
-            }
-            Cell cell = row.getCell(tempColIndex);
-            if (cell == null) {
-                cell = row.createCell(255, Cell.CELL_TYPE_FORMULA);
-            }
-            cell.setCellFormula(booleanFormula);
-
-            // Since we use the same cell for all calculations, we need to clear
-            // it each time. For some reason we can't clear just one cell.
-            getFormulaEvaluator().clearAllCachedResultValues();
-            CellValue value = getFormulaEvaluator().evaluate(cell);
-            boolean match = value.getBooleanValue();
-
-            row.removeCell(cell);
-
-            if (tempRowCreated) {
-                // Remove row after use because #18705
-                sheet.removeRow(row);
-            }
-            return match;
-
+        final ValueEval eval = WorkbookEvaluatorUtil.evaluate(spreadsheet, ptgs);
+        if (eval instanceof BoolEval) {
+            return eval == null ? false : ((BoolEval) eval).getBooleanValue();
         } else {
-            // TODO Does not support HSSF files for now, since HSSF does not
-            // read cell references in the file correctly.Since HSSF formulas
-            // are read completely wrong, that boolean formula above is useless.
             return false;
         }
+
     }
 
     /**
