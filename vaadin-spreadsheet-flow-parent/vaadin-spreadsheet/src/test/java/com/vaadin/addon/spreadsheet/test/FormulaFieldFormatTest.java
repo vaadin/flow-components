@@ -1,12 +1,11 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Locale;
 
 import org.junit.Test;
 
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test for formula field formatting.
@@ -39,7 +38,7 @@ public class FormulaFieldFormatTest extends AbstractSpreadsheetTestCase {
     @Test
     public void rounding_sheetWithGeneralFormatRuleForNumericCells_formulaFieldContentsUnformattedExceptForLocale() {
         spreadsheetPage = headerPage.loadFile("general_round.xlsx", this);
-        assertFormat("E3", "999999999999", "999999999999");
+        assertFormat("E3", "1E+12", "999999999999");
         assertFormat("E14", "10", "9.99999999999");
     }
 

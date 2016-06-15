@@ -1,18 +1,18 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
-import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
-import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
-
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Locale;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
+import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 
 public class GenericTest extends AbstractSpreadsheetTestCase {
 
@@ -73,17 +73,17 @@ public class GenericTest extends AbstractSpreadsheetTestCase {
         Assert.assertEquals("example", spreadsheet.getCellValue("E2"));
         Assert.assertEquals("example", spreadsheet.getCellValue("F2"));
 
-        Assert.assertEquals("38247.1226851852", spreadsheet.getCellValue("B3"));
+        Assert.assertEquals("38247.12269", spreadsheet.getCellValue("B3"));
         Assert.assertEquals("38247.12", spreadsheet.getCellValue("C3"));
         Assert.assertEquals("3824712.27%", spreadsheet.getCellValue("D3"));
         Assert.assertEquals("17-Sep-04", spreadsheet.getCellValue("E3"));
-        Assert.assertEquals("3.82E04", spreadsheet.getCellValue("F3"));
+        Assert.assertEquals("3.82E+04", spreadsheet.getCellValue("F3"));
 
         Assert.assertEquals("3.1415", spreadsheet.getCellValue("B6"));
         Assert.assertEquals("3.14", spreadsheet.getCellValue("C6"));
         Assert.assertEquals("314.15%", spreadsheet.getCellValue("D6"));
         Assert.assertEquals("3-Jan-00", spreadsheet.getCellValue("E6"));
-        Assert.assertEquals("3.14E00", spreadsheet.getCellValue("F6"));
+        Assert.assertEquals("3.14E+00", spreadsheet.getCellValue("F6"));
     }
 
     @Test

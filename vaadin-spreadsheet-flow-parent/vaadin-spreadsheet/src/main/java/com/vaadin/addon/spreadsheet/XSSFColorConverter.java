@@ -127,7 +127,7 @@ public class XSSFColorConverter implements ColorConverter {
             return sb.toString();
         }
 
-        byte[] argb = color.getARgb();
+        byte[] argb = color.getARGB();
         if (argb == null) {
             sb.append("#000;");
             return sb.toString();
@@ -175,7 +175,7 @@ public class XSSFColorConverter implements ColorConverter {
         if (color.isSetTheme()) {
             XSSFColor themeColor = workbook.getTheme().getThemeColor(
                     (int) color.getTheme());
-            argb = themeColor.getARgb();
+            argb = themeColor.getARGB();
         } else {
             argb = color.getRgb();
         }
@@ -392,7 +392,7 @@ public class XSSFColorConverter implements ColorConverter {
             return null;
         }
 
-        byte[] argb = color.getARgb();
+        byte[] argb = color.getARGB();
         if (argb == null) {
             return null;
         }

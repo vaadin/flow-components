@@ -40,6 +40,7 @@ import org.apache.poi.ss.formula.ptg.RefPtgBase;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.ComparisonOperator;
+import org.apache.poi.ss.usermodel.ConditionType;
 import org.apache.poi.ss.usermodel.ConditionalFormatting;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.FontFormatting;
@@ -635,14 +636,9 @@ public class ConditionalFormatter implements Serializable {
          * arguments. So, to use it, we need to copy the formula to an existing
          * cell temporarily, and run the eval.
          */
-
-        switch (rule.getConditionType()) {
-        case ConditionalFormattingRule.CONDITION_TYPE_CELL_VALUE_IS:
+        if (rule.getConditionType().equals(ConditionType.CELL_VALUE_IS)) {
             return matchesValue(cell, rule);
-        case ConditionalFormattingRule.CONDITION_TYPE_FORMULA:
-            return matchesFormula(rule, deltaColumn, deltaRow);
-
-        default:
+        } else {
             return matchesFormula(rule, deltaColumn, deltaRow);
         }
     }

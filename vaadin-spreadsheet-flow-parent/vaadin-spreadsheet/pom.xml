@@ -22,7 +22,7 @@
         <vaadin.version>7.6.6</vaadin.version>
         <testbench.api.version>7.5.7</testbench.api.version>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
-        <poi.version>3.12</poi.version>
+        <poi.version>3.15</poi.version>
         <tb.hub>testbench-hub.intra.itmill.com</tb.hub>
     </properties>
 
@@ -417,6 +417,12 @@
             <id>Vaadin releases</id>
             <url>http://oss.sonatype.org/content/repositories/vaadin-releases</url>
         </repository>
+
+        <repository>
+            <id>Apache POI</id>
+            <url>http://mvnrepository.com/artifact/org.apache.poi/poi</url>
+        </repository>
+
         <repository>
             <id>vaadin-addons</id>
             <url>http://maven.vaadin.com/vaadin-addons</url>

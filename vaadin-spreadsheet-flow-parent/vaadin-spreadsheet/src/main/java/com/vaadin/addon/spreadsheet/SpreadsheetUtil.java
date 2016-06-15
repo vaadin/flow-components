@@ -295,7 +295,9 @@ public class SpreadsheetUtil implements Serializable {
             } catch (NoSuchMethodException e) {
             } catch (InvocationTargetException e) {
             } catch (IllegalAccessException e) {
+            } catch (UnsupportedOperationException e) {
             }
+
         }
         return parseNumber(value, locale);
     }

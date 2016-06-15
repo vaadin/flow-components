@@ -19,9 +19,8 @@ package com.vaadin.addon.spreadsheet.action;
 
 import java.util.List;
 
-import org.apache.poi.hssf.record.cf.CellRangeUtil;
 import org.apache.poi.ss.util.CellRangeAddress;
-
+import org.apache.poi.ss.util.CellRangeUtil;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.addon.spreadsheet.SpreadsheetFilterTable;

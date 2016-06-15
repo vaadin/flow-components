@@ -44,10 +44,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.poi.hssf.converter.AbstractExcelUtils;
-import org.apache.poi.hssf.record.cf.CellRangeUtil;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.PaneInformation;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -57,7 +55,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeUtil;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.ss.util.PaneInformation;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -1886,6 +1886,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 resetOriginalRowHeight);
         // need to re-send the cell values to client
         // remove all cached cell data that is now empty
+        getFormulaEvaluator().clearAllCachedResultValues();
         int start = n < 0 ? Math.max(lastNonBlankRow, startRow) : startRow;
         int end = n < 0 ? endRow : startRow + n - 1;
         valueManager.updateDeletedRowsInClientCache(start + 1, end + 1);
