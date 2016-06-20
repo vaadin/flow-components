@@ -276,13 +276,15 @@ public class SpreadsheetUtil implements Serializable {
                         Cell.class);
                 formatter.setAccessible(true);
                 Format format = (Format) formatter.invoke(df, cell);
-                ParsePosition parsePosition = new ParsePosition(0);
-                Object parsed = format.parseObject(value, parsePosition);
-                if (parsePosition.getIndex() == value.length()) {
-                    if (parsed instanceof Double) {
-                        return (Double) parsed;
-                    } else if (parsed instanceof Number) {
-                        return ((Number) parsed).doubleValue();
+                if (format != null) {
+                    ParsePosition parsePosition = new ParsePosition(0);
+                    Object parsed = format.parseObject(value, parsePosition);
+                    if (parsePosition.getIndex() == value.length()) {
+                        if (parsed instanceof Double) {
+                            return (Double) parsed;
+                        } else if (parsed instanceof Number) {
+                            return ((Number) parsed).doubleValue();
+                        }
                     }
                 }
             } catch (NoSuchMethodException e) {
