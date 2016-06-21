@@ -226,7 +226,7 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        
+
         &.cell-range {
           background-color: rgba(232, 242, 252, 0.8);
         }
@@ -1039,6 +1039,10 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
     padding: 10px;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
 
     .popupContent {
       overflow: visible;

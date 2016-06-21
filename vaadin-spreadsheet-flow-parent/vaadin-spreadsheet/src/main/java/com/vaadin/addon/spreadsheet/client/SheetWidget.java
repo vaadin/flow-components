@@ -495,7 +495,9 @@ public class SheetWidget extends Panel {
                         updateCellCommentDisplay(mouseOverOrOutEvent, target);
                     } else {
                         if (!cellCommentEditMode
-                                && cellCommentOverlay.isShowing()) {
+                                && cellCommentOverlay.isShowing()
+                                && !className.contains("comment")) {
+                            Event.releaseCapture(sheet);
                             cellCommentOverlay.hide();
                             cellCommentCellClassName = null;
                             cellCommentCellColumn = -1;
@@ -1022,7 +1024,8 @@ public class SheetWidget extends Panel {
     }
 
     protected void onSheetMouseMove(Event event) {
-        if (cellCommentCellColumn != -1 && cellCommentCellRow != -1) {
+        if (!cellCommentEditMode && cellCommentCellColumn != -1
+                && cellCommentCellRow != -1) {
             // the comment should only be displayed after the
             // mouse has "stopped" on top of a cell with a comment
             cellCommentHandler.trigger();
@@ -1161,6 +1164,7 @@ public class SheetWidget extends Panel {
             event.stopPropagation();
             event.preventDefault();
             if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
+                Event.releaseCapture(sheet);
                 actionHandler.onCellRightClick(event, targetCol, targetRow);
             } else {
                 sheet.focus();
@@ -4139,6 +4143,7 @@ public class SheetWidget extends Panel {
                 // show comment unless already shown
                 if (!(cellCommentOverlay.isVisible() && targetClassName
                         .equals(cellCommentCellClassName))) {
+                    Event.setCapture(sheet);
                     jsniUtil.parseColRow(targetClassName);
                     cellCommentCellColumn = jsniUtil.getParsedCol();
                     cellCommentCellRow = jsniUtil.getParsedRow();

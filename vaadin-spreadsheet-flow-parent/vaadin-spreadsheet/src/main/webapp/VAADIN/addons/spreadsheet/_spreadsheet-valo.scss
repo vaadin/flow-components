@@ -1020,6 +1020,10 @@
     padding: round($spreadsheet-base-font-size / 2);
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
 
     .popupContent {
       overflow: visible;
