@@ -525,13 +525,16 @@
 
     <ul>
       <li>Performance improvements when first column or row is hidden</li>
-      <li>Allow disabling the chart overlays</li>
+      <li>Added new API to allow disabling the chart overlays</li>
+      <li><a href="http://dev.vaadin.com/ticket/19546">#19546</a> Fixed issue with parent layout resizing</li>
+      <li>Fixed issue that caused merged cells to be positioned at the bottom of the sheet after being scrolled out of view</li>
+      <li>Spreadsheet is not cropped anymore when parent layout has undefined size</li>
     </ul>
 
     <h2 id="api-changes">API changes</h2>
     <ul>
         <li>New method spreadsheet.setChartsEnabled to show or hide charts.</li>
-        <li>New method spreadsheet.isChartsEnabled to that embedded charts are displayed.</li>
+        <li>New method spreadsheet.isChartsEnabled to check if embedded charts are shown.</li>
     </ul>
 
     <h2 id="limitations">Limitations</h2>
