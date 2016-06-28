@@ -90,7 +90,7 @@ public class ScatterSeriesReader extends
         // this type, requires handleReferencedValueUpdates that can handle also
         // x values and figuring out how to set selection to two ranges.
 
-        handleReferencedValueUpdates(formulaY, seriesData);
+        handleReferencedValueUpdates(ptListY, seriesData, false);
 
         seriesData.dataSelectListener = new DataSelectListener() {
             @Override

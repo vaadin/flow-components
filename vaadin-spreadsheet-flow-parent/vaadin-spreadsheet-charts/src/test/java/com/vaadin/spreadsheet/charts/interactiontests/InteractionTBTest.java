@@ -35,6 +35,20 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
+    public void userChangesCategoryInSpreadsheet_chartsUpdated()
+            throws Exception {
+        SpreadsheetPage spreadsheetPage = headerPage.loadFile(
+                "ChartsWithCategories.xlsx", this);
+
+        // need to move selection so that fill indicator is not clicked while
+        // selecting A3
+        spreadsheetPage.getCellAt(5, 5).click();
+        spreadsheetPage.getCellAt(1, 3).setValue("New Category Value");
+        Thread.sleep(1000);
+        compareScreen("chartsUpdatedOnCategoryChange");
+    }
+
+    @Test
     public void userSelectsPoint_spreadsheetSelectionUpdated() throws Exception {
         headerPage.loadFile("InteractionSample.xlsx", this);
         overlayHelper.getOverlayElement("B1")
@@ -84,8 +98,9 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     }
 
     private void assertSelection(String... cells) {
-        for (String cell : cells)
+        for (String cell : cells) {
             assertCellInSelectionRange(cell);
+        }
     }
 
     private WebElement getCellElement(String cell) {

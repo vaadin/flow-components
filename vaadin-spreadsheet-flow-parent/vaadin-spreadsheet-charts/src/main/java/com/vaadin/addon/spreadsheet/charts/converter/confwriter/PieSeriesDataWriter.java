@@ -46,9 +46,6 @@ public class PieSeriesDataWriter extends AbstractSeriesDataWriter {
             boolean blanksAsZeros) {
         DataSeriesItem item = super.createDataSeriesItem(point, true);
 
-        if (getSeriesData().categories.size() > point.xValue.intValue())
-            item.setName(getSeriesData().categories.get(point.xValue.intValue()));
-
         item.setSliced(getSeriesData().isExploded);
         return item;
     }

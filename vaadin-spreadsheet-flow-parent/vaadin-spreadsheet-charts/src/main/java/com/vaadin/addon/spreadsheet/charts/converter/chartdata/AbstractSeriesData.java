@@ -43,6 +43,8 @@ public abstract class AbstractSeriesData {
 
     public interface DataUpdateListener {
         void dataModified(int i, Double cellValue);
+
+        void categoryModified(int i, String cellValue);
     }
 
     public DataUpdateListener dataUpdateListener;

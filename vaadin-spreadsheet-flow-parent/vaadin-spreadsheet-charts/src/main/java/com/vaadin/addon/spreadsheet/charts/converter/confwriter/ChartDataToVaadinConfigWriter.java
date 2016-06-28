@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.vaadin.addon.charts.model.AxisType;
 import com.vaadin.addon.charts.model.ChartModel;
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.model.Frame;
@@ -297,8 +298,7 @@ public class ChartDataToVaadinConfigWriter {
                     .convertSeries(definition.blanksAsZeros));
 
             if (series.categories.size() > 0) {
-                conf.getxAxis().setCategories(
-                        series.categories.toArray(new String[] {}));
+                conf.getxAxis().setType(AxisType.CATEGORY);
             }
         }
     }

@@ -66,11 +66,21 @@ public abstract class AbstractSeriesDataWriter {
             public void dataModified(int i, Double cellValue) {
                 DataSeriesItem item = dataSeries.get(i);
 
-                if (blanksAsZeros && cellValue == null)
+                if (blanksAsZeros && cellValue == null) {
                     item.setY(0d);
-                else
+                } else {
                     item.setY(cellValue);
+                }
                 
+                dataSeries.update(item);
+            }
+
+            @Override
+            public void categoryModified(int i, String cellValue) {
+                DataSeriesItem item = dataSeries.get(i);
+
+                item.setName(cellValue);
+
                 dataSeries.update(item);
             }
         };
@@ -92,11 +102,18 @@ public abstract class AbstractSeriesDataWriter {
 
     protected DataSeriesItem createDataSeriesItem(SeriesPoint point,
             boolean blanksAsZeros) {
+        DataSeriesItem result = null;
+        if (point.yValue == null && blanksAsZeros) {
+            result = new DataSeriesItem(point.xValue, 0d);
+        } else {
+            result = new DataSeriesItem(point.xValue, point.yValue);
+        }
 
-        if (point.yValue == null && blanksAsZeros)
-            return new DataSeriesItem(point.xValue, 0d);
-        else
-            return new DataSeriesItem(point.xValue, point.yValue);
+        if (getSeriesData().categories.size() > point.xValue.intValue()) {
+            result.setName(getSeriesData().categories.get(point.xValue
+                    .intValue()));
+        }
+        return result;
     }
 
     protected void configureDataSeries(DataSeries dataSeriesForWriting) {
