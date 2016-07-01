@@ -17,33 +17,10 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_CENTER;
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_CENTER_SELECTION;
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_FILL;
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_JUSTIFY;
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_LEFT;
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_RIGHT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DASHED;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DASH_DOT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DASH_DOT_DOT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DOTTED;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DOUBLE;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_HAIR;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM_DASHED;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM_DASH_DOT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM_DASH_DOT_DOT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_NONE;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_SLANTED_DASH_DOT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_THICK;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_THIN;
-import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_BOTTOM;
-import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_CENTER;
-import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_TOP;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -68,6 +45,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STBorderStyle;
 
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
+import static org.apache.poi.ss.usermodel.CellStyle.*;
 
 /**
  * SpreadsheetStyleFactory is an utility class for the Spreadsheet component.
@@ -155,6 +133,18 @@ public class SpreadsheetStyleFactory implements Serializable {
     private final HashMap<Integer, String> shiftedBorderLeftStyles = new HashMap<Integer, String>();
     /** */
     private final HashMap<String, String> mergedCellBorders = new HashMap<String, String>();
+
+    /**
+     * Temp structure for shiftedBorderTopStyles that keeps track of the
+     * association between: StyleId -> ColumnId -> Rows
+     */
+    private final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> shiftedBorderTopStylesMap = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
+
+    /**
+     * Temp structure for shiftedBorderLeftStyles that keeps track of the
+     * association between: StyleId -> ColumnId -> Rows
+     */
+    private final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> shiftedBorderLeftStylesMap = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
 
     private ColorConverter colorConverter;
 
@@ -427,9 +417,12 @@ public class SpreadsheetStyleFactory implements Serializable {
         CellStyle cellStyle = cell.getCellStyle();
         addCellStyleCSS(cellStyle);
 
+        shiftedBorderTopStylesMap.clear();
+        shiftedBorderLeftStylesMap.clear();
         // custom styles
         doCellCustomStyling(cell);
-
+        updateStyleMap(shiftedBorderLeftStylesMap, shiftedBorderLeftStyles);
+        updateStyleMap(shiftedBorderTopStylesMap, shiftedBorderTopStyles);
         if (updateCustomBorders) {
             if (shiftedBorderLeftStyles.containsKey(key)) {
                 final String style = shiftedBorderLeftStyles.get(key);
@@ -503,11 +496,17 @@ public class SpreadsheetStyleFactory implements Serializable {
             spreadsheet.getState().shiftedCellBorderStyles.clear();
         }
 
+        shiftedBorderTopStylesMap.clear();
+        shiftedBorderLeftStylesMap.clear();
+
         for (Row row : spreadsheet.getActiveSheet()) {
             for (Cell cell : row) {
                 doCellCustomStyling(cell);
             }
         }
+        updateStyleMap(shiftedBorderLeftStylesMap, shiftedBorderLeftStyles);
+        updateStyleMap(shiftedBorderTopStylesMap, shiftedBorderTopStyles);
+
         for (String value : shiftedBorderLeftStyles.values()) {
             if (value.startsWith(".col")) {
                 spreadsheet.getState().shiftedCellBorderStyles.add(value);
@@ -649,64 +648,97 @@ public class SpreadsheetStyleFactory implements Serializable {
                 || region.row1 == (rowIndex + 1)
                 || region.row2 == (rowIndex + 1)) {
 
-            StringBuilder sb;
             if (shiftedBorderLeftStyles.containsKey(key)) {
                 // need to add the border right style to previous cell on
                 // left, which might be a merged cell
                 if (columnIndex > 0) {
-                    String value = shiftedBorderLeftStyles.get(key);
-                    sb = new StringBuilder();
-                    sb.append(".col");
+                    int row, col;
+
                     MergedRegion previousRegion = spreadsheet.mergedRegionContainer
                             .getMergedRegion(columnIndex, rowIndex + 1);
                     if (previousRegion != null) {
-                        sb.append(previousRegion.col1);
-                        sb.append(".row");
-                        sb.append(previousRegion.row1);
+                        col = previousRegion.col1;
+                        row = previousRegion.row1;
                     } else {
-                        sb.append(columnIndex);
-                        sb.append(".row");
-                        sb.append(rowIndex + 1);
+                        col = columnIndex;
+                        row = rowIndex + 1;
                     }
-                    if (!value.contains(sb.toString() + ",")
-                            && !value.contains(sb.toString() + "{")) {
-                        if (!value.startsWith("{")) {
-                            sb.append(",");
-                        }
-                        sb.append(value);
-                        shiftedBorderLeftStyles.put(key, sb.toString());
-                    }
+                    insertMapEntryIfNeeded(shiftedBorderLeftStylesMap, key,
+                            row, col);
                 }
             }
             if (shiftedBorderTopStyles.containsKey(key)) {
                 // need to add the border bottom style to cell on previous
                 // row, which might be a merged cell
                 if (rowIndex > 0) {
-                    String value = shiftedBorderTopStyles.get(key);
-                    sb = new StringBuilder();
-                    sb.append(".col");
+                    int row, col;
                     MergedRegion previousRegion = spreadsheet.mergedRegionContainer
                             .getMergedRegion(columnIndex + 1, rowIndex);
+
                     if (previousRegion != null) {
-                        sb.append(previousRegion.col1);
-                        sb.append(".row");
-                        sb.append(previousRegion.row1);
+                        col = previousRegion.col1;
+                        row = previousRegion.row1;
                     } else {
-                        sb.append(columnIndex + 1);
-                        sb.append(".row");
-                        sb.append(rowIndex);
+                        col = columnIndex + 1;
+                        row = rowIndex;
                     }
-                    if (!value.contains(sb.toString() + ",")
-                            && !value.contains(sb.toString() + "{")) {
-                        if (!value.startsWith("{")) {
-                            sb.append(",");
-                        }
-                        sb.append(value);
-                        shiftedBorderTopStyles.put(key, sb.toString());
-                    }
+                    insertMapEntryIfNeeded(shiftedBorderTopStylesMap, key, row,
+                            col);
+
                 }
             }
 
+        }
+    }
+
+    private void insertMapEntryIfNeeded(
+            HashMap<Integer, HashMap<Integer, HashSet<Integer>>> shiftedBorderStylesMap,
+            int key, int row, int col) {
+        HashMap<Integer, HashSet<Integer>> colToRowMap = shiftedBorderStylesMap
+                .get(key);
+        if (colToRowMap == null) {
+            colToRowMap = new HashMap<Integer, HashSet<Integer>>();
+            shiftedBorderStylesMap.put(key, colToRowMap);
+        }
+        HashSet<Integer> rows = colToRowMap.get(col);
+        if (rows == null) {
+            rows = new HashSet<Integer>();
+            colToRowMap.put(col, rows);
+        }
+        rows.add(row);
+    }
+
+    private void updateStyleMap(
+            HashMap<Integer, HashMap<Integer, HashSet<Integer>>> shiftedBorderStylesMap,
+            HashMap<Integer, String> shiftedBorderStyles) {
+        for (Map.Entry<Integer, HashMap<Integer, HashSet<Integer>>> currentEntry : shiftedBorderStylesMap
+                .entrySet()) {
+            Integer key = currentEntry.getKey();
+            HashMap<Integer, HashSet<Integer>> colToRows = currentEntry
+                    .getValue();
+
+            if (colToRows != null) {
+                String value = shiftedBorderStyles.get(key);
+                StringBuilder sb = new StringBuilder();
+                boolean somethingAdded = false;
+                for (Map.Entry<Integer, HashSet<Integer>> colToRowEntry : colToRows
+                        .entrySet()) {
+                    Integer col = colToRowEntry.getKey();
+                    for (Integer row : colToRowEntry.getValue()) {
+                        if (somethingAdded) {
+                            sb.append(",");
+                        } else {
+                            somethingAdded = true;
+                        }
+                        sb.append(".col").append(col);
+                        sb.append(".row").append(row);
+                    }
+
+                }
+                sb.append(value);
+
+                shiftedBorderStyles.put(key, sb.toString());
+            }
         }
     }
 
