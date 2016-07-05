@@ -17,7 +17,10 @@ package com.vaadin.addon.spreadsheet.action;
  * #L%
  */
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
@@ -26,7 +29,7 @@ import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 
 /**
  * Spreadsheet action for showing or hiding a cell comment.
- * 
+ *
  * @author Vaadin Ltd.
  * @since 1.0
  */
@@ -39,7 +42,7 @@ public class ShowHideCellCommentAction extends SpreadsheetAction {
 
     @Override
     public boolean isApplicableForSelection(Spreadsheet spreadsheet,
-            SelectionChangeEvent event) {
+                                            SelectionChangeEvent event) {
         if (!spreadsheet.getActiveSheet().getProtect()) {
             if (event.getCellRangeAddresses().size() == 0
                     && event.getIndividualSelectedCells().size() == 0) {
@@ -61,23 +64,32 @@ public class ShowHideCellCommentAction extends SpreadsheetAction {
 
     @Override
     public boolean isApplicableForHeader(Spreadsheet spreadsheet,
-            CellRangeAddress headerRange) {
+                                         CellRangeAddress headerRange) {
         return false;
     }
 
     @Override
     public void executeActionOnSelection(Spreadsheet spreadsheet,
-            SelectionChangeEvent event) {
+                                         SelectionChangeEvent event) {
         CellReference cr = event.getSelectedCellReference();
         Comment cellComment = spreadsheet.getActiveSheet().getCellComment(
                 cr.getRow(), cr.getCol());
         cellComment.setVisible(!cellComment.isVisible());
-        spreadsheet.refreshCells(spreadsheet.getCell(cr.getRow(), cr.getCol()));
+        Sheet sheet = spreadsheet.getActiveSheet();
+        Row row = sheet.getRow(cr.getRow());
+        if (row == null) {
+            row = sheet.createRow(cr.getRow());
+        }
+        Cell cell = spreadsheet.getCell(cr);
+        if (cell == null) {
+            cell = row.createCell(cr.getCol());
+        }
+        spreadsheet.refreshCells(cell);
     }
 
     @Override
     public void executeActionOnHeader(Spreadsheet spreadsheet,
-            CellRangeAddress headerRange) {
+                                      CellRangeAddress headerRange) {
         throw new UnsupportedOperationException(
                 "Hide header action can't be executed against a selection.");
     }
