@@ -1,10 +1,5 @@
 package com.vaadin.addon.spreadsheet.test;
 
-
-import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
-import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
-import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
-import com.vaadin.testbench.parallel.Browser;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -12,6 +7,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
+import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
+import com.vaadin.addon.spreadsheet.test.testutil.ContextMenuHelper;
+import com.vaadin.testbench.parallel.Browser;
 
 public class CommentTest extends AbstractSpreadsheetTestCase {
 
@@ -46,13 +46,40 @@ public class CommentTest extends AbstractSpreadsheetTestCase {
         assertCommentOverlayIsShownOnHover("Invalid formula");
     }
 
+    @Test
+    public void openFileWithComment_deleteComment_NoException()
+            throws InterruptedException {
+        headerPage.loadFile("comment_sheet.xlsx", this);
+
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        ContextMenuHelper contextMenu = new ContextMenuHelper(driver);
+        SheetCellElement cell = spreadsheet.getCellAt(3, 3);
+        cell.contextClick();
+        contextMenu.clickItem("Delete comment");
+        assertNoErrorIndicatorDetected();
+    }
+
+    @Test
+    public void openFileWithComment_showComment_NoException()
+            throws InterruptedException {
+        headerPage.loadFile("comment_sheet.xlsx", this);
+
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        ContextMenuHelper contextMenu = new ContextMenuHelper(driver);
+        SheetCellElement cell = spreadsheet.getCellAt(3, 3);
+        cell.contextClick();
+        contextMenu.clickItem("Show comment");
+        assertNoErrorIndicatorDetected();
+    }
 
     @Test
     public void removeRow_removeRowWithComment_commentIsRemoved() {
-        skipBrowser("Context click does not work with PhantomJS and Firefox", Browser.PHANTOMJS, Browser.FIREFOX);
+        skipBrowser("Context click does not work with PhantomJS and Firefox",
+                Browser.PHANTOMJS, Browser.FIREFOX);
         headerPage.createNewSpreadsheet();
         headerPage.loadFile("cell_comments.xlsx", this); // A1 has a comment
-        final SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        final SpreadsheetElement spreadsheet = $(SpreadsheetElement.class)
+                .first();
 
         spreadsheet.getRowHeader(1).contextClick();
         spreadsheet.getContextMenu().getItem("Delete row").click();
@@ -64,7 +91,6 @@ public class CommentTest extends AbstractSpreadsheetTestCase {
             }
         });
     }
-
 
     private void assertCommentOverlayIsShownOnHover(String commentContains) {
         moveMouseOverCell("A2");
@@ -78,7 +104,8 @@ public class CommentTest extends AbstractSpreadsheetTestCase {
     public void moveMouseOverCell(String cellAddress) {
         SheetCellElement cell = $(SpreadsheetElement.class).first()
                 .getCellAt(cellAddress);
-        WebElement cornerElement = driver.findElement(By.cssSelector(".v-spreadsheet > .corner"));
+        WebElement cornerElement = driver
+                .findElement(By.cssSelector(".v-spreadsheet > .corner"));
 
         new Actions(driver).moveToElement(cornerElement)
                 .moveToElement(cell.getWrappedElement()).build().perform();
@@ -88,10 +115,10 @@ public class CommentTest extends AbstractSpreadsheetTestCase {
         waitUntil(new ExpectedCondition<Object>() {
             @Override
             public Object apply(WebDriver webDriver) {
-                return webDriver.findElements(By.xpath(
-                        "//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')" +
-                                " and contains(text(), '" + text + "')]"
-                )).size() > 0;
+                return webDriver.findElements(By
+                        .xpath("//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')"
+                                + " and contains(text(), '" + text + "')]"))
+                        .size() > 0;
             }
         });
     }
@@ -100,10 +127,10 @@ public class CommentTest extends AbstractSpreadsheetTestCase {
         waitUntil(new ExpectedCondition<Object>() {
             @Override
             public Object apply(WebDriver webDriver) {
-                return webDriver.findElements(By.xpath(
-                        "//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')" +
-                                " and contains(text(), '" + text + "')]"
-                )).size() == 0;
+                return webDriver.findElements(By
+                        .xpath("//div[(@class='comment-overlay-label' or @class='comment-overlay-invalidformula')"
+                                + " and contains(text(), '" + text + "')]"))
+                        .size() == 0;
             }
         });
     }
