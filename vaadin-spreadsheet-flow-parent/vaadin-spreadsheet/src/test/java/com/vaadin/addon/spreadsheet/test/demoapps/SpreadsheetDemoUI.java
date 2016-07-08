@@ -19,9 +19,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.vaadin.data.Item;
-import com.vaadin.data.Property;
-import com.vaadin.ui.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
@@ -33,8 +30,6 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
-import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeListener;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SheetChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SheetChangeListener;
 import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
@@ -53,10 +48,27 @@ import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractField;
+import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.DateField;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.NativeSelect;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
 @SuppressWarnings("serial")
 @Theme("demo")
@@ -73,8 +85,6 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     private Button download;
 
     private ComboBox openTestSheetSelect;
-
-    private SelectionChangeListener selectionChangeListener;
 
     private SpreadsheetComponentFactory spreadsheetFieldFactory;
 
@@ -109,71 +119,14 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     protected void init(VaadinRequest request) {
         SpreadsheetFactory.logMemoryUsage();
         setContent(layout);
-
-        options = new HorizontalLayout();
-        options.setSpacing(true);
-
         layout.setMargin(true);
         layout.setSizeFull();
 
-        gridlines = new CheckBox("display grid lines");
-        gridlines.setImmediate(true);
+        options = new HorizontalLayout();
+        options.setSpacing(true);
+        rowColHeadings=createRowHeadings();
 
-        rowColHeadings = new CheckBox("display row and column headers");
-        rowColHeadings.setImmediate(true);
-
-        gridlines.addValueChangeListener(new ValueChangeListener() {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                Boolean display = (Boolean) event.getProperty().getValue();
-
-                if (spreadsheet != null) {
-                    spreadsheet.setGridlinesVisible(display);
-                }
-            }
-        });
-
-        rowColHeadings.addValueChangeListener(new ValueChangeListener() {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                Boolean display = (Boolean) event.getProperty().getValue();
-
-                if (spreadsheet != null) {
-                    spreadsheet.setRowColHeadingsVisible(display);
-                }
-            }
-        });
-
-        Button newSpreadsheetButton = new Button("Create new",
-            new Button.ClickListener() {
-
-                @Override
-                public void buttonClick(ClickEvent event) {
-                    if (spreadsheet == null) {
-                        spreadsheet = new Spreadsheet();
-                        updateLocale();
-                        spreadsheet
-                                .addSelectionChangeListener(selectionChangeListener);
-                        spreadsheet
-                                .addSheetChangeListener(selectedSheetChangeListener);
-                        layout.addComponent(spreadsheet);
-                        layout.setExpandRatio(spreadsheet, 1.0f);
-                    } else {
-                        spreadsheet.reset();
-                    }
-                    spreadsheet.setSpreadsheetComponentFactory(null);
-                    save.setEnabled(true);
-                    previousFile = null;
-                    openTestSheetSelect.setValue(null);
-                    gridlines.setValue(spreadsheet.isGridlinesVisible());
-                    rowColHeadings.setValue(spreadsheet
-                            .isRowColHeadingsVisible());
-
-                    Page.getCurrent().setUriFragment(null, false);
-                }
-            });
+        Button newSpreadsheetButton = createNewButton();
 
         File file = null;
         try {
@@ -200,65 +153,14 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 }
             }
         });
-        openTestSheetSelect = new ComboBox(null, testSheetContainer);
-        openTestSheetSelect.setId("testSheetSelect");
-        openTestSheetSelect.setImmediate(true);
-        openTestSheetSelect.setItemCaptionPropertyId("Name");
-        openTestSheetSelect.setPageLength(30);
-        openTestSheetSelect.setWidth("250px");
+        openTestSheetSelect=createTestSheetCombobox(testSheetContainer);
+        updateButton=createUpdateButton(testSheetContainer);
+        save=createSaveButton();
 
-        updateButton = new Button("Update", new Button.ClickListener() {
-
-            @Override
-            public void buttonClick(ClickEvent event) {
-                Object value = openTestSheetSelect.getValue();
-                if (value != null && value instanceof File) {
-                    loadFile((File) value);
-                }
-                Object caption = testSheetContainer.getItem(value).getItemProperty("Name").getValue();
-                if(caption != null) {
-                    Page.getCurrent().setUriFragment("file/" + caption.toString(), false);
-                }
-            }
-        });
-        updateButton.setId("update");
-
-        save = new Button("Save", new Button.ClickListener() {
-
-            @Override
-            public void buttonClick(ClickEvent event) {
-                if (spreadsheet != null) {
-                    try {
-                        if (previousFile != null) {
-                            int i = previousFile.getName().lastIndexOf(".xls");
-                            String fileName = previousFile.getName().substring(
-                                    0, i)
-                                    + ("(1)")
-                                    + previousFile.getName().substring(i);
-                            previousFile = spreadsheet.write(fileName);
-                        } else {
-                            previousFile = spreadsheet.write("workbook1");
-                        }
-                        download.setEnabled(true);
-                        FileResource resource = new FileResource(previousFile);
-                        FileDownloader fileDownloader = new FileDownloader(
-                                resource);
-                        fileDownloader.extend(download);
-                        previousFile.deleteOnExit();
-                    } catch (FileNotFoundException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-        save.setEnabled(false);
         download = new Button("Download");
         download.setEnabled(false);
 
+        gridlines =createCBNewLines();
         Button customComponentTest = new Button(
                 "Create Custom Editor Test sheet", new Button.ClickListener() {
 
@@ -404,32 +306,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         sheetOptions.addComponent(download);
         layout.addComponent(options);
 
-        selectionChangeListener = new SelectionChangeListener() {
-
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                printSelectionChangeEventContents(event);
-            }
-        };
-
         selectedSheetChangeListener = new SheetChangeListener() {
-            // private int counter = 0;
-
             @Override
             public void onSheetChange(SheetChangeEvent event) {
-                // Workbook workbook = ((Spreadsheet) event.getComponent())
-                // .getWorkbook();
-                // c.removeAllItems();
-                // for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-                // c.addItem(i);
-                // }
-
-                // System.out.println("SELECTED SHEET CHANGED: #" + counter++);
-                // System.out.println("Previous sheet:"
-                // + event.getPreviousSheet().getSheetName()
-                // + ", New Sheet: " + event.getNewSheet().getSheetName()
-                // + " index: " + event.getNewSheetVisibleIndex()
-                // + " POIIndex: " + event.getNewSheetPOIIndex());
                 gridlines.setValue(spreadsheet.isGridlinesVisible());
                 rowColHeadings.setValue(spreadsheet.isRowColHeadingsVisible());
             }
@@ -502,6 +381,136 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     }
 
+    private Button createSaveButton() {
+        Button save = new Button("Save", new Button.ClickListener() {
+
+            @Override
+            public void buttonClick(ClickEvent event) {
+                if (spreadsheet != null) {
+                    try {
+                        if (previousFile != null) {
+                            int i = previousFile.getName().lastIndexOf(".xls");
+                            String fileName = previousFile.getName().substring(
+                                    0, i)
+                                    + ("(1)")
+                                    + previousFile.getName().substring(i);
+                            previousFile = spreadsheet.write(fileName);
+                        } else {
+                            previousFile = spreadsheet.write("workbook1");
+                        }
+                        download.setEnabled(true);
+                        FileResource resource = new FileResource(previousFile);
+                        FileDownloader fileDownloader = new FileDownloader(
+                                resource);
+                        fileDownloader.extend(download);
+                        previousFile.deleteOnExit();
+                    } catch (FileNotFoundException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        save.setEnabled(false);
+        return save;
+    }
+
+    private Button createUpdateButton(final FilesystemContainer testSheetContainer) {
+        Button updateButton = new Button("Update", new Button.ClickListener() {
+
+            @Override
+            public void buttonClick(ClickEvent event) {
+                Object value = openTestSheetSelect.getValue();
+                if (value != null && value instanceof File) {
+                    loadFile((File) value);
+                }
+                Object caption = testSheetContainer.getItem(value).getItemProperty("Name").getValue();
+                if(caption != null) {
+                    Page.getCurrent().setUriFragment("file/" + caption.toString(), false);
+                }
+            }
+        });
+        updateButton.setId("update");
+        return updateButton;
+    }
+
+    private ComboBox createTestSheetCombobox(FilesystemContainer testSheetContainer) {
+        ComboBox cb = new ComboBox(null, testSheetContainer);
+        cb.setId("testSheetSelect");
+        cb.setImmediate(true);
+        cb.setItemCaptionPropertyId("Name");
+        cb.setPageLength(30);
+        cb.setWidth("250px");
+        return cb;
+    }
+
+    private Button createNewButton() {
+        return new Button("Create new",
+                new Button.ClickListener() {
+
+                    @Override
+                    public void buttonClick(ClickEvent event) {
+                        if (spreadsheet == null) {
+                            spreadsheet = new Spreadsheet();
+                            updateLocale();
+                            spreadsheet
+                                    .addSheetChangeListener(selectedSheetChangeListener);
+                            layout.addComponent(spreadsheet);
+                            layout.setExpandRatio(spreadsheet, 1.0f);
+                        } else {
+                            spreadsheet.reset();
+                        }
+                        spreadsheet.setSpreadsheetComponentFactory(null);
+                        save.setEnabled(true);
+                        previousFile = null;
+                        openTestSheetSelect.setValue(null);
+                        gridlines.setValue(spreadsheet.isGridlinesVisible());
+                        rowColHeadings.setValue(spreadsheet
+                                .isRowColHeadingsVisible());
+
+                        Page.getCurrent().setUriFragment(null, false);
+                    }
+                });
+    }
+
+    private CheckBox createRowHeadings() {
+        CheckBox rowColHeadings = new CheckBox("display row and column headers");
+        rowColHeadings.setImmediate(true);
+
+        rowColHeadings.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                Boolean display = (Boolean) event.getProperty().getValue();
+
+                if (spreadsheet != null) {
+                    spreadsheet.setRowColHeadingsVisible(display);
+                }
+            }
+        });
+        return rowColHeadings;
+    }
+
+    private CheckBox createCBNewLines() {
+        CheckBox cb = new CheckBox("display grid lines");
+        cb.setImmediate(true);
+        cb.addValueChangeListener(new ValueChangeListener() {
+
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                Boolean display = (Boolean) event.getProperty().getValue();
+
+                if (spreadsheet != null) {
+                    spreadsheet.setGridlinesVisible(display);
+                }
+            }
+        });
+        return cb;
+    }
+
     /*
      * Rudimentary fragment handling to make developing&testing faster
      */
@@ -551,28 +560,11 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         }
     }
 
-    private void printSelectionChangeEventContents(SelectionChangeEvent event) {
-        // System.out.println("Selected cell: "
-        // + event.getSelectedCellReference().toString());
-        // System.out.println("Merged region: "
-        // + event.getSelectedCellMergedRegion());
-        // System.out.println("Ranges:");
-        // for (CellRangeAddress range : event.getCellRangeAddresses()) {
-        // System.out.println(range.toString());
-        // }
-        // System.out.println("Individual Cells:");
-        // for (CellReference cell : event.getIndividualSelectedCells()) {
-        // System.out.println(cell.toString());
-        // }
-    }
-
     private void loadFile(File file) {
         try {
             if (spreadsheet == null) {
                 spreadsheet = new Spreadsheet(file);
-                spreadsheet.addSelectionChangeListener(selectionChangeListener);
                 spreadsheet.addSheetChangeListener(selectedSheetChangeListener);
-                // spreadsheet.addActionHandler(spreadsheetActionHandler);
                 layout.addComponent(spreadsheet);
                 layout.setExpandRatio(spreadsheet, 1.0f);
             } else {
