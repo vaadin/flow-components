@@ -33,7 +33,7 @@ import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 
 /**
  * Spreadsheet action for inserting or deleting a comment to a cell.
- *
+ * 
  * @author Vaadin Ltd.
  * @since 1.0
  */
@@ -46,7 +46,7 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
 
     @Override
     public boolean isApplicableForSelection(Spreadsheet spreadsheet,
-                                            SelectionChangeEvent event) {
+            SelectionChangeEvent event) {
         if (!spreadsheet.getActiveSheet().getProtect()) {
             if (event.getCellRangeAddresses().size() == 0
                     && event.getIndividualSelectedCells().size() == 0) {
@@ -66,48 +66,44 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
 
     @Override
     public boolean isApplicableForHeader(Spreadsheet spreadsheet,
-                                         CellRangeAddress headerRange) {
+            CellRangeAddress headerRange) {
         return false;
     }
 
     @Override
     public void executeActionOnSelection(Spreadsheet spreadsheet,
-                                         SelectionChangeEvent event) {
+            SelectionChangeEvent event) {
         Sheet sheet = spreadsheet.getActiveSheet();
         CellReference cr = event.getSelectedCellReference();
-        boolean cellCreated = false, rowCreated = false, commentEdited = false;
-        Row row = sheet.getRow(cr.getRow());
-        if (row == null) {
-            row = sheet.createRow(cr.getRow());
-            rowCreated = true;
-        }
-        Cell cell = spreadsheet.getCell(cr);
+        Cell cell = spreadsheet.getCell(cr.getRow(), cr.getCol());
+        boolean created = false;
         if (cell == null) {
-            cell = row.createCell(cr.getCol());
-            cellCreated = true;
-        }
-        if (cell.getCellComment() == null) {
-            createCellComment(spreadsheet, sheet, cell, cr);
-            commentEdited = true;
-        } else {
-            cell.removeCellComment();
-            if (cellCreated) {
-                sheet.getRow(cr.getRow()).removeCell(cell);
+            Row row = sheet.getRow(cr.getRow());
+            if (row == null) {
+                row = sheet.createRow(cr.getRow());
             }
-            if (rowCreated) {
-                sheet.removeRow(sheet.getRow(cr.getRow()));
+            cell = row.createCell(cr.getCol());
+            createCellComment(spreadsheet, sheet, cell, cr);
+            created = true;
+        } else {
+
+            if (cell.getCellComment() == null) {
+                createCellComment(spreadsheet, sheet, cell, cr);
+                created = true;
+            } else {
+                cell.removeCellComment();
             }
         }
         if (cell != null) {
             spreadsheet.refreshCells(cell);
         }
-        if (commentEdited) {
+        if (created) {
             spreadsheet.editCellComment(cr);
         }
     }
 
     private void createCellComment(Spreadsheet spreadsheet, Sheet sheet,
-                                   Cell cell, CellReference cellRef) {
+            Cell cell, CellReference cellRef) {
         CreationHelper factory = sheet.getWorkbook().getCreationHelper();
         Drawing drawing = sheet.createDrawingPatriarch();
 
@@ -139,7 +135,7 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
 
     @Override
     public void executeActionOnHeader(Spreadsheet spreadsheet,
-                                      CellRangeAddress headerRange) {
+            CellRangeAddress headerRange) {
         throw new UnsupportedOperationException(
                 "Cell comment actions can't be executed against a header range.");
     }
