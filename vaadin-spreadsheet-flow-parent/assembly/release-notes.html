@@ -531,13 +531,17 @@
       <li>Spreadsheet is not cropped anymore when parent layout has undefined size</li>
       <li>Fixed an issue with updating charts category, when referenced cell is modified</li>
       <li>Prevent exception in embedded charts for xlsx files in created in Numbers for Mac</li>
-       <li>Fixed a problem with scrolling in comments <a href="https://dev.vaadin.com/ticket/19444">#19444</a></li>
+      <li><a href="https://dev.vaadin.com/ticket/19444">#19444</a> Fixed a problem with scrolling in comments</li>
+      <li>Fixed an issue with custom formatted numbers</li>
+      <li>Fixed an issue when deleting a comment, which was created in Excel</li>
+      <li><a href="https://dev.vaadin.com/ticket/18074">#18074</a>Introduced new API to handle or prevent delete actions</li>
     </ul>
 
     <h2 id="api-changes">API changes</h2>
     <ul>
         <li>New method spreadsheet.setChartsEnabled to show or hide charts.</li>
         <li>New method spreadsheet.isChartsEnabled to check if embedded charts are shown.</li>
+        <li>New method spreadsheet.setCellDeletionHandler to add a custom implementation of CellDeletionHandler.</li>
     </ul>
 
     <h2 id="limitations">Limitations</h2>
