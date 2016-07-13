@@ -1,0 +1,370 @@
+---
+title: Vaadin Spreadsheet Tutorial
+order: 2
+layout: page
+---
+
+[[spreadsheet.tutorial]]
+= Spreadsheet Tutorial
+
+[[spreadsheet.tutorial.introduction]]
+== Introduction
+
+In this tutorial we are going to create a simple Vaadin application and use the Vaadin Spreadsheet add-on to view, edit and style the contents of an Excel spreadsheet directly in the browser.
+
+In this tutorial, you will learn how to:
+
+* Add Vaadin Spreadsheet to a project
+* Create an empty spreadsheet
+* Load spreadsheet from a file
+* Set styles (Bold, Background Color and Font Color) to selected cells
+
+The complete source code for the resulting project is available at link:https://github.com/vaadin/spreadsheet-tutorial[https://github.com/vaadin/spreadsheet-tutorial].
+
+[[spreadsheet.tutorial.prerequisites]]
+== Prerequisites
+
+Since Vaadin Spreadsheet uses link:http://poi.apache.org/spreadsheet/index.html[Apache POI] under the hood, it is beneficial to get to know the POI API unless you’re already familiar with it.
+
+In order to follow this tutorial you will need the following tools/setup:
+
+* Command line Maven
+* JDK installed
+* IDE (optional)
+
+[[spreadsheet.tutorial.project-setup]]
+== Project setup
+
+To start off we need to create a new project where we can use the Spreadsheet. We will use Maven to set up a project, which can later be imported into your favorite IDE. Execute the following command to create the project. You can also use your IDE to generate a new maven project using the vaadin-archetype-application archetype, version 7.5.7
+
+----
+mvn archetype:generate -DarchetypeGroupId=com.vaadin  \
+  -DarchetypeArtifactId=vaadin-archetype-application \
+  -DarchetypeVersion=7.5.7
+----
+
+You will be asked a few questions for setting up the project. I answered like this:
+
+[subs="normal"]
+----
+Define value for property 'groupId': : [replaceable]#com.vaadin#
+Define value for property 'artifactId': : [replaceable]#spreadsheet-tutorial#
+Define value for property 'version':  1.0-SNAPSHOT: : [replaceable]#<return>#
+Define value for property 'package':  com.vaadin: : [replaceable]#<return>#
+[INFO] Using property: themeName = mytheme
+[INFO] Using property: uiName = MyUI
+[INFO] Using property: widgetsetName = MyAppWidgetset
+Confirm properties configuration:
+groupId: com.vaadin
+artifactId: spreadsheet-tutorial
+version: 1.0-SNAPSHOT
+package: com.vaadin
+themeName: mytheme
+uiName: MyUI
+widgetsetName: MyAppWidgetset
+Y: : [replaceable]#<return>#
+----
+
+Now you should have a project generated for you in a directory named after the artifactId that you specified, i.e. spreadsheet-tutorial. You can run this new project by issuing the following commands:
+
+----
+cd spreadsheet-tutorial
+mvn vaadin:compile jetty:run
+----
+
+The latter command will compile all sources and start a local web server. Wait until it prints out “Started Jetty Server” and navigate to http://localhost:8080 using your favorite browser. Note that you don’t usually need to call vaadin:compile – this is only the needed the first time you compile a new project created with the application archetype or if the widget set has changed by yourself or if you add an add-on to your project, as we’ll see later.
+
+In your browser you should see a button titled “Click Me”. When you click it, the text “Thank you for clicking” appears below the button. Great, the application works! We can now move on to replace this button with a Spreadsheet! Stop the web server by pressing ctrl-C in the window where you started it.
+
+Let's first add the Vaadin Spreadsheet dependency to the project and compile the widget set. Open the pom.xml file and find the <dependencies> tag. Add the following dependency declaration just before the end tag (</dependencies>):
+
+[subs="normal"]
+----
+...
+    <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.0.1</version>
+        <scope>provided</scope>
+    </dependency>
+    [replaceable]#<dependency>
+        <groupId>com.vaadin.addon</groupId>
+        <artifactId>vaadin-spreadsheet</artifactId>
+        <version>1.2.0.beta2</version>
+    </dependency>#
+</dependencies>
+...
+----
+
+It’s recommended to use the latest version available, the version number can be checked at link:https://vaadin.com/directory#!addon/vaadin-spreadsheet[Vaadin Directory].
+
+After this we need to fetch a license for Vaadin Spreadsheet in order to be able to compile the widget set. You can get a free trial key from link:https://vaadin.com/directory#!addon/vaadin-spreadsheet[Vaadin Directory]. Click the large orange “Free trial key” button to the right and copy and paste the key into a file named [literal]#.vaadin.spreadsheet.developer.license# in your link:https://en.wikipedia.org/wiki/Home_directory#Default_home_directory_per_operating_system[home directory]. After this you can issue the following command to compile the widget set:
+
+----
+mvn clean vaadin:compile
+----
+
+Now we have created a new project, added the Vaadin Spreadsheet add-on to it and can move on to create our spreadsheet.
+
+[[spreadsheet.tutorial.creating-your-first-spreadsheet]]
+== Project Creating your first Spreadsheet
+
+Let's replace the Button with an empty Spreadsheet. To do so we will create a new field for the Spreadsheet and a new method that initializes it.
+Open the [literal]#com.vaadin.MyUI# class and change the init method to the following:
+
+[source, java]
+----
+private Spreadsheet spreadsheet = null;
+
+@Override
+protected void init(VaadinRequest request) {
+   final VerticalLayout layout = new VerticalLayout();
+   layout.setSizeFull();
+   setContent(layout);
+
+   initSpreadsheet();
+   layout.addComponent(spreadsheet);
+}
+
+private void initSpreadsheet(){
+   spreadsheet = new Spreadsheet();
+}
+----
+
+Now run it by issuing [literal]#mvn jetty:run# on the command line and load http://localhost:8080 in your browser. You should see an empty spreadsheet that is ready to be edited.
+
+Now let's make the Spreadsheet load an existing .xlsx file ‘Simple Invoice.xlsx’. Please note that this tutorial is done with an xlsx file and not an xls file, as we’ll see later there are some differences in the styling options when using old xls format. The file could be obtained using the Vaadin Upload component, but in this case we’re going to read it directly from the file system. The example file can be downloaded from link:https://github.com/vaadin/spreadsheet-tutorial[https://github.com/vaadin/spreadsheet-tutorial] and saved in the project folder. To read the file we’ll need to do the following change in the way we create the Spreadsheet object:
+
+[source, java]
+----
+private void initSpreadsheet(){
+   File sampleFile = new File("Simple Invoice.xlsx");
+   try {
+       spreadsheet = new Spreadsheet(sampleFile);
+   } catch (IOException e) {
+       e.printStackTrace();
+   }
+}
+----
+
+Stop the running jetty process by pressing kbd:[ctrl-C] and start it again by issuing [literal]#mvn jetty:run# once more. Reload the page in your browser and the Spreadsheet should now contain the sample file content.
+
+[[spreadsheet.tutorial.styling]]
+== Styling the Spreadsheet
+
+In order to allow the user to change styles of the selected cells we will create a HorizontalLayout that will serve as a styling toolbar and add some buttons to it. To accomplish this we will create the toolbar and add it to the main layout before adding the Spreadsheet.
+
+[source, java]
+----
+protected void init(VaadinRequest request) {
+   ...
+
+   HorizontalLayout styleToolbar = createStyleToolbar();
+   layout.addComponent(styleToolbar);
+   layout.setExpandRatio(styleToolbar, 0);
+   initSpreadsheet();
+   layout.addComponent(spreadsheet);
+   layout.setExpandRatio(spreadsheet, 1);
+}
+----
+
+The expand ratio will allow us to use the minimum space required for the toolbar and use all the rest for the Spreadsheet. And the createStyleToolbar method will be defined in the following way:
+
+[source, java]
+----
+private HorizontalLayout createStyleToolbar() {
+   HorizontalLayout toolbar = new HorizontalLayout();
+   Button boldButton = new Button(FontAwesome.BOLD);
+   boldButton.addClickListener(new ClickListener() {
+       @Override
+       public void buttonClick(ClickEvent event) {
+           updateSelectedCellsBold();
+       }
+   });
+   ColorPicker backgroundColor = new ColorPicker();
+   backgroundColor.setCaption("Background Color");
+   backgroundColor.addColorChangeListener(new ColorChangeListener() {
+       @Override
+       public void colorChanged(ColorChangeEvent event) {
+           updateSelectedCellsBackgroundColor(event.getColor());
+       }
+   });
+   ColorPicker fontColor = new ColorPicker();
+   fontColor.setCaption("Font Color");
+   fontColor.addColorChangeListener(new ColorChangeListener() {
+   @Override
+   public void colorChanged(ColorChangeEvent event) {
+       updateSelectedCellsFontColor(event.getColor());
+   }
+   });
+   toolbar.addComponent(boldButton);
+   toolbar.addComponent(backgroundColor);
+   toolbar.addComponent(fontColor);
+   return toolbar;
+}
+
+private void updateSelectedCellsBold() {
+   // TODO Auto-generated method stub
+}
+private void updateSelectedCellsBackgroundColor(Color newColor) {
+   // TODO Auto-generated method stub
+}
+private void updateSelectedCellsFontColor(Color newColor) {
+   // TODO Auto-generated method stub
+}
+----
+
+If we restart the application now we will be able to see the final layout of the spreadsheet-tutorial application. We are also ready to update the styles of the selected cells when the toolbar buttons are clicked by the user. To do so we are going to interact with Apache POI API and classes such as:
+
+* org.apache.poi.ss.usermodel.Cell
+* org.apache.poi.ss.usermodel.CellStyle
+* org.apache.poi.ss.usermodel.Font
+* org.apache.poi.ss.util.CellReference
+
+The Spreadsheet component will return a Set<CellReference> when calling
+
+[source, java]
+----
+spreadsheet.getSelectedCellReferences()
+----
+
+With these references we will be able to obtain the actual Cells from the POI model by calling
+
+[source, java]
+----
+spreadsheet.getCell(cellRef.getRow(), cellRef.getCol())
+----
+
+The result of getCell might be null if the cell is blank and that’s why we will create a helper method to get or create a Cell that will be used in our three updateSelectedCells* methods
+
+[source, java]
+----
+private Cell getOrCreateCell(CellReference cellRef) {
+   Cell cell = spreadsheet.getCell(cellRef.getRow(), cellRef.getCol());
+   if (cell == null) {
+       cell = spreadsheet.createCell(cellRef.getRow(), cellRef.getCol(),"");
+   }
+   return cell;
+}
+----
+
+Once we have the Cell we need to obtain the CellStyle object from the cell. This object contains formatting information for the cell and the contents on a sheet, but as the CellStyle objects are shared we might end up modifying the style of more cells than expected. To prevent that, we will use a clone of the original CellStyle. For this purpose we will create a cloneStyle method as follows:
+
+[source, java]
+----
+private CellStyle cloneStyle(Cell cell) {
+   CellStyle newStyle = spreadsheet.getWorkbook().createCellStyle();
+   newStyle.cloneStyleFrom(cell.getCellStyle());
+   return newStyle;
+}
+----
+
+CellStyle object is enough to set the background color, but in order to set bold, italic or font color we will need the Font object, once again Font objects are shared in POI model so we will have to clone them too. Unfortunately there is no [methodname]#cloneFontFrom# method in POI so we will have to manually copy the values we don’t want to lose.
+
+[source, java]
+----
+private Font cloneFont(CellStyle cellstyle) {
+   Font newFont = spreadsheet.getWorkbook().createFont();
+   Font originalFont = spreadsheet.getWorkbook().getFontAt(cellstyle.getFontIndex());
+   if (originalFont != null) {
+       newFont.setBold(originalFont.getBold());
+       newFont.setItalic(originalFont.getItalic());
+       newFont.setFontHeight(originalFont.getFontHeight());
+       newFont.setUnderline(originalFont.getUnderline());
+       newFont.setStrikeout(originalFont.getStrikeout());
+       // This cast can only be done when using .xlsx files
+       XSSFFont originalXFont = (XSSFFont) originalFont;
+       XSSFFont newXFont = (XSSFFont) newFont;
+       newXFont.setColor(originalXFont.getXSSFColor());
+   }
+   return newFont;
+}
+----
+
+Now that we know how to obtain the CellStyle and Font objects we can implement the updateSelectedCells* methods and they will look like this:
+
+*updateSelectedCellsBold
+
+[source, java]
+----
+private void updateSelectedCellsBold() {
+   if (spreadsheet != null) {
+       List<Cell> cellsToRefresh = new ArrayList<Cell>();
+       for (CellReference cellRef : spreadsheet.getSelectedCellReferences()) {
+           // Obtain Cell using CellReference
+           Cell cell = getOrCreateCell(cellRef);
+           // Clone Cell CellStyle
+           CellStyle style = cloneStyle(cell);
+           // Clone CellStyle Font
+           Font font = cloneFont(style);
+           // Toggle current bold state
+           font.setBold(!font.getBold());
+           style.setFont(font);
+           cell.setCellStyle(style);
+
+           cellsToRefresh.add(cell);
+       }
+       // Update all edited cells
+       spreadsheet.refreshCells(cellsToRefresh);
+   }
+}
+----
+
+* updateSelectedCellsBackgroundColor
+
+[source, java]
+----
+private void updateSelectedCellsBackgroundColor(Color newColor
+) {
+   if (spreadsheet != null && newColor != null) {
+       List<Cell> cellsToRefresh = new ArrayList<Cell>();
+       for (CellReference cellRef : spreadsheet.getSelectedCellReferences()) {
+           // Obtain Cell using CellReference
+           Cell cell = getOrCreateCell(cellRef);
+           // Clone Cell CellStyle
+           // This cast can only be done when using .xlsx files
+           XSSFCellStyle style = (XSSFCellStyle) cloneStyle(cell);
+           XSSFColor color = new XSSFColor(java.awt.Color.decode(newColor.getCSS()));
+           // Set new color value
+           style.setFillForegroundColor(color);
+           cell.setCellStyle(style);
+
+           cellsToRefresh.add(cell);
+       }
+       // Update all edited cells
+       spreadsheet.refreshCells(cellsToRefresh);
+   }
+}
+----
+
+* updateSelectedCellsFontColor
+
+[source, java]
+----
+private void updateSelectedCellsFontColor(Color newColor) {
+   if (spreadsheet != null && newColor != null) {
+       List<Cell> cellsToRefresh = new ArrayList<Cell>();
+       for (CellReference cellRef : spreadsheet.getSelectedCellReferences()) {
+           // Obtain Cell using CellReference
+           Cell cell = getOrCreateCell(cellRef);
+           // Clone Cell CellStyle
+           // This cast can only be done when using .xlsx files
+           XSSFCellStyle style = (XSSFCellStyle) cloneStyle(cell);
+           XSSFColor color = new XSSFColor(java.awt.Color.decode(newColor
+                       .getCSS()));
+           // Clone CellStyle Font
+           // This cast can only be done when using .xlsx files
+           XSSFFont font = (XSSFFont) cloneFont(style);
+           font.setColor(color);
+           style.setFont(font);
+           cell.setCellStyle(style);
+
+           cellsToRefresh.add(cell);
+       }
+       // Update all edited cells
+       spreadsheet.refreshCells(cellsToRefresh);
+   }
+}
+----
+
+After this we’re all done! The end result is a simple Excel spreadsheet editor running in your browser. Of course, you probably want to fine-tune the styling toolbar a bit. You can also add a save feature to the application. Saving is not covered in this tutorial, but please see the write methods in the Spreadsheet class for some hints. For examples, please see the link:http://demo.vaadin.com/spreadsheet/[on-line demo.]
