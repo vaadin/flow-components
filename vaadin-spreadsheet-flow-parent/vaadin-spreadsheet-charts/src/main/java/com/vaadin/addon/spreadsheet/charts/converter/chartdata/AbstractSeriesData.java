@@ -42,7 +42,9 @@ public abstract class AbstractSeriesData {
     public abstract AbstractSeriesDataWriter getSeriesDataWriter();
 
     public interface DataUpdateListener {
-        void dataModified(int i, Double cellValue);
+        void xDataModified(int i, Double cellValue);
+
+        void yDataModified(int i, Double cellValue);
 
         void categoryModified(int i, String cellValue);
     }

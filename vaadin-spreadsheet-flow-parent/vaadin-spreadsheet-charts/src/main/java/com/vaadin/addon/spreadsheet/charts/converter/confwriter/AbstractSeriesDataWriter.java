@@ -62,8 +62,22 @@ public abstract class AbstractSeriesDataWriter {
         }
 
         series.dataUpdateListener = new DataUpdateListener() {
+
             @Override
-            public void dataModified(int i, Double cellValue) {
+            public void xDataModified(int i, Double cellValue) {
+                DataSeriesItem item = dataSeries.get(i);
+
+                if (blanksAsZeros && cellValue == null) {
+                    item.setX(0d);
+                } else {
+                    item.setX(cellValue);
+                }
+
+                dataSeries.update(item);
+            }
+
+            @Override
+            public void yDataModified(int i, Double cellValue) {
                 DataSeriesItem item = dataSeries.get(i);
 
                 if (blanksAsZeros && cellValue == null) {
@@ -83,6 +97,7 @@ public abstract class AbstractSeriesDataWriter {
 
                 dataSeries.update(item);
             }
+
         };
 
         return dataSeries;

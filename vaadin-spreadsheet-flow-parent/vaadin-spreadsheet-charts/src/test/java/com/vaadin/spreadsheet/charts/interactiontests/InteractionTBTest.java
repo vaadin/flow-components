@@ -49,6 +49,20 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
+    public void userChangesXValuesInSpreadsheetForScatterPlot_chartsUpdated()
+            throws Exception {
+        SpreadsheetPage spreadsheetPage = headerPage.loadFile("Scatter.xlsx",
+                this);
+
+        // need to move selection so that fill indicator is not clicked while
+        // selecting A2
+        spreadsheetPage.getCellAt(1, 5).click();
+        spreadsheetPage.getCellAt(1, 2).setValue("50");
+        Thread.sleep(1000);
+        compareScreen("chartsUpdatedOnXValuesChange");
+    }
+
+    @Test
     public void userSelectsPoint_spreadsheetSelectionUpdated() throws Exception {
         headerPage.loadFile("InteractionSample.xlsx", this);
         overlayHelper.getOverlayElement("B1")

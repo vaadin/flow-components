@@ -35,7 +35,8 @@ import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ScatterSeriesData
 public class ScatterSeriesReader extends
         AbstractSeriesReader<CTScatterSer, ScatterSeriesData> {
 
-    public ScatterSeriesReader(CTScatterChart ctChart, Spreadsheet spreadsheet) {
+    public ScatterSeriesReader(CTScatterChart ctChart,
+            Spreadsheet spreadsheet) {
         super(ctChart, spreadsheet);
     }
 
@@ -87,10 +88,12 @@ public class ScatterSeriesReader extends
         seriesData.seriesData = list;
 
         // TODO: fix interaction, handle updates has to be made compatible with
-        // this type, requires handleReferencedValueUpdates that can handle also
-        // x values and figuring out how to set selection to two ranges.
+        // this type, requires figuring out how to set selection to two ranges.
 
-        handleReferencedValueUpdates(ptListY, seriesData, false);
+        handleReferencedValueUpdates(ptListY, seriesData,
+                ValueUpdateMode.Y_VALUES);
+        handleReferencedValueUpdates(ptListX, seriesData,
+                ValueUpdateMode.X_VALUES);
 
         seriesData.dataSelectListener = new DataSelectListener() {
             @Override

@@ -42,6 +42,10 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
     private final Spreadsheet spreadsheet;
     private final boolean is3d;
 
+    public enum ValueUpdateMode {
+        Y_VALUES, X_VALUES, CATEGORIES
+    };
+
     public AbstractSeriesReader(XmlObject ctChart, Spreadsheet spreadsheet) {
         this(ctChart, spreadsheet, false);
     }
@@ -112,7 +116,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
                         return cellReferences.size();
                     }
                 });
-        handleReferencedValueUpdates(cellReferences, seriesData, true);
+        handleReferencedValueUpdates(cellReferences, seriesData,
+                ValueUpdateMode.CATEGORIES);
     }
 
     private List<CellReference> getCategoryCellReferences(
@@ -196,7 +201,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
 
         seriesData.seriesData = list;
 
-        handleReferencedValueUpdates(ptList, seriesData, false);
+        handleReferencedValueUpdates(ptList, seriesData,
+                ValueUpdateMode.Y_VALUES);
 
         seriesData.dataSelectListener = new DataSelectListener() {
             @Override
@@ -209,7 +215,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
     @SuppressWarnings("serial")
     protected void handleReferencedValueUpdates(
             final List<CellReference> referencedCells,
-            final SERIES_DATA_TYPE seriesData, final boolean category) {
+            final SERIES_DATA_TYPE seriesData,
+            final ValueUpdateMode updateMode) {
         spreadsheet.addCellValueChangeListener(new CellValueChangeListener() {
             @Override
             public void onCellValueChange(CellValueChangeEvent event) {
@@ -230,15 +237,24 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
                     final int index = referencedCells
                             .indexOf(absoluteChangedCell);
 
-                    if (!category) {
+                    if (updateMode == ValueUpdateMode.Y_VALUES
+                            || updateMode == ValueUpdateMode.X_VALUES) {
                         final SeriesPoint item = seriesData.seriesData
                                 .get(index);
                         final Double cellValue = Utils.getNumericValue(
                                 absoluteChangedCell, spreadsheet);
-                        item.yValue = cellValue;
-                        seriesData.dataUpdateListener.dataModified(index,
-                                cellValue);
-                    } else {
+                        if (updateMode == ValueUpdateMode.Y_VALUES) {
+                            item.yValue = cellValue;
+                            seriesData.dataUpdateListener.yDataModified(index,
+                                    cellValue);
+                        }
+                        if (updateMode == ValueUpdateMode.X_VALUES) {
+                            item.xValue = cellValue;
+                            seriesData.dataUpdateListener.xDataModified(index,
+                                    cellValue);
+                        }
+                    }
+                    if (updateMode == ValueUpdateMode.CATEGORIES) {
                         final String cellValue = Utils.getStringValue(
                                 absoluteChangedCell, spreadsheet);
                         seriesData.dataUpdateListener.categoryModified(index,
