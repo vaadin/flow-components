@@ -60,9 +60,12 @@ public class ScatterSeriesReader extends
             LineSeriesReaderUtils.setMarkerForData(seriesData,
                     serie.getMarker());
 
-        if (serie.getSpPr() != null)
+        if (serie.getSpPr() != null) {
             LineSeriesReaderUtils.setDashStyleForData(seriesData,
                     serie.getSpPr());
+            LineSeriesReaderUtils.setLineWidthForData(seriesData,
+                    serie.getSpPr());
+        }
     }
 
     /**

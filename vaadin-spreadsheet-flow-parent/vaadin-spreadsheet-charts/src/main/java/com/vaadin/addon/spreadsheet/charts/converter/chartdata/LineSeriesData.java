@@ -33,6 +33,8 @@ public class LineSeriesData extends AbstractSeriesData {
      */
     public String dashStyle = "";
 
+    public Integer lineWidth;
+
     /**
      * Currently this string value corresponds to
      * com.vaadin.addon.charts.model.MarkerSymbolEnum.

@@ -48,7 +48,11 @@ public class ScatterSeriesDataWriter extends AbstractSeriesDataWriter {
     protected void configureDataSeries(DataSeries dataSeriesForWriting) {
         super.configureDataSeries(dataSeriesForWriting);
 
-        getPlotOptions().setLineWidth(SCATTER_LINE_WIDTH);
+        if (getSeriesData().lineWidth != null) {
+            getPlotOptions().setLineWidth(getSeriesData().lineWidth);
+        } else {
+            getPlotOptions().setLineWidth(SCATTER_LINE_WIDTH);
+        }
         getPlotOptions().setDashStyle(
                 LineSeriesWriterUtils.getDashStyle(getSeriesData().dashStyle));
 

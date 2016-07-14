@@ -31,9 +31,25 @@ public class LineSeriesReaderUtils {
     public static void setDashStyleForData(LineSeriesData seriesData,
             CTShapeProperties ctShapeProperties) {
         try {
-            seriesData.dashStyle = LineSeriesReaderUtils
-                    .getDashStyleString(ctShapeProperties.getLn().getPrstDash()
-                            .getVal());
+            if (ctShapeProperties.getLn().getNoFill() != null) {
+                seriesData.dashStyle = "";
+            } else {
+                seriesData.dashStyle = LineSeriesReaderUtils.getDashStyleString(
+                        ctShapeProperties.getLn().getPrstDash().getVal());
+            }
+        } catch (NullPointerException e) {
+            // instead of null checks
+        }
+    }
+
+    public static void setLineWidthForData(LineSeriesData seriesData,
+            CTShapeProperties ctShapeProperties) {
+        try {
+            // currently just set line width to 0 if there are no dashes between
+            // scatter points
+            if (ctShapeProperties.getLn().isSetNoFill()) {
+                seriesData.lineWidth = 0;
+            }
         } catch (NullPointerException e) {
             // instead of null checks
         }

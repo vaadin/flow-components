@@ -63,6 +63,14 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
+    public void displayingEmbeddedScatterPlotWithoutDashsWorks()
+            throws Exception {
+        headerPage.loadFile("scatter_lines.xlsx", this);
+
+        compareScreen("scatter_with_and_without_lines");
+    }
+
+    @Test
     public void userSelectsPoint_spreadsheetSelectionUpdated() throws Exception {
         headerPage.loadFile("InteractionSample.xlsx", this);
         overlayHelper.getOverlayElement("B1")
@@ -85,7 +93,7 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void openFileWithNotSuportedForumla_noExceptionRaised_noChart() throws Exception {
-        SpreadsheetPage spreadsheetPage = headerPage.loadFile("unparsed_formula.xlsx", this);
+        headerPage.loadFile("unparsed_formula.xlsx", this);
         compareScreen("unparsedFormula");
     }
 
