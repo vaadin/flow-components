@@ -37,6 +37,7 @@ $popup-button-border-color: #A7A7A7 !default;
 $popup-button-arrow-color: #676767 !default;
 $popup-overlay-bg-color: #fff !default;
 $popup-overlay-text-color: #474747 !default;
+$popup-button-overlay-height: 275px;
 $cell-comment-bg-color: #fff !default;
 $cell-comment-border-color: #A7A7A7 !default;
 $spreadsheet-header-grouping-color: #C7C7C7 !default;
@@ -1095,10 +1096,11 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
     padding: 5px;
 
-    .v-panel .spreadsheet-item-filter-layout {
+    .v-panel.spreadsheet-item-filter-layout {
       background-color: transparent;
       border: none;
       color: $popup-overlay-text-color;
+      height: $popup-button-overlay-height;
       .v-panel-captionwrap,
       .v-panel-content,
       .v-panel-deco {

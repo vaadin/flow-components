@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -30,8 +31,11 @@ import com.vaadin.addon.spreadsheet.PopupButton.PopupCloseEvent;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupCloseListener;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupOpenEvent;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupOpenListener;
+import com.vaadin.data.Container.Sortable;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.data.util.ItemSorter;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
@@ -53,6 +57,7 @@ public class ItemFilter extends Panel implements ValueChangeListener,
     private CellRangeAddress filterRange;
     private CheckBox allItems;
     private OptionGroup options;
+    private IndexedContainer optionsContainer;
     private ArrayList<String> allCellValues;
     private Collection<String> latestFilteredValues;
     private PopupButton popupButton;
@@ -185,7 +190,21 @@ public class ItemFilter extends Panel implements ValueChangeListener,
      * Creates the filter selection component.
      */
     protected void initOptions() {
+        optionsContainer = new IndexedContainer();
+        optionsContainer.setItemSorter(new ItemSorter() {
+
+            @Override
+            public void setSortProperties(Sortable container,
+                    Object[] propertyId, boolean[] ascending) {
+            }
+
+            @Override
+            public int compare(Object itemId1, Object itemId2) {
+                return ((String) itemId1).compareToIgnoreCase((String) itemId2);
+            }
+        });
         options = new OptionGroup();
+        options.setContainerDataSource(optionsContainer);
         options.setImmediate(true);
         options.setMultiSelect(true);
         options.addValueChangeListener(this);
@@ -196,21 +215,31 @@ public class ItemFilter extends Panel implements ValueChangeListener,
      */
     public void updateOptions() {
         Set<String> newValues = getAllValues();
+        boolean needsSort = false;
+
         // remove changed, or update value
-        for (String old : allCellValues) {
+        Iterator<String> iter = allCellValues.iterator();
+        while (iter.hasNext()) {
+            String old = iter.next();
             if (!newValues.contains(old)) {
-                options.removeItem(old);
-                allCellValues.remove(old);
+                optionsContainer.removeItem(old);
+                iter.remove();
             }
         }
 
         // add new
         for (String item : newValues) {
             if (!allCellValues.contains(item)) {
-                options.addItem(item);
+                optionsContainer.addItem(item);
                 allCellValues.add(item);
+                needsSort = true;
             }
         }
+
+        if (needsSort) {
+            optionsContainer.sort(new Object[0], new boolean[0]);
+        }
+
         Set<String> visibleValues = getVisibleValues();
         cancelValueChangeUpdate = true;
         options.setValue(visibleValues);
@@ -227,7 +256,7 @@ public class ItemFilter extends Panel implements ValueChangeListener,
     protected Set<String> getVisibleValues() {
         Set<String> values = new HashSet<String>();
         for (int r = filterRange.getFirstRow(); r <= filterRange.getLastRow(); r++) {
-            if (!filteredRows.contains(r)) {
+            if (!filteredRows.contains(r) && !spreadsheet.isRowHidden(r)) {
                 values.add(spreadsheet.getCellValue(spreadsheet.getCell(r,
                         filterRange.getFirstColumn())));
             }

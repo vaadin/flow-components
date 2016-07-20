@@ -83,6 +83,7 @@
   $spreadsheet-popup-button-size: 14px !default;
   $spreadsheet-popup-button-margin: 1px !default;
   $spreadsheet-popup-button-content-padding: 3px !default;
+  $spreadsheet-popup-button-overlay-height: 275px;
   $spreadsheet-touch-corner-size: 7px !default;
   $spreadsheet-touch-corner-left-offset: 7px !default;
   $spreadsheet-touch-corner-bottom-offset: 7px !default;
@@ -1074,6 +1075,7 @@
     .v-panel.spreadsheet-item-filter-layout {
       background-color: transparent;
       border: none;
+      height: $spreadsheet-popup-button-overlay-height;
 
       .v-panel-captionwrap,
       .v-panel-content,
