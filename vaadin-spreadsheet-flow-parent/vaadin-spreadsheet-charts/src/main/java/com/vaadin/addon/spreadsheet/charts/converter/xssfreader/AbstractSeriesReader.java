@@ -125,7 +125,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
 
         if (axisDataSource.isSetStrRef()) {
             String formula = axisDataSource.getStrRef().getF();
-            return Utils.getAllReferencedCells(formula);
+            return Utils.getAllReferencedVisibleCells(formula, spreadsheet);
         } else if (axisDataSource.isSetMultiLvlStrRef()) {
             return tryHandleMultilevelCategories(axisDataSource);
         } else {
@@ -140,7 +140,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         String formula = axisDataSource.getMultiLvlStrRef().getF();
 
         final List<CellReference> allReferencedCells = Utils
-                .getAllReferencedCells(formula);
+                .getAllReferencedVisibleCells(formula, spreadsheet);
 
         final CellReference firstCell = allReferencedCells.get(0);
         final CellReference lastCell = allReferencedCells
@@ -190,7 +190,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             SERIES_DATA_TYPE seriesData) {
         final String formula = val.getNumRef().getF();
 
-        final List<CellReference> ptList = Utils.getAllReferencedCells(formula);
+        final List<CellReference> ptList = Utils.getAllReferencedVisibleCells(formula, spreadsheet);
 
         List<SeriesPoint> list = new ArrayList<SeriesPoint>();
 

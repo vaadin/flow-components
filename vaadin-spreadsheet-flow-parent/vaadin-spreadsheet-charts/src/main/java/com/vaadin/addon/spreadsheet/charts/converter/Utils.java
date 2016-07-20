@@ -89,6 +89,24 @@ public class Utils {
         }
         return cellRefs;
     }
+    
+    /*
+     * This function uses the getAllReferencedCells function but filters out all the hidden rows from the list
+     * honoring filtering of charts based on spreadsheettable filter settings
+     */
+    public static List<CellReference> getAllReferencedVisibleCells(
+            String formula, Spreadsheet spreadsheet) {
+        final List<CellReference> cellRefs = getAllReferencedCells(formula);
+
+        // Filter out hidden cells of rows that are hidden (Excel spec)
+        ArrayList<CellReference> visibleCells = new ArrayList<CellReference>();
+        for (CellReference cr : cellRefs) {
+            if (!spreadsheet.isRowHidden(cr.getRow())) {
+                visibleCells.add(cr);
+            }
+        }
+        return visibleCells;
+    }
 
     public static String getStringValue(CellReference ref,
                                         Spreadsheet spreadsheet) {

@@ -42,24 +42,35 @@ public class BubbleSeriesReader
     }
 
     private void createSeriesDataPointsForBubble(CTAxDataSource xVal,
-            CTNumDataSource yVal, CTNumDataSource bubbleSize,
-            BubbleSeriesData seriesData) {
+                                                 CTNumDataSource yVal, CTNumDataSource bubbleSize,
+                                                 BubbleSeriesData seriesData) {
         final List<CellReference> ptListX = Utils
-                .getAllReferencedCells(xVal.getNumRef().getF());
+                .getAllReferencedVisibleCells(xVal.getNumRef().getF(), getSpreadsheet());
 
         final String formulaY = yVal.getNumRef().getF();
         final List<CellReference> ptListY = Utils
-                .getAllReferencedCells(formulaY);
+                .getAllReferencedVisibleCells(formulaY, getSpreadsheet());
 
-        final List<CellReference> ptListSize = Utils
-                .getAllReferencedCells(bubbleSize.getNumRef().getF());
+        final List<Double> sizes = new ArrayList<Double>();
+        List<CellReference> ptListSize = new ArrayList<CellReference>();
+        if (bubbleSize.getNumRef() == null) {
+            for (int i = 0; i < ptListY.size(); i++) {
+                sizes.add(new Double(1));
+            }
+        } else {
+            ptListSize = Utils
+                    .getAllReferencedVisibleCells(bubbleSize.getNumRef().getF(), getSpreadsheet());
+            for (int i = 0; i < ptListSize.size(); i++) {
+                sizes.add(getNumericValueFromCellRef(ptListSize.get(i)));
+            }
+        }
 
         final List<SeriesPoint> list = new ArrayList<SeriesPoint>();
 
         for (int i = 0; i < ptListY.size(); i++) {
             list.add(new SeriesPoint(getNumericValueFromCellRef(ptListX.get(i)),
                     getNumericValueFromCellRef(ptListY.get(i)),
-                    getNumericValueFromCellRef(ptListSize.get(i))));
+                    sizes.get(i)));
         }
 
         seriesData.seriesData = list;

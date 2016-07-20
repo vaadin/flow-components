@@ -73,12 +73,12 @@ public class ScatterSeriesReader extends
      */
     protected void createSeriesDataPointsForScatter(CTAxDataSource xVal,
             CTNumDataSource yVal, ScatterSeriesData seriesData) {
-        final List<CellReference> ptListX = Utils.getAllReferencedCells(xVal
-                .getNumRef().getF());
+        final List<CellReference> ptListX = Utils.getAllReferencedVisibleCells(
+                xVal.getNumRef().getF(), getSpreadsheet());
 
         final String formulaY = yVal.getNumRef().getF();
-        final List<CellReference> ptListY = Utils
-                .getAllReferencedCells(formulaY);
+        final List<CellReference> ptListY = Utils.getAllReferencedVisibleCells(
+                formulaY, getSpreadsheet());
 
         final List<SeriesPoint> list = new ArrayList<SeriesPoint>();
 
