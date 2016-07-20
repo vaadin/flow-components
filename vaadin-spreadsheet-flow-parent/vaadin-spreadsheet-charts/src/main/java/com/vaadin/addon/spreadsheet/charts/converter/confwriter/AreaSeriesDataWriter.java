@@ -56,6 +56,10 @@ public class AreaSeriesDataWriter extends AbstractSeriesDataWriter {
                 Utils.getEnumValueOrDefault(Stacking.class,
                         stacking, Stacking.NONE));
 
-        getPlotOptions().setMarker(new Marker(false));
+        getPlotOptions().setDashStyle(
+                LineSeriesWriterUtils.getDashStyle(getSeriesData().dashStyle));
+        getPlotOptions().setMarker(
+                LineSeriesWriterUtils.getMarker(getSeriesData().markerSymbol));
+
     }
 }

@@ -19,12 +19,16 @@ package com.vaadin.addon.spreadsheet.charts.converter.confwriter;
 
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.model.DataSeries;
+import com.vaadin.addon.charts.model.Marker;
 import com.vaadin.addon.charts.model.Pane;
+import com.vaadin.addon.charts.model.Stacking;
 import com.vaadin.addon.charts.model.YAxis;
+import com.vaadin.addon.charts.model.style.SolidColor;
 import com.vaadin.addon.charts.model.style.Style;
+import com.vaadin.addon.spreadsheet.charts.converter.Utils;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.RadarSeriesData;
 
-public class RadarSeriesWriter extends LineSeriesDataWriter {
+public class RadarSeriesWriter extends AreaSeriesDataWriter {
 
     public RadarSeriesWriter(RadarSeriesData series) {
         super(series);
@@ -51,6 +55,13 @@ public class RadarSeriesWriter extends LineSeriesDataWriter {
     @Override
     protected void configureDataSeries(DataSeries dataSeriesForWriting) {
         super.configureDataSeries(dataSeriesForWriting);
+        if(!getSeriesData().filled){
+            getPlotOptions().setFillColor(new SolidColor(0,0,0,0));
+            /*The code line:
+            *   getPlotOptions().setFillColor(new SolidColor(0,0,0,0));
+            * is because of bug HighChart bug #4888 and it is fixed in 4.2.2 version and can be replaced by the following line of code when migrate to new HighChart version:
+            *   getPlotOptions().setFillOpacity(0);*/
+        }
 
         getPlotOptions().setDashStyle(
                 LineSeriesWriterUtils.getDashStyle(getSeriesData().dashStyle));

@@ -1,11 +1,12 @@
 package com.vaadin.spreadsheet.charts.typetests;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
+import com.vaadin.addon.charts.model.PlotOptionsArea;
 import com.vaadin.spreadsheet.charts.ChartTestBase;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class RadarTest extends ChartTestBase {
 
@@ -16,23 +17,27 @@ public class RadarTest extends ChartTestBase {
             {0,1500, 2500, 4000, 3500, 1500, 800, 550, 2500, 6000, 5500, 3000 }
 
     };
+
     @Test
     public void notFilledRadar() throws Exception {
-        Configuration conf = getChartFromSampleFile(
-                "Type Sample - Radar.xlsx", "G14").getConfiguration();
-        assertSeriesType(conf.getSeries(), ChartType.LINE);
+        Configuration conf = getChartFromSampleFile("Type Sample - Radar.xlsx",
+                "G14").getConfiguration();
+        assertSeriesType(conf.getSeries(), ChartType.AREA);
         assertData(conf.getSeries(), chartData);
         Assert.assertTrue(conf.getChart().getPolar());
+        Assert.assertNotNull((((PlotOptionsArea) conf.getSeries().get(0)
+                .getPlotOptions()).getFillColor() != null));
     }
 
-    //This feature is not supported
     @Test
-    @Ignore
     public void filledRadar() throws Exception {
         Configuration conf = getChartFromSampleFile(
-                "TypeSample - Filled Radar.xlsx", "F1").getConfiguration();
+                "Type Sample - Filled Radar.xlsx", "G14").getConfiguration();
 
         assertSeriesType(conf.getSeries(), ChartType.AREA);
         Assert.assertTrue(conf.getChart().getPolar());
+        Assert.assertNull(((PlotOptionsArea) conf.getSeries().get(0)
+                .getPlotOptions()).getFillColor());
+
     }
 }

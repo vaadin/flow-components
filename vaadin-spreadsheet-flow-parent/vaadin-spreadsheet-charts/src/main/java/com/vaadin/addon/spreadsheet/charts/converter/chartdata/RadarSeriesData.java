@@ -17,13 +17,13 @@ package com.vaadin.addon.spreadsheet.charts.converter.chartdata;
  * #L%
  */
 
-import com.vaadin.addon.spreadsheet.charts.converter.confwriter.LineSeriesDataWriter;
+import com.vaadin.addon.spreadsheet.charts.converter.confwriter.AreaSeriesDataWriter;
 import com.vaadin.addon.spreadsheet.charts.converter.confwriter.RadarSeriesWriter;
 
-public class RadarSeriesData extends LineSeriesData {
+public class RadarSeriesData extends AreaSeriesData {
 
     @Override
-    public LineSeriesDataWriter getSeriesDataWriter() {
+    public AreaSeriesDataWriter getSeriesDataWriter() {
         return new RadarSeriesWriter(this);
     }
 

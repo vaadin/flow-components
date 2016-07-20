@@ -19,6 +19,7 @@ package com.vaadin.addon.spreadsheet.charts.converter.xssfreader;
 
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTRadarChart;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTRadarSer;
+import org.openxmlformats.schemas.drawingml.x2006.chart.STRadarStyle;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.RadarSeriesData;
@@ -32,7 +33,12 @@ public class RadarSeriesReader extends
 
     @Override
     protected RadarSeriesData createSeriesDataObject(CTRadarSer serie) {
-        return new RadarSeriesData();
+        RadarSeriesData result = new RadarSeriesData();
+        CTRadarChart radarChart = (CTRadarChart) getChart();
+        if (radarChart.getRadarStyle() != null && radarChart.getRadarStyle().getVal() != STRadarStyle.FILLED) {
+            result.filled = false;
+        }
+        return result;
     }
 
     @Override

@@ -20,9 +20,11 @@ package com.vaadin.addon.spreadsheet.charts.converter.chartdata;
 import com.vaadin.addon.spreadsheet.charts.converter.confwriter.AbstractSeriesDataWriter;
 import com.vaadin.addon.spreadsheet.charts.converter.confwriter.AreaSeriesDataWriter;
 
-public class AreaSeriesData extends AbstractSeriesData {
+public class AreaSeriesData extends LineSeriesData {
 
     public Stacking stacking = Stacking.NONE;
+
+    public boolean filled = true;
 
     @Override
     public AbstractSeriesDataWriter getSeriesDataWriter() {
