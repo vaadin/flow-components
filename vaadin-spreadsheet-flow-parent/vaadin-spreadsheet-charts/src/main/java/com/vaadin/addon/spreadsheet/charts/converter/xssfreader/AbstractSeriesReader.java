@@ -31,6 +31,9 @@ import org.openxmlformats.schemas.drawingml.x2006.chart.CTSerTx;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeListener;
+import com.vaadin.addon.spreadsheet.Spreadsheet.FormulaValueChangeEvent;
+import com.vaadin.addon.spreadsheet.Spreadsheet.FormulaValueChangeListener;
+import com.vaadin.addon.spreadsheet.Spreadsheet.ValueChangeEvent;
 import com.vaadin.addon.spreadsheet.charts.converter.Utils;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesData;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesData.DataSelectListener;
@@ -212,67 +215,83 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         };
     }
 
+    private void onValueChange(final List<CellReference> referencedCells,
+                               final SERIES_DATA_TYPE seriesData,
+                               final ValueUpdateMode updateMode,
+                               ValueChangeEvent event) {
+        if (seriesData.dataUpdateListener == null) {
+            return;
+        }
+
+        for (CellReference changedCell : event.getChangedCells()) {
+            // getChangedCell erroneously provides relative cell refs
+            // if this gets fixed, this conversion method should be
+            // removed
+            // https://dev.vaadin.com/ticket/19717
+            updatePoint(referencedCells, seriesData, updateMode,
+                    changedCell);
+        }
+    }
+
     @SuppressWarnings("serial")
     protected void handleReferencedValueUpdates(
             final List<CellReference> referencedCells,
             final SERIES_DATA_TYPE seriesData,
             final ValueUpdateMode updateMode) {
+
         spreadsheet.addCellValueChangeListener(new CellValueChangeListener() {
             @Override
             public void onCellValueChange(CellValueChangeEvent event) {
-                if (seriesData.dataUpdateListener == null) {
-                    return;
-                }
-
-                for (CellReference changedCell : event.getChangedCells()) {
-                    // getChangedCell erroneously provides relative cell refs
-                    // if this gets fixed, this conversion method should be
-                    // removed
-                    // https://dev.vaadin.com/ticket/19717
-                    CellReference absoluteChangedCell = relativeToAbsolute(changedCell);
-                    if (!referencedCells.contains(absoluteChangedCell)) {
-                        continue;
-                    }
-
-                    final int index = referencedCells
-                            .indexOf(absoluteChangedCell);
-
-                    if (updateMode != ValueUpdateMode.CATEGORIES) {
-                        final SeriesPoint item = seriesData.seriesData
-                                .get(index);
-                        final Double cellValue = Utils.getNumericValue(
-                                absoluteChangedCell, spreadsheet);
-                        if (updateMode == ValueUpdateMode.X_VALUES) {
-                            item.xValue = cellValue;
-                            seriesData.dataUpdateListener.xDataModified(index,
-                                    cellValue);
-                        }
-                        if (updateMode == ValueUpdateMode.Y_VALUES) {
-                            item.yValue = cellValue;
-                            seriesData.dataUpdateListener.yDataModified(index,
-                                    cellValue);
-                        }
-                        if (updateMode == ValueUpdateMode.Z_VALUES) {
-                            item.zValue = cellValue;
-                            seriesData.dataUpdateListener.zDataModified(index,
-                                    cellValue);
-                        }
-                    } else {
-                        final String cellValue = Utils.getStringValue(
-                                absoluteChangedCell, spreadsheet);
-                        seriesData.dataUpdateListener.categoryModified(index,
-                                cellValue);
-                    }
-                }
-            }
-
-            private CellReference relativeToAbsolute(CellReference cell) {
-                String sheetName = spreadsheet.getActiveSheet().getSheetName();
-                return new CellReference(sheetName, cell.getRow(), cell
-                        .getCol(), true, true);
+                onValueChange(referencedCells, seriesData, updateMode, event);
             }
         });
 
+        spreadsheet.addFormulaValueChangeListener(new FormulaValueChangeListener() {
+            @Override
+            public void onFormulaValueChange(FormulaValueChangeEvent event) {
+                onValueChange(referencedCells, seriesData, updateMode, event);
+            }
+        });
+    }
+
+    private void updatePoint(List<CellReference> referencedCells,
+                             SERIES_DATA_TYPE seriesData, ValueUpdateMode updateMode,
+                             CellReference changedCell) {
+        CellReference absoluteChangedCell = relativeToAbsolute(changedCell);
+        if (!referencedCells.contains(absoluteChangedCell)) {
+            return;
+        }
+
+        final int index = referencedCells.indexOf(absoluteChangedCell);
+
+        if (updateMode != ValueUpdateMode.CATEGORIES) {
+            final SeriesPoint item = seriesData.seriesData.get(index);
+            final Double cellValue = Utils.getNumericValue(absoluteChangedCell,
+                    spreadsheet);
+            if (updateMode == ValueUpdateMode.X_VALUES) {
+                item.xValue = cellValue;
+                seriesData.dataUpdateListener.xDataModified(index, cellValue);
+            }
+            if (updateMode == ValueUpdateMode.Y_VALUES) {
+                item.yValue = cellValue;
+                seriesData.dataUpdateListener.yDataModified(index, cellValue);
+            }
+            if (updateMode == ValueUpdateMode.Z_VALUES) {
+                item.zValue = cellValue;
+                seriesData.dataUpdateListener.zDataModified(index,
+                        cellValue);
+            }
+        } else {
+            final String cellValue = Utils.getStringValue(absoluteChangedCell,
+                    spreadsheet);
+            seriesData.dataUpdateListener.categoryModified(index, cellValue);
+        }
+    }
+
+    private CellReference relativeToAbsolute(CellReference cell) {
+        String sheetName = spreadsheet.getActiveSheet().getSheetName();
+        return new CellReference(sheetName, cell.getRow(), cell.getCol(), true,
+                true);
     }
 
     protected String tryGetSeriesName(CTSerTx tx) {

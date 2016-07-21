@@ -113,6 +113,20 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
+    public void userChangesCellAffactingAFormulaInSpreadsheet_chartsUpdated()
+            throws Exception {
+        SpreadsheetPage spreadsheetPage = headerPage
+                .loadFile("FormulaValues.xlsx", this);
+
+        // need to move selection so that fill indicator is not clicked while
+        // selecting A2
+        spreadsheetPage.getCellAt(1, 5).click();
+        spreadsheetPage.getCellAt(2, 4).setValue("50");
+        Thread.sleep(1000);
+        compareScreen("chartsUpdatedOnFormulaChange");
+    }
+
+    @Test
     public void openNumbersCreatedExcelFile_noExceptionsRaised_withCharts() {
         headerPage.loadFile("NumbersCreatedExcelFile.xlsx", this);
         assertNoErrorIndicatorDetected();

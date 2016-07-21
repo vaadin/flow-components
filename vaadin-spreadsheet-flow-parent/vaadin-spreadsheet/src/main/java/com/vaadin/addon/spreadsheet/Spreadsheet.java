@@ -3912,20 +3912,43 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * This event is fired when cell value changes.
+     * This is a parent class for a value change events.
      */
-    public static class CellValueChangeEvent extends Component.Event {
-
+    public abstract static class ValueChangeEvent extends Component.Event {
         private final Set<CellReference> changedCells;
 
-        public CellValueChangeEvent(Component source,
-                Set<CellReference> changedCells) {
+        public ValueChangeEvent(Component source,
+                                    Set<CellReference> changedCells) {
             super(source);
             this.changedCells = changedCells;
         }
 
         public Set<CellReference> getChangedCells() {
             return changedCells;
+        }
+    }
+
+    /**
+     * This event is fired when cell value changes.
+     */
+    public static class CellValueChangeEvent extends ValueChangeEvent {
+
+        public CellValueChangeEvent(Component source,
+                Set<CellReference> changedCells) {
+            super(source,changedCells);
+        }
+
+    }
+
+    /**
+     * This event is fired when the value of a cell referenced by a formula cell
+     * changes making the formula value change
+     */
+    public static class FormulaValueChangeEvent extends ValueChangeEvent {
+
+        public FormulaValueChangeEvent(Component source,
+                Set<CellReference> changedCells) {
+            super(source,changedCells);
         }
     }
 
@@ -4090,6 +4113,25 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
+     * Used for knowing when a cell referenced by a formula cell has changed in
+     * the Spreadsheet UI making the formula value change
+     */
+    public interface FormulaValueChangeListener extends Serializable {
+        public static final Method FORMULA_VALUE_CHANGE_METHOD = ReflectTools
+                .findMethod(FormulaValueChangeListener.class,
+                        "onFormulaValueChange",
+                        FormulaValueChangeEvent.class);
+
+        /**
+         * This is called when user changes the cell value in Spreadsheet.
+         * 
+         * @param event
+         *            FormulaValueChangeEvent that happened
+         */
+        public void onFormulaValueChange(FormulaValueChangeEvent event);
+    }
+
+    /**
      * Adds the given SelectionChangeListener to this Spreadsheet.
      * 
      * @param listener
@@ -4109,6 +4151,18 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void addCellValueChangeListener(CellValueChangeListener listener) {
         addListener(CellValueChangeEvent.class, listener,
                 CellValueChangeListener.CELL_VALUE_CHANGE_METHOD);
+    }
+
+    /**
+     * Adds the given FormulaValueChangeListener to this Spreadsheet.
+     * 
+     * @param listener
+     *            Listener to add.
+     */
+    public void addFormulaValueChangeListener(
+            FormulaValueChangeListener listener) {
+        addListener(FormulaValueChangeEvent.class, listener,
+                FormulaValueChangeListener.FORMULA_VALUE_CHANGE_METHOD);
     }
 
     /**

@@ -46,6 +46,7 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFHyperlink;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.formula.FormulaParseException;
+import org.apache.poi.ss.formula.eval.ErrorEval;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -62,6 +63,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellDeletionHandler;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueHandler;
+import com.vaadin.addon.spreadsheet.Spreadsheet.FormulaValueChangeEvent;
 import com.vaadin.addon.spreadsheet.client.CellData;
 import com.vaadin.addon.spreadsheet.command.CellValueCommand;
 import com.vaadin.ui.UI;
@@ -106,6 +108,8 @@ public class CellValueManager implements Serializable {
     private final HashSet<CellData> removedCells = new HashSet<CellData>();
     /** */
     private final HashSet<String> markedCells = new HashSet<String>();
+
+    private HashSet<CellReference> changedFormulaCells = new HashSet<CellReference>();
 
     private boolean topLeftCellsLoaded;
     private HashMap<Integer, Float> cellStyleWidthRatioMap;
@@ -178,6 +182,31 @@ public class CellValueManager implements Serializable {
         return spreadsheet.getFormulaEvaluator();
     }
 
+    private String getCachedFormulaCellValue(Cell formulaCell) {
+        String result = null;
+        switch (formulaCell.getCachedFormulaResultType()) {
+        case Cell.CELL_TYPE_STRING:
+            result = formulaCell.getStringCellValue();
+            break;
+        case Cell.CELL_TYPE_BOOLEAN:
+            result = String.valueOf(formulaCell
+                    .getBooleanCellValue());
+            break;
+        case Cell.CELL_TYPE_ERROR:
+            result = ErrorEval.getText(formulaCell
+                    .getErrorCellValue());
+            break;
+        case Cell.CELL_TYPE_NUMERIC:
+            CellStyle style = formulaCell.getCellStyle();
+            result = formatter.formatRawCellContents(
+                    formulaCell.getNumericCellValue(),
+                    style.getDataFormat(),
+                    style.getDataFormatString());
+            break;
+        }
+        return result;
+    }
+
     protected CellData createCellDataForCell(Cell cell) {
         CellData cellData = new CellData();
         cellData.row = cell.getRowIndex() + 1;
@@ -192,7 +221,12 @@ public class CellValueManager implements Serializable {
                             .reFormatFormulaValue(cell.getCellFormula(),
                                     spreadsheet.getLocale());
                     try {
-                        formatter.formatCellValue(cell, getFormulaEvaluator());
+                        String oldValue = getCachedFormulaCellValue(cell);
+                        String newValue = formatter.formatCellValue(cell,
+                                getFormulaEvaluator());
+                        if (!newValue.equals(oldValue)) {
+                            changedFormulaCells.add(new CellReference(cell));
+                        }
                     } catch (RuntimeException rte) {
                         // Apache POI throws RuntimeExceptions for an invalid
                         // formula from POI model
@@ -684,6 +718,11 @@ public class CellValueManager implements Serializable {
         spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cells));
     }
 
+    private void fireFormulaValueChangeEvent(Set<CellReference> changedCells) {
+        spreadsheet.fireEvent(new FormulaValueChangeEvent(spreadsheet,
+                changedCells));
+    }
+
     private void fireCellValueChangeEvent(Set<CellReference> changedCells) {
         spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet,
                 changedCells));
@@ -1094,6 +1133,10 @@ public class CellValueManager implements Serializable {
                     updatedCellData.add(cd);
                 }
             }
+        }
+        if (!changedFormulaCells.isEmpty()) {
+            fireFormulaValueChangeEvent(changedFormulaCells);
+            changedFormulaCells = new HashSet<CellReference>();
         }
         // empty cells have cell data with just col and row
         updatedCellData.addAll(removedCells);
