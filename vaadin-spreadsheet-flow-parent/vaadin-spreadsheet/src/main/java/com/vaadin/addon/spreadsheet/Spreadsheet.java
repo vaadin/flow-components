@@ -947,7 +947,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             throws IllegalArgumentException {
         // POI allows user to hide all sheets ...
         if (hidden != 0
-                && SpreadsheetUtil.getNumberOfVisibleSheets(workbook) == 1) {
+                && SpreadsheetUtil.getNumberOfVisibleSheets(workbook) == 1
+                && !workbook.isSheetHidden(sheetPOIIndex)) {
             throw new IllegalArgumentException(
                     "At least one sheet should be always visible.");
         }
