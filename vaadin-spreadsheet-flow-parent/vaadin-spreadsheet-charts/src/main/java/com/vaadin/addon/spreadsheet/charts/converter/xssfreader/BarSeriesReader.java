@@ -63,6 +63,15 @@ public class BarSeriesReader extends
     @Override
     protected void fillSeriesData(ColumnSeriesData seriesData, CTBarSer serie) {
         super.fillSeriesData(seriesData, serie);
+        if(getChart() instanceof CTBarChart) {
+            if(((CTBarChart)getChart()).getVaryColors().getVal()){
+                seriesData.isColorByPoint = true;
+            }
+        } else if(getChart() instanceof CTBar3DChart){
+            if (((CTBar3DChart) getChart()).getVaryColors().getVal()) {
+                seriesData.isColorByPoint = true;
+            }
+        }
 
         seriesData.stacking = getStacking(getGrouping().getVal());
 

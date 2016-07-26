@@ -50,6 +50,9 @@ public class ColumnSeriesDataWriter extends AbstractSeriesDataWriter {
         super.configureDataSeries(dataSeries);
 
         String stacking = getSeriesData().stacking.toString();
+        if(getSeriesData().isColorByPoint){
+            getPlotOptions().setColorByPoint(true);
+        }
 
         getPlotOptions().setStacking(
                 Utils.getEnumValueOrDefault(Stacking.class, stacking,

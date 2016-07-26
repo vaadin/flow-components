@@ -1,9 +1,13 @@
 package com.vaadin.spreadsheet.charts.typetests;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
+import com.vaadin.addon.charts.model.PlotOptionsArea;
+import com.vaadin.addon.charts.model.PlotOptionsBar;
+import com.vaadin.addon.charts.model.PlotOptionsColumn;
 import com.vaadin.addon.charts.model.Stacking;
 import com.vaadin.spreadsheet.charts.ChartTestBase;
 
@@ -153,6 +157,42 @@ public class ColumnAndBarTest extends ChartTestBase {
 
         assertSeriesType(conf.getSeries(), ChartType.COLUMN);
         assertData(conf.getSeries(), columnAndBarData);
+    }
+
+    @Test
+    public void columnNotColorByPoint() throws Exception {
+        Configuration conf = getChartFromSampleFile("ColorByPoint.xlsx",
+                "K2").getConfiguration();
+        assertSeriesType(conf.getSeries(), ChartType.COLUMN);
+        Assert.assertNull(((PlotOptionsColumn) conf.getSeries().get(0)
+                .getPlotOptions()).getColorByPoint());
+    }
+
+    @Test
+    public void columnColorByPoint() throws Exception {
+        Configuration conf = getChartFromSampleFile("ColorByPoint.xlsx",
+                "D2").getConfiguration();
+        assertSeriesType(conf.getSeries(), ChartType.COLUMN);
+        Assert.assertTrue(((PlotOptionsColumn) conf.getSeries().get(0)
+                .getPlotOptions()).getColorByPoint());
+    }
+
+    @Test
+    public void barNotColorByPoint() throws Exception {
+        Configuration conf = getChartFromSampleFile("ColorByPoint.xlsx",
+                "K18").getConfiguration();
+        assertSeriesType(conf.getSeries(), ChartType.BAR);
+        Assert.assertNull(((PlotOptionsBar) conf.getSeries().get(0)
+                .getPlotOptions()).getColorByPoint());
+    }
+
+    @Test
+    public void barColorByPoint() throws Exception {
+        Configuration conf = getChartFromSampleFile("ColorByPoint.xlsx",
+                "D18").getConfiguration();
+        assertSeriesType(conf.getSeries(), ChartType.BAR);
+        Assert.assertTrue(((PlotOptionsBar) conf.getSeries().get(0)
+                .getPlotOptions()).getColorByPoint());
     }
 
 }

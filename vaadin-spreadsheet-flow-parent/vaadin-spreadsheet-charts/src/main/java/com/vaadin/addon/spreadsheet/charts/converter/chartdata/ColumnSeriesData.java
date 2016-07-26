@@ -23,6 +23,7 @@ import com.vaadin.addon.spreadsheet.charts.converter.confwriter.ColumnSeriesData
 public class ColumnSeriesData extends AbstractSeriesData {
 
     public Stacking stacking = Stacking.NONE;
+    public boolean isColorByPoint = false;
 
     @Override
     public AbstractSeriesDataWriter getSeriesDataWriter() {
