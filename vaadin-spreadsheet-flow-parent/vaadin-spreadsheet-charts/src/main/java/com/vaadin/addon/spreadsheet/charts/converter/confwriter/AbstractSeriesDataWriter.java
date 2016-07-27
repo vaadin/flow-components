@@ -21,6 +21,7 @@ import com.vaadin.addon.charts.model.AbstractPlotOptions;
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.model.DataSeries;
 import com.vaadin.addon.charts.model.DataSeriesItem;
+import com.vaadin.addon.charts.model.DataSeriesItem3d;
 import com.vaadin.addon.charts.model.Series;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesData;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesData.DataUpdateListener;
@@ -86,6 +87,19 @@ public abstract class AbstractSeriesDataWriter {
                     item.setY(cellValue);
                 }
                 
+                dataSeries.update(item);
+            }
+
+            @Override
+            public void zDataModified(int i, Double cellValue) {
+                DataSeriesItem3d item = (DataSeriesItem3d) dataSeries.get(i);
+
+                if (blanksAsZeros && cellValue == null) {
+                    item.setZ(0d);
+                } else {
+                    item.setZ(cellValue);
+                }
+
                 dataSeries.update(item);
             }
 

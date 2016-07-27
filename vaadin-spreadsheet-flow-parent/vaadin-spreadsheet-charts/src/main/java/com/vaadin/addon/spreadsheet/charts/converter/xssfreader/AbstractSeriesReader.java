@@ -43,7 +43,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
     private final boolean is3d;
 
     public enum ValueUpdateMode {
-        Y_VALUES, X_VALUES, CATEGORIES
+        Y_VALUES, X_VALUES, Z_VALUES, CATEGORIES
     };
 
     public AbstractSeriesReader(XmlObject ctChart, Spreadsheet spreadsheet) {
@@ -237,24 +237,27 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
                     final int index = referencedCells
                             .indexOf(absoluteChangedCell);
 
-                    if (updateMode == ValueUpdateMode.Y_VALUES
-                            || updateMode == ValueUpdateMode.X_VALUES) {
+                    if (updateMode != ValueUpdateMode.CATEGORIES) {
                         final SeriesPoint item = seriesData.seriesData
                                 .get(index);
                         final Double cellValue = Utils.getNumericValue(
                                 absoluteChangedCell, spreadsheet);
-                        if (updateMode == ValueUpdateMode.Y_VALUES) {
-                            item.yValue = cellValue;
-                            seriesData.dataUpdateListener.yDataModified(index,
-                                    cellValue);
-                        }
                         if (updateMode == ValueUpdateMode.X_VALUES) {
                             item.xValue = cellValue;
                             seriesData.dataUpdateListener.xDataModified(index,
                                     cellValue);
                         }
-                    }
-                    if (updateMode == ValueUpdateMode.CATEGORIES) {
+                        if (updateMode == ValueUpdateMode.Y_VALUES) {
+                            item.yValue = cellValue;
+                            seriesData.dataUpdateListener.yDataModified(index,
+                                    cellValue);
+                        }
+                        if (updateMode == ValueUpdateMode.Z_VALUES) {
+                            item.zValue = cellValue;
+                            seriesData.dataUpdateListener.zDataModified(index,
+                                    cellValue);
+                        }
+                    } else {
                         final String cellValue = Utils.getStringValue(
                                 absoluteChangedCell, spreadsheet);
                         seriesData.dataUpdateListener.categoryModified(index,
@@ -269,12 +272,14 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
                         .getCol(), true, true);
             }
         });
+
     }
 
     protected String tryGetSeriesName(CTSerTx tx) {
         try {
-            if (tx.isSetV())
+            if (tx.isSetV()) {
                 return tx.getV();
+            }
 
             if (tx.isSetStrRef()) {
                 String formula = tx.getStrRef().getF();

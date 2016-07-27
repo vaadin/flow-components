@@ -24,13 +24,20 @@ import com.vaadin.addon.spreadsheet.charts.converter.confwriter.AbstractSeriesDa
 
 public abstract class AbstractSeriesData {
     public static class SeriesPoint {
+
         public SeriesPoint(Number x, Number y) {
             xValue = x;
             yValue = y;
         }
 
+        public SeriesPoint(Number x, Number y, Number z) {
+            this(x, y);
+            zValue = z;
+        }
+
         public Number xValue = 0;
         public Number yValue = 0;
+        public Number zValue = 0;
     }
     
     public String name = "";
@@ -45,6 +52,8 @@ public abstract class AbstractSeriesData {
         void xDataModified(int i, Double cellValue);
 
         void yDataModified(int i, Double cellValue);
+
+        void zDataModified(int i, Double cellValue);
 
         void categoryModified(int i, String cellValue);
     }

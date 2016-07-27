@@ -15,10 +15,11 @@ import com.vaadin.testbench.By;
 public class InteractionTBTest extends AbstractSpreadsheetTestCase {
 
     private OverlayHelper overlayHelper;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        overlayHelper=new OverlayHelper(driver);
+        overlayHelper = new OverlayHelper(driver);
     }
 
     @After
@@ -46,6 +47,20 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
         spreadsheetPage.getCellAt(1, 3).setValue("New Category Value");
         Thread.sleep(1000);
         compareScreen("chartsUpdatedOnCategoryChange");
+    }
+
+    @Test
+    public void userChangesSizeValueInSpreadsheetForBubbleChart_chartsUpdated()
+            throws Exception {
+        SpreadsheetPage spreadsheetPage = headerPage.loadFile("Bubble.xlsx",
+                this);
+
+        // need to move selection so that fill indicator is not clicked while
+        // selecting A2
+        spreadsheetPage.getCellAt(1, 5).click();
+        spreadsheetPage.getCellAt(3, 2).setValue("2");
+        Thread.sleep(1000);
+        compareScreen("chartsUpdatedOnSizeValuesChange");
     }
 
     @Test
@@ -96,7 +111,6 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
         headerPage.loadFile("unparsed_formula.xlsx", this);
         compareScreen("unparsedFormula");
     }
-
 
     @Test
     public void openNumbersCreatedExcelFile_noExceptionsRaised_withCharts() {

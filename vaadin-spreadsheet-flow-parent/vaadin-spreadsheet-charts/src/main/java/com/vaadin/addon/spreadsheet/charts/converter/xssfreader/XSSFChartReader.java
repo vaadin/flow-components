@@ -29,6 +29,7 @@ import org.apache.xmlbeans.XmlObject;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTAreaChart;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTBar3DChart;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTBarChart;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTBubbleChart;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTChart;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTDoughnutChart;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTLineChart;
@@ -166,6 +167,12 @@ public class XSSFChartReader {
         for (CTAreaChart ctChart : plotArea.getAreaChartList()) {
             list.addAll(addYAxis(
                     new AreaSeriesReader(ctChart, spreadsheet).getSeries(),
+                    getAxIdList(ctChart)));
+        }
+
+        for (CTBubbleChart ctChart : plotArea.getBubbleChartList()) {
+            list.addAll(addYAxis(
+                    new BubbleSeriesReader(ctChart, spreadsheet).getSeries(),
                     getAxIdList(ctChart)));
         }
 
