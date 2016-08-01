@@ -24,4 +24,8 @@ public class ContextMenuHelper extends SeleniumHelper {
 		}
 		TestBenchTestCase.testBench(driver).waitForVaadin();
 	}
+
+	public boolean hasOption (String caption) {
+		return driver.findElements(By.xpath("//div[@class='popupContent']//*[text()='"+caption+"']")).size()!=0;
+	}
 }

@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet.test;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -71,6 +72,21 @@ public class CommentTest extends AbstractSpreadsheetTestCase {
         contextMenu.clickItem("Show comment");
         assertNoErrorIndicatorDetected();
     }
+
+    @Test
+    public void contextClick_on_commentIndicator()
+            throws InterruptedException {
+        headerPage.loadFile("comment_sheet.xlsx", this);
+
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        ContextMenuHelper contextMenu = new ContextMenuHelper(driver);
+        SheetCellElement cell = spreadsheet.getCellAt(3, 3);
+        Assert.assertTrue(cell.hasCommentIndicator());
+        WebElement triangle = cell.findElement(By.className("cell-comment-triangle"));
+        new Actions(getDriver()).contextClick(triangle).build().perform();
+        Assert.assertFalse(contextMenu.hasOption("Insert comment"));
+    }
+
 
     @Test
     public void removeRow_removeRowWithComment_commentIsRemoved() {

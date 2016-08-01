@@ -1132,7 +1132,11 @@ public class SheetWidget extends Panel {
                 stoppedSelectingCellsWithDrag(event);
             }
         } else if (className.contains("cell")) {
-            jsniUtil.parseColRow(className);
+            if(className.equals("cell-comment-triangle")){
+                jsniUtil.parseColRow(target.getParentElement().getAttribute("class"));
+            }else {
+                jsniUtil.parseColRow(className);
+            }
             int targetCol = jsniUtil.getParsedCol();
             int targetRow = jsniUtil.getParsedRow();
             // because of text overflow, the click might have happened on
