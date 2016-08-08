@@ -3713,8 +3713,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void setPopup(CellReference cellReference, PopupButton popupButton) {
         removePopupButton(cellReference);
         if (popupButton != null) {
-            popupButton.setCellReference(cellReference);
-            sheetPopupButtons.put(cellReference, popupButton);
+            CellReference newCellReference = SpreadsheetUtil.relativeToAbsolute(this, cellReference);
+            popupButton.setCellReference(newCellReference);
+            sheetPopupButtons.put(newCellReference, popupButton);
             if (isCellVisible(cellReference.getRow() + 1,
                     cellReference.getCol() + 1)) {
                 registerPopupButton(popupButton);
@@ -3722,6 +3723,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             }
         }
     }
+
 
     private void removePopupButton(CellReference cellReference) {
         PopupButton oldButton = sheetPopupButtons.get(cellReference);
@@ -3739,12 +3741,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private void loadPopupButtons() {
         if (sheetPopupButtons != null) {
             for (PopupButton popupButton : sheetPopupButtons.values()) {
-                int column = popupButton.getColumn() + 1;
-                int row = popupButton.getRow() + 1;
-                if (isCellVisible(row, column)) {
-                    registerPopupButton(popupButton);
-                } else {
-                    unRegisterPopupButton(popupButton);
+                if (getActiveSheet().getSheetName().equals(popupButton.getCellReference().getSheetName())) {
+                    int column = popupButton.getColumn() + 1;
+                    int row = popupButton.getRow() + 1;
+                    if (isCellVisible(row, column)) {
+                        registerPopupButton(popupButton);
+                    } else {
+                        unRegisterPopupButton(popupButton);
+                    }
                 }
             }
         }

@@ -100,13 +100,14 @@ public class PopupButton extends AbstractComponent implements HasComponents {
      * @return Target cell reference
      */
     public CellReference getCellReference() {
-        return new CellReference(getState(false).row - 1,
-                getState(false).col - 1);
+        return new CellReference(getState(false).sheet, getState(false).row - 1,
+                getState(false).col - 1,false,false);
     }
 
     void setCellReference(CellReference cellReference) {
         getState().col = cellReference.getCol() + 1;
         getState().row = cellReference.getRow() + 1;
+        getState().sheet = cellReference.getSheetName();
     }
 
     /**

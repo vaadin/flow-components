@@ -1,5 +1,10 @@
 package com.vaadin.addon.spreadsheet.test;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -10,18 +15,15 @@ import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 import com.vaadin.testbench.parallel.Browser;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test for sheet SheetTabSheet navigation.
+ *
  */
-
 public class SheetTabSheetTest extends AbstractSpreadsheetTestCase {
 
     SpreadsheetPage spreadsheetPage;
-    SheetController sheetController;
+    private SheetController sheetController;
 
     @Override
     @Before
@@ -103,6 +105,15 @@ public class SheetTabSheetTest extends AbstractSpreadsheetTestCase {
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
         spreadsheet.findElements(By.className("sheet-tabsheet-tab")).get(index)
                 .click();
+    }
+    @Test
+    public void filter_changeTab_hideFilter() {
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        headerPage.loadTestFixture(TestFixtures.SpreadsheetTable);
+        spreadsheet.addSheet("2");
+        loadSheet(1);
+
+        Assert.assertFalse("Cell B2 should not have a filter",spreadsheet.getCellAt(2,2).hasPopupButton());
     }
 
     private void verifySheetFocused() {

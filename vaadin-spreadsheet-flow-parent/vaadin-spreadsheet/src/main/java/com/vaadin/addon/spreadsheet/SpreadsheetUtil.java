@@ -92,6 +92,11 @@ public class SpreadsheetUtil implements Serializable {
                 && DateUtil.isCellDateFormatted(cell);
     }
 
+    public static CellReference relativeToAbsolute(Spreadsheet sheet,CellReference cell) {
+        String sheetName = sheet.getActiveSheet().getSheetName();
+        return new CellReference(sheetName, cell.getRow(), cell
+                .getCol(), true, true);
+    }
     /**
      * Generates the column header for column with the given index
      * 

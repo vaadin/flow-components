@@ -31,9 +31,7 @@ import org.openxmlformats.schemas.drawingml.x2006.chart.CTSerTx;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeListener;
-import com.vaadin.addon.spreadsheet.Spreadsheet.FormulaValueChangeEvent;
-import com.vaadin.addon.spreadsheet.Spreadsheet.FormulaValueChangeListener;
-import com.vaadin.addon.spreadsheet.Spreadsheet.ValueChangeEvent;
+import com.vaadin.addon.spreadsheet.SpreadsheetUtil;
 import com.vaadin.addon.spreadsheet.charts.converter.Utils;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesData;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesData.DataSelectListener;
@@ -218,7 +216,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
     private void onValueChange(final List<CellReference> referencedCells,
                                final SERIES_DATA_TYPE seriesData,
                                final ValueUpdateMode updateMode,
-                               ValueChangeEvent event) {
+                               Spreadsheet.ValueChangeEvent event) {
         if (seriesData.dataUpdateListener == null) {
             return;
         }
@@ -246,9 +244,9 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             }
         });
 
-        spreadsheet.addFormulaValueChangeListener(new FormulaValueChangeListener() {
+        spreadsheet.addFormulaValueChangeListener(new Spreadsheet.FormulaValueChangeListener() {
             @Override
-            public void onFormulaValueChange(FormulaValueChangeEvent event) {
+            public void onFormulaValueChange(Spreadsheet.FormulaValueChangeEvent event) {
                 onValueChange(referencedCells, seriesData, updateMode, event);
             }
         });
@@ -257,7 +255,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
     private void updatePoint(List<CellReference> referencedCells,
                              SERIES_DATA_TYPE seriesData, ValueUpdateMode updateMode,
                              CellReference changedCell) {
-        CellReference absoluteChangedCell = relativeToAbsolute(changedCell);
+        CellReference absoluteChangedCell = SpreadsheetUtil.relativeToAbsolute(spreadsheet, changedCell);
         if (!referencedCells.contains(absoluteChangedCell)) {
             return;
         }
@@ -286,12 +284,6 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
                     spreadsheet);
             seriesData.dataUpdateListener.categoryModified(index, cellValue);
         }
-    }
-
-    private CellReference relativeToAbsolute(CellReference cell) {
-        String sheetName = spreadsheet.getActiveSheet().getSheetName();
-        return new CellReference(sheetName, cell.getRow(), cell.getCol(), true,
-                true);
     }
 
     protected String tryGetSeriesName(CTSerTx tx) {

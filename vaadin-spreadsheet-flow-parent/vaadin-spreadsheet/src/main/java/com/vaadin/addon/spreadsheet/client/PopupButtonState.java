@@ -30,4 +30,5 @@ public class PopupButtonState extends AbstractComponentState {
     public boolean headerHidden;
     public String popupHeight = null;
     public String popupWidth = null;
+    public String sheet;
 }
