@@ -303,6 +303,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /** are tables for currently active sheet loaded */
     private boolean tablesLoaded;
 
+    private SheetState sheetState = new SheetState(this);
+
     /** image sizes need to be recalculated on column/row resizing */
     private boolean reloadImageSizesFromPOI;
 
@@ -2612,6 +2614,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         historyManager.clear();
         invalidFormulas.clear();
         sheetPopupButtons.clear();
+        sheetState.clear();
         clearSheetOverlays();
     }
 
@@ -2867,7 +2870,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             reload = false;
             getState().reload = true;
             if (initialSheetSelection == null) {
-                initialSheetSelection = "A1";
+                if(sheetState.getSelectedCellsOnSheet(getActiveSheet()) == null){
+                    initialSheetSelection = "A1";
+                }else {
+                    initialSheetSelection = sheetState.getSelectedCellsOnSheet(getActiveSheet());
+                }
             }
         } else {
             getState().reload = false;
