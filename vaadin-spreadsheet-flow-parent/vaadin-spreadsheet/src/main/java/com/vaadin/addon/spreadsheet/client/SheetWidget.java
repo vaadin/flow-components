@@ -17,6 +17,20 @@ package com.vaadin.addon.spreadsheet.client;
  * #L%
  */
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
@@ -61,20 +75,6 @@ import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.VLazyExecutor;
 import com.vaadin.client.ui.VOverlay;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class SheetWidget extends Panel {
 
@@ -2079,8 +2079,8 @@ public class SheetWidget extends Panel {
 
     /** Replace stylesheet with the array of rules given */
     private void resetStyleSheetRules(StyleElement stylesheet,
-            List<String> rules) {
-        jsniUtil.clearCSSRules(stylesheet);
+                                      List<String> rules) {
+         jsniUtil.clearCSSRules(stylesheet);
         for (int i = 0; i < rules.size(); i++) {
             jsniUtil.insertRule(stylesheet, rules.get(i));
         }
@@ -2168,7 +2168,7 @@ public class SheetWidget extends Panel {
 
         int initialTop = calculateTopValueOfScrolledRows();
         int initialLeft = calculateLeftValueOfScrolledColumns();
-
+        createOverlayStyles(cellSizeAndPositionStyle, sizeStyleRules);
         createRowStyles(sizeStyleRules, firstRowIndex, lastRowIndex, initialTop);
         createColumnStyles(sizeStyleRules, firstColumnIndex, lastColumnIndex,
                 initialLeft);
@@ -2181,9 +2181,23 @@ public class SheetWidget extends Panel {
             createRowStyles(sizeStyleRules, 1, verticalSplitPosition, 0);
         }
 
+
         resetStyleSheetRules(cellSizeAndPositionStyle, sizeStyleRules);
     }
+    private void createOverlayStyles(StyleElement stylesheet, List<String> rules) {
+        Set<String> overlayRowIndex = new HashSet<String>();
+        for (Entry<String, SheetOverlay> entry : sheetOverlays.entrySet()) {
+            SheetOverlay overlay = entry.getValue();
+            overlayRowIndex.add("" + overlay.getRow());
+        }
+        String[] overlaySelectors = new String[overlayRowIndex.size()];
+        overlayRowIndex.toArray(overlaySelectors);
+        String[] overlayRules= jsniUtil.getOverlayRules(stylesheet,overlaySelectors);
 
+        for (int i=0;i<overlayRules.length;i++) {
+            rules.add(overlayRules[i]);
+        }
+    }
     private int calculateLeftValueOfScrolledColumns() {
         int left = 0;
         for (int i = 1; i < (firstColumnIndex - horizontalSplitPosition); i++) {

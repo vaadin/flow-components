@@ -133,7 +133,24 @@ public class SheetJsniUtil {
                 stylesheet.sheet.deleteRule(0);
             } else {
                 stylesheet.sheet.removeRule(0);
-            } 
+            }
         }
     }-*/;
+
+    /** Gets all Overlay rules */
+    public native String[] getOverlayRules(StyleElement stylesheet, String[] overlaySelectors)
+    /*-{
+        var overlayRules = [];
+        var rules = stylesheet.sheet.cssRules ? stylesheet.sheet.cssRules : stylesheet.sheet.rules;
+        for (var ruleIndex = 0; ruleIndex < rules.length; ruleIndex++) {
+            var rule = rules[ruleIndex];
+            for (var i = 0; i < overlaySelectors.length; i++) {
+                if (rule["selectorText"].indexOf(".row" + overlaySelectors[i]) !== -1) {
+                    overlayRules.push(rule["cssText"]);
+                }
+            }
+        }
+        return overlayRules;
+    }-*/;
+
 }
