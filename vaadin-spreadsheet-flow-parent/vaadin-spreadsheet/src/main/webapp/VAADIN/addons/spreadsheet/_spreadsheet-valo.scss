@@ -928,18 +928,17 @@
       cursor: pointer;
       height: $spreadsheet-popup-button-size;
       width: $spreadsheet-popup-button-size;
-      font-family: FontAwesome;
       outline: none;
+      background: url(triangle-inactive.png);
+      background-size: 100% 100%;
+      box-shadow: none;
+      border:none;
+    }
 
-      &::before {
-        content: "\f0d7";
-        display: block;
-        padding-left: $spreadsheet-popup-button-content-padding;
-      }
-
-      &::after {
-        border: none;
-      }
+    // FILTER ACTIVE BUTTON
+    .sheet div div.popupbutton.active {
+      background: url(triangle-active.png);
+      background-size: 100% 100%;
     }
 
     // TOUCH STYLES

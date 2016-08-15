@@ -935,24 +935,24 @@ $spreadsheet-freeze-pane-border: 1px solid $default-font-color !default;
       /* Vaadin SASS compiler can't handle the following line */
       /* background: linear-gradient(to bottom, $col-header-gradient-top-color 2%, $col-header-gradient-bottom-color 98%); */
       filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='$col-header-gradient-top-color', endColorstr='$col-header-gradient-bottom-color', GradientType=0);
-      border: 1px solid $popup-button-border-color;
       bottom: 1px;
       cursor: pointer;
       height: 14px;
       position: absolute;
       right: 1px;
       width: 14px;
-      font-family: FontAwesome;
       line-height: 15px;
       outline: none;
-      font-size: 15px;
-      border-radius: 3px;
-      color: $popup-button-arrow-color;
+      background: url(triangle-inactive.png);
+      background-size: 100% 100%;
+      box-shadow: none;
+      border:none;
+    }
 
-      &::before {
-        content: "\f0d7";
-        padding-left: 3px;
-      }
+    // FILTER ACTIVE BUTTON
+    .sheet div div.popupbutton.active {
+      background: url(triangle-active.png);
+      background-size: 100% 100%;
     }
 
     /* TOUCH STYLES */
