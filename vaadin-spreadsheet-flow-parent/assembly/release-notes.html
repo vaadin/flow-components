@@ -536,12 +536,20 @@
       <li><a href="https://dev.vaadin.com/ticket/19444">#19444</a> Fixed a problem with scrolling in comments</li>
       <li>Fixed an issue with custom formatted numbers</li>
       <li>Fixed an issue when deleting a comment, which was created in Excel</li>
-      <li><a href="https://dev.vaadin.com/ticket/18074">#18074</a>Introduced new API to handle or prevent delete actions</li>
-      <li><a href="https://dev.vaadin.com/ticket/13972">#13972</a>Improve cell styling performance for big sheets.</li>
+      <li><a href="https://dev.vaadin.com/ticket/18074">#18074</a> Introduced new API to handle or prevent delete actions</li>
+      <li><a href="https://dev.vaadin.com/ticket/13972">#13972</a> Improve cell styling performance for big sheets.</li>
       <li><a href="https://dev.vaadin.com/ticket/19258">#19258</a> Last selection remains on the sheets while switching between sheets.</li>
       <li>Fixed an issue with scrolling sheets with big overlays.</li>
-      <li><a href="https://dev.vaadin.com/ticket/20066">#20066</a>Fixed an issue with filters when changing active sheet.</li>	
-      <li><a href="https://dev.vaadin.com/ticket/20068">#20068</a>Filter popup button shows active filter.</li>
+      <li><a href="https://dev.vaadin.com/ticket/20066">#20066</a> Fixed an issue with filters when changing active sheet.</li>	
+      <li><a href="https://dev.vaadin.com/ticket/20068">#20068</a> Filter popup button shows active filter.</li>
+      <li><a href="https://dev.vaadin.com/ticket/19063">#19063</a> Fixed bug in hiding hidden sheet.</li>
+      <li><a href="https://dev.vaadin.com/ticket/20070">#20070</a> <a href="https://dev.vaadin.com/ticket/20071">#20071</a> <a href="https://dev.vaadin.com/ticket/20072">#20072</a> Spreadsheet table filter improvement.</li>
+      <li><a href="https://dev.vaadin.com/ticket/20168">#20168</a> Fixed bug in comment context menu.</li>
+      <li><a href="https://dev.vaadin.com/ticket/20057">#20057</a> Charts act same as Excel with filtered value.</li>
+      <li>Filled radar chart is added.</li>
+      <li>Embedded charts are now updated when formula value changes.</li>
+      <li>Bubble chart is added to spreadsheet embedded charts.</li>
+      <li>Color by point is added to spreadsheet embedded chart.</li>
     </ul>
 
     <h2 id="api-changes">API changes</h2>
@@ -549,6 +557,7 @@
         <li>New method spreadsheet.setChartsEnabled to show or hide charts.</li>
         <li>New method spreadsheet.isChartsEnabled to check if embedded charts are shown.</li>
         <li>New method spreadsheet.setCellDeletionHandler to add a custom implementation of CellDeletionHandler.</li>
+        <li>New method spreadsheet.addFormulaValueChangeListener to add a listener for FormulaValueChange events.</li>
     </ul>
 
     <h2 id="limitations">Limitations</h2>
