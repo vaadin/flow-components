@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.xmlbeans.XmlObject;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTAxDataSource;
@@ -201,6 +204,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         }
 
         seriesData.seriesData = list;
+        seriesData.tooltipDecimals = calculateDecimalsForTooltip(ptList);
 
         handleReferencedValueUpdates(ptList, seriesData,
                 ValueUpdateMode.Y_VALUES);
@@ -211,6 +215,40 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
                 spreadsheet.setSelection(formula);
             }
         };
+    }
+
+    private int calculateDecimalsForTooltip(List<CellReference> ptList) {
+
+        if (ptList.size() <= 0) {
+            // No points, so go with the default number of decimals
+            return -1;
+        }
+
+        CellReference ref = ptList.get(0);
+        Sheet sheet = spreadsheet.getWorkbook().getSheet(ref.getSheetName());
+        Cell cell = spreadsheet.getCell(ref, sheet);
+        CellStyle style = cell.getCellStyle();
+        String styleString = style.getDataFormatString();
+        if (styleString == null || styleString.isEmpty()
+                || styleString.equals("General")) {
+            // No formatting info given, so go with the default number of
+            // decimals
+            return -1;
+        }
+
+        //In formatting strings "." is always used it seems.
+        char sep = '.';
+
+        // Take the last occurrence if the user has the same symbol as thousand
+        // separator (should not be possible)
+        int sepIndex = styleString.trim().lastIndexOf(sep);
+        int decimalCount;
+        if (sepIndex < 0) {
+            decimalCount = 0;
+        } else {
+            decimalCount = styleString.length() - sepIndex - 1;
+        }
+        return decimalCount;
     }
 
     private void onValueChange(final List<CellReference> referencedCells,

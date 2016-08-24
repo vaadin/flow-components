@@ -17,6 +17,7 @@ package com.vaadin.addon.spreadsheet.charts.converter.confwriter;
  * #L%
  */
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -31,6 +32,7 @@ import com.vaadin.addon.charts.model.LayoutDirection;
 import com.vaadin.addon.charts.model.Legend;
 import com.vaadin.addon.charts.model.Options3d;
 import com.vaadin.addon.charts.model.PlotOptionsSeries;
+import com.vaadin.addon.charts.model.Series;
 import com.vaadin.addon.charts.model.Title;
 import com.vaadin.addon.charts.model.VerticalAlign;
 import com.vaadin.addon.charts.model.XAxis;
@@ -65,10 +67,11 @@ public class ChartDataToVaadinConfigWriter {
     public Configuration createConfigurationFromChartData(ChartData definition) {
         logger.info("createConfData()");
 
-        if (definition.plotData.size() > 0)
+        if (definition.plotData.size() > 0) {
             logger.info("*** NEXT CHART *** title: " + definition.title
                     + " , series type: "
                     + definition.plotData.get(0).getClass().getSimpleName());
+        }
 
         Configuration conf = new Configuration();
 
@@ -102,16 +105,77 @@ public class ChartDataToVaadinConfigWriter {
         updateXAxisTitle(conf.getxAxis(), definition.xAxisProperties);
         updateYAxesTitles(conf, definition.yAxesProperties);
 
-        if (conf.getSeries().isEmpty())
+        if (conf.getSeries().isEmpty()) {
             conf.setSubTitle("*** Unsupported chart type ***");
+        }
+        updateTooltip(definition, conf);
 
         return conf;
     }
 
+    private void updateTooltip(ChartData definition, Configuration conf) {
+        StringBuilder formatter = new StringBuilder();
+        formatter.append("function(){");
+        formatter.append("var text='';");
+        Iterator<AbstractSeriesData> seriesIt = definition.plotData.iterator();
+        int i = 0;
+        while (seriesIt.hasNext()) {
+            AbstractSeriesData series = seriesIt.next();
+
+            String seriesTitle = "'Series'";
+            String pointTitle = "'Point'";
+            String pointData;
+            if (series.is3d) {
+                pointData = "z";
+            } else {
+                pointData = "y";
+            }
+
+            // Excel uses one based numbering
+            String seriesName = series.name == null ? Integer.toString(i + 1)
+                    : "this.series.name";
+
+            String seriesFormatter = "if(this.series.options.id == '$id'){\n"
+                    + "   var formattedNumber;\n"
+                    + "   var signlessNumer = Math.abs(this.$v);"
+                    + "   if ($tooltipDecimals < 0 ) {\n"
+                    + "      //Round numbers to contain only 9 digits if they contain decimals.\n"
+                    + "      var tooltipDecimals = (signlessNumer>1.0 ? 9-Math.floor(Math.log(signlessNumer)/Math.LN10) : 9);\n"
+                    + "      formattedNumber = (Math.round(this.$v) == this.$v ? this.$v : Math.round(this.$v * Math.pow(10,tooltipDecimals))/Math.pow(10,tooltipDecimals));\n"
+                    + "   } else {\n"
+                    + "      //numberFormat can handle numbers 20 digits long.\n"
+                    + "      var tooltipDecimals = (Math.ceil(Math.log(signlessNumer)/Math.LN10) + $tooltipDecimals<= 20 ? $tooltipDecimals : 20);\n"
+                    + "      formattedNumber = Highcharts.numberFormat(this.$v, tooltipDecimals);\n"
+                    + "   }\n"
+                    + "   text = $seriesTitle + ' ' + \n"
+                    + "      (typeof $seriesName == 'number' ? $seriesName : JSON.stringify($seriesName)) + ' ' + $pointTitle + ' ' + \n"
+                    + "      (('name' in this.point) ? JSON.stringify(this.point.name) : this.x + 1) + \n"
+                    + "      ' <br>' + formattedNumber;" + "}";
+
+            formatter.append(seriesFormatter
+                    .replace("$v", pointData)
+                    .replace("$id", Integer.toString(i++))
+                    .replace("$seriesTitle", seriesTitle)
+                    .replace("$seriesName", seriesName)
+                    .replace("$pointTitle", pointTitle)
+                    .replace("$tooltipDecimals",
+                            Integer.toString(series.tooltipDecimals)));
+
+            if (seriesIt.hasNext()) {
+                formatter.append(" else \n");
+            }
+        }
+
+        formatter.append("return text; }");
+        conf.getTooltip().setFormatter(formatter.toString());
+
+    }
+
     private void updateYAxesTitles(Configuration conf,
             List<AxisProperties> yAxisProperties) {
-        if (yAxisProperties == null || yAxisProperties.size() == 0)
+        if (yAxisProperties == null || yAxisProperties.size() == 0) {
             return;
+        }
 
         YAxis defaultyAxis = conf.getyAxis();
         updateYAxisTitle(defaultyAxis, yAxisProperties.get(0));
@@ -128,8 +192,9 @@ public class ChartDataToVaadinConfigWriter {
     private void updateBackgroundColor(Configuration conf,
             BackgroundProperties background) {
 
-        if (background == null)
+        if (background == null) {
             return;
+        }
 
         if (background.color != null) {
             conf.getChart().setBackgroundColor(
@@ -176,16 +241,18 @@ public class ChartDataToVaadinConfigWriter {
 
     private SolidColor createSolidColorFromColorProperties(
             ColorProperties colorProp, SolidColor defaultColor) {
-        if (colorProp == null)
+        if (colorProp == null) {
             return defaultColor;
+        }
 
         return new SolidColor(colorProp.red, colorProp.green, colorProp.blue,
                 colorProp.opacity);
     }
 
     private void updateXAxisTitle(XAxis axis, AxisProperties axisProperties) {
-        if (axisProperties == null)
+        if (axisProperties == null) {
             return;
+        }
 
         axis.setTitle(wrapStringIntoItalicsTagIfNeeded(axisProperties.title,
                 axisProperties.textProperties));
@@ -275,28 +342,31 @@ public class ChartDataToVaadinConfigWriter {
     }
 
     private int estimateTitleVerticalSize(ChartData definition) {
-        if (definition.title == null || definition.title.isEmpty())
+        if (definition.title == null || definition.title.isEmpty()) {
             return 0;
-        else if (definition.titleStyle != null
+        } else if (definition.titleStyle != null
                 && definition.titleStyle.textProperties != null
                 && definition.titleStyle.textProperties.size > 0) {
             return (int) definition.titleStyle.textProperties.size;
-        } else
+        } else {
             return DEFAULT_LEGEND_Y_OFFSET;
+        }
     }
 
     protected void convertPlotData(ChartData definition, Configuration conf) {
         logger.info("convertPlotData()");
 
+        int i = 0;
         for (AbstractSeriesData series : definition.plotData) {
             AbstractSeriesDataWriter seriesDataWriter = series
                     .getSeriesDataWriter();
 
             seriesDataWriter.configureChart(conf);
 
-            conf.addSeries(seriesDataWriter
-                    .convertSeries(definition.blanksAsZeros));
-
+            Series chartSeries = seriesDataWriter
+                    .convertSeries(definition.blanksAsZeros);
+            chartSeries.setId(Integer.toString(i++));
+            conf.addSeries(chartSeries);
             if (series.categories.size() > 0) {
                 conf.getxAxis().setType(AxisType.CATEGORY);
             }
@@ -306,8 +376,9 @@ public class ChartDataToVaadinConfigWriter {
     protected Title createTitle(String titleString, TitleProperties titleProps) {
         logger.info("createTitle()");
 
-        if (titleString == null)
+        if (titleString == null) {
             return new Title("");
+        }
 
         Style style = createStyleFromTextFroperties(titleProps.textProperties);
 
@@ -323,29 +394,34 @@ public class ChartDataToVaadinConfigWriter {
 
     private String wrapStringIntoItalicsTagIfNeeded(String string,
             TextProperties textPr) {
-        if (textPr != null && textPr.italics)
+        if (textPr != null && textPr.italics) {
             return "<i>" + string + "</i>";
-        else
+        } else {
             return string;
+        }
     }
 
     private Style createStyleFromTextFroperties(TextProperties textProps) {
         Style style = new Style();
 
-        if (textProps == null)
+        if (textProps == null) {
             return style;
+        }
 
         style.setColor(createSolidColorFromColorProperties(textProps.color,
                 SolidColor.GREY));
 
-        if (textProps.size > 0)
+        if (textProps.size > 0) {
             style.setFontSize(textProps.size + "pt");
+        }
 
-        if (textProps.fontFamily != null)
+        if (textProps.fontFamily != null) {
             style.setFontFamily(textProps.fontFamily);
+        }
 
-        if (textProps.bold)
+        if (textProps.bold) {
             style.setFontWeight(FontWeight.BOLD);
+        }
 
         // chart model style doesn't support italics
 

@@ -43,6 +43,7 @@ public abstract class AbstractSeriesData {
     public String name = "";
     public List<SeriesPoint> seriesData = Collections.emptyList();
     public List<String> categories = Collections.emptyList();
+    public int tooltipDecimals = -1;
 
     public boolean is3d = false;
 
