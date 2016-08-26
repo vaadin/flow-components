@@ -61,7 +61,7 @@
         <dependency>
             <groupId>com.vaadin.addon</groupId>
             <artifactId>vaadin-spreadsheet</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin.addon</groupId>
@@ -98,7 +98,7 @@
         <dependency>
             <groupId>com.vaadin.addon</groupId>
             <artifactId>vaadin-spreadsheet-testbench-api</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -432,7 +432,7 @@
                 <dependency>
                     <groupId>com.vaadin.addon</groupId>
                     <artifactId>vaadin-spreadsheet</artifactId>
-                    <version>${version}</version>
+                    <version>${project.version}</version>
                     <type>test-jar</type>
                     <scope>test</scope>
                 </dependency>

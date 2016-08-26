@@ -503,7 +503,7 @@
         <dependency>
             <groupId>com.vaadin.addon</groupId>
             <artifactId>vaadin-spreadsheet-testbench-api</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
