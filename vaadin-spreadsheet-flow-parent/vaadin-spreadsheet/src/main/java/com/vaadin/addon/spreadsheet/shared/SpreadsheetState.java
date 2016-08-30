@@ -81,6 +81,10 @@ public class SpreadsheetState extends TabIndexState {
     public HashMap<Integer, Integer> rowIndexToStyleIndex = null;
     @DelegateToWidget
     public HashMap<Integer, Integer> columnIndexToStyleIndex = null;
+    @DelegateToWidget
+    public Set<Integer> lockedColumnIndexes = null;
+    @DelegateToWidget
+    public Set<Integer> lockedRowIndexes = null;
 
     @DelegateToWidget
     public ArrayList<String> shiftedCellBorderStyles = null;

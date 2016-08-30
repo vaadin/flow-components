@@ -2097,7 +2097,8 @@ public class SheetWidget extends Panel {
 
     public boolean isCellLocked(int column, int row) {
         CellData cd = getCellData(column, row);
-        return cd == null ? actionHandler.isSheetProtected() : cd.locked;
+        return cd == null ? actionHandler.isColProtected(column)
+                && actionHandler.isRowProtected(row) : cd.locked;
     }
 
     public String getCellFormulaValue(int column, int row) {
@@ -3573,8 +3574,9 @@ public class SheetWidget extends Panel {
         // because of a bug in SpreadsheetConnector, this method sometimes
         // called too late, when the overlays were already removed (after
         // switching a tab)
-        if (overlay != null)
+        if (overlay != null) {
             remove(overlay);
+        }
     }
 
     public void addMergedRegion(MergedRegion region) {

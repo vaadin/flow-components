@@ -1,10 +1,14 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import com.google.common.base.Predicate;
-import com.vaadin.addon.spreadsheet.test.demoapps.SpreadsheetDemoUI;
-import com.vaadin.addon.spreadsheet.test.pageobjects.HeaderPage;
-import com.vaadin.addon.spreadsheet.test.tb3.MultiBrowserTest;
-import com.vaadin.testbench.elements.NativeSelectElement;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Locale;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.openqa.selenium.By;
@@ -14,12 +18,11 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.io.File;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Locale;
-
-import static org.junit.Assert.*;
+import com.google.common.base.Predicate;
+import com.vaadin.addon.spreadsheet.test.demoapps.SpreadsheetDemoUI;
+import com.vaadin.addon.spreadsheet.test.pageobjects.HeaderPage;
+import com.vaadin.addon.spreadsheet.test.tb3.MultiBrowserTest;
+import com.vaadin.testbench.elements.NativeSelectElement;
 
 public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
 
@@ -106,6 +109,17 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
     protected void loadPage(String theme, String spreadsheetFile) throws Exception {
         driver.get(getTestUrl() + "?theme=" + theme);
         headerPage.loadFile(spreadsheetFile, this);
+        testBench(driver).waitForVaadin();
+    }
+
+    /**
+     * Navigates with file fragment.
+     *
+     * @param spreadsheetFile
+     *            file to load
+     */
+    protected void loadPage(String spreadsheetFile) throws Exception {
+        driver.get(getTestUrl() + "#file/" + spreadsheetFile);
         testBench(driver).waitForVaadin();
     }
 

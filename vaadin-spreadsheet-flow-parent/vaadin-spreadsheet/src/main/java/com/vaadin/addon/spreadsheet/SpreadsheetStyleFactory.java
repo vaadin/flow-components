@@ -17,6 +17,30 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
+import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_CENTER;
+import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_CENTER_SELECTION;
+import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_FILL;
+import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_JUSTIFY;
+import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_LEFT;
+import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_RIGHT;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DASHED;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DASH_DOT;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DASH_DOT_DOT;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DOTTED;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DOUBLE;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_HAIR;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM_DASHED;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM_DASH_DOT;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM_DASH_DOT_DOT;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_NONE;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_SLANTED_DASH_DOT;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_THICK;
+import static org.apache.poi.ss.usermodel.CellStyle.BORDER_THIN;
+import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_BOTTOM;
+import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_CENTER;
+import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_TOP;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +69,6 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STBorderStyle;
 
 import com.vaadin.addon.spreadsheet.client.MergedRegion;
-import static org.apache.poi.ss.usermodel.CellStyle.*;
 
 /**
  * SpreadsheetStyleFactory is an utility class for the Spreadsheet component.
@@ -220,6 +243,16 @@ public class SpreadsheetStyleFactory implements Serializable {
         } else {
             spreadsheet.getState().columnIndexToStyleIndex.clear();
         }
+        if (spreadsheet.getState().lockedColumnIndexes == null) {
+            spreadsheet.getState().lockedColumnIndexes = new HashSet<Integer>();
+        } else {
+            spreadsheet.getState().lockedColumnIndexes.clear();
+        }
+        if (spreadsheet.getState().lockedRowIndexes == null) {
+            spreadsheet.getState().lockedRowIndexes = new HashSet<Integer>();
+        } else {
+            spreadsheet.getState().lockedRowIndexes.clear();
+        }
 
         Sheet activeSheet = spreadsheet.getActiveSheet();
         for (int i = 0; i < spreadsheet.getRows(); i++) {
@@ -228,6 +261,13 @@ public class SpreadsheetStyleFactory implements Serializable {
                 int styleIndex = row.getRowStyle().getIndex();
                 spreadsheet.getState().rowIndexToStyleIndex.put(i + 1,
                         styleIndex);
+                if (row.getRowStyle().getLocked()) {
+                    spreadsheet.getState().lockedRowIndexes.add(i + 1);
+                }
+            } else {
+                if (spreadsheet.isActiveSheetProtected()) {
+                    spreadsheet.getState().lockedRowIndexes.add(i + 1);
+                }
             }
         }
 
@@ -236,6 +276,9 @@ public class SpreadsheetStyleFactory implements Serializable {
                 int styleIndex = activeSheet.getColumnStyle(i).getIndex();
                 spreadsheet.getState().columnIndexToStyleIndex.put(i + 1,
                         styleIndex);
+                if (activeSheet.getColumnStyle(i).getLocked()) {
+                    spreadsheet.getState().lockedColumnIndexes.add(i + 1);
+                }
             }
         }
     }

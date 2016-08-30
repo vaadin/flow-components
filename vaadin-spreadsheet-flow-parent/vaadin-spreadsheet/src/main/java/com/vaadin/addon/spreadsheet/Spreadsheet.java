@@ -2845,8 +2845,22 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @return true if the cell is locked, false otherwise
      */
     public boolean isCellLocked(Cell cell) {
-        return isActiveSheetProtected()
-                && (cell == null || cell.getCellStyle().getLocked());
+        if (isActiveSheetProtected()) {
+            if (cell != null) {
+                if (cell.getCellStyle().getIndex() != 0) {
+                    return cell.getCellStyle().getLocked();
+                } else {
+                    return getState(false).lockedColumnIndexes.contains(cell
+                            .getColumnIndex() + 1)
+                            && getState(false).lockedRowIndexes.contains(cell
+                                    .getRowIndex() + 1);
+                }
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**

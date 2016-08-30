@@ -245,4 +245,9 @@ public interface SheetHandler extends GroupingHandler {
     void selectAll();
 
     boolean isSheetProtected();
+
+    boolean isColProtected(int col);
+
+    boolean isRowProtected(int row);
+
 }

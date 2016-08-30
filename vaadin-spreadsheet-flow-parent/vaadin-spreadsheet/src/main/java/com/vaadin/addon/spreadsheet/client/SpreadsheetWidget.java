@@ -119,6 +119,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private Map<Integer, String> cellStyleToCSSStyle;
     public Map<Integer, Integer> rowIndexToStyleIndex;
     public Map<Integer, Integer> columnIndexToStyleIndex;
+    private Set<Integer> lockedColumnIndexes;
+    private Set<Integer> lockedRowIndexes;
 
     private Map<Integer, String> conditionalFormattingStyles = new HashMap<Integer, String>();
 
@@ -242,6 +244,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             super.setWidth(DEFAULT_WIDTH);
         }
     }
+
     /**
      * Enable or disable Formatting columns locking.
      *
@@ -469,7 +472,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void removeVisibleCellComment(String key) {
         sheetWidget.setCellCommentVisible(false, key);
     }
-    
+
     /**
      * Handles overlays, currently images and charts.
      */
@@ -1609,6 +1612,28 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
     }
 
+    public void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
+        if (this.lockedColumnIndexes == null) {
+            this.lockedColumnIndexes = lockedColumnIndexes;
+        } else {
+            this.lockedColumnIndexes.clear();
+            if (lockedColumnIndexes != null) {
+                this.lockedColumnIndexes.addAll(lockedColumnIndexes);
+            }
+        }
+    }
+
+    public void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
+        if (this.lockedRowIndexes == null) {
+            this.lockedRowIndexes = lockedRowIndexes;
+        } else {
+            this.lockedRowIndexes.clear();
+            if (lockedRowIndexes != null) {
+                this.lockedRowIndexes.addAll(lockedRowIndexes);
+            }
+        }
+    }
+
     public void setShiftedCellBorderStyles(
             ArrayList<String> shiftedCellBorderStyles) {
         sheetWidget.removeShiftedCellBorderStyles();
@@ -1653,6 +1678,16 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     @Override
     public boolean isSheetProtected() {
         return sheetProtected;
+    }
+
+    @Override
+    public boolean isColProtected(int col) {
+        return lockedColumnIndexes.contains(col);
+    }
+
+    @Override
+    public boolean isRowProtected(int row) {
+        return lockedRowIndexes.contains(row);
     }
 
     public void setWorkbookProtected(boolean workbookProtected) {
