@@ -34,6 +34,7 @@ import com.vaadin.addon.spreadsheet.Spreadsheet;
 public class Utils {
     private static final Logger LOGGER = Logger
             .getLogger(Utils.class.getName());
+
     @SuppressWarnings("unchecked")
     public static <T> T callMethodUsingReflection(Object o, String name) {
         try {
@@ -46,7 +47,7 @@ public class Utils {
         return null;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <E extends Enum> E getEnumValueOrDefault(
             Class<? extends E> eClass, String value, E defaultValue) {
         try {
@@ -57,7 +58,7 @@ public class Utils {
     }
 
     public static String getStringValueFromFormula(String formula,
-                                                   Spreadsheet spreadsheet) {
+            Spreadsheet spreadsheet) {
         List<String> strings = new ArrayList<String>();
 
         for (CellReference ref : getAllReferencedCells(formula)) {
@@ -80,8 +81,9 @@ public class Utils {
     public static List<CellReference> getAllReferencedCells(String formula) {
 
         // generateContiguous cannot parse a forumula in parentheses.
-        if (formula.startsWith("(") && formula.endsWith(""))
+        if (formula.startsWith("(") && formula.endsWith("")) {
             formula = formula.substring(1, formula.length() - 1);
+        }
 
         ArrayList<CellReference> cellRefs = new ArrayList<CellReference>();
         for (AreaReference area : AreaReference.generateContiguous(formula)) {
@@ -89,39 +91,58 @@ public class Utils {
         }
         return cellRefs;
     }
-    
-    /*
-     * This function uses the getAllReferencedCells function but filters out all the hidden rows from the list
-     * honoring filtering of charts based on spreadsheettable filter settings
+
+    /**
+     * This function uses the getAllReferencedCells function but filters out all
+     * the hidden rows from the list honoring filtering of charts based on
+     * spreadsheettable filter settings
      */
     public static List<CellReference> getAllReferencedVisibleCells(
             String formula, Spreadsheet spreadsheet) {
+        return getAllReferencedCells(formula, spreadsheet, false);
+    }
+
+    /**
+     * This function uses the getAllReferencedCells function but filters out all
+     * the hidden rows from the list honoring filtering of charts based on
+     * spreadsheettable filter settings if includeHiddenCells is true
+     * 
+     */
+    public static List<CellReference> getAllReferencedCells(String formula,
+            Spreadsheet spreadsheet, boolean includeHiddenCells) {
         final List<CellReference> cellRefs = getAllReferencedCells(formula);
 
-        // Filter out hidden cells of rows that are hidden (Excel spec)
-        ArrayList<CellReference> visibleCells = new ArrayList<CellReference>();
-        for (CellReference cr : cellRefs) {
-            if (!spreadsheet.isRowHidden(cr.getRow())) {
-                visibleCells.add(cr);
+        if (includeHiddenCells) {
+            return cellRefs;
+        } else {
+            // Filter out hidden cells of rows that are hidden (Excel spec)
+            ArrayList<CellReference> visibleCells = new ArrayList<CellReference>();
+            for (CellReference cr : cellRefs) {
+                if (!spreadsheet.isRowHidden(cr.getRow())) {
+                    visibleCells.add(cr);
+                }
             }
+            return visibleCells;
         }
-        return visibleCells;
     }
 
     public static String getStringValue(CellReference ref,
-                                        Spreadsheet spreadsheet) {
+            Spreadsheet spreadsheet) {
         return spreadsheet.getCellValue(spreadsheet.getCell(ref));
     }
 
-    public static Double getNumericValue(CellReference ref, Spreadsheet spreadsheet) {
+    public static Double getNumericValue(CellReference ref,
+            Spreadsheet spreadsheet) {
         try {
-            Sheet sheet = spreadsheet.getWorkbook().getSheet(ref.getSheetName());
+            Sheet sheet = spreadsheet.getWorkbook()
+                    .getSheet(ref.getSheetName());
             Cell cell = spreadsheet.getCell(ref, sheet);
             spreadsheet.getFormulaEvaluator().evaluateFormulaCell(cell);
 
-            if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC ||
-                    cell.getCellType() == Cell.CELL_TYPE_FORMULA)
+            if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC
+                    || cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
                 return cell.getNumericCellValue();
+            }
         } catch (NullPointerException e) {
         } catch (IllegalStateException e) {
         } catch (NumberFormatException e) {
@@ -133,10 +154,9 @@ public class Utils {
     }
 
     private static void logError() {
-        final String ERROR_TEXT =
-                        "The format of this data series is not supported by Vaadin Spreadsheet. "+
-                        "Please see our list " +
-                        "of known limitations: https://vaadin.com/docs/-/part/spreadsheet/spreadsheet-overview.html limitations.";
+        final String ERROR_TEXT = "The format of this data series is not supported by Vaadin Spreadsheet. "
+                + "Please see our list "
+                + "of known limitations: https://vaadin.com/docs/-/part/spreadsheet/spreadsheet-overview.html limitations.";
         LOGGER.warning(ERROR_TEXT);
     }
 }

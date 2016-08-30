@@ -34,12 +34,12 @@ import com.vaadin.addon.spreadsheet.charts.converter.chartdata.Stacking;
 public class BarSeriesReader extends
         AbstractSeriesReader<CTBarSer, ColumnSeriesData> {
 
-    public BarSeriesReader(CTBarChart ctChart, Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet);
+    public BarSeriesReader(CTBarChart ctChart, Spreadsheet spreadsheet, boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, showDataInHiddenCells);
     }
 
-    public BarSeriesReader(CTBar3DChart ctChart, Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet, true);
+    public BarSeriesReader(CTBar3DChart ctChart, Spreadsheet spreadsheet, boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, true, showDataInHiddenCells);
     }
 
     private CTBarDir getBarDir() {

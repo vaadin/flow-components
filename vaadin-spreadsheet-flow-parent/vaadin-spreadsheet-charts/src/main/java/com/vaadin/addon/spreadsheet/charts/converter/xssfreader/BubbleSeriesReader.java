@@ -15,11 +15,12 @@ import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesDat
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.AbstractSeriesData.SeriesPoint;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.BubbleSeriesData;
 
-public class BubbleSeriesReader
-        extends AbstractSeriesReader<CTBubbleSer, BubbleSeriesData> {
+public class BubbleSeriesReader extends
+        AbstractSeriesReader<CTBubbleSer, BubbleSeriesData> {
 
-    public BubbleSeriesReader(XmlObject ctChart, Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet);
+    public BubbleSeriesReader(XmlObject ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, showDataInHiddenCells);
     }
 
     @Override
@@ -28,28 +29,25 @@ public class BubbleSeriesReader
     }
 
     @Override
-    protected void fillSeriesData(BubbleSeriesData seriesData,
-            CTBubbleSer serie) {
+    protected void fillSeriesData(BubbleSeriesData seriesData, CTBubbleSer serie) {
         seriesData.name = tryGetSeriesName(serie.getTx());
 
         if (serie.getXVal() == null) {
             createSeriesDataPoints(serie.getYVal(), seriesData);
         } else {
             createSeriesDataPointsForBubble(serie.getXVal(), serie.getYVal(),
-                    serie.getBubbleSize(),
-                    seriesData);
+                    serie.getBubbleSize(), seriesData);
         }
     }
 
     private void createSeriesDataPointsForBubble(CTAxDataSource xVal,
-                                                 CTNumDataSource yVal, CTNumDataSource bubbleSize,
-                                                 BubbleSeriesData seriesData) {
-        final List<CellReference> ptListX = Utils
-                .getAllReferencedVisibleCells(xVal.getNumRef().getF(), getSpreadsheet());
-
+            CTNumDataSource yVal, CTNumDataSource bubbleSize,
+            BubbleSeriesData seriesData) {
+        final List<CellReference> ptListX = Utils.getAllReferencedCells(xVal
+                .getNumRef().getF(), getSpreadsheet(), showDataInHiddenCells);
         final String formulaY = yVal.getNumRef().getF();
-        final List<CellReference> ptListY = Utils
-                .getAllReferencedVisibleCells(formulaY, getSpreadsheet());
+        final List<CellReference> ptListY = Utils.getAllReferencedCells(
+                formulaY, getSpreadsheet(), showDataInHiddenCells);
 
         final List<Double> sizes = new ArrayList<Double>();
         List<CellReference> ptListSize = new ArrayList<CellReference>();
@@ -58,8 +56,8 @@ public class BubbleSeriesReader
                 sizes.add(new Double(1));
             }
         } else {
-            ptListSize = Utils
-                    .getAllReferencedVisibleCells(bubbleSize.getNumRef().getF(), getSpreadsheet());
+            ptListSize = Utils.getAllReferencedCells(bubbleSize.getNumRef()
+                    .getF(), getSpreadsheet(), showDataInHiddenCells);
             for (int i = 0; i < ptListSize.size(); i++) {
                 sizes.add(getNumericValueFromCellRef(ptListSize.get(i)));
             }
@@ -68,9 +66,9 @@ public class BubbleSeriesReader
         final List<SeriesPoint> list = new ArrayList<SeriesPoint>();
 
         for (int i = 0; i < ptListY.size(); i++) {
-            list.add(new SeriesPoint(getNumericValueFromCellRef(ptListX.get(i)),
-                    getNumericValueFromCellRef(ptListY.get(i)),
-                    sizes.get(i)));
+            list.add(new SeriesPoint(
+                    getNumericValueFromCellRef(ptListX.get(i)),
+                    getNumericValueFromCellRef(ptListY.get(i)), sizes.get(i)));
         }
 
         seriesData.seriesData = list;

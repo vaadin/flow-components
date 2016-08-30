@@ -13,7 +13,8 @@ public enum TestFixtures {
             AddOrRemoveCommentFixture.class), Formats(FormatsFixture.class), DisableChartOverlays(
             DisableChartsFixture.class), StyleMergeReigions(
             StyleMergeReigions.class), RemoveFixture(RemoveFixture.class), DefaultStyleUnlocked(
-            DefaultStyleUnlockedFixture.class);
+            DefaultStyleUnlockedFixture.class), HideSecondRow(
+            HideSecondRowFixture.class);
 
     public final SpreadsheetFixtureFactory factory;
 

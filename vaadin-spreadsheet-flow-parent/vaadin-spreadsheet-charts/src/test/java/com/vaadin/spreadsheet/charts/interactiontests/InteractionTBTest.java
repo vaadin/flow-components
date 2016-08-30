@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.addon.spreadsheet.test.AbstractSpreadsheetTestCase;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 import com.vaadin.addon.spreadsheet.test.testutil.OverlayHelper;
 import com.vaadin.testbench.By;
@@ -110,6 +111,15 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     public void openFileWithNotSuportedForumla_noExceptionRaised_noChart() throws Exception {
         headerPage.loadFile("unparsed_formula.xlsx", this);
         compareScreen("unparsedFormula");
+    }
+
+    @Test
+    public void chartWithShowDataInHiddenCells_rowIsHidden_chartsAreDifferent()
+            throws Exception {
+        loadPage("Data_On_Hidden_Rows.xlsx");
+        headerPage.loadTestFixture(TestFixtures.HideSecondRow);
+
+        compareScreen("firstSeriesMissing");
     }
 
     @Test

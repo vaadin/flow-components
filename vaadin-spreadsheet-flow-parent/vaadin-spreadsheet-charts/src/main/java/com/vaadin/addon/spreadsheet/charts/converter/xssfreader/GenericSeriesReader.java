@@ -32,8 +32,9 @@ import com.vaadin.addon.spreadsheet.charts.converter.confwriter.AbstractSeriesDa
 @SuppressWarnings("rawtypes")
 public class GenericSeriesReader extends AbstractSeriesReader {
 
-    public GenericSeriesReader(XmlObject ctChart, Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet);
+    public GenericSeriesReader(XmlObject ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, showDataInHiddenCells);
     }
 
     @Override

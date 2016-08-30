@@ -45,20 +45,23 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
     private final XmlObject ctChart;
     private final Spreadsheet spreadsheet;
     private final boolean is3d;
+    protected final boolean showDataInHiddenCells;
 
     public enum ValueUpdateMode {
         Y_VALUES, X_VALUES, Z_VALUES, CATEGORIES
     };
 
-    public AbstractSeriesReader(XmlObject ctChart, Spreadsheet spreadsheet) {
-        this(ctChart, spreadsheet, false);
+    public AbstractSeriesReader(XmlObject ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
+        this(ctChart, spreadsheet, false, showDataInHiddenCells);
     }
 
     public AbstractSeriesReader(XmlObject ctChart, Spreadsheet spreadsheet,
-            boolean is3d) {
+            boolean is3d, boolean showDataInHiddenCells) {
         this.ctChart = ctChart;
         this.spreadsheet = spreadsheet;
         this.is3d = is3d;
+        this.showDataInHiddenCells = showDataInHiddenCells;
     }
 
     protected abstract SERIES_DATA_TYPE createSeriesDataObject(CT_SER_TYPE serie);
@@ -129,7 +132,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
 
         if (axisDataSource.isSetStrRef()) {
             String formula = axisDataSource.getStrRef().getF();
-            return Utils.getAllReferencedVisibleCells(formula, spreadsheet);
+            return Utils.getAllReferencedCells(formula, spreadsheet,
+                    showDataInHiddenCells);
         } else if (axisDataSource.isSetMultiLvlStrRef()) {
             return tryHandleMultilevelCategories(axisDataSource);
         } else {
@@ -144,7 +148,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         String formula = axisDataSource.getMultiLvlStrRef().getF();
 
         final List<CellReference> allReferencedCells = Utils
-                .getAllReferencedVisibleCells(formula, spreadsheet);
+                .getAllReferencedCells(formula, spreadsheet,
+                        showDataInHiddenCells);
 
         final CellReference firstCell = allReferencedCells.get(0);
         final CellReference lastCell = allReferencedCells
@@ -194,7 +199,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             SERIES_DATA_TYPE seriesData) {
         final String formula = val.getNumRef().getF();
 
-        final List<CellReference> ptList = Utils.getAllReferencedVisibleCells(formula, spreadsheet);
+        final List<CellReference> ptList = Utils.getAllReferencedCells(formula,
+                spreadsheet, showDataInHiddenCells);
 
         List<SeriesPoint> list = new ArrayList<SeriesPoint>();
 

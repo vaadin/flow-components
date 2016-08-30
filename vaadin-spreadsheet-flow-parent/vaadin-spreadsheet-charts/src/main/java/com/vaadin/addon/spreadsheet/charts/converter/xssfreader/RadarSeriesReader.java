@@ -27,15 +27,17 @@ import com.vaadin.addon.spreadsheet.charts.converter.chartdata.RadarSeriesData;
 public class RadarSeriesReader extends
         AbstractSeriesReader<CTRadarSer, RadarSeriesData> {
 
-    public RadarSeriesReader(CTRadarChart ctChart, Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet);
+    public RadarSeriesReader(CTRadarChart ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, showDataInHiddenCells);
     }
 
     @Override
     protected RadarSeriesData createSeriesDataObject(CTRadarSer serie) {
         RadarSeriesData result = new RadarSeriesData();
         CTRadarChart radarChart = (CTRadarChart) getChart();
-        if (radarChart.getRadarStyle() != null && radarChart.getRadarStyle().getVal() != STRadarStyle.FILLED) {
+        if (radarChart.getRadarStyle() != null
+                && radarChart.getRadarStyle().getVal() != STRadarStyle.FILLED) {
             result.filled = false;
         }
         return result;

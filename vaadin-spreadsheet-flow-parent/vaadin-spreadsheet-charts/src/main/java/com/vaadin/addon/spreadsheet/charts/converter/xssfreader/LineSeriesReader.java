@@ -27,8 +27,9 @@ import com.vaadin.addon.spreadsheet.charts.converter.chartdata.SplineSeriesData;
 public class LineSeriesReader extends
         AbstractSeriesReader<CTLineSer, LineSeriesData> {
 
-    public LineSeriesReader(CTLineChart ctChart, Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet);
+    public LineSeriesReader(CTLineChart ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, showDataInHiddenCells);
     }
 
     @Override

@@ -29,23 +29,27 @@ public class PieSeriesReader extends
         AbstractSeriesReader<CTPieSer, PieSeriesData> {
 
     private boolean isDoughnut = false;
-    
+
     /**
-     * In Excel donuts have only one exploded ring, this flag marks that we handled it
+     * In Excel donuts have only one exploded ring, this flag marks that we
+     * handled it
      */
     private boolean isExplodedDoughnutHandled = false;
 
-    public PieSeriesReader(CTPieChart ctChart, Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet);
+    public PieSeriesReader(CTPieChart ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, showDataInHiddenCells);
     }
 
-    public PieSeriesReader(CTDoughnutChart ctChart, Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet);
+    public PieSeriesReader(CTDoughnutChart ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, showDataInHiddenCells);
         isDoughnut = true;
     }
 
-    public PieSeriesReader(CTPie3DChart ctChart, Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet, true);
+    public PieSeriesReader(CTPie3DChart ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, true, showDataInHiddenCells);
     }
 
     @Override

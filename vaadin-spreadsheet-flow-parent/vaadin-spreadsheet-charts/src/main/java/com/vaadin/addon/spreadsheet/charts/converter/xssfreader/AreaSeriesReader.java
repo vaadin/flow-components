@@ -28,8 +28,9 @@ import com.vaadin.addon.spreadsheet.charts.converter.chartdata.Stacking;
 public class AreaSeriesReader extends
         AbstractSeriesReader<CTAreaSer, AreaSeriesData> {
 
-    public AreaSeriesReader(CTAreaChart ctChart, Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet);
+    public AreaSeriesReader(CTAreaChart ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, showDataInHiddenCells);
     }
 
     @Override
@@ -40,7 +41,7 @@ public class AreaSeriesReader extends
     @Override
     protected void fillSeriesData(AreaSeriesData seriesData, CTAreaSer serie) {
         super.fillSeriesData(seriesData, serie);
-        
+
         CTAreaChart chart = (CTAreaChart) getChart();
         if (chart.isSetGrouping()) {
             seriesData.stacking = getStacking(chart.getGrouping().getVal());

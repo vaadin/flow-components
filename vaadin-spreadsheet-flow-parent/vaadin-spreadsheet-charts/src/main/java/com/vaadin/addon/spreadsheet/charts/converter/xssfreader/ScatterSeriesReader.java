@@ -35,9 +35,9 @@ import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ScatterSeriesData
 public class ScatterSeriesReader extends
         AbstractSeriesReader<CTScatterSer, ScatterSeriesData> {
 
-    public ScatterSeriesReader(CTScatterChart ctChart,
-            Spreadsheet spreadsheet) {
-        super(ctChart, spreadsheet);
+    public ScatterSeriesReader(CTScatterChart ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
+        super(ctChart, spreadsheet, showDataInHiddenCells);
     }
 
     @Override
@@ -50,15 +50,17 @@ public class ScatterSeriesReader extends
             CTScatterSer serie) {
         seriesData.name = tryGetSeriesName(serie.getTx());
 
-        if (serie.getXVal() == null)
+        if (serie.getXVal() == null) {
             createSeriesDataPoints(serie.getYVal(), seriesData);
-        else
+        } else {
             createSeriesDataPointsForScatter(serie.getXVal(), serie.getYVal(),
                     seriesData);
+        }
 
-        if (serie.getMarker() != null)
+        if (serie.getMarker() != null) {
             LineSeriesReaderUtils.setMarkerForData(seriesData,
                     serie.getMarker());
+        }
 
         if (serie.getSpPr() != null) {
             LineSeriesReaderUtils.setDashStyleForData(seriesData,
@@ -73,12 +75,12 @@ public class ScatterSeriesReader extends
      */
     protected void createSeriesDataPointsForScatter(CTAxDataSource xVal,
             CTNumDataSource yVal, ScatterSeriesData seriesData) {
-        final List<CellReference> ptListX = Utils.getAllReferencedVisibleCells(
-                xVal.getNumRef().getF(), getSpreadsheet());
+        final List<CellReference> ptListX = Utils.getAllReferencedCells(xVal
+                .getNumRef().getF(), getSpreadsheet(), showDataInHiddenCells);
 
         final String formulaY = yVal.getNumRef().getF();
-        final List<CellReference> ptListY = Utils.getAllReferencedVisibleCells(
-                formulaY, getSpreadsheet());
+        final List<CellReference> ptListY = Utils.getAllReferencedCells(
+                formulaY, getSpreadsheet(), showDataInHiddenCells);
 
         final List<SeriesPoint> list = new ArrayList<SeriesPoint>();
 
