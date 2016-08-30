@@ -741,10 +741,11 @@ public class SheetWidget extends Panel {
             firstColumnPosition = newFirstColumnPosition;
             lastColumnPosition = newLastColumnPosition;
 
-            if (leftEdgeChange > 0 || hScrollDiff < 0) {
-                handleHorizontalScrollLeft(scrollLeft);
-                updateCells(0, -1);
-            }
+            //always call handle scroll left, otherwise
+            //expanding groups with layouts does not work
+            handleHorizontalScrollLeft(scrollLeft);
+            updateCells(0, -1);
+
             if (rightEdgeChange < 0
                     || hScrollDiff > 0
                     || (lastColumnIndex < actionHandler.getMaxColumns() && lastColumnPosition < rightBound)) {
