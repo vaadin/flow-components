@@ -1418,6 +1418,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             return null;
         }
     }
+
     /**
      * Returns the Cell corresponding to the given reference. If the cell is
      * updated in outside code, call {@link #refreshCells(Cell...)} AFTER ALL
@@ -1432,6 +1433,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         return cellReference == null ? null : getCell(cellReference.getRow(),
                 cellReference.getCol());
     }
+
     /**
      * Returns the Cell corresponding to the given reference. If the cell is
      * updated in outside code, call {@link #refreshCells(Cell...)} AFTER ALL
@@ -1446,8 +1448,9 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public Cell getCell(CellReference cellReference, Sheet sheet) {
         return cellReference == null ? null : getCell(cellReference.getRow(),
-                cellReference.getCol(),sheet);
+                cellReference.getCol(), sheet);
     }
+
     /**
      * Deletes the cell from the sheet and the underlying POI model as well.
      * This really deletes the cell, instead of just making it's value blank.
@@ -2884,10 +2887,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             reload = false;
             getState().reload = true;
             if (initialSheetSelection == null) {
-                if(sheetState.getSelectedCellsOnSheet(getActiveSheet()) == null){
+                if (sheetState.getSelectedCellsOnSheet(getActiveSheet()) == null) {
                     initialSheetSelection = "A1";
-                }else {
-                    initialSheetSelection = sheetState.getSelectedCellsOnSheet(getActiveSheet());
+                } else {
+                    initialSheetSelection = sheetState
+                            .getSelectedCellsOnSheet(getActiveSheet());
                 }
             }
         } else {
@@ -3727,7 +3731,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void setPopup(CellReference cellReference, PopupButton popupButton) {
         removePopupButton(cellReference);
         if (popupButton != null) {
-            CellReference newCellReference = SpreadsheetUtil.relativeToAbsolute(this, cellReference);
+            CellReference newCellReference = SpreadsheetUtil
+                    .relativeToAbsolute(this, cellReference);
             popupButton.setCellReference(newCellReference);
             sheetPopupButtons.put(newCellReference, popupButton);
             if (isCellVisible(cellReference.getRow() + 1,
@@ -3737,7 +3742,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             }
         }
     }
-
 
     private void removePopupButton(CellReference cellReference) {
         PopupButton oldButton = sheetPopupButtons.get(cellReference);
@@ -3755,7 +3759,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private void loadPopupButtons() {
         if (sheetPopupButtons != null) {
             for (PopupButton popupButton : sheetPopupButtons.values()) {
-                if (getActiveSheet().getSheetName().equals(popupButton.getCellReference().getSheetName())) {
+                if (getActiveSheet().getSheetName().equals(
+                        popupButton.getCellReference().getSheetName())) {
                     int column = popupButton.getColumn() + 1;
                     int row = popupButton.getRow() + 1;
                     if (isCellVisible(row, column)) {
@@ -3943,7 +3948,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         private final Set<CellReference> changedCells;
 
         public ValueChangeEvent(Component source,
-                                    Set<CellReference> changedCells) {
+                Set<CellReference> changedCells) {
             super(source);
             this.changedCells = changedCells;
         }
@@ -3960,7 +3965,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         public CellValueChangeEvent(Component source,
                 Set<CellReference> changedCells) {
-            super(source,changedCells);
+            super(source, changedCells);
         }
 
     }
@@ -3973,7 +3978,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
         public FormulaValueChangeEvent(Component source,
                 Set<CellReference> changedCells) {
-            super(source,changedCells);
+            super(source, changedCells);
         }
     }
 
@@ -4144,8 +4149,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public interface FormulaValueChangeListener extends Serializable {
         public static final Method FORMULA_VALUE_CHANGE_METHOD = ReflectTools
                 .findMethod(FormulaValueChangeListener.class,
-                        "onFormulaValueChange",
-                        FormulaValueChangeEvent.class);
+                        "onFormulaValueChange", FormulaValueChangeEvent.class);
 
         /**
          * This is called when user changes the cell value in Spreadsheet.
@@ -4923,6 +4927,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         SpreadsheetFactory.calculateSheetSizes(this, activeSheet);
         SpreadsheetFactory.loadGrouping(this);
         reloadActiveSheetStyles();
+        if (hasSheetOverlays()) {
+            reloadImageSizesFromPOI = true;
+            loadOrUpdateOverlays();
+        }
     }
 
     /**

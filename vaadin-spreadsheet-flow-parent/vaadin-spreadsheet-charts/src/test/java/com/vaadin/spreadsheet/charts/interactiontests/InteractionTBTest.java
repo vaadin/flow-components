@@ -135,6 +135,18 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
         Thread.sleep(1000);
         compareScreen("chartsUpdatedOnFormulaChange");
     }
+    
+    @Test
+    public void sheetWithGroupingAndChart_groupIsCollapsed_chartPointsAreHidden()
+            throws Exception {
+        headerPage
+                .loadFile("chart and grouping.xlsx", this);
+        WebElement marker =  driver.findElement(By
+                .cssSelector(".grouping"));
+        marker.click();
+        Thread.sleep(1000);
+        compareScreen("chartsUpdatedOnCollapse");
+    }
 
     @Test
     public void openNumbersCreatedExcelFile_noExceptionsRaised_withCharts() {
