@@ -1,6 +1,6 @@
 ---
 title: Charts Within Spreadsheets
-order: 8
+order: 10
 layout: page
 ---
 
@@ -139,7 +139,3 @@ Vaadin charts are shown in the spreadsheet by default; you can disable showing t
 Spreadsheet spreadsheet = new Spreadsheet();
 spreadsheet.setChartsEnabled(false);
 ----
-
-
-
-

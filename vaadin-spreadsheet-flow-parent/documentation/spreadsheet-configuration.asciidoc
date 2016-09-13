@@ -1,6 +1,6 @@
 ---
 title: Spreadsheet Configuration
-order: 4
+order: 6
 layout: page
 ---
 
@@ -57,7 +57,3 @@ The result is shown in <<figure.spreadsheet.configuration.frozen>>.
 [[figure.spreadsheet.configuration.frozen]]
 .Frozen Row and Column Panes
 image::img/spreadsheet-config-frozenpane.png[]
-
-
-
-

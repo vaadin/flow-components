@@ -1,6 +1,6 @@
 ---
 title: Cell Content and Formatting
-order: 5
+order: 7
 layout: page
 ---
 
@@ -136,7 +136,3 @@ You can create popup buttons for a row of cells in a cell range by defining a
 __table__, as described in
 <<dummy/../../spreadsheet/spreadsheet-table#spreadsheet.table,"Tables Within
 Spreadsheets">>.
-
-
-
-

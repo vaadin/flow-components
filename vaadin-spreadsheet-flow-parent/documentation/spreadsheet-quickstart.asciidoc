@@ -1,0 +1,151 @@
+---
+title: Quickstart
+order: 2
+layout: page
+---
+
+[[spreadsheet.quickstart]]
+= Quickstart
+
+[[spreadsheet.quickstart.introduction]]
+== Introduction
+
+In this quickstart, we are going to create a simple Vaadin application and use the Vaadin Spreadsheet add-on to open an existing Excel spreadsheet file.
+
+[[spreadsheet.quickstart.prerequisites]]
+== Prerequisites
+
+In order to follow this tutorial, you will need the following tools/setup:
+
+* Command line Maven
+* JDK installed
+* IDE (optional)
+
+[[spreadsheet.quickstart.project-setup]]
+== Project setup
+
+To start off, we need to create a new project where we can use Spreadsheet. We will use Maven to set up a project, which can later be imported into your favorite IDE. You can also use your IDE to generate a new maven project using the `vaadin-archetype-application archetype`, version 7.7.0. Execute the following command to create the project:
+
+[subs="normal"]
+----
+[command]#mvn# archetype:generate -DarchetypeGroupId=com.vaadin  \
+  -DarchetypeArtifactId=[replaceable]#vaadin-archetype-application# \
+  -DarchetypeVersion=[replaceable]#7.7.0#
+----
+
+You will be asked a few questions for setting up the project. In the following, the suitable answers are given for going through this quickstart:
+
+[subs="normal"]
+----
+Define value for property 'groupId': : [replaceable]#com.vaadin#
+Define value for property 'artifactId': : [replaceable]#spreadsheet-quickstart#
+Define value for property 'version':  1.0-SNAPSHOT: : [replaceable]#<return>#
+Define value for property 'package':  com.vaadin: : [replaceable]#<return>#
+[INFO] Using property: themeName = mytheme
+[INFO] Using property: uiName = MyUI
+[INFO] Using property: widgetsetName = MyAppWidgetset
+Confirm properties configuration:
+groupId: com.vaadin
+artifactId: spreadsheet-quickstart
+version: 1.0-SNAPSHOT
+package: com.vaadin
+themeName: mytheme
+uiName: MyUI
+widgetsetName: MyAppWidgetset
+Y: : [replaceable]#<return>#
+----
+
+Now you should have a generated project in a directory that you specified its name after the `artifactId`, for example, `spreadsheet-quickstart`. You can run the new project by issuing the following commands:
+
+----
+[command]#cd# spreadsheet-quickstart
+[command]#mvn# jetty:run
+----
+
+The latter command will compile all sources and start a local web server. Wait until it prints out “Started Jetty Server” and navigate to http://localhost:8080 using your favorite browser.
+
+In your browser, you should see a [guibutton]#Click Me# button. When you click it, the text “Thank you for clicking” should appear below it. Great, the application works! We can now move on to replace this button with a Spreadsheet! Stop the web server by pressing kbd:[Ctrl+C] in the window where you started it.
+
+Let us first add the Vaadin Spreadsheet dependency to the project and compile the widget set. Open the [filename]#pom.xml# file and find the [elementname]#dependencies# tag. Add the following dependency declaration just before the end tag ([elementname]#/dependencies#):
+
+[subs="normal"]
+----
+...
+    *<dependency>
+        <groupId>com.vaadin.addon</groupId>
+        <artifactId>vaadin-spreadsheet</artifactId>
+        <version>1.2.1</version>
+    </dependency>*
+</dependencies>
+...
+----
+
+It is recommended to use the latest version available, the version number can be checked at link:https://vaadin.com/directory#!addon/vaadin-spreadsheet[Vaadin Directory].
+
+After this, we need to fetch a license for Vaadin Spreadsheet in order to be able to compile the widget set. You can get a free trial key from link:https://vaadin.com/directory#!addon/vaadin-spreadsheet[Vaadin Directory]. Click the large orange “Free trial key” button to the right and copy and paste the key into a file named [literal]#.vaadin.spreadsheet.developer.license# in your link:https://en.wikipedia.org/wiki/Home_directory#Default_home_directory_per_operating_system[home directory].
+
+Now we have created a new project, added the Vaadin Spreadsheet add-on to it and can move on to create our spreadsheet.
+
+[[spreadsheet.quickstart.creating]]
+== Creating your first Spreadsheet
+
+Let us replace the [classname]#Button# with a [classname]#Spreadsheet#. To this end, follow the following steps:
+
+. Copy the existing file to the root of the project
+
+. Create a new [classname]#File# instance
+
++
+[source, java]
+----
+File sampleFile = new File("Simple Invoice.xlsx");
+----
+. Use the sample file in [classname]#Spreadsheet# constructor
+
++
+[source, java]
+----
+Spreadsheet spreadsheet = null;
+try {
+     spreadsheet = new Spreadsheet(sampleFile);
+} catch (IOException e) {
+   e.printStackTrace();
+}
+----
+. Add the spreadsheet to the main layout
+
++
+[source, java]
+----
+layout.addComponent(spreadsheet);
+----
+
+Open the [classname]#com.vaadin.MyUI# class and change the [methodname]#init# method to the following:
+
+[source, java]
+----
+private Spreadsheet spreadsheet = null;
+
+@Override
+protected void init(VaadinRequest request) {
+   final VerticalLayout layout = new VerticalLayout();
+   layout.setSizeFull();
+   setContent(layout);
+
+   initSpreadsheet();
+   layout.addComponent(spreadsheet);
+}
+
+private void initSpreadsheet(){
+   File sampleFile = new File("Simple Invoice.xlsx");
+   try {
+       spreadsheet = new Spreadsheet(sampleFile);
+   } catch (IOException e) {
+       e.printStackTrace();
+   }
+}
+----
+
+Now run it by issuing [literal]#mvn jetty:run# on the command line and load http://localhost:8080 in your browser. You should see a Spreadsheet with the content of the sample file.
+
+After this we are all done! The end result is a simple UI showing an Excel spreadsheet running in your browser. For examples, please see the on-line demo at link:http://demo.vaadin.com/spreadsheet/[demo.vaadin.com/spreadsheet].

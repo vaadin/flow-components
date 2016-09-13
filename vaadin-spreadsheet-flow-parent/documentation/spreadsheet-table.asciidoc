@@ -1,6 +1,6 @@
 ---
 title: Tables Within Spreadsheets
-order: 7
+order: 9
 layout: page
 ---
 
@@ -74,7 +74,3 @@ as sorting.
 the rows in the table in the popup menus. The menu is filled with checkboxes for
 each unique value in the column. Deselecting the items causes hiding the
 respective rows in the spreadsheet.
-
-
-
-

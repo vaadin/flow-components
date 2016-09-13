@@ -1,6 +1,6 @@
 ---
 title: Installing Vaadin Spreadsheet
-order: 2
+order: 5
 layout: page
 ---
 
@@ -57,7 +57,7 @@ dependency, you need to include the following dependency in the POM. The
 &lt;dependency&gt;
     &lt;groupId&gt;com.vaadin.addon&lt;/groupId&gt;
     &lt;artifactId&gt;vaadin-spreadsheet&lt;/artifactId&gt;
-    &lt;version&gt;[replaceable]#LATEST#&lt;/version&gt;
+    &lt;version&gt;[replaceable]##LATEST##&lt;/version&gt;
 &lt;/dependency&gt;
 ----
 You can use the [parameter]#LATEST# version as shown above or (preferably) a

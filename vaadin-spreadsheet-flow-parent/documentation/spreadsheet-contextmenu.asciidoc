@@ -1,6 +1,6 @@
 ---
 title: Context Menus
-order: 6
+order: 8
 layout: page
 ---
 
@@ -38,7 +38,3 @@ You can implement custom context menus either by implementing an
 [classname]#SpreadsheetDefaultActionHandler#. The source code of the default
 handler should serve as a good example of implementing context menu items for
 different purposes.
-
-
-
-

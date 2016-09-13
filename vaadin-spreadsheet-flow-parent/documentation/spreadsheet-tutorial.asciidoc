@@ -1,6 +1,6 @@
 ---
 title: Vaadin Spreadsheet Tutorial
-order: 2
+order: 3
 layout: page
 ---
 
@@ -18,6 +18,8 @@ In this tutorial, you will learn how to:
 * Create an empty spreadsheet
 * Load spreadsheet from a file
 * Set styles (Bold, Background Color and Font Color) to selected cells
+
+If you have followed <<dummy/../../spreadsheet/spreadsheet-quickstart#spreadsheet.quickstart,"Quickstart">>, you can skip the project setup and Spreadsheet loading sections and continue with <<dummy/../../spreadsheet/spreadsheet-tutorial#spreadsheet.tutorial.styling,"Styling the Spreadsheet">>.
 
 The complete source code for the resulting project is available at link:https://github.com/vaadin/spreadsheet-tutorial[https://github.com/vaadin/spreadsheet-tutorial].
 
@@ -81,16 +83,10 @@ Let's first add the Vaadin Spreadsheet dependency to the project and compile the
 [subs="normal"]
 ----
 ...
-    <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>3.0.1</version>
-        <scope>provided</scope>
-    </dependency>
     [replaceable]#<dependency>
         <groupId>com.vaadin.addon</groupId>
         <artifactId>vaadin-spreadsheet</artifactId>
-        <version>1.2.0.beta2</version>
+        <version>1.2.1</version>
     </dependency>#
 </dependencies>
 ...
@@ -367,4 +363,4 @@ private void updateSelectedCellsFontColor(Color newColor) {
 }
 ----
 
-After this we’re all done! The end result is a simple Excel spreadsheet editor running in your browser. Of course, you probably want to fine-tune the styling toolbar a bit. You can also add a save feature to the application. Saving is not covered in this tutorial, but please see the write methods in the Spreadsheet class for some hints. For examples, please see the link:http://demo.vaadin.com/spreadsheet/[on-line demo.]
+After this, we are all done! The end result is a simple Excel [classname]#spreadsheet# editor running in your browser. Of course, you probably want to fine-tune the styling toolbar a bit. You can also add a save feature to the application. Saving is not covered in this tutorial, but please see the write methods in the Spreadsheet class for some hints. For examples, please see the on-line demo at link:http://demo.vaadin.com/spreadsheet/[demo.vaadin.com/spreadsheet].
