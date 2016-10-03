@@ -3870,7 +3870,16 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private boolean isMergedCell(String key) {
+    /**
+     * NOTE: FOR INTERNAL USE ONLY, may be removed or changed in the future.
+     * 
+     * @param key
+     *            key that identifies the cell position by column and row
+     * @return {@code true} if cell belongs to a merged region, {@code false}
+     *         otherwise
+     * @see #toKey(int, int)
+     */
+    boolean isMergedCell(String key) {
         for (Cell cell : mergedCells.values()) {
             if (key.equals(toKey(cell.getCol(), cell.getRow()))) {
                 return true;

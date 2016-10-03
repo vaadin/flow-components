@@ -158,7 +158,12 @@ public class Cell {
         } else {
             overflowing = false;
         }
-        element.getStyle().setOverflow(Overflow.VISIBLE);
+        if (sheetWidget.isMergedCell(SheetWidget.toKey(col, row))
+                && !(this instanceof MergedCell)) {
+            element.getStyle().setOverflow(Overflow.HIDDEN);
+        } else {
+            element.getStyle().setOverflow(Overflow.VISIBLE);
+        }
         overflowDirty = false;
     }
 
@@ -215,7 +220,8 @@ public class Cell {
 
         if (cellCommentTriangle != null) {
             element.appendChild(cellCommentTriangle);
-        } if (invalidFormulaTriangle != null) {
+        }
+        if (invalidFormulaTriangle != null) {
             element.appendChild(invalidFormulaTriangle);
         }
         if (popupButtonElement != null) {
