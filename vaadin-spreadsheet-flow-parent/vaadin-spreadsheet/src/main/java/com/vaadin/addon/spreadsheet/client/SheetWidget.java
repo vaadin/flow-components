@@ -741,8 +741,8 @@ public class SheetWidget extends Panel {
             firstColumnPosition = newFirstColumnPosition;
             lastColumnPosition = newLastColumnPosition;
 
-            //always call handle scroll left, otherwise
-            //expanding groups with layouts does not work
+            // always call handle scroll left, otherwise
+            // expanding groups with layouts does not work
             handleHorizontalScrollLeft(scrollLeft);
             updateCells(0, -1);
 
@@ -1133,9 +1133,10 @@ public class SheetWidget extends Panel {
                 stoppedSelectingCellsWithDrag(event);
             }
         } else if (className.contains("cell")) {
-            if(className.equals("cell-comment-triangle")){
-                jsniUtil.parseColRow(target.getParentElement().getAttribute("class"));
-            }else {
+            if (className.equals("cell-comment-triangle")) {
+                jsniUtil.parseColRow(target.getParentElement().getAttribute(
+                        "class"));
+            } else {
                 jsniUtil.parseColRow(className);
             }
             int targetCol = jsniUtil.getParsedCol();
@@ -2080,8 +2081,8 @@ public class SheetWidget extends Panel {
 
     /** Replace stylesheet with the array of rules given */
     private void resetStyleSheetRules(StyleElement stylesheet,
-                                      List<String> rules) {
-         jsniUtil.clearCSSRules(stylesheet);
+            List<String> rules) {
+        jsniUtil.clearCSSRules(stylesheet);
         for (int i = 0; i < rules.size(); i++) {
             jsniUtil.insertRule(stylesheet, rules.get(i));
         }
@@ -2183,9 +2184,9 @@ public class SheetWidget extends Panel {
             createRowStyles(sizeStyleRules, 1, verticalSplitPosition, 0);
         }
 
-
         resetStyleSheetRules(cellSizeAndPositionStyle, sizeStyleRules);
     }
+
     private void createOverlayStyles(StyleElement stylesheet, List<String> rules) {
         Set<String> overlayRowIndex = new HashSet<String>();
         for (Entry<String, SheetOverlay> entry : sheetOverlays.entrySet()) {
@@ -2194,12 +2195,14 @@ public class SheetWidget extends Panel {
         }
         String[] overlaySelectors = new String[overlayRowIndex.size()];
         overlayRowIndex.toArray(overlaySelectors);
-        String[] overlayRules= jsniUtil.getOverlayRules(stylesheet,overlaySelectors);
+        String[] overlayRules = jsniUtil.getOverlayRules(stylesheet,
+                overlaySelectors);
 
-        for (int i=0;i<overlayRules.length;i++) {
+        for (int i = 0; i < overlayRules.length; i++) {
             rules.add(overlayRules[i]);
         }
     }
+
     private int calculateLeftValueOfScrolledColumns() {
         int left = 0;
         for (int i = 1; i < (firstColumnIndex - horizontalSplitPosition); i++) {
@@ -2238,10 +2241,11 @@ public class SheetWidget extends Panel {
         // end when their rows are no longer rendered
         for (Entry<Integer, MergedCell> entry : mergedCells.entrySet()) {
             int row = entry.getValue().getRow() - 1;
-            if (topMap.containsKey(row)) {
+            if (!(row == endIndex && endIndex == verticalSplitPosition)
+                    && topMap.containsKey(row)) {
                 entry.getValue().getElement().getStyle()
                         .setTop(topMap.get(row), Unit.PX);
-            } else if (row < startIndex) {
+            } else if (row < startIndex && endIndex != verticalSplitPosition) {
                 entry.getValue().getElement().getStyle().setTop(0, Unit.PX);
             }
         }
@@ -2270,10 +2274,11 @@ public class SheetWidget extends Panel {
         int absoluteRight = getElement().getAbsoluteRight();
         for (Entry<Integer, MergedCell> entry : mergedCells.entrySet()) {
             int col = entry.getValue().getCol() - 1;
-            if (leftMap.containsKey(col)) {
+            if (!(col == endIndex && endIndex == horizontalSplitPosition)
+                    && leftMap.containsKey(col)) {
                 entry.getValue().getElement().getStyle()
                         .setLeft(leftMap.get(col), Unit.PX);
-            } else if (col > endIndex) {
+            } else if (col > endIndex && endIndex != horizontalSplitPosition) {
                 entry.getValue().getElement().getStyle()
                         .setLeft(absoluteRight, Unit.PX);
             }
@@ -4964,7 +4969,7 @@ public class SheetWidget extends Panel {
     }
 
     private Cell getFirstVisibleCellInRow(ArrayList<Cell> row) {
-        //column indexing starts from 1
+        // column indexing starts from 1
         int columnIndex = 0;
         for (Cell cell : row) {
             if (!actionHandler.isColumnHidden(columnIndex + 1)) {
@@ -4983,8 +4988,8 @@ public class SheetWidget extends Panel {
         int index = firstRowIndex;
         final int bound = sheet.getAbsoluteTop();
         for (ArrayList<Cell> row : rows) {
-            Cell cell=getFirstVisibleCellInRow(row);
-            if (cell!=null && cell.getElement().getAbsoluteTop() >= bound) {
+            Cell cell = getFirstVisibleCellInRow(row);
+            if (cell != null && cell.getElement().getAbsoluteTop() >= bound) {
                 return index;
             } else {
                 index++;
