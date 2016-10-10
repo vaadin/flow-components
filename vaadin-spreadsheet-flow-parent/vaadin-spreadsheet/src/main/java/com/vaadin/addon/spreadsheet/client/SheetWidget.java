@@ -5720,7 +5720,7 @@ public class SheetWidget extends Panel {
                     getRules(shiftedBorderCellStyle));
             for (String style : styles) {
                 try {
-                    sb.append(style.replace(".col", "." + sheetId
+                    sb.append(style.replace(".col", ".v-spreadsheet." + sheetId
                             + " .cell.col"));
                 } catch (Exception e) {
                     debugConsole.log(Level.SEVERE,
