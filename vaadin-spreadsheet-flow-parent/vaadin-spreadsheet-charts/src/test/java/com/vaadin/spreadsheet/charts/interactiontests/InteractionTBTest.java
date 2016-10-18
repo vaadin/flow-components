@@ -2,7 +2,6 @@ package com.vaadin.spreadsheet.charts.interactiontests;
 
 import java.util.Arrays;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
@@ -21,11 +20,6 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     public void setUp() throws Exception {
         super.setUp();
         overlayHelper = new OverlayHelper(driver);
-    }
-
-    @After
-    public void tearDown() {
-        getDriver().close();
     }
 
     @Test
@@ -116,7 +110,8 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     @Test
     public void chartWithShowDataInHiddenCells_rowIsHidden_chartsAreDifferent()
             throws Exception {
-        loadPage("Data_On_Hidden_Rows.xlsx");
+        headerPage.loadFile("Data_On_Hidden_Rows.xlsx", this);
+
         headerPage.loadTestFixture(TestFixtures.HideSecondRow);
 
         compareScreen("firstSeriesMissing");

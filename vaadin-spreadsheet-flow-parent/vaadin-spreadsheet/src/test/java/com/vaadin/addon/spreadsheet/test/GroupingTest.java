@@ -68,6 +68,7 @@ public class GroupingTest extends AbstractSpreadsheetTestCase {
     public void grouping_expandColumnGroup_imageInsideGroupExpand() throws IOException, InterruptedException {
         SpreadsheetElement spreadsheetElement =loadImageFile();
         collapseColumn(spreadsheetElement);
+        Thread.sleep(1000);
         expandColumn(spreadsheetElement);
         Thread.sleep(2000);
 
