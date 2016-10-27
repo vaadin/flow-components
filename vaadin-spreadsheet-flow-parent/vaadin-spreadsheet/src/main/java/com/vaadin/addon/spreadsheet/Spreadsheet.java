@@ -2980,7 +2980,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * @param lastColumn
      *            Index of the ending column, 1-based
      */
-    private void loadCells(int firstRow, int firstColumn, int lastRow,
+    protected void loadCells(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
         loadCustomComponents();
         loadHyperLinks();
