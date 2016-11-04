@@ -364,7 +364,7 @@ class GroupingUtil implements Serializable{
                 null, null, Boolean.TRUE });
     }
 
-    public static void expandColumn(XSSFSheet sheet, int columnIndex) {
+    public static short expandColumn(XSSFSheet sheet, int columnIndex) {
         CTCols cols = sheet.getCTWorksheet().getColsArray(0);
         CTCol col = sheet.getColumnHelper().getColumn(columnIndex, false);
         int colInfoIx = sheet.getColumnHelper().getIndexOfColumn(cols, col);
@@ -372,12 +372,12 @@ class GroupingUtil implements Serializable{
         int idx = (Integer) callSheetMethod("findColInfoIdx", sheet,
                 new Object[] { (int) col.getMax(), colInfoIx });
         if (idx == -1) {
-            return;
+            return -1;
         }
 
         // If it is already expanded do nothing.
         if (!isColumnGroupCollapsed(sheet, idx)) {
-            return;
+            return -1;
         }
 
         // Find the start/end of the group.
@@ -397,10 +397,10 @@ class GroupingUtil implements Serializable{
         // is the enclosing group
         // hidden bit only is altered for this outline level. ie. don't
         // uncollapse contained groups
-        @SuppressWarnings("deprecation")
         CTCol[] colArray = cols.getColArray();
         @SuppressWarnings("unused")
         CTCol columnInfo = colArray[endIdx];
+        short expandedLevel = -1;
         if (!isColumnGroupHiddenByParent(sheet, idx)) {
             /** Start */
             short outlineLevel = col.getOutlineLevel();
@@ -414,6 +414,7 @@ class GroupingUtil implements Serializable{
                         nestedGroup = false;
                         ci.setCollapsed(true);
                     }
+                    expandedLevel = outlineLevel;
                 } else {
                     nestedGroup = true;
                 }
@@ -427,6 +428,7 @@ class GroupingUtil implements Serializable{
         // new Object[] { (int) columnInfo.getMax() + 1, null, null,
         // Boolean.FALSE, Boolean.FALSE });
         /** end */
+        return expandedLevel;
     }
 
     private static boolean isColumnGroupCollapsed(XSSFSheet sheet, int idx) {

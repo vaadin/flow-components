@@ -78,6 +78,7 @@ import com.vaadin.addon.spreadsheet.client.OverlayInfo;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc;
 import com.vaadin.addon.spreadsheet.command.SizeChangeCommand;
 import com.vaadin.addon.spreadsheet.command.SizeChangeCommand.Type;
+import com.vaadin.addon.spreadsheet.shared.GroupingData;
 import com.vaadin.addon.spreadsheet.shared.SpreadsheetState;
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
@@ -4916,7 +4917,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             if (collapsed) {
                 GroupingUtil.collapseColumn(activeSheet, index);
             } else {
-                GroupingUtil.expandColumn(activeSheet, index);
+                short expandLevel = GroupingUtil.expandColumn(activeSheet, index);
+                updateExpandedRegion(activeSheet, index, expandLevel);
             }
         } else {
             if (collapsed) {
@@ -4931,6 +4933,38 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         if (hasSheetOverlays()) {
             reloadImageSizesFromPOI = true;
             loadOrUpdateOverlays();
+        }
+        updateMarkedCells();
+    }
+
+    private void updateExpandedRegion(XSSFSheet sheet, int columnIndex,
+            int expandLevel) {
+        if (expandLevel < 0) {
+            return;
+        }
+        int endIndex = -1;
+        for (GroupingData data : getState().colGroupingData) {
+            if (data.level == expandLevel) {
+                endIndex = data.endIndex;
+                break;
+            }
+        }
+        if (endIndex < 0) {
+            return;
+        }
+        // update the style for the region cells, effects region + 1 row&col
+        int firstRowNum = sheet.getFirstRowNum();
+        int lastRowNum = sheet.getLastRowNum();
+        for (int r = firstRowNum; r <= lastRowNum; r++) {
+            Row row = sheet.getRow(r);
+            if (row != null) {
+                for (int c = columnIndex; c <= endIndex; c++) {
+                    Cell cell = row.getCell(c);
+                    if (cell != null) {
+                        valueManager.markCellForUpdate(cell);
+                    }
+                }
+            }
         }
     }
 
