@@ -3740,7 +3740,7 @@ public class SheetWidget extends Panel {
         if (width == 0 || height == 0) {
             mergedCell.getElement().getStyle().setDisplay(Display.NONE);
         } else {
-            mergedCell.getElement().getStyle().setDisplay(Display.BLOCK);
+            mergedCell.getElement().getStyle().setProperty("display", "flex");
         }
     }
 
