@@ -233,6 +233,9 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         CellReference ref = ptList.get(0);
         Sheet sheet = spreadsheet.getWorkbook().getSheet(ref.getSheetName());
         Cell cell = spreadsheet.getCell(ref, sheet);
+        if (cell == null) {
+            return -1;
+        }
         CellStyle style = cell.getCellStyle();
         String styleString = style.getDataFormatString();
         if (styleString == null || styleString.isEmpty()
