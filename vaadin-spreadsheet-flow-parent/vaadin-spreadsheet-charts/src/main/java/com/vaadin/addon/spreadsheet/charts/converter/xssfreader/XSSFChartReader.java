@@ -80,8 +80,14 @@ public class XSSFChartReader {
 
         if (view3d != null) {
             chartData.view3dData = new ChartData.View3dData();
-            chartData.view3dData.rotation3dAngleA = view3d.getRotX().getVal();
-            chartData.view3dData.rotation3dAngleB = view3d.getRotY().getVal();
+            if (view3d.getRotX() != null) {
+                chartData.view3dData.rotation3dAngleA = view3d.getRotX()
+                        .getVal();
+            }
+            if (view3d.getRotY() != null) {
+                chartData.view3dData.rotation3dAngleB = view3d.getRotY()
+                        .getVal();
+            }
         }
 
         chartData.legendProperties = getLegendProperties();

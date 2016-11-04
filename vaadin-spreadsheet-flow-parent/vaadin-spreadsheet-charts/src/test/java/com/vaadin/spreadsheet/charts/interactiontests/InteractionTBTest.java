@@ -151,6 +151,12 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
+    public void openFile_fileHas3dChart_noExceptionsRaised() {
+        headerPage.loadFile("3DChart.xlsx", this);
+        assertNoErrorIndicatorDetected();
+    }
+
+    @Test
     public void openNumbersCreatedExcelFile_noExceptionsRaised_withCharts() {
         headerPage.loadFile("NumbersCreatedExcelFile.xlsx", this);
         assertNoErrorIndicatorDetected();
