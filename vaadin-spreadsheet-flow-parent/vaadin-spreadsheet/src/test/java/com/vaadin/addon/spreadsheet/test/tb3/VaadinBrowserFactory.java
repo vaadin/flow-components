@@ -21,7 +21,11 @@ public class VaadinBrowserFactory extends DefaultBrowserFactory {
         case IE11:
             return createIE(browser, "11");
         case PHANTOMJS:
-            return create(browser, "1", Platform.LINUX);
+            DesiredCapabilities phantom2 = create(browser, "2", Platform.LINUX);
+            // Hack for the test cluster
+            phantom2.setCapability("phantomjs.binary.path",
+                    "/usr/bin/phantomjs2");
+            return phantom2;
         case CHROME:
             return create(browser, "40", Platform.VISTA);
         case FIREFOX:

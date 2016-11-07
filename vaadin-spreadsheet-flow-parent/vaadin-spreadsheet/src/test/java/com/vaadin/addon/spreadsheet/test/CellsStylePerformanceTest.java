@@ -1,10 +1,7 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import com.google.common.base.Predicate;
-import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
-import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
-import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
-import com.vaadin.testbench.By;
+import java.util.List;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -13,7 +10,11 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import java.util.List;
+import com.google.common.base.Predicate;
+import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
+import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
+import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
+import com.vaadin.testbench.By;
 
 public class CellsStylePerformanceTest extends AbstractSpreadsheetTestCase {
 
@@ -31,11 +32,12 @@ public class CellsStylePerformanceTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
-    public void spreadsheetWithManyStyles_setValueInCell_styleUpdateTimeLessThanHalfSecond() {
+    public void spreadsheetWithManyStyles_setValueInCell_styleUpdateTimeLessThanASecond() {
         SpreadsheetPage spreadsheetPage = headerPage.loadFile("cell_styles_performance.xlsx", this);
         clearLog();
         SheetCellElement cell = spreadsheetPage.getCellAt(1, 1);
         cell.setValue("foo");
+        Integer expected = 1000;
 
         waitUntil(new Predicate<WebDriver>() {
             @Override
@@ -44,7 +46,9 @@ public class CellsStylePerformanceTest extends AbstractSpreadsheetTestCase {
             }
         });
         Integer time = Integer.parseInt(getJson());
-        assertLessThanOrEqual("Time should be less than 500ms", time, 500);
+        assertLessThanOrEqual(String.format(
+                "Time should be less than %sms, was: %sms", expected, time),
+                time, expected);
     }
 
 

@@ -397,7 +397,7 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <systemPropertyVariables>
-                                <browsers.include>phantomjs1</browsers.include>
+                                <browsers.include>phantomjs2</browsers.include>
                             </systemPropertyVariables>
                         </configuration>
                     </plugin>

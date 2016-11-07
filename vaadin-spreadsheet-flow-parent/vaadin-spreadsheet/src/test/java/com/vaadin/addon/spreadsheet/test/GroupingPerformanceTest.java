@@ -62,9 +62,7 @@ public class GroupingPerformanceTest extends AbstractSpreadsheetTestCase {
         });
         DesiredCapabilities desiredCapabilities = getDesiredCapabilities();
         Integer expected = 2000;
-        if (BrowserUtil.isPhantomJS(desiredCapabilities)) {
-            expected = 1000;
-        } else if (BrowserUtil.isIE(desiredCapabilities, 11)
+        if (BrowserUtil.isIE(desiredCapabilities, 11)
                 || BrowserUtil.isIE(desiredCapabilities, 10)) {
             expected = 2500;
         }
