@@ -5,9 +5,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vaadin.version>7.6.6</vaadin.version>
+        <vaadin.version>7.7.3</vaadin.version>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
-        <testbench.api.version>7.5.7</testbench.api.version>
+        <testbench.api.version>7.7.3</testbench.api.version>
         <jetty.plugin.version>9.2.3.v20140905</jetty.plugin.version>
         <tb.hub>testbench-hub.intra.itmill.com</tb.hub>
     </properties>
@@ -104,7 +104,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench</artifactId>
-            <version>4.0.0</version>
+            <version>4.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
