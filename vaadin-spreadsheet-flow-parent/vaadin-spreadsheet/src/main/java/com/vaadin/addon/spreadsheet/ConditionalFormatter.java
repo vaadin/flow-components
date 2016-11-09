@@ -33,10 +33,10 @@ import java.util.logging.Logger;
 import org.apache.poi.hssf.usermodel.HSSFSheetConditionalFormatting;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.FormulaParser;
-import org.apache.poi.ss.formula.FormulaRenderer;
 import org.apache.poi.ss.formula.FormulaType;
 import org.apache.poi.ss.formula.WorkbookEvaluatorUtil;
 import org.apache.poi.ss.formula.eval.BoolEval;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.apache.poi.ss.formula.eval.ValueEval;
 import org.apache.poi.ss.formula.ptg.Ptg;
 import org.apache.poi.ss.formula.ptg.RefPtgBase;
@@ -686,7 +686,13 @@ public class ConditionalFormatter implements Serializable {
             }
         }
 
-        final ValueEval eval = WorkbookEvaluatorUtil.evaluate(spreadsheet, ptgs);
+        ValueEval eval;
+        try {
+            eval = WorkbookEvaluatorUtil.evaluate(spreadsheet, ptgs);
+        } catch (NotImplementedException e) {
+            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            return false;
+        }
         if (eval instanceof BoolEval) {
             return eval == null ? false : ((BoolEval) eval).getBooleanValue();
         } else {
@@ -718,8 +724,13 @@ public class ConditionalFormatter implements Serializable {
                 && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_NUMERIC;
 
         if (isFormulaType) {
-            // make sure we have the latest value for formula cells
-            getFormulaEvaluator().evaluateFormulaCell(cell);
+            try {
+                // make sure we have the latest value for formula cells
+                getFormulaEvaluator().evaluateFormulaCell(cell);
+            } catch (NotImplementedException e) {
+                LOGGER.log(Level.FINEST, e.getMessage(), e);
+                return false;
+            }
         }
 
         // other than numerical types

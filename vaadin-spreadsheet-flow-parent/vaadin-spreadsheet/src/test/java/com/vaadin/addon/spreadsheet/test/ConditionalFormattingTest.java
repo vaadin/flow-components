@@ -24,5 +24,9 @@ public class ConditionalFormattingTest extends AbstractSpreadsheetTestCase {
         assertEquals(value, spreadSheet.getCellAt("B1").getCssValue("background-color"));
     }
 
+    @Test
+    public void unsupportedFormula_parse_noErrorIndicator() {
+        assertNoErrorIndicatorDetected();
+    }
 
 }
