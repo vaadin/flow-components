@@ -83,7 +83,7 @@ public class PopupButtonWidget extends FocusWidget implements ClickHandler,
         root.setClassName(BUTTON_CLASSNAME);
         root.setAttribute("role", "button");
 
-        popup = new VOverlay(true, false, true);
+        popup = new VOverlay(true, false);
         popup.setStyleName(POPUP_OVERLAY_CLASSNAME);
         popupLayout = new VerticalPanel();
         popupLayout.setStylePrimaryName(POPUP_OVERLAY_LAYOUT_CLASSNAME);

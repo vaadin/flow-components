@@ -2,7 +2,6 @@ package com.vaadin.addon.spreadsheet.test;
 
 import java.util.Locale;
 
-import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -10,9 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 
 public class FormulaFormatTest extends AbstractSpreadsheetTestCase {
 

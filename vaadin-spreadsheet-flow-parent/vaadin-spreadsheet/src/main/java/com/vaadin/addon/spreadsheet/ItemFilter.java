@@ -31,13 +31,13 @@ import com.vaadin.addon.spreadsheet.PopupButton.PopupCloseEvent;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupCloseListener;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupOpenEvent;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupOpenListener;
-import com.vaadin.data.Container.Sortable;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.data.util.ItemSorter;
+import com.vaadin.v7.data.Container.Sortable;
+import com.vaadin.v7.data.Property.ValueChangeEvent;
+import com.vaadin.v7.data.Property.ValueChangeListener;
+import com.vaadin.v7.data.util.IndexedContainer;
+import com.vaadin.v7.data.util.ItemSorter;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.OptionGroup;
+import com.vaadin.v7.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
@@ -166,11 +166,7 @@ public class ItemFilter extends Panel implements ValueChangeListener,
      */
     protected void initAllItemsCheckbox() {
         allItems = new CheckBox("(Select All)", true);
-        allItems.setImmediate(true);
-        allItems.addValueChangeListener(new ValueChangeListener() {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
+        allItems.addValueChangeListener(event -> {
                 if (!cancelValueChangeUpdate) {
                     Boolean value = allItems.getValue();
                     cancelValueChangeUpdate = true;
@@ -182,7 +178,6 @@ public class ItemFilter extends Panel implements ValueChangeListener,
                     }
                     cancelValueChangeUpdate = false;
                 }
-            }
         });
     }
 
@@ -205,7 +200,6 @@ public class ItemFilter extends Panel implements ValueChangeListener,
         });
         options = new OptionGroup();
         options.setContainerDataSource(optionsContainer);
-        options.setImmediate(true);
         options.setMultiSelect(true);
         options.addValueChangeListener(this);
     }

@@ -28,7 +28,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
 import com.vaadin.ui.VerticalLayout;
@@ -210,12 +209,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
         button.setDisableOnClick(true);
         button.setEnabled(false);
         button.addStyleName(CLEAR_FILTERS_BUTTON_CLASSNAME);
-        button.addClickListener(new ClickListener() {
-            @Override
-            public void buttonClick(ClickEvent event) {
-                clearAllFilters();
-            }
-        });
+        button.addClickListener(event -> clearAllFilters());
         return button;
     }
 

@@ -7,7 +7,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.themes.BaseTheme;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 class MinimizableComponentContainer extends CssLayout {
@@ -31,7 +31,7 @@ class MinimizableComponentContainer extends CssLayout {
     private Button createMinimizeButton() {
         final Button minimizeButton = new Button(FontAwesome.MINUS);
 
-        minimizeButton.setStyleName(BaseTheme.BUTTON_LINK);
+        minimizeButton.setStyleName(ValoTheme.BUTTON_LINK);
         minimizeButton.addStyleName("minimize-button");
 
         minimizeButton.addClickListener(new ClickListener() {

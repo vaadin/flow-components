@@ -10,23 +10,22 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.InlineDateField;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.PopupDateField;
-import com.vaadin.ui.Slider;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
+import com.vaadin.v7.data.Property.ValueChangeEvent;
+import com.vaadin.v7.data.Property.ValueChangeListener;
+import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
+import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.v7.ui.DateField;
+import com.vaadin.v7.ui.Field;
+import com.vaadin.v7.ui.InlineDateField;
+import com.vaadin.v7.ui.NativeSelect;
+import com.vaadin.v7.ui.PopupDateField;
+import com.vaadin.v7.ui.Slider;
+import com.vaadin.v7.ui.TextArea;
+import com.vaadin.v7.ui.TextField;
 
 public class CustomComponentFixture implements SpreadsheetFixture {
 
@@ -131,9 +130,6 @@ class CellMultiplexerEditorFactory implements SpreadsheetComponentFactory {
         field.addValueChangeListener(new ValueToCellUpdater(spreadsheet,
                 rowIndex, columnIndex));
 
-        if (field instanceof AbstractComponent) {
-            ((AbstractComponent) field).setImmediate(true);
-        }
         return field;
     }
 

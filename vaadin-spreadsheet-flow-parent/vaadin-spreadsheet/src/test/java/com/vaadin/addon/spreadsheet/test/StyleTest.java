@@ -2,11 +2,11 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.hamcrest.Matchers.equalTo;
 
-import com.vaadin.testbench.parallel.Browser;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
+import com.vaadin.testbench.parallel.Browser;
 
 public class StyleTest extends Test1 {
 

@@ -12,12 +12,12 @@ import com.vaadin.addon.spreadsheet.PopupButton;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeListener;
-import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.v7.data.Property;
+import com.vaadin.v7.data.Property.ValueChangeEvent;
+import com.vaadin.v7.data.Property.ValueChangeListener;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.ListSelect;
+import com.vaadin.v7.ui.CustomField;
+import com.vaadin.v7.ui.ListSelect;
 
 @SuppressWarnings("serial")
 public class PopupButtonFixture implements SpreadsheetFixture {
@@ -90,13 +90,12 @@ class CellListSelectComponent extends CustomField<String> {
         this.dataValidationButton = dataValidationButton;
         listSelect = new ListSelect();
         listSelect.setMultiSelect(false);
-        listSelect.setImmediate(true);
         listSelect.addValueChangeListener(new Property.ValueChangeListener() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public void valueChange(
-                    com.vaadin.data.Property.ValueChangeEvent event) {
+                    com.vaadin.v7.data.Property.ValueChangeEvent event) {
                 final String value = (String) listSelect.getValue();
                 setValue(value);
                 CellListSelectComponent.this.dataValidationButton.closePopup();

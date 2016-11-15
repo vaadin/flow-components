@@ -306,7 +306,10 @@ public class SpreadsheetFactory implements Serializable {
             if (workbook instanceof SXSSFWorkbook) {
                 ((SXSSFWorkbook) workbook).dispose();
             }
-        } finally {
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
+        }
+        finally {
             if (fos != null) {
                 fos.close();
             }

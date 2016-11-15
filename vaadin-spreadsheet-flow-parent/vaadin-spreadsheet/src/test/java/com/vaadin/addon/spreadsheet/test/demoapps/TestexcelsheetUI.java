@@ -39,15 +39,15 @@ import com.vaadin.addon.spreadsheet.test.fixtures.SpreadsheetFixtureFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.StylesFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.ValueHandlerFixture;
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.util.FilesystemContainer;
+import com.vaadin.v7.data.util.FilesystemContainer;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.v7.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
+import com.vaadin.v7.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
@@ -138,10 +138,8 @@ public class TestexcelsheetUI extends UI {
         layout.setSizeFull();
         rowBufferSizeField = new TextField("Row Buffer Size:");
         rowBufferSizeField.setId("rowBufferSizeField");
-        rowBufferSizeField.setImmediate(true);
         columnBufferSizeField = new TextField("Column Buffer Size:");
         columnBufferSizeField.setId("columnBufferSizeField");
-        columnBufferSizeField.setImmediate(true);
 
         Button newSpreadsheetButton = new Button("Create new",
                 new Button.ClickListener() {

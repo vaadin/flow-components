@@ -52,7 +52,6 @@ public class CellComment extends VOverlay {
     private final DivElement line;
 
     private Element cellElement;
-
     private String linePositionClassName;
 
     private TextAreaElement input = Document.get().createTextAreaElement();
@@ -78,10 +77,9 @@ public class CellComment extends VOverlay {
         label.setVisible(false);
         label.setStyleName(COMMENT_OVERLAY_LABEL_CLASSNAME);
         setStyleName(COMMENT_OVERLAY_CLASSNAME);
-        setShadowStyle(COMMENT_OVERLAY_SHADOW_CLASSNAME);
+        addStyleName(COMMENT_OVERLAY_SHADOW_CLASSNAME);
         setOwner(owner);
         setAnimationEnabled(false);
-        setShadowEnabled(true);
         setVisible(false);
         setZIndex(30);
 

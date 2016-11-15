@@ -5,10 +5,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vaadin.version>7.7.3</vaadin.version>
+        <vaadin.version>8.0.0.alpha6</vaadin.version>
+        <charts.version>4.0-SNAPSHOT</charts.version>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
         <testbench.api.version>7.7.3</testbench.api.version>
-        <jetty.plugin.version>9.2.3.v20140905</jetty.plugin.version>
+        <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
         <tb.hub>testbench-hub.intra.itmill.com</tb.hub>
     </properties>
 
@@ -30,7 +31,25 @@
             <id>vaadin-addons</id>
             <url>http://maven.vaadin.com/vaadin-addons</url>
         </repository>
+        <repository>
+            <id>vaadin-prereleases</id>
+            <name>Vaadin Pre-releases</name>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+        </repository>
+        <repository>
+            <id>vaadin-snapshots</id>
+            <name>Vaadin addons snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+        </repository>
     </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>vaadin-prereleases</id>
+            <name>Vaadin Pre-releases</name>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <distributionManagement>
         <snapshotRepository>
@@ -66,7 +85,7 @@
         <dependency>
             <groupId>com.vaadin.addon</groupId>
             <artifactId>vaadin-charts</artifactId>
-            <version>3.0.0</version>
+            <version>${charts.version}</version>
         </dependency>
 
         <dependency>
@@ -87,7 +106,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-themes</artifactId>
             <version>${vaadin.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin.addon</groupId>
@@ -107,7 +125,6 @@
             <version>${testbench.api.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
     <build>
         <plugins>
@@ -128,8 +145,8 @@
                 <version>3.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
                 <executions>
                     <execution>
@@ -193,7 +210,7 @@
                 <version>${vaadin.plugin.version}</version>
                 <configuration>
                     <webappDirectory>${project.build.directory}/testwebapp/VAADIN/widgetsets</webappDirectory>
-                    <extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
+                    <extraJvmArgs>-Xms512M -Xmx1g</extraJvmArgs>
                     <hostedWebapp>${project.build.directory}/testwebapp</hostedWebapp>
                     <noServer>true</noServer>
                     <runTarget>http://localhost:9998/</runTarget>
@@ -202,7 +219,7 @@
                     <compileReport>true</compileReport>
                     <strict>true</strict>
 
-                    <module>com.vaadin.addon.spreadsheet.charts.AppWidgetSet</module>
+                    <module>com.vaadin.addon.spreadsheet.charts.WidgetSet</module>
                 </configuration>
                 <executions>
                     <!-- You are free to mark this as permanently ignored in Eclipse -->
@@ -309,7 +326,6 @@
                     <httpConnector>
                         <port>9998</port>
                     </httpConnector>
-                    <useProvidedScope>true</useProvidedScope>
                     <useTestClasspath>true</useTestClasspath>
                     <stopKey>STOP</stopKey>
                     <stopPort>8005</stopPort>
@@ -369,6 +385,7 @@
                     <exclude>rebel.xml</exclude>
                 </excludes>
             </resource>
+
             <resource>
                 <directory>src/main/resources</directory>
             </resource>

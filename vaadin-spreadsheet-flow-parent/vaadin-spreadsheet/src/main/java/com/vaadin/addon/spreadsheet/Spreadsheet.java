@@ -4681,43 +4681,43 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         Attributes attr = design.attributes();
 
         DesignAttributeHandler.writeAttribute(ATTR_NO_GRIDLINES, attr,
-                !isGridlinesVisible(), false, Boolean.class);
+                !isGridlinesVisible(), false, Boolean.class, designContext);
 
         DesignAttributeHandler.writeAttribute(ATTR_NO_HEADINGS, attr,
-                !isRowColHeadingsVisible(), false, Boolean.class);
+                !isRowColHeadingsVisible(), false, Boolean.class, designContext);
 
         DesignAttributeHandler.writeAttribute(ATTR_NO_FUNCTION_BAR, attr,
-                !isFunctionBarVisible(), false, Boolean.class);
+                !isFunctionBarVisible(), false, Boolean.class, designContext);
 
         DesignAttributeHandler.writeAttribute(ATTR_NO_SHEET_SELECTION_BAR,
-                attr, !isSheetSelectionBarVisible(), false, Boolean.class);
+                attr, !isSheetSelectionBarVisible(), false, Boolean.class, designContext);
 
         DesignAttributeHandler.writeAttribute(ATTR_ACTIVE_SHEET, attr,
-                getActiveSheetIndex(), 0, Integer.class);
+                getActiveSheetIndex(), 0, Integer.class, designContext);
 
         DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_COL_COUNT, attr,
                 getDefaultColumnCount(), SpreadsheetFactory.DEFAULT_COLUMNS,
-                Integer.class);
+                Integer.class, designContext);
 
         DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_ROW_COUNT, attr,
                 getDefaultRowCount(), SpreadsheetFactory.DEFAULT_ROWS,
-                Integer.class);
+                Integer.class, designContext);
 
         if (defaultColWidthSet) {
             DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_COL_WIDTH, attr,
                     getDefaultColumnWidth(),
-                    SpreadsheetUtil.getDefaultColumnWidthInPx(), Integer.class);
+                    SpreadsheetUtil.getDefaultColumnWidthInPx(), Integer.class, designContext);
         }
 
         if (defaultRowHeightSet) {
             DesignAttributeHandler.writeAttribute(ATTR_DEFAULT_ROW_HEIGHT,
                     attr, getDefaultRowHeight(),
-                    SpreadsheetFactory.DEFAULT_ROW_HEIGHT_POINTS, Float.class);
+                    SpreadsheetFactory.DEFAULT_ROW_HEIGHT_POINTS, Float.class, designContext);
         }
 
         if (srcUri != null) {
             DesignAttributeHandler.writeAttribute(ATTR_SRC, attr, srcUri, null,
-                    String.class);
+                    String.class, designContext);
         }
     }
 

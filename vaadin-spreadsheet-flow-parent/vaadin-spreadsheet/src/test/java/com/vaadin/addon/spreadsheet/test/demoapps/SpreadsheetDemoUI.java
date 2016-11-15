@@ -11,6 +11,9 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.Format;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -36,10 +39,7 @@ import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.annotations.Theme;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.data.util.FilesystemContainer;
-import com.vaadin.data.util.converter.Converter.ConversionException;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
@@ -48,20 +48,14 @@ import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
@@ -69,9 +63,20 @@ import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.v7.data.Property.ValueChangeEvent;
+import com.vaadin.v7.data.Property.ValueChangeListener;
+import com.vaadin.v7.data.util.FilesystemContainer;
+import com.vaadin.v7.data.util.converter.Converter.ConversionException;
+import com.vaadin.v7.ui.AbstractField;
+import com.vaadin.v7.ui.AbstractSelect;
+import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.v7.ui.NativeSelect;
+import com.vaadin.v7.ui.TextField;
 
 @SuppressWarnings("serial")
 @Theme("demo")
+@Widgetset("com.vaadin.addon.spreadsheet.Widgetset")
 public class SpreadsheetDemoUI extends UI implements Receiver {
 
     VerticalLayout layout = new VerticalLayout();
@@ -208,13 +213,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 });
 
         hideTop = new CheckBox("toggle top bar visibility");
-        hideTop.setImmediate(true);
-
         hideBottom = new CheckBox("toggle bottom bar visibility");
-        hideBottom.setImmediate(true);
-
         hideBoth = new CheckBox("report mode");
-        hideBoth.setImmediate(true);
 
         hideTop.addValueChangeListener(new ValueChangeListener() {
 
@@ -323,10 +323,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             fixtureSelect.addItems(fixture.toString());
         }
 
-        loadFixtureBtn = new Button("Load", new Button.ClickListener() {
-
-            @Override
-            public void buttonClick(ClickEvent event) {
+        loadFixtureBtn = new Button("Load");
+        loadFixtureBtn.addClickListener(event -> {
                 if (spreadsheet == null) {
                     return;
                 }
@@ -334,7 +332,6 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 String fixtureName = (String) fixtureSelect.getValue();
                 TestFixtures fixture = TestFixtures.valueOf(fixtureName);
                 fixture.factory.create().loadFixture(spreadsheet);
-            }
         });
 
         loadFixtureBtn.setId("loadFixtureBtn");
@@ -440,7 +437,6 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     private ComboBox createTestSheetCombobox(FilesystemContainer testSheetContainer) {
         ComboBox cb = new ComboBox(null, testSheetContainer);
         cb.setId("testSheetSelect");
-        cb.setImmediate(true);
         cb.setItemCaptionPropertyId("Name");
         cb.setPageLength(30);
         cb.setWidth("250px");
@@ -478,7 +474,6 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private CheckBox createRowHeadings() {
         CheckBox rowColHeadings = new CheckBox("display row and column headers");
-        rowColHeadings.setImmediate(true);
 
         rowColHeadings.addValueChangeListener(new ValueChangeListener() {
 
@@ -496,7 +491,6 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private CheckBox createCBNewLines() {
         CheckBox cb = new CheckBox("display grid lines");
-        cb.setImmediate(true);
         cb.addValueChangeListener(new ValueChangeListener() {
 
             @Override
@@ -739,11 +733,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             });
             comboBox.setWidth("100%");
 
-            dateField.setImmediate(true);
-            dateField.addValueChangeListener(new ValueChangeListener() {
+            dateField.addValueChangeListener(event ->{
 
-                @Override
-                public void valueChange(ValueChangeEvent event) {
                     CellReference selectedCellReference = spreadsheet
                             .getSelectedCellReference();
                     Cell cell = spreadsheet.getCell(
@@ -751,7 +742,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                             selectedCellReference.getCol());
                     try {
                         Date oldValue = cell.getDateCellValue();
-                        Date value = dateField.getValue();
+
+                        //TODO change to use LocalDate
+                        Date value = Date.from(dateField.getValue().atStartOfDay().toInstant(ZoneOffset.UTC));
                         if (oldValue != null && !oldValue.equals(value)) {
                             cell.setCellValue(value);
                             spreadsheet.refreshCells(cell);
@@ -761,9 +754,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     } catch (NullPointerException npe) {
                         npe.printStackTrace();
                     }
-                }
             });
-            checkBox.setImmediate(true);
             checkBox.addValueChangeListener(new ValueChangeListener() {
 
                 @Override
@@ -846,16 +837,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                             .getBooleanCellValue());
                 } else if (customEditor instanceof DateField) {
                     final String s = cell.getCellStyle().getDataFormatString();
-                    if (s.contains("ss")) {
-                        ((DateField) customEditor)
-                                .setResolution(Resolution.SECOND);
-                    } else if (s.contains("mm")) {
-                        ((DateField) customEditor)
-                                .setResolution(Resolution.MINUTE);
-                    } else if (s.contains("h")) {
-                        ((DateField) customEditor)
-                                .setResolution(Resolution.HOUR);
-                    } else if (s.contains("d")) {
+
+                    if (s.contains("d")) {
                         ((DateField) customEditor)
                                 .setResolution(Resolution.DAY);
                     } else if (s.contains("m") || s.contains("mmm")) {
@@ -865,8 +848,10 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         ((DateField) customEditor)
                                 .setResolution(Resolution.YEAR);
                     }
-                    ((DateField) customEditor)
-                            .setValue(cell.getDateCellValue());
+                    // TODO change to use LocalDate
+                    // cell.getDateCellValue() should return localDate so you don't nee this hack
+                    LocalDate date = cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    ((DateField) customEditor).setValue(date);
                     ((DateField) customEditor).setWidth("100%");
                     Format format = spreadsheet.getDataFormatter()
                             .createFormat(cell);
