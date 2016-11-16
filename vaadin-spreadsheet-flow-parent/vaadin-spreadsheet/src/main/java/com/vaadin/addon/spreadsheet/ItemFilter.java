@@ -20,9 +20,11 @@ package com.vaadin.addon.spreadsheet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -31,13 +33,10 @@ import com.vaadin.addon.spreadsheet.PopupButton.PopupCloseEvent;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupCloseListener;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupOpenEvent;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupOpenListener;
-import com.vaadin.v7.data.Container.Sortable;
-import com.vaadin.v7.data.Property.ValueChangeEvent;
-import com.vaadin.v7.data.Property.ValueChangeListener;
-import com.vaadin.v7.data.util.IndexedContainer;
-import com.vaadin.v7.data.util.ItemSorter;
+import com.vaadin.server.data.DataSource;
+import com.vaadin.server.data.ListDataSource;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.ui.CheckBoxGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
@@ -49,15 +48,15 @@ import com.vaadin.ui.VerticalLayout;
  * unique cell value that can be found within the cells of the table column.
  */
 @SuppressWarnings("serial")
-public class ItemFilter extends Panel implements ValueChangeListener,
-        SpreadsheetFilter {
+public class ItemFilter extends Panel implements SpreadsheetFilter {
 
     private static final String ITEM_FILTER_LAYOUT_CLASSNAME = "spreadsheet-item-filter-layout";
     private Spreadsheet spreadsheet;
     private CellRangeAddress filterRange;
     private CheckBox allItems;
-    private OptionGroup options;
-    private IndexedContainer optionsContainer;
+    private CheckBoxGroup<String> filterCheckbox;
+    private DataSource<String> filterOptionsDS;
+    private List<String> filterOptions = new ArrayList<>();
     private ArrayList<String> allCellValues;
     private Collection<String> latestFilteredValues;
     private PopupButton popupButton;
@@ -110,7 +109,7 @@ public class ItemFilter extends Panel implements ValueChangeListener,
     protected void initLayouts() {
         layout = new VerticalLayout();
         layout.addComponent(allItems);
-        layout.addComponent(options);
+        layout.addComponent(filterCheckbox);
 
         setContent(layout);
         setStyleName(ITEM_FILTER_LAYOUT_CLASSNAME);
@@ -131,7 +130,7 @@ public class ItemFilter extends Panel implements ValueChangeListener,
                 // options were left unchecked.
                 if (!allItems.getValue()) {
                     @SuppressWarnings("unchecked")
-                    Collection<String> currentValue = (Collection<String>) options
+                    Collection<String> currentValue = (Collection<String>) filterCheckbox
                             .getValue();
                     cancelValueChangeUpdate = true;
                     if (currentValue.isEmpty()) {
@@ -139,9 +138,9 @@ public class ItemFilter extends Panel implements ValueChangeListener,
                                 || latestFilteredValues
                                         .containsAll(allCellValues)) {
                             allItems.setValue(true);
-                            options.setValue(allCellValues);
+                            filterCheckbox.setValue(new HashSet<>(allCellValues));
                         } else {
-                            options.setValue(latestFilteredValues);
+                            filterCheckbox.setValue(new HashSet<>(latestFilteredValues));
                         }
                     } else {
                         if (currentValue.containsAll(allCellValues)) {
@@ -171,10 +170,10 @@ public class ItemFilter extends Panel implements ValueChangeListener,
                     Boolean value = allItems.getValue();
                     cancelValueChangeUpdate = true;
                     if (value) {
-                        options.setValue(allCellValues);
+                        filterCheckbox.setValue(new HashSet<>(allCellValues));
                         updateFilteredItems(allCellValues);
                     } else {
-                        options.setValue(Collections.emptySet());
+                        filterCheckbox.setValue(Collections.emptySet());
                     }
                     cancelValueChangeUpdate = false;
                 }
@@ -185,23 +184,35 @@ public class ItemFilter extends Panel implements ValueChangeListener,
      * Creates the filter selection component.
      */
     protected void initOptions() {
-        optionsContainer = new IndexedContainer();
-        optionsContainer.setItemSorter(new ItemSorter() {
-
-            @Override
-            public void setSortProperties(Sortable container,
-                    Object[] propertyId, boolean[] ascending) {
-            }
-
-            @Override
-            public int compare(Object itemId1, Object itemId2) {
-                return ((String) itemId1).compareToIgnoreCase((String) itemId2);
+        filterOptionsDS = new ListDataSource(filterOptions);
+        filterCheckbox = new CheckBoxGroup();
+        filterCheckbox.setDataSource(filterOptionsDS);
+        filterCheckbox.addValueChangeListener(event->{
+            if (firstUpdate) {
+                firstUpdate = false;
+            } else {
+                if (!cancelValueChangeUpdate) {
+                    Collection<String> value = (Collection<String>) filterCheckbox
+                            .getValue();
+                    // value should not be updated when options are empty and all
+                    // items is unchecked - just as in Excel
+                    if (!value.isEmpty()) {
+                        updateFilteredItems(value);
+                        cancelValueChangeUpdate = true;
+                        if (value.containsAll(allCellValues)) {
+                            if (!allItems.getValue()) {
+                                allItems.setValue(true);
+                            }
+                        } else {
+                            if (allItems.getValue()) {
+                                allItems.setValue(false);
+                            }
+                        }
+                        cancelValueChangeUpdate = false;
+                    }
+                }
             }
         });
-        options = new OptionGroup();
-        options.setContainerDataSource(optionsContainer);
-        options.setMultiSelect(true);
-        options.addValueChangeListener(this);
     }
 
     /**
@@ -216,7 +227,7 @@ public class ItemFilter extends Panel implements ValueChangeListener,
         while (iter.hasNext()) {
             String old = iter.next();
             if (!newValues.contains(old)) {
-                optionsContainer.removeItem(old);
+                filterOptions.remove(old);
                 iter.remove();
             }
         }
@@ -224,19 +235,20 @@ public class ItemFilter extends Panel implements ValueChangeListener,
         // add new
         for (String item : newValues) {
             if (!allCellValues.contains(item)) {
-                optionsContainer.addItem(item);
+                filterOptions.add(item);
                 allCellValues.add(item);
                 needsSort = true;
             }
         }
 
         if (needsSort) {
-            optionsContainer.sort(new Object[0], new boolean[0]);
+            Comparator<String> byString = (String s1,String s2) -> s1.compareToIgnoreCase(s2);
+            Collections.sort(filterOptions, byString);
         }
 
         Set<String> visibleValues = getVisibleValues();
         cancelValueChangeUpdate = true;
-        options.setValue(visibleValues);
+        filterCheckbox.setValue(visibleValues);
         allItems.setValue(visibleValues.containsAll(allCellValues));
         cancelValueChangeUpdate = false;
     }
@@ -287,38 +299,9 @@ public class ItemFilter extends Panel implements ValueChangeListener,
                 filteredRows.add(new Integer(r));
             }
         }
-        latestFilteredValues = visibleValues;
+        latestFilteredValues = new ArrayList<>(visibleValues);
 
         filterTable.onFiltersUpdated();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void valueChange(ValueChangeEvent event) {
-        if (firstUpdate) {
-            firstUpdate = false;
-        } else {
-            if (!cancelValueChangeUpdate) {
-                Collection<String> value = (Collection<String>) options
-                        .getValue();
-                // value should not be updated when options are empty and all
-                // items is unchecked - just as in Excel
-                if (!value.isEmpty()) {
-                    updateFilteredItems(value);
-                    cancelValueChangeUpdate = true;
-                    if (value.containsAll(allCellValues)) {
-                        if (!allItems.getValue()) {
-                            allItems.setValue(true);
-                        }
-                    } else {
-                        if (allItems.getValue()) {
-                            allItems.setValue(false);
-                        }
-                    }
-                    cancelValueChangeUpdate = false;
-                }
-            }
-        }
     }
 
     @Override
@@ -330,7 +313,8 @@ public class ItemFilter extends Panel implements ValueChangeListener,
     public void clearFilter() {
         cancelValueChangeUpdate = true;
         allItems.setValue(true);
-        options.setValue(allCellValues);
+        filterCheckbox.setValue(new HashSet<>(allCellValues));
+        filterOptionsDS.refreshAll();
         filteredRows.clear();
         cancelValueChangeUpdate = false;
     }
