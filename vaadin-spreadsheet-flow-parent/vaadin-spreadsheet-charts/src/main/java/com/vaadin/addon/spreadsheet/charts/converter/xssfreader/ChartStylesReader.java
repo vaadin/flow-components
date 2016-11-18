@@ -18,6 +18,7 @@ package com.vaadin.addon.spreadsheet.charts.converter.xssfreader;
  */
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -230,6 +231,9 @@ class ChartStylesReader {
         if (themeElements == null) {
             ThemesTable theme = ((XSSFWorkbook) spreadsheet.getWorkbook())
                     .getTheme();
+            if (theme == null) {
+                return null;
+            }
             ThemeDocument themeDocument;
             try {
                 themeDocument = ThemeDocument.Factory.parse(theme
@@ -262,6 +266,9 @@ class ChartStylesReader {
     }
 
     private String getMinorFont() {
+        if (getThemeElements() == null) {
+            return "";
+        }
         try {
             return getThemeElements().getFontScheme().getMinorFont().getLatin()
                     .getTypeface();
@@ -271,6 +278,9 @@ class ChartStylesReader {
     }
 
     private String getMajorFont() {
+        if (getThemeElements() == null) {
+            return "";
+        }
         try {
             return getThemeElements().getFontScheme().getMajorFont().getLatin()
                     .getTypeface();
@@ -298,10 +308,13 @@ class ChartStylesReader {
     }
 
     private Map<String, byte[]> getColorMap() {
-        if (colorMap == null)
-            colorMap = ColorUtils.createColorMap(getThemeElements()
-                    .getClrScheme());
-
+        if (colorMap == null) {
+            if (getThemeElements() == null) {
+                return new HashMap<>();
+            }
+            colorMap = ColorUtils
+                    .createColorMap(getThemeElements().getClrScheme());
+        }
         return colorMap;
     }
 }
