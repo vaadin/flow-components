@@ -1,7 +1,6 @@
 package com.vaadin.addon.spreadsheet.test;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -30,6 +29,7 @@ public class CustomComponentsTest extends Test1 {
         Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B2"));
         Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B3"));
 
+        testBench(driver).waitForVaadin();
         typeInTextFieldEditor(b2, NUM_PROXY.toString());
 
         sheetController.putCellContent("B3", "=B2*2");
@@ -78,6 +78,7 @@ public class CustomComponentsTest extends Test1 {
         Assert.assertEquals("1", sheetController.getCellContent("C4"));
     }
 
+
     @Test
     public void testNativeSelect() {
         loadServerFixture("CUSTOM_COMPONENTS");
@@ -92,7 +93,7 @@ public class CustomComponentsTest extends Test1 {
 
         sheetController.selectCell("G1");
 
-        Assert.assertEquals("90", sheetController.getCellContent("I3"));
+        Assert.assertEquals("120", sheetController.getCellContent("I3"));
     }
 
     @Test
@@ -113,17 +114,6 @@ public class CustomComponentsTest extends Test1 {
         Sleeper.sleepTightInSeconds(3);
 
         Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B2"));
-    }
-
-    @Test
-    public void testButtonHandling() {
-        loadServerFixture("CUSTOM_COMPONENTS");
-
-        driver.findElement(By.id("b10-btn")).click();
-        testBench(driver).waitForVaadin();
-        Assert.assertEquals("42", sheetController.getCellContent("B11"));
-        Assert.assertEquals("b12", driver.findElement(By.id("b12-label"))
-                .getText());
     }
 
 }
