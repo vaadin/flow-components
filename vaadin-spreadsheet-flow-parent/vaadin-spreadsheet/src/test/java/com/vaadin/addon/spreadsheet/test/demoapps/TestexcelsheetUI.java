@@ -39,6 +39,7 @@ import com.vaadin.addon.spreadsheet.test.fixtures.SpreadsheetFixtureFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.StylesFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.ValueHandlerFixture;
 import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.v7.data.util.FilesystemContainer;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
@@ -58,6 +59,7 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("demo")
 @Deprecated
 // Should be removed at some point in favor of SpreadsheetDemoUI
+@Widgetset("com.vaadin.addon.spreadsheet.Widgetset")
 public class TestexcelsheetUI extends UI {
 
     private Spreadsheet spreadsheet;

@@ -5,6 +5,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.SpreadsheetTable;
 import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TabSheet;
@@ -12,6 +13,7 @@ import com.vaadin.ui.UI;
 
 @SuppressWarnings("serial")
 @Theme("demo")
+@Widgetset("com.vaadin.addon.spreadsheet.Widgetset")
 public class TabsheetTestUI extends UI {
 
     @Override

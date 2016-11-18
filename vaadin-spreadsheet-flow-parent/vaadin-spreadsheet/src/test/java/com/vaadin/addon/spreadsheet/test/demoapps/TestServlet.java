@@ -7,7 +7,6 @@ import com.vaadin.server.VaadinServlet;
 
 @WebServlet(value = "/*", asyncSupported = true, initParams = {
         @WebInitParam(name = "heartbeatInterval", value = "10"),
-        @WebInitParam(name = "widgetset", value = "com.vaadin.addon.spreadsheet.Widgetset"),
         @WebInitParam(name = "UIProvider", value = "com.vaadin.addon.spreadsheet.test.demoapps.TestUIProviderImpl") })
 public class TestServlet extends VaadinServlet {
 }

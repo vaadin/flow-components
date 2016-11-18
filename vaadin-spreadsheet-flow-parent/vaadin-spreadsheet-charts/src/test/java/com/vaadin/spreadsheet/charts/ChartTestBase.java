@@ -25,7 +25,7 @@ import com.vaadin.addon.charts.model.Stacking;
 import com.vaadin.addon.spreadsheet.SheetChartWrapper;
 import com.vaadin.addon.spreadsheet.SheetOverlayWrapper;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.spreadsheet.charts.ui.SpreadsheetChartsDemoUI;
+import com.vaadin.addon.spreadsheet.test.demoapps.SpreadsheetChartsDemoUI;
 
 public class ChartTestBase {
     private static String sampleFileDiretory = "";

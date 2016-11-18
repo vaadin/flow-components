@@ -15,6 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -24,6 +25,7 @@ import com.vaadin.ui.VerticalSplitPanel;
 
 @SuppressWarnings("serial")
 @Theme("demo")
+@Widgetset("com.vaadin.addon.spreadsheet.Widgetset")
 public class MultipleSpreadsheetUI extends UI {
 
     private List<XSSFCellStyle> wb1CellStyles = new ArrayList<XSSFCellStyle>();

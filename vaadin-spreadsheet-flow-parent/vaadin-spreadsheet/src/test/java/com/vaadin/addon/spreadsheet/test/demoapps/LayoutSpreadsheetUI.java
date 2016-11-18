@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -14,6 +15,7 @@ import com.vaadin.ui.VerticalLayout;
 
 @SuppressWarnings("serial")
 @Theme("demo")
+@Widgetset("com.vaadin.addon.spreadsheet.Widgetset")
 public class LayoutSpreadsheetUI extends UI {
 
 

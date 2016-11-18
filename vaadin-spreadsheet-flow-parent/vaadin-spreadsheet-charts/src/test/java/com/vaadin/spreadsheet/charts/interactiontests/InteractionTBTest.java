@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.addon.spreadsheet.test.AbstractSpreadsheetTestCase;
+import com.vaadin.addon.spreadsheet.test.demoapps.SpreadsheetChartsDemoUI;
 import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 import com.vaadin.addon.spreadsheet.test.testutil.OverlayHelper;
@@ -197,5 +198,10 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
                 + coordinates[0] + ".row" + coordinates[1]));
 
         return element;
+    }
+
+    @Override
+    public Class<?> getUIClass() {
+        return SpreadsheetChartsDemoUI.class;
     }
 }
