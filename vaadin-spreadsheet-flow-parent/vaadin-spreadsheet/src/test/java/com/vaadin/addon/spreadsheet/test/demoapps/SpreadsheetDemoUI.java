@@ -48,9 +48,11 @@ import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
@@ -67,9 +69,7 @@ import com.vaadin.v7.data.Property.ValueChangeEvent;
 import com.vaadin.v7.data.Property.ValueChangeListener;
 import com.vaadin.v7.data.util.FilesystemContainer;
 import com.vaadin.v7.data.util.converter.Converter.ConversionException;
-import com.vaadin.v7.ui.AbstractField;
 import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.CheckBox;
 import com.vaadin.v7.ui.ComboBox;
 import com.vaadin.v7.ui.NativeSelect;
 import com.vaadin.v7.ui.TextField;
@@ -216,30 +216,19 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         hideBottom = new CheckBox("toggle bottom bar visibility");
         hideBoth = new CheckBox("report mode");
 
-        hideTop.addValueChangeListener(new ValueChangeListener() {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                spreadsheet.setFunctionBarVisible(!hideTop.getValue());
-                hideBoth.setValue(spreadsheet.isReportStyle());
-            }
+        hideTop.addValueChangeListener(event -> {
+            spreadsheet.setFunctionBarVisible(!hideTop.getValue());
+            hideBoth.setValue(spreadsheet.isReportStyle());
         });
-        hideBottom.addValueChangeListener(new ValueChangeListener() {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
+        hideBottom.addValueChangeListener(event1 ->  {
                 spreadsheet.setSheetSelectionBarVisible(!hideBottom.getValue());
                 hideBoth.setValue(spreadsheet.isReportStyle());
-            }
         });
-        hideBoth.addValueChangeListener(new ValueChangeListener() {
 
-            @Override
-            public void valueChange(ValueChangeEvent event) {
+        hideBoth.addValueChangeListener(event1 -> {
                 spreadsheet.setReportStyle(hideBoth.getValue());
                 hideTop.setValue(!spreadsheet.isFunctionBarVisible());
                 hideBottom.setValue(!spreadsheet.isFunctionBarVisible());
-            }
         });
 
         checkBoxLayout.addComponents(gridlines, rowColHeadings, hideTop,
@@ -292,12 +281,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             localeSelect.addItem(locale);
             localeSelect.setItemCaption(locale, locale.getDisplayName());
         }
-        localeSelect.addValueChangeListener(new ValueChangeListener() {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
+        localeSelect.addValueChangeListener(e-> {
                 updateLocale();
-            }
         });
 
         HorizontalLayout sheetOptions = new HorizontalLayout();
@@ -474,32 +459,19 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private CheckBox createRowHeadings() {
         CheckBox rowColHeadings = new CheckBox("display row and column headers");
-
-        rowColHeadings.addValueChangeListener(new ValueChangeListener() {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                Boolean display = (Boolean) event.getProperty().getValue();
-
+        rowColHeadings.addValueChangeListener(event ->{
                 if (spreadsheet != null) {
-                    spreadsheet.setRowColHeadingsVisible(display);
+                    spreadsheet.setRowColHeadingsVisible(event.getValue());
                 }
-            }
         });
         return rowColHeadings;
     }
 
     private CheckBox createCBNewLines() {
         CheckBox cb = new CheckBox("display grid lines");
-        cb.addValueChangeListener(new ValueChangeListener() {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                Boolean display = (Boolean) event.getProperty().getValue();
-
-                if (spreadsheet != null) {
-                    spreadsheet.setGridlinesVisible(display);
-                }
+        cb.addValueChangeListener(event -> {
+            if (spreadsheet != null) {
+                spreadsheet.setGridlinesVisible(event.getValue());
             }
         });
         return cb;
@@ -753,25 +725,21 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                         npe.printStackTrace();
                     }
             });
-            checkBox.addValueChangeListener(new ValueChangeListener() {
-
-                @Override
-                public void valueChange(ValueChangeEvent event) {
-                    CellReference selectedCellReference = spreadsheet
-                            .getSelectedCellReference();
-                    Cell cell = spreadsheet.getCell(
-                            selectedCellReference.getRow(),
-                            selectedCellReference.getCol());
-                    try {
-                        Boolean value = checkBox.getValue();
-                        Boolean oldValue = cell.getBooleanCellValue();
-                        if (value != oldValue) {
-                            cell.setCellValue(value);
-                            spreadsheet.refreshCells(cell);
-                        }
-                    } catch (IllegalStateException ise) {
-                        ise.printStackTrace();
+            checkBox.addValueChangeListener(event -> {
+                CellReference selectedCellReference = spreadsheet
+                        .getSelectedCellReference();
+                Cell cell = spreadsheet.getCell(
+                        selectedCellReference.getRow(),
+                        selectedCellReference.getCol());
+                try {
+                    Boolean value = checkBox.getValue();
+                    Boolean oldValue = cell.getBooleanCellValue();
+                    if (value != oldValue) {
+                        cell.setCellValue(value);
+                        spreadsheet.refreshCells(cell);
                     }
+                } catch (IllegalStateException ise) {
+                    ise.printStackTrace();
                 }
             });
         }
