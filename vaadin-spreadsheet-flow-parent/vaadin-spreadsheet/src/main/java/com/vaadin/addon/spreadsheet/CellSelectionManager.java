@@ -21,11 +21,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.poi.ss.util.CellRangeUtil;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeUtil;
 import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
@@ -736,6 +737,10 @@ public class CellSelectionManager implements Serializable {
      *            Merged region that was added
      */
     protected void mergedRegionAdded(CellRangeAddress region) {
+        if (selectedCellReference == null) {
+            return;
+        }
+
         boolean fire = false;
         if (region.isInRange(selectedCellReference.getRow(),
                 selectedCellReference.getCol())) {
@@ -777,6 +782,9 @@ public class CellSelectionManager implements Serializable {
      *            Merged region that was removed
      */
     protected void mergedRegionRemoved(CellRangeAddress region) {
+        if (selectedCellReference == null) {
+            return;
+        }
         if (region.isInRange(selectedCellReference.getRow(),
                 selectedCellReference.getCol())) {
             cellRangeAddresses.add(region);

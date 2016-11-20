@@ -3518,7 +3518,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
     }
 
-    private void loadRangeComponents(HashSet<Component> newCustomComponents,
+    void loadRangeComponents(HashSet<Component> newCustomComponents,
             Set<Integer> rowsWithComponents, int row1, int col1, int row2,
             int col2) {
         for (int r = row1 - 1; r < row2; r++) {
@@ -3567,7 +3567,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     }
                 }
                 if (region != null) {
-                    c = region.col2;
+                    c = region.col2 - 1;
                 }
             }
         }
