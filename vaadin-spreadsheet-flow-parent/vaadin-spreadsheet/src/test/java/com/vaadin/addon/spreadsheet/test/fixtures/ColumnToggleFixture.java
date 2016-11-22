@@ -6,19 +6,13 @@ import java.util.List;
 import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.addon.spreadsheet.test.demoapps.TestexcelsheetUI;
 
-public class ColumnToggleFixture extends UIFixture {
-
-    public ColumnToggleFixture(TestexcelsheetUI ui) {
-        super(ui);
-    }
+public class ColumnToggleFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(Spreadsheet spreadsheet) {
         List<Integer> columnIndexes = new ArrayList<Integer>();
-
-        for (CellReference cellRef : ui.currentSelection) {
+        for (CellReference cellRef : spreadsheet.getSelectedCellReferences()) {
             if (!columnIndexes.contains((int) cellRef.getCol())) {
                 columnIndexes.add((int) cellRef.getCol());
             }

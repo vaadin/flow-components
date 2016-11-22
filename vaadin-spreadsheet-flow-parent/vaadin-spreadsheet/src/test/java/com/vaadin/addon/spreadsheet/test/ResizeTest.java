@@ -2,6 +2,7 @@ package com.vaadin.addon.spreadsheet.test;
 
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -11,8 +12,13 @@ import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.parallel.Browser;
 
-public class ResizeTest extends Test1 {
+public class ResizeTest extends AbstractSpreadsheetTestCase {
 
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        headerPage.createNewSpreadsheet();
+    }
     @Test
     public void testColumnResize() {
 

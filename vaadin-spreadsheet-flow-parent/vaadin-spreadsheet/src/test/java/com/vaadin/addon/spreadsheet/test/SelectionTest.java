@@ -2,14 +2,30 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.testutil.ModifierController;
+import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 import com.vaadin.testbench.parallel.Browser;
 
-public class SelectionTest extends Test1 {
+public class SelectionTest extends AbstractSpreadsheetTestCase {
 
+    protected SheetController ctrl;
+    protected ModifierController shift;
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        headerPage.createNewSpreadsheet();
+        ctrl = new ModifierController(driver, Keys.CONTROL,
+                testBench(getDriver()), getDesiredCapabilities());
+        shift = new ModifierController(driver, Keys.SHIFT,
+                testBench(getDriver()), getDesiredCapabilities());
+    }
     @Test
     public void testSelectionSingleCell() {
         skipBrowser("Shift/Ctrl select fails with Firefox and PhantomJS", Browser.FIREFOX, Browser.PHANTOMJS);

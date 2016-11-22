@@ -2,18 +2,21 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-
 import java.util.GregorianCalendar;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class ValueHandlerTest extends Test1 {
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
+
+public class ValueHandlerTest extends AbstractSpreadsheetTestCase {
 
     @Before
-    public void loadFixture() {
-        loadServerFixture("CELL_VALUE_HANDLER");
+    public void setUp() throws Exception {
+        super.setUp();
+        headerPage.createNewSpreadsheet();
+        headerPage.loadTestFixture(TestFixtures.ValueChangeHandler);
     }
 
     @Test

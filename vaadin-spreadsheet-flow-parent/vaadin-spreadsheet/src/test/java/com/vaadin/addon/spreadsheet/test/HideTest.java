@@ -3,22 +3,25 @@ package com.vaadin.addon.spreadsheet.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import com.vaadin.testbench.parallel.Browser;
-import org.junit.Ignore;
 import org.junit.Test;
 
-public class HideTest extends Test1 {
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
+import com.vaadin.testbench.parallel.Browser;
+
+public class HideTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testHideColumn() {
+        headerPage.createNewSpreadsheet();
+
         sheetController.selectCell("C2");
-        loadServerFixture("TOGGLE_COLUMNS");
+        headerPage.loadTestFixture(TestFixtures.ColumnToggle);
         assertCellIsVisible("B2");
         assertCellIsHidden("C2");
         assertCellIsVisible("D2");
 
         sheetController.selectRegion("B2", "D2");
-        loadServerFixture("TOGGLE_COLUMNS");
+        headerPage.loadTestFixture(TestFixtures.ColumnToggle);
         assertCellIsHidden("B2");
         assertCellIsVisible("C2");
         assertCellIsHidden("D2");
@@ -26,16 +29,17 @@ public class HideTest extends Test1 {
 
     @Test
     public void testHideRow() {
+        headerPage.createNewSpreadsheet();
         skipBrowser("Fails on phantom JS, B3 is visible after hiding region", Browser.PHANTOMJS);
 
         sheetController.selectCell("B3");
-        loadServerFixture("TOGGLE_ROWS");
+        headerPage.loadTestFixture(TestFixtures.RowToggle);
         assertCellIsVisible("B2");
         assertCellIsHidden("B3");
         assertCellIsVisible("B4");
 
         sheetController.selectRegion("B2", "B4");
-        loadServerFixture("TOGGLE_ROWS");
+        headerPage.loadTestFixture(TestFixtures.RowToggle);
         assertCellIsHidden("B2");
         assertCellIsVisible("B3");
         assertCellIsHidden("B4");

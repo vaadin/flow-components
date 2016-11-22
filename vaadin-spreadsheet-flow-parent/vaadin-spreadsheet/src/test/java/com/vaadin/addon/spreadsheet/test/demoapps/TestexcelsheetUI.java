@@ -1,7 +1,6 @@
 package com.vaadin.addon.spreadsheet.test.demoapps;
 
 import static com.vaadin.ui.Alignment.BOTTOM_CENTER;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
@@ -19,38 +18,33 @@ import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeListener;
 import com.vaadin.addon.spreadsheet.test.fixtures.ActionFixture;
-import com.vaadin.addon.spreadsheet.test.fixtures.CellMergeFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.ClassFixtureFactory;
-import com.vaadin.addon.spreadsheet.test.fixtures.ColumnToggleFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.CommentFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.CustomComponentFixture;
-import com.vaadin.addon.spreadsheet.test.fixtures.DeletionHandlerFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.EagerFixtureFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.FormatsFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.HyperLinkFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.LockCellFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.PopupButtonFixture;
-import com.vaadin.addon.spreadsheet.test.fixtures.RowToggleFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.SheetsFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.ShiftFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.SimpleCustomEditorFixture;
-import com.vaadin.addon.spreadsheet.test.fixtures.SpreadsheetFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.SpreadsheetFixtureFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.StylesFixture;
 import com.vaadin.addon.spreadsheet.test.fixtures.ValueHandlerFixture;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
-import com.vaadin.v7.data.util.FilesystemContainer;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.v7.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.v7.data.util.FilesystemContainer;
+import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.v7.ui.TextField;
 
 /**
  * Main UI class
@@ -78,20 +72,11 @@ public class TestexcelsheetUI extends UI {
         {
             put("FORMATS", new ClassFixtureFactory(FormatsFixture.class));
             put("STYLES", new ClassFixtureFactory(StylesFixture.class));
-            put("SELECTION", new SelectionFixtureFactory());
             put("SHEETS", new ClassFixtureFactory(SheetsFixture.class));
             put("LOCK_SELECTED_CELLS", new EagerFixtureFactory(
                     new LockCellFixture(TestexcelsheetUI.this)));
-            put("TOGGLE_COLUMNS", new EagerFixtureFactory(
-                    new ColumnToggleFixture(TestexcelsheetUI.this)));
-            put("TOGGLE_ROWS", new EagerFixtureFactory(new RowToggleFixture(
-                    TestexcelsheetUI.this)));
-            put("SHEET_RENAME_1", new ClassFixtureFactory(
-                    SheetsFixture.Rename1.class));
             put("CELL_VALUE_HANDLER", new ClassFixtureFactory(
                     ValueHandlerFixture.class));
-            put("CELL_DELETION_HANDLER", new ClassFixtureFactory(
-                    DeletionHandlerFixture.class));
             put("CUSTOM_COMPONENTS", new ClassFixtureFactory(
                     CustomComponentFixture.class));
             put("HYPERLINKS", new ClassFixtureFactory(HyperLinkFixture.class));
@@ -101,8 +86,6 @@ public class TestexcelsheetUI extends UI {
                     ShiftFixture.InsertRow.class));
             put("DELETE_ROW", new ClassFixtureFactory(
                     ShiftFixture.DeleteRow.class));
-            put("MERGE_CELLS", new EagerFixtureFactory(new CellMergeFixture(
-                    TestexcelsheetUI.this)));
             put("POPUPBUTTON",
                     new EagerFixtureFactory(new PopupButtonFixture()));
             put("SIMPLE_CUSTOM_EDITOR", new ClassFixtureFactory(
@@ -373,24 +356,6 @@ public class TestexcelsheetUI extends UI {
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
-    }
-
-    public class SelectionFixture implements SpreadsheetFixture {
-        @Override
-        public void loadFixture(Spreadsheet spreadsheet) {
-            for (CellReference cellRef : currentSelection) {
-                spreadsheet.createCell(cellRef.getRow(), cellRef.getCol(),
-                        "SELECTED");
-            }
-            spreadsheet.refreshAllCellValues();
-        }
-    }
-
-    class SelectionFixtureFactory implements SpreadsheetFixtureFactory {
-        @Override
-        public SpreadsheetFixture create() {
-            return TestexcelsheetUI.this.new SelectionFixture();
         }
     }
 

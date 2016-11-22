@@ -1,21 +1,26 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import static org.junit.Assert.fail;
-
-import com.vaadin.testbench.parallel.Browser;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.testbench.By;
+import com.vaadin.testbench.parallel.Browser;
 
-public class MultipleSheetTest extends Test1 {
+public class MultipleSheetTest extends AbstractSpreadsheetTestCase {
+
+    public void setUp() throws Exception {
+        super.setUp();
+        headerPage.createNewSpreadsheet();
+    }
 
     @Test
     public void testMultipleSheet() {
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
 
         driver.findElement(By.xpath("//div[contains(@class,'col4 row4')]"))
                 .click();
@@ -24,37 +29,27 @@ public class MultipleSheetTest extends Test1 {
                         .xpath("//div[contains(@class, 'col6 row6')]"))).click(
                 8, 8, Keys.CONTROL);
         testBench(driver).waitForVaadin();
-        sheetController.putCellContent("B2", "sheet0 value");
+
+        spreadsheet.getCellAt("B2").setValue("sheet0 value");
         Assert.assertEquals("sheet0 value",
                 sheetController.getCellContent("B2"));
 
-        driver.findElement(
-                By.xpath("//*[@id='spreadsheetId']//*[@class='add-new-tab']"))
-                .click();
-        testBench(driver).waitForVaadin();
-        driver.findElement(By
-                .xpath("//*[@id='spreadsheetId']//*[text()='Sheet1']"));
-        testBench(driver).waitForVaadin();
-        Assert.assertEquals("", sheetController.getCellContent("B2"));
+        spreadsheet.addSheet("new sheet");
+        spreadsheet.selectSheet("new sheet");
 
-        sheetController.putCellContent("C3", "sheet1 value");
-        Assert.assertEquals("sheet1 value",
-                sheetController.getCellContent("C3"));
-
-        driver.findElement(
-                By.xpath("//*[@id='spreadsheetId']//*[text()='Sheet1']"))
-                .click();
+        Assert.assertEquals("", spreadsheet.getCellAt("B2").getValue());
+        spreadsheet.getCellAt("B2").setValue("sheet1 value");
+        spreadsheet.selectSheet("Sheet1");
         testBench(driver).waitForVaadin();
-        Assert.assertEquals("", sheetController.getCellContent("C3"));
-        Assert.assertEquals("sheet0 value",
-                sheetController.getCellContent("B2"));
+        Assert.assertEquals("", spreadsheet.getCellAt("C3").getValue());
+        Assert.assertEquals("sheet0 value", spreadsheet.getCellAt("B2")
+                .getValue());
     }
 
     @Test
     public void testRenameSheet() {
         skipBrowser("Cannot find the 'new sheet name' element on PhantomJS", Browser.PHANTOMJS);
 
-        createNewSheet();
         Actions actions = new Actions(driver);
         actions.doubleClick(driver.findElement(By
                 .xpath("//div[@class='sheet-tabsheet-container']//div[text()='Sheet1']")));
@@ -77,33 +72,31 @@ public class MultipleSheetTest extends Test1 {
         testBench(driver).waitForVaadin();
         driver.findElement(By
                 .xpath("//*[@class='sheet-tabsheet-container']//*[text()='new sheet name']"));
-        loadServerFixture("SHEET_RENAME_1");
+        headerPage.loadTestFixture(TestFixtures.Rename);
         Assert.assertNotNull(driver.findElement(By
                 .xpath("//*[@class='sheet-tabsheet-container']//*[text()='new_sheet_REnamed']")));
     }
 
     @Test
     public void testMultipleSheetByAPI() {
-        skipBrowser("Cannot find the 'dontSee' element on PhantomJS", Browser.PHANTOMJS);
-        newSheetAndLoadServerFixture("SHEETS");
-
-        driver.findElement(By
-                .xpath("//*[@id='spreadsheetId']//*[text()='newSheet1']"));
-        driver.findElement(By
-                .xpath("//*[@id='spreadsheetId']//*[text()='newSheet2']"));
-        try {
-            driver.findElement(By
-                    .xpath("//*[@id='spreadsheetId']//*[text()='dontSee']"));
-            fail();
-        } catch (NoSuchElementException exception) {
-        }
-
-        try {
-            driver.findElement(By
-                    .xpath("//*[@id='spreadsheetId']//*[text()='dontSee2']"));
-            fail();
-        } catch (NoSuchElementException exception) {
-        }
+        headerPage.loadTestFixture(TestFixtures.CreateSheet);
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        spreadsheet.findElement(By.xpath("//*[text()='newSheet1']"));
+        spreadsheet.findElement(By.xpath("//*[text()='newSheet2']"));
     }
+
+    @Test(expected=NoSuchElementException.class)
+    public void multiplySheets_removeSheetBySpreadsheetAPI_sheetIsRemoved() {
+        headerPage.loadTestFixture(TestFixtures.CreateSheet);
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        spreadsheet.findElement(By.xpath("//*[text()='dontSee']"));
+    }
+    @Test(expected=NoSuchElementException.class)
+    public void multiplySheets_removeSheetByPOI_sheetIsRemoved() {
+        headerPage.loadTestFixture(TestFixtures.CreateSheet);
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        spreadsheet.findElement(By.xpath("//*[text()='dontSee2']"));
+    }
+
 
 }

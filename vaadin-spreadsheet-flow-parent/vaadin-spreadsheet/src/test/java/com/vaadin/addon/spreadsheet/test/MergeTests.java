@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet.test;
 
+import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 
 import org.junit.Assert;
@@ -7,27 +8,31 @@ import org.junit.Test;
 
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.testbench.parallel.Browser;
 
-public class MergeTests extends Test1 {
+public class MergeTests extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testSelectionBug() {
+        headerPage.createNewSpreadsheet();
+        final SpreadsheetElement spreadsheetElement = $(SpreadsheetElement.class).first();
 
         sheetController.selectRegion("B2", "C3");
-        loadServerFixture("MERGE_CELLS");
+        headerPage.loadTestFixture(TestFixtures.MergeCells);
 
         sheetController.selectRegion("C4", "D3");
-        loadServerFixture("SELECTION");
+        headerPage.loadTestFixture(TestFixtures.Selection);
 
-        assertCellValue("D4", "SELECTED");
-        assertCellValue("B4", "SELECTED");
-        assertCellValue("D2", "SELECTED");
+        assertEquals("SELECTED",spreadsheetElement.getCellAt("D4").getValue());
+        assertEquals("SELECTED",spreadsheetElement.getCellAt("B4").getValue());
+        assertEquals("SELECTED",spreadsheetElement.getCellAt("D2").getValue());
     }
 
     @Test
     public void testBasic() {
         skipBrowser("insertAndRet() does not work correctly in IE", Browser.IE9, Browser.IE10, Browser.IE11);
+        headerPage.createNewSpreadsheet();
         final SpreadsheetElement spreadsheetElement = $(SpreadsheetElement.class).first();
         spreadsheetElement.getCellAt("A1").setValue("1");
         spreadsheetElement.getCellAt("A2").setValue("2");
@@ -38,26 +43,26 @@ public class MergeTests extends Test1 {
 
 
         sheetController.selectRegion("A1", "A2");
-        loadServerFixture("MERGE_CELLS");
-
-        assertCellValue("B1", "2");
-        assertCellValue("B2", "3");
+        headerPage.loadTestFixture(TestFixtures.MergeCells);
+        assertEquals("2",spreadsheetElement.getCellAt("B1").getValue());
+        assertEquals("3",spreadsheetElement.getCellAt("B2").getValue());
 
         final SheetCellElement a1 = spreadsheetElement.getCellAt("A1");
         a1.setValue("10");
 
-        assertCellValue("B1", "11");
-        assertCellValue("B2", "3");
+        assertEquals("11",spreadsheetElement.getCellAt("B1").getValue());
+        assertEquals("3",spreadsheetElement.getCellAt("B2").getValue());
     }
 
     @Test
     public void testContents() {
+        headerPage.createNewSpreadsheet();
         sheetController.selectCell("A2");
         sheetController.putCellContent("A1", "A1 text");
         sheetController.putCellContent("B1", "B1 text");
 
         sheetController.selectRegion("A1", "B1");
-        loadServerFixture("MERGE_CELLS");
+        headerPage.loadTestFixture(TestFixtures.MergeCells);
 
         Assert.assertTrue("A1 text".equals(sheetController
                 .getMergedCellContent("A1")));
@@ -68,7 +73,7 @@ public class MergeTests extends Test1 {
      */
     @Test
     public void testColumnAlignments() throws IOException {
-        loadSheetFile("column_alignment_style.xlsx");
+        headerPage.loadFile("column_alignment_style.xlsx", this);
 
         compareScreen("column_alignments");
     }

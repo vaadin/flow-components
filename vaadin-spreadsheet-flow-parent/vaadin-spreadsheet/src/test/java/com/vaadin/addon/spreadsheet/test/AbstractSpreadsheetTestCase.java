@@ -22,16 +22,19 @@ import com.google.common.base.Predicate;
 import com.vaadin.addon.spreadsheet.test.demoapps.SpreadsheetDemoUI;
 import com.vaadin.addon.spreadsheet.test.pageobjects.HeaderPage;
 import com.vaadin.addon.spreadsheet.test.tb3.MultiBrowserTest;
+import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 import com.vaadin.testbench.elements.NativeSelectElement;
 
 public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
 
     protected HeaderPage headerPage;
-
+    protected SheetController sheetController;
     @Before
     public void setUp() throws Exception {
         openTestURL();
         headerPage = new HeaderPage(getDriver());
+        sheetController = new SheetController(driver, testBench(driver),
+                getDesiredCapabilities());
     }
 
     @Override
@@ -56,6 +59,10 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
         return file;
     }
 
+    protected void assertInRange(double from, double value, double to) {
+        Assert.assertTrue("Value [" + value + "] is not in range: [" + from
+                + " - " + to + "]", value >= from && value <= to);
+    }
     protected void assertNoErrorIndicatorDetected() {
         Assert.assertTrue(
                 "Error indicator detected when there should be none.",
@@ -143,5 +150,9 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
                 break;
             }
         }
+    }
+
+    protected double getSize(String size) {
+        return Double.parseDouble(size.replaceAll("[^.0-9]", ""));
     }
 }

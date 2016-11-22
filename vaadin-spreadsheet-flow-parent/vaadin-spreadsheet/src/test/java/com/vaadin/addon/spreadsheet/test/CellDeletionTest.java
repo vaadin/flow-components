@@ -9,14 +9,18 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.testbench.By;
 import com.vaadin.testbench.parallel.Browser;
 
-public class CellDeletionTest extends Test1 {
+public class CellDeletionTest extends AbstractSpreadsheetTestCase {
+
 
     @Before
-    public void loadFixture() {
-        loadServerFixture("CELL_DELETION_HANDLER");
+    public void setUp() throws Exception {
+        super.setUp();
+        headerPage.createNewSpreadsheet();
+        headerPage.loadTestFixture(TestFixtures.DeletionHandler);
     }
 
     @Test

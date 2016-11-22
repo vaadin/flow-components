@@ -3,11 +3,11 @@ package com.vaadin.addon.spreadsheet.test;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-public class ImageTests extends Test1 {
+public class ImageTests extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testFromUpload() {
-        loadSheetFile("picture_sheet.xlsx");
+        headerPage.loadFile("picture_sheet.xlsx", this);
 
         assertInRange(200, imageWidth("C2"), 260);
 
@@ -19,7 +19,7 @@ public class ImageTests extends Test1 {
     }
 
     public double imageWidth(String cell) {
-        sheetController.waitForVaadin();
+        testBench(driver).waitForVaadin();
         return driver.findElement(
                 By.xpath(sheetController.cellToXPath(cell) + "/img")).getSize().width;
     }

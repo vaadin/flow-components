@@ -1,21 +1,18 @@
 package com.vaadin.addon.spreadsheet.test.fixtures;
 
+import java.util.Set;
+
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.addon.spreadsheet.test.demoapps.TestexcelsheetUI;
 
-public class CellMergeFixture extends UIFixture {
-
-    public CellMergeFixture(TestexcelsheetUI ui) {
-        super(ui);
-    }
+public class CellMergeFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(Spreadsheet spreadsheet) {
-
-        if (ui.currentSelection == null || ui.currentSelection.isEmpty()) {
+        Set<CellReference> seletecCells =spreadsheet.getSelectedCellReferences();
+        if (seletecCells == null || seletecCells.isEmpty()) {
             return;
         }
 
@@ -24,7 +21,7 @@ public class CellMergeFixture extends UIFixture {
         int firstCol = Integer.MAX_VALUE;
         int lastCol = 0;
 
-        for (CellReference cellRef : ui.currentSelection) {
+        for (CellReference cellRef : seletecCells) {
             if (cellRef.getRow() < firstRow) {
                 firstRow = cellRef.getRow();
             }

@@ -14,8 +14,17 @@ public enum TestFixtures {
             DisableChartsFixture.class), StyleMergeReigions(
             StyleMergeReigions.class), RemoveFixture(RemoveFixture.class), DefaultStyleUnlocked(
             DefaultStyleUnlockedFixture.class), HideSecondRow(
-            HideSecondRowFixture.class), LargeSpreadsheet(
-            LargeSpreadsheetFixture.class);
+            HideSecondRowFixture.class),
+            LargeSpreadsheet(LargeSpreadsheetFixture.class),
+            ColumnToggle(ColumnToggleFixture.class),
+            RowToggle(RowToggleFixture.class),
+            DeletionHandler(DeletionHandlerFixture.class),
+            Selection(SelectionFixture.class),
+            MergeCells(CellMergeFixture.class),
+            ValueChangeHandler(ValueHandlerFixture.class),
+            Rename(RenameFixture.class),
+            CreateSheet(SheetsFixture.class)
+    ;
 
     public final SpreadsheetFixtureFactory factory;
 
