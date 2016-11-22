@@ -3,30 +3,35 @@ package com.vaadin.addon.spreadsheet.test;
 import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ErrorCollector;
 
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 import com.vaadin.testbench.parallel.Browser;
 
-public class StyleTest extends Test1 {
+public class StyleTest extends AbstractSpreadsheetTestCase {
+
+    @Rule
+    public ErrorCollector collector = new ErrorCollector();
 
     @Test
     @Ignore("Fails in all browsers, Are POI CellStyles even supported?")
     public void testCssStyleFromFixture() {
-        SheetController c = keyboardSetup();
-        newSheetAndLoadServerFixture("STYLES");
-
+        headerPage.createNewSpreadsheet();
+        headerPage.loadTestFixture(TestFixtures.Styles);
         testBench(driver).waitForVaadin();
-        assertCorrectCss(c);
+        assertCorrectCss(sheetController);
         testBench(driver).waitForVaadin();
     }
 
     @Test
     public void testCssFromUpload() {
         skipBrowser("Fails in Phantom", Browser.PHANTOMJS);
-        SheetController c = keyboardSetup();
-        loadSheetFile("spreadsheet_styles.xlsx");
-        assertCorrectCss(c); // TODO - Fails with rev 18
+        headerPage.createNewSpreadsheet();
+        headerPage.loadFile("spreadsheet_styles.xlsx",this);
+        assertCorrectCss(sheetController); // TODO - Fails with rev 18
         testBench(driver).waitForVaadin();
     }
 

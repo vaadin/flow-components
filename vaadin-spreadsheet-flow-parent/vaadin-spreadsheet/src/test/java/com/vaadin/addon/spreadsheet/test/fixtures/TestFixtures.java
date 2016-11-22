@@ -23,7 +23,14 @@ public enum TestFixtures {
             MergeCells(CellMergeFixture.class),
             ValueChangeHandler(ValueHandlerFixture.class),
             Rename(RenameFixture.class),
-            CreateSheet(SheetsFixture.class)
+            CreateSheet(SheetsFixture.class),
+            CustomEditor(SimpleCustomEditorFixture.class),
+            Styles(StylesFixture.class),
+            LockCell(LockCellFixture.class),
+            CustomComponent(CustomComponentFixture.class),
+            Action(ActionFixture.class),
+            InsertRow(InsertRowFixture.class),
+            DeleteRow(DeleteRowFixture.class)
     ;
 
     public final SpreadsheetFixtureFactory factory;

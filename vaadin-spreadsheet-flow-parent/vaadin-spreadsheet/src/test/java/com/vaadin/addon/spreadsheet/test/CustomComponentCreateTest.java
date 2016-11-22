@@ -2,7 +2,9 @@ package com.vaadin.addon.spreadsheet.test;
 
 import org.junit.Test;
 
-public class CustomComponentCreateTest extends Test1 {
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
+
+public class CustomComponentCreateTest extends AbstractSpreadsheetTestCase {
 
     /**
      * Ticket #18546
@@ -14,9 +16,8 @@ public class CustomComponentCreateTest extends Test1 {
     public void CustomEditor_AddEditor_DisplayEditorImmediately()
             throws Exception {
 
-        createNewSheet();
-        loadServerFixture("SIMPLE_CUSTOM_EDITOR");
-
+        headerPage.createNewSpreadsheet();
+        headerPage.loadTestFixture(TestFixtures.CustomEditor);
         compareScreen("customeditor_addcell_displayeditor");
     }
 

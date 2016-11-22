@@ -1,6 +1,7 @@
 package com.vaadin.addon.spreadsheet.test;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -10,18 +11,23 @@ import org.openqa.selenium.support.ui.Select;
 
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 
-public class CustomComponentsTest extends Test1 {
+public class CustomComponentsTest extends AbstractSpreadsheetTestCase {
 
     final static String TEXT_PROXY = "text";
     final static Integer NUM_PROXY = 42;
 
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        headerPage.createNewSpreadsheet();
+    }
     @Test
     public void testTextField() {
-        loadServerFixture("CUSTOM_COMPONENTS");
-
-        SheetCellElement b2 = $(SpreadsheetElement.class).first().getCellAt(
-                "B2");
+        headerPage.loadTestFixture(TestFixtures.CustomComponent);
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        SheetCellElement b2 = spreadsheet.getCellAt("B2");
         typeInTextFieldEditor(b2, TEXT_PROXY);
 
         sheetController.putCellContent("B3", "=B2");
@@ -31,13 +37,12 @@ public class CustomComponentsTest extends Test1 {
 
         testBench(driver).waitForVaadin();
         typeInTextFieldEditor(b2, NUM_PROXY.toString());
+        spreadsheet.getCellAt("B3").setValue("=B2*2");
 
-        sheetController.putCellContent("B3", "=B2*2");
-
-        Assert.assertEquals(NUM_PROXY.toString(),
-                sheetController.getCellContent("B2"));
-        Assert.assertEquals((NUM_PROXY * 2) + "",
-                sheetController.getCellContent("B3"));
+        Assert.assertEquals(NUM_PROXY.toString(), spreadsheet.
+                getCellAt("B2").getValue());
+        Assert.assertEquals((NUM_PROXY * 2) + "", spreadsheet
+                .getCellAt("B3").getValue());
     }
 
     private void typeInTextFieldEditor(SheetCellElement cell, String text) {
@@ -50,12 +55,12 @@ public class CustomComponentsTest extends Test1 {
     private void activateEditorInCell(SheetCellElement cell) {
         cell.click();
         new Actions(getDriver()).moveToElement(cell).moveByOffset(7, 7)
-                .doubleClick().build().perform();
+                .click().build().perform();
     }
 
     @Test
     public void testCheckBox() throws InterruptedException {
-        loadServerFixture("CUSTOM_COMPONENTS");
+        headerPage.loadTestFixture(TestFixtures.CustomComponent);
 
         sheetController.putCellContent("C3", "=C2*2");
         sheetController.putCellContent("C4", "=IF(C2,1,0)");
@@ -78,10 +83,9 @@ public class CustomComponentsTest extends Test1 {
         Assert.assertEquals("1", sheetController.getCellContent("C4"));
     }
 
-
     @Test
     public void testNativeSelect() {
-        loadServerFixture("CUSTOM_COMPONENTS");
+        headerPage.loadTestFixture(TestFixtures.CustomComponent);
 
         sheetController.putCellContent("I3", "=I2*3");
 
@@ -98,7 +102,7 @@ public class CustomComponentsTest extends Test1 {
 
     @Test
     public void testScrollingBug() throws InterruptedException {
-        loadServerFixture("CUSTOM_COMPONENTS");
+        headerPage.loadTestFixture(TestFixtures.CustomComponent);
 
         SheetCellElement b2 = $(SpreadsheetElement.class).first().getCellAt(
                 "B2");

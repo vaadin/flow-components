@@ -9,13 +9,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.addon.spreadsheet.test.demoapps.TestexcelsheetUI;
 
-public class LockCellFixture extends UIFixture {
-
-    public LockCellFixture(TestexcelsheetUI ui) {
-        super(ui);
-    }
+public class LockCellFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(Spreadsheet spreadsheet) {
@@ -25,7 +20,7 @@ public class LockCellFixture extends UIFixture {
         Workbook wb = cell.getSheet().getWorkbook();
 
         List<Cell> updatedCells = new ArrayList<Cell>();
-        for (CellReference cellRef : ui.currentSelection) {
+        for (CellReference cellRef : spreadsheet.getSelectedCellReferences()) {
             cell = spreadsheet.getCell(cellRef.getRow(), cellRef.getCol());
             if (cell == null) {
                 cell = spreadsheet.createCell(cellRef.getRow(),

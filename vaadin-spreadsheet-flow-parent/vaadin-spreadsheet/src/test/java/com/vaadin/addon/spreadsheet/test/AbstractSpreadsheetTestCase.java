@@ -3,9 +3,6 @@ package com.vaadin.addon.spreadsheet.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,23 +37,6 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
     @Override
     protected Class<?> getUIClass() {
         return SpreadsheetDemoUI.class;
-    }
-
-    protected File getTestSheetFile(String testSheetFileName) {
-        File file = null;
-
-        try {
-            file = new File(Test1.class
-                    .getClassLoader()
-                    .getResource(
-                            "test_sheets" + File.separator + testSheetFileName)
-                    .toURI());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        Assert.assertNotNull("Spreadsheet file null", file);
-        Assert.assertTrue("Spreadsheet file does not exist", file.exists());
-        return file;
     }
 
     protected void assertInRange(double from, double value, double to) {

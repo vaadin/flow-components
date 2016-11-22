@@ -4,24 +4,26 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class LockTest extends Test1 {
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 
-    @Test
+public class LockTest extends AbstractSpreadsheetTestCase {
+
     @Ignore("Fails with all browsers, user can still add content to B2 after lock fixture is run")
+    @Test
     public void testLockedCells() {
-        sheetController.putCellContent("B2", "value");
+        headerPage.createNewSpreadsheet();
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        spreadsheet.getCellAt("B2").setValue("value");
+        sheetController.selectRegion("B3","D4");
+        headerPage.loadTestFixture(TestFixtures.LockCell);
 
-        sheetController.selectCell("C3");
-        shift.clickCell("D4");
+        Assert.assertEquals("locked", spreadsheet.getCellAt("B2").getValue());
+        spreadsheet.getCellAt("B2").setValue("new value on locked cell");
+        Assert.assertEquals("value", spreadsheet.getCellAt("B2").getValue());
 
-        loadServerFixture("LOCK_SELECTED_CELLS");
-
-        Assert.assertEquals("value", sheetController.getCellContent("B2"));
-        sheetController.putCellContent("B2", "new value on locked cell");
-        Assert.assertEquals("value", sheetController.getCellContent("B2"));
-
-        Assert.assertEquals("unlocked", sheetController.getCellContent("C3"));
+        Assert.assertEquals("unlocked", spreadsheet.getCellAt("C3").getValue());
         sheetController.putCellContent("C3", "value");
-        Assert.assertEquals("value", sheetController.getCellContent("C3"));
+        Assert.assertEquals("value", spreadsheet.getCellAt("C3").getValue());
     }
 }

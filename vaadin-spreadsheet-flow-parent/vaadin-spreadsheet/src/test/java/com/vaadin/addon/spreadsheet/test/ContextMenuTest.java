@@ -3,6 +3,7 @@ package com.vaadin.addon.spreadsheet.test;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
@@ -11,34 +12,49 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
+import com.vaadin.addon.spreadsheet.test.testutil.ContextMenuHelper;
+import com.vaadin.addon.spreadsheet.test.testutil.ModifierController;
+import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 import com.vaadin.testbench.annotations.BrowserConfiguration;
 
-public class ContextMenuTest extends Test1 {
+public class ContextMenuTest extends AbstractSpreadsheetTestCase {
 
+    private ContextMenuHelper contextMenu;
+    private SheetController ctrl;
+    private ModifierController shift;
     @BrowserConfiguration
     public List<DesiredCapabilities> getBrowsersToTest() {
         // PhantomJS doesn't support right-click
         return getBrowsersExcludingPhantomJS();
     }
 
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        headerPage.createNewSpreadsheet();
+        contextMenu = new ContextMenuHelper(driver);
+        ctrl = new ModifierController(driver, Keys.CONTROL,
+                testBench(getDriver()), getDesiredCapabilities());
+        shift = new ModifierController(driver, Keys.SHIFT,
+                testBench(getDriver()), getDesiredCapabilities());
+    }
     @Test
     public void testSingleCell() {
-        loadServerFixture("ACTIONS");
-
+        headerPage.loadTestFixture(TestFixtures.Action);
         SheetCellElement b2 = $(SpreadsheetElement.class).first().getCellAt(
                 "B2");
         b2.click();
 
         b2.contextClick();
         contextMenu.clickItem("Number");
-
         Assert.assertEquals("42", b2.getValue());
     }
 
     @Test
     @Ignore("Fails with Firefox")
     public void testMultipleCells() {
-        loadServerFixture("ACTIONS");
+        headerPage.loadTestFixture(TestFixtures.Action);
 
         sheetController.selectCell("B2");
         ctrl.selectCell("C3");
@@ -68,7 +84,7 @@ public class ContextMenuTest extends Test1 {
     @Test
     @Ignore("Fails with Firefox")
     public void testHeaders() throws InterruptedException {
-        loadServerFixture("ACTIONS");
+        headerPage.loadTestFixture(TestFixtures.Action);
 
         $(SpreadsheetElement.class).first().getColumnHeader(3).contextClick();
         contextMenu.clickItem("Column action");
