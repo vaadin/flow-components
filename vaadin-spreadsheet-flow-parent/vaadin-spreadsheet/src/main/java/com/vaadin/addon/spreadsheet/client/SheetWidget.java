@@ -65,6 +65,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.addon.spreadsheet.client.Cell.CellValueStyleKey;
 import com.vaadin.addon.spreadsheet.client.CopyPasteTextBox.CopyPasteHandler;
 import com.vaadin.addon.spreadsheet.shared.GroupingData;
 import com.vaadin.client.ApplicationConfiguration;
@@ -111,7 +112,7 @@ public class SheetWidget extends Panel {
 
     final Logger debugConsole = Logger.getLogger("spreadsheet-logger");
 
-    Map<Integer, Integer> scrollWidthCache = new HashMap<Integer, Integer>();
+    Map<CellValueStyleKey, Integer> scrollWidthCache = new HashMap<CellValueStyleKey, Integer>();
 
     final SheetHandler actionHandler;
 

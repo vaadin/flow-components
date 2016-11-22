@@ -17,6 +17,8 @@ package com.vaadin.addon.spreadsheet.client;
  * #L%
  */
 
+import java.util.Objects;
+
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -308,8 +310,42 @@ public class Cell {
         return value != null && !value.isEmpty();
     }
 
-    private int getUniqueKey() {
-        return 31 * (value.hashCode() + cellStyle.hashCode());
+    private CellValueStyleKey getUniqueKey() {
+        return new CellValueStyleKey(value, cellStyle);
+    }
+
+    static class CellValueStyleKey {
+        private String value;
+
+        private String cellStyle;
+
+        public CellValueStyleKey(String value, String cellStyle) {
+            super();
+            this.value = value;
+            this.cellStyle = cellStyle;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value, cellStyle);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof CellValueStyleKey)) {
+                return false;
+            }
+            CellValueStyleKey other = (CellValueStyleKey) obj;
+            return Objects.equals(value, other.value)
+                    && Objects.equals(cellStyle, other.cellStyle);
+        }
+
     }
 
 }
