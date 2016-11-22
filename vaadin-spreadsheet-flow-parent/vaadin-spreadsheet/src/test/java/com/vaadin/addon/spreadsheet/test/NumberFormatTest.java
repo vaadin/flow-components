@@ -57,7 +57,9 @@ public class NumberFormatTest extends AbstractSpreadsheetTestCase {
     @Test
     public void numberFormat_sheetWithNumberFormatRuleForNumericCells_formulaFieldHasLocalizedDecimalSeparatorForDoubles() {
         Locale locale = new Locale("fi", "FI");
-        setLocale(locale);
+        //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
+        //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
+        setLocaleForNativeSelect(locale);
         spreadsheetPage.clickOnCell(Expected.INTEGER_DECIMAL_FORMAT1.getCell());
         assertEquals("Unexpected formula field value for Finnish locale,",
                 Expected.INTEGER_DECIMAL.getValue().replace(".", ","),
@@ -115,7 +117,9 @@ public class NumberFormatTest extends AbstractSpreadsheetTestCase {
     }
 
     private void setDefaultLocale() {
-        setLocale(Locale.US);
+        //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
+        //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
+        setLocaleForNativeSelect(Locale.US);
     }
 
     public enum Type {

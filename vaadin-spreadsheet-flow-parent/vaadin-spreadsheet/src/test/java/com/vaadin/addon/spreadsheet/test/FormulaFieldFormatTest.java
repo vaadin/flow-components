@@ -1,11 +1,11 @@
 package com.vaadin.addon.spreadsheet.test;
 
+import static org.junit.Assert.assertEquals;
 import java.util.Locale;
 
 import org.junit.Test;
 
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Test for formula field formatting.
@@ -71,8 +71,10 @@ public class FormulaFieldFormatTest extends AbstractSpreadsheetTestCase {
                 spreadsheetPage.getFormulaFieldValue());
     }
 
+    //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
+    //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
     private void setDefaultLocale() {
-        setLocale(Locale.US);
+        setLocaleForNativeSelect(Locale.US);
     }
 
 }

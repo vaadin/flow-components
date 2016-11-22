@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
-
 import java.util.Locale;
 
 import org.junit.Test;
@@ -18,7 +17,9 @@ public class GeneralSmallRoundingTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void generalFormat_spreadsheetWithGeneralFormatAndLocaleFI_smallNmbersRoundedCorrectly() {
-        setLocale(new Locale("fi", "FI"));
+        //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
+        //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
+        setLocaleForNativeSelect(new Locale("fi", "FI"));
         headerPage.loadFile("general_round.xlsx", this);
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
 
@@ -40,7 +41,10 @@ public class GeneralSmallRoundingTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void generalFormat_spreadsheetWithGeneralFormatAndLocaleUS_negativeNumbersRoundedCorrectly() {
-        setLocale(Locale.US);
+        //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
+        //setLocale(Locale.US);
+        //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
+        setLocaleForNativeSelect(Locale.US);
         headerPage.loadFile("negative_general_round.xlsx", this);
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
 
@@ -62,7 +66,9 @@ public class GeneralSmallRoundingTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void generalFormat_spreadsheetWithGeneralFormatAndLocaleFI_negativeNumbersRoundedCorrectly() {
-        setLocale(new Locale("fi", "FI"));
+        //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
+        //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
+        setLocaleForNativeSelect(new Locale("fi", "FI"));
         headerPage.loadFile("negative_general_round.xlsx", this);
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
 

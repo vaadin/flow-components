@@ -4,16 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.Format;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -46,18 +48,25 @@ import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.data.DataSource;
+import com.vaadin.server.data.ListDataSource;
+import com.vaadin.server.data.Query;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractField;
+import com.vaadin.ui.AbstractSingleSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
@@ -65,20 +74,13 @@ import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
-import com.vaadin.v7.data.Property.ValueChangeEvent;
-import com.vaadin.v7.data.Property.ValueChangeListener;
-import com.vaadin.v7.data.util.FilesystemContainer;
-import com.vaadin.v7.data.util.converter.Converter.ConversionException;
-import com.vaadin.v7.ui.AbstractSelect;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.NativeSelect;
-import com.vaadin.v7.ui.TextField;
 
 @SuppressWarnings("serial")
 @Theme("demo")
 @Widgetset("com.vaadin.addon.spreadsheet.Widgetset")
 public class SpreadsheetDemoUI extends UI implements Receiver {
-
+    private static final Logger LOGGER = Logger
+            .getLogger(SpreadsheetDemoUI.class.getName());
     VerticalLayout layout = new VerticalLayout();
 
     Spreadsheet spreadsheet;
@@ -89,8 +91,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private Button download;
 
-    private ComboBox openTestSheetSelect;
-
+    private ComboBox<File> openTestSheetSelect;
+    private DataSource<File> fileDataSource;
     private SpreadsheetComponentFactory spreadsheetFieldFactory;
 
     private SheetChangeListener selectedSheetChangeListener;
@@ -107,9 +109,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private HorizontalLayout options;
 
-    private AbstractSelect localeSelect;
+    private AbstractSingleSelect<Locale> localeSelect;
     private Button loadFixtureBtn;
-    private NativeSelect fixtureSelect;
+    private NativeSelect<TestFixtures> fixtureSelect;
 
     public SpreadsheetDemoUI() {
         super();
@@ -133,34 +135,23 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         Button newSpreadsheetButton = createNewButton();
 
-        File file = null;
+
+        ClassLoader classLoader = SpreadsheetDemoUI.class.getClassLoader();
+        URL resource = classLoader.getResource("test_sheets" + File.separator);
+        URI uri = null;
         try {
-            ClassLoader classLoader = SpreadsheetDemoUI.class.getClassLoader();
-            URL resource = classLoader.getResource("test_sheets"
-                    + File.separator);
-            file = new File(resource.toURI());
+            uri = resource.toURI();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+        if (uri != null) {
+            String excelFilesRegex = ".*\\.xls|.*\\.xlsx|.*\\.xlsm";
+            fileDataSource = FileDataSource.create(uri, excelFilesRegex, LOGGER);
 
-        final FilesystemContainer testSheetContainer = new FilesystemContainer(file);
-        testSheetContainer.setRecursive(false);
-        testSheetContainer.setFilter(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-                if (name != null
-                        && (name.endsWith(".xls") || name.endsWith(".xlsx") || name
-                                .endsWith(".xlsm"))) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
-        openTestSheetSelect=createTestSheetCombobox(testSheetContainer);
-        updateButton=createUpdateButton(testSheetContainer);
-        save=createSaveButton();
+            openTestSheetSelect = createTestSheetCombobox(fileDataSource);
+        }
+        updateButton = createUpdateButton();
+        save = createSaveButton();
 
         download = new Button("Download");
         download.setEnabled(false);
@@ -204,13 +195,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         VerticalLayout checkBoxLayout = new VerticalLayout();
 
         Button freezePanesButton = new Button("Freeze Pane",
-                new Button.ClickListener() {
-
-                    @Override
-                    public void buttonClick(ClickEvent event) {
-                        addWindow(new FreezePaneWindow());
-                    }
-                });
+                e->addWindow(new FreezePaneWindow()));
 
         hideTop = new CheckBox("toggle top bar visibility");
         hideBottom = new CheckBox("toggle bottom bar visibility");
@@ -276,14 +261,11 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 return o1.getDisplayName().compareTo(o2.getDisplayName());
             }
         });
-
-        for (Locale locale : locales) {
-            localeSelect.addItem(locale);
-            localeSelect.setItemCaption(locale, locale.getDisplayName());
-        }
-        localeSelect.addValueChangeListener(e-> {
-                updateLocale();
-        });
+        localeSelect.setDataSource(new ListDataSource<>(locales));
+        //TODO Vaadin8
+        //Use setItemCaptionGenerator when this is done
+        //https://github.com/vaadin/framework8-issues/issues/477
+        localeSelect.addValueChangeListener(e-> updateLocale());
 
         HorizontalLayout sheetOptions = new HorizontalLayout();
         sheetOptions.setSpacing(true);
@@ -303,20 +285,17 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         fixtureSelect = new NativeSelect();
         fixtureSelect.setId("fixtureSelect");
-        fixtureSelect.setItemCaptionMode(AbstractSelect.ItemCaptionMode.ID);
-        for (TestFixtures fixture : TestFixtures.values()) {
-            fixtureSelect.addItems(fixture.toString());
-        }
+        List<TestFixtures> fixtures = Arrays.asList(TestFixtures.values());
+        fixtureSelect.setDataSource(new ListDataSource<>(fixtures));
 
         loadFixtureBtn = new Button("Load");
         loadFixtureBtn.addClickListener(event -> {
-                if (spreadsheet == null) {
-                    return;
-                }
+            if (spreadsheet == null) {
+                return;
+            }
 
-                String fixtureName = (String) fixtureSelect.getValue();
-                TestFixtures fixture = TestFixtures.valueOf(fixtureName);
-                fixture.factory.create().loadFixture(spreadsheet);
+            TestFixtures fixture = fixtureSelect.getValue();
+            fixture.factory.create().loadFixture(spreadsheet);
         });
 
         loadFixtureBtn.setId("loadFixtureBtn");
@@ -350,14 +329,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         options.addComponent(updateUpload);
         options.addComponent(closeDownload);
 
-        getPage().addUriFragmentChangedListener(
-                new Page.UriFragmentChangedListener() {
-                    @Override
-                    public void uriFragmentChanged(
-                            Page.UriFragmentChangedEvent event) {
-                        updateFromFragment();
-                    }
-                });
+        getPage().addUriFragmentChangedListener(e -> {
+                updateFromFragment();
+        });
 
         updateFromFragment();
 
@@ -400,29 +374,27 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         return save;
     }
 
-    private Button createUpdateButton(final FilesystemContainer testSheetContainer) {
-        Button updateButton = new Button("Update", new Button.ClickListener() {
-
-            @Override
-            public void buttonClick(ClickEvent event) {
-                Object value = openTestSheetSelect.getValue();
-                if (value != null && value instanceof File) {
-                    loadFile((File) value);
-                }
-                Object caption = testSheetContainer.getItem(value).getItemProperty("Name").getValue();
-                if(caption != null) {
-                    Page.getCurrent().setUriFragment("file/" + caption.toString(), false);
-                }
+    private Button createUpdateButton() {
+        Button updateButton = new Button("Update");
+        updateButton.addClickListener(e -> {
+            File file = openTestSheetSelect.getValue();
+            if (file != null ) {
+                loadFile(file);
+                Page.getCurrent().setUriFragment("file/" + file.getName(), false);
             }
         });
         updateButton.setId("update");
         return updateButton;
     }
 
-    private ComboBox createTestSheetCombobox(FilesystemContainer testSheetContainer) {
-        ComboBox cb = new ComboBox(null, testSheetContainer);
+    private ComboBox createTestSheetCombobox(DataSource<File> ds) {
+        ComboBox<File> cb = new ComboBox(null);
+
+        cb.setDataSource(ds);
+        cb.setItemCaptionGenerator(
+                e-> e.getName()
+        );
         cb.setId("testSheetSelect");
-        cb.setItemCaptionPropertyId("Name");
         cb.setPageLength(30);
         cb.setWidth("250px");
         return cb;
@@ -502,30 +474,28 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     System.out.println("Opening fixture " + fixture);
                 }
             }
-            for (Object id : openTestSheetSelect.getItemIds()) {
-                File file = (File) id;
-                if (filename.equals(file.getName())) {
-                    openTestSheetSelect.select(file);
-                    updateButton.click();
-
-                    if (sheetIndex != null) {
-                        spreadsheet.setActiveSheetIndex(sheetIndex);
-                    }
-
-                    if (fixture != null) {
-                        fixtureSelect.setValue(fixture.toString());
-                        loadFixtureBtn.click();
-                    }
-
-                    return;
-                }
-            }
-
+            open(filename,fixture,sheetIndex);
             Notification.show("File not found: " + filename,
                     Notification.Type.WARNING_MESSAGE);
         }
     }
+    private void open(String filename,TestFixtures fixture,Integer sheetIndex) {
+        fileDataSource.fetch(new Query()).filter(f->
+                filename.equals(f.getName())
+        ).findFirst().ifPresent(file->{
+            openTestSheetSelect.select(file);
+            updateButton.click();
 
+            if (sheetIndex != null) {
+                spreadsheet.setActiveSheetIndex(sheetIndex);
+            }
+
+            if (fixture != null) {
+                fixtureSelect.setValue(fixture);
+                loadFixtureBtn.click();
+            }
+        });
+    }
     private void loadFile(File file) {
         try {
             if (spreadsheet == null) {
@@ -585,7 +555,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 { "", true, Calendar.getInstance(), 500.0D,
                         "here is another button", comboBoxValues[1] } };
 
-        private final ComboBox comboBox;
+        private final ComboBox<String> comboBox;
 
         private boolean initializingComboBoxValue;
 
@@ -600,10 +570,42 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         private Button button5;
 
         private boolean hidden = false;
-
-        private NativeSelect nativeSelect;
+        private NativeSelect<String> nativeSelect;
 
         private ComboBox comboBox2;
+
+        private NativeSelect<String> createNativeSelect() {
+            if (nativeSelect == null) {
+                List<String> items = new ArrayList<>();
+                items.add("JEE");
+                nativeSelect = new NativeSelect<>();
+                nativeSelect.setDataSource(new ListDataSource(items));
+                nativeSelect.setWidth("100%");
+            }
+            return nativeSelect;
+        }
+
+        private ComboBox<String> createCombobox() {
+            final ComboBox<String> comboBox = new ComboBox<>();
+            comboBox.setDataSource(new ListDataSource<>(
+                    Arrays.asList(comboBoxValues)
+            ));
+            comboBox.addValueChangeListener(e -> {
+                if (!initializingComboBoxValue) {
+                    CellReference cr = spreadsheet
+                            .getSelectedCellReference();
+                    Cell cell = spreadsheet.getCell(cr.getRow(),
+                            cr.getCol());
+                    if (cell != null) {
+                        cell.setCellValue(comboBox.getValue());
+                        spreadsheet.refreshCells(cell);
+                    }
+                }
+            });
+            comboBox.setWidth("100%");
+            return comboBox;
+
+        }
 
         public SpreadsheetEditorComponentFactoryTest() {
             testWorkbook = new XSSFWorkbook();
@@ -680,30 +682,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             cell2.setCellStyle(lockedCellStyle);
             Row row6 = sheet.createRow(6);
             row6.setHeightInPoints(22F);
-            comboBox = new ComboBox();
-            for (String s : comboBoxValues) {
-                comboBox.addItem(s);
-            }
-            comboBox.setImmediate(true);
-            comboBox.setBuffered(false);
-            comboBox.addValueChangeListener(new ValueChangeListener() {
 
-                @Override
-                public void valueChange(ValueChangeEvent event) {
-                    if (!initializingComboBoxValue) {
-                        String s = (String) comboBox.getValue();
-                        CellReference cr = spreadsheet
-                                .getSelectedCellReference();
-                        Cell cell = spreadsheet.getCell(cr.getRow(),
-                                cr.getCol());
-                        if (cell != null) {
-                            cell.setCellValue(s);
-                            spreadsheet.refreshCells(cell);
-                        }
-                    }
-                }
-            });
-            comboBox.setWidth("100%");
+            comboBox = createCombobox();
 
             dateField.addValueChangeListener(event ->{
 
@@ -931,32 +911,19 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 if (columnIndex == 5) {
                     if (button5 == null) {
                         button5 = new Button("Hide all custom components",
-                                new Button.ClickListener() {
-
-                                    @Override
-                                    public void buttonClick(ClickEvent event) {
-                                        hidden = !hidden;
-                                        spreadsheet.reloadVisibleCellContents();
-                                    }
+                                e -> {
+                                    hidden = !hidden;
+                                    spreadsheet.reloadVisibleCellContents();
                                 });
                     }
                     return button5;
                 }
             } else if (!hidden && rowIndex == 6) {
                 if (columnIndex == 1) {
-                    if (nativeSelect == null) {
-                        nativeSelect = new NativeSelect();
-                        nativeSelect.addItem("JEE");
-                        nativeSelect.setWidth("100%");
-                    }
-                    return nativeSelect;
+                    return createNativeSelect();
                 } else if (columnIndex == 2) {
                     if (comboBox2 == null) {
-                        comboBox2 = new ComboBox();
-                        for (String s : comboBoxValues) {
-                            comboBox2.addItem(s);
-                        }
-                        comboBox2.setWidth("100%");
+                        comboBox2 = createCombobox();
                     }
                     return comboBox2;
                 }
@@ -1004,30 +971,25 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             final TextField hSplitTF = new TextField(
                     "Horizontal Split Position");
             hSplitTF.setValue("6");
-            hSplitTF.setConverter(Integer.class);
             final TextField vSplitTF = new TextField("Vertical Split Position");
-            vSplitTF.setConverter(Integer.class);
             vSplitTF.setValue("6");
             l.addComponent(vSplitTF);
             l.addComponent(hSplitTF);
-            l.addComponent(new Button("Submit values",
-                    new Button.ClickListener() {
+            Button button = new Button("Submit values");
+            button.addClickListener(event -> {
+                try {
+                    int vSprlit = Integer.parseInt(vSplitTF.getValue());
+                    int hSprlit = Integer.parseInt(hSplitTF.getValue());
 
-                        @Override
-                        public void buttonClick(ClickEvent event) {
-                            try {
-                                if (spreadsheet != null) {
-                                    spreadsheet.createFreezePane(
-                                            (Integer) vSplitTF
-                                                    .getConvertedValue(),
-                                            (Integer) hSplitTF
-                                                    .getConvertedValue());
-                                }
-                            } catch (ConversionException e) {
-                            }
-                            close();
-                        }
-                    }));
+                    spreadsheet.createFreezePane(vSprlit, hSprlit);
+                } catch (NumberFormatException e) {
+
+                }
+
+                close();
+            });
+            l.addComponent(button);
+
         }
     }
 }
