@@ -10,14 +10,10 @@ import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.PopupButton;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeEvent;
-import com.vaadin.addon.spreadsheet.Spreadsheet.SelectionChangeListener;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.Property.ValueChangeEvent;
-import com.vaadin.v7.data.Property.ValueChangeListener;
+import com.vaadin.server.data.ListDataSource;
 import com.vaadin.ui.Component;
-import com.vaadin.v7.ui.CustomField;
-import com.vaadin.v7.ui.ListSelect;
+import com.vaadin.ui.CustomField;
+import com.vaadin.ui.NativeSelect;
 
 @SuppressWarnings("serial")
 public class PopupButtonFixture implements SpreadsheetFixture {
@@ -27,22 +23,19 @@ public class PopupButtonFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(final Spreadsheet spreadsheet) {
-        spreadsheet.addSelectionChangeListener(new SelectionChangeListener() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                if(event.getAllSelectedCells().size() != 1) {
-                    return;
-                }
-                List<String> values = new ArrayList<String>(VALUES);
-                CellReference ref = event.getSelectedCellReference();
-                CellReference newRef = new CellReference(ref.getRow(), ref
-                        .getCol());
-                DataValidationButton popupButton = new DataValidationButton(
-                        values);
-                popupButton.setUp();
-                event.getSpreadsheet().setPopup(newRef, popupButton);
-                popupButton.openPopup();
+        spreadsheet.addSelectionChangeListener(event -> {
+            if (event.getAllSelectedCells().size() != 1) {
+                return;
             }
+            List<String> values = new ArrayList<String>(VALUES);
+            CellReference ref = event.getSelectedCellReference();
+            CellReference newRef = new CellReference(ref.getRow(), ref
+                    .getCol());
+            DataValidationButton popupButton = new DataValidationButton(
+                    spreadsheet, values);
+            popupButton.setUp();
+            event.getSpreadsheet().setPopup(newRef, popupButton);
+            popupButton.openPopup();
         });
     }
 }
@@ -50,28 +43,14 @@ public class PopupButtonFixture implements SpreadsheetFixture {
 class DataValidationButton extends PopupButton {
     private final CellListSelectComponent cellListSelectComponent;
 
-    private final ValueChangeListener valueChangeListener = new ValueChangeListener() {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void valueChange(ValueChangeEvent event) {
-            String value = (String) event.getProperty().getValue();
-            Spreadsheet sheet = (Spreadsheet) getParent();
-            Cell cell = sheet.getCell(getRow(), getColumn());
-            cell.setCellValue(value);
-            sheet.refreshCells(cell);
-        }
-    };
-
-    public DataValidationButton(Collection<String> values) {
+    public DataValidationButton(Spreadsheet parent,Collection<String> values) {
         super();
-        cellListSelectComponent = new CellListSelectComponent(values, this);
+        cellListSelectComponent = new CellListSelectComponent(values, this,parent);
     }
 
     public void setUp() {
         setHeaderHidden(false);
         cellListSelectComponent.setSizeFull();
-        cellListSelectComponent.addValueChangeListener(valueChangeListener);
         setContent(cellListSelectComponent);
     }
 
@@ -79,42 +58,40 @@ class DataValidationButton extends PopupButton {
 
 class CellListSelectComponent extends CustomField<String> {
     private static final long serialVersionUID = 1L;
-    private final ListSelect listSelect;
+    private final NativeSelect<String> listSelect;
     private Collection<String> values;
-    private DataValidationButton dataValidationButton;
 
     public CellListSelectComponent(Collection<String> values,
-            DataValidationButton dataValidationButton) {
+                                   DataValidationButton context,
+                                   Spreadsheet sheet) {
         super();
         this.values = values;
-        this.dataValidationButton = dataValidationButton;
-        listSelect = new ListSelect();
-        listSelect.setMultiSelect(false);
-        listSelect.addValueChangeListener(new Property.ValueChangeListener() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void valueChange(
-                    com.vaadin.v7.data.Property.ValueChangeEvent event) {
-                final String value = (String) listSelect.getValue();
-                setValue(value);
-                CellListSelectComponent.this.dataValidationButton.closePopup();
+        listSelect = new NativeSelect();
+        listSelect.addValueChangeListener(event -> {
+            CellListSelectComponent.this.setValue(event.getValue());
+            Cell cell = sheet.getCell(context.getRow(), context.getColumn());
+            if (cell == null) {
+                cell = sheet.createCell(context.getRow(), context.getColumn(), event.getValue());
             }
+            sheet.refreshCells(cell);
+            context.closePopup();
         });
     }
 
     @Override
     protected Component initContent() {
-        for (String val : values) {
-            listSelect.addItem(val);
-        }
-        listSelect.setRows(5);
+        listSelect.setDataSource(new ListDataSource<>(values));
         listSelect.setSizeFull();
         return listSelect;
     }
 
+
     @Override
-    public Class<String> getType() {
-        return String.class;
+    public String getValue() {
+        return listSelect.getValue();
+    }
+
+    @Override
+    protected void doSetValue(String value) {
     }
 }

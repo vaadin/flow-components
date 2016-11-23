@@ -1,48 +1,50 @@
 package com.vaadin.addon.spreadsheet.test.fixtures;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.vaadin.addon.spreadsheet.PopupButton;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.ui.Table;
+import com.vaadin.server.Sizeable;
+import com.vaadin.server.data.ListDataSource;
+import com.vaadin.ui.Grid;
 
 @SuppressWarnings("serial")
 public class TablePopupButtonFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(final Spreadsheet spreadsheet) {
+
         spreadsheet
-                .addSelectionChangeListener(new Spreadsheet.SelectionChangeListener() {
-                    @Override
-                    public void onSelectionChange(
-                            Spreadsheet.SelectionChangeEvent selectionChangeEvent) {
-                        BeanItemContainer<ItemThing> beans = new BeanItemContainer<ItemThing>(
-                                ItemThing.class);
-                        beans.addBean(new ItemThing("A"));
-                        beans.addBean(new ItemThing("B"));
+                .addSelectionChangeListener(e -> {
+                    List<ItemThing> items = new ArrayList<>();
+                    items.add(new ItemThing("A"));
+                    items.add(new ItemThing("A"));
+                    Grid<ItemThing> content = new Grid<>();
+                    content.setDataSource(new ListDataSource<>(items));
+                    content.setHeight("200px");
+                    int columnIndex =spreadsheet.getSelectedCellReference().getCol();
+                    int columnWidth = (int) spreadsheet.getActiveSheet().getColumnWidthInPixels(columnIndex);
 
-                        final Table content = new Table("",
-                                beans);
-                        content.setHeight("200px");
-
-                        PopupButton popupButton = new PopupButton(content);
-                        spreadsheet.setPopup(
-                                spreadsheet.getSelectedCellReference(),
-                                popupButton);
-                    }
+                    content.setWidth(columnWidth, Sizeable.Unit.PIXELS);
+                    content.addColumn("foo", ItemThing::getValue);
+                    PopupButton popupButton = new PopupButton(content);
+                    spreadsheet.setPopup(
+                            spreadsheet.getSelectedCellReference(),
+                            popupButton);
                 });
     }
 
     public class ItemThing implements Serializable {
-        private String string;
+        private String value;
 
         ItemThing(String s) {
-            string = s;
+            value = s;
         }
 
-        public String getString() {
-            return string;
+        public String getValue() {
+            return value;
         }
     }
 }

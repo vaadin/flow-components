@@ -1,7 +1,6 @@
 package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 
 import org.junit.Test;
