@@ -322,17 +322,17 @@ public abstract class AbstractTB3Test extends ParallelTest {
      */
     private String getDeploymentPath(Class<?> uiClass) {
         String runPath = "";
-
+        String classPath = uiClass.getSimpleName();
         if (UI.class.isAssignableFrom(uiClass)) {
-            return runPath + "/" + uiClass.getCanonicalName()
+            return runPath + "/" + classPath
                     + (isDebug() ? "?debug" : "");
         } else if (LegacyApplication.class.isAssignableFrom(uiClass)) {
-            return runPath + "/" + uiClass.getCanonicalName()
+            return runPath + "/" + classPath
                     + "?restartApplication" + (isDebug() ? "&debug" : "");
         } else {
             throw new IllegalArgumentException(
                     "Unable to determine path for enclosing class "
-                            + uiClass.getCanonicalName());
+                            + classPath);
         }
     }
 
