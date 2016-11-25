@@ -11,20 +11,20 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import com.vaadin.server.data.ListDataSource;
+import com.vaadin.server.data.ListDataProvider;
 
 /**
 Helper class a replacement for Vaadin 7 FilesystemContainer
 Doesn't support hierarchy.
  */
-class FileDataSource {
+class FileDataProvider {
     /**
      *
      * @param root root folder
      * @param filter Regexp for filtering files.
-     * @return a ListDataSource of File
+     * @return a ListDataProvider of File
      */
-    public static ListDataSource<File> create(URI root, String filter,Logger logger) {
+    public static ListDataProvider<File> create(URI root, String filter, Logger logger) {
         List<File> pathFiles = new ArrayList<>();
 
         try(Stream<Path> paths = Files.walk(Paths.get(root),1)) {
@@ -38,7 +38,7 @@ class FileDataSource {
             logger.warning("Could not test Excel sheet "+e.getMessage());
         }
         pathFiles.sort((File f1,File f2)->f1.getName().compareTo(f2.getName()));
-        return new ListDataSource<>(pathFiles);
+        return new ListDataProvider<>(pathFiles);
     }
 
 }

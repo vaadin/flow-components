@@ -33,8 +33,8 @@ import com.vaadin.addon.spreadsheet.PopupButton.PopupCloseEvent;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupCloseListener;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupOpenEvent;
 import com.vaadin.addon.spreadsheet.PopupButton.PopupOpenListener;
-import com.vaadin.server.data.DataSource;
-import com.vaadin.server.data.ListDataSource;
+import com.vaadin.server.data.DataProvider;
+import com.vaadin.server.data.ListDataProvider;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CheckBoxGroup;
 import com.vaadin.ui.Panel;
@@ -55,7 +55,7 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
     private CellRangeAddress filterRange;
     private CheckBox allItems;
     private CheckBoxGroup<String> filterCheckbox;
-    private DataSource<String> filterOptionsDS;
+    private DataProvider<String> filterOptionsProvider;
     private List<String> filterOptions = new ArrayList<>();
     private ArrayList<String> allCellValues;
     private Collection<String> latestFilteredValues;
@@ -184,9 +184,9 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
      * Creates the filter selection component.
      */
     protected void initOptions() {
-        filterOptionsDS = new ListDataSource(filterOptions);
+        filterOptionsProvider = new ListDataProvider<>(filterOptions);
         filterCheckbox = new CheckBoxGroup();
-        filterCheckbox.setDataSource(filterOptionsDS);
+        filterCheckbox.setDataProvider(filterOptionsProvider);
         filterCheckbox.addValueChangeListener(event->{
             if (firstUpdate) {
                 firstUpdate = false;
@@ -314,7 +314,7 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
         cancelValueChangeUpdate = true;
         allItems.setValue(true);
         filterCheckbox.setValue(new HashSet<>(allCellValues));
-        filterOptionsDS.refreshAll();
+        filterOptionsProvider.refreshAll();
         filteredRows.clear();
         cancelValueChangeUpdate = false;
     }

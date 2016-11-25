@@ -10,7 +10,7 @@ import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.PopupButton;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.server.data.ListDataSource;
+import com.vaadin.server.data.ListDataProvider;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.NativeSelect;
@@ -80,7 +80,7 @@ class CellListSelectComponent extends CustomField<String> {
 
     @Override
     protected Component initContent() {
-        listSelect.setDataSource(new ListDataSource<>(values));
+        listSelect.setDataProvider(new ListDataProvider<>(values));
         listSelect.setSizeFull();
         return listSelect;
     }

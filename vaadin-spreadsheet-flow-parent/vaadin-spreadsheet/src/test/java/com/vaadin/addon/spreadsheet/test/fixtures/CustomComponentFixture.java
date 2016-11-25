@@ -12,7 +12,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.data.HasValue;
-import com.vaadin.server.data.ListDataSource;
+import com.vaadin.server.data.ListDataProvider;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
@@ -186,7 +186,7 @@ class ComponentEditorFactory extends AbstractComponentFactory {
         NativeSelect<String> cb = new NativeSelect<>();
         String[] keys = {"10","20","30","40","50"};
         List<String> items = new ArrayList<String>(Arrays.asList(keys));
-        cb.setDataSource(new ListDataSource<>(items));
+        cb.setDataProvider(new ListDataProvider<>(items));
         cb.addValueChangeListener(e -> {
             spreadsheet.createCell(row, col, e.getValue());
             spreadsheet.refreshCells(spreadsheet.getCell(row, col));

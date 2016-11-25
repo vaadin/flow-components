@@ -48,8 +48,8 @@ import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.data.DataSource;
-import com.vaadin.server.data.ListDataSource;
+import com.vaadin.server.data.DataProvider;
+import com.vaadin.server.data.ListDataProvider;
 import com.vaadin.server.data.Query;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -92,7 +92,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     private Button download;
 
     private ComboBox<File> openTestSheetSelect;
-    private DataSource<File> fileDataSource;
+    private DataProvider<File> fileDataSource;
     private SpreadsheetComponentFactory spreadsheetFieldFactory;
 
     private SheetChangeListener selectedSheetChangeListener;
@@ -146,7 +146,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         }
         if (uri != null) {
             String excelFilesRegex = ".*\\.xls|.*\\.xlsx|.*\\.xlsm";
-            fileDataSource = FileDataSource.create(uri, excelFilesRegex, LOGGER);
+            fileDataSource = FileDataProvider.create(uri, excelFilesRegex, LOGGER);
 
             openTestSheetSelect = createTestSheetCombobox(fileDataSource);
         }
@@ -261,7 +261,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 return o1.getDisplayName().compareTo(o2.getDisplayName());
             }
         });
-        localeSelect.setDataSource(new ListDataSource<>(locales));
+        localeSelect.setDataProvider(new ListDataProvider<>(locales));
         //TODO Vaadin8
         //Use setItemCaptionGenerator when this is done
         //https://github.com/vaadin/framework8-issues/issues/477
@@ -286,7 +286,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         fixtureSelect = new NativeSelect();
         fixtureSelect.setId("fixtureSelect");
         List<TestFixtures> fixtures = Arrays.asList(TestFixtures.values());
-        fixtureSelect.setDataSource(new ListDataSource<>(fixtures));
+        fixtureSelect.setDataProvider(new ListDataProvider<>(fixtures));
 
         loadFixtureBtn = new Button("Load");
         loadFixtureBtn.addClickListener(event -> {
@@ -387,10 +387,10 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         return updateButton;
     }
 
-    private ComboBox createTestSheetCombobox(DataSource<File> ds) {
+    private ComboBox createTestSheetCombobox(DataProvider<File> ds) {
         ComboBox<File> cb = new ComboBox(null);
 
-        cb.setDataSource(ds);
+        cb.setDataProvider(ds);
         cb.setItemCaptionGenerator(
                 e-> e.getName()
         );
@@ -483,7 +483,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         fileDataSource.fetch(new Query()).filter(f->
                 filename.equals(f.getName())
         ).findFirst().ifPresent(file->{
-            openTestSheetSelect.select(file);
+            openTestSheetSelect.setValue(file);
             updateButton.click();
 
             if (sheetIndex != null) {
@@ -579,7 +579,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 List<String> items = new ArrayList<>();
                 items.add("JEE");
                 nativeSelect = new NativeSelect<>();
-                nativeSelect.setDataSource(new ListDataSource(items));
+                nativeSelect.setDataProvider(new ListDataProvider(items));
                 nativeSelect.setWidth("100%");
             }
             return nativeSelect;
@@ -587,7 +587,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         private ComboBox<String> createCombobox() {
             final ComboBox<String> comboBox = new ComboBox<>();
-            comboBox.setDataSource(new ListDataSource<>(
+            comboBox.setDataProvider(new ListDataProvider<>(
                     Arrays.asList(comboBoxValues)
             ));
             comboBox.addValueChangeListener(e -> {
