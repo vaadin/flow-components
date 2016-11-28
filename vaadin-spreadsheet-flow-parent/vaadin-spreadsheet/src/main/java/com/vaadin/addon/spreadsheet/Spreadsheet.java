@@ -2017,11 +2017,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         // PopupButtons
         if (!sheetPopupButtons.isEmpty()) {
             Map<CellReference, PopupButton> updated = new HashMap<CellReference, PopupButton>();
-
-            for (Entry<CellReference, PopupButton> entry : sheetPopupButtons
-                    .entrySet()) {
-                CellReference cell = entry.getKey();
-                PopupButton pbutton = entry.getValue();
+            for (PopupButton pbutton : sheetPopupButtons.values()) {
+                CellReference cell = pbutton.getCellReference();
                 unRegisterPopupButton(pbutton);
                 int row = cell.getRow();
                 if (rowWasRemoved(row, first, n)) {
@@ -2033,7 +2030,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     pbutton.setCellReference(newCell);
                     updated.put(newCell, pbutton);
                 } else {
-                    updated.put(cell, entry.getValue());
+                    updated.put(cell, pbutton);
                 }
             }
             sheetPopupButtons = updated;
@@ -3733,12 +3730,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void setPopup(CellReference cellReference, PopupButton popupButton) {
         removePopupButton(cellReference);
         if (popupButton != null) {
-            CellReference newCellReference = SpreadsheetUtil
+            CellReference absoluteCellReference = SpreadsheetUtil
                     .relativeToAbsolute(this, cellReference);
-            popupButton.setCellReference(newCellReference);
-            sheetPopupButtons.put(newCellReference, popupButton);
-            if (isCellVisible(cellReference.getRow() + 1,
-                    cellReference.getCol() + 1)) {
+            popupButton.setCellReference(absoluteCellReference);
+            sheetPopupButtons.put(absoluteCellReference, popupButton);
+            if (isCellVisible(absoluteCellReference.getRow() + 1,
+                    absoluteCellReference.getCol() + 1)) {
                 registerPopupButton(popupButton);
                 markAsDirty();
             }
@@ -3746,10 +3743,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     private void removePopupButton(CellReference cellReference) {
-        PopupButton oldButton = sheetPopupButtons.get(cellReference);
+        CellReference absoluteCellReference = SpreadsheetUtil
+                .relativeToAbsolute(this, cellReference);
+        PopupButton oldButton = sheetPopupButtons.get(absoluteCellReference);
         if (oldButton != null) {
             unRegisterPopupButton(oldButton);
-            sheetPopupButtons.remove(cellReference);
+            sheetPopupButtons.remove(absoluteCellReference);
             markAsDirty();
         }
     }

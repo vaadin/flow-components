@@ -132,7 +132,8 @@ public class SpreadsheetTable implements Serializable {
             for (int c = fullTableRegion.getFirstColumn(); c <= fullTableRegion
                     .getLastColumn(); c++) {
                 CellReference popupButtonCellReference = new CellReference(
-                        fullTableRegion.getFirstRow(), c);
+                        sheet.getSheetName(), fullTableRegion.getFirstRow(), c,
+                        true, true);
                 PopupButton popupButton = new PopupButton();
                 popupButtons.put(popupButtonCellReference, popupButton);
                 spreadsheet.setPopup(popupButtonCellReference, popupButton);
