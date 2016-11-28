@@ -33,6 +33,6 @@ public class SheetHeaderElement extends AbstractElement {
     public TestBenchElement getResizeHandle() {
         return wrapElement(
                 findElement(By.className("header-resize-dnd-second")),
-                getCommandExecutor());
+                getTestBenchCommandExecutor());
     }
 }

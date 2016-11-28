@@ -1,0 +1,12 @@
+---
+title: Spreadsheet 1 to Spreadsheet 2 Migration Guide
+order: 10
+layout: page
+---
+
+[[spreadsheet.migration]]
+= Spreadsheet 1 to Spreadsheet 2 Migration Guide
+
+Spreadsheet 2 is using Vaadin Framework 8.
+To use Spreadsheet 2, you need to migrate your application to Vaadin 8, see Vaadin Framework 8 migration guide.
+Besides that no changes are needed.

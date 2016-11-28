@@ -21,4 +21,6 @@ include::spreadsheet-cells.asciidoc[leveloffset=+2]
 include::spreadsheet-contextmenu.asciidoc[leveloffset=+2]
 
 include::spreadsheet-table.asciidoc[leveloffset=+2]
+
+include::spreadsheet-migration-vaadin8.asciidoc[leveloffset=+2]
 (((range="endofrange", startref="term.spreadsheet")))

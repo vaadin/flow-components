@@ -1,13 +1,16 @@
 package com.vaadin.addon.spreadsheet.test;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.server.browserlaunchers.Sleeper;
+import org.openqa.selenium.support.ui.Duration;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.Sleeper;
 
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
@@ -112,10 +115,9 @@ public class CustomComponentsTest extends AbstractSpreadsheetTestCase {
         Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B2"));
         sheetController.selectCell("B5");
         sheetController.navigateToCell("B100");
-
-        Sleeper.sleepTightInSeconds(1);
+        Sleeper.SYSTEM_SLEEPER.sleep(new Duration(1, TimeUnit.SECONDS));
         sheetController.navigateToCell("B1");
-        Sleeper.sleepTightInSeconds(3);
+        Sleeper.SYSTEM_SLEEPER.sleep(new Duration(3, TimeUnit.SECONDS));
 
         Assert.assertEquals(TEXT_PROXY, sheetController.getCellContent("B2"));
     }

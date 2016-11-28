@@ -17,12 +17,13 @@ package com.vaadin.addon.spreadsheet.elements;
  * #L%
  */
 
-import com.vaadin.testbench.By;
-import com.vaadin.testbench.elementsbase.AbstractElement;
+import java.util.List;
+
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import java.util.List;
+import com.vaadin.testbench.By;
+import com.vaadin.testbench.elementsbase.AbstractElement;
 
 /**
  * This class represents one cell within the currently active sheet of a
@@ -52,7 +53,7 @@ public class SheetCellElement extends AbstractElement {
             cellValueInput.clear();
             cellValueInput.sendKeys(newValue);
             cellValueInput.sendKeys(Keys.TAB);
-            getCommandExecutor().waitForVaadin();
+            getTestBenchCommandExecutor().waitForVaadin();
         }
     }
 
