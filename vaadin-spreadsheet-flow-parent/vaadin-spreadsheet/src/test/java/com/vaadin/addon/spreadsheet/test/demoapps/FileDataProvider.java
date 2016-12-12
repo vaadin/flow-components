@@ -25,20 +25,33 @@ class FileDataProvider {
      * @return a ListDataProvider of File
      */
     public static ListDataProvider<File> create(URI root, String filter, Logger logger) {
+        return new ListDataProvider<>(getFiles(root, filter, logger));
+    }
+
+    /**
+     *
+     * @param root
+     *            root folder
+     * @param filter
+     *            Regexp for filtering files.
+     * @return a List of Files
+     */
+    public static List<File> getFiles(URI root, String filter, Logger logger) {
         List<File> pathFiles = new ArrayList<>();
 
-        try(Stream<Path> paths = Files.walk(Paths.get(root),1)) {
+        try (Stream<Path> paths = Files.walk(Paths.get(root), 1)) {
             paths.forEach(filePath -> {
-                if(!Files.isDirectory(filePath) && (filePath.getFileName().toString().matches(filter))) {
+                if (!Files.isDirectory(filePath) && (filePath.getFileName()
+                        .toString().matches(filter))) {
                     pathFiles.add(filePath.toFile());
                 }
             });
+        } catch (IOException e) {
+            logger.warning("Could not test Excel sheet " + e.getMessage());
         }
-        catch (IOException e) {
-            logger.warning("Could not test Excel sheet "+e.getMessage());
-        }
-        pathFiles.sort((File f1,File f2)->f1.getName().compareTo(f2.getName()));
-        return new ListDataProvider<>(pathFiles);
+        pathFiles.sort(
+                (File f1, File f2) -> f1.getName().compareTo(f2.getName()));
+        return pathFiles;
     }
 
 }

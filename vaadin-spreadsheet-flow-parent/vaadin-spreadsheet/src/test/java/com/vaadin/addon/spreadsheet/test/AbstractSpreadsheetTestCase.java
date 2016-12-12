@@ -3,6 +3,7 @@ package com.vaadin.addon.spreadsheet.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -86,15 +87,6 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
                 $(NativeSelectElement.class).id("localeSelect").getValue());
     }
 
-    //TODO Vaadin8
-    //Use setItemCaptionGenerator when this is done
-    //https://github.com/vaadin/framework8-issues/issues/477
-    protected void setLocaleForNativeSelect(Locale locale) {
-        $(NativeSelectElement.class).id("localeSelect").selectByText(
-                locale.toString());
-        assertEquals("Unexpected locale,", locale.toString(),
-                $(NativeSelectElement.class).id("localeSelect").getValue());
-    }
     /**
      * Navigates with theme parameter to spread sheet file. This way is
      * necessary to change the theme.

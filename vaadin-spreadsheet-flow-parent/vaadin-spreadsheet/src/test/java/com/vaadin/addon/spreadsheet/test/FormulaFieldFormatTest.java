@@ -1,6 +1,7 @@
 package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertEquals;
+
 import java.util.Locale;
 
 import org.junit.Test;
@@ -71,10 +72,8 @@ public class FormulaFieldFormatTest extends AbstractSpreadsheetTestCase {
                 spreadsheetPage.getFormulaFieldValue());
     }
 
-    //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
-    //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
     private void setDefaultLocale() {
-        setLocaleForNativeSelect(Locale.US);
+        setLocale(Locale.US);
     }
 
 }

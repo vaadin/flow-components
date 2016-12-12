@@ -5,10 +5,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vaadin.version>8.0.0.alpha7</vaadin.version>
+        <vaadin.version>8.0.0.alpha8</vaadin.version>
         <charts.version>4.0-SNAPSHOT</charts.version>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
-        <testbench.api.version>7.7.3</testbench.api.version>
+        <testbench.api.version>8.0.0.alpha7</testbench.api.version>
         <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
         <tb.hub>testbench-hub.intra.itmill.com</tb.hub>
     </properties>

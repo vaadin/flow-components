@@ -17,7 +17,7 @@ public class GeneralRoundingTest extends AbstractSpreadsheetTestCase {
     public void generalFormat_spreadsheetWithGeneralFormatAndLocaleUS_numbersRoundedCorrectly() {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
-        setLocaleForNativeSelect(Locale.US);
+        setLocale(Locale.US);
 
         headerPage.loadFile("general_round.xlsx", this);
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
@@ -42,7 +42,7 @@ public class GeneralRoundingTest extends AbstractSpreadsheetTestCase {
     public void generalFormat_spreadsheetWithGeneralFormatAndLocaleFI_numbersRoundedCorrectly() {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
-        setLocaleForNativeSelect(new Locale("fi", "FI"));
+        setLocale(new Locale("fi", "FI"));
         headerPage.loadFile("general_round.xlsx", this);
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
 
@@ -67,7 +67,7 @@ public class GeneralRoundingTest extends AbstractSpreadsheetTestCase {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
         assertEquals("Check US locale",Locale.US.toString(),"en_US");
-        setLocaleForNativeSelect(Locale.US);
+        setLocale(Locale.US);
 
 
         headerPage.loadFile("negative_general_round.xlsx", this);
@@ -93,7 +93,7 @@ public class GeneralRoundingTest extends AbstractSpreadsheetTestCase {
     public void generalFormat_spreadsheetWithGeneralFormatAndLocaleFI_negativeNumbersRoundedCorrectly() {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
-        setLocaleForNativeSelect(new Locale("fi", "FI"));
+        setLocale(new Locale("fi", "FI"));
         headerPage.loadFile("negative_general_round.xlsx", this);
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
 

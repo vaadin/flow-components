@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -48,13 +49,11 @@ import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.data.DataProvider;
 import com.vaadin.server.data.ListDataProvider;
 import com.vaadin.server.data.Query;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.AbstractSingleSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -92,7 +91,6 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     private Button download;
 
     private ComboBox<File> openTestSheetSelect;
-    private DataProvider<File> fileDataSource;
     private SpreadsheetComponentFactory spreadsheetFieldFactory;
 
     private SheetChangeListener selectedSheetChangeListener;
@@ -109,7 +107,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private HorizontalLayout options;
 
-    private AbstractSingleSelect<Locale> localeSelect;
+    private NativeSelect<Locale> localeSelect;
     private Button loadFixtureBtn;
     private NativeSelect<TestFixtures> fixtureSelect;
 
@@ -146,9 +144,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         }
         if (uri != null) {
             String excelFilesRegex = ".*\\.xls|.*\\.xlsx|.*\\.xlsm";
-            fileDataSource = FileDataProvider.create(uri, excelFilesRegex, LOGGER);
 
-            openTestSheetSelect = createTestSheetCombobox(fileDataSource);
+            openTestSheetSelect = createTestSheetCombobox(
+                    FileDataProvider.getFiles(uri, excelFilesRegex, LOGGER));
         }
         updateButton = createUpdateButton();
         save = createSaveButton();
@@ -261,10 +259,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 return o1.getDisplayName().compareTo(o2.getDisplayName());
             }
         });
-        localeSelect.setDataProvider(new ListDataProvider<>(locales));
-        //TODO Vaadin8
-        //Use setItemCaptionGenerator when this is done
-        //https://github.com/vaadin/framework8-issues/issues/477
+        localeSelect.setItems(locales);
+        localeSelect.setItemCaptionGenerator(Locale::getDisplayName);
         localeSelect.addValueChangeListener(e-> updateLocale());
 
         HorizontalLayout sheetOptions = new HorizontalLayout();
@@ -285,8 +281,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         fixtureSelect = new NativeSelect();
         fixtureSelect.setId("fixtureSelect");
-        List<TestFixtures> fixtures = Arrays.asList(TestFixtures.values());
-        fixtureSelect.setDataProvider(new ListDataProvider<>(fixtures));
+        fixtureSelect.setItems(TestFixtures.values());
 
         loadFixtureBtn = new Button("Load");
         loadFixtureBtn.addClickListener(event -> {
@@ -387,13 +382,11 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         return updateButton;
     }
 
-    private ComboBox createTestSheetCombobox(DataProvider<File> ds) {
+    private ComboBox<File> createTestSheetCombobox(List<File> files) {
         ComboBox<File> cb = new ComboBox(null);
 
-        cb.setDataProvider(ds);
-        cb.setItemCaptionGenerator(
-                e-> e.getName()
-        );
+        cb.setItems(files);
+        cb.setItemCaptionGenerator(File::getName);
         cb.setId("testSheetSelect");
         cb.setPageLength(30);
         cb.setWidth("250px");
@@ -475,15 +468,15 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 }
             }
             open(filename,fixture,sheetIndex);
-            Notification.show("File not found: " + filename,
-                    Notification.Type.WARNING_MESSAGE);
         }
     }
-    private void open(String filename,TestFixtures fixture,Integer sheetIndex) {
-        fileDataSource.fetch(new Query()).filter(f->
-                filename.equals(f.getName())
-        ).findFirst().ifPresent(file->{
-            openTestSheetSelect.setValue(file);
+
+    private void open(String filename, TestFixtures fixture,
+            Integer sheetIndex) {
+        Optional<File> file = openTestSheetSelect.getDataProvider()
+                .fetch(new Query<File, String>(filename)).findFirst();
+        if (file.isPresent()) {
+            openTestSheetSelect.setValue(file.get());
             updateButton.click();
 
             if (sheetIndex != null) {
@@ -494,8 +487,12 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                 fixtureSelect.setValue(fixture);
                 loadFixtureBtn.click();
             }
-        });
+        } else {
+            Notification.show("File not found: " + filename,
+                    Notification.Type.WARNING_MESSAGE);
+        }
     }
+
     private void loadFile(File file) {
         try {
             if (spreadsheet == null) {
@@ -528,7 +525,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
     private void updateLocale() {
         if (spreadsheet != null && localeSelect.getValue() instanceof Locale) {
-            spreadsheet.setLocale((Locale) localeSelect.getValue());
+            spreadsheet.setLocale(localeSelect.getValue());
         }
     }
 
@@ -587,9 +584,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         private ComboBox<String> createCombobox() {
             final ComboBox<String> comboBox = new ComboBox<>();
-            comboBox.setDataProvider(new ListDataProvider<>(
-                    Arrays.asList(comboBoxValues)
-            ));
+            comboBox.setItems(comboBoxValues);
             comboBox.addValueChangeListener(e -> {
                 if (!initializingComboBoxValue) {
                     CellReference cr = spreadsheet

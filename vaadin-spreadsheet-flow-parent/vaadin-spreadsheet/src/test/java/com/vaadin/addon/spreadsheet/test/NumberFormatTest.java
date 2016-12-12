@@ -59,7 +59,7 @@ public class NumberFormatTest extends AbstractSpreadsheetTestCase {
         Locale locale = new Locale("fi", "FI");
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
-        setLocaleForNativeSelect(locale);
+        setLocale(locale);
         spreadsheetPage.clickOnCell(Expected.INTEGER_DECIMAL_FORMAT1.getCell());
         assertEquals("Unexpected formula field value for Finnish locale,",
                 Expected.INTEGER_DECIMAL.getValue().replace(".", ","),
@@ -119,7 +119,7 @@ public class NumberFormatTest extends AbstractSpreadsheetTestCase {
     private void setDefaultLocale() {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
-        setLocaleForNativeSelect(Locale.US);
+        setLocale(Locale.US);
     }
 
     public enum Type {

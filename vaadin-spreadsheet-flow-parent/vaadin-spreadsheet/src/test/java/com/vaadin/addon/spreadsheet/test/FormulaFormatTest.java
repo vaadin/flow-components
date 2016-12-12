@@ -18,7 +18,7 @@ public class FormulaFormatTest extends AbstractSpreadsheetTestCase {
             throws InterruptedException {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
-        setLocaleForNativeSelect(Locale.ITALY);
+        setLocale(Locale.ITALY);
         headerPage.createNewSpreadsheet();
 
         final SheetCellElement a1 = $(SpreadsheetElement.class).first()
@@ -66,7 +66,7 @@ public class FormulaFormatTest extends AbstractSpreadsheetTestCase {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //setLocale(Locale.ENGLISH);
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
-        setLocaleForNativeSelect(Locale.ENGLISH);
+        setLocale(Locale.ENGLISH);
         headerPage.createNewSpreadsheet();
 
         final SheetCellElement a1 = $(SpreadsheetElement.class).first()
@@ -112,7 +112,7 @@ public class FormulaFormatTest extends AbstractSpreadsheetTestCase {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //setLocale(Locale.ITALY);
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
-        setLocaleForNativeSelect(Locale.ITALY);
+        setLocale(Locale.ITALY);
         headerPage.createNewSpreadsheet();
 
         final SheetCellElement a1 = $(SpreadsheetElement.class).first()
@@ -127,7 +127,7 @@ public class FormulaFormatTest extends AbstractSpreadsheetTestCase {
         });
 
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
-        setLocaleForNativeSelect(Locale.ENGLISH);
+        setLocale(Locale.ENGLISH);
 
         a1.setValue("=1.1+1");
         waitUntil(new ExpectedCondition<Object>() {

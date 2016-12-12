@@ -38,7 +38,7 @@ public class GenericTest extends AbstractSpreadsheetTestCase {
     public void testDates() {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
-        setLocaleForNativeSelect(Locale.US);
+        setLocale(Locale.US);
         headerPage.createNewSpreadsheet();
         final SheetCellElement a1 = $(SpreadsheetElement.class).first()
                 .getCellAt("A1");
@@ -65,7 +65,7 @@ public class GenericTest extends AbstractSpreadsheetTestCase {
     public void testFormats() {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed
-        setLocaleForNativeSelect(Locale.US);
+        setLocale(Locale.US);
         SpreadsheetPage spreadsheet = headerPage.createNewSpreadsheet();
         headerPage.loadTestFixture(TestFixtures.Formats);
         final SheetCellElement a1 = $(SpreadsheetElement.class).first()

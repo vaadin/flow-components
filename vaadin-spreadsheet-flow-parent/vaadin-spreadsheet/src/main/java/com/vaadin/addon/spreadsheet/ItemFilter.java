@@ -55,7 +55,7 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
     private CellRangeAddress filterRange;
     private CheckBox allItems;
     private CheckBoxGroup<String> filterCheckbox;
-    private DataProvider<String> filterOptionsProvider;
+    private DataProvider<String, ?> filterOptionsProvider;
     private List<String> filterOptions = new ArrayList<>();
     private ArrayList<String> allCellValues;
     private Collection<String> latestFilteredValues;
@@ -86,9 +86,9 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
         this.popupButton = popupButton;
         this.filterTable = filterTable;
 
-        allCellValues = new ArrayList<String>();
-        filteredRows = new HashSet<Integer>();
-        latestFilteredValues = new LinkedHashSet<String>();
+        allCellValues = new ArrayList<>();
+        filteredRows = new HashSet<>();
+        latestFilteredValues = new LinkedHashSet<>();
         initComponents();
         updateOptions();
     }
@@ -130,7 +130,7 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
                 // options were left unchecked.
                 if (!allItems.getValue()) {
                     @SuppressWarnings("unchecked")
-                    Collection<String> currentValue = (Collection<String>) filterCheckbox
+                    Collection<String> currentValue = filterCheckbox
                             .getValue();
                     cancelValueChangeUpdate = true;
                     if (currentValue.isEmpty()) {
@@ -192,7 +192,7 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
                 firstUpdate = false;
             } else {
                 if (!cancelValueChangeUpdate) {
-                    Collection<String> value = (Collection<String>) filterCheckbox
+                    Collection<String> value = filterCheckbox
                             .getValue();
                     // value should not be updated when options are empty and all
                     // items is unchecked - just as in Excel
@@ -260,7 +260,7 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
      *         column
      */
     protected Set<String> getVisibleValues() {
-        Set<String> values = new HashSet<String>();
+        Set<String> values = new HashSet<>();
         for (int r = filterRange.getFirstRow(); r <= filterRange.getLastRow(); r++) {
             if (!filteredRows.contains(r) && !spreadsheet.isRowHidden(r)) {
                 values.add(spreadsheet.getCellValue(spreadsheet.getCell(r,
@@ -276,7 +276,7 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
      * @return All unique values within this column
      */
     protected Set<String> getAllValues() {
-        Set<String> values = new HashSet<String>();
+        Set<String> values = new HashSet<>();
         for (int r = filterRange.getFirstRow(); r <= filterRange.getLastRow(); r++) {
             values.add(spreadsheet.getCellValue(spreadsheet.getCell(r,
                     filterRange.getFirstColumn())));
