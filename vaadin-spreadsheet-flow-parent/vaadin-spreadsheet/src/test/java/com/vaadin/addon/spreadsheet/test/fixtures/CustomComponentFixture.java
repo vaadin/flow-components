@@ -182,10 +182,11 @@ class ComponentEditorFactory extends AbstractComponentFactory {
 
     }
 
-    private NativeSelect createCombo(Spreadsheet spreadsheet, int row, int col) {
+    private NativeSelect<String> createCombo(Spreadsheet spreadsheet, int row,
+            int col) {
         NativeSelect<String> cb = new NativeSelect<>();
         String[] keys = {"10","20","30","40","50"};
-        List<String> items = new ArrayList<String>(Arrays.asList(keys));
+        List<String> items = new ArrayList<>(Arrays.asList(keys));
         cb.setDataProvider(new ListDataProvider<>(items));
         cb.addValueChangeListener(e -> {
             spreadsheet.createCell(row, col, e.getValue());

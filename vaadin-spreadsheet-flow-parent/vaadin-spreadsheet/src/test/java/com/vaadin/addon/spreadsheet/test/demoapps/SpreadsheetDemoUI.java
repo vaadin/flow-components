@@ -247,7 +247,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             }
         }, "testsheet.xlsx")).extend(downloadButton);
 
-        localeSelect = new NativeSelect();
+        localeSelect = new NativeSelect<>();
         localeSelect.setWidth("200px");
         localeSelect.setId("localeSelect");
 
@@ -279,7 +279,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         spreadsheetFieldFactory = new SpreadsheetEditorComponentFactoryTest();
 
-        fixtureSelect = new NativeSelect();
+        fixtureSelect = new NativeSelect<>();
         fixtureSelect.setId("fixtureSelect");
         fixtureSelect.setItems(TestFixtures.values());
 
@@ -383,7 +383,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     }
 
     private ComboBox<File> createTestSheetCombobox(List<File> files) {
-        ComboBox<File> cb = new ComboBox(null);
+        ComboBox<File> cb = new ComboBox<>(null);
 
         cb.setItems(files);
         cb.setItemCaptionGenerator(File::getName);
@@ -569,14 +569,14 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         private boolean hidden = false;
         private NativeSelect<String> nativeSelect;
 
-        private ComboBox comboBox2;
+        private ComboBox<String> comboBox2;
 
         private NativeSelect<String> createNativeSelect() {
             if (nativeSelect == null) {
                 List<String> items = new ArrayList<>();
                 items.add("JEE");
                 nativeSelect = new NativeSelect<>();
-                nativeSelect.setDataProvider(new ListDataProvider(items));
+                nativeSelect.setDataProvider(new ListDataProvider<>(items));
                 nativeSelect.setWidth("100%");
             }
             return nativeSelect;

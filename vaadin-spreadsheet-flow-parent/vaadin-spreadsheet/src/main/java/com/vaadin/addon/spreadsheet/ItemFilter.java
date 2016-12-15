@@ -185,7 +185,7 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
      */
     protected void initOptions() {
         filterOptionsProvider = new ListDataProvider<>(filterOptions);
-        filterCheckbox = new CheckBoxGroup();
+        filterCheckbox = new CheckBoxGroup<>();
         filterCheckbox.setDataProvider(filterOptionsProvider);
         filterCheckbox.addValueChangeListener(event->{
             if (firstUpdate) {

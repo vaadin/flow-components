@@ -27,7 +27,7 @@ public class PopupButtonFixture implements SpreadsheetFixture {
             if (event.getAllSelectedCells().size() != 1) {
                 return;
             }
-            List<String> values = new ArrayList<String>(VALUES);
+            List<String> values = new ArrayList<>(VALUES);
             CellReference ref = event.getSelectedCellReference();
             CellReference newRef = new CellReference(ref.getRow(), ref
                     .getCol());
@@ -66,7 +66,7 @@ class CellListSelectComponent extends CustomField<String> {
                                    Spreadsheet sheet) {
         super();
         this.values = values;
-        listSelect = new NativeSelect();
+        listSelect = new NativeSelect<>();
         listSelect.addValueChangeListener(event -> {
             CellListSelectComponent.this.setValue(event.getValue());
             Cell cell = sheet.getCell(context.getRow(), context.getColumn());
