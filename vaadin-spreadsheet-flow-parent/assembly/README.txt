@@ -23,7 +23,7 @@ Maven
 Dependency snippet for Maven users:
 
 <dependency>
-<groupId>com.vaadin.addon</groupId>
+<groupId>com.vaadin</groupId>
 <artifactId>vaadin-spreadsheet</artifactId>
 <version>${project.version}</version>
 </dependency>
@@ -40,7 +40,7 @@ Ivy
 
 IVY dependency snippet:
 
-<dependency org="com.vaadin.addon" name="vaadin-spreadsheet" rev="${project.version}" conf="default->default" />
+<dependency org="com.vaadin" name="vaadin-spreadsheet" rev="${project.version}" conf="default->default" />
 
 Using plain Jar
 ---------------

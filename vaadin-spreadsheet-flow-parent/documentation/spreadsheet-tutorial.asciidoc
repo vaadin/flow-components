@@ -84,7 +84,7 @@ Let's first add the Vaadin Spreadsheet dependency to the project and compile the
 ----
 ...
     [replaceable]#<dependency>
-        <groupId>com.vaadin.addon</groupId>
+        <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spreadsheet</artifactId>
         <version>1.2.1</version>
     </dependency>#

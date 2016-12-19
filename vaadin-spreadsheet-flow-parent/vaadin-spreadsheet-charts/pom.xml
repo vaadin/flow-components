@@ -16,7 +16,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
-    <groupId>com.vaadin.addon</groupId>
+    <groupId>com.vaadin</groupId>
     <artifactId>vaadin-spreadsheet-charts</artifactId>
     <version>2.0-SNAPSHOT</version>
     <name>Vaadin Spreadsheet Charts Integration</name>
@@ -78,12 +78,12 @@
         </dependency>
 
         <dependency>
-            <groupId>com.vaadin.addon</groupId>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spreadsheet</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.vaadin.addon</groupId>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-charts</artifactId>
             <version>${charts.version}</version>
         </dependency>
@@ -108,7 +108,7 @@
             <version>${vaadin.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.vaadin.addon</groupId>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spreadsheet-testbench-api</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -440,7 +440,7 @@
             </activation>
             <dependencies>
                 <dependency>
-                    <groupId>com.vaadin.addon</groupId>
+                    <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-spreadsheet</artifactId>
                     <version>${project.version}</version>
                     <type>test-jar</type>

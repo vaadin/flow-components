@@ -28,7 +28,7 @@ The [literal]#++artifactId++# should be [literal]#++vaadin-spreadsheet-charts++#
 [subs="normal"]
 ----
 &lt;dependency&gt;
-    &lt;groupId&gt;com.vaadin.addon&lt;/groupId&gt;
+    &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
     &lt;artifactId&gt;vaadin-spreadsheet-charts&lt;/artifactId&gt;
     &lt;version&gt;[replaceable]#LATEST#&lt;/version&gt;
 &lt;/dependency&gt;
@@ -63,7 +63,7 @@ in the [filename]#ivy.xml#:
 
 [subs="normal"]
 ----
-&lt;dependency org="com.vaadin.addon"
+&lt;dependency org="com.vaadin"
             name="vaadin-spreadsheet-charts"
             rev="[replaceable]#latest.release#"
             conf="default-+++&gt;+++default" /&gt;
