@@ -12,7 +12,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.data.HasValue;
-import com.vaadin.server.data.ListDataProvider;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;

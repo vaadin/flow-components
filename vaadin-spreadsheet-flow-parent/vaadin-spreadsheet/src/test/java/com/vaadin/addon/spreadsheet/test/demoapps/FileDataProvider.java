@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import com.vaadin.server.data.ListDataProvider;
+import com.vaadin.data.provider.ListDataProvider;
 
 /**
 Helper class a replacement for Vaadin 7 FilesystemContainer

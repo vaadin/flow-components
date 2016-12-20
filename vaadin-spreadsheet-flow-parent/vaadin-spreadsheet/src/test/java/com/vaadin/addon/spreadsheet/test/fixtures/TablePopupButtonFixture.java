@@ -6,8 +6,8 @@ import java.util.List;
 
 import com.vaadin.addon.spreadsheet.PopupButton;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.server.Sizeable;
-import com.vaadin.server.data.ListDataProvider;
 import com.vaadin.ui.Grid;
 
 @SuppressWarnings("serial")
@@ -28,7 +28,7 @@ public class TablePopupButtonFixture implements SpreadsheetFixture {
                     int columnWidth = (int) spreadsheet.getActiveSheet().getColumnWidthInPixels(columnIndex);
 
                     content.setWidth(columnWidth, Sizeable.Unit.PIXELS);
-                    content.addColumn("foo", ItemThing::getValue);
+                    content.addColumn(ItemThing::getValue).setCaption("Foo");
                     PopupButton popupButton = new PopupButton(content);
                     spreadsheet.setPopup(
                             spreadsheet.getSelectedCellReference(),

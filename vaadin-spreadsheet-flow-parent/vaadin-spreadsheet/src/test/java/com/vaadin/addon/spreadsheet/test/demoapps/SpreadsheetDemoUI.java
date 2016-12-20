@@ -43,14 +43,14 @@ import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
 import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
+import com.vaadin.data.provider.ListDataProvider;
+import com.vaadin.data.provider.Query;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.data.ListDataProvider;
-import com.vaadin.server.data.Query;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractField;
@@ -125,6 +125,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         SpreadsheetFactory.logMemoryUsage();
         setContent(layout);
         layout.setMargin(true);
+        layout.setSpacing(false);
         layout.setSizeFull();
 
         options = new HorizontalLayout();
@@ -191,6 +192,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
         });
 
         VerticalLayout checkBoxLayout = new VerticalLayout();
+        checkBoxLayout.setMargin(false);
+        checkBoxLayout.setSpacing(false);
 
         Button freezePanesButton = new Button("Freeze Pane",
                 e->addWindow(new FreezePaneWindow()));
@@ -297,21 +300,26 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         HorizontalLayout loadFixture = new HorizontalLayout(fixtureSelect,
                 loadFixtureBtn);
+        loadFixture.setSpacing(false);
         loadFixture.setComponentAlignment(loadFixtureBtn,
                 Alignment.BOTTOM_CENTER);
 
         VerticalLayout createAndFreeze = new VerticalLayout();
         createAndFreeze.setSpacing(true);
+        createAndFreeze.setMargin(false);
         createAndFreeze.addComponents(newSpreadsheetButton,
                 customComponentTest, freezePanesButton);
 
         HorizontalLayout updateLayout = new HorizontalLayout();
+        updateLayout.setSpacing(false);
         updateLayout.addComponents(openTestSheetSelect, updateButton);
         VerticalLayout updateUpload = new VerticalLayout();
+        updateUpload.setMargin(false);
         updateUpload.setSpacing(true);
         updateUpload.addComponents(updateLayout, upload, localeSelect);
 
         VerticalLayout closeDownload = new VerticalLayout();
+        closeDownload.setMargin(false);
         closeDownload.setSpacing(true);
         closeDownload.addComponents(closeButton, downloadButton, loadFixture);
 
@@ -961,6 +969,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             center();
 
             VerticalLayout l = new VerticalLayout();
+            l.setSpacing(false);
+            l.setMargin(false);
             setContent(l);
 
             final TextField hSplitTF = new TextField(

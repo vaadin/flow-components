@@ -10,7 +10,7 @@ import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.addon.spreadsheet.PopupButton;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.server.data.ListDataProvider;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.NativeSelect;
