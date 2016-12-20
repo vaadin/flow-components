@@ -33,6 +33,7 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.poi.POIXMLException;
 import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
@@ -222,8 +223,10 @@ public class SpreadsheetFactory implements Serializable {
     static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
             final File spreadsheetFile) throws IOException {
         try {
-            reloadSpreadsheetComponent(spreadsheet,
-                    WorkbookFactory.create(spreadsheetFile));
+            Workbook workbook = WorkbookFactory.create(spreadsheetFile);
+            reloadSpreadsheetComponent(spreadsheet, workbook);
+        } catch (POIXMLException e) {
+            throw new IOException(e);
         } catch (InvalidFormatException e) {
             throw new IOException("Invalid file format.", e);
         }

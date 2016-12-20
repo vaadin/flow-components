@@ -137,7 +137,7 @@ Vaadin Spreadsheet 1.2 has the following limitations:
 * link:http://poi.apache.org/spreadsheet/limitations.html[Limitations of Apache POI]
 * Using a table as a named range in formulas is not supported. As a workaround, you can manually convert tables to ranges. Open the spreadsheet in Excel, right-click on the table, select the [guilabel]#Convert to Range# action, and save the spreadsheet.
 * The `SUBTOTAL` formula is limited to aggregate functions that do not ignore hidden values (function codes from 1 to 7, as well as 9), because they are https://poi.apache.org/apidocs/org/apache/poi/ss/formula/functions/Subtotal.html[not implemented in Apache POI]
-
+* Strict OOXML format is link:https://bz.apache.org/bugzilla/show_bug.cgi?id=57699[not supported by Apache POI]
 
 [[spreadsheet.overview.license]]
 == Licensing
