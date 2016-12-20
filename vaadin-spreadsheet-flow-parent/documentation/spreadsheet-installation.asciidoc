@@ -4,7 +4,7 @@ order: 5
 layout: page
 ---
 
-[[spreadsheet.installation]]
+[[spreadsheet.installation.general]]
 = Installing Vaadin Spreadsheet
 
 You can download and install Spreadsheet from Vaadin Directory at
