@@ -533,6 +533,7 @@
       <li>There are no provided toolbars or menus for formatting cells.</li>
       <li>Vaadin Spreadsheet is heavily based on Apache POI and, as such, inherits all limitations of this library. See <a href="http://poi.apache.org/spreadsheet/limitations.html">Apache POI - HSSF and XSSF Limitations</a> for a partial list of these.</li>
       <li>There is only limited support for the older XLS format. Please use XLSX for a better experience.</li>
+      <li>Strict OOXML format is <a href="https://bz.apache.org/bugzilla/show_bug.cgi?id=57699">not supported by Apache POI.</a>
       <li>As Apache POI is used on the server-side, you should be aware that loading XLSX files will eat memory for each session where loaded. Normal cases are no problem, but make sure to take this into account if you allow users to upload Excel files.</li>
       <li>Rendering performance is not too great on Mozilla Firefox.</li>
     </ul>
