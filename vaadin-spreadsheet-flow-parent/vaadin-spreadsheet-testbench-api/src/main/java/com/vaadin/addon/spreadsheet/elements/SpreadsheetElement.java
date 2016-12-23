@@ -252,7 +252,7 @@ public class SpreadsheetElement extends AbstractElement {
     public ContextMenuElement getContextMenu() {
         try {
             WebElement cm = getDriver().findElement(By.className("v-contextmenu"));
-            return wrapElement(cm, getTestBenchCommandExecutor()).wrap(
+            return wrapElement(cm, getCommandExecutor()).wrap(
                     ContextMenuElement.class);
         } catch (WebDriverException e) {
             throw new NoSuchElementException("Context menu not found", e);
@@ -371,6 +371,6 @@ public class SpreadsheetElement extends AbstractElement {
 
     private TestBenchElement getBottomRightPane() {
         return wrapElement(findElement(By.className("bottom-right-pane")),
-                getTestBenchCommandExecutor());
+                getCommandExecutor());
     }
 }

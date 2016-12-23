@@ -53,7 +53,7 @@ public class SheetCellElement extends AbstractElement {
             cellValueInput.clear();
             cellValueInput.sendKeys(newValue);
             cellValueInput.sendKeys(Keys.TAB);
-            getTestBenchCommandExecutor().waitForVaadin();
+            getCommandExecutor().waitForVaadin();
         }
     }
 

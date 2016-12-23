@@ -21,7 +21,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jetty.version>9.3.9.v20160517</jetty.version>
         <vaadin.version>8.0.0.beta1</vaadin.version>
-        <testbench.api.version>8.0.0.alpha7</testbench.api.version>
+        <testbench.version>5.0.0.beta1</testbench.version>
+        <testbench.api.version>${vaadin.version}</testbench.api.version>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
         <poi.version>3.15</poi.version>
         <jetty.plugin.version>9.2.3.v20140905</jetty.plugin.version>
@@ -527,7 +528,12 @@
             <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-testbench</artifactId>
+            <version>${testbench.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-api</artifactId>

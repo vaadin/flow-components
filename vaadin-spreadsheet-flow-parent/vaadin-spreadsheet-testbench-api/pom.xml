@@ -40,7 +40,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-api</artifactId>
-            <version>8.0.0.alpha7</version>
+            <version>8.0.0.beta1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

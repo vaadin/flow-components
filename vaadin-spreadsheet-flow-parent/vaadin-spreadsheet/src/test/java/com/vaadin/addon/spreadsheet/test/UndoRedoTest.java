@@ -399,7 +399,7 @@ public class UndoRedoTest extends AbstractSpreadsheetTestCase {
     private void paste() {
         new Actions(getDriver())
                 .sendKeys(Keys.chord(Keys.CONTROL, "v")).build().perform();
-        getTestBenchCommandExecutor().waitForVaadin();
+        getCommandExecutor().waitForVaadin();
     }
 
     private void copy() {
