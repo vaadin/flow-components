@@ -54,21 +54,26 @@ public class BarSeriesReader extends
 
     @Override
     protected ColumnSeriesData createSeriesDataObject(CTBarSer serie) {
-        if (getBarDir().getVal() == STBarDir.BAR)
+        if (getBarDir().getVal() == STBarDir.BAR) {
             return new BarSeriesData();
-        else
+        } else {
             return new ColumnSeriesData();
+        }
     }
 
     @Override
     protected void fillSeriesData(ColumnSeriesData seriesData, CTBarSer serie) {
         super.fillSeriesData(seriesData, serie);
         if(getChart() instanceof CTBarChart) {
-            if(((CTBarChart)getChart()).getVaryColors().getVal()){
+            CTBarChart chart = (CTBarChart) getChart();
+            if (chart.getVaryColors() != null
+                    && chart.getVaryColors().getVal()) {
                 seriesData.isColorByPoint = true;
             }
         } else if(getChart() instanceof CTBar3DChart){
-            if (((CTBar3DChart) getChart()).getVaryColors().getVal()) {
+            CTBar3DChart chart = (CTBar3DChart) getChart();
+            if (chart.getVaryColors() != null
+                    && chart.getVaryColors().getVal()) {
                 seriesData.isColorByPoint = true;
             }
         }
