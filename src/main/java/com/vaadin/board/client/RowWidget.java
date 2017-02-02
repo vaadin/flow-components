@@ -2,9 +2,9 @@ package com.vaadin.board.client;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 
-public class BoardRow extends FlowPanel {
+public class RowWidget extends FlowPanel {
 
-    public BoardRow() {
+    public RowWidget() {
         super("vaadin-board-row");
     }
 

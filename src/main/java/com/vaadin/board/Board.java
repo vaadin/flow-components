@@ -1,12 +1,12 @@
 package com.vaadin.board;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import com.vaadin.annotations.HtmlImport;
 import com.vaadin.board.client.BoardState;
-import com.vaadin.board.client.BoardState.RowState;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
 
@@ -16,17 +16,17 @@ public class Board extends PolymerComponent implements HasComponents {
 
     private final List<Row> rows = new ArrayList<>();
 
-    @Override
-    public BoardState getState() {
-        return (BoardState) super.getState();
-    }
-
     /**
      * Creates an empty board.
      *
      * Use #addRow(Row) to add content to the board.
      **/
     public Board() {
+    }
+
+    @Override
+    public BoardState getState() {
+        return (BoardState) super.getState();
     }
 
     /**
@@ -43,8 +43,9 @@ public class Board extends PolymerComponent implements HasComponents {
      **/
     public Row addRow(Component... components) {
         Row row = new Row(this);
-        getState().rows.add(new RowState());
         rows.add(row);
+        row.setParent(this);
+
         row.addComponents(components);
         markAsDirty();
         return row;
@@ -52,19 +53,7 @@ public class Board extends PolymerComponent implements HasComponents {
 
     @Override
     public Iterator<Component> iterator() {
-        return rows.stream().flatMap(row -> row.getComponents().stream())
-                .iterator();
+        return Collections.unmodifiableCollection((List) rows).iterator();
     }
 
-    /**
-     * Gets the state object for a child row.
-     *
-     * @param row
-     *            the row to fetch the state for
-     * @return the state object for the row
-     */
-    protected RowState getState(Row row) {
-        int rowIndex = rows.indexOf(row);
-        return getState().rows.get(rowIndex);
-    }
 }

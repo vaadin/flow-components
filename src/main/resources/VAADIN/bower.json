@@ -16,7 +16,7 @@
     "tests"
   ],
   "dependencies": {
-    "vaadin-board": "vaadin/vaadin-board#task/resizableMixin",
+    "vaadin-board": "vaadin/vaadin-board#master",
     "polymer": "Polymer/polymer#2.0-preview"
   }
 }
