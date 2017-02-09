@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Element;
 import com.vaadin.board.Row;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
+import com.vaadin.client.StyleConstants;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
 import com.vaadin.shared.ui.Connect;
@@ -24,6 +25,14 @@ public class RowConnector extends AbstractHasComponentsConnector {
     @Override
     public RowState getState() {
         return (RowState) super.getState();
+    }
+
+    @Override
+    protected void updateWidgetStyleNames() {
+        super.updateWidgetStyleNames();
+
+        // Setting v-widget sets display: inline-block which is not wanted
+        setWidgetStyleName(StyleConstants.UI_WIDGET, false);
     }
 
     @Override
