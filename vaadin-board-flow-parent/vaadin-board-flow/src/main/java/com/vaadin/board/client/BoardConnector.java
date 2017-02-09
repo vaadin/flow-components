@@ -2,9 +2,11 @@ package com.vaadin.board.client;
 
 import java.util.List;
 
+import com.google.gwt.core.client.Scheduler;
 import com.vaadin.board.Board;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
+import com.vaadin.client.LayoutManager;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
 import com.vaadin.shared.ui.Connect;
 
@@ -46,9 +48,8 @@ public class BoardConnector extends AbstractHasComponentsConnector {
             }
         }
 
-        // Hack, hack
-        for (ComponentConnector child : getChildComponents()) {
-            ((RowConnector) child).forceLayout();
-        }
+        // Board does not layout immediately on initial paint
+        Scheduler.get().scheduleDeferred(() -> LayoutManager
+                .get(getConnection()).setNeedsMeasureRecursively(this));
     }
 }

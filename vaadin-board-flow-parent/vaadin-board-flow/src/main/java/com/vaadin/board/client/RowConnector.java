@@ -2,10 +2,12 @@ package com.vaadin.board.client;
 
 import java.util.List;
 
-import com.google.gwt.user.client.Element;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.Command;
 import com.vaadin.board.Row;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
+import com.vaadin.client.LayoutManager;
 import com.vaadin.client.StyleConstants;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
@@ -15,7 +17,18 @@ import com.vaadin.shared.ui.Connect;
 public class RowConnector extends AbstractHasComponentsConnector {
 
     public RowConnector() {
+
+        addIronResizeListener(getWidget().getElement(), () -> {
+            LayoutManager.get(getConnection()).setNeedsMeasureRecursively(this);
+        });
     }
+
+    private native void addIronResizeListener(Element element, Command listener)
+    /*-{
+        element.addEventListener("iron-resize", $entry(function() {
+            listener.@Command::execute()();
+        }));
+    }-*/;
 
     @Override
     public RowWidget getWidget() {
@@ -64,15 +77,4 @@ public class RowConnector extends AbstractHasComponentsConnector {
         }
 
     }
-
-    public void forceLayout() {
-        for (int i = 0; i < getWidget().getWidgetCount(); i++) {
-            forceRowLayout(getWidget().getWidget(i).getElement());
-        }
-    }
-
-    protected native void forceRowLayout(Element element)
-    /*-{
-        element._onIronResize();
-    }-*/;
 }
