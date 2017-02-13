@@ -1,0 +1,73 @@
+---
+title: Basic Use
+order: 2
+layout: page
+---
+
+[[board.basic-use]]
+= Basic Use
+
+The [classname]#vaadin-board# is a regular web component, which you can add to a
+web page. Vaadin Board is using link:https://github.com/polymer/polymer/tree/2.0-preview[Polymer 2].
+
+[[board.install]]
+== Install
+You can use http://bower.io[Bower] to install Vaadin Board dependency by running the following command inside your project folder:
+
+[subs="normal"]
+----
+[prompt]#$# [command]#bower# install --save vaadin-board#[replaceable]#1.x.x#
+----
+Replace the version number with the most current one.
+
+Add html import:
+
+[source, html]
+----
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="import" href="bower_components/vaadin-board/vaadin-board.html">
+  <link rel="import" href="bower_components/vaadin-board/vaadin-board-row.html">
+</head>
+</html>
+----
+[[board.installing.license]]
+== Installing a License Key
+NOT IMPLEMENTED
+
+[[board.basic-use.configuration]]
+== Basic Vaadin Board configuration
+
+[classname]#vaadin-board# is divided into rows, using [classname]#vaadin-board-row#.
+Rows are divided into columns.
+You can put any WebComponent or HTML element inside the [classname]#vaadin-board-row#.
+Every element inside the row can take from one to four columns.
+Based on available space, the vaadin board rearranges child elements based on available space.
+In the example below every child [element-name]#div# will use 33% on Desktop, but will be
+rearranged to two rows when switching to tablet: one row with 2 items 50% of available space each and second row
+with 100% width item, see example below.
+
+[source, html]
+----
+<body>
+    <vaadin-board-row>
+        <div>top A</div>
+        <div>top B</div>
+        <div>top C</div>
+    </vaadin-board-row>
+  </div>
+</body>
+</html>
+----
+
+You can use `board-cols` to specify the width of the inner element in columns:
+
+[source, html]
+----
+<vaadin-board-row>
+    <div class="top a" board-cols="2">top A</div>
+    <div class="top b">top B</div>
+    <div class="top c">top C</div>
+</vaadin-board-row>
+----

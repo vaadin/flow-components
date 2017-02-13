@@ -1,0 +1,20 @@
+---
+title: Overview
+order: 1
+layout: page
+---
+
+[[board.overview]]
+= Overview
+The [elementname]#vaadin-board# is a Polymer element for creating flexible responsive layouts and building nice looking dashboards.
+The [elementname]#vaadin-board# key feature is how it effectively reorders the widgets on different screen sizes, maximizing the use of space and looking stunning.
+Vaadin Board is using link:https://github.com/polymer/polymer/tree/2.0-preview[Polymer 2].
+
+= Features
+
+- Allows to divide you layout into regions by using [elementname]#vaadin-board-row#.
+- Layout is responsive - rearranges child elements based on available space.
+- Supports nested regions.
+
+= Limitations
+
