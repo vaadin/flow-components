@@ -6,13 +6,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.vaadin.annotations.HtmlImport;
+import com.vaadin.annotations.JavaScript;
 import com.vaadin.board.client.BoardState;
+import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
 
+@JavaScript("vaadin://bower_components/webcomponentsjs/webcomponents-lite.js")
 @HtmlImport("vaadin://bower_components/vaadin-board/vaadin-board.html")
 @HtmlImport("vaadin://bower_components/vaadin-board/vaadin-board-row.html")
-public class Board extends PolymerComponent implements HasComponents {
+public class Board extends AbstractComponent implements HasComponents {
 
     private final List<Row> rows = new ArrayList<>();
 
