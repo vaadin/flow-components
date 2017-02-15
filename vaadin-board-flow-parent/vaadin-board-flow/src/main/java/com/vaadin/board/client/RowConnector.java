@@ -76,5 +76,9 @@ public class RowConnector extends AbstractHasComponentsConnector {
             }
         }
 
+        // Force shady DOM to distribute the child elements immediately so e.g.
+        // a Grid child can correctly calculated its height
+        BoardConnector.flushShadyDOM();
+
     }
 }

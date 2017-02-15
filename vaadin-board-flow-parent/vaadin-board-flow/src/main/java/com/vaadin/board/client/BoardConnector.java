@@ -48,8 +48,23 @@ public class BoardConnector extends AbstractHasComponentsConnector {
             }
         }
 
+        // Force shady DOM to distribute the child elements immediately so e.g.
+        // a Grid child can correctly calculated its height
+        flushShadyDOM();
+
         // Board does not layout immediately on initial paint
         Scheduler.get().scheduleDeferred(() -> LayoutManager
                 .get(getConnection()).setNeedsMeasureRecursively(this));
     }
+
+    /**
+     * Calls window.ShadyDOM.flush, if it is available.
+     */
+    public static native void flushShadyDOM()
+    /*-{
+        if ($wnd.ShadyDOM) {
+            $wnd.ShadyDOM.flush();
+        }
+    }-*/;
+
 }
