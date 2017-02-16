@@ -58,10 +58,6 @@
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-client-compiled</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-themes</artifactId>
 		</dependency>
 		<dependency>
@@ -92,7 +88,6 @@
 				<version>2.3.1</version>
 				<configuration>
 					<archive>
-<!--						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>-->
 						<index>true</index>
 						<manifest>
 							<addClasspath>true</addClasspath>
@@ -116,10 +111,6 @@
 							<Vaadin-Widgetsets>com.vaadin.board.BoardWidgetSet</Vaadin-Widgetsets>
 						</manifestEntries>
 					</archive>
-					<excludes>
-						<!-- Remove resources included due to gwt compilation -->
-						<exclude>**/demoandtestapp/*</exclude>
-					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>
