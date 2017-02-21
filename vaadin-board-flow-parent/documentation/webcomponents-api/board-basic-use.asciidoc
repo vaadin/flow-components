@@ -36,7 +36,7 @@ Add html import:
 NOT IMPLEMENTED
 
 [[board.basic-use.configuration]]
-== Basic Vaadin Board configuration
+== Basic Configuration
 
 [classname]#vaadin-board# is divided into rows, using [classname]#vaadin-board-row#.
 Rows are divided into columns.
@@ -67,4 +67,41 @@ You can use `board-cols` to specify the width of the inner element in columns:
     <div class="top b">top B</div>
     <div class="top c">top C</div>
 </vaadin-board-row>
+----
+
+[[board.basic-use.styling]]
+
+== Styling
+Vaadin Board rearranges elements in your layout based on available space.
+In some cases you want to use different styles depending on how the elements are laid out, e.g. use smaller font size for mobile devices.
+Vaadin Board has three predefined class selectors for [classname]#vaadin-board-row#:
+
+* small - for rows smaller than 600 pixels.
+* middle - for rows between 600 and 969 pixels.
+* large - for rows bigger than 960 pixels.
+
+
+[source, html]
+----
+<vaadin-board>
+  <vaadin-board-row>
+      <div>top A</div>
+      <div>top B</div>
+      <div>top C</div>
+      <div>top C</div>
+  </vaadin-board-row>
+</vaadin-board>
+----
+
+[source, css]
+----
+.large {
+    font-size:20px;
+}
+.medium {
+    font-size:16px;
+}
+.small {
+    font-size:10px;
+}
 ----
