@@ -3190,77 +3190,38 @@ public class SheetWidget extends Panel {
         int columnBufferSize = actionHandler.getColumnBufferSize();
         int leftBound = scrollLeft - columnBufferSize;
         int rightBound = scrollLeft + scrollViewWidth + columnBufferSize;
+
         if (leftBound < 0) {
             leftBound = 0;
         }
-        int move = 0;
-        int add = 0;
+
         int maxFirstColumn = horizontalSplitPosition + 1; // hSP is 0 when no
-                                                          // split
         while (firstColumnPosition > leftBound
                 && firstColumnIndex > maxFirstColumn) {
             if (lastColumnPosition
                     - actionHandler.getColWidthActual(lastColumnIndex) > rightBound) {
-                // move column from right to left
-                move++;
                 lastColumnPosition -= actionHandler
                         .getColWidthActual(lastColumnIndex);
                 lastColumnIndex--;
-            } else {
-                // add column to left
-                add++;
             }
             firstColumnIndex--;
             firstColumnPosition -= actionHandler
                     .getColWidthActual(firstColumnIndex);
         }
+
         if (firstColumnPosition <= 0 || firstColumnIndex <= 1) {
             firstColumnPosition = 0;
             firstColumnIndex = maxFirstColumn;
         }
+
         while (rightBound < (lastColumnPosition - actionHandler
                 .getColWidthActual(lastColumnIndex)) && lastColumnIndex > 1) {
             lastColumnPosition -= actionHandler
                     .getColWidthActual(lastColumnIndex);
             lastColumnIndex--;
         }
-        if (move > colHeaders.size()) {
-            resetColHeaders();
-        } else {
-            while (move + add > 0) {
-                DivElement header;
-                if (move > 0) {
-                    move--;
-                    header = colHeaders.remove(colHeaders.size() - 1);
-                    header.setInnerHTML(actionHandler
-                            .getColHeader(firstColumnIndex + (move + add))
-                            + createHeaderDNDHTML());
-                    header.setClassName("ch col"
-                            + Integer.toString(firstColumnIndex + (move + add)));
-                    if (selectedColHeaderIndexes.contains(firstColumnIndex
-                            + (move + add))) {
-                        header.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                    }
-                } else {
-                    add--;
-                    header = Document.get().createDivElement();
-                    header.setInnerHTML(actionHandler
-                            .getColHeader(firstColumnIndex + add)
-                            + createHeaderDNDHTML());
-                    header.setClassName("ch col"
-                            + Integer.toString(firstColumnIndex + add));
-                    if (selectedColHeaderIndexes.contains(firstColumnIndex
-                            + add)) {
-                        header.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                    }
-                    topRightPane.appendChild(header);
-                }
-                colHeaders.add(0, header);
-            }
-            while (colHeaders.size() > (lastColumnIndex - firstColumnIndex + 1)) {
-                colHeaders.remove(colHeaders.size() - 1).removeFromParent();
-            }
-        }
+
+        resetColHeaders();
     }
 
     /**
@@ -3273,28 +3234,24 @@ public class SheetWidget extends Panel {
         int columnBufferSize = actionHandler.getColumnBufferSize();
         int leftBound = scrollLeft - columnBufferSize;
         int rightBound = scrollLeft + scrollViewWidth + columnBufferSize;
+
         if (leftBound < 0) {
             leftBound = 0;
         }
-        int move = 0;
-        int add = 0;
+
         final int maximumCols = actionHandler.getMaxColumns();
         while (lastColumnPosition < rightBound && lastColumnIndex < maximumCols) {
             if ((firstColumnPosition + actionHandler
                     .getColWidthActual(firstColumnIndex)) < leftBound) {
-                // move column from left to right
-                move++;
                 firstColumnPosition += actionHandler
                         .getColWidthActual(firstColumnIndex);
                 firstColumnIndex++;
-            } else {
-                // add column to right
-                add++;
             }
             lastColumnIndex++;
             lastColumnPosition += actionHandler
                     .getColWidthActual(lastColumnIndex);
         }
+
         while (leftBound > (firstColumnPosition + actionHandler
                 .getColWidthActual(firstColumnIndex))
                 && firstColumnIndex < maximumCols) {
@@ -3302,185 +3259,74 @@ public class SheetWidget extends Panel {
                     .getColWidthActual(firstColumnIndex);
             firstColumnIndex++;
         }
-        if (move > colHeaders.size()) {
-            resetColHeaders();
-        } else {
-            while (move + add > 0) {
-                DivElement header;
-                if (move > 0) {
-                    move--;
-                    header = colHeaders.remove(0);
-                    header.setInnerHTML(actionHandler
-                            .getColHeader(lastColumnIndex - (move + add))
-                            + createHeaderDNDHTML());
-                    header.setClassName("ch col"
-                            + Integer.toString(lastColumnIndex - (move + add)));
-                    if (selectedColHeaderIndexes.contains(lastColumnIndex
-                            - (move + add))) {
-                        header.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                    }
-                } else {
-                    add--;
-                    header = Document.get().createDivElement();
-                    header.setInnerHTML(actionHandler
-                            .getColHeader(lastColumnIndex - add)
-                            + createHeaderDNDHTML());
-                    header.setClassName("ch col"
-                            + Integer.toString(lastColumnIndex - add));
-                    if (selectedColHeaderIndexes
-                            .contains(lastColumnIndex - add)) {
-                        header.addClassName(SELECTED_COLUMN_HEADER_CLASSNAME);
-                    }
-                    topRightPane.appendChild(header);
-                }
-                colHeaders.add(header);
-            }
-            while (colHeaders.size() > (lastColumnIndex - firstColumnIndex + 1)) {
-                colHeaders.remove(0).removeFromParent();
-            }
-        }
+
+        resetColHeaders();
     }
 
     private void handleVerticalScrollDown(int scrollTop) {
         int rowBufferSize = actionHandler.getRowBufferSize();
         int topBound = scrollTop - rowBufferSize;
         int bottomBound = scrollTop + scrollViewHeight + rowBufferSize;
+
         if (topBound < 0) {
             topBound = 0;
         }
-        int move = 0;
-        int add = 0;
+
         final int maximumRows = actionHandler.getMaxRows();
         while (lastRowPosition < bottomBound && lastRowIndex < maximumRows) {
             if ((firstRowPosition + getRowHeight(firstRowIndex)) < topBound) {
-                // move row from top to bottom
-                move++;
                 firstRowPosition += getRowHeight(firstRowIndex);
                 firstRowIndex++;
-            } else {
-                // add row to bottom
-                add++;
             }
             lastRowIndex++;
             lastRowPosition += getRowHeight(lastRowIndex);
         }
+
         while (topBound > (firstRowPosition + getRowHeight(firstRowIndex))
                 && firstRowIndex < maximumRows) {
             firstRowPosition += getRowHeight(firstRowIndex);
             firstRowIndex++;
         }
-        if (move > rowHeaders.size()) {
-            resetRowHeaders();
-        } else {
-            while (move + add > 0) {
-                DivElement header;
-                if (move > 0) {
-                    move--;
-                    header = rowHeaders.remove(0);
-                    header.setInnerHTML(actionHandler.getRowHeader(lastRowIndex
-                            - (move + add))
-                            + createHeaderDNDHTML());
-                    header.setClassName("rh row"
-                            + Integer.toString(lastRowIndex - (move + add)));
-                    if (selectedRowHeaderIndexes.contains(lastRowIndex
-                            - (move + add))) {
-                        header.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                    }
-                } else {
-                    add--;
-                    header = Document.get().createDivElement();
-                    header.setInnerHTML(actionHandler.getRowHeader(lastRowIndex
-                            - add)
-                            + createHeaderDNDHTML());
-                    header.setClassName("rh row"
-                            + Integer.toString(lastRowIndex - add));
-                    bottomLeftPane.appendChild(header);
-                    if (selectedRowHeaderIndexes.contains(lastRowIndex - add)) {
-                        header.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                    }
-                }
-                rowHeaders.add(header);
-            }
-            while (rowHeaders.size() > (lastRowIndex - firstRowIndex + 1)) {
-                rowHeaders.remove(0).removeFromParent();
-            }
-        }
-    }
 
-    public TextBox getInlineEditor() {
-        // FIXME setter for operations instead?
-        return input;
+        resetRowHeaders();
     }
 
     private void handleVerticalScrollUp(int scrollTop) {
         int rowBufferSize = actionHandler.getRowBufferSize();
         int topBound = scrollTop - rowBufferSize;
         int bottomBound = scrollTop + scrollViewHeight + rowBufferSize;
+
         if (topBound < 0) {
             topBound = 0;
         }
-        int move = 0;
-        int add = 0;
+
         int maxTopRow = verticalSplitPosition + 1; // vSP is 0 when no split
         while (firstRowPosition > topBound && firstRowIndex > maxTopRow) {
             if ((lastRowPosition - getRowHeight(lastRowIndex)) > bottomBound) {
-                // move column from bottom to top
-                move++;
                 lastRowPosition -= getRowHeight(lastRowIndex);
                 lastRowIndex--;
-            } else {
-                // add column to top
-                add++;
             }
             firstRowIndex--;
             firstRowPosition -= getRowHeight(firstRowIndex);
         }
+
         if (firstRowPosition <= 0 || firstRowIndex <= 1) {
             firstRowPosition = 0;
             firstRowIndex = maxTopRow;
         }
+
         while (bottomBound < (lastRowPosition - getRowHeight(lastRowIndex))
                 && lastRowIndex > 1) {
             lastRowPosition -= getRowHeight(lastRowIndex);
             lastRowIndex--;
         }
-        if (move > rowHeaders.size()) {
-            resetRowHeaders();
-        } else {
-            while (move + add > 0) {
 
-                DivElement header;
-                if (move > 0) {
-                    move--;
-                    header = rowHeaders.remove(rowHeaders.size() - 1);
-                    header.setInnerHTML(actionHandler
-                            .getRowHeader(firstRowIndex + (move + add))
-                            + createHeaderDNDHTML());
-                    header.setClassName("rh row"
-                            + Integer.toString(firstRowIndex + (move + add)));
-                    if (selectedRowHeaderIndexes.contains(firstRowIndex
-                            + (move + add))) {
-                        header.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                    }
-                } else {
-                    add--;
-                    header = Document.get().createDivElement();
-                    header.setInnerHTML(actionHandler
-                            .getRowHeader(firstRowIndex + add)
-                            + createHeaderDNDHTML());
-                    header.setClassName("rh row"
-                            + Integer.toString(firstRowIndex + add));
-                    if (selectedRowHeaderIndexes.contains(firstRowIndex + add)) {
-                        header.addClassName(SELECTED_ROW_HEADER_CLASSNAME);
-                    }
-                    bottomLeftPane.appendChild(header);
-                }
-                rowHeaders.add(0, header);
-            }
-            while (rowHeaders.size() > (lastRowIndex - firstRowIndex + 1)) {
-                rowHeaders.remove(rowHeaders.size() - 1).removeFromParent();
-            }
-        }
+        resetRowHeaders();
+    }
+
+    public TextBox getInlineEditor() {
+        // FIXME setter for operations instead?
+        return input;
     }
 
     public boolean isSelectedCellCustomized() {
