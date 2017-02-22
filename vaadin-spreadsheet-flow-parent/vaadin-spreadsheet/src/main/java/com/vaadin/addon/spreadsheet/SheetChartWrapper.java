@@ -17,7 +17,7 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
-import static com.vaadin.shared.ui.label.ContentMode.HTML;
+import static com.vaadin.shared.ui.ContentMode.HTML;
 
 import java.io.Serializable;
 import java.util.logging.Level;

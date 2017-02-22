@@ -51,8 +51,8 @@ import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.shared.ui.datefield.Resolution;
-import com.vaadin.shared.ui.label.ContentMode;
+import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.shared.ui.datefield.DateResolution;
 import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -482,7 +482,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
     private void open(String filename, TestFixtures fixture,
             Integer sheetIndex) {
         Optional<File> file = openTestSheetSelect.getDataProvider()
-                .fetch(new Query<File, String>(filename)).findFirst();
+                .fetch(new Query<>()).filter(f -> f.getName().equals(filename))
+                .findFirst();
         if (file.isPresent()) {
             openTestSheetSelect.setValue(file.get());
             updateButton.click();
@@ -789,13 +790,13 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
                     if (s.contains("d")) {
                         ((DateField) customEditor)
-                                .setResolution(Resolution.DAY);
+                                .setResolution(DateResolution.DAY);
                     } else if (s.contains("m") || s.contains("mmm")) {
                         ((DateField) customEditor)
-                                .setResolution(Resolution.MONTH);
+                                .setResolution(DateResolution.MONTH);
                     } else {
                         ((DateField) customEditor)
-                                .setResolution(Resolution.YEAR);
+                                .setResolution(DateResolution.YEAR);
                     }
 
                     LocalDate date = cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
