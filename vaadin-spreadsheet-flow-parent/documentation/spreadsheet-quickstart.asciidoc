@@ -24,13 +24,13 @@ In order to follow this tutorial, you will need the following tools/setup:
 [[spreadsheet.quickstart.project-setup]]
 == Project setup
 
-To start off, we need to create a new project where we can use Spreadsheet. We will use Maven to set up a project, which can later be imported into your favorite IDE. You can also use your IDE to generate a new maven project using the `vaadin-archetype-application archetype`, version 7.7.0. Execute the following command to create the project:
+To start off, we need to create a new project where we can use Spreadsheet. We will use Maven to set up a project, which can later be imported into your favorite IDE. You can also use your IDE to generate a new maven project using the `vaadin-archetype-application archetype`, version 8.0.0. Execute the following command to create the project:
 
 [subs="normal"]
 ----
 [command]#mvn# archetype:generate -DarchetypeGroupId=com.vaadin  \
   -DarchetypeArtifactId=[replaceable]#vaadin-archetype-application# \
-  -DarchetypeVersion=[replaceable]#7.7.0#
+  -DarchetypeVersion=[replaceable]#8.0.0#
 ----
 
 You will be asked a few questions for setting up the project. In the following, the suitable answers are given for going through this quickstart:
@@ -74,7 +74,7 @@ Let us first add the Vaadin Spreadsheet dependency to the project and compile th
     *<dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spreadsheet</artifactId>
-        <version>1.2.1</version>
+        <version>2.0.0</version>
     </dependency>*
 </dependencies>
 ...

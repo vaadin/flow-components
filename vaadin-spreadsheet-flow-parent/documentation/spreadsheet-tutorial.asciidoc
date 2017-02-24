@@ -37,12 +37,12 @@ In order to follow this tutorial you will need the following tools/setup:
 [[spreadsheet.tutorial.project-setup]]
 == Project setup
 
-To start off we need to create a new project where we can use the Spreadsheet. We will use Maven to set up a project, which can later be imported into your favorite IDE. Execute the following command to create the project. You can also use your IDE to generate a new maven project using the vaadin-archetype-application archetype, version 7.5.7
+To start off we need to create a new project where we can use the Spreadsheet. We will use Maven to set up a project, which can later be imported into your favorite IDE. Execute the following command to create the project. You can also use your IDE to generate a new maven project using the vaadin-archetype-application archetype, version 8.0.0
 
 ----
 mvn archetype:generate -DarchetypeGroupId=com.vaadin  \
   -DarchetypeArtifactId=vaadin-archetype-application \
-  -DarchetypeVersion=7.5.7
+  -DarchetypeVersion=8.0.0
 ----
 
 You will be asked a few questions for setting up the project. I answered like this:
@@ -86,7 +86,7 @@ Let's first add the Vaadin Spreadsheet dependency to the project and compile the
     [replaceable]#<dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spreadsheet</artifactId>
-        <version>1.2.1</version>
+        <version>2.0.0</version>
     </dependency>#
 </dependencies>
 ...
@@ -179,20 +179,12 @@ private HorizontalLayout createStyleToolbar() {
    });
    ColorPicker backgroundColor = new ColorPicker();
    backgroundColor.setCaption("Background Color");
-   backgroundColor.addColorChangeListener(new ColorChangeListener() {
-       @Override
-       public void colorChanged(ColorChangeEvent event) {
-           updateSelectedCellsBackgroundColor(event.getColor());
-       }
-   });
+   backgroundColor.addValueChangeListener(
+       event -> updateSelectedCellsBackgroundColor(event.getValue()));
    ColorPicker fontColor = new ColorPicker();
    fontColor.setCaption("Font Color");
-   fontColor.addColorChangeListener(new ColorChangeListener() {
-   @Override
-   public void colorChanged(ColorChangeEvent event) {
-       updateSelectedCellsFontColor(event.getColor());
-   }
-   });
+   fontColor.addValueChangeListener(
+       event -> updateSelectedCellsFontColor(event.getValue()));
    toolbar.addComponent(boldButton);
    toolbar.addComponent(backgroundColor);
    toolbar.addComponent(fontColor);
