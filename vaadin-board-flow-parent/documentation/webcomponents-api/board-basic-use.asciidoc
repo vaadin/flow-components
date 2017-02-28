@@ -51,27 +51,84 @@ with 100% width item, see example below.
 ----
 <vaadin-board>
   <vaadin-board-row>
-      <div>top A</div>
-      <div>top B</div>
-      <div>top C</div>
+      <vaadin-line-chart>
+        <chart-title>Sales</chart-title>
+        <!-- Configuration omitted -->
+      </vaadin-line-chart>
+      <vaadin-column-chart>
+        <chart-title>Overall sales by region</chart-title>
+      </vaadin-column-chart>
+      <vaadin-column-chart>
+        <chart-title>Services sales by region</chart-title>
+      </vaadin-column-chart>
   </vaadin-board-row>
 </vaadin-board>
 ----
+
+[[figure.board.basic-use]]
+.Vaadin Board Basic Configuration
+image::img/board-basic-use.png[]
 
 You can use `board-cols` to specify the width of the inner element in columns:
 
 [source, html]
 ----
-<vaadin-board-row>
-    <div class="top a" board-cols="2">top A</div>
-    <div class="top b">top B</div>
-    <div class="top c">top C</div>
-</vaadin-board-row>
+<vaadin-board>
+  <vaadin-board-row>
+      <vaadin-line-chart board-cols="3">
+        <chart-title>Sales</chart-title>
+        <!-- Configuration omitted -->
+      </vaadin-line-chart>
+
+      <vaadin-column-chart>
+        <chart-title>Overall sales by region</chart-title>
+      </vaadin-column-chart>
+  </vaadin-board-row>
+</vaadin-board>
 ----
 
-[[board.basic-use.styling]]
+[[figure.board.basic-use.board-cols]]
+.Configure Row Width
+image::img/board-basic-use-board-cols.png[]
 
+[[board.basic-use.nested]]
+== Nested Rows
+
+Vaadin Board allows to have nested rows.
+Nested rows are responsive in relation to the parent slot size.
+
+[source, html]
+----
+<vaadin-board>
+  <vaadin-board-row>
+      <vaadin-line-chart>
+        <chart-title>Sales</chart-title>
+        <!-- Configuration omitted -->
+      </vaadin-line-chart>
+
+      <vaadin-board-row>
+          <vaadin-pie-chart>
+              <chart-title>Browser market shares</chart-title>
+          </vaadin-pie-chart>
+          <vaadin-pie-chart>
+              <chart-title>Annual expenses</chart-title>
+          </vaadin-pie-chart>
+          <vaadin-column-chart>
+          </vaadin-column-chart>
+          <vaadin-column-chart>
+          </vaadin-column-chart>
+      </vaadin-board-row>
+  </vaadin-board-row>
+</vaadin-board>
+----
+
+[[figure.board.basic-use.nested]]
+.Nested Rows
+image::img/board-basic-use-nested.png[]
+
+[[board.basic-use.styling]]
 == Styling
+
 Vaadin Board rearranges elements in your layout based on available space.
 In some cases you want to use different styles depending on how the elements are laid out, e.g. use smaller font size for mobile devices.
 Vaadin Board has three predefined class selectors for [classname]#vaadin-board-row#:
