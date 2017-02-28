@@ -33,7 +33,13 @@ Add html import:
 ----
 [[board.installing.license]]
 == Installing a License Key
-NOT IMPLEMENTED
+You need to install a license key in order to develop your application with Vaadin Board web component.
+
+You can purchase Vaadin Board or obtain a free trial key from the link:https://vaadin.com/pro/licenses[Vaadin Licenses page].
+You need to register in the Vaadin website to obtain the key.
+
+When you first time open the web page with Vaadin Board, you will see a pop-up that asks you to enter the license key.
+If the license is valid, it will be saved to the local storage of the browser and you will not see the pop-up again.
 
 [[board.basic-use.configuration]]
 == Basic Configuration
