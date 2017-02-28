@@ -43,7 +43,7 @@ Rows are divided into columns.
 You can put any WebComponent or HTML element inside the [classname]#vaadin-board-row#.
 Every element inside the row can take from one to four columns.
 Based on available space, the vaadin board rearranges child elements based on available space.
-In the example below every child [element-name]#div# will use 33% on Desktop, but will be
+In the example below every child [elementname]#div# will use 33% on Desktop, but will be
 rearranged to two rows when switching to tablet: one row with 2 items 50% of available space each and second row
 with 100% width item, see example below.
 
@@ -105,3 +105,9 @@ Vaadin Board has three predefined class selectors for [classname]#vaadin-board-r
     font-size:10px;
 }
 ----
+
+[[board.basic-use.redraw]]
+=== Redraw method
+
+Vaadin Board relies on resize events to achieve responsiveness.
+In some cases the board size might change without a resize event, for instance if a fixed size is set in its style, for such cases the [methodname]#redraw# method of the [elementname]#vaadin-board# element should be used.
