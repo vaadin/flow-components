@@ -382,6 +382,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private Set<Integer> rowsWithComponents;
 
     /**
+     * Minimum row height for rows containing components (in points).
+     */
+    private int minimumRowHeightForComponents = 30;
+
+    /**
      * Creates a new Spreadsheet component using the newer Excel version format
      * {@link XSSFWorkbook}. Also creates one sheet using the default row
      * {@link SpreadsheetFactory#DEFAULT_ROWS} and column
@@ -3577,8 +3582,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 continue;
             }
             float currentHeight = getState(false).rowH[row];
-            if (currentHeight < MINIMUM_ROW_HEIGHT_FOR_COMPONENTS) {
-                getState().rowH[row] = MINIMUM_ROW_HEIGHT_FOR_COMPONENTS;
+            if (currentHeight < getMinimumRowHeightForComponents()) {
+                getState().rowH[row] = getMinimumRowHeightForComponents();
             }
         }
         // Reset row height for rows which no longer have components
@@ -5086,4 +5091,23 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         sheetOverlays.add(image);
     }
 
+    /**
+     * Get the minimum row heigth in points for the rows that contain custom
+     * components
+     * @return the minimum row heigths in points
+     */
+    public int getMinimumRowHeightForComponents() {
+        return minimumRowHeightForComponents;
+    }
+
+    /***
+     * Set the minimum row heigth in points for the rows that contain custom
+     * components. If set to a small value, it might cause some components
+     * like checkboxes to be cut off
+     * @param minimumRowHeightForComponents the minimum row height in points
+     */
+    public void setMinimumRowHeightForComponents(
+            final int minimumRowHeightForComponents) {
+        this.minimumRowHeightForComponents = minimumRowHeightForComponents;
+    }
 }
