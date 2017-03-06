@@ -84,6 +84,7 @@ public class CellValueManager implements Serializable {
      * Pattern to be used to show original values in formula bar
      */
     private static final String EXCEL_FORMULA_BAR_DECIMAL_FORMAT = "###.################";
+    private static final String ZERO_AS_STRING = "0";
 
     private short hyperlinkStyleIndex = -1;
 
@@ -332,12 +333,27 @@ public class CellValueManager implements Serializable {
             } else {
                 cellData.originalValue = getOriginalCellValue(cell);
             }
+
+            handleIsDisplayZeroPreference(cell, cellData);
         } catch (RuntimeException rte) {
             LOGGER.log(Level.FINEST, rte.getMessage(), rte);
             cellData.value = "#VALUE!";
         }
 
         return cellData;
+    }
+
+    private void handleIsDisplayZeroPreference(Cell cell, CellData cellData) {
+        boolean isCellNumeric = cell.getCellType() == Cell.CELL_TYPE_NUMERIC;
+        boolean isCellFormula = cell.getCellType() == Cell.CELL_TYPE_FORMULA;
+        boolean isApplicableCellType = isCellNumeric || isCellFormula;
+
+        boolean displayZeroAsBlank = !cell.getSheet().isDisplayZeros();
+        boolean valueIsZero = ZERO_AS_STRING.equals(cellData.value);
+
+        if (isApplicableCellType && displayZeroAsBlank && valueIsZero) {
+            cellData.value = "";
+        }
     }
 
     /**

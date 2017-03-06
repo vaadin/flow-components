@@ -169,4 +169,9 @@ public class SpreadsheetPage extends Page {
     public String getFormulaFieldValue() {
         return getFormulaField().getAttribute("value");
     }
+
+    public void selectSheetAt(int sheetIndex) {
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        spreadsheet.selectSheetAt(sheetIndex);
+    }
 }
