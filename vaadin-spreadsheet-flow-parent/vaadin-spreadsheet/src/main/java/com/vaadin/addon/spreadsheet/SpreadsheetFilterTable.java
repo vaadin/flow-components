@@ -192,7 +192,9 @@ public class SpreadsheetFilterTable extends SpreadsheetTable implements
     private void addComponentToPopup(PopupButton popupButton,
             Component component) {
         if (popupButton.getContent() == null) {
-            popupButton.setContent(new VerticalLayout());
+            VerticalLayout content = new VerticalLayout();
+            content.setMargin(false);
+            popupButton.setContent(content);
         }
 
         ((VerticalLayout) popupButton.getContent()).addComponent(component);

@@ -108,6 +108,7 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
      */
     protected void initLayouts() {
         layout = new VerticalLayout();
+        layout.setMargin(false);
         layout.addComponent(allItems);
         layout.addComponent(filterCheckbox);
 
