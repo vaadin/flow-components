@@ -1018,7 +1018,6 @@ public class SheetWidget extends Panel {
      * stuff when it is unnecessary.
      *
      * @param event
-     * @param sheetPaneElement
      */
     protected void onSheetMouseOverOrOut(Event event) {
         mouseOverOrOutEvent = event;
@@ -1089,8 +1088,6 @@ public class SheetWidget extends Panel {
 
     /**
      *
-     * @param target
-     *            The clicked element
      * @param event
      *            The original event (that can be onClick or onTouchStart)
      */
@@ -4312,9 +4309,7 @@ public class SheetWidget extends Panel {
     }
 
     /**
-     * Clears the sheet. After this no headers or cells are visible. A
-     * {@link #resetModel(SpreadsheetSettings)} call will make sheet visible
-     * again.
+     * Clears the sheet. After this no headers or cells are visible.
      *
      * @param removed
      *            if the widget is completely removed from DOM after this
@@ -5660,8 +5655,8 @@ public class SheetWidget extends Panel {
     }
 
     /**
-     * PopupButtons should not change position (cell), but the popupButton's
-     * col&row values come after the popupButton has actually been added.
+     * PopupButtons should not change position (cell), but the popupButton's col
+     * and row values come after the popupButton has actually been added.
      */
     public void updatePopupButtonPosition(PopupButtonWidget popupButton,
             int oldRow, int oldCol, int newRow, int newCol) {

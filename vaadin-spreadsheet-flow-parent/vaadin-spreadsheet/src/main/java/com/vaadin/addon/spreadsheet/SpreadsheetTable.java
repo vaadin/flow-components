@@ -170,7 +170,7 @@ public class SpreadsheetTable implements Serializable {
 
     /**
      * Gets the {@link PopupButton} for the given column. If given column is
-     * outside of the table region, <code>null></code> will be returned.
+     * outside of the table region, <code>null</code> will be returned.
      * 
      * @param col
      *            Column index, 0-based
@@ -185,7 +185,7 @@ public class SpreadsheetTable implements Serializable {
     /**
      * Gets the {@link PopupButton} for the header cell pointed by
      * {@link CellReference}. If given reference is not a header cell for this
-     * table, or is outside of the table region, <code>null></code> will be
+     * table, or is outside of the table region, <code>null</code> will be
      * returned.
      * 
      * @param filterCellReference

@@ -1581,7 +1581,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /**
      * Creates a new Formula type cell with the given formula.
      * 
-     * After all editing is done, call {@link #refreshCells(Cell...)()} or
+     * After all editing is done, call {@link #refreshCells(Cell...)} or
      * {@link #refreshAllCellValues()} to make sure client side is updated.
      * 
      * @param row
@@ -1593,7 +1593,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *            nor "+")
      * @return The newly created cell
      * @throws IllegalArgumentException
-     *             If columnIndex < 0 or greater than the maximum number of
+     *             If columnIndex &lt; 0 or greater than the maximum number of
      *             supported columns (255 for *.xls, 1048576 for *.xlsx)
      */
     public Cell createFormulaCell(int row, int col, String formula)
@@ -1637,7 +1637,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *            Object representing the type and value of the Cell
      * @return The newly created cell
      * @throws IllegalArgumentException
-     *             If columnIndex < 0 or greater than the maximum number of
+     *             If columnIndex &lt; 0 or greater than the maximum number of
      *             supported columns (255 for *.xls, 1048576 for *.xlsx)
      */
     public Cell createCell(int row, int col, Object value)
@@ -1728,7 +1728,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * Does {@link #setMaxColumns(int)} & {@link #setMaxRows(int)} in one
+     * Does {@link #setMaxColumns(int)} and {@link #setMaxRows(int)} in one
      * method.
      * 
      * @param rows
@@ -2588,8 +2588,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Call this to force the spreadsheet to reload the currently viewed cell
-     * contents. This forces reload of all: custom components (always visible &
-     * editors) from {@link SpreadsheetComponentFactory}, hyperlinks, cells'
+     * contents. This forces reload of all: custom components (always visible
+     * and editors) from {@link SpreadsheetComponentFactory}, hyperlinks, cells'
      * comments and cells' contents. Also updates styles for the visible area.
      */
     public void reloadVisibleCellContents() {
@@ -4476,7 +4476,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Reloads all data from the current spreadsheet and performs a full
-     * re-render. <br/>
+     * re-render.
+     * <p>
      * Functionally same as calling {@link #setWorkbook(Workbook)} with
      * {@link #getWorkbook()} parameter.
      */

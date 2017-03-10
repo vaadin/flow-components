@@ -159,13 +159,13 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     /**
      * Temp structure for shiftedBorderTopStyles that keeps track of the
-     * association between: StyleId -> ColumnId -> Rows
+     * association between: StyleId to ColumnId to Rows
      */
     private final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> shiftedBorderTopStylesMap = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
 
     /**
      * Temp structure for shiftedBorderLeftStyles that keeps track of the
-     * association between: StyleId -> ColumnId -> Rows
+     * association between: StyleId to ColumnId to Rows
      */
     private final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> shiftedBorderLeftStylesMap = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
 

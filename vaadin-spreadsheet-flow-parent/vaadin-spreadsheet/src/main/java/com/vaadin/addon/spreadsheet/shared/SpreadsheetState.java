@@ -118,7 +118,7 @@ public class SpreadsheetState extends TabIndexState {
 
     public HashMap<String, String> componentIDtoCellKeysMap;
 
-    /** Cell CSS key -> link tooltip (usually same as address) */
+    // Cell CSS key to link tooltip (usually same as address)
     @DelegateToWidget
     public HashMap<String, String> hyperlinksTooltips;
 

@@ -27,7 +27,7 @@ import java.util.Locale;
 
 /**
  * Converts between a localized formula and a non-localized formula.
- * <p/>
+ * <p>
  * This is needed because internally POI only handles formulas with '.' as the
  * decimal separator, and ',' as the argument separator.
  */

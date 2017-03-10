@@ -248,7 +248,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /**
      * Enable or disable Formatting columns locking.
      *
-     * @param value
+     * @param enabled
      *            the new content. Can not be HTML.
      */
     public void setLockFormatColumns(boolean enabled) {
@@ -265,7 +265,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /**
      * Enable or disable Formatting rows locking.
      *
-     * @param value
+     * @param enabled
      *            the new content. Can not be HTML.
      */
     public void setLockFormatRows(boolean enabled) {

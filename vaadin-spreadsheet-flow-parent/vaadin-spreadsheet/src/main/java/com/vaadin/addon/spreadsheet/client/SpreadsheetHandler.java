@@ -208,7 +208,7 @@ public interface SpreadsheetHandler extends GroupingHandler {
      * @param col1
      * @param row2
      * @param col2
-     * @param newRowSizes
+     * @param newColumnSizes
      *            column index and new size (px)
      */
     public void columnResized(Map<Integer, Integer> newColumnSizes, int row1,

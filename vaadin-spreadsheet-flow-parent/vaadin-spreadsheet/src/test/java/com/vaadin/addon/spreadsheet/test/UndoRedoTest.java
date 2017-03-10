@@ -366,8 +366,9 @@ public class UndoRedoTest extends AbstractSpreadsheetTestCase {
     }
 
     /**
-     * Deletes the row from spreadsheet using 'Delete row' action in context menu
-     * <p/>
+     * Deletes the row from spreadsheet using 'Delete row' action in context
+     * menu
+     * <p>
      * Does not work with PhantomJS or Firefox
      *
      * @param spreadsheet
