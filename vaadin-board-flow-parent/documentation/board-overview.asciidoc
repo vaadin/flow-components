@@ -6,6 +6,7 @@ layout: page
 
 [[board.overview]]
 = Overview
+
 The [elementname]#vaadin-board# is a Polymer element for creating flexible responsive layouts and building nice looking dashboards.
 The [elementname]#vaadin-board# key feature is how it effectively reorders the widgets on different screen sizes, maximizing the use of space and looking stunning.
 Vaadin Board is using link:https://github.com/polymer/polymer/tree/2.0-preview[Polymer 2].
@@ -18,3 +19,12 @@ Vaadin Board is using link:https://github.com/polymer/polymer/tree/2.0-preview[P
 
 = Limitations
 
+- Because non-chrome browsers need to load a polyfill, you can see flickering, before definition of the web component comes in.
+You can suspend rendering the component before it is ready by adding the `unresolved` attribute in body:
+
+[source, html]
+----
+  <body unresolved>
+   //Your code here
+  </body>
+----
