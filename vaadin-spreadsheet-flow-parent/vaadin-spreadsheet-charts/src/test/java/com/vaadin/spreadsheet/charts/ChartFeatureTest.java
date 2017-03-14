@@ -3,6 +3,7 @@ package com.vaadin.spreadsheet.charts;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.addon.charts.model.AxisType;
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.model.DataSeries;
 import com.vaadin.addon.charts.model.HorizontalAlign;
@@ -226,6 +227,34 @@ public class ChartFeatureTest extends ChartTestBase {
         Assert.assertEquals(new Integer(0), ((DataSeries)conf.getSeries().get(2)).getyAxis());
         Assert.assertEquals(new Integer(1), ((DataSeries)conf.getSeries().get(3)).getyAxis());
         Assert.assertEquals(new Integer(1), ((DataSeries)conf.getSeries().get(4)).getyAxis());
+    }
+    
+    @Test
+    public void categories_loadSampleE1_axisTypeCategory()
+            throws Exception {
+        Configuration conf = getChartFromSampleFile("numeric-categories.xlsx",
+                "E1").getConfiguration();
+
+        Assert.assertEquals(AxisType.CATEGORY, conf.getxAxis().getType());
+    }
+
+    @Test
+    public void categories_loadSampleE1_categorySetAsPointName()
+            throws Exception {
+        Configuration conf = getChartFromSampleFile("numeric-categories.xlsx",
+                "E1").getConfiguration();
+
+        Assert.assertEquals("2",
+                ((DataSeries) conf.getSeries().get(0)).get(0).getName());
+        Assert.assertEquals("4",
+                ((DataSeries) conf.getSeries().get(0)).get(1).getName());
+        Assert.assertEquals("8",
+                ((DataSeries) conf.getSeries().get(0)).get(2).getName());
+        Assert.assertEquals("16",
+                ((DataSeries) conf.getSeries().get(0)).get(3).getName());
+        Assert.assertEquals("32",
+                ((DataSeries) conf.getSeries().get(0)).get(4).getName());
+
     }
 
     @Test

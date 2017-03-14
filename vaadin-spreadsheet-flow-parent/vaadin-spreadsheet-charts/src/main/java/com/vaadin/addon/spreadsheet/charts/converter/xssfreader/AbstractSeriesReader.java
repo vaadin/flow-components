@@ -67,7 +67,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
     protected abstract SERIES_DATA_TYPE createSeriesDataObject(CT_SER_TYPE serie);
 
     public List<SERIES_DATA_TYPE> getSeries() {
-        List<SERIES_DATA_TYPE> list = new ArrayList<SERIES_DATA_TYPE>();
+        List<SERIES_DATA_TYPE> list = new ArrayList<>();
 
         for (CT_SER_TYPE serie : getSerList()) {
             list.add(createAndFillSeriesDataObject(serie));
@@ -110,7 +110,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         final List<CellReference> cellReferences = getCategoryCellReferences(axisDataSource);
 
         // AbstractList is not serializable, so we wrap it into an ArrayList
-        seriesData.categories = new ArrayList<String>(
+        seriesData.categories = new ArrayList<>(
                 new AbstractList<String>() {
                     @Override
                     public String get(int index) {
@@ -132,6 +132,10 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
 
         if (axisDataSource.isSetStrRef()) {
             String formula = axisDataSource.getStrRef().getF();
+            return Utils.getAllReferencedCells(formula, spreadsheet,
+                    showDataInHiddenCells);
+        } else if (axisDataSource.isSetNumRef()) {
+            String formula = axisDataSource.getNumRef().getF();
             return Utils.getAllReferencedCells(formula, spreadsheet,
                     showDataInHiddenCells);
         } else if (axisDataSource.isSetMultiLvlStrRef()) {
@@ -202,7 +206,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         final List<CellReference> ptList = Utils.getAllReferencedCells(formula,
                 spreadsheet, showDataInHiddenCells);
 
-        List<SeriesPoint> list = new ArrayList<SeriesPoint>();
+        List<SeriesPoint> list = new ArrayList<>();
 
         for (int i = 0; i < ptList.size(); i++) {
             Double cellNumericValue = getNumericValueFromCellRef(ptList.get(i));
