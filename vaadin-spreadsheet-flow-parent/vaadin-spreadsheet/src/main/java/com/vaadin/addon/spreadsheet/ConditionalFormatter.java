@@ -638,7 +638,7 @@ public class ConditionalFormatter implements Serializable {
         if (rule.getConditionType().equals(ConditionType.CELL_VALUE_IS)) {
             return matchesValue(cell, rule);
         } else {
-            return matchesFormula(rule, deltaColumn, deltaRow);
+            return matchesFormula(cell, rule, deltaColumn, deltaRow);
         }
 
     }
@@ -649,12 +649,14 @@ public class ConditionalFormatter implements Serializable {
      *
      * NOTE: Does not support HSSF files currently.
      *
+     * @param cell
+     *            Cell containing the formula
      * @param rule
      *            Conditional formatting rule to get the formula from
      * @return True if the formula in the given rule is of boolean formula type
      *         and evaluates to <code>true</code>, false otherwise
      */
-    protected boolean matchesFormula(ConditionalFormattingRule rule, int deltaColumn, int deltaRow) {
+    protected boolean matchesFormula(Cell cell, ConditionalFormattingRule rule, int deltaColumn, int deltaRow) {
         if ( ! (rule instanceof XSSFConditionalFormattingRule)) {
             // TODO Does not support HSSF files for now, since HSSF does not
             // read cell references in the file correctly.Since HSSF formulas
@@ -688,7 +690,7 @@ public class ConditionalFormatter implements Serializable {
 
         ValueEval eval;
         try {
-            eval = WorkbookEvaluatorUtil.evaluate(spreadsheet, ptgs);
+            eval = WorkbookEvaluatorUtil.evaluate(spreadsheet, ptgs, cell);
         } catch (NotImplementedException e) {
             LOGGER.log(Level.FINEST, e.getMessage(), e);
             return false;
