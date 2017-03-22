@@ -9,6 +9,7 @@ import com.vaadin.addon.charts.model.DataSeries;
 import com.vaadin.addon.charts.model.HorizontalAlign;
 import com.vaadin.addon.charts.model.LayoutDirection;
 import com.vaadin.addon.charts.model.VerticalAlign;
+import com.vaadin.addon.spreadsheet.Spreadsheet;
 
 public class ChartFeatureTest extends ChartTestBase {
 
@@ -33,6 +34,18 @@ public class ChartFeatureTest extends ChartTestBase {
                 .getText());
         Assert.assertEquals("Title below axis", conf.getxAxis().getTitle()
                 .getText());
+    }
+
+    @Test
+    public void chartTitle_loadSampleJ13_titlesEqualsCellValue()
+            throws Exception {
+        String fileName = "Tagetik 6.xlsx";
+        Configuration conf = getChartFromSampleFile(fileName, "J13")
+                .getConfiguration();
+        Spreadsheet spreadsheet = new Spreadsheet(getSampleFile(fileName));
+
+        Assert.assertEquals(spreadsheet.getCell("B14").getStringCellValue(),
+                conf.getTitle().getText());
     }
 
     @Test

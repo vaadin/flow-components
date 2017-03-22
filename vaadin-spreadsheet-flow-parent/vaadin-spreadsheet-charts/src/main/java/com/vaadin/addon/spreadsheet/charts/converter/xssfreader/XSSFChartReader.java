@@ -253,7 +253,7 @@ public class XSSFChartReader {
             // default title
             if (title.isEmpty() && plotData.size() > 0
                     && plotData.get(0).name != null) {
-                title = plotData.get(0).name.toUpperCase();
+                title = plotData.get(0).name;
             }
         }
 

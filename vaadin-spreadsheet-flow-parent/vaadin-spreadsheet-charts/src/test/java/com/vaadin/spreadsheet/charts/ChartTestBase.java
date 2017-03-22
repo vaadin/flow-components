@@ -44,7 +44,7 @@ public class ChartTestBase {
         sampleFileDiretory = new File(resource.toURI()).getAbsolutePath();
     }
 
-    private File getSampleFile(String filename) {
+    protected File getSampleFile(String filename) {
         return new File(sampleFileDiretory + File.separator + filename);
     }
 
@@ -98,10 +98,11 @@ public class ChartTestBase {
                 ((DataSeries) seriesList.get(0)).getData().size());
         for (int i = 0; i < data.length; i++) {
                 final Number y = ((DataSeries) seriesList.get(0)).getData().get(i).getY();
-                if (data[i] != null)
+                if (data[i] != null) {
                     Assert.assertEquals((Double) y, data[i].doubleValue(), 0.1);
-                else
+                } else {
                     Assert.assertNull(y);
+                }
         }
     }
 
@@ -113,11 +114,12 @@ public class ChartTestBase {
                 final Number y = ((DataSeries) seriesList.get(i)).getData()
                         .get(j).getY();
 
-                if (data[i][j] != null)
+                if (data[i][j] != null) {
                     Assert.assertEquals((Double) y, data[i][j].doubleValue(),
                             0.1);
-                else
+                } else {
                     Assert.assertNull(y);
+                }
             }
         }
     }
