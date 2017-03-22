@@ -249,7 +249,7 @@
                         <exclude>**/junit/*</exclude>
                     </excludes>
                     <includes>
-                        <include>**/*Test*</include>
+                        <include>**/*Test*.java</include>
                     </includes>
                     <systemProperties>
                         <property>
