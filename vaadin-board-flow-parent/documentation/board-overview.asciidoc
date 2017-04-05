@@ -28,3 +28,9 @@ You can suspend rendering the component before it is ready by adding the `unreso
    //Your code here
   </body>
 ----
+
+- Because Vaadin Board uses flexbox, there is a limited support for IE11.
+If you want to have a border for the direct child of the [elementname]#vaadin-board-row# you need to create a wrapper
+[elementname]#div# and add a border there, but not to the direct child of the [elementname]#vaadin-board-row#.
+The description of the bug can be found link:https://github.com/philipwalton/flexbugs#7-flex-basis-doesnt-account-for-box-sizingborder-box[here].
+
