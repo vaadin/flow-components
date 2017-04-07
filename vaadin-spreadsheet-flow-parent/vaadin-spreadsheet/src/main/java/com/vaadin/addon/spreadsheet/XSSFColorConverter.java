@@ -122,6 +122,11 @@ public class XSSFColorConverter implements ColorConverter {
 
         sb.append(attr);
         sb.append(":");
+        if (color.isIndexed() && ColorConverterUtil
+            .hasCustomIndexedColors(workbook)) {
+            sb.append(ColorConverterUtil.getIndexedARGB(workbook,color));
+            return sb.toString();
+        }
         if (color == null || color.isAuto()) {
             sb.append("#000;");
             return sb.toString();
@@ -141,7 +146,7 @@ public class XSSFColorConverter implements ColorConverter {
         }
 
         try {
-            String temp = toRGBA(argb);
+            String temp = ColorConverterUtil.toRGBA(argb);
             sb.append(temp);
         } catch (NumberFormatException nfe) {
             LOGGER.log(Level.FINE, nfe.getMessage() + " " + nfe.getCause(), nfe);
@@ -193,7 +198,7 @@ public class XSSFColorConverter implements ColorConverter {
         }
 
         try {
-            String temp = toRGBA(argb);
+            String temp = ColorConverterUtil.toRGBA(argb);
             sb.append(temp);
         } catch (NumberFormatException nfe) {
             LOGGER.log(Level.FINE, nfe.getMessage() + " " + nfe.getCause(), nfe);
@@ -323,7 +328,7 @@ public class XSSFColorConverter implements ColorConverter {
             return styleColor(themeColor, bgColor.getTint());
         } else {
             byte[] rgb = bgColor.getRgb();
-            return rgb == null ? null : toRGBA(rgb);
+            return rgb == null ? null : ColorConverterUtil.toRGBA(rgb);
         }
 
     }
@@ -350,7 +355,7 @@ public class XSSFColorConverter implements ColorConverter {
             return styleColor(themeColor, ctColor.getTint());
         } else {
             byte[] rgb = ctColor.getRgb();
-            return rgb == null ? null : toRGBA(rgb);
+            return rgb == null ? null : ColorConverterUtil.toRGBA(rgb);
         }
 
     }
@@ -391,6 +396,12 @@ public class XSSFColorConverter implements ColorConverter {
         if (color == null || color.isAuto()) {
             return null;
         }
+        //the XSSFColor#getARGB() method returns wrong colors for custom indexed colors
+        // to be removed when bug # 60898 is resolved (https://bz.apache.org/bugzilla/show_bug.cgi?id=60898)
+        if (color.isIndexed() && ColorConverterUtil
+            .hasCustomIndexedColors(workbook)) {
+            return ColorConverterUtil.getIndexedARGB(workbook, color);
+        }
 
         byte[] argb = color.getARGB();
         if (argb == null) {
@@ -404,42 +415,12 @@ public class XSSFColorConverter implements ColorConverter {
         }
 
         try {
-            String temp = toRGBA(argb);
+            String temp = ColorConverterUtil.toRGBA(argb);
             return temp;
         } catch (NumberFormatException nfe) {
             LOGGER.log(Level.FINE, nfe.getMessage() + " " + nfe.getCause(), nfe);
             return String.format("#%02x%02x%02x;", argb[1], argb[2], argb[3]);
         }
-    }
-
-    private String toRGBA(byte[] argb) {
-        StringBuilder sb = new StringBuilder("rgba(");
-        int rgba[] = new int[3];
-        for (int i = 1; i < argb.length; i++) {
-            int x = argb[i];
-            if (x < 0) {
-                x += 256;
-            }
-            rgba[i - 1] = x;
-        }
-        sb.append(rgba[0]);
-        sb.append(",");
-        sb.append(rgba[1]);
-        sb.append(",");
-        sb.append(rgba[2]);
-        sb.append(",");
-        float x = argb[0];
-        if (x == -1.0f) {
-            x = 1.0f;
-        } else if (x == 0.0) {
-            // This is done because of a bug (???) in POI. Colors from libre
-            // office in POI have the alpha-channel as 0.0, so that makes the
-            // colors all wrong. The correct value should be -1.0 (no Alpha)
-            x = 1.0f;
-        }
-        sb.append(x);
-        sb.append(");");
-        return sb.toString();
     }
 
     private byte applyTint(int lum, double tint) {
@@ -481,4 +462,5 @@ public class XSSFColorConverter implements ColorConverter {
 
         return dxf;
     }
+
 }
