@@ -17,7 +17,27 @@ Vaadin Board is using link:https://github.com/polymer/polymer/tree/2.0-preview[P
 - Layout is responsive - rearranges child elements based on available space.
 - Supports nested regions.
 
-= Limitations
+= Internet Explorer 11 & Safari 9 support
+
+Vaadin Board is using Polymer 2 and ES6. To support IE11 and Safari 9 you need to transpile ES6 to ES5.
+The easiest way to do that, is using link:https://www.polymer-project.org/2.0/docs/tools/polymer-cli#build[Polymer CLI].
+Add a build configuration to your link:https://www.polymer-project.org/2.0/docs/tools/polymer-json[polymer.json]:
+
+[source, html]
+----
+  "builds": [{
+    "name": "my-app",
+    "js": {"minify": true, "compile": true},
+    "css": {"minify": true},
+    "html": {"minify": true}
+  }]
+----
+Running [command]`polymer build` in you application folder will create a traspiled version of your application.
+Your application will be transpiled and saved in build folder.
+
+Another option to transpile ES6 to ES5 is to use link:https://babeljs.io/[Babel].
+
+= Known Issues
 
 - Because non-chrome browsers need to load a polyfill, you can see flickering, before definition of the web component comes in.
 You can suspend rendering the component before it is ready by adding the `unresolved` attribute in body:
