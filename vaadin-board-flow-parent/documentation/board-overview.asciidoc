@@ -55,3 +55,5 @@ If you want to have a border for the direct child of the [elementname]#vaadin-bo
 The description of the bug can be found link:https://github.com/philipwalton/flexbugs#7-flex-basis-doesnt-account-for-box-sizingborder-box[here].
 
 - There is a memory leak problem with Internet Explorer 11 and Polymer 2, see details link:https://github.com/Polymer/polymer/issues/3430[here].
+
+- HTML Imports polyfill has a known issue with Safari 10, meaning that Web Components will not be loaded correctly in some cases, see details link:https://github.com/Polymer/polymer/issues/4476[here].
