@@ -97,6 +97,10 @@ You can use `board-cols` to specify the width of the inner element in columns:
 .Configure Row Width
 image::img/board-basic-use-board-cols.png[]
 
+[NOTE]
+
+Elements inside a row will have overflow set to hidden by default, it can be overriden.
+
 [[board.basic-use.nested]]
 == Nested Rows
 
