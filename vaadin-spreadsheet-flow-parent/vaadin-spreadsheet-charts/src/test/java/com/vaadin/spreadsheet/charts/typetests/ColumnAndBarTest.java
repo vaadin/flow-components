@@ -1,10 +1,15 @@
 package com.vaadin.spreadsheet.charts.typetests;
 
+import static org.junit.Assert.assertEquals;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
+import com.vaadin.addon.charts.model.DataSeries;
+import com.vaadin.addon.charts.model.DataSeriesItem;
 import com.vaadin.addon.charts.model.PlotOptionsArea;
 import com.vaadin.addon.charts.model.PlotOptionsBar;
 import com.vaadin.addon.charts.model.PlotOptionsColumn;
@@ -193,6 +198,18 @@ public class ColumnAndBarTest extends ChartTestBase {
         assertSeriesType(conf.getSeries(), ChartType.BAR);
         Assert.assertTrue(((PlotOptionsBar) conf.getSeries().get(0)
                 .getPlotOptions()).getColorByPoint());
+    }
+
+    @Test
+    public void barWithHiddenCol() throws Exception {
+        Configuration conf = getChartFromSampleFile(
+            "HiddenColumnChartTest.xlsx", "D10").getConfiguration();
+        assertSeriesType(conf.getSeries(), ChartType.COLUMN);
+        List<DataSeriesItem> data = ((DataSeries) conf.getSeries().get(0))
+            .getData();
+        assertEquals(5, data.size());
+        assertEquals("c", data.get(2).getName());
+
     }
 
 }

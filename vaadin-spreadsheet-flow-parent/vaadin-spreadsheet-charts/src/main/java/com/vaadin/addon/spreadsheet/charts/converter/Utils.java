@@ -68,7 +68,8 @@ public class Utils {
         return join(strings, " ");
     }
 
-    public static String join(final List<String> array, final String separator) {
+    public static String join(final List<String> array,
+            final String separator) {
         final StringBuilder buf = new StringBuilder(array.size() * 16);
         for (String str : array) {
             buf.append(str);
@@ -103,9 +104,17 @@ public class Utils {
     }
 
     /**
-     * This function uses the getAllReferencedCells function but filters out all
-     * the hidden rows from the list honoring filtering of charts based on
-     * spreadsheettable filter settings if includeHiddenCells is true
+     * This function returns all the cells that the given formula references.
+     * You can optionally filter out all the hidden rows from the list honoring
+     * filtering of charts based on spreadsheettable filter settings.
+     * 
+     * @param formula
+     *            The formula to find referenced cells for
+     * @param spreadsheet
+     *            Spreadsheet to operate on
+     * @param includeHiddenCells
+     *            <code>true</code> to include cells residing on hidden rows or
+     *            columns, <code>false</code> to omit them
      * 
      */
     public static List<CellReference> getAllReferencedCells(String formula,
@@ -118,7 +127,8 @@ public class Utils {
             // Filter out hidden cells of rows that are hidden (Excel spec)
             ArrayList<CellReference> visibleCells = new ArrayList<CellReference>();
             for (CellReference cr : cellRefs) {
-                if (!spreadsheet.isRowHidden(cr.getRow())) {
+                if (!spreadsheet.isRowHidden(cr.getRow())
+                        && !spreadsheet.isColumnHidden(cr.getCol())) {
                     visibleCells.add(cr);
                 }
             }
