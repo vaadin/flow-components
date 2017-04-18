@@ -57,18 +57,29 @@ with 100% width item, see example below.
 ----
 <vaadin-board>
   <vaadin-board-row>
-      <vaadin-line-chart>
-        <chart-title>Sales</chart-title>
-        <!-- Configuration omitted -->
-      </vaadin-line-chart>
-      <vaadin-column-chart>
-        <chart-title>Overall sales by region</chart-title>
-      </vaadin-column-chart>
-      <vaadin-column-chart>
-        <chart-title>Services sales by region</chart-title>
-      </vaadin-column-chart>
+     <div class="item">1</div>
+     <div class="item">2</div>
+     <div class="item">3</div>
   </vaadin-board-row>
 </vaadin-board>
+----
+
+We can add styling to our content. Insert the following CSS , inside the [elementname]`style` tag:
+
+[source, html]
+----
+.item {
+    display: block;
+    margin-left: 0;
+    margin-right: 0;
+    font-weight: bold;
+    border-style: solid;
+    border-width: 3px;
+    border-color: #fff;
+    text-align: center;
+    background-color: #cacaca;
+    height:200px;
+}
 ----
 
 [[figure.board.basic-use]]
@@ -81,14 +92,8 @@ You can use `board-cols` to specify the width of the inner element in columns:
 ----
 <vaadin-board>
   <vaadin-board-row>
-      <vaadin-line-chart board-cols="3">
-        <chart-title>Sales</chart-title>
-        <!-- Configuration omitted -->
-      </vaadin-line-chart>
-
-      <vaadin-column-chart>
-        <chart-title>Overall sales by region</chart-title>
-      </vaadin-column-chart>
+        <div class="item" board-cols="3">1</div>
+        <div class="item">2</div>
   </vaadin-board-row>
 </vaadin-board>
 ----
@@ -110,25 +115,14 @@ Nested rows are responsive in relation to the parent slot size.
 [source, html]
 ----
 <vaadin-board>
-  <vaadin-board-row>
-      <vaadin-line-chart>
-        <chart-title>Sales</chart-title>
-        <!-- Configuration omitted -->
-      </vaadin-line-chart>
-
-      <vaadin-board-row>
-          <vaadin-pie-chart>
-              <chart-title>Browser market shares</chart-title>
-          </vaadin-pie-chart>
-          <vaadin-pie-chart>
-              <chart-title>Annual expenses</chart-title>
-          </vaadin-pie-chart>
-          <vaadin-column-chart>
-          </vaadin-column-chart>
-          <vaadin-column-chart>
-          </vaadin-column-chart>
-      </vaadin-board-row>
-  </vaadin-board-row>
+   <vaadin-board-row>
+     <div class="item" board-cols="3">1</div>
+     <vaadin-board-row>
+         <div class="item">2</div>
+         <div class="item">3</div>
+         <div class="item">4</div>
+     </vaadin-board-row>
+   </vaadin-board-row>
 </vaadin-board>
 ----
 
