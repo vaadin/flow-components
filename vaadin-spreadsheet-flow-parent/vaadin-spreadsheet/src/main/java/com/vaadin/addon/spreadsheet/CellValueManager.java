@@ -837,9 +837,9 @@ public class CellValueManager implements Serializable {
         }
         // removeCell and removeCells makes sure that cells are removed and
         // cleared from client side cache.
-        updateMarkedCellValues();
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
         fireCellValueChangeEvent(spreadsheet.getSelectedCellReferences());
+        spreadsheet.updateMarkedCells();
         spreadsheet.loadHyperLinks();
     }
 
