@@ -36,7 +36,11 @@ import org.apache.poi.ss.formula.FormulaParser;
 import org.apache.poi.ss.formula.FormulaType;
 import org.apache.poi.ss.formula.WorkbookEvaluatorUtil;
 import org.apache.poi.ss.formula.eval.BoolEval;
+import org.apache.poi.ss.formula.eval.ErrorEval;
 import org.apache.poi.ss.formula.eval.NotImplementedException;
+import org.apache.poi.ss.formula.eval.NumberEval;
+import org.apache.poi.ss.formula.eval.NumericValueEval;
+import org.apache.poi.ss.formula.eval.StringEval;
 import org.apache.poi.ss.formula.eval.ValueEval;
 import org.apache.poi.ss.formula.ptg.Ptg;
 import org.apache.poi.ss.formula.ptg.RefPtgBase;
@@ -543,8 +547,10 @@ public class ConditionalFormatter implements Serializable {
                 for (int col = cra.getFirstColumn(); col <= cra.getLastColumn(); col++) {
 
                     Cell cell = spreadsheet.getCell(row, col);
-                    if (cell != null
-                            && matches(cell, rule, col - firstColumn, row
+                    if (cell == null) {
+                        cell = spreadsheet.createCell(row, col, "");
+                    }
+                    if (matches(cell, rule, col - firstColumn, row
                                     - firstRow)) {
                         Set<Integer> list = cellToIndex.get(SpreadsheetUtil
                                 .toKey(cell));
@@ -635,10 +641,15 @@ public class ConditionalFormatter implements Serializable {
          * arguments. So, to use it, we need to copy the formula to an existing
          * cell temporarily, and run the eval.
          */
-        if (rule.getConditionType().equals(ConditionType.CELL_VALUE_IS)) {
-            return matchesValue(cell, rule);
-        } else {
-            return matchesFormula(cell, rule, deltaColumn, deltaRow);
+        try {
+            if (rule.getConditionType().equals(ConditionType.CELL_VALUE_IS)) {
+                return matchesValue(cell, rule, deltaColumn, deltaRow);
+            } else {
+                return matchesFormula(cell, rule, deltaColumn, deltaRow);
+            }
+        } catch (NotImplementedException e) {
+            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            return false;
         }
 
     }
@@ -650,11 +661,12 @@ public class ConditionalFormatter implements Serializable {
      * NOTE: Does not support HSSF files currently.
      *
      * @param cell
-     *            Cell containing the formula
+     *            Cell with conditional formatting
      * @param rule
-     *            Conditional formatting rule to get the formula from
-     * @return True if the formula in the given rule is of boolean formula type
-     *         and evaluates to <code>true</code>, false otherwise
+     *            Conditional formatting rule based on formula
+     * @return Formula value, if the formula is of boolean formula type
+     *         Formula value != 0, if the formula is of numeric formula type
+     *         and false otherwise
      */
     protected boolean matchesFormula(Cell cell, ConditionalFormattingRule rule, int deltaColumn, int deltaRow) {
         if ( ! (rule instanceof XSSFConditionalFormattingRule)) {
@@ -669,9 +681,27 @@ public class ConditionalFormatter implements Serializable {
             return false;
         }
 
+        ValueEval eval = getValueEvalFromFormula(booleanFormula, cell, deltaColumn, deltaRow);
+        
+        if (eval instanceof ErrorEval){
+            LOGGER.log(Level.FINEST, ((ErrorEval) eval).getErrorString(), eval);
+        }
+        
+        if (eval instanceof BoolEval) {
+            return eval == null ? false : ((BoolEval) eval).getBooleanValue();
+        } else {
+            if (eval instanceof NumericValueEval) {
+                return  ((NumberEval) eval).getNumberValue() != 0;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private ValueEval getValueEvalFromFormula(String formula, Cell cell, int deltaColumn, int deltaRow) {
         // Parse formula and use deltas to get relative cell references to work
         // (#18702)
-        Ptg[] ptgs = FormulaParser.parse(booleanFormula, WorkbookEvaluatorUtil.getEvaluationWorkbook(spreadsheet),
+        Ptg[] ptgs = FormulaParser.parse(formula, WorkbookEvaluatorUtil.getEvaluationWorkbook(spreadsheet),
                 FormulaType.CELL, spreadsheet.getActiveSheetIndex());
 
         for (Ptg ptg : ptgs) {
@@ -687,20 +717,7 @@ public class ConditionalFormatter implements Serializable {
                 }
             }
         }
-
-        ValueEval eval;
-        try {
-            eval = WorkbookEvaluatorUtil.evaluate(spreadsheet, ptgs, cell);
-        } catch (NotImplementedException e) {
-            LOGGER.log(Level.FINEST, e.getMessage(), e);
-            return false;
-        }
-        if (eval instanceof BoolEval) {
-            return eval == null ? false : ((BoolEval) eval).getBooleanValue();
-        } else {
-            return false;
-        }
-
+        return WorkbookEvaluatorUtil.evaluate(spreadsheet, ptgs, cell);
     }
 
     /**
@@ -712,12 +729,22 @@ public class ConditionalFormatter implements Serializable {
      *            Target cell
      * @param rule
      *            Conditional formatting rule to match against.
+     * @param deltaColumn
+     *            delta (on column axis) between cell and the origin cell 
+     * @param deltaRow
+     *            delta (on row axis) between cell and the origin cell 
      * @return True if the given cells value matches the given
      *         <code>VALUE_IS</code> rule, false otherwise
      */
-    protected boolean matchesValue(Cell cell, ConditionalFormattingRule rule) {
+    protected boolean matchesValue(Cell cell, ConditionalFormattingRule rule, int deltaColumn, int deltaRow) {
 
         boolean isFormulaType = cell.getCellType() == Cell.CELL_TYPE_FORMULA;
+
+        if (isFormulaType) {
+            // make sure we have the latest value for formula cells
+            getFormulaEvaluator().evaluateFormulaCell(cell);
+        }
+        
         boolean isFormulaStringType = isFormulaType
                 && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_STRING;
         boolean isFormulaBooleanType = isFormulaType
@@ -725,31 +752,33 @@ public class ConditionalFormatter implements Serializable {
         boolean isFormulaNumericType = isFormulaType
                 && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_NUMERIC;
 
-        if (isFormulaType) {
-            try {
-                // make sure we have the latest value for formula cells
-                getFormulaEvaluator().evaluateFormulaCell(cell);
-            } catch (NotImplementedException e) {
-                LOGGER.log(Level.FINEST, e.getMessage(), e);
-                return false;
-            }
+        String formula = rule.getFormula1();
+        byte comparisonOperation = rule.getComparisonOperation();
+        ValueEval eval = getValueEvalFromFormula(formula, cell, deltaColumn, deltaRow);
+        
+        if (eval instanceof ErrorEval){
+            LOGGER.log(Level.FINEST, ((ErrorEval) eval).getErrorString(), eval);
+            return false;
+        }
+        
+        if (!hasCoherentType(eval, cell.getCellType(), isFormulaStringType,
+            isFormulaBooleanType, isFormulaNumericType)) {
+            // Comparison between different types (e.g. Bool vs String)
+            return (comparisonOperation == ComparisonOperator.NOT_EQUAL);
         }
 
         // other than numerical types
         if (cell.getCellType() == Cell.CELL_TYPE_STRING || isFormulaStringType) {
 
-            // Excel stores conditional formatting strings surrounded with ", so
-            // we must surround the cell value. String cell value from POI is
-            // never null.
-            String quotedStringValue = String.format("\"%s\"",
-                    cell.getStringCellValue());
+            String formulaValue = ((StringEval)eval).getStringValue();
+            String stringValue = cell.getStringCellValue();
 
             // Excel string comparison ignores case
-            switch (rule.getComparisonOperation()) {
+            switch (comparisonOperation) {
             case ComparisonOperator.EQUAL:
-                return quotedStringValue.equalsIgnoreCase(rule.getFormula1());
+                return stringValue.equalsIgnoreCase(formulaValue);
             case ComparisonOperator.NOT_EQUAL:
-                return !quotedStringValue.equalsIgnoreCase(rule.getFormula1());
+                return !stringValue.equalsIgnoreCase(formulaValue);
             }
         }
         if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN
@@ -757,9 +786,9 @@ public class ConditionalFormatter implements Serializable {
             // not sure if this is used, since no boolean option exists in
             // Excel..
 
-            Boolean formulaVal = Boolean.parseBoolean(rule.getFormula1());
+            boolean formulaVal = ((BoolEval)eval).getBooleanValue();
 
-            switch (rule.getComparisonOperation()) {
+            switch (comparisonOperation) {
             case ComparisonOperator.EQUAL:
                 return cell.getBooleanCellValue() == formulaVal;
             case ComparisonOperator.NOT_EQUAL:
@@ -771,16 +800,9 @@ public class ConditionalFormatter implements Serializable {
         if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC
                 || isFormulaNumericType) {
 
-            double formula1Val = -1;
-            try {
-                formula1Val = Double.valueOf(rule.getFormula1());
+            double formula1Val = ((NumericValueEval)eval).getNumberValue();
 
-            } catch (NumberFormatException w) {
-                // non-numeric formatting rules cannot match
-                return false;
-            }
-
-            switch (rule.getComparisonOperation()) {
+            switch (comparisonOperation) {
 
             case ComparisonOperator.EQUAL:
                 return cell.getNumericCellValue() == formula1Val;
@@ -811,5 +833,44 @@ public class ConditionalFormatter implements Serializable {
         }
 
         return false;
+    }
+
+    /**
+     * @param eval
+     *            Value of a formula
+     * @param cellType
+     *            Type of a cell
+     * @param isFormulaStringType
+     *            true if eval is a formula of type String, false otherwise
+     * @param isFormulaBooleanType
+     *            true if eval is a formula of type Boolean, false otherwise
+     * @param isFormulaNumericType
+     *            true if eval is a formula of type Numeric, false otherwise
+     * @return true if eval is coherent with cellType, false otherwise
+     */
+    private boolean hasCoherentType(ValueEval eval, int cellType,
+        boolean isFormulaStringType, boolean isFormulaBooleanType,
+        boolean isFormulaNumericType) {
+        switch (cellType) {
+        case Cell.CELL_TYPE_STRING:
+            return eval instanceof StringEval;
+        case Cell.CELL_TYPE_BOOLEAN:
+            return eval instanceof BoolEval;
+        case Cell.CELL_TYPE_NUMERIC:
+            return eval instanceof NumericValueEval || isFormulaNumericType;
+        case Cell.CELL_TYPE_FORMULA:
+            return isCoherentTypeFormula(eval, isFormulaStringType,
+                isFormulaBooleanType, isFormulaNumericType);
+        }
+        return false;
+    }
+
+    private boolean isCoherentTypeFormula(ValueEval eval,
+        boolean isFormulaStringType, boolean isFormulaBooleanType,
+        boolean isFormulaNumericType) {
+        boolean coherentString = eval instanceof StringEval && isFormulaStringType;
+        boolean coherentBoolean = eval instanceof BoolEval && isFormulaBooleanType;
+        boolean coherentNumeric = eval instanceof NumericValueEval && isFormulaNumericType;
+        return coherentString || coherentBoolean || coherentNumeric;
     }
 }
