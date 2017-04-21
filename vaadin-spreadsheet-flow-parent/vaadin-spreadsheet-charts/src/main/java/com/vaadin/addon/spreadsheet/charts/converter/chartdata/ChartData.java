@@ -79,7 +79,8 @@ public class ChartData {
     public static class AxisProperties {
         public String title = "";
         public TextProperties textProperties;
-
+        public Double minVal; // null means use HighCharts default scaling logic
+        public Double maxVal; // null means use HighCharts default scaling logic
         // Note: tried adding horizontal title for y-axis support, doesn't
         // really work in Highchart
     }

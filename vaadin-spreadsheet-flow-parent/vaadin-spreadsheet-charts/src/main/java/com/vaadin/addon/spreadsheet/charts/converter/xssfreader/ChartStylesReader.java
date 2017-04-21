@@ -29,6 +29,7 @@ import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.XmlException;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTCatAx;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTScaling;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTTitle;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTValAx;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTBaseStyles;
@@ -39,6 +40,7 @@ import org.openxmlformats.schemas.drawingml.x2006.main.CTTextCharacterProperties
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTextParagraph;
 import org.openxmlformats.schemas.drawingml.x2006.main.ThemeDocument;
 
+import com.vaadin.addon.charts.model.YAxis;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ChartData.AxisProperties;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ChartData.BackgroundProperties;
@@ -149,7 +151,7 @@ class ChartStylesReader {
 
         for (CTValAx valAx : valAxList) {
             result.put(valAx.getAxId().getVal(),
-                    getAxisProperties(valAx.getTitle()));
+                    getAxisProperties(valAx));
         }
 
         return result;
@@ -160,7 +162,7 @@ class ChartStylesReader {
                 .getCatAxList();
 
         if (catAxList.size() > 0)
-            return getAxisProperties(catAxList.get(0).getTitle());
+            return getAxisProperties(catAxList.get(0));
         else
             return null;
     }
@@ -197,10 +199,48 @@ class ChartStylesReader {
         }
     }
 
-    private AxisProperties getAxisProperties(CTTitle title) {
+    /**
+     * Allows for overriding to wrap in additional property detection/conversion
+     * NOTE: POI needs a meta-API for the generated OOXML CT* classes,
+     * so shared properties like these can come from a common interface
+     * @param yAx 
+     * @return axis properties
+     */
+    protected AxisProperties getAxisProperties(CTValAx yAx) {
         AxisProperties axisProperties = new AxisProperties();
 
-        readAxisTitle(title, axisProperties);
+        readAxisTitle(yAx.getTitle(), axisProperties);
+
+        CTScaling scaling = yAx.getScaling();
+        if (scaling != null && scaling.isSetMin()) {
+            axisProperties.minVal = Double.valueOf(scaling.getMin().getVal());
+        }
+        if (scaling != null && scaling.isSetMax()) {
+            axisProperties.maxVal = Double.valueOf(scaling.getMax().getVal());
+        }
+
+        return axisProperties;
+    }
+
+    /**
+     * Allows for overriding to wrap in additional property detection/conversion
+     * NOTE: POI needs a meta-API for the generated OOXML CT* classes,
+     * so shared properties like these can come from a common interface
+     * @param xAx 
+     * @return axis properties
+     */
+    protected AxisProperties getAxisProperties(CTCatAx xAx) {
+        AxisProperties axisProperties = new AxisProperties();
+
+        readAxisTitle(xAx.getTitle(), axisProperties);
+
+        CTScaling scaling = xAx.getScaling();
+        if (scaling != null && scaling.isSetMin()) {
+            axisProperties.minVal = Double.valueOf(scaling.getMin().getVal());
+        }
+        if (scaling != null && scaling.isSetMax()) {
+            axisProperties.maxVal = Double.valueOf(scaling.getMax().getVal());
+        }
 
         return axisProperties;
     }

@@ -102,8 +102,8 @@ public class ChartDataToVaadinConfigWriter {
 
         updateBackgroundColor(conf, definition.background);
 
-        updateXAxisTitle(conf.getxAxis(), definition.xAxisProperties);
-        updateYAxesTitles(conf, definition.yAxesProperties);
+        updateXAxis(conf.getxAxis(), definition.xAxisProperties);
+        updateYAxes(conf, definition.yAxesProperties);
 
         if (conf.getSeries().isEmpty()) {
             conf.setSubTitle("*** Unsupported chart type ***");
@@ -171,14 +171,18 @@ public class ChartDataToVaadinConfigWriter {
 
     }
 
-    private void updateYAxesTitles(Configuration conf,
+    private void updateYAxes(Configuration conf,
             List<AxisProperties> yAxisProperties) {
         if (yAxisProperties == null || yAxisProperties.size() == 0) {
             return;
         }
 
         YAxis defaultyAxis = conf.getyAxis();
-        updateYAxisTitle(defaultyAxis, yAxisProperties.get(0));
+        AxisProperties firstYAxisProps = yAxisProperties.get(0);
+        updateYAxisTitle(defaultyAxis, firstYAxisProps);
+        // todo: how to tell if the stored double is really a date?
+        defaultyAxis.setMin(firstYAxisProps.minVal);
+        defaultyAxis.setMax(firstYAxisProps.maxVal);
 
         for (AxisProperties axProp : yAxisProperties.subList(1,
                 yAxisProperties.size())) {
@@ -186,6 +190,8 @@ public class ChartDataToVaadinConfigWriter {
             axis.setOpposite(true);
             conf.addyAxis(axis);
             updateYAxisTitle(axis, axProp);
+            axis.setMin(axProp.minVal);
+            axis.setMax(axProp.maxVal);
         }
     }
 
@@ -249,7 +255,7 @@ public class ChartDataToVaadinConfigWriter {
                 colorProp.opacity);
     }
 
-    private void updateXAxisTitle(XAxis axis, AxisProperties axisProperties) {
+    private void updateXAxis(XAxis axis, AxisProperties axisProperties) {
         if (axisProperties == null) {
             return;
         }
@@ -259,6 +265,9 @@ public class ChartDataToVaadinConfigWriter {
 
         axis.getTitle().setStyle(
                 createStyleFromTextFroperties(axisProperties.textProperties));
+
+        axis.setMin(axisProperties.minVal);
+        axis.setMax(axisProperties.maxVal);
     }
 
     private void updateYAxisTitle(YAxis axis, AxisProperties axisProperties) {

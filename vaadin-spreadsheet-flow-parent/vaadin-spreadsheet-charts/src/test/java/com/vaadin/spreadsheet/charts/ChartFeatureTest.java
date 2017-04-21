@@ -241,7 +241,7 @@ public class ChartFeatureTest extends ChartTestBase {
         Assert.assertEquals(new Integer(1), ((DataSeries)conf.getSeries().get(3)).getyAxis());
         Assert.assertEquals(new Integer(1), ((DataSeries)conf.getSeries().get(4)).getyAxis());
     }
-    
+
     @Test
     public void categories_loadSampleE1_axisTypeCategory()
             throws Exception {
@@ -249,6 +249,19 @@ public class ChartFeatureTest extends ChartTestBase {
                 "E1").getConfiguration();
 
         Assert.assertEquals(AxisType.CATEGORY, conf.getxAxis().getType());
+    }
+
+    @Test
+    public void categories_loadSampleE1_axisTypeCategoryExplicitYAxisBounds()
+            throws Exception {
+        Configuration conf = getChartFromSampleFile("numeric-categories-Explicit-Y-Axis-Bounds.xlsx",
+                "E1").getConfiguration();
+
+        // min still set to auto scaling
+        Assert.assertNull(conf.getyAxis().getMin());
+        // max set to an explicit value
+        Assert.assertNotNull(conf.getyAxis().getMax());
+        Assert.assertEquals(100d, conf.getyAxis().getMax().doubleValue(), 0.0);
     }
 
     @Test
@@ -267,7 +280,6 @@ public class ChartFeatureTest extends ChartTestBase {
                 ((DataSeries) conf.getSeries().get(0)).get(3).getName());
         Assert.assertEquals("32",
                 ((DataSeries) conf.getSeries().get(0)).get(4).getName());
-
     }
 
     @Test
