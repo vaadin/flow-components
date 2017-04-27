@@ -12,9 +12,10 @@ layout: page
 In this tutorial, you will learn how to:
 
 1. <<Create a Polymer application>>
-2. <<Add the Vaadin Board dependency>>
-3. <<Install your license key>>
-4. <<Add the Vaadin Board component to your web page>>
+2. <<Install Vaadin Board>>
+3. <<Import Vaadin Board in your app>>
+4. <<Install your license key>>
+5. <<Add the Vaadin Board component to your web page>>
 
 In this tutorial we will use https://www.polymer-project.org/2.0/docs/tools/polymer-cli[Polymer CLI] for creating the initial project. At the end of the tutorial, you should end up with the same code as found at https://github.com/vaadin/vaadin-board-getting-started[GitHub].
 
@@ -22,9 +23,22 @@ In this tutorial we will use https://www.polymer-project.org/2.0/docs/tools/poly
 == Create a Polymer application
 
 1. https://www.polymer-project.org/2.0/docs/tools/polymer-cli#install[Install Polymer CLI].
-2. On the same page, follow the instructions to "Set up basic app project", but when Polymer CLI asks [prompt]`Which starter template would you like to use?` (step 3), select `polymer-2-application`.
+2. Create a directory for your app project:
++
+[subs="normal"]
+----
+[prompt]#$# [command]#mkdir# my-app
+[prompt]#$# [command]#cd# my-app
+----
++
+3. Use Polymer to initialize a new application:
++
+[subs="normal"]
+----
+[prompt]#$# [command]#polymer# init
+----
 
-After the initialization process, Polymer CLI generates the following files and directories:
+Polymer CLI will ask you a few questions to set up your app. Choose `polymer-2-application` as the starter template for your project. After the initialization process, Polymer CLI downloads dependencies and generates the following files and directories:
 
 `bower.json`:: Configuration file for Bower.
 `bower_components/`:: Project dependencies. See Manage dependencies.
@@ -32,10 +46,17 @@ After the initialization process, Polymer CLI generates the following files and 
 `src/my-app/my-app.html`:: Source code for main element.
 `test/my-app/my-app_test.html`:: Tests for main element.
 
-Use [command]`polymer serve --open` to run the Polymer application.
+== Running your application
+
+Run your app with:
+[subs="normal"]
+----
+[prompt]#$# [command]#polymer# serve --open
+----
+The [command]`--open` flag will fire up a browser window and open your app in it.
 
 [[board.project.setup.dependency]]
-== Add the Vaadin Board dependency
+== Install Vaadin Board
 
 You can use http://bower.io[Bower] to install Vaadin Board dependency by running the following command inside your project folder:
 
@@ -44,18 +65,15 @@ You can use http://bower.io[Bower] to install Vaadin Board dependency by running
 [prompt]#$# [command]#bower# install --save vaadin-board
 ----
 
-This will install the latest available version of Vaadin Board.
+This will install the latest available version of Vaadin Board in your project.
 
-You can then import Vaadin Board inside your HTML element (in `src/my-app/my-app.html`):
+== Import Vaadin Board in your app
+
+Next we'll modify your app to include a Vaadin Board. Open your app element in `src/my-app/my-app.html` and add the following line in as the second line in the file, under the Polymer import, to import Vaadin Board component into your app:
 
 [source, html]
 ----
-<!DOCTYPE html>
-<html>
-<head>
-  <link rel="import" href="../../bower_components/vaadin-board/vaadin-board.html">
-</head>
-</html>
+<link rel="import" href="../../bower_components/vaadin-board/vaadin-board.html">
 ----
 
 [[board.project.setup.installing.license]]
@@ -86,18 +104,18 @@ Insert the following code in your HTML element (again, in `src/my-app/my-app.htm
 
 [source, html]
 ----
-    <vaadin-board>
-      <vaadin-board-row>
-        <div class="item">1</div>
-        <div class="item">2</div>
-        <div class="item">3</div>
-        <div class="item">4</div>
-      </vaadin-board-row>
-      <vaadin-board-row>
-        <div class="item">1</div>
-        <div class="item">2</div>
-      </vaadin-board-row>
-    </vaadin-board>
+<vaadin-board>
+  <vaadin-board-row>
+    <div class="item">1</div>
+    <div class="item">2</div>
+    <div class="item">3</div>
+    <div class="item">4</div>
+  </vaadin-board-row>
+  <vaadin-board-row>
+    <div class="item">1</div>
+    <div class="item">2</div>
+  </vaadin-board-row>
+</vaadin-board>
 ----
 
 Then we can add styling to our content. Insert the following CSS , inside the [elementname]`style` tag:
@@ -116,6 +134,66 @@ Then we can add styling to our content. Insert the following CSS , inside the [e
     background-color: #cacaca;
     height:100px;
 }
+----
+
+After these modifications your `src/my-app/my-app.html` should look like this:
+
+[source, html]
+----
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/vaadin-board/vaadin-board.html">
+
+<dom-module id="my-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .item {
+        display: block;
+        margin-left: 0;
+        margin-right: 0;
+        font-weight: bold;
+        border-style: solid;
+        border-width: 3px;
+        border-color: #fff;
+        text-align: center;
+        background-color: #cacaca;
+        height:100px;
+      }
+    </style>
+
+    <vaadin-board>
+      <vaadin-board-row>
+        <div class="item">1</div>
+        <div class="item">2</div>
+        <div class="item">3</div>
+        <div class="item">4</div>
+      </vaadin-board-row>
+      <vaadin-board-row>
+        <div class="item">1</div>
+        <div class="item">2</div>
+      </vaadin-board-row>
+    </vaadin-board>
+  </template>
+
+  <script>
+    class MyApplication extends Polymer.Element {
+      static get is() { return 'my-app'; }
+      static get properties() {
+        return {
+          prop1: {
+            type: String,
+            value: 'my-app'
+          }
+        };
+      }
+    }
+
+    window.customElements.define(MyApplication.is, MyApplication);
+  </script>
+</dom-module>
 ----
 
 Run [command]`polymer serve --open` to see the following result:
