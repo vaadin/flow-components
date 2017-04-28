@@ -206,4 +206,4 @@ Vaadin Board rearranges child elements based on viewport size.
 You can change the size of the Web browser window to see how your application will look on different devices.
 
 Congratulations! You have your first Vaadin Board setup.
-Visit our link:https://vaadin.com/docs/-/part/board/board-overview.html[docs] and link://https://demo.vaadin.com/vaadin-board[demos] for more information.
+Visit our link:https://vaadin.com/docs/-/part/board/board-overview.html[docs] and link:https://demo.vaadin.com/vaadin-board[demos] for more information.
