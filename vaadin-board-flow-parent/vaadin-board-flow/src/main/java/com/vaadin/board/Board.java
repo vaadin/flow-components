@@ -12,9 +12,8 @@ import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
 
-@JavaScript("vaadin://bower_components/webcomponentsjs/webcomponents-lite.js")
-@HtmlImport("vaadin://bower_components/vaadin-board/vaadin-board.html")
-@HtmlImport("vaadin://bower_components/vaadin-board/vaadin-board-row.html")
+@HtmlImport("frontend://vaadin-board/vaadin-board.html")
+@HtmlImport("frontend://vaadin-board/vaadin-board-row.html")
 public class Board extends AbstractComponent implements HasComponents {
 
     private final List<Row> rows = new ArrayList<>();

@@ -16,11 +16,6 @@
     "tests"
   ],
   "dependencies": {
-    "vaadin-board": "vaadin/vaadin-board#master",
-    "polymer": "v2.0.0-rc.2"
-  },
-  "resolutions": {
-    "polymer": "v2.0.0-rc.2",
-    "webcomponentsjs": "v1.0.0-rc.5"
+    "vaadin-board": "vaadin/vaadin-board#1.0.0-beta1"
   }
 }

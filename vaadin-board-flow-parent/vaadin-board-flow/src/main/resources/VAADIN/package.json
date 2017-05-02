@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "bower": "^1.8.0"
-  },
-  "name": "vaadin-board-yarn",
-  "private": "true",
-  "version": "1.0.0"
-}
