@@ -39,7 +39,7 @@ You can purchase Vaadin Board or obtain a free trial key from the link:https://v
 You need to register in the Vaadin website to obtain the key.
 
 When you first time open the web page with Vaadin Board, you will see a pop-up that asks you to enter the license key.
-If the license is valid, it will be saved to the local storage of the browser and you will not see the pop-up again. License dialog will only be shown in development environment when accessing the web page using localhost or 127.0.0.1.
+If the license is valid, it will be saved to the local storage of the browser and you will not see the pop-up again. The license dialog will only be shown in development environment when accessing the web page using localhost or 127.0.0.1.
 
 [[board.basic-use.configuration]]
 == Basic Configuration
