@@ -11,6 +11,7 @@
 
 	<modules>
 		<module>vaadin-board-flow</module>
+		<module>integration-tests</module>
 	</modules>
 
 </project>

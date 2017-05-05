@@ -1,0 +1,9 @@
+{
+  "browsers": [
+    {
+      "browserName": "Chrome",
+      "platform": "ANY",
+      "version": ""
+    }
+  ]
+}
