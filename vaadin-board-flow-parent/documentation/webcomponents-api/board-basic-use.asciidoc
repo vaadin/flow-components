@@ -172,3 +172,44 @@ Vaadin Board has three predefined class selectors for [classname]#vaadin-board-r
 
 Vaadin Board relies on resize events to achieve responsiveness.
 In some cases the board size might change without a resize event, for instance if a fixed size is set in its style, for such cases the [methodname]#redraw# method of the [elementname]#vaadin-board# element should be used.
+
+[[board.basic-use.es6-transpile]]
+== Internet Explorer 11 & Safari 9 support
+
+Vaadin Board is using Polymer 2 and ES6. To support IE11 and Safari 9 you need to transpile ES6 to ES5.
+The easiest way to do that, is using link:https://www.polymer-project.org/2.0/docs/tools/polymer-cli#build[Polymer CLI].
+Add a build configuration to your link:https://www.polymer-project.org/2.0/docs/tools/polymer-json[polymer.json]:
+
+[source, html]
+----
+  "builds": [{
+    "name": "my-app",
+    "js": {"minify": true, "compile": true},
+    "css": {"minify": true},
+    "html": {"minify": true}
+  }]
+----
+Running [command]`polymer build` in you application folder will create a transpiled version of your application.
+Your application will be transpiled and saved in build folder.
+
+Another option to transpile ES6 to ES5 is to use link:https://babeljs.io/[Babel].
+
+[[board.basic-use.known-issues]]
+== Known Issues
+
+- Because non-chrome browsers need to load a polyfill, you can see flickering, before definition of the web component comes in.
+You can suspend rendering the component before it is ready by adding the `unresolved` attribute in body:
+
+[source, html]
+----
+  <body unresolved>
+   //Your code here
+  </body>
+----
+
+- Because Vaadin Board uses flexbox, there is a limited support for IE11.
+If you want to have a border for the direct child of the [elementname]#vaadin-board-row# you need to create a wrapper
+[elementname]#div# and add a border there, but not to the direct child of the [elementname]#vaadin-board-row#.
+The description of the bug can be found link:https://github.com/philipwalton/flexbugs#7-flex-basis-doesnt-account-for-box-sizingborder-box[here].
+
+- There is a memory leak problem with Internet Explorer 11 and Polymer 2, see details link:https://github.com/Polymer/polymer/issues/3430[here].
