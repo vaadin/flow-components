@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.openqa.selenium.Platform;
+import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.google.gson.stream.JsonReader;
@@ -18,22 +19,22 @@ import com.google.gson.stream.JsonReader;
 public class TestUtils {
 
     private static  DesiredCapabilities parseBrowser(String browser) {
-        if (browser.equals("Chrome")) {
+        switch (browser) {
+        case BrowserType.CHROME:
             return DesiredCapabilities.chrome();
-        } else if (browser.equals("Internet Explorer")) {
+        case BrowserType.IE:
             return DesiredCapabilities.internetExplorer();
-        } else if (browser.equals("Firefox")) {
+        case BrowserType.FIREFOX:
             return DesiredCapabilities.firefox();
-        } else {
+        default:
             return DesiredCapabilities.firefox();
         }
     }
 
     public  List<DesiredCapabilities> getCapabilitiesFromFile(String path)
         throws FileNotFoundException {
-        FileReader config = null;
         URL url = getClass().getResource(path);
-        config = new FileReader(new File(url.getPath()));
+        FileReader config = new FileReader(new File(url.getPath()));
         return createCapabilities(config);
 
     }
@@ -55,14 +56,19 @@ public class TestUtils {
                         Map<String, String> noNameProps = new HashMap<>();
                         while (reader.hasNext()) {
                             String property = reader.nextName();
-                            if (property.equals("browserName")) {
+                            switch (property) {
+                            case "browserName":
                                 browser = reader.nextString();
-                            } else if (property.equals("platform")) {
+                                break;
+                            case "platform":
                                 platform = reader.nextString();
-                            } else if (property.equals("version")) {
+                                break;
+                            case "version":
                                 version = reader.nextString();
-                            } else {
+                                break;
+                            default:
                                 noNameProps.put(property, reader.nextString());
+                                break;
                             }
 
                         }
