@@ -1,8 +1,11 @@
 package com.vaadin.board.client;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.StyleInjector;
 import com.vaadin.board.Board;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
@@ -13,7 +16,13 @@ import com.vaadin.shared.ui.Connect;
 @Connect(Board.class)
 public class BoardConnector extends AbstractHasComponentsConnector {
 
+    private static Set<String> loaddedCss = new HashSet<>();
     public BoardConnector() {
+        final String HIDE_LICENSE_CSS = "vaadin-license-dialog{ display:none}\n vaadin-license-box{ display:none}";
+        if(!loaddedCss.contains(HIDE_LICENSE_CSS)) {
+            StyleInjector.inject(HIDE_LICENSE_CSS);
+            loaddedCss.add(HIDE_LICENSE_CSS);
+        }
     }
 
     @Override
@@ -32,8 +41,7 @@ public class BoardConnector extends AbstractHasComponentsConnector {
     }
 
     @Override
-    public void onConnectorHierarchyChange(
-            ConnectorHierarchyChangeEvent event) {
+    public void onConnectorHierarchyChange(ConnectorHierarchyChangeEvent event) {
         List<ComponentConnector> previousChildren = event.getOldChildren();
         int currentIndex = 0;
         BoardWidget board = getWidget();
@@ -53,8 +61,7 @@ public class BoardConnector extends AbstractHasComponentsConnector {
         flushShadyDOM();
 
         // Board does not layout immediately on initial paint
-        Scheduler.get().scheduleDeferred(() -> LayoutManager
-                .get(getConnection()).setNeedsMeasureRecursively(this));
+        Scheduler.get().scheduleDeferred(() -> LayoutManager.get(getConnection()).setNeedsMeasureRecursively(this));
     }
 
     /**

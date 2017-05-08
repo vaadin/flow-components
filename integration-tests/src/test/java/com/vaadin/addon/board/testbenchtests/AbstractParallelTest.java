@@ -11,8 +11,6 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.testbench.annotations.BrowserConfiguration;
@@ -118,18 +116,6 @@ public abstract class AbstractParallelTest extends ParallelTest {
     protected void openURL() {
         String url = getTestUrl();
         getDriver().get(url);
-        removeLicenseChecker();
     }
 
-    //TODO this should be removed when component itself removes the license checker.
-    private void  removeLicenseChecker(){
-        WebDriver driver = getDriver();
-        JavascriptExecutor js;
-        if (driver instanceof JavascriptExecutor) {
-            js = (JavascriptExecutor) driver;
-            js.executeScript("var elem = document.querySelector(\"vaadin-license-dialog\");"
-                + "if(elem) {elem.style=\"display:none\";}");
-        }
-
-    }
 }
