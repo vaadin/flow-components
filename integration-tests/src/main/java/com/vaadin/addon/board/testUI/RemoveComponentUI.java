@@ -5,7 +5,7 @@ import com.vaadin.board.Row;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 
-public class AddRemoveRowUI extends AbstractTestUI {
+public class RemoveComponentUI extends AbstractTestUI {
 
     @Override
     protected void init(VaadinRequest request) {

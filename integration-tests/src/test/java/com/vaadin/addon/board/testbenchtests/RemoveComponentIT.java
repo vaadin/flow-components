@@ -6,14 +6,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.addon.board.testUI.AddRemoveRowUI;
+import com.vaadin.addon.board.testUI.RemoveComponentUI;
 import com.vaadin.testbench.By;
 
-public class AddRemoveRowIT extends AbstractParallelTest {
+public class RemoveComponentIT extends AbstractParallelTest {
 
     @Override
     protected Class<?> getUIClass() {
-        return AddRemoveRowUI.class;
+        return RemoveComponentUI.class;
     }
 
     @Test

@@ -28,8 +28,10 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertEquals("Btn2 should have same Y as the board Y coordinate",
             board.getLocation().getY(), btn2.getLocation().getY());
 
-        Assert.assertEquals("Btn3 should have Y == btn1.height", btn1.getSize().getHeight(), btn3.getLocation().getY());
-        Assert.assertEquals("Btn3 should have Y == btn1.height", btn2.getSize().getHeight(), btn4.getLocation().getY());
+        Assert.assertEquals("Btn3 should have Y == board.location + btn1.height",
+            board.getLocation().getY() + btn1.getSize().getHeight(), btn3.getLocation().getY());
+        Assert.assertEquals("Btn4 should have Y == board.location +btn2.height",
+            board.getLocation().getY() + btn2.getSize().getHeight(), btn4.getLocation().getY());
     }
 
 }
