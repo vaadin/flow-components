@@ -2,20 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>com.vaadin</groupId>
     <artifactId>board-integration-tests</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
     <name>board-integration-tests</name>
+
+    <parent>
+        <groupId>com.vaadin.board</groupId>
+        <artifactId>vaadin-board-root</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
 
     <prerequisites>
         <maven>3</maven>
     </prerequisites>
 
     <properties>
-        <vaadin.version>8.1-SNAPSHOT</vaadin.version>
-        <vaadin.plugin.version>8.1-SNAPSHOT</vaadin.plugin.version>
         <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -29,8 +31,17 @@
             <id>vaadin-addons</id>
             <url>http://maven.vaadin.com/vaadin-addons</url>
         </repository>
+            <repository>
+                <id>vaadin-prereleases</id>
+                <url>http://maven.vaadin.com/vaadin-prereleases</url>
+            </repository>
     </repositories>
-
+    <pluginRepositories>
+        <pluginRepository>
+            <id>vaadin-prereleases</id>
+            <url>http://maven.vaadin.com/vaadin-prereleases</url>
+        </pluginRepository>
+    </pluginRepositories>
     <dependencyManagement>
         <dependencies>
             <dependency>

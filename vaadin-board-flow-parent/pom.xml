@@ -8,7 +8,10 @@
 	<packaging>pom</packaging>
 	<version>1.0-SNAPSHOT</version>
 	<name>vaadin-board-root</name>
-
+	<properties>
+		<vaadin.version>8.1.0.alpha7</vaadin.version>
+		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
+	</properties>
 	<modules>
 		<module>vaadin-board-flow</module>
 		<module>integration-tests</module>
