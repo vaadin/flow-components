@@ -1,0 +1,131 @@
+---
+title: Installing Vaadin Board
+order: 2
+layout: page
+---
+
+[[board.installing]]
+= Installing Vaadin Board
+
+As with most Vaadin add-ons, you can install Vaadin Board as a Maven dependency in your project.
+For general instructions on installing add-ons, please see
+<<dummy/../../../framework/addons/addons-overview.asciidoc#addons.overview,"Using
+Vaadin Add-ons">>.
+
+Vaadin Board 1.0.0 requires Vaadin 8.1.0-beta1 or later.
+
+Using Vaadin Board requires a license key, which you must install before
+compiling the widget set. The widget set must be compiled after setting up the
+dependency or library JARs.
+
+[[board.installing.maven]]
+== Maven Dependency
+
+The Maven dependency for Vaadin Board is as follows:
+
+[subs="normal"]
+----
+&lt;dependency&gt;
+    &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
+    &lt;artifactId&gt;vaadin-board&lt;/artifactId&gt;
+    &lt;version&gt;[replaceable]##1.0.0##&lt;/version&gt;
+&lt;/dependency&gt;
+----
+You also need to define the Vaadin add-ons repository if not already defined:
+
+[source,xml]
+----
+<repository>
+   <id>vaadin-addons</id>
+   <url>http://maven.vaadin.com/vaadin-addons</url>
+</repository>
+----
+
+[[board.installing.license]]
+== Installing License Key
+
+You need to install a license key before compiling the widget set. The license
+key is checked during widget set compilation, so you do not need it when
+deploying the application.
+
+You can obtain a free trial key from the
+link:https://vaadin.com/pro/licenses[Vaadin Pro Licenses].
+You need to register in Vaadin Directory to get the key.
+
+To install the license key in a development workstation, you can copy and paste
+it verbatim to a [filename]#.vaadin.board.developer.license# file in your home
+directory. For example, in Linux and OS X:
+
+[subs="normal"]
+[source,xml]
+----
+[prompt]#$# [command]#echo# "[replaceable]##L1cen5e-c0de##" &gt; [parameter]#~/.vaadin.board.developer.license#
+----
+You can also pass the key as a system property to the widget set compiler,
+usually with a [literal]#++-D++# option. For example, on the command-line:
+
+[subs="normal"]
+[source,xml]
+----
+[prompt]#$# [command]#java# -D[parameter]##vaadin.board.developer.license##=[replaceable]##L1cen5e-c0de## ...
+----
+ifdef::web[]
+See link:https://vaadin.com/directory/help/installing-cval-license[the CVAL
+license key installation instructions] for more details.
+endif::web[]
+
+[[board.installing.license.environments]]
+=== Passing License Key in Different Environments
+
+How you actually pass the parameter to the widget set compiler depends on the
+development environment and the build system that you use to compile the widget
+set. Below are listed a few typical environments:
+
+Eclipse IDE:: To install the license key for all projects, select "Window > Preferences" and
+navigate to the "Java > Installed JREs" section. Select the JRE version that you
+use for the application and click [guibutton]#Edit#. In the [guilabel]#Default
+VM arguments#, give the [parameter]#-D# expression as shown above.
+
+Apache Ant:: If compiling the project with Apache Ant, you could set the key in the Ant
+script as follows:
+
+
++
+[subs="normal"]
+[source,xml]
+----
+&lt;sysproperty key="vaadin.board.developer.license"
+             value="**L1cen5e-c0de**"/&gt;
+----
++
+However, you should never store license keys in a source repository, so if the
+Ant script is stored in a source repository, you should pass the license key to
+Ant as a property that you then use in the script for the value argument of the
+[literal]#++<sysproperty>++# as follows:
+
+
++
+[subs="normal"]
+[source,xml]
+----
+&lt;sysproperty key="vaadin.board.developer.license"
+    value="**${vaadin.board.developer.license}**"/&gt;
+----
++
+When invoking Ant from the command-line, you can pass the property with a
+[parameter]#-D# parameter to Ant.
+
+Apache Maven:: If building the project with Apache Maven, you can pass the license key with a
+[literal]#++-D++# parameter to Maven:
+
+
++
+[subs="normal"]
+[source,xml]
+----
+[prompt]#$# [command]#mvn# -D[parameter]##vaadin.board.developer.license##=[replaceable]##L1cen5e-c0de## package
+----
+Continuous Integration Systems:: In CIS systems, you can pass the license key to build runners as a system
+property in the build configuration. However, this only passes it to a runner.
+As described above, Ant does not pass it to sub-processes implicitly, so you
+need to forward it explicitly as described earlier.

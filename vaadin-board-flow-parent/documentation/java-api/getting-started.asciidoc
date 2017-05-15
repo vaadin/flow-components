@@ -1,0 +1,224 @@
+---
+title: Getting Started
+order: 1
+layout: page
+---
+
+[[board.introduction]]
+= Getting Started
+In this chapter, we are going to create a simple Vaadin application and use the Vaadin Board add-on to create a responsive layout.
+
+[[board.prerequisites]]
+== Prerequisites
+
+In order to follow this tutorial, you will need the following tools/setup:
+
+* Command line Maven
+* JDK installed
+* IDE (optional)
+
+[[board.project-setup]]
+== Project setup
+
+To start off, we need to create a new project where we can use Vaadin Board.
+We will use Maven to set up a project, which can later be imported into your favorite IDE.
+You can also use your IDE to generate a new maven project using the `vaadin-archetype-application archetype`, version 8.1.0-beta1.
+Execute the following command to create the project:
+
+[subs="normal"]
+----
+[command]#mvn# archetype:generate -DarchetypeGroupId=com.vaadin  \
+  -DarchetypeArtifactId=[replaceable]#vaadin-archetype-application# \
+  -DarchetypeVersion=[replaceable]#8.1.0-beta1#
+----
+
+You will be asked a few questions for setting up the project.
+In the following, the suitable answers are given for going through this quickstart:
+
+[subs="normal"]
+----
+Define value for property 'groupId': : [replaceable]#com.vaadin#
+Define value for property 'artifactId': : [replaceable]#getting-started#
+Define value for property 'version':  1.0-SNAPSHOT: : [replaceable]#<return>#
+Define value for property 'package':  com.vaadin: : [replaceable]#<return>#
+[INFO] Using property: themeName = mytheme
+[INFO] Using property: uiName = MyUI
+[INFO] Using property: widgetsetName = MyAppWidgetset
+Confirm properties configuration:
+groupId: com.vaadin
+artifactId: spreadsheet-quickstart
+version: 1.0-SNAPSHOT
+package: com.vaadin
+themeName: mytheme
+uiName: MyUI
+widgetsetName: MyAppWidgetset
+Y: : [replaceable]#<return>#
+----
+
+Now you should have a generated project in a directory that you specified its name after the `artifactId`, for example, `getting-started`.
+You can run the new project by issuing the following commands:
+
+[subs="normal"]
+----
+[command]#cd# getting-started
+[command]#mvn# jetty:run
+----
+
+The latter command will compile all sources and start a local web server.
+Wait until it prints out “Started Jetty Server” and navigate to http://localhost:8080 using your favorite browser.
+
+In your browser, you should see a [guibutton]#Click Me# button.
+When you click it, the text “Thank you for clicking” should appear below it.
+Great, the application works!
+We can now move on to replace this button with a Vaadin Board!
+Stop the web server by pressing kbd:[Ctrl+C] in the window where you started it.
+
+Let us first add the Vaadin Board dependency to the project and compile the widget set.
+Open the [filename]#pom.xml# file and find the [elementname]#dependencies# tag.
+Add the following dependency declaration just before the end tag ([elementname]#/dependencies#):
+
+[subs="normal"]
+----
+...
+    *<dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-board</artifactId>
+        <version>1.0.0</version>
+    </dependency>*
+</dependencies>
+...
+----
+
+It is recommended to use the latest version available, the version number can be checked at link:https://vaadin.com/directory#!addon/vaadin-board[Vaadin Directory].
+
+You need to add vaadin frontend plugin to your POM.xml. Add the following code into the plugins section of your POM.xml:
+
+[subs="normal"]
+----
+  <plugin>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-frontend-maven-plugin</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <executions>
+          <execution>
+              <goals>
+                  <goal>update</goal>
+              </goals>
+          </execution>
+      </executions>
+  </plugin>
+  <plugin>
+      <groupId>com.github.eirslett</groupId>
+      <artifactId>frontend-maven-plugin</artifactId>
+      <version>1.4</version>
+      <configuration>
+          <nodeVersion>v6.9.1</nodeVersion>
+          <yarnVersion>v0.22.0</yarnVersion>
+          <workingDirectory>src/main/frontend</workingDirectory>
+          <skip>${vaadin.frontend.ok}</skip>
+      </configuration>
+      <executions>
+          <execution>
+              <id>install node and yarn</id>
+              <goals>
+                  <goal>install-node-and-yarn</goal>
+              </goals>
+              <configuration></configuration>
+          </execution>
+          <execution>
+              <id>yarn install</id>
+              <goals>
+                  <goal>yarn</goal>
+              </goals>
+          </execution>
+      </executions>
+  </plugin>
+----
+
+After this, we need to fetch a license for Vaadin Board in order to be able to compile the widget set.
+You can get a free trial key from link:https://vaadin.com/directory#!addon/vaadin-board[Vaadin Directory].
+Click the large orange “Free trial key” button to the right and copy and paste the key into a file named [literal]#.vaadin.board.developer.license# in your link:https://en.wikipedia.org/wiki/Home_directory#Default_home_directory_per_operating_system[home directory].
+
+Now we have created a new project, added the Vaadin Board add-on to it and can move on to create our layout.
+
+
+
+[[board.creating]]
+= Creating your first Board
+
+Go to [classname]`MyUI` class and replace [methodname]`init` method with the following one:
+
+[source, java]
+----
+    protected void init(VaadinRequest request) {
+        Board board = new Board();
+        board.setSizeFull();
+        Label lbl1 =  createLabel("LABEL1");
+        Label lbl2 =  createLabel("LABEL2");
+        Label lbl3 =  createLabel("LABEL3");
+        Label lbl4 =  createLabel("LABEL4");
+
+        board.addRow(lbl1, lbl2, lbl3, lbl4);
+        setContent(board);
+    }
+    private Label createLabel(String content) {
+        Label label = new Label(content);
+        label.setSizeFull();
+        label.addStyleName(ValoTheme.LABEL_H1);
+        label.addStyleName("mystyle");
+        return label;
+    }
+----
+
+
+[classname]`Board` is divided into rows, using [classname]`Row`.
+Rows are divided into columns.
+You can put any Vaadin Component inside the [classname]`Row`.
+Every element inside the row can take from one to four columns.
+Vaadin Board rearranges child elements based on available space.
+
+In the example below every label will use 25% on Desktop, but will be
+rearranged to two rows when switching to tablet: one row with 2 items 50% of available space each and second row
+with 100% width item.
+
+Then we can add styling to our content. Insert the following CSS to your theme, inside the mytheme.scss file:
+
+[source,html]
+----
+  .v-label.mystyle  {
+    display: block;
+    margin-left: 0;
+    margin-right: 0;
+    font-weight: bold;
+    border-style: solid;
+    border-width: 5px;
+    border-color: #fff;
+    text-align: center;
+    background-color: #cacaca;
+  }
+----
+
+Start your server to see the result:
+
+[subs="normal"]
+----
+[command]#mvn# jetty:run
+----
+
+[[getting-started-configuration-desktop]]
+.Vaadin Board Basic Configuration on desktop
+image::img/board-getting-started-configuration-desktop.png[]
+
+Vaadin Board rearranges child elements based on viewport size.
+You can change the size of the Web browser window to see how your application will look on different devices.
+
+[[figure.getting-started-configuration-tablet]]
+.Vaadin Board Basic Configuration on tablet
+image::img/getting-started-configuration-tablet.png[]
+
+[[figure.getting-started-configuration-mobile]]
+.Vaadin Board Basic Configuration on mobile
+image::img/getting-started-configuration-mobile.png[]
+
+Congratulations! You have your first Vaadin Board setup.
+Continue with link:https://vaadin.com/docs/-/part/board/board-overview.html[docs] and visit our link:https://demo.vaadin.com/vaadin-board[demos] for more information.

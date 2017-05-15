@@ -1,0 +1,100 @@
+---
+title: Basic Use
+order: 3
+layout: page
+---
+
+[[board.basic-use]]
+= Basic Use
+
+The [classname]#Board# is a responsive layout, where you can add any Vaadin component.
+This chapter assumes you have already added Vaadin Board to your project and installed the license key.
+If not, check the instructions in <<./installing#board.installing,"Getting Started Section">>.
+
+[[board.basic-use.configuration]]
+== Basic Configuration
+
+[classname]#Board# is divided into rows, using [classname]#Row# class.
+Rows are divided into columns.
+You can put any Vaadin component inside the [classname]#Row#.
+Every element inside the row can take from one to four columns.
+Vaadin Board rearranges child elements based on available space.
+In the example below every child [classname]#Label# will use 25% on Desktop, but will be
+rearranged to two rows when switching to tablet: both with 2 items that take 50% of available space each, see example below.
+
+[source, java]
+----
+        Board board = new Board();
+        board.setSizeFull();
+
+        Label lbl1 =  new Label("LABEL1");
+        Label lbl2 =  new Label("LABEL2");
+        Label lbl3 =  new Label("LABEL3");
+        Label lbl4 =  new Label("LABEL4");
+
+        board.addRow(lbl1, lbl2, lbl3, lbl4);
+        setContent(board);
+----
+
+You can specify the element to occupy from one to four columns, by using [methodname]#setCols()#:
+
+[source, java]
+----
+        Board board = new Board();
+        board.setSizeFull();
+
+        Label lbl1 =  new Label("LABEL1");
+        Label lbl2 =  new Label("LABEL2");
+        Label lbl3 =  new Label("LABEL3");
+
+        Row row = board.addRow(lbl1, lbl2, lbl3);
+        // specify first component to use
+        // 2 columns
+        row.setCols(lbl1, 2);
+        setContent(board);
+----
+
+[[board.basic-use.nested]]
+== Nested Rows
+
+[NOTE]
+
+Not implemented
+
+[[board.basic-use.styling]]
+== Styling
+
+Vaadin Board rearranges elements in your layout based on available space.
+In some cases you want to use different styles depending on how the elements are laid out, e.g. use smaller font size for mobile devices.
+Vaadin Board has three predefined class selectors for [classname]#vaadin-board-row#:
+
+* small - for rows smaller than 600 pixels.
+* middle - for rows between 600 and 969 pixels.
+* large - for rows bigger than 960 pixels.
+
+[source, java]
+----
+    Board board = new Board();
+    board.setSizeFull();
+
+    Label lbl1 =  new Label("LABEL1");
+    Label lbl2 =  new Label("LABEL2");
+    Label lbl3 =  new Label("LABEL3");
+
+    board.addRow(lbl1, lbl2, lbl3);
+    setContent(board);
+----
+
+[source, css]
+----
+vaadin-board-row.large .v-label {
+	font-weight: bold;
+	font-size: 28px;
+}
+vaadin-board-row.medium .v-label {
+	font-weight: normal;
+	font-size: 18px;
+}
+----
+
+After adding this CSS to your theme you will see that labels have different font-size for different viewport size.
