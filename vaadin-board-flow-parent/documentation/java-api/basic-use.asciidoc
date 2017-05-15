@@ -54,6 +54,16 @@ You can specify the element to occupy from one to four columns, by using [method
         setContent(board);
 ----
 
+[NOTE]
+By default, mobile browsers have fixed viewport size.
+Set the viewport size to follow the screen-width of the device by adding the [classname]#@Viewport# annotation to the UI class:
+
+[source, java]
+----
+@Viewport("width=device-width")
+public class MyUI extends UI {
+----
+
 [[board.basic-use.nested]]
 == Nested Rows
 
