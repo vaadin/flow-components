@@ -11,16 +11,15 @@ import com.vaadin.client.LayoutManager;
 import com.vaadin.client.StyleConstants;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
+import com.vaadin.shared.Connector;
 import com.vaadin.shared.ui.Connect;
 
 @Connect(Row.class)
 public class RowConnector extends AbstractHasComponentsConnector {
 
     public RowConnector() {
-
-        addIronResizeListener(getWidget().getElement(), () -> {
-            LayoutManager.get(getConnection()).setNeedsMeasureRecursively(this);
-        });
+        addIronResizeListener(getWidget().getElement(),
+                              () -> LayoutManager.get(RowConnector.this.getConnection()).setNeedsMeasureRecursively(RowConnector.this));
     }
 
     private native void addIronResizeListener(Element element, Command listener)
@@ -43,7 +42,6 @@ public class RowConnector extends AbstractHasComponentsConnector {
     @Override
     protected void updateWidgetStyleNames() {
         super.updateWidgetStyleNames();
-
         // Setting v-widget sets display: inline-block which is not wanted
         setWidgetStyleName(StyleConstants.UI_WIDGET, false);
     }
@@ -51,7 +49,15 @@ public class RowConnector extends AbstractHasComponentsConnector {
     @Override
     public void onStateChanged(StateChangeEvent stateChangeEvent) {
         super.onStateChanged(stateChangeEvent);
-        // TODO Cols support
+        for (Connector connector : getState().cols.keySet()) {
+            int colsValue = getState().cols.get(connector);
+            String strValue = "" + colsValue;
+            ((ComponentConnector) connector)
+                .getWidget()
+                .getElement()
+                .setAttribute("board-cols", strValue);
+        }
+        getWidget().redraw(getWidget().getElement());
     }
 
     @Override
