@@ -1067,7 +1067,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     @Override
     public void onCellInputValueChange(String value) {
-        formulaBarWidget.setFormulaFieldValue(value);
+        formulaBarWidget.setCellPlainValue(value);
     }
 
     @Override

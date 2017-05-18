@@ -102,8 +102,6 @@ public class Cell {
                     && sheetWidget.measureValueWidth(cellStyle, value) > getElement()
                             .getClientWidth()) {
                 element.setInnerText("###");
-            } else if (value.startsWith("'")) {
-                element.setInnerText(value.substring(1, value.length()));
             } else {
                 element.setInnerText(value);
             }

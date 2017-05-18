@@ -35,6 +35,8 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
  * Utility class for miscellaneous Spreadsheet operations.
@@ -399,4 +401,41 @@ public class SpreadsheetUtil implements Serializable {
         return null;
     }
 
+    /**
+     * Determine if the given cell content should be displayed with a
+     * leading quote in both cell editor and formula bar
+     * <p>
+     *
+     * @param cell
+     *     The cell to be checked
+     * @return true if the cell contains a string with the "quotePrefix" style
+     *         set. Note that for Excel 97 file format, returns true for
+     *         every string.
+     */
+    public static boolean needsLeadingQuote(Cell cell) {
+        if (cell.getCellType() != Cell.CELL_TYPE_STRING) {
+            return false;
+        }
+
+        if (cell.getStringCellValue() == null) {
+            return false;
+        }
+
+        return styleHasQuotePrefix(cell);
+    }
+
+    private static boolean styleHasQuotePrefix(Cell cell) {
+        if (!(cell instanceof XSSFCell)) {
+            // in 97 format all strings are prefixed
+            return true;
+        }
+
+        XSSFCellStyle cellStyle = (XSSFCellStyle) cell.getCellStyle();
+
+        if (cellStyle == null || cellStyle.getCoreXf() == null) {
+            return false;
+        }
+
+        return cellStyle.getCoreXf().getQuotePrefix();
+    }
 }

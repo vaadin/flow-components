@@ -305,6 +305,8 @@ public class CellSelectionManager implements Serializable {
                     if (!spreadsheet.isCellHidden(cell)) {
                         if (formula) {
                             value = cell.getCellFormula();
+                        } else if (SpreadsheetUtil.needsLeadingQuote(cell)) {
+                            value = "'" + spreadsheet.getCellValue(cell);
                         } else {
                             value = spreadsheet.getCellValue(cell);
                         }

@@ -134,6 +134,12 @@ public class SheetController implements SheetClicker {
                 .getCellAt(cell);
         new Actions(getDriver()).doubleClick(cellElement).build().perform();
     }
+    
+    public WebElement getInlineEditor(String cell) {
+        openInlineEditor(cell);
+        waitForVaadin();
+        return getCellElement(cell).findElement(By.xpath("../input"));
+    }
 
     private void clearInput() {
         WebElement inlineInput = driver.findElement(By.id("cellinput"));

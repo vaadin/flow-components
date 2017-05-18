@@ -950,10 +950,6 @@ public class FormulaBarWidget extends Composite {
         }
     }
 
-    public void setFormulaFieldValue(String value) {
-        formulaField.setValue(value);
-    }
-
     public void clear() {
         setCellPlainValue("");
         setSelectedCellAddress("");

@@ -57,6 +57,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
@@ -345,6 +347,13 @@ public class CellValueManager implements Serializable {
         return cellData;
     }
 
+    private void setLeadingQuoteStyle(Cell cell, boolean leadingQuote) {
+        if (cell instanceof XSSFCell) {
+            ((XSSFCell) cell).getCellStyle().getCoreXf()
+                .setQuotePrefix(leadingQuote);
+        }
+    }
+
     private void handleIsDisplayZeroPreference(Cell cell, CellData cellData) {
         boolean isCellNumeric = cell.getCellType() == Cell.CELL_TYPE_NUMERIC;
         boolean isCellFormula = cell.getCellType() == Cell.CELL_TYPE_FORMULA;
@@ -389,7 +398,11 @@ public class CellValueManager implements Serializable {
             return originalValueDecimalFormat
                     .format(cell.getNumericCellValue());
         case Cell.CELL_TYPE_STRING:
-            return cell.getStringCellValue();
+            String stringCellValue = cell.getStringCellValue();
+            if (SpreadsheetUtil.needsLeadingQuote(cell)) {
+                return "'" + stringCellValue;
+            }
+            return stringCellValue;
         case Cell.CELL_TYPE_BOOLEAN:
             return String.valueOf(cell.getBooleanCellValue());
         case Cell.CELL_TYPE_BLANK:
@@ -596,6 +609,7 @@ public class CellValueManager implements Serializable {
                             && cell.getCellFormula().startsWith("HYPERLINK")) {
                         updateHyperlinks = true;
                     }
+                    setLeadingQuoteStyle(cell, false);
                 }
                 if (formulaFormatter.isFormulaFormat(value)) {
                     if (formulaFormatter.isValidFormulaFormat(value,
@@ -661,6 +675,10 @@ public class CellValueManager implements Serializable {
                     } else if (oldCellType == Cell.CELL_TYPE_BOOLEAN) {
                         cell.setCellValue(Boolean.parseBoolean(value));
                     } else {
+                        if (value.startsWith("'")) {
+                            value = value.substring(1, value.length());
+                            setLeadingQuoteStyle(cell, true);
+                        }
                         cell.setCellType(Cell.CELL_TYPE_STRING);
                         cell.setCellValue(value);
                     }
