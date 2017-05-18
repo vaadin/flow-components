@@ -57,17 +57,42 @@ public class HyperlinkTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void hyperlink_sheetWithHyperLinks_externalFromLinkOpensPopupToCorrectPage() {
-        testExternal("A3");
+        testExternal("A3", "google");
     }
 
     @Test
     public void hyperlink_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
-        testExternal("A2");
+        testExternal("A2", "google");
+    }
+
+    @Test
+    public void hyperlinkWithSpace_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
+        testExternal("A7", "google");
+    }
+
+    @Test
+    public void hyperlinkWithBracketAndSpace1_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
+        testExternal("A8", "google");
+    }
+
+    @Test
+    public void hyperlinkWithBracketAndSpace2_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
+        testExternal("A10", "google");
+    }
+
+    @Test
+    public void hyperlinkInFormula_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
+        testExternal("I1", "google");
+    }
+
+    @Test
+    public void hyperlinkInSharedFormula_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
+        testExternal("I2", "mail");
     }
 
     @Test
     public void hyperlink_sheetWithHyperLinks_externalFromMergedCellOpensPopupToCorrectPage() {
-        testExternal("C7");
+        testExternal("C7", "google");
     }
 
     @Test
@@ -136,10 +161,10 @@ public class HyperlinkTest extends AbstractSpreadsheetTestCase {
         waitUntilSelected(expected);
     }
 
-    private void testExternal(String cell) {
+    private void testExternal(String cell, String urlSubstring) {
         sheetController.clickCell(cell);
         popup.switchToPopup();
-        waitUntilUrlContains("google");
+        waitUntilUrlContains(urlSubstring);
         popup.backToMainWindow();
     }
 

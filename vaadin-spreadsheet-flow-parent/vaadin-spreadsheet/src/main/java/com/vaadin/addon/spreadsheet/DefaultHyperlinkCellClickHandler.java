@@ -18,6 +18,8 @@ package com.vaadin.addon.spreadsheet;
  */
 
 import static org.apache.poi.common.usermodel.Hyperlink.LINK_DOCUMENT;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Hyperlink;
@@ -62,7 +64,7 @@ public class DefaultHyperlinkCellClickHandler implements
                         .open(cell.getHyperlink().getAddress(), "_new");
             }
         } else if (isHyperlinkFormulaCell(cell)) {
-            String address = getHyperlinkFunctionCellAddress(cell);
+            String address = getHyperlinkFunctionCellAddress(cell, spreadsheet);
             if (address.startsWith("#")) { // inter-sheet address
                 navigateTo(cell, spreadsheet, address.substring(1));
             } else if (address.startsWith("[") && address.contains("]")) {
@@ -110,19 +112,46 @@ public class DefaultHyperlinkCellClickHandler implements
      * Should only be called for cells {@link #isHyperlinkFormulaCell(Cell)}
      * returns true.
      * <p>
-     * The address is inside the first quotation marks:
+     * The address is inside the first argument:
      * <code>HYPERLINK("address","friendly name")</code>
-     * 
+     * or
+     * <code>HYPERLINK(D5,"friendly name")</code>
+     *
      * @param cell
      *            Target cell containing a hyperlink function
+     * @param spreadsheet
+     *            spreadsheet for evaluating the first argument (formula case) 
      * @return the address that the hyperlink function points to
      */
-    public final static String getHyperlinkFunctionCellAddress(Cell cell) {
-        String cellFormula = cell.getCellFormula();
-        int startindex = cellFormula.indexOf("\"");
-        int endindex = cellFormula.indexOf('"', startindex + 1);
-        String address = cellFormula.substring(startindex + 1, endindex);
+    public final static String getHyperlinkFunctionCellAddress(Cell cell,
+        Spreadsheet spreadsheet) {
+        String address = "";
+        final String firstArg = getFirstArgumentFromFormula(cell.getCellFormula());
+
+        final boolean isDirectLink = firstArg.startsWith("\"") && firstArg.endsWith("\"");
+
+        if (isDirectLink) {
+            address = firstArg.substring(1, firstArg.length() - 1);
+        } else { // address is specified in a cell
+            Cell firstArgCell = spreadsheet.getCell(firstArg);
+
+            if (firstArgCell != null) {
+                address = spreadsheet.getCellValue(firstArgCell);
+            }
+        }
+
         return address;
+    }
+
+    private static String getFirstArgumentFromFormula(String cellFormula) {
+        // matches (arg1[;...]) with possible whitespace between any constituents.
+        Pattern pattern = Pattern.compile("\\(\\s*(\\w*?|\".*?\")\\s*(,.*)?\\)");
+        Matcher matcher = pattern.matcher(cellFormula);
+        if (matcher.find()) {
+            return matcher.group(1);
+        } else {
+            return "";
+        }
     }
 
     /**
