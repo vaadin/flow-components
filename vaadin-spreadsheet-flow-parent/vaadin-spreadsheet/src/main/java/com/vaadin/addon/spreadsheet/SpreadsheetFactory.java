@@ -955,32 +955,30 @@ public class SpreadsheetFactory implements Serializable {
     static void loadFreezePane(Spreadsheet spreadsheet) {
         final Sheet sheet = spreadsheet.getActiveSheet();
         PaneInformation paneInformation = sheet.getPaneInformation();
+
         // only freeze panes supported
         if (paneInformation != null && paneInformation.isFreezePane()) {
+
             /*
-             * In POI, HorizontalSplitPosition means rows and
-             * VerticalSplitPosition means columns. Changed the meaning for the
-             * component internals. The left split column / top split row is the
-             * *absolute* index of the first unfrozen column / row.
+             * In POI, HorizontalSplit means rows and VerticalSplit means columns.
+             *
+             * In Spreadsheet the meaning is the opposite.
              */
             spreadsheet.getState().horizontalSplitPosition = paneInformation
-                    .getVerticalSplitLeftColumn();
+                .getVerticalSplitPosition() + sheet.getLeftCol();
+
             spreadsheet.getState().verticalSplitPosition = paneInformation
-                    .getHorizontalSplitTopRow();
+                .getHorizontalSplitPosition() + sheet.getTopRow();
 
             /*
              * If the view was scrolled down / right when panes were frozen, the
              * invisible frozen rows/columns are effectively hidden in Excel. We
              * mimic this behavior here.
              */
-            for (int col = 0; col < Math.max(0,
-                    paneInformation.getVerticalSplitLeftColumn()
-                            - paneInformation.getVerticalSplitPosition()); col++) {
+            for (int col = 0; col < sheet.getLeftCol(); col++) {
                 spreadsheet.setColumnHidden(col, true);
             }
-            for (int row = 0; row < Math.max(0,
-                    paneInformation.getHorizontalSplitTopRow()
-                            - paneInformation.getHorizontalSplitPosition()); row++) {
+            for (int row = 0; row < sheet.getTopRow(); row++) {
                 spreadsheet.setRowHidden(row, true);
             }
         } else {
