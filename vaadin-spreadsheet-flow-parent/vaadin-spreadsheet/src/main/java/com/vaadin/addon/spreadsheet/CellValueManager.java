@@ -136,9 +136,9 @@ public class CellValueManager implements Serializable {
         this.spreadsheet = spreadsheet;
         UI current = UI.getCurrent();
         if (current != null) {
-            formatter = new DataFormatter(current.getLocale());
+            formatter = new CustomDataFormatter(current.getLocale());
         } else {
-            formatter = new DataFormatter();
+            formatter = new CustomDataFormatter();
         }
     }
 
@@ -171,7 +171,7 @@ public class CellValueManager implements Serializable {
     }
 
     protected void updateLocale(Locale locale) {
-        formatter = new DataFormatter(locale);
+        formatter = new CustomDataFormatter(locale);
         localeDecimalSymbols = DecimalFormatSymbols.getInstance(locale);
         originalValueDecimalFormat = new DecimalFormat(
                 EXCEL_FORMULA_BAR_DECIMAL_FORMAT, localeDecimalSymbols);

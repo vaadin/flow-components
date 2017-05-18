@@ -277,7 +277,7 @@ public class SpreadsheetUtil implements Serializable {
             return null;
         }
         if (cell.getCellStyle().getDataFormatString() != null) {
-            DataFormatter df = new DataFormatter(locale);
+            DataFormatter df = new CustomDataFormatter(locale);
             try {
                 Method formatter = df.getClass().getDeclaredMethod("getFormat",
                         Cell.class);
