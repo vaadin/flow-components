@@ -53,7 +53,7 @@ public class Row extends AbstractComponentContainer {
      * @param board
      *     the board this row is connected to
      **/
-    Row(Board board) {
+    public Row(Board board) {
         this.board = board;
     }
 
