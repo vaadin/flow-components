@@ -114,6 +114,9 @@
 							<Vaadin-Widgetsets>com.vaadin.board.BoardWidgetSet</Vaadin-Widgetsets>
 						</manifestEntries>
 					</archive>
+					<excludes>
+						<exclude>VAADIN/**</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>
