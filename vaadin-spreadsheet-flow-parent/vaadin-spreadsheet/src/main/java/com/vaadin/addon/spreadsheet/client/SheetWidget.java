@@ -4129,8 +4129,14 @@ public class SheetWidget extends Panel {
             CellData cd = i.next();
             if (cd.row >= r1 && cd.row <= r2 && cd.col >= c1 && cd.col <= c2) {
                 if (rowIndex != cd.row) {
+                    if (rows.get(0).size() > 0 && rows.get(0).get(0).getRow() != r1) {
+                        r1 = rows.get(0).get(0).getRow();
+                    }
                     row = rows.get(cd.row - r1);
                     rowIndex = cd.row;
+                    if (row.get(0).getCol() != c1) {
+                        c1 = row.get(0).getCol();
+                    }
                 }
                 row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
                         cd.needsMeasure);
