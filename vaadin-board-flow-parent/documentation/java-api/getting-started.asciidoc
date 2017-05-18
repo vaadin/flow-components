@@ -6,6 +6,12 @@ layout: page
 
 [[board.introduction]]
 = Getting Started
+
+IMPORTANT: Vaadin Board is is currently being developed and only available in the Vaadin Framework 8.1 prerelease versions, starting from 8.1.0.alpha7.
+There is no vaadin-archetype available for this version, so you can not generate the application.
+You need to add vaadin prerelease repository to your POM.xml and change vaadin dependencies to 8.1.0.alpha7 in your existing vaadin project.
+
+
 In this chapter, we are going to create a simple Vaadin application and use the Vaadin Board add-on to create a responsive layout.
 
 [[board.prerequisites]]
@@ -22,14 +28,14 @@ In order to follow this tutorial, you will need the following tools/setup:
 
 To start off, we need to create a new project where we can use Vaadin Board.
 We will use Maven to set up a project, which can later be imported into your favorite IDE.
-You can also use your IDE to generate a new maven project using the `vaadin-archetype-application archetype`, version 8.1.0-beta1.
+You can also use your IDE to generate a new maven project using the `vaadin-archetype-application archetype`, version 8.1.0-alpha7.
 Execute the following command to create the project:
 
 [subs="normal"]
 ----
 [command]#mvn# archetype:generate -DarchetypeGroupId=com.vaadin  \
   -DarchetypeArtifactId=[replaceable]#vaadin-archetype-application# \
-  -DarchetypeVersion=[replaceable]#8.1.0-beta1#
+  -DarchetypeVersion=[replaceable]#8.1.0-alpha7#
 ----
 
 You will be asked a few questions for setting up the project.
@@ -83,7 +89,7 @@ Add the following dependency declaration just before the end tag ([elementname]#
     *<dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-board</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.0.alpha2</version>
     </dependency>*
 </dependencies>
 ...
