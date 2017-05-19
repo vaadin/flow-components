@@ -13,13 +13,13 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 /**
  * TODO: to be removed when the bug (https://bz.apache.org/bugzilla/show_bug.cgi?id=60040) is resolved
  * <p>
- * POI library has two classes {@Link org.apache.poi.ss.format.CellFormat} and
- * {@Link org.apache.poi.ss.usermodel.DataFormatter} to deal with custom formatting.
+ * POI library has two classes {@link org.apache.poi.ss.format.CellFormat} and
+ * {@link org.apache.poi.ss.usermodel.DataFormatter} to deal with custom formatting.
  * The implementation is very buggy!
  * <p>
  * This class work around the following bugs:
  * <p>
- * 1) {@Link org.apache.poi.ss.format.CellFormat} does not use the Locale info.
+ * 1) {@link org.apache.poi.ss.format.CellFormat} does not use the Locale info.
  * Therefore cells having three or four part custom format
  * (eg. #.##0,00#;(#.##0,00);"-") are not correctly formatted.
  * <p>
