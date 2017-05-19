@@ -63,9 +63,5 @@
             <source>assembly/license.html</source>
             <filtered>true</filtered>
         </file>
-        <file>
-            <source>assembly/release-notes.html</source>
-            <filtered>true</filtered>
-        </file>
     </files>
 </assembly>

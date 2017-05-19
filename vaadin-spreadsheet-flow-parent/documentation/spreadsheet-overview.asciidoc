@@ -130,7 +130,7 @@ endif::web[]
 [[spreadsheet.overview.limitations]]
 == Limitations
 
-Vaadin Spreadsheet 1.2 has the following limitations:
+Vaadin Spreadsheet 2.0 has the following limitations:
 
 * No provided toolbars, menus, or other controls for formatting cells
 * Limited support for the older XSL format
