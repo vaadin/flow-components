@@ -43,7 +43,7 @@ public class Board extends AbstractComponent implements HasComponents {
      * @returns a row instance which can be used for further configuration
      **/
     public Row addRow(Component... components) {
-        Row row = new Row(this);
+        Row row = new Row();
         rows.add(row);
         row.setParent(this);
 

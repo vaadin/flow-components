@@ -40,22 +40,7 @@ public class Row extends AbstractComponentContainer {
             throw new IllegalStateException("max col value you can set is 4");
     }
 
-    private final Board board;
-
     protected List<Component> components = new ArrayList<>();
-
-    /**
-     * Creates an empty row instance.
-     * <p>
-     * For internal use by Board. To create a new row, use
-     * {@link Board#addRow(Component...)}
-     *
-     * @param board
-     *     the board this row is connected to
-     **/
-    public Row(Board board) {
-        this.board = board;
-    }
 
     /**
      * Adds the given component(s) to the row.

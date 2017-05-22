@@ -20,7 +20,7 @@ public class InnerRowUI extends AbstractTestUI {
         Button btn3 = new Button("Button 3");
 
 
-        Row innerRow = new Row(board);
+        Row innerRow = new Row();
         innerRow.setSizeFull();
 
         Button inner1 = new Button("Inner 1");
