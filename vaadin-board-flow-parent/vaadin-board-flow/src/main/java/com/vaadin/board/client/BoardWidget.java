@@ -19,4 +19,15 @@ public class BoardWidget extends FlowPanel {
         }
         super.add(child, container);
     }
+
+    private native void redraw(Element elem)/*-{
+        elem.redraw();
+    }-*/;
+
+    /**
+     * Calls the redraw of the Web Component board.
+     */
+    public void redraw() {
+        this.redraw(getElement());
+    }
 }

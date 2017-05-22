@@ -26,6 +26,14 @@ public class BoardConnector extends AbstractHasComponentsConnector {
     }
 
     @Override
+    protected void init() {
+        super.init();
+        getLayoutManager().addElementResizeListener(getWidget().getElement(), e-> {
+            getWidget().redraw();
+        });
+    }
+
+    @Override
     public BoardWidget getWidget() {
         return (BoardWidget) super.getWidget();
     }
