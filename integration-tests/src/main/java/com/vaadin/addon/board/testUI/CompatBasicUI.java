@@ -1,27 +1,24 @@
 package com.vaadin.addon.board.testUI;
 
-import static com.vaadin.addon.board.testUI.UIFunctions.newInstanceStream;
-import static com.vaadin.addon.board.testUI.UIFunctions.testLayout;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Component;
 
 /**
  *
  */
-public abstract class CompatBasicUI extends AbstractTestUI {
+public abstract class CompatBasicUI extends AbstractTestCompUI {
 
-    protected abstract Class<? extends Component> nextClass();
+    abstract protected Component createTestComponent();
+
+    protected Component[] createInstances(int n) {
+        Component[] comps = new Component[n];
+        for (int i = 0; i < n; i++) {
+            comps[i] = createTestComponent();
+        }
+        return comps;
+    }
 
     @Override
-    protected void init(VaadinRequest vaadinRequest) {
-        setContent(
-            testLayout()
-                .apply(
-                    newInstanceStream()
-                        .apply(nextClass(), 3)
-                        .getOrElse(Stream::of)));
+    protected Component[] createTestedComponents() {
+        return createInstances(3);
     }
 }

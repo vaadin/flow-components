@@ -23,6 +23,7 @@ public class Board extends AbstractComponent implements HasComponents {
    * Use #addRow(Row) to add content to the board.
    **/
   public Board() {
+    this.setWidth(100, Unit.PERCENTAGE);
   }
 
   @Override

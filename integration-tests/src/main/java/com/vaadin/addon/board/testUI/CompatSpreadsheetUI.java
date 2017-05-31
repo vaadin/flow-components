@@ -1,12 +1,7 @@
 package com.vaadin.addon.board.testUI;
 
-import static com.vaadin.addon.board.testUI.UIFunctions.testLayout;
-
-import java.util.stream.Stream;
-
 import com.vaadin.addon.spreadsheet.Spreadsheet;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Component;
 
 /**
  *
@@ -14,30 +9,12 @@ import com.vaadin.ui.HorizontalLayout;
 
 //Todo - video https://youtu.be/n3jXzy2EvaU
 //DASH-116
-public class CompatSpreadsheetUI extends AbstractTestUI {
-
-  boolean simple = false;
-
+public class CompatSpreadsheetUI extends AbstractTestCompUI {
 
   @Override
-  protected void init(VaadinRequest vaadinRequest) {
-
-    if(simple) {
-      Spreadsheet sheet = nextElement();
-      HorizontalLayout layout = new HorizontalLayout();
-      layout.addComponent(sheet);
-      layout.setSizeFull(); // Typically
-      setContent(layout);
-    } else {
-      setContent(
-          testLayout().apply(
-              Stream.of(
-                  nextElement(),
-                  nextElement(),
-                  nextElement())
-          ));
-    }
-
+  protected Component[] createTestedComponents() {
+    Component[] comps = { nextElement(), nextElement(), nextElement() };
+    return comps;
   }
 
   private Spreadsheet nextElement() {
@@ -51,6 +28,5 @@ public class CompatSpreadsheetUI extends AbstractTestUI {
     sheet.setSizeFull();
     return sheet;
   }
-
 
 }

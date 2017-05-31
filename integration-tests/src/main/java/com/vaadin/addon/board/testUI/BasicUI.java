@@ -1,7 +1,6 @@
 package com.vaadin.addon.board.testUI;
 
 import com.vaadin.board.Board;
-import com.vaadin.board.Row;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 

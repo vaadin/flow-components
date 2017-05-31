@@ -1,8 +1,6 @@
 package com.vaadin.addon.board.testbenchtests;
 
-import static com.vaadin.addon.board.testUI.UIFunctions.SWITCH;
 import static com.vaadin.addon.board.testUI.UIFunctions.readTestbenchProperties;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -19,11 +17,10 @@ import org.junit.BeforeClass;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import com.vaadin.addon.board.testUI.AbstractTestCompUI;
 import com.vaadin.testbench.annotations.BrowserConfiguration;
-import com.vaadin.testbench.annotations.RunLocally;
 import com.vaadin.testbench.annotations.RunOnHub;
 import com.vaadin.testbench.elements.ButtonElement;
-import com.vaadin.testbench.parallel.Browser;
 import com.vaadin.testbench.parallel.ParallelTest;
 
 @RunOnHub("tb3-hub.intra.itmill.com")
@@ -31,11 +28,11 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        readTestbenchProperties.execute();
+        readTestbenchProperties();
     }
 
     public Supplier<WebElement> buttonSwitchSupplier = () -> $(ButtonElement.class)
-        .caption(SWITCH).first();
+        .caption(AbstractTestCompUI.SWITCH).first();
 
 
     @Before

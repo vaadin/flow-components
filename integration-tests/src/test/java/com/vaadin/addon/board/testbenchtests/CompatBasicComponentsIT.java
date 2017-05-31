@@ -1,9 +1,7 @@
 package com.vaadin.addon.board.testbenchtests;
 
-import static com.vaadin.addon.board.testUI.UIFunctions.ID_PREFIX;
 import static com.vaadin.addon.board.testbenchtests.TestFunctions.genericAssertHeight;
 import static com.vaadin.addon.board.testbenchtests.TestFunctions.genericAssertWidth;
-
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -11,7 +9,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.openqa.selenium.WebElement;
-import com.vaadin.addon.board.testUI.AbstractTestUI;
+
+import com.vaadin.addon.board.testUI.AbstractTestCompUI;
 import com.vaadin.addon.board.testUI.CompatBasicComponents;
 import com.vaadin.addon.frp.Pair;
 import com.vaadin.testbench.elements.AbstractComponentElement;
@@ -42,7 +41,7 @@ public class CompatBasicComponentsIT {
   static Stream<
       Pair<
           Class<? extends AbstractComponentElement>,
-          Class<? extends AbstractTestUI>>> testCombos() {
+          Class<? extends AbstractTestCompUI>>> testCombos() {
     return Stream.of(
         new Pair<>(ButtonElement.class, CompatBasicComponents.ButtonUI.class),
         new Pair<>(CheckBoxGroupElement.class, CompatBasicComponents.CheckBoxGroupUI.class),
@@ -73,7 +72,7 @@ public class CompatBasicComponentsIT {
     @Parameterized.Parameter
     public Pair<
         Class<? extends AbstractComponentElement>,
-        Class<? extends AbstractTestUI>> nextTestCombo;
+        Class<? extends AbstractTestCompUI>> nextTestCombo;
 
     @Parameterized.Parameters(name = "{index}: nextTestCombo - {0}")
     public static Object[] data() {
@@ -82,7 +81,7 @@ public class CompatBasicComponentsIT {
 
     public Supplier<WebElement> middleElementSupplier() {
       return () -> $(middleElementClass())
-          .id(ID_PREFIX + 1);
+          .id(AbstractTestCompUI.ID_PREFIX + 1);
     }
 
     @Test
@@ -97,7 +96,7 @@ public class CompatBasicComponentsIT {
     }
 
     @Override
-    protected Class<? extends AbstractTestUI> getUIClass() {
+    protected Class<? extends AbstractTestCompUI> getUIClass() {
       return nextTestCombo.getT2();
     }
 

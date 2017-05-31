@@ -1,7 +1,6 @@
 package com.vaadin.addon.board.testUI;
 
 import static com.vaadin.addon.charts.model.Compare.PERCENT;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -121,7 +119,8 @@ public class CompatChartComponents {
   public static class PieChartUI extends CompatBasicChartUI {
 
 
-    protected Component getChart() {
+    @Override
+    protected Component nextChartInstance() {
       Chart chart = new Chart(ChartType.PIE);
 
       Configuration conf = chart.getConfiguration();
@@ -162,10 +161,6 @@ public class CompatChartComponents {
       return new DataSeries(firefox, ie, chrome, safari, opera, others);
     }
 
-    @Override
-    protected Component nextChartInstance() {
-      return getChart();
-    }
   }
 
 
@@ -288,7 +283,8 @@ public class CompatChartComponents {
 
   //DASH-111
   public static class GaugeUI extends CompatBasicChartUI {
-    protected Component getChart() {
+    @Override
+    protected Component nextChartInstance() {
       final Chart chart = new Chart();
       chart.setWidth(500, Unit.PIXELS);
 
@@ -401,15 +397,13 @@ public class CompatChartComponents {
       thread.start();
     }
 
-    @Override
-    protected Component nextChartInstance() {
-      return getChart();
-    }
   }
 
 
   public static class TimeLineUI extends CompatBasicChartUI {
-    protected Component getChart() {
+
+    @Override
+    protected Component nextChartInstance() {
       final Chart chart = new Chart();
       chart.setHeight("450px");
       chart.setWidth("100%");
@@ -471,11 +465,6 @@ public class CompatChartComponents {
 
       chart.drawChart(configuration);
       return chart;
-    }
-
-    @Override
-    protected Component nextChartInstance() {
-      return getChart();
     }
 
     public static class StockPrices {

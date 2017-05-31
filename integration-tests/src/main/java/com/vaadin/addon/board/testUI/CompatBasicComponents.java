@@ -1,14 +1,9 @@
 package com.vaadin.addon.board.testUI;
 
-import static com.vaadin.addon.board.testUI.UIFunctions.testLayout;
-
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import com.vaadin.server.ExternalResource;
-import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CheckBoxGroup;
@@ -38,82 +33,79 @@ public class CompatBasicComponents {
 
   public static class ButtonUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return Button.class;
+    protected Component createTestComponent() {
+      return new Button();
     }
   }
 
   public static class ComboBoxUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return ComboBox.class;
+    protected Component createTestComponent() {
+      return new ComboBox<>();
     }
   }
 
   public static class CheckBoxUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return CheckBox.class;
+    protected Component createTestComponent() {
+      return new CheckBox();
     }
   }
 
   public static class ColorPickerUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return ColorPicker.class;
+    protected Component createTestComponent() {
+      return new ColorPicker();
     }
   }
 
-  public static class CheckBoxGroupUI extends AbstractTestUI {
+  public static class CheckBoxGroupUI extends AbstractTestCompUI {
     @Override
-    protected void init(VaadinRequest vaadinRequest) {
+    protected Component[] createTestedComponents() {
       CheckBoxGroup<String> c1 = new CheckBoxGroup<>("A");
       c1.setItems("1", "2", "3");
       CheckBoxGroup<String> c2 = new CheckBoxGroup<>("B");
       c2.setItems("1", "2", "3");
       CheckBoxGroup<String> c3 = new CheckBoxGroup<>("C");
       c3.setItems("1", "2", "3");
-      setContent(
-          testLayout()
-              .apply(
-                  Stream.of(c1, c2, c3)));
+      Component[] comps = { c1, c2, c3 };
+      return comps;
     }
   }
 
-  public static class RadioButtonGroupUI extends AbstractTestUI {
+  public static class RadioButtonGroupUI extends AbstractTestCompUI {
     @Override
-    protected void init(VaadinRequest vaadinRequest) {
+    protected Component[] createTestedComponents() {
+
       RadioButtonGroup<String> c1 = new RadioButtonGroup<>("A");
       c1.setItems("1", "2", "3");
       RadioButtonGroup<String> c2 = new RadioButtonGroup<>("B");
       c2.setItems("1", "2", "3");
       RadioButtonGroup<String> c3 = new RadioButtonGroup<>("C");
       c3.setItems("1", "2", "3");
-      setContent(
-          testLayout()
-              .apply(
-                  Stream.of(c1, c2, c3)));
+      Component[] comps = { c1, c2, c3 };
+      return comps;
     }
   }
 
   public static class DateFieldUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return DateField.class;
+    protected Component createTestComponent() {
+      return new DateField();
     }
   }
 
   //DASH-107
   public static class FlashUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return Flash.class;
+    protected Component createTestComponent() {
+      return new Flash();
     }
   }
 
 
   //DASH-106
-  public static class GridUI extends AbstractTestUI {
+  public static class GridUI extends CompatBasicUI {
 
     private static class Person {
       private String name;
@@ -134,15 +126,7 @@ public class CompatBasicComponents {
     }
 
     @Override
-    protected void init(VaadinRequest vaadinRequest) {
-      setContent(
-          testLayout()
-              .apply(
-                  Stream.of(nextElement(), nextElement(), nextElement())));
-//            setContent(nextGrid());
-    }
-
-    private Grid<Person> nextElement() {
+    protected Component createTestComponent() {
       List<Person> people = Arrays.asList(
           new Person("Nicolaus Copernicus", 1543),
           new Person("Galileo Galilei", 1564),
@@ -151,28 +135,21 @@ public class CompatBasicComponents {
       grid.setItems(people);
       grid.addColumn(Person::getName).setCaption("Name");
       grid.addColumn(Person::getBirthYear).setCaption("Year of birth");
+      grid.setWidth("100%");
       return grid;
     }
+
   }
 
   public static class LabelUI extends CompatBasicUI {
-    @Override
-    protected Class<? extends Component> nextClass() {
-      return Label.class;
+    protected Component createTestComponent() {
+      return new Label();
     }
   }
 
-  public static class LinkUI extends AbstractTestUI {
+  public static class LinkUI extends CompatBasicUI {
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
-      setContent(
-          testLayout()
-              .apply(
-                  Stream.of(nextElement(), nextElement(), nextElement())));
-    }
-
-    private Link nextElement() {
+    protected Component createTestComponent() {
       return new Link("http://vaadin.com/",
           new ExternalResource("http://vaadin.com/"));
     }
@@ -181,58 +158,45 @@ public class CompatBasicComponents {
 
   public static class PanelUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return Panel.class;
+    protected Component createTestComponent() {
+      return new Panel();
     }
   }
 
   public static class PasswordFieldUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return PasswordField.class;
+    protected Component createTestComponent() {
+      return new PasswordField();
     }
   }
 
-  public static class ProgressBarUI extends AbstractTestUI {
+  public static class ProgressBarUI extends CompatBasicUI {
     @Override
-    protected void init(VaadinRequest vaadinRequest) {
-      setContent(
-          testLayout()
-              .apply(
-                  Stream.of(nextElement(), nextElement(), nextElement())));
-    }
-
-    private ProgressBar nextElement() {
+    protected Component createTestComponent() {
       return new ProgressBar(0.8f);
     }
+
   }
 
   public static class SliderUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return Slider.class;
+    protected Component createTestComponent() {
+      return new Slider();
     }
   }
 
   //Todo resizing problem - video https://youtu.be/cLtxYeYXzVU
   //DASH-112
-  public static class TabSheetUI extends AbstractTestUI {
+  public static class TabSheetUI extends CompatBasicUI {
     @Override
-    protected void init(VaadinRequest vaadinRequest) {
-      setContent(
-          testLayout()
-              .apply(
-                  Stream.of(nextElement(), nextElement(), nextElement())));
-    }
+    protected Component createTestComponent() {
+        TabSheet tabSheet = new TabSheet();
+        tabSheet.addTab(nextTabElement()).setCaption("Tab 001");
+        tabSheet.addTab(nextTabElement()).setCaption("Tab 002");
+        return tabSheet;
+      }
 
-    private TabSheet nextElement() {
-      TabSheet tabSheet = new TabSheet();
-      tabSheet.addTab(nextTabElement()).setCaption("Tab 001");
-      tabSheet.addTab(nextTabElement()).setCaption("Tab 002");
-      return tabSheet;
-    }
-
-    private VerticalLayout nextTabElement() {
+    static private VerticalLayout nextTabElement() {
       VerticalLayout tab = new VerticalLayout();
       tab.setSizeFull();
       tab.addComponents(
@@ -247,8 +211,8 @@ public class CompatBasicComponents {
   //DASH-109
   public static class TwinColSelectUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return TwinColSelect.class;
+    protected Component createTestComponent() {
+      return new TwinColSelect<>();
     }
   }
 
@@ -256,25 +220,18 @@ public class CompatBasicComponents {
   //DASH-108
   public static class VideoUI extends CompatBasicUI {
     @Override
-    protected Class<? extends Component> nextClass() {
-      return Video.class;
+    protected Component createTestComponent() {
+      return new Video();
     }
   }
 
 
   //Todo resizing problem - video https://youtu.be/zuW-5VkqdOk
   //DASH-115
-  public static class RichTextAreaUI extends AbstractTestUI {
+  public static class RichTextAreaUI extends CompatBasicUI {
 
     @Override
-    protected void init(VaadinRequest vaadinRequest) {
-      setContent(
-          testLayout()
-              .apply(
-                  Stream.of(nextElement(), nextElement(), nextElement())));
-    }
-
-    private RichTextArea nextElement() {
+    protected Component createTestComponent() {
       final RichTextArea rtarea = new RichTextArea();
       rtarea.setCaption("My Rich Text Area");
       rtarea.setValue("<h1>Hello</h1>\n" +
@@ -282,6 +239,4 @@ public class CompatBasicComponents {
       return rtarea;
     }
   }
-
-
 }

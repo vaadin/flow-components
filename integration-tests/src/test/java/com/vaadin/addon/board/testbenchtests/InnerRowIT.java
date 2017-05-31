@@ -8,9 +8,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.addon.board.testUI.InnerRowUI;
 import com.vaadin.testbench.By;
-import com.vaadin.testbench.annotations.RunLocally;
 import com.vaadin.testbench.elements.ButtonElement;
-import com.vaadin.testbench.parallel.Browser;
 
 public class InnerRowIT extends AbstractParallelTest {
 
