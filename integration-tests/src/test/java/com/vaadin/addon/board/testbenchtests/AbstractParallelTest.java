@@ -1,5 +1,8 @@
 package com.vaadin.addon.board.testbenchtests;
 
+import static com.vaadin.addon.board.testUI.UIFunctions.SWITCH;
+import static com.vaadin.addon.board.testUI.UIFunctions.readTestbenchProperties;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -8,17 +11,32 @@ import java.net.SocketException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.testbench.annotations.BrowserConfiguration;
+import com.vaadin.testbench.annotations.RunLocally;
 import com.vaadin.testbench.annotations.RunOnHub;
+import com.vaadin.testbench.elements.ButtonElement;
+import com.vaadin.testbench.parallel.Browser;
 import com.vaadin.testbench.parallel.ParallelTest;
 
 @RunOnHub("tb3-hub.intra.itmill.com")
 public abstract class AbstractParallelTest extends ParallelTest {
+
+    @BeforeClass
+    public static void setUp() throws Exception {
+        readTestbenchProperties.execute();
+    }
+
+    public Supplier<WebElement> buttonSwitchSupplier = () -> $(ButtonElement.class)
+        .caption(SWITCH).first();
+
 
     @Before
     public void setup() throws Exception {
@@ -70,7 +88,11 @@ public abstract class AbstractParallelTest extends ParallelTest {
     protected String getDeploymentPath() {
         Class<?> uiClass = getUIClass();
         if (uiClass != null) {
-            return "/" + uiClass.getSimpleName();
+            final Package aPackage = uiClass.getPackage();
+            final String aPackageName = aPackage.getName();
+            return uiClass.getName()
+                .replace(aPackageName, "")
+                .replace(".", "/");
         }
         return "/";
     }
@@ -115,6 +137,11 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     protected void openURL() {
         String url = getTestUrl();
+        getDriver().get(url);
+    }
+
+    protected void openURLWithAppRestart() {
+        String url = getTestUrl() + "?restartApplication";
         getDriver().get(url);
     }
 

@@ -9,7 +9,7 @@
 	<version>1.0-SNAPSHOT</version>
 	<name>vaadin-board-root</name>
 	<properties>
-		<vaadin.version>8.1.0.alpha7</vaadin.version>
+		<vaadin.version>8.1.0.beta1</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 	</properties>
 	<modules>

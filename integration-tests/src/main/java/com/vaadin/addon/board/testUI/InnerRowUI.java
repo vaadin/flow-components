@@ -33,15 +33,11 @@ public class InnerRowUI extends AbstractTestUI {
 
         Button button = new Button("Add Inner row");
         button.setId(BUTTON_ADD_ID);
-        button.addClickListener(e->{
-            outterRow.addComponent(innerRow);
-        });
+        button.addClickListener(e-> outterRow.addComponent(innerRow));
 
         Button buttonRmv = new Button("Remove Inner row");
         buttonRmv.setId(BUTTON_RMV_ID);
-        buttonRmv.addClickListener(e->{
-            outterRow.removeComponent(innerRow);
-        });
+        buttonRmv.addClickListener(e-> outterRow.removeComponent(innerRow));
 
         layout.addComponents(board, button, buttonRmv);
         setContent(layout);
