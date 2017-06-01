@@ -21,9 +21,7 @@ import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.RadioButtonGroup;
 import com.vaadin.ui.RichTextArea;
 import com.vaadin.ui.Slider;
-import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TwinColSelect;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Video;
 
 /**
@@ -185,27 +183,7 @@ public class CompatBasicComponents {
     }
   }
 
-  //Todo resizing problem - video https://youtu.be/cLtxYeYXzVU
-  //DASH-112
-  public static class TabSheetUI extends CompatBasicUI {
-    @Override
-    protected Component createTestComponent() {
-        TabSheet tabSheet = new TabSheet();
-        tabSheet.addTab(nextTabElement()).setCaption("Tab 001");
-        tabSheet.addTab(nextTabElement()).setCaption("Tab 002");
-        return tabSheet;
-      }
 
-    static private VerticalLayout nextTabElement() {
-      VerticalLayout tab = new VerticalLayout();
-      tab.setSizeFull();
-      tab.addComponents(
-          new Button("TabButton 1"),
-          new Button("TabButton 2")
-      );
-      return tab;
-    }
-  }
 
   //Todo resizing problem - video https://youtu.be/CY3_h9cNCPQ
   //DASH-109

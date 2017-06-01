@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -38,6 +39,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
     @Before
     public void setup() throws Exception {
         super.setup();
+        getDriver().manage().window().setSize(new Dimension(1024,768));
         openURL();
     }
 

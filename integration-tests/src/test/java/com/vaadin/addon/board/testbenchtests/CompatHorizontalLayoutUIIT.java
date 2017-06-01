@@ -1,7 +1,5 @@
 package com.vaadin.addon.board.testbenchtests;
 
-import static com.vaadin.addon.board.testbenchtests.TestFunctions.genericAssertHeight;
-import static com.vaadin.addon.board.testbenchtests.TestFunctions.genericAssertWidth;
 import java.util.function.Supplier;
 
 import org.junit.Test;
@@ -21,21 +19,15 @@ public class CompatHorizontalLayoutUIIT extends AbstractParallelTest {
   }
 
 
-  Supplier<WebElement> buttonMiddleSupplier = () -> $(ButtonElement.class)
+  Supplier<WebElement> testedElementSupplier = () -> $(ButtonElement.class)
       .id(AbstractTestCompUI.ID_PREFIX + 2);
 
   @Test
   public void testGenericWidth()
       throws Exception {
-    genericAssertWidth.accept(buttonSwitchSupplier, buttonMiddleSupplier);
+    TestFunctions.assertDimension(buttonSwitchSupplier.get(),testedElementSupplier.get(),(elem)->{
+      return elem.getSize().width;
+    });
   }
-
-  @Test
-  public void testGenericHeight()
-      throws Exception {
-    genericAssertHeight.accept(buttonSwitchSupplier, buttonMiddleSupplier);
-  }
-
-
 
 }

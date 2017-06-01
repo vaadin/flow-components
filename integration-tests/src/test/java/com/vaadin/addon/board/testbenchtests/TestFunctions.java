@@ -1,14 +1,13 @@
 package com.vaadin.addon.board.testbenchtests;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
 import com.vaadin.addon.frp.Result;
 import com.vaadin.testbench.By;
 
@@ -36,35 +35,18 @@ public class TestFunctions {
     );
   }
 
+  static void assertDimension(WebElement controlElement, WebElement testedElement, Function<WebElement, Integer> callback) {
 
-  static Function<Supplier<WebElement>, Integer> width = (supplier) ->
-      supplier.get().getSize().getWidth();
+    int valueBefore = callback.apply(testedElement);
+    controlElement.click();
+    int valueAfter = callback.apply(testedElement);
+    controlElement.click();
+    int valueReset = callback.apply(testedElement);
 
-  static Function<Supplier<WebElement>, Integer> height = (supplier) ->
-      supplier.get().getSize().getHeight();
-
-  static Function<
-      Function<Supplier<WebElement>, Integer>,
-      BiConsumer<Supplier<WebElement>, Supplier<WebElement>>> genericAssert = (func)
-      -> (buttonSwitchSupplier, middleElementSupplier) -> {
-
-    int widthBefore = func.apply(middleElementSupplier);
-    buttonSwitchSupplier.get().click();
-    int widthAfter = func.apply(middleElementSupplier);
-    buttonSwitchSupplier.get().click();
-    int widthReset = func.apply(middleElementSupplier);
-
-    Assert.assertTrue("before < after", widthBefore < widthAfter);
-    Assert.assertTrue("after > reset", widthAfter > widthReset);
-    Assert.assertTrue("after > before", widthAfter > widthBefore);
-    Assert.assertTrue("before == reset", widthBefore == widthReset);
-  };
-
-  static BiConsumer<Supplier<WebElement>, Supplier<WebElement>> genericAssertWidth
-      = (buttonSwitchSupplier, middleElementSupplier) -> genericAssert.apply(TestFunctions.width);
-
-  static BiConsumer<Supplier<WebElement>, Supplier<WebElement>> genericAssertHeight
-      = (buttonSwitchSupplier, middleElementSupplier) -> genericAssert.apply(TestFunctions.height);
-
+    Assert.assertTrue("before < after", valueBefore < valueAfter);
+    Assert.assertTrue("after > reset", valueAfter > valueReset);
+    Assert.assertTrue("after > before", valueAfter > valueBefore);
+    Assert.assertTrue("before == reset", valueBefore == valueReset);
+  }
 
 }

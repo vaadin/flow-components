@@ -26,6 +26,7 @@ public abstract class AbstractTestCompUI extends AbstractTestUI {
         int i = 0;
         for (final Component component : components) {
             component.setId(ID_PREFIX + i++);
+            component.setSizeFull();
         }
 
         final Row row = board.addRow(components);

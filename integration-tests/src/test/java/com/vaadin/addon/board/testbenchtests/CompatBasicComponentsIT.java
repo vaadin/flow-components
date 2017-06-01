@@ -1,7 +1,5 @@
 package com.vaadin.addon.board.testbenchtests;
 
-import static com.vaadin.addon.board.testbenchtests.TestFunctions.genericAssertHeight;
-import static com.vaadin.addon.board.testbenchtests.TestFunctions.genericAssertWidth;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -20,7 +18,6 @@ import com.vaadin.testbench.elements.CheckBoxGroupElement;
 import com.vaadin.testbench.elements.ColorPickerElement;
 import com.vaadin.testbench.elements.ComboBoxElement;
 import com.vaadin.testbench.elements.DateFieldElement;
-import com.vaadin.testbench.elements.FlashElement;
 import com.vaadin.testbench.elements.GridElement;
 import com.vaadin.testbench.elements.LabelElement;
 import com.vaadin.testbench.elements.LinkElement;
@@ -29,7 +26,6 @@ import com.vaadin.testbench.elements.PasswordFieldElement;
 import com.vaadin.testbench.elements.ProgressBarElement;
 import com.vaadin.testbench.elements.RadioButtonGroupElement;
 import com.vaadin.testbench.elements.SliderElement;
-import com.vaadin.testbench.elements.TabSheetElement;
 import com.vaadin.testbench.elements.TwinColSelectElement;
 import com.vaadin.testbench.elements.VideoElement;
 
@@ -49,7 +45,8 @@ public class CompatBasicComponentsIT {
         new Pair<>(ColorPickerElement.class, CompatBasicComponents.ColorPickerUI.class),
         new Pair<>(ComboBoxElement.class, CompatBasicComponents.ComboBoxUI.class),
         new Pair<>(DateFieldElement.class, CompatBasicComponents.DateFieldUI.class),
-        new Pair<>(FlashElement.class, CompatBasicComponents.FlashUI.class),
+    //  Flash does not work
+    //    new Pair<>(FlashElement.class, CompatBasicComponents.FlashUI.class),
         new Pair<>(GridElement.class, CompatBasicComponents.GridUI.class),
         new Pair<>(LabelElement.class, CompatBasicComponents.LabelUI.class),
         new Pair<>(LinkElement.class, CompatBasicComponents.LinkUI.class),
@@ -58,7 +55,6 @@ public class CompatBasicComponentsIT {
         new Pair<>(ProgressBarElement.class, CompatBasicComponents.ProgressBarUI.class),
         new Pair<>(RadioButtonGroupElement.class, CompatBasicComponents.RadioButtonGroupUI.class),
         new Pair<>(SliderElement.class, CompatBasicComponents.SliderUI.class),
-        new Pair<>(TabSheetElement.class, CompatBasicComponents.TabSheetUI.class),
 //        new Pair<>(TreeElement.class, CompatBasicComponents.TreeUI.class), // Tree is a Composite
         new Pair<>(TwinColSelectElement.class, CompatBasicComponents.TwinColSelectUI.class),
         new Pair<>(VideoElement.class, CompatBasicComponents.VideoUI.class)
@@ -86,13 +82,10 @@ public class CompatBasicComponentsIT {
 
     @Test
     public void testGenericWidth() throws Exception {
-      genericAssertWidth.accept(buttonSwitchSupplier, middleElementSupplier());
-      compareScreen(nextTestCombo.getT2().getSimpleName());
-    }
-
-    @Test
-    public void testGenericheight() throws Exception {
-      genericAssertHeight.accept(buttonSwitchSupplier, middleElementSupplier());
+      WebElement controlElement = $(ButtonElement.class).caption(AbstractTestCompUI.SWITCH).first();
+      TestFunctions.assertDimension(controlElement,middleElementSupplier().get(), (elem)->{
+        return elem.getSize().width;
+      });
     }
 
     @Override
@@ -103,6 +96,8 @@ public class CompatBasicComponentsIT {
     public Class<? extends AbstractComponentElement> middleElementClass() {
       return nextTestCombo.getT1();
     }
+
+
 
   }
 
