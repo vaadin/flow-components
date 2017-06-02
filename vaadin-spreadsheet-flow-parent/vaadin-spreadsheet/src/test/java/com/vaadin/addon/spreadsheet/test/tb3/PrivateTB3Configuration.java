@@ -70,7 +70,7 @@ public abstract class PrivateTB3Configuration extends ScreenshotTB3Test {
     protected String getScreenshotDirectory() {
         String screenshotDirectory = getProperty(SCREENSHOT_DIRECTORY);
         if (screenshotDirectory == null) {
-            screenshotDirectory = "./";
+            screenshotDirectory = ".";
         }
         return screenshotDirectory;
     }

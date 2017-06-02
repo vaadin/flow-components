@@ -48,6 +48,11 @@ import com.vaadin.testbench.parallel.BrowserUtil;
  */
 public abstract class ScreenshotTB3Test extends AbstractTB3Test {
 
+    /**
+     * This amount of first lines will be made transparent in an error screenshot.
+     */
+    protected int defaultHeaderHeight = 172;
+    
     private String screenshotBaseName;
 
     @Rule
@@ -111,6 +116,19 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
      * @throws IOException
      */
     protected void compareScreen(String identifier) throws IOException {
+        compareScreen(identifier, defaultHeaderHeight);
+    }
+
+    /**
+     * @param identifier
+     *     The identifier of the image
+     * @param headerHeight
+     *     The height of the header that will be made transparent 
+     *     in the error screenshot.
+     *
+     * @throws IOException
+     */
+    protected void compareScreen(String identifier, int headerHeight) throws IOException {
         if (identifier == null || identifier.isEmpty()) {
             throw new IllegalArgumentException("Empty identifier not supported");
         }
@@ -144,15 +162,18 @@ public abstract class ScreenshotTB3Test extends AbstractTB3Test {
             File failurePng = getErrorFileFromReference(failedAlternative);
             if (failedAlternative != referenceToKeep) {
                 // Delete png + HTML
-                String htmlFileName = failurePng.getName().replace(".png",
-                        ".html");
+                String htmlFileName = failurePng.getName()
+                    .replace(".png", ".html");
                 File failureHtml = new File(failurePng.getParentFile(),
-                        htmlFileName);
+                    htmlFileName);
 
                 failurePng.delete();
                 failureHtml.delete();
             }
         }
+
+        ImageUtils.makeHeaderTransparent(
+            getErrorFileFromReference(mainReference), headerHeight);
     }
 
     /**

@@ -178,8 +178,13 @@ public class SpreadsheetTable implements Serializable {
      *         table.
      */
     public PopupButton getPopupButton(int col) {
-        return getPopupButton(new CellReference(fullTableRegion.getFirstRow(),
-                col));
+        for (PopupButton button : popupButtons.values()) {
+            if (button.getColumn() == col) {
+                return button;
+            }
+        }
+        
+        return null;
     }
 
     /**

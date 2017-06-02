@@ -248,6 +248,10 @@ public class PopupButton extends AbstractComponent implements HasComponents {
     public void markActive(boolean active) {
         getState().active = active;
     }
+    
+    public boolean isActive() {
+        return getState().active;
+    }
 
     /**
      * Adds a {@link PopupOpenListener} to this pop-up button.
