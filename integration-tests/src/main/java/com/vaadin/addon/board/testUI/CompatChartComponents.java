@@ -6,11 +6,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.addon.charts.Chart;
@@ -33,12 +28,9 @@ import com.vaadin.addon.charts.model.PlotOptionsBar;
 import com.vaadin.addon.charts.model.PlotOptionsColumn;
 import com.vaadin.addon.charts.model.PlotOptionsPie;
 import com.vaadin.addon.charts.model.PlotOptionsSeries;
-import com.vaadin.addon.charts.model.PlotOptionsSolidgauge;
 import com.vaadin.addon.charts.model.PlotOptionsSpline;
 import com.vaadin.addon.charts.model.RangeSelector;
 import com.vaadin.addon.charts.model.Series;
-import com.vaadin.addon.charts.model.SeriesTooltip;
-import com.vaadin.addon.charts.model.Stop;
 import com.vaadin.addon.charts.model.Tooltip;
 import com.vaadin.addon.charts.model.VerticalAlign;
 import com.vaadin.addon.charts.model.XAxis;
@@ -48,7 +40,6 @@ import com.vaadin.addon.charts.model.style.Color;
 import com.vaadin.addon.charts.model.style.SolidColor;
 import com.vaadin.addon.charts.model.style.Style;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.UI;
 
 /**
  *
@@ -280,8 +271,6 @@ public class CompatChartComponents {
     }
   }
 
-
-  //DASH-111
   public static class GaugeUI extends CompatBasicChartUI {
     @Override
     protected Component nextChartInstance() {
@@ -320,81 +309,12 @@ public class CompatChartComponents {
       yaxis.getTitle().setY(- 70);
       yaxis.setLabels(new Labels());
       yaxis.getLabels().setY(16);
-      Stop stop1 = new Stop(0.1f, SolidColor.GREEN);
-      Stop stop2 = new Stop(0.5f, SolidColor.YELLOW);
-      Stop stop3 = new Stop(0.9f, SolidColor.RED);
-      yaxis.setStops(stop1, stop2, stop3);
-
-      PlotOptionsSolidgauge plotOptions = new PlotOptionsSolidgauge();
-      plotOptions.setTooltip(new SeriesTooltip());
-      plotOptions.getTooltip().setValueSuffix(" km/h");
-      DataLabels labels = new DataLabels();
-      labels.setY(5);
-      labels.setBorderWidth(0);
-      labels.setUseHTML(true);
-      labels.setFormat("<div style=\"text-align:center\"><span style=\"font-size:25px;\">{y}</span><br/>"
-          + "                       <span style=\"font-size:12pxg\">km/h</span></div>");
-      plotOptions.setDataLabels(labels);
-      configuration.setPlotOptions(plotOptions);
 
       final ListSeries series = new ListSeries("Speed", 80);
       configuration.setSeries(series);
 
-      runWhileAttached(chart, new Runnable() {
-        Random r = new Random(0);
-
-        @Override
-        public void run() {
-          Integer oldValue = series.getData()[0].intValue();
-          Integer newValue = (int) (oldValue + (r.nextDouble() - 0.5) * 20.0);
-          if (newValue > 200) {
-            newValue = 200;
-          } else if (newValue < 0) {
-            newValue = 0;
-          }
-          series.updatePoint(0, newValue);
-        }
-      }, 3000, 12000);
-
       chart.drawChart(configuration);
       return chart;
-    }
-
-    public static void runWhileAttached(final Component component,
-                                        final Runnable task, final int interval, final int initialPause) {
-      // Until reliable push available in our demo servers
-      UI.getCurrent().setPollInterval(interval);
-
-      final Thread thread = new Thread() {
-        @Override
-        public void run() {
-          try {
-            Thread.sleep(initialPause);
-            while (component.getUI() != null) {
-              Future<Void> future = component.getUI().access(task);
-              future.get();
-              Thread.sleep(interval);
-            }
-          } catch (InterruptedException e) {
-          } catch (ExecutionException e) {
-            Logger.getLogger(this.getClass().getName())
-                .log(Level.WARNING,
-                    "Stopping repeating command due to an exception",
-                    e);
-          } catch (com.vaadin.ui.UIDetachedException e) {
-          } catch (Exception e) {
-            Logger.getLogger(this.getClass().getName())
-                .log(Level.WARNING,
-                    "Unexpected exception while running scheduled update",
-                    e);
-          }
-          Logger.getLogger(this.getClass().getName()).log(Level.INFO,
-              "Thread stopped");
-        }
-
-        ;
-      };
-      thread.start();
     }
 
   }

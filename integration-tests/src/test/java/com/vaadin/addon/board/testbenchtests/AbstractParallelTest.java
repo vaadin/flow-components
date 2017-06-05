@@ -27,11 +27,6 @@ import com.vaadin.testbench.parallel.ParallelTest;
 @RunOnHub("tb3-hub.intra.itmill.com")
 public abstract class AbstractParallelTest extends ParallelTest {
 
-    @BeforeClass
-    public static void setUp() throws Exception {
-        readTestbenchProperties();
-    }
-
     public Supplier<WebElement> buttonSwitchSupplier = () -> $(ButtonElement.class)
         .caption(AbstractTestCompUI.SWITCH).first();
 

@@ -15,7 +15,12 @@ public abstract class CompatBasicChartUI extends AbstractTestCompUI {
 
   @Override
   protected Component[] createTestedComponents() {
-    Component[] comps={nextChartInstance(),nextChartInstance(),nextChartInstance()};
+    Component[] comps={
+        nextChartInstance(),
+        nextChartInstance(),
+        nextChartInstance(),
+        nextChartInstance()
+    };
     return  comps;
   }
 
