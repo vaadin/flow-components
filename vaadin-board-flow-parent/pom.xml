@@ -15,6 +15,7 @@
 	</properties>
 	<modules>
 		<module>vaadin-board-flow</module>
+		<module>precompiled</module>
 		<module>integration-tests</module>
 	</modules>
 
