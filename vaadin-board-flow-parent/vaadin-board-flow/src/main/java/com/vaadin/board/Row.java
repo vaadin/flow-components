@@ -6,14 +6,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Element;
+
 import com.vaadin.annotations.HtmlImport;
 import com.vaadin.board.client.RowState;
 import com.vaadin.shared.Connector;
 import com.vaadin.ui.AbstractComponentContainer;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.declarative.DesignContext;
 
 @HtmlImport("frontend://vaadin-board/vaadin-board-row.html")
 public class Row extends AbstractComponentContainer {
+
 
     private void checkNewColValue(Component component, int cols) {
         Map<Connector, Integer> map = getState().cols;
@@ -163,4 +168,35 @@ public class Row extends AbstractComponentContainer {
         return Collections.unmodifiableCollection(components).iterator();
     }
 
+    @Override
+    public void readDesign(Element design, DesignContext designContext) {
+        super.readDesign(design, designContext);
+        String content = design.html();
+        // handle children
+        for (Element childComponent : design.children()) {
+            Component child = designContext.readDesign(childComponent);
+            int cols = 1;
+            for (Attribute attr : childComponent.attributes()) {
+                if (attr.getKey().equals(":cols")) {
+                    cols = Integer.parseInt(attr.getValue());
+                }
+            }
+            this.addComponent(child, cols);
+        }
+    }
+
+    @Override
+    public void writeDesign(Element design, DesignContext designContext) {
+        super.writeDesign(design, designContext);
+        Iterator<Component> it = iterator();
+        while (it.hasNext()) {
+            Component comp = it.next();
+            Element childElement = designContext.createElement(comp);
+            int boardCols = getCols(comp);
+            if (boardCols > 1) {
+                childElement.attr(":cols", "" + boardCols);
+            }
+            design.appendChild(childElement);
+        }
+    }
 }

@@ -5,11 +5,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jsoup.nodes.Element;
+
 import com.vaadin.annotations.HtmlImport;
 import com.vaadin.board.client.BoardState;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
+import com.vaadin.ui.declarative.DesignContext;
+import com.vaadin.ui.declarative.DesignException;
 
 @HtmlImport("frontend://vaadin-board/vaadin-board.html")
 @HtmlImport("frontend://vaadin-board/vaadin-board-row.html")
@@ -68,4 +72,34 @@ public class Board extends AbstractComponent implements HasComponents {
     return Collections.<Component>unmodifiableCollection(rows).iterator();
   }
 
+  @Override
+  public void readDesign(Element design, DesignContext designContext) {
+    super.readDesign(design, designContext);
+    // handle children
+    for (Element childComponent : design.children()) {
+      Component child = designContext.readDesign(childComponent);
+      if (child instanceof Row) {
+        Row row = (Row) child;
+        rows.add(row);
+        row.setParent(this);
+      } else {
+        throw new DesignException("<vaadin-board> can have only <vaadin-board-row> as a child component.");
+      }
+    }
+  }
+
+  @Override
+  public void writeDesign(Element design, DesignContext designContext) {
+    super.writeDesign(design, designContext);
+    Iterator<Component> iter = iterator();
+    while(iter.hasNext()) {
+      Component comp = iter.next();
+      if(comp instanceof Row) {
+          Element childElement = designContext.createElement(comp);
+          design.appendChild(childElement);
+      } else {
+        throw new DesignException("Board can have only Row as a child component.");
+      }
+    }
+  }
 }
