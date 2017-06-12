@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.xmlbeans.XmlObject;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTAxDataSource;
@@ -222,7 +223,16 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         seriesData.dataSelectListener = new DataSelectListener() {
             @Override
             public void dataSelected() {
-                spreadsheet.setSelection(formula);
+                AreaReference[] areaReferences = Utils
+                        .getAreaReferences(formula);
+
+                spreadsheet.setSelectionRange(
+                        areaReferences[0].getFirstCell().getRow(),
+                        areaReferences[0].getFirstCell().getCol(),
+                        areaReferences[areaReferences.length - 1].getLastCell()
+                                .getRow(),
+                        areaReferences[areaReferences.length - 1].getLastCell()
+                                .getCol());
             }
         };
     }

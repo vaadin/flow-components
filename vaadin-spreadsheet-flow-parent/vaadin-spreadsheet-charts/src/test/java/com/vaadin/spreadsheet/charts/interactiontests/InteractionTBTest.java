@@ -163,6 +163,18 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
         assertNoErrorIndicatorDetected();
     }
 
+    @Test
+    public void userClicksColumn_spreadsheetSelectionUpdated()
+            throws Exception {
+        headerPage.loadFile("chart_with_filtered_out_column.xlsx", this);
+
+        overlayHelper.getOverlayElement("G11")
+                .findElements(By.cssSelector(".highcharts-series-0 > rect"))
+                .get(0).click();
+
+        assertSelection("G4", "H4", "I4", "J4", "K4", "L4", "M4", "N4", "O4");
+    }
+
     private void assertCellInSelectionRange(String cell) {
         Assert.assertTrue("Cell " + cell + " is not selected",
                 cellHasCellRangeClass(cell) || cellIsSpecialSelected(cell));
