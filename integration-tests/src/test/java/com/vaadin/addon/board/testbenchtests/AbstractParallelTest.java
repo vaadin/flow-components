@@ -1,6 +1,5 @@
 package com.vaadin.addon.board.testbenchtests;
 
-import static com.vaadin.addon.board.testUI.UIFunctions.readTestbenchProperties;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -13,7 +12,6 @@ import java.util.function.Supplier;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;

@@ -7,6 +7,8 @@ import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.addon.board.testUI.InnerRowUI;
+import com.vaadin.board.elements.BoardElement;
+import com.vaadin.board.elements.RowElement;
 import com.vaadin.testbench.By;
 import com.vaadin.testbench.elements.ButtonElement;
 
@@ -23,8 +25,8 @@ public class InnerRowIT extends AbstractParallelTest {
         ButtonElement addButton = $(ButtonElement.class).id(InnerRowUI.BUTTON_ADD_ID);
         addButton.click();
 
-        WebElement board =getDriver().findElement(By.tagName("vaadin-board"));
-        List<WebElement> rows = board.findElements(By.xpath("//vaadin-board/vaadin-board-row"));
+        BoardElement board = $(BoardElement.class).get(0);
+        List<RowElement> rows = board.getRows();
         List<WebElement> innerRow = board.findElements(By.xpath("//vaadin-board/vaadin-board-row/vaadin-board-row"));
         List<WebElement> innerRowChildren = board.findElements(By.xpath("//vaadin-board/vaadin-board-row/vaadin-board-row/*"));
 
@@ -41,8 +43,8 @@ public class InnerRowIT extends AbstractParallelTest {
         addButton.click();
         rmvButton.click();
 
-        WebElement board =getDriver().findElement(By.tagName("vaadin-board"));
-        List<WebElement> rows = board.findElements(By.xpath("//vaadin-board/vaadin-board-row"));
+        BoardElement board = $(BoardElement.class).get(0);
+        List<RowElement> rows = board.getRows();
         List<WebElement> innerRow = board.findElements(By.xpath("//vaadin-board/vaadin-board-row/vaadin-board-row"));
 
         Assert.assertEquals("Board has only one row" , 1, rows.size());

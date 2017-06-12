@@ -17,6 +17,7 @@
 		<module>vaadin-board-flow</module>
 		<module>precompiled</module>
 		<module>integration-tests</module>
+		<module>testbench-api</module>
 	</modules>
 
 </project>

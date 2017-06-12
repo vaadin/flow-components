@@ -4,10 +4,11 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.addon.board.testUI.BoardDynamicResizeUI;
-import com.vaadin.testbench.By;
+import com.vaadin.board.elements.BoardElement;
+import com.vaadin.board.elements.RowElement;
+import com.vaadin.testbench.elements.AbstractComponentElement;
 import com.vaadin.testbench.elements.ButtonElement;
 
 public class BoardDynamicResizeIT extends AbstractParallelTest {
@@ -19,8 +20,9 @@ public class BoardDynamicResizeIT extends AbstractParallelTest {
 
     @Test
     public void basicLayout_boardTabletSize_twoRowsAndTwoItemsInRow() {
-        WebElement board = getDriver().findElement(By.tagName("vaadin-board"));
-        List<WebElement> rowChildren = board.findElements(By.xpath("//vaadin-board/vaadin-board-row/*"));
+        BoardElement board = $(BoardElement.class).get(0);
+        RowElement row = board.getRow(0);
+        List<AbstractComponentElement> rowChildren = row.$(AbstractComponentElement.class).all();
         ButtonElement resizeButton = $(ButtonElement.class).caption("resize").first();
         resizeButton.click();
 

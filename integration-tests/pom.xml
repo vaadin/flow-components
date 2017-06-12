@@ -112,6 +112,11 @@
 			<artifactId>vaadin-spreadsheet</artifactId>
 			<version>${vaadin-spreadsheet.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.vaadin.board</groupId>
+			<artifactId>vaadin-board-testbench-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 
 	</dependencies>
