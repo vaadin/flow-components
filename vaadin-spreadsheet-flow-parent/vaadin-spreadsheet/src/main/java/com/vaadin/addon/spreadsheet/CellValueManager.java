@@ -582,6 +582,7 @@ public class CellValueManager implements Serializable {
         command.captureCellValues(new CellReference(row - 1, col - 1));
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
         boolean updateHyperlinks = false;
+        boolean formulaChanged = false;
 
         if (getCustomCellValueHandler() == null
                 || getCustomCellValueHandler().cellValueUpdated(cell,
@@ -616,10 +617,14 @@ public class CellValueManager implements Serializable {
                             spreadsheetLocale)) {
                         spreadsheet.removeInvalidFormulaMark(col, row);
                         getFormulaEvaluator().notifyUpdateCell(cell);
+                        String newFormula = formulaFormatter
+                            .unFormatFormulaValue(value.substring(1),
+                                                  spreadsheetLocale);
+                        formulaChanged =
+                            ((cell.getCellType() == Cell.CELL_TYPE_FORMULA)
+                                && !newFormula.equals(cell.getCellFormula()));
                         cell.setCellType(Cell.CELL_TYPE_FORMULA);
-                        cell.setCellFormula(formulaFormatter
-                                .unFormatFormulaValue(value.substring(1),
-                                        spreadsheetLocale));
+                        cell.setCellFormula(newFormula);
                         getFormulaEvaluator().notifySetFormula(cell);
                         if (value.startsWith("=HYPERLINK(")
                                 && cell.getCellStyle().getIndex() != hyperlinkStyleIndex) {
@@ -715,7 +720,8 @@ public class CellValueManager implements Serializable {
                 if (formattedCellValue == null
                         || !formattedCellValue
                                 .equals(getFormattedCellValue(cell))
-                        || oldCellType != cell.getCellType()) {
+                        || oldCellType != cell.getCellType()
+                        || formulaChanged) {
                     fireCellValueChangeEvent(cell);
                 }
             }
