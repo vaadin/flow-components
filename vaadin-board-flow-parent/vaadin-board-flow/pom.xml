@@ -9,7 +9,7 @@
 	<name>vaadin-board</name>
 
 	<parent>
-		<groupId>com.vaadin.board</groupId>
+		<groupId>com.vaadin</groupId>
 		<artifactId>vaadin-board-root</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
