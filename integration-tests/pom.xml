@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.vaadin</groupId>
-	<artifactId>board-integration-tests</artifactId>
+	<artifactId>vaadin-board-integration-tests</artifactId>
 	<packaging>war</packaging>
-	<name>board-integration-tests</name>
+	<name>vaadin-board-integration-tests</name>
 
 	<parent>
 		<groupId>com.vaadin.board</groupId>
