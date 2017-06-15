@@ -30,8 +30,8 @@ public enum TestFixtures {
             CustomComponent(CustomComponentFixture.class),
             Action(ActionFixture.class),
             InsertRow(InsertRowFixture.class),
-            DeleteRow(DeleteRowFixture.class)
-    ;
+    DeleteRow(DeleteRowFixture.class), RowHeaderDoubleClick(
+            RowHeaderDoubleClickFixture.class);
 
     public final SpreadsheetFixtureFactory factory;
 

@@ -215,6 +215,14 @@ public interface SpreadsheetHandler extends GroupingHandler {
             int col1, int row2, int col2);
 
     /**
+     * Row autofit with double click on the row header resizing area.
+     *
+     * @param rowIndex
+     *     1-based
+     */
+    public void onRowAutofit(int rowIndex);
+
+    /**
      * Column autofit with double click on the column header resizing area.
      * 
      * @param columnIndex
@@ -254,4 +262,5 @@ public interface SpreadsheetHandler extends GroupingHandler {
     public void clearSelectedCellsOnCut();
 
     public void updateCellComment(String text, int col, int row);
+
 }

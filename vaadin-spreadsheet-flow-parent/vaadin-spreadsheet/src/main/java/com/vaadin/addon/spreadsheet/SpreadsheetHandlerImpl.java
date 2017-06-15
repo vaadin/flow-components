@@ -210,6 +210,11 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     }
 
     @Override
+    public void onRowAutofit(int rowIndex) {
+        spreadsheet.onRowHeaderDoubleClick(rowIndex - 1);
+    }
+
+    @Override
     public void onColumnAutofit(int columnIndex) {
         spreadsheet.onColumnAutofit(columnIndex - 1);
     }

@@ -856,6 +856,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     @Override
+    public void onRowHeaderDoubleClick(int rowIndex) {
+        spreadsheetHandler.onRowAutofit(rowIndex);
+    }
+
+    @Override
     public void onColumnHeaderResizeDoubleClick(int columnIndex) {
         spreadsheetHandler.onColumnAutofit(columnIndex);
     }

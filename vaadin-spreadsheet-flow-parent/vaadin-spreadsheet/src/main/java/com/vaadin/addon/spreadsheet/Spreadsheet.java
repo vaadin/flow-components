@@ -1811,6 +1811,33 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
+     * This method is called when rowIndex auto-fit has been initiated from the
+     * browser by double-clicking the border of the target rowIndex header.
+     *
+     * @param rowIndex
+     *     Index of the target rowIndex, 0-based
+     */
+    protected void onRowHeaderDoubleClick(int rowIndex) {
+        fireRowHeaderDoubleClick(rowIndex);
+    }
+
+    private void fireRowHeaderDoubleClick(int rowIndex) {
+        fireEvent(new RowHeaderDoubleClickEvent(this, rowIndex));
+    }
+
+    /**
+     * adds a {@link RowHeaderDoubleClickListener} to the Spreadsheet
+     *
+     * @param listener
+     *     The listener to add
+     **/
+    public void addRowHeaderDoubleClickListener(
+        RowHeaderDoubleClickListener listener) {
+        addListener(RowHeaderDoubleClickEvent.class, listener,
+            RowHeaderDoubleClickListener.ON_ROW_ON_ROW_HEADER_DOUBLE_CLICK);
+    }
+
+    /**
      * This method is called when column auto-fit has been initiated from the
      * browser by double-clicking the border of the target column header.
      * 
@@ -5181,5 +5208,38 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void setMinimumRowHeightForComponents(
             final int minimumRowHeightForComponents) {
         this.minimumRowHeightForComponents = minimumRowHeightForComponents;
+    }
+
+    /**
+     * This event is fired when the border of a row header is double clicked
+     **/
+    public static class RowHeaderDoubleClickEvent extends Component.Event {
+        private final int rowIndex;
+
+        public RowHeaderDoubleClickEvent(Component source, int row) {
+            super(source);
+            rowIndex = row;
+        }
+
+        public int getRowIndex() {
+            return rowIndex;
+        }
+    }
+
+    /**
+     * Interface for listening a {@link RowHeaderDoubleClickEvent} event
+     **/
+    public interface RowHeaderDoubleClickListener extends Serializable {
+        Method ON_ROW_ON_ROW_HEADER_DOUBLE_CLICK = ReflectTools
+            .findMethod(RowHeaderDoubleClickListener.class,
+                "onRowHeaderDoubleClick", RowHeaderDoubleClickEvent.class);
+
+        /**
+         * This method is called when the user doubleclicks on the border of a row header
+         *
+         * @param event
+         *     The RowHeaderDoubleClilckEvent that happened
+         **/
+        void onRowHeaderDoubleClick(RowHeaderDoubleClickEvent event);
     }
 }

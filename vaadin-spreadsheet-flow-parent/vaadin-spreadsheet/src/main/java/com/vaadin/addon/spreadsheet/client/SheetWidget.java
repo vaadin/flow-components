@@ -344,6 +344,7 @@ public class SheetWidget extends Panel {
     private boolean resizingRow;
     private boolean resized;
     private boolean columnResizeCancelled;
+    private boolean rowResizeCancelled;
 
     private int cellCommentCellColumn = -1;
     private int cellCommentCellRow = -1;
@@ -1545,6 +1546,7 @@ public class SheetWidget extends Panel {
                                     || className
                                             .equals(HEADER_RESIZE_DND_SECOND_CLASSNAME)) {
                                 columnResizeCancelled = true;
+                                rowResizeCancelled = true;
                                 resizingColumn = false;
                                 resizingRow = false;
                                 jsniUtil.clearCSSRules(resizeStyle);
@@ -1600,6 +1602,7 @@ public class SheetWidget extends Panel {
                                         if (i == 1) { // row
                                             i = jsniUtil
                                                     .parseHeaderIndex(className);
+                                            rowResizeCancelled = false;
                                             startRowResizeDrag(
                                                     i - 1,
                                                     SpreadsheetWidget
@@ -1626,6 +1629,7 @@ public class SheetWidget extends Panel {
                                         if (i == 1) { // row
                                             i = jsniUtil
                                                     .parseHeaderIndex(className);
+                                            rowResizeCancelled = false;
                                             startRowResizeDrag(
                                                     i,
                                                     SpreadsheetWidget
@@ -1653,7 +1657,16 @@ public class SheetWidget extends Panel {
                                                 .getAttribute("class");
                                         int i = jsniUtil.isHeader(className);
                                         if (i == 1) { // row
-                                            // autofit row ???
+                                            i = jsniUtil
+                                                .parseHeaderIndex(className) - 1;
+                                            while (actionHandler
+                                                .isRowHidden(i) && i > 0) {
+                                                i--;
+                                            }
+                                            if (i > 0) {
+                                                actionHandler
+                                                    .onRowHeaderDoubleClick(i);
+                                            }
                                         } else if (i == 2) { // col
                                             i = jsniUtil
                                                     .parseHeaderIndex(className) - 1;
@@ -1673,7 +1686,16 @@ public class SheetWidget extends Panel {
                                                 .getAttribute("class");
                                         int i = jsniUtil.isHeader(className);
                                         if (i == 1) { // row
-                                            // autofit row ???
+                                            i = jsniUtil
+                                                .parseHeaderIndex(className);
+                                            while (actionHandler
+                                                .isRowHidden(i) && i > 0) {
+                                                i--;
+                                            }
+                                            if (i > 0) {
+                                                actionHandler
+                                                    .onRowHeaderDoubleClick(i);
+                                            }
                                         } else if (i == 2) { // col
                                             i = jsniUtil
                                                     .parseHeaderIndex(className);
@@ -1748,46 +1770,55 @@ public class SheetWidget extends Panel {
         return selectingCells;
     }
 
-    private void startRowResizeDrag(int rowIndex, int clientX, int clientY) {
-        // for some reason FF doesn't hide headers instantly,
-        // the event might be from hidden div
-        while (actionHandler.isRowHidden(rowIndex)) {
-            rowIndex--;
-        }
-        if (rowIndex == 0) { // ERROR ...
-            return;
-        }
-        Event.setCapture(getElement());
-        resizingRow = true;
+    private void startRowResizeDrag(final int rowIndex, final int clientX, final int clientY) {
         resized = false;
-        resizedRowIndex = rowIndex;
-        resizedColumnIndex = -1;
-        DivElement header;
-        if (resizedRowIndex <= verticalSplitPosition) {
-            header = frozenRowHeaders.get(resizedRowIndex - 1);
-        } else {
-            header = rowHeaders.get(rowIndex - firstRowIndex);
-        }
-        resizeFirstEdgePos = header.getAbsoluteTop();
-        resizeLastEdgePos = header.getAbsoluteBottom();
-        if (actionHandler.getRowHeight(rowIndex) > 0) {
-            resizeTooltipLabel.setText("Height: "
-                    + actionHandler.getRowHeight(rowIndex) + "pt");
-        } else {
-            resizeTooltipLabel.setText("Hide row");
-        }
-        showResizeTooltipRelativeTo(clientX, clientY);
-        resizeTooltip.show();
-        spreadsheet.addClassName(ROW_RESIZING_CLASSNAME);
-        resizeLineStable.addClassName("row" + rowIndex);
-        rowIndex++;
-        while (rowIndex < actionHandler.getMaxRows()
-                && actionHandler.isRowHidden(rowIndex)) {
-            rowIndex++;
-        }
-        resizeLine.addClassName("rh row" + (rowIndex));
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
-        handleRowResizeDrag(clientX, clientY);
+            @Override
+            public void execute() {
+                if (rowResizeCancelled) {
+                    return;
+                }
+                int tempRowIndex = rowIndex;
+                // for some reason FF doesn't hide headers instantly,
+                // the event might be from hidden div
+                while (actionHandler.isRowHidden(tempRowIndex)) {
+                    tempRowIndex--;
+                }
+                if (tempRowIndex == 0) { // ERROR ...
+                    return;
+                }
+                Event.setCapture(getElement());
+                resizingRow = true;
+                resizedRowIndex = tempRowIndex;
+                resizedColumnIndex = -1;
+                DivElement header;
+                if (resizedRowIndex <= verticalSplitPosition) {
+                    header = frozenRowHeaders.get(resizedRowIndex - 1);
+                } else {
+                    header = rowHeaders.get(tempRowIndex - firstRowIndex);
+                }
+                resizeFirstEdgePos = header.getAbsoluteTop();
+                resizeLastEdgePos = header.getAbsoluteBottom();
+                if (actionHandler.getRowHeight(tempRowIndex) > 0) {
+                    resizeTooltipLabel.setText(
+                        "Height: " + actionHandler.getRowHeight(tempRowIndex) + "pt");
+                } else {
+                    resizeTooltipLabel.setText("Hide row");
+                }
+                showResizeTooltipRelativeTo(clientX, clientY);
+                resizeTooltip.show();
+                spreadsheet.addClassName(ROW_RESIZING_CLASSNAME);
+                resizeLineStable.addClassName("row" + tempRowIndex);
+                tempRowIndex++;
+                while (rowIndex < actionHandler.getMaxRows() && actionHandler.isRowHidden(tempRowIndex)) {
+                    tempRowIndex++;
+                }
+                resizeLine.addClassName("rh row" + (tempRowIndex));
+
+                handleRowResizeDrag(clientX, clientY);
+            }
+        });
     }
 
     private void startColumnResizeDrag(final int columnIndex,
