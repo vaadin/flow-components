@@ -32,6 +32,7 @@ import org.apache.poi.ss.usermodel.ExcelStyleDateFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -40,6 +41,7 @@ import com.vaadin.addon.spreadsheet.Spreadsheet.SheetChangeEvent;
 import com.vaadin.addon.spreadsheet.Spreadsheet.SheetChangeListener;
 import com.vaadin.addon.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.addon.spreadsheet.SpreadsheetFactory;
+import com.vaadin.addon.spreadsheet.SpreadsheetFilterTable;
 import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
@@ -554,12 +556,15 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         private final Object[][] data = {
                 { "Testing custom editors", "Boolean", "Date", "Numeric",
-                        "Button", "ComboBox" },
-                { "nulls:", false, null, 0, null, null },
+                        "Button", "ComboBox", "Long text in this header",
+                        "last one" },
+                { "nulls:", false, null, 0, null, null, null, null },
                 { "", true, new Date(), 5, "here is a button",
-                        comboBoxValues[0] },
+                        comboBoxValues[0], "some value", "" },
                 { "", true, Calendar.getInstance(), 500.0D,
-                        "here is another button", comboBoxValues[1] } };
+                        "here is another button", comboBoxValues[1], "some "
+                    + "value", ""
+                } };
 
         private final ComboBox<String> comboBox;
 
@@ -575,10 +580,17 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
 
         private Button button5;
 
+        private Button button6;
+
+        private Button button7;
+
+        private SpreadsheetFilterTable filterableTable;
+
         private boolean hidden = false;
         private NativeSelect<String> nativeSelect;
 
         private ComboBox<String> comboBox2;
+
 
         private NativeSelect<String> createNativeSelect() {
             if (nativeSelect == null) {
@@ -623,6 +635,8 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             sheet.setColumnWidth(3, 6000);
             sheet.setColumnWidth(4, 6000);
             sheet.setColumnWidth(5, 6000);
+            sheet.setColumnWidth(6, 4000);
+            sheet.setColumnWidth(7, 7000);
 
             for (int i = 0; i < data.length; i++) {
                 Row row = sheet.createRow(i);
@@ -921,6 +935,30 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                                 });
                     }
                     return button5;
+                }
+                if (columnIndex == 6) {
+                    if (button6 == null) {
+                        button6 = new Button("Autofit columns 1-7", e -> {
+                            for (int i = 0; i < 7; i++) {
+                                spreadsheet.autofitColumn(i);
+                            }
+                        });
+                    }
+                    return button6;
+                }
+                if (columnIndex == 7) {
+                    if (button7 == null) {
+                        button7 = new Button("Add filter to column 6", e -> {
+                            if (filterableTable != null) {
+                                spreadsheet.unregisterTable(filterableTable);
+                            }
+                            filterableTable = new SpreadsheetFilterTable(
+                                spreadsheet, sheet,
+                                new CellRangeAddress(0, 100, 6, 6));
+                            spreadsheet.registerTable(filterableTable);
+                        });
+                    }
+                    return button7;
                 }
             } else if (!hidden && rowIndex == 6) {
                 if (columnIndex == 1) {

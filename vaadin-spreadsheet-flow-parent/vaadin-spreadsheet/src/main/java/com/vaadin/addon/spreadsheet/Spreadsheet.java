@@ -40,6 +40,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -125,6 +126,16 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * A common formula evaluator for this Spreadsheet
      */
     private FormulaEvaluator formulaEvaluator;
+
+    /**
+     * Pixel width of the filter popup button
+     */
+    private static final int FILTER_BUTTON_PIXEL_WIDTH = 14;
+
+    /**
+     * Map of autofitted column widths in points
+     */
+    private Map<CellReference, Integer> autofittedColumnWidths = new WeakHashMap<>();
 
     /**
      * An interface for handling the edited cell value from user input.
@@ -1828,8 +1839,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void autofitColumn(int columnIndex) {
         final Sheet activeSheet = getActiveSheet();
         activeSheet.autoSizeColumn(columnIndex);
-        getState().colW[columnIndex] = AbstractExcelUtils
-                .getColumnWidthInPx(activeSheet.getColumnWidth(columnIndex));
+        int columnPixelWidth = getColumnAutofitPixelWidth(columnIndex, AbstractExcelUtils
+            .getColumnWidthInPx(activeSheet.getColumnWidth(columnIndex)));
+
+        getState().colW[columnIndex] = columnPixelWidth;
         getCellValueManager().clearCacheForColumn(columnIndex + 1);
         getCellValueManager().loadCellData(firstRow, columnIndex + 1, lastRow,
                 columnIndex + 1);
@@ -1987,6 +2000,33 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     private boolean hasSheetOverlays() {
         return sheetOverlays != null && sheetOverlays.size() > 0;
+    }
+
+    /**
+     * Checks if the current column has a filter popup button and calculates
+     * extra width to accommodate when to include it in autofit.
+     *
+     * @param columnIndex Index of the target column, 0 based
+     * @param autofitWidth The autofit width without the button, in pixels
+     * @return Pixel width of the column
+     */
+    private int getColumnAutofitPixelWidth(int columnIndex, int autofitWidth) {
+        List<SpreadsheetTable> tablesForActiveSheet = getTablesForActiveSheet();
+        CellReference cr = new CellReference(getActiveSheet()
+            .getSheetName(), 0, columnIndex,
+            true, true);
+        autofittedColumnWidths.put(cr, autofitWidth);
+        for (SpreadsheetTable st : tablesForActiveSheet) {
+            if (!(st instanceof SpreadsheetFilterTable)) {
+                continue;
+            }
+            SpreadsheetFilterTable ft = (SpreadsheetFilterTable) st;
+            PopupButton popupButton = ft.getPopupButton(cr);
+            if (popupButton != null) {
+                return autofitWidth + FILTER_BUTTON_PIXEL_WIDTH;
+            }
+        }
+        return autofitWidth;
     }
 
     /**
@@ -3801,6 +3841,37 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void registerTable(SpreadsheetTable table) {
         tables.add(table);
+        if (table instanceof SpreadsheetFilterTable) {
+            updateAutofittedColumns((SpreadsheetFilterTable) table);
+        }
+    }
+
+    /**
+     * When adding a filter table, re-run autofit for columns that
+     * haven't been resized since the last autofit
+     * @param table
+     *            The SpreadsheetFilterTable that was added
+     */
+    private void updateAutofittedColumns(SpreadsheetFilterTable table) {
+        Sheet filteredSheet = table.getSheet();
+        CellRangeAddress fullTableRegion = table.getFullTableRegion();
+        int firstColumn = fullTableRegion.getFirstColumn();
+        int lastColumn = fullTableRegion.getLastColumn();
+        for (int i = firstColumn; i <= lastColumn; i++) {
+            CellReference cr = new CellReference(filteredSheet.getSheetName(),
+                0, i, true, true);
+            if (!autofittedColumnWidths.containsKey(cr)) {
+                continue;
+            }
+            Integer autofittedWidth = autofittedColumnWidths.get(cr);
+            int currentWidth = AbstractExcelUtils.getColumnWidthInPx(filteredSheet
+                .getColumnWidth(cr.getCol()));
+            // only update columns that haven't changed size since the last
+            // autofit
+            if (currentWidth == autofittedWidth) {
+                autofitColumn(cr.getCol());
+            }
+        }
     }
 
     /**

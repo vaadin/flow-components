@@ -22,6 +22,8 @@ import java.util.Objects;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Overflow;
 
@@ -154,8 +156,15 @@ public class Cell {
             overflowDiv.getStyle().setWidth(width, Style.Unit.PX);
             overflowDiv.getStyle().setOverflow(Overflow.HIDDEN);
             overflowDiv.getStyle().setTextOverflow(Style.TextOverflow.ELLIPSIS);
-            overflowDiv.setInnerText(element.getInnerText());
-            element.setInnerText(null);
+
+            NodeList<Node> childNodes = element.getChildNodes();
+            if (childNodes != null) {
+                for (int i = childNodes.getLength() -1; i >= 0 ; i--) {
+                    overflowDiv.appendChild(childNodes
+                        .getItem(i));
+                }
+            }
+            element.setInnerHTML(null);
             element.appendChild(overflowDiv);
 
             overflowing = true;
@@ -174,6 +183,9 @@ public class Cell {
     int measureOverflow() {
         if (overflowing) {
             updateInnerText();
+            if (popupButtonElement != null) {
+                element.appendChild(popupButtonElement);
+            }
         }
         Integer scrollW = sheetWidget.scrollWidthCache.get(getUniqueKey());
         if (scrollW == null) {
