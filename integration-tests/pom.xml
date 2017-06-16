@@ -129,7 +129,7 @@
 					<webAppConfig>
 						<resourceBases>
 						      <resourceBase>${project.basedir}/src/main/webapp</resourceBase>
-						      <resourceBase>../precompiled/src/main/generated-resources/META-INF/resources/</resourceBase>
+						      <resourceBase>${project.basedir}/../precompiled/src/main/generated-resources/META-INF/resources/</resourceBase>
 						</resourceBases>
 					</webAppConfig>
 				</configuration>
