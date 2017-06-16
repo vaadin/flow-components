@@ -94,7 +94,7 @@
 			<version>${vaadin-spreadsheet.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.vaadin.board</groupId>
+			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-board-testbench-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -172,6 +172,14 @@
 				</executions>
 			</plugin>
 			<!-- -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

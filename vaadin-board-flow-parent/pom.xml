@@ -13,13 +13,25 @@
 		<vaadin.version>8.1-SNAPSHOT</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 	</properties>
+
 	<modules>
 		<module>vaadin-board-flow</module>
 		<module>precompiled</module>
-		<module>integration-tests</module>
 		<module>testbench-api</module>
+		<module>integration-tests</module>
 	</modules>
-
+	<distributionManagement>
+		<snapshotRepository>
+			<id>vaadin-snapshots</id>
+			<name>Vaadin snapshot repository</name>
+			<url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>vaadin-addons</id>
+			<name>Vaadin add-ons repository</name>
+			<url>http://vaadin.com/nexus/content/repositories/vaadin-addons</url>
+		</repository>
+	</distributionManagement>
 	<repositories>
 		<repository>
 			<id>vaadin-snapshots</id>
@@ -40,4 +52,14 @@
 			<url>https://oss.sonatype.org/content/repositories/vaadin-snapshots</url>
 		</pluginRepository>
 	</pluginRepositories>
+	<profiles>
+		<profile>
+			<id>release</id>
+			<modules>
+				<module>vaadin-board-flow</module>
+				<module>precompiled</module>
+				<module>testbench-api</module>
+			</modules>
+		</profile>
+	</profiles>
 </project>
