@@ -43,6 +43,9 @@ public class CompatLayoutComponents {
       HorizontalLayout l3 = new HorizontalLayout(createButton("A3", ID_PREFIX + 3));
 
       Component[] comps = {l1,l2,l3};
+      for(Component comp:comps) {
+        comp.setSizeFull();
+      }
       return comps;
     }
   }
