@@ -9,8 +9,8 @@ import org.junit.rules.ErrorCollector;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
-import com.google.common.base.Predicate;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.testbench.By;
 import com.vaadin.testbench.parallel.BrowserUtil;
@@ -44,11 +44,11 @@ public class GroupingPerformanceTest extends AbstractSpreadsheetTestCase {
 
         waitForElementPresent(By.cssSelector(".row-group-pane .grouping.minus"));
 
-        waitUntil(new Predicate<WebDriver>() {
+        waitUntil(new ExpectedCondition<Boolean>() {
             private int processingCount;
 
             @Override
-            public boolean apply(WebDriver webDriver) {
+            public Boolean apply(WebDriver webDriver) {
                 processingCount = 0;
                 processingCount += checkDebugLog();
                 return processingCount >= 2;

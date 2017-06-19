@@ -9,8 +9,8 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
-import com.google.common.base.Predicate;
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
@@ -39,9 +39,9 @@ public class CellsStylePerformanceTest extends AbstractSpreadsheetTestCase {
         cell.setValue("foo");
         Integer expected = 1000;
 
-        waitUntil(new Predicate<WebDriver>() {
+        waitUntil(new ExpectedCondition<Boolean>() {
             @Override
-            public boolean apply(WebDriver webDriver) {
+            public Boolean apply(WebDriver webDriver) {
                 return !getJson().equals("");
             }
         });

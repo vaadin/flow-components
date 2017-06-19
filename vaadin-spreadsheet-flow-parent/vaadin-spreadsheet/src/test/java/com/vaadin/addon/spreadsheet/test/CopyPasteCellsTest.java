@@ -1,9 +1,7 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import com.google.common.base.Predicate;
-import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
-import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
-import com.vaadin.testbench.By;
+import java.util.List;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -13,7 +11,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
-import java.util.List;
+import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
+import com.vaadin.testbench.By;
 
 public class CopyPasteCellsTest extends AbstractSpreadsheetTestCase {
 
@@ -60,9 +60,9 @@ public class CopyPasteCellsTest extends AbstractSpreadsheetTestCase {
 
         copyPasteRegion("A3", "B3", "D3", true);
 
-        waitUntil(new Predicate<WebDriver>() {
+        waitUntil(new ExpectedCondition<Boolean>() {
             @Override
-            public boolean apply(WebDriver webDriver) {
+            public Boolean apply(WebDriver webDriver) {
                 return !getJson().equals("");
             }
         });
@@ -77,9 +77,9 @@ public class CopyPasteCellsTest extends AbstractSpreadsheetTestCase {
         sheetController.selectRegion(startCopyCell, endCopyCell);
         copy();
         sheetController.clickCell(pasteStartCell);
-        waitUntil(new Predicate<WebDriver>() {
+        waitUntil(new ExpectedCondition<Boolean>() {
             @Override
-            public boolean apply(WebDriver webDriver) {
+            public Boolean apply(WebDriver webDriver) {
                 return "D3".equals(sheetController.getSelectedCell());
             }
         });

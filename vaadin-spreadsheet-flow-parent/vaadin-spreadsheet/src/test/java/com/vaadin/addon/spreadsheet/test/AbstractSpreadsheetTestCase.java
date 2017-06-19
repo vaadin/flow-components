@@ -10,13 +10,11 @@ import java.util.Locale;
 import org.junit.Assert;
 import org.junit.Before;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.google.common.base.Predicate;
 import com.vaadin.addon.spreadsheet.test.demoapps.SpreadsheetDemoUI;
 import com.vaadin.addon.spreadsheet.test.pageobjects.HeaderPage;
 import com.vaadin.addon.spreadsheet.test.tb3.MultiBrowserTest;
@@ -27,6 +25,7 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
 
     protected HeaderPage headerPage;
     protected SheetController sheetController;
+
     @Before
     public void setUp() throws Exception {
         openTestURL();
@@ -44,15 +43,16 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
         Assert.assertTrue("Value [" + value + "] is not in range: [" + from
                 + " - " + to + "]", value >= from && value <= to);
     }
+
     protected void assertNoErrorIndicatorDetected() {
-        Assert.assertTrue(
-                "Error indicator detected when there should be none.",
+        Assert.assertTrue("Error indicator detected when there should be none.",
                 findElements(By.className("v-errorindicator")).isEmpty());
     }
 
     protected void assertAddressFieldValue(String expected, String actual) {
-        assertEquals("Expected " + expected + " on addressField, actual:"
-                + actual, expected, actual);
+        assertEquals(
+                "Expected " + expected + " on addressField, actual:" + actual,
+                expected, actual);
     }
 
     protected void assertNotSelectedCell(String cell, boolean selected) {
@@ -63,26 +63,21 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
         assertTrue("Cell " + cell + " should be the selected cell", selected);
     }
 
-    protected void waitUntil(Predicate<WebDriver> condition,int timeout) {
-        new WebDriverWait(getDriver(), timeout).until(condition);
-
-    }
-    protected void waitUntil(Predicate<WebDriver> condition) {
-        new WebDriverWait(getDriver(), 20).until(condition);
-
-    }
     protected void waitUntil(ExpectedCondition<?> condition) {
-        new WebDriverWait(getDriver(), 20).until(condition);
+        waitUntil(condition, 20);
+    }
+
+    protected void waitUntil(ExpectedCondition<?> condition, int timeout) {
+        new WebDriverWait(getDriver(), timeout).until(condition);
     }
 
     protected void waitForElementPresent(By locator) {
-        new WebDriverWait(getDriver(), 20).until(ExpectedConditions
-                .presenceOfElementLocated(locator));
+        waitUntil(ExpectedConditions.presenceOfElementLocated(locator));
     }
 
     protected void setLocale(Locale locale) {
-        $(NativeSelectElement.class).id("localeSelect").selectByText(
-                locale.getDisplayName());
+        $(NativeSelectElement.class).id("localeSelect")
+                .selectByText(locale.getDisplayName());
         assertEquals("Unexpected locale,", locale.getDisplayName(),
                 $(NativeSelectElement.class).id("localeSelect").getValue());
     }

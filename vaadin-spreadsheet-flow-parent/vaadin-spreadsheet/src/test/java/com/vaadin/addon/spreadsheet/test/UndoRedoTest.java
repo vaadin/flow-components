@@ -12,7 +12,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
-import com.google.common.base.Predicate;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
 import com.vaadin.addon.spreadsheet.test.testutil.SheetController;
 import com.vaadin.testbench.By;
@@ -302,16 +301,16 @@ public class UndoRedoTest extends AbstractSpreadsheetTestCase {
         sheetController.clickCell("D1");
 
         paste();
-        waitUntil(new Predicate<WebDriver>() {
+        waitUntil(new ExpectedCondition<Boolean>() {
             @Override
-            public boolean apply(WebDriver webDriver) {
+            public Boolean apply(WebDriver webDriver) {
                 return spreadsheet.getCellAt("E1").getValue().equals("2");
             }
         });
         undo();
-        waitUntil(new Predicate<WebDriver>() {
+        waitUntil(new ExpectedCondition<Boolean>() {
             @Override
-            public boolean apply(WebDriver webDriver) {
+            public Boolean apply(WebDriver webDriver) {
                 return spreadsheet.getCellAt("E1").getValue().equals("4");
             }
         });
@@ -328,23 +327,23 @@ public class UndoRedoTest extends AbstractSpreadsheetTestCase {
         sheetController.clickCell("D1");
 
         paste();
-        waitUntil(new Predicate<WebDriver>() {
+        waitUntil(new ExpectedCondition<Boolean>() {
             @Override
-            public boolean apply(WebDriver webDriver) {
+            public Boolean apply(WebDriver webDriver) {
                 return spreadsheet.getCellAt("E1").getValue().equals("2");
             }
         });
         undo();
-        waitUntil(new Predicate<WebDriver>() {
+        waitUntil(new ExpectedCondition<Boolean>() {
             @Override
-            public boolean apply(WebDriver webDriver) {
+            public Boolean apply(WebDriver webDriver) {
                 return spreadsheet.getCellAt("E1").getValue().equals("4");
             }
         });
         redo();
-        waitUntil(new Predicate<WebDriver>() {
+        waitUntil(new ExpectedCondition<Boolean>() {
             @Override
-            public boolean apply(WebDriver webDriver) {
+            public Boolean apply(WebDriver webDriver) {
                 return spreadsheet.getCellAt("E1").getValue().equals("2");
             }
         });
