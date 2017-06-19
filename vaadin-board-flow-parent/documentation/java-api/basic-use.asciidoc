@@ -173,3 +173,7 @@ vaadin-board-row.medium .v-label {
 ----
 
 After adding this CSS to your theme you will see that labels have different font-size for different viewport size.
+
+[[board.basic-use.known-issues]]
+== Known Issues
+- Setting height for the row is not supported. Set height for the child components.

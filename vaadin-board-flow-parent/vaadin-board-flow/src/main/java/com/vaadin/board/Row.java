@@ -185,6 +185,37 @@ public class Row extends AbstractComponentContainer {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * Setting full height for the row is not supported. Set height for the child components.
+     */
+    @Override
+    public void setSizeFull() {
+        super.setSizeFull();
+    }
+
+    /*
+    * (non-Javadoc)
+    *
+    * Setting height for the row is not supported. Set height for the child components.
+    */
+    @Override
+    public void setHeight(String height) {
+        super.setHeight(height);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * Setting height for the row is not supported. Set height for the child components.
+     */
+    @Override
+    public void setHeight(float height, Unit unit) {
+        throw new UnsupportedOperationException(
+            "Setting height for the row is not supported. Set height for the child components.");
+    }
+
     @Override
     public void writeDesign(Element design, DesignContext designContext) {
         super.writeDesign(design, designContext);
