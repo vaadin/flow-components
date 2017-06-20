@@ -21,7 +21,7 @@ public class InnerRowUI extends AbstractTestUI {
 
 
         Row innerRow = new Row();
-        innerRow.setSizeFull();
+        innerRow.setWidth("100%");
 
         Button inner1 = new Button("Inner 1");
         Button inner2 = new Button("Inner 2");

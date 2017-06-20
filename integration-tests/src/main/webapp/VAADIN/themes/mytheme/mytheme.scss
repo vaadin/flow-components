@@ -38,4 +38,8 @@
   .v-ui {
     margin-top:20px;
   }
+
+  .v-loading-indicator, .v-loading-indicator-delay, .v-loading-indicator-wait {
+    opacity:0!important;
+  }
 }

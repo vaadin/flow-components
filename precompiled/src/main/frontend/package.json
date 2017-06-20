@@ -10,6 +10,6 @@
     "mkdirp": "^0.5.1"
   },
   "scripts": {
-    "install": "bower install && node update-addons-html.js && polymer build && node move-build-to-resources.js"
+    "install": "bower install --allow-root && node update-addons-html.js && polymer build && node move-build-to-resources.js"
   }
 }

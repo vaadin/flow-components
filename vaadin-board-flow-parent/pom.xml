@@ -9,8 +9,8 @@
 	<version>1.0-SNAPSHOT</version>
 	<name>vaadin-board-root</name>
 	<properties>
-		<!--<vaadin.version>8.1.0.beta1</vaadin.version>-->
-		<vaadin.version>8.1-SNAPSHOT</vaadin.version>
+		<!--<vaadin.version>8.1-SNAPSHOT</vaadin.version>-->
+		<vaadin.version>8.1.0.beta2</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 	</properties>
 
@@ -50,6 +50,10 @@
 		<pluginRepository>
 			<id>vaadin-snapshots</id>
 			<url>https://oss.sonatype.org/content/repositories/vaadin-snapshots</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>vaadin-prereleases</id>
+			<url>http://maven.vaadin.com/vaadin-prereleases</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<profiles>
