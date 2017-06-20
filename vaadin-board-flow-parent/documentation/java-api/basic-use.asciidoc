@@ -177,3 +177,12 @@ After adding this CSS to your theme you will see that labels have different font
 [[board.basic-use.known-issues]]
 == Known Issues
 - Setting height for the row is not supported. Set height for the child components.
+
+- Because Vaadin Board uses flexbox, there is a limited support for IE11.
+If you want to have a border for the direct child of the [classname]#Row# you need to create a wrapper HTML element
+and add a border there, but not to the direct child of the [classname]#Row#.
+The description of the bug can be found link:https://github.com/philipwalton/flexbugs#7-flex-basis-doesnt-account-for-box-sizingborder-box[here].
+
+For Vaadin Components this means, you need to put Vaadin Components that have border inside a [classname]#CSSLayout#.
+This limitation does not affect [classname]#Label#, [classname]#Grid#, [classname]#Chart#.
+
