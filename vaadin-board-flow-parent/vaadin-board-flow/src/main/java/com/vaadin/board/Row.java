@@ -132,6 +132,12 @@ public class Row extends AbstractComponentContainer {
         addComponent(component, 1);
     }
 
+    /**
+     * Removes the given component from the row.
+     *
+     * @param component
+     *            the component to remove
+     **/
     @Override
     public void removeComponent(Component component) {
         super.removeComponent(component);
@@ -183,8 +189,6 @@ public class Row extends AbstractComponentContainer {
         }
     }
 
-    ;
-
     @Override
     protected RowState getState() {
         return (RowState) super.getState();
@@ -214,6 +218,11 @@ public class Row extends AbstractComponentContainer {
         getState(true).cols.put(component, cols);
     }
 
+    /**
+     * Replacing components is not supported for Row
+     * 
+     * @throws UnsupportedOperationException
+     */
     @Override
     public void replaceComponent(Component oldComponent,
                                  Component newComponent) {
@@ -247,30 +256,33 @@ public class Row extends AbstractComponentContainer {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * Setting full height for the row is not supported. Set height for the child components.
+    /**
+     * Setting full height for the row is not supported. Set height for the
+     * child components.
+     * 
+     * @throws UnsupportedOperationException
      */
     @Override
     public void setSizeFull() {
         super.setSizeFull();
     }
 
-    /*
-    * (non-Javadoc)
-    *
-    * Setting height for the row is not supported. Set height for the child components.
-    */
+    /**
+     * Setting height for the row is not supported. Set height for the child
+     * components.
+     * 
+     * @throws UnsupportedOperationException
+     */
     @Override
     public void setHeight(String height) {
         super.setHeight(height);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * Setting height for the row is not supported. Set height for the child components.
+    /**
+     * Setting height for the row is not supported. Set height for the child
+     * components.
+     * 
+     * @throws UnsupportedOperationException
      */
     @Override
     public void setHeight(float height, Unit unit) {
