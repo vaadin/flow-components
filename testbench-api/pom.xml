@@ -7,7 +7,7 @@
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-board-testbench-api</artifactId>
     <packaging>jar</packaging>
-    <name>vaadin-board-testbench-api</name>
+    <name>Vaadin Board Testbench API</name>
 
     <parent>
         <artifactId>vaadin-board-root</artifactId>
@@ -29,6 +29,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
+                <version>1.8</version>
                 <configuration>
                     <licenseName>cval3</licenseName>
                     <licenseResolver>file://${basedir}/src/license</licenseResolver>

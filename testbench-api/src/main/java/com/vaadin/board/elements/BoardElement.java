@@ -2,9 +2,9 @@ package com.vaadin.board.elements;
 
 /*
  * #%L
- * Vaadin Spreadsheet Testbench API
+ * Vaadin Board Testbench API
  * %%
- * Copyright (C) 2013 - 2016 Vaadin Ltd
+ * Copyright (C) 2017 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).

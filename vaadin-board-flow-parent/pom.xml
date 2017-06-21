@@ -8,6 +8,12 @@
 	<packaging>pom</packaging>
 	<version>1.0-SNAPSHOT</version>
 	<name>vaadin-board-root</name>
+	<inceptionYear>2017</inceptionYear>
+	<organization>
+		<name>Vaadin Ltd</name>
+		<url>http://vaadin.com/</url>
+	</organization>
+	
 	<properties>
 		<!--<vaadin.version>8.1-SNAPSHOT</vaadin.version>-->
 		<vaadin.version>8.1.0.beta2</vaadin.version>

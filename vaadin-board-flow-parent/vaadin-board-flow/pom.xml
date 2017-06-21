@@ -6,8 +6,7 @@
 	<groupId>com.vaadin</groupId>
 	<artifactId>vaadin-board</artifactId>
 	<packaging>jar</packaging>
-	<name>vaadin-board</name>
-
+	<name>Vaadin Board</name>
 	<parent>
 		<groupId>com.vaadin</groupId>
 		<artifactId>vaadin-board-root</artifactId>
@@ -78,6 +77,18 @@
 		</resources>
 
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>1.8</version>
+				<configuration>
+					<licenseName>cval3</licenseName>
+					<licenseResolver>file://${basedir}/src/license</licenseResolver>
+					<includes>
+						<include>**/main/**/*.java</include>
+					</includes>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
