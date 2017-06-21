@@ -72,7 +72,7 @@ public class BoardWriterTest {
         Label label = new Label("1-1");
         label.setSizeFull();
         Row row = board.addRow(label);
-        row.setCols(label, 2);
+        row.setComponentSpan(label, 2);
         String declarative = write(board);
         Assert.assertEquals("Board has one row", BOARD_WITH_BOARD_COLS_CONFIG, declarative);
     }
@@ -95,7 +95,7 @@ public class BoardWriterTest {
         board.setSizeFull();
         Row innerRow = new Row();
         Row outterRow = board.addRow(innerRow);
-        outterRow.setCols(innerRow, 2);
+        outterRow.setComponentSpan(innerRow, 2);
         Label label = new Label("1-1");
         innerRow.addComponent(label, 2);
         String declarative = write(board);

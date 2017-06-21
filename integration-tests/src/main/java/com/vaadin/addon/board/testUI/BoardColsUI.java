@@ -17,7 +17,7 @@ public class BoardColsUI extends AbstractTestUI {
         Button btn3 = new Button("Button 3");
 
         Row row = board.addRow(btn1, btn2, btn3);
-        row.setCols(btn1, 2);
+        row.setComponentSpan(btn1, 2);
         setContent(board);
     }
 

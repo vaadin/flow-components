@@ -116,7 +116,7 @@ public class Row extends AbstractComponentContainer {
      * Adds the given component(s) to the row.
      * <p>
      * All added components are set to use 1 column. Use
-     * {@link #setCols(Component, int)} to make a component span multiple
+     * {@link #setComponentSpan(Component, int)} to make a component span multiple
      * columns.
      *
      * @param components
@@ -135,7 +135,7 @@ public class Row extends AbstractComponentContainer {
      * Adds the given component to the row.
      * <p>
      * All added components are set to use 1 column. Use
-     * {@link #setCols(Component, int)} to make a component span multiple
+     * {@link #setComponentSpan(Component, int)} to make a component span multiple
      * columns.
      *
      * @param component
@@ -183,9 +183,22 @@ public class Row extends AbstractComponentContainer {
         super.addComponent(component);
         components.add(component);
         getState(true).cols.put(component, 1);
-        setCols(component, cols);
+        setComponentSpan(component, cols);
     }
 
+    /**
+     * Adds the given row as a nested row to the current row.
+     *
+     * @param row
+     *            the row to add as a nested row
+
+     * @throws IllegalStateException
+     *             if adding the nested row would cause the current row to have more than
+     *             4 child components
+     **/
+    public void addNestedRow(Row row) {
+        addComponent(row,1);
+    }
     /**
      * Gets the number of columns the given component spans.
      *
@@ -193,7 +206,7 @@ public class Row extends AbstractComponentContainer {
      *            the child component to get columns for
      * @return the number of columns the component spans, by default 1.
      **/
-    public int getCols(Component component) {
+    public int getComponentSpan(Component component) {
         if (getState().cols.containsKey(component)) {
             return getState().cols.get(component);
         } else {
@@ -221,18 +234,18 @@ public class Row extends AbstractComponentContainer {
      *
      * @param component
      *            the child component to set columns for
-     * @param cols
+     * @param columns
      *            the number of columns the component spans
      * @throws IllegalArgumentException
      *             if the component is not a child component or if the number of
      *             columns is less than 1
      **/
-    public void setCols(Component component, int cols) {
-        checkIfValueSmallerOrEqualFour(component, cols);
-        checkNewColValue(component, cols);
-        checkIfNotNegative(component, cols);
+    public void setComponentSpan(Component component, int columns) {
+        checkIfValueSmallerOrEqualFour(component, columns);
+        checkNewColValue(component, columns);
+        checkIfNotNegative(component, columns);
 
-        getState(true).cols.put(component, cols);
+        getState(true).cols.put(component, columns);
     }
 
     /**
@@ -314,7 +327,7 @@ public class Row extends AbstractComponentContainer {
         while (it.hasNext()) {
             Component comp = it.next();
             Element childElement = designContext.createElement(comp);
-            int boardCols = getCols(comp);
+            int boardCols = getComponentSpan(comp);
             if (boardCols > 1) {
                 childElement.attr(":cols", "" + boardCols);
             }

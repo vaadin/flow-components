@@ -36,7 +36,7 @@ rearranged to two rows when switching to tablet: both with 2 items that take 50%
         setContent(board);
 ----
 
-You can specify the element to occupy from one to four columns, by using [methodname]#setCols()#:
+You can specify the element to occupy from one to four columns, by using [methodname]#setComponentSpan()#:
 
 [source, java]
 ----
@@ -50,7 +50,7 @@ You can specify the element to occupy from one to four columns, by using [method
         Row row = board.addRow(lbl1, lbl2, lbl3);
         // specify first component to use
         // 2 columns
-        row.setCols(lbl1, 2);
+        row.setComponentSpan(lbl1, 2);
         setContent(board);
 ----
 
@@ -83,16 +83,16 @@ behave like columns. Let us look at the example:
 
         board.setSizeFull();
         Row outerRow = board.addRow(lbl1,lbl2,lbl3);
-        Row innerRow = new Row();
+        Row nestedRow = new Row();
 
-        innerRow.setSizeFull();
+        nestedRow.setWidth("100%");
 
         Label inner1 = createLabel("Inner 1");
         Label inner3 = createLabel("Inner 3");
         Label inner4 = createLabel("Inner 4");
         Label inner2 = createLabel("Inner 2");
-        innerRow.addComponents(inner1, inner2, inner3, inner4);
-        outerRow.addComponent(innerRow);
+        nestedRow.addComponents(inner1, inner2, inner3, inner4);
+        outerRow.addNestedRow(nestedRow);
 
         layout.addComponents(board);
         setContent(layout);

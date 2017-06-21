@@ -9,8 +9,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.VerticalLayout;
 
-import javax.swing.text.html.CSS;
-
 /**
  * Created by diegocardoso on 07/06/2017.
  */
@@ -51,7 +49,7 @@ public class SalesDashboard extends VerticalLayout {
         Row secondLine = board.addRow(midColumnChart, lineChartsInnerRow);
         secondLine.addStyleName("mid-line-charts-row");
 
-        secondLine.setCols(midColumnChart, 3);
+        secondLine.setComponentSpan(midColumnChart, 3);
 
         //Third row
         board.addRow(

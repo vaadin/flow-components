@@ -28,13 +28,13 @@ public class ImageCollage extends VerticalLayout {
         //Fourth row
         Component twoColumnsFourthRow = createImageBox("10");
         Row fourthRow = board.addRow(createImageBox("09"), twoColumnsFourthRow, createImageBox("11"));
-        fourthRow.setCols(twoColumnsFourthRow, 2);
+        fourthRow.setComponentSpan(twoColumnsFourthRow, 2);
 
         //Fifth row
         Component threeColumnsFifthRow = createImageBox("12");
 
         Row fifthRow = board.addRow(threeColumnsFifthRow, createImageBox("13"));
-        fifthRow.setCols(threeColumnsFifthRow, 3);
+        fifthRow.setComponentSpan(threeColumnsFifthRow, 3);
 
         //Sixth row
         Row firstGroupSixthRow = new Row();
@@ -55,7 +55,7 @@ public class ImageCollage extends VerticalLayout {
         Component twoColumnsSeventhRow = createImageBox("23");
 
         Row seventhRow = board.addRow(firstGroupSeventhRow, twoColumnsSeventhRow);
-        seventhRow.setCols(twoColumnsSeventhRow, 2);
+        seventhRow.setComponentSpan(twoColumnsSeventhRow, 2);
 
         //Eighth row
         board.addRow(createImageBox("04"), createImageBox("25"));

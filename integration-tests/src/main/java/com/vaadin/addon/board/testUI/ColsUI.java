@@ -21,10 +21,10 @@ public class ColsUI extends AbstractTestUI {
         Button btnB = new Button("Button B");
         Button btnC = new Button("Button C");
         Row row = board.addRow(btnA, btnB, btnC);
-        row.setCols(btnA, 2);
+        row.setComponentSpan(btnA, 2);
 
-        Button btnRemove = new Button("remove", e -> row.setCols(btnA, 1));
-        Button btnException = new Button("exception", e -> row.setCols(btnA, 4));
+        Button btnRemove = new Button("remove", e -> row.setComponentSpan(btnA, 1));
+        Button btnException = new Button("exception", e -> row.setComponentSpan(btnA, 4));
 
         VerticalLayout layout = new VerticalLayout();
         layout.addComponents(board, btnRemove, btnException);

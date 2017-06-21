@@ -87,7 +87,7 @@ public class BoardReaderTest {
             Iterator<Component> rowComps = row.iterator();
             while (rowComps.hasNext()) {
                 Label label = (Label) rowComps.next();
-                int boardCols = row.getCols(label);
+                int boardCols = row.getComponentSpan(label);
                 Assert.assertEquals("Label board cols attribute is 2", 2, boardCols);
             }
         }

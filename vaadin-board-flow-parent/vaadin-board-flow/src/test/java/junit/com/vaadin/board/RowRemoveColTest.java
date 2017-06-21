@@ -18,7 +18,7 @@ public class RowRemoveColTest {
         Row row = new Board().addRow();
         Button component = new Button();
         row.addComponent(component, 4);
-        row.setCols(component,1);
+        row.setComponentSpan(component,1);
         row.addComponent(new Button(), 3);
     }
 
@@ -31,7 +31,7 @@ public class RowRemoveColTest {
         Row row = new Board().addRow();
         Button component = new Button();
         row.addComponent(component, 4);
-        row.setCols(component, 2);
+        row.setComponentSpan(component, 2);
         row.addComponent(new Button(), 2);
     }
 

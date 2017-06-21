@@ -47,8 +47,8 @@ public abstract class AbstractTestCompUI extends AbstractTestUI {
         btnSmallSize.setSizeFull();
         btnSmallSize.setId(SMALL_SIZE_BTN);
         final Button buttonSwitch = new Button(SWITCH,
-            (Button.ClickListener) clickEvent -> row.setCols(components[1],
-                (row.getCols(components[1]) > 1) ? 1 : 2));
+            (Button.ClickListener) clickEvent -> row.setComponentSpan(components[1],
+                (row.getComponentSpan(components[1]) > 1) ? 1 : 2));
         buttonSwitch.setSizeFull();
         baseLayout.addComponents(board, btnFullSize,btnMiddleSize, btnSmallSize, buttonSwitch);
 
