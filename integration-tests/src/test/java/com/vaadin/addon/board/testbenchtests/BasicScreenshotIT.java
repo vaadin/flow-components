@@ -15,6 +15,7 @@ public class BasicScreenshotIT extends AbstractParallelTest {
 
     @Test
     public void basicLayout_boardTabletSize_twoRowsAndTwoItemsInRow() throws IOException {
+        openURL();
         compareScreen("basicUItest");
     }
 

@@ -20,6 +20,7 @@ public class BoardDynamicResizeIT extends AbstractParallelTest {
 
     @Test
     public void basicLayout_boardTabletSize_twoRowsAndTwoItemsInRow() {
+        openURL();
         BoardElement board = $(BoardElement.class).get(0);
         RowElement row = board.getRow(0);
         List<AbstractComponentElement> rowChildren = row.$(AbstractComponentElement.class).all();

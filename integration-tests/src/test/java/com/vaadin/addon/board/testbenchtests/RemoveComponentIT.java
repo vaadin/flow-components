@@ -18,6 +18,7 @@ public class RemoveComponentIT extends AbstractParallelTest {
 
     @Test
     public void basicLayout_removeComponentFromRow_removedComponentsNotShown() {
+        openURL();
         BoardElement board =$(BoardElement.class).first();
 
         List<AbstractComponentElement> children = board.getRow(0).$(AbstractComponentElement.class).all();

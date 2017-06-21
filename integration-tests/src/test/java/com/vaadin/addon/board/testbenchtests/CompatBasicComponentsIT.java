@@ -1,17 +1,10 @@
 package com.vaadin.addon.board.testbenchtests;
 
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.addon.board.testUI.AbstractTestCompUI;
 import com.vaadin.addon.board.testUI.CompatBasicComponents;
-import com.vaadin.addon.frp.Pair;
-import com.vaadin.testbench.elements.AbstractComponentElement;
 import com.vaadin.testbench.elements.ButtonElement;
 import com.vaadin.testbench.elements.CheckBoxElement;
 import com.vaadin.testbench.elements.CheckBoxGroupElement;
@@ -32,73 +25,176 @@ import com.vaadin.testbench.elements.VideoElement;
 /**
  *
  */
-public class CompatBasicComponentsIT {
+public class CompatBasicComponentsIT extends AbstractParallelTest {
 
-  static Stream<
-      Pair<
-          Class<? extends AbstractComponentElement>,
-          Class<? extends AbstractTestCompUI>>> testCombos() {
-    return Stream.of(
-        new Pair<>(ButtonElement.class, CompatBasicComponents.ButtonUI.class),
-        new Pair<>(CheckBoxGroupElement.class, CompatBasicComponents.CheckBoxGroupUI.class),
-        new Pair<>(CheckBoxElement.class, CompatBasicComponents.CheckBoxUI.class),
-        new Pair<>(ColorPickerElement.class, CompatBasicComponents.ColorPickerUI.class),
-        new Pair<>(ComboBoxElement.class, CompatBasicComponents.ComboBoxUI.class),
-        new Pair<>(DateFieldElement.class, CompatBasicComponents.DateFieldUI.class),
-    //  Flash does not work
-    //    new Pair<>(FlashElement.class, CompatBasicComponents.FlashUI.class),
-        new Pair<>(GridElement.class, CompatBasicComponents.GridUI.class),
-        new Pair<>(LabelElement.class, CompatBasicComponents.LabelUI.class),
-        new Pair<>(LinkElement.class, CompatBasicComponents.LinkUI.class),
-        new Pair<>(PanelElement.class, CompatBasicComponents.PanelUI.class),
-        new Pair<>(PasswordFieldElement.class, CompatBasicComponents.PasswordFieldUI.class),
-        new Pair<>(ProgressBarElement.class, CompatBasicComponents.ProgressBarUI.class),
-        new Pair<>(RadioButtonGroupElement.class, CompatBasicComponents.RadioButtonGroupUI.class),
-        new Pair<>(SliderElement.class, CompatBasicComponents.SliderUI.class),
-//        new Pair<>(TreeElement.class, CompatBasicComponents.TreeUI.class), // Tree is a Composite
-        new Pair<>(TwinColSelectElement.class, CompatBasicComponents.TwinColSelectUI.class),
-        new Pair<>(VideoElement.class, CompatBasicComponents.VideoUI.class)
-    );
-  }
-
-
-  @RunWith(value = Parameterized.class)
-  public static class GenericTest extends AbstractParallelTest {
-
-    @Parameterized.Parameter
-    public Pair<
-        Class<? extends AbstractComponentElement>,
-        Class<? extends AbstractTestCompUI>> nextTestCombo;
-
-    @Parameterized.Parameters(name = "{index}: nextTestCombo - {0}")
-    public static Object[] data() {
-      return testCombos().toArray();
-    }
-
-    public Supplier<WebElement> middleElementSupplier() {
-      return () -> $(middleElementClass())
-          .id(AbstractTestCompUI.ID_PREFIX + 1);
+    public void testGenericWidth(WebElement testedElement)
+        throws Exception {
+        WebElement controlElement = $(ButtonElement.class).caption(AbstractTestCompUI.SWITCH).first();
+        TestFunctions.assertDimension(controlElement, testedElement, (elem) -> {
+            return elem.getSize().width;
+        });
     }
 
     @Test
-    public void testGenericWidth() throws Exception {
-      WebElement controlElement = $(ButtonElement.class).caption(AbstractTestCompUI.SWITCH).first();
-      TestFunctions.assertDimension(controlElement,middleElementSupplier().get(), (elem)->{
-        return elem.getSize().width;
-      });
+    public void testButton()
+        throws Exception {
+        setUIClass(CompatBasicComponents.ButtonUI.class);
+        openURL();
+        ButtonElement testedElement = $(ButtonElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
     }
 
-    @Override
-    protected Class<? extends AbstractTestCompUI> getUIClass() {
-      return nextTestCombo.getT2();
+    @Test
+    public void testCheckBoxGroup()
+        throws Exception {
+        setUIClass(CompatBasicComponents.CheckBoxGroupUI.class);
+        openURL();
+        CheckBoxGroupElement testedElement = $(CheckBoxGroupElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
     }
 
-    public Class<? extends AbstractComponentElement> middleElementClass() {
-      return nextTestCombo.getT1();
+    @Test
+    public void testCheckBox()
+        throws Exception {
+        setUIClass(CompatBasicComponents.CheckBoxUI.class);
+        openURL();
+        CheckBoxElement testedElement = $(CheckBoxElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
     }
 
+    @Test
+    public void testColorPicker()
+        throws Exception {
+        setUIClass(CompatBasicComponents.ColorPickerUI.class);
+        openURL();
+        ColorPickerElement testedElement = $(ColorPickerElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
 
+    @Test
+    public void testComboBox()
+        throws Exception {
+        setUIClass(CompatBasicComponents.ComboBoxUI.class);
+        openURL();
+        ComboBoxElement testedElement = $(ComboBoxElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
 
-  }
+    @Test
+    public void testDateField()
+        throws Exception {
+        setUIClass(CompatBasicComponents.DateFieldUI.class);
+        openURL();
+        DateFieldElement testedElement = $(DateFieldElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    @Test
+    public void testGrid()
+        throws Exception {
+        setUIClass(CompatBasicComponents.GridUI.class);
+        openURL();
+        GridElement testedElement = $(GridElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    @Test
+    public void testLabel()
+        throws Exception {
+        setUIClass(CompatBasicComponents.LabelUI.class);
+        openURL();
+        LabelElement testedElement = $(LabelElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    @Test
+    public void testLink()
+        throws Exception {
+        setUIClass(CompatBasicComponents.LinkUI.class);
+        openURL();
+        LinkElement testedElement = $(LinkElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    @Test
+    public void testPanel()
+        throws Exception {
+        setUIClass(CompatBasicComponents.PanelUI.class);
+        openURL();
+        PanelElement testedElement = $(PanelElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    @Test
+    public void testPasswordField()
+        throws Exception {
+        setUIClass(CompatBasicComponents.PasswordFieldUI.class);
+        openURL();
+        PasswordFieldElement testedElement = $(PasswordFieldElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    @Test
+    public void testProgressBar()
+        throws Exception {
+        setUIClass(CompatBasicComponents.ProgressBarUI.class);
+        openURL();
+        ProgressBarElement testedElement = $(ProgressBarElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    @Test
+    public void testRadioButtonGroup()
+        throws Exception {
+        setUIClass(CompatBasicComponents.RadioButtonGroupUI.class);
+        openURL();
+        RadioButtonGroupElement testedElement = $(RadioButtonGroupElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    @Test
+    public void testSlider()
+        throws Exception {
+        setUIClass(CompatBasicComponents.SliderUI.class);
+        openURL();
+        SliderElement testedElement = $(SliderElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    @Test
+    public void testTwinColSelect()
+        throws Exception {
+        setUIClass(CompatBasicComponents.TwinColSelectUI.class);
+        openURL();
+        TwinColSelectElement testedElement = $(TwinColSelectElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    @Test
+    public void testVideo()
+        throws Exception {
+        setUIClass(CompatBasicComponents.VideoUI.class);
+        openURL();
+        VideoElement testedElement = $(VideoElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        testGenericWidth(testedElement);
+    }
+
+    //  Flash does not work
+    //    @Test
+    //    public void testFlash() throws Exception {
+    //      setUIClass(CompatBasicComponents.FlashUI.class);
+    //      openURL();
+    //      FlashElement testedElement = $(FlashElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+    //      testGenericWidth(testedElement);
+    //    }
+
+    //Tree is not working
+    //    @Test
+    //    public void testTree() throws Exception {
+    //      setUIClass(CompatTreeUI.class);
+    //      openURL();
+    //      TreeElement testedElement = $(TreeElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+    //      testGenericWidth(testedElement);
+    //    }
 
 }

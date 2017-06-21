@@ -20,6 +20,7 @@ public abstract class CompatChartsUIIT extends AbstractParallelTest {
 
   @Test
   public void testScreenshot() throws Exception {
+    openURL();
     String chartType= getUIClass().getSimpleName();
     compareScreen("initial"+chartType);
 

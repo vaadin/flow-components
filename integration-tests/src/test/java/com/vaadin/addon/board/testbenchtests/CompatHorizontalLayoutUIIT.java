@@ -23,8 +23,8 @@ public class CompatHorizontalLayoutUIIT extends AbstractParallelTest {
       .id(AbstractTestCompUI.ID_PREFIX + 2);
 
   @Test
-  public void testGenericWidth()
-      throws Exception {
+  public void testGenericWidth() throws Exception {
+    openURL();
     TestFunctions.assertDimension(buttonSwitchSupplier.get(),testedElementSupplier.get(),(elem)->{
       return elem.getSize().width;
     });

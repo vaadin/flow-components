@@ -33,7 +33,6 @@ public abstract class AbstractParallelTest extends ParallelTest {
     public void setup() throws Exception {
         super.setup();
         getDriver().manage().window().setSize(new Dimension(1024,768));
-        openURL();
     }
 
     public void compareScreen(String referenceName) throws IOException {
@@ -75,8 +74,14 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return "http://"+findAutoHostname()+":"+getPort();
     }
 
-    protected abstract Class<?> getUIClass();
+    private Class<?> uiClass;
+    protected void setUIClass( Class<?> uiClass){
+        this.uiClass = uiClass;
+    }
 
+    protected Class<?> getUIClass(){
+        return this.uiClass;
+    }
     protected String getDeploymentPath() {
         Class<?> uiClass = getUIClass();
         if (uiClass != null) {

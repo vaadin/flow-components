@@ -19,6 +19,12 @@ public class InnerRowIT extends AbstractParallelTest {
         return InnerRowUI.class;
     }
 
+    @Override
+    public void setup() throws Exception {
+        super.setup();
+        openURL();
+    }
+
     @Test
     public void oneRowBoard_addInnerRow_hasOneInnerRow() {
 

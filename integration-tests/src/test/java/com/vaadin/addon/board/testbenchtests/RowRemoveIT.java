@@ -21,6 +21,7 @@ public class RowRemoveIT extends AbstractParallelTest {
 
     @Test
     public void twoRowsBoard_removeRow_hasOneRow() {
+        openURL();
         BoardElement board =$(BoardElement.class).first();
         List<RowElement> rows = board.getRows();
         List<WebElement> children = board.findElements(By.xpath("//vaadin-board/vaadin-board-row/*"));

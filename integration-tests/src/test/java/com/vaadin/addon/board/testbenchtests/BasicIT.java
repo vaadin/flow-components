@@ -16,6 +16,7 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void basicLayout_boardTabletSize_twoRowsAndTwoItemsInRow() {
+        openURL();
         BoardElement board = $(BoardElement.class).get(0);
         ButtonElement btn1 = $(ButtonElement.class).caption("Button 1").first();
         ButtonElement btn2 = $(ButtonElement.class).caption("Button 2").first();

@@ -3,6 +3,7 @@ package com.vaadin.addon.board.testbenchtests;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.addon.board.testUI.ColsUI;
@@ -20,9 +21,15 @@ public class ColsIT extends AbstractParallelTest {
         return ColsUI.class;
     }
 
+
+    @Before
+    public void setup() throws Exception {
+        super.setup();
+        openURL();
+    }
     @Test
-    public void removeColsTest()
-        throws Exception {
+    public void removeColsTest() throws Exception {
+
         BoardElement board = $(BoardElement.class).get(0);
         List<RowElement> rows = board.getRows();
         Assert.assertEquals(1, rows.size());
@@ -36,14 +43,12 @@ public class ColsIT extends AbstractParallelTest {
     }
 
     @Test
-    public void exceptionColsTest()
-        throws Exception {
+    public void exceptionColsTest() throws Exception {
         BoardElement board = $(BoardElement.class).get(0);
         List<RowElement> rows = board.getRows();
         Assert.assertEquals(1, rows.size());
 
         ButtonElement btn = $(ButtonElement.class).caption("exception").first();
-
         int widthOld = $(ButtonElement.class).caption("Button A").first().getSize().getWidth();
         btn.click();
         int widthNew = $(ButtonElement.class).caption("Button A").first().getSize().getWidth();
