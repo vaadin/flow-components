@@ -239,6 +239,9 @@ public class Row extends AbstractComponentContainer {
      * @throws IllegalArgumentException
      *             if the component is not a child component or if the number of
      *             columns is less than 1
+     * @throws IllegalStateException
+     *             if setting components span would cause the row to have
+     *             a sum of columns more than four.
      **/
     public void setComponentSpan(Component component, int columns) {
         checkIfValueSmallerOrEqualFour(component, columns);
