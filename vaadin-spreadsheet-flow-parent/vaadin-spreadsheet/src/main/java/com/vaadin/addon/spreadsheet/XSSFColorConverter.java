@@ -122,13 +122,13 @@ public class XSSFColorConverter implements ColorConverter {
 
         sb.append(attr);
         sb.append(":");
+        if (color == null || color.isAuto()) {
+            sb.append("#000;");
+            return sb.toString();
+        }
         if (color.isIndexed() && ColorConverterUtil
             .hasCustomIndexedColors(workbook)) {
             sb.append(ColorConverterUtil.getIndexedARGB(workbook,color));
-            return sb.toString();
-        }
-        if (color == null || color.isAuto()) {
-            sb.append("#000;");
             return sb.toString();
         }
 

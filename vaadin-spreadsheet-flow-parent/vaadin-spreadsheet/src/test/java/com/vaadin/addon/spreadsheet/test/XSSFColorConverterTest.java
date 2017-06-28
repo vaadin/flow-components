@@ -3,6 +3,7 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -10,7 +11,6 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.addon.spreadsheet.ColorConverterUtil;
@@ -23,9 +23,7 @@ public class XSSFColorConverterTest extends AbstractSpreadsheetTestCase {
     private XSSFWorkbook workbook;
     private SpreadsheetPage spreadsheetPage;
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    public void loadWorkbook() throws IOException {
         InputStream is = getClass()
             .getResourceAsStream("/test_sheets/wrong_color.xlsx");
 
@@ -34,7 +32,14 @@ public class XSSFColorConverterTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
+    public void nullColor_openFile_noException() throws IOException {
+        spreadsheetPage = headerPage.loadFile("null_color.xlsx", this);
+        assertNoErrorIndicatorDetected();
+    }
+
+    @Test
     public void customIndexedColor_compareForegroundColor_consistentColors() throws IOException {
+        loadWorkbook();
         XSSFCell cell = workbook.getSheetAt(1).getRow(0).getCell(0);
         XSSFColor color = cell.getCellStyle().getFillForegroundColorColor();
         String indexedARGB = ColorConverterUtil.getIndexedARGB(workbook,color);
@@ -54,7 +59,7 @@ public class XSSFColorConverterTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void customIndexedColor_compareBorderColor_consistentColors() throws IOException {
-
+        loadWorkbook();
         XSSFCell cell = workbook.getSheetAt(1).getRow(2).getCell(1);
         XSSFColor color = cell.getCellStyle().getBorderColor(
             XSSFCellBorder.BorderSide.RIGHT);
