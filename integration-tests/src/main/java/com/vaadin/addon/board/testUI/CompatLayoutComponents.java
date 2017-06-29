@@ -60,7 +60,12 @@ public class CompatLayoutComponents {
       VerticalLayout l2 = new VerticalLayout(createButton("A2", ID_PREFIX + 2));
       VerticalLayout l3 = new VerticalLayout(createButton("A3", ID_PREFIX + 3));
 
-      Component[] comps = { l1, l2, l3 };
+      VerticalLayout[] comps = {l1,l2,l3};
+      for(VerticalLayout comp:comps) {
+        comp.setMargin(false);
+        comp.setSizeFull();
+
+      }
       return comps;
     }
   }
@@ -72,7 +77,8 @@ public class CompatLayoutComponents {
         GridLayout l2 = (new GridLayout(1, 1, createButton("A2", ID_PREFIX + 2)));
         GridLayout l3 = (new GridLayout(1, 1, createButton("A3", ID_PREFIX + 3)));
 
-        Component[] comps = { l1, l2, l3 };
+        Component[] comps = {l1,l2,l3};
+
         return comps;
       }
   }
@@ -85,6 +91,9 @@ public class CompatLayoutComponents {
       CssLayout l3 = new CssLayout(createButton("A3", ID_PREFIX + 3));
 
       Component[] comps = { l1, l2, l3 };
+      for(Component comp:comps) {
+        comp.setSizeFull();
+      }
       return comps;
     }
   }

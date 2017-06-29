@@ -28,6 +28,13 @@ public abstract class AbstractParallelTest extends ParallelTest {
     public Supplier<WebElement> buttonSwitchSupplier = () -> $(ButtonElement.class)
         .caption(AbstractTestCompUI.SWITCH).first();
 
+    public void testGenericWidth(WebElement testedElement)
+        throws Exception {
+        WebElement controlElement = $(ButtonElement.class).caption(AbstractTestCompUI.SWITCH).first();
+        TestFunctions.assertDimension(controlElement, testedElement, (elem) -> {
+            return elem.getSize().width;
+        });
+    }
 
     @Before
     public void setup() throws Exception {

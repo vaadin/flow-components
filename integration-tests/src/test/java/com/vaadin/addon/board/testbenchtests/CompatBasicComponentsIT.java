@@ -1,7 +1,6 @@
 package com.vaadin.addon.board.testbenchtests;
 
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.addon.board.testUI.AbstractTestCompUI;
 import com.vaadin.addon.board.testUI.CompatBasicComponents;
@@ -26,14 +25,6 @@ import com.vaadin.testbench.elements.VideoElement;
  *
  */
 public class CompatBasicComponentsIT extends AbstractParallelTest {
-
-    public void testGenericWidth(WebElement testedElement)
-        throws Exception {
-        WebElement controlElement = $(ButtonElement.class).caption(AbstractTestCompUI.SWITCH).first();
-        TestFunctions.assertDimension(controlElement, testedElement, (elem) -> {
-            return elem.getSize().width;
-        });
-    }
 
     @Test
     public void testButton()
