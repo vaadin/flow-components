@@ -178,6 +178,19 @@ After adding this CSS to your theme you will see that labels have different font
 == Known Issues
 - Setting height for the row is not supported. Set height for the child components.
 
+- You can not set relative height for [classname]#Grid#, [classname]#GridTree#, [classname]#GridLayout#, [classname]#SpreadSheet# inside the board row.
+If  Vaadin component height depends on its content, setting  relative height for this component makes them very small.
+You need to set the height of the component in pixels or set its content to have fixed size.
+This issue happens for Grid, Tree, GridTree, GridLayout, Spreadsheet.
+
+- Vaadin Flash Component does not resize correctly inside the Vaadin Board.
+
+- Vaadin TwinColSelect does not resize correctly, the second row of the component sometimes rendered at the bottom, instead of
+ to the right of the first row.
+
+- Vaadin TabSheet does not resize correctly, when changing from a small viewport size to a big one.
+ Wrapping [classname]#TabSheet# inside the [classname]#CSSLayout# fixes the problem.
+
 - Because Vaadin Board uses flexbox, there is a limited support for IE11.
 If you want to have a border for the direct child of the [classname]#Row# you need to create a wrapper HTML element
 and add a border there, but not to the direct child of the [classname]#Row#.
