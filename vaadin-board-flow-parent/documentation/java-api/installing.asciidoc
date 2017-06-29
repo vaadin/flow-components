@@ -7,16 +7,16 @@ layout: page
 [[board.installing]]
 = Installing Vaadin Board
 
-IMPORTANT: Vaadin Board is is currently being developed and only available in the Vaadin Framework 8.1 prerelease versions, starting from 8.1.0.alpha7.
+IMPORTANT: Vaadin Board is is currently being developed and only available in the Vaadin Framework 8.1 prerelease versions, starting from 8.1.0.beta2.
 There is no vaadin-archetype available for this version, so you can not generate the application.
-You need to add vaadin prerelease repository to your POM.xml and change vaadin dependencies to 8.1.0.alpha7 in you existing vaadin project.
+You need to add vaadin prerelease repository to your POM.xml and change vaadin dependencies to 8.1.0.beta2 in you existing vaadin project.
 
 As with most Vaadin add-ons, you can install Vaadin Board as a Maven dependency in your project.
 For general instructions on installing add-ons, please see
 <<dummy/../../../framework/addons/addons-overview.asciidoc#addons.overview,"Using
 Vaadin Add-ons">>.
 
-Vaadin Board 1.0.0 requires Vaadin 8.1.0-alpha7 or later.
+Vaadin Board 1.0.0 requires Vaadin 8.1.0.beta2 or later.
 
 Using Vaadin Board requires a license key, which you must install before
 compiling the widget set. The widget set must be compiled after setting up the
@@ -32,7 +32,12 @@ The Maven dependency for Vaadin Board is as follows:
 &lt;dependency&gt;
     &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
     &lt;artifactId&gt;vaadin-board&lt;/artifactId&gt;
-    &lt;version&gt;[replaceable]##1.0.0.alpha2##&lt;/version&gt;
+    &lt;version&gt;[replaceable]##1.0.0-alpha10##&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
+    &lt;artifactId&gt;vaadin-board-precompiled&lt;/artifactId&gt;
+    &lt;version&gt;[replaceable]##1.0.0-alpha10##&lt;/version&gt;
 &lt;/dependency&gt;
 ----
 You also need to define the Vaadin add-ons repository if not already defined:

@@ -7,9 +7,9 @@ layout: page
 [[board.introduction]]
 = Getting Started
 
-IMPORTANT: Vaadin Board is is currently being developed and only available in the Vaadin Framework 8.1 prerelease versions, starting from 8.1.0.alpha7.
+IMPORTANT: Vaadin Board is is currently being developed and only available in the Vaadin Framework 8.1 prerelease versions, starting from 8.1.0.beta2.
 There is no vaadin-archetype available for this version, so you can not generate the application.
-You need to add vaadin prerelease repository to your POM.xml and change vaadin dependencies to 8.1.0.alpha7 in your existing vaadin project.
+You need to add vaadin prerelease repository to your POM.xml and change vaadin dependencies to 8.1.0.beta2 in your existing vaadin project.
 
 
 In this chapter, we are going to create a simple Vaadin application and use the Vaadin Board add-on to create a responsive layout.
@@ -28,14 +28,16 @@ In order to follow this tutorial, you will need the following tools/setup:
 
 To start off, we need to create a new project where we can use Vaadin Board.
 We will use Maven to set up a project, which can later be imported into your favorite IDE.
-You can also use your IDE to generate a new maven project using the `vaadin-archetype-application archetype`, version 8.1.0-alpha7.
+You can also use your IDE to generate a new maven project using the `vaadin-archetype-application archetype`, version 8.1.0.beta2.
 Execute the following command to create the project:
 
 [subs="normal"]
 ----
-[command]#mvn# archetype:generate -DarchetypeGroupId=com.vaadin  \
-  -DarchetypeArtifactId=[replaceable]#vaadin-archetype-application# \
-  -DarchetypeVersion=[replaceable]#8.1.0-alpha7#
+mvn org.apache.maven.plugins:maven-archetype-plugin:2.4:generate  \
+    -DarchetypeGroupId=com.vaadin \
+    -DarchetypeArtifactId=vaadin-archetype-application  \
+    -DarchetypeRepository=https://maven.vaadin.com/vaadin-prereleases  \
+    -DarchetypeVersion=8.1.0.beta2
 ----
 
 You will be asked a few questions for setting up the project.
@@ -89,58 +91,18 @@ Add the following dependency declaration just before the end tag ([elementname]#
     *<dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-board</artifactId>
-        <version>1.0.0.alpha2</version>
+        <version>1.0.0-alpha10</version>
+    </dependency>
+    <dependency>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-board-precompiled</artifactId>
+        <version>1.0.0-alpha10</version>
     </dependency>*
 </dependencies>
 ...
 ----
 
 It is recommended to use the latest version available, the version number can be checked at link:https://vaadin.com/directory#!addon/vaadin-board[Vaadin Directory].
-
-You need to add vaadin frontend plugin to your POM.xml. Add the following code into the plugins section of your POM.xml:
-
-
-[subs="normal"]
-----
-  <plugin>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-frontend-maven-plugin</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <executions>
-          <execution>
-              <goals>
-                  <goal>update</goal>
-              </goals>
-          </execution>
-      </executions>
-  </plugin>
-  <plugin>
-      <groupId>com.github.eirslett</groupId>
-      <artifactId>frontend-maven-plugin</artifactId>
-      <version>1.4</version>
-      <configuration>
-          <nodeVersion>v6.9.1</nodeVersion>
-          <yarnVersion>v0.22.0</yarnVersion>
-          <workingDirectory>src/main/frontend</workingDirectory>
-          <skip>${vaadin.frontend.ok}</skip>
-      </configuration>
-      <executions>
-          <execution>
-              <id>install node and yarn</id>
-              <goals>
-                  <goal>install-node-and-yarn</goal>
-              </goals>
-              <configuration></configuration>
-          </execution>
-          <execution>
-              <id>yarn install</id>
-              <goals>
-                  <goal>yarn</goal>
-              </goals>
-          </execution>
-      </executions>
-  </plugin>
-----
 
 After this, we need to fetch a license for Vaadin Board in order to be able to compile the widget set.
 You can get a free trial key from link:https://vaadin.com/directory#!addon/vaadin-board[Vaadin Directory].
