@@ -181,7 +181,7 @@ After adding this CSS to your theme you will see that labels have different font
 - You can not set relative height for [classname]#Grid#, [classname]#GridTree#, [classname]#GridLayout#, [classname]#SpreadSheet# inside the board row.
 If  Vaadin component height depends on its content, setting  relative height for this component makes them very small.
 You need to set the height of the component in pixels or set its content to have fixed size.
-This issue happens for Grid, Tree, GridTree, GridLayout, Spreadsheet.
+This issue happens for Grid, Tree, TreeGrid, GridLayout, Spreadsheet.
 
 - Vaadin Flash Component does not resize correctly inside the Vaadin Board.
 
