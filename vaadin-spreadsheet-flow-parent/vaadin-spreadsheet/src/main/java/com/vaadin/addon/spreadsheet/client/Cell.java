@@ -175,7 +175,14 @@ public class Cell {
                 && !(this instanceof MergedCell)) {
             element.getStyle().setOverflow(Overflow.HIDDEN);
         } else {
-            element.getStyle().setOverflow(Overflow.VISIBLE);
+            if (overflowPx > 0) {
+                element.getStyle().setOverflow(Overflow.VISIBLE);
+            } else {
+                // in this case we have a line wrapping enabled cell,
+                // so if there is overflow it is only vertical and
+                // it is always hidden in Excel
+                element.getStyle().setOverflow(Overflow.HIDDEN);
+            }
         }
         overflowDirty = false;
     }
@@ -289,29 +296,6 @@ public class Cell {
         }
     }
 
-    public boolean isNeedsMeasure() {
-        return needsMeasure;
-    }
-
-    /**
-     * @param sizes
-     * @param beginIndex
-     *            1-based inclusive
-     * @param endIndex
-     *            1-based exclusive
-     * @return
-     */
-    public int countSum(int[] sizes, int beginIndex, int endIndex) {
-        if (sizes == null || sizes.length < endIndex - 1) {
-            return 0;
-        }
-        int pos = 0;
-        for (int i = beginIndex; i < endIndex; i++) {
-            pos += sizes[i - 1];
-        }
-        return pos;
-    }
-
     public boolean isOverflowDirty() {
         return value != null && !value.isEmpty() && overflowDirty;
     }
@@ -325,23 +309,27 @@ public class Cell {
     }
 
     private CellValueStyleKey getUniqueKey() {
-        return new CellValueStyleKey(value, cellStyle);
+        return new CellValueStyleKey(value, cellStyle, row, col);
     }
 
     static class CellValueStyleKey {
         private String value;
-
         private String cellStyle;
+        private int row;
+        private int col;
 
-        public CellValueStyleKey(String value, String cellStyle) {
+        public CellValueStyleKey(String value, String cellStyle, int row,
+                int col) {
             super();
             this.value = value;
             this.cellStyle = cellStyle;
+            this.row = row;
+            this.col = col;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(value, cellStyle);
+            return Objects.hash(value, cellStyle, row, col);
         }
 
         @Override
@@ -357,9 +345,10 @@ public class Cell {
             }
             CellValueStyleKey other = (CellValueStyleKey) obj;
             return Objects.equals(value, other.value)
-                    && Objects.equals(cellStyle, other.cellStyle);
+                    && Objects.equals(cellStyle, other.cellStyle)
+                    && Objects.equals(row, other.row)
+                    && Objects.equals(col, other.col);
         }
-
     }
 
 }

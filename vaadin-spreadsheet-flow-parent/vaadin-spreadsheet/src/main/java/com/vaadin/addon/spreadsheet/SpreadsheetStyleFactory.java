@@ -608,7 +608,7 @@ public class SpreadsheetStyleFactory implements Serializable {
                 VERTICAL_ALIGN);
 
         if (cellStyle.getWrapText()) { // default is to overflow
-            sb.append("overflow:hidden;white-space:normal;");
+            sb.append("overflow:hidden;white-space:normal;word-wrap:break-word;");
         }
 
         if (cellStyle.getIndention() > 0) {
