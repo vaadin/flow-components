@@ -48,40 +48,4 @@
       object-fit: cover;
     }
   }
-
-  .sales-dashboard-demo-area {
-    padding: 16px;
-
-    .top-chart-container {
-      height: 300px;
-    }
-
-    .mid-line-charts-row {
-      min-height: 300px;
-      height: 100%;
-      flex: 2 1 40%;
-
-      .mid-line-main-chart {
-        height: auto !important;
-
-        & > div {
-          height: 100% !important;
-        }
-      }
-    }
-
-    .mid-line-chart-container {
-      height: auto !important;
-      overflow: hidden;
-      display: flex;
-      flex-direction: row;
-      flex-grow: 1;
-
-      .mid-line-chart {
-        flex-grow: 1;
-        height: 200px !important;
-      }
-    }
-  }
-
 }

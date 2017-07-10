@@ -2,6 +2,7 @@ package com.vaadin.addon.board.examples;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
 
 import com.vaadin.board.Board;
 import com.vaadin.board.Row;
@@ -84,6 +85,7 @@ public class ImageCollage extends VerticalLayout {
         URL folderResource = ImageCollage.class.getResource(IMAGE_PATH);
         File folder = new File((folderResource.getFile()));
         String[] fileNames = folder.list();
+        Arrays.sort(fileNames);
         resources = new FileResource[fileNames.length];
         for (int i = 0; i < fileNames.length; i++) {
             URL resource = ImageCollage.class.getResource(IMAGE_PATH + fileNames[i]);

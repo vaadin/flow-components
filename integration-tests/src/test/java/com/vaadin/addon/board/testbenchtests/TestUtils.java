@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -17,6 +18,10 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import com.google.gson.stream.JsonReader;
 
 public class TestUtils {
+
+    public static final Dimension WINDOW_SIZE_LARGE = new Dimension(1920, 1080);
+    public static final Dimension WINDOW_SIZE_MEDIUM = new Dimension(768, 1024);
+    public static final Dimension WINDOW_SIZE_SMALL = new Dimension(375, 667);
 
     private static  DesiredCapabilities parseBrowser(String browser) {
         switch (browser) {
