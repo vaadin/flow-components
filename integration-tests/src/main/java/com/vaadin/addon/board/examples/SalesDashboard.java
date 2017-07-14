@@ -18,6 +18,7 @@ public class SalesDashboard extends VerticalLayout {
     private final String GREEN = "#98DF58";
     private final String BLUE = "#3090F0";
     private final String GRAY = "#808080";
+    private final String LIGHT_GRAY = "#CECECE";
     private final String MAGENTA = "#EC64A5";
     private final String CYAN = "#24DCD4";
     private final String PURPLE = "#685CB0";
@@ -142,7 +143,18 @@ public class SalesDashboard extends VerticalLayout {
         joeSeriesOptions.setColor(new SolidColor(BLUE));
         joeSeries.setPlotOptions(joeSeriesOptions);
 
+        ListSeries budgetSeries = new ListSeries("Budget", 2200000, 1300000, 1700000, 1200000, 1700000);
+        PlotOptionsColumn budgetSeriesOptions = new PlotOptionsColumn();
+        budgetSeriesOptions.setColor(new SolidColor(LIGHT_GRAY));
+        budgetSeriesOptions.setPointPadding(0.3f);
+        budgetSeriesOptions.setPointPlacement(PointPlacement.ON);
+        budgetSeriesOptions.setPointStart(0.45f);
+
+        budgetSeries.setStack("budget");
+        budgetSeries.setPlotOptions(budgetSeriesOptions);
+
         configuration.setSeries(
+                budgetSeries,
                 johnSeries,
                 janeSeries,
                 joeSeries
