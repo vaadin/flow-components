@@ -290,4 +290,12 @@ public class ChartFeatureTest extends ChartTestBase {
         final Double[] dataSeries = { 1d, 2d, 3d, 4d, 5d, 6d, 7d, 8d, 9d };
         assertData(conf.getSeries(), dataSeries);
     }
+
+    @Test
+    public void multiLevelCategoryWithNoCache_loadSample_chartRendered()
+        throws Exception {
+        Configuration conf = getChartFromSampleFile(
+            "MultilevelCategoriesWithNoCachedData.xlsm", "L2").getConfiguration();
+        Assert.assertEquals(AxisType.CATEGORY, conf.getxAxis().getType());
+    }
 }
