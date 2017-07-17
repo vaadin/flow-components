@@ -62,6 +62,50 @@ public class GenericTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
+    public void numericCell_newPercentageCell_cellStaysNumeric() {
+        setLocale(Locale.US);
+        SpreadsheetPage spreadsheetPage = headerPage.createNewSpreadsheet();
+        // need to move selection so that fill indicator is not clicked while
+        // selecting A2
+        spreadsheetPage.clickOnCell("F1");
+
+        spreadsheetPage.setCellValue("A2", "19");
+        Assert.assertEquals("19", spreadsheetPage.getCellValue("A2"));
+        spreadsheetPage.setCellValue("A3", "19%");
+        Assert.assertEquals("19.00%", spreadsheetPage.getCellValue("A3"));
+
+        // force reload of the sheet
+        spreadsheetPage.addSheet("new sheet");
+        spreadsheetPage.selectSheetAt(0);
+
+        Assert.assertEquals("19", spreadsheetPage.getCellValue("A2"));
+        Assert.assertEquals("19.00%", spreadsheetPage.getCellValue("A3"));
+    }
+
+    @Test
+    public void percentageCell_newNumericCell_cellStaysNumeric() {
+        setLocale(Locale.US);
+        SpreadsheetPage spreadsheetPage = headerPage.createNewSpreadsheet();
+        // need to move selection so that fill indicator is not clicked while
+        // selecting A2
+        spreadsheetPage.clickOnCell("F1");
+
+        spreadsheetPage.setCellValue("A2", "19%");
+        Assert.assertEquals("19.00%", spreadsheetPage.getCellValue("A2"));
+        spreadsheetPage.setCellValue("A3", "19");
+        Assert.assertEquals("19", spreadsheetPage.getCellValue("A3"));
+
+        // force reload of the sheet
+        spreadsheetPage.addSheet("new sheet");
+        spreadsheetPage.selectSheetAt(0);
+
+        Assert.assertEquals("19.00%", spreadsheetPage.getCellValue("A2"));
+        Assert.assertEquals("19", spreadsheetPage.getCellValue("A3"));
+
+    }
+
+
+    @Test
     public void testFormats() {
         //TODO Vaadin8 use setLocale instead of setLocaleForNativeSElect
         //When https://github.com/vaadin/framework8-issues/issues/477 is fixed

@@ -58,7 +58,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
@@ -659,7 +658,9 @@ public class CellValueManager implements Serializable {
                     } else if (percentage != null) {
                         cell.setCellType(Cell.CELL_TYPE_NUMERIC);
                         CellStyle cs = cell.getCellStyle();
-                        if (cs == null) {
+                        // Do not use default cell style (index == 0) for
+                        // percentage as it will affect all cells
+                        if (cs == null || cs.getIndex() == 0) {
                             cs = workbook.createCellStyle();
                             cell.setCellStyle(cs);
                         }

@@ -185,7 +185,12 @@ public class SpreadsheetPage extends Page {
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
         spreadsheet.selectSheetAt(sheetIndex);
     }
-    
+
+    public void addSheet(String sheetName) {
+        SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
+        spreadsheet.addSheet(sheetName);
+    }
+
     private SheetCellElement getCellAt(String address) {
         Point point = AddressUtil.addressToPoint(address);
         return getCellAt(point.getX(), point.getY());
