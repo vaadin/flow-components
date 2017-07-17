@@ -317,20 +317,23 @@ public class XSSFColorConverter implements ColorConverter {
 
         XSSFConditionalFormattingRule r = (XSSFConditionalFormattingRule) rule;
         CTDxf dxf = getXMLColorDataWithReflection(r);
+        if (dxf.isSetFill() && dxf.getFill().isSetPatternFill()
+                && dxf.getFill().getPatternFill().isSetBgColor()) {
+            CTColor bgColor = dxf.getFill().getPatternFill().getBgColor();
 
-        CTColor bgColor = dxf.getFill().getPatternFill().getBgColor();
+            if (bgColor.isSetTheme()) {
+                XSSFColor themeColor = workbook.getTheme()
+                        .getThemeColor((int) bgColor.getTheme());
 
-        if (bgColor.isSetTheme()) {
-            XSSFColor themeColor = workbook.getTheme().getThemeColor(
-                    (int) bgColor.getTheme());
-
-            // CF rules have tint in bgColor but not the XSSFColor.
-            return styleColor(themeColor, bgColor.getTint());
+                // CF rules have tint in bgColor but not the XSSFColor.
+                return styleColor(themeColor, bgColor.getTint());
+            } else {
+                byte[] rgb = bgColor.getRgb();
+                return rgb == null ? null : ColorConverterUtil.toRGBA(rgb);
+            }
         } else {
-            byte[] rgb = bgColor.getRgb();
-            return rgb == null ? null : ColorConverterUtil.toRGBA(rgb);
+            return null;
         }
-
     }
 
     @Override

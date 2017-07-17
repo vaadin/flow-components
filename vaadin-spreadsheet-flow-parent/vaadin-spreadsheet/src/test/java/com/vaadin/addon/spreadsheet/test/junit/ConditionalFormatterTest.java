@@ -24,16 +24,7 @@ public class ConditionalFormatterTest {
     @Test
     public void createConditionalFormatterRules_sheetWithStringFormatRuleForNumericCell_rulesCreatedWithoutExceptions()
             throws URISyntaxException, IOException {
-
-        ClassLoader classLoader = ConditionalFormatterTest.class
-                .getClassLoader();
-        URL resource = classLoader.getResource("test_sheets" + File.separator
-                + "conditional_formatting.xlsx");
-        File file = new File(resource.toURI());
-
-        Spreadsheet sheet = new Spreadsheet(file);
-
-        new ConditionalFormatter(sheet).createConditionalFormatterRules();
+        createConditionalFormatterRulesForSheet("conditional_formatting.xlsx");
     }
 
     /**
@@ -41,8 +32,7 @@ public class ConditionalFormatterTest {
      * 
      * This test might fail if assertions are enabled due to
      * {@link SheetImageWrapper#hashCode()} using
-     * {@link ClientAnchor#hashCode()} which wasn't designed and does
-     * {@code
+     * {@link ClientAnchor#hashCode()} which wasn't designed and does {@code
      *         assert false : "hashCode not designed";
      * }. Assertions can be disabled with -DenableAssertions=false in maven.
      * HashCode issue reported in SHEET-120
@@ -50,20 +40,35 @@ public class ConditionalFormatterTest {
     @Test
     public void matchesFormula_rulesWithoutFormula_formulasEvaluatedWithoutExceptions()
             throws URISyntaxException, IOException {
+        // ensure sheet with rules without formulas is active
+        createConditionalFormatterRulesForSheet(
+                "ConditionalFormatterSamples.xlsx", 3);
+    }
 
+    @Test
+    public void createConditionalFormatterRules_ruleWithNullBackgroundColor_rulesCreatedWithoutExceptions()
+            throws URISyntaxException, IOException {
+        createConditionalFormatterRulesForSheet(
+                "conditionalformater_nobackground.xlsx");
+    }
+
+    private void createConditionalFormatterRulesForSheet(String fileName)
+            throws URISyntaxException, IOException {
+        createConditionalFormatterRulesForSheet(fileName, null);
+    }
+
+    private void createConditionalFormatterRulesForSheet(String fileName,
+            Integer sheetIndex) throws URISyntaxException, IOException {
         ClassLoader classLoader = ConditionalFormatterTest.class
                 .getClassLoader();
-        URL resource = classLoader.getResource("test_sheets" + File.separator
-                + "ConditionalFormatterSamples.xlsx");
+        URL resource = classLoader
+                .getResource("test_sheets" + File.separator + fileName);
         File file = new File(resource.toURI());
 
         Spreadsheet sheet = new Spreadsheet(file);
 
-        // active sheet is saved in file
-        // it might change after modifying test file
-        // ensure sheet with rules without formulas is active
-        if (sheet.getActiveSheetIndex() != 3) {
-            sheet.setActiveSheetIndex(3);
+        if (sheetIndex != null && sheet.getActiveSheetIndex() != sheetIndex) {
+            sheet.setActiveSheetIndex(sheetIndex);
         }
         new ConditionalFormatter(sheet).createConditionalFormatterRules();
     }
