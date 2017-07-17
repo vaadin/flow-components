@@ -4958,6 +4958,10 @@ public class SheetWidget extends Panel {
                         && row <= lastRowIndex || row <= verticalSplitPosition));
     }
 
+    boolean isColumnFrozen(int col) {
+        return col <= horizontalSplitPosition;
+    }
+
     private Cell getFrozenCell(int col, int row) {
         int colArrayIndex = col - 1;
         int rowArrayIndex = row - 1;

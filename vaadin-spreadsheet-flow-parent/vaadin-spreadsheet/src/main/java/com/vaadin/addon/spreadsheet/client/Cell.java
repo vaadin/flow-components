@@ -134,11 +134,11 @@ public class Cell {
             int colIndex = col;
             int width = 0;
             int[] colW = sheetWidget.actionHandler.getColWidths();
-            boolean inFreezePane = col <= sheetWidget.verticalSplitPosition;
-
+            boolean inFreezePane = sheetWidget
+                    .isColumnFrozen(colIndex);
             while (colIndex < colW.length && width < overflowPx) {
                 if (inFreezePane
-                        && colIndex >= sheetWidget.verticalSplitPosition) {
+                        && !sheetWidget.isColumnFrozen(colIndex + 1)) {
                     break;
                 }
                 Cell nextCell = sheetWidget.getCell(colIndex + 1, row);
