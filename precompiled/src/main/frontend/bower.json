@@ -13,7 +13,7 @@
   ],
   "dependencies": {
     "vaadin-addons": "./vaadin-addons/bower.json",
-    "webcomponentsjs": "v1.0.0-rc.11"
+    "webcomponentsjs": "^1.0.0"
   }
 }
 

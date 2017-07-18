@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.vaadin</groupId>
@@ -19,6 +19,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+
+		<frontend.working.directory>src/main/frontend</frontend.working.directory>
 	</properties>
 
 	<repositories>
@@ -36,48 +38,73 @@
 	</dependencies>
 
 	<build>
-	<resources>
-	 <resource> <directory>src/main/generated-resources</directory></resource>
-	</resources>
-	<plugins>
-        <plugin>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-frontend-maven-plugin</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>update</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-        <plugin>
-            <groupId>com.github.eirslett</groupId>
-            <artifactId>frontend-maven-plugin</artifactId>
-            <version>1.4</version>
-            <configuration>
-                <nodeVersion>v6.9.1</nodeVersion>
-                <yarnVersion>v0.22.0</yarnVersion>
-                <workingDirectory>src/main/frontend</workingDirectory>
-            </configuration>
-            <executions>
-                <execution>
-                    <id>install node and yarn</id>
-                    <goals>
-                        <goal>install-node-and-yarn</goal>
-                    </goals>
-                    <configuration></configuration>
-                </execution>
-                <execution>
-                    <id>yarn install</id>
-                    <goals>
-                        <goal>yarn</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/generated-resources</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${frontend.working.directory}/bower_components</directory>
+						</fileset>
+						<fileset>
+							<directory>${frontend.working.directory}/build</directory>
+						</fileset>
+						<fileset>
+							<directory>${frontend.working.directory}/etc</directory>
+						</fileset>
+						<fileset>
+							<directory>${frontend.working.directory}/node</directory>
+						</fileset>
+						<fileset>
+							<directory>${frontend.working.directory}/node_modules</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.vaadin</groupId>
+				<artifactId>vaadin-frontend-maven-plugin</artifactId>
+				<version>0.1-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>update</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.4</version>
+				<configuration>
+					<nodeVersion>v6.9.1</nodeVersion>
+					<yarnVersion>v0.22.0</yarnVersion>
+					<workingDirectory>${frontend.working.directory}</workingDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install node and yarn</id>
+						<goals>
+							<goal>install-node-and-yarn</goal>
+						</goals>
+						<configuration></configuration>
+					</execution>
+					<execution>
+						<id>yarn install</id>
+						<goals>
+							<goal>yarn</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 
 </project>
