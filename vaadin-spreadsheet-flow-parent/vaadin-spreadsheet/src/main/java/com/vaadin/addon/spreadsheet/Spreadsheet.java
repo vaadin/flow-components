@@ -133,6 +133,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private static final int FILTER_BUTTON_PIXEL_WIDTH = 14;
 
     /**
+     * Extra padding (in pixels) to add between the filter popup button and cell text
+     * when autofitting a column.
+     */
+    private static final int FILTER_BUTTON_PIXEL_PADDING = 2;
+
+    /**
      * Map of autofitted column widths in points
      */
     private Map<CellReference, Integer> autofittedColumnWidths = new WeakHashMap<>();
@@ -2050,7 +2056,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             SpreadsheetFilterTable ft = (SpreadsheetFilterTable) st;
             PopupButton popupButton = ft.getPopupButton(cr);
             if (popupButton != null) {
-                return autofitWidth + FILTER_BUTTON_PIXEL_WIDTH;
+                return autofitWidth + FILTER_BUTTON_PIXEL_WIDTH + FILTER_BUTTON_PIXEL_PADDING;
             }
         }
         return autofitWidth;
