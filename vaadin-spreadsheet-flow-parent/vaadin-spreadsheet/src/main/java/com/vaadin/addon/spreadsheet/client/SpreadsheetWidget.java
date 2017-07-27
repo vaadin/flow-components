@@ -409,13 +409,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         sheetWidget.removePopupButton(popupButton);
     }
 
-    public void showCellValue(String value, int col, int row, boolean formula,
-            boolean locked) {
+    public void updateFormulaBar(String possibleName, int col, int row) {
         // do check in case the user has changed the selected cell before the
         // formula was sent
         if (sheetWidget.getSelectedCellColumn() == col
                 && sheetWidget.getSelectedCellRow() == row) {
             updateSelectedCellValues(col, row);
+            if (possibleName != null) {
+                formulaBarWidget.setSelectedCellAddress(possibleName);
+            }
         }
     }
 
@@ -707,6 +709,10 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     public void updateSelectedCellValues(int column, int row) {
+        updateSelectedCellValues(column, row, null);
+    }
+
+    public void updateSelectedCellValues(int column, int row, String name) {
         if (!sheetWidget.isEditingCell()) {
             String formulaValue = sheetWidget.getCellFormulaValue(column, row);
             if (formulaValue != null && !formulaValue.isEmpty()) {
@@ -724,7 +730,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             sheetWidget.displayCustomCellEditor(customEditorFactory
                     .getCustomEditor(sheetWidget.getSelectedCellKey()));
         }
-        formulaBarWidget.setSelectedCellAddress(createCellAddress(column, row));
+        if (name != null) {
+            formulaBarWidget.setSelectedCellAddress(name);
+        } else {
+            formulaBarWidget
+                .setSelectedCellAddress(createCellAddress(column, row));
+        }
     }
 
     @Override
@@ -1906,18 +1917,17 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
     }
 
-    public void selectCell(int col, int row, String value, boolean formula,
+    public void selectCell(String name, int col, int row, String value, boolean formula,
             boolean locked, boolean initialSelection) {
-        selectionHandler.selectCell(col, row, value, formula, locked,
+        selectionHandler.selectCell(name, col, row, value, formula, locked,
                 initialSelection);
     }
 
-    public void selectCellRange(int selectedCellColumn, int selectedCellRow,
-            int firstColumn, int lastColumn, int firstRow, int lastRow,
-            String value, boolean formula, boolean locked, boolean scroll) {
-        selectionHandler.selectCellRange(selectedCellColumn, selectedCellRow,
-                firstColumn, lastColumn, firstRow, lastRow, value, formula,
-                locked, scroll);
+    public void selectCellRange(String name, int selectedCellColumn, int selectedCellRow,
+            int firstColumn, int lastColumn, int firstRow, int lastRow, boolean scroll) {
+        
+        selectionHandler.selectCellRange(name, selectedCellColumn, selectedCellRow,
+                firstColumn, lastColumn, firstRow, lastRow, scroll);
     }
 
     public void refreshCellStyles() {
@@ -2046,5 +2056,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void setRowGroupingInversed(boolean inversed) {
         sheetWidget.setRowGroupingInversed(inversed);
+    }
+    
+    public void setNamedRanges(List<String> namedRanges) {
+        formulaBarWidget.setNamedRanges(namedRanges);
     }
 }

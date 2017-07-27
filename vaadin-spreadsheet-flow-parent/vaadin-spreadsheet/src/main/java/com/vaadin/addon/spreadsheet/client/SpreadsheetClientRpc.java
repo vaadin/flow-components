@@ -32,25 +32,17 @@ public interface SpreadsheetClientRpc extends ClientRpc {
     void updateBottomLeftCellValues(ArrayList<CellData> cellData);
 
     /**
-     * 
-     * @param value
      * @param col
-     *            1-based
+     *            Selected cell's column. 1-based
      * @param row
-     *            1-based
-     * @param formula
-     * @param locked
+     *            Selected cell's row. 1-based
      */
-    void showCellValue(String value, int col, int row, boolean formula,
-            boolean locked);
+    void updateFormulaBar(String possibleName, int col, int row);
 
     void invalidCellAddress();
 
-    void showSelectedCell(int col, int row, String cellValue, boolean function,
+    void showSelectedCell(String name, int col, int row, String cellValue, boolean function,
             boolean locked, boolean initialSelection);
-
-    void showSelectedCellRange(int firstColumn, int lastColumn, int firstRow,
-            int lastRow, String value, boolean formula, boolean locked);
 
     /**
      * The String arrays contain the caption and the icon resource key.
@@ -62,26 +54,9 @@ public interface SpreadsheetClientRpc extends ClientRpc {
     /**
      * Updates the selected cell and painted range. Displays the selected cell
      * value. Indexes 1-based.
-     * 
-     * @param col
-     *            selected
-     * @param row
-     *            selected
-     * @param c1
-     *            painted
-     * @param c2
-     *            painted
-     * @param r1
-     *            painted
-     * @param r2
-     *            painted
-     * @param value
-     * @param formula
-     * @param cellLocked
      */
-    void setSelectedCellAndRange(int col, int row, int c1, int c2, int r1,
-            int r2, String value, boolean formula, boolean cellLocked,
-            boolean scroll);
+    void setSelectedCellAndRange(String name, int col, int row, int c1, int c2, int r1,
+            int r2, boolean scroll);
 
     void cellsUpdated(ArrayList<CellData> updatedCellData);
 

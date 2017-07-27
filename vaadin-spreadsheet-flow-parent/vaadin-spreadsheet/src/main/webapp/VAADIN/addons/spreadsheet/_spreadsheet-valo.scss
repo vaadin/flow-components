@@ -194,6 +194,22 @@
         outline: none;
       }
 
+      .arrow {
+        position: absolute;
+        left: 161px;
+        top: 0;
+        line-height: 33px;
+        font-size: x-small;
+      }
+      
+      .namedrangebox {
+        position: absolute;
+        left: 161px;
+        width: 15px;
+        height: 100%;
+        opacity: 0;
+      }
+      
       .fixed-left-panel {
         @include box-sizing(border-box);
         float: left;

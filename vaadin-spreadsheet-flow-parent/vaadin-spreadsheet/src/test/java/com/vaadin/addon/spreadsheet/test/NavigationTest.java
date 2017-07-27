@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.vaadin.testbench.parallel.Browser;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -15,6 +14,7 @@ import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.addon.spreadsheet.elements.AddressUtil;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
+import com.vaadin.testbench.parallel.Browser;
 
 public class NavigationTest extends AbstractSpreadsheetTestCase {
 
@@ -51,7 +51,6 @@ public class NavigationTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testUpdatingAddressFieldMovesSelection() throws Exception {
-        skipBrowser("setAddressFieldValue() does not work correctly with PhantomJS", Browser.PHANTOMJS);
         spreadsheetPage.setAddressFieldValue("A5");
         assertSelectedCell("A5", spreadsheetPage.isCellSelected("A5"));
 
@@ -211,7 +210,6 @@ public class NavigationTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testEnterSelectionRangeInAddress() throws Exception {
-        skipBrowser("setAddressFieldValue() does not work correctly with PhantomJS", Browser.PHANTOMJS);
         spreadsheetPage.setAddressFieldValue("A1:C7");
         assertSelectionRange("A1:C7", true);
     }
@@ -293,8 +291,6 @@ public class NavigationTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testRightKeyDiscardsSelection() throws Exception {
-        skipBrowser("setAddressFieldValue() does not work correctly with PhantomJS", Browser.PHANTOMJS);
-
         spreadsheetPage.setAddressFieldValue("A1:B2");
         // Assert that everything is selected
         assertSelectionRange("A1:B2", true);
@@ -308,8 +304,6 @@ public class NavigationTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testDownKeyDiscardsSelection() throws Exception {
-        skipBrowser("setAddressFieldValue() does not work correctly with PhantomJS", Browser.PHANTOMJS);
-
         spreadsheetPage.setAddressFieldValue("A1:B2");
         // Assert that everything is selected
         assertSelectionRange("A1:B2", true);
@@ -323,7 +317,6 @@ public class NavigationTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testLeftKeyDiscardsSelection() throws Exception {
-        skipBrowser("setAddressFieldValue() does not work correctly with PhantomJS", Browser.PHANTOMJS);
         spreadsheetPage.setAddressFieldValue("B1:C2");
         // Assert that everything is selected
         assertSelectionRange("B1:C2", true);
@@ -335,7 +328,6 @@ public class NavigationTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testUpKeyDiscardsSelection() throws Exception {
-        skipBrowser("setAddressFieldValue() does not work correctly with PhantomJS", Browser.PHANTOMJS);
         spreadsheetPage.setAddressFieldValue("A2:B3");
         // Assert that everything is selected
         assertSelectionRange("A2:B3", true);
@@ -348,7 +340,6 @@ public class NavigationTest extends AbstractSpreadsheetTestCase {
     @Test
     public void testShiftArrowsShrinksSelectionWhenActiveOnEdgeOfSelection()
             throws Exception {
-        skipBrowser("setAddressFieldValue() does not work correctly with PhantomJS", Browser.PHANTOMJS);
         // TODO well this test is a bit incomplete
         spreadsheetPage.setAddressFieldValue("C4:E6");
         assertSelectionRange("C4:E6", true);
@@ -357,7 +348,6 @@ public class NavigationTest extends AbstractSpreadsheetTestCase {
     @Test
     public void testSheetScrollsWhenPushingAgainstRightEdge() throws Exception {
         skipBrowser("AA1 is selected instead of AB1", Browser.IE11);
-        skipBrowser("setAddressFieldValue() does not work correctly with PhantomJS", Browser.PHANTOMJS);
         spreadsheetPage.setAddressFieldValue("Z1");
 
         // We need to press the key two times to make it scroll.
@@ -373,7 +363,6 @@ public class NavigationTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void testSheetScrollsWhenPushingAgainstBottomEdge() throws Exception {
-        skipBrowser("setAddressFieldValue() does not work correctly with PhantomJS", Browser.PHANTOMJS);
         skipBrowser("Sending multiple keys fails in IE sometimes", Browser.IE9, Browser.IE10, Browser.IE11);
 
         spreadsheetPage.setAddressFieldValue("A40");

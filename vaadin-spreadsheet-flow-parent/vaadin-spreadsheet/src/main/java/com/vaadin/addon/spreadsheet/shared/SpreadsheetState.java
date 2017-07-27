@@ -159,4 +159,7 @@ public class SpreadsheetState extends TabIndexState {
 
     @DelegateToWidget
     public boolean lockFormatRows = true;
+
+    @DelegateToWidget
+    public List<String> namedRanges;
 }

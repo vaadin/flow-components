@@ -49,6 +49,8 @@ public class CellSelectionManager implements Serializable {
     private CellRangeAddress paintedCellRange;
     private SelectionChangeEvent latestSelectionEvent;
 
+    private final NamedRangeUtils namedRangeUtils;
+
     private final ArrayList<CellRangeAddress> cellRangeAddresses = new ArrayList<CellRangeAddress>();
     private final ArrayList<CellReference> individualSelectedCells = new ArrayList<CellReference>();
 
@@ -59,6 +61,7 @@ public class CellSelectionManager implements Serializable {
      */
     public CellSelectionManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
+        namedRangeUtils = new NamedRangeUtils(spreadsheet);
     }
 
     /**
@@ -156,10 +159,7 @@ public class CellSelectionManager implements Serializable {
                             selectedCellReference.getCol() + 1, false);
                 }
             } else {
-                handleCellRangeSelection(
-                        new CellReference(paintedCellRange.getFirstRow(),
-                                paintedCellRange.getFirstColumn()),
-                        paintedCellRange, true);
+                handleCellRangeSelection(paintedCellRange);
             }
         } else if (selectedCellReference != null) {
             handleCellAddressChange(selectedCellReference.getRow() + 1,
@@ -211,7 +211,10 @@ public class CellSelectionManager implements Serializable {
      */
     protected void onSheetAddressChanged(String value, boolean initialSelection) {
         try {
-            if (value.contains(":")) {
+            if (namedRangeUtils.isNamedRange(value)) {
+                namedRangeUtils.onNamedRange(value);
+            }
+            else if (value.contains(":")) {
                 CellRangeAddress cra = spreadsheet
                         .createCorrectCellRangeAddress(value);
                 // need to check the range for merged regions
@@ -229,7 +232,7 @@ public class CellSelectionManager implements Serializable {
                 paintedCellRange = cra;
                 cellRangeAddresses.clear();
                 cellRangeAddresses.add(cra);
-            } else {
+            } else if (namedRangeUtils.isCellReference(value)) {
                 final CellReference cellReference = new CellReference(value);
                 MergedRegion region = MergedRegionUtil.findIncreasingSelection(
                         spreadsheet.getMergedRegionContainer(),
@@ -268,6 +271,11 @@ public class CellSelectionManager implements Serializable {
         }
     }
 
+    private void handleCellAddressChange(int rowIndex, int colIndex,
+        boolean initialSelection) {
+        handleCellAddressChange(rowIndex, colIndex, initialSelection, null);
+    }
+
     /**
      * Reports the correct cell selection value (formula/data) and selection.
      * This method is called when the cell selection has changed via the address
@@ -278,8 +286,8 @@ public class CellSelectionManager implements Serializable {
      * @param columnIndex
      *            Index of column, 1-based
      */
-    private void handleCellAddressChange(int rowIndex, int colIndex,
-            boolean initialSelection) {
+    void handleCellAddressChange(int rowIndex, int colIndex,
+            boolean initialSelection, String name) {
         if (rowIndex >= spreadsheet.getState().rows) {
             rowIndex = spreadsheet.getState().rows;
         }
@@ -312,16 +320,16 @@ public class CellSelectionManager implements Serializable {
                             value = spreadsheet.getCellValue(cell);
                         }
                     }
-                    spreadsheet.getRpcProxy().showSelectedCell(colIndex,
+                    spreadsheet.getRpcProxy().showSelectedCell(name, colIndex,
                             rowIndex, value, formula,
                             spreadsheet.isCellLocked(cell), initialSelection);
                 } else {
-                    spreadsheet.getRpcProxy().showSelectedCell(colIndex,
+                    spreadsheet.getRpcProxy().showSelectedCell(name, colIndex,
                             rowIndex, "", false,
                             spreadsheet.isCellLocked(cell), initialSelection);
                 }
             } else {
-                spreadsheet.getRpcProxy().showSelectedCell(colIndex, rowIndex,
+                spreadsheet.getRpcProxy().showSelectedCell(name, colIndex, rowIndex,
                         "", false, spreadsheet.isActiveSheetProtected(),
                         initialSelection);
             }
@@ -362,120 +370,52 @@ public class CellSelectionManager implements Serializable {
      *            1-based
      */
     private void handleCellSelection(int rowIndex, int columnIndex) {
-        Workbook workbook = spreadsheet.getWorkbook();
-        final Row row = workbook.getSheetAt(workbook.getActiveSheetIndex())
-                .getRow(rowIndex - 1);
-        if (row != null) {
-            final Cell cell = row.getCell(columnIndex - 1);
-            if (cell != null) {
-                String value = "";
-                boolean formula = cell.getCellTypeEnum() == CellType.FORMULA;
-                if (!spreadsheet.isCellHidden(cell)) {
-                    if (formula) {
-                        value = cell.getCellFormula();
-                    } else {
-                        value = spreadsheet.getCellValue(cell);
-                    }
-                }
-                spreadsheet.getRpcProxy().showCellValue(value, columnIndex,
-                        rowIndex, formula, spreadsheet.isCellLocked(cell));
-            } else {
-                spreadsheet.getRpcProxy().showCellValue("", columnIndex,
-                        rowIndex, false, spreadsheet.isCellLocked(cell));
-            }
-        } else {
-            spreadsheet.getRpcProxy().showCellValue("", columnIndex, rowIndex,
-                    false, spreadsheet.isActiveSheetProtected());
-        }
+        spreadsheet.getRpcProxy()
+            .updateFormulaBar(null, columnIndex, rowIndex);
     }
 
-    /**
-     * Handles the new cell range that was given in the address field, returns
-     * the range and new selected cell formula/value (if any)
-     * 
-     * @param cra
-     *            Range of cells to select
-     */
+    private void handleCellSelection(int rowIndex, int columnIndex,
+        CellRangeAddress cra) {
+        
+        final String possibleName = namedRangeUtils
+            .getNameForFormulaIfExists(cra);
+
+        spreadsheet.getRpcProxy()
+            .updateFormulaBar(possibleName, columnIndex, rowIndex);
+    }
+    
     protected void handleCellRangeSelection(CellRangeAddress cra) {
-        int row1 = cra.getFirstRow();
-        int row2 = cra.getLastRow();
-        int col1 = cra.getFirstColumn();
-        int col2 = cra.getLastColumn();
-        Workbook workbook = spreadsheet.getWorkbook();
-        final Row row = workbook.getSheetAt(workbook.getActiveSheetIndex())
-                .getRow(row1);
-        if (row != null) {
-            final Cell cell = row.getCell(col1);
-            if (cell != null) {
-                String value = "";
-                boolean formula = cell.getCellTypeEnum() == CellType.FORMULA;
-                if (!spreadsheet.isCellHidden(cell)) {
-                    if (formula) {
-                        value = cell.getCellFormula();
-                    } else {
-                        value = spreadsheet.getCellValue(cell);
-                    }
-                }
-                spreadsheet.getRpcProxy().showSelectedCellRange(col1 + 1,
-                        col2 + 1, row1 + 1, row2 + 1, value, formula,
-                        spreadsheet.isCellLocked(cell));
-            } else {
-                spreadsheet.getRpcProxy().showSelectedCellRange(col1 + 1,
-                        col2 + 1, row1 + 1, row2 + 1, "", false,
-                        spreadsheet.isCellLocked(cell));
-            }
-        } else {
-            spreadsheet.getRpcProxy().showSelectedCellRange(col1 + 1, col2 + 1,
-                    row1 + 1, row2 + 1, "", false,
-                    spreadsheet.isActiveSheetProtected());
-        }
+        final String possibleName = namedRangeUtils
+            .getNameForFormulaIfExists(cra);
+
+        handleCellRangeSelection(possibleName, cra);
+    }
+    
+    protected void handleCellRangeSelection(String name, CellRangeAddress cra) {
+
+        final CellReference firstCell = new CellReference(cra.getFirstRow(),
+            cra.getFirstColumn());
+
+        handleCellRangeSelection(name, firstCell, cra, true);
     }
 
-    /**
-     * Sets the given range and starting point as the current selection.
-     * 
-     * @param startingPoint
-     *            Reference to starting point
-     * @param cellsToSelect
-     *            Selection area
-     */
     protected void handleCellRangeSelection(CellReference startingPoint,
+        CellRangeAddress cellsToSelect, boolean scroll) {
+
+        handleCellRangeSelection(null, startingPoint, cellsToSelect, scroll);
+    }
+
+    private void handleCellRangeSelection(String name, CellReference startingPoint,
             CellRangeAddress cellsToSelect, boolean scroll) {
-        int row1 = cellsToSelect.getFirstRow();
-        int row2 = cellsToSelect.getLastRow();
-        int col1 = cellsToSelect.getFirstColumn();
-        int col2 = cellsToSelect.getLastColumn();
-        Workbook workbook = spreadsheet.getWorkbook();
-        final Row row = workbook.getSheetAt(workbook.getActiveSheetIndex())
-                .getRow(startingPoint.getRow());
-        if (row != null) {
-            final Cell cell = row.getCell(startingPoint.getCol());
-            if (cell != null) {
-                String value = "";
-                boolean formula = cell.getCellTypeEnum() == CellType.FORMULA;
-                if (!spreadsheet.isCellHidden(cell)) {
-                    if (formula) {
-                        value = cell.getCellFormula();
-                    } else {
-                        value = spreadsheet.getCellValue(cell);
-                    }
-                }
-                spreadsheet.getRpcProxy().setSelectedCellAndRange(
-                        startingPoint.getCol() + 1, startingPoint.getRow() + 1,
-                        col1 + 1, col2 + 1, row1 + 1, row2 + 1, value, formula,
-                        spreadsheet.isCellLocked(cell), scroll);
-            } else {
-                spreadsheet.getRpcProxy().setSelectedCellAndRange(
-                        startingPoint.getCol() + 1, startingPoint.getRow() + 1,
-                        col1 + 1, col2 + 1, row1 + 1, row2 + 1, "", false,
-                        spreadsheet.isCellLocked(cell), scroll);
-            }
-        } else {
-            spreadsheet.getRpcProxy().setSelectedCellAndRange(
-                    startingPoint.getCol() + 1, startingPoint.getRow() + 1,
-                    col1 + 1, col2 + 1, row1 + 1, row2 + 1, "", false,
-                    spreadsheet.isActiveSheetProtected(), scroll);
-        }
+        int row1 = cellsToSelect.getFirstRow() + 1;
+        int row2 = cellsToSelect.getLastRow() + 1;
+        int col1 = cellsToSelect.getFirstColumn() + 1;
+        int col2 = cellsToSelect.getLastColumn() + 1;
+
+        spreadsheet.getRpcProxy().setSelectedCellAndRange(name,
+                startingPoint.getCol() + 1, startingPoint.getRow() + 1, col1,
+                col2, row1, row2, scroll);
+
         selectedCellReference = startingPoint;
         cellRangeAddresses.clear();
         individualSelectedCells.clear();
@@ -485,17 +425,6 @@ public class CellSelectionManager implements Serializable {
         }
         ensureClientHasSelectionData();
         fireNewSelectionChangeEvent();
-    }
-
-    /**
-     * Sets the given range as the current selection
-     * 
-     * @param cra
-     *            New cell range to be selected
-     */
-    protected void cellRangeSelected(CellRangeAddress cra) {
-        onCellRangeSelected(cra.getFirstRow() + 1, cra.getFirstColumn() + 1,
-                cra.getLastRow() + 1, cra.getLastColumn() + 1);
     }
 
     /**
@@ -547,10 +476,11 @@ public class CellSelectionManager implements Serializable {
         selectedCellReference = new CellReference(selectedCellRow - 1,
                 selectedCellColumn - 1);
 
-        handleCellSelection(selectedCellRow, selectedCellColumn);
-
         CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(row1,
                 col1, row2, col2);
+
+        handleCellSelection(selectedCellRow, selectedCellColumn, cra);
+        
         paintedCellRange = cra;
         cellRangeAddresses.add(cra);
 

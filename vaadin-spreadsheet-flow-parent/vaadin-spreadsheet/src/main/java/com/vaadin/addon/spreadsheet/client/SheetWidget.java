@@ -4843,7 +4843,12 @@ public class SheetWidget extends Panel {
     }
 
     public int getRightVisibleColumnIndex() {
+        if (rows.size() == 0) {
+            return lastColumnIndex;
+        }
+        
         int index = lastColumnIndex;
+            
         final List<Cell> cells = rows.get(0);
         int size = cells.size();
         for (int i = size - 1; i > 0; i--) {

@@ -39,6 +39,8 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.vaadin.addon.spreadsheet.client.SheetWidget.CellCoord;
 
@@ -73,6 +75,8 @@ public class FormulaBarWidget extends Composite {
     }
 
     private final TextBox formulaField;
+    private final ListBox namedRangeBox;
+    private final HTML namedRangeBoxArrow;
     private final TextBox addressField;
     private final Element formulaOverlay = DOM.createDiv();
 
@@ -151,12 +155,24 @@ public class FormulaBarWidget extends Composite {
         formulaField.setStyleName("functionfield");
         addressField.setStyleName("addressfield");
 
+        namedRangeBox = new ListBox();
+        namedRangeBox.setStyleName("namedrangebox");
+        namedRangeBox.setMultipleSelect(false);
+        namedRangeBox.addItem("");
+
+        namedRangeBoxArrow = new HTML("▼");
+        namedRangeBoxArrow.setStyleName("arrow");
+
+        setNamedRangeBoxVisible(false);
+
         FlowPanel panel = new FlowPanel();
         FlowPanel left = new FlowPanel();
         FlowPanel right = new FlowPanel();
         left.setStyleName("fixed-left-panel");
         right.setStyleName("adjusting-right-panel");
         left.add(addressField);
+        left.add(namedRangeBoxArrow);
+        left.add(namedRangeBox);
         right.add(formulaField);
         panel.add(left);
         panel.add(right);
@@ -171,6 +187,19 @@ public class FormulaBarWidget extends Composite {
         getElement().appendChild(formulaOverlay);
     }
 
+    private void trySelectNamedRangeBoxValue(String value) {
+        final int size = namedRangeBox.getItemCount();
+
+        for (int i = 0; i < size; i++) {
+            if (namedRangeBox.getItemText(i).equals(value)) {
+                namedRangeBox.setSelectedIndex(i);
+                return;
+            }
+        }
+        
+        namedRangeBox.setSelectedIndex(0);
+    }
+    
     /**
      * Removes all keyboard selection variables, clears paint
      */
@@ -238,6 +267,15 @@ public class FormulaBarWidget extends Composite {
     }
 
     private void initListeners() {
+        Event.sinkEvents(namedRangeBox.getElement(), Event.ONCHANGE);
+        Event.setEventListener(namedRangeBox.getElement(), new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                addressField.setValue(namedRangeBox.getSelectedValue());
+                submitAddressValue();
+            }
+        });
+
         Event.sinkEvents(addressField.getElement(), Event.ONKEYUP
                 | Event.FOCUSEVENTS);
         Event.setEventListener(addressField.getElement(), new EventListener() {
@@ -248,8 +286,8 @@ public class FormulaBarWidget extends Composite {
                     final int keyCode = event.getKeyCode();
                     if (keyCode == KeyCodes.KEY_ENTER) {
                         // submit address value
-                        handler.onAddressEntered(addressField.getValue()
-                                .replaceAll(" ", ""));
+                        submitAddressValue();
+                        trySelectNamedRangeBoxValue(addressField.getValue());
                         addressField.setFocus(false);
                     } else if (keyCode == KeyCodes.KEY_ESCAPE) {
                         revertCellAddressValue();
@@ -317,6 +355,11 @@ public class FormulaBarWidget extends Composite {
             }
 
         });
+    }
+
+    private void submitAddressValue() {
+        handler.onAddressEntered(addressField.getValue()
+                .replaceAll(" ", ""));
     }
 
     /**
@@ -936,6 +979,7 @@ public class FormulaBarWidget extends Composite {
     public void setSelectedCellAddress(String selection) {
         cachedAddressFieldValue = selection;
         addressField.setValue(selection);
+        trySelectNamedRangeBoxValue(selection);
     }
 
     public void setCellPlainValue(String plainValue) {
@@ -1126,5 +1170,27 @@ public class FormulaBarWidget extends Composite {
                 checkForCoordsAtCaret();
             }
         });
+    }
+
+    public void setNamedRanges(List<String> namedRanges) {
+        namedRangeBox.clear();
+        namedRangeBox.addItem("");
+
+        if (namedRanges != null && !namedRanges.isEmpty()) {
+            setNamedRangeBoxVisible(true);
+
+            for (String name : namedRanges) {
+                namedRangeBox.addItem(name);
+            }
+            
+            trySelectNamedRangeBoxValue(addressField.getValue());
+        } else {
+            setNamedRangeBoxVisible(false);
+        }
+    }
+
+    private void setNamedRangeBoxVisible(boolean visible) {
+        namedRangeBox.setVisible(visible);
+        namedRangeBoxArrow.setVisible(visible);
     }
 }

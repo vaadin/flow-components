@@ -1,10 +1,15 @@
 package com.vaadin.addon.spreadsheet.test.pageobjects;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.Select;
 
 import com.vaadin.addon.spreadsheet.elements.AddressUtil;
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
@@ -14,11 +19,9 @@ import com.vaadin.testbench.By;
 public class SpreadsheetPage extends Page {
 
     public static final String BACKGROUND_COLOR = "background-color";
-    private final SheetSelection selection;
 
     public SpreadsheetPage(WebDriver driver) {
         super(driver);
-        selection = new SheetSelection(driver, this);
     }
 
     public boolean isDisplayed() {
@@ -90,7 +93,7 @@ public class SpreadsheetPage extends Page {
     public void setAddressFieldValue(String address) {
         WebElement addressField = getAddressField();
         addressField.clear();
-        addressField.sendKeys(address + Keys.RETURN);
+        addressField.sendKeys(address + Keys.ENTER);
     }
 
     public void dragFromCellToCell(String from, String to) {
@@ -194,5 +197,64 @@ public class SpreadsheetPage extends Page {
     private SheetCellElement getCellAt(String address) {
         Point point = AddressUtil.addressToPoint(address);
         return getCellAt(point.getX(), point.getY());
+    }
+
+    public String getSelectionFormula() {
+        final SpreadsheetElement sprElement = $(SpreadsheetElement.class).first();
+
+        WebElement selection = findElement(org.openqa.selenium.By.className("sheet-selection"));
+        final String[] classes = selection.getAttribute("class").split(" ");
+
+        int startRow = -1;
+        int startColumn = -1;
+
+        for (String c : classes) {
+            if (c.startsWith("row")) {
+                startRow = Integer.parseInt(c.substring(3));
+            }
+            if (c.startsWith("col")) {
+                startColumn = Integer.parseInt(c.substring(3));
+            }
+        }
+
+        int endRow = startRow + 1;
+        while (sprElement.getCellAt(endRow, startColumn).isCellSelected()) {
+            endRow++;
+        }
+        endRow--;
+
+        int endColumn = startColumn;
+        while (sprElement.getCellAt(startRow, endColumn).isCellSelected()) {
+            endColumn++;
+        }
+        endColumn--;
+
+        return new CellRangeAddress(startRow - 1, endRow - 1, startColumn - 1,
+            endColumn - 1).formatAsString();
+    }
+
+    public String getSelectedSheetName() {
+        WebElement selectedSheetTab = findElement(
+            By.cssSelector(".sheet-tabsheet-tab.selected-tab"));
+
+        return selectedSheetTab.getText();
+    }
+
+    public List<String> getNamedRanges() {
+        final List<WebElement> options = new Select(
+            findElement(By.className("namedrangebox"))).getOptions();
+
+        final List<String> optionStrings = new ArrayList<String>();
+        
+        for (WebElement option : options) {
+            optionStrings.add(option.getText());
+        }
+
+        return optionStrings;
+    }
+
+    public void selectNamedRange(String name) {
+        new Select(findElement(By.className("namedrangebox")))
+            .selectByVisibleText(name);
     }
 }

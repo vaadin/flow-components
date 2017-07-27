@@ -4635,9 +4635,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *            Index of the last column of the area, 0-based
      */
     public void setSelectionRange(int row1, int col1, int row2, int col2) {
-        CellReference ref = new CellReference(row1, col1);
         CellRangeAddress cra = new CellRangeAddress(row1, row2, col1, col2);
-        selectionManager.handleCellRangeSelection(ref, cra, true);
+        selectionManager.handleCellRangeSelection(cra);
     }
 
     /**
@@ -4648,8 +4647,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void setSelection(String selectionRange) {
         CellRangeAddress cra = CellRangeAddress.valueOf(selectionRange);
-        setSelectionRange(cra.getFirstRow(), cra.getFirstColumn(),
-                cra.getLastRow(), cra.getLastColumn());
+        selectionManager.handleCellRangeSelection(cra);
     }
 
     /**

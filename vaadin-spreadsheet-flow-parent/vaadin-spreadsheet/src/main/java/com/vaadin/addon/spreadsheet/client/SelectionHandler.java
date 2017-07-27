@@ -100,11 +100,10 @@ public class SelectionHandler {
         }
     }
 
-    public void selectCellRange(int selectedCellColumn, int selectedCellRow,
-            int firstColumn, int lastColumn, int firstRow, int lastRow,
-            String value, boolean formula, boolean locked, boolean scroll) {
+    public void selectCellRange(String name, int selectedCellColumn, int selectedCellRow,
+            int firstColumn, int lastColumn, int firstRow, int lastRow, boolean scroll) {
         spreadsheet.updateSelectedCellValues(selectedCellColumn,
-                selectedCellRow);
+                selectedCellRow, name);
         if (!sheetWidget.isCoherentSelection()) {
             sheetWidget.setCoherentSelection(true);
         }
@@ -133,7 +132,7 @@ public class SelectionHandler {
         sheetWidget.focusSheet();
     }
 
-    public void selectCell(int col, int row, String value, boolean formula,
+    public void selectCell(String name, int col, int row, String value, boolean formula,
             boolean locked, boolean initialSelection) {
         if (spreadsheet.customCellEditorDisplayed) {
             spreadsheet.customCellEditorDisplayed = false;
@@ -158,8 +157,12 @@ public class SelectionHandler {
             spreadsheet.formulaBarWidget.setCellPlainValue(value);
         }
         spreadsheet.formulaBarWidget.setFormulaFieldEnabled(!locked);
-        spreadsheet.formulaBarWidget.setSelectedCellAddress(spreadsheet
-                .createCellAddress(col, row));
+        if (name != null) {
+            spreadsheet.formulaBarWidget.setSelectedCellAddress(name);
+        } else {
+            spreadsheet.formulaBarWidget
+                .setSelectedCellAddress(spreadsheet.createCellAddress(col, row));
+        }
 
         // scroll the cell into view
         if (!sheetWidget.isSelectedCellCompletelyVisible()) {
