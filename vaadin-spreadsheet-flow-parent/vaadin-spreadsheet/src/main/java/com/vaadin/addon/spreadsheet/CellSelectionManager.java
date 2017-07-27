@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -301,7 +302,7 @@ public class CellSelectionManager implements Serializable {
                 final Cell cell = row.getCell(colIndex - 1);
                 if (cell != null) {
                     String value = "";
-                    boolean formula = cell.getCellType() == Cell.CELL_TYPE_FORMULA;
+                    boolean formula = cell.getCellTypeEnum() == CellType.FORMULA;
                     if (!spreadsheet.isCellHidden(cell)) {
                         if (formula) {
                             value = cell.getCellFormula();
@@ -368,7 +369,7 @@ public class CellSelectionManager implements Serializable {
             final Cell cell = row.getCell(columnIndex - 1);
             if (cell != null) {
                 String value = "";
-                boolean formula = cell.getCellType() == Cell.CELL_TYPE_FORMULA;
+                boolean formula = cell.getCellTypeEnum() == CellType.FORMULA;
                 if (!spreadsheet.isCellHidden(cell)) {
                     if (formula) {
                         value = cell.getCellFormula();
@@ -407,7 +408,7 @@ public class CellSelectionManager implements Serializable {
             final Cell cell = row.getCell(col1);
             if (cell != null) {
                 String value = "";
-                boolean formula = cell.getCellType() == Cell.CELL_TYPE_FORMULA;
+                boolean formula = cell.getCellTypeEnum() == CellType.FORMULA;
                 if (!spreadsheet.isCellHidden(cell)) {
                     if (formula) {
                         value = cell.getCellFormula();
@@ -451,7 +452,7 @@ public class CellSelectionManager implements Serializable {
             final Cell cell = row.getCell(startingPoint.getCol());
             if (cell != null) {
                 String value = "";
-                boolean formula = cell.getCellType() == Cell.CELL_TYPE_FORMULA;
+                boolean formula = cell.getCellTypeEnum() == CellType.FORMULA;
                 if (!spreadsheet.isCellHidden(cell)) {
                     if (formula) {
                         value = cell.getCellFormula();

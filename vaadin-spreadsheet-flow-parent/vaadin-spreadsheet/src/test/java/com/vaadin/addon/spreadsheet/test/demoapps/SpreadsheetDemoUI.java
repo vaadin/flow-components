@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.ExcelStyleDateFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -628,7 +629,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             final Sheet sheet = getTestWorkbook().createSheet(
                     "Custom Components");
             Row lastRow = sheet.createRow(100);
-            lastRow.createCell(100, Cell.CELL_TYPE_BOOLEAN).setCellValue(true);
+            lastRow.createCell(100, CellType.BOOLEAN).setCellValue(true);
             sheet.setColumnWidth(0, 6000);
             sheet.setColumnWidth(1, 6000);
             sheet.setColumnWidth(2, 6000);
@@ -646,9 +647,9 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
                     Object value = data[i][j];
                     if (i == 0 || j == 0 || j == 4 || j == 5) {
                         // string cells
-                        cell.setCellType(Cell.CELL_TYPE_STRING);
+                        cell.setCellType(CellType.STRING);
                     } else if (j == 2 || j == 3) {
-                        cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+                        cell.setCellType(CellType.NUMERIC);
                     }
                     final DataFormat format = getTestWorkbook()
                             .createDataFormat();
@@ -796,7 +797,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             }
 
             if (cell != null) {
-                if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
+                if (cell.getCellTypeEnum() == CellType.BOOLEAN) {
                     ((CheckBox) customEditor).setValue(cell
                             .getBooleanCellValue());
                 } else if (customEditor instanceof DateField) {

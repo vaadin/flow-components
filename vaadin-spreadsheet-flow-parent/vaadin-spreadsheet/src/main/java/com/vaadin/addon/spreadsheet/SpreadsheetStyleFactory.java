@@ -17,30 +17,6 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_CENTER;
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_CENTER_SELECTION;
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_FILL;
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_JUSTIFY;
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_LEFT;
-import static org.apache.poi.ss.usermodel.CellStyle.ALIGN_RIGHT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DASHED;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DASH_DOT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DASH_DOT_DOT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DOTTED;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_DOUBLE;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_HAIR;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM_DASHED;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM_DASH_DOT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_MEDIUM_DASH_DOT_DOT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_NONE;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_SLANTED_DASH_DOT;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_THICK;
-import static org.apache.poi.ss.usermodel.CellStyle.BORDER_THIN;
-import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_BOTTOM;
-import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_CENTER;
-import static org.apache.poi.ss.usermodel.CellStyle.VERTICAL_TOP;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,9 +32,11 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FontFamily;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
@@ -130,25 +108,30 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     }
 
-    private static final Map<Short, String> ALIGN = mapFor(ALIGN_LEFT, "left",
-            ALIGN_CENTER, "center", ALIGN_RIGHT, "right", ALIGN_FILL, "left",
-            ALIGN_JUSTIFY, "left", ALIGN_CENTER_SELECTION, "center");
+    private static final Map<HorizontalAlignment, String> ALIGN = mapFor(HorizontalAlignment.LEFT, "left",
+    		HorizontalAlignment.CENTER, "center", HorizontalAlignment.RIGHT, "right", HorizontalAlignment.FILL, "left",
+    		HorizontalAlignment.JUSTIFY, "left", HorizontalAlignment.CENTER_SELECTION, "center");
 
-    private static final Map<Short, String> VERTICAL_ALIGN = mapFor(
-            VERTICAL_BOTTOM, "flex-end", VERTICAL_CENTER, "center",
-            VERTICAL_TOP, "flex-start");
+    private static final Map<VerticalAlignment, String> VERTICAL_ALIGN = mapFor(
+    		VerticalAlignment.BOTTOM, "flex-end", VerticalAlignment.CENTER, "center",
+    		VerticalAlignment.TOP, "flex-start");
 
-    static final Map<Short, BorderStyle> BORDER = mapFor(BORDER_DASH_DOT,
-            BorderStyle.DASHED_THIN, BORDER_DASH_DOT_DOT,
-            BorderStyle.DASHED_THIN, BORDER_DASHED, BorderStyle.DASHED_THIN,
-            BORDER_DOTTED, BorderStyle.DOTTED_THIN, BORDER_DOUBLE,
-            BorderStyle.DOUBLE, BORDER_HAIR, BorderStyle.SOLID_THIN,
-            BORDER_MEDIUM, BorderStyle.SOLID_MEDIUM, BORDER_MEDIUM_DASH_DOT,
-            BorderStyle.DASHED_MEDIUM, BORDER_MEDIUM_DASH_DOT_DOT,
-            BorderStyle.DASHED_MEDIUM, BORDER_MEDIUM_DASHED,
-            BorderStyle.DASHED_MEDIUM, BORDER_NONE, BorderStyle.NONE,
-            BORDER_SLANTED_DASH_DOT, BorderStyle.DASHED_MEDIUM, BORDER_THICK,
-            BorderStyle.SOLID_THICK, BORDER_THIN, BorderStyle.SOLID_THIN);
+    static final Map<org.apache.poi.ss.usermodel.BorderStyle, BorderStyle> BORDER = mapFor(
+            org.apache.poi.ss.usermodel.BorderStyle.DASH_DOT, BorderStyle.DASHED_THIN,
+            org.apache.poi.ss.usermodel.BorderStyle.DASH_DOT_DOT, BorderStyle.DASHED_THIN,
+            org.apache.poi.ss.usermodel.BorderStyle.DASHED, BorderStyle.DASHED_THIN,
+            org.apache.poi.ss.usermodel.BorderStyle.DOTTED, BorderStyle.DOTTED_THIN, 
+            org.apache.poi.ss.usermodel.BorderStyle.DOUBLE, BorderStyle.DOUBLE, 
+            org.apache.poi.ss.usermodel.BorderStyle.HAIR, BorderStyle.SOLID_THIN,
+            org.apache.poi.ss.usermodel.BorderStyle.MEDIUM, BorderStyle.SOLID_MEDIUM, 
+            org.apache.poi.ss.usermodel.BorderStyle.MEDIUM_DASH_DOT, BorderStyle.DASHED_MEDIUM, 
+            org.apache.poi.ss.usermodel.BorderStyle.MEDIUM_DASH_DOT_DOT, BorderStyle.DASHED_MEDIUM, 
+            org.apache.poi.ss.usermodel.BorderStyle.MEDIUM_DASHED, BorderStyle.DASHED_MEDIUM, 
+            org.apache.poi.ss.usermodel.BorderStyle.NONE, BorderStyle.NONE,
+            null, BorderStyle.NONE,
+            org.apache.poi.ss.usermodel.BorderStyle.SLANTED_DASH_DOT, BorderStyle.DASHED_MEDIUM, 
+            org.apache.poi.ss.usermodel.BorderStyle.THICK, BorderStyle.SOLID_THICK, 
+            org.apache.poi.ss.usermodel.BorderStyle.THIN, BorderStyle.SOLID_THIN);
 
     /** CellStyle index to selector + style map */
     private final HashMap<Integer, String> shiftedBorderTopStyles = new HashMap<Integer, String>();
@@ -175,7 +158,7 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private Font defaultFont;
 
-    private short defaultTextAlign;
+    private HorizontalAlignment defaultTextAlign;
 
     private short defaultFontHeightInPoints;
 
@@ -209,7 +192,7 @@ public class SpreadsheetStyleFactory implements Serializable {
 
         // get default text alignments
         CellStyle cellStyle = workbook.getCellStyleAt((short) 0);
-        defaultTextAlign = cellStyle.getAlignment();
+        defaultTextAlign = cellStyle.getAlignmentEnum();
         // defaultVerticalAlign = cellStyle.getVerticalAlignment();
 
         // create default style (cell style 0)
@@ -593,8 +576,8 @@ public class SpreadsheetStyleFactory implements Serializable {
         fontStyle(sb, cellStyle);
         colorConverter.colorStyles(cellStyle, sb);
         borderStyles(sb, cellStyle);
-        if (cellStyle.getAlignment() != defaultTextAlign) {
-            styleOut(sb, "text-align", cellStyle.getAlignment(), ALIGN);
+        if (cellStyle.getAlignmentEnum() != defaultTextAlign) {
+            styleOut(sb, "text-align", cellStyle.getAlignmentEnum(), ALIGN);
             // TODO For correct overflow, rtl should be used for right align
             // if (cellStyle.getAlignment() == ALIGN_RIGHT) {
             // sb.append("direction:rtl;");
@@ -604,7 +587,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         // excel default is bottom, so that is what we have in the CSS base
         // files.
         // TODO This only works on modern (10+) IE.
-        styleOut(sb, "justify-content", cellStyle.getVerticalAlignment(),
+        styleOut(sb, "justify-content", cellStyle.getVerticalAlignmentEnum(),
                 VERTICAL_ALIGN);
 
         if (cellStyle.getWrapText()) { // default is to overflow
@@ -791,10 +774,8 @@ public class SpreadsheetStyleFactory implements Serializable {
                     cellStyle.getFontIndex());
             defaultFontFamily = styleFontFamily(defaultFont);
             sb.append(defaultFontFamily);
-            if (defaultFont.getBoldweight() != Font.BOLDWEIGHT_NORMAL) {
-                sb.append("font-weight:");
-                sb.append(defaultFont.getBoldweight());
-                sb.append(";");
+            if (defaultFont.getBold()) {
+                sb.append("font-weight:bold;");
             }
             if (defaultFont.getItalic()) {
                 sb.append("font-style:italic;");
@@ -823,10 +804,8 @@ public class SpreadsheetStyleFactory implements Serializable {
             if (!fontFamily.equals(defaultFontFamily)) {
                 sb.append(fontFamily);
             }
-            if (font.getBoldweight() != Font.BOLDWEIGHT_NORMAL) {
-                sb.append("font-weight:");
-                sb.append(font.getBoldweight());
-                sb.append(";");
+            if (font.getBold()) {
+                sb.append("font-weight:bold;");
             }
             if (font.getItalic()) {
                 sb.append("font-style:italic;");
@@ -894,7 +873,7 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private String getBorderRightStyle(CellStyle cellStyle) {
         StringBuilder sb = new StringBuilder();
-        BorderStyle borderRight = BORDER.get(cellStyle.getBorderRight());
+        BorderStyle borderRight = BORDER.get(cellStyle.getBorderRightEnum());
         if (cellStyle instanceof XSSFCellStyle
                 && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {
             // borders from theme are not working in POI 3.9
@@ -907,7 +886,7 @@ public class SpreadsheetStyleFactory implements Serializable {
                         .getStyle() : null;
                 if (ptrn != null) {
                     Short key = (short) (ptrn.intValue() - 1);
-                    borderRight = BORDER.get(key);
+                    borderRight = BORDER.get(org.apache.poi.ss.usermodel.BorderStyle.valueOf(key));
                 }
             }
         }
@@ -922,7 +901,7 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private String getBorderBottomStyle(CellStyle cellStyle) {
         StringBuilder sb = new StringBuilder();
-        BorderStyle borderBottom = BORDER.get(cellStyle.getBorderBottom());
+        BorderStyle borderBottom = BORDER.get(cellStyle.getBorderBottomEnum());
         if (cellStyle instanceof XSSFCellStyle
                 && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {
             // borders from theme are not working in POI 3.9
@@ -935,7 +914,7 @@ public class SpreadsheetStyleFactory implements Serializable {
                         .getStyle() : null;
                 if (ptrn != null) {
                     Short key = (short) (ptrn.intValue() - 1);
-                    borderBottom = BORDER.get(key);
+                    borderBottom = BORDER.get(org.apache.poi.ss.usermodel.BorderStyle.valueOf(key));
                 }
             }
         }
@@ -950,10 +929,10 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private void borderStyles(StringBuilder sb, CellStyle cellStyle) {
 
-        BorderStyle borderLeft = BORDER.get(cellStyle.getBorderLeft());
-        BorderStyle borderRight = BORDER.get(cellStyle.getBorderRight());
-        BorderStyle borderTop = BORDER.get(cellStyle.getBorderTop());
-        BorderStyle borderBottom = BORDER.get(cellStyle.getBorderBottom());
+        BorderStyle borderLeft = BORDER.get(cellStyle.getBorderLeftEnum());
+        BorderStyle borderRight = BORDER.get(cellStyle.getBorderRightEnum());
+        BorderStyle borderTop = BORDER.get(cellStyle.getBorderTopEnum());
+        BorderStyle borderBottom = BORDER.get(cellStyle.getBorderBottomEnum());
 
         if (cellStyle instanceof XSSFCellStyle
                 && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {
@@ -968,7 +947,7 @@ public class SpreadsheetStyleFactory implements Serializable {
                         .getStyle() : null;
                 if (ptrn != null) {
                     Short key = (short) (ptrn.intValue() - 1);
-                    borderLeft = BORDER.get(key);
+                    borderLeft = BORDER.get(org.apache.poi.ss.usermodel.BorderStyle.valueOf(key));
                 }
             }
             if (borderRight == BorderStyle.NONE) {
@@ -976,7 +955,7 @@ public class SpreadsheetStyleFactory implements Serializable {
                         .getStyle() : null;
                 if (ptrn != null) {
                     Short key = (short) (ptrn.intValue() - 1);
-                    borderRight = BORDER.get(key);
+                    borderRight = BORDER.get(org.apache.poi.ss.usermodel.BorderStyle.valueOf(key));
                 }
             }
             if (borderBottom == BorderStyle.NONE) {
@@ -984,7 +963,7 @@ public class SpreadsheetStyleFactory implements Serializable {
                         .getStyle() : null;
                 if (ptrn != null) {
                     Short key = (short) (ptrn.intValue() - 1);
-                    borderBottom = BORDER.get(key);
+                    borderBottom = BORDER.get(org.apache.poi.ss.usermodel.BorderStyle.valueOf(key));
                 }
             }
             if (borderTop == BorderStyle.NONE) {
@@ -992,7 +971,7 @@ public class SpreadsheetStyleFactory implements Serializable {
                         .getStyle() : null;
                 if (ptrn != null) {
                     Short key = (short) (ptrn.intValue() - 1);
-                    borderTop = BORDER.get(key);
+                    borderTop = BORDER.get(org.apache.poi.ss.usermodel.BorderStyle.valueOf(key));
                 }
 
             }

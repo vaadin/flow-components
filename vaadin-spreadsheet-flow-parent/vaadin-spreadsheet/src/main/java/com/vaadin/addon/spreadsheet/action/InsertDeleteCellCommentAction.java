@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
@@ -52,7 +53,7 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
                     && event.getIndividualSelectedCells().size() == 0) {
                 CellReference cr = event.getSelectedCellReference();
                 Comment cellComment = spreadsheet.getActiveSheet()
-                        .getCellComment(cr.getRow(), cr.getCol());
+                        .getCellComment(new CellAddress(cr.getRow(), cr.getCol()));
                 if (cellComment == null) {
                     setCaption("Insert comment");
                 } else {

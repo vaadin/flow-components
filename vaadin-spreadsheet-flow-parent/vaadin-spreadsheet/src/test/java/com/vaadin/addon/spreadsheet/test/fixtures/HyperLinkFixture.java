@@ -1,5 +1,6 @@
 package com.vaadin.addon.spreadsheet.test.fixtures;
 
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Hyperlink;
@@ -40,12 +41,12 @@ public class HyperLinkFixture implements SpreadsheetFixture {
         cell = spreadsheet.createCell(2, 1, "file link");
         sheet = cell.getSheet();
         helper = sheet.getWorkbook().getCreationHelper();
-        link = helper.createHyperlink(Hyperlink.LINK_FILE);
+        link = helper.createHyperlink(HyperlinkType.FILE);
         link.setAddress("/file-path");
         cell.setHyperlink(link);
 
         cell = spreadsheet.createCell(2, 2, "change me");
-        link = helper.createHyperlink(Hyperlink.LINK_DOCUMENT);
+        link = helper.createHyperlink(HyperlinkType.DOCUMENT);
         ((XSSFHyperlink) link).setTooltip("handled hyperlink");
         cell.setHyperlink(link);
 

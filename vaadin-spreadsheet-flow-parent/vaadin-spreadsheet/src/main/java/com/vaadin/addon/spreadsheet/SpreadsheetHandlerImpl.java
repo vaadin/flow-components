@@ -17,19 +17,6 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
-import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
-import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedEditEvent;
-import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
-import com.vaadin.addon.spreadsheet.command.CellValueCommand;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.RichTextString;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellReference;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +25,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.RichTextString;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
+
+import com.vaadin.addon.spreadsheet.Spreadsheet.CellValueChangeEvent;
+import com.vaadin.addon.spreadsheet.Spreadsheet.ProtectedEditEvent;
+import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
+import com.vaadin.addon.spreadsheet.command.CellValueCommand;
 
 /**
  * Implementation of the Spreadsheet Server RPC interface.
@@ -309,13 +312,13 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                     Double numVal = SpreadsheetUtil.parseNumber(cell,
                             cellContent, spreadsheet.getLocale());
                     if (numVal != null) {
-                        cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+                        cell.setCellType(CellType.NUMERIC);
                         cell.setCellValue(numVal);
                     } else {
                         cell.setCellValue(cellContent);
                     }
                 } else {
-                    cell.setCellType(Cell.CELL_TYPE_BLANK);
+                    cell.setCellType(CellType.BLANK);
                     spreadsheet.markCellAsDeleted(cell, true);
                 }
 
@@ -447,7 +450,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
 
         for (Cell targetCell : targetCells) {
-            targetCell.setCellType(Cell.CELL_TYPE_BLANK);
+            targetCell.setCellType(CellType.BLANK);
             spreadsheet.markCellAsDeleted(targetCell, true);
         }
 
@@ -459,7 +462,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     public void updateCellComment(String text, int col, int row) {
         CreationHelper factory = spreadsheet.getWorkbook().getCreationHelper();
         RichTextString str = factory.createRichTextString(text);
-        spreadsheet.getActiveSheet().getCellComment(row - 1, col - 1)
+        spreadsheet.getActiveSheet().getCellComment(new CellAddress(row - 1, col - 1))
                 .setString(str);
     }
 

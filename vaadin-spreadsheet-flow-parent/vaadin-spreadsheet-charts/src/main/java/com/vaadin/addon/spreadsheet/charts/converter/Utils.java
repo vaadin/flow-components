@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellReference;
@@ -154,10 +155,10 @@ public class Utils {
             Sheet sheet = spreadsheet.getWorkbook()
                     .getSheet(ref.getSheetName());
             Cell cell = spreadsheet.getCell(ref, sheet);
-            spreadsheet.getFormulaEvaluator().evaluateFormulaCell(cell);
+            spreadsheet.getFormulaEvaluator().evaluateFormulaCellEnum(cell);
 
-            if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC
-                    || cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+            if (cell.getCellTypeEnum() == CellType.NUMERIC
+                    || cell.getCellTypeEnum() == CellType.FORMULA) {
                 return cell.getNumericCellValue();
             }
         } catch (NullPointerException e) {

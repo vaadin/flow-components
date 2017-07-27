@@ -1,8 +1,10 @@
 package com.vaadin.addon.spreadsheet.test.fixtures;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -22,19 +24,19 @@ public class StylesFixture implements SpreadsheetFixture {
 
         c = spreadsheet.createCell(1, 0, "hcenter");
         cellStyle = wb.createCellStyle();
-        cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
         c.setCellStyle(cellStyle);
         sssf.cellStyleUpdated(c, true);
 
         c = spreadsheet.createCell(1, 1, "right align");
         cellStyle = wb.createCellStyle();
-        cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+        cellStyle.setAlignment(HorizontalAlignment.RIGHT);
         c.setCellStyle(cellStyle);
         sssf.cellStyleUpdated(c, true);
 
         c = spreadsheet.createCell(2, 0, "blue bottom");
         cellStyle = wb.createCellStyle();
-        cellStyle.setBorderBottom(CellStyle.BORDER_THICK);
+        cellStyle.setBorderBottom(BorderStyle.THICK);
         cellStyle.setBottomBorderColor(IndexedColors.BLUE.getIndex());
         c.setCellStyle(cellStyle);
         sssf.cellStyleUpdated(c, true);
@@ -55,7 +57,7 @@ public class StylesFixture implements SpreadsheetFixture {
 
         c = spreadsheet.createCell(3, 1, "bold text");
         font = wb.createFont();
-        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        font.setBold(true);
         cellStyle = wb.createCellStyle();
         cellStyle.setFont(font);
         c.setCellStyle(cellStyle);
@@ -87,14 +89,14 @@ public class StylesFixture implements SpreadsheetFixture {
         c = spreadsheet.createCell(6, 1,
                 "right aligned that should overflow by default to other cells");
         cellStyle = wb.createCellStyle();
-        cellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
+        cellStyle.setAlignment(HorizontalAlignment.RIGHT);
         c.setCellStyle(cellStyle);
         sssf.cellStyleUpdated(c, true);
         c = spreadsheet
                 .createCell(7, 1,
                         "center aligned text that should overflow by default to other cells");
         cellStyle = wb.createCellStyle();
-        cellStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        cellStyle.setAlignment(HorizontalAlignment.CENTER);
         c.setCellStyle(cellStyle);
         sssf.cellStyleUpdated(c, true);
 

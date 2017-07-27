@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
@@ -48,7 +49,7 @@ public class ShowHideCellCommentAction extends SpreadsheetAction {
                     && event.getIndividualSelectedCells().size() == 0) {
                 CellReference cr = event.getSelectedCellReference();
                 Comment cellComment = spreadsheet.getActiveSheet()
-                        .getCellComment(cr.getRow(), cr.getCol());
+                        .getCellComment(new CellAddress(cr.getRow(), cr.getCol()));
                 if (cellComment != null) {
                     if (cellComment.isVisible()) {
                         setCaption("Hide comment");
@@ -73,7 +74,7 @@ public class ShowHideCellCommentAction extends SpreadsheetAction {
                                          SelectionChangeEvent event) {
         CellReference cr = event.getSelectedCellReference();
         Comment cellComment = spreadsheet.getActiveSheet().getCellComment(
-                cr.getRow(), cr.getCol());
+        		new CellAddress(cr.getRow(), cr.getCol()));
         cellComment.setVisible(!cellComment.isVisible());
         Sheet sheet = spreadsheet.getActiveSheet();
         Row row = sheet.getRow(cr.getRow());

@@ -18,6 +18,7 @@ package com.vaadin.addon.spreadsheet.action;
  */
 
 import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
@@ -45,7 +46,7 @@ public class EditCellCommentAction extends SpreadsheetAction {
                     && event.getIndividualSelectedCells().size() == 0) {
                 CellReference cr = event.getSelectedCellReference();
                 Comment cellComment = spreadsheet.getActiveSheet()
-                        .getCellComment(cr.getRow(), cr.getCol());
+                        .getCellComment(new CellAddress(cr.getRow(), cr.getCol()));
                 if (cellComment != null) {
                     return true;
                 }

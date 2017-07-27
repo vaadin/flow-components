@@ -17,9 +17,6 @@ package com.vaadin.addon.spreadsheet;
  * #L%
  */
 
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC;
-import static org.apache.poi.ss.usermodel.Cell.CELL_TYPE_STRING;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -179,31 +177,31 @@ public class CellSelectionShifter implements Serializable {
             boolean removeShifted, Double sequenceIncrement) {
         // clear the new cell first because it might have errors which prevent
         // it from being set to a new type
-        if (newCell.getCellType() != Cell.CELL_TYPE_BLANK
-                || shiftedCell.getCellType() == Cell.CELL_TYPE_BLANK) {
-            newCell.setCellType(Cell.CELL_TYPE_BLANK);
+        if (newCell.getCellTypeEnum() != CellType.BLANK
+                || shiftedCell.getCellTypeEnum() == CellType.BLANK) {
+            newCell.setCellType(CellType.BLANK);
         }
-        newCell.setCellType(shiftedCell.getCellType());
+        newCell.setCellType(shiftedCell.getCellTypeEnum());
         newCell.setCellStyle(shiftedCell.getCellStyle());
         spreadsheet.getSpreadsheetStyleFactory()
                 .cellStyleUpdated(newCell, true);
-        switch (shiftedCell.getCellType()) {
-        case Cell.CELL_TYPE_FORMULA:
+        switch (shiftedCell.getCellTypeEnum()) {
+        case FORMULA:
             shiftFormula(shiftedCell, newCell);
             break;
-        case Cell.CELL_TYPE_BOOLEAN:
+        case BOOLEAN:
             newCell.setCellValue(shiftedCell.getBooleanCellValue());
             break;
-        case Cell.CELL_TYPE_ERROR:
+        case ERROR:
             newCell.setCellValue(shiftedCell.getErrorCellValue());
             break;
-        case Cell.CELL_TYPE_NUMERIC:
+        case NUMERIC:
             shiftNumeric(shiftedCell, newCell, sequenceIncrement);
             break;
-        case Cell.CELL_TYPE_STRING:
+        case STRING:
             shiftString(shiftedCell, newCell, sequenceIncrement);
             break;
-        case Cell.CELL_TYPE_BLANK:
+        case BLANK:
             // cell is cleared when type is set
         default:
             break;
@@ -635,9 +633,9 @@ public class CellSelectionShifter implements Serializable {
         if (row != null) {
             Cell firstCell = row.getCell(c1 - 1);
             if (firstCell != null) {
-                if (firstCell.getCellType() == CELL_TYPE_STRING) {
+                if (firstCell.getCellTypeEnum() == CellType.STRING) {
                     return getSequenceIncrement(getRowStringValues(row, c1, c2));
-                } else if (firstCell.getCellType() == CELL_TYPE_NUMERIC) {
+                } else if (firstCell.getCellTypeEnum() == CellType.NUMERIC) {
                     return getSequenceIncrement(getRowNumericValues(row, c1, c2));
                 }
             }
@@ -670,7 +668,7 @@ public class CellSelectionShifter implements Serializable {
             row = activeSheet.getRow(i - 1);
             if (row != null) {
                 cell = row.getCell(columnIndex - 1);
-                if (cell != null && cell.getCellType() == CELL_TYPE_STRING) {
+                if (cell != null && cell.getCellTypeEnum() == CellType.STRING) {
                     result[i - r1] = cell.getStringCellValue();
                 } else {
                     break;
@@ -707,7 +705,7 @@ public class CellSelectionShifter implements Serializable {
             row = activeSheet.getRow(i - 1);
             if (row != null) {
                 cell = row.getCell(columnIndex - 1);
-                if (cell != null && cell.getCellType() == CELL_TYPE_NUMERIC) {
+                if (cell != null && cell.getCellTypeEnum() == CellType.NUMERIC) {
                     result[i - r1] = cell.getNumericCellValue();
                 } else {
                     break;
@@ -737,7 +735,7 @@ public class CellSelectionShifter implements Serializable {
         Cell cell;
         for (int i = c1; i <= c2; i++) {
             cell = row.getCell(i - 1);
-            if (cell != null && cell.getCellType() == CELL_TYPE_STRING) {
+            if (cell != null && cell.getCellTypeEnum() == CellType.STRING) {
                 result[i - c1] = cell.getStringCellValue();
             } else {
                 break;
@@ -765,7 +763,7 @@ public class CellSelectionShifter implements Serializable {
         for (int i = c1; i <= c2; i++) {
             shiftedCell = row.getCell(i - 1);
             if (shiftedCell != null
-                    && shiftedCell.getCellType() == CELL_TYPE_NUMERIC) {
+                    && shiftedCell.getCellTypeEnum() == CellType.NUMERIC) {
                 result[i - c1] = shiftedCell.getNumericCellValue();
             } else {
                 break;
@@ -875,10 +873,10 @@ public class CellSelectionShifter implements Serializable {
         if (row != null) {
             Cell firstCell = row.getCell(cIndex - 1);
             if (firstCell != null) {
-                if (firstCell.getCellType() == CELL_TYPE_STRING) {
+                if (firstCell.getCellTypeEnum() == CellType.STRING) {
                     return getSequenceIncrement(getColumnStringValues(
                             activeSheet, cIndex, r1, r2));
-                } else if (firstCell.getCellType() == CELL_TYPE_NUMERIC) {
+                } else if (firstCell.getCellTypeEnum() == CellType.NUMERIC) {
                     return getSequenceIncrement(getColumnNumericValues(
                             activeSheet, cIndex, r1, r2));
                 }

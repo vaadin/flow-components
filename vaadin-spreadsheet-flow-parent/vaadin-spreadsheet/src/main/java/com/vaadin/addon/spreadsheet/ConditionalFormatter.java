@@ -45,6 +45,7 @@ import org.apache.poi.ss.formula.eval.ValueEval;
 import org.apache.poi.ss.formula.ptg.Ptg;
 import org.apache.poi.ss.formula.ptg.RefPtgBase;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ComparisonOperator;
 import org.apache.poi.ss.usermodel.ConditionType;
 import org.apache.poi.ss.usermodel.ConditionalFormatting;
@@ -330,13 +331,13 @@ public class ConditionalFormatter implements Serializable {
         if (borderFormatting != null) {
 
             BorderStyle borderLeft = SpreadsheetStyleFactory.BORDER
-                    .get(borderFormatting.getBorderLeft());
+                    .get(borderFormatting.getBorderLeftEnum());
             BorderStyle borderRight = SpreadsheetStyleFactory.BORDER
-                    .get(borderFormatting.getBorderRight());
+                    .get(borderFormatting.getBorderRightEnum());
             BorderStyle borderTop = SpreadsheetStyleFactory.BORDER
-                    .get(borderFormatting.getBorderTop());
+                    .get(borderFormatting.getBorderTopEnum());
             BorderStyle borderBottom = SpreadsheetStyleFactory.BORDER
-                    .get(borderFormatting.getBorderBottom());
+                    .get(borderFormatting.getBorderBottomEnum());
 
             // In Excel, we can set a border to 'none', which overrides previous
             // rules. Default is 'not set', in which case we add no CSS.
@@ -738,19 +739,19 @@ public class ConditionalFormatter implements Serializable {
      */
     protected boolean matchesValue(Cell cell, ConditionalFormattingRule rule, int deltaColumn, int deltaRow) {
 
-        boolean isFormulaType = cell.getCellType() == Cell.CELL_TYPE_FORMULA;
+        boolean isFormulaType = cell.getCellTypeEnum() == CellType.FORMULA;
 
         if (isFormulaType) {
             // make sure we have the latest value for formula cells
-            getFormulaEvaluator().evaluateFormulaCell(cell);
+            getFormulaEvaluator().evaluateFormulaCellEnum(cell);
         }
         
         boolean isFormulaStringType = isFormulaType
-                && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_STRING;
+                && cell.getCachedFormulaResultTypeEnum() == CellType.STRING;
         boolean isFormulaBooleanType = isFormulaType
-                && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_BOOLEAN;
+                && cell.getCachedFormulaResultTypeEnum() == CellType.BOOLEAN;
         boolean isFormulaNumericType = isFormulaType
-                && cell.getCachedFormulaResultType() == Cell.CELL_TYPE_NUMERIC;
+                && cell.getCachedFormulaResultTypeEnum() == CellType.NUMERIC;
 
         String formula = rule.getFormula1();
         byte comparisonOperation = rule.getComparisonOperation();
@@ -761,14 +762,14 @@ public class ConditionalFormatter implements Serializable {
             return false;
         }
         
-        if (!hasCoherentType(eval, cell.getCellType(), isFormulaStringType,
+        if (!hasCoherentType(eval, cell.getCellTypeEnum(), isFormulaStringType,
             isFormulaBooleanType, isFormulaNumericType)) {
             // Comparison between different types (e.g. Bool vs String)
             return (comparisonOperation == ComparisonOperator.NOT_EQUAL);
         }
 
         // other than numerical types
-        if (cell.getCellType() == Cell.CELL_TYPE_STRING || isFormulaStringType) {
+        if (cell.getCellTypeEnum() == CellType.STRING || isFormulaStringType) {
 
             String formulaValue = ((StringEval)eval).getStringValue();
             String stringValue = cell.getStringCellValue();
@@ -781,7 +782,7 @@ public class ConditionalFormatter implements Serializable {
                 return !stringValue.equalsIgnoreCase(formulaValue);
             }
         }
-        if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN
+        if (cell.getCellTypeEnum() == CellType.BOOLEAN
                 || isFormulaBooleanType) {
             // not sure if this is used, since no boolean option exists in
             // Excel..
@@ -797,7 +798,7 @@ public class ConditionalFormatter implements Serializable {
         }
 
         // numerical types
-        if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC
+        if (cell.getCellTypeEnum() == CellType.NUMERIC
                 || isFormulaNumericType) {
 
             double formula1Val = ((NumericValueEval)eval).getNumberValue();
@@ -848,21 +849,22 @@ public class ConditionalFormatter implements Serializable {
      *            true if eval is a formula of type Numeric, false otherwise
      * @return true if eval is coherent with cellType, false otherwise
      */
-    private boolean hasCoherentType(ValueEval eval, int cellType,
+    private boolean hasCoherentType(ValueEval eval, CellType cellType,
         boolean isFormulaStringType, boolean isFormulaBooleanType,
         boolean isFormulaNumericType) {
         switch (cellType) {
-        case Cell.CELL_TYPE_STRING:
+        case STRING:
             return eval instanceof StringEval;
-        case Cell.CELL_TYPE_BOOLEAN:
+        case BOOLEAN:
             return eval instanceof BoolEval;
-        case Cell.CELL_TYPE_NUMERIC:
+        case NUMERIC:
             return eval instanceof NumericValueEval || isFormulaNumericType;
-        case Cell.CELL_TYPE_FORMULA:
+        case FORMULA:
             return isCoherentTypeFormula(eval, isFormulaStringType,
                 isFormulaBooleanType, isFormulaNumericType);
+        default:
+        	return false;
         }
-        return false;
     }
 
     private boolean isCoherentTypeFormula(ValueEval eval,

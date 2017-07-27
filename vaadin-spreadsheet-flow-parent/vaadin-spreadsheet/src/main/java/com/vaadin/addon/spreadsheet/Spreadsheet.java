@@ -48,6 +48,7 @@ import org.apache.poi.hssf.converter.AbstractExcelUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -55,6 +56,7 @@ import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeUtil;
 import org.apache.poi.ss.util.CellReference;
@@ -1623,11 +1625,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         Cell cell = r.getCell(col);
         if (cell == null) {
-            cell = r.createCell(col, Cell.CELL_TYPE_FORMULA);
+            cell = r.createCell(col, CellType.FORMULA);
         } else {
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
             valueManager.clearCellCache(key);
-            cell.setCellType(Cell.CELL_TYPE_FORMULA);
+            cell.setCellType(CellType.FORMULA);
         }
         cell.setCellFormula(formula);
         valueManager.cellUpdated(cell);
@@ -2159,7 +2161,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 for (short c = row.getFirstCellNum(); c < row.getLastCellNum(); c++) {
                     Cell cell = row.getCell(c);
                     if (cell != null
-                            && cell.getCellType() != Cell.CELL_TYPE_BLANK) {
+                            && cell.getCellTypeEnum() != CellType.BLANK) {
                         return r;
                     }
                 }
@@ -3496,7 +3498,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 // shifting etc.) from merged cell into basic or vice versa.
                 if (region == null || region.col1 == c_one_based
                         && region.row1 == row_one_based) {
-                    Comment comment = sheet.getCellComment(r, c);
+                    Comment comment = sheet.getCellComment(new CellAddress(r, c));
                     String key = SpreadsheetUtil.toKey(c_one_based,
                             row_one_based);
                     if (comment != null) {
