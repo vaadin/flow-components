@@ -628,6 +628,12 @@ public class SpreadsheetStyleFactory implements Serializable {
         // the actual merged cell
         final int columnIndex = cell.getColumnIndex();
         final int rowIndex = cell.getRowIndex();
+
+        if (spreadsheet.isColumnHidden(columnIndex) || spreadsheet
+            .isRowHidden(rowIndex)) {
+            return;
+        }
+
         MergedRegion region = spreadsheet.mergedRegionContainer
                 .getMergedRegion((columnIndex + 1), (rowIndex + 1));
         if (region != null) {
@@ -680,13 +686,19 @@ public class SpreadsheetStyleFactory implements Serializable {
                 if (columnIndex > 0) {
                     int row, col;
 
+                    int upperVisibleColumnIndex = columnIndex;
+                    while (spreadsheet.isColumnHidden(upperVisibleColumnIndex - 1)) {
+                        upperVisibleColumnIndex--;
+                    }
+
                     MergedRegion previousRegion = spreadsheet.mergedRegionContainer
-                            .getMergedRegion(columnIndex, rowIndex + 1);
+                            .getMergedRegion(upperVisibleColumnIndex, rowIndex + 1);
+
                     if (previousRegion != null) {
                         col = previousRegion.col1;
                         row = previousRegion.row1;
                     } else {
-                        col = columnIndex;
+                        col = upperVisibleColumnIndex;
                         row = rowIndex + 1;
                     }
                     insertMapEntryIfNeeded(shiftedBorderLeftStylesMap, key,
@@ -698,15 +710,21 @@ public class SpreadsheetStyleFactory implements Serializable {
                 // row, which might be a merged cell
                 if (rowIndex > 0) {
                     int row, col;
+
+                    int prevVisibleRowIndex = rowIndex;
+                    while (spreadsheet.isRowHidden(prevVisibleRowIndex - 1)) {
+                        prevVisibleRowIndex--;
+                    }
+
                     MergedRegion previousRegion = spreadsheet.mergedRegionContainer
-                            .getMergedRegion(columnIndex + 1, rowIndex);
+                            .getMergedRegion(columnIndex + 1, prevVisibleRowIndex);
 
                     if (previousRegion != null) {
                         col = previousRegion.col1;
                         row = previousRegion.row1;
                     } else {
                         col = columnIndex + 1;
-                        row = rowIndex;
+                        row = prevVisibleRowIndex;
                     }
                     insertMapEntryIfNeeded(shiftedBorderTopStylesMap, key, row,
                             col);

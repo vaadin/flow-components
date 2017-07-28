@@ -14,6 +14,7 @@ import org.openqa.selenium.support.ui.Select;
 import com.vaadin.addon.spreadsheet.elements.AddressUtil;
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
+import com.vaadin.addon.spreadsheet.test.testutil.ContextMenuHelper;
 import com.vaadin.testbench.By;
 
 public class SpreadsheetPage extends Page {
@@ -199,6 +200,32 @@ public class SpreadsheetPage extends Page {
         return getCellAt(point.getX(), point.getY());
     }
 
+    public void contextClickOnRowHeader(int i) {
+        $(SpreadsheetElement.class).first().getRowHeader(i).contextClick();
+    }
+
+    public void contextClickOnColumnHeader(char column) {
+        $(SpreadsheetElement.class).first().getColumnHeader(column - 'A' + 1)
+            .contextClick();
+    }
+    
+    public void clickContextMenuItem(String caption) {
+        final ContextMenuHelper contextMenu = new ContextMenuHelper(
+            getDriver());
+
+        contextMenu.clickItem(caption);
+    }
+    
+    public void unhideRow(int i) {
+        contextClickOnRowHeader(i + 1);
+        clickContextMenuItem("Unhide row " + i);
+    }
+
+    public void unhideColumn(char c) {
+        contextClickOnColumnHeader((char) (c + 1));
+        clickContextMenuItem("Unhide column " + c);
+    }
+        
     public String getSelectionFormula() {
         final SpreadsheetElement sprElement = $(SpreadsheetElement.class).first();
 

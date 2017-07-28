@@ -2448,6 +2448,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             reloadImageSizesFromPOI = true;
             loadOrUpdateOverlays();
         }
+        
+        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**
@@ -2491,6 +2493,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             reloadImageSizesFromPOI = true;
             loadOrUpdateOverlays();
         }
+        
+        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**
