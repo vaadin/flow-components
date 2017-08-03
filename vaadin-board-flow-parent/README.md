@@ -2,7 +2,7 @@
 Vaadin addon allows to create flexible responsive layouts and build nice looking dashboard.
 Vaadin Board key feature is how it effectively reorders UI components on different screen sizes, maximizing the use of space and looking stunning.
 
-**You need to use 8.1.0.beta2 or higher version of Vaadin Framework.**
+**Board requires Vaadin Framework 8.1 or newer.**
 
 ### License & Author
 
