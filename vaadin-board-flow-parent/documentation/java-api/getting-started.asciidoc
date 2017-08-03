@@ -37,7 +37,7 @@ mvn org.apache.maven.plugins:maven-archetype-plugin:2.4:generate  \
     -DarchetypeGroupId=com.vaadin \
     -DarchetypeArtifactId=vaadin-archetype-application  \
     -DarchetypeRepository=https://maven.vaadin.com/vaadin-prereleases  \
-    -DarchetypeVersion=8.1.0.beta2
+    -DarchetypeVersion=8.1.0
 ----
 
 You will be asked a few questions for setting up the project.
@@ -91,12 +91,12 @@ Add the following dependency declaration just before the end tag ([elementname]#
     *<dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-board</artifactId>
-        <version>1.0.0-beta1</version>
+        <version>1.0.0-beta2</version>
     </dependency>
     <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-board-precompiled</artifactId>
-        <version>1.0.0-beta1</version>
+        <version>1.0.0-beta2</version>
     </dependency>*
 </dependencies>
 ...
