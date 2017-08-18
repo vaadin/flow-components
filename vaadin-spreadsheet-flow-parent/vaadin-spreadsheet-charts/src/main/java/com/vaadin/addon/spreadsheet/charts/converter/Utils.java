@@ -146,7 +146,8 @@ public class Utils {
 
     public static String getStringValue(CellReference ref,
             Spreadsheet spreadsheet) {
-        return spreadsheet.getCellValue(spreadsheet.getCell(ref));
+        Sheet sheet = spreadsheet.getWorkbook().getSheet(ref.getSheetName());
+        return spreadsheet.getCellValue(spreadsheet.getCell(ref, sheet));
     }
 
     public static Double getNumericValue(CellReference ref,

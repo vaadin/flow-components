@@ -94,10 +94,22 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
     }
 
     @Test
-    public void openFileWithNotSuportedForumla_noExceptionRaised() throws Exception {
-        SpreadsheetPage spreadsheetPage = headerPage.loadFile("InteractionSample.xlsx", this);
-        spreadsheetPage.getCellAt(1,12).setValue("test");
-        spreadsheetPage.getCellAt(1,13).setValue("");
+    public void pieChart_labelDataInSeparateSheet_labelIsShown()
+            throws Exception {
+        headerPage.loadFile("pie_labels.xlsx", this);
+        WebElement dataLabel = overlayHelper.getOverlayElement("A4")
+                .findElements(By.tagName("tspan")).get(0);
+
+        Assert.assertEquals("Header 1", dataLabel.getText());
+    }
+
+    @Test
+    public void openFileWithNotSuportedForumla_noExceptionRaised()
+            throws Exception {
+        SpreadsheetPage spreadsheetPage = headerPage
+                .loadFile("InteractionSample.xlsx", this);
+        spreadsheetPage.getCellAt(1, 12).setValue("test");
+        spreadsheetPage.getCellAt(1, 13).setValue("");
         Thread.sleep(1000);
         compareScreen("chartIgnoreStringInput");
     }
