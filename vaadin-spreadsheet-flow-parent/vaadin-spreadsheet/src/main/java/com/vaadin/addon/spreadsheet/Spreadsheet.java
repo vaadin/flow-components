@@ -1682,7 +1682,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             cell.setCellValue((Date) value);
         } else if (value instanceof Calendar) {
             cell.setCellValue((Calendar) value);
-        } else {
+        } else if (value != null) {
             cell.setCellValue(value.toString());
         }
         valueManager.cellUpdated(cell);
