@@ -44,12 +44,6 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
 
     private FormulaBarWidget formulaBarWidget;
 
-    /**
-     * Input has full focus only when it has been clicked. Otherwise i.e. arrow
-     * keys change cell selection instead of input caret position.
-     */
-    private boolean inputFullFocus;
-
     public SheetInputEventListener() {
     }
 
@@ -66,14 +60,6 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
         editor.addClickHandler(this);
         editor.addMouseDownHandler(this);
         editor.addMouseUpHandler(this);
-    }
-
-    public void setInputFullFocus(boolean inputFullFocus) {
-        this.inputFullFocus = inputFullFocus;
-    }
-
-    protected void cellEditingStopped() {
-        inputFullFocus = false;
     }
 
     @Override
@@ -97,7 +83,7 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
     @Override
     public void onClick(ClickEvent event) {
         if (widget.isEditingCell()) {
-            inputFullFocus = true;
+            formulaBarWidget.setInlineEdit(true);
         }
         event.stopPropagation();
     }
@@ -131,7 +117,7 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
                 event.preventDefault();
                 break;
             case KeyCodes.KEY_UP:
-                if (!inputFullFocus) {
+                if (formulaBarWidget.hasLightFocus()) {
                     handler.onCellInputEnter(widget.getInlineEditor()
                             .getValue(), true);
                     event.preventDefault();
@@ -142,7 +128,7 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
                 }
                 break;
             case KeyCodes.KEY_DOWN:
-                if (!inputFullFocus) {
+                if (formulaBarWidget.hasLightFocus()) {
                     handler.onCellInputEnter(widget.getInlineEditor()
                             .getValue(), false);
                     event.preventDefault();
@@ -153,7 +139,7 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
                 }
                 break;
             case KeyCodes.KEY_LEFT:
-                if (!inputFullFocus) {
+                if (formulaBarWidget.hasLightFocus()) {
                     handler.onCellInputTab(widget.getInlineEditor().getValue(),
                             true);
                     event.preventDefault();
@@ -161,7 +147,7 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
                     formulaBarWidget.moveFormulaCellSelection(
                             event.isShiftKeyDown(), false, false, false);
                     event.preventDefault();
-                } else if (inputFullFocus) {
+                } else if (formulaBarWidget.isInlineEdit()) {
                     formulaBarWidget.updateEditorCaretPos(true);
                     // prevent scrolling
                     if (widget.getInlineEditor().getCursorPos() == 0) {
@@ -170,7 +156,7 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
                 }
                 break;
             case KeyCodes.KEY_RIGHT:
-                if (!inputFullFocus) {
+                if (formulaBarWidget.hasLightFocus()) {
                     handler.onCellInputTab(widget.getInlineEditor().getValue(),
                             false);
                     event.preventDefault();
@@ -178,7 +164,7 @@ public class SheetInputEventListener implements FocusHandler, KeyPressHandler,
                     formulaBarWidget.moveFormulaCellSelection(
                             event.isShiftKeyDown(), false, true, false);
                     event.preventDefault();
-                } else if (inputFullFocus) {
+                } else if (formulaBarWidget.isInlineEdit()) {
                     formulaBarWidget.updateEditorCaretPos(true);
                     // prevent scrolling
                     int cursorPos = widget.getInlineEditor().getCursorPos();

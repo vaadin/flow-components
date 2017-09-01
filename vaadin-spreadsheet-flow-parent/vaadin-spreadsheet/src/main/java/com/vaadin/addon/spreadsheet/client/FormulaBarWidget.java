@@ -89,6 +89,12 @@ public class FormulaBarWidget extends Composite {
     private boolean editingFormula;
     private boolean enableKeyboardNavigation;
     private TextBox currentEditor;
+    private boolean inlineEdit;
+
+    /**
+     * Input is in full focus when it has been double-clicked or in 'edit' mode.
+     */
+    private boolean inFullFocus;
 
     private SheetInputEventListener sheetInputEventListener;
 
@@ -588,28 +594,28 @@ public class FormulaBarWidget extends Composite {
             break;
 
         case KeyCodes.KEY_UP:
-            if (isEditingFormula() && enableKeyboardNavigation) {
+            if (enableKeyboardNavigation) {
                 moveFormulaCellSelection(event.getShiftKey(), true, false,
                         false);
                 event.preventDefault();
             }
             break;
         case KeyCodes.KEY_RIGHT:
-            if (isEditingFormula() && enableKeyboardNavigation) {
+            if (enableKeyboardNavigation) {
                 moveFormulaCellSelection(event.getShiftKey(), false, true,
                         false);
                 event.preventDefault();
             }
             break;
         case KeyCodes.KEY_DOWN:
-            if (isEditingFormula() && enableKeyboardNavigation) {
+            if (enableKeyboardNavigation) {
                 moveFormulaCellSelection(event.getShiftKey(), false, false,
                         true);
                 event.preventDefault();
             }
             break;
         case KeyCodes.KEY_LEFT:
-            if (isEditingFormula() && enableKeyboardNavigation) {
+            if (enableKeyboardNavigation) {
                 moveFormulaCellSelection(event.getShiftKey(), false, false,
                         false);
                 event.preventDefault();
@@ -633,7 +639,6 @@ public class FormulaBarWidget extends Composite {
         formulaLastKnownPos = -1;
         formulaStartPos = -1;
         clearFormulaSelection();
-
     }
 
     private void checkFormulaEdit(final TextBox editor) {
@@ -653,9 +658,7 @@ public class FormulaBarWidget extends Composite {
 
                         parseAndPaintCellRefs(val);
                         checkForCoordsAtCaret();
-
                     }
-
                 }
             }
         });
@@ -1026,19 +1029,20 @@ public class FormulaBarWidget extends Composite {
      * for the formula.
      */
     public boolean isKeyboardNavigationEnabled() {
-        return enableKeyboardNavigation;
+        return enableKeyboardNavigation && editingFormula;
     }
 
     public void startInlineEdit(boolean inputFullFocus) {
 
-        sheetInputEventListener.setInputFullFocus(inputFullFocus);
+        setInlineEdit(inputFullFocus);
         checkFormulaEdit(inlineEditor);
         updateEditorCaretPos(true);
         checkKeyboardNavigation();
     }
 
     public void stopInlineEdit() {
-        sheetInputEventListener.cellEditingStopped();
+        setInlineEdit(false);
+        setInFullFocus(false);
         stopEditing();
     }
 
@@ -1192,5 +1196,29 @@ public class FormulaBarWidget extends Composite {
     private void setNamedRangeBoxVisible(boolean visible) {
         namedRangeBox.setVisible(visible);
         namedRangeBoxArrow.setVisible(visible);
+    }
+
+    public boolean isInFullFocus() {
+        return inFullFocus;
+    }
+
+    public void setInFullFocus(boolean inFullFocus) {
+        this.inFullFocus = inFullFocus;
+    }
+
+    public boolean isInlineEdit() {
+        return inlineEdit;
+    }
+
+    public void setInlineEdit(boolean inlineEdit) {
+        this.inlineEdit = inlineEdit;
+    }
+
+    public boolean hasLightFocus() {
+        return !inlineEdit
+                || (inlineEdit
+                && !inFullFocus
+                && !editingFormula
+        );
     }
 }

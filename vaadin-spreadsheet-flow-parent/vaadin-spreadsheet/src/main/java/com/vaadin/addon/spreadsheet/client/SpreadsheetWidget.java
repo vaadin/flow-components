@@ -1019,6 +1019,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             if (!inlineEditing && !customCellEditorDisplayed) {
                 inlineEditing = true;
                 sheetWidget.startEditingCell(true, true, value);
+                formulaBarWidget.setInFullFocus(true);
                 formulaBarWidget.startInlineEdit(true);
             }
         }
@@ -1177,6 +1178,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     inlineEditing = true;
                     sheetWidget.startEditingCell(true, true,
                             formulaBarWidget.getFormulaFieldValue());
+                    formulaBarWidget.setInFullFocus(true);
                     formulaBarWidget.startInlineEdit(true);
                 }
                 break;
