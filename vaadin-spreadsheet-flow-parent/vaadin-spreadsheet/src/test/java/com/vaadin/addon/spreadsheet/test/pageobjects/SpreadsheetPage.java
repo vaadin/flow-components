@@ -284,4 +284,9 @@ public class SpreadsheetPage extends Page {
         new Select(findElement(By.className("namedrangebox")))
             .selectByVisibleText(name);
     }
+
+    public List<WebElement> getGroupings() {
+        return $(SpreadsheetElement.class).first()
+                .findElements(By.cssSelector(".col-group-pane .grouping.plus"));
+    }
 }

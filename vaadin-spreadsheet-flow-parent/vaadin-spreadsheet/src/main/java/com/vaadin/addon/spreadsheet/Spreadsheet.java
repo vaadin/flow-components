@@ -5057,7 +5057,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         }
         int endIndex = -1;
         for (GroupingData data : getState().colGroupingData) {
-            if (data.level == expandLevel) {
+            if (data.level == expandLevel && data.startIndex <= columnIndex && columnIndex <= data.endIndex) {
                 endIndex = data.endIndex;
                 break;
             }
