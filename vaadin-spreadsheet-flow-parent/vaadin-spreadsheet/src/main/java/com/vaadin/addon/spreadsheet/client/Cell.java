@@ -102,6 +102,7 @@ public class Cell {
         } else {
             element.getStyle().setZIndex(ZINDEXVALUE);
             if (needsMeasure
+                    && getCellWidth() > 0
                     && sheetWidget.measureValueWidth(cellStyle, value) > getCellWidth()) {
                 element.setInnerText("###");
             } else {

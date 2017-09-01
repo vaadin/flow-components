@@ -1058,21 +1058,36 @@ public class SheetWidget extends Panel {
 
             if (clientX < target.getAbsoluteLeft()
                     && cell.getCol() > firstColumnIndex) {
-                newX = cell.getCol() - 1;
+                newX--;
+                while (actionHandler.isColumnHidden(newX)
+                        && newX > firstColumnIndex) {
+                    newX--;
+                }
                 changed = true;
             } else if (clientX > target.getAbsoluteRight()
                     && cell.getCol() < lastColumnIndex) {
-                newX = cell.getCol() + 1;
+                newX++;
+                while (actionHandler.isColumnHidden(newX)
+                        && newX < lastColumnIndex) {
+                    newX++;
+                }
                 changed = true;
             }
 
             if (clientY < target.getAbsoluteTop()
                     && cell.getRow() > firstRowIndex) {
-                newY = cell.getRow() - 1;
+                newY--;
+                while (actionHandler.isRowHidden(newY)
+                        && newY > firstRowIndex) {
+                    newY--;
+                }
                 changed = true;
             } else if (clientY > target.getAbsoluteBottom()
                     && cell.getRow() < lastRowIndex) {
-                newY = cell.getRow() + 1;
+                newY++;
+                while (actionHandler.isRowHidden(newY) && newY < lastRowIndex) {
+                    newY++;
+                }
                 changed = true;
             }
 

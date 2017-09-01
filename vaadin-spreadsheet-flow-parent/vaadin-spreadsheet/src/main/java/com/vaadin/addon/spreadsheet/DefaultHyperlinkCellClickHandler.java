@@ -57,12 +57,12 @@ public class DefaultHyperlinkCellClickHandler implements
     @Override
     public void onHyperLinkCellClick(Cell cell, Hyperlink hyperlink,
             Spreadsheet spreadsheet) {
-        if (hyperlink != null) {
+        if (hyperlink != null && hyperlink.getAddress() != null) {
             if (hyperlink.getTypeEnum() == HyperlinkType.DOCUMENT) { // internal
                 navigateTo(cell, spreadsheet, hyperlink.getAddress());
             } else {
                 spreadsheet.getUI().getPage()
-                        .open(cell.getHyperlink().getAddress(), "_new");
+                        .open(hyperlink.getAddress(), "_new");
             }
         } else if (isHyperlinkFormulaCell(cell)) {
             String address = getHyperlinkFunctionCellAddress(cell, spreadsheet);
