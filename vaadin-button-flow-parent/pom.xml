@@ -13,9 +13,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        
+
         <!-- Dependencies -->
-        <flow.version>1.0.0.alpha4</flow.version>
+        <flow.version>1.0.0.alpha5</flow.version>
         <servlet.api.version>3.1.0</servlet.api.version>
         <jetty.version>9.4.7.v20170914</jetty.version>
     </properties>
@@ -25,7 +25,51 @@
             <id>flow-internal-release</id>
             <url>https://repo.vaadin.com/nexus/content/repositories/flow</url>
         </repository>
+        <repository>
+            <id>webjars</id>
+            <url>https://dl.bintray.com/webjars/maven</url>
+        </repository>
     </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.webjars.bower</groupId>
+                <artifactId>polymer</artifactId>
+                <version>2.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars.bower</groupId>
+                <artifactId>github-com-polymer-polymer</artifactId>
+                <version>v2.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars.bower</groupId>
+                <artifactId>github-com-webcomponents-shadycss</artifactId>
+                <version>v1.0.6</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars.bower</groupId>
+                <artifactId>webcomponentsjs</artifactId>
+                <version>1.0.14</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars.bower</groupId>
+                <artifactId>vaadin-control-state-mixin</artifactId>
+                <version>1.1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars.bower</groupId>
+                <artifactId>github-com-vaadin-vaadin-control-state-mixin</artifactId>
+                <version>v1.1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars.bower</groupId>
+                <artifactId>vaadin-themable-mixin</artifactId>
+                <version>1.1.3</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -37,6 +81,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
             <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>vaadin-button</artifactId>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -63,30 +112,4 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <!-- This copies the client-engine from flow-client.jar to be served by jetty. -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-client-engine</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeGroupIds>com.vaadin</includeGroupIds>
-                            <includeArtifactIds>flow-client</includeArtifactIds>
-                            <excludeTransitive>true</excludeTransitive>
-                            <includes>META-INF/resources/VAADIN/static/client/*</includes>
-                            <overWrite>true</overWrite>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>
