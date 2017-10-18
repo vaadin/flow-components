@@ -43,8 +43,11 @@ public class DemoServer {
         new DemoServer().startServer();
     }
 
-    // contains the client engine copied by maven-dependency-plugin
-    private static final String WEB_APP_PATH = "target/dependency/META-INF/resources";
+    private static final String WEB_APP_PATH = "target/testwebapp";
+
+    private static final String TEST_CLASSES_PATH = ".*/target/test-classes/";
+
+    private static final String JAR_PATTERN = ".*\\.jar$";
 
     /**
      * Starts a web server to the port defined by {@link #getPort()}. It serves
@@ -70,18 +73,18 @@ public class DemoServer {
         if (!file.exists()) {
             file.mkdirs();
         }
-
         context.setWar(file.getPath());
+
         context.setContextPath("/");
 
         ClassList classlist = ClassList.setServerDefault(server);
         classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
                 "org.eclipse.jetty.annotations.AnnotationConfiguration");
 
-        // Enable annotation scanning for uitest classes even though they are
-        // not inside webroot
+        // Enable annotation scanning for uitest classes.
+        // Enable scanning for resources inside jar-files.
         context.setAttribute(WebInfConfiguration.CONTAINER_JAR_PATTERN,
-                ".*/target/test-classes/");
+                TEST_CLASSES_PATH + "|" + JAR_PATTERN);
 
         configure(context, server);
         server.setHandler(context);

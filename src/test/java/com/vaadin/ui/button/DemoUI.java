@@ -26,6 +26,6 @@ import com.vaadin.ui.html.Div;
 public class DemoUI extends Div {
 
     public DemoUI() {
-        setText("Button demo ui");
+        add(new Button("This is a button"));
     }
 }
