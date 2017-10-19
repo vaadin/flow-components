@@ -1,0 +1,20 @@
+{
+  "name": "charts",
+  "homepage": "https://github.com/vaadin/charts",
+  "authors": [],
+  "description": "",
+  "main": "",
+  "license": "Apache2",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "~2.0.2",
+    "vaadin-charts": "#6.0-preview"
+  }
+}
