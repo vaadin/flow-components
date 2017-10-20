@@ -15,7 +15,7 @@
 	</organization>
 	
 	<properties>
-		<vaadin.version>8.1.0</vaadin.version>
+		<vaadin.version>8.1.5</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 	</properties>
 
