@@ -15,7 +15,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- Dependencies -->
-        <flow.version>1.0.0.alpha5</flow.version>
+        <flow.version>1.0.0.alpha6</flow.version>
         <servlet.api.version>3.1.0</servlet.api.version>
         <jetty.version>9.4.7.v20170914</jetty.version>
     </properties>
@@ -34,39 +34,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.webjars.bower</groupId>
-                <artifactId>polymer</artifactId>
-                <version>2.0.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bower</groupId>
-                <artifactId>github-com-polymer-polymer</artifactId>
-                <version>v2.0.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bower</groupId>
-                <artifactId>github-com-webcomponents-shadycss</artifactId>
-                <version>v1.0.6</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bower</groupId>
-                <artifactId>webcomponentsjs</artifactId>
-                <version>1.0.14</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bower</groupId>
-                <artifactId>vaadin-control-state-mixin</artifactId>
-                <version>1.1.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bower</groupId>
-                <artifactId>github-com-vaadin-vaadin-control-state-mixin</artifactId>
-                <version>v1.1.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bower</groupId>
-                <artifactId>vaadin-themable-mixin</artifactId>
-                <version>1.1.3</version>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-webjars-bom</artifactId>
+                <type>pom</type>
+                <scope>import</scope>
+                <version>${flow.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -85,7 +57,6 @@
         <dependency>
             <groupId>org.webjars.bower</groupId>
             <artifactId>vaadin-button</artifactId>
-            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
