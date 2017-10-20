@@ -29,9 +29,6 @@ import java.util.Date;
 
 public abstract class Axis extends AbstractConfigurationObject {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
 
     protected Number min;
@@ -217,30 +214,30 @@ public abstract class Axis extends AbstractConfigurationObject {
     /**
      * @see #setAllowDecimals(Boolean)
      */
-    abstract public Boolean getAllowDecimals();
+    public abstract Boolean getAllowDecimals();
 
     /**
      * Whether to allow decimals in this axis' ticks. When counting integers,
      * like persons or hits on a web page, decimals must be avoided in the axis
      * tick labels.
      */
-    abstract public void setAllowDecimals(Boolean allowDecimals);
+    public abstract void setAllowDecimals(Boolean allowDecimals);
 
     /**
      * @see #setAlternateGridColor(Color)
      */
-    abstract public Color getAlternateGridColor();
+    public abstract Color getAlternateGridColor();
 
     /**
      * When using an alternate grid color, a band is painted across the plot
      * area between every other grid line.
      */
-    abstract public void setAlternateGridColor(Color alternateGridColor);
+    public abstract void setAlternateGridColor(Color alternateGridColor);
 
     /**
      * @see #setCategories(String...)
      */
-    abstract public String[] getCategories();
+    public abstract String[] getCategories();
 
     /**
      * <p>
@@ -260,7 +257,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * </pre>
      * </p>
      */
-    abstract public void setCategories(String... categories);
+    public abstract void setCategories(String... categories);
 
     /**
      * Adds category to the categories array
@@ -269,7 +266,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            to add
      * @see #setCategories(String...)
      */
-    abstract public void addCategory(String category);
+    public abstract void addCategory(String category);
 
     /**
      * Removes first occurrence of category in categories array
@@ -278,22 +275,22 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            to remove
      * @see #setCategories(String...)
      */
-    abstract public void removeCategory(String category);
+    public abstract void removeCategory(String category);
 
     /**
      * @see #setCeiling(Number)
      */
-    abstract public Number getCeiling();
+    public abstract Number getCeiling();
 
     /**
      * The highest allowed value for automatically computed axis extremes.
      */
-    abstract public void setCeiling(Number ceiling);
+    public abstract void setCeiling(Number ceiling);
 
     /**
      * @see #setDateTimeLabelFormats(DateTimeLabelFormats)
      */
-    abstract public DateTimeLabelFormats getDateTimeLabelFormats();
+    public abstract DateTimeLabelFormats getDateTimeLabelFormats();
 
     /**
      * For a datetime axis, the scale will automatically adjust to the
@@ -301,13 +298,13 @@ public abstract class Axis extends AbstractConfigurationObject {
      * used for each unit. For an overview of the replacement codes, see
      * dateFormat.
      */
-    abstract public void setDateTimeLabelFormats(
+    public abstract void setDateTimeLabelFormats(
         DateTimeLabelFormats dateTimeLabelFormats);
 
     /**
      * @see #setEndOnTick(Boolean)
      */
-    abstract public Boolean getEndOnTick();
+    public abstract Boolean getEndOnTick();
 
     /**
      * Whether to force the axis to end on a tick. Use this option with the
@@ -318,68 +315,68 @@ public abstract class Axis extends AbstractConfigurationObject {
     /**
      * @see #setFloor(Number)
      */
-    abstract public Number getFloor();
+    public abstract Number getFloor();
 
     /**
      * The lowest allowed value for automatically computed axis extremes.
      */
-    abstract public void setFloor(Number floor);
+    public abstract void setFloor(Number floor);
 
     /**
      * @see #setGridLineColor(Color)
      */
-    abstract public Color getGridLineColor();
+    public abstract Color getGridLineColor();
 
     /**
      * Color of the grid lines extending the ticks across the plot area.
      */
-    abstract public void setGridLineColor(Color gridLineColor);
+    public abstract void setGridLineColor(Color gridLineColor);
 
     /**
      * @see #setGridLineDashStyle(DashStyle)
      */
-    abstract public DashStyle getGridLineDashStyle();
+    public abstract DashStyle getGridLineDashStyle();
 
     /**
      * The dash or dot style of the grid lines.
      */
-    abstract public void setGridLineDashStyle(DashStyle gridLineDashStyle);
+    public abstract void setGridLineDashStyle(DashStyle gridLineDashStyle);
 
     /**
      * @see #setGridLineWidth(Number)
      */
-    abstract public Number getGridLineWidth();
+    public abstract Number getGridLineWidth();
 
     /**
      * The width of the grid lines extending the ticks across the plot area.
      */
-    abstract public void setGridLineWidth(Number gridLineWidth);
+    public abstract void setGridLineWidth(Number gridLineWidth);
 
     /**
      * @see #setId(String)
      */
-    abstract public String getId();
+    public abstract String getId();
 
     /**
      * An id for the axis. This can be used after render time to get a pointer
      * to the axis object through <code>chart.get()</code>.
      */
-    abstract public void setId(String id);
+    public abstract void setId(String id);
 
     /**
      * @see #setLabels(Labels)
      */
-    abstract public Labels getLabels();
+    public abstract Labels getLabels();
 
     /**
      * The axis labels show the number or category for each tick.
      */
-    abstract public void setLabels(Labels labels);
+    public abstract void setLabels(Labels labels);
 
     /**
      * @see #setLinkedTo(Number)
      */
-    abstract public Number getLinkedTo();
+    public abstract Number getLinkedTo();
 
     /**
      * Index of another axis that this axis is linked to. When an axis is linked
@@ -387,12 +384,12 @@ public abstract class Axis extends AbstractConfigurationObject {
      * assigned by min or max or by setExtremes. It can be used to show
      * additional info, or to ease reading the chart by duplicating the scales.
      */
-    abstract public void setLinkedTo(Number linkedTo);
+    public abstract void setLinkedTo(Number linkedTo);
 
     /**
      * @see #setMaxPadding(Number)
      */
-    abstract public Number getMaxPadding();
+    public abstract Number getMaxPadding();
 
     /**
      * Padding of the max value relative to the length of the axis. A padding of
@@ -401,12 +398,12 @@ public abstract class Axis extends AbstractConfigurationObject {
      * the axis' <code>max</code> option is set or a max extreme is set using
      * <code>axis.setExtremes()</code>, the maxPadding will be ignored.
      */
-    abstract public void setMaxPadding(Number maxPadding);
+    public abstract void setMaxPadding(Number maxPadding);
 
     /**
      * @see #setMinPadding(Number)
      */
-    abstract public Number getMinPadding();
+    public abstract Number getMinPadding();
 
     /**
      * Padding of the min value relative to the length of the axis. A padding of
@@ -415,64 +412,64 @@ public abstract class Axis extends AbstractConfigurationObject {
      * the axis' <code>min</code> option is set or a min extreme is set using
      * <code>axis.setExtremes()</code>, the minPadding will be ignored.
      */
-    abstract public void setMinPadding(Number minPadding);
+    public abstract void setMinPadding(Number minPadding);
 
     /**
      * @see #setMinTickInterval(Number)
      */
-    abstract public Number getMinTickInterval();
+    public abstract Number getMinTickInterval();
 
     /**
      * The minimum tick interval allowed in axis values. For example on zooming
      * in on an axis with daily data, this can be used to prevent the axis from
      * showing hours.
      */
-    abstract public void setMinTickInterval(Number minTickInterval);
+    public abstract void setMinTickInterval(Number minTickInterval);
 
     /**
      * @see #setMinorGridLineColor(Color)
      */
-    abstract public Color getMinorGridLineColor();
+    public abstract Color getMinorGridLineColor();
 
     /**
      * Color of the minor, secondary grid lines.
      */
-    abstract public void setMinorGridLineColor(Color minorGridLineColor);
+    public abstract void setMinorGridLineColor(Color minorGridLineColor);
 
     /**
      * @see #setMinorGridLineDashStyle(DashStyle)
      */
-    abstract public DashStyle getMinorGridLineDashStyle();
+    public abstract DashStyle getMinorGridLineDashStyle();
 
     /**
      * The dash or dot style of the minor grid lines.
      */
-    abstract public void setMinorGridLineDashStyle(DashStyle minorGridLineDashStyle);
+    public abstract void setMinorGridLineDashStyle(DashStyle minorGridLineDashStyle);
 
     /**
      * @see #setMinorGridLineWidth(Number)
      */
-    abstract public Number getMinorGridLineWidth();
+    public abstract Number getMinorGridLineWidth();
 
     /**
      * Width of the minor, secondary grid lines.
      */
-    abstract public void setMinorGridLineWidth(Number minorGridLineWidth);
+    public abstract void setMinorGridLineWidth(Number minorGridLineWidth);
 
     /**
      * @see #setMinorTickColor(Color)
      */
-    abstract public Color getMinorTickColor();
+    public abstract Color getMinorTickColor();
 
     /**
      * Color for the minor tick marks.
      */
-    abstract public void setMinorTickColor(Color minorTickColor);
+    public abstract void setMinorTickColor(Color minorTickColor);
 
     /**
      * @see #setMinorTickInterval(String)
      */
-    abstract public String getMinorTickInterval();
+    public abstract String getMinorTickInterval();
 
     /**
      * <p>
@@ -498,43 +495,43 @@ public abstract class Axis extends AbstractConfigurationObject {
      * not supported.
      * </p>
      */
-    abstract public void setMinorTickInterval(String minorTickInterval);
+    public abstract void setMinorTickInterval(String minorTickInterval);
 
     /**
      * @see #setMinorTickLength(Number)
      */
-    abstract public Number getMinorTickLength();
+    public abstract Number getMinorTickLength();
 
     /**
      * The pixel length of the minor tick marks.
      */
-    abstract public void setMinorTickLength(Number minorTickLength);
+    public abstract void setMinorTickLength(Number minorTickLength);
 
     /**
      * @see #setMinorTickPosition(TickPosition)
      */
-    abstract public TickPosition getMinorTickPosition();
+    public abstract TickPosition getMinorTickPosition();
 
     /**
      * The position of the minor tick marks relative to the axis line. Can be
      * one of <code>inside</code> and <code>outside</code>.
      */
-    abstract public void setMinorTickPosition(TickPosition minorTickPosition);
+    public abstract void setMinorTickPosition(TickPosition minorTickPosition);
 
     /**
      * @see #setMinorTickWidth(Number)
      */
-    abstract public Number getMinorTickWidth();
+    public abstract Number getMinorTickWidth();
 
     /**
      * The pixel width of the minor tick mark.
      */
-    abstract public void setMinorTickWidth(Number minorTickWidth);
+    public abstract void setMinorTickWidth(Number minorTickWidth);
 
     /**
      * @see #setOffset(Number)
      */
-    abstract public Number getOffset();
+    public abstract Number getOffset();
 
     /**
      * The distance in pixels from the plot area to the axis line. A positive
@@ -542,12 +539,12 @@ public abstract class Axis extends AbstractConfigurationObject {
      * area. This is typically used when two or more axes are displayed on the
      * same side of the plot.
      */
-    abstract public void setOffset(Number offset);
+    public abstract void setOffset(Number offset);
 
     /**
      * @see #setOpposite(Boolean)
      */
-    abstract public Boolean getOpposite();
+    public abstract Boolean getOpposite();
 
     /**
      * Whether to display the axis on the opposite side of the normal. The
@@ -555,12 +552,12 @@ public abstract class Axis extends AbstractConfigurationObject {
      * so the opposite sides will be right and top respectively. This is
      * typically used with dual or multiple axes.
      */
-    abstract public void setOpposite(Boolean opposite);
+    public abstract void setOpposite(Boolean opposite);
 
     /**
      * @see #setPlotBands(PlotBand...)
      */
-    abstract public PlotBand[] getPlotBands();
+    public abstract PlotBand[] getPlotBands();
 
     /**
      * <p>
@@ -568,7 +565,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * interval on the axis.
      * </p>
      */
-    abstract public void setPlotBands(PlotBand... plotBands);
+    public abstract void setPlotBands(PlotBand... plotBands);
 
     /**
      * Adds plotBand to the plotBands array
@@ -577,7 +574,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            to add
      * @see #setPlotBands(PlotBand...)
      */
-    abstract public void addPlotBand(PlotBand plotBand);
+    public abstract void addPlotBand(PlotBand plotBand);
 
     /**
      * Removes first occurrence of plotBand in plotBands array
@@ -586,18 +583,18 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            to remove
      * @see #setPlotBands(PlotBand...)
      */
-    abstract public void removePlotBand(PlotBand plotBand);
+    public abstract void removePlotBand(PlotBand plotBand);
 
     /**
      * @see #setPlotLines(PlotLine...)
      */
-    abstract public PlotLine[] getPlotLines();
+    public abstract PlotLine[] getPlotLines();
 
     /**
      * An array of lines stretching across the plot area, marking a specific
      * value on one of the axes.
      */
-    abstract public void setPlotLines(PlotLine... plotLines);
+    public abstract void setPlotLines(PlotLine... plotLines);
 
     /**
      * Adds plotLine to the plotLines array
@@ -606,7 +603,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            to add
      * @see #setPlotLines(PlotLine...)
      */
-    abstract public void addPlotLine(PlotLine plotLine);
+    public abstract void addPlotLine(PlotLine plotLine);
 
     /**
      * Removes first occurrence of plotLine in plotLines array
@@ -615,75 +612,75 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            to remove
      * @see #setPlotLines(PlotLine...)
      */
-    abstract public void removePlotLine(PlotLine plotLine);
+    public abstract void removePlotLine(PlotLine plotLine);
 
     /**
      * @see #setReversed(Boolean)
      */
-    abstract public Boolean getReversed();
+    public abstract Boolean getReversed();
 
     /**
      * Whether to reverse the axis so that the highest number is closest to the
      * origin.
      */
-    abstract public void setReversed(Boolean reversed);
+    public abstract void setReversed(Boolean reversed);
 
     /**
      * @see #setShowEmpty(Boolean)
      */
-    abstract public Boolean getShowEmpty();
+    public abstract Boolean getShowEmpty();
 
     /**
      * Whether to show the axis line and title when the axis has no data.
      */
-    abstract public void setShowEmpty(Boolean showEmpty);
+    public abstract void setShowEmpty(Boolean showEmpty);
 
     /**
      * @see #setShowFirstLabel(Boolean)
      */
-    abstract public Boolean getShowFirstLabel();
+    public abstract Boolean getShowFirstLabel();
 
     /**
      * Whether to show the first tick label.
      */
-    abstract public void setShowFirstLabel(Boolean showFirstLabel);
+    public abstract void setShowFirstLabel(Boolean showFirstLabel);
 
     /**
      * @see #setShowLastLabel(Boolean)
      */
-    abstract public Boolean getShowLastLabel();
+    public abstract Boolean getShowLastLabel();
 
     /**
      * Whether to show the last tick label.
      */
-    abstract public void setShowLastLabel(Boolean showLastLabel);
+    public abstract void setShowLastLabel(Boolean showLastLabel);
 
     /**
      * @see #setStartOfWeek(Number)
      */
-    abstract public Number getStartOfWeek();
+    public abstract Number getStartOfWeek();
 
     /**
      * For datetime axes, this decides where to put the tick between weeks. 0 =
      * Sunday, 1 = Monday.
      */
-    abstract public void setStartOfWeek(Number startOfWeek);
+    public abstract void setStartOfWeek(Number startOfWeek);
 
     /**
      * @see #setStartOnTick(Boolean)
      */
-    abstract public Boolean getStartOnTick();
+    public abstract Boolean getStartOnTick();
 
     /**
      * Whether to force the axis to start on a tick. Use this option with the
      * <code>minPadding</code> option to control the axis start.
      */
-    abstract public void setStartOnTick(Boolean startOnTick);
+    public abstract void setStartOnTick(Boolean startOnTick);
 
     /**
      * @see #setTickAmount(Number)
      */
-    abstract public Number getTickAmount();
+    public abstract Number getTickAmount();
 
     /**
      * <p>
@@ -696,22 +693,22 @@ public abstract class Axis extends AbstractConfigurationObject {
      * category axes are not affected.
      * </p>
      */
-    abstract public void setTickAmount(Number tickAmount);
+    public abstract void setTickAmount(Number tickAmount);
 
     /**
      * @see #setTickColor(Color)
      */
-    abstract public Color getTickColor();
+    public abstract Color getTickColor();
 
     /**
      * Color for the main tick marks.
      */
-    abstract public void setTickColor(Color tickColor);
+    public abstract void setTickColor(Color tickColor);
 
     /**
      * @see #setTickInterval(Number)
      */
-    abstract public Number getTickInterval();
+    public abstract Number getTickInterval();
 
     /**
      * <p>
@@ -735,66 +732,66 @@ public abstract class Axis extends AbstractConfigurationObject {
      * remove ticks.
      * </p>
      */
-    abstract public void setTickInterval(Number tickInterval);
+    public abstract void setTickInterval(Number tickInterval);
 
     /**
      * @see #setTickLength(Number)
      */
-    abstract public Number getTickLength();
+    public abstract Number getTickLength();
 
     /**
      * The pixel length of the main tick marks.
      */
-    abstract public void setTickLength(Number tickLength);
+    public abstract void setTickLength(Number tickLength);
 
     /**
      * @see #setTickPixelInterval(Number)
      */
-    abstract public Number getTickPixelInterval();
+    public abstract Number getTickPixelInterval();
 
     /**
      * If tickInterval is <code>null</code> this option sets the approximate
      * pixel interval of the tick marks. Not applicable to categorized axis.
      */
-    abstract public void setTickPixelInterval(Number tickPixelInterval);
+    public abstract void setTickPixelInterval(Number tickPixelInterval);
 
     /**
      * @see #setTickPosition(TickPosition)
      */
-    abstract public TickPosition getTickPosition();
+    public abstract TickPosition getTickPosition();
 
     /**
      * The position of the major tick marks relative to the axis line. Can be
      * one of <code>inside</code> and <code>outside</code>.
      */
-    abstract public void setTickPosition(TickPosition tickPosition);
+    public abstract void setTickPosition(TickPosition tickPosition);
 
     /**
      * @see #setTickPositions(Number[])
      */
-    abstract public Number[] getTickPositions();
+    public abstract Number[] getTickPositions();
 
     /**
      * An array defining where the ticks are laid out on the axis. This
      * overrides the default behaviour of <code>tickPixelInterval</code> and
      * <code>tickInterval</code>.
      */
-    abstract public void setTickPositions(Number[] tickPositions);
+    public abstract void setTickPositions(Number[] tickPositions);
 
     /**
      * @see #setTickWidth(Number)
      */
-    abstract public Number getTickWidth();
+    public abstract Number getTickWidth();
 
     /**
      * The pixel width of the major tick marks.
      */
-    abstract public void setTickWidth(Number tickWidth);
+    public abstract void setTickWidth(Number tickWidth);
 
     /**
      * @see #setTickmarkPlacement(TickmarkPlacement)
      */
-    abstract public TickmarkPlacement getTickmarkPlacement();
+    public abstract TickmarkPlacement getTickmarkPlacement();
 
     /**
      * For categorized axes only. If <code>on</code> the tick mark is placed in
@@ -802,22 +799,22 @@ public abstract class Axis extends AbstractConfigurationObject {
      * placed between categories. The default is <code>between</code> if the
      * <code>tickInterval</code> is 1, else <code>on</code>.
      */
-    abstract public void setTickmarkPlacement(TickmarkPlacement tickmarkPlacement);
+    public abstract void setTickmarkPlacement(TickmarkPlacement tickmarkPlacement);
 
     /**
      * @see #setTitle(AxisTitle)
      */
-    abstract public AxisTitle getTitle();
+    public abstract AxisTitle getTitle();
 
     /**
      * The axis title, showing next to the axis line.
      */
-    abstract public void setTitle(AxisTitle title);
+    public abstract void setTitle(AxisTitle title);
 
     /**
      * @see #setType(AxisType)
      */
-    abstract public AxisType getType();
+    public abstract AxisType getType();
 
     /**
      * The type of axis. Can be one of <code>"linear"</code>,
@@ -828,19 +825,19 @@ public abstract class Axis extends AbstractConfigurationObject {
      * names of the chart's series are used for categories, if not a
      * categories array is defined.
      */
-    abstract public void setType(AxisType type);
+    public abstract void setType(AxisType type);
 
     /**
      * @see #setUnits(TimeUnitMultiples...)
      */
-    abstract public TimeUnitMultiples[] getUnits();
+    public abstract TimeUnitMultiples[] getUnits();
 
     /**
      * Datetime axis only. An array determining what time intervals the ticks
      * are allowed to fall on. Each array item is an array where the first value
      * is the time unit and the second value another array of allowed multiples.
      */
-    abstract public void setUnits(TimeUnitMultiples... units);
+    public abstract void setUnits(TimeUnitMultiples... units);
 
     /**
      * Adds unit to the units array
@@ -849,7 +846,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            to add
      * @see #setUnits(TimeUnitMultiples...)
      */
-    abstract public void addUnit(TimeUnitMultiples unit);
+    public abstract void addUnit(TimeUnitMultiples unit);
 
     /**
      * Removes first occurrence of unit in units array
@@ -858,19 +855,19 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            to remove
      * @see #setUnits(TimeUnitMultiples...)
      */
-    abstract public void removeUnit(TimeUnitMultiples unit);
+    public abstract void removeUnit(TimeUnitMultiples unit);
 
     /**
      * @see #setVisible(Boolean)
      */
-    abstract public Boolean getVisible();
+    public abstract Boolean getVisible();
 
     /**
      * Whether axis, including axis title, line, ticks and labels, should be
      * visible.
      */
-    abstract public void setVisible(Boolean visible);
+    public abstract void setVisible(Boolean visible);
 
-    abstract public void setTitle(String title);
+    public abstract void setTitle(String title);
 
 }

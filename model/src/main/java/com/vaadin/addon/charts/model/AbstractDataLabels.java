@@ -25,122 +25,122 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
     /**
      * @see #setBackgroundColor(Color)
      */
-    abstract public Color getBackgroundColor();
+    public abstract Color getBackgroundColor();
 
     /**
      * The background color or gradient for the data label.
      */
-    abstract public void setBackgroundColor(Color backgroundColor);
+    public abstract void setBackgroundColor(Color backgroundColor);
 
     /**
      * @see #setBorderColor(Color)
      */
-    abstract public Color getBorderColor();
+    public abstract Color getBorderColor();
 
     /**
      * The border color for the data label.
      */
-    abstract public void setBorderColor(Color borderColor);
+    public abstract void setBorderColor(Color borderColor);
 
     /**
      * @see #setBorderRadius(Number)
      */
-    abstract public Number getBorderRadius();
+    public abstract Number getBorderRadius();
 
     /**
      * The border radius in pixels for the data label.
      */
-    abstract public void setBorderRadius(Number borderRadius);
+    public abstract void setBorderRadius(Number borderRadius);
 
     /**
      * @see #setBorderWidth(Number)
      */
-    abstract public Number getBorderWidth();
+    public abstract Number getBorderWidth();
 
     /**
      * The border width in pixels for the data label.
      */
-    abstract public void setBorderWidth(Number borderWidth);
+    public abstract void setBorderWidth(Number borderWidth);
 
     /**
      * @see #setColor(Color)
      */
-    abstract public Color getColor();
+    public abstract Color getColor();
 
     /**
      * The text color for the data labels.
      */
-    abstract public void setColor(Color color);
+    public abstract void setColor(Color color);
 
     /**
      * @see #setCrop(Boolean)
      */
-    abstract public Boolean getCrop();
+    public abstract Boolean getCrop();
 
     /**
      * Whether to hide data labels that are outside the plot area. By default,
      * the data label is moved inside the plot area according to the overflow option.
      */
-    abstract public void setCrop(Boolean crop);
+    public abstract void setCrop(Boolean crop);
 
     /**
      * @see #setDefer(Boolean)
      */
-    abstract public Boolean getDefer();
+    public abstract Boolean getDefer();
     /**
      * Whether to defer displaying the data labels until the initial series
      * animation has finished.
      */
-    abstract public void setDefer(Boolean defer);
+    public abstract void setDefer(Boolean defer);
 
     /**
      * @see #setEnabled(Boolean)
      */
-    abstract public Boolean getEnabled();
+    public abstract Boolean getEnabled();
 
     /**
      * Enable or disable the data labels.
      */
-    abstract public void setEnabled(Boolean enabled);
+    public abstract void setEnabled(Boolean enabled);
 
     /**
      * @see #setFormat(String)
      */
-    abstract public String getFormat();
+    public abstract String getFormat();
 
     /**
      * A format string for the data label. Available variables are the same
      * as for <code>formatter</code>.
      */
-    abstract public void setFormat(String format);
+    public abstract void setFormat(String format);
 
     /**
      * @see #setFormatter(String)
      */
-    abstract public String getFormatter();
+    public abstract String getFormatter();
 
     /**
      * Callback JavaScript function to format the data label.
      * Note that if a <code>format</code> is defined, the format
      * takes precedence and the formatter is ignored.
      */
-    abstract public void setFormatter(String _fn_formatter);
+    public abstract void setFormatter(String _fn_formatter);
 
     /**
      * @see #setInside(Boolean)
      */
-    abstract public Boolean getInside();
+    public abstract Boolean getInside();
 
     /**
      * For points with an extent, like columns, whether to align the data label
      * inside the box or to the actual value point.
      */
-    abstract public void setInside(Boolean inside);
+    public abstract void setInside(Boolean inside);
 
     /**
      * @see #setOverflow(String)
      */
-    abstract public String getOverflow();
+    public abstract String getOverflow();
 
     /**
      * How to handle data labels that flow outside the plot area. The default is
@@ -149,80 +149,80 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * labels outside the plot area, set <code>crop</code> to <code>false</code>
      * and <code>overflow</code> to <code>"none"</code>.
      */
-    abstract public void setOverflow(String overflow);
+    public abstract void setOverflow(String overflow);
 
     /**
      * @see #setPadding(Number)
      */
-    abstract public Number getPadding();
+    public abstract Number getPadding();
 
     /**
      * When either the <code>borderWidth</code> or the
      * <code>backgroundColor</code> is set, this is the padding within the box.
      */
-    abstract public void setPadding(Number padding);
+    public abstract void setPadding(Number padding);
 
     /**
      * @see #setRotation(Number)
      */
-    abstract public Number getRotation();
+    public abstract Number getRotation();
 
     /**
      * Text rotation in degrees. Note that due to a more complex structure,
      * backgrounds, borders and padding will be lost on a rotated data label.
      */
-    abstract public void setRotation(Number rotation);
+    public abstract void setRotation(Number rotation);
 
     /**
      * @see #setShadow(Boolean)
      */
-    abstract public Boolean getShadow();
+    public abstract Boolean getShadow();
 
     /**
      * The shadow of the box.
      */
-    abstract public void setShadow(Boolean shadow);
+    public abstract void setShadow(Boolean shadow);
 
     /**
      * @see #setShape(Shape)
      */
-    abstract public Shape getShape();
+    public abstract Shape getShape();
 
     /**
      * The name of a symbol to use for the border around the label. Symbols are
      * predefined functions on the Renderer object.
      */
-    abstract public void setShape(Shape shape);
+    public abstract void setShape(Shape shape);
 
     /**
      * @see #setStyle(Style)
      */
-    abstract public Style getStyle();
+    public abstract Style getStyle();
 
     /**
      * Styles for the label.
      */
-    abstract public void setStyle(Style style);
+    public abstract void setStyle(Style style);
 
     /**
      * @see #setUseHTML(Boolean)
      */
-    abstract public Boolean getUseHTML();
+    public abstract Boolean getUseHTML();
 
     /**
      * Whether to use HTML to render the labels.
      */
-    abstract public void setUseHTML(Boolean useHTML);
+    public abstract void setUseHTML(Boolean useHTML);
 
     /**
      * @see #setVerticalAlign(VerticalAlign)
      */
-    abstract public VerticalAlign getVerticalAlign();
+    public abstract VerticalAlign getVerticalAlign();
 
     /**
      * The vertical alignment of a data label.
      */
-    abstract public void setVerticalAlign(VerticalAlign verticalAlign);
+    public abstract void setVerticalAlign(VerticalAlign verticalAlign);
 }
 
 
