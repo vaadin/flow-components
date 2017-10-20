@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>webcomponents-helper</artifactId>
-			<version>0.2-SNAPSHOT</version>
+			<version>0.2.0</version>
 		</dependency>
 
 		<dependency>
