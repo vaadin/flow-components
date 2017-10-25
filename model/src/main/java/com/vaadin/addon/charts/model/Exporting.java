@@ -20,7 +20,7 @@ public class Exporting extends AbstractConfigurationObject {
 	private Number scale;
 	private Number sourceHeight;
 	private Number sourceWidth;
-	private String type;
+	private ExportFileType type;
 	private String url;
 	private Number width;
 
@@ -261,9 +261,9 @@ public class Exporting extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setType(String)
+	 * @see #setType(ExportFileType)
 	 */
-	public String getType() {
+	public ExportFileType getType() {
 		return type;
 	}
 
@@ -275,7 +275,7 @@ public class Exporting extends AbstractConfigurationObject {
 	 * <p>
 	 * Defaults to: image/png
 	 */
-	public void setType(String type) {
+	public void setType(ExportFileType type) {
 		this.type = type;
 	}
 

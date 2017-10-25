@@ -20,7 +20,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
 	private String description;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
-	private String findNearestPointBy;
+	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
 	private String linecap;
@@ -231,9 +231,9 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
 	}
 
 	/**
-	 * @see #setFindNearestPointBy(String)
+	 * @see #setFindNearestPointBy(Dimension)
 	 */
-	public String getFindNearestPointBy() {
+	public Dimension getFindNearestPointBy() {
 		return findNearestPointBy;
 	}
 
@@ -250,7 +250,7 @@ public class PlotOptionsSolidgauge extends GaugeOptions {
 	 * hover) for tooltip.
 	 * </p>
 	 */
-	public void setFindNearestPointBy(String findNearestPointBy) {
+	public void setFindNearestPointBy(Dimension findNearestPointBy) {
 		this.findNearestPointBy = findNearestPointBy;
 	}
 

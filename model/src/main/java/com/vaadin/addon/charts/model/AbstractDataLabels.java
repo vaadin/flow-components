@@ -22,6 +22,9 @@ import com.vaadin.addon.charts.model.style.Style;
 
 public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
+    public static final String OVERFLOW_JUSTIFY = "justify";
+    public static final String OVERFLOW_NONE = "none";
+
     /**
      * @see #setBackgroundColor(Color)
      */

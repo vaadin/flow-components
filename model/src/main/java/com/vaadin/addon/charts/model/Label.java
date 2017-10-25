@@ -10,7 +10,7 @@ public class Label extends AbstractConfigurationObject {
 	private Number rotation;
 	private Style style;
 	private String text;
-	private String textAlign;
+	private TextAlign textAlign;
 	private Boolean useHTML;
 	private VerticalAlign verticalAlign;
 	private Number x;
@@ -96,9 +96,9 @@ public class Label extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setTextAlign(String)
+	 * @see #setTextAlign(TextAlign)
 	 */
-	public String getTextAlign() {
+	public TextAlign getTextAlign() {
 		return textAlign;
 	}
 
@@ -109,7 +109,7 @@ public class Label extends AbstractConfigurationObject {
 	 * anchor point. Possible values are "left", "center" and "right". Defaults
 	 * to the same as the <code>align</code> option.
 	 */
-	public void setTextAlign(String textAlign) {
+	public void setTextAlign(TextAlign textAlign) {
 		this.textAlign = textAlign;
 	}
 

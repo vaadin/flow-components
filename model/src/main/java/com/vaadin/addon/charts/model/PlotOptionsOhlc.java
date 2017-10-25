@@ -27,7 +27,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	private String description;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
-	private String findNearestPointBy;
+	private Dimension findNearestPointBy;
 	private String gapUnit;
 	private Boolean getExtremesFromAll;
 	private Number groupPadding;
@@ -62,7 +62,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	private Number turboThreshold;
 	private Color upColor;
 	private Boolean visible;
-	private String zoneAxis;
+	private ZoneAxis zoneAxis;
 	private ArrayList<Zones> zones;
 
 	public PlotOptionsOhlc() {
@@ -430,9 +430,9 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	}
 
 	/**
-	 * @see #setFindNearestPointBy(String)
+	 * @see #setFindNearestPointBy(Dimension)
 	 */
-	public String getFindNearestPointBy() {
+	public Dimension getFindNearestPointBy() {
 		return findNearestPointBy;
 	}
 
@@ -449,7 +449,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	 * hover) for tooltip.
 	 * </p>
 	 */
-	public void setFindNearestPointBy(String findNearestPointBy) {
+	public void setFindNearestPointBy(Dimension findNearestPointBy) {
 		this.findNearestPointBy = findNearestPointBy;
 	}
 
@@ -1127,9 +1127,9 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	}
 
 	/**
-	 * @see #setZoneAxis(String)
+	 * @see #setZoneAxis(ZoneAxis)
 	 */
-	public String getZoneAxis() {
+	public ZoneAxis getZoneAxis() {
 		return zoneAxis;
 	}
 
@@ -1138,7 +1138,7 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	 * <p>
 	 * Defaults to: y
 	 */
-	public void setZoneAxis(String zoneAxis) {
+	public void setZoneAxis(ZoneAxis zoneAxis) {
 		this.zoneAxis = zoneAxis;
 	}
 

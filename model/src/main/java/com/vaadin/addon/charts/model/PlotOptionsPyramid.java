@@ -24,7 +24,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	private String description;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
-	private String findNearestPointBy;
+	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private String height;
 	private ArrayList<String> keys;
@@ -42,7 +42,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	private SeriesTooltip tooltip;
 	private Boolean visible;
 	private String width;
-	private String zoneAxis;
+	private ZoneAxis zoneAxis;
 	private ArrayList<Zones> zones;
 
 	public PlotOptionsPyramid() {
@@ -347,9 +347,9 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	}
 
 	/**
-	 * @see #setFindNearestPointBy(String)
+	 * @see #setFindNearestPointBy(Dimension)
 	 */
-	public String getFindNearestPointBy() {
+	public Dimension getFindNearestPointBy() {
 		return findNearestPointBy;
 	}
 
@@ -366,7 +366,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	 * hover) for tooltip.
 	 * </p>
 	 */
-	public void setFindNearestPointBy(String findNearestPointBy) {
+	public void setFindNearestPointBy(Dimension findNearestPointBy) {
 		this.findNearestPointBy = findNearestPointBy;
 	}
 
@@ -689,9 +689,9 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	}
 
 	/**
-	 * @see #setZoneAxis(String)
+	 * @see #setZoneAxis(ZoneAxis)
 	 */
-	public String getZoneAxis() {
+	public ZoneAxis getZoneAxis() {
 		return zoneAxis;
 	}
 
@@ -700,7 +700,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 	 * <p>
 	 * Defaults to: y
 	 */
-	public void setZoneAxis(String zoneAxis) {
+	public void setZoneAxis(ZoneAxis zoneAxis) {
 		this.zoneAxis = zoneAxis;
 	}
 

@@ -26,9 +26,9 @@ public class ChartModel extends AbstractConfigurationObject {
 	private Number marginRight;
 	private Number marginTop;
 	private Options3d options3d;
-	private String panKey;
+	private PanKey panKey;
 	private Boolean panning;
-	private PinchType pinchType;
+	private Dimension pinchType;
 	private Color plotBackgroundColor;
 	private String plotBackgroundImage;
 	private Color plotBorderColor;
@@ -49,7 +49,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	private ChartType type;
 	private String typeDescription;
 	private Number width;
-	private ZoomType zoomType;
+	private Dimension zoomType;
 
 	public ChartModel() {
 	}
@@ -414,9 +414,9 @@ public class ChartModel extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setPanKey(String)
+	 * @see #setPanKey(PanKey)
 	 */
-	public String getPanKey() {
+	public PanKey getPanKey() {
 		return panKey;
 	}
 
@@ -428,7 +428,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	 * <code>event.altKey</code>, <code>event.ctrlKey</code>,
 	 * <code>event.metaKey</code> and <code>event.shiftKey</code>).
 	 */
-	public void setPanKey(String panKey) {
+	public void setPanKey(PanKey panKey) {
 		this.panKey = panKey;
 	}
 
@@ -460,9 +460,9 @@ public class ChartModel extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setPinchType(PinchType)
+	 * @see #setPinchType(Dimension)
 	 */
-	public PinchType getPinchType() {
+	public Dimension getPinchType() {
 		return pinchType;
 	}
 
@@ -477,7 +477,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	 * <p>
 	 * Defaults to: null
 	 */
-	public void setPinchType(PinchType pinchType) {
+	public void setPinchType(Dimension pinchType) {
 		this.pinchType = pinchType;
 	}
 
@@ -850,9 +850,9 @@ public class ChartModel extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setZoomType(ZoomType)
+	 * @see #setZoomType(Dimension)
 	 */
-	public ZoomType getZoomType() {
+	public Dimension getZoomType() {
 		return zoomType;
 	}
 
@@ -860,7 +860,7 @@ public class ChartModel extends AbstractConfigurationObject {
 	 * Decides in what dimensions the user can zoom by dragging the mouse. Can
 	 * be one of <code>x</code>, <code>y</code> or <code>xy</code>.
 	 */
-	public void setZoomType(ZoomType zoomType) {
+	public void setZoomType(Dimension zoomType) {
 		this.zoomType = zoomType;
 	}
 

@@ -23,6 +23,9 @@ import java.util.Date;
 
 public abstract class AreaOptions extends AbstractPlotOptions {
 
+    public static final String LINECAP_ROUND = "round";
+    public static final String LINKED_TO_PREVIOUS = ":previous";
+
     /**
      * @see #setAllowPointSelect(Boolean)
      */
@@ -474,14 +477,14 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setVisible(Boolean visible);
 
     /**
-     * @see #setZoneAxis(String)
+     * @see #setZoneAxis(ZoneAxis)
      */
-    public abstract String getZoneAxis();
+    public abstract ZoneAxis getZoneAxis();
 
     /**
      * Defines the Axis on which the zones are applied.
      */
-    public abstract void setZoneAxis(String zoneAxis);
+    public abstract void setZoneAxis(ZoneAxis zoneAxis);
 
     /**
      * @see #setZones(Zones...)

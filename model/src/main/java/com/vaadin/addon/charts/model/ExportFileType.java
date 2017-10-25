@@ -17,21 +17,26 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
-
 /**
- * Parameters for in what dimensions the user can zoom by dragging the mouse.
+ * Default MIME type for exporting if chart.exportChart() is called without specifying a type option.
+ *
+ * Defaults to image/png.
  */
-public enum ZoomType implements ChartEnum {
-    X("x"), Y("y"), XY("xy");
+public enum ExportFileType implements ChartEnum {
 
-    private final String zoomType;
+    IMAGE_PNG("image/png"),
+    IMAGE_JPEG("image/jpeg"),
+    APPLICATION_PDF("application/pdf"),
+    IMAGE_SVG_XML("image/svg+xml");
 
-    private ZoomType(String zoomType) {
-        this.zoomType = zoomType;
+    private final String type;
+
+    private ExportFileType(String type) {
+        this.type = type;
     }
 
     @Override
     public String toString() {
-        return zoomType;
+        return type;
     }
 }

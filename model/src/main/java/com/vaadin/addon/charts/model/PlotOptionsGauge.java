@@ -20,7 +20,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 	private Dial dial;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
-	private String findNearestPointBy;
+	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
 	private String linkedTo;
@@ -289,9 +289,9 @@ public class PlotOptionsGauge extends GaugeOptions {
 	}
 
 	/**
-	 * @see #setFindNearestPointBy(String)
+	 * @see #setFindNearestPointBy(Dimension)
 	 */
-	public String getFindNearestPointBy() {
+	public Dimension getFindNearestPointBy() {
 		return findNearestPointBy;
 	}
 
@@ -308,7 +308,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 	 * hover) for tooltip.
 	 * </p>
 	 */
-	public void setFindNearestPointBy(String findNearestPointBy) {
+	public void setFindNearestPointBy(Dimension findNearestPointBy) {
 		this.findNearestPointBy = findNearestPointBy;
 	}
 

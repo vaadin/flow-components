@@ -32,7 +32,7 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	private Number edgeWidth;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
-	private String findNearestPointBy;
+	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private Number groupPadding;
 	private Number groupZPadding;
@@ -63,7 +63,7 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	private SeriesTooltip tooltip;
 	private Color upColor;
 	private Boolean visible;
-	private String zoneAxis;
+	private ZoneAxis zoneAxis;
 	private ArrayList<Zones> zones;
 
 	public PlotOptionsWaterfall() {
@@ -558,9 +558,9 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	}
 
 	/**
-	 * @see #setFindNearestPointBy(String)
+	 * @see #setFindNearestPointBy(Dimension)
 	 */
-	public String getFindNearestPointBy() {
+	public Dimension getFindNearestPointBy() {
 		return findNearestPointBy;
 	}
 
@@ -577,7 +577,7 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	 * hover) for tooltip.
 	 * </p>
 	 */
-	public void setFindNearestPointBy(String findNearestPointBy) {
+	public void setFindNearestPointBy(Dimension findNearestPointBy) {
 		this.findNearestPointBy = findNearestPointBy;
 	}
 
@@ -1185,9 +1185,9 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	}
 
 	/**
-	 * @see #setZoneAxis(String)
+	 * @see #setZoneAxis(ZoneAxis)
 	 */
-	public String getZoneAxis() {
+	public ZoneAxis getZoneAxis() {
 		return zoneAxis;
 	}
 
@@ -1196,7 +1196,7 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	 * <p>
 	 * Defaults to: y
 	 */
-	public void setZoneAxis(String zoneAxis) {
+	public void setZoneAxis(ZoneAxis zoneAxis) {
 		this.zoneAxis = zoneAxis;
 	}
 

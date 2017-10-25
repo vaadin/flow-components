@@ -520,14 +520,14 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
     public abstract void setVisible(Boolean visible);
 
     /**
-     * @see #setZoneAxis(String)
+     * @see #setZoneAxis(ZoneAxis)
      */
-    public abstract String getZoneAxis();
+    public abstract ZoneAxis getZoneAxis();
 
     /**
      * Defines the Axis on which the zones are applied.
      */
-    public abstract void setZoneAxis(String zoneAxis);
+    public abstract void setZoneAxis(ZoneAxis zoneAxis);
 
     /**
      * @see #setZones(Zones...)

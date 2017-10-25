@@ -17,21 +17,27 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
-
 /**
- * Parameters for in what dimensions the user can do multitouch gestures.
+ * The text alignment for the label. While align determines where the texts anchor point is placed within the plot band,
+ * textAlign determines how the text is aligned against its anchor point.
+ * Defaults to the same as the align option.
+ *
+ * Defaults to undefined.
  */
-public enum PinchType implements ChartEnum {
-    X("x"), Y("y"), XY("xy");
+public enum TextAlign implements ChartEnum {
 
-    private final String zoomType;
+    LEFT("left"),
+    CENTER("center"),
+    RIGHT("right");
 
-    private PinchType(String zoomType) {
-        this.zoomType = zoomType;
+    private final String alignment;
+
+    private TextAlign(String alignment) {
+        this.alignment = alignment;
     }
 
     @Override
     public String toString() {
-        return zoomType;
+        return alignment;
     }
 }

@@ -25,7 +25,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 	private Boolean enableMouseTracking;
 	private Number endAngle;
 	private Boolean exposeElementToA11y;
-	private String findNearestPointBy;
+	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private Boolean ignoreHiddenPoint;
 	private String innerSize;
@@ -44,7 +44,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 	private Boolean stickyTracking;
 	private SeriesTooltip tooltip;
 	private Boolean visible;
-	private String zoneAxis;
+	private ZoneAxis zoneAxis;
 	private ArrayList<Zones> zones;
 
 	public PlotOptionsPie() {
@@ -406,9 +406,9 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setFindNearestPointBy(String)
+	 * @see #setFindNearestPointBy(Dimension)
 	 */
-	public String getFindNearestPointBy() {
+	public Dimension getFindNearestPointBy() {
 		return findNearestPointBy;
 	}
 
@@ -425,7 +425,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 	 * hover) for tooltip.
 	 * </p>
 	 */
-	public void setFindNearestPointBy(String findNearestPointBy) {
+	public void setFindNearestPointBy(Dimension findNearestPointBy) {
 		this.findNearestPointBy = findNearestPointBy;
 	}
 
@@ -785,9 +785,9 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setZoneAxis(String)
+	 * @see #setZoneAxis(ZoneAxis)
 	 */
-	public String getZoneAxis() {
+	public ZoneAxis getZoneAxis() {
 		return zoneAxis;
 	}
 
@@ -796,7 +796,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 	 * <p>
 	 * Defaults to: y
 	 */
-	public void setZoneAxis(String zoneAxis) {
+	public void setZoneAxis(ZoneAxis zoneAxis) {
 		this.zoneAxis = zoneAxis;
 	}
 

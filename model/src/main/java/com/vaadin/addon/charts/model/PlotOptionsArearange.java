@@ -28,7 +28,7 @@ public class PlotOptionsArearange extends AreaOptions {
 	private Boolean exposeElementToA11y;
 	private Color fillColor;
 	private Number fillOpacity;
-	private String findNearestPointBy;
+	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
 	private Color lineColor;
@@ -54,7 +54,7 @@ public class PlotOptionsArearange extends AreaOptions {
 	private Boolean trackByArea;
 	private Number turboThreshold;
 	private Boolean visible;
-	private String zoneAxis;
+	private ZoneAxis zoneAxis;
 	private ArrayList<Zones> zones;
 	private Compare compare;
 	private Number compareBase;
@@ -420,9 +420,9 @@ public class PlotOptionsArearange extends AreaOptions {
 	}
 
 	/**
-	 * @see #setFindNearestPointBy(String)
+	 * @see #setFindNearestPointBy(Dimension)
 	 */
-	public String getFindNearestPointBy() {
+	public Dimension getFindNearestPointBy() {
 		return findNearestPointBy;
 	}
 
@@ -439,7 +439,7 @@ public class PlotOptionsArearange extends AreaOptions {
 	 * hover) for tooltip.
 	 * </p>
 	 */
-	public void setFindNearestPointBy(String findNearestPointBy) {
+	public void setFindNearestPointBy(Dimension findNearestPointBy) {
 		this.findNearestPointBy = findNearestPointBy;
 	}
 
@@ -934,9 +934,9 @@ public class PlotOptionsArearange extends AreaOptions {
 	}
 
 	/**
-	 * @see #setZoneAxis(String)
+	 * @see #setZoneAxis(ZoneAxis)
 	 */
-	public String getZoneAxis() {
+	public ZoneAxis getZoneAxis() {
 		return zoneAxis;
 	}
 
@@ -945,7 +945,7 @@ public class PlotOptionsArearange extends AreaOptions {
 	 * <p>
 	 * Defaults to: y
 	 */
-	public void setZoneAxis(String zoneAxis) {
+	public void setZoneAxis(ZoneAxis zoneAxis) {
 		this.zoneAxis = zoneAxis;
 	}
 

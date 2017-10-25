@@ -28,7 +28,7 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	private String description;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
-	private String findNearestPointBy;
+	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
 	private Number lineWidth;
@@ -55,7 +55,7 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	private SeriesTooltip tooltip;
 	private Number turboThreshold;
 	private Boolean visible;
-	private String zoneAxis;
+	private ZoneAxis zoneAxis;
 	private ArrayList<Zones> zones;
 	private Compare compare;
 	private Number compareBase;
@@ -403,9 +403,9 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setFindNearestPointBy(String)
+	 * @see #setFindNearestPointBy(Dimension)
 	 */
-	public String getFindNearestPointBy() {
+	public Dimension getFindNearestPointBy() {
 		return findNearestPointBy;
 	}
 
@@ -422,7 +422,7 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	 * hover) for tooltip.
 	 * </p>
 	 */
-	public void setFindNearestPointBy(String findNearestPointBy) {
+	public void setFindNearestPointBy(Dimension findNearestPointBy) {
 		this.findNearestPointBy = findNearestPointBy;
 	}
 
@@ -961,9 +961,9 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setZoneAxis(String)
+	 * @see #setZoneAxis(ZoneAxis)
 	 */
-	public String getZoneAxis() {
+	public ZoneAxis getZoneAxis() {
 		return zoneAxis;
 	}
 
@@ -972,7 +972,7 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	 * <p>
 	 * Defaults to: y
 	 */
-	public void setZoneAxis(String zoneAxis) {
+	public void setZoneAxis(ZoneAxis zoneAxis) {
 		this.zoneAxis = zoneAxis;
 	}
 

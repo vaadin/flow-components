@@ -28,7 +28,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	private Number edgeWidth;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
-	private String findNearestPointBy;
+	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private Number groupZPadding;
 	private ArrayList<String> keys;
@@ -57,7 +57,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	private Color whiskerColor;
 	private String whiskerLength;
 	private Number whiskerWidth;
-	private String zoneAxis;
+	private ZoneAxis zoneAxis;
 	private ArrayList<Zones> zones;
 
 	public PlotOptionsErrorbar() {
@@ -369,9 +369,9 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setFindNearestPointBy(String)
+	 * @see #setFindNearestPointBy(Dimension)
 	 */
-	public String getFindNearestPointBy() {
+	public Dimension getFindNearestPointBy() {
 		return findNearestPointBy;
 	}
 
@@ -388,7 +388,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	 * hover) for tooltip.
 	 * </p>
 	 */
-	public void setFindNearestPointBy(String findNearestPointBy) {
+	public void setFindNearestPointBy(Dimension findNearestPointBy) {
 		this.findNearestPointBy = findNearestPointBy;
 	}
 
@@ -939,9 +939,9 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setZoneAxis(String)
+	 * @see #setZoneAxis(ZoneAxis)
 	 */
-	public String getZoneAxis() {
+	public ZoneAxis getZoneAxis() {
 		return zoneAxis;
 	}
 
@@ -950,7 +950,7 @@ public class PlotOptionsErrorbar extends AbstractPlotOptions {
 	 * <p>
 	 * Defaults to: y
 	 */
-	public void setZoneAxis(String zoneAxis) {
+	public void setZoneAxis(ZoneAxis zoneAxis) {
 		this.zoneAxis = zoneAxis;
 	}
 

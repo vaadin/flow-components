@@ -27,6 +27,8 @@ public abstract class Axis extends AbstractConfigurationObject {
 
     private static final long serialVersionUID = 1L;
 
+    public static final String MINOR_TICK_INTERVAL_AUTO = "auto";
+
     protected Number min;
     protected Number max;
 

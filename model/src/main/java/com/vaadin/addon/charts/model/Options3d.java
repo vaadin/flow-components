@@ -7,6 +7,7 @@ package com.vaadin.addon.charts.model;
  */
 public class Options3d extends AbstractConfigurationObject {
 
+	public static final String AXIS_LABEL_POSITION_AUTO = "auto";
 	private Number alpha;
 	private String axisLabelPosition;
 	private Number beta;
