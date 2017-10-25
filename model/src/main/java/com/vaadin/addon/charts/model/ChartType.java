@@ -17,30 +17,6 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
-import com.vaadin.addon.charts.model.PlotOptionsArea;
-import com.vaadin.addon.charts.model.PlotOptionsArearange;
-import com.vaadin.addon.charts.model.PlotOptionsAreaspline;
-import com.vaadin.addon.charts.model.PlotOptionsAreasplinerange;
-import com.vaadin.addon.charts.model.PlotOptionsBar;
-import com.vaadin.addon.charts.model.PlotOptionsBubble;
-import com.vaadin.addon.charts.model.PlotOptionsCandlestick;
-import com.vaadin.addon.charts.model.PlotOptionsColumn;
-import com.vaadin.addon.charts.model.PlotOptionsColumnrange;
-import com.vaadin.addon.charts.model.PlotOptionsFlags;
-import com.vaadin.addon.charts.model.PlotOptionsFunnel;
-import com.vaadin.addon.charts.model.PlotOptionsGauge;
-import com.vaadin.addon.charts.model.PlotOptionsHeatmap;
-import com.vaadin.addon.charts.model.PlotOptionsLine;
-import com.vaadin.addon.charts.model.PlotOptionsOhlc;
-import com.vaadin.addon.charts.model.PlotOptionsPie;
-import com.vaadin.addon.charts.model.PlotOptionsPolygon;
-import com.vaadin.addon.charts.model.PlotOptionsPyramid;
-import com.vaadin.addon.charts.model.PlotOptionsScatter;
-import com.vaadin.addon.charts.model.PlotOptionsSolidgauge;
-import com.vaadin.addon.charts.model.PlotOptionsSpline;
-import com.vaadin.addon.charts.model.PlotOptionsTreemap;
-import com.vaadin.addon.charts.model.PlotOptionsWaterfall;
-
 /**
  * The default series type for the chart. Can be one of LINE, SPLINE, AREA,
  * AREASPLINE, COLUMN, BAR, PIE, SCATTER, AREARANGE, AREASPLINERANGE, and

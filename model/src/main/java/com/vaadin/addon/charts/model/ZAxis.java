@@ -74,6 +74,9 @@ public class ZAxis extends Axis {
 	private ArrayList<TimeUnitMultiples> units;
 	private Boolean visible;
 
+	public ZAxis() {
+	}
+
 	/**
 	 * @see #setAllowDecimals(Boolean)
 	 */
@@ -128,14 +131,14 @@ public class ZAxis extends Axis {
 	 * However, if you have multiple series, best practice remains defining the
 	 * <code>categories</code> array.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * Example:
-	 *
+	 * 
 	 * <pre>
 	 * categories: ['Apples', 'Bananas', 'Oranges']
 	 * </pre>
-	 *
+	 * 
 	 * Defaults to <code>null</code>
 	 * </p>
 	 */
@@ -145,7 +148,7 @@ public class ZAxis extends Axis {
 
 	/**
 	 * Adds category to the categories array
-	 *
+	 * 
 	 * @param category
 	 *            to add
 	 * @see #setCategories(String...)
@@ -159,7 +162,7 @@ public class ZAxis extends Axis {
 
 	/**
 	 * Removes first occurrence of category in categories array
-	 *
+	 * 
 	 * @param category
 	 *            to remove
 	 * @see #setCategories(String...)
@@ -215,7 +218,7 @@ public class ZAxis extends Axis {
 	 * Configure a crosshair that follows either the mouse pointer or the
 	 * hovered point.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -249,9 +252,9 @@ public class ZAxis extends Axis {
 	 * <code>hour</code> unit be used for intermediate values on the same axis.
 	 * For an overview of the replacement codes, see <a
 	 * href="#Highcharts.dateFormat">dateFormat</a>.
-	 *
+	 * 
 	 * Defaults to:
-	 *
+	 * 
 	 * <pre>
 	 * {
 	 * 		millisecond: '%H:%M:%S.%L',
@@ -281,7 +284,7 @@ public class ZAxis extends Axis {
 	 * <p>
 	 * <i>Requires Accessibility module</i>
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * Description of the axis to screen reader users.
 	 * </p>
@@ -336,7 +339,7 @@ public class ZAxis extends Axis {
 	 * <p>
 	 * Color of the grid lines extending the ticks across the plot area.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -380,7 +383,7 @@ public class ZAxis extends Axis {
 	 * <p>
 	 * The width of the grid lines extending the ticks across the plot area.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -453,7 +456,7 @@ public class ZAxis extends Axis {
 	 * <p>
 	 * The color of the line marking the axis itself.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -479,7 +482,7 @@ public class ZAxis extends Axis {
 	 * <p>
 	 * The width of the line marking the axis itself.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -524,7 +527,7 @@ public class ZAxis extends Axis {
 	 * automatically calculated. If the <code>endOnTick</code> option is true,
 	 * the <code>max</code> value might be rounded up.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * If a <a href="#yAxis.tickAmount">tickAmount</a> is set, the axis may be
 	 * extended beyond the set max in order to reach the given number of ticks.
@@ -607,18 +610,18 @@ public class ZAxis extends Axis {
 	 * datetime axis the main unit is milliseconds. If minRange is set to
 	 * 3600000, you can't zoom in more than to one hour.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * The default minRange for the x axis is five times the smallest interval
 	 * between any of the data points.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * On a logarithmic axis, the unit for the minimum range is the power. So a
 	 * minRange of 1 means that the axis can be zoomed to 10-100, 100-1000,
 	 * 1000-10000 etc.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * Note that the <code>minPadding</code>, <code>maxPadding</code>,
 	 * <code>startOnTick</code> and <code>endOnTick</code> settings also affect
@@ -657,8 +660,8 @@ public class ZAxis extends Axis {
 	 * <p>
 	 * Color of the minor, secondary grid lines.
 	 * </p>
-	 *
-	 *
+	 * 
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -702,7 +705,7 @@ public class ZAxis extends Axis {
 	 * <p>
 	 * Width of the minor, secondary grid lines.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -753,11 +756,11 @@ public class ZAxis extends Axis {
 	 * results in a best guess, attempting to enter approximately 5 minor ticks
 	 * between each major tick.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * If user settings dictate minor ticks to become too dense, they don't make
 	 * sense, and will be ignored to prevent performance problems.</a>
-	 *
+	 * 
 	 * <p>
 	 * On axes using <a href="#xAxis.categories">categories</a>, minor ticks are
 	 * not supported.
@@ -873,12 +876,12 @@ public class ZAxis extends Axis {
 	 * An array of colored bands stretching across the plot area marking an
 	 * interval on the axis.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In a gauge, a plot band on the Y axis (value axis) will stretch along the
 	 * perimeter of the gauge.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -893,7 +896,7 @@ public class ZAxis extends Axis {
 
 	/**
 	 * Adds plotBand to the plotBands array
-	 *
+	 * 
 	 * @param plotBand
 	 *            to add
 	 * @see #setPlotBands(PlotBand...)
@@ -907,7 +910,7 @@ public class ZAxis extends Axis {
 
 	/**
 	 * Removes first occurrence of plotBand in plotBands array
-	 *
+	 * 
 	 * @param plotBand
 	 *            to remove
 	 * @see #setPlotBands(PlotBand...)
@@ -933,7 +936,7 @@ public class ZAxis extends Axis {
 	 * An array of lines stretching across the plot area, marking a specific
 	 * value on one of the axes.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -948,7 +951,7 @@ public class ZAxis extends Axis {
 
 	/**
 	 * Adds plotLine to the plotLines array
-	 *
+	 * 
 	 * @param plotLine
 	 *            to add
 	 * @see #setPlotLines(PlotLine...)
@@ -962,7 +965,7 @@ public class ZAxis extends Axis {
 
 	/**
 	 * Removes first occurrence of plotLine in plotLines array
-	 *
+	 * 
 	 * @param plotLine
 	 *            to remove
 	 * @see #setPlotLines(PlotLine...)
@@ -1135,7 +1138,7 @@ public class ZAxis extends Axis {
 	 * <p>
 	 * Color for the main tick marks.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -1173,12 +1176,12 @@ public class ZAxis extends Axis {
 	 * 0.2 puts a tick on 0.1, 0.2, 0.4, 0.6, 0.8, 1, 2, 4, 6, 8, 10, 20, 40
 	 * etc.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * If the tickInterval is too dense for labels to be drawn, Highcharts may
 	 * remove ticks.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * If the chart has multiple axes, the <a
 	 * href="#chart.alignTicks">alignTicks</a> option may interfere with the
@@ -1217,13 +1220,13 @@ public class ZAxis extends Axis {
 	 * If tickInterval is <code>null</code> this option sets the approximate
 	 * pixel interval of the tick marks. Not applicable to categorized axis.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * The tick interval is also influenced by the <a
 	 * href="#xAxis.minTickInterval">minTickInterval</a> option, that, by
 	 * default prevents ticks from being denser than the data points.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * Defaults to <code>72</code> for the Y axis and <code>100</code> for the X
 	 * axis.
@@ -1278,7 +1281,7 @@ public class ZAxis extends Axis {
 	 * <p>
 	 * The pixel width of the major tick marks.
 	 * </p>
-	 *
+	 * 
 	 * <p>
 	 * In <a href=
 	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -1390,7 +1393,7 @@ public class ZAxis extends Axis {
 	 * are allowed to fall on. Each array item is an array where the first value
 	 * is the time unit and the second value another array of allowed multiples.
 	 * Defaults to:
-	 *
+	 * 
 	 * <pre>
 	 * units: [[
 	 * 		'millisecond', // unit name
@@ -1425,7 +1428,7 @@ public class ZAxis extends Axis {
 
 	/**
 	 * Adds unit to the units array
-	 *
+	 * 
 	 * @param unit
 	 *            to add
 	 * @see #setUnits(TimeUnitMultiples...)
@@ -1439,7 +1442,7 @@ public class ZAxis extends Axis {
 
 	/**
 	 * Removes first occurrence of unit in units array
-	 *
+	 * 
 	 * @param unit
 	 *            to remove
 	 * @see #setUnits(TimeUnitMultiples...)

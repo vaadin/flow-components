@@ -17,9 +17,6 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
-import com.vaadin.addon.charts.model.SeriesTooltip;
-import com.vaadin.addon.charts.model.States;
-import com.vaadin.addon.charts.model.Zones;
 import com.vaadin.addon.charts.model.style.Color;
 
 import java.util.Date;

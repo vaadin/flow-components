@@ -17,22 +17,20 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
-import com.vaadin.addon.charts.model.PlotOptionsLine;
-
 /**
  * Defines different step line types. Configurable in {@link PlotOptionsLine}.
  */
 public enum StepType implements ChartEnum {
     RIGHT("right"), CENTER("center"), LEFT("left"), NONE("");
 
-    private String highchartNAme;
+    private String highchartName;
 
     private StepType(String n) {
-        this.highchartNAme = n;
+        this.highchartName = n;
     }
 
     public String toString() {
-        return highchartNAme;
+        return highchartName;
     }
 
 }

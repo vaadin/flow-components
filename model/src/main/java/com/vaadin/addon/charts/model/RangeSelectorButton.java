@@ -17,8 +17,6 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
-import com.vaadin.addon.charts.model.DataGrouping;
-
 /**
  * Options for range selector buttons.
  */
@@ -30,7 +28,6 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
     private DataGrouping dataGrouping;
 
     public RangeSelectorButton() {
-
     }
 
     public RangeSelectorButton(RangeSelectorTimespan type, Number count,

@@ -17,8 +17,6 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
-import com.vaadin.addon.charts.model.YAxis;
-
 /**
  * The {@link YAxis} will show percentage or absolute change depending on
  * whether compare is set to {@link Compare#PERCENT} or {@link Compare#VALUE}

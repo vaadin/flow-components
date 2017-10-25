@@ -17,10 +17,6 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
-import com.vaadin.addon.charts.model.DataLabels;
-import com.vaadin.addon.charts.model.SeriesTooltip;
-import com.vaadin.addon.charts.model.Zones;
-
 public abstract class GaugeOptions extends AbstractPlotOptions {
 
     /**
