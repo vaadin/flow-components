@@ -3,84 +3,36 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.vaadin</groupId>
+    <parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>flow-component</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
     <artifactId>vaadin-split-layout-flow</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-
-        <!-- Dependencies -->
-        <flow.version>1.0.0.alpha6</flow.version>
-        <servlet.api.version>3.1.0</servlet.api.version>
-        <jetty.version>9.4.7.v20170914</jetty.version>
+        <flow.version>1.0-SNAPSHOT</flow.version>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>flow-internal-release</id>
-            <url>https://repo.vaadin.com/nexus/content/repositories/flow</url>
-        </repository>
-        <repository>
-            <id>webjars</id>
-            <url>https://dl.bintray.com/webjars/maven</url>
-        </repository>
-    </repositories>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-webjars-bom</artifactId>
-                <type>pom</type>
-                <scope>import</scope>
-                <version>${flow.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-    
     <dependencies>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-html-components</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-client</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.webjars.bower</groupId>
             <artifactId>vaadin-split-layout</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${servlet.api.version}</version>
-            <scope>provided</scope>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-server</artifactId>
+            <version>${flow.version}</version>
         </dependency>
+
+        <!-- Dependencies for the demo -->
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-webapp</artifactId>
-            <version>${jetty.version}</version>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-component-demo-helpers</artifactId>
+            <version>${flow.version}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-continuation</artifactId>
-            <version>${jetty.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-annotations</artifactId>
-            <version>${jetty.version}</version>
-            <scope>provided</scope>
-        </dependency>
+        </dependency>      
     </dependencies>
 </project>
