@@ -22,18 +22,19 @@ import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.datepicker.DatePicker;
 import com.vaadin.ui.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.ui.html.Div;
 
 /**
  * View for {@link DatePicker} demo.
+ * 
+ * @author Vaadin Ltd
  */
 @Route("")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-date-picker.html")
 public class DatePickerView extends DemoView {
 	
-	public static void main(String... args) throws Exception {
+    public static void main(String... args) throws Exception {
         new ComponentDemoServer().startServer();
     }
 

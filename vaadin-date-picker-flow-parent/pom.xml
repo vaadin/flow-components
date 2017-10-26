@@ -11,11 +11,11 @@
 
     <artifactId>vaadin-date-picker-flow</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    
+
     <properties>
         <flow.version>1.0-SNAPSHOT</flow.version>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.webjars.bower</groupId>
@@ -26,22 +26,11 @@
             <artifactId>flow-server</artifactId>
             <version>${flow.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-html-components</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
-        
+
         <!-- Dependencies for the demo -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
-            <version>${flow.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-components</artifactId>
             <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
