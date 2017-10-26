@@ -49,7 +49,6 @@ import elemental.json.JsonValue;
  * @param <T>
  *            the type of the items to be inserted in the combo box
  */
-
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>>
         implements HasSize, HasItems<T>, HasValidation,
         HasValue<ComboBox<T>, T>, HasDataProvider<T> {

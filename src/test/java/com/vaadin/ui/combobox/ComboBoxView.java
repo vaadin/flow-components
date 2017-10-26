@@ -22,18 +22,18 @@ import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.router.Route;
-import com.vaadin.ui.combobox.ComboBox;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Div;
-
 /**
  * View for {@link ComboBox} demo.
+ * 
+ * @author Vaadin Ltd
  */
 @Route("")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-combo-box.html")
 public class ComboBoxView extends DemoView {
-	
-	public static void main(String... args) throws Exception {
+
+    public static void main(String... args) throws Exception {
         new ComponentDemoServer().startServer();
     }
 	
