@@ -39,13 +39,39 @@ public class VaadinChartIT extends ParallelTest {
 		getDriver().get("http://" + findAutoHostname() + ":8080");
 	}
 
-	@Test
-	public void checkChartDisplayed() {
+	private WebElement getChartElement() {
 		waitUntilPresent(By.tagName("vaadin-chart"));
 		final WebElement chart = findElement(By.tagName("vaadin-chart"));
 		assertNotNull(chart);
+		return chart;
+	}
+
+	@Test
+	public void Chart_TitleDisplayed() {
+		final WebElement chart = getChartElement();
 		final WebElement title = getElementFromShadowRoot(chart, By.className("highcharts-title"));
-		assertTrue(title.getText().contains("First Chart for Flow!"));
+		assertTrue(title.getText().contains("First Chart for Flow"));
+	}
+
+	@Test
+	public void Chart_TitleCanBeChanged() {
+		final WebElement chart = getChartElement();
+		final WebElement title = getElementFromShadowRoot(chart, By.className("highcharts-title"));
+		assertTrue(title.getText().contains("First Chart for Flow"));
+
+		final WebElement changeTitleButton = findElement(By.id("change_title"));
+		changeTitleButton.click();
+
+		final WebElement titleChanged = getElementFromShadowRoot(chart, By.className("highcharts-title"));
+		assertTrue(titleChanged.getText().contains("First Chart for Flow - title changed"));
+	}
+
+	@Test
+	public void Chart_SeriesNameIsSet() {
+		final WebElement chart = getChartElement();
+		final WebElement series = getElementFromShadowRoot(chart, By.className("highcharts-legend-item"));
+
+		assertTrue(series.getText().contains("Tokyo"));
 	}
 
 	private void waitUntilPresent(By by) {

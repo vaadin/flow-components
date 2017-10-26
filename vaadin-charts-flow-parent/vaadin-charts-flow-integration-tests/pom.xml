@@ -14,7 +14,7 @@
     <version>6.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
-    <name>Vaadin Charts</name>
+    <name>Vaadin Charts Integration Test</name>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
