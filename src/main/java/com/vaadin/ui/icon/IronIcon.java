@@ -22,13 +22,14 @@ import com.vaadin.ui.common.HasStyle;
 import com.vaadin.ui.common.HtmlImport;
 
 /**
- * 
- * Component for displaying an icon from icon sets
+ * Server side component for
+ * <a href="https://github.com/PolymerElements/iron-icon">iron-icon</a> element
+ * to display an icon.
  * 
  * @author Vaadin Ltd
  */
 @Tag("iron-icon")
-@HtmlImport("frontend://bower_components/vaadin-icons/vaadin-icons.html")
+@HtmlImport("frontend://bower_components/iron-icon/iron-icon.html")
 public class IronIcon extends Component implements HasStyle {
     private static final String ICON_ATTRIBUTE_NAME = "icon";
 
@@ -41,7 +42,7 @@ public class IronIcon extends Component implements HasStyle {
      * @param icon
      *            the icon name
      */
-    public void Icon(String collection, String icon) {
+    public IronIcon(String collection, String icon) {
         // iron-icon's icon-attribute uses the format "collection:name",
         // eg. icon="vaadin:arrow-down"
         getElement().setAttribute(ICON_ATTRIBUTE_NAME, collection + ':' + icon);

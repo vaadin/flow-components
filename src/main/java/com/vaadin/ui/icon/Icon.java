@@ -15,6 +15,8 @@
  */
 package com.vaadin.ui.icon;
 
+import com.vaadin.ui.common.HtmlImport;
+
 /**
  * Component for displaying an icon from the
  * <a href="https://vaadin.com/icons">Vaadin Icons</a> collection.
@@ -22,6 +24,7 @@ package com.vaadin.ui.icon;
  * @author Vaadin Ltd
  * @see VaadinIcons
  */
+@HtmlImport("frontend://bower_components/vaadin-icons/vaadin-icons.html")
 public class Icon extends IronIcon {
 
     private static final String ICON_COLLECTION_NAME = "vaadin";
@@ -34,6 +37,7 @@ public class Icon extends IronIcon {
      *            the icon to display
      */
     public Icon(VaadinIcons icon) {
-        Icon(ICON_COLLECTION_NAME, icon.name().toLowerCase().replace('_', '-'));
+        super(ICON_COLLECTION_NAME,
+                icon.name().toLowerCase().replace('_', '-'));
     }
 }

@@ -34,6 +34,8 @@
             <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- TODO: Remove the dependency below after components have been deployed individually,
+         and replace with vaadin-ordered-layout -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-components</artifactId>
