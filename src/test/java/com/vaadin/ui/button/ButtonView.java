@@ -29,7 +29,7 @@ import com.vaadin.ui.icon.VaadinIcons;
 /**
  * View for {@link Button} demo.
  */
-@Route("")
+@Route("vaadin-button")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 public class ButtonView extends DemoView {
 
