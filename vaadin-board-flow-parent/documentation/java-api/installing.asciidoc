@@ -14,7 +14,7 @@ For general instructions on installing add-ons, please see
 <<dummy/../../../framework/addons/addons-overview.asciidoc#addons.overview,"Using
 Vaadin Add-ons">>.
 
-Vaadin Board 1.0.0 requires Vaadin 8.1.0 or later.
+Vaadin Board 1.0.1 requires Vaadin 8.1 or later.
 
 Using Vaadin Board requires a license key, which you must install before
 compiling the widget set. The widget set must be compiled after setting up the
@@ -30,12 +30,12 @@ The Maven dependency for Vaadin Board is as follows:
 &lt;dependency&gt;
     &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
     &lt;artifactId&gt;vaadin-board&lt;/artifactId&gt;
-    &lt;version&gt;[replaceable]##1.0.0##&lt;/version&gt;
+    &lt;version&gt;[replaceable]##1.0.1##&lt;/version&gt;
 &lt;/dependency&gt;
 &lt;dependency&gt;
     &lt;groupId&gt;com.vaadin&lt;/groupId&gt;
     &lt;artifactId&gt;vaadin-board-precompiled&lt;/artifactId&gt;
-    &lt;version&gt;[replaceable]##1.0.0##&lt;/version&gt;
+    &lt;version&gt;[replaceable]##1.0.1##&lt;/version&gt;
 &lt;/dependency&gt;
 ----
 You also need to define the Vaadin add-ons repository if not already defined:
