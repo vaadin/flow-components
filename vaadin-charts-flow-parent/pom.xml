@@ -29,6 +29,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.organization>Vaadin Ltd</project.organization>
         <vaadin.version>10.0-SNAPSHOT</vaadin.version>
+        <flow.version>1.0.0.alpha7</flow.version>
         <jetty.version>9.3.9.v20160517</jetty.version>
     </properties>
 
@@ -64,8 +65,23 @@
             <!-- Vaadin -->
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>vaadin</artifactId>
-                <version>${vaadin.version}</version>
+                <artifactId>flow-server</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-client</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-data</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-html-components</artifactId>
+                <version>${flow.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -61,88 +61,14 @@
             <artifactId>vaadin-charts-flow-model</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-data</artifactId>
+        </dependency>
     </dependencies>
 
-    <build>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/frontend</directory>
-                <includes>
-                    <include>bower.json</include>
-                </includes>
-                <targetPath>META-INF</targetPath>
-            </resource>
-        </resources>
-
-        <plugins>
-            <plugin>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${maven.failsafe.plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <systemPropertyVariables>
-                        <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>${maven.clean.plugin.version}</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${frontend.working.directory}/bower_components</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/build</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/node</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/node_modules</directory>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>${frontend.maven.plugin.version}</version>
-                <configuration>
-                    <nodeVersion>${node.version}</nodeVersion>
-                    <npmVersion>${npm.version}</npmVersion>
-                    <workingDirectory>${frontend.working.directory}</workingDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>install-node-and-npm</id>
-                        <goals>
-                            <goal>install-node-and-npm</goal>
-                            <goal>npm</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>npm run</id>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>${npm.build.goal}</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

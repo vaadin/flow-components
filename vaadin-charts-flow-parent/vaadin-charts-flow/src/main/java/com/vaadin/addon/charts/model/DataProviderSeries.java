@@ -25,9 +25,9 @@ import java.util.*;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-//import com.vaadin.data.provider.DataProvider;
-//import com.vaadin.data.provider.DataProviderListener;
-//import com.vaadin.data.provider.Query;
+import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.provider.DataProviderListener;
+import com.vaadin.data.provider.Query;
 import com.vaadin.shared.Registration;
 
 /**
@@ -42,10 +42,8 @@ import com.vaadin.shared.Registration;
  */
 public class DataProviderSeries<T> extends AbstractSeries {
 
-    //TODO Enable it again
-//    @JsonIgnore
-//    private final DataProvider<T, ?> dataProvider;
-
+    @JsonIgnore
+    private final DataProvider<T, ?> dataProvider;
     public static final String X_ATTRIBUTE = "x";
     public static final String Y_ATTRIBUTE = "y";
     private static final String NAME_ATTRIBUTE = "name";
@@ -55,9 +53,8 @@ public class DataProviderSeries<T> extends AbstractSeries {
     public static final String OPEN_PROPERTY = "open";
     public static final String CLOSE_PROPERTY = "close";
 
-    //TODO Enable it again
-//    @JsonIgnore
-//    private final Map<String, Function<T, Object>> chartAttributeToCallback;
+    @JsonIgnore
+    private final Map<String, Function<T, Object>> chartAttributeToCallback;
 
     @JsonIgnore
     private boolean automaticChartUpdateEnabled = true;
@@ -65,13 +62,12 @@ public class DataProviderSeries<T> extends AbstractSeries {
     @JsonIgnore
     private Registration dataProviderRegistration;
 
-    //TODO Enable it again
-//    @JsonIgnore
-//    private DataProviderListener<T> listener = (DataProviderListener<T>) event -> {
-//        if (getConfiguration() != null) {
-//            getConfiguration().fireSeriesChanged(DataProviderSeries.this);
-//        }
-//    };
+    @JsonIgnore
+    private DataProviderListener<T> listener = (DataProviderListener<T>) event -> {
+        if (getConfiguration() != null) {
+            getConfiguration().fireSeriesChanged(DataProviderSeries.this);
+        }
+    };
 
     /**
      * Creates a new series using data from the given data provider.
@@ -91,13 +87,12 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param dataProvider
      *            the data provider which contains the data
      */
-    //TODO Enable it again
-//    public DataProviderSeries(DataProvider<T, ?> dataProvider) {
-//        this.dataProvider = dataProvider;
-//        chartAttributeToCallback = new HashMap<>();
-//        dataProviderRegistration = dataProvider
-//                .addDataProviderListener(listener);
-//    }
+    public DataProviderSeries(DataProvider<T, ?> dataProvider) {
+        this.dataProvider = dataProvider;
+        chartAttributeToCallback = new HashMap<>();
+        dataProviderRegistration = dataProvider
+                .addDataProviderListener(listener);
+    }
 
     /**
      * Creates a new series using data from the given data provider and y
@@ -108,12 +103,11 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param callBack
      *            the function which retrieves the y values
      */
-    //TODO Enable it again
-//    public DataProviderSeries(DataProvider<T, ?> dataProvider,
-//            Function<T, Object> callBack) {
-//        this(dataProvider);
-//        setY(callBack);
-//    }
+    public DataProviderSeries(DataProvider<T, ?> dataProvider,
+            Function<T, Object> callBack) {
+        this(dataProvider);
+        setY(callBack);
+    }
 
     /**
      * Sets the function used for retrieving the value for the given property
@@ -125,8 +119,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      *            the function which retrieves the value for the property
      */
     public void setProperty(String propertyName, Function<T, Object> callBack) {
-        //TODO Enable it again
-//        chartAttributeToCallback.put(propertyName, callBack);
+        chartAttributeToCallback.put(propertyName, callBack);
     }
 
     /**
@@ -225,10 +218,9 @@ public class DataProviderSeries<T> extends AbstractSeries {
      *
      * @return the underlying data provider.
      */
-    //TODO Enable it again
-//    public DataProvider<T, ?> getDataProvider() {
-//        return dataProvider;
-//    }
+    public DataProvider<T, ?> getDataProvider() {
+        return dataProvider;
+    }
 
     /**
      * Returns a list mappings between chart attributes(keys) and values. For
@@ -238,22 +230,20 @@ public class DataProviderSeries<T> extends AbstractSeries {
      */
 
     public List<Map<String, Optional<Object>>> getValues() {
-        //TODO Enable it again
-//        return dataProvider
-//            .fetch(new Query<>())
-//            .map((item) ->
-//                chartAttributeToCallback
-//                    .entrySet()
-//                    .stream()
-//                    .collect(
-//                        toMap(
-//                            Entry::getKey,
-//                            entry -> (entry.getValue() != null) ?
-//                                Optional.ofNullable(entry.getValue().apply(item)) :
-//                                Optional.empty()))
-//            )
-//            .collect(toList());
-        return new ArrayList<>();
+        return dataProvider
+            .fetch(new Query<>())
+            .map((item) ->
+                chartAttributeToCallback
+                    .entrySet()
+                    .stream()
+                    .collect(
+                        toMap(
+                            Entry::getKey,
+                            entry -> (entry.getValue() != null) ?
+                                Optional.ofNullable(entry.getValue().apply(item)) :
+                                Optional.empty()))
+            )
+            .collect(toList());
     }
 
     /**
@@ -262,9 +252,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @return
      */
     public Set<String> getChartAttributes() {
-        return Collections.emptySet();
-        //TODO Enable it again
-//        return chartAttributeToCallback.keySet();
+        return chartAttributeToCallback.keySet();
     }
 
     /**
@@ -290,7 +278,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
         if (automaticChartUpdateEnabled) {
             if (dataProviderRegistration == null) {
                 //TODO Enable it again
-//                dataProviderRegistration = dataProvider.addDataProviderListener(listener);
+                dataProviderRegistration = dataProvider.addDataProviderListener(listener);
             }
         } else {
             if (dataProviderRegistration != null) {

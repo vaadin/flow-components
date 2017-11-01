@@ -23,12 +23,12 @@ import com.vaadin.addon.charts.model.ListSeries;
 import com.vaadin.addon.charts.model.XAxis;
 import com.vaadin.addon.charts.model.YAxis;
 
-import com.vaadin.annotations.StyleSheet;
-import com.vaadin.flow.html.Div;
-import com.vaadin.flow.html.NativeButton;
 import com.vaadin.flow.router.HasChildView;
 import com.vaadin.flow.router.View;
 import com.vaadin.ui.Composite;
+import com.vaadin.ui.common.StyleSheet;
+import com.vaadin.ui.html.Div;
+import com.vaadin.ui.html.NativeButton;
 
 @StyleSheet("context://styles.css")
 public class MainView extends Composite<Div> implements HasChildView {

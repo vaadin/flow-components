@@ -16,10 +16,10 @@
 package com.vaadin.addon.charts.ui;
 
 import com.vaadin.addon.charts.ui.Servlet.MyRouterConfigurator;
-import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.flow.router.RouterConfiguration;
 import com.vaadin.flow.router.RouterConfigurator;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.VaadinServletConfiguration;
 
 import javax.servlet.annotation.WebServlet;
 

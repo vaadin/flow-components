@@ -4,18 +4,16 @@ package com.vaadin.addon.charts;
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.util.ChartSerialization;
-import com.vaadin.annotations.HtmlImport;
-import com.vaadin.annotations.Tag;
-import com.vaadin.flow.template.PolymerTemplate;
-import com.vaadin.flow.template.model.TemplateModel;
-import com.vaadin.ui.AttachEvent;
-import com.vaadin.ui.UI;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Tag;
+import com.vaadin.ui.common.HtmlImport;
+import com.vaadin.ui.event.AttachEvent;
 import elemental.json.JsonObject;
 import elemental.json.impl.JreJsonFactory;
 
 @Tag("vaadin-chart")
 @HtmlImport("frontend://bower_components/vaadin-charts/vaadin-chart.html")
-public class VaadinChart extends PolymerTemplate<TemplateModel> {
+public class VaadinChart extends Component {
 
 	private Configuration configuration;
 	private final JreJsonFactory jsonFactory = new JreJsonFactory();
@@ -42,9 +40,7 @@ public class VaadinChart extends PolymerTemplate<TemplateModel> {
 	protected void onAttach(AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
 
-		final UI ui = attachEvent.getUI();
-
-		ui.beforeClientResponse(this, () -> {
+		attachEvent.getUI().beforeClientResponse(this, () -> {
 			drawChart();
 		});
 	}

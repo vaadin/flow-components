@@ -28,7 +28,6 @@
 
         <!-- Plugins -->
         <frontend.maven.plugin.version>1.4</frontend.maven.plugin.version>
-        <jetty.version>9.3.7.v20160115</jetty.version>
         <driver.binary.downloader.maven.plugin.version>1.0.14</driver.binary.downloader.maven.plugin.version>
         <maven.failsafe.plugin.version>2.20</maven.failsafe.plugin.version>
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
@@ -40,7 +39,7 @@
         <node.version>v7.10.1</node.version>
         <npm.version>5.3.0</npm.version>
 
-        <frontend.working.directory>src/main/frontend</frontend.working.directory>
+        <frontend.working.directory>src/main/webapp/frontend</frontend.working.directory>
         <vaadin.frontend.path>VAADIN/static/frontend</vaadin.frontend.path>
     </properties>
 
@@ -70,7 +69,14 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
-            <version>0.1.22</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-client</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -129,80 +135,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>${jetty.version}</version>
-                <configuration>
-                    <scanIntervalSeconds>-1</scanIntervalSeconds>
-                    <stopPort>8081</stopPort>
-                    <stopWait>5</stopWait>
-                    <stopKey>foo</stopKey>
-                    <!-- Prevent Jetty from scanning the classpath. -->
-                    <!-- Speeds up startup time significantly -->
-                    <webAppConfig>
-                        <webInfIncludeJarPattern>.*/flow-.*.jar$|.*/test-resources-.*.jar$</webInfIncludeJarPattern>
-                        <containerIncludeJarPattern>^$</containerIncludeJarPattern>
-                        <resourceBases>
-                            <resourceBase>${project.basedir}/src/main/webapp</resourceBase>
-                            <resourceBase>${jetty.extra.resource.base}</resourceBase>
-                        </resourceBases>
-                    </webAppConfig>
-                </configuration>
-                <executions>
-                    <!-- start and stop jetty (running our app) when running integration tests -->
-                    <execution>
-                        <id>start-jetty</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>stop-jetty</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.saucelabs.maven.plugin</groupId>
-                <artifactId>sauce-connect-plugin</artifactId>
-                <version>2.1.23</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.saucelabs</groupId>
-                        <artifactId>ci-sauce</artifactId>
-                        <version>1.129</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <sauceUsername>${SAUCE_USERNAME}</sauceUsername>
-                    <sauceAccessKey>${SAUCE_ACCESS_KEY}</sauceAccessKey>
-                </configuration>
-                <executions>
-                    <!-- Start Sauce Connect prior to running the integration tests -->
-                    <execution>
-                        <id>start-sauceconnect</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start-sauceconnect</goal>
-                        </goals>
-                    </execution>
-                    <!-- Stop the Sauce Connect process after the integration tests have finished -->
-                    <execution>
-                        <id>stop-sauceconnect</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop-sauceconnect</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
                 <version>${frontend.maven.plugin.version}</version>
@@ -247,6 +179,90 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>run-tests</id>
+            <activation>
+                <property>
+                    <name>skipTests</name>
+                    <value>!true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <configuration>
+                            <scanIntervalSeconds>-1</scanIntervalSeconds>
+                            <stopPort>8081</stopPort>
+                            <stopWait>5</stopWait>
+                            <stopKey>foo</stopKey>
+                            <!-- Prevent Jetty from scanning the classpath. -->
+                            <!-- Speeds up startup time significantly -->
+                            <webAppConfig>
+                                <webInfIncludeJarPattern>.*/flow-.*.jar$|.*/test-resources-.*.jar$</webInfIncludeJarPattern>
+                                <containerIncludeJarPattern>^$</containerIncludeJarPattern>
+                                <resourceBases>
+                                    <resourceBase>${project.basedir}/src/main/webapp</resourceBase>
+                                    <resourceBase>${jetty.extra.resource.base}</resourceBase>
+                                </resourceBases>
+                            </webAppConfig>
+                        </configuration>
+                        <executions>
+                            <!-- start and stop jetty (running our app) when running integration tests -->
+                            <execution>
+                                <id>start-jetty</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-jetty</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.saucelabs.maven.plugin</groupId>
+                        <artifactId>sauce-connect-plugin</artifactId>
+                        <version>2.1.23</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.saucelabs</groupId>
+                                <artifactId>ci-sauce</artifactId>
+                                <version>1.129</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <sauceUsername>${SAUCE_USERNAME}</sauceUsername>
+                            <sauceAccessKey>${SAUCE_ACCESS_KEY}</sauceAccessKey>
+                        </configuration>
+                        <executions>
+                            <!-- Start Sauce Connect prior to running the integration tests -->
+                            <execution>
+                                <id>start-sauceconnect</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start-sauceconnect</goal>
+                                </goals>
+                            </execution>
+                            <!-- Stop the Sauce Connect process after the integration tests have finished -->
+                            <execution>
+                                <id>stop-sauceconnect</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop-sauceconnect</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>productionMode</id>
             <activation>
