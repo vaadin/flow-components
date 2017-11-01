@@ -49,6 +49,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.PaneInformation;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -425,6 +426,10 @@ public class SpreadsheetFactory implements Serializable {
         final List<String> names = new ArrayList<String>();
 
         for (Name name : namedRanges) {
+            if (!isNameSelectable(name)) {
+                continue;
+            }
+
             final int nameLocalTo = name.getSheetIndex();
             final int activeSheet = spreadsheet.getWorkbook()
                 .getActiveSheetIndex();
@@ -435,6 +440,24 @@ public class SpreadsheetFactory implements Serializable {
         }
 
         spreadsheet.getState().namedRanges = names;
+    }
+
+    private static boolean isNameSelectable(Name name) {
+        if (name.isFunctionName()) {
+            return false;
+        }
+
+        if (!AreaReference.isContiguous(name.getRefersToFormula())) {
+            return false;
+        }
+
+        // a workaround for https://bz.apache.org/bugzilla/show_bug.cgi?id=61701
+        try {
+            name.getSheetName();
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     /**

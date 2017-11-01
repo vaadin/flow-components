@@ -3,6 +3,8 @@ package com.vaadin.addon.spreadsheet.test;
 import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
 import com.vaadin.addon.spreadsheet.elements.SheetCellElement;
 import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
@@ -37,9 +39,14 @@ public class SheetFilterTableTest extends AbstractSpreadsheetTestCase {
     public void filter_removeTable_hideFilter() {
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
         headerPage.loadTestFixture(TestFixtures.SpreadsheetTable);
-        SheetCellElement cell = spreadsheet.getCellAt("B2");
+        final SheetCellElement cell = spreadsheet.getCellAt("B2");
         cell.contextClick();
         spreadsheet.getContextMenu().getItem("Delete Table B2:F6").click();
-        assertFalse("Cell B2 should not have a filter", cell.hasPopupButton());
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver arg0) {
+                return !cell.hasPopupButton();
+            }
+        });
     }
 }

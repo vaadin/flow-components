@@ -12,6 +12,7 @@ import com.vaadin.addon.spreadsheet.test.fixtures.TestFixtures;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 import com.vaadin.addon.spreadsheet.test.testutil.OverlayHelper;
 import com.vaadin.testbench.By;
+import com.vaadin.testbench.parallel.Browser;
 
 public class InteractionTBTest extends AbstractSpreadsheetTestCase {
 
@@ -116,6 +117,7 @@ public class InteractionTBTest extends AbstractSpreadsheetTestCase {
 
     @Test
     public void openFileWithNotSuportedForumla_noExceptionRaised_noChart() throws Exception {
+        skipBrowser("Fails to select file in combobox", Browser.IE11);
         headerPage.loadFile("unparsed_formula.xlsx", this);
         compareScreen("unparsedFormula");
     }

@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vaadin.testbench.annotations.RunLocally;
+import com.vaadin.testbench.parallel.Browser;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,11 +27,11 @@ public class NamedRangeTests extends AbstractSpreadsheetTestCase {
         }
     };
 
-    private List<String> rangesOnSheet1 = Arrays
-        .asList("", "john", "local", "noncont", "numbers", "sheet2");
+    private List<String> selectableRangesOnSheet1 = Arrays
+        .asList("", "john", "local", "numbers", "sheet2");
 
-    private List<String> rangesOnSheet2 = Arrays
-        .asList("", "john", "noncont", "numbers", "sheet2");
+    private List<String> selectableRangesOnSheet2 = Arrays
+        .asList("", "john", "numbers", "sheet2");
 
     @Before
     @Override
@@ -45,7 +47,7 @@ public class NamedRangeTests extends AbstractSpreadsheetTestCase {
      */
     @Test
     public void testNamedRanges() throws Exception {
-        assertNamedRangeSelectValues(rangesOnSheet1);
+        assertNamedRangeSelectValues(selectableRangesOnSheet1);
 
         testTypingExistingSheet1NamedRanges();
 
@@ -55,7 +57,7 @@ public class NamedRangeTests extends AbstractSpreadsheetTestCase {
 
         testSheetSwitch_selectSheet2Range_assertSheet2AndCorrectSelection();
 
-        assertNamedRangeSelectValues(rangesOnSheet2);
+        assertNamedRangeSelectValues(selectableRangesOnSheet2);
 
         selectAndAssertJohnRange();
 
