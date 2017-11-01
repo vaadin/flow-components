@@ -141,7 +141,7 @@ public class ButtonIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return "/vaadin-button";
+        return "/";
     }
 
 }
