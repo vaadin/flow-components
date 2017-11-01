@@ -81,10 +81,4 @@ public class ComboBoxIT extends ComponentDemoTest {
         waitUntil(driver -> message.getText().equals(
                 "Selected artist: Haircuts for Men\nThe old selection was: Haywyre"));
     }
-
-    @Override
-    protected String getTestPath() {
-        return "/";
-    }
-
 }
