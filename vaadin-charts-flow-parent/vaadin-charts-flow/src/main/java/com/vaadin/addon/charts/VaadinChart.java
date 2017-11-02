@@ -1,6 +1,5 @@
 package com.vaadin.addon.charts;
 
-
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.util.ChartSerialization;
@@ -40,9 +39,7 @@ public class VaadinChart extends Component {
 	protected void onAttach(AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
 
-		attachEvent.getUI().beforeClientResponse(this, () -> {
-			drawChart();
-		});
+		attachEvent.getUI().beforeClientResponse(this, () -> drawChart());
 	}
 
 	/**

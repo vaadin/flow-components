@@ -14,19 +14,8 @@
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow-model</artifactId>
     <version>6.0-SNAPSHOT</version>
+
     <name>Vaadin Charts for Flow Model</name>
-
-    <repositories>
-        <repository>
-            <id>flow-internal-release</id>
-            <url>https://repo.vaadin.com/nexus/content/repositories/flow</url>
-        </repository>
-
-        <repository>
-            <id>vaadin-addons</id>
-            <url>http://maven.vaadin.com/vaadin-addons</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -40,17 +29,4 @@
             <version>2.5.2</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-		<groupId>com.vaadin</groupId>
-		<artifactId>vaadin-charts-flow-parent</artifactId>
-		<version>6.0-SNAPSHOT</version>
-	</parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-charts-flow-parent</artifactId>
+        <version>6.0-SNAPSHOT</version>
+    </parent>
 
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow</artifactId>
@@ -16,44 +16,6 @@
     <packaging>jar</packaging>
 
     <name>Vaadin Charts for Flow</name>
-
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <!-- Dependencies -->
-        <servlet.api.version>3.1.0</servlet.api.version>
-
-        <!-- Plugins -->
-        <frontend.maven.plugin.version>1.4</frontend.maven.plugin.version>
-        <driver.binary.downloader.maven.plugin.version>1.0.14</driver.binary.downloader.maven.plugin.version>
-        <maven.failsafe.plugin.version>2.20</maven.failsafe.plugin.version>
-        <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
-        <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
-        <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
-
-        <!-- Frontend -->
-        <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
-        <node.version>v7.10.1</node.version>
-        <npm.version>5.3.0</npm.version>
-
-        <frontend.working.directory>src/main/frontend</frontend.working.directory>
-        <vaadin.frontend.path>VAADIN/static/frontend</vaadin.frontend.path>
-    </properties>
-
-    <repositories>
-        <repository>
-            <id>flow-internal-release</id>
-            <url>https://repo.vaadin.com/nexus/content/repositories/flow</url>
-        </repository>
-
-        <repository>
-            <id>vaadin-addons</id>
-            <url>http://maven.vaadin.com/vaadin-addons</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
