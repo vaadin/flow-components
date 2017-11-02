@@ -20,7 +20,6 @@ import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.button.Button;
-import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Div;
 import com.vaadin.ui.layout.FlexLayout.Alignment;
 import com.vaadin.ui.layout.FlexLayout.JustifyContentMode;
@@ -31,7 +30,6 @@ import com.vaadin.ui.layout.FlexLayout.JustifyContentMode;
  * @author Vaadin Ltd
  */
 @Route("horizontal-layout")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-horizontal-layout.html")
 public class HorizontalLayoutView extends DemoView {
 
     public static void main(String... args) throws Exception {
