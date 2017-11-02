@@ -1,0 +1,60 @@
+/*
+ * Copyright 2000-2017 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.ui.upload.receivers;
+
+import java.io.OutputStream;
+
+/**
+ * Class containing file information for upload.
+ */
+public class FileData {
+    private final String mimeType, fileName;
+    private final OutputStream outputBuffer;
+
+    public FileData(String mimeType, String fileName,
+            OutputStream outputBuffer) {
+        this.mimeType = mimeType;
+        this.fileName = fileName;
+        this.outputBuffer = outputBuffer;
+    }
+
+    /**
+     * Returns the mimeType of this file.
+     *
+     * @return mime types of the files
+     */
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    /**
+     * Return the name of this file.
+     * 
+     * @return file name
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * Return the output buffer for this file data.
+     * 
+     * @return output buffer
+     */
+    public OutputStream getOutputBuffer() {
+        return outputBuffer;
+    }
+}
