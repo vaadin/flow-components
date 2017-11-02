@@ -10,10 +10,11 @@ Run from the command line:
 
 To run the demo for HorizontalLayout
 - `mvn exec:java -Dexec.mainClass="com.vaadin.ui.layout.HorizontalLayoutView" -Dexec.classpathScope="test"`
+- Then navigate to `http://localhost:9998/horizontal-layout`
+
 To run the demo for VerticalLayout
 - `mvn exec:java -Dexec.mainClass="com.vaadin.ui.layout.VerticalLayoutView" -Dexec.classpathScope="test"`
-
-Then navigate to `http://localhost:9998`
+- Then navigate to `http://localhost:9998/vertical-layout`
 
 ## Using the component in a Flow application
 To use the component in an application using maven, 
