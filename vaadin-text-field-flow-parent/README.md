@@ -11,11 +11,11 @@ Run from the command line:
 
 To run the demo for TextField
 - `mvn exec:java -Dexec.mainClass="com.vaadin.ui.textfield.TextFieldView" -Dexec.classpathScope="test"`
+- Then navigate to `http://localhost:9998/text-field`
 
 To run the demo for PasswordField
 - `mvn exec:java -Dexec.mainClass="com.vaadin.ui.textfield.PasswordFieldView" -Dexec.classpathScope="test"`
-
-Then navigate to `http://localhost:9998`
+- Then navigate to `http://localhost:9998/password-field`
 
 ## Using the component in a Flow application
 To use the component in an application using maven, 
