@@ -33,7 +33,7 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
             <version>${flow.version}</version>
-            <scope>provided</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
