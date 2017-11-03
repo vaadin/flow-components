@@ -84,13 +84,14 @@ public class DefaultHyperlinkCellClickHandler implements
         if (address.contains("!")) { // has sheet name -> change
             String currentSheetName = cell.getSheet().getSheetName();
             String sheetName = address.substring(0, address.indexOf("!"));
+            String addressInSheet = address.substring(address.indexOf("!") + 1);
             if (!currentSheetName.equals(sheetName)) {
                 int sheetPOIIndex = getSheetIndex(cell, sheetName);
                 spreadsheet.setActiveSheetWithPOIIndex(sheetPOIIndex);
             }
             spreadsheet.initialSheetSelection = address;
             spreadsheet.getCellSelectionManager().onSheetAddressChanged(
-                    address, true);
+                    addressInSheet, true);
         } else {
             // change selection to cell within the same sheet
             spreadsheet.getCellSelectionManager().onSheetAddressChanged(
