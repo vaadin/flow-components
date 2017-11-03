@@ -33,4 +33,33 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>update-license-headers</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>1.6</version>
+                        <configuration>
+                            <licenseName>cval3</licenseName>
+                            <licenseResolver>${project.baseUri}src/license</licenseResolver>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>update-file-header</goal>
+                                </goals>
+                                <phase>process-sources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
