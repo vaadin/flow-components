@@ -144,7 +144,8 @@ public class DataSeries extends AbstractSeries {
      * @param colors
      *            An array of colors for each category name, value pair.
      */
-    public void setData(String[] categoryNames, Number[] values, Color[] colors) {
+    public void setData(String[] categoryNames, Number[] values,
+            Color[] colors) {
         assert (categoryNames.length == values.length);
         assert (categoryNames.length == colors.length);
         data.clear();

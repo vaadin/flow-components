@@ -230,20 +230,14 @@ public class DataProviderSeries<T> extends AbstractSeries {
      */
 
     public List<Map<String, Optional<Object>>> getValues() {
-        return dataProvider
-            .fetch(new Query<>())
-            .map((item) ->
-                chartAttributeToCallback
-                    .entrySet()
-                    .stream()
-                    .collect(
-                        toMap(
-                            Entry::getKey,
-                            entry -> (entry.getValue() != null) ?
-                                Optional.ofNullable(entry.getValue().apply(item)) :
-                                Optional.empty()))
-            )
-            .collect(toList());
+        return dataProvider.fetch(new Query<>())
+                .map((item) -> chartAttributeToCallback.entrySet().stream()
+                        .collect(toMap(Entry::getKey,
+                                entry -> (entry.getValue() != null)
+                                        ? Optional.ofNullable(
+                                                entry.getValue().apply(item))
+                                        : Optional.empty())))
+                .collect(toList());
     }
 
     /**
@@ -272,13 +266,15 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param automaticChartUpdateEnabled
      *            True sets the chart updating to enabled, false disables it.
      */
-    public void setAutomaticChartUpdateEnabled(boolean automaticChartUpdateEnabled) {
+    public void setAutomaticChartUpdateEnabled(
+            boolean automaticChartUpdateEnabled) {
         this.automaticChartUpdateEnabled = automaticChartUpdateEnabled;
 
         if (automaticChartUpdateEnabled) {
             if (dataProviderRegistration == null) {
-                //TODO Enable it again
-                dataProviderRegistration = dataProvider.addDataProviderListener(listener);
+                // TODO Enable it again
+                dataProviderRegistration = dataProvider
+                        .addDataProviderListener(listener);
             }
         } else {
             if (dataProviderRegistration != null) {

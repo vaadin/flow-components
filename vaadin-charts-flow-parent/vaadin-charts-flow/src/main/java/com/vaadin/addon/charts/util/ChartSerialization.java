@@ -42,12 +42,10 @@ public class ChartSerialization implements Serializable {
     static {
         ObjectMapper defaultMapper = ChartSerialization.createObjectMapper();
         jsonWriterChartOptions = defaultMapper
-            .setSerializerFactory(
-                defaultMapper
-                    .getSerializerFactory()
-                    .withSerializerModifier(
-                        new ChartOptionsBeanSerializerModifier()))
-            .writer();
+                .setSerializerFactory(defaultMapper.getSerializerFactory()
+                        .withSerializerModifier(
+                                new ChartOptionsBeanSerializerModifier()))
+                .writer();
 
         // writer is thread safe so we can use a shared instance
         jsonWriter = createObjectMapper().writer();
@@ -61,7 +59,8 @@ public class ChartSerialization implements Serializable {
         return createObjectMapper(new DefaultBeanSerializerModifier());
     }
 
-    public static ObjectMapper createObjectMapper(BeanSerializerModifier modifier) {
+    public static ObjectMapper createObjectMapper(
+            BeanSerializerModifier modifier) {
         ObjectMapper mapper = new ObjectMapper()
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL)
                 .setVisibility(PropertyAccessor.ALL, Visibility.NONE)
@@ -77,8 +76,8 @@ public class ChartSerialization implements Serializable {
                 .registerModule(InstantSerializer.getModule());
 
         // serializer modifier used when basic serializer isn't enough
-        return mapper.setSerializerFactory(mapper.getSerializerFactory()
-                .withSerializerModifier(modifier));
+        return mapper.setSerializerFactory(
+                mapper.getSerializerFactory().withSerializerModifier(modifier));
     }
 
     /**

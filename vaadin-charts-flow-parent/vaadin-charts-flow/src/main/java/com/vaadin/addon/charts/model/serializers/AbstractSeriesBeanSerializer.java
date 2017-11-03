@@ -28,8 +28,8 @@ import com.vaadin.addon.charts.model.PlotOptionsSeries;
  * We need to use a bean serializer so that annotations work.
  *
  */
-public class AbstractSeriesBeanSerializer extends
-        BeanSerializationDelegate<AbstractSeries> {
+public class AbstractSeriesBeanSerializer
+        extends BeanSerializationDelegate<AbstractSeries> {
 
     @Override
     public Class<AbstractSeries> getBeanClass() {
@@ -39,7 +39,8 @@ public class AbstractSeriesBeanSerializer extends
     @Override
     public void serialize(AbstractSeries bean,
             BeanSerializerDelegator<AbstractSeries> serializer,
-            JsonGenerator jgen, SerializerProvider provider) throws IOException {
+            JsonGenerator jgen, SerializerProvider provider)
+            throws IOException {
         AbstractSeries series = bean;
 
         jgen.writeStartObject();
@@ -49,8 +50,8 @@ public class AbstractSeriesBeanSerializer extends
 
         if (series.getPlotOptions() != null
                 && !(bean.getPlotOptions() instanceof PlotOptionsSeries)) {
-            jgen.writeObjectField("type", series.getPlotOptions()
-                    .getChartType());
+            jgen.writeObjectField("type",
+                    series.getPlotOptions().getChartType());
         }
 
         jgen.writeEndObject();

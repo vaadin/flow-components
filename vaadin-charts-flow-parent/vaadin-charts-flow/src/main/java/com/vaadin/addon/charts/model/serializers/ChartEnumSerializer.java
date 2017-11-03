@@ -42,8 +42,8 @@ public class ChartEnumSerializer extends JsonSerializer<ChartEnum> {
 
     @Override
     public void serialize(ChartEnum value, JsonGenerator gen,
-            SerializerProvider serializers) throws IOException,
-            JsonProcessingException {
+            SerializerProvider serializers)
+            throws IOException, JsonProcessingException {
         gen.writeString(value.toString());
     }
 }

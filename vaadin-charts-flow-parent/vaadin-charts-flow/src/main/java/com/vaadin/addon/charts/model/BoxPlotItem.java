@@ -18,8 +18,8 @@ package com.vaadin.addon.charts.model;
  */
 
 /**
- * A DataSeriesItem implementation suitable for <a
- * href="http://en.wikipedia.org/wiki/Box_plot">box plot charts</a>. Plot box
+ * A DataSeriesItem implementation suitable for
+ * <a href="http://en.wikipedia.org/wiki/Box_plot">box plot charts</a>. Plot box
  * charts visualize well some statistical data.
  * 
  * @see PlotOptionsBoxPlot

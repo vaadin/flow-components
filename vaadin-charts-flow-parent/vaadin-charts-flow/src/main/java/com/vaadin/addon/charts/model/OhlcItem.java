@@ -50,7 +50,8 @@ public class OhlcItem extends DataSeriesItem {
      * @param low
      * @param close
      */
-    public OhlcItem(Number x, Number open, Number high, Number low, Number close) {
+    public OhlcItem(Number x, Number open, Number high, Number low,
+            Number close) {
         this();
         setX(x);
         setOpen(open);
@@ -79,11 +80,12 @@ public class OhlcItem extends DataSeriesItem {
     }
 
     /**
-     * @deprecated as of 4.0. Use {@link #OhlcItem(Instant, Number, Number, Number, Number)}
+     * @deprecated as of 4.0. Use
+     *             {@link #OhlcItem(Instant, Number, Number, Number, Number)}
      */
     @Deprecated
     public OhlcItem(Date date, Number open, Number high, Number low,
-                    Number close) {
+            Number close) {
         this();
         setX(date);
         setOpen(open);
@@ -91,6 +93,7 @@ public class OhlcItem extends DataSeriesItem {
         setHigh(high);
         setClose(close);
     }
+
     /**
      * @see #setOpen(Number)
      */

@@ -41,8 +41,8 @@ public class PaneListSerializer extends JsonSerializer<PaneList> {
 
     @Override
     public void serialize(PaneList value, JsonGenerator gen,
-            SerializerProvider serializers) throws IOException,
-            JsonProcessingException {
+            SerializerProvider serializers)
+            throws IOException, JsonProcessingException {
         if (value != null && value.getNumberOfPanes() == 1) {
             gen.writeObject(value.getPane(0));
         } else if (value != null) {

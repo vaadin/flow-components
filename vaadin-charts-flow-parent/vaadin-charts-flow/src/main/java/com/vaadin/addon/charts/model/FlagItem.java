@@ -59,6 +59,7 @@ public class FlagItem extends DataSeriesItem {
         setX(date);
         setTitle(title);
     }
+
     /**
      * Constructs an item with X, Title and Text values
      *
@@ -93,6 +94,7 @@ public class FlagItem extends DataSeriesItem {
         setTitle(title);
         setText(text);
     }
+
     /**
      * Sets the title of the flag
      * 

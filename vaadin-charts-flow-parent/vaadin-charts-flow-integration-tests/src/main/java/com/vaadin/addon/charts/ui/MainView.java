@@ -32,39 +32,41 @@ import com.vaadin.ui.html.NativeButton;
 @StyleSheet("context://styles.css")
 public class MainView extends Composite<Div> implements HasChildView {
 
-	public MainView() {
-		final VaadinChart chart = new VaadinChart();
+    public MainView() {
+        final VaadinChart chart = new VaadinChart();
 
-		Configuration configuration = chart.getConfiguration();
-		configuration.setTitle("First Chart for Flow");
-		chart.getConfiguration().getChart().setType(ChartType.AREA);
-		getContent().add(chart);
+        Configuration configuration = chart.getConfiguration();
+        configuration.setTitle("First Chart for Flow");
+        chart.getConfiguration().getChart().setType(ChartType.AREA);
+        getContent().add(chart);
 
-		configuration.addSeries(new ListSeries("Tokyo", 20, 12, 34, 23, 65, 8, 4, 7, 76, 19, 20, 8));
-		configuration.addSeries(new ListSeries("Miami", 34, 29, 23, 65, 8, 4, 7, 7, 59, 8, 9, 19));
+        configuration.addSeries(new ListSeries("Tokyo", 20, 12, 34, 23, 65, 8,
+                4, 7, 76, 19, 20, 8));
+        configuration.addSeries(new ListSeries("Miami", 34, 29, 23, 65, 8, 4, 7,
+                7, 59, 8, 9, 19));
 
-		XAxis x = new XAxis();
-		x.setCategories("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
-				"Sep", "Oct", "Nov", "Dec");
-		configuration.addxAxis(x);
+        XAxis x = new XAxis();
+        x.setCategories("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+                "Sep", "Oct", "Nov", "Dec");
+        configuration.addxAxis(x);
 
-		YAxis y = new YAxis();
-		y.setMin(0);
-		y.setTitle("Rainfall (mm)");
-		configuration.addyAxis(y);
+        YAxis y = new YAxis();
+        y.setMin(0);
+        y.setTitle("Rainfall (mm)");
+        configuration.addyAxis(y);
 
-		NativeButton changeTitleButton = new NativeButton();
-		changeTitleButton.setId("change_title");
-		changeTitleButton.setText("Change title");
-		changeTitleButton.addClickListener(e -> {
-			configuration.setTitle("First Chart for Flow - title changed");
-			chart.drawChart();
-		});
+        NativeButton changeTitleButton = new NativeButton();
+        changeTitleButton.setId("change_title");
+        changeTitleButton.setText("Change title");
+        changeTitleButton.addClickListener(e -> {
+            configuration.setTitle("First Chart for Flow - title changed");
+            chart.drawChart();
+        });
 
-		getContent().add(changeTitleButton);
-	}
+        getContent().add(changeTitleButton);
+    }
 
-	@Override
-	public void setChildView(View childView) {
-	}
+    @Override
+    public void setChildView(View childView) {
+    }
 }

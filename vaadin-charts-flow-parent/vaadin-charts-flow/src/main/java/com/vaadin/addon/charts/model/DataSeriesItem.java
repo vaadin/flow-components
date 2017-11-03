@@ -114,7 +114,8 @@ public class DataSeriesItem extends AbstractSeriesItem {
     }
 
     /**
-     * Constructs a DataSeriesItem with the given instant as X value and Y value.
+     * Constructs a DataSeriesItem with the given instant as X value and Y
+     * value.
      *
      * @param instant
      *            Instant of the item, as its X-value.
@@ -136,8 +137,8 @@ public class DataSeriesItem extends AbstractSeriesItem {
     }
 
     /**
-     * Constructs a DataSeriesItem with the given instant as X value with min and
-     * max values for use in range visualizations.
+     * Constructs a DataSeriesItem with the given instant as X value with min
+     * and max values for use in range visualizations.
      *
      * @param instant
      *            Instant of the item, as its X-value.
@@ -153,7 +154,8 @@ public class DataSeriesItem extends AbstractSeriesItem {
     }
 
     /**
-     * @deprecated as of 4.0. Use {@link #DataSeriesItem(Instant, Number,Number)}
+     * @deprecated as of 4.0. Use
+     *             {@link #DataSeriesItem(Instant, Number,Number)}
      */
     @Deprecated
     public DataSeriesItem(Date date, Number low, Number high) {
@@ -161,6 +163,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
         setLow(low);
         setHigh(high);
     }
+
     /**
      * Constructs a DataSeriesItem with the given X, min and max values for use
      * in range visualizations.

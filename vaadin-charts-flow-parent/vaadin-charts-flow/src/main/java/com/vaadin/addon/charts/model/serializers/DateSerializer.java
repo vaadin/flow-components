@@ -43,8 +43,8 @@ public class DateSerializer extends JsonSerializer<Date> {
 
     @Override
     public void serialize(Date value, JsonGenerator gen,
-        SerializerProvider serializers)
-        throws IOException, JsonProcessingException {
+            SerializerProvider serializers)
+            throws IOException, JsonProcessingException {
         final Instant instantUTC = value.toInstant(); // converting to UTC
         gen.writeNumber(Util.toHighchartsTS(instantUTC));
     }

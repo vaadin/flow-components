@@ -98,7 +98,8 @@ public class HeatSeries extends AbstractSeries {
             } else { // Append
                 Number[][] newData = new Number[data.length + values.length][3];
                 System.arraycopy(data, 0, newData, 0, data.length);
-                System.arraycopy(values, 0, newData, data.length, values.length);
+                System.arraycopy(values, 0, newData, data.length,
+                        values.length);
                 data = newData;
             }
         } else {

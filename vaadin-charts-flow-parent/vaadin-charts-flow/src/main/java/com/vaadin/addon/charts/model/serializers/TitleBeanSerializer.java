@@ -29,9 +29,9 @@ import com.vaadin.addon.charts.model.Title;
 public class TitleBeanSerializer extends BeanSerializationDelegate<Title> {
 
     @Override
-    public void serialize(Title bean,
-            BeanSerializerDelegator<Title> serializer, JsonGenerator jgen,
-            SerializerProvider provider) throws IOException {
+    public void serialize(Title bean, BeanSerializerDelegator<Title> serializer,
+            JsonGenerator jgen, SerializerProvider provider)
+            throws IOException {
         jgen.writeStartObject();
 
         if (bean != null && bean.getText() == null) {

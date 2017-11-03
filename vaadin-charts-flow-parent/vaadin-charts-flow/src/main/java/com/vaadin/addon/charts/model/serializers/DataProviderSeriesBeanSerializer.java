@@ -74,28 +74,38 @@ public class DataProviderSeriesBeanSerializer
 
         jgen.writeEndObject();
     }
+
     private ArrayNode createDataArray(DataProviderSeries<?> chartDataProvider) {
         ArrayNode data = JsonNodeFactory.instance.arrayNode();
         Set<String> attributes = chartDataProvider.getChartAttributes();
         checkRequiredProperties(attributes);
         Mode mode = inferSerializationMode(attributes);
 
-        for (final Map<String, Optional<Object>> chartAttributeToValue : chartDataProvider.getValues()) {
-            Optional<Object> xValue = chartAttributeToValue.getOrDefault(xAttribute, Optional.empty());
-            Optional<Object> yValue = chartAttributeToValue.getOrDefault(yAttribute, Optional.empty());
-            Optional<Object> oValue = chartAttributeToValue.getOrDefault(OPEN_PROPERTY, Optional.empty());
-            Optional<Object> lValue = chartAttributeToValue.getOrDefault(LOW_PROPERTY, Optional.empty());
-            Optional<Object> hValue = chartAttributeToValue.getOrDefault(HIGH_PROPERTY, Optional.empty());
-            Optional<Object> cValue = chartAttributeToValue.getOrDefault(CLOSE_PROPERTY, Optional.empty());
+        for (final Map<String, Optional<Object>> chartAttributeToValue : chartDataProvider
+                .getValues()) {
+            Optional<Object> xValue = chartAttributeToValue
+                    .getOrDefault(xAttribute, Optional.empty());
+            Optional<Object> yValue = chartAttributeToValue
+                    .getOrDefault(yAttribute, Optional.empty());
+            Optional<Object> oValue = chartAttributeToValue
+                    .getOrDefault(OPEN_PROPERTY, Optional.empty());
+            Optional<Object> lValue = chartAttributeToValue
+                    .getOrDefault(LOW_PROPERTY, Optional.empty());
+            Optional<Object> hValue = chartAttributeToValue
+                    .getOrDefault(HIGH_PROPERTY, Optional.empty());
+            Optional<Object> cValue = chartAttributeToValue
+                    .getOrDefault(CLOSE_PROPERTY, Optional.empty());
 
             switch (mode) {
             case ONLY_Y:
-                final Optional<Object> value = chartAttributeToValue.get(yAttribute);
+                final Optional<Object> value = chartAttributeToValue
+                        .get(yAttribute);
                 addValue(data, value);
                 break;
             case XY:
                 if (xValue.isPresent() && yValue.isPresent()) {
-                    final ArrayNode entryArray = JsonNodeFactory.instance.arrayNode();
+                    final ArrayNode entryArray = JsonNodeFactory.instance
+                            .arrayNode();
                     data.add(entryArray);
                     addValue(entryArray, xValue);
                     addValue(entryArray, yValue);
@@ -105,8 +115,10 @@ public class DataProviderSeriesBeanSerializer
                 break;
             case XLH:
 
-                if (xValue.isPresent() && lValue.isPresent() && hValue.isPresent()) {
-                    final ArrayNode entryArray = JsonNodeFactory.instance.arrayNode();
+                if (xValue.isPresent() && lValue.isPresent()
+                        && hValue.isPresent()) {
+                    final ArrayNode entryArray = JsonNodeFactory.instance
+                            .arrayNode();
                     data.add(entryArray);
                     addValue(entryArray, xValue);
                     addValue(entryArray, lValue);
@@ -117,13 +129,12 @@ public class DataProviderSeriesBeanSerializer
                 break;
             case XOHLC:
 
-                if (xValue.isPresent() &&
-                    oValue.isPresent() &&
-                    hValue.isPresent() &&
-                    lValue.isPresent() &&
-                    cValue.isPresent()) {
+                if (xValue.isPresent() && oValue.isPresent()
+                        && hValue.isPresent() && lValue.isPresent()
+                        && cValue.isPresent()) {
 
-                    final ArrayNode entryArray = JsonNodeFactory.instance.arrayNode();
+                    final ArrayNode entryArray = JsonNodeFactory.instance
+                            .arrayNode();
                     data.add(entryArray);
                     addValue(entryArray, xValue);
                     addValue(entryArray, oValue);
@@ -137,17 +148,19 @@ public class DataProviderSeriesBeanSerializer
 
             default:
                 // render as json object
-                final ObjectNode entryObject = JsonNodeFactory.instance.objectNode();
+                final ObjectNode entryObject = JsonNodeFactory.instance
+                        .objectNode();
 
-                xValue.ifPresent(o -> addNamedValue(entryObject, xAttribute, xValue));
-                yValue.ifPresent(o -> addNamedValue(entryObject, yAttribute, yValue));
+                xValue.ifPresent(
+                        o -> addNamedValue(entryObject, xAttribute, xValue));
+                yValue.ifPresent(
+                        o -> addNamedValue(entryObject, yAttribute, yValue));
 
-                chartAttributeToValue
-                    .entrySet()
-                    .stream()
-                    .filter(e -> !e.getKey().equals(xAttribute))
-                    .filter(e -> !e.getKey().equals(yAttribute))
-                    .forEach(e -> addNamedValue(entryObject, e.getKey(), e.getValue()));
+                chartAttributeToValue.entrySet().stream()
+                        .filter(e -> !e.getKey().equals(xAttribute))
+                        .filter(e -> !e.getKey().equals(yAttribute))
+                        .forEach(e -> addNamedValue(entryObject, e.getKey(),
+                                e.getValue()));
 
                 data.add(entryObject);
 
@@ -161,10 +174,8 @@ public class DataProviderSeriesBeanSerializer
     private void checkRequiredProperties(Set<String> attributes) {
 
         Boolean hasYProperty = attributes.contains(yAttribute);
-        Boolean hasHighProperty = attributes
-                .contains(HIGH_PROPERTY);
-        Boolean hasLowProperty = attributes
-                .contains(LOW_PROPERTY);
+        Boolean hasHighProperty = attributes.contains(HIGH_PROPERTY);
+        Boolean hasLowProperty = attributes.contains(LOW_PROPERTY);
 
         if (!hasYProperty && (!hasHighProperty || !hasLowProperty)) {
             throw new IllegalStateException(
@@ -211,7 +222,8 @@ public class DataProviderSeriesBeanSerializer
         }
     }
 
-    private void addNamedValue(ObjectNode data, String name, Optional<Object> value) {
+    private void addNamedValue(ObjectNode data, String name,
+            Optional<Object> value) {
         if (value.isPresent()) {
             ValueNode node = JsonNodeFactory.instance.pojoNode(value.get());
             data.set(name, node);

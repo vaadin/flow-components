@@ -41,8 +41,8 @@ public class StopSerializer extends JsonSerializer<Stop> {
 
     @Override
     public void serialize(Stop value, JsonGenerator gen,
-            SerializerProvider serializers) throws IOException,
-            JsonProcessingException {
+            SerializerProvider serializers)
+            throws IOException, JsonProcessingException {
         gen.writeStartArray();
         gen.writeNumber(value.getPosition());
         gen.writeString(value.getColor().toString());

@@ -31,8 +31,8 @@ import com.vaadin.addon.charts.model.TimeUnitMultiples;
  * Serializer for {@link com.vaadin.addon.charts.model.TimeUnitMultiples}.
  *
  */
-public class TimeUnitMultiplesSerializer extends
-        JsonSerializer<TimeUnitMultiples> {
+public class TimeUnitMultiplesSerializer
+        extends JsonSerializer<TimeUnitMultiples> {
 
     public static Module getModule() {
         SimpleModule module = new SimpleModule();
@@ -43,8 +43,8 @@ public class TimeUnitMultiplesSerializer extends
 
     @Override
     public void serialize(TimeUnitMultiples value, JsonGenerator gen,
-            SerializerProvider serializers) throws IOException,
-            JsonProcessingException {
+            SerializerProvider serializers)
+            throws IOException, JsonProcessingException {
         gen.writeStartArray();
         gen.writeString(value.getTimeUnit().toString());
         if (value.getAllowedMultiples() != null) {

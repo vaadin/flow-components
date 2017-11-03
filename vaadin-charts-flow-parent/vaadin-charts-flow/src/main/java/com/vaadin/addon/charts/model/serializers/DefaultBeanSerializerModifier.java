@@ -38,13 +38,13 @@ public class DefaultBeanSerializerModifier extends BeanSerializerModifier {
     @Override
     public JsonSerializer<?> modifySerializer(SerializationConfig config,
             BeanDescription beanDesc, JsonSerializer<?> serializer) {
-        if(DataProviderSeries.class.isAssignableFrom(beanDesc.getBeanClass())) {
+        if (DataProviderSeries.class
+                .isAssignableFrom(beanDesc.getBeanClass())) {
             return new BeanSerializerDelegator<DataProviderSeries>(
                     (BeanSerializerBase) serializer,
                     new DataProviderSeriesBeanSerializer());
-        }
-         else if (DataSeriesItem.class.isAssignableFrom(beanDesc
-                .getBeanClass())) {
+        } else if (DataSeriesItem.class
+                .isAssignableFrom(beanDesc.getBeanClass())) {
             return new BeanSerializerDelegator<DataSeriesItem>(
                     (BeanSerializerBase) serializer,
                     new DataSeriesItemBeanSerializer());
@@ -53,14 +53,15 @@ public class DefaultBeanSerializerModifier extends BeanSerializerModifier {
                     (BeanSerializerBase) serializer, new TitleBeanSerializer());
         } else if (AxisTitle.class.isAssignableFrom(beanDesc.getBeanClass())) {
             return new BeanSerializerDelegator<AxisTitle>(
-                    (BeanSerializerBase) serializer, new AxisTitleBeanSerializer());
-        }
-        else if (LegendTitle.class.isAssignableFrom(beanDesc.getBeanClass())) {
+                    (BeanSerializerBase) serializer,
+                    new AxisTitleBeanSerializer());
+        } else if (LegendTitle.class
+                .isAssignableFrom(beanDesc.getBeanClass())) {
             return new BeanSerializerDelegator<LegendTitle>(
-                    (BeanSerializerBase) serializer, new LegendTitleBeanSerializer());
-        }
-        else if (AbstractSeries.class.isAssignableFrom(beanDesc
-                .getBeanClass())) {
+                    (BeanSerializerBase) serializer,
+                    new LegendTitleBeanSerializer());
+        } else if (AbstractSeries.class
+                .isAssignableFrom(beanDesc.getBeanClass())) {
             return new BeanSerializerDelegator<AbstractSeries>(
                     (BeanSerializerBase) serializer,
                     new AbstractSeriesBeanSerializer());

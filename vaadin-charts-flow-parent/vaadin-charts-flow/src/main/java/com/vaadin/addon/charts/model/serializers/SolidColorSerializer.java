@@ -41,8 +41,8 @@ public class SolidColorSerializer extends JsonSerializer<SolidColor> {
 
     @Override
     public void serialize(SolidColor value, JsonGenerator gen,
-            SerializerProvider serializers) throws IOException,
-            JsonProcessingException {
+            SerializerProvider serializers)
+            throws IOException, JsonProcessingException {
         gen.writeString(value.toString());
     }
 }

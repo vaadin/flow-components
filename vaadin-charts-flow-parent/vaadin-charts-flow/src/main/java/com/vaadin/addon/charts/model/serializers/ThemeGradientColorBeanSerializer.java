@@ -54,7 +54,8 @@ public class ThemeGradientColorBeanSerializer extends BeanSerializerBase {
     }
 
     @Override
-    public BeanSerializerBase withObjectIdWriter(ObjectIdWriter objectIdWriter) {
+    public BeanSerializerBase withObjectIdWriter(
+            ObjectIdWriter objectIdWriter) {
         return new ThemeGradientColorBeanSerializer(this, objectIdWriter);
     }
 

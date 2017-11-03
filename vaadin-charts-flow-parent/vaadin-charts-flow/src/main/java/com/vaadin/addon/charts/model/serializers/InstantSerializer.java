@@ -43,8 +43,8 @@ public class InstantSerializer extends JsonSerializer<Instant> {
 
     @Override
     public void serialize(Instant value, JsonGenerator gen,
-                          SerializerProvider serializers) throws IOException,
-            JsonProcessingException {
+            SerializerProvider serializers)
+            throws IOException, JsonProcessingException {
         gen.writeNumber(Util.toHighchartsTS(value));
     }
 }

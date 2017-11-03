@@ -26,19 +26,21 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.vaadin.addon.charts.model.style.GradientColor;
 
-public class GradientColorStopsSerializer extends JsonSerializer<GradientColor.Stop> {
+public class GradientColorStopsSerializer
+        extends JsonSerializer<GradientColor.Stop> {
 
     public static Module getModule() {
         SimpleModule module = new SimpleModule();
-        module.addSerializer(GradientColor.Stop.class, new GradientColorStopsSerializer());
+        module.addSerializer(GradientColor.Stop.class,
+                new GradientColorStopsSerializer());
 
         return module;
     }
 
     @Override
     public void serialize(GradientColor.Stop value, JsonGenerator gen,
-        SerializerProvider serializers)
-        throws IOException, JsonProcessingException {
+            SerializerProvider serializers)
+            throws IOException, JsonProcessingException {
         gen.writeStartArray();
         gen.writeNumber(value.getPosition());
         gen.writeString(value.getColor().toString());

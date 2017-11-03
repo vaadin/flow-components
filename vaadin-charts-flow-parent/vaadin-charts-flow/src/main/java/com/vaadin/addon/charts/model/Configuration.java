@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Chart's configuration root object containing all the child objects that are
  * used to configure chart, axes, legend, titles etc.
@@ -58,9 +57,10 @@ public class Configuration extends AbstractConfigurationObject
     private NoData noData;
     private Navigator navigator;
 
-    //TODO Enable it again
-//    @JsonIgnore
-//    private final List<ConfigurationChangeListener> changeListeners = new ArrayList<ConfigurationChangeListener>();
+    // TODO Enable it again
+    // @JsonIgnore
+    // private final List<ConfigurationChangeListener> changeListeners = new
+    // ArrayList<ConfigurationChangeListener>();
 
     /**
      * @see #setChart(ChartModel)
@@ -826,11 +826,11 @@ public class Configuration extends AbstractConfigurationObject
      * @param value
      */
     void fireDataAdded(Series series, Number value) {
-        //TODO Enable it again
-//        DataAddedEvent dataAddedEvent = new DataAddedEvent(series, value);
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.dataAdded(dataAddedEvent);
-//        }
+        // TODO Enable it again
+        // DataAddedEvent dataAddedEvent = new DataAddedEvent(series, value);
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.dataAdded(dataAddedEvent);
+        // }
     }
 
     /**
@@ -839,39 +839,43 @@ public class Configuration extends AbstractConfigurationObject
      * @param shift
      */
     void fireDataAdded(Series series, DataSeriesItem item, boolean shift) {
-        //TODO Enable it again
-//        DataAddedEvent dataAddedEvent = new DataAddedEvent(series, item, shift);
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.dataAdded(dataAddedEvent);
-//        }
+        // TODO Enable it again
+        // DataAddedEvent dataAddedEvent = new DataAddedEvent(series, item,
+        // shift);
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.dataAdded(dataAddedEvent);
+        // }
     }
 
     /** Notifies listeners that a data point has been removed */
     void fireDataRemoved(Series series, int index) {
-//        DataRemovedEvent dataRemovedEvent = new DataRemovedEvent(series, index);
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.dataRemoved(dataRemovedEvent);
-//        }
+        // DataRemovedEvent dataRemovedEvent = new DataRemovedEvent(series,
+        // index);
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.dataRemoved(dataRemovedEvent);
+        // }
     }
 
     /** Notifies listeners that a data point has been updated */
     void fireDataUpdated(Series series, Number value, int pointIndex) {
-        //TODO Enable it again
-//        DataUpdatedEvent dataUpdatedEvent = new DataUpdatedEvent(series, value,
-//                pointIndex);
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.dataUpdated(dataUpdatedEvent);
-//        }
+        // TODO Enable it again
+        // DataUpdatedEvent dataUpdatedEvent = new DataUpdatedEvent(series,
+        // value,
+        // pointIndex);
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.dataUpdated(dataUpdatedEvent);
+        // }
     }
 
     /** Notifies listeners that a data point has been updated */
     void fireDataUpdated(Series series, DataSeriesItem item, int pointIndex) {
-        //TODO Enable it again
-//        DataUpdatedEvent dataUpdatedEvent = new DataUpdatedEvent(series, item,
-//                pointIndex);
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.dataUpdated(dataUpdatedEvent);
-//        }
+        // TODO Enable it again
+        // DataUpdatedEvent dataUpdatedEvent = new DataUpdatedEvent(series,
+        // item,
+        // pointIndex);
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.dataUpdated(dataUpdatedEvent);
+        // }
     }
 
     /**
@@ -881,21 +885,21 @@ public class Configuration extends AbstractConfigurationObject
      *            The updated series
      */
     void fireSeriesChanged(Series series) {
-        //TODO Enable it again
-//        SeriesChangedEvent event = new SeriesChangedEvent(series);
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.seriesChanged(event);
-//        }
+        // TODO Enable it again
+        // SeriesChangedEvent event = new SeriesChangedEvent(series);
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.seriesChanged(event);
+        // }
     }
 
     /** Notifies listeners that a series is enabled or disabled */
     void fireSeriesEnabled(Series series, boolean enabled) {
-        //TODO Enable it again
-//        SeriesStateEvent seriesEnablationEvent = new SeriesStateEvent(series,
-//                enabled);
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.seriesStateChanged(seriesEnablationEvent);
-//        }
+        // TODO Enable it again
+        // SeriesStateEvent seriesEnablationEvent = new SeriesStateEvent(series,
+        // enabled);
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.seriesStateChanged(seriesEnablationEvent);
+        // }
     }
 
     /**
@@ -905,10 +909,10 @@ public class Configuration extends AbstractConfigurationObject
      *            Whether or not animation has been changed.
      */
     void fireAnimationChanged(boolean animation) {
-        //TODO Enable it again
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.animationChanged(animation);
-//        }
+        // TODO Enable it again
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.animationChanged(animation);
+        // }
     }
 
     /**
@@ -919,18 +923,18 @@ public class Configuration extends AbstractConfigurationObject
      * @return Dimension, as defined in ChartClientRpc.
      */
     private short getAxisDimension(Axis axis) {
-        //TODO Enable it again
-//        if (xAxis.contains(axis)) {
-//            return ChartClientRpc.X_AXIS;
-//        } else if (yAxis.contains(axis)) {
-//            return ChartClientRpc.Y_AXIS;
-//        } else if (zAxis.getAxes().contains(axis)) {
-//            return ChartClientRpc.Z_AXIS;
-//        } else if (colorAxis.getAxes().contains(axis)) {
-//            return ChartClientRpc.COLOR_AXIS;
-//        } else {
-            return -1;
-//        }
+        // TODO Enable it again
+        // if (xAxis.contains(axis)) {
+        // return ChartClientRpc.X_AXIS;
+        // } else if (yAxis.contains(axis)) {
+        // return ChartClientRpc.Y_AXIS;
+        // } else if (zAxis.getAxes().contains(axis)) {
+        // return ChartClientRpc.Z_AXIS;
+        // } else if (colorAxis.getAxes().contains(axis)) {
+        // return ChartClientRpc.COLOR_AXIS;
+        // } else {
+        return -1;
+        // }
     }
 
     /**
@@ -943,19 +947,19 @@ public class Configuration extends AbstractConfigurationObject
      * @return Index of the axis at given dimension.
      */
     private int getAxisIndex(short dimension, Axis axis) {
-        //TODO Enable it again
-//        switch (dimension) {
-//        case ChartClientRpc.X_AXIS:
-//            return xAxis.indexOf(axis);
-//        case ChartClientRpc.Y_AXIS:
-//            return yAxis.indexOf(axis);
-//        case ChartClientRpc.Z_AXIS:
-//            return zAxis.indexOf(axis);
-//        case ChartClientRpc.COLOR_AXIS:
-//            return colorAxis.getAxes().indexOf(axis);
-//        default:
-            return -1;
-//        }
+        // TODO Enable it again
+        // switch (dimension) {
+        // case ChartClientRpc.X_AXIS:
+        // return xAxis.indexOf(axis);
+        // case ChartClientRpc.Y_AXIS:
+        // return yAxis.indexOf(axis);
+        // case ChartClientRpc.Z_AXIS:
+        // return zAxis.indexOf(axis);
+        // case ChartClientRpc.COLOR_AXIS:
+        // return colorAxis.getAxes().indexOf(axis);
+        // default:
+        return -1;
+        // }
     }
 
     /**
@@ -975,17 +979,17 @@ public class Configuration extends AbstractConfigurationObject
     @Override
     public void fireAxesRescaled(Axis axis, Number minimum, Number maximum,
             boolean redraw, boolean animate) {
-        //TODO Enable it again
-//        // determine the dimension of the axis, either x or y
-//        short axisType = getAxisDimension(axis);
-//
-//        int axisIndex = getAxisIndex(axisType, axis);
-//
-//        AxisRescaledEvent event = new AxisRescaledEvent(axisType, axisIndex,
-//                minimum, maximum, redraw, animate);
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.axisRescaled(event);
-//        }
+        // TODO Enable it again
+        // // determine the dimension of the axis, either x or y
+        // short axisType = getAxisDimension(axis);
+        //
+        // int axisIndex = getAxisIndex(axisType, axis);
+        //
+        // AxisRescaledEvent event = new AxisRescaledEvent(axisType, axisIndex,
+        // minimum, maximum, redraw, animate);
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.axisRescaled(event);
+        // }
     }
 
     /**
@@ -1004,10 +1008,10 @@ public class Configuration extends AbstractConfigurationObject
      *            Whether or not to animate.
      */
     public void resetZoom(boolean redraw, boolean animate) {
-        //TODO Enable it again
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.resetZoom(redraw, animate);
-//        }
+        // TODO Enable it again
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.resetZoom(redraw, animate);
+        // }
     }
 
     /**
@@ -1021,12 +1025,12 @@ public class Configuration extends AbstractConfigurationObject
      */
     void fireItemSliced(Series series, int index, boolean sliced,
             boolean redraw, boolean animation) {
-        //TODO Enable it again
-//        ItemSlicedEvent event = new ItemSlicedEvent(series, index, sliced,
-//                redraw, animation);
-//        for (ConfigurationChangeListener listener : changeListeners) {
-//            listener.itemSliced(event);
-//        }
+        // TODO Enable it again
+        // ItemSlicedEvent event = new ItemSlicedEvent(series, index, sliced,
+        // redraw, animation);
+        // for (ConfigurationChangeListener listener : changeListeners) {
+        // listener.itemSliced(event);
+        // }
 
     }
 
@@ -1037,14 +1041,14 @@ public class Configuration extends AbstractConfigurationObject
      * cause unexpected behavior.
      * 
      * @param listener
-     *            Listener to add.
-//     */
-//    public void addChangeListener(ConfigurationChangeListener listener) {
-        //TODO Enable it again
-//        if (!changeListeners.contains(listener)) {
-//            changeListeners.add(listener);
-//        }
-//    }
+     *            Listener to add. //
+     */
+    // public void addChangeListener(ConfigurationChangeListener listener) {
+    // TODO Enable it again
+    // if (!changeListeners.contains(listener)) {
+    // changeListeners.add(listener);
+    // }
+    // }
 
     /**
      * Removes a change listener.
@@ -1052,10 +1056,10 @@ public class Configuration extends AbstractConfigurationObject
      * @param listener
      *            Listener to remove.
      */
-//    public void removeChangeListener(ConfigurationChangeListener listener) {
-        //TODO Enable it again
-//        changeListeners.remove(listener);
-//    }
+    // public void removeChangeListener(ConfigurationChangeListener listener) {
+    // TODO Enable it again
+    // changeListeners.remove(listener);
+    // }
 
     /**
      * Returns the color axis. This is used in color-based diagrams, like heat

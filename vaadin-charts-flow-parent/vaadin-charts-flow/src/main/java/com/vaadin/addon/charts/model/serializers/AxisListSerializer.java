@@ -41,8 +41,8 @@ public class AxisListSerializer extends JsonSerializer<AxisList> {
 
     @Override
     public void serialize(AxisList value, JsonGenerator gen,
-            SerializerProvider serializers) throws IOException,
-            JsonProcessingException {
+            SerializerProvider serializers)
+            throws IOException, JsonProcessingException {
         if (value != null && value.getNumberOfAxes() == 1) {
             gen.writeObject(value.getAxis(0));
         } else if (value != null) {

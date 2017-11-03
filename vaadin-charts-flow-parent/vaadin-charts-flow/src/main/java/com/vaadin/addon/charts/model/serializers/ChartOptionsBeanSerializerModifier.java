@@ -32,29 +32,28 @@ import com.vaadin.addon.charts.model.style.GradientColor;
  * Modifier that adds special handling for {@link ChartOptions} and
  * {@link GradientColor} inside {@link ChartOptions}
  */
-public class ChartOptionsBeanSerializerModifier extends
-        DefaultBeanSerializerModifier {
+public class ChartOptionsBeanSerializerModifier
+        extends DefaultBeanSerializerModifier {
 
     @Override
-    public List<BeanPropertyWriter> changeProperties(
-            SerializationConfig config, BeanDescription beanDesc,
-            List<BeanPropertyWriter> beanProperties) {
+    public List<BeanPropertyWriter> changeProperties(SerializationConfig config,
+            BeanDescription beanDesc, List<BeanPropertyWriter> beanProperties) {
 
-//        if (ChartOptions.class.isAssignableFrom(beanDesc.getBeanClass())) {
-//            // make sure we only serialize the lang and theme fields from
-//            // ChartOptions, otherwise everything from parent would be
-//            // serialized
-//            List<BeanPropertyWriter> newProperties = new ArrayList<BeanPropertyWriter>();
-//
-//            for (BeanPropertyWriter writer : beanProperties) {
-//                if ("lang" == writer.getName() || "theme" == writer.getName()) {
-//                    newProperties.add(writer);
-//                }
-//            }
-//            return newProperties;
-//        } else
-          if (GradientColor.class
-                .isAssignableFrom(beanDesc.getBeanClass())) {
+        // if (ChartOptions.class.isAssignableFrom(beanDesc.getBeanClass())) {
+        // // make sure we only serialize the lang and theme fields from
+        // // ChartOptions, otherwise everything from parent would be
+        // // serialized
+        // List<BeanPropertyWriter> newProperties = new
+        // ArrayList<BeanPropertyWriter>();
+        //
+        // for (BeanPropertyWriter writer : beanProperties) {
+        // if ("lang" == writer.getName() || "theme" == writer.getName()) {
+        // newProperties.add(writer);
+        // }
+        // }
+        // return newProperties;
+        // } else
+        if (GradientColor.class.isAssignableFrom(beanDesc.getBeanClass())) {
             // don't serialize gradients normally, instead use the custom
             // serializer
             List<BeanPropertyWriter> newProperties = new ArrayList<BeanPropertyWriter>();

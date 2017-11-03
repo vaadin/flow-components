@@ -115,6 +115,7 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
     public void setX(Date date) {
         setX(Util.toHighchartsTS(date));
     }
+
     /**
      * Checks whether or not the item is sliced. Makes sense only in pie charts.
      *

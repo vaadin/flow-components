@@ -29,8 +29,8 @@ import com.vaadin.addon.charts.model.OhlcItem;
  * Custom bean serializer for {@link DataSeriesItem}
  *
  */
-public class DataSeriesItemBeanSerializer extends
-        BeanSerializationDelegate<DataSeriesItem> {
+public class DataSeriesItemBeanSerializer
+        extends BeanSerializationDelegate<DataSeriesItem> {
 
     @Override
     public Class<DataSeriesItem> getBeanClass() {
@@ -40,7 +40,8 @@ public class DataSeriesItemBeanSerializer extends
     @Override
     public void serialize(DataSeriesItem bean,
             BeanSerializerDelegator<DataSeriesItem> serializer,
-            JsonGenerator jgen, SerializerProvider provider) throws IOException {
+            JsonGenerator jgen, SerializerProvider provider)
+            throws IOException {
 
         if (bean.isCustomized()) {
             jgen.writeStartObject();

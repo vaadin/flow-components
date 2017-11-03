@@ -28,16 +28,16 @@ import javax.servlet.annotation.WebServlet;
 @VaadinServletConfiguration(routerConfigurator = MyRouterConfigurator.class, productionMode = false)
 public class Servlet extends VaadinServlet {
 
-	/**
-	 * The router configurator defines the how to map URLs to views.
-	 */
-	public static class MyRouterConfigurator implements RouterConfigurator {
-		@Override
-		public void configure(RouterConfiguration configuration) {
-			/*
-			 * For the root, only show the main view without any sub view
-			 */
-			configuration.setRoute("", MainView.class);
-		}
-	}
+    /**
+     * The router configurator defines the how to map URLs to views.
+     */
+    public static class MyRouterConfigurator implements RouterConfigurator {
+        @Override
+        public void configure(RouterConfiguration configuration) {
+            /*
+             * For the root, only show the main view without any sub view
+             */
+            configuration.setRoute("", MainView.class);
+        }
+    }
 }

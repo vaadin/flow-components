@@ -27,9 +27,8 @@ import java.io.IOException;
  * Serializer for {@link com.vaadin.addon.charts.model.LegendTitle}.
  *
  */
-public class LegendTitleBeanSerializer extends BeanSerializationDelegate<LegendTitle> {
-
-
+public class LegendTitleBeanSerializer
+        extends BeanSerializationDelegate<LegendTitle> {
 
     @Override
     public Class<LegendTitle> getBeanClass() {
@@ -37,8 +36,8 @@ public class LegendTitleBeanSerializer extends BeanSerializationDelegate<LegendT
     }
 
     public void serialize(LegendTitle bean,
-                          BeanSerializerDelegator<LegendTitle> serializer, JsonGenerator jgen,
-                          SerializerProvider provider) throws IOException {
+            BeanSerializerDelegator<LegendTitle> serializer, JsonGenerator jgen,
+            SerializerProvider provider) throws IOException {
         jgen.writeStartObject();
 
         if (bean != null && bean.getText() == null) {

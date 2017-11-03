@@ -146,7 +146,6 @@ public class Drilldown extends AbstractConfigurationObject {
         this.drillUpButton = drillUpButton;
     }
 
-
     /**
      * @see #setAllowPointDrilldown(Boolean)
      */

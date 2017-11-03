@@ -45,7 +45,8 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
         super(source, objectIdWriter);
     }
 
-    public BeanSerializerDelegator(BeanSerializerBase source, String[] toIgnore) {
+    public BeanSerializerDelegator(BeanSerializerBase source,
+            String[] toIgnore) {
         super(source, toIgnore);
     }
 
@@ -61,7 +62,8 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
     }
 
     @Override
-    public BeanSerializerBase withObjectIdWriter(ObjectIdWriter objectIdWriter) {
+    public BeanSerializerBase withObjectIdWriter(
+            ObjectIdWriter objectIdWriter) {
         return new BeanSerializerDelegator(this, objectIdWriter);
     }
 
@@ -94,8 +96,8 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
 
     @Override
     public void serializeFields(Object bean, JsonGenerator jgen,
-            SerializerProvider provider) throws IOException,
-            JsonGenerationException {
+            SerializerProvider provider)
+            throws IOException, JsonGenerationException {
         super.serializeFields(bean, jgen, provider);
     }
 }

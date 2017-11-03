@@ -43,111 +43,123 @@ import java.util.List;
 @RunOnHub
 public class VaadinChartIT extends ParallelTest {
 
-	@Override
-	protected String getHubURL() {
-		final String username = System.getProperty("SAUCE_USERNAME");
-		final String accessKey = System.getProperty("SAUCE_ACCESS_KEY");
-		return "http://" + username + ":" + accessKey + "@localhost:4445/wd/hub";
-	}
+    @Override
+    protected String getHubURL() {
+        final String username = System.getProperty("SAUCE_USERNAME");
+        final String accessKey = System.getProperty("SAUCE_ACCESS_KEY");
+        return "http://" + username + ":" + accessKey
+                + "@localhost:4445/wd/hub";
+    }
 
-	@Before
-	public void setUp() {
-		getDriver().get("http://" + findAutoHostname() + ":8080");
-	}
+    @Before
+    public void setUp() {
+        getDriver().get("http://" + findAutoHostname() + ":8080");
+    }
 
-	private WebElement getChartElement() {
-		waitUntilPresent(By.tagName("vaadin-chart"));
-		final WebElement chart = findElement(By.tagName("vaadin-chart"));
-		assertNotNull(chart);
-		return chart;
-	}
+    private WebElement getChartElement() {
+        waitUntilPresent(By.tagName("vaadin-chart"));
+        final WebElement chart = findElement(By.tagName("vaadin-chart"));
+        assertNotNull(chart);
+        return chart;
+    }
 
-	@Test
-	public void Chart_TitleDisplayed() {
-		final WebElement chart = getChartElement();
-		final WebElement title = getElementFromShadowRoot(chart, By.className("highcharts-title"));
-		assertTrue(title.getText().contains("First Chart for Flow"));
-	}
+    @Test
+    public void Chart_TitleDisplayed() {
+        final WebElement chart = getChartElement();
+        final WebElement title = getElementFromShadowRoot(chart,
+                By.className("highcharts-title"));
+        assertTrue(title.getText().contains("First Chart for Flow"));
+    }
 
-	@Test
-	public void Chart_TitleCanBeChanged() {
-		final WebElement chart = getChartElement();
-		final WebElement title = getElementFromShadowRoot(chart, By.className("highcharts-title"));
-		assertTrue(title.getText().contains("First Chart for Flow"));
+    @Test
+    public void Chart_TitleCanBeChanged() {
+        final WebElement chart = getChartElement();
+        final WebElement title = getElementFromShadowRoot(chart,
+                By.className("highcharts-title"));
+        assertTrue(title.getText().contains("First Chart for Flow"));
 
-		final WebElement changeTitleButton = findElement(By.id("change_title"));
-		changeTitleButton.click();
+        final WebElement changeTitleButton = findElement(By.id("change_title"));
+        changeTitleButton.click();
 
-		final WebElement titleChanged = getElementFromShadowRoot(chart, By.className("highcharts-title"));
-		assertTrue(titleChanged.getText().contains("First Chart for Flow - title changed"));
-	}
+        final WebElement titleChanged = getElementFromShadowRoot(chart,
+                By.className("highcharts-title"));
+        assertTrue(titleChanged.getText()
+                .contains("First Chart for Flow - title changed"));
+    }
 
-	@Test
-	public void Chart_SeriesNameIsSet() {
-		final WebElement chart = getChartElement();
-		final WebElement series = getElementFromShadowRoot(chart, By.className("highcharts-legend-item"));
+    @Test
+    public void Chart_SeriesNameIsSet() {
+        final WebElement chart = getChartElement();
+        final WebElement series = getElementFromShadowRoot(chart,
+                By.className("highcharts-legend-item"));
 
-		assertTrue(series.getText().contains("Tokyo"));
-	}
+        assertTrue(series.getText().contains("Tokyo"));
+    }
 
-	private void waitUntilPresent(By by) {
-		new WebDriverWait(getDriver(), 10).until(ExpectedConditions.presenceOfElementLocated(by));
-	}
+    private void waitUntilPresent(By by) {
+        new WebDriverWait(getDriver(), 10)
+                .until(ExpectedConditions.presenceOfElementLocated(by));
+    }
 
-	private WebElement getElementFromShadowRoot(WebElement shadowRootOwner, By by) {
-		WebElement shadowRoot = (WebElement) executeScript("return arguments[0].shadowRoot", shadowRootOwner);
-		assertNotNull("Could not locate shadowRoot in the element", shadowRoot);
-		return shadowRoot.findElements(by).stream().findFirst()
-				.orElseThrow(() -> new AssertionError("Could not find required element in the shadowRoot"));
-	}
+    private WebElement getElementFromShadowRoot(WebElement shadowRootOwner,
+            By by) {
+        WebElement shadowRoot = (WebElement) executeScript(
+                "return arguments[0].shadowRoot", shadowRootOwner);
+        assertNotNull("Could not locate shadowRoot in the element", shadowRoot);
+        return shadowRoot.findElements(by).stream().findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Could not find required element in the shadowRoot"));
+    }
 
-	/**
-	 * @return all supported browsers which are actively tested
-	 */
-	public List<DesiredCapabilities> getAllBrowsers() {
-		List<DesiredCapabilities> allBrowsers = new ArrayList<>();
-			allBrowsers.add(BrowserUtil.chrome());
-		return Collections.unmodifiableList(allBrowsers);
-	}
+    /**
+     * @return all supported browsers which are actively tested
+     */
+    public List<DesiredCapabilities> getAllBrowsers() {
+        List<DesiredCapabilities> allBrowsers = new ArrayList<>();
+        allBrowsers.add(BrowserUtil.chrome());
+        return Collections.unmodifiableList(allBrowsers);
+    }
 
-	@BrowserConfiguration
-	public List<DesiredCapabilities> getBrowserConfiguration() {
-		return getAllBrowsers();
-	}
+    @BrowserConfiguration
+    public List<DesiredCapabilities> getBrowserConfiguration() {
+        return getAllBrowsers();
+    }
 
-	/**
-	 * Tries to automatically determine the IP address of the machine the test
-	 * is running on.
-	 *
-	 * @return An IP address of one of the network interfaces in the machine.
-	 * @throws RuntimeException
-	 *             if there was an error or no IP was found
-	 */
-	private static String findAutoHostname() {
-		try {
-			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-			while (interfaces.hasMoreElements()) {
-				NetworkInterface nwInterface = interfaces.nextElement();
-				if (!nwInterface.isUp() || nwInterface.isLoopback()
-						|| nwInterface.isVirtual()) {
-					continue;
-				}
-				Enumeration<InetAddress> addresses = nwInterface.getInetAddresses();
-				while (addresses.hasMoreElements()) {
-					InetAddress address = addresses.nextElement();
-					if (address.isLoopbackAddress()) {
-						continue;
-					}
-					if (address.isSiteLocalAddress()) {
-						return address.getHostAddress();
-					}
-				}
-			}
-		} catch (SocketException e) {
-			throw new RuntimeException("Could not enumerate ");
-		}
+    /**
+     * Tries to automatically determine the IP address of the machine the test
+     * is running on.
+     *
+     * @return An IP address of one of the network interfaces in the machine.
+     * @throws RuntimeException
+     *             if there was an error or no IP was found
+     */
+    private static String findAutoHostname() {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface
+                    .getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface nwInterface = interfaces.nextElement();
+                if (!nwInterface.isUp() || nwInterface.isLoopback()
+                        || nwInterface.isVirtual()) {
+                    continue;
+                }
+                Enumeration<InetAddress> addresses = nwInterface
+                        .getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if (address.isLoopbackAddress()) {
+                        continue;
+                    }
+                    if (address.isSiteLocalAddress()) {
+                        return address.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            throw new RuntimeException("Could not enumerate ");
+        }
 
-		throw new RuntimeException(
-				"No compatible (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) ip address found.");
-	}
+        throw new RuntimeException(
+                "No compatible (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) ip address found.");
+    }
 }
