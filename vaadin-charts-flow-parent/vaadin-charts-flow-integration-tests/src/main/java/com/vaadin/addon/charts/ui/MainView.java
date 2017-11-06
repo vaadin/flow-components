@@ -16,57 +16,68 @@
  */
 package com.vaadin.addon.charts.ui;
 
-import com.vaadin.addon.charts.VaadinChart;
-import com.vaadin.addon.charts.model.ChartType;
-import com.vaadin.addon.charts.model.Configuration;
-import com.vaadin.addon.charts.model.ListSeries;
-import com.vaadin.addon.charts.model.XAxis;
-import com.vaadin.addon.charts.model.YAxis;
-import com.vaadin.flow.router.HasChildView;
-import com.vaadin.flow.router.View;
-import com.vaadin.ui.Composite;
+import java.util.Optional;
+
+import com.vaadin.addon.charts.examples.AbstractChartExample;
+import com.vaadin.addon.charts.examples.DefaultExample;
+import com.vaadin.router.HasUrlParameter;
+import com.vaadin.router.Route;
+import com.vaadin.router.WildcardParameter;
+import com.vaadin.router.event.BeforeNavigationEvent;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.common.StyleSheet;
 import com.vaadin.ui.html.Div;
-import com.vaadin.ui.html.NativeButton;
 
 @StyleSheet("context://styles.css")
-public class MainView extends Composite<Div> implements HasChildView {
-
-    public MainView() {
-        final VaadinChart chart = new VaadinChart();
-
-        Configuration configuration = chart.getConfiguration();
-        configuration.setTitle("First Chart for Flow");
-        chart.getConfiguration().getChart().setType(ChartType.AREA);
-        getContent().add(chart);
-
-        configuration.addSeries(new ListSeries("Tokyo", 20, 12, 34, 23, 65, 8,
-                4, 7, 76, 19, 20, 8));
-        configuration.addSeries(new ListSeries("Miami", 34, 29, 23, 65, 8, 4, 7,
-                7, 59, 8, 9, 19));
-
-        XAxis x = new XAxis();
-        x.setCategories("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
-                "Sep", "Oct", "Nov", "Dec");
-        configuration.addxAxis(x);
-
-        YAxis y = new YAxis();
-        y.setMin(0);
-        y.setTitle("Rainfall (mm)");
-        configuration.addyAxis(y);
-
-        NativeButton changeTitleButton = new NativeButton();
-        changeTitleButton.setId("change_title");
-        changeTitleButton.setText("Change title");
-        changeTitleButton.addClickListener(e -> {
-            configuration.setTitle("First Chart for Flow - title changed");
-            chart.drawChart();
-        });
-
-        getContent().add(changeTitleButton);
-    }
+@Route("")
+public class MainView extends Div implements HasUrlParameter<String> {
+    public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.addon.charts.examples.";
 
     @Override
-    public void setChildView(View childView) {
+    public void setParameter(BeforeNavigationEvent event,
+            @WildcardParameter String parameter) {
+        removeAll();
+        Optional<Component> content = getContentFromParameter(parameter);
+        if (content.isPresent()) {
+            add(content.get());
+        } else {
+            setText("couldn't find demo for url: " + parameter);
+        }
     }
+
+    /**
+     * Parses route parameter to obtain the actual example to show
+     * 
+     * @param route
+     *            path that can be either
+     *            <ul>
+     *            <li>category&#47demo</li>
+     *            <li>fully qualified name</li>
+     *            </ul>
+     * 
+     * @return Component for route or {@link Optional#empty()}
+     */
+    private Optional<Component> getContentFromParameter(String route) {
+        // Empty route will show a simple chart by default otherwise parameter
+        // will be converted to full qualified class and will be instantiated
+        if (route == null || route.isEmpty()) {
+            return Optional.of(new DefaultExample());
+        }
+        String className;
+        if (route.startsWith(EXAMPLE_BASE_PACKAGE)) {
+            className = route;
+        } else {
+            className = EXAMPLE_BASE_PACKAGE + route.replace("/", ".");
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            Class<? extends AbstractChartExample> forName = (Class<? extends AbstractChartExample>) Class
+                    .forName(className);
+            return Optional.of(forName.newInstance());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
 }

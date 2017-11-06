@@ -47,7 +47,7 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-charts-flow</artifactId>
+            <artifactId>vaadin-charts-flow-examples</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -17,6 +17,7 @@
         <module>vaadin-charts-flow</module>
         <module>model</module>
         <module>vaadin-charts-flow-integration-tests</module>
+        <module>vaadin-charts-flow-demo</module>
     </modules>
 
     <organization>
