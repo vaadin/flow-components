@@ -15,7 +15,6 @@
  */
 package com.vaadin.ui.textfield;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.common.HtmlImport;
@@ -29,11 +28,7 @@ import com.vaadin.ui.html.Div;
 @Route("text-field")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
 public class TextFieldView extends DemoView {
-	
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
-	
+
     @Override
     protected void initView() {
         Div message = new Div();

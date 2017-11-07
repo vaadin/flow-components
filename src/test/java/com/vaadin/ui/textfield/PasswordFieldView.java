@@ -15,7 +15,6 @@
  */
 package com.vaadin.ui.textfield;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.button.Button;
@@ -32,12 +31,8 @@ import com.vaadin.ui.passwordfield.PasswordField;
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 public class PasswordFieldView extends DemoView {
-    
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
-	
-	@Override
+
+    @Override
     protected void initView() {
         Div message = new Div();
 

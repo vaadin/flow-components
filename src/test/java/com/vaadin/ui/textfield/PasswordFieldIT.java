@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
 import com.vaadin.ui.passwordfield.PasswordField;
@@ -29,10 +28,6 @@ import com.vaadin.ui.passwordfield.PasswordField;
  * Integration tests for the {@link PasswordField}.
  */
 public class PasswordFieldIT extends ComponentDemoTest {
-
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     @Override
     protected String getTestPath() {
