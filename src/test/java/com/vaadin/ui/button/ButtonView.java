@@ -15,7 +15,6 @@
  */
 package com.vaadin.ui.button;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.Component;
@@ -32,11 +31,6 @@ import com.vaadin.ui.icon.VaadinIcons;
 @Route("")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 public class ButtonView extends DemoView {
-
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
-
     private Div message;
 
     @Override
