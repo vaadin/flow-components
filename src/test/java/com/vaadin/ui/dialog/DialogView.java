@@ -15,7 +15,6 @@
  */
 package com.vaadin.ui.dialog;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.button.Button;
@@ -31,10 +30,6 @@ import com.vaadin.ui.layout.HorizontalLayout;
 @Route("")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 public class DialogView extends DemoView {
-	
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     private static final String BUTTON_CAPTION = "Open dialog";
 

@@ -21,7 +21,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
 
@@ -31,10 +30,6 @@ import com.vaadin.testbench.By;
 public class DialogIT extends ComponentDemoTest {
 
     private static final String DIALOG_OVERLAY_TAG = "vaadin-dialog-overlay";
-
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     @Test
     public void openAndCloseBasicDialog() {
