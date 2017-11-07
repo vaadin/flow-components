@@ -18,7 +18,6 @@ package com.vaadin.ui.combobox;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.router.Route;
@@ -32,10 +31,6 @@ import com.vaadin.ui.html.Div;
 @Route("")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-combo-box.html")
 public class ComboBoxView extends DemoView {
-
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 	
     /**
      * Example object.
