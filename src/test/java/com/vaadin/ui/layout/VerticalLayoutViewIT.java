@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
 
@@ -27,10 +26,6 @@ import com.vaadin.testbench.By;
  * Tests for the {@link VerticalLayoutView}.
  */
 public class VerticalLayoutViewIT extends ComponentDemoTest {
-
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     @Override
     protected String getTestPath() {

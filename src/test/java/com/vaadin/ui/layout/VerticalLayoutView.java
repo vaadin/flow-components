@@ -15,7 +15,6 @@
  */
 package com.vaadin.ui.layout;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.Component;
@@ -31,10 +30,6 @@ import com.vaadin.ui.layout.FlexLayout.JustifyContentMode;
  */
 @Route("vertical-layout")
 public class VerticalLayoutView extends DemoView {
-	
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     @Override
     protected void initView() {
