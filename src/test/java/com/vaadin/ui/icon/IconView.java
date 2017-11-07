@@ -15,7 +15,6 @@
  */
 package com.vaadin.ui.icon;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.common.StyleSheet;
@@ -32,10 +31,6 @@ import com.vaadin.ui.layout.VerticalLayout;
 @Route("")
 @StyleSheet("styles.css")
 public class IconView extends DemoView {
-
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     @Override
     protected void initView() {
