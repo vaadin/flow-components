@@ -16,6 +16,20 @@
     <properties>
         <flow.version>1.0-SNAPSHOT</flow.version>
     </properties>
+    
+    <repositories>
+        <repository>
+            <id>flow</id>
+            <url>https://repo.vaadin.com/nexus/content/repositories/flow/</url>
+        </repository>
+        <repository>
+            <id>flow-snapshots</id>
+            <url>https://repo.vaadin.com/nexus/content/repositories/flow-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>

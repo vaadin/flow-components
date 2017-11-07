@@ -18,6 +18,7 @@ package com.vaadin.ui.upload;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +28,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.util.MessageDigestUtil;
 import com.vaadin.router.Route;
@@ -52,10 +52,6 @@ import com.vaadin.ui.upload.receivers.MultiFileMemoryBuffer;
  */
 @Route("")
 public class UploadView extends DemoView {
-
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     @Override
     protected void initView() {
