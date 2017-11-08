@@ -33,7 +33,7 @@ import com.vaadin.flow.demo.ComponentDemoTest;
 /**
  * Upload component test class.
  */
-public class TestFileUploadTest extends ComponentDemoTest {
+public class UploadIT extends ComponentDemoTest {
 
     @Test
     public void testUploadAnyFile() throws Exception {
