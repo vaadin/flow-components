@@ -103,7 +103,11 @@ public class RowTypes extends VerticalLayout {
     }
 
     public Component createBox(String number, String size) {
+        // IE11 has an issue for calculating flex-basis if element has margin, padding or border
+        // Adding a wrapper fixes the issue
         CssLayout boxContainer = new CssLayout();
+
+        CssLayout innerContainer = new CssLayout();
 
         Label numberLbl = new Label(number);
         numberLbl.addStyleName("box__number");
@@ -111,8 +115,10 @@ public class RowTypes extends VerticalLayout {
         Label sizeLbl = new Label(size);
         sizeLbl.addStyleName("box__size");
 
-        boxContainer.addComponents(numberLbl, sizeLbl);
-        boxContainer.addStyleName("box");
+        innerContainer.addComponents(numberLbl, sizeLbl);
+        innerContainer.addStyleName("box");
+
+        boxContainer.addComponent(innerContainer);
 
         return boxContainer;
     }
