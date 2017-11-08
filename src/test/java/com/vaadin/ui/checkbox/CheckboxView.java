@@ -15,7 +15,6 @@
  */
 package com.vaadin.ui.checkbox;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.button.Button;
@@ -30,10 +29,6 @@ import com.vaadin.ui.html.Div;
 @Route("")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-checkbox.html")
 public class CheckboxView extends DemoView {
-
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     @Override
     protected void initView() {
