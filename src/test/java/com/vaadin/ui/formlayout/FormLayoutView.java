@@ -26,7 +26,6 @@ import com.vaadin.data.BinderValidationStatus;
 import com.vaadin.data.BindingValidationStatus;
 import com.vaadin.data.validator.EmailValidator;
 import com.vaadin.data.validator.StringLengthValidator;
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.function.SerializablePredicate;
 import com.vaadin.router.Route;
@@ -55,10 +54,6 @@ import com.vaadin.ui.textfield.TextField;
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-date-picker.html")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-checkbox.html")
 public class FormLayoutView extends DemoView {
-	
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     @Override
     protected void initView() {
