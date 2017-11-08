@@ -17,7 +17,6 @@ package com.vaadin.ui.splitlayout;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.common.HasStyle;
@@ -30,10 +29,6 @@ import com.vaadin.ui.html.Label;
  */
 @Route("")
 public class SplitLayoutView extends DemoView {
-	
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     private static final String FIRST_CONTENT_TEXT = "First content component";
     private static final String SECOND_CONTENT_TEXT = "Second content component";

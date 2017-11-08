@@ -22,7 +22,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.demo.ComponentDemoServer;
 import com.vaadin.flow.demo.ComponentDemoTest;
 
 /**
@@ -31,10 +30,6 @@ import com.vaadin.flow.demo.ComponentDemoTest;
 public class SplitLayoutIT extends ComponentDemoTest {
 
     private static String SPLIT_LAYOUT_TAG = "vaadin-split-layout";
-
-    public static void main(String... args) throws Exception {
-        new ComponentDemoServer().startServer();
-    }
 
     @Test
     public void combined_layouts() {
