@@ -18,8 +18,8 @@ package com.vaadin.addon.charts.ui;
 
 import java.util.Optional;
 
-import com.vaadin.addon.charts.examples.AbstractChartExample;
-import com.vaadin.addon.charts.examples.DefaultExample;
+import com.vaadin.addon.charts.AbstractChartExample;
+import com.vaadin.addon.charts.examples.area.AreaChart;
 import com.vaadin.router.HasUrlParameter;
 import com.vaadin.router.Route;
 import com.vaadin.router.WildcardParameter;
@@ -61,7 +61,7 @@ public class MainView extends Div implements HasUrlParameter<String> {
         // Empty route will show a simple chart by default otherwise parameter
         // will be converted to full qualified class and will be instantiated
         if (route == null || route.isEmpty()) {
-            return Optional.of(new DefaultExample());
+            return Optional.of(new AreaChart());
         }
         String className;
         if (route.startsWith(EXAMPLE_BASE_PACKAGE)) {

@@ -17,6 +17,7 @@
         <module>vaadin-charts-flow</module>
         <module>model</module>
         <module>vaadin-charts-flow-integration-tests</module>
+        <module>demo</module>
         <module>vaadin-charts-flow-demo</module>
     </modules>
 
@@ -37,7 +38,7 @@
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
 
         <vaadin.version>10.0-SNAPSHOT</vaadin.version>
-        <flow.version>1.0.0.alpha7</flow.version>
+        <flow.version>1.0.0.alpha8</flow.version>
         <jetty.version>9.3.9.v20160517</jetty.version>
     </properties>
 

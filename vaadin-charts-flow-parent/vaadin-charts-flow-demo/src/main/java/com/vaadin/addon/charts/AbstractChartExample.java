@@ -1,4 +1,4 @@
-package com.vaadin.addon.charts.examples;
+package com.vaadin.addon.charts;
 
 import com.vaadin.ui.html.Div;
 

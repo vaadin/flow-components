@@ -1,7 +1,7 @@
 package com.vaadin.addon.charts.examples.column;
 
 import com.vaadin.addon.charts.VaadinChart;
-import com.vaadin.addon.charts.examples.AbstractChartExample;
+import com.vaadin.addon.charts.AbstractChartExample;
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.model.Credits;

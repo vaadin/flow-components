@@ -1,0 +1,28 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/charts-demo-app.html",
+  "sources": [
+   "bower.json"
+  ],
+  "extraDependencies": [
+    "bower_components/webcomponentsjs/webcomponents-lite.js"
+  ],
+  "builds": [{
+    "name": "es5",
+    "compile": true,
+    "js": {"minify": true},
+    "css": {"minify": true},
+    "html": {"minify": true}
+  },
+    {
+    "name": "es6",
+    "js": {"minify": true},
+    "css": {"minify": true},
+    "html": {"minify": true}
+  }],
+  "lint": {
+    "rules": [
+      "polymer-2"
+    ]
+  },
+}
