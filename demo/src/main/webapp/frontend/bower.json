@@ -30,7 +30,7 @@
     "paper-dialog": "2.0.0",
     "paper-icon-button": "2.0.0",
     "polymer": "~2.0.2",
-    "vaadin-charts": "#master",
+    "vaadin-charts": "^6.0.0",
     "vaadin-icons": "4.0.0",
     "vaadin-grid": "^3.0.0",
     "vaadin-split-layout": "1.1.0",
