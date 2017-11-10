@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vaadin.addon.charts.VaadinChart;
+import com.vaadin.addon.charts.Chart;
 import com.vaadin.addon.charts.model.style.Color;
 
 /**

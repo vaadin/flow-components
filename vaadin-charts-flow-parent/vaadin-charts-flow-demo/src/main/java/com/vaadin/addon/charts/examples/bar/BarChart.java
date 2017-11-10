@@ -1,7 +1,7 @@
 package com.vaadin.addon.charts.examples.bar;
 
 import com.vaadin.addon.charts.AbstractChartExample;
-import com.vaadin.addon.charts.VaadinChart;
+import com.vaadin.addon.charts.Chart;
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.model.ListSeries;
@@ -12,7 +12,7 @@ public class BarChart extends AbstractChartExample {
 
     @Override
     public void initDemo() {
-        VaadinChart chart = new VaadinChart();
+        Chart chart = new Chart();
 
         Configuration configuration = chart.getConfiguration();
         configuration.setTitle("Example Bar Chart");

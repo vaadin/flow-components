@@ -1,6 +1,6 @@
 package com.vaadin.addon.charts.examples.column;
 
-import com.vaadin.addon.charts.VaadinChart;
+import com.vaadin.addon.charts.Chart;
 import com.vaadin.addon.charts.AbstractChartExample;
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
@@ -15,7 +15,7 @@ public class ColumnWithNegativeValues extends AbstractChartExample {
 
     @Override
     public void initDemo() {
-        VaadinChart chart = new VaadinChart(ChartType.COLUMN);
+        Chart chart = new Chart(ChartType.COLUMN);
 
         Configuration conf = chart.getConfiguration();
         conf.setTitle(new Title("Column chart with negative values"));

@@ -1,7 +1,7 @@
 package com.vaadin.addon.charts.examples.area;
 
 import com.vaadin.addon.charts.SkipFromDemo;
-import com.vaadin.addon.charts.VaadinChart;
+import com.vaadin.addon.charts.Chart;
 import com.vaadin.addon.charts.AbstractChartExample;
 import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
@@ -15,7 +15,7 @@ public class AreaChart extends AbstractChartExample {
 
     @Override
     public void initDemo() {
-        final VaadinChart chart = new VaadinChart();
+        final Chart chart = new Chart();
 
         Configuration configuration = chart.getConfiguration();
         configuration.setTitle("First Chart for Flow");

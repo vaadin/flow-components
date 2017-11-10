@@ -28,7 +28,7 @@ import elemental.json.impl.JreJsonFactory;
 
 @Tag("vaadin-chart")
 @HtmlImport("frontend://bower_components/vaadin-charts/vaadin-chart.html")
-public class VaadinChart extends Component {
+public class Chart extends Component {
 
     private Configuration configuration;
     private final JreJsonFactory jsonFactory = new JreJsonFactory();
@@ -36,17 +36,17 @@ public class VaadinChart extends Component {
     /**
      * Creates a new chart with default configuration
      */
-    public VaadinChart() {
+    public Chart() {
         this.configuration = new Configuration();
     }
 
     /**
      * Creates a new chart with the given type
      *
-     * @see #VaadinChart()
+     * @see #Chart()
      * @param type
      */
-    public VaadinChart(ChartType type) {
+    public Chart(ChartType type) {
         this();
         getConfiguration().getChart().setType(type);
     }

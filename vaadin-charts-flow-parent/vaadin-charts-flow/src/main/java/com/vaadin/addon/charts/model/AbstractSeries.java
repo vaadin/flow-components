@@ -3,7 +3,7 @@ package com.vaadin.addon.charts.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.vaadin.addon.charts.VaadinChart;
+import com.vaadin.addon.charts.Chart;
 
 /*
  * #%L
@@ -148,7 +148,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
      * configuration are wished to be applied at once.
      *
      * @see #setVisible(Boolean)
-     * @see VaadinChart#drawChart()
+     * @see Chart#drawChart()
      *
      * @param visible
      *            true if the series should be displayed, false if not
