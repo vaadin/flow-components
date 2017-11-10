@@ -15,7 +15,7 @@
     <properties>
         <flow.version>1.0-SNAPSHOT</flow.version>
     </properties>
-    
+
     <repositories>
         <repository>
             <id>flow</id>
@@ -29,6 +29,12 @@
             </snapshots>
         </repository>
     </repositories>
+
+    <scm>
+        <connection>scm:https:https://github.com/vaadin/vaadin-form-layout-flow.git</connection>
+        <developerConnection>scm:git:git@github.com:vaadin/vaadin-form-layout-flow.git</developerConnection>
+        <url>https://github.com/vaadin/vaadin-form-layout-flow/</url>
+    </scm>
 
     <dependencies>
         <dependency>
@@ -45,7 +51,7 @@
             <artifactId>flow-html-components</artifactId>
             <version>${flow.version}</version>
         </dependency>
-        
+
 
         <!-- Dependencies for the demo -->
         <dependency>
@@ -54,8 +60,9 @@
             <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- TODO: Remove the dependency below after components have been deployed individually, and replace
-         with vaadin-text-field-flow, vaadin-date-picker-flow, vaadin-button-flow, vaadin-checkbox-flow. -->
+        <!-- TODO: Remove the dependency below after components have been 
+            deployed individually, and replace with vaadin-text-field-flow, vaadin-date-picker-flow, 
+            vaadin-button-flow, vaadin-checkbox-flow. -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-components</artifactId>
