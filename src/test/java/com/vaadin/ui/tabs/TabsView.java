@@ -135,8 +135,7 @@ public class TabsView extends DemoView {
 
     private void createFullWidthTabs() {
         // begin-source-example
-        // source-example-heading: Tabs that cover the entire width of the tab
-        // bar
+        // source-example-heading: Tabs covering the full width of the tab bar
         Tab tab1 = new Tab("Tab one");
         Tab tab2 = new Tab("Tab two");
         Tab tab3 = new Tab("Tab three");
@@ -145,7 +144,7 @@ public class TabsView extends DemoView {
         // end-source-example
 
         tabs.setId("full-width-tabs");
-        addCard("Tabs that cover the entire width of the tab bar", tabs);
+        addCard("Tabs covering the full width of the tab bar", tabs);
     }
 
     private void createPreselectedTabs() {
@@ -184,8 +183,7 @@ public class TabsView extends DemoView {
         tabsToPages.put(tab3, page3);
         Tabs tabs = new Tabs(tab1, tab2, tab3);
         Div pages = new Div(page1, page2, page3);
-        Set<HasStyle> pagesShown = Stream.of(page1)
-                .collect(Collectors.toSet());
+        Set<HasStyle> pagesShown = Stream.of(page1).collect(Collectors.toSet());
 
         tabs.addSelectedChangeListener(event -> {
             pagesShown.forEach(page -> page.getStyle().set("display", "none"));
@@ -209,7 +207,8 @@ public class TabsView extends DemoView {
     private void createTabsWithCustomContent() {
         // begin-source-example
         // source-example-heading: Tabs with custom content
-        Image image1 = new Image("https://api.adorable.io/avatars/100/peter.png", "Peter");
+        Image image1 = new Image(
+                "https://api.adorable.io/avatars/100/peter.png", "Peter");
         image1.setWidth("24px");
         image1.setHeight("24px");
         image1.getStyle().set("borderRadius", "50%");
