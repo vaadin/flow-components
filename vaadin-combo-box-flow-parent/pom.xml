@@ -15,7 +15,13 @@
     <properties>
         <flow.version>1.0-SNAPSHOT</flow.version>
     </properties>
-    
+
+    <scm>
+        <connection>scm:https:https://github.com/vaadin/vaadin-combo-box-flow.git</connection>
+        <developerConnection>scm:git:git@github.com:vaadin/vaadin-combo-box-flow.git</developerConnection>
+        <url>https://github.com/vaadin/vaadin-combo-box-flow/</url>
+    </scm>
+
     <repositories>
         <repository>
             <id>flow</id>
