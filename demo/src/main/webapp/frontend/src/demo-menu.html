@@ -54,7 +54,7 @@
           </div>
           <app-menu slot="submenu-content" class="submenu">
             <template is="dom-repeat" items="[[category.demos]]" as="demo">
-              <a router-link category="[[category.name]]" id="[[demo.component]]" name="[[demo.component]]" href="/[[category.name]]/[[demo.component]]"
+              <a router-link category="[[category.name]]" id="[[demo.component]]" name="[[demo.component]]" href="[[category.name]]/[[demo.component]]"
                 class="app-menu-item">[[demo.caption]]</a>
             </template>
           </app-menu>
