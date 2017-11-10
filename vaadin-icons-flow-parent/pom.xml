@@ -29,6 +29,12 @@
             </snapshots>
         </repository>
     </repositories>
+    
+    <scm>
+        <connection>scm:https:https://github.com/vaadin/vaadin-icons-flow.git</connection>
+        <developerConnection>scm:git:git@github.com:vaadin/vaadin-icons-flow.git</developerConnection>
+        <url>https://github.com/vaadin/vaadin-icons-flow/</url>
+    </scm>
 
     <dependencies>
         <dependency>
