@@ -31,6 +31,12 @@
         </repository>
     </repositories>
 
+    <scm>
+        <connection>scm:https:https://github.com/vaadin/vaadin-text-field-flow.git</connection>
+        <developerConnection>scm:git:git@github.com:vaadin/vaadin-text-field-flow.git</developerConnection>
+        <url>https://github.com/vaadin/vaadin-text-field-flow/</url>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>org.webjars.bower</groupId>
