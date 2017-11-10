@@ -30,6 +30,12 @@
             </snapshots>
         </repository>
     </repositories>
+    
+    <scm>
+        <connection>scm:https:https://github.com/vaadin/vaadin-upload-flow.git</connection>
+        <developerConnection>scm:git:git@github.com:vaadin/vaadin-upload-flow.git</developerConnection>
+        <url>https://github.com/vaadin/vaadin-upload-flow/</url>
+    </scm>
 
     <dependencies>
         <dependency>
