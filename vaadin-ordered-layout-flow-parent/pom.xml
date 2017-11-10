@@ -29,6 +29,12 @@
             </snapshots>
         </repository>
     </repositories>
+    
+    <scm>
+        <connection>scm:https:https://github.com/vaadin/vaadin-ordered-layout-flow.git</connection>
+        <developerConnection>scm:git:git@github.com:vaadin/vaadin-ordered-layout-flow.git</developerConnection>
+        <url>https://github.com/vaadin/vaadin-ordered-layout-flow/</url>
+    </scm>
 
     <dependencies>
         <dependency>
