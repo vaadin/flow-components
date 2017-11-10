@@ -29,6 +29,12 @@
             </snapshots>
         </repository>
     </repositories>
+    
+    <scm>
+        <connection>scm:https:https://github.com/vaadin/vaadin-dialog-flow.git</connection>
+        <developerConnection>scm:git:git@github.com:vaadin/vaadin-dialog-flow.git</developerConnection>
+        <url>https://github.com/vaadin/vaadin-dialog-flow/</url>
+    </scm>
 
     <dependencies>
         <dependency>
