@@ -30,6 +30,13 @@
         </repository>
     </repositories>
 
+    <scm>
+        <connection>scm:https:https://github.com/vaadin/vaadin-checkbox-flow.git</connection>
+        <developerConnection>scm:git:git@github.com:vaadin/vaadin-checkbox-flow.git
+        </developerConnection>
+        <url>https://github.com/vaadin/vaadin-checkbox-flow/</url>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>org.webjars.bower</groupId>
