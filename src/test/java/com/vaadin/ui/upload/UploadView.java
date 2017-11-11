@@ -88,8 +88,6 @@ public class UploadView extends DemoView {
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
 
-        // upload.addFinishedListener(
-        // event -> System.out.println("Finished event"));
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(),
@@ -109,8 +107,7 @@ public class UploadView extends DemoView {
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
         upload.setAccept("image/jpeg,image/png,image/gif");
-        // upload.addFinishedListener(
-        // event -> System.out.println("Finished event"));
+
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(),
