@@ -4,7 +4,7 @@
 // found inside imports in vaadin-addons/bower.json
 const fs = require('fs');
 
-var addonsBower = JSON.parse(fs.readFileSync("vaadin-addons/bower.json"));
+var addonsBower = JSON.parse(fs.readFileSync("../../../../addon/src/main/resources/bower.json"));
 var addonsDeps = addonsBower.dependencies;
 
 var dependencies = Object.keys(addonsDeps);
