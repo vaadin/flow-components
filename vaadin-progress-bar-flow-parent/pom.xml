@@ -5,16 +5,27 @@
 
     <parent>
         <groupId>com.vaadin</groupId>
-        <artifactId>flow-component</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <artifactId>flow-component-base</artifactId>
+        <version>1.0.0.alpha3</version>
     </parent>
 
     <artifactId>vaadin-progress-bar-flow</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <flow.version>1.0-SNAPSHOT</flow.version>
+        <flow.version>1.0.0.alpha9</flow.version>
     </properties>
+    
+    <repositories>
+        <repository>
+            <id>flow</id>
+            <url>https://repo.vaadin.com/nexus/content/repositories/flow/</url>
+        </repository>
+        <repository>
+            <id>flow-component-base</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
