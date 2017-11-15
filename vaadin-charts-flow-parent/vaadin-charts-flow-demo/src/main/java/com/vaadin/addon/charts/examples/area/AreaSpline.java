@@ -22,10 +22,6 @@ public class AreaSpline extends AbstractChartExample {
 
 	private static final SolidColor LIGHT_BLUE = new SolidColor(68, 170, 213, .2);
 
-	public String getDescription() {
-		return "Area-Spline";
-	}
-
 	@Override
 	public void initDemo() {
 		Chart chart = new Chart(ChartType.AREASPLINE);
