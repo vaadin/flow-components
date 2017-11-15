@@ -6,12 +6,12 @@ for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 ## Running the component demo
 Run from the command line:
 - `mvn clean install`
-- `mvn exec:java -Dexec.mainClass="com.vaadin.ui.button.ButtonView" -Dexec.classpathScope="test"`
+- `mvn jetty:run`
 
 Then navigate to `http://localhost:9998` to view the demo.
 
 ## Using the component in a Flow application
-To use the component in an application using maven, 
+To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
 <dependency>
