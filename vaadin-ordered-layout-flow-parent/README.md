@@ -7,14 +7,9 @@ The repository contains implementations for `FlexLayout`, `HorizontalLayout` and
 ## Running the component demo
 Run from the command line:
 - `mvn clean install`
+- `mvn jetty:run`
 
-To run the demo for HorizontalLayout
-- `mvn exec:java -Dexec.mainClass="com.vaadin.ui.layout.HorizontalLayoutView" -Dexec.classpathScope="test"`
-- Then navigate to `http://localhost:9998/horizontal-layout`
-
-To run the demo for VerticalLayout
-- `mvn exec:java -Dexec.mainClass="com.vaadin.ui.layout.VerticalLayoutView" -Dexec.classpathScope="test"`
-- Then navigate to `http://localhost:9998/vertical-layout`
+Then navigate to `http://localhost:9998/horizontal-layout` for the demo of HorizontalLayout and to `http://localhost:9998/vertical-layout` for the demo of VerticalLayout
 
 ## Using the component in a Flow application
 To use the component in an application using maven, 
@@ -26,7 +21,6 @@ add the following dependency to your `pom.xml`:
     <version>${component.version}</version>
 </dependency>
 ```
-Right now the usage requires the component to be locally built and installed through `mvn install`
 
 ## Flow documentation
 Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow/blob/master/flow-documentation/Overview.asciidoc).
