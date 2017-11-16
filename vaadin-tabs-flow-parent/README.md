@@ -20,7 +20,6 @@ add the following dependency to your `pom.xml`:
     <version>${component.version}</version>
 </dependency>
 ```
-Right now the usage requires the component to be locally built and installed through `mvn install`.
 
 ## Flow documentation
 Documentation for flow can be found in 
