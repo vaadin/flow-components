@@ -1,10 +1,10 @@
 {
-  "name": "vaadin-charts",
-  "homepage": "https://github.com/vaadin/charts",
+  "name": "charts",
+  "homepage": "https://github.com/vaadin/vaadin-charts-flow",
   "authors": [],
   "description": "",
   "main": "",
-  "license": "Apache2",
+  "license": "https://vaadin.com/license/cval-3.0",
   "private": true,
   "ignore": [
     "**/.*",
@@ -14,7 +14,6 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "~2.0.2",
-    "vaadin-charts": "^6.0.0"
+    "vaadin-charts": "v6.0.0-alpha2"
   }
 }

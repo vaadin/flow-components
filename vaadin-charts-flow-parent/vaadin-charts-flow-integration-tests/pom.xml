@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-charts-flow-parent</artifactId>
@@ -11,7 +11,6 @@
 
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow-integration-test</artifactId>
-    <version>6.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>Vaadin Charts for Flow Integration Test</name>
@@ -23,24 +22,24 @@
         <servlet.api.version>3.1.0</servlet.api.version>
 
         <!-- Plugins -->
-        <frontend.maven.plugin.version>1.4</frontend.maven.plugin.version>
+        <jetty.version>9.3.7.v20160115</jetty.version>
         <driver.binary.downloader.maven.plugin.version>1.0.14</driver.binary.downloader.maven.plugin.version>
         <maven.failsafe.plugin.version>2.20</maven.failsafe.plugin.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
-
-        <!-- Frontend -->
-        <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
-        <node.version>v7.10.1</node.version>
-        <npm.version>5.3.0</npm.version>
-
-        <frontend.working.directory>src/main/webapp/frontend</frontend.working.directory>
-        <vaadin.frontend.path>VAADIN/static/frontend</vaadin.frontend.path>
+        <flow.maven.plugin.version>1.0-SNAPSHOT</flow.maven.plugin.version>
     </properties>
 
     <repositories>
         <repository>
             <id>saucelabs-repository</id>
             <url>http://repository-saucelabs.forge.cloudbees.com/release</url>
+        </repository>
+        <repository>
+            <id>flow-internal-snapshots</id>
+            <url>https://repo.vaadin.com/nexus/content/repositories/flow-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -95,69 +94,10 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
                 <version>${maven.clean.plugin.version}</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${frontend.working.directory}/bower_components</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/build</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/node</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/node_modules</directory>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>${frontend.maven.plugin.version}</version>
-                <configuration>
-                    <nodeVersion>${node.version}</nodeVersion>
-                    <npmVersion>${npm.version}</npmVersion>
-                    <workingDirectory>${frontend.working.directory}</workingDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>install-node-and-npm</id>
-                        <goals>
-                            <goal>install-node-and-npm</goal>
-                            <goal>npm</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>npm run</id>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>${npm.build.goal}</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-frontend-maven-plugin</artifactId>
-                <version>0.1-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>update</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
@@ -190,16 +130,16 @@
                             <!-- Prevent Jetty from scanning the classpath. -->
                             <!-- Speeds up startup time significantly -->
                             <webAppConfig>
-                                <webInfIncludeJarPattern>.*/flow-.*.jar$|.*/test-resources-.*.jar$</webInfIncludeJarPattern>
+                                <!-- <webInfIncludeJarPattern>.*/flow-.*.jar$|.*/test-resources-.*.jar$</webInfIncludeJarPattern> -->
                                 <containerIncludeJarPattern>^$</containerIncludeJarPattern>
                                 <resourceBases>
                                     <resourceBase>${project.basedir}/src/main/webapp</resourceBase>
-                                    <resourceBase>${jetty.extra.resource.base}</resourceBase>
                                 </resourceBases>
                             </webAppConfig>
                         </configuration>
                         <executions>
-                            <!-- start and stop jetty (running our app) when running integration tests -->
+                            <!-- start and stop jetty (running our app) when running integration 
+                                tests -->
                             <execution>
                                 <id>start-jetty</id>
                                 <phase>pre-integration-test</phase>
@@ -240,7 +180,8 @@
                                     <goal>start-sauceconnect</goal>
                                 </goals>
                             </execution>
-                            <!-- Stop the Sauce Connect process after the integration tests have finished -->
+                            <!-- Stop the Sauce Connect process after the integration tests have 
+                                finished -->
                             <execution>
                                 <id>stop-sauceconnect</id>
                                 <phase>post-integration-test</phase>
@@ -254,71 +195,6 @@
             </build>
         </profile>
         <profile>
-            <id>productionMode</id>
-            <activation>
-                <property>
-                    <name>vaadin.productionMode</name>
-                </property>
-            </activation>
-
-            <properties>
-                <npm.build.goal>run prodMode</npm.build.goal>
-                <jetty.extra.resource.base>${project.build.directory}/jetty-extra-resources</jetty.extra.resource.base>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>com.vaadin</groupId>
-                    <artifactId>flow-server-production-mode</artifactId>
-                    <version>${project.version}</version>
-                </dependency>
-            </dependencies>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <version>${maven.war.plugin.version}</version>
-                        <configuration>
-                            <webResources>
-                                <resource>
-                                    <directory>${frontend.working.directory}/build</directory>
-                                    <targetPath>${vaadin.frontend.path}</targetPath>
-                                </resource>
-                            </webResources>
-                            <packagingExcludes>**/node_modules/,**/node/,**/etc/,**/bower.json,**/package.json
-                            </packagingExcludes>
-                        </configuration>
-                    </plugin>
-
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <version>${maven.resources.plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <id>copy-resources</id>
-                                <phase>process-resources</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${project.build.directory}/jetty-extra-resources/${vaadin.frontend.path}</outputDirectory>
-                                    <overwrite>true</overwrite>
-                                    <resources>
-                                        <resource>
-                                            <directory>${project.basedir}/${frontend.working.directory}/build</directory>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
             <id>debugMode</id>
             <activation>
                 <property>
@@ -326,11 +202,6 @@
                 </property>
             </activation>
 
-            <properties>
-                <npm.build.goal>run devMode</npm.build.goal>
-                <jetty.extra.resource.base>${project.basedir}/${frontend.working.directory}</jetty.extra.resource.base>
-            </properties>
-
             <build>
                 <plugins>
                     <plugin>
@@ -338,14 +209,6 @@
                         <artifactId>maven-war-plugin</artifactId>
                         <version>${maven.war.plugin.version}</version>
                         <configuration>
-                            <webResources>
-                                <resource>
-                                    <directory>${frontend.working.directory}</directory>
-                                    <excludes>
-                                        <exclude>build/**</exclude>
-                                    </excludes>
-                                </resource>
-                            </webResources>
                             <packagingExcludes>**/node_modules/,**/node/,**/etc/,**/bower.json,**/package.json
                             </packagingExcludes>
                         </configuration>

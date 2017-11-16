@@ -12,7 +12,6 @@
 
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow</artifactId>
-    <version>6.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Vaadin Charts for Flow</name>
@@ -26,6 +25,11 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts-flow-webjar</artifactId>
+            <version>6.0.0-alpha2</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>

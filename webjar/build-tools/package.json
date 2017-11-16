@@ -1,0 +1,13 @@
+{
+  "name": "vaadin-charts-flow",
+  "description": "Frontend dependencies for vaadin-charts-flow",
+  "version": "1.0.0",
+  "author": "Vaadin Ltd",
+  "license": "SEE LICENSE IN https://vaadin.com/license/cval-3.0",
+  "devDependencies": {
+    "bower": "1.8.2"
+  },
+  "scripts": {
+    "install": "cd ../src/main/frontend && bower install"
+  }
+}
