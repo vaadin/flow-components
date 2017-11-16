@@ -8,14 +8,9 @@ The repository contains implementations for `TextField` and `PasswordField`
 ## Running the component demo
 Run from the command line:
 - `mvn clean install`
+- `mvn jetty:run`
 
-To run the demo for TextField
-- `mvn exec:java -Dexec.mainClass="com.vaadin.ui.textfield.TextFieldView" -Dexec.classpathScope="test"`
-- Then navigate to `http://localhost:9998/text-field`
-
-To run the demo for PasswordField
-- `mvn exec:java -Dexec.mainClass="com.vaadin.ui.textfield.PasswordFieldView" -Dexec.classpathScope="test"`
-- Then navigate to `http://localhost:9998/password-field`
+Then navigate to `http://localhost:9998/text-field` for the demo of TextField and to `http://localhost:9998/password-field` for the demo of PasswordField
 
 ## Using the component in a Flow application
 To use the component in an application using maven, 
@@ -27,7 +22,6 @@ add the following dependency to your `pom.xml`:
     <version>${component.version}</version>
 </dependency>
 ```
-Right now the usage requires the component to be locally built and installed through `mvn install`
 
 ## Flow documentation
 Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow/blob/master/flow-documentation/Overview.asciidoc).
