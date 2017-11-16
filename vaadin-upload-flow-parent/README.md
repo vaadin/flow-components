@@ -6,7 +6,7 @@ for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 ## Running the component demo
 Run from the command line:
 - `mvn clean install`
-- `mvn exec:java -Dexec.mainClass="com.vaadin.ui.upload.UploadView" -Dexec.classpathScope="test"`
+- `mvn jetty:run`
 
 Then navigate to `http://localhost:9998`
 
@@ -20,7 +20,6 @@ add the following dependency to your `pom.xml`:
     <version>${component.version}</version>
 </dependency>
 ```
-Right now the usage requires the component to be locally built and installed through `mvn install`
 
 ## Flow documentation
 Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow/blob/master/flow-documentation/Overview.asciidoc).
