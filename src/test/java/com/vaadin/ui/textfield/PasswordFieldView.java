@@ -17,14 +17,13 @@ package com.vaadin.ui.textfield;
 
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
-import com.vaadin.ui.button.Button;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Div;
-import com.vaadin.ui.passwordfield.PasswordField;
+import com.vaadin.ui.html.NativeButton;
 
 /**
  * View for {@link GeneratedVaadinPasswordField} demo.
- * 
+ *
  * @author Vaadin Ltd
  */
 @Route("password-field")
@@ -44,8 +43,8 @@ public class PasswordFieldView extends DemoView {
         passwordField.addValueChangeListener(event -> message.setText(
                 String.format("Password field value changed from '%s' to '%s'",
                         event.getOldValue(), event.getValue())));
-        Button button = new Button("Toggle eye icon if password is hidden",
-                event -> {
+        NativeButton button = new NativeButton(
+                "Toggle eye icon if password is hidden", event -> {
                     if (!passwordField.isPasswordVisible()) {
                         passwordField.setRevealButtonHidden(
                                 !passwordField.isRevealButtonHidden());

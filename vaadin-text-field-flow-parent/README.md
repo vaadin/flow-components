@@ -3,14 +3,16 @@
 This project is the Component wrapper implementation of [`<vaadin-text-field>`](https://github.com/vaadin/vaadin-text-field) element
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
-The repository contains implementations for `TextField` and `PasswordField`
+The repository contains implementations for `TextField`, `PasswordField` and `TextArea`.
 
 ## Running the component demo
 Run from the command line:
 - `mvn clean install`
 - `mvn jetty:run`
 
-Then navigate to `http://localhost:9998/text-field` for the demo of TextField and to `http://localhost:9998/password-field` for the demo of PasswordField
+Then navigate to `http://localhost:9998/text-field` for the demo of TextField, 
+to `http://localhost:9998/password-field` for the demo of PasswordField and to
+`http://localhost:9998/text-area` for the demo of TextArea 
 
 ## Using the component in a Flow application
 To use the component in an application using maven, 

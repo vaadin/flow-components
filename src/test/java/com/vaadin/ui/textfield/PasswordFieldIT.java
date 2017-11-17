@@ -22,7 +22,6 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.passwordfield.PasswordField;
 
 /**
  * Integration tests for the {@link PasswordField}.
@@ -38,8 +37,8 @@ public class PasswordFieldIT extends ComponentDemoTest {
     public void valueChangeListenerReportsCorrectValues() {
         WebElement passwordFieldValueDiv = layout
                 .findElement(By.id("password-field-value"));
-        WebElement passwordField = layout
-                .findElement(By.id("password-field-with-value-change-listener"));
+        WebElement passwordField = layout.findElement(
+                By.id("password-field-with-value-change-listener"));
 
         passwordField.sendKeys("a");
         waitUntilTextsEqual("Password field value changed from '' to 'a'",
@@ -52,8 +51,8 @@ public class PasswordFieldIT extends ComponentDemoTest {
 
     @Test
     public void passwordFieldHasPlaceholder() {
-        WebElement passwordField = layout
-                .findElement(By.id("password-field-with-value-change-listener"));
+        WebElement passwordField = layout.findElement(
+                By.id("password-field-with-value-change-listener"));
         Assert.assertEquals(passwordField.getAttribute("placeholder"),
                 "placeholder text");
     }
