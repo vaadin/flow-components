@@ -12,7 +12,7 @@
 
     <artifactId>vaadin-charts-flow-webjar</artifactId>
     <!-- Needs to be kept manually in sync with charts version dependency
-         in addon pom.xml and in webjar bower.json -->
+         in addon pom.xml -->
     <version>6.0.0-alpha2</version>
     <packaging>jar</packaging>
 
@@ -32,7 +32,9 @@
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
 
-        <!-- Needs to be kept manually in sync with charts version in bower.json -->
+        <vaadin.charts.version>${project.version}</vaadin.charts.version>
+    <!-- Needs to be manually kept in sync with the highcharts version available 
+        in project.version of vaadin-chart -->
         <highcharts.version>5.0.14</highcharts.version>
 
         <buildtools.directory>build-tools</buildtools.directory>
@@ -114,9 +116,39 @@
                         <fileset>
                             <directory>${frontend.working.directory}/bower_components</directory>
                         </fileset>
+                        <fileset>
+                            <directory>${frontend.working.directory}/</directory>
+                            <includes>
+                                <include>bower.json</include>
+                            </includes>
+                        </fileset>
                     </filesets>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                  <execution>
+                    <id>prepare-bower-json</id>
+                    <phase>validate</phase>
+                    <goals>
+                      <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                      <outputDirectory>src/main/frontend</outputDirectory>
+                      <resources>
+                        <resource>
+                          <directory>build-tools</directory>
+                          <includes>
+                            <include>bower.json</include>
+                          </includes>
+                          <filtering>true</filtering>
+                        </resource>
+                      </resources>
+                    </configuration>
+                  </execution>
+                </executions>
+              </plugin>
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
