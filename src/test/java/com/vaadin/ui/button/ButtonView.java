@@ -28,13 +28,13 @@ import com.vaadin.ui.icon.VaadinIcons;
 /**
  * View for {@link Button} demo.
  */
-@Route("")
+@Route("vaadin-button")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 public class ButtonView extends DemoView {
     private Div message;
 
     @Override
-    protected void initView() {
+    public void initView() {
         createDefaultButton();
         createButtonsWithIcons();
         createImageButtonWithAutofocus();

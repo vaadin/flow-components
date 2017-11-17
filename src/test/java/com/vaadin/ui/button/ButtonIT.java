@@ -132,4 +132,9 @@ public class ButtonIT extends ComponentDemoTest {
     private int getCenterX(WebElement element) {
         return element.getLocation().getX() + element.getSize().getWidth() / 2;
     }
+
+    @Override
+    protected String getTestPath() {
+        return ("/vaadin-button");
+    }
 }
