@@ -28,7 +28,7 @@ import com.vaadin.ui.html.Div;
  * 
  * @author Vaadin Ltd
  */
-@Route("")
+@Route("vaadin-combobox")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-combo-box.html")
 public class ComboBoxView extends DemoView {
 	
@@ -90,7 +90,7 @@ public class ComboBoxView extends DemoView {
     private static final String WIDTH_STRING = "250px";
 
     @Override
-    protected void initView() {
+    public void initView() {
         createStringComboBox();
         createObjectComboBox();
         createComboBoxWithObjectStringSimpleValue();
