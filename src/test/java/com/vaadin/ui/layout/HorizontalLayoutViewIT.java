@@ -28,7 +28,7 @@ import com.vaadin.testbench.By;
 public class HorizontalLayoutViewIT extends ComponentDemoTest {
     @Override
     protected String getTestPath() {
-        return "/horizontal-layout";
+        return "/vaadin-horizontal-layout";
     }
 
     @Test

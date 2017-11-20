@@ -9,10 +9,10 @@ Run from the command line:
 - `mvn clean install`
 - `mvn jetty:run`
 
-Then navigate to `http://localhost:9998/horizontal-layout` for the demo of HorizontalLayout and to `http://localhost:9998/vertical-layout` for the demo of VerticalLayout
+Then navigate to `http://localhost:9998/vaadin-horizontal-layout` for the demo of HorizontalLayout and to `http://localhost:9998/vaadin-vertical-layout` for the demo of VerticalLayout
 
 ## Using the component in a Flow application
-To use the component in an application using maven, 
+To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
 <dependency>

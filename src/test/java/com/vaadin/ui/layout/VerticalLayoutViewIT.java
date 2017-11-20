@@ -29,7 +29,7 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return "/vertical-layout";
+        return "/vaadin-vertical-layout";
     }
 
     @Test

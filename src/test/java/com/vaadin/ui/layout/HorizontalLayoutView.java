@@ -28,7 +28,7 @@ import com.vaadin.ui.layout.FlexLayout.JustifyContentMode;
  * 
  * @author Vaadin Ltd
  */
-@Route("horizontal-layout")
+@Route("vaadin-horizontal-layout")
 public class HorizontalLayoutView extends DemoView {
 	
     @Override
