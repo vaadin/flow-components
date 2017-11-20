@@ -47,7 +47,7 @@ import com.vaadin.ui.textfield.TextField;
  *
  * @author Vaadin Ltd
  */
-@Route("")
+@Route("vaadin-form-layout")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-form-layout.html")
@@ -56,7 +56,7 @@ import com.vaadin.ui.textfield.TextField;
 public class FormLayoutView extends DemoView {
 
     @Override
-    protected void initView() {
+    public void initView() {
         createResponsiveLayout();
         createFormLayoutWithItems();
         createFormLayoutWithBinder();

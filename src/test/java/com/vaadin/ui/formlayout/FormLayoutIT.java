@@ -160,4 +160,9 @@ public class FormLayoutIT extends ComponentDemoTest {
     private void forceClick(WebElement element) {
         executeScript("arguments[0].click();", element);
     }
+
+    @Override
+    protected String getTestPath() {
+        return ("/vaadin-form-layout");
+    }
 }
