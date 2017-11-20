@@ -11,9 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.addon.spreadsheet.test.demoapps.SpreadsheetDemoUI;
 import com.vaadin.addon.spreadsheet.test.pageobjects.HeaderPage;
@@ -61,14 +59,6 @@ public abstract class AbstractSpreadsheetTestCase extends MultiBrowserTest {
 
     protected void assertSelectedCell(String cell, boolean selected) {
         assertTrue("Cell " + cell + " should be the selected cell", selected);
-    }
-
-    protected void waitUntil(ExpectedCondition<?> condition) {
-        waitUntil(condition, 20);
-    }
-
-    protected void waitUntil(ExpectedCondition<?> condition, int timeout) {
-        new WebDriverWait(getDriver(), timeout).until(condition);
     }
 
     protected void waitForElementPresent(By locator) {

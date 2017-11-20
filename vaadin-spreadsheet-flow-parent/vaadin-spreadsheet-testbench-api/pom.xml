@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
-            <version>5.1.0.alpha1</version>
+            <version>5.1.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
