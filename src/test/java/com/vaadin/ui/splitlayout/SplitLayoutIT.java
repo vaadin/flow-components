@@ -106,4 +106,9 @@ public class SplitLayoutIT extends ComponentDemoTest {
         Assert.assertEquals("Primary component width should be 150",
                 150, primaryComponent.getSize().width);
     }
+
+    @Override
+    protected String getTestPath() {
+        return "/vaadin-split-layout";
+    }
 }

@@ -27,7 +27,7 @@ import com.vaadin.ui.html.Label;
  * 
  * @author Vaadin Ltd
  */
-@Route("")
+@Route("vaadin-split-layout")
 public class SplitLayoutView extends DemoView {
 
     private static final String FIRST_CONTENT_TEXT = "First content component";
