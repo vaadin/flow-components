@@ -145,7 +145,8 @@ public class SheetJsniUtil {
         for (var ruleIndex = 0; ruleIndex < rules.length; ruleIndex++) {
             var rule = rules[ruleIndex];
             for (var i = 0; i < overlaySelectors.length; i++) {
-                if (rule["selectorText"].indexOf(".row" + overlaySelectors[i]) !== -1) {
+                // checking for ".rowX," prevents from matching ".rowXY"
+                if (rule["selectorText"].indexOf(".row" + overlaySelectors[i]+",") !== -1) {
                     overlayRules.push(rule["cssText"]);
                 }
             }

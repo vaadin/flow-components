@@ -2221,15 +2221,16 @@ public class SheetWidget extends Panel {
 
     private void resetRowAndColumnStyles() {
         final List<String> sizeStyleRules = new ArrayList<String>();
+        createOverlayStyles(cellSizeAndPositionStyle, sizeStyleRules);
 
         int initialTop = calculateTopValueOfScrolledRows();
-        int initialLeft = calculateLeftValueOfScrolledColumns();
-        createOverlayStyles(cellSizeAndPositionStyle, sizeStyleRules);
         createRowStyles(sizeStyleRules, firstRowIndex, lastRowIndex, initialTop);
+
+        int initialLeft = calculateLeftValueOfScrolledColumns();
         createColumnStyles(sizeStyleRules, firstColumnIndex, lastColumnIndex,
                 initialLeft);
 
-        // Create styles for freezed columns and rows if needed
+        // Create styles for frozen columns and rows if needed
         if (horizontalSplitPosition > 0) {
             createColumnStyles(sizeStyleRules, 1, horizontalSplitPosition, 0);
         }
@@ -2252,7 +2253,9 @@ public class SheetWidget extends Panel {
                 overlaySelectors);
 
         for (int i = 0; i < overlayRules.length; i++) {
-            rules.add(overlayRules[i]);
+            if (!rules.contains(overlayRules[i])) {
+                rules.add(overlayRules[i]);
+            }
         }
     }
 
