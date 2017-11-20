@@ -80,4 +80,9 @@ public class IconIT extends ComponentDemoTest {
             String expectedValue) {
         Assert.assertEquals(expectedValue, element.getCssValue(propertyName));
     }
+
+    @Override
+    protected String getTestPath() {
+        return ("/vaadin-icons");
+    }
 }

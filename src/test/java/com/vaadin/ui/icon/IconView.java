@@ -28,12 +28,12 @@ import com.vaadin.ui.layout.VerticalLayout;
  * 
  * @author Vaadin Ltd
  */
-@Route("")
+@Route("vaadin-icons")
 @StyleSheet("styles.css")
 public class IconView extends DemoView {
 
     @Override
-    protected void initView() {
+    public void initView() {
         createBasicIconsView();
         createStyledIconView();
         createAllIconsView();
