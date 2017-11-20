@@ -25,12 +25,12 @@ import com.vaadin.ui.html.Div;
  *
  * @author Vaadin Ltd
  */
-@Route("text-area")
+@Route("vaadin-text-area")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
 public class TextAreaView extends DemoView {
 
     @Override
-    protected void initView() {
+    public void initView() {
         addBasicFeatures();
         addMaxHeightFeature();
         addMinHeightFeature();

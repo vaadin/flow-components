@@ -32,7 +32,7 @@ public class TextAreaIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return "/text-area";
+        return "/vaadin-text-area";
     }
 
     @Test

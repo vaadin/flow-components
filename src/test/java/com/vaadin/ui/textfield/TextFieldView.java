@@ -25,12 +25,12 @@ import com.vaadin.ui.html.Div;
  * 
  * @author Vaadin Ltd
  */
-@Route("text-field")
+@Route("vaadin-text-field")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
 public class TextFieldView extends DemoView {
 
     @Override
-    protected void initView() {
+    public void initView() {
         Div message = new Div();
 
         // begin-source-example

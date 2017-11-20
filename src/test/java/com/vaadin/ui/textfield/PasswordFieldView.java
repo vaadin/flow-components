@@ -26,13 +26,13 @@ import com.vaadin.ui.html.NativeButton;
  *
  * @author Vaadin Ltd
  */
-@Route("password-field")
+@Route("vaadin-password-field")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 public class PasswordFieldView extends DemoView {
 
     @Override
-    protected void initView() {
+    public void initView() {
         Div message = new Div();
 
         // begin-source-example

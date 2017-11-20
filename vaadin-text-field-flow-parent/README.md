@@ -10,12 +10,12 @@ Run from the command line:
 - `mvn clean install`
 - `mvn jetty:run`
 
-Then navigate to `http://localhost:9998/text-field` for the demo of TextField, 
-to `http://localhost:9998/password-field` for the demo of PasswordField and to
-`http://localhost:9998/text-area` for the demo of TextArea 
+Then navigate to `http://localhost:9998/vaadin-text-field` for the demo of TextField,
+to `http://localhost:9998/vaadin-password-field` for the demo of PasswordField and to
+`http://localhost:9998/vaadin-text-area` for the demo of TextArea 
 
 ## Using the component in a Flow application
-To use the component in an application using maven, 
+To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
 <dependency>
