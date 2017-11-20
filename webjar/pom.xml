@@ -4,12 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-charts-flow-parent</artifactId>
-        <version>6.0-SNAPSHOT</version>
-    </parent>
-
+    <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow-webjar</artifactId>
     <!-- Needs to be kept manually in sync with charts version dependency
          in addon pom.xml -->
@@ -19,21 +14,27 @@
     <name>Vaadin Charts for Flow WebJar</name>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.organization>Vaadin Ltd</project.organization>
 
-        <!-- Dependencies -->
-        <servlet.api.version>3.1.0</servlet.api.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
+        <vaadin.version>10.0.0-alpha6</vaadin.version>
+        <flow.version>1.0.0.alpha8</flow.version>
+        <jetty.version>9.3.9.v20160517</jetty.version>
+        <!-- Frontend -->
+        <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
+        <frontend.maven.plugin.version>1.6</frontend.maven.plugin.version>
+        <node.version>v7.10.1</node.version>
+        <yarn.version>v0.27.5</yarn.version>
         <!-- Plugins -->
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
-        <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
 
         <vaadin.charts.version>${project.version}</vaadin.charts.version>
-    <!-- Needs to be manually kept in sync with the highcharts version available 
+        <!-- Needs to be manually kept in sync with the highcharts version available 
         in project.version of vaadin-chart -->
         <highcharts.version>5.0.14</highcharts.version>
 
@@ -43,10 +44,26 @@
 
     <repositories>
         <repository>
+            <id>flow-internal-release</id>
+            <url>https://repo.vaadin.com/nexus/content/repositories/flow</url>
+        </repository>
+        <repository>
             <id>vaadin-addons</id>
             <url>http://maven.vaadin.com/vaadin-addons</url>
         </repository>
     </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-bom</artifactId>
+                <version>${vaadin.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -127,6 +144,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven.resources.plugin.version}</version>
                 <executions>
                   <execution>
                     <id>prepare-bower-json</id>
