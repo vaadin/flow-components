@@ -128,4 +128,9 @@ public class DatePickerIT extends ComponentDemoTest {
         waitUntil(
                 driver -> "Select the starting date".equals(message.getText()));
     }
+
+    @Override
+    protected String getTestPath() {
+        return ("/vaadin-date-picker");
+    }
 }

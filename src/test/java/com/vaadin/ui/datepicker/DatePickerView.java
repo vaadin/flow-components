@@ -29,12 +29,12 @@ import com.vaadin.ui.html.Div;
  * 
  * @author Vaadin Ltd
  */
-@Route("")
+@Route("vaadin-date-picker")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-date-picker.html")
 public class DatePickerView extends DemoView {
 
     @Override
-    protected void initView() {
+    public void initView() {
         createSimpleDatePicker();
         createMinAndMaxDatePicker();
         createFinnishDatePicker();

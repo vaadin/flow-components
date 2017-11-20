@@ -8,10 +8,10 @@ Run from the command line:
 - `mvn clean install`
 - `mvn jetty:run`
 
-Then navigate to `http://localhost:9998`
+Then navigate to `http://localhost:9998/vaadin-date-picker`
 
 ## Using the component in a Flow application
-To use the component in an application using maven, 
+To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
 <dependency>
@@ -31,4 +31,3 @@ Documentation for flow can be found in [Flow documentation](https://github.com/v
 
 ## License
 Apache License 2.0
-
