@@ -39,12 +39,12 @@ import com.vaadin.ui.layout.VerticalLayout;
  *
  * @author Vaadin Ltd.
  */
-@Route("")
+@Route("vaadin-tabs")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-progress-bar.html")
 public class TabsView extends DemoView {
 
     @Override
-    protected void initView() {
+    public void initView() {
         createHorizontalTabs();
         createVerticalTabs();
         createScrollableHorizontalTabs();
