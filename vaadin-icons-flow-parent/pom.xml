@@ -55,12 +55,10 @@
             <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- TODO: Remove the dependency below after components have been deployed individually,
-         and replace with vaadin-ordered-layout -->
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-components</artifactId>
-            <version>${flow.version}</version>
+            <artifactId>vaadin-ordered-layout-flow</artifactId>
+            <version>1.0.0.alpha1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
