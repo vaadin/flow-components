@@ -64,4 +64,9 @@ public class CheckboxIT extends ComponentDemoTest {
                 "Accessible checkbox should have the aria-label attribute",
                 "Click me", checkbox.getAttribute("aria-label"));
     }
+
+    @Override
+    protected String getTestPath() {
+        return ("/vaadin-checkbox");
+    }
 }

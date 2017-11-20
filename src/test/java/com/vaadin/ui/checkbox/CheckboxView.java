@@ -26,12 +26,12 @@ import com.vaadin.ui.html.Div;
  * 
  * @author Vaadin Ltd
  */
-@Route("")
+@Route("vaadin-checkbox")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-checkbox.html")
 public class CheckboxView extends DemoView {
 
     @Override
-    protected void initView() {
+    public void initView() {
         addDefaultCheckbox();
         addDisabledCheckbox();
         addIndeterminateCheckbox();

@@ -8,10 +8,10 @@ Run from the command line:
 - `mvn clean install`
 - `mvn jetty:run`
 
-Then navigate to `http://localhost:9998` to see the demo.
+Then navigate to `http://localhost:9998/vaadin-checkbox` to see the demo.
 
 ## Using the component in a Flow application
-To use the component in an application using maven, 
+To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
 <dependency>
