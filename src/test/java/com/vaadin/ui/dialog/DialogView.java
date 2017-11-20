@@ -27,14 +27,14 @@ import com.vaadin.ui.layout.HorizontalLayout;
  * 
  * @author Vaadin Ltd
  */
-@Route("")
+@Route("vaadin-dialog")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 public class DialogView extends DemoView {
 
     private static final String BUTTON_CAPTION = "Open dialog";
 
     @Override
-    protected void initView() {
+    public void initView() {
         addBasicDialog();
         addDialogWithOpenedChangedListener();
         addDialogWithHTML();
