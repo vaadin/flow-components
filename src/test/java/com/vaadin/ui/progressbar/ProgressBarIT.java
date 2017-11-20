@@ -47,4 +47,9 @@ public class ProgressBarIT extends ComponentDemoTest {
     private String valueOf(WebElement progressBar) {
         return progressBar.getAttribute("value");
     }
+
+    @Override
+    protected String getTestPath() {
+        return "/vaadin-progress-bar";
+    }
 }

@@ -27,12 +27,12 @@ import com.vaadin.ui.common.HtmlImport;
  *
  * @author Vaadin Ltd.
  */
-@Route("")
+@Route("vaadin-progress-bar")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-progress-bar.html")
 public class ProgressBarView extends DemoView {
 
     @Override
-    protected void initView() {
+    public void initView() {
         createBasicProgressBar();
         createProgressBarWithCustomBounds();
         createIndeterminateProgressBar();

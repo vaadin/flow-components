@@ -1,6 +1,6 @@
 # ProgressBar Component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-progress-bar>`](https://github.com/vaadin/vaadin-progress-bar) 
+This project is the Component wrapper implementation of [`<vaadin-progress-bar>`](https://github.com/vaadin/vaadin-progress-bar)
 element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Running the component demo
@@ -8,10 +8,10 @@ Run from the command line:
 - `mvn clean install`
 - `mvn jetty:run`
 
-Then navigate to `http://localhost:9998` to view the demo.
+Then navigate to `http://localhost:9998/vaadin-progress-bar` to view the demo.
 
 ## Using the component in a Flow application
-To use the component in an application using maven, 
+To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
 <dependency>
@@ -22,12 +22,12 @@ add the following dependency to your `pom.xml`:
 ```
 
 ## Flow documentation
-Documentation for flow can be found in 
+Documentation for flow can be found in
 [Flow documentation](https://github.com/vaadin/flow/blob/master/flow-documentation/Overview.asciidoc).
 
 ## Contributing
 - Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/master/eclipse)
-- [Submit a pull request](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github) 
+- [Submit a pull request](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github)
   with detailed title and description
 - Wait for response from one of Vaadin Flow team members
 
