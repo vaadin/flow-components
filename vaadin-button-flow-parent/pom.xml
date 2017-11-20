@@ -57,8 +57,8 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-components</artifactId>
-            <version>${flow.version}</version>
+            <artifactId>vaadin-icons-flow</artifactId>
+            <version>1.0.0.alpha2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
