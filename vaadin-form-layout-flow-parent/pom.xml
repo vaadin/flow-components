@@ -56,13 +56,40 @@
             <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- TODO: Remove the dependency below after components have been 
-            deployed individually, and replace with vaadin-text-field-flow, vaadin-date-picker-flow, 
-            vaadin-button-flow, vaadin-checkbox-flow. -->
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-components</artifactId>
+            <artifactId>flow-data</artifactId>
             <version>${flow.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-button-flow</artifactId>
+            <version>1.0.0.alpha1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-checkbox-flow</artifactId>
+            <version>1.0.0.alpha1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-date-picker-flow</artifactId>
+            <version>1.0.0.alpha1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-text-field-flow</artifactId>
+            <version>1.0.0.alpha1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-ordered-layout-flow</artifactId>
+            <version>1.0.0.alpha1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
