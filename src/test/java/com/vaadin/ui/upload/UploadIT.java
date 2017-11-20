@@ -116,4 +116,9 @@ public class UploadIT extends ComponentDemoTest {
                             + element.getClass().getName());
         }
     }
+
+    @Override
+    protected String getTestPath() {
+        return "/vaadin-upload";
+    }
 }

@@ -50,11 +50,11 @@ import com.vaadin.ui.upload.receivers.MultiFileMemoryBuffer;
  *
  * @author Vaadin Ltd
  */
-@Route("")
+@Route("vaadin-upload")
 public class UploadView extends DemoView {
 
     @Override
-    protected void initView() {
+    public void initView() {
         createSimpleUpload();
         createSimpleMultiFileUpload();
         createFilteredMultiFileUpload();
