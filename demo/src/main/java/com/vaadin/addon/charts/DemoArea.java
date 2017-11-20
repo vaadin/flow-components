@@ -18,6 +18,8 @@ public class DemoArea extends PolymerTemplate<TemplateModel> {
     private Div div;
 
     public void setContent(Component component) {
+        component.getChildren().findFirst().get().getElement()
+                .getClassList().add(component.getClass().getSimpleName().toLowerCase());
         if (currentChart != null) {
             div.remove(currentChart);
         }
