@@ -35,6 +35,7 @@ public class AxisTitleBeanSerializer
         return AxisTitle.class;
     }
 
+    @Override
     public void serialize(AxisTitle bean,
             BeanSerializerDelegator<AxisTitle> serializer, JsonGenerator jgen,
             SerializerProvider provider) throws IOException {

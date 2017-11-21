@@ -35,6 +35,7 @@ public class LegendTitleBeanSerializer
         return LegendTitle.class;
     }
 
+    @Override
     public void serialize(LegendTitle bean,
             BeanSerializerDelegator<LegendTitle> serializer, JsonGenerator jgen,
             SerializerProvider provider) throws IOException {
