@@ -56,7 +56,7 @@ public class ChartOptionsBeanSerializerModifier
         if (GradientColor.class.isAssignableFrom(beanDesc.getBeanClass())) {
             // don't serialize gradients normally, instead use the custom
             // serializer
-            List<BeanPropertyWriter> newProperties = new ArrayList<BeanPropertyWriter>();
+            List<BeanPropertyWriter> newProperties = new ArrayList<>();
 
             for (BeanPropertyWriter writer : beanProperties) {
                 if ("radialGradient" != writer.getName()

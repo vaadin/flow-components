@@ -39,10 +39,10 @@ import com.vaadin.addon.charts.model.style.Color;
  */
 public class DataSeries extends AbstractSeries {
 
-    private List<DataSeriesItem> data = new ArrayList<DataSeriesItem>();
+    private List<DataSeriesItem> data = new ArrayList<>();
 
     @JsonIgnore
-    private List<Series> drilldownSeries = new ArrayList<Series>();
+    private List<Series> drilldownSeries = new ArrayList<>();
 
     /**
      * Constructs an empty {@link DataSeries}. Developers should then populate

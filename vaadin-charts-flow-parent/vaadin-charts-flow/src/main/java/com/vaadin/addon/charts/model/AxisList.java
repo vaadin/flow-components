@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class AxisList<T extends Axis> extends AbstractConfigurationObject {
 
-    private List<T> axesList = new ArrayList<T>();
+    private List<T> axesList = new ArrayList<>();
 
     /**
      * @return the number of axes in the list

@@ -1,5 +1,8 @@
 package com.vaadin.addon.charts.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /*
  * #%L
  * Vaadin Charts
@@ -21,9 +24,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vaadin.addon.charts.model.style.Style;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Options for drill down, the concept of inspecting increasingly high
  * resolution data through clicking on chart items like columns or pie slices.
@@ -35,7 +35,7 @@ public class Drilldown extends AbstractConfigurationObject {
     private Boolean allowPointDrilldown;
     private Boolean animation;
     private DrillUpButton drillUpButton;
-    private List<Series> series = new ArrayList<Series>();
+    private List<Series> series = new ArrayList<>();
 
     @JsonIgnore
     private Configuration configuration;

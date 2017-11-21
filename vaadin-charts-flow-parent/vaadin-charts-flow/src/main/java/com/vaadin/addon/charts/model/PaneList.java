@@ -24,7 +24,7 @@ import java.util.List;
  * Pane Container to allow multiple Panes
  */
 public class PaneList extends AbstractConfigurationObject {
-    private final List<Pane> paneList = new ArrayList<Pane>();
+    private final List<Pane> paneList = new ArrayList<>();
 
     /**
      * @return The number of panes in the list

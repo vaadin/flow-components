@@ -40,29 +40,29 @@ public class DefaultBeanSerializerModifier extends BeanSerializerModifier {
             BeanDescription beanDesc, JsonSerializer<?> serializer) {
         if (DataProviderSeries.class
                 .isAssignableFrom(beanDesc.getBeanClass())) {
-            return new BeanSerializerDelegator<DataProviderSeries>(
+            return new BeanSerializerDelegator<>(
                     (BeanSerializerBase) serializer,
                     new DataProviderSeriesBeanSerializer());
         } else if (DataSeriesItem.class
                 .isAssignableFrom(beanDesc.getBeanClass())) {
-            return new BeanSerializerDelegator<DataSeriesItem>(
+            return new BeanSerializerDelegator<>(
                     (BeanSerializerBase) serializer,
                     new DataSeriesItemBeanSerializer());
         } else if (Title.class.isAssignableFrom(beanDesc.getBeanClass())) {
-            return new BeanSerializerDelegator<Title>(
+            return new BeanSerializerDelegator<>(
                     (BeanSerializerBase) serializer, new TitleBeanSerializer());
         } else if (AxisTitle.class.isAssignableFrom(beanDesc.getBeanClass())) {
-            return new BeanSerializerDelegator<AxisTitle>(
+            return new BeanSerializerDelegator<>(
                     (BeanSerializerBase) serializer,
                     new AxisTitleBeanSerializer());
         } else if (LegendTitle.class
                 .isAssignableFrom(beanDesc.getBeanClass())) {
-            return new BeanSerializerDelegator<LegendTitle>(
+            return new BeanSerializerDelegator<>(
                     (BeanSerializerBase) serializer,
                     new LegendTitleBeanSerializer());
         } else if (AbstractSeries.class
                 .isAssignableFrom(beanDesc.getBeanClass())) {
-            return new BeanSerializerDelegator<AbstractSeries>(
+            return new BeanSerializerDelegator<>(
                     (BeanSerializerBase) serializer,
                     new AbstractSeriesBeanSerializer());
         } else {

@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class TreeSeries extends AbstractSeries {
 
-    private List<TreeSeriesItem> data = new LinkedList<TreeSeriesItem>();
+    private List<TreeSeriesItem> data = new LinkedList<>();
 
     public TreeSeries() {
     }
@@ -75,7 +75,7 @@ public class TreeSeries extends AbstractSeries {
      * @param data
      */
     public void setData(Collection<TreeSeriesItem> data) {
-        this.data = new LinkedList<TreeSeriesItem>(data);
+        this.data = new LinkedList<>(data);
     }
 
     /**

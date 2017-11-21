@@ -42,10 +42,10 @@ public class Configuration extends AbstractConfigurationObject
     private Tooltip tooltip;
     private Legend legend;
     private Credits credits;
-    private Map<String, AbstractPlotOptions> plotOptions = new HashMap<String, AbstractPlotOptions>();
+    private Map<String, AbstractPlotOptions> plotOptions = new HashMap<>();
     private HTMLLabels labels;
 
-    private List<Series> series = new ArrayList<Series>();
+    private List<Series> series = new ArrayList<>();
     private Drilldown drilldown;
 
     private PaneList pane;
@@ -236,7 +236,7 @@ public class Configuration extends AbstractConfigurationObject
     public XAxis getxAxis() {
 
         if (xAxis == null) {
-            xAxis = new AxisList<XAxis>();
+            xAxis = new AxisList<>();
         }
 
         if (xAxis.getNumberOfAxes() == 0) {
@@ -286,7 +286,7 @@ public class Configuration extends AbstractConfigurationObject
      */
     public void addxAxis(XAxis axis) {
         if (xAxis == null) {
-            xAxis = new AxisList<XAxis>();
+            xAxis = new AxisList<>();
         }
         if (axis.getConfiguration() == null) {
             axis.setConfiguration(this);
@@ -305,7 +305,7 @@ public class Configuration extends AbstractConfigurationObject
      */
     public YAxis getyAxis() {
         if (yAxis == null) {
-            yAxis = new AxisList<YAxis>();
+            yAxis = new AxisList<>();
         }
 
         if (yAxis.getNumberOfAxes() == 0) {
@@ -356,7 +356,7 @@ public class Configuration extends AbstractConfigurationObject
      */
     public void addyAxis(YAxis axis) {
         if (yAxis == null) {
-            yAxis = new AxisList<YAxis>();
+            yAxis = new AxisList<>();
         }
         if (axis.getConfiguration() == null) {
             axis.setConfiguration(this);
@@ -384,7 +384,7 @@ public class Configuration extends AbstractConfigurationObject
      */
     public ZAxis getzAxis() {
         if (zAxis == null) {
-            zAxis = new AxisList<ZAxis>();
+            zAxis = new AxisList<>();
         }
 
         if (zAxis.getNumberOfAxes() == 0) {
@@ -435,7 +435,7 @@ public class Configuration extends AbstractConfigurationObject
      */
     public void addzAxis(ZAxis axis) {
         if (zAxis == null) {
-            zAxis = new AxisList<ZAxis>();
+            zAxis = new AxisList<>();
         }
         if (axis.getConfiguration() == null) {
             axis.setConfiguration(this);
@@ -798,13 +798,13 @@ public class Configuration extends AbstractConfigurationObject
      * throws {@link IllegalStateException} if series are not ListSeries type
      */
     public void reverseListSeries() {
-        List<Series> newSeries = new ArrayList<Series>();
+        List<Series> newSeries = new ArrayList<>();
         String[] newCategories = new String[series.size()];
 
         for (int j = 0; j < getxAxis().getCategories().length; j++) {
 
             String name = getxAxis().getCategories()[j];
-            List<Number> numbers = new ArrayList<Number>();
+            List<Number> numbers = new ArrayList<>();
             for (int i = 0; i < series.size(); i++) {
                 if (series.get(i) instanceof ListSeries) {
                     numbers.add(((ListSeries) series.get(i)).getData()[j]);
@@ -1071,7 +1071,7 @@ public class Configuration extends AbstractConfigurationObject
     public ColorAxis getColorAxis() {
 
         if (colorAxis == null) {
-            colorAxis = new AxisList<ColorAxis>();
+            colorAxis = new AxisList<>();
         }
 
         if (colorAxis.getNumberOfAxes() == 0) {
@@ -1122,7 +1122,7 @@ public class Configuration extends AbstractConfigurationObject
      */
     public void addColorAxis(ColorAxis axis) {
         if (colorAxis == null) {
-            colorAxis = new AxisList<ColorAxis>();
+            colorAxis = new AxisList<>();
         }
         if (axis.getConfiguration() == null) {
             axis.setConfiguration(this);
