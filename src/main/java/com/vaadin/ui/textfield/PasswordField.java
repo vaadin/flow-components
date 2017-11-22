@@ -16,12 +16,9 @@
 
 package com.vaadin.ui.textfield;
 
-import java.util.Objects;
-
 import com.vaadin.ui.common.HasSize;
 import com.vaadin.ui.common.HasValidation;
 import com.vaadin.ui.common.HasValue;
-import com.vaadin.ui.event.Synchronize;
 
 /**
  * Server-side component for the {@code vaadin-password-field} element.
@@ -35,7 +32,6 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
      * Constructs an empty {@code PasswordField}.
      */
     public PasswordField() {
-        getElement().synchronizeProperty("hasValue", "value-changed");
     }
 
     /**
@@ -45,7 +41,6 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
      *            the text to set as the label
      */
     public PasswordField(String label) {
-        this();
         setLabel(label);
     }
 
@@ -72,7 +67,6 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
      * @see #addValueChangeListener(com.vaadin.ui.common.HasValue.ValueChangeListener)
      */
     public PasswordField(ValueChangeListener<PasswordField, String> listener) {
-        this();
         addValueChangeListener(listener);
     }
 
@@ -119,19 +113,5 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     @Override
     public String getEmptyValue() {
         return "";
-    }
-
-    @Override
-    public void setValue(String value) {
-        if (!Objects.equals(value, getValue())) {
-            super.setValue(value);
-        }
-    }
-
-    @Override
-    @Synchronize("value-changed")
-    public String getValue() {
-        String value = super.getValue();
-        return value == null ? getEmptyValue() : value;
     }
 }

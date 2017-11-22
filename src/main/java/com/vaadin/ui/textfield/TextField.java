@@ -15,12 +15,8 @@
  */
 package com.vaadin.ui.textfield;
 
-import java.util.Objects;
-
 import com.vaadin.ui.common.HasSize;
 import com.vaadin.ui.common.HasValidation;
-import com.vaadin.ui.common.HasValue;
-import com.vaadin.ui.event.Synchronize;
 
 /**
  * Server-side component for the {@code vaadin-text-field} element.
@@ -28,13 +24,12 @@ import com.vaadin.ui.event.Synchronize;
  * @author Vaadin Ltd
  */
 public class TextField extends GeneratedVaadinTextField<TextField>
-        implements HasSize, HasValidation, HasValue<TextField, String> {
+        implements HasSize, HasValidation {
 
     /**
      * Constructs an empty {@code TextField}.
      */
     public TextField() {
-        getElement().synchronizeProperty("hasValue", "value-changed");
     }
 
     /**
@@ -44,7 +39,6 @@ public class TextField extends GeneratedVaadinTextField<TextField>
      *            the text to set as the label
      */
     public TextField(String label) {
-        this();
         setLabel(label);
     }
 
@@ -91,7 +85,6 @@ public class TextField extends GeneratedVaadinTextField<TextField>
      * @see #addValueChangeListener(com.vaadin.ui.common.HasValue.ValueChangeListener)
      */
     public TextField(ValueChangeListener<TextField, String> listener) {
-        this();
         addValueChangeListener(listener);
     }
 
@@ -137,24 +130,5 @@ public class TextField extends GeneratedVaadinTextField<TextField>
     @Override
     public String getEmptyValue() {
         return "";
-    }
-
-    @Override
-    public boolean hasValue() {
-        return !isEmpty();
-    }
-
-    @Override
-    public void setValue(String value) {
-        if (!Objects.equals(value, getValue())) {
-            super.setValue(value);
-        }
-    }
-
-    @Override
-    @Synchronize("value-changed")
-    public String getValue() {
-        String value = super.getValue();
-        return value == null ? getEmptyValue() : value;
     }
 }
