@@ -15,8 +15,6 @@
  */
 package com.vaadin.ui.radiobutton;
 
-import java.util.Optional;
-
 /**
  * Server-side component for the {@code vaadin-radio-button} element.
  *
@@ -29,14 +27,10 @@ class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>> {
     RadioButton(String key, T item) {
         this.item = item;
         getElement().setProperty("value", key);
-        getElement().setText(getCaption(item));
     }
 
     T getItem() {
         return item;
     }
 
-    private String getCaption(T item) {
-        return Optional.ofNullable(item).map(Object::toString).orElse(null);
-    }
 }

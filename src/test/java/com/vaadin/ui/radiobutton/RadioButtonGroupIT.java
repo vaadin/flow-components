@@ -42,13 +42,15 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
         buttons.get(1).click();
 
-        waitUntil(driver -> "Text area value changed from 'null' to 'bar'"
-                .equals(valueDiv.getText()));
+        waitUntil(
+                driver -> "Radio button group value changed from 'null' to 'bar'"
+                        .equals(valueDiv.getText()));
 
         buttons.get(0).click();
 
-        waitUntil(driver -> "Text area value changed from 'bar' to 'foo'"
-                .equals(valueDiv.getText()));
+        waitUntil(
+                driver -> "Radio button group value changed from 'bar' to 'foo'"
+                        .equals(valueDiv.getText()));
     }
 
     @Test
@@ -57,6 +59,28 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
         Assert.assertEquals(Boolean.TRUE.toString(),
                 group.getAttribute("disabled"));
+    }
+
+    @Test
+    public void itemRenderer() {
+        WebElement valueDiv = layout
+                .findElement(By.id("button-group-renderer-value"));
+        WebElement group = layout.findElement(By.id("button-group-renderer"));
+
+        List<WebElement> buttons = group
+                .findElements(By.tagName("vaadin-radio-button"));
+
+        buttons.get(1).click();
+        WebElement anchor = buttons.get(0).findElement(By.tagName("a"));
+
+        Assert.assertEquals("http://example.com/1",
+                anchor.getAttribute("href"));
+
+        Assert.assertEquals("Joe", anchor.getText());
+
+        waitUntil(
+                driver -> "Radio button group value changed from 'null' to 'John'"
+                        .equals(valueDiv.getText()));
     }
 
     @Test

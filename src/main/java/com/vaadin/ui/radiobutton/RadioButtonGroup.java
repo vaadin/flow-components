@@ -27,6 +27,8 @@ import com.vaadin.function.SerializablePredicate;
 import com.vaadin.shared.Registration;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.event.PropertyChangeEvent;
+import com.vaadin.ui.html.Label;
+import com.vaadin.ui.renderers.ComponentRenderer;
 
 /**
  * Server-side component for the {@code vaadin-radio-group} element.
@@ -44,6 +46,9 @@ public class RadioButtonGroup<T>
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
 
     private SerializablePredicate<T> itemEnabledProvider = item -> true;
+
+    private ComponentRenderer<? extends Component, T> itemRenderer = item -> new Label(
+            String.valueOf(item));
 
     public RadioButtonGroup() {
         getElement().synchronizeProperty(VALUE, "value-changed");
@@ -112,6 +117,30 @@ public class RadioButtonGroup<T>
         refreshButtons();
     }
 
+    /**
+     * Returns the item component renderer.
+     *
+     * @return the item renderer
+     * @see #setItemRenderer
+     */
+    public ComponentRenderer<? extends Component, T> getItemRenderer() {
+        return itemRenderer;
+    }
+
+    /**
+     * Sets the item renderer for this radio button group. The renderer is
+     * applied to each item to create a component which represents the item.
+     *
+     * @param itemRenderer
+     *            the item renderer, not {@code null}
+     */
+    public void setItemRenderer(
+            ComponentRenderer<? extends Component, T> itemRenderer) {
+        Objects.requireNonNull(itemRenderer);
+        this.itemRenderer = itemRenderer;
+        refreshButtons();
+    }
+
     private void refresh() {
         keyMapper.removeAll();
         removeAll();
@@ -121,6 +150,7 @@ public class RadioButtonGroup<T>
 
     private Component createRadioButton(T item) {
         RadioButton<T> button = new RadioButton<>(keyMapper.key(item), item);
+        updateButton(button);
         return button;
     }
 
@@ -133,6 +163,8 @@ public class RadioButtonGroup<T>
 
     private void updateButton(RadioButton<T> button) {
         button.setDisabled(!getItemEnabledProvider().test(button.getItem()));
+        button.removeAll();
+        button.add(getItemRenderer().createComponent(button.getItem()));
     }
 
     private ValueChangeEvent<RadioButtonGroup<T>, T> createValueChangeEvent(
