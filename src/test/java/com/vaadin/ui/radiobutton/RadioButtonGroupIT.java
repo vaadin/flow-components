@@ -59,4 +59,16 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
                 group.getAttribute("disabled"));
     }
 
+    @Test
+    public void disabledGroupItems() {
+        WebElement group = layout
+                .findElement(By.id("button-group-disabled-items"));
+
+        List<WebElement> buttons = group
+                .findElements(By.tagName("vaadin-radio-button"));
+
+        Assert.assertEquals(Boolean.TRUE.toString(),
+                buttons.get(1).getAttribute("disabled"));
+    }
+
 }

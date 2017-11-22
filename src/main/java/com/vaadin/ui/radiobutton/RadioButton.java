@@ -24,9 +24,16 @@ import java.util.Optional;
  */
 class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>> {
 
+    private T item;
+
     RadioButton(String key, T item) {
+        this.item = item;
         getElement().setProperty("value", key);
         getElement().setText(getCaption(item));
+    }
+
+    T getItem() {
+        return item;
     }
 
     private String getCaption(T item) {

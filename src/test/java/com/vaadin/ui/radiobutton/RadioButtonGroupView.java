@@ -28,6 +28,7 @@ public class RadioButtonGroupView extends DemoView {
     protected void initView() {
         addBasicFeatures();
         addDisabled();
+        addDisabledItems();
     }
 
     private void addBasicFeatures() {
@@ -60,6 +61,20 @@ public class RadioButtonGroupView extends DemoView {
         group.setId("button-group-disabled");
 
         addCard("Basic text area", group);
+    }
+
+    private void addDisabledItems() {
+
+        // begin-source-example
+        // source-example-heading: Radio button group with item enabled provider
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("foo", "bar", "baz");
+        group.setItemEnabledProvider(item -> !"bar".equals(item));
+        // end-source-example
+
+        group.setId("button-group-disabled-items");
+
+        addCard("Radio button group with item enabled provider", group);
     }
 
 }

@@ -16,12 +16,14 @@
 package com.vaadin.ui.radiobutton;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import com.vaadin.data.HasDataProvider;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.KeyMapper;
 import com.vaadin.data.provider.Query;
 import com.vaadin.data.selection.SingleSelect;
+import com.vaadin.function.SerializablePredicate;
 import com.vaadin.shared.Registration;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.event.PropertyChangeEvent;
@@ -40,6 +42,8 @@ public class RadioButtonGroup<T>
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+
+    private SerializablePredicate<T> itemEnabledProvider = item -> true;
 
     public RadioButtonGroup() {
         getElement().synchronizeProperty(VALUE, "value-changed");
@@ -81,6 +85,33 @@ public class RadioButtonGroup<T>
         return dataProvider;
     }
 
+    /**
+     * Returns the item enabled predicate.
+     *
+     * @return the item enabled predicate
+     * @see #setItemEnabledProvider
+     */
+    public SerializablePredicate<T> getItemEnabledProvider() {
+        return itemEnabledProvider;
+    }
+
+    /**
+     * Sets the item enabled predicate for this radio button group. The
+     * predicate is applied to each item to determine whether the item should be
+     * enabled ({@code true}) or disabled ({@code false}). Disabled items are
+     * displayed as grayed out and the user cannot select them. The default
+     * predicate always returns true (all the items are enabled).
+     *
+     * @param itemEnabledProvider
+     *            the item enable predicate, not {@code null}
+     */
+    public void setItemEnabledProvider(
+            SerializablePredicate<T> itemEnabledProvider) {
+        Objects.requireNonNull(itemEnabledProvider);
+        this.itemEnabledProvider = itemEnabledProvider;
+        refreshButtons();
+    }
+
     private void refresh() {
         keyMapper.removeAll();
         removeAll();
@@ -89,7 +120,19 @@ public class RadioButtonGroup<T>
     }
 
     private Component createRadioButton(T item) {
-        return new RadioButton<>(keyMapper.key(item), item);
+        RadioButton<T> button = new RadioButton<>(keyMapper.key(item), item);
+        return button;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void refreshButtons() {
+        getChildren().filter(RadioButton.class::isInstance)
+                .map(child -> (RadioButton<T>) child)
+                .forEach(this::updateButton);
+    }
+
+    private void updateButton(RadioButton<T> button) {
+        button.setDisabled(!getItemEnabledProvider().test(button.getItem()));
     }
 
     private ValueChangeEvent<RadioButtonGroup<T>, T> createValueChangeEvent(
