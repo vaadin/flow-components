@@ -89,6 +89,15 @@ public class Chart extends Component {
     }
 
     /**
+     * Determines if the chart is a timeline chart or a normal chart.
+     *
+     * @param timeline true for timeline chart
+     */
+    public void setTimeline(Boolean timeline) {
+        getElement().setProperty("timeline", timeline);
+    }
+
+    /**
      * @return the chart configuration that is used for this chart
      */
     public Configuration getConfiguration() {

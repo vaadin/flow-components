@@ -34,6 +34,9 @@
                 <targetPath>vaadin-charts-flow-demo</targetPath>
                 <filtering>false</filtering>
             </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
         </resources>
     </build>
 </project>
