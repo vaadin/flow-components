@@ -1,5 +1,20 @@
 package com.vaadin.addon.charts;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.reflections.Reflections;
+
 import com.vaadin.flow.model.TemplateModel;
 import com.vaadin.router.HasUrlParameter;
 import com.vaadin.router.PageTitle;
@@ -12,20 +27,6 @@ import com.vaadin.ui.common.StyleSheet;
 import com.vaadin.ui.event.AttachEvent;
 import com.vaadin.ui.polymertemplate.Id;
 import com.vaadin.ui.polymertemplate.PolymerTemplate;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.reflections.Reflections;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 @Route("")
 @PageTitle("Vaadin Charts for Flow Demo")
@@ -60,7 +61,7 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
     private Pair<String, String> currentExample;
 
     static {
-        final String GROUP_ORDER = "basic,column,bar,pie,area,lineandscatter,dynamic,combinations,"
+        final String GROUP_ORDER = "column,bar,pie,area,lineandscatter,dynamic,combinations,"
                 + "other,timeline,declarative,container";
 
         NAME_INDEXED_SUBTYPES = new Reflections("com.vaadin.addon.charts.examples")
@@ -124,7 +125,7 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
         Optional<Pair<String, String>> categoryPagePair = split(route);
         if (!categoryPagePair.isPresent()
                 || !NAME_INDEXED_SUBTYPES.containsKey(categoryPagePair.get().getValue())) {
-            return new ImmutablePair<>("basic", "emptychart");
+            return new ImmutablePair<>("column", "columnchart");
         }
 
         return categoryPagePair.get();
