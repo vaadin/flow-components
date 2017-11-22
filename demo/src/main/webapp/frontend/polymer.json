@@ -1,21 +1,21 @@
 {
-  "entrypoint": "index.html",
-  "shell": "src/charts-demo-app.html",
+  "entrypoint": "src/charts-demo-app.html",
   "sources": [
-   "bower.json"
+   "bower.json",
+   "images/*",
+   "style.css"
   ],
   "extraDependencies": [
     "bower_components/webcomponentsjs/webcomponents-lite.js"
   ],
   "builds": [{
-    "name": "es5",
-    "compile": true,
-    "js": {"minify": true},
-    "css": {"minify": true},
-    "html": {"minify": true}
+    "name": "frontend-es5",
+    "js": {"compile": true, "minify": false},
+    "css": {"minify": false},
+    "html": {"minify": false}
   },
     {
-    "name": "es6",
+    "name": "frontend-es6",
     "js": {"minify": true},
     "css": {"minify": true},
     "html": {"minify": true}
@@ -24,5 +24,5 @@
     "rules": [
       "polymer-2"
     ]
-  },
+  }
 }

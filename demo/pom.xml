@@ -94,9 +94,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>${maven.clean.plugin.version}</version>
                 <configuration>
                     <filesets>
+                        <fileset>
+                            <directory>src/main/webapp/frontend-es5</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>src/main/webapp/frontend-es6</directory>
+                        </fileset>
                         <fileset>
                             <directory>${frontend.working.directory}/bower_components</directory>
                         </fileset>
@@ -114,7 +119,7 @@
                 <configuration>
                     <nodeVersion>${node.version}</nodeVersion>
                     <yarnVersion>${yarn.version}</yarnVersion>
-                    <workingDirectory>${frontend.working.directory}</workingDirectory>
+                    <workingDirectory>${buildtools.directory}</workingDirectory>
                 </configuration>
                 <executions>
                     <execution>
@@ -134,13 +139,30 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>${maven.war.plugin.version}</version>
-
             </plugin>
-
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
+    <profiles>
+      <profile>
+          <id>release</id>
+          <activation>
+              <property>
+                  <name>vaadin.productionMode</name>
+              </property>
+          </activation>
+          <properties>
+              <yarn.build.goal>run build</yarn.build.goal>
+          </properties>
+          <dependencies>
+              <dependency>
+                  <groupId>com.vaadin</groupId>
+                  <artifactId>flow-server-production-mode</artifactId>
+              </dependency>
+          </dependencies>
+      </profile>
+    </profiles>
 </project>
