@@ -20,6 +20,7 @@ import com.vaadin.router.Route;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Anchor;
 import com.vaadin.ui.html.Div;
+import com.vaadin.ui.renderers.TextRenderer;
 
 @Route("vaadin-radio-button")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-radio-button.html")
@@ -53,6 +54,7 @@ public class RadioButtonGroupView extends DemoView {
     protected void initView() {
         addBasicFeatures();
         addItemRenderer();
+        addItemLabelGenerator();
         addDisabled();
         addDisabledItems();
     }
@@ -94,6 +96,26 @@ public class RadioButtonGroupView extends DemoView {
         message.setId("button-group-renderer-value");
 
         addCard("Radio button group with renderer", group, message);
+    }
+
+    private void addItemLabelGenerator() {
+        Div message = new Div();
+
+        // begin-source-example
+        // source-example-heading: Radio button group with label generator
+        RadioButtonGroup<Person> group = new RadioButtonGroup<>();
+        group.setItems(new Person("Joe"), new Person("John"),
+                new Person("Bill"));
+        group.setItemRenderer(new TextRenderer<>(Person::getName));
+        group.addValueChangeListener(event -> message.setText(String.format(
+                "Radio button group value changed from '%s' to '%s'",
+                getName(event.getOldValue()), getName(event.getValue()))));
+        // end-source-example
+
+        group.setId("button-group-with-item-generator");
+        message.setId("button-group-gen-value");
+
+        addCard("Radio button group with label generator", group, message);
     }
 
     private void addDisabled() {

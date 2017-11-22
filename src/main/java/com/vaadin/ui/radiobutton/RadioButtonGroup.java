@@ -27,8 +27,8 @@ import com.vaadin.function.SerializablePredicate;
 import com.vaadin.shared.Registration;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.event.PropertyChangeEvent;
-import com.vaadin.ui.html.Label;
 import com.vaadin.ui.renderers.ComponentRenderer;
+import com.vaadin.ui.renderers.TextRenderer;
 
 /**
  * Server-side component for the {@code vaadin-radio-group} element.
@@ -47,8 +47,7 @@ public class RadioButtonGroup<T>
 
     private SerializablePredicate<T> itemEnabledProvider = item -> true;
 
-    private ComponentRenderer<? extends Component, T> itemRenderer = item -> new Label(
-            String.valueOf(item));
+    private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>();
 
     public RadioButtonGroup() {
         getElement().synchronizeProperty(VALUE, "value-changed");
@@ -112,8 +111,7 @@ public class RadioButtonGroup<T>
      */
     public void setItemEnabledProvider(
             SerializablePredicate<T> itemEnabledProvider) {
-        Objects.requireNonNull(itemEnabledProvider);
-        this.itemEnabledProvider = itemEnabledProvider;
+        this.itemEnabledProvider = Objects.requireNonNull(itemEnabledProvider);
         refreshButtons();
     }
 
@@ -136,8 +134,7 @@ public class RadioButtonGroup<T>
      */
     public void setItemRenderer(
             ComponentRenderer<? extends Component, T> itemRenderer) {
-        Objects.requireNonNull(itemRenderer);
-        this.itemRenderer = itemRenderer;
+        this.itemRenderer = Objects.requireNonNull(itemRenderer);
         refreshButtons();
     }
 
