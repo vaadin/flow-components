@@ -42,6 +42,33 @@
         <frontend.working.directory>src/main/frontend</frontend.working.directory>
     </properties>
 
+    <url>http://vaadin.com/charts</url>
+
+    <scm>
+        <connection>scm:git:https://github.com/vaadin/vaadin-charts-flow.git</connection>
+        <developerConnection>scm:git:https://github.com/vaadin/vaadin-charts-flow.git</developerConnection>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>cval3</name>
+            <url>https://vaadin.com/license/cval-3</url>
+        </license>
+    </licenses>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>vaadin-snapshots</id>
+            <name>Vaadin snapshot repository</name>
+            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>vaadin-addons</id>
+            <name>Vaadin add-ons repository</name>
+            <url>http://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
+        </repository>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>flow-internal-release</id>
