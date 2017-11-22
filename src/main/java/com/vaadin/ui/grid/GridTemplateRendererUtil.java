@@ -29,8 +29,8 @@ import com.vaadin.function.SerializableConsumer;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.grid.Grid.GridDataGenerator;
-import com.vaadin.ui.renderers.ComponentRenderer;
 import com.vaadin.ui.renderers.ComponentRendererUtil;
+import com.vaadin.ui.renderers.ComponentTemplateRenderer;
 import com.vaadin.ui.renderers.TemplateRenderer;
 import com.vaadin.util.JsonSerializer;
 
@@ -45,15 +45,15 @@ import com.vaadin.util.JsonSerializer;
 class GridTemplateRendererUtil {
 
     /**
-     * Internal object to hold {@link ComponentRenderer}s and their generated
-     * {@link Component}s together.
+     * Internal object to hold {@link ComponentTemplateRenderer}s and their
+     * generated {@link Component}s together.
      * 
      * @param <T>
      *            the model item attached to the component
      */
     static final class RendereredComponent<T> implements Serializable {
         private Component component;
-        private ComponentRenderer<? extends Component, T> componentRenderer;
+        private ComponentTemplateRenderer<? extends Component, T> componentRenderer;
 
         /**
          * Default constructor.
@@ -64,7 +64,7 @@ class GridTemplateRendererUtil {
          *            the renderer that generated the component
          */
         public RendereredComponent(Component component,
-                ComponentRenderer<? extends Component, T> componentRenderer) {
+                ComponentTemplateRenderer<? extends Component, T> componentRenderer) {
             this.component = component;
             this.componentRenderer = componentRenderer;
         }
@@ -80,8 +80,8 @@ class GridTemplateRendererUtil {
 
         /**
          * Recreates the component by calling
-         * {@link ComponentRenderer#createComponent(Object)}, and sets the
-         * internal component returned by {@link #getComponent()}.
+         * {@link ComponentTemplateRenderer#createComponent(Object)}, and sets
+         * the internal component returned by {@link #getComponent()}.
          * 
          * @param item
          *            the model item to be attached to the component instance
@@ -171,15 +171,15 @@ class GridTemplateRendererUtil {
                                 handlerName, itemKey));
             }
         } else {
-            Logger.getLogger(GridTemplateRendererUtil.class.getName()).log(Level.INFO,
-                    () -> String.format(
+            Logger.getLogger(GridTemplateRendererUtil.class.getName())
+                    .log(Level.INFO, () -> String.format(
                             "Received an event for the handler '%s' without any data. Ignoring event.",
                             handlerName));
         }
     }
 
     static <T> void setupHeaderOrFooterComponentRenderer(Component owner,
-            ComponentRenderer<? extends Component, T> componentRenderer) {
+            ComponentTemplateRenderer<? extends Component, T> componentRenderer) {
         Element container = ComponentRendererUtil
                 .createContainerForRenderers(owner);
 
@@ -190,12 +190,12 @@ class GridTemplateRendererUtil {
                 container.getAttribute("id"));
 
         Component renderedComponent = componentRenderer.createComponent(null);
-        GridTemplateRendererUtil.registerRenderedComponent(componentRenderer, null,
-                container, "0", renderedComponent);
+        GridTemplateRendererUtil.registerRenderedComponent(componentRenderer,
+                null, container, "0", renderedComponent);
     }
 
     static <T> void registerRenderedComponent(
-            ComponentRenderer<? extends Component, T> componentRenderer,
+            ComponentTemplateRenderer<? extends Component, T> componentRenderer,
             Map<String, RendereredComponent<T>> renderedComponents,
             Element container, String key, Component component) {
         component.getElement().setAttribute("data-flow-renderer-item-key", key);

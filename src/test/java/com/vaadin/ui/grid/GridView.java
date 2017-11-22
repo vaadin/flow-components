@@ -36,18 +36,13 @@ import com.vaadin.ui.html.Div;
 import com.vaadin.ui.html.Label;
 import com.vaadin.ui.layout.HorizontalLayout;
 import com.vaadin.ui.layout.VerticalLayout;
-import com.vaadin.ui.renderers.ComponentRenderer;
+import com.vaadin.ui.renderers.ComponentTemplateRenderer;
 import com.vaadin.ui.renderers.TemplateRenderer;
 import com.vaadin.ui.textfield.TextField;
 
 /**
  * View for {@link Grid} demo.
  */
-// @Route(value = "vaadin-grid", layout = MainLayout.class)
-// @ComponentDemo(name = "Grid")
-// @HtmlImport("bower_components/vaadin-valo-theme/vaadin-grid.html")
-// @HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
-// @HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
 @Route("vaadin-grid")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-grid.html")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
@@ -237,7 +232,7 @@ public class GridView extends DemoView {
         createColumnTemplate();
         createDetailsRow();
         createColumnGroup();
-        createColumnComponentRenderer();
+        createColumnComponentTemplateRenderer();
         createSorting();
         createHeaderAndFooterUsingTemplates();
         createHeaderAndFooterUsingComponents();
@@ -423,19 +418,19 @@ public class GridView extends DemoView {
                 grid);
     }
 
-    private void createColumnComponentRenderer() {
+    private void createColumnComponentTemplateRenderer() {
         // begin-source-example
         // source-example-heading: Grid with columns using component renderer
         Grid<Person> grid = new Grid<>();
         grid.setItems(createItems());
 
         // You can use a constructor and a separate setter for the renderer
-        grid.addColumn(new ComponentRenderer<>(PersonComponent::new,
+        grid.addColumn(new ComponentTemplateRenderer<>(PersonComponent::new,
                 PersonComponent::setPerson)).setHeader("Person");
 
         // Or you can use an ordinary function to get the component
-        grid.addColumn(
-                new ComponentRenderer<>(item -> new Button("Remove", evt -> {
+        grid.addColumn(new ComponentTemplateRenderer<>(
+                item -> new Button("Remove", evt -> {
                     ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) grid
                             .getDataProvider();
                     dataProvider.getItems().remove(item);
@@ -443,7 +438,8 @@ public class GridView extends DemoView {
                 }))).setHeader("Actions");
 
         // Item details can also use components
-        grid.setItemDetailsRenderer(new ComponentRenderer<>(PersonCard::new));
+        grid.setItemDetailsRenderer(
+                new ComponentTemplateRenderer<>(PersonCard::new));
 
         // When items are updated, new components are generated
         TextField idField = new TextField("", "Person id");
@@ -673,7 +669,7 @@ public class GridView extends DemoView {
         grid.setItems(getItems());
 
         Column<Person> nameColumn = grid.addColumn(Person::getName)
-                .setHeader(new ComponentRenderer<>(() -> {
+                .setHeader(new ComponentTemplateRenderer<>(() -> {
                     Label label = new Label("Name");
                     label.getStyle().set("color", "green");
                     label.setTitle("Name");
@@ -681,7 +677,7 @@ public class GridView extends DemoView {
                 })).setComparator((p1, p2) -> p1.getName()
                         .compareToIgnoreCase(p2.getName()));
         Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
-                .setHeader(new ComponentRenderer<>(() -> {
+                .setHeader(new ComponentTemplateRenderer<>(() -> {
                     Label label = new Label("Age");
                     label.getStyle().set("color", "blue");
                     label.setTitle("Age");
@@ -696,12 +692,12 @@ public class GridView extends DemoView {
 
         ColumnGroup informationColumnGroup = grid
                 .mergeColumns(nameColumn, ageColumn)
-                .setHeader(new ComponentRenderer<>(() -> {
+                .setHeader(new ComponentTemplateRenderer<>(() -> {
                     Label label = new Label("Basic Information");
                     label.getStyle().set("color", "orange");
                     label.setTitle("Basic Information");
                     return label;
-                })).setFooter(new ComponentRenderer<>(() -> {
+                })).setFooter(new ComponentTemplateRenderer<>(() -> {
                     Label label = new Label(
                             "Total: " + getItems().size() + " people");
                     label.getStyle().set("color", "red");
@@ -709,7 +705,7 @@ public class GridView extends DemoView {
                 }));
         ColumnGroup addressColumnGroup = grid
                 .mergeColumns(streetColumn, postalCodeColumn)
-                .setHeader(new ComponentRenderer<>(() -> {
+                .setHeader(new ComponentTemplateRenderer<>(() -> {
                     Label label = new Label("Address Information");
                     label.setTitle("Address Information");
                     return label;
