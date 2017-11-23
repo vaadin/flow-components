@@ -11,6 +11,7 @@ import com.vaadin.addon.charts.model.PlotOptionsColumn;
 import com.vaadin.addon.charts.model.PlotOptionsPie;
 import com.vaadin.addon.charts.model.PlotOptionsSpline;
 import com.vaadin.addon.charts.model.XAxis;
+import com.vaadin.addon.charts.model.style.Style;
 
 public class ColumnLineAndPie extends AbstractChartExample {
 
@@ -29,7 +30,11 @@ public class ColumnLineAndPie extends AbstractChartExample {
                 "Plums" });
         conf.addxAxis(x);
 
-        conf.setLabels(new HTMLLabels(new HTMLLabelItem("Total fruit consumption")));
+        Style labelStyle = new Style();
+        labelStyle.setTop("8px");
+        labelStyle.setLeft("40px");
+        conf.setLabels(new HTMLLabels(labelStyle, new HTMLLabelItem(
+                "Total fruit consumption")));
 
         DataSeries series = new DataSeries();
         PlotOptionsColumn plotOptions = new PlotOptionsColumn();
