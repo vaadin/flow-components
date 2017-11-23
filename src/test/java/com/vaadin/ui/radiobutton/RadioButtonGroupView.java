@@ -20,10 +20,13 @@ import com.vaadin.router.Route;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Anchor;
 import com.vaadin.ui.html.Div;
+import com.vaadin.ui.html.Image;
+import com.vaadin.ui.renderers.IconRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
 
 @Route("vaadin-radio-button")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-radio-button.html")
+
 public class RadioButtonGroupView extends DemoView {
 
     public static class Person {
@@ -55,6 +58,7 @@ public class RadioButtonGroupView extends DemoView {
         addBasicFeatures();
         addItemRenderer();
         addItemLabelGenerator();
+        addItemIconGenerator();
         addDisabled();
         addDisabledItems();
     }
@@ -116,6 +120,28 @@ public class RadioButtonGroupView extends DemoView {
         message.setId("button-group-gen-value");
 
         addCard("Radio button group with label generator", group, message);
+    }
+
+    private void addItemIconGenerator() {
+        // begin-source-example
+        // source-example-heading: Radio button group with icon generator
+        RadioButtonGroup<Person> group = new RadioButtonGroup<>();
+        group.setItems(new Person(1, "Joe"), new Person(2, "John"),
+                new Person(3, "Bill"));
+        group.setItemRenderer(new IconRenderer<Person>(item -> {
+            Image image = new Image("https://vaadin.com/images/vaadin-logo.svg",
+                    "");
+            image.getStyle().set("height", "15px");
+            image.getStyle().set("float", "left");
+            image.getStyle().set("marginRight", "5px");
+            image.getStyle().set("marginTop", "2px");
+            return image;
+        }, Person::getName));
+        // end-source-example
+
+        group.setId("button-group-icon-generator");
+
+        addCard("Radio button group with icon generator", group);
     }
 
     private void addDisabled() {

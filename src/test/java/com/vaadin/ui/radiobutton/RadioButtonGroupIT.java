@@ -110,6 +110,22 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
     }
 
     @Test
+    public void iconGenerator() {
+        WebElement group = layout
+                .findElement(By.id("button-group-icon-generator"));
+
+        List<WebElement> buttons = group
+                .findElements(By.tagName("vaadin-radio-button"));
+
+        WebElement anchor = buttons.get(2).findElement(By.tagName("img"));
+
+        Assert.assertEquals("https://vaadin.com/images/vaadin-logo.svg",
+                anchor.getAttribute("src"));
+
+        Assert.assertEquals("Bill", buttons.get(2).getText());
+    }
+
+    @Test
     public void disabledGroupItems() {
         WebElement group = layout
                 .findElement(By.id("button-group-disabled-items"));
