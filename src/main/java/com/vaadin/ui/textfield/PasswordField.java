@@ -18,7 +18,6 @@ package com.vaadin.ui.textfield;
 
 import com.vaadin.ui.common.HasSize;
 import com.vaadin.ui.common.HasValidation;
-import com.vaadin.ui.common.HasValue;
 
 /**
  * Server-side component for the {@code vaadin-password-field} element.
@@ -26,7 +25,7 @@ import com.vaadin.ui.common.HasValue;
  * @author Vaadin Ltd.
  */
 public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
-        implements HasSize, HasValidation, HasValue<PasswordField, String> {
+        implements HasSize, HasValidation {
 
     /**
      * Constructs an empty {@code PasswordField}.
