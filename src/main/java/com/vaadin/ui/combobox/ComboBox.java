@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.vaadin.data.HasDataProvider;
-import com.vaadin.data.HasItems;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.KeyMapper;
 import com.vaadin.data.provider.Query;
@@ -50,8 +49,8 @@ import elemental.json.JsonValue;
  *            the type of the items to be inserted in the combo box
  */
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>>
-        implements HasSize, HasItems<T>, HasValidation,
-        HasValue<ComboBox<T>, T>, HasDataProvider<T> {
+        implements HasSize, HasValidation, HasValue<ComboBox<T>, T>,
+        HasDataProvider<T> {
     private static final String ITEM_LABEL_PROPERTY = "label";
     private static final String KEY_PROPERTY = "key";
     private static final String SELECTED_ITEM_PROPERTY_NAME = "selectedItem";
