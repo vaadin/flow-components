@@ -116,6 +116,26 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
     }
 
     /**
+     * Create a button with a text, an icon and a listener for click events.
+     * 
+     * @param text
+     *            the text inside the button
+     * @param icon
+     *            the icon inside the button
+     * @param clickListener
+     *            the event listener for click events
+     * @see #setText(String)
+     * @see #setIcon(Component)
+     * @see #addClickListener(ComponentEventListener)
+     */
+    public Button(String text, Component icon,
+            ComponentEventListener<ClickEvent<Button>> clickListener) {
+        setIcon(icon);
+        setText(text);
+        addClickListener(clickListener);
+    }
+
+    /**
      * Sets the given string as the text content of this component.
      * <p>
      * This method removes any existing text-content and replaces it with the
