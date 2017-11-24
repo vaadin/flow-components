@@ -18,10 +18,6 @@
     
     <repositories>
         <repository>
-            <id>flow</id>
-            <url>https://repo.vaadin.com/nexus/content/repositories/flow/</url>
-        </repository>
-        <repository>
             <id>flow-component-base</id>
             <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
