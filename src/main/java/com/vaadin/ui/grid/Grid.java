@@ -993,7 +993,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * Sets the page size.
      * <p>
      * This method is private at the moment because the Grid doesn't support
-     * changing the the pageSize after the initial load.
+     * changing the pageSize after the initial load.
      *
      * @param pageSize
      *            the maximum number of items sent per request. Should be
