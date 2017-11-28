@@ -16,6 +16,8 @@
 package com.vaadin.ui.grid;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,7 +25,7 @@ import org.junit.Test;
 
 import com.vaadin.ui.grid.Grid.Column;
 
-public class GridColumnGroupingTest {
+public class GridColumnTest {
 
     Grid<String> grid;
     Column<String> firstColumn;
@@ -39,16 +41,35 @@ public class GridColumnGroupingTest {
     }
 
     @Test
+    public void setKey_getByKey() {
+        firstColumn.setKey("foo");
+        secondColumn.setKey("bar");
+        Assert.assertEquals(firstColumn, grid.getColumnByKey("foo"));
+        Assert.assertEquals(secondColumn, grid.getColumnByKey("bar"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void changeKey_throws() {
+        firstColumn.setKey("foo");
+        firstColumn.setKey("bar");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void duplicateKey_throws() {
+        firstColumn.setKey("foo");
+        secondColumn.setKey("foo");
+    }
+
+    @Test
     public void merged_column_order() {
         Assert.assertEquals(
                 Arrays.asList(firstColumn, secondColumn, thirdColumn),
-                grid.getParentColumns());
+                getTopLevelColumns());
         ColumnGroup merged = grid.mergeColumns(firstColumn, thirdColumn);
         Assert.assertEquals(Arrays.asList(merged, secondColumn),
-                grid.getParentColumns());
+                getTopLevelColumns());
         ColumnGroup secondMerge = grid.mergeColumns(merged, secondColumn);
-        Assert.assertEquals(Arrays.asList(secondMerge),
-                grid.getParentColumns());
+        Assert.assertEquals(Arrays.asList(secondMerge), getTopLevelColumns());
         Assert.assertEquals(
                 Arrays.asList(firstColumn, thirdColumn, secondColumn),
                 grid.getColumns());
@@ -64,5 +85,14 @@ public class GridColumnGroupingTest {
     public void cant_merge_already_merged_columns() {
         grid.mergeColumns(firstColumn, secondColumn);
         grid.mergeColumns(firstColumn, thirdColumn);
+    }
+
+    private List<ColumnBase<?>> getTopLevelColumns() {
+        return grid.getElement().getChildren()
+                .map(element -> element.getComponent())
+                .filter(component -> component.isPresent()
+                        && component.get() instanceof ColumnBase<?>)
+                .map(component -> (ColumnBase<?>) component.get())
+                .collect(Collectors.toList());
     }
 }

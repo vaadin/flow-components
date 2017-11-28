@@ -245,10 +245,19 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         private Map<String, RendereredComponent<T>> renderedComponents;
 
-        private String columnId;
+        private String columnId; // for internal implementation only
+        private String columnKey; // defined and used by the user
 
         private boolean sortingEnabled;
-        private SortOrderProvider sortOrderProvider;
+
+        private SortOrderProvider sortOrderProvider = direction -> {
+            String key = getKey();
+            if (key == null) {
+                return Stream.empty();
+            }
+            return Stream.of(new QuerySortOrder(key, direction));
+        };
+
         private SerializableComparator<T> comparator;
 
         private String rawHeaderTemplate;
@@ -269,7 +278,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             this.columnId = columnId;
 
             comparator = (a, b) -> 0;
-            sortOrderProvider = direction -> Stream.empty();
 
             if (renderer instanceof ComponentTemplateRenderer) {
                 renderedComponents = new HashMap<>();
@@ -339,6 +347,45 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         @Synchronize("flex-grow-changed")
         public int getFlexGrow() {
             return getElement().getProperty("flexGrow", 1);
+        }
+
+        /**
+         * Sets the user-defined identifier to map this column. The key can be
+         * used to fetch the column later with
+         * {@link Grid#getColumnByKey(String)}.
+         * <p>
+         * The key is also used as the {@link #setSortProperty(String...)
+         * backend sort property} for this column if no sort property or sort
+         * order provider has been set for this column.
+         * <p>
+         * The key has to be unique within the grid, and it can't be changed
+         * after set once.
+         *
+         * @see #setSortProperty(String...)
+         * @see #setSortOrderProvider(SortOrderProvider)
+         *
+         * @param key
+         *            the identifier key, can't be {@code null}
+         * @return this column
+         */
+        public Column<T> setKey(String key) {
+            Objects.requireNonNull(key, "Column key cannot be null");
+            if (this.columnKey != null) {
+                throw new IllegalStateException("Column key cannot be changed");
+            }
+            getGrid().setColumnKey(key, this);
+            this.columnKey = key;
+            return this;
+        }
+
+        /**
+         * Gets the user-defined key for this column, or {@code null} if no key
+         * has been set.
+         * 
+         * @return the user-defined key
+         */
+        public String getKey() {
+            return columnKey;
         }
 
         /**
@@ -504,15 +551,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         public boolean isSortable() {
             return sortingEnabled;
-        }
-
-        /**
-         * Gets the generated unique identifier of this column.
-         *
-         * @return the unique id of the column, not <code>null</code>
-         */
-        public String getColumnId() {
-            return columnId;
         }
 
         @Override
@@ -745,8 +783,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     private Element detailsTemplate;
     private Map<String, RendereredComponent<T>> renderedDetailComponents;
 
-    private Map<String, Column<T>> idToColumnMap = new HashMap<>();
-    private List<ColumnBase<?>> parentColumns = new ArrayList<>();
+    private Map<String, Column> idToColumnMap = new HashMap<>();
+    private Map<String, Column> keyToColumnMap = new HashMap<>();
 
     private final List<GridSortOrder<T>> sortOrder = new ArrayList<>();
 
@@ -788,9 +826,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @return the created column
      */
     public Column<T> addColumn(ValueProvider<T, ?> valueProvider) {
-        String columnKey = getColumnKey(false);
-        return addColumn(TemplateRenderer.<T> of("[[item." + columnKey + "]]")
-                .withProperty(columnKey, valueProvider));
+        String columnId = createColumnId(false);
+        return addColumn(TemplateRenderer.<T> of("[[item." + columnId + "]]")
+                .withProperty(columnId, valueProvider));
     }
 
     /**
@@ -830,13 +868,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @see TemplateRenderer#of(String)
      */
     public Column<T> addColumn(TemplateRenderer<T> renderer) {
-        String columnKey = getColumnKey(true);
+        String columnId = createColumnId(true);
 
         getDataCommunicator().reset();
 
-        Column<T> column = new Column<>(this, columnKey, renderer);
-        idToColumnMap.put(columnKey, column);
-        parentColumns.add(column);
+        Column<T> column = new Column<>(this, columnId, renderer);
+        idToColumnMap.put(columnId, column);
         getElement().appendChild(column.getElement());
 
         return column;
@@ -893,7 +930,24 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         return column;
     }
 
-    private String getColumnKey(boolean increment) {
+    /**
+     * Sets a user-defined identifier for given column.
+     *
+     * @see Column#setKey(String)
+     *
+     * @param column
+     *            the column
+     * @param key
+     *            the user-defined identifier
+     */
+    protected void setColumnKey(String key, Column column) {
+        if (keyToColumnMap.containsKey(key)) {
+            throw new IllegalArgumentException("Duplicate key for columns");
+        }
+        keyToColumnMap.put(key, column);
+    }
+
+    private String createColumnId(boolean increment) {
         int id = nextColumnId;
         if (increment) {
             nextColumnId++;
@@ -1233,6 +1287,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @return the column group that contains the merged columns
      */
     public ColumnGroup mergeColumns(Collection<ColumnBase<?>> columnsToMerge) {
+        List<ColumnBase<?>> topLevelColumns = getTopLevelColumns();
+
         Objects.requireNonNull(columnsToMerge,
                 "Columns to merge cannot be null");
         if (columnsToMerge.size() < 2) {
@@ -1240,62 +1296,68 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                     "Cannot merge less than two columns");
         }
         if (columnsToMerge.stream()
-                .anyMatch(column -> !parentColumns.contains(column))) {
+                .anyMatch(column -> !topLevelColumns.contains(column))) {
             throw new IllegalArgumentException(
-                    "Cannot merge a column that is not a parent column of this grid");
+                    "Cannot merge a column that already belongs to a column group");
         }
 
-        int insertIndex = parentColumns
+        int insertIndex = topLevelColumns
                 .indexOf(columnsToMerge.iterator().next());
 
         columnsToMerge.forEach(column -> {
             getElement().removeChild(column.getElement());
-            parentColumns.remove(column);
         });
 
         ColumnGroup columnGroup = new ColumnGroup(this, columnsToMerge);
-
         getElement().insertChild(insertIndex, columnGroup.getElement());
-        parentColumns.add(insertIndex, columnGroup);
 
         return columnGroup;
     }
 
     /**
-     * Gets an unmodifiable list of all parent columns currently in this
-     * {@link Grid}. Parent columns are the top level columns of this Grid, i.e.
-     * the topmost ColumnGroup
-     *
-     * @return unmodifiable list of parent columns
+     * Gets a list of columns and/or column groups that are direct
+     * child-elements of this grid (those that are top-most in the column
+     * hierarchy).
+     * 
+     * @return top-level columns and/or column groups of this grid
      */
-    public List<ColumnBase<?>> getParentColumns() {
-        return Collections.unmodifiableList(parentColumns);
+    private List<ColumnBase<?>> getTopLevelColumns() {
+        return getElement().getChildren().map(element -> element.getComponent())
+                .filter(component -> component.isPresent()
+                        && component.get() instanceof ColumnBase<?>)
+                .map(component -> (ColumnBase<?>) component.get())
+                .collect(Collectors.toList());
     }
 
     /**
      * Gets an unmodifiable list of all {@link Column}s currently in this
      * {@link Grid}.
+     * <p>
+     * <strong>Note:</strong> If column reordering is enabled with
+     * {@link #setColumnReorderingAllowed(boolean)} and the user has reordered
+     * the columns, the order of the list returned by this method might not be
+     * correct.
      *
      * @return unmodifiable list of columns
      */
     public List<Column<T>> getColumns() {
         List<Column<T>> ret = new ArrayList<>();
-        getParentColumns().forEach(column -> appendChildColumns(ret, column));
+        getTopLevelColumns().forEach(column -> appendChildColumns(ret, column));
         return Collections.unmodifiableList(ret);
     }
 
     /**
-     * Gets a {@link Column} of this grid by its identifying string.
+     * Gets a {@link Column} of this grid by its key.
      *
-     * @see Column#getColumnId()
+     * @see Column#setKey()
      *
-     * @param columnId
-     *            the identifier of the column to get
-     * @return the column corresponding to the given column identifier, or
-     *         {@code null} if there is no such column
+     * @param columnKey
+     *            the identifier key of the column to get
+     * @return the column corresponding to the given column key, or {@code null}
+     *         if no column has such key
      */
-    public Column<T> getColumn(String columnId) {
-        return idToColumnMap.get(columnId);
+    public Column<T> getColumnByKey(String columnKey) {
+        return keyToColumnMap.get(columnKey);
     }
 
     /**
