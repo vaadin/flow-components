@@ -84,7 +84,7 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
             TemplateRenderer<?> renderer, Element headerOrFooter) {
         if (renderer instanceof ComponentTemplateRenderer) {
             GridTemplateRendererUtil.setupHeaderOrFooterComponentRenderer(this,
-                    (ComponentTemplateRenderer) renderer);
+                    (ComponentTemplateRenderer<?, ?>) renderer);
         }
 
         headerOrFooter.setProperty("innerHTML",
