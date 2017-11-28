@@ -15,6 +15,7 @@
  */
 package com.vaadin.ui.iron.list;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +32,6 @@ import com.vaadin.function.ValueProvider;
 import com.vaadin.router.Route;
 import com.vaadin.router.RouteAlias;
 import com.vaadin.ui.html.Label;
-import com.vaadin.ui.iron.list.model.Person;
 import com.vaadin.ui.renderers.TemplateRenderer;
 
 @Route("")
@@ -42,6 +42,49 @@ public class IronListView extends DemoView {
     static {
         Faker faker = Faker.instance(new Random(42));
         LIST_OF_BOOKS = createListOfStrings(1000, () -> faker.book().title());
+    }
+
+    /**
+     * Example object used in the demo.
+     */
+    public static class Person implements Serializable {
+
+        private String firstName;
+        private String lastName;
+        private String email;
+        private String picture;
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public void setLastName(String lastName) {
+            this.lastName = lastName;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getPicture() {
+            return picture;
+        }
+
+        public void setPicture(String picture) {
+            this.picture = picture;
+        }
     }
 
     @Override
