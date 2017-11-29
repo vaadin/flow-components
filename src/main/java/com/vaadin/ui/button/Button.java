@@ -314,7 +314,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
      * <p>
      * Note that using this method together with convenience methods, such as
      * {@link #setText(String)} and {@link #setIcon(Component)}, may have
-     * unexpected results, eg. in the order of child elements and the result of
+     * unexpected results, e.g. in the order of child elements and the result of
      * {@link #getText()}.
      *
      * @param components
