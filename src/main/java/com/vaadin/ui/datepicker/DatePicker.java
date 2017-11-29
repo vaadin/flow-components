@@ -182,7 +182,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * Gets the minimum date in the date picker. Dates before that will be
      * disabled in the popup.
      *
-     * @return the the minimum date that is allowed to be selected, or
+     * @return the minimum date that is allowed to be selected, or
      *         <code>null</code> if there's no minimum
      */
     public LocalDate getMin() {
@@ -209,7 +209,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * Gets the maximum date in the date picker. Dates after that will be
      * disabled in the popup.
      *
-     * @return the the maximum date that is allowed to be selected, or
+     * @return the maximum date that is allowed to be selected, or
      *         <code>null</code> if there's no maximum
      */
     public LocalDate getMax() {
@@ -359,7 +359,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
         /**
          * Gets the short names of the week days.
          *
-         * @return the the short names of the week days
+         * @return the short names of the week days
          */
         public List<String> getWeekdaysShort() {
             return weekdaysShort;
