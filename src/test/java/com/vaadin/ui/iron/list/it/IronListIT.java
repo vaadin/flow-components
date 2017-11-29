@@ -23,6 +23,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.AbstractComponentIT;
@@ -84,7 +86,7 @@ public class IronListIT extends AbstractComponentIT {
     public void templateFromRendererWithPeople() {
         WebElement list = findElement(By.id("template-renderer-with-people"));
 
-        JsonArray items = getItems(list);
+        JsonArray items = getItems(getDriver(), list);
         Assert.assertEquals(3, items.length());
         for (int i = 0; i < items.length(); i++) {
             Assert.assertEquals(String.valueOf(i + 1),
@@ -101,7 +103,7 @@ public class IronListIT extends AbstractComponentIT {
                 By.id("template-renderer-with-people-update-item"));
 
         scrollIntoViewAndClick(update);
-        items = getItems(list);
+        items = getItems(getDriver(), list);
         JsonObject person = items.getObject(0);
         Assert.assertEquals("Person 1 Updated", person.getString("name"));
         Assert.assertEquals("person_1_updated", person.getString("user"));
@@ -112,7 +114,7 @@ public class IronListIT extends AbstractComponentIT {
         WebElement list = findElement(By.id("lazy-loaded"));
         WebElement message = findElement(By.id("lazy-loaded-message"));
 
-        JsonArray items = getItems(list);
+        JsonArray items = getItems(getDriver(), list);
         // the items are preallocated in the list, but they are empty
         Assert.assertEquals(100, items.length());
 
@@ -129,9 +131,9 @@ public class IronListIT extends AbstractComponentIT {
 
         // scrolls all the way down
         executeScript("arguments[0].scrollBy(0,10000);", list);
-        waitUntil(driver -> getItems(list).get(0) instanceof JsonNull);
+        waitUntil(driver -> getItems(driver, list).get(0) instanceof JsonNull);
 
-        items = getItems(list);
+        items = getItems(getDriver(), list);
 
         // all the initial items should be empty
         assertItemsAreNotPresent(items, 0, items.length() - 32);
@@ -139,6 +141,33 @@ public class IronListIT extends AbstractComponentIT {
         // the last 32 items should have data
         assertItemsArePresent(items, items.length() - 32, items.length(),
                 "Item ");
+    }
+
+    @Test
+    public void templateWithEventHandlers() {
+        WebElement list = findElement(By.id("template-events"));
+        WebElement message = findElement(By.id("template-events-message"));
+
+        JsonArray items = getItems(driver, list);
+        assertItemsArePresent(items, 0, 3, "Clickable item ");
+
+        // clicks on the first item to remove it
+        WebElement item = findElement(By.id("template-events-item-0"));
+        scrollIntoViewAndClick(item);
+        waitUntil(driver -> getItems(driver, list).length() == 2);
+        Assert.assertEquals("Clickable item 1 removed", message.getText());
+
+        // clicks on the last item to remove it
+        item = findElement(By.id("template-events-item-1"));
+        scrollIntoViewAndClick(item);
+        waitUntil(driver -> getItems(driver, list).length() == 1);
+        Assert.assertEquals("Clickable item 3 removed", message.getText());
+
+        // clicks on the first item again to remove it
+        item = findElement(By.id("template-events-item-0"));
+        scrollIntoViewAndClick(item);
+        waitUntil(driver -> getItems(driver, list).length() == 0);
+        Assert.assertEquals("Clickable item 2 removed", message.getText());
     }
 
     private void assertItemsArePresent(JsonArray items, int startingIndex,
@@ -168,7 +197,7 @@ public class IronListIT extends AbstractComponentIT {
             String itemLabelPrefixForFirstSet) {
         WebElement list = findElement(By.id(listId));
 
-        JsonArray items = getItems(list);
+        JsonArray items = getItems(getDriver(), list);
         Assert.assertEquals(3, items.length());
 
         assertItemsArePresent(items, 0, 3, itemLabelPrefixForFirstSet);
@@ -181,8 +210,8 @@ public class IronListIT extends AbstractComponentIT {
         WebElement set2Items = findElement(By.id(buttonIdFor2Items));
 
         scrollIntoViewAndClick(set2Items);
-        waitUntil(driver -> getItems(list).length() == 2);
-        JsonArray items = getItems(list);
+        waitUntil(driver -> getItems(driver, list).length() == 2);
+        JsonArray items = getItems(getDriver(), list);
         for (int i = 0; i < items.length(); i++) {
             Assert.assertEquals(
                     "The label of the initial object at the index " + i
@@ -199,8 +228,8 @@ public class IronListIT extends AbstractComponentIT {
         WebElement set3Items = findElement(By.id(buttonIdFor3Items));
 
         scrollIntoViewAndClick(set3Items);
-        waitUntil(driver -> getItems(list).length() == 3);
-        JsonArray items = getItems(list);
+        waitUntil(driver -> getItems(driver, list).length() == 3);
+        JsonArray items = getItems(getDriver(), list);
         for (int i = 0; i < items.length(); i++) {
             Assert.assertEquals(
                     "The label of the updated object at the index " + i
@@ -217,11 +246,12 @@ public class IronListIT extends AbstractComponentIT {
 
         WebElement set0Items = findElement(By.id(buttonIdFor0Items));
         scrollIntoViewAndClick(set0Items);
-        waitUntil(driver -> getItems(list).length() == 0);
+        waitUntil(driver -> getItems(driver, list).length() == 0);
     }
 
-    private JsonArray getItems(WebElement element) {
-        Object result = executeScript("return arguments[0].items;", element);
+    public static JsonArray getItems(WebDriver driver, WebElement element) {
+        Object result = ((JavascriptExecutor) driver)
+                .executeScript("return arguments[0].items;", element);
         JsonArray array = Json.createArray();
         if (!(result instanceof List)) {
             return array;

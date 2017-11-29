@@ -39,6 +39,7 @@ import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.common.JavaScript;
 import com.vaadin.ui.renderers.ComponentRenderer;
 import com.vaadin.ui.renderers.TemplateRenderer;
+import com.vaadin.ui.renderers.TemplateRendererUtil;
 import com.vaadin.util.JsonSerializer;
 
 import elemental.json.JsonObject;
@@ -208,6 +209,11 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
             + "</span>",
         //@formatter:on
                 renderer.getTemplate()));
+
+        TemplateRendererUtil.registerEventHandlers(renderer, template,
+                this.getElement(),
+                key -> getDataCommunicator().getKeyMapper().get(key));
+
         getDataCommunicator().reset();
     }
 

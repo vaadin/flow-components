@@ -16,10 +16,12 @@
 package com.vaadin.ui.iron.list.it;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.Query;
+import com.vaadin.function.ValueProvider;
 import com.vaadin.router.Route;
 import com.vaadin.ui.html.Div;
 import com.vaadin.ui.html.Label;
@@ -73,6 +75,7 @@ public class IronListTestPage extends Div {
         createTemplateFromValueProviderWithPeople();
         createTemplateFromRendererWithPeople();
         createLazyLoadingDataProvider();
+        createTemplateWithEventHandlers();
     }
 
     private void createListWithStrings() {
@@ -108,11 +111,14 @@ public class IronListTestPage extends Div {
 
         list.setDataProvider(dataProvider1);
 
-        NativeButton setProviderWith3Items = new NativeButton("Change dataprovider 1",
+        NativeButton setProviderWith3Items = new NativeButton(
+                "Change dataprovider 1",
                 evt -> list.setDataProvider(dataProvider1));
-        NativeButton setProviderWith2Items = new NativeButton("Change dataprovider 2",
+        NativeButton setProviderWith2Items = new NativeButton(
+                "Change dataprovider 2",
                 evt -> list.setDataProvider(dataProvider2));
-        NativeButton setEmptyProvider = new NativeButton("Change dataprovider 3",
+        NativeButton setEmptyProvider = new NativeButton(
+                "Change dataprovider 3",
                 evt -> list.setDataProvider(dataProvider3));
 
         list.setId("dataprovider-with-strings");
@@ -120,7 +126,8 @@ public class IronListTestPage extends Div {
         setProviderWith2Items.setId("dataprovider-with-strings-2-items");
         setEmptyProvider.setId("dataprovider-with-strings-0-items");
 
-        add(list, setProviderWith3Items, setProviderWith2Items, setEmptyProvider);
+        add(list, setProviderWith3Items, setProviderWith2Items,
+                setEmptyProvider);
     }
 
     private void createTemplateFromValueProviderWithPeople() {
@@ -137,17 +144,18 @@ public class IronListTestPage extends Div {
         list.setDataProvider(dataProvider1);
         list.setRenderer(Person::getName);
 
-        NativeButton setProviderWith3Items = new NativeButton("Change dataprovider 1",
-                evt -> {
+        NativeButton setProviderWith3Items = new NativeButton(
+                "Change dataprovider 1", evt -> {
                     list.setRenderer(Person::getName);
                     list.setDataProvider(dataProvider1);
                 });
-        NativeButton setProviderWith2Items = new NativeButton("Change dataprovider 2",
-                evt -> {
+        NativeButton setProviderWith2Items = new NativeButton(
+                "Change dataprovider 2", evt -> {
                     list.setDataProvider(dataProvider2);
                     list.setRenderer(person -> String.valueOf(person.getAge()));
                 });
-        NativeButton setEmptyProvider = new NativeButton("Change dataprovider 3",
+        NativeButton setEmptyProvider = new NativeButton(
+                "Change dataprovider 3",
                 evt -> list.setDataProvider(dataProvider3));
 
         list.setId("dataprovider-with-people");
@@ -155,7 +163,8 @@ public class IronListTestPage extends Div {
         setProviderWith2Items.setId("dataprovider-with-people-2-items");
         setEmptyProvider.setId("dataprovider-with-people-0-items");
 
-        add(list, setProviderWith3Items, setProviderWith2Items, setEmptyProvider);
+        add(list, setProviderWith3Items, setProviderWith2Items,
+                setEmptyProvider);
     }
 
     private void createTemplateFromRendererWithPeople() {
@@ -203,6 +212,31 @@ public class IronListTestPage extends Div {
 
         list.setId("lazy-loaded");
         message.setId("lazy-loaded-message");
+
+        add(list, message);
+    }
+
+    private void createTemplateWithEventHandlers() {
+        IronList<String> list = new IronList<>();
+        list.setHeight("100px");
+
+        Label message = new Label();
+
+        List<String> items = new ArrayList<>(Arrays.asList("Clickable item 1",
+                "Clickable item 2", "Clickable item 3"));
+
+        list.setRenderer(TemplateRenderer.<String> of(
+                "<div on-click='remove' id='template-events-item-[[index]]'>[[item.label]]</div>")
+                .withProperty("label", ValueProvider.identity())
+                .withEventHandler("remove", item -> {
+                    items.remove(item);
+                    list.getDataCommunicator().reset();
+                    message.setText(item + " removed");
+                }));
+
+        list.setItems(items);
+        list.setId("template-events");
+        message.setId("template-events-message");
 
         add(list, message);
     }
