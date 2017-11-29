@@ -44,7 +44,7 @@ public class IronIcon extends Component implements HasStyle {
      */
     public IronIcon(String collection, String icon) {
         // iron-icon's icon-attribute uses the format "collection:name",
-        // eg. icon="vaadin:arrow-down"
+        // e.g. icon="vaadin:arrow-down"
         getElement().setAttribute(ICON_ATTRIBUTE_NAME, collection + ':' + icon);
     }
 
