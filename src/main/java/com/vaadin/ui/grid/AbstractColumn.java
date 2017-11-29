@@ -15,7 +15,6 @@
  */
 package com.vaadin.ui.grid;
 
-import com.vaadin.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.common.HasStyle;
@@ -92,8 +91,8 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
                         : getFooterRendererTemplate(renderer));
         GridTemplateRendererUtil.setupTemplateRenderer(
                 (TemplateRenderer) renderer, headerOrFooter, getElement(),
-                getGrid().getDataGenerator(), () -> (DataKeyMapper) getGrid()
-                        .getDataCommunicator().getKeyMapper());
+                getGrid().getDataGenerator(),
+                key -> getGrid().getDataCommunicator().getKeyMapper().get(key));
     }
 
     protected String getHeaderRendererTemplate(TemplateRenderer<?> renderer) {

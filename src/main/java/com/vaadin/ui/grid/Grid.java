@@ -41,7 +41,6 @@ import com.vaadin.data.provider.DataChangeEvent;
 import com.vaadin.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.data.provider.DataGenerator;
-import com.vaadin.data.provider.DataKeyMapper;
 import com.vaadin.data.provider.DataProvider;
 import com.vaadin.data.provider.DataProviderListener;
 import com.vaadin.data.provider.Query;
@@ -294,9 +293,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
             GridTemplateRendererUtil.setupTemplateRenderer(
                     (TemplateRenderer) renderer, contentTemplate, getElement(),
-                    getGrid().getDataGenerator(),
-                    () -> (DataKeyMapper) getGrid().getDataCommunicator()
-                            .getKeyMapper());
+                    getGrid().getDataGenerator(), key -> getGrid()
+                            .getDataCommunicator().getKeyMapper().get(key));
         }
 
         /**
@@ -1230,7 +1228,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         GridTemplateRendererUtil.setupTemplateRenderer(renderer,
                 detailsTemplate, getElement(), getDataGenerator(),
-                () -> getDataCommunicator().getKeyMapper());
+                key -> getDataCommunicator().getKeyMapper().get(key));
     }
 
     /**
