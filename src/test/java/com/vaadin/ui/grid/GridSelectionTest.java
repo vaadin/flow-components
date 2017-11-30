@@ -23,9 +23,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.data.selection.SingleSelect;
 import com.vaadin.ui.grid.Grid.SelectionMode;
 
+/**
+ * Unit tests for Grid selection.
+ * 
+ * @author Vaadin Ltd.
+ */
 public class GridSelectionTest {
+
+    @Test
+    public void singleSelection_selectCurrent_noEvent() {
+        Grid<String> grid = new Grid<>();
+        grid.setItems("one", "two");
+
+        SingleSelect<Grid<String>, String> singleSelect = grid.asSingleSelect();
+        singleSelect.setValue("one");
+
+        singleSelect.addValueChangeListener(event -> Assert
+                .fail("Selection change should not be triggered"));
+
+        singleSelect.setValue(singleSelect.getValue());
+    }
 
     @Test
     public void multiSelectionListeners() {
