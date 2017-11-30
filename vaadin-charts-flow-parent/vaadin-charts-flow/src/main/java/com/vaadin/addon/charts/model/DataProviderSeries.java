@@ -17,11 +17,15 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
-import static java.util.Map.Entry;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -64,9 +68,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
 
     @JsonIgnore
     private DataProviderListener<T> listener = (DataProviderListener<T>) event -> {
-        if (getConfiguration() != null) {
-            getConfiguration().fireSeriesChanged(DataProviderSeries.this);
-        }
+        updateSeries();
     };
 
     /**

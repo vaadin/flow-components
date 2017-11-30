@@ -243,4 +243,9 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
         setyAxis(indexOf);
     }
 
+    public void updateSeries() {
+        if (getConfiguration() != null) {
+            getConfiguration().fireSeriesChanged(this);
+        }
+    }
 }

@@ -124,7 +124,7 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
      *         center in a pie chart, <b>false</b> otherwise.
      */
     public boolean getSliced() {
-        return sliced;
+        return sliced != null && sliced;
     }
 
     /**

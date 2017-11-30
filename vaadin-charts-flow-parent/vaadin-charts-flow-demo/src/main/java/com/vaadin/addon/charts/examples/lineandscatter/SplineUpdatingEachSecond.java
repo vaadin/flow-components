@@ -48,7 +48,6 @@ public class SplineUpdatingEachSecond extends AbstractChartExample {
                 final long x = System.currentTimeMillis();
                 final double y = random.nextDouble();
                 series.add(new DataSeriesItem(x, y), true, true);
-                chart.drawChart();
         }, 1000, 1000);
 
         add(chart);
