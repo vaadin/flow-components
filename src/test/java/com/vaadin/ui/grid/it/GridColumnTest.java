@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.grid;
+package com.vaadin.ui.grid.it;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +23,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.ui.grid.ColumnBase;
+import com.vaadin.ui.grid.ColumnGroup;
+import com.vaadin.ui.grid.Grid;
 import com.vaadin.ui.grid.Grid.Column;
 
 public class GridColumnTest {

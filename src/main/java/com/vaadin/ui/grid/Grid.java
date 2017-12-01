@@ -781,8 +781,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     private Element detailsTemplate;
     private Map<String, RendereredComponent<T>> renderedDetailComponents;
 
-    private Map<String, Column<T>> idToColumnMap = new HashMap<>();
-    private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
+    private Map<String, Column> idToColumnMap = new HashMap<>();
+    private Map<String, Column> keyToColumnMap = new HashMap<>();
 
     private final List<GridSortOrder<T>> sortOrder = new ArrayList<>();
 
@@ -1511,11 +1511,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         getDataProvider().addDataProviderListener(dataProviderListener);
 
-        itemEventBus.addListener(Grid.DataProviderChangedEvent.class, event -> {
-            getDataProvider().addDataProviderListener(dataProviderListener);
-            container.removeAllChildren();
-            renderedComponents.clear();
-        });
+        itemEventBus.addListener(Grid.DataProviderChangedEvent.class,
+                event -> getDataProvider()
+                        .addDataProviderListener(dataProviderListener));
 
         itemEventBus.addListener(ItemsSentEvent.class,
                 event -> onItemsSent(event.getItems(), container,
@@ -1536,6 +1534,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             // DataProvider
             onDataRefreshEvent((DataRefreshEvent<T>) event, componentRenderer,
                     renderedComponents, container);
+        } else {
+            // otherwise the DataProvider was entirely renewed, so we need to
+            // clear everything
+            container.removeAllChildren();
+            renderedComponents.clear();
         }
     }
 

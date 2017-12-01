@@ -434,7 +434,7 @@ public class GridView extends DemoView {
                     ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) grid
                             .getDataProvider();
                     dataProvider.getItems().remove(item);
-                    dataProvider.refreshAll();
+                    grid.getDataCommunicator().reset();
                 }))).setHeader("Actions");
 
         // Item details can also use components
