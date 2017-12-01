@@ -1,8 +1,8 @@
 package com.vaadin.addon.charts;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class Category {
 
@@ -15,7 +15,7 @@ public class Category {
 
     public Category(String name) {
         this.name = name;
-        this.caption = toCaption(name);
+        caption = toCaption(name);
     }
 
     public String getName() {
@@ -76,8 +76,8 @@ public class Category {
         }
 
         public Demo(String component) {
-            this.component = component.toLowerCase();
-            this.caption = splitCamelCase(component);
+            this.component = component;
+            caption = splitCamelCase(component);
         }
 
         public String getComponent() {

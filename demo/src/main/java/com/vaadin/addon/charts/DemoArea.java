@@ -19,7 +19,7 @@ public class DemoArea extends PolymerTemplate<TemplateModel> {
 
     public void setContent(Component component) {
         component.getChildren().findFirst().get().getElement()
-                .getClassList().add(component.getClass().getSimpleName().toLowerCase());
+                .getClassList().add(component.getClass().getSimpleName());
         if (currentChart != null) {
             div.remove(currentChart);
         }

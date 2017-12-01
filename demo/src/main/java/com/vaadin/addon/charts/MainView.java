@@ -7,10 +7,10 @@ import static java.util.stream.Collectors.toMap;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
@@ -22,6 +22,7 @@ import com.vaadin.router.Route;
 import com.vaadin.router.WildcardParameter;
 import com.vaadin.router.event.BeforeNavigationEvent;
 import com.vaadin.ui.Tag;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.common.StyleSheet;
 import com.vaadin.ui.event.AttachEvent;
@@ -68,7 +69,7 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
                 .getSubTypesOf(AbstractChartExample.class)
                 .stream()
                 .filter(example -> !example.isAnnotationPresent(SkipFromDemo.class))
-                .collect(toMap(e -> e.getSimpleName().toLowerCase(), Function.identity()));
+                        .collect(toMap(e -> e.getSimpleName(), Function.identity()));
 
         CATEGORIES = NAME_INDEXED_SUBTYPES
                 .values()
@@ -104,40 +105,35 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
 
     @Override
     public void setParameter(BeforeNavigationEvent event, @WildcardParameter String parameter) {
-        currentExample = getTargetExample(parameter);
-        getModel().setCategory(currentExample.getKey());
-        getModel().setPage(currentExample.getValue());
+        currentExample = getTargetExample(event, parameter);
 
         try {
             Class<? extends AbstractChartExample> exampleClass
                     = NAME_INDEXED_SUBTYPES.get(currentExample.getValue());
 
+            String category = lastTokenInPackageName(exampleClass);
+            getModel().setCategory(category);
+            getModel().setPage(currentExample.getValue());
+
             demoArea.setContent(exampleClass.newInstance());
             snippet.setSource(IOUtils.toString(getClass().getResourceAsStream(
-                    "/examples/" + currentExample.getKey()
+                    "/examples/" + category
                             + "/" + exampleClass.getSimpleName() + ".java")));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private Pair<String, String> getTargetExample(String route) {
-        Optional<Pair<String, String>> categoryPagePair = split(route);
-        if (!categoryPagePair.isPresent()
-                || !NAME_INDEXED_SUBTYPES.containsKey(categoryPagePair.get().getValue())) {
-            return new ImmutablePair<>("column", "columnchart");
+    private Pair<String, String> getTargetExample(BeforeNavigationEvent event,
+            String route) {
+        Pair<String, String> categoryPagePair = new ImmutablePair<>(null, route);
+        if (StringUtils.isEmpty(route) || !NAME_INDEXED_SUBTYPES
+                .containsKey(categoryPagePair.getValue())) {
+            UI.getCurrent().navigateTo("ColumnChart");
+            return new ImmutablePair<>("column", "ColumnChart");
         }
 
-        return categoryPagePair.get();
-    }
-
-    private Optional<Pair<String, String>> split(String route) {
-        if (route == null || !route.contains("/")) {
-            return Optional.empty();
-        }
-
-        String[] tokens = route.split("/");
-        return Optional.of(new ImmutablePair<>(tokens[tokens.length - 2], tokens[tokens.length - 1]));
+        return categoryPagePair;
     }
 
     private static String lastTokenInPackageName(Class<? extends AbstractChartExample> clazz) {
