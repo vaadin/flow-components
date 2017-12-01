@@ -18,7 +18,7 @@
     
     <repositories>
         <repository>
-            <id>flow-component-base</id>
+            <id>vaadin-prereleases</id>
             <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
         <repository>
@@ -43,12 +43,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
-            <version>${flow.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-components</artifactId>
             <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
