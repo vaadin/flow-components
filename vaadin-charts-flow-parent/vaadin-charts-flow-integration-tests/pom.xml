@@ -27,6 +27,7 @@
         <maven.failsafe.plugin.version>2.20</maven.failsafe.plugin.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
         <flow.maven.plugin.version>1.0-SNAPSHOT</flow.maven.plugin.version>
+        <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
     </properties>
 
     <repositories>
@@ -73,6 +74,12 @@
             <version>6.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.saucelabs</groupId>
+            <artifactId>ci-sauce</artifactId>
+            <version>1.129</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -91,6 +98,9 @@
                 <configuration>
                     <systemPropertyVariables>
                         <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
+                        <sauce.user>${sauce.user}</sauce.user>
+                        <sauce.sauceAccessKey>${sauce.sauceAccessKey}</sauce.sauceAccessKey>
+                        <sauce.options>${sauce.options}</sauce.options>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -167,10 +177,6 @@
                                 <version>1.129</version>
                             </dependency>
                         </dependencies>
-                        <configuration>
-                            <sauceUsername>${SAUCE_USERNAME}</sauceUsername>
-                            <sauceAccessKey>${SAUCE_ACCESS_KEY}</sauceAccessKey>
-                        </configuration>
                         <executions>
                             <!-- Start Sauce Connect prior to running the integration tests -->
                             <execution>
