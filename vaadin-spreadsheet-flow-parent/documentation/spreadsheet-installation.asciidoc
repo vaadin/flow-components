@@ -170,4 +170,4 @@ The Demo, illustrated in
 for Vaadin Spreadsheet">> in the overview, showcases most of the functionality
 in Vaadin Spreadsheet. You can try out the demo online at
 link:http://demo.vaadin.com/spreadsheet[demo.vaadin.com/spreadsheet] or check the sources
-from the link:http://https://github.com/vaadin/spreadsheet[GitHub page].
+from the link:https://github.com/vaadin/spreadsheet[GitHub page].
