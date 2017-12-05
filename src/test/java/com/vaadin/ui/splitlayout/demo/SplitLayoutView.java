@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.splitlayout;
+package com.vaadin.ui.splitlayout.demo;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,6 +21,7 @@ import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.common.HasStyle;
 import com.vaadin.ui.html.Label;
+import com.vaadin.ui.splitlayout.SplitLayout;
 
 /**
  * View for {@link SplitLayout} demo.
