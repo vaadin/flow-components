@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.iron.list;
+package com.vaadin.ui.iron.list.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,7 +21,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.demo.TabbedComponentDemoTest;
-import com.vaadin.ui.iron.list.it.IronListIT;
 
 import elemental.json.JsonArray;
 

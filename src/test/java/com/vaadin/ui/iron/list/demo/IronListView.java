@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.iron.list;
+package com.vaadin.ui.iron.list.demo;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -36,6 +36,7 @@ import com.vaadin.router.Route;
 import com.vaadin.router.RouteAlias;
 import com.vaadin.ui.html.Label;
 import com.vaadin.ui.html.NativeButton;
+import com.vaadin.ui.iron.list.IronList;
 import com.vaadin.ui.renderers.TemplateRenderer;
 
 @Route("")
