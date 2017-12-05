@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.formlayout;
+package com.vaadin.ui.formlayout.demo;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -35,6 +35,7 @@ import com.vaadin.ui.button.Button;
 import com.vaadin.ui.checkbox.Checkbox;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.datepicker.DatePicker;
+import com.vaadin.ui.formlayout.FormLayout;
 import com.vaadin.ui.formlayout.FormLayout.FormItem;
 import com.vaadin.ui.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.ui.html.Div;
