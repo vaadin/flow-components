@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.icon;
+package com.vaadin.ui.icon.tests;
 
 import java.util.List;
 
@@ -23,6 +23,8 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
+import com.vaadin.ui.icon.VaadinIcons;
+import com.vaadin.ui.icon.demo.IconView;
 
 /**
  * Integration tests for the {@link IconView}.
