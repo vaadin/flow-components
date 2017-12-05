@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.grid;
+package com.vaadin.ui.grid.tests;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -24,6 +24,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.data.selection.SingleSelect;
+import com.vaadin.ui.grid.Grid;
+import com.vaadin.ui.grid.GridMultiSelectionModel;
 import com.vaadin.ui.grid.Grid.SelectionMode;
 
 /**

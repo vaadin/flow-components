@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.grid;
+package com.vaadin.ui.grid.tests;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.vaadin.router.Route;
 import com.vaadin.ui.button.Button;
+import com.vaadin.ui.grid.Grid;
 import com.vaadin.ui.html.Div;
 import com.vaadin.ui.html.Label;
 import com.vaadin.ui.renderers.ComponentTemplateRenderer;

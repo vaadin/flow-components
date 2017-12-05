@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.grid;
+package com.vaadin.ui.grid.tests;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +28,7 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.data.provider.QuerySortOrder;
 import com.vaadin.flow.demo.TabbedComponentDemoTest;
 import com.vaadin.testbench.By;
+import com.vaadin.ui.grid.demo.GridView;
 
 /**
  * Integration tests for the {@link GridView}.
