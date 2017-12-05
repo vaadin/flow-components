@@ -22,13 +22,13 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.addon.charts.AbstractChartExample;
 import com.vaadin.addon.charts.examples.area.AreaChart;
-import com.vaadin.ui.Component;
 
 public class BasicChartIT extends AbstractTBTest {
 
     @Override
-    protected Class<? extends Component> getTestView() {
+    protected Class<? extends AbstractChartExample> getTestView() {
         return AreaChart.class;
     }
 

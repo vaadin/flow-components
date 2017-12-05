@@ -26,12 +26,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.saucelabs.ci.sauceconnect.AbstractSauceTunnelManager;
+import com.vaadin.addon.charts.AbstractChartExample;
 import com.vaadin.testbench.annotations.BrowserConfiguration;
 import com.vaadin.testbench.annotations.RunOnHub;
 import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.testbench.parallel.ParallelTest;
 import com.vaadin.tests.elements.ChartElement;
-import com.vaadin.ui.Component;
 
 @RunOnHub
 public abstract class AbstractTBTest extends ParallelTest {
@@ -137,6 +137,6 @@ public abstract class AbstractTBTest extends ParallelTest {
         return 8080;
     }
 
-    protected abstract Class<? extends Component> getTestView();
+    protected abstract Class<? extends AbstractChartExample> getTestView();
 
 }

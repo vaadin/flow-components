@@ -79,6 +79,7 @@ public class DynamicExtremes extends AbstractChartExample {
 
         Input toggleExtremesButton = new Input();
         toggleExtremesButton.setValue("Toggle extremes");
+        toggleExtremesButton.setId("toggleExtremesButton");
         toggleExtremesButton.setType("button");
         toggleExtremesButton.addListener(ClickEvent.class, e -> {
             if (setExtremes) {

@@ -31,6 +31,7 @@ public class DynamicChanges extends AbstractChartExample {
         Input addPointButton = new Input();
         addPointButton.setValue("Add Point");
         addPointButton.setType("button");
+        addPointButton.setId("addPointButton");
         addPointButton.addListener(ClickEvent.class, e -> {
             series.add(new DataSeriesItem(
                     "Random browser " + Math.floor(Math.random() * 20),
@@ -39,6 +40,7 @@ public class DynamicChanges extends AbstractChartExample {
 
         Input removePointButton = new Input();
         removePointButton.setValue("Remove Point");
+        removePointButton.setId("removePointButton");
         removePointButton.setType("button");
         removePointButton.addListener(ClickEvent.class, e -> {
             if (!series.getData().isEmpty()) {
@@ -48,6 +50,7 @@ public class DynamicChanges extends AbstractChartExample {
 
         Input updatePointButton = new Input();
         updatePointButton.setValue("Update Point");
+        updatePointButton.setId("updatePointButton");
         updatePointButton.setType("button");
         updatePointButton.addListener(ClickEvent.class, e -> {
             if (!series.getData().isEmpty()) {
@@ -59,6 +62,7 @@ public class DynamicChanges extends AbstractChartExample {
 
         Input slicePointButton = new Input();
         slicePointButton.setValue("Slice Point");
+        slicePointButton.setId("slicePointButton");
         slicePointButton.setType("button");
         slicePointButton.addListener(ClickEvent.class, e -> {
             if (!series.getData().isEmpty()) {
@@ -70,6 +74,7 @@ public class DynamicChanges extends AbstractChartExample {
 
         Input disableSeriesButton = new Input();
         disableSeriesButton.setValue("Toggle Series Visibility");
+        disableSeriesButton.setId("disableSeriesButton");
         disableSeriesButton.setType("button");
         disableSeriesButton.addListener(ClickEvent.class, e -> {
             series.setVisible(!series.isVisible());
@@ -77,6 +82,7 @@ public class DynamicChanges extends AbstractChartExample {
 
         Input resetSeriesButton = new Input();
         resetSeriesButton.setValue("Reset Series");
+        resetSeriesButton.setId("resetSeriesButton");
         resetSeriesButton.setType("button");
         resetSeriesButton.addListener(ClickEvent.class, e -> {
             series.setData(getInitialData());
