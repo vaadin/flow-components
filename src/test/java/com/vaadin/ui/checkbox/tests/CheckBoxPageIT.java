@@ -13,31 +13,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.checkbox;
+package com.vaadin.ui.checkbox.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
-public class CheckBoxTest {
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
+
+/**
+ * @author Vaadin Ltd
+ *
+ */
+@TestPath("checkbox-test")
+public class CheckBoxPageIT extends AbstractComponentIT {
 
     @Test
-    public void initialValueCtor() {
-        Checkbox checkbox = new Checkbox(true);
-        Assert.assertTrue(checkbox.getValue());
+    public void valueChangeListenerInSameRequest_checkBoxValueIsSet() {
+        open();
 
-        checkbox = new Checkbox(false);
-        Assert.assertFalse(checkbox.getValue());
+        WebElement checkbox = findElement(By.id("checkbox"));
+        Assert.assertTrue(getInShadowRoot(checkbox, By.id("nativeCheckbox"))
+                .isSelected());
     }
-
-    @Test
-    public void labelAndInitialValueCtor() {
-        Checkbox checkbox = new Checkbox("foo", true);
-        Assert.assertTrue(checkbox.getValue());
-        Assert.assertEquals("foo", checkbox.getLabel());
-
-        checkbox = new Checkbox("foo", false);
-        Assert.assertFalse(checkbox.getValue());
-        Assert.assertEquals("foo", checkbox.getLabel());
-    }
-
 }

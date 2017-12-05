@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.checkbox;
+package com.vaadin.ui.checkbox.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,6 +21,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
+import com.vaadin.ui.checkbox.demo.CheckboxView;
 
 /**
  * Integration tests for the {@link CheckboxView}.

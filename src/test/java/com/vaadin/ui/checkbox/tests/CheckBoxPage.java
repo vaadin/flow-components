@@ -13,9 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.checkbox;
+package com.vaadin.ui.checkbox.tests;
 
 import com.vaadin.router.Route;
+import com.vaadin.ui.checkbox.Checkbox;
 import com.vaadin.ui.html.Div;
 
 /**
