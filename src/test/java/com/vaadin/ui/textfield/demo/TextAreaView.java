@@ -13,12 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.textfield;
+package com.vaadin.ui.textfield.demo;
 
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Div;
+import com.vaadin.ui.textfield.GeneratedVaadinTextArea;
+import com.vaadin.ui.textfield.TextArea;
 
 /**
  * View for {@link GeneratedVaadinTextArea} demo.

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.textfield.it;
+package com.vaadin.ui.textfield.tests;
 
 import com.vaadin.router.Route;
 import com.vaadin.ui.button.Button;
