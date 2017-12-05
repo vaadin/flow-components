@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.vaadin.ui.tabs;
+package com.vaadin.ui.tabs.demo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +33,9 @@ import com.vaadin.ui.html.Span;
 import com.vaadin.ui.icon.Icon;
 import com.vaadin.ui.icon.VaadinIcons;
 import com.vaadin.ui.layout.VerticalLayout;
+import com.vaadin.ui.tabs.Tab;
+import com.vaadin.ui.tabs.Tabs;
+import com.vaadin.ui.tabs.Tabs.Orientation;
 
 /**
  * View for {@link Tabs} demo.
