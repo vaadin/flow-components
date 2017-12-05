@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.datepicker;
+package com.vaadin.ui.datepicker.demo;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.common.HtmlImport;
+import com.vaadin.ui.datepicker.DatePicker;
 import com.vaadin.ui.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.ui.html.Div;
 

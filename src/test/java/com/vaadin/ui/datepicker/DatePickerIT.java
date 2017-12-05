@@ -24,6 +24,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
+import com.vaadin.ui.datepicker.demo.DatePickerView;
 
 /**
  * Integration tests for the {@link DatePickerView}.
