@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.radiobutton;
+package com.vaadin.ui.radiobutton.demo;
 
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
@@ -21,6 +21,7 @@ import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Anchor;
 import com.vaadin.ui.html.Div;
 import com.vaadin.ui.html.Image;
+import com.vaadin.ui.radiobutton.RadioButtonGroup;
 import com.vaadin.ui.renderers.IconRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
 
