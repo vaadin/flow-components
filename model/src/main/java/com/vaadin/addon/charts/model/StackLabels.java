@@ -1,6 +1,4 @@
 package com.vaadin.addon.charts.model;
-
-import com.vaadin.addon.charts.model.style.Style;
 /**
  * The stack labels show the total value for each bar in a stacked column or bar
  * chart. The label will be placed on top of positive columns and below negative
@@ -14,7 +12,6 @@ public class StackLabels extends AbstractConfigurationObject {
 	private String format;
 	private String _fn_formatter;
 	private Number rotation;
-	private Style style;
 	private String textAlign;
 	private Boolean useHTML;
 	private VerticalAlign verticalAlign;
@@ -101,37 +98,6 @@ public class StackLabels extends AbstractConfigurationObject {
 	 */
 	public void setRotation(Number rotation) {
 		this.rotation = rotation;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * <p>
-	 * CSS styles for the label.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the styles are set in the
-	 * <code>.highcharts-stack-label</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: { "color": "#000000", "fontSize": "11px", "fontWeight":
-	 * "bold", "textShadow":
-	 * "1px 1px contrast, -1px -1px contrast, -1px 1px contrast, 1px -1px contrast"
-	 * }
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**

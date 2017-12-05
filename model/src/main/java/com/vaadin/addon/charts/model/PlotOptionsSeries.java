@@ -1,8 +1,8 @@
 package com.vaadin.addon.charts.model;
 
-import com.vaadin.addon.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import com.vaadin.addon.charts.model.style.Color;
 import java.util.Date;
 import java.time.Instant;
 import com.vaadin.addon.charts.util.Util;
@@ -17,13 +17,11 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	private Boolean animation;
 	private Number animationLimit;
 	private String className;
-	private Color color;
 	private Number colorIndex;
 	private Boolean connectEnds;
 	private Boolean connectNulls;
 	private Number cropThreshold;
 	private Cursor cursor;
-	private DashStyle dashStyle;
 	private DataLabels dataLabels;
 	private String description;
 	private Boolean enableMouseTracking;
@@ -31,7 +29,6 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
-	private Number lineWidth;
 	private String linecap;
 	private String linkedTo;
 	private Marker marker;
@@ -156,37 +153,6 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * <p>
-	 * The main color or the series. In line type series it applies to the line
-	 * and the point markers unless otherwise specified. In bar type series it
-	 * applies to the bars unless a color is specified per point. The default
-	 * value is pulled from the <code>options.colors</code> array.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the color can be defined by the <a
-	 * href="#plotOptions.series.colorIndex">colorIndex</a> option. Also, the
-	 * series color can be set with the <code>.highcharts-series</code>,
-	 * <code>.highcharts-color-{n}</code>,
-	 * <code>.highcharts-{type}-series</code> or
-	 * <code>.highcharts-series-{n}</code> class, or individual classes given by
-	 * the <code>className</code> option.
-	 * </p>
-	 */
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	/**
 	 * @see #setColorIndex(Number)
 	 */
 	public Number getColorIndex() {
@@ -274,38 +240,6 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	 */
 	public void setCursor(Cursor cursor) {
 		this.cursor = cursor;
-	}
-
-	/**
-	 * @see #setDashStyle(DashStyle)
-	 */
-	public DashStyle getDashStyle() {
-		return dashStyle;
-	}
-
-	/**
-	 * A name for the dash style to use for the graph. Applies only to series
-	 * type having a graph, like <code>line</code>, <code>spline</code>,
-	 * <code>area</code> and <code>scatter</code> in case it has a
-	 * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
-	 * <ul>
-	 * <li>Solid</li>
-	 * <li>ShortDash</li>
-	 * <li>ShortDot</li>
-	 * <li>ShortDashDot</li>
-	 * <li>ShortDashDotDot</li>
-	 * <li>Dot</li>
-	 * <li>Dash</li>
-	 * <li>LongDash</li>
-	 * <li>DashDot</li>
-	 * <li>LongDashDot</li>
-	 * <li>LongDashDotDot</li>
-	 * </ul>
-	 * <p>
-	 * Defaults to: Solid
-	 */
-	public void setDashStyle(DashStyle dashStyle) {
-		this.dashStyle = dashStyle;
 	}
 
 	/**
@@ -488,22 +422,6 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
 	 */
 	public void removeKey(String key) {
 		this.keys.remove(key);
-	}
-
-	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * Pixel with of the graph line.
-	 * <p>
-	 * Defaults to: 2
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
 	}
 
 	/**

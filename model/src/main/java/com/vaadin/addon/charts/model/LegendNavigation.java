@@ -1,7 +1,4 @@
 package com.vaadin.addon.charts.model;
-
-import com.vaadin.addon.charts.model.style.Color;
-import com.vaadin.addon.charts.model.style.Style;
 /**
  * Options for the paging or navigation appearing when the legend is overflown.
  * Navigation works well on screen, but not in static exported images. One way
@@ -11,30 +8,11 @@ import com.vaadin.addon.charts.model.style.Style;
  */
 public class LegendNavigation extends AbstractConfigurationObject {
 
-	private Color activeColor;
 	private Boolean animation;
 	private Number arrowSize;
 	private Boolean enabled;
-	private Color inactiveColor;
-	private Style style;
 
 	public LegendNavigation() {
-	}
-
-	/**
-	 * @see #setActiveColor(Color)
-	 */
-	public Color getActiveColor() {
-		return activeColor;
-	}
-
-	/**
-	 * The color for the active up or down arrow in the legend page navigation.
-	 * <p>
-	 * Defaults to: #003399
-	 */
-	public void setActiveColor(Color activeColor) {
-		this.activeColor = activeColor;
 	}
 
 	/**
@@ -101,39 +79,5 @@ public class LegendNavigation extends AbstractConfigurationObject {
 	 */
 	public void setEnabled(Boolean enabled) {
 		this.enabled = enabled;
-	}
-
-	/**
-	 * @see #setInactiveColor(Color)
-	 */
-	public Color getInactiveColor() {
-		return inactiveColor;
-	}
-
-	/**
-	 * The color of the inactive up or down arrow in the legend page navigation.
-	 * .
-	 * <p>
-	 * Defaults to: #cccccc
-	 */
-	public void setInactiveColor(Color inactiveColor) {
-		this.inactiveColor = inactiveColor;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * Text styles for the legend page navigation.
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 }

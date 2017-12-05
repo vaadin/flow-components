@@ -28,60 +28,9 @@ import com.vaadin.addon.charts.model.style.Color;
  * the Pane-configuration object.</b>
  */
 public class Background extends AbstractConfigurationObject {
-    private Color backgroundColor;
-    private Color borderColor;
-    private Number borderWidth;
     private String outerRadius;
     private String innerRadius;
     private BackgroundShape shape;
-
-    /**
-     * @see #setBackgroundColor(Color)
-     */
-    public Color getBackgroundColor() {
-        return backgroundColor;
-    }
-
-    /**
-     * Sets the background color
-     * 
-     * @param backgroundColor
-     */
-    public void setBackgroundColor(Color backgroundColor) {
-        this.backgroundColor = backgroundColor;
-    }
-
-    /**
-     * @see #setBorderColor(Color)
-     */
-    public Color getBorderColor() {
-        return borderColor;
-    }
-
-    /**
-     * Sets the border color
-     * 
-     * @param borderColor
-     */
-    public void setBorderColor(Color borderColor) {
-        this.borderColor = borderColor;
-    }
-
-    /**
-     * @see #setBorderWidth(Number)
-     */
-    public Number getBorderWidth() {
-        return borderWidth;
-    }
-
-    /**
-     * Sets the width of the border
-     * 
-     * @param borderWidth
-     */
-    public void setBorderWidth(Number borderWidth) {
-        this.borderWidth = borderWidth;
-    }
 
     /**
      * Sets the outer radius of the circular shaped background using a string

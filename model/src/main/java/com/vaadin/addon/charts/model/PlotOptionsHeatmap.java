@@ -23,7 +23,6 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	private Number borderRadius;
 	private Number borderWidth;
 	private String className;
-	private Color color;
 	private Boolean colorByPoint;
 	private Number colorIndex;
 	private ArrayList<Color> colors;
@@ -212,25 +211,6 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 	 */
 	public void setClassName(String className) {
 		this.className = className;
-	}
-
-	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * The main color of the series. In heat maps this color is rarely used, as
-	 * we mostly use the color to denote the value of each point. Unless options
-	 * are set in the <a href="#colorAxis">colorAxis</a>, the default value is
-	 * pulled from the <a href="#colors">options.colors</a> array.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setColor(Color color) {
-		this.color = color;
 	}
 
 	/**

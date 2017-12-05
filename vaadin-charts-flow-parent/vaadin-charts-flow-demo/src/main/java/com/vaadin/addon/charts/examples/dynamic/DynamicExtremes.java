@@ -53,8 +53,8 @@ public class DynamicExtremes extends AbstractChartExample {
         legend.setAlign(HorizontalAlign.RIGHT);
         legend.setVerticalAlign(VerticalAlign.TOP);
         legend.setX(-10d);
+
         legend.setY(100d);
-        legend.setBorderWidth(0);
 
         ListSeries ls = new ListSeries();
         ls.setName("Tokyo");

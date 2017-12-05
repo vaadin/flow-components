@@ -1,6 +1,4 @@
 package com.vaadin.addon.charts.model;
-
-import com.vaadin.addon.charts.model.style.Style;
 /**
  * Options for displaying a message like "No data to display". This feature
  * requires the file <code>no-data-to-display.js</code> to be loaded in the
@@ -10,7 +8,6 @@ import com.vaadin.addon.charts.model.style.Style;
 public class NoData extends AbstractConfigurationObject {
 
 	private Position position;
-	private Style style;
 	private Boolean useHTML;
 
 	public NoData() {
@@ -34,26 +31,6 @@ public class NoData extends AbstractConfigurationObject {
 	 */
 	public void setPosition(Position position) {
 		this.position = position;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * CSS styles for the no-data label.
-	 * <p>
-	 * Defaults to: { "fontSize": "12px", "fontWeight": "bold", "color":
-	 * "#666666" }
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**

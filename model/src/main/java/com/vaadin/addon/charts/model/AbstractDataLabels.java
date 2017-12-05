@@ -26,26 +26,6 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
     public static final String OVERFLOW_NONE = "none";
 
     /**
-     * @see #setBackgroundColor(Color)
-     */
-    public abstract Color getBackgroundColor();
-
-    /**
-     * The background color or gradient for the data label.
-     */
-    public abstract void setBackgroundColor(Color backgroundColor);
-
-    /**
-     * @see #setBorderColor(Color)
-     */
-    public abstract Color getBorderColor();
-
-    /**
-     * The border color for the data label.
-     */
-    public abstract void setBorderColor(Color borderColor);
-
-    /**
      * @see #setBorderRadius(Number)
      */
     public abstract Number getBorderRadius();
@@ -64,16 +44,6 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * The border width in pixels for the data label.
      */
     public abstract void setBorderWidth(Number borderWidth);
-
-    /**
-     * @see #setColor(Color)
-     */
-    public abstract Color getColor();
-
-    /**
-     * The text color for the data labels.
-     */
-    public abstract void setColor(Color color);
 
     /**
      * @see #setCrop(Boolean)
@@ -196,16 +166,6 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * predefined functions on the Renderer object.
      */
     public abstract void setShape(Shape shape);
-
-    /**
-     * @see #setStyle(Style)
-     */
-    public abstract Style getStyle();
-
-    /**
-     * Styles for the label.
-     */
-    public abstract void setStyle(Style style);
 
     /**
      * @see #setUseHTML(Boolean)

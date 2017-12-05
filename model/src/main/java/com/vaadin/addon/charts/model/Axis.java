@@ -321,16 +321,6 @@ public abstract class Axis extends AbstractConfigurationObject {
     public abstract void setFloor(Number floor);
 
     /**
-     * @see #setGridLineColor(Color)
-     */
-    public abstract Color getGridLineColor();
-
-    /**
-     * Color of the grid lines extending the ticks across the plot area.
-     */
-    public abstract void setGridLineColor(Color gridLineColor);
-
-    /**
      * @see #setGridLineDashStyle(DashStyle)
      */
     public abstract DashStyle getGridLineDashStyle();
@@ -339,16 +329,6 @@ public abstract class Axis extends AbstractConfigurationObject {
      * The dash or dot style of the grid lines.
      */
     public abstract void setGridLineDashStyle(DashStyle gridLineDashStyle);
-
-    /**
-     * @see #setGridLineWidth(Number)
-     */
-    public abstract Number getGridLineWidth();
-
-    /**
-     * The width of the grid lines extending the ticks across the plot area.
-     */
-    public abstract void setGridLineWidth(Number gridLineWidth);
 
     /**
      * @see #setId(String)
@@ -425,16 +405,6 @@ public abstract class Axis extends AbstractConfigurationObject {
     public abstract void setMinTickInterval(Number minTickInterval);
 
     /**
-     * @see #setMinorGridLineColor(Color)
-     */
-    public abstract Color getMinorGridLineColor();
-
-    /**
-     * Color of the minor, secondary grid lines.
-     */
-    public abstract void setMinorGridLineColor(Color minorGridLineColor);
-
-    /**
      * @see #setMinorGridLineDashStyle(DashStyle)
      */
     public abstract DashStyle getMinorGridLineDashStyle();
@@ -443,16 +413,6 @@ public abstract class Axis extends AbstractConfigurationObject {
      * The dash or dot style of the minor grid lines.
      */
     public abstract void setMinorGridLineDashStyle(DashStyle minorGridLineDashStyle);
-
-    /**
-     * @see #setMinorGridLineWidth(Number)
-     */
-    public abstract Number getMinorGridLineWidth();
-
-    /**
-     * Width of the minor, secondary grid lines.
-     */
-    public abstract void setMinorGridLineWidth(Number minorGridLineWidth);
 
     /**
      * @see #setMinorTickColor(Color)

@@ -27,9 +27,7 @@ public class XAxis extends Axis {
 	private String description;
 	private Boolean endOnTick;
 	private Number floor;
-	private Color gridLineColor;
 	private DashStyle gridLineDashStyle;
-	private Number gridLineWidth;
 	private Number gridZIndex;
 	private String id;
 	private Labels labels;
@@ -40,9 +38,7 @@ public class XAxis extends Axis {
 	private Number minPadding;
 	private Number minRange;
 	private Number minTickInterval;
-	private Color minorGridLineColor;
 	private DashStyle minorGridLineDashStyle;
-	private Number minorGridLineWidth;
 	private Color minorTickColor;
 	private String minorTickInterval;
 	private Number minorTickLength;
@@ -349,31 +345,6 @@ public class XAxis extends Axis {
 	}
 
 	/**
-	 * @see #setGridLineColor(Color)
-	 */
-	public Color getGridLineColor() {
-		return gridLineColor;
-	}
-
-	/**
-	 * <p>
-	 * Color of the grid lines extending the ticks across the plot area.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke is given in the
-	 * <code>.highcharts-grid-line</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: #e6e6e6
-	 */
-	public void setGridLineColor(Color gridLineColor) {
-		this.gridLineColor = gridLineColor;
-	}
-
-	/**
 	 * @see #setGridLineDashStyle(DashStyle)
 	 */
 	public DashStyle getGridLineDashStyle() {
@@ -390,31 +361,6 @@ public class XAxis extends Axis {
 	 */
 	public void setGridLineDashStyle(DashStyle gridLineDashStyle) {
 		this.gridLineDashStyle = gridLineDashStyle;
-	}
-
-	/**
-	 * @see #setGridLineWidth(Number)
-	 */
-	public Number getGridLineWidth() {
-		return gridLineWidth;
-	}
-
-	/**
-	 * <p>
-	 * The width of the grid lines extending the ticks across the plot area.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke width is given in the
-	 * <code>.highcharts-grid-line</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setGridLineWidth(Number gridLineWidth) {
-		this.gridLineWidth = gridLineWidth;
 	}
 
 	/**
@@ -628,32 +574,6 @@ public class XAxis extends Axis {
 	}
 
 	/**
-	 * @see #setMinorGridLineColor(Color)
-	 */
-	public Color getMinorGridLineColor() {
-		return minorGridLineColor;
-	}
-
-	/**
-	 * <p>
-	 * Color of the minor, secondary grid lines.
-	 * </p>
-	 * 
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke width is given in the
-	 * <code>.highcharts-minor-grid-line</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: #f2f2f2
-	 */
-	public void setMinorGridLineColor(Color minorGridLineColor) {
-		this.minorGridLineColor = minorGridLineColor;
-	}
-
-	/**
 	 * @see #setMinorGridLineDashStyle(DashStyle)
 	 */
 	public DashStyle getMinorGridLineDashStyle() {
@@ -670,31 +590,6 @@ public class XAxis extends Axis {
 	 */
 	public void setMinorGridLineDashStyle(DashStyle minorGridLineDashStyle) {
 		this.minorGridLineDashStyle = minorGridLineDashStyle;
-	}
-
-	/**
-	 * @see #setMinorGridLineWidth(Number)
-	 */
-	public Number getMinorGridLineWidth() {
-		return minorGridLineWidth;
-	}
-
-	/**
-	 * <p>
-	 * Width of the minor, secondary grid lines.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke width is given in the
-	 * <code>.highcharts-grid-line</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setMinorGridLineWidth(Number minorGridLineWidth) {
-		this.minorGridLineWidth = minorGridLineWidth;
 	}
 
 	/**

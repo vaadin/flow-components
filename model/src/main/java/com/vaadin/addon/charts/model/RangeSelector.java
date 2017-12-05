@@ -1,10 +1,8 @@
 package com.vaadin.addon.charts.model;
 
-import com.vaadin.addon.charts.model.style.ButtonTheme;
 import java.util.ArrayList;
 import java.util.Arrays;
 import com.vaadin.addon.charts.model.style.Color;
-import com.vaadin.addon.charts.model.style.Style;
 /**
  * The range selector is a tool for selecting ranges to display within the
  * chart. It provides buttons to select preconfigured ranges in the chart, like
@@ -16,7 +14,6 @@ public class RangeSelector extends AbstractConfigurationObject {
 	private Boolean allButtonsEnabled;
 	private ButtonPosition buttonPosition;
 	private Number buttonSpacing;
-	private ButtonTheme buttonTheme;
 	private ArrayList<RangeSelectorButton> buttons;
 	private Boolean enabled;
 	private Number height;
@@ -28,8 +25,6 @@ public class RangeSelector extends AbstractConfigurationObject {
 	private String inputEditDateFormat;
 	private Boolean inputEnabled;
 	private ButtonPosition inputPosition;
-	private Style inputStyle;
-	private Style labelStyle;
 	private Number selected;
 
 	public RangeSelector() {
@@ -86,46 +81,6 @@ public class RangeSelector extends AbstractConfigurationObject {
 	 */
 	public void setButtonSpacing(Number buttonSpacing) {
 		this.buttonSpacing = buttonSpacing;
-	}
-
-	/**
-	 * @see #setButtonTheme(ButtonTheme)
-	 */
-	public ButtonTheme getButtonTheme() {
-		if (buttonTheme == null) {
-			buttonTheme = new ButtonTheme();
-		}
-		return buttonTheme;
-	}
-
-	/**
-	 * <p>
-	 * A collection of attributes for the buttons. The object takes SVG
-	 * attributes like <code>fill</code>, <code>stroke</code>,
-	 * <code>stroke-width</code>, as well as <code>style</code>, a collection of
-	 * CSS properties for the text.
-	 * </p>
-	 * 
-	 * <p>
-	 * The object can also be extended with states, so you can set
-	 * presentational options for <code>hover</code>, <code>select</code> or
-	 * <code>disabled</code> button states.
-	 * </p>
-	 * 
-	 * <p>
-	 * CSS styles for the text label.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the buttons are styled by the
-	 * <code>.highcharts-range-selector-buttons .highcharts-button</code> rule
-	 * with its different states.
-	 * </p>
-	 */
-	public void setButtonTheme(ButtonTheme buttonTheme) {
-		this.buttonTheme = buttonTheme;
 	}
 
 	/**
@@ -364,59 +319,6 @@ public class RangeSelector extends AbstractConfigurationObject {
 	 */
 	public void setInputPosition(ButtonPosition inputPosition) {
 		this.inputPosition = inputPosition;
-	}
-
-	/**
-	 * @see #setInputStyle(Style)
-	 */
-	public Style getInputStyle() {
-		if (inputStyle == null) {
-			inputStyle = new Style();
-		}
-		return inputStyle;
-	}
-
-	/**
-	 * <p>
-	 * CSS for the HTML inputs in the range selector.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the inputs are styled by the
-	 * <code>.highcharts-range-input text</code> rule in SVG mode, and
-	 * <code>input.highcharts-range-selector</code> when active.
-	 * </p>
-	 */
-	public void setInputStyle(Style inputStyle) {
-		this.inputStyle = inputStyle;
-	}
-
-	/**
-	 * @see #setLabelStyle(Style)
-	 */
-	public Style getLabelStyle() {
-		if (labelStyle == null) {
-			labelStyle = new Style();
-		}
-		return labelStyle;
-	}
-
-	/**
-	 * <p>
-	 * CSS styles for the labels - the Zoom, From and To texts.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the labels are styled by the
-	 * <code>.highcharts-range-label</code> class.
-	 * </p>
-	 */
-	public void setLabelStyle(Style labelStyle) {
-		this.labelStyle = labelStyle;
 	}
 
 	/**
