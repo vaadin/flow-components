@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.upload;
+package com.vaadin.ui.upload.demo;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -42,6 +42,8 @@ import com.vaadin.ui.html.Image;
 import com.vaadin.ui.html.NativeButton;
 import com.vaadin.ui.html.Span;
 import com.vaadin.ui.paper.dialog.GeneratedPaperDialog;
+import com.vaadin.ui.upload.Upload;
+import com.vaadin.ui.upload.UploadI18N;
 import com.vaadin.ui.upload.receivers.MemoryBuffer;
 import com.vaadin.ui.upload.receivers.MultiFileMemoryBuffer;
 
