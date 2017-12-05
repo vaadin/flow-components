@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.combobox;
+package com.vaadin.ui.combobox.demo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +21,7 @@ import java.util.List;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.router.Route;
+import com.vaadin.ui.combobox.ComboBox;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Div;
 /**
@@ -28,7 +29,7 @@ import com.vaadin.ui.html.Div;
  * 
  * @author Vaadin Ltd
  */
-@Route("vaadin-combobox")
+@Route("vaadin-combo-box")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-combo-box.html")
 public class ComboBoxView extends DemoView {
 	

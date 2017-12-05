@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.combobox;
+package com.vaadin.ui.combobox.test;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,6 +22,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
+import com.vaadin.ui.combobox.demo.ComboBoxView;
 
 /**
  * Integration tests for the {@link ComboBoxView}.
@@ -79,6 +80,6 @@ public class ComboBoxIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return ("/vaadin-combobox");
+        return ("/vaadin-combo-box");
     }
 }
