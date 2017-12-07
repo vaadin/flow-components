@@ -129,7 +129,7 @@ public class RadioButtonGroupView extends DemoView {
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person(1, "Joe"), new Person(2, "John"),
                 new Person(3, "Bill"));
-        group.setItemRenderer(new IconRenderer<Person>(item -> {
+        group.setItemRenderer(new IconRenderer<>(item -> {
             Image image = new Image("https://vaadin.com/images/vaadin-logo.svg",
                     "");
             image.getStyle().set("height", "15px");
