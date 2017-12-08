@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-charts-webjar</artifactId>
-            <version>6.0.0-alpha5</version>
+            <version>6.0.0-alpha6</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
