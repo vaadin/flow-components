@@ -12,6 +12,14 @@ window.gridConnector = {
     grid.size = 0; // To avoid NaN here and there before we get proper data
 
     grid.$connector = {};
+    
+    // Used by flow-grid-component-renderer 
+    grid.$connector.asyncNotifyResize = function() {
+      grid.$connector.resizeDebouncer = Polymer.Debouncer.debounce(
+          grid.$connector.resizeDebouncer,
+              Polymer.Async.animationFrame,
+              () => grid.notifyResize());
+    }
 
     grid.$connector.doSelection = function(item, userOriginated) {
       if (selectionMode === 'NONE') {
@@ -102,8 +110,8 @@ window.gridConnector = {
     grid.addEventListener('sorter-changed', sorterChangeListener);
 
     const itemsUpdated = function(items) {
-      if (!items || !(items instanceof Array)) {
-        throw 'Attempted to call itemsUpdated with an invalid value';
+      if (!items || !Array.isArray(items)) {
+        throw 'Attempted to call itemsUpdated with an invalid value: ' + JSON.stringify(items);
       }
       const detailsOpenedItems = [];
       for (let i = 0; i < items.length; ++i) {
@@ -187,7 +195,7 @@ window.gridConnector = {
           }
         }
       }
-      for (let page in pagesToUpdate) {
+      for (let page of pagesToUpdate) {
         updateGridCache(page);
       }
     };

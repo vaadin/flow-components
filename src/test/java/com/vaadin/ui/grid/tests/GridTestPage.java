@@ -71,12 +71,13 @@ public class GridTestPage extends Div {
 
         grid.setItems(firstList);
 
-        grid.addColumn(new ComponentTemplateRenderer<>(item -> {
+        grid.addColumn(new ComponentTemplateRenderer<Label, Item>(item -> {
             Label label = new Label(item.getName());
             label.setId("grid-with-component-renderers-item-name-"
                     + item.getNumber());
             return label;
-        }));
+        }).withProperty("id", item -> "grid-with-component-renderers-item-name-"
+                + item.getNumber()));
         grid.addColumn(new ComponentTemplateRenderer<>(item -> {
             Label label = new Label(String.valueOf(item.getNumber()));
             label.setId("grid-with-component-renderers-item-number-"

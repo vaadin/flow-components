@@ -37,12 +37,10 @@ import com.vaadin.data.event.SortEvent;
 import com.vaadin.data.event.SortEvent.SortNotifier;
 import com.vaadin.data.provider.ArrayUpdater;
 import com.vaadin.data.provider.ArrayUpdater.Update;
-import com.vaadin.data.provider.DataChangeEvent;
-import com.vaadin.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.data.provider.DataGenerator;
 import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.DataProviderListener;
+import com.vaadin.data.provider.KeyMapper;
 import com.vaadin.data.provider.Query;
 import com.vaadin.data.provider.QuerySortOrder;
 import com.vaadin.data.provider.SortDirection;
@@ -62,7 +60,6 @@ import com.vaadin.function.ValueProvider;
 import com.vaadin.shared.Registration;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Tag;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.common.ClientDelegate;
 import com.vaadin.ui.common.Focusable;
 import com.vaadin.ui.common.HasSize;
@@ -70,11 +67,9 @@ import com.vaadin.ui.common.HasStyle;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.common.JavaScript;
 import com.vaadin.ui.event.ComponentEvent;
-import com.vaadin.ui.event.ComponentEventBus;
 import com.vaadin.ui.event.ComponentEventListener;
 import com.vaadin.ui.event.Synchronize;
-import com.vaadin.ui.grid.GridTemplateRendererUtil.RendereredComponent;
-import com.vaadin.ui.renderers.ComponentRendererUtil;
+import com.vaadin.ui.grid.GridTemplateRendererUtil.ComponentDataGenerator;
 import com.vaadin.ui.renderers.ComponentTemplateRenderer;
 import com.vaadin.ui.renderers.TemplateRenderer;
 import com.vaadin.util.JsonSerializer;
@@ -98,9 +93,12 @@ import elemental.json.JsonValue;
 @HtmlImport("frontend://bower_components/vaadin-grid/vaadin-grid-sorter.html")
 @HtmlImport("frontend://bower_components/vaadin-checkbox/vaadin-checkbox.html")
 @HtmlImport("frontend://flow-component-renderer.html")
+@HtmlImport("frontend://flow-grid-component-renderer.html")
 @JavaScript("frontend://gridConnector.js")
 public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>> {
+
+    private static final String GRID_COMPONENT_RENDERER_TAG = "flow-grid-component-renderer";
 
     private final class UpdateQueue implements Update {
         private List<Runnable> queue = new ArrayList<>();
@@ -113,7 +111,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         public void set(int start, List<JsonValue> items) {
             enqueue("$connector.set", start,
                     items.stream().collect(JsonUtils.asArray()));
-            itemEventBus.fireEvent(new ItemsSentEvent(Grid.this, items));
         }
 
         @Override
@@ -130,34 +127,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         private void enqueue(String name, Serializable... arguments) {
             queue.add(() -> getElement().callFunction(name, arguments));
-        }
-    }
-
-    private static final class ItemsSentEvent extends ComponentEvent<Grid<?>> {
-
-        private final List<JsonValue> items;
-
-        public ItemsSentEvent(Grid<?> source, List<JsonValue> items) {
-            super(source, false);
-            this.items = items;
-        }
-
-        public List<JsonValue> getItems() {
-            return items;
-        }
-    }
-
-    /**
-     * Internal event fired when DataProviders are changed in the Grid.
-     */
-    private static final class DataProviderChangedEvent
-            extends ComponentEvent<Grid<?>> {
-
-        /**
-         * Default event constructor.
-         */
-        public DataProviderChangedEvent(Grid<?> source) {
-            super(source, false);
         }
     }
 
@@ -242,7 +211,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     @Tag("vaadin-grid-column")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
-        private Map<String, RendereredComponent<T>> renderedComponents;
+        private Map<String, Component> renderedComponents;
 
         private String columnId; // for internal implementation only
         private String columnKey; // defined and used by the user
@@ -278,15 +247,20 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
             comparator = (a, b) -> 0;
 
+            String template;
             if (renderer instanceof ComponentTemplateRenderer) {
                 renderedComponents = new HashMap<>();
                 ComponentTemplateRenderer<? extends Component, T> componentRenderer = (ComponentTemplateRenderer<? extends Component, T>) renderer;
-                grid.setupItemComponentRenderer(this, componentRenderer,
-                        renderedComponents);
+                grid.setupItemComponentRenderer(this, columnId,
+                        componentRenderer, renderedComponents);
+                template = componentRenderer
+                        .getTemplate(GRID_COMPONENT_RENDERER_TAG);
+            } else {
+                template = renderer.getTemplate();
             }
 
             Element contentTemplate = new Element("template")
-                    .setProperty("innerHTML", renderer.getTemplate());
+                    .setProperty("innerHTML", template);
 
             getElement().setAttribute("id", columnId)
                     .appendChild(contentTemplate);
@@ -536,13 +510,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             this.sortingEnabled = sortable;
 
             if (headerTemplate != null) {
-                headerTemplate.removeFromParent();
-                headerTemplate = new Element("template")
-                        .setAttribute("class", "header")
-                        .setProperty("innerHTML",
-                                sortable ? addGridSorter(rawHeaderTemplate)
-                                        : rawHeaderTemplate);
-                getElement().appendChild(headerTemplate);
+                headerTemplate.setProperty("innerHTML",
+                        sortable ? addGridSorter(rawHeaderTemplate)
+                                : rawHeaderTemplate);
             }
             return this;
         }
@@ -668,9 +638,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          * @param generator
          *            the data generator to add
          */
-        public void addDataGenerator(DataGenerator<T> generator) {
+        public Registration addDataGenerator(DataGenerator<T> generator) {
             assert generator != null : "generator should not be null";
             dataGenerators.add(generator);
+            return () -> removeDataGenerator(generator);
         }
 
         /**
@@ -773,18 +744,18 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private int nextColumnId = 0;
 
-    private ComponentEventBus itemEventBus = new ComponentEventBus(this);
-
     private GridSelectionModel<T> selectionModel;
 
     private final DetailsManager<T> detailsManager = new DetailsManager<>(this);
     private Element detailsTemplate;
-    private Map<String, RendereredComponent<T>> renderedDetailComponents;
+    private Map<String, Component> renderedDetailComponents;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
     private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
 
     private final List<GridSortOrder<T>> sortOrder = new ArrayList<>();
+
+    private Registration itemDetailsDataGeneratorRegistration;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -957,7 +928,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
         getDataCommunicator().setDataProvider(dataProvider, null);
-        itemEventBus.fireEvent(new DataProviderChangedEvent(this));
     }
 
     /**
@@ -1202,26 +1172,36 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         if (detailsTemplate != null) {
             getElement().removeChild(detailsTemplate);
         }
+        if (renderedDetailComponents != null) {
+            renderedDetailComponents
+                    .forEach((key, rendereredComponent) -> rendereredComponent
+                            .getElement().removeFromParent());
+            renderedDetailComponents = null;
+        }
+        if (itemDetailsDataGeneratorRegistration != null) {
+            itemDetailsDataGeneratorRegistration.remove();
+            itemDetailsDataGeneratorRegistration = null;
+        }
         if (renderer == null) {
             return;
         }
+
+        String template;
         if (renderer instanceof ComponentTemplateRenderer) {
-            renderedDetailComponents = renderedDetailComponents == null
-                    ? new HashMap<>()
-                    : renderedDetailComponents;
-            renderedDetailComponents
-                    .forEach((key, rendereredComponent) -> rendereredComponent
-                            .getComponent().getElement().removeFromParent());
-            renderedDetailComponents.clear();
+            renderedDetailComponents = new HashMap<>();
 
             ComponentTemplateRenderer<? extends Component, T> componentRenderer = (ComponentTemplateRenderer<? extends Component, T>) renderer;
-            setupItemComponentRenderer(this, componentRenderer,
-                    renderedDetailComponents);
+            itemDetailsDataGeneratorRegistration = setupItemComponentRenderer(
+                    this, null, componentRenderer, renderedDetailComponents);
+            template = componentRenderer
+                    .getTemplate(GRID_COMPONENT_RENDERER_TAG);
+        } else {
+            template = renderer.getTemplate();
         }
 
         Element newDetailsTemplate = new Element("template")
                 .setAttribute("class", "row-details")
-                .setProperty("innerHTML", renderer.getTemplate());
+                .setProperty("innerHTML", template);
 
         detailsTemplate = newDetailsTemplate;
         getElement().appendChild(detailsTemplate);
@@ -1493,93 +1473,29 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         setSortOrder(sortOrderBuilder.build(), true);
     }
 
-    private void setupItemComponentRenderer(Component owner,
+    private Registration setupItemComponentRenderer(Component owner,
+            String ownerId,
             ComponentTemplateRenderer<? extends Component, T> componentRenderer,
-            Map<String, RendereredComponent<T>> renderedComponents) {
+            Map<String, Component> renderedComponents) {
 
-        Element container = ComponentRendererUtil
-                .createContainerForRenderers(owner);
+        Element container = new Element("div", false);
+        owner.getElement().appendVirtualChild(container);
 
-        componentRenderer.setTemplateAttribute("key", "[[item.key]]");
-        componentRenderer.setTemplateAttribute("keyname",
-                "data-flow-renderer-item-key");
-        componentRenderer.setTemplateAttribute("containerid",
-                container.getAttribute("id"));
+        String appId = GridTemplateRendererUtil.getAppId();
 
-        DataProviderListener<T> dataProviderListener = event -> onDataChangeEvent(
-                event, componentRenderer, renderedComponents, container);
+        componentRenderer.setTemplateAttribute("appid", appId);
+        String nodeIdPropertyName = ownerId == null ? "nodeId" : ownerId;
+        componentRenderer.setTemplateAttribute("nodeid",
+                "[[item." + nodeIdPropertyName + "]]");
 
-        getDataProvider().addDataProviderListener(dataProviderListener);
-
-        itemEventBus.addListener(Grid.DataProviderChangedEvent.class, event -> {
-            getDataProvider().addDataProviderListener(dataProviderListener);
-            container.removeAllChildren();
-            renderedComponents.clear();
-        });
-
-        itemEventBus.addListener(ItemsSentEvent.class,
-                event -> onItemsSent(event.getItems(), container,
-                        componentRenderer, renderedComponents));
+        return getDataGenerator().addDataGenerator(
+                new ComponentDataGenerator<>(componentRenderer,
+                        renderedComponents, container, nodeIdPropertyName,
+                        (KeyMapper<T>) getDataCommunicator().getKeyMapper()));
     }
 
     GridDataGenerator<T> getDataGenerator() {
         return gridDataGenerator;
-    }
-
-    private void onDataChangeEvent(DataChangeEvent<T> event,
-            ComponentTemplateRenderer<? extends Component, T> componentRenderer,
-            Map<String, RendereredComponent<T>> renderedComponents,
-            Element container) {
-
-        if (event instanceof DataRefreshEvent) {
-            // this event is fired when a single item is refreshed on the
-            // DataProvider
-            onDataRefreshEvent((DataRefreshEvent<T>) event, componentRenderer,
-                    renderedComponents, container);
-        }
-    }
-
-    private void onDataRefreshEvent(DataRefreshEvent<T> event,
-            ComponentTemplateRenderer<? extends Component, T> componentRenderer,
-            Map<String, RendereredComponent<T>> renderedComponents,
-            Element container) {
-
-        T item = event.getItem();
-        String key = getDataCommunicator().getKeyMapper().key(item);
-        RendereredComponent<T> rendereredComponent = renderedComponents
-                .get(key);
-        if (rendereredComponent != null) {
-            Component old = rendereredComponent.getComponent();
-            Component recreatedComponent = rendereredComponent
-                    .recreateComponent(item);
-
-            if (old.getElement().getNode().getId() != recreatedComponent
-                    .getElement().getNode().getId()) {
-
-                ComponentRendererUtil.removeRendereredComponent(UI.getCurrent(),
-                        container,
-                        "[data-flow-renderer-item-key='" + key + "']");
-
-                GridTemplateRendererUtil.registerRenderedComponent(
-                        componentRenderer, renderedComponents, container, key,
-                        recreatedComponent);
-            }
-        }
-    }
-
-    private void onItemsSent(List<JsonValue> items, Element container,
-            ComponentTemplateRenderer<? extends Component, T> componentRenderer,
-            Map<String, RendereredComponent<T>> renderedComponents) {
-        items.stream().map(value -> ((JsonObject) value).getString("key"))
-                .filter(key -> !renderedComponents.containsKey(key))
-                .forEach(key -> {
-                    Component renderedComponent = componentRenderer
-                            .createComponent(getDataCommunicator()
-                                    .getKeyMapper().get(key));
-                    GridTemplateRendererUtil.registerRenderedComponent(
-                            componentRenderer, renderedComponents, container,
-                            key, renderedComponent);
-                });
     }
 
     private void setSortOrder(List<GridSortOrder<T>> order,

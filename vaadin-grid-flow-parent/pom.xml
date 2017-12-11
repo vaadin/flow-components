@@ -43,6 +43,12 @@
             <artifactId>flow-data</artifactId>
             <version>${flow.version}</version>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Dependencies for the demo -->
         <dependency>

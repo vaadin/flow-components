@@ -15,12 +15,17 @@
  */
 package com.vaadin.ui.grid.tests;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.AbstractComponentIT;
@@ -46,14 +51,17 @@ public class GridTestPageIT extends AbstractComponentIT {
         WebElement grid = findElement(By.id("grid-with-component-renderers"));
         String itemIdPrefix = "grid-with-component-renderers-";
 
+        waitUntil(driver -> getItems(driver, grid).size() == 20);
         assertItemsArePresent(grid, itemIdPrefix, 0, 20);
 
         WebElement button = findElement(By.id(itemIdPrefix + "change-list"));
 
         clickElementWithJs(button);
+        waitUntil(driver -> getItems(driver, grid).size() == 10);
         assertItemsArePresent(grid, itemIdPrefix, 20, 10);
 
         clickElementWithJs(button);
+        waitUntil(driver -> getItems(driver, grid).size() == 20);
         assertItemsArePresent(grid, itemIdPrefix, 0, 20);
     }
 
@@ -64,7 +72,6 @@ public class GridTestPageIT extends AbstractComponentIT {
      * should be re-enabled.
      */
     @Test
-    @Ignore
     public void openGridWithComponents_removeItems_componentsAreRemoved() {
         WebElement grid = findElement(By.id("grid-with-component-renderers"));
         String itemIdPrefix = "grid-with-component-renderers-";
@@ -96,12 +103,20 @@ public class GridTestPageIT extends AbstractComponentIT {
     }
 
     private void assertItemIsNotPresent(WebElement grid, String itemId) {
-        try {
-            grid.findElement(By.id(itemId));
-            Assert.fail("Item with Id '" + itemId
-                    + "' is not supposed to be in the Grid");
-        } catch (NoSuchElementException ex) {
-            // expected
+        /*
+         * Grid reuses some cells over time, and items not used anymore can
+         * still be shown in the DOM tree, but are not visible in the UI.
+         * Because of that, we can't just try to find the item in the tree and
+         * assert that it's not there.
+         */
+        Map<Integer, Map<String, ?>> items = getItems(driver, grid);
+        Set<Entry<Integer, Map<String, ?>>> entrySet = items.entrySet();
+        for (Entry<Integer, Map<String, ?>> entry : entrySet) {
+            Map<String, ?> map = entry.getValue();
+            if (itemId.equals(map.get("id"))) {
+                Assert.fail("Item ID '" + itemId
+                        + "' is not supposed to be in the Grid");
+            }
         }
     }
 
@@ -118,6 +133,14 @@ public class GridTestPageIT extends AbstractComponentIT {
     private String getInnerText(WebElement element) {
         return String.valueOf(
                 executeScript("return arguments[0].innerText", element));
+    }
+
+    public static Map<Integer, Map<String, ?>> getItems(WebDriver driver,
+            WebElement element) {
+        Object result = ((JavascriptExecutor) driver)
+                .executeScript("return arguments[0]._cache.items;", element);
+
+        return (Map<Integer, Map<String, ?>>) result;
     }
 
 }

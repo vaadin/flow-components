@@ -82,9 +82,22 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
     private void setupHeaderOrFooter(boolean header,
             TemplateRenderer<?> renderer, Element headerOrFooter) {
         if (renderer instanceof ComponentTemplateRenderer) {
-            GridTemplateRendererUtil.setupHeaderOrFooterComponentRenderer(this,
-                    (ComponentTemplateRenderer<?, ?>) renderer);
+            /*
+             * The ComponentTemplateRenderer requires a nodeId to work, and for
+             * that it needs the parent to be attached.
+             */
+            headerOrFooter.getNode().runWhenAttached(ui -> {
+                GridTemplateRendererUtil.setupHeaderOrFooterComponentRenderer(
+                        this, (ComponentTemplateRenderer<?, ?>) renderer);
+                setupHeaderOrFooterTemplate(header, renderer, headerOrFooter);
+            });
+        } else {
+            setupHeaderOrFooterTemplate(header, renderer, headerOrFooter);
         }
+    }
+
+    private void setupHeaderOrFooterTemplate(boolean header,
+            TemplateRenderer<?> renderer, Element headerOrFooter) {
 
         headerOrFooter.setProperty("innerHTML",
                 header ? getHeaderRendererTemplate(renderer)

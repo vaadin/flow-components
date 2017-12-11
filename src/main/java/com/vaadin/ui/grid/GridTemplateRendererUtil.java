@@ -15,18 +15,22 @@
  */
 package com.vaadin.ui.grid;
 
-import java.io.Serializable;
 import java.util.Map;
 
+import com.vaadin.data.provider.DataGenerator;
+import com.vaadin.data.provider.KeyMapper;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.function.ValueProvider;
+import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.grid.Grid.GridDataGenerator;
-import com.vaadin.ui.renderers.ComponentRendererUtil;
 import com.vaadin.ui.renderers.ComponentTemplateRenderer;
 import com.vaadin.ui.renderers.TemplateRenderer;
 import com.vaadin.ui.renderers.TemplateRendererUtil;
 import com.vaadin.util.JsonSerializer;
+
+import elemental.json.JsonObject;
 
 /**
  * Helper class with utility methods used internally by {@link Grid} to support
@@ -38,56 +42,82 @@ import com.vaadin.util.JsonSerializer;
  */
 class GridTemplateRendererUtil {
 
-    /**
-     * Internal object to hold {@link ComponentTemplateRenderer}s and their
-     * generated {@link Component}s together.
-     * 
-     * @param <T>
-     *            the model item attached to the component
-     */
-    static final class RendereredComponent<T> implements Serializable {
-        private Component component;
+    private GridTemplateRendererUtil() {
+    }
+
+    static class ComponentDataGenerator<T> implements DataGenerator<T> {
+
         private ComponentTemplateRenderer<? extends Component, T> componentRenderer;
+        private Map<String, Component> renderedComponents;
+        private Element container;
+        private String nodeIdPropertyName;
+        private KeyMapper<T> keyMapper;
 
-        /**
-         * Default constructor.
-         * 
-         * @param component
-         *            the generated component
-         * @param componentRenderer
-         *            the renderer that generated the component
-         */
-        public RendereredComponent(Component component,
-                ComponentTemplateRenderer<? extends Component, T> componentRenderer) {
-            this.component = component;
+        public ComponentDataGenerator(
+                ComponentTemplateRenderer<? extends Component, T> componentRenderer,
+                Map<String, Component> renderedComponents, Element container,
+                String nodeIdPropertyName, KeyMapper<T> keyMapper) {
             this.componentRenderer = componentRenderer;
+            this.renderedComponents = renderedComponents;
+            this.container = container;
+            this.nodeIdPropertyName = nodeIdPropertyName;
+            this.keyMapper = keyMapper;
         }
 
-        /**
-         * Gets the current generated component.
-         * 
-         * @return the generated component by the renderer
-         */
-        public Component getComponent() {
-            return component;
+        @Override
+        public void generateData(T item, JsonObject jsonObject) {
+            String itemKey = jsonObject.getString("key");
+            Component renderedComponent = renderedComponents.get(itemKey);
+            if (renderedComponent == null) {
+                renderedComponent = componentRenderer.createComponent(item);
+                GridTemplateRendererUtil.registerRenderedComponent(
+                        componentRenderer, renderedComponents, container,
+                        itemKey, renderedComponent);
+            }
+            int nodeId = renderedComponent.getElement().getNode().getId();
+            jsonObject.put(nodeIdPropertyName, nodeId);
         }
 
-        /**
-         * Recreates the component by calling
-         * {@link ComponentTemplateRenderer#createComponent(Object)}, and sets
-         * the internal component returned by {@link #getComponent()}.
-         * 
-         * @param item
-         *            the model item to be attached to the component instance
-         * @return the new generated component returned by the renderer
-         */
-        public Component recreateComponent(T item) {
-            component = componentRenderer.createComponent(item);
-            return component;
+        @Override
+        public void refreshData(T item) {
+            String itemKey = keyMapper.key(item);
+            Component oldComponent = renderedComponents.get(itemKey);
+            if (oldComponent != null) {
+                Component recreatedComponent = componentRenderer
+                        .createComponent(item);
+
+                int oldId = oldComponent.getElement().getNode().getId();
+                int newId = recreatedComponent.getElement().getNode().getId();
+                if (oldId != newId) {
+                    container.removeChild(oldComponent.getElement());
+                    GridTemplateRendererUtil.registerRenderedComponent(
+                            componentRenderer, renderedComponents, container,
+                            itemKey, recreatedComponent);
+                }
+            }
+        }
+
+        @Override
+        public void destroyData(T item) {
+            String itemKey = keyMapper.key(item);
+            Component rendereredComponent = renderedComponents.remove(itemKey);
+            if (rendereredComponent != null) {
+                rendereredComponent.getElement().removeFromParent();
+            }
+        }
+
+        @Override
+        public void destroyAllData() {
+            container.removeAllChildren();
+            renderedComponents.clear();
         }
     }
 
-    private GridTemplateRendererUtil() {
+    static String getAppId() {
+        String appId = UI.getCurrent().getSession().getService().getMainDivId(
+                UI.getCurrent().getSession(), VaadinRequest.getCurrent());
+        appId = appId.substring(0, appId.indexOf("-"));
+        return appId;
     }
 
     static <T> void setupTemplateRenderer(TemplateRenderer<T> renderer,
@@ -106,30 +136,27 @@ class GridTemplateRendererUtil {
 
     static <T> void setupHeaderOrFooterComponentRenderer(Component owner,
             ComponentTemplateRenderer<? extends Component, T> componentRenderer) {
-        Element container = ComponentRendererUtil
-                .createContainerForRenderers(owner);
-
-        componentRenderer.setTemplateAttribute("key", "0");
-        componentRenderer.setTemplateAttribute("keyname",
-                "data-flow-renderer-item-key");
-        componentRenderer.setTemplateAttribute("containerid",
-                container.getAttribute("id"));
 
         Component renderedComponent = componentRenderer.createComponent(null);
-        GridTemplateRendererUtil.registerRenderedComponent(componentRenderer,
-                null, container, "0", renderedComponent);
+        owner.getElement().appendVirtualChild(renderedComponent.getElement());
+
+        String appId = getAppId();
+
+        componentRenderer.setTemplateAttribute("appid", appId);
+        componentRenderer.setTemplateAttribute("nodeid", String
+                .valueOf(renderedComponent.getElement().getNode().getId()));
     }
 
     static <T> void registerRenderedComponent(
             ComponentTemplateRenderer<? extends Component, T> componentRenderer,
-            Map<String, RendereredComponent<T>> renderedComponents,
-            Element container, String key, Component component) {
-        component.getElement().setAttribute("data-flow-renderer-item-key", key);
-        container.appendChild(component.getElement());
+            Map<String, Component> renderedComponents, Element container,
+            String itemKey, Component component) {
+
+        Element element = component.getElement();
+        container.appendChild(element);
 
         if (renderedComponents != null) {
-            renderedComponents.put(key,
-                    new RendereredComponent<>(component, componentRenderer));
+            renderedComponents.put(itemKey, component);
         }
     }
 

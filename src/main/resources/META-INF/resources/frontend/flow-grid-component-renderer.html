@@ -1,0 +1,17 @@
+<dom-module id="flow-grid-component-renderer">  
+  <script>
+  class FlowGridComponentRenderer extends FlowComponentRenderer {
+    static get is() { return 'flow-grid-component-renderer'; }
+    
+    _notifyResize(){
+      if (this.parentElement && this.parentElement.parentElement && 
+          this.parentElement.parentElement.tagName === "VAADIN-GRID"){
+            
+        let grid = this.parentElement.parentElement;
+        grid.$connector.asyncNotifyResize();
+      }
+    }
+  }
+  window.customElements.define(FlowGridComponentRenderer.is, FlowGridComponentRenderer);
+  </script> 
+</dom-module>
