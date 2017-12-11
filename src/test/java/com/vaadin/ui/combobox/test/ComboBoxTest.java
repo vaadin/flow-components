@@ -68,6 +68,14 @@ public class ComboBoxTest {
         comboBox.setDataProvider(null);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void labelItemGeneratorReturnsNull_throw() {
+        ComboBox<Object> comboBox = new ComboBox<>();
+
+        comboBox.setItemLabelGenerator(obj -> null);
+        comboBox.setItems(Arrays.asList("foo", "bar"));
+    }
+
     private void assertItem(TestComboBox comboBox, int index, String caption) {
         JsonValue value1 = comboBox.items.get(index);
         Assert.assertEquals(caption,

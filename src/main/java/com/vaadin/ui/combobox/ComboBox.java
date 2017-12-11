@@ -48,9 +48,8 @@ import elemental.json.JsonValue;
  * @param <T>
  *            the type of the items to be inserted in the combo box
  */
-public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>>
-        implements HasSize, HasValidation, HasValue<ComboBox<T>, T>,
-        HasDataProvider<T> {
+public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
+        HasSize, HasValidation, HasValue<ComboBox<T>, T>, HasDataProvider<T> {
     private static final String ITEM_LABEL_PROPERTY = "label";
     private static final String KEY_PROPERTY = "key";
     private static final String SELECTED_ITEM_PROPERTY_NAME = "selectedItem";
@@ -290,7 +289,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>>
         JsonObject json = Json.createObject();
         json.put(KEY_PROPERTY, keyMapper.key(item));
 
-        json.put(ITEM_LABEL_PROPERTY, itemLabelGenerator.apply(item));
+        String text = getItemLabelGenerator().apply(item);
+        if (text == null) {
+            throw new IllegalStateException(String.format(
+                    "Got 'null' as a label value for the item '%s'. "
+                            + "'%s' instance may not return 'null' values",
+                    item, ItemLabelGenerator.class.getSimpleName()));
+        }
+        json.put(ITEM_LABEL_PROPERTY, text);
 
         return json;
     }
