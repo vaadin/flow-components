@@ -16,7 +16,6 @@
 package com.vaadin.ui.upload.receivers;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,14 +26,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.vaadin.ui.upload.MultiFileReceiver;
 
 /**
- * Basic multi file in memory file receiver implementation.
+ * Basic receiver implementation for receiving multiple file upload and storing
+ * them as files. Files are stored by default to Files
+ * created using {@link java.io.File#createTempFile(String, String)} with a null
+ * suffix.
+ * <p>
+ * For a custom file the constructor {@link AbstractFileBuffer(FileFactory)}
+ * should be used.
  */
-public class MultiFileBuffer extends AbstractFileBuffer implements MultiFileReceiver {
+public class MultiFileBuffer extends AbstractFileBuffer
+        implements MultiFileReceiver {
 
     private Map<String, FileData> files = new HashMap<>();
 
@@ -47,9 +52,9 @@ public class MultiFileBuffer extends AbstractFileBuffer implements MultiFileRece
     }
 
     /**
-     * Get the files in memory for this buffer.
-     * 
-     * @return files in memory
+     * Get the files stored for this buffer.
+     *
+     * @return files stored
      */
     public Set<String> getFiles() {
         return files.keySet();
@@ -57,9 +62,9 @@ public class MultiFileBuffer extends AbstractFileBuffer implements MultiFileRece
 
     /**
      * Get file data for upload with file name
-     * 
+     *
      * @param fileName
-     *            file name to get upload data for
+     *         file name to get upload data for
      * @return file data for filename or null if not found
      */
     public FileData getFileData(String fileName) {
@@ -68,9 +73,9 @@ public class MultiFileBuffer extends AbstractFileBuffer implements MultiFileRece
 
     /**
      * Get the output stream for file.
-     * 
+     *
      * @param fileName
-     *            name of file to get stream for
+     *         name of file to get stream for
      * @return file output stream or null if not available
      */
     public FileDescriptor getFileDescriptor(String fileName) {
@@ -89,16 +94,17 @@ public class MultiFileBuffer extends AbstractFileBuffer implements MultiFileRece
 
     /**
      * Get the input stream for file with fileName.
-     * 
+     *
      * @param fileName
-     *            name of file to get input stream for
+     *         name of file to get input stream for
      * @return input stream for file or empty stream if file not found
      */
     public InputStream getInputStream(String fileName) {
         if (files.containsKey(fileName)) {
             try {
-                return new FileInputStream(((FileOutputStream) files
-                        .get(fileName).getOutputBuffer()).getFD());
+                return new FileInputStream(
+                        ((FileOutputStream) files.get(fileName)
+                                .getOutputBuffer()).getFD());
             } catch (IOException e) {
                 getLogger().log(Level.WARNING,
                         "Failed to create InputStream for: '" + fileName + "'",
