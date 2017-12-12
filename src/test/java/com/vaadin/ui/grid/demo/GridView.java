@@ -154,6 +154,11 @@ public class GridView extends DemoView {
         public void setPostalCode(String postalCode) {
             this.postalCode = postalCode;
         }
+
+        @Override
+        public String toString() {
+            return String.format("%s %s", street, number);
+        }
     }
     // end-source-example
 
@@ -240,6 +245,7 @@ public class GridView extends DemoView {
         createSorting();
         createHeaderAndFooterUsingTemplates();
         createHeaderAndFooterUsingComponents();
+        createBeanGrid();
 
         addCard("Grid example model",
                 new Label("These objects are used in the examples above"));
@@ -723,6 +729,24 @@ public class GridView extends DemoView {
         grid.setId("grid-header-with-components");
         addCard("Using components", "Column header and footer using components",
                 grid);
+    }
+
+    private void createBeanGrid() {
+        // begin-source-example
+        // source-example-heading: Automatically adding columns
+        // Providing a bean-type generates columns for all of it's properties
+        Grid<Person> grid = new Grid<>(Person.class);
+        grid.setItems(getItems());
+
+        // Property-names are automatically set as keys
+        grid.getColumnByKey("id").setHidden(true);
+
+        // Columns for sub-properties can be added easily
+        grid.addColumn("address.postalCode");
+
+        // end-source-example
+        grid.setId("bean-grid");
+        addCard("Configuring Columns", "Automatically adding columns", grid);
     }
 
     private List<Person> getItems() {

@@ -25,14 +25,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.data.BeanPropertySet;
 import com.vaadin.data.Binder;
 import com.vaadin.data.HasDataProvider;
+import com.vaadin.data.PropertyDefinition;
+import com.vaadin.data.PropertySet;
 import com.vaadin.data.event.SortEvent;
 import com.vaadin.data.event.SortEvent.SortNotifier;
 import com.vaadin.data.provider.ArrayUpdater;
@@ -754,6 +758,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private final List<GridSortOrder<T>> sortOrder = new ArrayList<>();
 
+    private PropertySet<T> propertySet;
+
     private Registration itemDetailsDataGeneratorRegistration;
 
     /**
@@ -782,6 +788,28 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         getElement().getNode()
                 .runWhenAttached(ui -> ui.getPage().executeJavaScript(
                         "window.gridConnector.initLazy($0)", getElement()));
+    }
+
+    /**
+     * Creates a new grid with an initial set of columns for each of the bean's
+     * properties. The property-values of the bean will be converted to Strings.
+     * Full names of the properties will be used as the
+     * {@link Column#setKey(String) column keys} and the property captions will
+     * be used as the {@link Column#setHeader(String) column headers}.
+     * <p>
+     * You can add columns for nested properties of the bean with
+     * {@link #addColumn(String)}.
+     *
+     * @param beanType
+     *            the bean type to use, not <code>null</code>
+     */
+    public Grid(Class<T> beanType) {
+        this();
+        Objects.requireNonNull(beanType, "Bean type can't be null");
+        propertySet = BeanPropertySet.get(beanType);
+        propertySet.getProperties()
+                .filter(property -> !property.isSubProperty())
+                .forEach(this::addColumn);
     }
 
     /**
@@ -899,6 +927,53 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
+     * <strong>Note:</strong> This method can only be used for a Grid created
+     * from a bean type with {@link #Grid(Class)}.
+     * <p>
+     * Adds a new column for the given property name. The property values are
+     * converted to Strings in the grid cells. The property's full name will be
+     * used as the {@link Column#setKey(String) column key} and the property
+     * caption will be used as the {@link Column#setHeader(String) column
+     * header}.
+     * <p>
+     * You can add columns for nested properties with dot notation, eg.
+     * <code>"property.nestedProperty"</code>
+     *
+     * @param propertyName
+     *            the property name of the new column, not <code>null</code>
+     * @return the created column
+     */
+    public Column<T> addColumn(String propertyName) {
+        if (propertySet == null) {
+            throw new UnsupportedOperationException(
+                    "This method can't be used for a Grid that isn't constructed from a bean type");
+        }
+        Objects.requireNonNull(propertyName, "Property name can't be null");
+
+        PropertyDefinition<T, ?> property;
+        try {
+            property = propertySet.getProperty(propertyName).get();
+        } catch (NoSuchElementException | IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Can't resolve property name '"
+                    + propertyName + "' from '" + propertySet + "'");
+        }
+        return addColumn(property);
+    }
+
+    private Column<T> addColumn(PropertyDefinition<T, ?> property) {
+        Column<T> column = addColumn(
+                item -> String.valueOf(property.getGetter().apply(item)))
+                        .setHeader(property.getCaption());
+        try {
+            return column.setKey(property.getFullName());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException(
+                    "Multiple columns for the same property: "
+                            + property.getFullName());
+        }
+    }
+
+    /**
      * Sets a user-defined identifier for given column.
      *
      * @see Column#setKey(String)
@@ -910,7 +985,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     protected void setColumnKey(String key, Column column) {
         if (keyToColumnMap.containsKey(key)) {
-            throw new IllegalArgumentException("Duplicate key for columns");
+            throw new IllegalArgumentException(
+                    "Duplicate key for columns: " + key);
         }
         keyToColumnMap.put(key, column);
     }
@@ -1271,6 +1347,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         if (columnsToMerge.size() < 2) {
             throw new IllegalArgumentException(
                     "Cannot merge less than two columns");
+        }
+        if (columnsToMerge.contains(null)) {
+            throw new NullPointerException(
+                    "Columns to merge cannot contain null values");
         }
         if (columnsToMerge.stream()
                 .anyMatch(column -> !topLevelColumns.contains(column))) {
