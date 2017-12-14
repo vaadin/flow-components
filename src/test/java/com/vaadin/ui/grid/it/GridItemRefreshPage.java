@@ -23,6 +23,8 @@ import com.vaadin.router.Route;
 import com.vaadin.ui.button.Button;
 import com.vaadin.ui.grid.Grid;
 import com.vaadin.ui.html.Div;
+import com.vaadin.ui.html.Label;
+import com.vaadin.ui.renderers.ComponentTemplateRenderer;
 
 @Route("grid-item-refresh-page")
 public class GridItemRefreshPage extends Div {
@@ -57,34 +59,96 @@ public class GridItemRefreshPage extends Div {
     }
 
     public GridItemRefreshPage() {
+        createTemplateGrid();
+        createComponentGrid();
+    }
+
+    private void createTemplateGrid() {
         Grid<Bean> grid = new Grid<>();
+        grid.setHeight("500px");
         grid.addColumn(Bean::getFirstField).setHeader("First Field");
         grid.addColumn(Bean::getSecondField).setHeader("Second Field");
         List<Bean> items = createItems(1000);
         grid.setItems(items);
+        grid.setId("template-grid");
 
-        Button refreshFirstBtn = new Button("update and refresh first item");
-        refreshFirstBtn.addClickListener(event -> {
-            updateBean(items.get(0));
-            grid.getDataProvider().refreshItem(items.get(0));
-        });
-        Button refreshMultipleBtn = new Button("update and refresh items 5-10");
-        refreshMultipleBtn.addClickListener(event -> {
-            items.subList(4, 10).forEach(item -> {
-                updateBean(item);
-                grid.getDataProvider().refreshItem(item);
-            });
-        });
-        Button refreshAllBtn = new Button("refresh all through data provider");
-        refreshAllBtn.addClickListener(event -> {
-            items.forEach(this::updateBean);
-            grid.getDataProvider().refreshAll();
-        });
+        Div div = new Div();
+        div.setText("Template Grid");
+        add(div, grid);
+        addButtons(grid, items, "template-");
+    }
 
-        refreshFirstBtn.setId("refresh-first");
-        refreshMultipleBtn.setId("refresh-multiple");
-        refreshAllBtn.setId("refresh-all");
-        add(grid, refreshFirstBtn, refreshMultipleBtn, refreshAllBtn);
+    private void createComponentGrid() {
+        Grid<Bean> grid = new Grid<>();
+        grid.setHeight("500px");
+        grid.addColumn(new ComponentTemplateRenderer<Label, Bean>(
+                item -> new Label(item.getFirstField())))
+                .setHeader("First Field");
+        grid.addColumn(new ComponentTemplateRenderer<Label, Bean>(
+                item -> new Label(String.valueOf(item.getSecondField()))))
+                .setHeader("Second Field");
+        List<Bean> items = createItems(1000);
+        grid.setItems(items);
+        grid.setId("component-grid");
+
+        Div div = new Div();
+        div.setText("Component Grid");
+        add(div, grid);
+        addButtons(grid, items, "component-");
+    }
+
+    private void addButtons(Grid<Bean> grid, List<Bean> items,
+            String idPrefix) {
+        Button refreshFirstBtn = new Button("update and refresh first item",
+                event -> {
+                    updateBean(items.get(0));
+                    grid.getDataProvider().refreshItem(items.get(0));
+                });
+        Button refreshMultipleBtn = new Button("update and refresh items 5-10",
+                event -> {
+                    items.subList(4, 10).forEach(item -> {
+                        updateBean(item);
+                        grid.getDataProvider().refreshItem(item);
+                    });
+                });
+        Button refreshProviderBtn = new Button(
+                "refresh all through data provider", event -> {
+                    items.forEach(this::updateBean);
+                    grid.getDataProvider().refreshAll();
+                });
+
+        Button refreshFirstCommunicatorBtn = new Button(
+                "update and refresh first item through data communicator",
+                event -> {
+                    updateBean(items.get(0));
+                    grid.getDataCommunicator().refresh(items.get(0));
+                });
+        Button refreshMultipleCommunicatorBtn = new Button(
+                "update and refresh items 5-10 through data communicator",
+                event -> {
+                    items.subList(4, 10).forEach(item -> {
+                        updateBean(item);
+                        grid.getDataCommunicator().refresh(item);
+                    });
+                });
+        Button resetCommunicatorBtn = new Button(
+                "refresh all through data communicator", event -> {
+                    items.forEach(this::updateBean);
+                    grid.getDataCommunicator().reset();
+                });
+
+        refreshFirstBtn.setId(idPrefix + "refresh-first");
+        refreshMultipleBtn.setId(idPrefix + "refresh-multiple");
+        refreshProviderBtn.setId(idPrefix + "refresh-all");
+
+        refreshFirstCommunicatorBtn
+                .setId(idPrefix + "refresh-first-communicator");
+        refreshMultipleCommunicatorBtn
+                .setId(idPrefix + "refresh-multiple-communicator");
+        resetCommunicatorBtn.setId(idPrefix + "reset-communicator");
+        add(grid, refreshFirstBtn, refreshMultipleBtn, refreshProviderBtn,
+                refreshFirstCommunicatorBtn, refreshMultipleCommunicatorBtn,
+                resetCommunicatorBtn);
     }
 
     private List<Bean> createItems(int numberOfItems) {

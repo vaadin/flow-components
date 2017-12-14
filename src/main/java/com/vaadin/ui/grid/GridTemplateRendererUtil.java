@@ -67,9 +67,13 @@ class GridTemplateRendererUtil {
         @Override
         public void generateData(T item, JsonObject jsonObject) {
             String itemKey = jsonObject.getString("key");
-            Component renderedComponent = renderedComponents.get(itemKey);
-            if (renderedComponent == null) {
-                renderedComponent = componentRenderer.createComponent(item);
+            Component oldRenderedComponent = renderedComponents.get(itemKey);
+            Component renderedComponent = componentRenderer
+                    .createComponent(item);
+            if (oldRenderedComponent != renderedComponent) {
+                if (oldRenderedComponent != null) {
+                    oldRenderedComponent.getElement().removeFromParent();
+                }
                 GridTemplateRendererUtil.registerRenderedComponent(
                         componentRenderer, renderedComponents, container,
                         itemKey, renderedComponent);
@@ -100,9 +104,9 @@ class GridTemplateRendererUtil {
         @Override
         public void destroyData(T item) {
             String itemKey = keyMapper.key(item);
-            Component rendereredComponent = renderedComponents.remove(itemKey);
-            if (rendereredComponent != null) {
-                rendereredComponent.getElement().removeFromParent();
+            Component renderedComponent = renderedComponents.remove(itemKey);
+            if (renderedComponent != null) {
+                renderedComponent.getElement().removeFromParent();
             }
         }
 

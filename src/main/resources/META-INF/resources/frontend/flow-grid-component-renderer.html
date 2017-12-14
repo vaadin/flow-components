@@ -5,7 +5,7 @@
   class FlowGridComponentRenderer extends FlowComponentRenderer {
     static get is() { return 'flow-grid-component-renderer'; }
     
-    _notifyResize(){
+    onComponentRendered(){
       if (this.parentElement && this.parentElement.parentElement && 
           this.parentElement.parentElement.tagName === "VAADIN-GRID"){
             
