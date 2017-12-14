@@ -13,25 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.layout.demo;
+package com.vaadin.flow.component.layout.demo;
 
+import com.vaadin.flow.component.layout.HorizontalLayout;
+import com.vaadin.flow.component.layout.FlexLayout.Alignment;
+import com.vaadin.flow.component.layout.FlexLayout.JustifyContentMode;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.button.Button;
 import com.vaadin.ui.html.Div;
-import com.vaadin.ui.layout.VerticalLayout;
-import com.vaadin.ui.layout.FlexLayout.Alignment;
-import com.vaadin.ui.layout.FlexLayout.JustifyContentMode;
 
 /**
- * View for the {@link VerticalLayout} component.
+ * View for the {@link HorizontalLayout} component.
  * 
  * @author Vaadin Ltd
  */
-@Route("vaadin-vertical-layout")
-public class VerticalLayoutView extends DemoView {
-
+@Route("vaadin-horizontal-layout")
+public class HorizontalLayoutView extends DemoView {
+	
     @Override
     protected void initView() {
         createDefaultLayout();
@@ -45,7 +45,7 @@ public class VerticalLayoutView extends DemoView {
     private void createDefaultLayout() {
         // begin-source-example
         // source-example-heading: Default layout
-        VerticalLayout layout = new VerticalLayout();
+        HorizontalLayout layout = new HorizontalLayout();
         layout.getStyle().set("border", "1px solid #9E9E9E");
 
         Component component1 = createComponent(1, "#78909C");
@@ -63,23 +63,22 @@ public class VerticalLayoutView extends DemoView {
     private void createLayoutWithSpacing() {
         // begin-source-example
         // source-example-heading: Layout with justify content
-        VerticalLayout layout = new VerticalLayout();
-        layout.setHeight("150px");
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setWidth("100%");
         layout.getStyle().set("border", "1px solid #9E9E9E");
-
-        // the default is JustifyContentMode.START
-        layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
         Component component1 = createComponent(1, "#78909C");
         Component component2 = createComponent(2, "#546E7A");
         Component component3 = createComponent(3, "#37474F");
 
+        // the default is JustifyContentMode.START
+        layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
+
         layout.add(component1, component2, component3);
         // end-source-example
 
-        component2.getElement().setProperty("innerHTML",
-                "Component 2<br>With long text");
-        component3.getElement().getStyle().set("fontSize", "9px");
+        component2.getElement().setText("Component 2 with long text");
+        component3.getElement().setText("C 3");
 
         Div buttons = new Div();
         buttons.add(createSpacingButton(layout, "justify-content-start-button",
@@ -101,13 +100,14 @@ public class VerticalLayoutView extends DemoView {
     private void createLayoutWithDefaultAlignment() {
         // begin-source-example
         // source-example-heading: Layout with general alignment
-        VerticalLayout layout = new VerticalLayout();
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setWidth("100%");
         layout.setHeight("150px");
         layout.getStyle().set("border", "1px solid #9E9E9E");
         layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
-        // the default is Alignment.START
-        layout.setDefaultHorizontalComponentAlignment(Alignment.STRETCH);
+        // the default is Alignment.BASELINE
+        layout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
 
         Component component1 = createComponent(1, "#78909C");
         Component component2 = createComponent(2, "#546E7A");
@@ -116,8 +116,8 @@ public class VerticalLayoutView extends DemoView {
         layout.add(component1, component2, component3);
         // end-source-example
 
-        component2.getElement().setText("Component 2 with long text");
-        component3.getElement().setText("C 3");
+        component2.getElement().getStyle().set("fontSize", "24px");
+        component3.getElement().getStyle().set("fontSize", "9px");
 
         Div buttons = new Div();
         buttons.add(createAlignmentButton(layout, "align-start-button",
@@ -128,6 +128,8 @@ public class VerticalLayoutView extends DemoView {
                 Alignment.CENTER));
         buttons.add(createAlignmentButton(layout, "align-stretch-button",
                 Alignment.STRETCH));
+        buttons.add(createAlignmentButton(layout, "align-baseline-button",
+                Alignment.BASELINE));
 
         layout.setId("layout-with-alignment");
 
@@ -137,22 +139,23 @@ public class VerticalLayoutView extends DemoView {
     private void createLayoutWithIndividualAlignments() {
         // begin-source-example
         // source-example-heading: Layout with individual alignments
-        VerticalLayout layout = new VerticalLayout();
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setWidth("100%");
         layout.setHeight("150px");
         layout.getStyle().set("border", "1px solid #9E9E9E");
         layout.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
         Component component1 = createComponent(1, "#78909C");
-        layout.setHorizontalComponentAlignment(Alignment.START, component1);
+        layout.setVerticalComponentAlignment(Alignment.START, component1);
 
         Component component2 = createComponent(2, "#546E7A");
-        layout.setHorizontalComponentAlignment(Alignment.CENTER, component2);
+        layout.setVerticalComponentAlignment(Alignment.CENTER, component2);
 
         Component component3 = createComponent(3, "#37474F");
-        layout.setHorizontalComponentAlignment(Alignment.END, component3);
+        layout.setVerticalComponentAlignment(Alignment.END, component3);
 
         Component component4 = createComponent(4, "#263238");
-        layout.setHorizontalComponentAlignment(Alignment.STRETCH, component4);
+        layout.setVerticalComponentAlignment(Alignment.STRETCH, component4);
 
         layout.add(component1, component2, component3, component4);
         // end-source-example
@@ -169,10 +172,9 @@ public class VerticalLayoutView extends DemoView {
     private void createLayoutWithExpandRatios() {
         // begin-source-example
         // source-example-heading: Layout with expand ratios
-        VerticalLayout layout = new VerticalLayout();
-        layout.setHeight("200px");
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setWidth("100%");
         layout.getStyle().set("border", "1px solid #9E9E9E");
-        layout.setDefaultHorizontalComponentAlignment(Alignment.STRETCH);
 
         Component component1 = createComponent(1, "#78909C");
         layout.expand(component1);
@@ -197,13 +199,12 @@ public class VerticalLayoutView extends DemoView {
     private void createLayoutWithCenterComponent() {
         // begin-source-example
         // source-example-heading: Layout with component in the center
-        VerticalLayout layout = new VerticalLayout();
-        layout.setHeight("200px");
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setWidth("200px");
         layout.getStyle().set("border", "1px solid #9E9E9E");
 
         Component component = createComponent(1, "#78909C");
         layout.add(component);
-        layout.setHorizontalComponentAlignment(Alignment.CENTER, component);
         layout.setJustifyContentMode(JustifyContentMode.AROUND);
 
         // end-source-example
@@ -222,16 +223,16 @@ public class VerticalLayoutView extends DemoView {
         return component;
     }
 
-    private Component createAlignmentButton(VerticalLayout layout, String id,
+    private Component createAlignmentButton(HorizontalLayout layout, String id,
             Alignment alignment) {
         Button button = new Button(alignment.name());
         button.setId(id);
         button.addClickListener(event -> layout
-                .setDefaultHorizontalComponentAlignment(alignment));
+                .setDefaultVerticalComponentAlignment(alignment));
         return button;
     }
 
-    private Component createSpacingButton(VerticalLayout layout, String id,
+    private Component createSpacingButton(HorizontalLayout layout, String id,
             JustifyContentMode spacing) {
         Button button = new Button(spacing.name());
         button.setId(id);

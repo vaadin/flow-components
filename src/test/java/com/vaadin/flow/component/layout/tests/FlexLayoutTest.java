@@ -13,15 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.layout.tests;
+package com.vaadin.flow.component.layout.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.layout.FlexLayout;
+import com.vaadin.flow.component.layout.FlexLayout.Alignment;
 import com.vaadin.ui.html.Div;
 import com.vaadin.ui.html.Label;
-import com.vaadin.ui.layout.FlexLayout;
-import com.vaadin.ui.layout.FlexLayout.Alignment;
 
 public class FlexLayoutTest {
 

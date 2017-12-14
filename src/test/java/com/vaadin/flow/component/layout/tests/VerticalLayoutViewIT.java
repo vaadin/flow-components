@@ -13,30 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.layout.tests;
+package com.vaadin.flow.component.layout.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.layout.demo.VerticalLayoutView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.layout.demo.HorizontalLayoutView;
 
 /**
- * Tests for the {@link HorizontalLayoutView}.
+ * Tests for the {@link VerticalLayoutView}.
  */
-public class HorizontalLayoutViewIT extends ComponentDemoTest {
+public class VerticalLayoutViewIT extends ComponentDemoTest {
+
     @Override
     protected String getTestPath() {
-        return "/vaadin-horizontal-layout";
+        return "/vaadin-vertical-layout";
     }
 
     @Test
     public void defaultLayout() {
         WebElement vlayout = layout.findElement(By.id("default-layout"));
         assertBasicFlexPropertiesAreSet(vlayout);
-        Assert.assertEquals("baseline", vlayout.getCssValue("align-items"));
+        Assert.assertEquals("flex-start", vlayout.getCssValue("align-items"));
     }
 
     @Test
@@ -80,7 +81,7 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
         WebElement vlayout = layout.findElement(By.id("layout-with-alignment"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
-        Assert.assertEquals("center", vlayout.getCssValue("align-items"));
+        Assert.assertEquals("stretch", vlayout.getCssValue("align-items"));
 
         WebElement button = layout.findElement(By.id("align-end-button"));
         scrollIntoViewAndClick(button);
@@ -100,11 +101,6 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
         button = layout.findElement(By.id("align-start-button"));
         button.click();
         waitUntil(driver -> "flex-start"
-                .equals(vlayout.getCssValue("align-items")));
-
-        button = layout.findElement(By.id("align-baseline-button"));
-        button.click();
-        waitUntil(driver -> "baseline"
                 .equals(vlayout.getCssValue("align-items")));
     }
 
@@ -148,18 +144,19 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void centerComponent() {
-        WebElement hlayout = layout.findElement(By.id("layout-with-center"));
-        assertBasicFlexPropertiesAreSet(hlayout);
+        WebElement vlayout = layout
+                .findElement(By.id("layout-with-center"));
+        assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-around",
-                hlayout.getCssValue("justify-content"));
-
-        Assert.assertTrue(isElementPresent(By.id("center")));
+                vlayout.getCssValue("justify-content"));
+        WebElement component = layout.findElement(By.id("center"));
+        Assert.assertEquals("center", component.getCssValue("align-self"));
     }
 
     private void assertBasicFlexPropertiesAreSet(WebElement vlayout) {
-        Assert.assertEquals("inline-flex", vlayout.getCssValue("display"));
-        Assert.assertEquals("row", vlayout.getCssValue("flex-direction"));
+        Assert.assertEquals("flex", vlayout.getCssValue("display"));
+        Assert.assertEquals("column", vlayout.getCssValue("flex-direction"));
     }
 
 }
