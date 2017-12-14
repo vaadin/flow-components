@@ -520,6 +520,34 @@ public class GridIT extends TabbedComponentDemoTest {
                         .anyMatch(cell -> cell.getText().startsWith("Street")));
     }
 
+    @Test
+    public void basicRenderers_rowsAreRenderedAsExpected() {
+        openTabAndCheckForErrors("using-renderers");
+        WebElement grid = findElement(By.id("grid-basic-renderers"));
+        scrollToElement(grid);
+        waitUntilCellHasText(grid, "Item 1");
+
+        List<WebElement> cells = grid
+                .findElements(By.tagName("vaadin-grid-cell-content"));
+
+        assertCellContent("Item 1", cells.get(0));
+        assertCellContent("$ 72.76", cells.get(1));
+        assertCellContent("1/10/18 11:19:11 AM", cells.get(2));
+        assertCellContent("Jan 25, 2018", cells.get(3));
+        assertCellContent("<button>Remove</button>", cells.get(4));
+
+        assertCellContent("Item 2", cells.get(5));
+        assertCellContent("$ 30.87", cells.get(6));
+        assertCellContent("1/10/18 11:14:54 AM", cells.get(7));
+        assertCellContent("Jan 19, 2018", cells.get(8));
+        assertCellContent("<button>Remove</button>", cells.get(9));
+    }
+
+    private void assertCellContent(String expected, WebElement cell) {
+        Assert.assertEquals("Wrong content of the rendered cell", expected,
+                cell.getAttribute("innerHTML"));
+    }
+
     private static String getSelectionMessage(Object oldSelection,
             Object newSelection, boolean isFromClient) {
         return String.format(

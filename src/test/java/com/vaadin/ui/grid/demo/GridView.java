@@ -15,9 +15,15 @@
  */
 package com.vaadin.ui.grid.demo;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -40,7 +46,11 @@ import com.vaadin.ui.html.Div;
 import com.vaadin.ui.html.Label;
 import com.vaadin.ui.layout.HorizontalLayout;
 import com.vaadin.ui.layout.VerticalLayout;
+import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.renderers.ComponentTemplateRenderer;
+import com.vaadin.ui.renderers.LocalDateRenderer;
+import com.vaadin.ui.renderers.LocalDateTimeRenderer;
+import com.vaadin.ui.renderers.NumberRenderer;
 import com.vaadin.ui.renderers.TemplateRenderer;
 import com.vaadin.ui.textfield.TextField;
 
@@ -65,8 +75,8 @@ public class GridView extends DemoView {
      */
     public static class Person {
         private int id;
-        private String name;
         private int age;
+        private String name;
         private Address address;
 
         public int getId() {
@@ -162,6 +172,45 @@ public class GridView extends DemoView {
     }
     // end-source-example
 
+    private static class Item {
+        private String name;
+        private double price;
+        private LocalDateTime purchaseDate;
+        private LocalDate estimatedDeliveryDate;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public void setPrice(double price) {
+            this.price = price;
+        }
+
+        public LocalDateTime getPurchaseDate() {
+            return purchaseDate;
+        }
+
+        public void setPurchaseDate(LocalDateTime purchaseDate) {
+            this.purchaseDate = purchaseDate;
+        }
+
+        public LocalDate getEstimatedDeliveryDate() {
+            return estimatedDeliveryDate;
+        }
+
+        public void setEstimatedDeliveryDate(LocalDate estimatedDeliveryDate) {
+            this.estimatedDeliveryDate = estimatedDeliveryDate;
+        }
+    }
+
     // begin-source-example
     // source-example-heading: Grid with columns using component renderer
     /**
@@ -238,6 +287,7 @@ public class GridView extends DemoView {
         createMultiSelect();
         createNoneSelect();
         createColumnApiExample();
+        createBasicRenderers();
         createColumnTemplate();
         createDetailsRow();
         createColumnGroup();
@@ -749,6 +799,43 @@ public class GridView extends DemoView {
         addCard("Configuring Columns", "Automatically adding columns", grid);
     }
 
+    private void createBasicRenderers() {
+        // begin-source-example
+        // source-example-heading: Using basic renderers
+        Grid<Item> grid = new Grid<>();
+        grid.setItems(getShoppingCart());
+
+        grid.addColumn(Item::getName).setHeader("Name");
+
+        // NumberRenderer to render numbers in general
+        grid.addColumn(new NumberRenderer<>(Item::getPrice, "$ %(,.2f",
+                Locale.US, "$ 0.00")).setHeader("Price");
+
+        // LocalDateTimeRenderer for date and time
+        grid.addColumn(new LocalDateTimeRenderer<>(Item::getPurchaseDate,
+                DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,
+                        FormatStyle.MEDIUM)))
+                .setHeader("Purchase date and time").setFlexGrow(2);
+
+        // LocalDateRenderer for dates
+        grid.addColumn(new LocalDateRenderer<>(Item::getEstimatedDeliveryDate,
+                DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
+                .setHeader("Estimated delivery date");
+
+        // ButtonRenderer for an easy clickable button,
+        // without creating a component
+        grid.addColumn(new ButtonRenderer<>("Remove", item -> {
+            ListDataProvider<Item> dataProvider = (ListDataProvider<Item>) grid
+                    .getDataProvider();
+            dataProvider.getItems().remove(item);
+            dataProvider.refreshAll();
+        })).setWidth("100px").setFlexGrow(0);
+        // end-source-example
+
+        grid.setId("grid-basic-renderers");
+        addCard("Using renderers", "Using basic renderers", grid);
+    }
+
     private List<Person> getItems() {
         return items;
     }
@@ -773,5 +860,26 @@ public class GridView extends DemoView {
         person.setAddress(address);
 
         return person;
+    }
+
+    private static List<Item> getShoppingCart() {
+        Random random = new Random(42);
+        LocalDate baseDate = LocalDate.of(2018, 1, 10);
+        return IntStream.range(1, 101)
+                .mapToObj(index -> createItem(index, random, baseDate))
+                .collect(Collectors.toList());
+
+    }
+
+    private static Item createItem(int index, Random random,
+            LocalDate baseDate) {
+        Item item = new Item();
+        item.setName("Item " + index);
+        item.setPrice(100 * random.nextDouble());
+        item.setPurchaseDate(baseDate.atTime(12, 0)
+                .minus(1 + random.nextInt(3600), ChronoUnit.SECONDS));
+        item.setEstimatedDeliveryDate(
+                baseDate.plus(1 + random.nextInt(15), ChronoUnit.DAYS));
+        return item;
     }
 }

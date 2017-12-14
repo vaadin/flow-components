@@ -65,12 +65,6 @@ public class GridTestPageIT extends AbstractComponentIT {
         assertItemsArePresent(grid, itemIdPrefix, 0, 20);
     }
 
-    /**
-     * Test ignored until https://github.com/vaadin/flow/issues/3077 is fixed.
-     * Currently some items are still left in the grid, but not visible. The
-     * internal implementation will change drastically with #3077, and this test
-     * should be re-enabled.
-     */
     @Test
     public void openGridWithComponents_removeItems_componentsAreRemoved() {
         WebElement grid = findElement(By.id("grid-with-component-renderers"));
