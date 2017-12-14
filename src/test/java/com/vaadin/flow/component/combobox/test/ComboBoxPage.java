@@ -13,14 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.combobox.test;
+package com.vaadin.flow.component.combobox.test;
 
 import java.util.stream.Stream;
 
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.router.Route;
 import com.vaadin.ui.button.Button;
-import com.vaadin.ui.combobox.ComboBox;
 import com.vaadin.ui.html.Div;
 import com.vaadin.ui.html.Label;
 

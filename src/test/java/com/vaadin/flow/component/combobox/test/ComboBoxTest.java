@@ -13,14 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.combobox.test;
+package com.vaadin.flow.component.combobox.test;
 
 import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.ui.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBox;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;

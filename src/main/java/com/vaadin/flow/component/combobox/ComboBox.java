@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.combobox;
+package com.vaadin.flow.component.combobox;
 
 import java.io.Serializable;
 import java.util.ArrayList;
