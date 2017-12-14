@@ -16,6 +16,7 @@
 package com.vaadin.ui.radiobutton.tests;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -135,6 +136,113 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
         Assert.assertEquals(Boolean.TRUE.toString(),
                 buttons.get(1).getAttribute("disabled"));
+    }
+
+    @Test
+    public void addedComponentsAfterItems() {
+        WebElement group = layout
+                .findElement(By.id("button-group-with-appended-text"));
+
+        List<WebElement> elements = group.findElements(By.xpath("./*"));
+
+        Assert.assertEquals(
+                "Unexpected amount of elements in radio-button-group", 4,
+                elements.size());
+        Assert.assertEquals("First element should be a <vaadin-radio-button>",
+                "vaadin-radio-button", elements.get(0).getTagName());
+        Assert.assertEquals("Second element should be a <vaadin-radio-button>",
+                "vaadin-radio-button", elements.get(1).getTagName());
+        Assert.assertEquals("Thirs element should be a <vaadin-radio-button>",
+                "vaadin-radio-button", elements.get(2).getTagName());
+        Assert.assertEquals("Fourth element should be a <label>", "label",
+                elements.get(3).getTagName());
+    }
+
+    @Test
+    public void insertedComponentsBetweenItems() {
+        WebElement group = layout
+                .findElement(By.id("button-group-with-inserted-component"));
+
+        List<WebElement> elements = group.findElements(By.xpath("./*"));
+
+        Assert.assertEquals(
+                "Unexpected amount of elements in radio-button-group", 5,
+                elements.size());
+        Assert.assertEquals("Second element should be a label", "label",
+                elements.get(1).getTagName());
+        Assert.assertEquals("Third element should be a <hr>", "hr",
+                elements.get(2).getTagName());
+        Assert.assertEquals("Fourth element should be a <vaadin-radio-button>",
+                "vaadin-radio-button", elements.get(3).getTagName());
+    }
+
+    @Test
+    public void componentsPrependedBeforeItems() {
+        WebElement group = layout
+                .findElement(By.id("button-group-with-prepended-component"));
+
+        List<WebElement> elements = group.findElements(By.xpath("./*"));
+
+        Assert.assertEquals(
+                "Unexpected amount of elements in radio-button-group", 12,
+                elements.size());
+        // Three groups of (label, hr, vaadin-radio-button, vaadin-radio-button)
+        IntStream.range(0, 2).forEach(i -> {
+            int firstInGroup = i * 4;
+            Assert.assertEquals(
+                    "Expected first in group " + (i + 1) + " to be a label",
+                    "label", elements.get(firstInGroup).getTagName());
+            Assert.assertEquals(
+                    "Expected second in group " + (i + 1) + " to be a <hr>",
+                    "hr", elements.get(firstInGroup + 1).getTagName());
+            Assert.assertEquals("Expected third in group " + (i + 1)
+                            + " to be a <vaadin-radio-button>", "vaadin-radio-button",
+                    elements.get(firstInGroup + 2).getTagName());
+            Assert.assertEquals("Expected fourth in group " + (i + 1)
+                            + " to be a <vaadin-radio-button>", "vaadin-radio-button",
+                    elements.get(firstInGroup + 3).getTagName());
+        });
+    }
+
+    @Test
+    public void dynamicComponentForAfterItem() {
+        WebElement group = layout
+                .findElement(By.id("button-group-with-dynamic-component"));
+
+        List<WebElement> elements = group.findElements(By.xpath("./*"));
+
+        Assert.assertEquals(
+                "Unexpected amount of elements in radio-button-group", 6,
+                elements.size());
+        for (int i = 0; i < 6; i++) {
+            Assert.assertEquals(
+                    "Expected only <vaadin-radio-button> to be available",
+                    "vaadin-radio-button", elements.get(i).getTagName());
+        }
+
+        elements.get(0).click();
+
+        elements = group.findElements(By.xpath("./*"));
+
+        Assert.assertEquals(
+                "Expected one label to have been added to radio-button-group",
+                7, elements.size());
+
+        Assert.assertEquals(
+                "Second element should be a label as first element was selected",
+                "label", elements.get(1).getTagName());
+
+        elements.get(4).click();
+
+        elements = group.findElements(By.xpath("./*"));
+
+        Assert.assertEquals(
+                "Expected label to stay, just change place in radio-button-group",
+                7, elements.size());
+
+        Assert.assertEquals(
+                "Fifth element should be a label as fourth element was selected",
+                "label", elements.get(4).getTagName());
     }
 
 }

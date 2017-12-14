@@ -20,14 +20,15 @@ import com.vaadin.router.Route;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.html.Anchor;
 import com.vaadin.ui.html.Div;
+import com.vaadin.ui.html.Hr;
 import com.vaadin.ui.html.Image;
+import com.vaadin.ui.html.Label;
 import com.vaadin.ui.radiobutton.RadioButtonGroup;
 import com.vaadin.ui.renderers.IconRenderer;
 import com.vaadin.ui.renderers.TextRenderer;
 
 @Route("vaadin-radio-button")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-radio-button.html")
-
 public class RadioButtonGroupView extends DemoView {
 
     public static class Person {
@@ -62,6 +63,10 @@ public class RadioButtonGroupView extends DemoView {
         addItemIconGenerator();
         addDisabled();
         addDisabledItems();
+        addComponentAfterItems();
+        insertComponentsBetweenItems();
+        prependAndInsertComponents();
+        dynamicComponents();
     }
 
     private void addBasicFeatures() {
@@ -90,8 +95,9 @@ public class RadioButtonGroupView extends DemoView {
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person(1, "Joe"), new Person(2, "John"),
                 new Person(3, "Bill"));
-        group.setItemRenderer(person -> new Anchor(
-                "http://example.com/" + person.getId(), person.getName()));
+        group.setItemRenderer(
+                person -> new Anchor("http://example.com/" + person.getId(),
+                        person.getName()));
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Radio button group value changed from '%s' to '%s'",
                 getName(event.getOldValue()), getName(event.getValue()))));
@@ -178,6 +184,94 @@ public class RadioButtonGroupView extends DemoView {
             return null;
         }
         return person.getName();
+    }
+
+    private void addComponentAfterItems() {
+        // begin-source-example
+        // source-example-heading: Add component to group
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("foo", "bar", "baz");
+        group.add(new Label("My Custom text"));
+
+        group.getElement().getStyle().set("display", "flex");
+        group.getElement().getStyle().set("flexDirection", "column");
+        // end-source-example
+
+        group.setId("button-group-with-appended-text");
+
+        addCard("Add component to group", group);
+    }
+
+    private void insertComponentsBetweenItems() {
+        // begin-source-example
+        // source-example-heading: Insert component after item in group
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+
+        // Note that setting items clear any components
+        group.addComponents(new Label("Foo group"), getFullSizeHr());
+
+        group.setItems("foo", "bar", "baz");
+        group.addComponents("foo", new Label("Not foo selections"),
+                getFullSizeHr());
+
+        group.getElement().getStyle().set("display", "flex");
+        group.getElement().getStyle().set("flexDirection", "column");
+        // end-source-example
+
+        group.setId("button-group-with-inserted-component");
+
+        addCard("Insert component after item in group", group);
+    }
+
+    private void prependAndInsertComponents() {
+        // begin-source-example
+        // source-example-heading: Insert components before item in group
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+
+        group.setItems("foo", "foo-bar", "bar", "bar-foo", "baz", "baz-baz");
+
+        group.prependComponents("foo", new Label("Foo group"), getFullSizeHr());
+        group.prependComponents("bar", new Label("Bar group"), getFullSizeHr());
+        group.prependComponents("baz", new Label("Baz group"), getFullSizeHr());
+
+        group.getElement().getStyle().set("display", "flex");
+        group.getElement().getStyle().set("flexDirection", "column");
+        // end-source-example
+
+        group.setId("button-group-with-prepended-component");
+
+        addCard("Insert components before item in group", group);
+    }
+
+    private void dynamicComponents() {
+        // begin-source-example
+        // source-example-heading: Move component in group on selection
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+
+        group.setItems("foo", "foo-bar", "bar", "bar-foo", "baz", "baz-baz");
+
+        Label below = new Label("= After Selected =");
+
+        group.addValueChangeListener(event -> {
+            if (below.getParent().isPresent()) {
+                group.removeComponent(below);
+            }
+            group.addComponents(event.getValue(), below);
+        });
+
+        group.getElement().getStyle().set("display", "flex");
+        group.getElement().getStyle().set("flexDirection", "column");
+        // end-source-example
+
+        group.setId("button-group-with-dynamic-component");
+
+        addCard("Move component in group on selection", group);
+    }
+
+    private Hr getFullSizeHr() {
+        Hr hr = new Hr();
+        hr.setSizeFull();
+        return hr;
     }
 
 }
