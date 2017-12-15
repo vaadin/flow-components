@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.checkbox;
+package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.ui.common.HasSize;
 import com.vaadin.ui.common.HasValue;
