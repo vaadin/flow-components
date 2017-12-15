@@ -1,0 +1,51 @@
+---
+title: Installing Vaadin Charts for Flow
+order: 2
+layout: page
+---
+
+[[charts.installing]]
+= Installing Vaadin Charts for Flow
+
+As with most components for Vaadin Flow, you can install Vaadin Charts for Flow as a Maven dependency in your project.
+
+Using Vaadin Charts requires a license key, which will be prompted on development time after 24 hours of the first time the application with Vaadin Charts is opened.
+
+[[charts.installing.maven]]
+== Maven Dependency
+
+The Maven dependency for Vaadin Charts is as follows:
+
+[source,xml]
+----
+<dependency>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-charts-flow</artifactId>
+    <version>6.0.0.alpha6</version>
+</dependency>
+----
+You also need to define the Vaadin add-ons repository if not already defined:
+
+[source,xml]
+----
+<repository>
+   <id>vaadin-addons</id>
+   <url>http://maven.vaadin.com/vaadin-addons</url>
+</repository>
+----
+
+
+[[charts.installing.license]]
+== Installing a License Key
+
+You need to install a license key in order to develop your application with Vaadin Charts.
+
+You can purchase Vaadin Charts or obtain a free trial key from the link:https://vaadin.com/pro/licenses[license section] in Vaadin website.
+You need to be a registered user to obtain the key.
+
+24 hours after you open the application with Vaadin Charts in a local browser, you will see a pop-up that asks you to enter the license key.
+If the license is valid, it will be saved to the local storage of the browser and you will not see the pop-up again.
+
+[[figure.charts.installing.license]]
+.Obtaining License Key from Vaadin website
+image::img/directory-download-license-key.png[]
