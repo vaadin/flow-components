@@ -13,20 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.datepicker;
+package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.testutil.ValidationTestView;
-import com.vaadin.router.Route;
-import com.vaadin.ui.common.HasValidation;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.testutil.AbstractValidationTest;
+import com.vaadin.flow.testutil.TestPath;
 
 /**
- * View for testing validation with {@link DatePicker}.
+ * Integration tests for {@link DatePicker} validation.
  */
-@Route("date-picker-validation")
-public class DatePickerValidationPage extends ValidationTestView {
+@TestPath("date-picker-validation")
+public class DatePickerValidationPageIT extends AbstractValidationTest {
 
-    @Override
-    protected HasValidation getValidationComponent() {
-        return new DatePicker();
-    }
 }

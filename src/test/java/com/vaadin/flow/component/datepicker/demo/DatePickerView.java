@@ -13,21 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.datepicker.demo;
+package com.vaadin.flow.component.datepicker.demo;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.datepicker.DatePicker;
-import com.vaadin.ui.datepicker.DatePicker.DatePickerI18n;
-import com.vaadin.ui.html.Div;
 
 /**
  * View for {@link DatePicker} demo.
- * 
+ *
  * @author Vaadin Ltd
  */
 @Route("vaadin-date-picker")

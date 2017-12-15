@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.datepicker;
+package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
 
@@ -22,9 +22,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.datepicker.demo.DatePickerView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.datepicker.demo.DatePickerView;
 
 /**
  * Integration tests for the {@link DatePickerView}.
