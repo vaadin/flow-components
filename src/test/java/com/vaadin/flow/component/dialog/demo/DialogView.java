@@ -13,19 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.dialog.demo;
+package com.vaadin.flow.component.dialog.demo;
 
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.button.Button;
 import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.dialog.Dialog;
-import com.vaadin.ui.html.Label;
 import com.vaadin.ui.layout.HorizontalLayout;
 
 /**
  * View for {@link Dialog} demo.
- * 
+ *
  * @author Vaadin Ltd
  */
 @Route("vaadin-dialog")

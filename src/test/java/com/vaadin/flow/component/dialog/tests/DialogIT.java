@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.dialog.tests;
+package com.vaadin.flow.component.dialog.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,9 +21,9 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.dialog.demo.DialogView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.dialog.demo.DialogView;
 
 /**
  * Integration tests for the {@link DialogView}.
