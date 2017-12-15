@@ -13,15 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.button.tests;
+package com.vaadin.flow.component.button.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.button.demo.ButtonView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.button.demo.ButtonView;
 
 /**
  * Integration tests for the {@link ButtonView}.

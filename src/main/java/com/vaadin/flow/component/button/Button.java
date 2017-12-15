@@ -13,16 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.button;
+package com.vaadin.flow.component.button;
 
-import javax.swing.Icon;
-
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.common.HasSize;
 import com.vaadin.ui.event.ComponentEventListener;
-import com.vaadin.ui.html.Image;
 
 /**
  * Server-side component for the <code>vaadin-button</code> element.
@@ -45,7 +43,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
 
     /**
      * Creates a button with a text inside.
-     * 
+     *
      * @param text
      *            the text inside the button
      * @see #setText(String)
@@ -56,7 +54,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
 
     /**
      * Creates a button with an icon inside.
-     * 
+     *
      * @param icon
      *            the icon inside the button
      * @see #setIcon(Component)
@@ -70,7 +68,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
      * <p>
      * Use {@link #setIconAfterText(boolean)} to change the order of the text
      * and the icon.
-     * 
+     *
      * @param text
      *            the text inside the button
      * @param icon
@@ -85,7 +83,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
 
     /**
      * Creates a button with a text and a listener for click events.
-     * 
+     *
      * @param text
      *            the text inside the button
      * @param clickListener
@@ -101,7 +99,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
 
     /**
      * Creates a button with an icon and a listener for click events.
-     * 
+     *
      * @param icon
      *            the icon inside the button
      * @param clickListener
@@ -117,7 +115,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
 
     /**
      * Create a button with a text, an icon and a listener for click events.
-     * 
+     *
      * @param text
      *            the text inside the button
      * @param icon
@@ -207,7 +205,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
      * This method also sets or removes this button's <code>theme=icon</code>
      * attribute and wraps it's possible text-content in a
      * <code>span</code>-element for better theming support.
-     * 
+     *
      * @param icon
      *            component to be used as an icon, may be <code>null</code> to
      *            only remove the current icon, can't be a text-node
@@ -241,7 +239,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
 
     /**
      * Gets the component that is defined as the icon of this button.
-     * 
+     *
      * @return the icon of this button, or <code>null</code> if the icon is not
      *         set
      */
@@ -255,7 +253,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
      * <p>
      * This method reorders possibly existing icon and text content if needed
      * and also affects icon and text that are set afterwards.
-     * 
+     *
      * @param iconAfterText
      *            whether the icon should be positioned after the text content
      *            or not
@@ -293,7 +291,7 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
     /**
      * Gets whether this button's icon is positioned after it's text content or
      * the other way around.
-     * 
+     *
      * @return <code>true</code> if this button positions it's icon after it's
      *         text content, <code>false</code> otherwise
      */

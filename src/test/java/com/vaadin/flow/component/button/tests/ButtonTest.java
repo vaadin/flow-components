@@ -13,16 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.button.tests;
+package com.vaadin.flow.component.button.tests;
 
 import java.util.function.Predicate;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.ui.Text;
-import com.vaadin.ui.button.Button;
 import com.vaadin.ui.icon.Icon;
 
 public class ButtonTest {
