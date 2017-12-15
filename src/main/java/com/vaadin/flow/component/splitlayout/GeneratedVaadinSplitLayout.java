@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.splitlayout;
+package com.vaadin.flow.component.splitlayout;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.common.ComponentSupplier;

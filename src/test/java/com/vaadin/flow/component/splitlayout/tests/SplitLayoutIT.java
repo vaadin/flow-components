@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.splitlayout.tests;
+package com.vaadin.flow.component.splitlayout.tests;
 
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -22,8 +22,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.splitlayout.demo.SplitLayoutView;
 import com.vaadin.flow.demo.ComponentDemoTest;
-import com.vaadin.ui.splitlayout.demo.SplitLayoutView;
 
 /**
  * Integration tests for {@link SplitLayoutView}.

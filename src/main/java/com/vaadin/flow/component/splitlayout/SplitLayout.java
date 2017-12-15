@@ -13,18 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.splitlayout;
+package com.vaadin.flow.component.splitlayout;
 
 import java.util.Optional;
 
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.common.HasSize;
-import com.vaadin.ui.html.Div;
 
 /**
  * Server-side component for the {@code <vaadin-split-layout>} element.
- * 
+ *
  * @author Vaadin Ltd
  */
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
@@ -42,7 +42,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
     /**
      * Constructs a VaadinSplitLayout with the given initial components to set
      * to the primary and secondary splits.
-     * 
+     *
      * @param primaryComponent
      *            the component set to the primary split
      * @param secondaryComponent
@@ -64,7 +64,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * <b>Note:</b> Removing the primary component through the component API
      * will move the secondary component to the primary split, causing this
      * layout to desync with the server. This is a known issue.
-     * 
+     *
      * @see #setVertical(boolean)
      * @return this instance, for method chaining
      */
@@ -82,7 +82,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
 
     /**
      * Get the component currently set to the primary split.
-     * 
+     *
      * @return the primary component, may be null
      */
     public Component getPrimaryComponent() {
@@ -96,7 +96,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * <p>
      * <b>Note:</b> Calling this method with multiple arguments will wrap the
      * components inside a {@code <div>} element.
-     * 
+     *
      * @see #setVertical(boolean)
      * @return this instance, for method chaining
      */
@@ -114,7 +114,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
 
     /**
      * Get the component currently set to the secondary split.
-     * 
+     *
      * @return the primary component, may be null
      */
     public Component getSecondaryComponent() {
@@ -127,7 +127,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * relative to the secondary component. In horizontal mode this is the width
      * of the component and in vertical mode this is the height. The given value
      * will automatically be clamped to the range [0, 100].
-     * 
+     *
      * @param position
      *            the relative position of the splitter, in percentages
      * @return this instance, for method chaining
@@ -148,7 +148,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
 
     /**
      * Set a style to the component in the primary split.
-     * 
+     *
      * @param styleName
      *            name of the style to set
      * @param value
@@ -161,7 +161,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
 
     /**
      * Set a style to the component in the secondary split.
-     * 
+     *
      * @param styleName
      *            name of the style to set
      * @param value
