@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.formlayout.tests;
+package com.vaadin.flow.component.formlayout.tests;
 
 import java.util.List;
 
@@ -23,9 +23,9 @@ import org.junit.Test;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.formlayout.demo.FormLayoutView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.formlayout.demo.FormLayoutView;
 
 /**
  * Integration tests for the {@link FormLayoutView}.

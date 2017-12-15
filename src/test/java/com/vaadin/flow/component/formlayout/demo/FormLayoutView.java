@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.formlayout.demo;
+package com.vaadin.flow.component.formlayout.demo;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -26,6 +26,11 @@ import com.vaadin.data.BinderValidationStatus;
 import com.vaadin.data.BindingValidationStatus;
 import com.vaadin.data.validator.EmailValidator;
 import com.vaadin.data.validator.StringLengthValidator;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.function.SerializablePredicate;
 import com.vaadin.router.Route;
@@ -35,11 +40,6 @@ import com.vaadin.ui.button.Button;
 import com.vaadin.ui.checkbox.Checkbox;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.datepicker.DatePicker;
-import com.vaadin.ui.formlayout.FormLayout;
-import com.vaadin.ui.formlayout.FormLayout.FormItem;
-import com.vaadin.ui.formlayout.FormLayout.ResponsiveStep;
-import com.vaadin.ui.html.Div;
-import com.vaadin.ui.html.Label;
 import com.vaadin.ui.layout.HorizontalLayout;
 import com.vaadin.ui.textfield.TextField;
 

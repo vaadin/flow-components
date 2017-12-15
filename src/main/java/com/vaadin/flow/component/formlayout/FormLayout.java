@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.formlayout;
+package com.vaadin.flow.component.formlayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,11 +23,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jsoup.helper.StringUtil;
 
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.common.HasComponents;
 import com.vaadin.ui.common.HasSize;
 import com.vaadin.ui.common.JsonSerializable;
-import com.vaadin.ui.html.Label;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
