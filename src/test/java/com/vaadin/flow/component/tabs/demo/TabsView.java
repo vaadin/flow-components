@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.vaadin.ui.tabs.demo;
+package com.vaadin.flow.component.tabs.demo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,20 +22,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.checkbox.Checkbox;
 import com.vaadin.ui.common.HasStyle;
 import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.html.Div;
-import com.vaadin.ui.html.Image;
-import com.vaadin.ui.html.Span;
 import com.vaadin.ui.icon.Icon;
 import com.vaadin.ui.icon.VaadinIcons;
 import com.vaadin.ui.layout.VerticalLayout;
-import com.vaadin.ui.tabs.Tab;
-import com.vaadin.ui.tabs.Tabs;
-import com.vaadin.ui.tabs.Tabs.Orientation;
 
 /**
  * View for {@link Tabs} demo.

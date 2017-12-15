@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.vaadin.ui.tabs.tests;
+package com.vaadin.flow.component.tabs.tests;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -22,9 +22,9 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.tabs.demo.TabsView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.tabs.demo.TabsView;
 /**
  * Integration tests for the {@link TabsView}.
  *

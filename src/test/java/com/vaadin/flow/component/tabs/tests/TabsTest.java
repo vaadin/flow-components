@@ -14,14 +14,14 @@
  * the License.
  */
 
-package com.vaadin.ui.tabs.tests;
+package com.vaadin.flow.component.tabs.tests;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.ui.tabs.Tab;
-import com.vaadin.ui.tabs.Tabs;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

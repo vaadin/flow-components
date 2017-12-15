@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.vaadin.ui.tabs;
+package com.vaadin.flow.component.tabs;
 
 import java.util.Locale;
 

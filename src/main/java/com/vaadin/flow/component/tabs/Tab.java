@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.vaadin.ui.tabs;
+package com.vaadin.flow.component.tabs;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.common.HasComponents;
