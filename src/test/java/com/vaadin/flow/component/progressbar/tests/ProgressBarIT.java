@@ -15,14 +15,14 @@
  *
  */
 
-package com.vaadin.ui.progressbar.tests;
+package com.vaadin.flow.component.progressbar.tests;
 
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.progressbar.demo.ProgressBarView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.progressbar.demo.ProgressBarView;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

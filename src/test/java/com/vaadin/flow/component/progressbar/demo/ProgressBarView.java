@@ -15,13 +15,13 @@
  *
  */
 
-package com.vaadin.ui.progressbar.demo;
+package com.vaadin.flow.component.progressbar.demo;
 
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.router.Route;
 import com.vaadin.ui.button.Button;
 import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.progressbar.ProgressBar;
 
 /**
  * View for {@link ProgressBar} demo.

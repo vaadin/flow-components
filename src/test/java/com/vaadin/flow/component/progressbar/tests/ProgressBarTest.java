@@ -15,13 +15,13 @@
  *
  */
 
-package com.vaadin.ui.progressbar.tests;
+package com.vaadin.flow.component.progressbar.tests;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.ui.progressbar.ProgressBar;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;

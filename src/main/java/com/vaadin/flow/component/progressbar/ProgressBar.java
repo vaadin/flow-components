@@ -15,7 +15,7 @@
  *
  */
 
-package com.vaadin.ui.progressbar;
+package com.vaadin.flow.component.progressbar;
 
 import com.vaadin.ui.common.HasSize;
 
