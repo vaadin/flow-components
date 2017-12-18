@@ -20,15 +20,15 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
 
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.server.NoInputStreamException;
-import com.vaadin.server.NoOutputStreamException;
-import com.vaadin.server.StreamReceiver;
-import com.vaadin.server.StreamVariable;
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.common.HasSize;
-import com.vaadin.ui.event.ComponentEventListener;
-import com.vaadin.util.JsonSerializer;
+import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.server.NoInputStreamException;
+import com.vaadin.flow.server.NoOutputStreamException;
+import com.vaadin.flow.server.StreamReceiver;
+import com.vaadin.flow.server.StreamVariable;
+import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonNull;
@@ -68,16 +68,15 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         // If client aborts upload mark upload as interrupted on server also
         addUploadAbortListener(event -> interruptUpload());
 
-        getElement().setAttribute("target",
-                new StreamReceiver(getElement().getNode(), "upload",
-                        getStreamVariable()));
+        getElement().setAttribute("target", new StreamReceiver(
+                getElement().getNode(), "upload", getStreamVariable()));
     }
 
     /**
      * Create a new instance of Upload with the given receiver.
      *
      * @param receiver
-     *         receiver that handles the upload
+     *            receiver that handles the upload
      */
     public Upload(Receiver receiver) {
         this();
@@ -165,9 +164,9 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Emits the progress event.
      *
      * @param totalBytes
-     *         bytes received so far
+     *            bytes received so far
      * @param contentLength
-     *         actual size of the file being uploaded, if known
+     *            actual size of the file being uploaded, if known
      */
     protected void fireUpdateProgress(long totalBytes, long contentLength) {
         fireEvent(new ProgressUpdateEvent(this, totalBytes, contentLength));
@@ -177,7 +176,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Add a progress listener that is informed on upload progress.
      *
      * @param listener
-     *         progress listener to add
+     *            progress listener to add
      * @return registration for removal of listener
      */
     public Registration addProgressListener(
@@ -189,7 +188,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Add a succeeded listener that is informed on upload failure.
      *
      * @param listener
-     *         failed listener to add
+     *            failed listener to add
      * @return registration for removal of listener
      */
     public Registration addFailedListener(
@@ -201,7 +200,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Add a succeeded listener that is informed on upload finished.
      *
      * @param listener
-     *         finished listener to add
+     *            finished listener to add
      * @return registration for removal of listener
      */
     public Registration addFinishedListener(
@@ -213,7 +212,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Add a succeeded listener that is informed on upload start.
      *
      * @param listener
-     *         start listener to add
+     *            start listener to add
      * @return registration for removal of listener
      */
     public Registration addStartedListener(
@@ -225,7 +224,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Add a succeeded listener that is informed on upload succeeded.
      *
      * @param listener
-     *         succeeded listener to add
+     *            succeeded listener to add
      * @return registration for removal of listener
      */
     public Registration addSucceededListener(
@@ -250,7 +249,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * the upload will be automatically set to only accept one file.
      *
      * @param receiver
-     *         receiver to use for file reception
+     *            receiver to use for file reception
      */
     public void setReceiver(Receiver receiver) {
         this.receiver = receiver;
@@ -265,7 +264,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Sets the internationalization properties for this component.
      *
      * @param i18n
-     *         the internationalized properties, not <code>null</code>
+     *            the internationalized properties, not <code>null</code>
      * @return this instance for method chaining
      */
     public Upload setI18n(UploadI18N i18n) {
@@ -284,8 +283,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * component.
      *
      * @return the object with the i18n properties, never <code>null</code>. If
-     * the i18n properties weren't set, the internal properties of the
-     * object will be <code>null</code>, but not the object itself.
+     *         the i18n properties weren't set, the internal properties of the
+     *         object will be <code>null</code>, but not the object itself.
      */
     public UploadI18N getI18n() {
         UploadI18N i18n = new UploadI18N();
@@ -331,9 +330,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         UploadI18N.Uploading.Error uploadingError = new UploadI18N.Uploading.Error();
         uploadingError.setServerUnavailable(
                 getStringObject(uploadingBase, "error", "serverUnavailable"));
-        uploadingError.setUnexpectedServerError(
-                getStringObject(uploadingBase, "error",
-                        "unexpectedServerError"));
+        uploadingError.setUnexpectedServerError(getStringObject(uploadingBase,
+                "error", "unexpectedServerError"));
         uploadingError.setForbidden(
                 getStringObject(uploadingBase, "error", "forbidden"));
 
@@ -351,8 +349,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         String result = null;
         JsonObject json = (JsonObject) getElement()
                 .getPropertyRaw(propertyName);
-        if (json != null && json.hasKey(subName) && !(json
-                .get(subName) instanceof JsonNull)) {
+        if (json != null && json.hasKey(subName)
+                && !(json.get(subName) instanceof JsonNull)) {
             result = json.getString(subName);
         }
         return result;
@@ -363,11 +361,11 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         String result = null;
         JsonObject json = (JsonObject) getElement()
                 .getPropertyRaw(propertyName);
-        if (json != null && json.hasKey(object) && !(json
-                .get(object) instanceof JsonNull)) {
+        if (json != null && json.hasKey(object)
+                && !(json.get(object) instanceof JsonNull)) {
             json = json.getObject(object);
-            if (json != null && json.hasKey(subName) && !(json
-                    .get(subName) instanceof JsonNull)) {
+            if (json != null && json.hasKey(subName)
+                    && !(json.get(subName) instanceof JsonNull)) {
                 result = json.getString(subName);
             }
         }

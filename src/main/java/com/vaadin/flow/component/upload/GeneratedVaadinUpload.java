@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2017 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,18 +17,18 @@ package com.vaadin.flow.component.upload;
 
 import javax.annotation.Generated;
 
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Tag;
-import com.vaadin.ui.common.ComponentSupplier;
-import com.vaadin.ui.common.HasComponents;
-import com.vaadin.ui.common.HasStyle;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.event.ComponentEvent;
-import com.vaadin.ui.event.ComponentEventListener;
-import com.vaadin.ui.event.DomEvent;
-import com.vaadin.ui.event.EventData;
-import com.vaadin.ui.event.Synchronize;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentSupplier;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -63,8 +63,10 @@ import elemental.json.JsonObject;
  * <td>{@code --vaadin-upload-drag-ripple}</td>
  * <td>A mixin that is applied to the ripple animation in the drop area</td>
  * <td>{@code</td>
- * </tr>
- * <tr>
+ *
+</tr>
+ *
+<tr>
  * <td>{@code --vaadin-upload-drop-label}</td>
  * <td>A mixin that is applied to the drop label</td>
  * <td>{@code</td>
@@ -97,7 +99,8 @@ import elemental.json.JsonObject;
  * </tr>
  * <tr>
  * <td>{@code --vaadin-upload-buttons-secondary}</td>
- * <td>A mixin that is applied to the secondary buttons container (right side)</td>
+ * <td>A mixin that is applied to the secondary buttons container (right
+ * side)</td>
  * <td>{@code</td>
  * </tr>
  * <tr>
@@ -140,7 +143,7 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code nodrop} property from the webcomponent
      */
     public boolean isNodrop() {
@@ -158,7 +161,7 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      * means that drop is enabled even in touch-devices, and true disables drop
      * in all devices.
      * </p>
-     * 
+     *
      * @param nodrop
      *            the boolean value to set
      */
@@ -177,7 +180,7 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code target} property from the webcomponent
      */
     public String getTarget() {
@@ -192,7 +195,7 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      * The server URL. The default value is an empty string, which means that
      * <em>window.location</em> will be used.
      * </p>
-     * 
+     *
      * @param target
      *            the String value to set
      */
@@ -312,10 +315,9 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      * The array of files being processed, or already uploaded.
      * </p>
      * <p>
-     * Each element is a <a
-     * href="https://developer.mozilla.org/en-US/docs/Web/API/File">{@code File}
-     * </a> object with a number of extra properties to track the upload
-     * process:
+     * Each element is a <a href=
+     * "https://developer.mozilla.org/en-US/docs/Web/API/File">{@code File} </a>
+     * object with a number of extra properties to track the upload process:
      * </p>
      * <ul>
      * <li>{@code uploadTarget}: The target URL used to upload this file.</li>
@@ -334,7 +336,8 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      * <li>{@code status}: Status of the upload process.</li>
      * <li>{@code error}: Error message in case the upload failed.</li>
      * <li>{@code abort}: True if the file was canceled by the user.</li>
-     * <li>{@code complete}: True when the file was transferred to the server.</li>
+     * <li>{@code complete}: True when the file was transferred to the
+     * server.</li>
      * <li>{@code uploading}: True while trasferring data to the server.
      * <p>
      * This property is synchronized automatically from client side when a
@@ -356,10 +359,9 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      * The array of files being processed, or already uploaded.
      * </p>
      * <p>
-     * Each element is a <a
-     * href="https://developer.mozilla.org/en-US/docs/Web/API/File">{@code File}
-     * </a> object with a number of extra properties to track the upload
-     * process:
+     * Each element is a <a href=
+     * "https://developer.mozilla.org/en-US/docs/Web/API/File">{@code File} </a>
+     * object with a number of extra properties to track the upload process:
      * </p>
      * <ul>
      * <li>{@code uploadTarget}: The target URL used to upload this file.</li>
@@ -378,7 +380,8 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      * <li>{@code status}: Status of the upload process.</li>
      * <li>{@code error}: Error message in case the upload failed.</li>
      * <li>{@code abort}: True if the file was canceled by the user.</li>
-     * <li>{@code complete}: True when the file was transferred to the server.</li>
+     * <li>{@code complete}: True when the file was transferred to the
+     * server.</li>
      * <li>{@code uploading}: True while trasferring data to the server.</li>
      * </ul>
      *
@@ -1143,15 +1146,15 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
-    public R addToAddButton(com.vaadin.ui.Component... components) {
+    public R addToAddButton(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "add-button");
             getElement().appendChild(component.getElement());
@@ -1165,15 +1168,15 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
-    public R addToDropLabelIcon(com.vaadin.ui.Component... components) {
+    public R addToDropLabelIcon(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "drop-label-icon");
             getElement().appendChild(component.getElement());
@@ -1187,15 +1190,15 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
-    public R addToDropLabel(com.vaadin.ui.Component... components) {
+    public R addToDropLabel(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "drop-label");
             getElement().appendChild(component.getElement());
@@ -1209,15 +1212,15 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
-    public R addToFileList(com.vaadin.ui.Component... components) {
+    public R addToFileList(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "file-list");
             getElement().appendChild(component.getElement());
@@ -1226,7 +1229,7 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
     }
 
     @Override
-    public void remove(com.vaadin.ui.Component... components) {
+    public void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
                 component.getElement().removeAttribute("slot");
@@ -1252,7 +1255,7 @@ public class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>> extends
      *            the components to add
      * @see HasComponents#add(Component...)
      */
-    public GeneratedVaadinUpload(com.vaadin.ui.Component... components) {
+    public GeneratedVaadinUpload(Component... components) {
         add(components);
     }
 

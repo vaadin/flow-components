@@ -28,6 +28,10 @@ import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.io.IOUtils;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HtmlComponent;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
@@ -39,13 +43,9 @@ import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.flow.util.MessageDigestUtil;
-import com.vaadin.router.Route;
-import com.vaadin.server.StreamResource;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Tag;
-import com.vaadin.ui.Text;
-import com.vaadin.ui.common.HtmlComponent;
+import com.vaadin.flow.internal.MessageDigestUtil;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamResource;
 
 /**
  * View for {@link Upload} demo.

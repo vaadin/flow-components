@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.upload;
 
-import com.vaadin.ui.event.ComponentEvent;
+import com.vaadin.flow.component.ComponentEvent;
 
 /**
  * ProgressUpdateEvent is sent to track progress of upload.
@@ -36,7 +36,7 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
 
     /**
      * Event constructor method to construct a new progress event.
-     * 
+     *
      * @param source
      *            the source of the file.
      * @param readBytes
@@ -57,12 +57,12 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
      * @return the Source of the event.
      */
     public Upload getUpload() {
-        return (Upload) getSource();
+        return getSource();
     }
 
     /**
      * Get bytes transferred for this update.
-     * 
+     *
      * @return bytes transferred
      */
     public long getReadBytes() {
@@ -71,7 +71,7 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
 
     /**
      * Get total file size.
-     * 
+     *
      * @return total file size or -1 if unknown
      */
     public long getContentLength() {

@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.upload;
 
-import com.vaadin.ui.event.ComponentEvent;
+import com.vaadin.flow.component.ComponentEvent;
 
 /**
  * Upload.FinishedEvent is sent when the upload receives a file, regardless of
@@ -44,13 +44,13 @@ public class FinishedEvent extends ComponentEvent<Upload> {
 
     /**
      * @param source
-     *         the source of the file.
+     *            the source of the file.
      * @param fileName
-     *         the received file name.
+     *            the received file name.
      * @param MIMEType
-     *         the MIME type of the received file.
+     *            the MIME type of the received file.
      * @param length
-     *         the length of the received file.
+     *            the length of the received file.
      */
     public FinishedEvent(Upload source, String fileName, String MIMEType,
             long length) {

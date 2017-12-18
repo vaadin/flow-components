@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2017 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,16 +17,16 @@ package com.vaadin.flow.component.upload;
 
 import javax.annotation.Generated;
 
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Tag;
-import com.vaadin.ui.common.ComponentSupplier;
-import com.vaadin.ui.common.HasStyle;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.event.ComponentEvent;
-import com.vaadin.ui.event.ComponentEventListener;
-import com.vaadin.ui.event.DomEvent;
-import com.vaadin.ui.event.EventData;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentSupplier;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
 
@@ -54,8 +54,10 @@ import elemental.json.JsonObject;
  * <td>{@code --vaadin-upload-file}</td>
  * <td>A mixin that is applied to the host element</td>
  * <td>{@code</td>
- * </tr>
- * <tr>
+ * 
+</tr>
+ * 
+<tr>
  * <td>{@code --vaadin-upload-file-row}</td>
  * <td>A mixin that is applied to the file row</td>
  * <td>{@code</td>
@@ -165,7 +167,7 @@ public class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadFile<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code file} property from the webcomponent
      */
     protected JsonObject protectedGetFile() {
@@ -179,7 +181,7 @@ public class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadFile<R>>
      * <p>
      * File metadata, upload status and progress information.
      * </p>
-     * 
+     *
      * @param file
      *            the JsonObject value to set
      */
