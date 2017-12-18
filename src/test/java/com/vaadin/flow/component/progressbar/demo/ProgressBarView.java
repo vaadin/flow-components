@@ -17,11 +17,11 @@
 
 package com.vaadin.flow.component.progressbar.demo;
 
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.router.Route;
-import com.vaadin.ui.button.Button;
-import com.vaadin.ui.common.HtmlImport;
+import com.vaadin.flow.router.Route;
 
 /**
  * View for {@link ProgressBar} demo.
@@ -54,7 +54,7 @@ public class ProgressBarView extends DemoView {
         // begin-source-example
         // source-example-heading: Progress bar with custom bounds
         ProgressBar progressBar = new ProgressBar(10, 100, 20);
-        Button progressButton = new Button("Make progress", e -> {
+        NativeButton progressButton = new NativeButton("Make progress", e -> {
             double value = progressBar.getValue() + 10;
             if (value > progressBar.getMax()) {
                 value = progressBar.getMin();
@@ -65,8 +65,7 @@ public class ProgressBarView extends DemoView {
 
         progressBar.setId("custom-progress-bar");
         progressButton.setId("progress-button");
-        addCard("Progress bar with custom bounds", progressBar,
-                progressButton);
+        addCard("Progress bar with custom bounds", progressBar, progressButton);
     }
 
     private void createIndeterminateProgressBar() {

@@ -17,7 +17,7 @@
 
 package com.vaadin.flow.component.progressbar;
 
-import com.vaadin.ui.common.HasSize;
+import com.vaadin.flow.component.HasSize;
 
 /**
  * Server-side component for the {@code vaadin-progress-bar} element.
@@ -40,7 +40,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      * an initial value of {@code min}.
      * <p/>
      * {@code min} must be less than {@code max}.
-     * 
+     *
      * @param min
      *            the low end of the scale of progress
      * @param max

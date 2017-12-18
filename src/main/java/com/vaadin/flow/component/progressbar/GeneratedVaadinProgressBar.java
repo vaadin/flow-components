@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2017 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.progressbar;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.common.ComponentSupplier;
-import com.vaadin.ui.common.HasStyle;
 import javax.annotation.Generated;
-import com.vaadin.ui.Tag;
-import com.vaadin.ui.common.HtmlImport;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentSupplier;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 
 /**
  * <p>
@@ -109,7 +110,7 @@ public class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code value} property from the webcomponent
      */
     public double getValue() {
@@ -123,7 +124,7 @@ public class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
      * <p>
      * Current progress value.
      * </p>
-     * 
+     *
      * @param value
      *            the double value to set
      */
@@ -141,7 +142,7 @@ public class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code min} property from the webcomponent
      */
     public double getMin() {
@@ -155,7 +156,7 @@ public class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
      * <p>
      * Minimum bound of the progress bar.
      * </p>
-     * 
+     *
      * @param min
      *            the double value to set
      */
@@ -173,7 +174,7 @@ public class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code max} property from the webcomponent
      */
     public double getMax() {
@@ -187,7 +188,7 @@ public class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
      * <p>
      * Maximum bound of the progress bar.
      * </p>
-     * 
+     *
      * @param max
      *            the double value to set
      */
@@ -205,7 +206,7 @@ public class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code indeterminate} property from the webcomponent
      */
     public boolean isIndeterminate() {
@@ -219,7 +220,7 @@ public class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
      * <p>
      * Indeterminate state of the progress bar.
      * </p>
-     * 
+     *
      * @param indeterminate
      *            the boolean value to set
      */
