@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.dialog.demo;
 
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.router.Route;
-import com.vaadin.ui.button.Button;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.layout.HorizontalLayout;
+import com.vaadin.flow.router.Route;
 
 /**
  * View for {@link Dialog} demo.
@@ -42,7 +42,7 @@ public class DialogView extends DemoView {
     }
 
     private void addBasicDialog() {
-        Button button = new Button(BUTTON_CAPTION);
+        NativeButton button = new NativeButton(BUTTON_CAPTION);
 
         // begin-source-example
         // source-example-heading: Basic dialog
@@ -55,7 +55,7 @@ public class DialogView extends DemoView {
     }
 
     private void addDialogWithOpenedChangedListener() {
-        Button button = new Button(BUTTON_CAPTION);
+        NativeButton button = new NativeButton(BUTTON_CAPTION);
         Label message = new Label();
         Dialog dialog = new Dialog("Hello World!");
 
@@ -78,7 +78,7 @@ public class DialogView extends DemoView {
     }
 
     private void addDialogWithHTML() {
-        Button button = new Button(BUTTON_CAPTION);
+        NativeButton button = new NativeButton(BUTTON_CAPTION);
 
         // begin-source-example
         // source-example-heading: Dialog with HTML content
