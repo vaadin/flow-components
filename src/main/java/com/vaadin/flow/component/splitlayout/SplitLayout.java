@@ -17,10 +17,10 @@ package com.vaadin.flow.component.splitlayout;
 
 import java.util.Optional;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.common.HasSize;
 
 /**
  * Server-side component for the {@code <vaadin-split-layout>} element.

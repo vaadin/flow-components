@@ -17,11 +17,11 @@ package com.vaadin.flow.component.splitlayout.demo;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.router.Route;
-import com.vaadin.ui.common.HasStyle;
+import com.vaadin.flow.router.Route;
 
 /**
  * View for {@link SplitLayout} demo.
