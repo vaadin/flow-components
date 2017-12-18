@@ -21,12 +21,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.common.HasSize;
-import com.vaadin.ui.common.HasValidation;
-import com.vaadin.ui.common.HasValue;
-import com.vaadin.util.JsonSerializer;
+import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
