@@ -13,23 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.textfield.tests;
+package com.vaadin.flow.component.textfield.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.textfield.PasswordField;
 
 /**
- * Integration tests for {@link PasswordField}.
+ * Integration tests for {@link TextField}.
  */
-@TestPath("password-field-test")
-public class PasswordFieldPageIT extends AbstractComponentIT {
+@TestPath("text-field-test")
+public class TextFieldPageIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -38,8 +38,7 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertReadOnly() {
-        WebElement webComponent = findElement(
-                By.tagName("vaadin-password-field"));
+        WebElement webComponent = findElement(By.tagName("vaadin-text-field"));
 
         Assert.assertNull(webComponent.getAttribute("readonly"));
 
@@ -57,8 +56,7 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertRequired() {
-        WebElement webComponent = findElement(
-                By.tagName("vaadin-password-field"));
+        WebElement webComponent = findElement(By.tagName("vaadin-text-field"));
 
         Assert.assertNull(webComponent.getAttribute("required"));
 
@@ -70,5 +68,18 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
         button.click();
         waitUntil(driver -> "false"
                 .equals(getProperty(webComponent, "required")));
+    }
+
+    @Test
+    public void assertValueWithoutListener() throws InterruptedException {
+        WebElement field = findElement(By.id("value-change"));
+
+        WebElement input = getInShadowRoot(field, By.cssSelector("input"));
+        input.sendKeys("foo");
+
+        findElement(By.id("get-value")).click();
+
+        String value = findElement(By.className("text-field-value")).getText();
+        Assert.assertEquals("foo", value);
     }
 }

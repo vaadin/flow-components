@@ -13,12 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.textfield.tests;
+package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.router.Route;
-import com.vaadin.ui.button.Button;
-import com.vaadin.ui.html.Div;
-import com.vaadin.ui.textfield.PasswordField;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.router.Route;
 
 /**
  * Test view for {@link PasswordField}.
@@ -32,19 +32,20 @@ public class PasswordFieldPage extends Div {
     public PasswordFieldPage() {
         Div message = new Div();
         PasswordField passwordField = new PasswordField();
-        passwordField.addValueChangeListener(
-                event -> message.setText(
-                        String.format("Old value: '%s'. New value: '%s'.",
-                                event.getOldValue(), event.getValue())));
+        passwordField.addValueChangeListener(event -> message
+                .setText(String.format("Old value: '%s'. New value: '%s'.",
+                        event.getOldValue(), event.getValue())));
         add(passwordField, message);
 
-        Button button = new Button("Set/unset text field read-only");
+        NativeButton button = new NativeButton(
+                "Set/unset text field read-only");
         button.setId("read-only");
-        button.addClickListener(
-                event -> passwordField.setReadOnly(!passwordField.isReadOnly()));
+        button.addClickListener(event -> passwordField
+                .setReadOnly(!passwordField.isReadOnly()));
         add(button);
 
-        Button required = new Button("Set/unset field required property");
+        NativeButton required = new NativeButton(
+                "Set/unset field required property");
         required.setId("required");
         required.addClickListener(
                 event -> passwordField.setRequiredIndicatorVisible(

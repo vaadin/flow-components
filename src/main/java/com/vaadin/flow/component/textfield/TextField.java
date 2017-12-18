@@ -13,10 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.textfield;
+package com.vaadin.flow.component.textfield;
 
-import com.vaadin.ui.common.HasSize;
-import com.vaadin.ui.common.HasValidation;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasValidation;
 
 /**
  * Server-side component for the {@code vaadin-text-field} element.

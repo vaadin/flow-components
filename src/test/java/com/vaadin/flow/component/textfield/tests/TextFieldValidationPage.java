@@ -13,21 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.textfield.tests;
+package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.testutil.ValidationTestView;
-import com.vaadin.router.Route;
-import com.vaadin.ui.common.HasValidation;
-import com.vaadin.ui.textfield.PasswordField;
 
 /**
- * View for testing validation with {@link PasswordField}.
+ * View for testing validation with {@link TextField}.
  */
-@Route("passwork-field-validation")
-public class PasswordFieldValidationPage extends ValidationTestView {
+@Route("text-field-validation")
+public class TextFieldValidationPage extends ValidationTestView {
 
     @Override
     protected HasValidation getValidationComponent() {
-        return new PasswordField();
+        return new TextField();
     }
+
 }

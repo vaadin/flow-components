@@ -13,48 +13,48 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.textfield.tests;
+package com.vaadin.flow.component.textfield.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.textfield.PasswordField;
 
 /**
- * Integration tests for the {@link PasswordField}.
+ * Integration tests for the {@link TextField}.
  */
-public class PasswordFieldIT extends ComponentDemoTest {
+public class TextFieldIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return "/vaadin-password-field";
+        return "/vaadin-text-field";
     }
 
     @Test
     public void valueChangeListenerReportsCorrectValues() {
-        WebElement passwordFieldValueDiv = layout
-                .findElement(By.id("password-field-value"));
-        WebElement passwordField = layout.findElement(
-                By.id("password-field-with-value-change-listener"));
+        WebElement textFieldValueDiv = layout
+                .findElement(By.id("text-field-value"));
+        WebElement textField = layout
+                .findElement(By.id("text-field-with-value-change-listener"));
 
-        passwordField.sendKeys("a");
-        waitUntilTextsEqual("Password field value changed from '' to 'a'",
-                passwordFieldValueDiv.getText());
+        textField.sendKeys("a");
+        waitUntilTextsEqual("Text field value changed from '' to 'a'",
+                textFieldValueDiv.getText());
 
-        passwordField.sendKeys(Keys.BACK_SPACE);
-        waitUntilTextsEqual("Password field value changed from 'a' to ''",
-                passwordFieldValueDiv.getText());
+        textField.sendKeys(Keys.BACK_SPACE);
+        waitUntilTextsEqual("Text field value changed from 'a' to ''",
+                textFieldValueDiv.getText());
     }
 
     @Test
-    public void passwordFieldHasPlaceholder() {
-        WebElement passwordField = layout.findElement(
-                By.id("password-field-with-value-change-listener"));
-        Assert.assertEquals(passwordField.getAttribute("placeholder"),
+    public void textFieldHasPlaceholder() {
+        WebElement textField = layout
+                .findElement(By.id("text-field-with-value-change-listener"));
+        Assert.assertEquals(textField.getAttribute("placeholder"),
                 "placeholder text");
     }
 

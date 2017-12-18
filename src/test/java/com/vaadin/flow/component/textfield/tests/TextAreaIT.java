@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.textfield.tests;
+package com.vaadin.flow.component.textfield.tests;
 
 import java.util.stream.IntStream;
 
@@ -22,9 +22,9 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.demo.ComponentDemoTest;
 import com.vaadin.testbench.By;
-import com.vaadin.ui.textfield.TextArea;
 
 /**
  * Integration tests for the {@link TextArea}.
@@ -57,9 +57,9 @@ public class TextAreaIT extends ComponentDemoTest {
         WebElement textArea = layout
                 .findElement(By.id("text-area-with-max-height"));
 
-        IntStream.range(0, 20).forEach(i -> textArea.sendKeys("foobarbaz"));
+        IntStream.range(0, 20).forEach(i -> textArea.sendKeys("foobarbaz\n"));
 
-        Assert.assertEquals(125, textArea.getSize().getHeight());
+        Assert.assertTrue(textArea.getSize().getHeight() <= 125);
     }
 
     @Test
@@ -67,11 +67,11 @@ public class TextAreaIT extends ComponentDemoTest {
         WebElement textArea = layout
                 .findElement(By.id("text-area-with-min-height"));
 
-        IntStream.range(0, 20).forEach(i -> textArea.sendKeys("foobarbaz"));
+        IntStream.range(0, 20).forEach(i -> textArea.sendKeys("foobarbaz\n"));
 
-        Assert.assertNotEquals(125, textArea.getSize().getHeight());
+        Assert.assertTrue(textArea.getSize().getHeight() >= 125);
 
-        IntStream.range(0, 20 * "foobarbaz".length())
+        IntStream.range(0, 20 * "foobarbaz\n".length())
                 .forEach(i -> textArea.sendKeys(Keys.BACK_SPACE));
 
         Assert.assertEquals(125, textArea.getSize().getHeight());
