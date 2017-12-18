@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.iron.list.tests;
+package com.vaadin.flow.component.ironlist.tests;
 
 import java.util.List;
 import java.util.Map;

@@ -13,25 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.iron.list.tests;
+package com.vaadin.flow.component.ironlist.tests;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.Query;
-import com.vaadin.function.ValueProvider;
-import com.vaadin.router.Route;
-import com.vaadin.ui.html.Div;
-import com.vaadin.ui.html.Label;
-import com.vaadin.ui.html.NativeButton;
-import com.vaadin.ui.iron.list.IronList;
-import com.vaadin.ui.renderers.TemplateRenderer;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.ironlist.IronList;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.renderer.TemplateRenderer;
+import com.vaadin.flow.router.Route;
 
 /**
  * Test view for {@link IronList}
- * 
+ *
  * @author Vaadin Ltd.
  */
 @Route("iron-list-test")

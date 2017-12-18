@@ -13,34 +13,34 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.iron.list;
+package com.vaadin.flow.component.ironlist;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.vaadin.data.HasDataProvider;
-import com.vaadin.data.provider.ArrayUpdater;
-import com.vaadin.data.provider.ArrayUpdater.Update;
-import com.vaadin.data.provider.DataCommunicator;
-import com.vaadin.data.provider.DataGenerator;
-import com.vaadin.data.provider.DataProvider;
+import com.vaadin.flow.component.ClientDelegate;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.data.provider.ArrayUpdater;
+import com.vaadin.flow.data.provider.ArrayUpdater.Update;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataGenerator;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.util.JsonUtils;
-import com.vaadin.function.ValueProvider;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Tag;
-import com.vaadin.ui.common.ClientDelegate;
-import com.vaadin.ui.common.Focusable;
-import com.vaadin.ui.common.HasSize;
-import com.vaadin.ui.common.HasStyle;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.common.JavaScript;
-import com.vaadin.ui.renderers.ComponentRenderer;
-import com.vaadin.ui.renderers.TemplateRenderer;
-import com.vaadin.ui.renderers.TemplateRendererUtil;
-import com.vaadin.util.JsonSerializer;
+import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.renderer.ComponentRenderer;
+import com.vaadin.flow.renderer.TemplateRenderer;
+import com.vaadin.flow.renderer.TemplateRendererUtil;
 
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
@@ -59,8 +59,8 @@ import elemental.json.JsonValue;
  * For list renderered in grid layout (setting {@link #setGridLayout(boolean)}
  * with <code>true</code>), the {@code width} of the component also needs to be
  * well defined.
- * 
- * 
+ *
+ *
  * @author Vaadin Ltd.
  *
  * @param <T>
@@ -166,7 +166,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      * Sets a renderer for the items in the list, by using a
      * {@link ValueProvider}. The String returned by the provider is used to
      * render each item.
-     * 
+     *
      * @param valueProvider
      *            a provider for the label string for each item in the list, not
      *            <code>null</code>
@@ -184,7 +184,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      * to render each item.
      * <p>
      * Note: {@link ComponentRenderer}s are not supported yet.
-     * 
+     *
      * @param renderer
      *            a renderer for the items in the list, not <code>null</code>
      */
@@ -220,7 +220,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
     /**
      * Gets whether this list is rendered in a grid layout instead of a linear
      * list.
-     * 
+     *
      * @return <code>true</code> if the list renders itself as a grid,
      *         <code>false</code> otherwise
      */
@@ -232,7 +232,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      * Sets this list to be rendered as a grid. Note that for the grid layout to
      * work properly, the component needs to have a well defined {@code width}
      * and {@code height}.
-     * 
+     *
      * @param gridLayout
      *            <code>true</code> to make the list renders itself as a grid,
      *            <code>false</code> to make it render as a linear list

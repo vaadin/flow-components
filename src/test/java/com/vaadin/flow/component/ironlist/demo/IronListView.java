@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.iron.list.demo;
+package com.vaadin.flow.component.ironlist.demo;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,17 +27,16 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.javafaker.Faker;
-
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.Query;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.ironlist.IronList;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.function.ValueProvider;
-import com.vaadin.router.Route;
-import com.vaadin.router.RouteAlias;
-import com.vaadin.ui.html.Label;
-import com.vaadin.ui.html.NativeButton;
-import com.vaadin.ui.iron.list.IronList;
-import com.vaadin.ui.renderers.TemplateRenderer;
+import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.renderer.TemplateRenderer;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 
 @Route("")
 @RouteAlias("iron-list")
