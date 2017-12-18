@@ -20,10 +20,10 @@ import java.util.function.Predicate;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.ui.Text;
-import com.vaadin.ui.icon.Icon;
 
 public class ButtonTest {
 
@@ -69,7 +69,8 @@ public class ButtonTest {
     @Test
     public void textIconAndEventCtor() {
         Icon icon = new Icon();
-        button = new Button("foo", icon, event -> {});
+        button = new Button("foo", icon, event -> {
+        });
         Assert.assertEquals("foo", button.getText());
         Assert.assertEquals(icon, button.getIcon());
     }

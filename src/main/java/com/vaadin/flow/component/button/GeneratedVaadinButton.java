@@ -17,15 +17,15 @@ package com.vaadin.flow.component.button;
 
 import javax.annotation.Generated;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Tag;
-import com.vaadin.ui.common.ComponentSupplier;
-import com.vaadin.ui.common.Focusable;
-import com.vaadin.ui.common.HasClickListeners;
-import com.vaadin.ui.common.HasComponents;
-import com.vaadin.ui.common.HasStyle;
-import com.vaadin.ui.common.HasText;
-import com.vaadin.ui.common.HtmlImport;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentSupplier;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasClickListeners;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 
 /**
  * <p>
@@ -104,7 +104,7 @@ public class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code autofocus} property from the webcomponent
      */
     public boolean isAutofocus() {
@@ -118,7 +118,7 @@ public class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * <p>
      * Specify that this control should have input focus when the page loads.
      * </p>
-     * 
+     *
      * @param autofocus
      *            the boolean value to set
      */
@@ -136,7 +136,7 @@ public class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code focused} property from the webcomponent
      */
     public boolean isFocused() {
@@ -153,7 +153,7 @@ public class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code disabled} property from the webcomponent
      */
     public boolean isDisabled() {
@@ -167,7 +167,7 @@ public class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * <p>
      * If true, the user cannot interact with this element.
      * </p>
-     * 
+     *
      * @param disabled
      *            the boolean value to set
      */
@@ -177,7 +177,7 @@ public class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
 
     /**
      * Sets the given string as the content of this component.
-     * 
+     *
      * @param the
      *            text content to set
      * @see HasText#setText(String)

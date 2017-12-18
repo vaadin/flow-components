@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.button.demo;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasClickListeners.ClickEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcons;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.router.Route;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.common.HasClickListeners.ClickEvent;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.icon.Icon;
-import com.vaadin.ui.icon.VaadinIcons;
+import com.vaadin.flow.router.Route;
 
 /**
  * View for {@link Button} demo.
