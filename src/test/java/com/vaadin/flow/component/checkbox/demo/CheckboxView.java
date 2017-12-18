@@ -16,11 +16,11 @@
 package com.vaadin.flow.component.checkbox.demo;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.router.Route;
-import com.vaadin.ui.button.Button;
-import com.vaadin.ui.common.HtmlImport;
+import com.vaadin.flow.router.Route;
 
 /**
  * View for {@link Checkbox} demo.
@@ -68,7 +68,7 @@ public class CheckboxView extends DemoView {
         indeterminateCheckbox.setIndeterminate(true);
         // end-source-example
 
-        Button button = new Button("Reset",
+        NativeButton button = new NativeButton("Reset",
                 event -> indeterminateCheckbox.setValue(null));
         button.setId("reset-indeterminate");
 

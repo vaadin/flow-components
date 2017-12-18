@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import com.vaadin.ui.common.HasSize;
-import com.vaadin.ui.common.HasValue;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasValue;
 
 import elemental.json.Json;
 

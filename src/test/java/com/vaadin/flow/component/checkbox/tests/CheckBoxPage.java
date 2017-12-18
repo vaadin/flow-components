@@ -17,7 +17,7 @@ package com.vaadin.flow.component.checkbox.tests;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.router.Route;
+import com.vaadin.flow.router.Route;
 
 /**
  * Test view for {@link Checkbox}.
