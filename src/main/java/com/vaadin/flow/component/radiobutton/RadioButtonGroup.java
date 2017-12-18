@@ -20,18 +20,18 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import com.vaadin.data.HasDataProvider;
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.KeyMapper;
-import com.vaadin.data.provider.Query;
-import com.vaadin.data.selection.SingleSelect;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.function.SerializablePredicate;
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.event.PropertyChangeEvent;
-import com.vaadin.ui.renderers.ComponentRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
+import com.vaadin.flow.dom.PropertyChangeEvent;
+import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.renderer.ComponentRenderer;
+import com.vaadin.flow.renderer.TextRenderer;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code vaadin-radio-group} element.
@@ -78,10 +78,9 @@ public class RadioButtonGroup<T>
     @Override
     public Registration addValueChangeListener(
             ValueChangeListener<RadioButtonGroup<T>, T> listener) {
-        return get().getElement()
-                .addPropertyChangeListener(getClientValuePropertyName(),
-                        event -> listener.onComponentEvent(
-                                createValueChangeEvent(event)));
+        return get().getElement().addPropertyChangeListener(
+                getClientValuePropertyName(), event -> listener
+                        .onComponentEvent(createValueChangeEvent(event)));
     }
 
     /**
@@ -111,7 +110,7 @@ public class RadioButtonGroup<T>
      * predicate always returns true (all the items are enabled).
      *
      * @param itemEnabledProvider
-     *         the item enable predicate, not {@code null}
+     *            the item enable predicate, not {@code null}
      */
     public void setItemEnabledProvider(
             SerializablePredicate<T> itemEnabledProvider) {
@@ -134,7 +133,7 @@ public class RadioButtonGroup<T>
      * applied to each item to create a component which represents the item.
      *
      * @param itemRenderer
-     *         the item renderer, not {@code null}
+     *            the item renderer, not {@code null}
      */
     public void setItemRenderer(
             ComponentRenderer<? extends Component, T> itemRenderer) {
@@ -183,7 +182,7 @@ public class RadioButtonGroup<T>
      * clear all components.
      *
      * @param components
-     *         components to add
+     *            components to add
      */
     public void addComponents(Component... components) {
         add(components);
@@ -193,23 +192,23 @@ public class RadioButtonGroup<T>
      * Remove a component from the group.
      *
      * @param component
-     *         component to remove
+     *            component to remove
      */
     public void removeComponent(Component component) {
         remove(component);
     }
 
     /**
-     * Adds the components after the given item.
-     * The item must have be added to group via setItems/dataProvider
+     * Adds the components after the given item. The item must have be added to
+     * group via setItems/dataProvider
      * <p>
      * Note! Changing the item set by setting new items or dataprovider will
      * clear all components.
      *
      * @param afterItem
-     *         item to add components after
+     *            item to add components after
      * @param components
-     *         components to add after item
+     *            components to add after item
      */
     public void addComponents(T afterItem, Component... components) {
         Optional<RadioButton<T>> itemButton = getRadioButtonForItem(afterItem);
@@ -219,23 +218,23 @@ public class RadioButtonGroup<T>
 
             for (Component component : components) {
                 insertPosition += 1;
-                getElement()
-                        .insertChild(insertPosition, component.getElement());
+                getElement().insertChild(insertPosition,
+                        component.getElement());
             }
         }
     }
 
     /**
-     * Adds the components before the given item.
-     * The item must have be added to group via setItems/dataProvider
+     * Adds the components before the given item. The item must have be added to
+     * group via setItems/dataProvider
      * <p>
      * Note! Changing the item set by setting new items or dataprovider will
      * clear all components.
      *
      * @param beforeItem
-     *         item to add components in front of
+     *            item to add components in front of
      * @param components
-     *         components to add before item
+     *            components to add before item
      */
     public void prependComponents(T beforeItem, Component... components) {
         Optional<RadioButton<T>> itemButton = getRadioButtonForItem(beforeItem);
@@ -244,8 +243,8 @@ public class RadioButtonGroup<T>
             int insertPosition = getItemPosition(itemButton);
 
             for (Component component : components) {
-                getElement()
-                        .insertChild(insertPosition, component.getElement());
+                getElement().insertChild(insertPosition,
+                        component.getElement());
                 insertPosition += 1;
             }
         }

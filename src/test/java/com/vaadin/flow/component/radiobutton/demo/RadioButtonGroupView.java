@@ -15,17 +15,17 @@
  */
 package com.vaadin.flow.component.radiobutton.demo;
 
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.router.Route;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.html.Anchor;
-import com.vaadin.ui.html.Div;
-import com.vaadin.ui.html.Hr;
-import com.vaadin.ui.html.Image;
-import com.vaadin.ui.html.Label;
-import com.vaadin.ui.renderers.IconRenderer;
-import com.vaadin.ui.renderers.TextRenderer;
+import com.vaadin.flow.renderer.IconRenderer;
+import com.vaadin.flow.renderer.TextRenderer;
+import com.vaadin.flow.router.Route;
 
 @Route("vaadin-radio-button")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-radio-button.html")
@@ -95,9 +95,8 @@ public class RadioButtonGroupView extends DemoView {
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person(1, "Joe"), new Person(2, "John"),
                 new Person(3, "Bill"));
-        group.setItemRenderer(
-                person -> new Anchor("http://example.com/" + person.getId(),
-                        person.getName()));
+        group.setItemRenderer(person -> new Anchor(
+                "http://example.com/" + person.getId(), person.getName()));
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Radio button group value changed from '%s' to '%s'",
                 getName(event.getOldValue()), getName(event.getValue()))));
