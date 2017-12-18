@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2017 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,13 +17,13 @@ package com.vaadin.flow.component.formlayout;
 
 import javax.annotation.Generated;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Tag;
-import com.vaadin.ui.common.ComponentSupplier;
-import com.vaadin.ui.common.HasClickListeners;
-import com.vaadin.ui.common.HasComponents;
-import com.vaadin.ui.common.HasStyle;
-import com.vaadin.ui.common.HtmlImport;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentSupplier;
+import com.vaadin.flow.component.HasClickListeners;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 
 /**
  * <p>
@@ -88,7 +88,7 @@ import com.vaadin.ui.common.HtmlImport;
  * The {@code label-position} host attribute can be used to target the label on
  * top state:
  * </p>
- * 
+ *
  * <pre>
  * <code>
  * &lt;dom-module id="my-form-item-theme" theme-for="vaadin-form-item"&gt;
@@ -97,7 +97,7 @@ import com.vaadin.ui.common.HtmlImport;
  *       :host {
  *         /&#42; default state styles, label aside &#42;/
  *       }
- * 
+ *
  *       :host([label-position="top"]) {
  *         /&#42; label on top state styles &#42;/
  *       }
@@ -154,75 +154,70 @@ import com.vaadin.ui.common.HtmlImport;
  * </tbody>
  * </table>
  */
-@Generated({"Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-		"WebComponent: Vaadin.FormItemElement#1.0.3", "Flow#1.0-SNAPSHOT"})
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
+        "WebComponent: Vaadin.FormItemElement#1.0.3", "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-form-item")
 @HtmlImport("frontend://bower_components/vaadin-form-layout/vaadin-form-item.html")
 public class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<R>>
-		extends
-			Component
-		implements
-			ComponentSupplier<R>,
-			HasStyle,
-			HasClickListeners<R>,
-			HasComponents {
+        extends Component implements ComponentSupplier<R>, HasStyle,
+        HasClickListeners<R>, HasComponents {
 
-	/**
-	 * Adds the given components as children of this component at the slot
-	 * 'label'.
-	 * 
-	 * @param components
-	 *            The components to add.
-	 * @see <a
-	 *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
-	 *      page about slots</a>
-	 * @see <a
-	 *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
-	 *      website about slots</a>
-	 * @return this instance, for method chaining
-	 */
-	public R addToLabel(com.vaadin.ui.Component... components) {
-		for (Component component : components) {
-			component.getElement().setAttribute("slot", "label");
-			getElement().appendChild(component.getElement());
-		}
-		return get();
-	}
+    /**
+     * Adds the given components as children of this component at the slot
+     * 'label'.
+     *
+     * @param components
+     *            The components to add.
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     *      page about slots</a>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     *      website about slots</a>
+     * @return this instance, for method chaining
+     */
+    public R addToLabel(Component... components) {
+        for (Component component : components) {
+            component.getElement().setAttribute("slot", "label");
+            getElement().appendChild(component.getElement());
+        }
+        return get();
+    }
 
-	@Override
-	public void remove(com.vaadin.ui.Component... components) {
-		for (Component component : components) {
-			if (getElement().equals(component.getElement().getParent())) {
-				component.getElement().removeAttribute("slot");
-				getElement().removeChild(component.getElement());
-			} else {
-				throw new IllegalArgumentException("The given component ("
-						+ component + ") is not a child of this component");
-			}
-		}
-	}
+    @Override
+    public void remove(Component... components) {
+        for (Component component : components) {
+            if (getElement().equals(component.getElement().getParent())) {
+                component.getElement().removeAttribute("slot");
+                getElement().removeChild(component.getElement());
+            } else {
+                throw new IllegalArgumentException("The given component ("
+                        + component + ") is not a child of this component");
+            }
+        }
+    }
 
-	@Override
-	public void removeAll() {
-		getElement().getChildren().forEach(
-				child -> child.removeAttribute("slot"));
-		getElement().removeAllChildren();
-	}
+    @Override
+    public void removeAll() {
+        getElement().getChildren()
+                .forEach(child -> child.removeAttribute("slot"));
+        getElement().removeAllChildren();
+    }
 
-	/**
-	 * Adds the given components as children of this component.
-	 * 
-	 * @param components
-	 *            the components to add
-	 * @see HasComponents#add(Component...)
-	 */
-	public GeneratedVaadinFormItem(com.vaadin.ui.Component... components) {
-		add(components);
-	}
+    /**
+     * Adds the given components as children of this component.
+     *
+     * @param components
+     *            the components to add
+     * @see HasComponents#add(Component...)
+     */
+    public GeneratedVaadinFormItem(Component... components) {
+        add(components);
+    }
 
-	/**
-	 * Default constructor.
-	 */
-	public GeneratedVaadinFormItem() {
-	}
+    /**
+     * Default constructor.
+     */
+    public GeneratedVaadinFormItem() {
+    }
 }

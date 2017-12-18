@@ -23,11 +23,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jsoup.helper.StringUtil;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.JsonSerializable;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.common.HasComponents;
-import com.vaadin.ui.common.HasSize;
-import com.vaadin.ui.common.JsonSerializable;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;

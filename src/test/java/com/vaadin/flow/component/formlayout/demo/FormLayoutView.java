@@ -20,28 +20,28 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.Binder.Binding;
-import com.vaadin.data.BinderValidationStatus;
-import com.vaadin.data.BindingValidationStatus;
-import com.vaadin.data.validator.EmailValidator;
-import com.vaadin.data.validator.StringLengthValidator;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Binder.Binding;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
+import com.vaadin.flow.data.binder.BindingValidationStatus;
+import com.vaadin.flow.data.validator.EmailValidator;
+import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.function.SerializablePredicate;
-import com.vaadin.router.Route;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Composite;
-import com.vaadin.ui.button.Button;
-import com.vaadin.ui.checkbox.Checkbox;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.datepicker.DatePicker;
-import com.vaadin.ui.layout.HorizontalLayout;
-import com.vaadin.ui.textfield.TextField;
+import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.router.Route;
 
 /**
  * Demo view for {@link FormLayout}.
@@ -224,8 +224,8 @@ public class FormLayoutView extends DemoView {
         DatePicker birthDate = new DatePicker();
         Checkbox doNotCall = new Checkbox("Do not call");
         Label infoLabel = new Label();
-        Button save = new Button("Save");
-        Button reset = new Button("Reset");
+        NativeButton save = new NativeButton("Save");
+        NativeButton reset = new NativeButton("Reset");
 
         layoutWithBinder.addFormItem(firstName, "First name");
         layoutWithBinder.addFormItem(lastName, "Last name");
