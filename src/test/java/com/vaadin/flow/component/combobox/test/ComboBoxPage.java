@@ -17,12 +17,12 @@ package com.vaadin.flow.component.combobox.test;
 
 import java.util.stream.Stream;
 
-import com.vaadin.data.provider.DataProvider;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.router.Route;
-import com.vaadin.ui.button.Button;
-import com.vaadin.ui.html.Div;
-import com.vaadin.ui.html.Label;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.router.Route;
 
 /**
  * Test view for {@link ComboBox}.
@@ -56,12 +56,13 @@ public class ComboBoxPage extends Div {
 
         comboBox.setId("combo");
 
-        Button setProvider = new Button("Update data provider",
+        NativeButton setProvider = new NativeButton("Update data provider",
                 event -> comboBox.setDataProvider(
                         DataProvider.ofItems("baz", "foobar")));
         setProvider.setId("update-provider");
 
-        Button setItemCaptionGenerator = new Button("Update caption generator",
+        NativeButton setItemCaptionGenerator = new NativeButton(
+                "Update caption generator",
                 event -> comboBox.setItemLabelGenerator(
                         item -> String.valueOf(item.length())));
         setItemCaptionGenerator.setId("update-caption-gen");

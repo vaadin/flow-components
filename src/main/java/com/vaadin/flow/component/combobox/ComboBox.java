@@ -24,16 +24,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.vaadin.data.HasDataProvider;
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.KeyMapper;
-import com.vaadin.data.provider.Query;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.common.HasSize;
-import com.vaadin.ui.common.HasValidation;
-import com.vaadin.ui.common.HasValue;
-import com.vaadin.ui.common.ItemLabelGenerator;
+import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;

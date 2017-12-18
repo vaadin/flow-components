@@ -19,20 +19,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.router.Route;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.html.Div;
+import com.vaadin.flow.router.Route;
+
 /**
  * View for {@link ComboBox} demo.
- * 
+ *
  * @author Vaadin Ltd
  */
 @Route("vaadin-combo-box")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-combo-box.html")
 public class ComboBoxView extends DemoView {
-	
+
     /**
      * Example object.
      */
