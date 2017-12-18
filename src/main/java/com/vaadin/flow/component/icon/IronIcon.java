@@ -13,45 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.ui.icon;
+package com.vaadin.flow.component.icon;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Tag;
-import com.vaadin.ui.common.HasStyle;
-import com.vaadin.ui.common.HtmlImport;
 
 /**
- * Component for displaying an icon from the
- * <a href="https://vaadin.com/icons">Vaadin Icons</a> collection.
- * 
+ * Server side component for
+ * <a href="https://github.com/PolymerElements/iron-icon">iron-icon</a> element
+ * to display an icon.
+ *
  * @author Vaadin Ltd
- * @see VaadinIcons
  */
 @Tag("iron-icon")
-@HtmlImport("frontend://bower_components/vaadin-icons/vaadin-icons.html")
-public class Icon extends Component implements HasStyle {
-
+@HtmlImport("frontend://bower_components/iron-icon/iron-icon.html")
+public class IronIcon extends Component implements HasStyle {
     private static final String ICON_ATTRIBUTE_NAME = "icon";
-    private static final String ICON_COLLECTION_NAME = "vaadin";
-
-    /**
-     * Creates an Icon component that displays a Vaadin logo.
-     */
-    public Icon() {
-        this(VaadinIcons.VAADIN_H);
-    }
-
-    /**
-     * Creates an Icon component that displays the given icon from
-     * {@link VaadinIcons}.
-     *
-     * @param icon
-     *            the icon to display
-     */
-    public Icon(VaadinIcons icon) {
-        this(ICON_COLLECTION_NAME, icon.name().toLowerCase().replace('_', '-'));
-    }
 
     /**
      * Creates an Icon component that displays the given {@code icon} from the
@@ -62,7 +42,7 @@ public class Icon extends Component implements HasStyle {
      * @param icon
      *            the icon name
      */
-    public Icon(String collection, String icon) {
+    public IronIcon(String collection, String icon) {
         // iron-icon's icon-attribute uses the format "collection:name",
         // e.g. icon="vaadin:arrow-down"
         getElement().setAttribute(ICON_ATTRIBUTE_NAME, collection + ':' + icon);
@@ -92,7 +72,7 @@ public class Icon extends Component implements HasStyle {
      * <p>
      * The color should be in a format understood by the browser, e.g. "orange",
      * "#FF9E2C" or "rgb(255, 158, 44)".
-     * 
+     *
      * @param color
      *            the fill color to set, may be <code>null</code> to clear the
      *            value
@@ -107,7 +87,7 @@ public class Icon extends Component implements HasStyle {
 
     /**
      * Gets the fill color of this icon as a String.
-     * 
+     *
      * @return the fill color of the icon, or <code>null</code> if the color has
      *         not been set
      */
