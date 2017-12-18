@@ -16,8 +16,8 @@
 
 package com.vaadin.flow.component.tabs;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.common.HasComponents;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
 
 /**
  * Server-side component for the {@code vaadin-tab} element.

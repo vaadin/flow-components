@@ -22,19 +22,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcons;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.router.Route;
-import com.vaadin.ui.checkbox.Checkbox;
-import com.vaadin.ui.common.HasStyle;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.icon.Icon;
-import com.vaadin.ui.icon.VaadinIcons;
-import com.vaadin.ui.layout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 
 /**
  * View for {@link Tabs} demo.

@@ -18,14 +18,14 @@ package com.vaadin.flow.component.tabs;
 
 import java.util.Locale;
 
-import com.vaadin.shared.Registration;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.common.HasOrderedComponents;
-import com.vaadin.ui.common.HasSize;
-import com.vaadin.ui.event.ComponentEvent;
-import com.vaadin.ui.event.ComponentEventListener;
-import com.vaadin.ui.event.DomEvent;
-import com.vaadin.ui.event.Synchronize;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.HasOrderedComponents;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code vaadin-tabs} element.
@@ -159,7 +159,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
 
     /**
      * Sets the orientation of this tab sheet.
-     * 
+     *
      * @param orientation
      *            the orientation
      */
