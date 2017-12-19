@@ -16,8 +16,6 @@ import com.vaadin.ui.html.Input;
 @SkipFromDemo
 public class DynamicChanges extends AbstractChartExample {
 
-    private boolean setExtremes = true;
-
     @Override
     public void initDemo() {
         Chart chart = new Chart(ChartType.PIE);

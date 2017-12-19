@@ -68,6 +68,13 @@ public interface ConfigurationChangeListener extends Serializable {
     void seriesStateChanged(SeriesStateEvent event);
 
     /**
+     * A new series has been added
+     *
+     * @param event
+     */
+    void seriesAdded(SeriesAddedEvent event);
+
+    /**
      * The series has been changed.
      *
      * @param event

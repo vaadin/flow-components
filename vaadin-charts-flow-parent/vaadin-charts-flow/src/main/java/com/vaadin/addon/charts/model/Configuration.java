@@ -32,6 +32,7 @@ import com.vaadin.addon.charts.events.DataAddedEvent;
 import com.vaadin.addon.charts.events.DataRemovedEvent;
 import com.vaadin.addon.charts.events.DataUpdatedEvent;
 import com.vaadin.addon.charts.events.ItemSlicedEvent;
+import com.vaadin.addon.charts.events.SeriesAddedEvent;
 import com.vaadin.addon.charts.events.SeriesChangedEvent;
 import com.vaadin.addon.charts.events.SeriesStateEvent;
 
@@ -106,6 +107,7 @@ public class Configuration extends AbstractConfigurationObject
         this.series.add(series);
         series.setConfiguration(this);
         addSeriesToDrilldownConfiguration(series);
+        fireSeriesAdded(series);
     }
 
     /**
@@ -875,6 +877,19 @@ public class Configuration extends AbstractConfigurationObject
                 pointIndex);
         for (ConfigurationChangeListener listener : changeListeners) {
             listener.dataUpdated(dataUpdatedEvent);
+        }
+    }
+
+    /**
+     * Notifies listeners that a new data series has been added.
+     *
+     * @param series
+     *            The added series
+     */
+    void fireSeriesAdded(Series series) {
+        SeriesAddedEvent seriesAddedEvent = new SeriesAddedEvent(series);
+        for (ConfigurationChangeListener listener : changeListeners) {
+            listener.seriesAdded(seriesAddedEvent);
         }
     }
 

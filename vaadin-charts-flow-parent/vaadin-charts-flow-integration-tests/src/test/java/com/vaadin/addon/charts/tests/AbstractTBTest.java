@@ -47,13 +47,24 @@ public abstract class AbstractTBTest extends ParallelTest {
     }
 
     protected WebElement getElementFromShadowRoot(WebElement shadowRootOwner,
-            By by) {
+                                                  By by) {
+        return getElementFromShadowRoot(shadowRootOwner, by, 0);
+    }
+
+    protected WebElement getElementFromShadowRoot(WebElement shadowRootOwner,
+            By by, int index) {
         WebElement shadowRoot = (WebElement) executeScript(
                 "return arguments[0].shadowRoot", shadowRootOwner);
         assertNotNull("Could not locate shadowRoot in the element", shadowRoot);
-        return shadowRoot.findElements(by).stream().findFirst()
-                .orElseThrow(() -> new AssertionError(
-                        "Could not find required element in the shadowRoot"));
+
+
+        List<WebElement> elements = shadowRoot.findElements(by);
+        if (elements.size() > index) {
+            return elements.get(index);
+        }
+
+        throw new AssertionError(
+                "Could not find required element in the shadowRoot");
     }
 
     @BrowserConfiguration

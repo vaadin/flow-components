@@ -10,7 +10,6 @@ import com.vaadin.addon.charts.model.DataSeries;
 import com.vaadin.addon.charts.model.PlotOptionsLine;
 import com.vaadin.addon.charts.model.Shape;
 import com.vaadin.addon.charts.model.YAxis;
-import com.vaadin.addon.charts.model.style.SolidColor;
 
 public class BasicLineWithCallouts extends AbstractChartExample {
 

@@ -97,10 +97,6 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
     @Override
     public void onAttach(AttachEvent e) {
         getElement().getClassList().add("hiddensplitter");
-        // TODO(sayo-vaadin): Workaround for Flow not properly handling reroute for wildcard parameters.
-        if (currentExample == null) {
-            setParameter(null, null);
-        }
     }
 
     @Override

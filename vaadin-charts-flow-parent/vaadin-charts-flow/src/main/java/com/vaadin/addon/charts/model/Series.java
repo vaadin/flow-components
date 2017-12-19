@@ -17,10 +17,12 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
+import java.io.Serializable;
+
 /**
  * Series interface for all kinds of Series
  */
-public interface Series {
+public interface Series extends Serializable {
 
     /**
      * @see #setName(String)

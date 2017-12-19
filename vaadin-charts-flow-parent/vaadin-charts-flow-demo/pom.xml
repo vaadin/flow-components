@@ -25,6 +25,16 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin</artifactId>
+            <version>${vaadin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-radio-button-flow</artifactId>
+            <version>LATEST</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -3,9 +3,6 @@ package com.vaadin.addon.charts.examples.combinations;
 import com.vaadin.addon.charts.AbstractChartExample;
 import com.vaadin.addon.charts.Chart;
 import com.vaadin.addon.charts.model.*;
-import com.vaadin.addon.charts.model.style.Color;
-import com.vaadin.addon.charts.model.style.SolidColor;
-import com.vaadin.addon.charts.model.style.Style;
 
 public class MultipleAxes extends AbstractChartExample {
 

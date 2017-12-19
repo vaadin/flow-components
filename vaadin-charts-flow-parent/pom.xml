@@ -37,8 +37,8 @@
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
 
-        <vaadin.version>10.0.0.alpha7</vaadin.version>
-        <flow.version>1.0.0.alpha10</flow.version>
+        <vaadin.version>10.0.0.alpha8</vaadin.version>
+        <flow.version>1.0.0.alpha12</flow.version>
         <jetty.version>9.3.9.v20160517</jetty.version>
         <!-- Frontend -->
         <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
