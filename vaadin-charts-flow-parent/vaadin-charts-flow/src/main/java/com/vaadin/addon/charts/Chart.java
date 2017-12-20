@@ -26,8 +26,8 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Tag;
 import com.vaadin.ui.common.HtmlImport;
 import com.vaadin.ui.event.AttachEvent;
-
 import com.vaadin.ui.event.ComponentEventListener;
+
 import elemental.json.JsonObject;
 import elemental.json.impl.JreJsonFactory;
 
@@ -111,14 +111,15 @@ public class Chart extends Component {
     }
 
     /**
-     * The series visibility is toggled by default if user clicks the series
-     * item in the legend. Calling setSeriesVisibilityTogglingDisabled(
-     * <code>true</code>) will disable this behaviour.
+     * The series or point visibility is toggled by default if user clicks the
+     * legend item that corresponds to the series or point. Calling
+     * setVisibilityTogglingDisabled( <code>true</code>) will disable this
+     * behavior.
      *
      * @param disabled
      */
-    public void setSeriesVisibilityTogglingDisabled(boolean disabled) {
-        getElement().setProperty("_seriesVisibilityTogglingDisabled", disabled);
+    public void setVisibilityTogglingDisabled(boolean disabled) {
+        getElement().setProperty("_visibilityTogglingDisabled", disabled);
     }
 
     /**
@@ -258,20 +259,37 @@ public class Chart extends Component {
     }
 
     /**
-     * Adds a legend item click listener, which will be notified of clicks on
-     * the legend's items
+     * Adds a series legend item click listener, which will be notified of
+     * clicks on the legend's items corresponding to a Series
      * <p>
-     * Note that by default, clicking on a legend item toggles the visibility
-     * of its associated series. To disable this behavior call
-     * setSeriesVisibilityTogglingDisabled(<code>true</code>)
+     * Note that by default, clicking on a legend item toggles the visibility of
+     * its associated series. To disable this behavior call
+     * setVisibilityTogglingDisabled(<code>true</code>)
      *
      * @param listener
      *
-     * @see #setSeriesVisibilityTogglingDisabled(boolean)
+     * @see #setVisibilityTogglingDisabled(boolean)
      */
-    public Registration addLegendItemClickListener(
+    public Registration addSeriesLegendItemClickListener(
             ComponentEventListener<SeriesLegendItemClickEvent> listener) {
         return addListener(SeriesLegendItemClickEvent.class, listener);
+    }
+
+    /**
+     * Adds a point legend item click listener, which will be notified of clicks
+     * on the legend's items corresponding to a Point
+     * <p>
+     * Note that by default, clicking on a legend item toggles the visibility of
+     * its associated point. To disable this behavior call
+     * setVisibilityTogglingDisabled(<code>true</code>)
+     *
+     * @param listener
+     *
+     * @see #setVisibilityTogglingDisabled(boolean)
+     */
+    public Registration addPointLegendItemClickListener(
+            ComponentEventListener<PointLegendItemClickEvent> listener) {
+        return addListener(PointLegendItemClickEvent.class, listener);
     }
 
     /**

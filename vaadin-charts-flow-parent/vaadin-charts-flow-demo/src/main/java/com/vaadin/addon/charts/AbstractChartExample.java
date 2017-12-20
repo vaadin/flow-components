@@ -1,13 +1,14 @@
 package com.vaadin.addon.charts;
 
-import com.vaadin.server.Command;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.html.Div;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import com.vaadin.server.Command;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.html.Div;
 
 /**
  * Abstract class for all chart examples.
@@ -18,6 +19,12 @@ public abstract class AbstractChartExample extends Div {
     }
 
     public abstract void initDemo();
+
+    protected void showNotification(String message) {
+        UI.getCurrent().getPage()
+                .executeJavaScript("window.alert($0);", message);
+
+    }
 
     /**
      * Runs given task repeatedly until the reference component is attached

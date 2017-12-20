@@ -109,14 +109,14 @@ public class ServerSideEvents extends AbstractChartExample {
         chart.addChartClickListener(event -> logEvent(event));
         chart.addPointClickListener(event -> logEvent(event));
         chart.addCheckBoxClickListener(event -> logEvent(event));
-        chart.addLegendItemClickListener(event -> logEvent(event));
+        chart.addSeriesLegendItemClickListener(event -> logEvent(event));
         chart.addSeriesHideListener(event -> logEvent(event));
         chart.addSeriesShowListener(event -> logEvent(event));
         chart.addPointSelectListener(event -> logEvent(event));
         chart.addPointUnselectListener(event -> logEvent(event));
         chart.drawChart();
 
-        chart.setSeriesVisibilityTogglingDisabled(false);
+        chart.setVisibilityTogglingDisabled(false);
 
         VerticalLayout layout = new VerticalLayout();
         layout.setId("master");
@@ -132,7 +132,7 @@ public class ServerSideEvents extends AbstractChartExample {
         visibilityToggling = new Checkbox("Disable series visibility toggling");
         visibilityToggling.setId("visibilityToggler");
         visibilityToggling.addValueChangeListener(e ->
-                chart.setSeriesVisibilityTogglingDisabled(visibilityToggling
+                chart.setVisibilityTogglingDisabled(visibilityToggling
                         .getValue()));
         visibilityToggling.setValue(false);
 

@@ -22,13 +22,16 @@ import com.vaadin.ui.event.EventData;
  */
 
 /**
- * The SeriesLegendItemClickEvent class stores information on click events on
- * the charts's legend items that correspond to a chart series.
+ * The PointLegendItemClickEvent class stores information on click events on the
+ * charts's legend items that correspond to a chart point.
  */
-@DomEvent("series-legend-item-click")
-public class SeriesLegendItemClickEvent extends ComponentEvent<Chart> implements HasSeries {
+@DomEvent("point-legend-item-click")
+public class PointLegendItemClickEvent extends ComponentEvent<Chart>
+        implements HasItem {
 
     private final int seriesIndex;
+    private final String category;
+    private final int pointIndex;
 
     /**
      * Constructs a SeriesLegendItemClickEvent
@@ -36,14 +39,28 @@ public class SeriesLegendItemClickEvent extends ComponentEvent<Chart> implements
      * @param source
      * @param fromClient
      */
-    public SeriesLegendItemClickEvent(Chart source, boolean fromClient,
-            @EventData("event.detail.series.index") int seriesIndex) {
+    public PointLegendItemClickEvent(Chart source, boolean fromClient,
+            @EventData("event.detail.point.series.index") int seriesIndex,
+            @EventData("event.detail.point.category") String category,
+            @EventData("event.detail.point.index") int pointIndex) {
         super(source, fromClient);
         this.seriesIndex = seriesIndex;
+        this.category = category;
+        this.pointIndex = pointIndex;
     }
 
     @Override
     public int getSeriesItemIndex() {
         return seriesIndex;
+    }
+
+    @Override
+    public String getCategory() {
+        return category;
+    }
+
+    @Override
+    public int getItemIndex() {
+        return pointIndex;
     }
 }
