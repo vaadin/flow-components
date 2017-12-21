@@ -41,9 +41,9 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
-import com.vaadin.flow.component.grid.GridTemplateRendererUtil.ComponentDataGenerator;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -53,10 +53,11 @@ import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.event.SortEvent.SortNotifier;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
+import com.vaadin.flow.data.provider.ComponentDataGenerator;
+import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -214,9 +215,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     @Tag("vaadin-grid-column")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
-        private Map<String, Component> renderedComponents;
-
-        private String columnId; // for internal implementation only
+        private final String columnId; // for internal implementation only
         private String columnKey; // defined and used by the user
 
         private boolean sortingEnabled;
@@ -252,10 +251,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
             String template;
             if (renderer instanceof ComponentTemplateRenderer) {
-                renderedComponents = new HashMap<>();
                 ComponentTemplateRenderer<? extends Component, T> componentRenderer = (ComponentTemplateRenderer<? extends Component, T>) renderer;
                 grid.setupItemComponentRenderer(this, columnId,
-                        componentRenderer, renderedComponents);
+                        componentRenderer);
                 template = componentRenderer
                         .getTemplate(GRID_COMPONENT_RENDERER_TAG);
             } else {
@@ -265,8 +263,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             Element contentTemplate = new Element("template")
                     .setProperty("innerHTML", template);
 
-            getElement().setAttribute("id", columnId)
-                    .appendChild(contentTemplate);
+            getElement().appendChild(contentTemplate);
 
             GridTemplateRendererUtil.setupTemplateRenderer(
                     (TemplateRenderer) renderer, contentTemplate, getElement(),
@@ -604,62 +601,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
-     * Data generator implementation for the Grid.
-     *
-     * @param <T>
-     *            the grid bean type
-     */
-    static class GridDataGenerator<T> implements DataGenerator<T> {
-
-        private final Set<DataGenerator<T>> dataGenerators = new HashSet<>();
-
-        @Override
-        public void generateData(T item, JsonObject jsonObject) {
-            dataGenerators.forEach(
-                    generator -> generator.generateData(item, jsonObject));
-        }
-
-        @Override
-        public void destroyData(T item) {
-            dataGenerators.forEach(generator -> generator.destroyData(item));
-        }
-
-        @Override
-        public void destroyAllData() {
-            dataGenerators.forEach(DataGenerator::destroyAllData);
-        }
-
-        @Override
-        public void refreshData(T item) {
-            dataGenerators.forEach(generator -> generator.refreshData(item));
-        }
-
-        /**
-         * Adds the given data generator. If the generator was already added,
-         * does nothing.
-         *
-         * @param generator
-         *            the data generator to add
-         */
-        public Registration addDataGenerator(DataGenerator<T> generator) {
-            assert generator != null : "generator should not be null";
-            dataGenerators.add(generator);
-            return () -> removeDataGenerator(generator);
-        }
-
-        /**
-         * Removes the given data generator.
-         *
-         * @param generator
-         *            the data generator to remove
-         */
-        public void removeDataGenerator(DataGenerator<T> generator) {
-            assert generator != null : "generator should not be null";
-            dataGenerators.remove(generator);
-        }
-    }
-
-    /**
      * Class for managing visible details rows.
      *
      * @param <T>
@@ -739,7 +680,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private final ArrayUpdater arrayUpdater = UpdateQueue::new;
 
-    private final GridDataGenerator<T> gridDataGenerator = new GridDataGenerator<>();
+    private final CompositeDataGenerator<T> gridDataGenerator = new CompositeDataGenerator<>();
     private final DataCommunicator<T> dataCommunicator = new DataCommunicator<>(
             gridDataGenerator, arrayUpdater,
             data -> getElement().callFunction("$connector.updateData", data),
@@ -751,7 +692,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private final DetailsManager<T> detailsManager = new DetailsManager<>(this);
     private Element detailsTemplate;
-    private Map<String, Component> renderedDetailComponents;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
     private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
@@ -1247,12 +1187,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         if (detailsTemplate != null) {
             getElement().removeChild(detailsTemplate);
         }
-        if (renderedDetailComponents != null) {
-            renderedDetailComponents
-                    .forEach((key, rendereredComponent) -> rendereredComponent
-                            .getElement().removeFromParent());
-            renderedDetailComponents = null;
-        }
         if (itemDetailsDataGeneratorRegistration != null) {
             itemDetailsDataGeneratorRegistration.remove();
             itemDetailsDataGeneratorRegistration = null;
@@ -1263,11 +1197,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         String template;
         if (renderer instanceof ComponentTemplateRenderer) {
-            renderedDetailComponents = new HashMap<>();
-
             ComponentTemplateRenderer<? extends Component, T> componentRenderer = (ComponentTemplateRenderer<? extends Component, T>) renderer;
             itemDetailsDataGeneratorRegistration = setupItemComponentRenderer(
-                    this, null, componentRenderer, renderedDetailComponents);
+                    this, null, componentRenderer);
             template = componentRenderer
                     .getTemplate(GRID_COMPONENT_RENDERER_TAG);
         } else {
@@ -1554,26 +1486,27 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private Registration setupItemComponentRenderer(Component owner,
             String ownerId,
-            ComponentTemplateRenderer<? extends Component, T> componentRenderer,
-            Map<String, Component> renderedComponents) {
+            ComponentTemplateRenderer<? extends Component, T> componentRenderer) {
 
         Element container = new Element("div", false);
         owner.getElement().appendVirtualChild(container);
 
-        String appId = GridTemplateRendererUtil.getAppId();
+        String appId = UI.getCurrent().getInternals().getAppId();
 
         componentRenderer.setTemplateAttribute("appid", appId);
         String nodeIdPropertyName = ownerId == null ? "nodeId" : ownerId;
         componentRenderer.setTemplateAttribute("nodeid",
                 "[[item." + nodeIdPropertyName + "]]");
 
-        return getDataGenerator().addDataGenerator(
-                new ComponentDataGenerator<>(componentRenderer,
-                        renderedComponents, container, nodeIdPropertyName,
-                        (KeyMapper<T>) getDataCommunicator().getKeyMapper()));
+        return getDataGenerator().addDataGenerator(new ComponentDataGenerator<>(
+                componentRenderer, container, nodeIdPropertyName,
+                getDataCommunicator().getKeyMapper()));
     }
 
-    GridDataGenerator<T> getDataGenerator() {
+    /*
+     * This method is not private because AbstractColumn uses it.
+     */
+    CompositeDataGenerator<T> getDataGenerator() {
         return gridDataGenerator;
     }
 

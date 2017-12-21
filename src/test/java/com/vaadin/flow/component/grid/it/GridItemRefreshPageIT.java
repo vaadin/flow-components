@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -47,18 +46,7 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
                 "template-reset-communicator");
     }
 
-    /*
-     * Tests ignored due to synchronization problems between the test code and
-     * the way the flow-component-renderer injects the components inside itself.
-     * Currently it uses a Polymer.Async.idlePeriod debouncer strategy, that
-     * makes it update the cell in a non-blocking way.
-     * 
-     * The bug these tests are supposed to prevent is described at
-     * https://github.com/vaadin/vaadin-grid-flow/issues/9
-     */
-
     @Test
-    @Ignore
     public void updateAndRefreshItemsOnTheServerUsingDataProvider_withComponentRenderer() {
         updateAndRefreshItemsOnTheServer("component-grid",
                 "component-refresh-first", "component-refresh-multiple",
@@ -66,7 +54,6 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore
     public void updateAndRefreshItemsOnTheServerUsingDataCommunicator_withComponentRenderer() {
         updateAndRefreshItemsOnTheServer("component-grid",
                 "component-refresh-first-communicator",
