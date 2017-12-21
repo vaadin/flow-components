@@ -35,13 +35,6 @@
             <id>saucelabs-repository</id>
             <url>http://repository-saucelabs.forge.cloudbees.com/release</url>
         </repository>
-        <repository>
-            <id>flow-internal-snapshots</id>
-            <url>https://repo.vaadin.com/nexus/content/repositories/flow-snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
     </repositories>
 
     <dependencies>
