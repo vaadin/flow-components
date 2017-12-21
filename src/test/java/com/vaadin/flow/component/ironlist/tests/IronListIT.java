@@ -170,6 +170,22 @@ public class IronListIT extends AbstractComponentIT {
         Assert.assertEquals("Clickable item 2 removed", message.getText());
     }
 
+    @Test
+    public void listWithComponentRenderer() {
+        WebElement list = findElement(By.id("component-renderer"));
+
+        List<WebElement> items = list
+                .findElements(By.className("component-rendered"));
+        Assert.assertEquals(3, items.size());
+
+        for (int i = 0; i < items.size(); i++) {
+            WebElement item = items.get(i);
+            Assert.assertEquals("label", item.getTagName());
+            Assert.assertEquals("Item " + (i + 1),
+                    item.getAttribute("innerHTML"));
+        }
+    }
+
     private void assertItemsArePresent(JsonArray items, int startingIndex,
             int endingIndex, String itemLabelprefix) {
 

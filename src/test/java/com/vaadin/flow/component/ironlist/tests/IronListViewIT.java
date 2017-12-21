@@ -60,13 +60,20 @@ public class IronListViewIT extends TabbedComponentDemoTest {
     @Test
     public void peopleListWithDataProvider() {
         openTabAndCheckForErrors("using-templates");
-        validateListSize("list-of-people-with-dataprovider", 50);
+        validateListSize("list-of-people-with-dataprovider", 500);
     }
 
     @Test
     public void rankedListWithEventHandling() {
         openTabAndCheckForErrors("using-templates");
         validateListSize("using-events-with-templates", 29);
+    }
+
+    @Test
+    public void peopleListWithComponentRenderer() {
+        openTabAndCheckForErrors("using-components");
+        validateListSize(
+                "list-of-people-with-dataprovider-and-component-renderer", 500);
     }
 
     private void validateListSize(String listId, int expectedSize) {

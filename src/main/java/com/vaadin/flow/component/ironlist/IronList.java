@@ -26,23 +26,26 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
+import com.vaadin.flow.data.provider.ComponentDataGenerator;
+import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.renderer.ComponentRenderer;
+import com.vaadin.flow.renderer.ComponentTemplateRenderer;
 import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.renderer.TemplateRendererUtil;
+import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 
 /**
@@ -71,6 +74,7 @@ import elemental.json.JsonValue;
  */
 @Tag("iron-list")
 @HtmlImport("frontend://bower_components/iron-list/iron-list.html")
+@HtmlImport("frontend://flow-component-renderer.html")
 @JavaScript("frontend://ironListConnector.js")
 public class IronList<T> extends Component implements HasDataProvider<T>,
         HasStyle, HasSize, Focusable<IronList<T>> {
@@ -108,18 +112,13 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
     private final ArrayUpdater arrayUpdater = UpdateQueue::new;
     private final Element template;
     private TemplateRenderer<T> renderer;
+    private String placeholderTemplate;
 
-    private final DataGenerator<T> listDataGenerator = new DataGenerator<T>() {
-        @Override
-        public void generateData(T item, JsonObject jsonObject) {
-            renderer.getValueProviders()
-                    .forEach((property, provider) -> jsonObject.put(property,
-                            JsonSerializer.toJson(provider.apply(item))));
-        }
-    };
+    private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
+    private Registration dataGeneratorRegistration;
 
     private final DataCommunicator<T> dataCommunicator = new DataCommunicator<>(
-            listDataGenerator, arrayUpdater,
+            dataGenerator, arrayUpdater,
             data -> getElement().callFunction("$connector.updateData", data),
             getElement().getNode());
 
@@ -127,8 +126,15 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      * Creates an empty list.
      */
     public IronList() {
+        dataGenerator.addDataGenerator(
+                (item, jsonObject) -> renderer.getValueProviders()
+                        .forEach((property, provider) -> jsonObject.put(
+                                property,
+                                JsonSerializer.toJson(provider.apply(item)))));
+
         template = new Element("template");
         getElement().appendChild(template);
+        placeholderTemplate = "<div style='width: 100px; height: 18px'></div>";
         setRenderer(item -> String.valueOf(item));
 
         getElement().getNode()
@@ -190,12 +196,52 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      */
     public void setRenderer(TemplateRenderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer must not be null");
-        if (renderer instanceof ComponentRenderer) {
-            throw new UnsupportedOperationException(
-                    "ComponentRenderers are not supported yet");
+
+        if (dataGeneratorRegistration != null) {
+            dataGeneratorRegistration.remove();
+            dataGeneratorRegistration = null;
+        }
+
+        if (renderer instanceof ComponentTemplateRenderer) {
+            ComponentTemplateRenderer<? extends Component, T> componentRenderer = (ComponentTemplateRenderer<? extends Component, T>) renderer;
+            dataGeneratorRegistration = setupItemComponentRenderer(this,
+                    componentRenderer);
         }
         this.renderer = renderer;
+        updateTemplateInnerHtml();
 
+        TemplateRendererUtil.registerEventHandlers(renderer, template,
+                this.getElement(),
+                key -> getDataCommunicator().getKeyMapper().get(key));
+
+        getDataCommunicator().reset();
+    }
+
+    /**
+     * Sets a HTML template for the placeholder item. The placeholder is shown
+     * in the list while the actual data is being fetched from the server.
+     * <p>
+     * For a smooth scrolling experience, it is recommended that the placeholder
+     * has the dimensions as close as possible to the final, rendered result.
+     * This is specially important when using {@link TemplateRenderer} or
+     * {@link ComponentTemplateRenderer}.
+     * <p>
+     * By default, the placeholder is an empty {@code <div>}, with {@code 100px}
+     * of width and {@code 18px} of height.
+     * 
+     * @param placeholderTemplate
+     *            the HTML to be used in the list while the actual item is being
+     *            loaded, not <code>null</code>
+     */
+    public void setPlaceholderTemplate(String placeholderTemplate) {
+        Objects.requireNonNull(placeholderTemplate,
+                "The placeholderTemplate must not be null");
+
+        this.placeholderTemplate = placeholderTemplate;
+        updateTemplateInnerHtml();
+    }
+
+    private void updateTemplateInnerHtml() {
         /**
          * The placeholder is used by the client connector to create temporary
          * elements that are populated on demand (when the user scrolls to that
@@ -204,17 +250,11 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
         template.setProperty("innerHTML", String.format(
         //@formatter:off
             "<span>"
-                + "<template is='dom-if' if='[[item.__placeholder]]'>&nbsp;</template>"
+                + "<template is='dom-if' if='[[item.__placeholder]]'>%s</template>"
                 + "<template is='dom-if' if='[[!item.__placeholder]]'>%s</template>"
             + "</span>",
         //@formatter:on
-                renderer.getTemplate()));
-
-        TemplateRendererUtil.registerEventHandlers(renderer, template,
-                this.getElement(),
-                key -> getDataCommunicator().getKeyMapper().get(key));
-
-        getDataCommunicator().reset();
+                placeholderTemplate, renderer.getTemplate()));
     }
 
     /**
@@ -244,5 +284,21 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
     @ClientDelegate
     private void setRequestedRange(int start, int length) {
         getDataCommunicator().setRequestedRange(start, length);
+    }
+
+    private Registration setupItemComponentRenderer(Component owner,
+            ComponentTemplateRenderer<? extends Component, T> componentRenderer) {
+
+        Element container = new Element("div", false);
+        owner.getElement().appendVirtualChild(container);
+
+        String appId = UI.getCurrent().getInternals().getAppId();
+
+        componentRenderer.setTemplateAttribute("appid", appId);
+        componentRenderer.setTemplateAttribute("nodeid", "[[item.nodeId]]");
+
+        return dataGenerator.addDataGenerator(
+                new ComponentDataGenerator<>(componentRenderer, container,
+                        "nodeId", getDataCommunicator().getKeyMapper()));
     }
 }

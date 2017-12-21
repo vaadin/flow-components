@@ -27,13 +27,19 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.javafaker.Faker;
+
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.ironlist.IronList;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.renderer.ComponentTemplateRenderer;
 import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -91,6 +97,43 @@ public class IronListView extends DemoView {
         }
     }
 
+    //@formatter:off
+    // begin-source-example
+    // source-example-heading: List of people with DataProvider and ComponentRenderer
+    /**
+     * Component to render a person card, with picture, name and email.
+     */
+    public static class PersonCard extends HorizontalLayout {
+
+        public PersonCard(Person person) {
+            setAlignItems(Alignment.CENTER);
+            getStyle().set("minWidth", "250px").set("padding", "10px")
+                    .set("display", "flex");
+
+            Image picture = new Image();
+            picture.setSrc(person.getPicture());
+            picture.setWidth("40px");
+            picture.setHeight("40px");
+            picture.getStyle().set("borderRadius", "50%");
+
+            Div pictureContainer = new Div(picture);
+            pictureContainer.getStyle().set("marginRight", "10px");
+            pictureContainer.setWidth("40px");
+            pictureContainer.setHeight("40px");
+
+            Label name = new Label(
+                    person.getFirstName() + " " + person.getLastName());
+            Label email = new Label(person.getEmail());
+            email.getStyle().set("fontSize", "13px");
+
+            VerticalLayout nameContainer = new VerticalLayout(name, email);
+
+            add(pictureContainer, nameContainer);
+        }
+    }
+    // end-source-example
+    //@formatter:on
+
     @Override
     public void initView() {
         createStringList();
@@ -98,6 +141,7 @@ public class IronListView extends DemoView {
         createPeopleListWithDataProvider();
         createChuckNorrisFacts();
         createRankedListWithEventHandling();
+        createPeopleListWithDataProviderAndComponentRenderer();
     }
 
     private void createStringList() {
@@ -182,6 +226,10 @@ public class IronListView extends DemoView {
                 .withProperty("lastName", Person::getLastName)
                 .withProperty("email", Person::getEmail)
                 .withProperty("picture", Person::getPicture));
+        
+        // For a smooth scrolling experience use a placeholder with the size as 
+        // close as possible to the final component,
+        list.setPlaceholderTemplate("<div style='width: 270px; height: 60px;'>Loading...</div>");
         // end-source-example
         //@formatter:on
 
@@ -248,6 +296,36 @@ public class IronListView extends DemoView {
                 }));
     }
 
+    private void createPeopleListWithDataProviderAndComponentRenderer() {
+        //@formatter:off
+        // begin-source-example
+        // source-example-heading: List of people with DataProvider and ComponentRenderer
+        /* IronList that uses the component above */
+        IronList<Person> list = new IronList<>();
+        list.setHeight("400px");
+        list.getStyle().set("border", "1px solid lightgray");
+
+        DataProvider<Person, ?> dataProvider = DataProvider
+                .ofCollection(createListOfPeople());
+
+        list.setDataProvider(dataProvider);
+        list.setGridLayout(true);
+        
+        // Uses the constructor of the PersonCard for each item in the list
+        list.setRenderer(new ComponentTemplateRenderer<>(PersonCard::new));
+        
+        // For a smooth scrolling experience use a placeholder with the size as 
+        // close as possible to the final component,
+        list.setPlaceholderTemplate("<div style='width: 270px; height: 60px;'>Loading...</div>");
+        // end-source-example
+        //@formatter:on
+
+        list.setId("list-of-people-with-dataprovider-and-component-renderer");
+        addCard("Using components",
+                "List of people with DataProvider and ComponentRenderer",
+                new Label("List of people with grid layout"), list);
+    }
+
     private Stream<String> queryStringsFromDatabase(Query<String, Void> query) {
         return LIST_OF_BOOKS
                 .subList(Math.min(query.getOffset(), LIST_OF_BOOKS.size() - 1),
@@ -293,9 +371,10 @@ public class IronListView extends DemoView {
     }
 
     private List<Person> createListOfPeople() {
-        List<Person> people = new ArrayList<>(50);
+        final int numberToGenerate = 500;
+        List<Person> people = new ArrayList<>(numberToGenerate);
         Faker faker = Faker.instance(new Random(42));
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < numberToGenerate; i++) {
             Person person = new Person();
             person.setFirstName(faker.name().firstName());
             person.setLastName(faker.name().lastName());

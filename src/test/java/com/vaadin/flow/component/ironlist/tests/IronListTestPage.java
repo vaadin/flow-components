@@ -26,6 +26,7 @@ import com.vaadin.flow.component.ironlist.IronList;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.renderer.ComponentTemplateRenderer;
 import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
@@ -76,6 +77,7 @@ public class IronListTestPage extends Div {
         createTemplateFromRendererWithPeople();
         createLazyLoadingDataProvider();
         createTemplateWithEventHandlers();
+        createListWithComponentRenderer();
     }
 
     private void createListWithStrings() {
@@ -239,6 +241,24 @@ public class IronListTestPage extends Div {
         message.setId("template-events-message");
 
         add(list, message);
+    }
+
+    private void createListWithComponentRenderer() {
+        IronList<String> list = new IronList<>();
+        list.setHeight("100px");
+
+        List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
+
+        list.setRenderer(new ComponentTemplateRenderer<>(item -> {
+            Label label = new Label(item);
+            label.addClassName("component-rendered");
+            return label;
+        }));
+
+        list.setItems(items);
+        list.setId("component-renderer");
+
+        add(list);
     }
 
     private List<Person> createPeople(int amount) {
