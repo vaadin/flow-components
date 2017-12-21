@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.notification.demo;
 
-import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.HorizontalAlign;
@@ -27,7 +27,6 @@ import com.vaadin.flow.router.Route;
  * View for {@link Notification} demo.
  */
 @Route("vaadin-notification")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 public class NotificationView extends DemoView {
 
     private static final String BUTTON_CAPTION = "Open notification";
@@ -36,6 +35,7 @@ public class NotificationView extends DemoView {
     public void initView() {
         createDefaultNotificaiton();
         createNotificationWithPosition();
+        createNotificationWithComponents();
     }
 
     private void createDefaultNotificaiton() {
@@ -58,8 +58,7 @@ public class NotificationView extends DemoView {
         // begin-source-example
         // source-example-heading: Notification with position
         Notification notification = new Notification(
-                "<h3>Hello World!</h3>"
-                        + "This notification has position setting",
+                "This notification is located on Top-Left",
                 2000, VerticalAlign.TOP, HorizontalAlign.START);
         // end-source-example
         button.setId("position-notification-button");
@@ -68,4 +67,22 @@ public class NotificationView extends DemoView {
         addCard("Notification with position", notification, button);
     }
 
+    private void createNotificationWithComponents() {
+        NativeButton button = new NativeButton(BUTTON_CAPTION);
+        button.setId("component-notification-button");
+        // begin-source-example
+        // source-example-heading: Notification with components
+        Label content = new Label(
+                "Hello, I am a notification with components!");
+        NativeButton buttonInside = new NativeButton("Bye");
+        Notification notification = new Notification(content, buttonInside);
+        buttonInside.addClickListener(event -> notification.close());
+        notification.setAlignment(VerticalAlign.MIDDLE, HorizontalAlign.CENTER);
+        // end-source-example
+        notification.setId("component-notification");
+        content.setId("label-inside-notification");
+        buttonInside.setId("button-inside-notification");
+        button.addClickListener(event -> notification.open());
+        addCard("Notification with components", notification, button);
+    }
 }

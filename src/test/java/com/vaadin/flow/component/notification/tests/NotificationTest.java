@@ -18,6 +18,8 @@ package com.vaadin.flow.component.notification.tests;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.HorizontalAlign;
 import com.vaadin.flow.component.notification.Notification.VerticalAlign;
@@ -26,11 +28,6 @@ import com.vaadin.flow.component.notification.Notification.VerticalAlign;
 public class NotificationTest {
 
     private Notification notification;
-
-    @Test
-    public void emptyCtor() {
-        notification = new Notification();
-    }
 
     @Test
     public void stringCtor() {
@@ -58,9 +55,17 @@ public class NotificationTest {
     }
 
     @Test
+    public void componentCtor() {
+        notification = new Notification(new Label(), new NativeButton());
+        notification.setAlignment(VerticalAlign.BOTTOM, HorizontalAlign.END);
+
+        Assert.assertEquals("bottom", notification.getVerticalAlign());
+        Assert.assertEquals("end", notification.getHorizontalAlign());
+    }
+
+    @Test
     public void setContent() {
-        notification = new Notification();
-        notification.setContent("new");
+        notification = new Notification("new");
         Assert.assertEquals("new",
                 notification.getElement().getChild(0).getProperty("innerHTML"));
         
@@ -68,6 +73,7 @@ public class NotificationTest {
         Assert.assertEquals("Hello",
                 notification.getElement().getChild(0).getProperty("innerHTML"));
     }
+
 
     @Test
     public void setAlignment() {
