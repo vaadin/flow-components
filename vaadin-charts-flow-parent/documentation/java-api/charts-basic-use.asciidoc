@@ -1,0 +1,424 @@
+---
+title: Basic Use
+order: 3
+layout: page
+---
+
+[[charts.basic-use]]
+= Basic Use
+
+The [classname]#Chart# is a regular Vaadin component, which you can add to a
+layout. You can give the chart type in the constructor or set it later in the
+chart model.
+
+[source, java]
+----
+Chart chart = new Chart(ChartType.COLUMN);
+
+//or
+
+Chart chart = new Chart();
+chart.getConfiguration().getChart().setType(ChartType.COLUMN);
+...
+layout.addComponent(chart);
+----
+
+The chart types are described in
+<<dummy/../../../charts/java-api/charts-charttypes#charts.charttypes,"Chart Types">>. The
+main parts of a chart are illustrated in <<figure.charts.overview.elements>>.
+
+[[figure.charts.overview.elements]]
+.Chart Elements
+image::img/charts-elements-lo.png[]
+
+To actually display something in a chart, you typically need to configure the
+following aspects:
+
+* Basic chart configuration
+* Configure __plot options__ for the chart type
+* Configure one or more __data series__ to display
+* Configure __axes__
+
+The plot options can be configured for each data series individually, or for
+different chart types in mixed-type charts.
+
+[[charts.basic-use.configuration]]
+== Basic Chart Configuration
+
+After creating a chart, you need to configure it further. At the least, you need
+to specify the data series to be displayed in the configuration.
+
+Most methods available in the [classname]#Chart# object handle its basic Vaadin
+component properties. All the chart-specific properties are in a separate
+[classname]#Configuration# object, which you can access with the
+[methodname]#getConfiguration()# method.
+
+[source, java]
+----
+Configuration conf = chart.getConfiguration();
+conf.setTitle("Reindeer Kills by Predators");
+conf.setSubTitle("Kills Grouped by Counties");
+----
+
+The configuration properties are described in more detail in
+<<dummy/../../../charts/java-api/charts-configuration#charts.configuration,"Chart
+Configuration">>.
+
+
+[[charts.basic-use.plotoptions]]
+== Plot Options
+
+Many chart settings can be configured in the __plot options__ of the chart or
+data series. Some of the options are chart type specific, as described later for
+each chart type, while many are shared.
+
+For example, for line charts, you could disable the point markers as follows:
+
+[source, java]
+----
+// Disable markers from lines
+PlotOptionsLine plotOptions = new PlotOptionsLine();
+plotOptions.setMarker(new Marker(false));
+conf.setPlotOptions(plotOptions);
+----
+
+You can set the plot options for the entire chart or for each data series
+separately, allowing also mixed-type charts, as described in
+<<charts.basic-use.mixed>>.
+
+The shared plot options are described in
+<<dummy/../../../charts/java-api/charts-configuration#charts.configuration.plotoptions,"Plot
+Options">>.
+
+
+[[charts.basic-use.data]]
+== Chart Data Series
+
+The data displayed in a chart is stored in the chart configuration as a list of
+[classname]#Series# objects. A new data series is added in a chart with the
+[methodname]#addSeries()# method.
+
+[source, java]
+----
+ListSeries series = new ListSeries("Diameter");
+series.setData(4900,  12100,  12800,
+               6800,  143000, 125000,
+               51100, 49500);
+conf.addSeries(series);
+----
+
+The data can be specified with a number of different series types
+[classname]#DataSeries#, [classname]#ListSeries#, [classname]#HeatSeries#
+and [classname]#TreeSeries#.
+
+Data point features, such as name and data labels, can be defined in the versatile
+[classname]#DataSeries#, which contains [classname]#DataSeriesItem# items.
+Special chart types, such as box plots and 3D scatter charts require using their
+own special data point type.
+
+The data series configuration is described in more detail in
+<<dummy/../../../charts/java-api/charts-data#charts.data,"Chart Data">>.
+
+
+[[charts.basic-use.axis]]
+== Axis Configuration
+
+One of the most common tasks for charts is customizing its axes. At the least,
+you usually want to set the axis titles. Usually you also want to specify labels
+for data values in the axes.
+
+When an axis is categorical rather than numeric, you can define category labels
+for the items. They must be in the same order and the same number as you have
+values in your data series.
+
+[source, java]
+----
+XAxis xaxis = new XAxis();
+xaxis.setCategories("Mercury", "Venus",   "Earth",
+                    "Mars",    "Jupiter", "Saturn",
+                    "Uranus",  "Neptune");
+xaxis.setTitle("Planet");
+conf.addxAxis(xaxis);
+----
+
+Formatting of numeric labels can be done with JavaScript expressions, for
+example as follows:
+
+[source, java]
+----
+// Set the Y axis title
+YAxis yaxis = new YAxis();
+yaxis.setTitle("Diameter");
+yaxis.getLabels().setFormatter(
+  "function() {return Math.floor(this.value/1000) + \'Mm\';}");
+yaxis.getLabels().setStep(2);
+conf.addyAxis(yaxis);
+----
+
+
+[[charts.basic-use.two-dimensional]]
+== Displaying Multiple Series
+
+The simplest data, which we saw in the examples earlier in this chapter, is
+one-dimensional and can be represented with a single data series. Most chart
+types support multiple data series, which are used for representing
+two-dimensional data. For example, in line charts, you can have multiple lines
+and in column charts the columns for different series are grouped by category.
+Different chart types can offer alternative display modes, such as stacked
+columns. The legend displays the symbols for each series.
+
+[source, java]
+----
+// The data
+// Source: V. Maijala, H. Norberg, J. Kumpula, M. Nieminen
+// Calf production and mortality in the Finnish
+// reindeer herding area. 2002.
+String predators[] = {"Bear", "Wolf", "Wolverine", "Lynx"};
+int kills[][] = {        // Location:
+        {8,   0,  7, 0}, // Muddusjarvi
+        {30,  1, 30, 2}, // Ivalo
+        {37,  0, 22, 2}, // Oraniemi
+        {13, 23,  4, 1}, // Salla
+        {3,  10,  9, 0}, // Alakitka
+};
+
+// Create a data series for each numeric column in the table
+for (int predator = 0; predator < 4; predator++) {
+    ListSeries series = new ListSeries();
+    series.setName(predators[predator]);
+
+    // The rows of the table
+    for (int location = 0; location < kills.length; location++)
+        series.addData(kills[location][predator]);
+    conf.addSeries(series);
+}
+----
+
+The result for both regular and stacked column chart is shown in
+<<figure.charts.basic-use.two-dimensional>>. Stacking is enabled with
+[methodname]#setStacking()# in [classname]#PlotOptionsColumn#.
+
+[[figure.charts.basic-use.two-dimensional]]
+.Multiple Series in a Chart
+image::img/charts-twodimensional.png[]
+
+
+[[charts.basic-use.mixed]]
+== Mixed Type Charts
+
+You can enable mixed charts by setting the chart type in the
+[classname]#PlotOptions# object for a data series, which overrides the default
+chart type set in the [classname]#Chart# object. You can also control the animation and
+other settings for the series in the plot options.
+
+For example, to get a line chart, you need to use [classname]#PlotOptionsLine#.
+
+[source, java]
+----
+// A data series as column graph
+DataSeries series1 = new DataSeries();
+PlotOptionsColumn options1 = new PlotOptionsColumn();
+series1.setPlotOptions(options1);
+series1.setData(4900,  12100,  12800,
+    6800,  143000, 125000, 51100, 49500);
+conf.addSeries(series1);
+
+// A data series as line graph
+ListSeries series2 = new ListSeries("Diameter");
+PlotOptionsLine options2 = new PlotOptionsLine();
+series2.setPlotOptions(options2);
+series2.setData(4900,  12100,  12800,
+    6800,  143000, 125000, 51100, 49500);
+conf.addSeries(series2);
+----
+
+In the above case, where we set the chart type for each series, the overall
+chart type is irrelevant.
+
+
+[[charts.basic-use.3d]]
+== 3D Charts
+
+Most chart types can be made 3-dimensional by adding 3D options to the chart.
+You can rotate the charts, set up the view distance, and define the thickness of
+the chart features, among other things. You can also set up a 3D axis frame
+around a chart.
+
+[[figure.charts.basic-use.3d.pie]]
+.3D Charts
+image::img/charts-3d-pie.png[]
+
+[[charts.basic-use.3d.options]]
+=== 3D Options
+
+3D view has to be enabled in the [classname]#Options3d# configuration, along
+with other parameters. Minimally, to have some 3D effect, you need to rotate the
+chart according to the __alpha__ and __beta__ parameters.
+
+Let us consider a basic scatter chart for an example. The basic configuration
+for scatter charts is described elsewhere, but let us look how to make it 3D.
+
+[source, java]
+----
+Chart chart = new Chart(ChartType.SCATTER);
+Configuration conf = chart.getConfiguration();
+... other chart configuration ...
+
+// In 3D!
+Options3d options3d = new Options3d();
+options3d.setEnabled(true);
+options3d.setAlpha(10);
+options3d.setBeta(30);
+options3d.setDepth(135); // Default is 100
+options3d.setViewDistance(100); // Default
+conf.getChart().setOptions3d(options3d);
+----
+
+The 3D options are as follows:
+
+[parameter]#alpha#:: The vertical tilt (pitch) in degrees.
+
+[parameter]#beta#:: The horizontal tilt (yaw) in degrees.
+
+[parameter]#depth#:: Depth of the third (Z) axis in pixel units.
+
+[parameter]#enabled#:: Whether 3D plot is enabled. Default is [parameter]#false#.
+
+[parameter]#frame#:: Defines the 3D frame, which consists of a back, bottom, and side panels that
+display the chart grid.
+
+[source, java]
++
+----
+Frame frame = new Frame();
+Back back=new Back();
+back.setColor(SolidColor.BEIGE);
+back.setSize(1);
+frame.setBack(back);
+options3d.setFrame(frame);
+----
+[parameter]#viewDistance#:: View distance for creating perspective distortion. Default is 100.
+
+
+
+
+[[charts.basic-use.3d.plotoptions]]
+=== 3D Plot Options
+
+The above sets up the general 3D view, but you also need to configure the 3D
+properties of the actual chart type. The 3D plot options are chart type
+specific. For example, a pie has __depth__ (or thickness), which you can
+configure as follows:
+
+[source, java]
+----
+// Set some plot options
+PlotOptionsPie options = new PlotOptionsPie();
+... Other plot options for the chart ...
+
+options.setDepth(45); // Our pie is quite thick
+
+conf.setPlotOptions(options);
+----
+
+
+[[charts.basic-use.3d.data]]
+=== 3D Data
+
+For some chart types, such as pies and columns, the 3D view is merely a visual
+representation for one- or two-dimensional data. Some chart types, such as
+scatter charts, also feature a third, __depth axis__, for data points. Such data
+points can be given as [classname]#DataSeriesItem3d# objects.
+
+The Z parameter is __depth__ and is not scaled; there is no configuration for
+the depth or Z axis. Therefore, you need to handle scaling yourself as is done
+in the following.
+
+[source, java]
+----
+// Orthogonal data points in 2x2x2 cube
+double[][] points = { {0.0, 0.0, 0.0}, // x, y, z
+                      {1.0, 0.0, 0.0},
+                      {0.0, 1.0, 0.0},
+                      {0.0, 0.0, 1.0},
+                      {-1.0, 0.0, 0.0},
+                      {0.0, -1.0, 0.0},
+                      {0.0, 0.0, -1.0}};
+
+DataSeries series = new DataSeries();
+for (int i=0; i<points.length; i++) {
+    double x = points[i][0];
+    double y = points[i][1];
+    double z = points[i][2];
+
+    // Scale the depth coordinate, as the depth axis is
+    // not scaled automatically
+    DataSeriesItem3d item = new DataSeriesItem3d(x, y,
+        z * options3d.getDepth().doubleValue());
+    series.add(item);
+}
+conf.addSeries(series);
+----
+
+Above, we defined 7 orthogonal data points in the 2x2x2 cube centerd in origo.
+The 3D depth was set to 135 earlier. The result is illustrated in
+<<figure.charts.basic-use.3d.scatter>>.
+
+[[figure.charts.basic-use.3d.scatter]]
+.3D Scatter Chart
+image::img/charts-3d-scatter.png[]
+
+
+ifdef::web[]
+[[charts.basic-use.3d.distance]]
+=== Distance Fade
+
+To add a bit more 3D effect, you can do some tricks, such as calculate the
+distance of the data points from a viewpoint and set the marker size and color
+according to the distance.
+
+[source, java]
+----
+public double distanceTo(double[] point, double alpha,
+                         double beta, double viewDist) {
+    final double theta = alpha * Math.PI / 180;
+    final double phi   = beta * Math.PI / 180;
+    double x = viewDist * Math.sin(theta) * Math.cos(phi);
+    double y = viewDist * Math.sin(theta) * Math.sin(phi);
+    double z = - viewDist * Math.cos(theta);
+    return Math.sqrt(Math.pow(x - point[0], 2) +
+                     Math.pow(y - point[1], 2) +
+                     Math.pow(z - point[2], 2));
+}
+----
+
+Using the distance requires some assumptions about the scaling and such, but for
+the data points (as defined earlier) in range -1.0 to +1.0 we could do as
+follows:
+
+[source, java]
+----
+...
+DataSeriesItem3d item = new DataSeriesItem3d(x, y,
+    z * options3d.getDepth().doubleValue());
+
+double distance = distanceTo(new double[]{x,y,z},
+                             alpha, beta, 2);
+
+Marker marker = new Marker(true);
+marker.setRadius(1 + 10 / distance);
+item.setMarker(marker);
+
+series.add(item);
+----
+
+Note that here the view distance is in the scale of the data coordinates, while
+the distance defined in the 3D options has different definition and scaling.
+With the above settings, which are somewhat exaggerated to illustrate the
+effect, the result is shown in <<figure.charts.basic-use.3d.fade>>.
+
+[[figure.charts.basic-use.3d.fade]]
+.3D Distance Fade
+image::img/charts-3d-distance.png[]
+
+endif::web[]

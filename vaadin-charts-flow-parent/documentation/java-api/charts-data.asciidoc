@@ -1,0 +1,302 @@
+---
+title: Chart Data
+order: 6
+layout: page
+---
+
+[[charts.data]]
+= Chart Data
+
+Chart data is stored in a data series model that contains information about the
+visual representation of the data points in addition to their values. There are
+a number of different types of series - [classname]#DataSeries#,
+[classname]#ListSeries#, [classname]#HeatSeries#, and
+[classname]#RangeSeries#.
+
+[[charts.data.listseries]]
+== List Series
+
+The [classname]#ListSeries# is essentially a helper type that makes the handling
+of simple sequential data easier than with [classname]#DataSeries#. The data
+points are assumed to be at a constant interval on the X axis, starting from the
+value specified with the [literal]#++pointStart++# property (default is 0) at
+intervals specified with the [literal]#++pointInterval++# property (default is
+1.0). The two properties are defined in the [classname]#PlotOptions# for the
+series.
+
+The Y axis values are given as constructor parameters or using the  [methodname]#setData()# method.
+
+[source, java]
+----
+ListSeries series = new ListSeries(
+      "Total Reindeer Population",
+      181091, 201485, 188105);
+PlotOptionsLine plotOptions = new PlotOptionsLine();
+plotOptions.setPointStart(1959);
+series.setPlotOptions(plotOptions);
+conf.addSeries(series);
+----
+
+You can also add them one by one with the [methodname]#addData()# method.
+
+If the chart has multiple Y axes, you can specify the axis for the series by its
+index number using [methodname]#setyAxis()#.
+
+
+[[charts.data.dataseries]]
+== Generic Data Series
+
+The [classname]#DataSeries# can represent a sequence of data points at an
+interval as well as scatter data. Data points are represented with the
+[classname]#DataSeriesItem# class, which has [parameter]#x# and [parameter]#y#
+properties for representing the data value. Each item can be given a category
+name.
+
+[source, java]
+----
+DataSeries series = new DataSeries();
+series.setName("Total Reindeer Population");
+series.add(new DataSeriesItem(1959, 181091));
+series.add(new DataSeriesItem(1960, 201485));
+series.add(new DataSeriesItem(1961, 188105));
+series.add(new DataSeriesItem(1962, 177206));
+
+// Modify the radius of one point
+series.get(2).getMarker().setRadius(20);
+conf.addSeries(series);
+----
+
+Data points are associated with some visual representation parameters: marker
+style, selected state, legend index, and dial style (for gauges). Most of them
+can be configured at the level of individual data series items, the series, or
+in the overall plot options for the chart. The configuration options are
+described in
+<<dummy/../../../charts/java-api/charts-configuration#charts.configuration,"Chart
+Configuration">>. Some parameters, such as the sliced option for pie charts is
+only meaningful to configure at item level.
+
+[[charts.data.dataseries.add]]
+=== Adding and Removing Data Items
+
+New [classname]#DataSeriesItem# items are added to a series with the
+[methodname]#add()# method. The basic method takes just the data item, but the
+other method takes also two boolean parameters. If the [parameter]#updateChart#
+parameter is [literal]#++false++#, the chart is not updated immediately. This is
+useful if you are adding many points in the same request.
+
+The [parameter]#shift# parameter, when [literal]#++true++#, causes removal of
+the first data point in the series in an optimized manner, thereby allowing an
+animated chart that moves to left as new points are added. This is most
+meaningful with data with even intervals.
+
+You can remove data points with the [methodname]#remove()# method in the series.
+Removal is generally not animated, unless a data point is added in the same
+change, as is caused by the [parameter]#shift# parameter for the
+[methodname]#add()#.
+
+
+[[charts.data.dataseries.update]]
+=== Updating Data Items
+
+If you update the properties of a [classname]#DataSeriesItem# object, you need
+to call the [methodname]#update()# method for the series with the item as the
+parameter. Changing data in this way causes animation
+of the change.
+
+
+[[charts.data.dataseries.range]]
+=== Range Data
+
+Range charts expect the Y values to be specified as minimum-maximum value pairs.
+The [classname]#DataSeriesItem# provides [methodname]#setLow()# and
+[methodname]#setHigh()# methods to set the minimum and maximum values of a data
+point, as well as a number of constructors that accept the values.
+
+[source, java]
+----
+RangeSeries series =
+    new RangeSeries("Temperature Extremes");
+
+// Give low-high values in constructor
+series.add(new DataSeriesItem(0, -51.5, 10.9));
+series.add(new DataSeriesItem(1, -49.0, 11.8));
+
+// Set low-high values with setters
+DataSeriesItem point = new DataSeriesItem();
+point.setX(2);
+point.setLow(-44.3);
+point.setHigh(17.5);
+series.add(point);
+----
+
+The [classname]#RangeSeries# offers a slightly simplified way of adding ranged
+data points, as described in <<charts.data.rangeseries>>.
+
+[[charts.data.rangeseries]]
+== Range Series
+
+The [classname]#RangeSeries# is a helper class that extends
+[classname]#DataSeries# to allow specifying interval data a bit easier, with a
+list of minimum-maximum value ranges in the Y axis. You can use the series in
+range charts, as described in
+<<dummy/../../../charts/java-api/charts-charttypes#charts.charttypes.rangecharts,"Area and
+Column Range Charts">>.
+
+For the X axis, the coordinates are generated at fixed intervals starting from the
+value specified with the [literal]#++pointStart++# property (default is 0) at
+intervals specified with the [literal]#++pointInterval++# property (default is
+1.0).
+
+[[charts.data.rangeseries.data]]
+=== Setting the Data
+
+The data in a [classname]#RangeSeries# is given as an array of minimum-maximum
+value pairs for the Y value axis. The pairs are also represented as arrays. You
+can pass the data using the ellipsis in the constructor or using
+[methodname]#setData()#:
+
+[source, java]
+----
+RangeSeries series =
+    new RangeSeries("Temperature Ranges",
+    new Double[]{-51.5,10.9},
+    new Double[]{-49.0,11.8},
+    ...
+    new Double[]{-47.0,10.8});
+conf.addSeries(series);
+----
+
+[[charts.data.dataproviderseries]]
+== Data Provider Series
+
+[classname]#DataProviderSeries# is an adapter for using a Vaadin [interfacename]#DataProvider# as a [classname]#DataSeries# in a chart. Using [methodname]#setPointName()#, [methodname]#setX()#, and [methodname]#setY()# you can define which parts of the bean in the [interfacename]#DataProvider# are used in the chart.
+
+[NOTE]
+[classname]#DataProviderSeries# is based on the data model in Vaadin Framework 8.
+It replaces [classname]#ContainerDataSeries#, which allowed binding to a [interfacename]#Container# data model in Vaadin Framework 7.
+
+Let us consider an example, where we have a [interfacename]#DataProvider# which provides items of type [classname]#Order#.
+The [classname]#Order# class has `getDescription()`, `getUnitPrice()`, and `getQuantity()` to be used for the chart:
+
+[source, java]
+----
+public class Order {
+    private String description;
+    private int quantity;
+    private double unitPrice;
+
+    public Order(String description, int quantity, double unitPrice) {
+        this.description = description;
+        this.quantity = quantity;
+        this.unitPrice = unitPrice;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public double getTotalPrice() {
+        return unitPrice * quantity;
+    }
+}
+----
+
+If we have a data provider containing a list of [classname]#Order# instances:
+
+[source, java]
+----
+// The data
+List<Order> orders = new ArrayList<>();
+orders.add(new Order("Domain Name", 3, 7.99));
+orders.add(new Order("SSL Certificate", 1, 119.00));
+orders.add(new Order("Web Hosting", 1, 19.95));
+orders.add(new Order("Email Box", 20, 0.15));
+orders.add(new Order("E-Commerce Setup", 1, 25.00));
+orders.add(new Order("Technical Support", 1, 50.00));
+
+DataProvider<Order, ?> dataProvider = new ListDataProvider<>(orders);
+----
+
+We can display the data in a [classname]#Chart# as follows:
+
+[source, java]
+----
+// Create a chart and use the data provider
+Chart chart = new Chart(ChartType.COLUMN);
+Configuration configuration = chart.getConfiguration();
+DataProviderSeries<Order> series = new DataProviderSeries<>(dataProvider, Order::getTotalPrice);
+configuration.addSeries(series);
+----
+
+[NOTE]
+The [classname]#DataProviderSeries# constructor takes the `y` value provider as an optional argument. It can also be set using [methodname]#setY#.
+
+To make the chart look nicer, we can add a name for the series and show the order description when hovering points:
+[source, java]
+----
+series.setName("Order item quantities");
+series.setX(Order::getDescription);
+----
+
+To show the description also as x axis labels, we need to set the x axis type to category as the labels are strings:
+[source, java]
+----
+configuration.getxAxis().setType(AxisType.CATEGORY);
+----
+
+The result, with some added titles, is shown in <<figure.charts.data.containerseries>>.
+
+[[figure.charts.data.containerseries]]
+.Chart Bound to a [interfacename]#DataProvider#
+image::img/charts-dataprovider.png[]
+
+[NOTE]
+Dynamic changes to the data will be loaded in the data series after calling the [methodname]#refreshAll()# method in the [classname]#DataProvider#.
+This behavior can be disabled by setting the [propertyname]#automaticChartUpdateEnabled# property to [literal]#false# in [classname]#DataProviderSeries#.
+
+[[charts.data.drilldown]]
+== Drill-Down
+
+Vaadin Charts allows drilling down from a chart to a more detailed view by
+clicking an item in the top-level view. To enable the feature, you need to
+provide a separate data series for each of the detailed views by calling the
+[methodname]#addItemWithDrilldown()# method. When the user clicks on a
+drill-down item, the current series is animated into the the linked drill-down
+series. A customizable back button is provided to navigate back to the main
+series, as shown in <<figure.charts.data.drilldown.drilldown-details>>.
+
+[[figure.charts.data.drilldown.drilldown-details]]
+.Detailed series after a drill-down
+image::img/charts-drilldown-details.png[]
+
+To make use of drill-down, you need to provide the top-level series and all the
+series below it beforehand. The data is transferred to the client-side at the
+same time and no client-server communication needs to happen for the drill-down.
+The drill-down series must have an identifier, set with [methodname]#setId()#,
+as shown below.
+
+[source, java]
+----
+DataSeries series = new DataSeries();
+
+DataSeriesItem mainItem = new DataSeriesItem("MSIE", 55.11);
+
+DataSeries drillDownSeries = new DataSeries("MSIE versions");
+drillDownSeries.setId("MSIE");
+
+drillDownSeries.add(new DataSeriesItem("MSIE 6.0", 10.85));
+drillDownSeries.add(new DataSeriesItem("MSIE 7.0", 7.35));
+drillDownSeries.add(new DataSeriesItem("MSIE 8.0", 33.06));
+drillDownSeries.add(new DataSeriesItem("MSIE 9.0", 2.81));
+
+series.addItemWithDrilldown(mainItem, drillDownSeries);
+----
+
