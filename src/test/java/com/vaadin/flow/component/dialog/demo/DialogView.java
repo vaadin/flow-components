@@ -15,11 +15,9 @@
  */
 package com.vaadin.flow.component.dialog.demo;
 
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -29,7 +27,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-dialog")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 public class DialogView extends DemoView {
 
     private static final String BUTTON_CAPTION = "Open dialog";
@@ -37,8 +34,7 @@ public class DialogView extends DemoView {
     @Override
     public void initView() {
         addBasicDialog();
-        addDialogWithOpenedChangedListener();
-        addDialogWithHTML();
+        addConfirmationDialog();
     }
 
     private void addBasicDialog() {
@@ -46,7 +42,9 @@ public class DialogView extends DemoView {
 
         // begin-source-example
         // source-example-heading: Basic dialog
-        Dialog dialog = new Dialog("Hello World!");
+        Dialog dialog = new Dialog();
+        dialog.add(new Label("Close me with the esc-key or an outside click"));
+
         button.addClickListener(event -> dialog.open());
         // end-source-example
 
@@ -54,41 +52,31 @@ public class DialogView extends DemoView {
         addCard("Basic dialog", button, dialog);
     }
 
-    private void addDialogWithOpenedChangedListener() {
+    private void addConfirmationDialog() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
-        Label message = new Label();
-        Dialog dialog = new Dialog("Hello World!");
 
         // begin-source-example
-        // source-example-heading: Dialog with an OpenedChangedListener
-        dialog.addOpenedChangeListener(event -> {
-            if (dialog.isOpened()) {
-                message.setText("Dialog opened!");
-            } else {
-                message.setText("Dialog closed!");
-            }
+        // source-example-heading: Confirmation dialog
+        Dialog dialog = new Dialog();
+
+        dialog.setCloseOnEsc(false);
+        dialog.setCloseOnOutsideClick(false);
+
+        Label messageLabel = new Label();
+
+        NativeButton confirmButton = new NativeButton("Confirm", event -> {
+            messageLabel.setText("Confirmed!");
+            dialog.close();
         });
+        NativeButton cancelButton = new NativeButton("Cancel", event -> {
+            messageLabel.setText("Cancelled...");
+            dialog.close();
+        });
+        dialog.add(confirmButton, cancelButton);
         // end-source-example
-
         button.addClickListener(event -> dialog.open());
-        button.setId("dialog-with-listener-button");
-        message.setId("dialog-message-label");
-        addCard("Dialog with an OpenedChangedListener",
-                new HorizontalLayout(button, message), dialog);
-    }
 
-    private void addDialogWithHTML() {
-        NativeButton button = new NativeButton(BUTTON_CAPTION);
-
-        // begin-source-example
-        // source-example-heading: Dialog with HTML content
-        Dialog dialog = new Dialog("<b>Dialog can be closed by:</b><ul>"
-                + "<li>Hitting the esc key</li>"
-                + "<li>Clicking outside of it</li></ul>");
-        // end-source-example
-
-        button.addClickListener(event -> dialog.open());
-        button.setId("dialog-with-html-button");
-        addCard("Dialog with HTML content", button, dialog);
+        button.setId("confirmation-dialog-button");
+        addCard("Confirmation dialog", button, dialog, messageLabel);
     }
 }

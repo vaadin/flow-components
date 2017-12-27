@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.dialog;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -22,40 +26,71 @@ import com.vaadin.flow.dom.Element;
  * 
  * @author Vaadin Ltd
  */
-public class Dialog extends GeneratedVaadinDialog<Dialog> {
+@HtmlImport("frontend://flow-component-renderer.html")
+public class Dialog extends GeneratedVaadinDialog<Dialog>
+        implements HasComponents {
+
+    private Element container;
 
     /**
      * Creates an empty dialog.
      */
     public Dialog() {
-        this("");
+        container = new Element("div", false);
+        getElement().appendVirtualChild(container);
+
+        // Attach <flow-component-renderer>
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, () -> attachComponentRenderer()));
     }
 
     /**
-     * Creates a dialog with the given String rendered as it's HTML content.
+     * Creates a dialog with given components inside.
      * 
-     * @param content
-     *            the content of the Dialog as HTML markup
+     * @param components
+     *            the components inside the dialog
+     * @see #add(Component...)
      */
-    public Dialog(String content) {
-        Element templateElement = new Element("template");
-        getElement().appendChild(templateElement);
-
-        templateElement.setProperty("innerHTML", content);
+    public Dialog(Component... components) {
+        this();
+        add(components);
     }
 
     /**
-     * Opens the dialog.
+     * Adds the given components into this dialog.
+     * <p>
+     * The elements in the DOM will not be children of the
+     * {@code <vaadin-dialog>} element, but will be inserted into an overlay
+     * that is attached into the {@code <body>}.
+     *
+     * @param components
+     *            the components to add
      */
-    public void open() {
-        setOpened(true);
+    @Override
+    public void add(Component... components) {
+        assert components != null;
+        for (Component component : components) {
+            assert component != null;
+            container.appendChild(component.getElement());
+        }
     }
 
-    /**
-     * Closes the dialog.
-     */
-    public void close() {
-        setOpened(false);
+    @Override
+    public void remove(Component... components) {
+        for (Component component : components) {
+            assert component != null;
+            if (container.equals(component.getElement().getParent())) {
+                container.removeChild(component.getElement());
+            } else {
+                throw new IllegalArgumentException("The given component ("
+                        + component + ") is not a child of this component");
+            }
+        }
+    }
+
+    @Override
+    public void removeAll() {
+        container.removeAllChildren();
     }
 
     /**
@@ -106,6 +141,54 @@ public class Dialog extends GeneratedVaadinDialog<Dialog> {
      */
     public void setCloseOnOutsideClick(boolean closeOnOutsideClick) {
         getElement().setProperty("noCloseOnOutsideClick", !closeOnOutsideClick);
+    }
+
+    /**
+     * Opens the dialog.
+     * <p>
+     * Note: You don't need to add the dialog component anywhere before opening
+     * it. Since {@code <vaadin-dialog>}'s location in the DOM doesn't really
+     * matter, opening a dialog will automatically add it to the {@code <body>}
+     * if it's not yet attached anywhere.
+     */
+    public void open() {
+        setOpened(true);
+    }
+
+    /**
+     * Closes the dialog.
+     */
+    public void close() {
+        setOpened(false);
+    }
+
+    /**
+     * Opens or closes the dialog.
+     * <p>
+     * Note: You don't need to add the dialog component anywhere before opening
+     * it. Since {@code <vaadin-dialog>}'s location in the DOM doesn't really
+     * matter, opening a dialog will automatically add it to the {@code <body>}
+     * if it's not yet attached anywhere.
+     * 
+     * @param opened
+     *            {@code true} to open the dialog, {@code false} to close it
+     */
+    @Override
+    public void setOpened(boolean opened) {
+        if (opened && !getElement().getNode().isAttached()
+                && UI.getCurrent() != null) {
+            UI.getCurrent().add(this);
+        }
+        super.setOpened(opened);
+    }
+
+    private void attachComponentRenderer() {
+        String appId = UI.getCurrent().getInternals().getAppId();
+        int nodeId = container.getNode().getId();
+        String template = "<template><flow-component-renderer appid=" + appId
+                + " nodeid=" + nodeId
+                + "></flow-component-renderer></template>";
+        getElement().setProperty("innerHTML", template);
     }
 
 }

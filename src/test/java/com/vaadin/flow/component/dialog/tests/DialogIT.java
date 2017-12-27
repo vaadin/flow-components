@@ -33,39 +33,27 @@ public class DialogIT extends ComponentDemoTest {
     private static final String DIALOG_OVERLAY_TAG = "vaadin-dialog-overlay";
 
     @Test
-    public void openAndCloseBasicDialog() {
+    public void openAndCloseBasicDialog_labelRendered() {
         findElement(By.id("basic-dialog-button")).click();
-        assertDialogOverlayContent("Hello World!");
+        getOverlayContent().findElement(By.tagName("label"));
 
-        closeAndVerify();
+        new Actions(getDriver()).sendKeys(Keys.ESCAPE).perform();
+        verifyDialogClosed();
     }
 
     @Test
-    public void openAndCloseDialogWithListener() {
-        WebElement label = findElement(By.id("dialog-message-label"));
-        Assert.assertTrue(label.getText().isEmpty());
+    public void openAndCloseConfirmationDialog_buttonsRenderedWithClickListeners() {
+        WebElement messageLabel = findElement(By.tagName("label"));
 
-        findElement(By.id("dialog-with-listener-button")).click();
-        assertDialogOverlayContent("Hello World!");
-        Assert.assertTrue(label.getText().contains("opened"));
+        findElement(By.id("confirmation-dialog-button")).click();
+        getOverlayContent().findElements(By.tagName("button")).get(0).click();
+        verifyDialogClosed();
+        Assert.assertEquals("Confirmed!", messageLabel.getText());
 
-        closeAndVerify();
-        Assert.assertTrue(label.getText().contains("closed"));
-    }
-
-    @Test
-    public void openAndCloseDialogWithHtml() {
-        scrollIntoViewAndClick(findElement(By.id("dialog-with-html-button")));
-
-        getOverlayContent().findElement(By.tagName("b"));
-        getOverlayContent().findElement(By.tagName("ul"));
-
-        closeAndVerify();
-    }
-
-    private void assertDialogOverlayContent(String expected) {
-        String content = getOverlayContent().getText();
-        Assert.assertTrue(content.contains(expected));
+        findElement(By.id("confirmation-dialog-button")).click();
+        getOverlayContent().findElements(By.tagName("button")).get(1).click();
+        verifyDialogClosed();
+        Assert.assertEquals("Cancelled...", messageLabel.getText());
     }
 
     private WebElement getOverlayContent() {
@@ -73,8 +61,7 @@ public class DialogIT extends ComponentDemoTest {
         return getInShadowRoot(overlay, By.id("content"));
     }
 
-    private void closeAndVerify() {
-        new Actions(getDriver()).sendKeys(Keys.ESCAPE).perform();
+    private void verifyDialogClosed() {
         waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
     }
 
