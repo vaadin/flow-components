@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.renderer.ComponentTemplateRenderer;
 import com.vaadin.flow.renderer.TemplateRenderer;
@@ -102,10 +103,14 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
         headerOrFooter.setProperty("innerHTML",
                 header ? getHeaderRendererTemplate(renderer)
                         : getFooterRendererTemplate(renderer));
-        GridTemplateRendererUtil.setupTemplateRenderer(
-                (TemplateRenderer) renderer, headerOrFooter, getElement(),
-                getGrid().getDataGenerator(),
-                key -> getGrid().getDataCommunicator().getKeyMapper().get(key));
+        DataGenerator dataGenerator = GridTemplateRendererUtil
+                .setupTemplateRenderer((TemplateRenderer) renderer,
+                        headerOrFooter, getElement(),
+
+                        key -> getGrid().getDataCommunicator().getKeyMapper()
+                                .get(key));
+
+        getGrid().getDataGenerator().addDataGenerator(dataGenerator);
     }
 
     protected String getHeaderRendererTemplate(TemplateRenderer<?> renderer) {

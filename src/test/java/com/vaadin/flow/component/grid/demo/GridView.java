@@ -59,7 +59,6 @@ import com.vaadin.flow.router.Route;
  */
 @Route("vaadin-grid")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-grid.html")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
 public class GridView extends DemoView {
 
@@ -592,10 +591,10 @@ public class GridView extends DemoView {
         grid.addColumn(Person::getAge).setHeader("Age");
 
         grid.setSelectionMode(SelectionMode.NONE);
-        grid.setItemDetailsRenderer(TemplateRenderer
-                .<Person> of("<div class='custom-details'>"
-                        + "<div>Hi! My name is [[item.name]]!</div>"
-                        + "<div><vaadin-button on-click='handleClick'>Update Person</vaadin-button></div>"
+        grid.setItemDetailsRenderer(TemplateRenderer.<Person> of(
+                "<div class='custom-details' style='border: 1px solid gray; padding: 10px; width: 100%; box-sizing: border-box;'>"
+                        + "<div>Hi! My name is <b>[[item.name]]!</b></div>"
+                        + "<div><button on-click='handleClick'>Update Person</button></div>"
                         + "</div>")
                 .withProperty("name", Person::getName)
                 .withEventHandler("handleClick", person -> {

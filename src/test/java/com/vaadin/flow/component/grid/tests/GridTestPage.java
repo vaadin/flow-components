@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.renderer.ComponentTemplateRenderer;
+import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -59,6 +60,8 @@ public class GridTestPage extends Div {
 
     public GridTestPage() {
         createGridWithComponentRenderers();
+        createGridWithTemplateDetailsRow();
+        createGridWithComponentDetailsRow();
     }
 
     private void createGridWithComponentRenderers() {
@@ -112,6 +115,38 @@ public class GridTestPage extends Div {
         });
         changeList.setId("grid-with-component-renderers-change-list");
         add(grid, changeList);
+    }
+
+    private void createGridWithTemplateDetailsRow() {
+        Grid<Item> grid = new Grid<>();
+
+        grid.setItems(generateItems(20, 0));
+
+        grid.addColumn(Item::getName);
+        grid.setItemDetailsRenderer(
+                TemplateRenderer.<Item> of("[[item.detailsProperty]]")
+                        .withProperty("detailsProperty",
+                                item -> "Details opened! " + item.getNumber()));
+
+        grid.setId("grid-with-template-details-row");
+        grid.setWidth("500px");
+        grid.setHeight("500px");
+        add(grid);
+    }
+
+    private void createGridWithComponentDetailsRow() {
+        Grid<Item> grid = new Grid<>();
+
+        grid.setItems(generateItems(20, 0));
+
+        grid.addColumn(Item::getName);
+        grid.setItemDetailsRenderer(new ComponentTemplateRenderer<>(
+                item -> new Label("Details opened! " + item.getNumber())));
+
+        grid.setId("grid-with-component-details-row");
+        grid.setWidth("500px");
+        grid.setHeight("500px");
+        add(grid);
     }
 
     private List<Item> generateItems(int amount, int startingIndex) {

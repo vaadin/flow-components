@@ -58,6 +58,7 @@ import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.HasDataGenerators;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -249,11 +250,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
             comparator = (a, b) -> 0;
 
+            HasDataGenerators<T> dataGenerator = grid.getDataGenerator();
             String template;
             if (renderer instanceof ComponentTemplateRenderer) {
                 ComponentTemplateRenderer<? extends Component, T> componentRenderer = (ComponentTemplateRenderer<? extends Component, T>) renderer;
-                grid.setupItemComponentRenderer(this, columnId,
-                        componentRenderer);
+                dataGenerator.addDataGenerator(grid.setupItemComponentRenderer(
+                        this, columnId, componentRenderer));
                 template = componentRenderer
                         .getTemplate(GRID_COMPONENT_RENDERER_TAG);
             } else {
@@ -265,10 +267,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
             getElement().appendChild(contentTemplate);
 
-            GridTemplateRendererUtil.setupTemplateRenderer(
-                    (TemplateRenderer) renderer, contentTemplate, getElement(),
-                    getGrid().getDataGenerator(), key -> getGrid()
-                            .getDataCommunicator().getKeyMapper().get(key));
+            dataGenerator.addDataGenerator(
+                    GridTemplateRendererUtil.setupTemplateRenderer(
+                            (TemplateRenderer) renderer, contentTemplate,
+                            getElement(), key -> getGrid().getDataCommunicator()
+                                    .getKeyMapper().get(key)));
         }
 
         /**
@@ -606,7 +609,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @param <T>
      *            the grid bean type
      */
-    private class DetailsManager<T> extends AbstractGridExtension<T> {
+    private class DetailsManager extends AbstractGridExtension<T> {
 
         private final Set<T> detailsVisible = new HashSet<>();
 
@@ -637,7 +640,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 refresh = detailsVisible.add(item);
             }
 
-            if (refresh) {
+            if (itemDetailsDataGenerator != null && refresh) {
                 refresh(item);
             }
         }
@@ -652,29 +655,46 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          *         {@code false} if it should be hidden
          */
         public boolean isDetailsVisible(T item) {
-            return detailsVisible.contains(item);
+            return itemDetailsDataGenerator != null
+                    && detailsVisible.contains(item);
         }
 
         @Override
         public void generateData(T item, JsonObject jsonObject) {
             if (isDetailsVisible(item)) {
                 jsonObject.put("detailsOpened", true);
+                itemDetailsDataGenerator.generateData(item, jsonObject);
             }
         }
 
         @Override
         public void destroyData(T item) {
             detailsVisible.remove(item);
+            if (itemDetailsDataGenerator != null) {
+                itemDetailsDataGenerator.destroyData(item);
+            }
         }
 
         @Override
         public void destroyAllData() {
             detailsVisible.clear();
+            if (itemDetailsDataGenerator != null) {
+                itemDetailsDataGenerator.destroyAllData();
+            }
         }
 
         private void setDetailsVisibleFromClient(Set<T> items) {
+            Set<T> toRefresh = new HashSet<>();
+            toRefresh.addAll(detailsVisible);
+            toRefresh.addAll(items);
+
             detailsVisible.clear();
             detailsVisible.addAll(items);
+            if (itemDetailsDataGenerator != null) {
+                for (T item : toRefresh) {
+                    refresh(item);
+                }
+            }
         }
     }
 
@@ -690,7 +710,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private GridSelectionModel<T> selectionModel;
 
-    private final DetailsManager<T> detailsManager = new DetailsManager<>(this);
+    private final DetailsManager detailsManager = new DetailsManager(this);
     private Element detailsTemplate;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
@@ -700,7 +720,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private PropertySet<T> propertySet;
 
-    private Registration itemDetailsDataGeneratorRegistration;
+    private DataGenerator<T> itemDetailsDataGenerator;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -1187,19 +1207,17 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         if (detailsTemplate != null) {
             getElement().removeChild(detailsTemplate);
         }
-        if (itemDetailsDataGeneratorRegistration != null) {
-            itemDetailsDataGeneratorRegistration.remove();
-            itemDetailsDataGeneratorRegistration = null;
-        }
+        detailsManager.destroyAllData();
         if (renderer == null) {
             return;
         }
 
         String template;
+        DataGenerator<T> extraGenerator = null;
         if (renderer instanceof ComponentTemplateRenderer) {
             ComponentTemplateRenderer<? extends Component, T> componentRenderer = (ComponentTemplateRenderer<? extends Component, T>) renderer;
-            itemDetailsDataGeneratorRegistration = setupItemComponentRenderer(
-                    this, null, componentRenderer);
+            extraGenerator = setupItemComponentRenderer(this, null,
+                    componentRenderer);
             template = componentRenderer
                     .getTemplate(GRID_COMPONENT_RENDERER_TAG);
         } else {
@@ -1213,9 +1231,13 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         detailsTemplate = newDetailsTemplate;
         getElement().appendChild(detailsTemplate);
 
-        GridTemplateRendererUtil.setupTemplateRenderer(renderer,
-                detailsTemplate, getElement(), getDataGenerator(),
-                key -> getDataCommunicator().getKeyMapper().get(key));
+        CompositeDataGenerator<T> detailsGenerator = GridTemplateRendererUtil
+                .setupTemplateRenderer(renderer, detailsTemplate, getElement(),
+                        key -> getDataCommunicator().getKeyMapper().get(key));
+        if (extraGenerator != null) {
+            detailsGenerator.addDataGenerator(extraGenerator);
+        }
+        itemDetailsDataGenerator = detailsGenerator;
     }
 
     /**
@@ -1484,7 +1506,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         setSortOrder(sortOrderBuilder.build(), true);
     }
 
-    private Registration setupItemComponentRenderer(Component owner,
+    private DataGenerator<T> setupItemComponentRenderer(Component owner,
             String ownerId,
             ComponentTemplateRenderer<? extends Component, T> componentRenderer) {
 
@@ -1498,9 +1520,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         componentRenderer.setTemplateAttribute("nodeid",
                 "[[item." + nodeIdPropertyName + "]]");
 
-        return getDataGenerator().addDataGenerator(new ComponentDataGenerator<>(
-                componentRenderer, container, nodeIdPropertyName,
-                getDataCommunicator().getKeyMapper()));
+        return new ComponentDataGenerator<>(componentRenderer, container,
+                nodeIdPropertyName, getDataCommunicator().getKeyMapper());
     }
 
     /*

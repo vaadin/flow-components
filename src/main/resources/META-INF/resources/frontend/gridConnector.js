@@ -69,7 +69,11 @@ window.gridConnector = {
     grid._createPropertyObserver('activeItem', '__activeItemChanged', true);
 
     grid.__activeItemChangedDetails = function(newVal, oldVal) {
-      grid.detailsOpenedItems = [newVal];
+      if (newVal && !newVal.detailsOpened) {
+        grid.$server.setDetailsVisible(newVal.key);
+      } else {
+        grid.$server.setDetailsVisible(null);
+      }
     }
     grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
 
@@ -114,12 +118,21 @@ window.gridConnector = {
         throw 'Attempted to call itemsUpdated with an invalid value: ' + JSON.stringify(items);
       }
       const detailsOpenedItems = [];
+      let updatedSelectedItem = false;
       for (let i = 0; i < items.length; ++i) {
-        if (items[i].detailsOpened) {
-          detailsOpenedItems.push(items[i]);
+        const item = items[i];
+        if (item.detailsOpened) {
+          detailsOpenedItems.push(item);
+        }
+        if (selectedKeys[item.key]) {
+          selectedKeys[item.key] = item;
+          updatedSelectedItem = true;
         }
       }
       grid.detailsOpenedItems = detailsOpenedItems;
+      if (updatedSelectedItem) {
+        grid.selectedItems = Object.values(selectedKeys);
+      }
     }
 
     const updateGridCache = function(page) {

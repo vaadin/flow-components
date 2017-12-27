@@ -275,13 +275,11 @@ public class GridIT extends TabbedComponentDemoTest {
         Assert.assertEquals("div",
                 children.get(1).getTagName().toLowerCase(Locale.ENGLISH));
 
-        WebElement button = children.get(1)
-                .findElement(By.tagName("vaadin-button"));
+        WebElement button = children.get(1).findElement(By.tagName("button"));
 
         Assert.assertEquals("Update Person", button.getText());
 
-        clickElementWithJs(
-                detailsElement.findElement(By.tagName("vaadin-button")));
+        clickElementWithJs(detailsElement.findElement(By.tagName("button")));
 
         Assert.assertTrue(hasCell(grid, "Person 1 Updated"));
     }
@@ -302,7 +300,7 @@ public class GridIT extends TabbedComponentDemoTest {
                 grid.findElements(By.className("custom-details")).size());
         Assert.assertTrue(grid.findElement(By.className("custom-details"))
                 .getAttribute("innerHTML")
-                .contains("Hi! My name is Person 2!"));
+                .contains("Hi! My name is <b>Person 2!</b>"));
     }
 
     @Test

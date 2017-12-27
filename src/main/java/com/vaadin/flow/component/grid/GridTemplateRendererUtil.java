@@ -17,7 +17,7 @@ package com.vaadin.flow.component.grid;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.data.provider.HasDataGenerators;
+import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -38,18 +38,21 @@ class GridTemplateRendererUtil {
     private GridTemplateRendererUtil() {
     }
 
-    static <T> void setupTemplateRenderer(TemplateRenderer<T> renderer,
-            Element contentTemplate, Element templateDataHost,
-            HasDataGenerators<T> dataGenerators,
-            ValueProvider<String, ?> keyMapper) {
+    static <T> CompositeDataGenerator<T> setupTemplateRenderer(
+            TemplateRenderer<T> renderer, Element contentTemplate,
+            Element templateDataHost, ValueProvider<String, ?> keyMapper) {
+
+        CompositeDataGenerator<T> composite = new CompositeDataGenerator<>();
 
         renderer.getValueProviders()
-                .forEach((key, provider) -> dataGenerators.addDataGenerator(
+                .forEach((key, provider) -> composite.addDataGenerator(
                         (item, jsonObject) -> jsonObject.put(key,
                                 JsonSerializer.toJson(provider.apply(item)))));
 
         TemplateRendererUtil.registerEventHandlers(renderer, contentTemplate,
                 templateDataHost, key -> (T) keyMapper.apply(key));
+
+        return composite;
     }
 
     static <T> void setupHeaderOrFooterComponentRenderer(Component owner,

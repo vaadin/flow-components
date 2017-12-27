@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,6 +86,66 @@ public class GridTestPageIT extends AbstractComponentIT {
         assertItemsArePresent(grid, itemIdPrefix, 1, 18);
     }
 
+    @Test
+    public void openGridWithTemplateDetailsRow_clickOnItems_dataIsTransmitted() {
+        WebElement grid = findElement(By.id("grid-with-template-details-row"));
+
+        Map<String, Map<String, ?>> items = getItems(driver, grid);
+        // verify that the properties needed for the details row are not loaded
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+            Assert.assertThat(map.keySet(),
+                    CoreMatchers.not(CoreMatchers.hasItem("detailsProperty")));
+        });
+
+        // click on the cell to open the details row
+        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
+
+        items = getItems(driver, grid);
+        // verify that the properties needed for the details row are loaded for
+        // row 0
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+            if ("0".equals(row)) {
+                Assert.assertEquals("Details opened! 0",
+                        map.get("detailsProperty"));
+            } else {
+                Assert.assertThat(map.keySet(), CoreMatchers
+                        .not(CoreMatchers.hasItem("detailsProperty")));
+            }
+        });
+    }
+
+    @Test
+    public void openGridWithComponentDetailsRow_clickOnItems_dataIsTransmitted() {
+        WebElement grid = findElement(By.id("grid-with-component-details-row"));
+
+        Map<String, Map<String, ?>> items = getItems(driver, grid);
+        // verify that the nodeId of the details row is not loaded
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+            Assert.assertThat(map.keySet(),
+                    CoreMatchers.not(CoreMatchers.hasItem("nodeId")));
+        });
+
+        // click on the cell to open the details row
+        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
+
+        items = getItems(driver, grid);
+        // verify that the nodeId of the details row is loaded for row 0
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+            if ("0".equals(row)) {
+                Assert.assertTrue("Node Id property not found for item 0",
+                        map.get("nodeId") != null && Integer.parseInt(
+                                String.valueOf(map.get("nodeId"))) > 0);
+            } else {
+                Assert.assertThat(map.keySet(),
+                        CoreMatchers.not(CoreMatchers.hasItem("nodeId")));
+            }
+        });
+    }
+
     private void assertItemsArePresent(WebElement grid, String itemIdPrefix,
             int startingIndex, int length) {
         for (int i = 0; i < length; i++) {
@@ -103,9 +164,9 @@ public class GridTestPageIT extends AbstractComponentIT {
          * Because of that, we can't just try to find the item in the tree and
          * assert that it's not there.
          */
-        Map<Integer, Map<String, ?>> items = getItems(driver, grid);
-        Set<Entry<Integer, Map<String, ?>>> entrySet = items.entrySet();
-        for (Entry<Integer, Map<String, ?>> entry : entrySet) {
+        Map<String, Map<String, ?>> items = getItems(driver, grid);
+        Set<Entry<String, Map<String, ?>>> entrySet = items.entrySet();
+        for (Entry<String, Map<String, ?>> entry : entrySet) {
             Map<String, ?> map = entry.getValue();
             if (itemId.equals(map.get("id"))) {
                 Assert.fail("Item ID '" + itemId
@@ -129,12 +190,17 @@ public class GridTestPageIT extends AbstractComponentIT {
                 executeScript("return arguments[0].innerText", element));
     }
 
-    public static Map<Integer, Map<String, ?>> getItems(WebDriver driver,
+    public static Map<String, Map<String, ?>> getItems(WebDriver driver,
             WebElement element) {
         Object result = ((JavascriptExecutor) driver)
                 .executeScript("return arguments[0]._cache.items;", element);
 
-        return (Map<Integer, Map<String, ?>>) result;
+        return (Map<String, Map<String, ?>>) result;
+    }
+
+    private WebElement getRow(WebElement grid, int row) {
+        return getInShadowRoot(grid, By.id("items"))
+                .findElements(By.cssSelector("tr")).get(row);
     }
 
 }
