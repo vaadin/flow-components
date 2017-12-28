@@ -109,26 +109,36 @@ public class IronListView extends DemoView {
             setAlignItems(Alignment.CENTER);
             getStyle().set("minWidth", "250px").set("padding", "10px")
                     .set("display", "flex");
-
+            
             Image picture = new Image();
-            picture.setSrc(person.getPicture());
             picture.setWidth("40px");
             picture.setHeight("40px");
             picture.getStyle().set("borderRadius", "50%");
-
+            picture.getStyle().set("backgroundColor", "lightgray");
+            
             Div pictureContainer = new Div(picture);
             pictureContainer.getStyle().set("marginRight", "10px");
             pictureContainer.setWidth("40px");
             pictureContainer.setHeight("40px");
-
-            Label name = new Label(
-                    person.getFirstName() + " " + person.getLastName());
-            Label email = new Label(person.getEmail());
+            
+            Label name = new Label();
+            Label email = new Label();
             email.getStyle().set("fontSize", "13px");
-
+            
             VerticalLayout nameContainer = new VerticalLayout(name, email);
 
             add(pictureContainer, nameContainer);
+            
+            boolean isPlaceHolder = person.getPicture() == null;
+            
+            if (isPlaceHolder) {
+                picture.setSrc("//:0");
+                name.setText(person.getFirstName());
+            } else {
+                picture.setSrc(person.getPicture());                
+                name.setText(person.getFirstName() + " " + person.getLastName());
+                email.setText(person.getEmail());                
+            }
         }
     }
     // end-source-example
@@ -215,7 +225,7 @@ public class IronListView extends DemoView {
         list.setRenderer(TemplateRenderer
                 .<Person> of("<div style='padding:10px; display:flex; min-width:250px'>"
                                 + "<div style='margin-right:10px; width:40px; height:40px'>"
-                                    + "<img src='[[item.picture]]' style='border-radius:50%; width:40px; height:40px'/>"
+                                    + "<img src='[[item.picture]]' style='border-radius:50%; width:40px; height:40px; background-color:lightgray'/>"
                                 + "</div>"
                                 + "<div>"
                                     + "[[item.firstName]] [[item.lastName]]"
@@ -227,9 +237,11 @@ public class IronListView extends DemoView {
                 .withProperty("email", Person::getEmail)
                 .withProperty("picture", Person::getPicture));
         
-        // For a smooth scrolling experience use a placeholder with the size as 
-        // close as possible to the final component,
-        list.setPlaceholderTemplate("<div style='width: 270px; height: 60px;'>Loading...</div>");
+        // For a smooth scrolling experience use a placeholder item
+        Person placeholder = new Person();
+        placeholder.setFirstName("-----");
+        placeholder.setPicture("//:0");
+        list.setPlaceholderItem(placeholder);
         // end-source-example
         //@formatter:on
 
@@ -314,9 +326,10 @@ public class IronListView extends DemoView {
         // Uses the constructor of the PersonCard for each item in the list
         list.setRenderer(new ComponentTemplateRenderer<>(PersonCard::new));
         
-        // For a smooth scrolling experience use a placeholder with the size as 
-        // close as possible to the final component,
-        list.setPlaceholderTemplate("<div style='width: 270px; height: 60px;'>Loading...</div>");
+        // For a smooth scrolling experience use a placeholder item
+        Person placeholder = new Person();
+        placeholder.setFirstName("-----");
+        list.setPlaceholderItem(placeholder);
         // end-source-example
         //@formatter:on
 

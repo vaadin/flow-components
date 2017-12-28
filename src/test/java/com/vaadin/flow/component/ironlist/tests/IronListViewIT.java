@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ironlist.tests;
 
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -42,46 +44,61 @@ public class IronListViewIT extends TabbedComponentDemoTest {
     @Test
     public void stringList() {
         openTabAndCheckForErrors("");
-        validateListSize("list-of-strings", 3);
+        validateListSize(findElement(By.id("list-of-strings")), 3);
     }
 
     @Test
     public void stringListWithDataProvider() {
         openTabAndCheckForErrors("");
-        validateListSize("list-of-strings-with-dataprovider", 1000);
+        validateListSize(
+                findElement(By.id("list-of-strings-with-dataprovider")), 1000);
     }
 
     @Test
     public void chuckNorrisFacts() {
         openTabAndCheckForErrors("using-templates");
-        validateListSize("chuck-norris-facts", 1000);
+        validateListSize(findElement(By.id("chuck-norris-facts")), 1000);
     }
 
     @Test
     public void peopleListWithDataProvider() {
         openTabAndCheckForErrors("using-templates");
-        validateListSize("list-of-people-with-dataprovider", 500);
+        WebElement list = findElement(
+                By.id("list-of-people-with-dataprovider"));
+        validateListSize(list, 500);
+        validatePlaceholderObject(list);
     }
 
     @Test
     public void rankedListWithEventHandling() {
         openTabAndCheckForErrors("using-templates");
-        validateListSize("using-events-with-templates", 29);
+        validateListSize(findElement(By.id("using-events-with-templates")), 29);
     }
 
     @Test
     public void peopleListWithComponentRenderer() {
         openTabAndCheckForErrors("using-components");
-        validateListSize(
-                "list-of-people-with-dataprovider-and-component-renderer", 500);
+        WebElement list = findElement(By
+                .id("list-of-people-with-dataprovider-and-component-renderer"));
+        validateListSize(list, 500);
+        validatePlaceholderObject(list);
     }
 
-    private void validateListSize(String listId, int expectedSize) {
-        WebElement list = findElement(By.id(listId));
+    private void validateListSize(WebElement list, int expectedSize) {
         JsonArray items = IronListIT.getItems(getDriver(), list);
-        Assert.assertEquals("There should be " + expectedSize
-                + " items in the '" + listId + "' iron-list", expectedSize,
-                items.length());
+        Assert.assertEquals(
+                "There should be " + expectedSize + " items in the '"
+                        + list.getAttribute("id") + "' iron-list",
+                expectedSize, items.length());
+    }
+
+    private void validatePlaceholderObject(WebElement list) {
+        Map<String, String> obj = (Map<String, String>) executeScript(
+                "return arguments[0].$connector.placeholderItem;", list);
+        Assert.assertEquals("The placeholderItem object of the '"
+                + list.getAttribute("id")
+                + "' iron-list should have the '-----' as firstName property",
+                "-----", obj.get("firstName"));
     }
 
 }

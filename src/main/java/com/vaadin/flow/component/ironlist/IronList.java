@@ -40,7 +40,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
-import com.vaadin.flow.renderer.ComponentRenderer;
 import com.vaadin.flow.renderer.ComponentTemplateRenderer;
 import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.renderer.TemplateRendererUtil;
@@ -59,7 +58,7 @@ import elemental.json.JsonValue;
  * {@code height}. It can be an absolute height, like {@code 100px}, or a
  * relative height inside a container with well defined height.
  * <p>
- * For list renderered in grid layout (setting {@link #setGridLayout(boolean)}
+ * For list rendered in grid layout (setting {@link #setGridLayout(boolean)}
  * with <code>true</code>), the {@code width} of the component also needs to be
  * well defined.
  *
@@ -112,10 +111,10 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
     private final ArrayUpdater arrayUpdater = UpdateQueue::new;
     private final Element template;
     private TemplateRenderer<T> renderer;
-    private String placeholderTemplate;
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
+    private T placeholderItem;
 
     private final DataCommunicator<T> dataCommunicator = new DataCommunicator<>(
             dataGenerator, arrayUpdater,
@@ -134,8 +133,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
 
         template = new Element("template");
         getElement().appendChild(template);
-        placeholderTemplate = "<div style='width: 100px; height: 18px'></div>";
-        setRenderer(item -> String.valueOf(item));
+        setRenderer(String::valueOf);
 
         getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(this,
@@ -189,7 +187,8 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      * {@link TemplateRenderer}. The template returned by the renderer is used
      * to render each item.
      * <p>
-     * Note: {@link ComponentRenderer}s are not supported yet.
+     * When set, a same renderer is used for the placeholder item. See
+     * {@link #setPlaceholderItem(Object)} for details.
      *
      * @param renderer
      *            a renderer for the items in the list, not <code>null</code>
@@ -218,30 +217,61 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
     }
 
     /**
-     * Sets a HTML template for the placeholder item. The placeholder is shown
-     * in the list while the actual data is being fetched from the server.
+     * Sets an item to be shown as placeholder in the list while the real data
+     * in being fetched from the server.
      * <p>
-     * For a smooth scrolling experience, it is recommended that the placeholder
-     * has the dimensions as close as possible to the final, rendered result.
-     * This is specially important when using {@link TemplateRenderer} or
-     * {@link ComponentTemplateRenderer}.
+     * Setting a placeholder item improves the user experience of the list while
+     * scrolling, since the placeholder uses the same renderer set with
+     * {@link #setRenderer(TemplateRenderer)}, maintaining the same height for
+     * placeholders and actual items.
      * <p>
-     * By default, the placeholder is an empty {@code <div>}, with {@code 100px}
-     * of width and {@code 18px} of height.
+     * When no placeholder item is set (or when set to <code>null</code>), an
+     * empty placeholder element is created with <code>100px</code> of width and
+     * <code>18px</code> of height.
+     * <p>
+     * Note: when using {@link ComponentTemplateRenderer}s, the component used
+     * for the placeholder is statically stamped in the list. It can not be
+     * modified, nor receives any events.
      * 
-     * @param placeholderTemplate
-     *            the HTML to be used in the list while the actual item is being
-     *            loaded, not <code>null</code>
+     * @param placeholderItem
+     *            the item used as placeholder in the list, while the real data
+     *            is being fetched from the server
      */
-    public void setPlaceholderTemplate(String placeholderTemplate) {
-        Objects.requireNonNull(placeholderTemplate,
-                "The placeholderTemplate must not be null");
-
-        this.placeholderTemplate = placeholderTemplate;
+    public void setPlaceholderItem(T placeholderItem) {
+        this.placeholderItem = placeholderItem;
+        getElement().callFunction("$connector.setPlaceholderItem",
+                JsonSerializer.toJson(placeholderItem));
         updateTemplateInnerHtml();
     }
 
+    /**
+     * Gets the placeholder item of this list, or <code>null</code> if none has
+     * been set.
+     * 
+     * @return the placeholder item
+     */
+    public T getPlaceholderItem() {
+        return placeholderItem;
+    }
+
     private void updateTemplateInnerHtml() {
+        String placeholderTemplate;
+        if (placeholderItem == null) {
+            /*
+             * When a placeholderItem is not set, there should be still a
+             * placeholder element with a non 0 size to avoid issues when
+             * scrolling.
+             */
+            placeholderTemplate = "<div style='width:100px;height:18px'></div>";
+        } else if (renderer instanceof ComponentTemplateRenderer) {
+            ComponentTemplateRenderer<?, T> componentRenderer = (ComponentTemplateRenderer<?, T>) renderer;
+            Component component = componentRenderer
+                    .createComponent(placeholderItem);
+            placeholderTemplate = component.getElement().getOuterHTML();
+        } else {
+            placeholderTemplate = renderer.getTemplate();
+        }
+
         /**
          * The placeholder is used by the client connector to create temporary
          * elements that are populated on demand (when the user scrolls to that

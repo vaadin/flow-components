@@ -5,6 +5,7 @@ window.ironListConnector = {
     let lastRequestedRange = [0, 0];
 
     list.$connector = {};
+    list.$connector.placeholderItem = {__placeholder: true};
 
     const updateRequestedItem = function() {
         /* 
@@ -50,7 +51,7 @@ window.ironListConnector = {
         for(let i = 0; i < count; i++) {
             if (list.items[start + i] === undefined) {
                 tempItems.push(i);
-                list.items[start + i] = {__placeholder: true};
+                list.items[start + i] = list.$connector.placeholderItem;
             }
         }
 
@@ -131,6 +132,14 @@ window.ironListConnector = {
             list.items.splice(newSize);
             list.notifySplices("items", [{index: newSize, removed: removed, addedCount : 0, object: list.items, type: "splice"}]);
         }
+    };
+
+    list.$connector.setPlaceholderItem = function(placeholderItem) {
+        if (!placeholderItem) {
+            placeholderItem = {};
+        }
+        placeholderItem.__placeholder = true;
+        list.$connector.placeholderItem = placeholderItem;
     };
   }
 }
