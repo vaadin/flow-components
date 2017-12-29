@@ -20,6 +20,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.HtmlUtils;
 
 /**
  * Server-side component for the <code>vaadin-notification</code> element.
@@ -31,7 +32,7 @@ public class Notification
         extends GeneratedVaadinNotification<Notification>
         implements HasComponents {
 
-    private Element container;
+    private Element container = new Element("div", false);
     private final Element templateElement = new Element("template");
     /**
      * Enumeration of all available positions for Vertical Alignment
@@ -50,50 +51,49 @@ public class Notification
     /**
      * Default constructor. Create an empty notification with component support
      * and non-auto-closing
-     * 
-     * @see #Notification(Component...)
+     * <p>
+     * Note: To mix text and child components in notification that also supports
+     * child components, use the {@link Text} component for the textual parts.
      */
     public Notification() {
-        container = new Element("div", false);
+        getElement().appendChild(templateElement);
         getElement().appendVirtualChild(container);
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        () -> attachComponentTemplate(ui)));
+
         setAlignment(VerticalAlign.BOTTOM, HorizontalAlign.START);
         setDuration(0);
     }
 
     /**
-     * Creates a Notification with the given String rendered as its HTML
-     * content. The default duration for the notification is 4000 milliseconds
+     * Creates a Notification with the given String rendered as its HTML text.
+     * The default duration for the notification is 4000 milliseconds
      * 
-     * @param content
-     *            the content of the Notification as HTML markup
+     * @param text
+     *            the text of the Notification
      */
-    public Notification(String content) {
-        this(content, 4000, VerticalAlign.BOTTOM,
+    public Notification(String text) {
+        this(text, 4000, VerticalAlign.BOTTOM,
                 HorizontalAlign.START);
     }
 
     /**
-     * Creates a Notification with given String rendered as its HTML content and
+     * Creates a Notification with given String rendered as its HTML text and
      * given Integer rendered as its duration.
      * <p>
      * Set to {@code 0} or a negative number to disable the notification
      * auto-closing.
      * 
-     * @param content
-     *            the content of the Notification as HTML markup
+     * @param text
+     *            the text of the Notification
      * @param duration
      *            the duration in milliseconds to show the notification
      */
-    public Notification(String content, int duration) {
-        this(content, duration, VerticalAlign.BOTTOM,
+    public Notification(String text, int duration) {
+        this(text, duration, VerticalAlign.BOTTOM,
                 HorizontalAlign.START);
     }
 
     /**
-     * Creates a Notification with given content String, duration, vertical and
+     * Creates a Notification with given text String, duration, vertical and
      * horizontal Alignment.
      * <P>
      * Set to {@code 0} or a negative number to disable the notification
@@ -102,8 +102,8 @@ public class Notification
      * Horizontal alignment is skipped in case verticalAlign is set to
      * {@code top-stretch|middle|bottom-stretch}
      * 
-     * @param content
-     *            the content of the Notification as HTML markup
+     * @param text
+     *            the text of the Notification
      * @param duration
      *            the duration in milliseconds to show the notification
      * @param vertical
@@ -113,11 +113,11 @@ public class Notification
      *            the horizontal alignment of the notification.Valid values are
      *            {@code start|center|end}
      */
-
-    public Notification(String content, int duration, VerticalAlign vertical,
+    public Notification(String text, int duration, VerticalAlign vertical,
             HorizontalAlign horizontal) {
         getElement().appendChild(templateElement);
-        setContent(content);
+        getElement().appendVirtualChild(container);
+        setText(text);
         setDuration((double) duration);
         setAlignment(vertical, horizontal);
     }
@@ -125,8 +125,8 @@ public class Notification
     /**
      * Creates a notification with given components inside.
      * <p>
-     * Component support will NOT allow you to use setContent(String Content) in
-     * the notification.
+     * Note: To mix text and child components in a component that also supports
+     * child components, use the {@link Text} component for the textual parts.
      * 
      * @param components
      *            the components inside the notification
@@ -136,13 +136,22 @@ public class Notification
         this();
         add(components);
     }
+
     /**
-     * Set the content of the notification with given String
+     * Set the text of the notification with given String
+     * <p>
+     * NOTE: When mixing this method with {@link #Notification()} and
+     * {@link #Notification(Component...)}. Method will remove all the
+     * components from the notification.
      * 
-     * @param content
+     * @param text
+     *            the text of the Notification
      */
-    public void setContent(String content) {
-        templateElement.setProperty("innerHTML", content);
+    public void setText(String text) {
+        removeAll();
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, () -> templateElement
+                        .setProperty("innerHTML", HtmlUtils.escape(text))));
     }
 
     /**
@@ -210,6 +219,11 @@ public class Notification
      * The elements in the DOM will not be children of the
      * {@code <vaadin-notification>} element, but will be inserted into an
      * overlay that is attached into the {@code <body>}.
+     * <p>
+     * NOTE: When mixing this method with {@link #Notification(String)},
+     * {@link #Notification(String, int)} and
+     * {@link #Notification(String, int, VerticalAlign, HorizontalAlign)},
+     * method will remove the text content.
      *
      * @param components
      *            the components to add
@@ -221,6 +235,8 @@ public class Notification
             assert component != null;
             container.appendChild(component.getElement());
         }
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, () -> attachComponentTemplate(ui)));
     }
 
     /**
@@ -253,9 +269,9 @@ public class Notification
     private void attachComponentTemplate(UI ui) {
         String appId = ui.getInternals().getAppId();
         int nodeId = container.getNode().getId();
-        String template = "<template><flow-component-renderer appid=" + appId
+        String template = "<flow-component-renderer appid=" + appId
                 + " nodeid=" + nodeId
-                + "></flow-component-renderer></template>";
-        getElement().setProperty("innerHTML", template);
+                + "></flow-component-renderer>";
+        templateElement.setProperty("innerHTML", template);
     }
 }

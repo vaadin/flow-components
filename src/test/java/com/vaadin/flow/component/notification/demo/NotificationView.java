@@ -43,9 +43,7 @@ public class NotificationView extends DemoView {
         // begin-source-example
         // source-example-heading: Default Notification
         Notification notification = new Notification(
-                "<h3>Hello World!</h3>"
-                        + "This notification has HTML content",
-                4000);
+                "This notification has text content", 2000);
         // end-source-example
         button.setId("default-notification-button");
         button.addClickListener(event -> notification.open());

@@ -33,41 +33,29 @@ public class NotificationIT extends ComponentDemoTest {
     @Test
     public void DefaultNotification() {
         findElement(By.id("default-notification-button")).click();
-        waitUntil(driver -> Boolean.TRUE.toString()
-                .equals(findElement(By.tagName(DIALOG_OVERLAY_TAG))
-                        .getAttribute("opened")));
-        assertNotificationOverlayContent("HTML content");
+        checkNotificationIsOpen();
+        assertNotificationOverlayContent("text content");
         Assert.assertEquals(1,
                 findElements(By.id("default-notification")).size());
-
-        waitUntil(driver -> Boolean.FALSE.toString()
-                .equals(findElement(By.tagName(DIALOG_OVERLAY_TAG))
-                        .getAttribute("opened")));
-
+        checkNotificationIsClose();
     }
 
     @Test
     public void NotificationWithPosition() {
         findElement(By.id("position-notification-button")).click();
-        waitUntil(driver -> Boolean.TRUE.toString()
-                .equals(findElement(By.tagName(DIALOG_OVERLAY_TAG))
-                        .getAttribute("opened")));
+        checkNotificationIsOpen();
         assertNotificationOverlayContent("Top-Left");
         Assert.assertEquals(1,
                 findElements(By.id("position-notification")).size());
 
-        waitUntil(driver -> Boolean.FALSE.toString()
-                .equals(findElement(By.tagName(DIALOG_OVERLAY_TAG))
-                        .getAttribute("opened")));
+        checkNotificationIsClose();
 
     }
 
     @Test
     public void NotificationWithComponent() {
         findElement(By.id("component-notification-button")).click();
-        waitUntil(driver -> Boolean.TRUE.toString()
-                .equals(findElement(By.tagName(DIALOG_OVERLAY_TAG))
-                        .getAttribute("opened")));
+        checkNotificationIsOpen();
         Assert.assertEquals(1,
                 findElements(By.id("component-notification")).size());
         assertNotificationOverlayContent("Bye");
@@ -78,9 +66,7 @@ public class NotificationIT extends ComponentDemoTest {
                 .findElements(By.id("label-inside-notification")).size());
         getOverlayContent().findElement(By.id("button-inside-notification"))
                 .click();
-        waitUntil(driver -> Boolean.FALSE.toString()
-                .equals(findElement(By.tagName(DIALOG_OVERLAY_TAG))
-                        .getAttribute("opened")));
+        checkNotificationIsClose();
     }
 
     private void assertNotificationOverlayContent(String expected) {
@@ -91,6 +77,18 @@ public class NotificationIT extends ComponentDemoTest {
     private WebElement getOverlayContent() {
         WebElement overlay = findElement(By.tagName(DIALOG_OVERLAY_TAG));
         return getInShadowRoot(overlay, By.id("content"));
+    }
+
+    private void checkNotificationIsClose() {
+        waitUntil(driver -> Boolean.FALSE.toString()
+                .equals(findElement(By.tagName(DIALOG_OVERLAY_TAG))
+                        .getAttribute("opened")));
+    }
+
+    private void checkNotificationIsOpen() {
+        waitUntil(driver -> Boolean.TRUE.toString()
+                .equals(findElement(By.tagName(DIALOG_OVERLAY_TAG))
+                        .getAttribute("opened")));
     }
 
     @Override

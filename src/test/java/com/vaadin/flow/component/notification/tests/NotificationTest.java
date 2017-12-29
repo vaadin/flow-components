@@ -30,15 +30,8 @@ public class NotificationTest {
     private Notification notification;
 
     @Test
-    public void stringCtor() {
-        notification = new Notification("fo");
-        assertCheck("fo");
-    }
-
-    @Test
     public void stringAndDurationCtor() {
         notification = new Notification("foo", 4000);
-        assertCheck("foo");
         Assert.assertEquals(4000, notification.getDuration(), 0);
         Assert.assertEquals("bottom", notification.getVerticalAlign());
         Assert.assertEquals("start", notification.getHorizontalAlign());
@@ -48,7 +41,6 @@ public class NotificationTest {
     public void stringDurAndPositionCtor() {
         notification = new Notification("fooo", 10000, VerticalAlign.TOP,
                 HorizontalAlign.END);
-        assertCheck("fooo");
         Assert.assertEquals(10000, notification.getDuration(), 0);
         Assert.assertEquals("top", notification.getVerticalAlign());
         Assert.assertEquals("end", notification.getHorizontalAlign());
@@ -62,18 +54,6 @@ public class NotificationTest {
         Assert.assertEquals("bottom", notification.getVerticalAlign());
         Assert.assertEquals("end", notification.getHorizontalAlign());
     }
-
-    @Test
-    public void setContent() {
-        notification = new Notification("new");
-        Assert.assertEquals("new",
-                notification.getElement().getChild(0).getProperty("innerHTML"));
-        
-        notification.setContent("Hello");
-        Assert.assertEquals("Hello",
-                notification.getElement().getChild(0).getProperty("innerHTML"));
-    }
-
 
     @Test
     public void setAlignment() {
@@ -93,13 +73,5 @@ public class NotificationTest {
                 HorizontalAlign.START);
         Assert.assertEquals("bottom-stretch", notification.getVerticalAlign());
         Assert.assertEquals("start", notification.getHorizontalAlign());
-    }
-
-    private void assertCheck(String string) {
-        Assert.assertEquals(1, notification.getElement().getChildCount());
-        Assert.assertEquals("template",
-                notification.getElement().getChild(0).getTag());
-        Assert.assertEquals(string,
-                notification.getElement().getChild(0).getProperty("innerHTML"));
     }
 }
