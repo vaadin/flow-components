@@ -33,7 +33,7 @@ import com.vaadin.flow.renderer.TemplateRenderer;
 public class AbstractColumn<T extends AbstractColumn<T>> extends Component
         implements ColumnBase<T>, HasStyle {
 
-    protected Grid<?> grid;
+    protected final Grid<?> grid;
     protected Element headerTemplate;
     protected Element footerTemplate;
 

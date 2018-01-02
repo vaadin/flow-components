@@ -216,7 +216,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     @Tag("vaadin-grid-column")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
-        private final String columnId; // for internal implementation only
+        private final String columnInternalId; // for internal implementation
+                                               // only
         private String columnKey; // defined and used by the user
 
         private boolean sortingEnabled;
@@ -233,6 +234,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         private String rawHeaderTemplate;
 
+        private Registration columnDataGeneratorRegistration;
+        private Registration componentDataGeneratorRegistration;
+
         /**
          * Constructs a new Column for use inside a Grid.
          *
@@ -246,16 +250,19 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         public Column(Grid<T> grid, String columnId,
                 TemplateRenderer<T> renderer) {
             super(grid);
-            this.columnId = columnId;
+            this.columnInternalId = columnId;
 
             comparator = (a, b) -> 0;
 
-            HasDataGenerators<T> dataGenerator = grid.getDataGenerator();
+            HasDataGenerators<T> gridDataGenerator = grid.getDataGenerator();
             String template;
             if (renderer instanceof ComponentTemplateRenderer) {
                 ComponentTemplateRenderer<? extends Component, T> componentRenderer = (ComponentTemplateRenderer<? extends Component, T>) renderer;
-                dataGenerator.addDataGenerator(grid.setupItemComponentRenderer(
-                        this, columnId, componentRenderer));
+                DataGenerator<T> componentDataGenerator = grid
+                        .setupItemComponentRenderer(this, columnId,
+                                componentRenderer);
+                columnDataGeneratorRegistration = gridDataGenerator
+                        .addDataGenerator(componentDataGenerator);
                 template = componentRenderer
                         .getTemplate(GRID_COMPONENT_RENDERER_TAG);
             } else {
@@ -267,11 +274,29 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
             getElement().appendChild(contentTemplate);
 
-            dataGenerator.addDataGenerator(
-                    GridTemplateRendererUtil.setupTemplateRenderer(
-                            (TemplateRenderer) renderer, contentTemplate,
-                            getElement(), key -> getGrid().getDataCommunicator()
-                                    .getKeyMapper().get(key)));
+            DataGenerator<T> columnDataGenerator = GridTemplateRendererUtil
+                    .setupTemplateRenderer((TemplateRenderer) renderer,
+                            contentTemplate, getElement(),
+                            key -> getGrid().getDataCommunicator()
+                                    .getKeyMapper().get(key));
+
+            columnDataGeneratorRegistration = gridDataGenerator
+                    .addDataGenerator(columnDataGenerator);
+        }
+
+        protected void destroyDataGenerators() {
+            if (columnDataGeneratorRegistration != null) {
+                columnDataGeneratorRegistration.remove();
+                columnDataGeneratorRegistration = null;
+            }
+            if (componentDataGeneratorRegistration != null) {
+                componentDataGeneratorRegistration.remove();
+                componentDataGeneratorRegistration = null;
+            }
+        }
+
+        protected String getInternalId() {
+            return columnInternalId;
         }
 
         /**
@@ -536,7 +561,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
 
         private String addGridSorter(String template) {
-            String escapedColumnId = HtmlUtils.escape(columnId);
+            String escapedColumnId = HtmlUtils.escape(columnInternalId);
             return String.format(
                     "<vaadin-grid-sorter path='%s'>%s</vaadin-grid-sorter>",
                     escapedColumnId, template);
@@ -1369,6 +1394,68 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public Column<T> getColumnByKey(String columnKey) {
         return keyToColumnMap.get(columnKey);
+    }
+
+    /**
+     * Removes a column with the given column key from the Grid.
+     * 
+     * @param columnKey
+     *            the key of the column, assigned by
+     *            {@link Column#setKey(String)}, or automatically created when
+     *            using {@link Grid#Grid(Class)}. Cannot be <code>null</code>
+     * @throws IllegalArgumentException
+     *             if the column is not part of this Grid
+     */
+    public void removeColumnByKey(String columnKey) {
+        Objects.requireNonNull(columnKey, "columnKey should not be null");
+
+        Column<T> columnByKey = getColumnByKey(columnKey);
+        if (columnByKey == null) {
+            throw new IllegalArgumentException("The column with key '"
+                    + columnKey + "' is not part of this Grid");
+        }
+        removeColumn(columnByKey);
+    }
+
+    /**
+     * Removes a column from the Grid.
+     * 
+     * @param column
+     *            the column to be removed, not <code>null</code>
+     * @throws IllegalArgumentException
+     *             if column is <code>null</code> or if it is not part of this
+     *             Grid
+     */
+    public void removeColumn(Column<T> column) {
+        Objects.requireNonNull(column, "column should not be null");
+
+        if (!column.getGrid().equals(this)
+                || column.getElement().getParent() == null) {
+            throw new IllegalArgumentException("The column with key '"
+                    + column.getKey() + "' is not part of this Grid");
+        }
+        removeColumnAndColumnGroupsIfNeeded(column);
+        column.destroyDataGenerators();
+        keyToColumnMap.remove(column.getKey());
+        idToColumnMap.remove(column.getInternalId());
+    }
+
+    private void removeColumnAndColumnGroupsIfNeeded(Column<?> column) {
+        Element parent = column.getElement().getParent();
+        parent.removeChild(column.getElement());
+        if (!parent.equals(getElement())) {
+            removeEmptyColumnGroups(parent);
+        }
+    }
+
+    private void removeEmptyColumnGroups(Element columnGroup) {
+        Element parent = columnGroup.getParent();
+        if (columnGroup.getChildCount() == 0) {
+            parent.removeChild(columnGroup);
+            if (!parent.equals(getElement())) {
+                removeEmptyColumnGroups(parent);
+            }
+        }
     }
 
     /**

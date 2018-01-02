@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -32,8 +32,6 @@ import com.vaadin.flow.dom.Element;
 @HtmlImport("frontend://bower_components/vaadin-grid/vaadin-grid-column-group.html")
 @Tag("vaadin-grid-column-group")
 public class ColumnGroup extends AbstractColumn<ColumnGroup> {
-
-    private final Collection<ColumnBase<?>> childColumns;
 
     /**
      * Constructs a new column group with the given header and grouping the
@@ -59,7 +57,6 @@ public class ColumnGroup extends AbstractColumn<ColumnGroup> {
      */
     public ColumnGroup(Grid<?> grid, Collection<ColumnBase<?>> columns) {
         super(grid);
-        childColumns = columns;
         columns.forEach(
                 column -> getElement().appendChild(column.getElement()));
     }
@@ -70,7 +67,11 @@ public class ColumnGroup extends AbstractColumn<ColumnGroup> {
      * @return the child columns of this column group
      */
     public List<ColumnBase<?>> getChildColumns() {
-        return new ArrayList<>(childColumns);
+        return getElement().getChildren()
+                .filter(element -> element.getComponent().isPresent()
+                        && element.getComponent().get() instanceof ColumnBase)
+                .map(element -> (ColumnBase<?>) element.getComponent().get())
+                .collect(Collectors.toList());
     }
 
     /**

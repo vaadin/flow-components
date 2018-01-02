@@ -501,23 +501,19 @@ public class GridIT extends TabbedComponentDemoTest {
         WebElement grid = findElement(By.id("bean-grid"));
         scrollToElement(grid);
 
-        Assert.assertEquals("Unexpected amount of columns", 5,
+        Assert.assertEquals("Unexpected amount of columns", 4,
                 grid.findElements(By.tagName("vaadin-grid-column")).size());
 
         List<WebElement> cells = getCells(grid);
 
         WebElement firstHeader = getCell(grid, "Address");
-        Assert.assertNotNull("Missing expected column header Address",
-                firstHeader);
-
+        
         int index = cells.indexOf(firstHeader);
-        for (String header : Arrays.asList("Name", "Id", "Age",
+        for (String header : Arrays.asList("Address", "Name", "Age",
                 "Postal Code")) {
-            if (header.equals("Id")) {
-                header = ""; // Id column is hidden
-            }
             Assert.assertEquals("Missing expected column header " + header,
-                    header, cells.get(++index).getText());
+                    header, cells.get(index).getText());
+            index++;
         }
     }
 

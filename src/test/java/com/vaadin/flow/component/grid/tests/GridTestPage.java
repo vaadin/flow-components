@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -62,6 +63,7 @@ public class GridTestPage extends Div {
         createGridWithComponentRenderers();
         createGridWithTemplateDetailsRow();
         createGridWithComponentDetailsRow();
+        createGridWithRemovableColumns();
     }
 
     private void createGridWithComponentRenderers() {
@@ -147,6 +149,32 @@ public class GridTestPage extends Div {
         grid.setWidth("500px");
         grid.setHeight("500px");
         add(grid);
+    }
+
+    private void createGridWithRemovableColumns() {
+        Grid<Item> grid = new Grid<>();
+
+        grid.setItems(generateItems(20, 0));
+
+        Column<Item> removedColumn = grid.addColumn(Item::getName);
+        Column<Item> nameColumn = grid.addColumn(Item::getName);
+        grid.addColumn(Item::getNumber);
+
+        grid.removeColumn(removedColumn);
+
+        NativeButton removeNameColumn = new NativeButton("Remove name column",
+                evt -> {
+                    grid.removeColumn(nameColumn);
+                    // forces refresh of the data
+                    grid.getDataCommunicator().reset();
+                });
+
+        grid.setId("grid-with-removable-columns");
+        grid.setWidth("500px");
+        grid.setHeight("500px");
+        removeNameColumn.setId("remove-name-column-button");
+        add(grid);
+        add(removeNameColumn);
     }
 
     private List<Item> generateItems(int amount, int startingIndex) {

@@ -791,7 +791,8 @@ public class GridView extends DemoView {
         grid.setItems(getItems());
 
         // Property-names are automatically set as keys
-        grid.getColumnByKey("id").setHidden(true);
+        // You can remove undesired columns by using the key
+        grid.removeColumnByKey("id");
 
         // Columns for sub-properties can be added easily
         grid.addColumn("address.postalCode");

@@ -31,8 +31,8 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortOrder;
@@ -259,12 +259,12 @@ public class GridSortingTest {
 
     private String getColumnId(Column column) {
         try {
-            Field columnId = Column.class.getDeclaredField("columnId");
+            Field columnId = Column.class.getDeclaredField("columnInternalId");
             columnId.setAccessible(true);
             return (String) columnId.get(column);
         } catch (SecurityException | IllegalAccessException
                 | IllegalArgumentException | NoSuchFieldException e) {
-            Assert.fail("Could not get columnId");
+            Assert.fail("Could not get columnInternalId");
             return null;
         }
     }

@@ -146,6 +146,41 @@ public class GridTestPageIT extends AbstractComponentIT {
         });
     }
 
+    @Test
+    public void openGridWithRemovableColumns_removeNameColumn_dataIsNotTransmitted() {
+        WebElement grid = findElement(By.id("grid-with-removable-columns"));
+
+        /*
+         * The first column was removed before the grid was rendered, so the
+         * col0 key shouldn't be present
+         */
+        Map<String, Map<String, ?>> items = getItems(driver, grid);
+        items.forEach((row, map) -> {
+            Assert.assertThat(map.keySet(),
+                    CoreMatchers.not(CoreMatchers.hasItem("col0")));
+            Assert.assertEquals("Item " + row, map.get("col1"));
+            Assert.assertEquals(String.valueOf(row),
+                    String.valueOf(map.get("col2")));
+        });
+
+        WebElement button = findElement(By.id("remove-name-column-button"));
+        clickElementWithJs(button);
+
+        /*
+         * The second column was removed and the DataCommunicator reset, so the
+         * col1 key shouldn't be present
+         */
+        items = getItems(driver, grid);
+        items.forEach((row, map) -> {
+            Assert.assertThat(map.keySet(),
+                    CoreMatchers.not(CoreMatchers.hasItem("col0")));
+            Assert.assertThat(map.keySet(),
+                    CoreMatchers.not(CoreMatchers.hasItem("col1")));
+            Assert.assertEquals(String.valueOf(row),
+                    String.valueOf(map.get("col2")));
+        });
+    }
+
     private void assertItemsArePresent(WebElement grid, String itemIdPrefix,
             int startingIndex, int length) {
         for (int i = 0; i < length; i++) {
