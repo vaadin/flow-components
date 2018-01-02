@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>vaadin-ordered-layout-flow</artifactId>
+    <version>1.0-SNAPSHOT</version>
 
     <properties>
         <flow.version>1.0-SNAPSHOT</flow.version>
