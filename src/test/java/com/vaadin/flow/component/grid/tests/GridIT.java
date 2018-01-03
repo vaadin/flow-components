@@ -254,7 +254,7 @@ public class GridIT extends TabbedComponentDemoTest {
 
     @Test
     public void gridDetailsRowTests() {
-        openTabAndCheckForErrors("using-templates");
+        openTabAndCheckForErrors("item-details");
         WebElement grid = findElement(By.id("grid-with-details-row"));
         scrollToElement(grid);
 
@@ -286,21 +286,42 @@ public class GridIT extends TabbedComponentDemoTest {
 
     @Test
     public void gridDetailsRowServerAPI() {
-        openTabAndCheckForErrors("using-templates");
-        WebElement grid = findElement(By.id("grid-with-details-row"));
+        openTabAndCheckForErrors("item-details");
+        WebElement grid = findElement(By.id("grid-with-details-row-2"));
         scrollToElement(grid);
 
-        Assert.assertEquals(0,
-                grid.findElements(By.className("custom-details")).size());
-        clickElementWithJs(findElement(By.id("toggle-details-button")));
+        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
 
-        waitUntil(driver -> grid.findElements(By.className("custom-details"))
-                .size() == 1);
-        Assert.assertEquals(1,
-                grid.findElements(By.className("custom-details")).size());
+        List<WebElement> toggleDetailsButtons = grid
+                .findElements(By.tagName("button"));
+
+        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
+        assertAmountOfOpenDetails(grid, 0);
+
+        clickElementWithJs(toggleDetailsButtons.get(1));
+        assertAmountOfOpenDetails(grid, 1);
+
         Assert.assertTrue(grid.findElement(By.className("custom-details"))
                 .getAttribute("innerHTML")
                 .contains("Hi! My name is <b>Person 2!</b>"));
+
+        clickElementWithJs(toggleDetailsButtons.get(3));
+        assertAmountOfOpenDetails(grid, 2);
+
+        clickElementWithJs(toggleDetailsButtons.get(1));
+        Assert.assertFalse(
+                "Details should be closed after clicking the button again",
+                grid.findElement(By.className("custom-details"))
+                        .getAttribute("innerHTML")
+                        .contains("Hi! My name is <b>Person 2!</b>"));
+    }
+
+    private void assertAmountOfOpenDetails(WebElement grid,
+            int expectedAmount) {
+        waitUntil(driver -> grid.findElements(By.className("custom-details"))
+                .size() == expectedAmount);
+        Assert.assertEquals(expectedAmount,
+                grid.findElements(By.className("custom-details")).size());
     }
 
     @Test

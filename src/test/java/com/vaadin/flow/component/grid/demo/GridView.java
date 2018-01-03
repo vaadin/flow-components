@@ -288,9 +288,10 @@ public class GridView extends DemoView {
         createColumnApiExample();
         createBasicRenderers();
         createColumnTemplate();
-        createDetailsRow();
         createColumnGroup();
         createColumnComponentTemplateRenderer();
+        createItemDetails();
+        createItemDetailsOpenedProgrammatically();
         createSorting();
         createHeaderAndFooterUsingTemplates();
         createHeaderAndFooterUsingComponents();
@@ -580,9 +581,9 @@ public class GridView extends DemoView {
                         freezeIdColumn, merge));
     }
 
-    private void createDetailsRow() {
+    private Grid<Person> createGridWithDetails() {
         // begin-source-example
-        // source-example-heading: Grid with a details row
+        // source-example-heading: Grid with item details
         Grid<Person> grid = new Grid<>();
         List<Person> people = createItems();
         grid.setItems(people);
@@ -591,6 +592,9 @@ public class GridView extends DemoView {
         grid.addColumn(Person::getAge).setHeader("Age");
 
         grid.setSelectionMode(SelectionMode.NONE);
+
+        // You can use any renderer for the item details. By default, the
+        // details are opened and closed by clicking the rows.
         grid.setItemDetailsRenderer(TemplateRenderer.<Person> of(
                 "<div class='custom-details' style='border: 1px solid gray; padding: 10px; width: 100%; box-sizing: border-box;'>"
                         + "<div>Hi! My name is <b>[[item.name]]!</b></div>"
@@ -601,17 +605,29 @@ public class GridView extends DemoView {
                     person.setName(person.getName() + " Updated");
                     grid.getDataProvider().refreshItem(person);
                 }));
-
-        NativeButton toggleDetails = new NativeButton(
-                "Toggle details open for second row");
-        toggleDetails
-                .addClickListener(event -> grid.setDetailsVisible(people.get(1),
-                        !grid.isDetailsVisible(people.get(1))));
         // end-source-example
+        return grid;
+    }
+
+    private void createItemDetails() {
+        Grid<Person> grid = createGridWithDetails();
         grid.setId("grid-with-details-row");
-        toggleDetails.setId("toggle-details-button");
-        addCard("Using templates", "Grid with a details row", grid,
-                toggleDetails);
+        addCard("Item details", "Grid with item details", grid);
+    }
+
+    private void createItemDetailsOpenedProgrammatically() {
+        Grid<Person> grid = createGridWithDetails();
+
+        // begin-source-example
+        // source-example-heading: Open details programmatically
+        // Disable the default way of opening item details:
+        grid.setDetailsVisibleOnClick(false);
+
+        grid.addColumn(new ButtonRenderer<>("Toggle details open", item -> grid
+                .setDetailsVisible(item, !grid.isDetailsVisible(item))));
+        // end-source-example
+        grid.setId("grid-with-details-row-2");
+        addCard("Item details", "Open details programmatically", grid);
     }
 
     private void createColumnGroup() {

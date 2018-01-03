@@ -9,6 +9,8 @@ window.gridConnector = {
     let selectedKeys = {};
     let selectionMode = 'SINGLE';
 
+    let detailsVisibleOnClick = true;
+
     grid.size = 0; // To avoid NaN here and there before we get proper data
 
     grid.$connector = {};
@@ -69,6 +71,9 @@ window.gridConnector = {
     grid._createPropertyObserver('activeItem', '__activeItemChanged', true);
 
     grid.__activeItemChangedDetails = function(newVal, oldVal) {
+      if(!detailsVisibleOnClick) {
+        return;
+      }
       if (newVal && !newVal.detailsOpened) {
         grid.$server.setDetailsVisible(newVal.key);
       } else {
@@ -76,6 +81,10 @@ window.gridConnector = {
       }
     }
     grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
+
+    grid.$connector.setDetailsVisibleOnClick = function(visibleOnClick) {
+      detailsVisibleOnClick = visibleOnClick;
+    };
 
     grid.dataProvider = function(params, callback) {
       if (params.pageSize != grid.pageSize) {

@@ -737,6 +737,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private final DetailsManager detailsManager = new DetailsManager(this);
     private Element detailsTemplate;
+    private boolean detailsVisibleOnClick = true;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
     private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
@@ -1469,6 +1470,35 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public void setDetailsVisible(T item, boolean visible) {
         detailsManager.setDetailsVisible(item, visible);
+    }
+
+    /**
+     * Sets whether the item details can be opened and closed by clicking the
+     * rows or not.
+     * 
+     * @param detailsVisibleOnClick
+     *            {@code true} to enable opening and closing item details by
+     *            clicking the rows, {@code false} to disable this functionality
+     * @see #setItemDetailsRenderer(TemplateRenderer)
+     */
+    public void setDetailsVisibleOnClick(boolean detailsVisibleOnClick) {
+        if (this.detailsVisibleOnClick != detailsVisibleOnClick) {
+            this.detailsVisibleOnClick = detailsVisibleOnClick;
+            getElement().callFunction("$connector.setDetailsVisibleOnClick",
+                    detailsVisibleOnClick);
+        }
+    }
+
+    /**
+     * Gets whether the item details are opened and closed by clicking the rows
+     * or not.
+     * 
+     * @return {@code true} if clicking the rows opens and closes their item
+     *         details, {@code false} otherwise
+     * @see #setItemDetailsRenderer(TemplateRenderer)
+     */
+    public boolean isDetailsVisibleOnClick() {
+        return detailsVisibleOnClick;
     }
 
     /**
