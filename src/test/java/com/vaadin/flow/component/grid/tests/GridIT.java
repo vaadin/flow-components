@@ -25,12 +25,12 @@ import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.demo.GridView;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.demo.TabbedComponentDemoTest;
-import com.vaadin.testbench.By;
 
 /**
  * Integration tests for the {@link GridView}.
@@ -528,7 +528,7 @@ public class GridIT extends TabbedComponentDemoTest {
         List<WebElement> cells = getCells(grid);
 
         WebElement firstHeader = getCell(grid, "Address");
-        
+
         int index = cells.indexOf(firstHeader);
         for (String header : Arrays.asList("Address", "Name", "Age",
                 "Postal Code")) {

@@ -55,30 +55,6 @@ public interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
     }
 
     /**
-     * Hides or shows the column. By default columns are visible before
-     * explicitly hiding them.
-     *
-     * @param hidden
-     *            {@code true} to hide the column, {@code false} to show
-     * @return this column, for method chaining
-     */
-    default T setHidden(boolean hidden) {
-        getElement().setProperty("hidden", hidden);
-        return (T) this;
-    }
-
-    /**
-     * Returns whether this column is hidden. Default is {@code false}.
-     *
-     * @return {@code true} if the column is currently hidden, {@code false}
-     *         otherwise
-     */
-    @Synchronize("hidden-changed")
-    default boolean isHidden() {
-        return getElement().getProperty("hidden", false);
-    }
-
-    /**
      * Sets this column's frozen state.
      * <p>
      * <strong>Note:</strong> Columns are frozen in-place, freeze columns from

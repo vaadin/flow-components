@@ -550,7 +550,7 @@ public class GridView extends DemoView {
         NativeButton idColumnVisibility = new NativeButton(
                 "Toggle visibility of the ID column");
         idColumnVisibility.addClickListener(
-                event -> idColumn.setHidden(!idColumn.isHidden()));
+                event -> idColumn.setVisible(!idColumn.isVisible()));
 
         NativeButton userReordering = new NativeButton(
                 "Toggle user reordering of columns");
