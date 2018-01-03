@@ -25,7 +25,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * wide.
  */
 @Tag("vaadin-vertical-layout")
-@HtmlImport("frontend://bower_components/vaadin-ordered-layout/vaadin-vertical-layout.html")
+@HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-vertical-layout.html")
 public class VerticalLayout extends Component
         implements FlexComponent<VerticalLayout> {
 
