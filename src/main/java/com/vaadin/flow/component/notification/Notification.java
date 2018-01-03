@@ -125,6 +125,27 @@ public class Notification
     }
 
     /**
+     * Shows a notification in the current page with given text, duration and
+     * position.
+     * 
+     * @param text
+     *            the text of the Notification
+     * @param duration
+     *            the duration in milliseconds to show the notification
+     * @param position
+     *            the position of the notification. Valid enumerate values are
+     *            TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE,
+     *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
+     * @return The notification
+     */
+    public static Notification show(String text, int duration,
+            Position position) {
+        Notification notification = new Notification(text, duration, position);
+        notification.open();
+        return notification;
+    }
+
+    /**
      * Set the text of the notification with given String
      * <p>
      * NOTE: When mixing this method with {@link #Notification()} and

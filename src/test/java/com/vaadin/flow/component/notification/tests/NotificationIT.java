@@ -32,7 +32,7 @@ public class NotificationIT extends ComponentDemoTest {
     private WebElement overlay;
 
     @Test
-    public void DefaultNotification() {
+    public void defaultNotification() {
         findElement(By.id("default-notification-button")).click();
         checkNotificationIsOpen();
         assertNotificationOverlayContent("text content");
@@ -42,7 +42,7 @@ public class NotificationIT extends ComponentDemoTest {
     }
 
     @Test
-    public void NotificationWithPosition() {
+    public void notificationWithPosition() {
         findElement(By.id("position-notification-button")).click();
         checkNotificationIsOpen();
         assertNotificationOverlayContent("Top-Left");
@@ -52,8 +52,17 @@ public class NotificationIT extends ComponentDemoTest {
     }
 
     @Test
-    public void NotificationWithComponent() {
-        findElement(By.id("component-notification-button")).click();
+    public void notificationWithStaticConvenienceMethod() {
+        checkNotificationIsOpen();
+        assertNotificationOverlayContent("static");
+        Assert.assertEquals(1,
+                findElements(By.id("static-notification")).size());
+    }
+
+    @Test
+    public void notificationWithComponent() {
+        clickElementWithJs(findElement(By.id("component-notification-button")));
+        // findElement(By.id("component-notification-button")).click();
         checkNotificationIsOpen();
         Assert.assertEquals(1,
                 findElements(By.id("component-notification")).size());

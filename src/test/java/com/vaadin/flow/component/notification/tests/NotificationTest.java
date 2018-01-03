@@ -45,9 +45,16 @@ public class NotificationTest {
     @Test
     public void componentCtor() {
         notification = new Notification(new Label(), new NativeButton());
-        notification.setPosition(Position.BOTTOM_END);
 
+        notification.setPosition(Position.BOTTOM_END);
         Assert.assertEquals("bottom-end", notification.getPosition());
+    }
+
+    @Test
+    public void staticCtor() {
+        notification = Notification.show("fooooo", 4000,
+                Position.BOTTOM_CENTER);
+        Assert.assertEquals("bottom-center", notification.getPosition());
     }
 
     @Test
