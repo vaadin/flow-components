@@ -28,6 +28,7 @@ import com.vaadin.testbench.By;
 public class NotificationTestPageIT extends AbstractComponentIT {
 
     private static final String DIALOG_OVERLAY_TAG = "vaadin-notification-overlay";
+    private WebElement overlay;
 
     @Before
     public void init() {
@@ -38,7 +39,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     @Test
     public void notificationWithButtonControl() {
         findElement(By.id("notification-open")).click();
-        checkNotificaitonIsOpen();
+        checkNotificationIsOpen();
         assertButtonSize(0);
         clickElementWithJs(findElement(By.id("notification-close")));
         checkNotificationIsClose();
@@ -48,7 +49,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     public void twoNotificitonAtSamePosition() {
         findElement(By.id("notification-button-1")).click();
         clickElementWithJs(findElement(By.id("notification-button-2")));
-        checkNotificaitonIsOpen();
+        checkNotificationIsOpen();
         assertNotificationOverlayContent("1111111");
         assertNotificationOverlayContent("2222222");
     }
@@ -56,7 +57,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     @Test
     public void notificitonAddComponents() {
         findElement(By.id("open-notification-button-add")).click();
-        checkNotificaitonIsOpen();
+        checkNotificationIsOpen();
         assertButtonSize(3);
         clickElementWithJs(findElement(By.id("close-notification-button-add")));
         checkNotificationIsClose();
@@ -65,7 +66,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     @Test
     public void notificitonRemoveComponents() {
         findElement(By.id("open-notification-button-remove")).click();
-        checkNotificaitonIsOpen();
+        checkNotificationIsOpen();
         assertButtonSize(2);
         clickElementWithJs(
                 findElement(By.id("close-notification-button-remove")));
@@ -75,7 +76,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     @Test
     public void notificitonRemoveAllComponents() {
         findElement(By.id("open-notification-button-remove-all")).click();
-        checkNotificaitonIsOpen();
+        checkNotificationIsOpen();
         assertButtonSize(0);
         clickElementWithJs(
                 findElement(By.id("close-notification-button-remove-all")));
@@ -85,7 +86,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     @Test
     public void notificationAddTwoComponents() {
         findElement(By.id("Add-two-components-open")).click();
-        checkNotificaitonIsOpen();
+        checkNotificationIsOpen();
         assertButtonSize(2);
         clickElementWithJs(findElement(By.id("add-two-components-close")));
         checkNotificationIsClose();
@@ -94,7 +95,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     @Test
     public void notificationAddMix() {
         findElement(By.id("Add-Mix-open")).click();
-        checkNotificaitonIsOpen();
+        checkNotificationIsOpen();
         assertButtonSize(1);
         Assert.assertFalse(getOverlayContent().getText().contains("5555555"));
         clickElementWithJs(findElement(By.id("add-Mix-close")));
@@ -104,21 +105,20 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     @Test
     public void notificationwithTextAndAddComponent() {
         findElement(By.id("component-add-text-open")).click();
-        checkNotificaitonIsOpen();
+        checkNotificationIsOpen();
         assertButtonSize(1);
         clickElementWithJs(findElement(By.id("component-add-text-close")));
         checkNotificationIsClose();
     }
-    
+
     @Test
     public void notificationAddComponentAddText() {
         findElement(By.id("add-component-add-text-open")).click();
-        checkNotificaitonIsOpen();
+        checkNotificationIsOpen();
         assertButtonSize(0);
         assertNotificationOverlayContent("Moi");
         clickElementWithJs(findElement(By.id("add-component-add-text-close")));
         checkNotificationIsClose();
-        
     }
 
     private void assertButtonSize(int number) {
@@ -127,15 +127,11 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     }
 
     private void checkNotificationIsClose() {
-        waitUntil(driver -> Boolean.FALSE.toString()
-                .equals(findElement(By.tagName(DIALOG_OVERLAY_TAG))
-                        .getAttribute("opened")));
+        waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
     }
 
-    private void checkNotificaitonIsOpen() {
-        waitUntil(driver -> Boolean.TRUE.toString()
-                .equals(findElement(By.tagName(DIALOG_OVERLAY_TAG))
-                        .getAttribute("opened")));
+    private void checkNotificationIsOpen() {
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
     }
 
     private void assertNotificationOverlayContent(String expected) {
@@ -144,8 +140,6 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     }
 
     private WebElement getOverlayContent() {
-        WebElement overlay = findElement(By.tagName(DIALOG_OVERLAY_TAG));
-        return getInShadowRoot(overlay, By.id("content"));
+        return overlay = findElement(By.tagName(DIALOG_OVERLAY_TAG));
     }
-
 }

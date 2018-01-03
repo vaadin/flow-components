@@ -18,8 +18,7 @@ package com.vaadin.flow.component.notification.demo;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.HorizontalAlign;
-import com.vaadin.flow.component.notification.Notification.VerticalAlign;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -43,7 +42,7 @@ public class NotificationView extends DemoView {
         // begin-source-example
         // source-example-heading: Default Notification
         Notification notification = new Notification(
-                "This notification has text content", 2000);
+                "This notification has text content", 3000);
         // end-source-example
         button.setId("default-notification-button");
         button.addClickListener(event -> notification.open());
@@ -57,7 +56,7 @@ public class NotificationView extends DemoView {
         // source-example-heading: Notification with position
         Notification notification = new Notification(
                 "This notification is located on Top-Left",
-                2000, VerticalAlign.TOP, HorizontalAlign.START);
+                3000, Position.TOP_START);
         // end-source-example
         button.setId("position-notification-button");
         button.addClickListener(event -> notification.open());
@@ -75,7 +74,7 @@ public class NotificationView extends DemoView {
         NativeButton buttonInside = new NativeButton("Bye");
         Notification notification = new Notification(content, buttonInside);
         buttonInside.addClickListener(event -> notification.close());
-        notification.setAlignment(VerticalAlign.MIDDLE, HorizontalAlign.CENTER);
+        notification.setPosition(Position.MIDDLE);
         // end-source-example
         notification.setId("component-notification");
         content.setId("label-inside-notification");

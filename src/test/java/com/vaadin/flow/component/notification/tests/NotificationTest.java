@@ -21,8 +21,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.HorizontalAlign;
-import com.vaadin.flow.component.notification.Notification.VerticalAlign;
+import com.vaadin.flow.component.notification.Notification.Position;
 
 
 public class NotificationTest {
@@ -33,45 +32,29 @@ public class NotificationTest {
     public void stringAndDurationCtor() {
         notification = new Notification("foo", 4000);
         Assert.assertEquals(4000, notification.getDuration(), 0);
-        Assert.assertEquals("bottom", notification.getVerticalAlign());
-        Assert.assertEquals("start", notification.getHorizontalAlign());
+        Assert.assertEquals("bottom-start", notification.getPosition());
     }
 
     @Test
     public void stringDurAndPositionCtor() {
-        notification = new Notification("fooo", 10000, VerticalAlign.TOP,
-                HorizontalAlign.END);
+        notification = new Notification("fooo", 10000, Position.TOP_END);
         Assert.assertEquals(10000, notification.getDuration(), 0);
-        Assert.assertEquals("top", notification.getVerticalAlign());
-        Assert.assertEquals("end", notification.getHorizontalAlign());
+        Assert.assertEquals("top-end", notification.getPosition());
     }
 
     @Test
     public void componentCtor() {
         notification = new Notification(new Label(), new NativeButton());
-        notification.setAlignment(VerticalAlign.BOTTOM, HorizontalAlign.END);
+        notification.setPosition(Position.BOTTOM_END);
 
-        Assert.assertEquals("bottom", notification.getVerticalAlign());
-        Assert.assertEquals("end", notification.getHorizontalAlign());
+        Assert.assertEquals("bottom-end", notification.getPosition());
     }
 
     @Test
-    public void setAlignment() {
+    public void setPositon() {
         notification = new Notification();
 
-        notification.setHorizontalAlign(HorizontalAlign.CENTER);
-        Assert.assertEquals("center", notification.getHorizontalAlign());
-
-        notification.setVerticalAlign(VerticalAlign.TOP);
-        Assert.assertEquals("top", notification.getVerticalAlign());
-
-        notification.setAlignment(VerticalAlign.BOTTOM, HorizontalAlign.END);
-        Assert.assertEquals("bottom", notification.getVerticalAlign());
-        Assert.assertEquals("end", notification.getHorizontalAlign());
-
-        notification.setAlignment(VerticalAlign.BOTTOM_STRETCH,
-                HorizontalAlign.START);
-        Assert.assertEquals("bottom-stretch", notification.getVerticalAlign());
-        Assert.assertEquals("start", notification.getHorizontalAlign());
+        notification.setPosition(Position.BOTTOM_STRETCH);
+        Assert.assertEquals("bottom-stretch", notification.getPosition());
     }
 }
