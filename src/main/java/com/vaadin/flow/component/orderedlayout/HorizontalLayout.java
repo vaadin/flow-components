@@ -26,15 +26,13 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  */
 @Tag("vaadin-horizontal-layout")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/vaadin-horizontal-layout.html")
-public class HorizontalLayout extends FlexLayout {
+public class HorizontalLayout extends Component
+        implements FlexComponent<HorizontalLayout> {
 
     /**
-     * Default constructor. Creates an empty layout, without spacing and without
-     * a predefined width. The default alignment is {@link Alignment#BASELINE}.
+     * Default constructor. Creates an empty layout.
      */
     public HorizontalLayout() {
-        getStyle().set("display", "inline-flex").set("flexDirection", "row");
-        setDefaultVerticalComponentAlignment(Alignment.BASELINE);
     }
 
     /**
@@ -132,54 +130,4 @@ public class HorizontalLayout extends FlexLayout {
         return getAlignItems();
     }
 
-    /**
-     * Sets the default vertical alignment to be used by all components without
-     * individual alignments inside the layout. Individual components can be
-     * aligned by using the {@link #setAlignSelf(Alignment, Component...)}
-     * method.
-     * <p>
-     * It effectively sets the {@code "alignItems"} style value.
-     * <p>
-     * The default alignment is {@link Alignment#BASELINE}.
-     *
-     * @param alignment
-     *            the alignment to apply to the components. Setting
-     *            <code>null</code> will reset the alignment to its default
-     */
-    @Override
-    public void setAlignItems(Alignment alignment) {
-        if (alignment == null) {
-            getStyle().set(ALIGN_ITEMS_CSS_PROPERTY,
-                    Alignment.BASELINE.getFlexValue());
-        } else {
-            getStyle().set(ALIGN_ITEMS_CSS_PROPERTY, alignment.getFlexValue());
-        }
-    }
-
-    /**
-     * Gets the default vertical alignment used by all components without
-     * individual alignments inside the layout.
-     * <p>
-     * The default alignment is {@link Alignment#BASELINE}.
-     *
-     * @return the general alignment used by the layout, never <code>null</code>
-     */
-    @Override
-    public Alignment getAlignItems() {
-        return Alignment.toAlignment(getStyle().get(ALIGN_ITEMS_CSS_PROPERTY),
-                Alignment.BASELINE);
-    }
-
-    /**
-     * Expands the given components.
-     * <p>
-     * It effectively sets {@code 1} as a flex grow property value for each
-     * component.
-     *
-     * @param componentsToExpand
-     *            components to expand
-     */
-    public void expand(Component... componentsToExpand) {
-        setFlexGrow(1.0d, componentsToExpand);
-    }
 }

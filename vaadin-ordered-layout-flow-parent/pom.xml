@@ -51,11 +51,5 @@
             <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-button-flow</artifactId>
-            <version>1.0.0.alpha1</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>

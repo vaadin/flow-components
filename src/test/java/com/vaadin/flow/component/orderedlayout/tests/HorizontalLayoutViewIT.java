@@ -36,7 +36,6 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
     public void defaultLayout() {
         WebElement vlayout = layout.findElement(By.id("default-layout"));
         assertBasicFlexPropertiesAreSet(vlayout);
-        Assert.assertEquals("baseline", vlayout.getCssValue("align-items"));
     }
 
     @Test
@@ -158,7 +157,6 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
     }
 
     private void assertBasicFlexPropertiesAreSet(WebElement vlayout) {
-        Assert.assertEquals("inline-flex", vlayout.getCssValue("display"));
         Assert.assertEquals("row", vlayout.getCssValue("flex-direction"));
     }
 

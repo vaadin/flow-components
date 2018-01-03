@@ -37,7 +37,6 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
     public void defaultLayout() {
         WebElement vlayout = layout.findElement(By.id("default-layout"));
         assertBasicFlexPropertiesAreSet(vlayout);
-        Assert.assertEquals("flex-start", vlayout.getCssValue("align-items"));
     }
 
     @Test
@@ -155,7 +154,6 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
     }
 
     private void assertBasicFlexPropertiesAreSet(WebElement vlayout) {
-        Assert.assertEquals("flex", vlayout.getCssValue("display"));
         Assert.assertEquals("column", vlayout.getCssValue("flex-direction"));
     }
 

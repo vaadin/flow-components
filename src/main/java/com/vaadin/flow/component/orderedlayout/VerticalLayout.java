@@ -26,15 +26,13 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  */
 @Tag("vaadin-vertical-layout")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/vaadin-vertical-layout.html")
-public class VerticalLayout extends FlexLayout {
+public class VerticalLayout extends Component
+        implements FlexComponent<VerticalLayout> {
 
     /**
-     * Default constructor. Creates an empty layout, with 100% width, without
-     * spacing, with items aligned as {@link Alignment#STRETCH}.
+     * Default constructor. Creates an empty layout.
      */
     public VerticalLayout() {
-        getStyle().set("flexDirection", "column").set("width", "100%");
-        setDefaultHorizontalComponentAlignment(Alignment.START);
     }
 
     /**
@@ -122,61 +120,10 @@ public class VerticalLayout extends FlexLayout {
      *
      * @see VerticalLayout#getAlignItems()
      *
-     *
      * @return the general alignment used by the layout, never <code>null</code>
      */
     public Alignment getDefaultHorizontalComponentAlignment() {
         return getAlignItems();
     }
 
-    /**
-     * Sets the default horizontal alignment to be used by all components
-     * without individual alignments inside the layout. Individual components
-     * can be aligned by using the
-     * {@link #setAlignSelf(Alignment, Component...)} method.
-     * <p>
-     * It effectively sets the {@code "alignItems"} style value.
-     * <p>
-     * The default alignment is {@link Alignment#START}.
-     *
-     * @param alignment
-     *            the alignment to apply to the components. Setting
-     *            <code>null</code> will reset the alignment to its default
-     */
-    @Override
-    public void setAlignItems(Alignment alignment) {
-        if (alignment == null) {
-            getStyle().set(ALIGN_ITEMS_CSS_PROPERTY,
-                    Alignment.START.getFlexValue());
-        } else {
-            getStyle().set(ALIGN_ITEMS_CSS_PROPERTY, alignment.getFlexValue());
-        }
-    }
-
-    /**
-     * Gets the default horizontal alignment used by all components without
-     * individual alignments inside the layout.
-     * <p>
-     * The default alignment is {@link Alignment#START}.
-     *
-     * @return the general alignment used by the layout, never <code>null</code>
-     */
-    @Override
-    public Alignment getAlignItems() {
-        return Alignment.toAlignment(getStyle().get(ALIGN_ITEMS_CSS_PROPERTY),
-                Alignment.START);
-    }
-
-    /**
-     * Expands the given components.
-     * <p>
-     * It effectively sets {@code 1} as a flex grow property value for each
-     * component.
-     *
-     * @param componentsToExpand
-     *            components to expand
-     */
-    public void expand(Component... componentsToExpand) {
-        setFlexGrow(1.0d, componentsToExpand);
-    }
 }
