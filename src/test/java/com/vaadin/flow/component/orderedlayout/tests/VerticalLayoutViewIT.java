@@ -17,11 +17,11 @@ package com.vaadin.flow.component.orderedlayout.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.orderedlayout.demo.VerticalLayoutView;
 import com.vaadin.flow.demo.ComponentDemoTest;
-import com.vaadin.testbench.By;
 
 /**
  * Tests for the {@link VerticalLayoutView}.

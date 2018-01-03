@@ -25,7 +25,7 @@ import com.vaadin.flow.component.HasStyle;
 /**
  * A component which implements Flexbox.
  *
- * @param <T>
+ * @param <C>
  *            the type of the component which implements the interface
  */
 public interface FlexComponent<C extends Component>
