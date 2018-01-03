@@ -27,7 +27,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd.
  */
 @Route("grid-page")
-public class GridPage extends Div {
+public class GridUpdateDataProviderPage extends Div {
 
     private Grid<String> grid;
 
@@ -43,7 +43,7 @@ public class GridPage extends Div {
     /**
      * Creates a view with a grid.
      */
-    public GridPage() {
+    public GridUpdateDataProviderPage() {
         grid = new Grid<>();
 
         grid.setDataProvider(dataProvider1);

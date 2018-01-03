@@ -31,7 +31,7 @@ import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("grid-page")
-public class GridPageIT extends AbstractComponentIT {
+public class GridUpdateDataProviderIT extends AbstractComponentIT {
 
     private WebElement grid;
 

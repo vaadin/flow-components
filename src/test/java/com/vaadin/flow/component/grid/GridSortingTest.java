@@ -13,9 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.grid.tests;
+package com.vaadin.flow.component.grid;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,9 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
-import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortOrder;
@@ -258,15 +255,7 @@ public class GridSortingTest {
     }
 
     private String getColumnId(Column column) {
-        try {
-            Field columnId = Column.class.getDeclaredField("columnInternalId");
-            columnId.setAccessible(true);
-            return (String) columnId.get(column);
-        } catch (SecurityException | IllegalAccessException
-                | IllegalArgumentException | NoSuchFieldException e) {
-            Assert.fail("Could not get columnInternalId");
-            return null;
-        }
+        return column.getInternalId();
     }
 
     private JsonObject createSortObject(String columnId, String direction) {

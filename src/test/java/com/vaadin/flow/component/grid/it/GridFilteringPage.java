@@ -17,11 +17,11 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("grid-filtering")
-public class GridFiltering extends Div {
+public class GridFilteringPage extends Div {
 
     private static final Set<String> DATA = getData();
 
-    public GridFiltering() {
+    public GridFilteringPage() {
         Grid<String> grid = new Grid<>();
         grid.setId("data-grid");
 
