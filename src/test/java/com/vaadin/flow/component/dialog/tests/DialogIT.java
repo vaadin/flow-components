@@ -17,13 +17,13 @@ package com.vaadin.flow.component.dialog.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.dialog.demo.DialogView;
 import com.vaadin.flow.demo.ComponentDemoTest;
-import com.vaadin.testbench.By;
 
 /**
  * Integration tests for the {@link DialogView}.
