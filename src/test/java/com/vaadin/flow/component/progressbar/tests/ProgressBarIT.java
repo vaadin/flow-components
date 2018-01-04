@@ -17,15 +17,15 @@
 
 package com.vaadin.flow.component.progressbar.tests;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.progressbar.demo.ProgressBarView;
 import com.vaadin.flow.demo.ComponentDemoTest;
-import com.vaadin.testbench.By;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests for the {@link ProgressBarView}.
