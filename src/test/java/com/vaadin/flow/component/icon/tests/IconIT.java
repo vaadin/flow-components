@@ -19,12 +19,12 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.icon.VaadinIcons;
 import com.vaadin.flow.component.icon.demo.IconView;
 import com.vaadin.flow.demo.ComponentDemoTest;
-import com.vaadin.testbench.By;
 
 /**
  * Integration tests for the {@link IconView}.
