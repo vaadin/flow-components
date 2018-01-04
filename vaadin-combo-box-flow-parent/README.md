@@ -8,7 +8,7 @@ Run from the command line:
 - `mvn clean install`
 - `mvn jetty:run`
 
-Then navigate to `http://localhost:9998/vaadin-combobox`
+Then navigate to `http://localhost:9998/vaadin-combo-box`
 
 ## Using the component in a Flow application
 To use the component in an application using maven,

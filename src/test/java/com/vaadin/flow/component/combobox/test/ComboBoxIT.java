@@ -18,11 +18,12 @@ package com.vaadin.flow.component.combobox.test;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.demo.ComboBoxView;
 import com.vaadin.flow.demo.ComponentDemoTest;
-import com.vaadin.testbench.By;
+
 
 /**
  * Integration tests for the {@link ComboBoxView}.
