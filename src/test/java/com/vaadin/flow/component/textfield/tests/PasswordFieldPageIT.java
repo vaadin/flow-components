@@ -18,12 +18,12 @@ package com.vaadin.flow.component.textfield.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.By;
 
 /**
  * Integration tests for {@link PasswordField}.

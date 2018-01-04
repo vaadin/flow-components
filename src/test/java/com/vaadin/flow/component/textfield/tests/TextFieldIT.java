@@ -17,12 +17,12 @@ package com.vaadin.flow.component.textfield.tests;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.demo.ComponentDemoTest;
-import com.vaadin.testbench.By;
 
 /**
  * Integration tests for the {@link TextField}.
