@@ -254,7 +254,7 @@ public class GridSortingTest {
         }
     }
 
-    private String getColumnId(Column column) {
+    private String getColumnId(Column<?> column) {
         return column.getInternalId();
     }
 

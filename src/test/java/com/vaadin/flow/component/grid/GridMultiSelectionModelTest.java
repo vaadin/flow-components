@@ -15,11 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,12 +30,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridMultiSelectionModel;
-import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class GridMultiSelectionModelTest {
 
@@ -62,8 +59,8 @@ public class GridMultiSelectionModelTest {
 
         grid.setItems(PERSON_A, PERSON_B, PERSON_C);
 
-        currentSelectionCapture = new AtomicReference<List<Person>>();
-        oldSelectionCapture = new AtomicReference<List<Person>>();
+        currentSelectionCapture = new AtomicReference<>();
+        oldSelectionCapture = new AtomicReference<>();
         events = new AtomicInteger();
 
         selectionModel.addMultiSelectionListener(event -> {
@@ -87,7 +84,7 @@ public class GridMultiSelectionModelTest {
         customGrid.setItems("Foo", "Bar", "Baz");
 
         List<String> selectionChanges = new ArrayList<>();
-        AtomicReference<List<String>> oldSelectionCapture = new AtomicReference<List<String>>();
+        AtomicReference<List<String>> oldSelectionCapture = new AtomicReference<>();
         ((GridMultiSelectionModel<String>) customGrid.getSelectionModel())
                 .addMultiSelectionListener(e -> {
                     selectionChanges.addAll(e.getValue());
