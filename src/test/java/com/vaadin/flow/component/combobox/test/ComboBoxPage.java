@@ -22,6 +22,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.renderer.ButtonRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -47,6 +48,7 @@ public class ComboBoxPage extends Div {
         createWithUpdateProvider();
         createWithValueChangeListener();
         createWithPresetValue();
+        createWithButtonRenderer();
     }
 
     private void createWithUpdateProvider() {
@@ -89,6 +91,19 @@ public class ComboBoxPage extends Div {
 
         titles.setId("titles-with-preset-value");
         add(titles);
+    }
+
+    private void createWithButtonRenderer() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Label message = new Label("Nothing clicked yet...");
+        message.setId("button-renderer-message");
+
+        comboBox.setItemRenderer(new ButtonRenderer<>(item -> item,
+                item -> message.setText("Button clicked: " + item)));
+        comboBox.setItems("foo", "bar");
+        comboBox.setId("button-renderer");
+
+        add(comboBox, message);
     }
 
     private void handleSelection(ComboBox<Title> titles) {

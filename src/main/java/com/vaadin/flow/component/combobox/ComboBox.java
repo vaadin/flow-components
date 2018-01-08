@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasSize;
@@ -33,6 +33,11 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.renderer.ComponentTemplateRenderer;
+import com.vaadin.flow.renderer.TemplateRenderer;
+import com.vaadin.flow.renderer.TemplateRendererUtil;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -61,6 +66,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
+    private Element template;
+    private TemplateRenderer<T> renderer;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -76,8 +83,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
             oldValue = getValue();
         });
 
-        setItemLabelPath(ITEM_LABEL_PROPERTY);
         setItemValuePath(ITEM_LABEL_PROPERTY);
+
+        renderer = TemplateRenderer.of("[[item.label]]");
+
+        template = new Element(TEMPLATE_TAG_NAME);
+        getElement().appendChild(template);
+        setItemRenderer(renderer);
     }
 
     /**
@@ -125,54 +137,28 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     }
 
     /**
-     * Sets the template of the items inside the list of the combo box. The
-     * template defines how the item is rendered, and it is based on the
-     * properties of the item.
-     * <p>
-     * For example, if you have an object with the properties "name" and "id",
-     * you can create a template like this: <blockquote>
-     *
-     * <pre>
-     * comboBox.setItemTemplate("Name: [[item.name]]<br>Id: [[item.id]]");
-     * </pre>
-     *
-     * </blockquote>
-     * <p>
-     * You can access any property of the object using the notation
-     * <code>[[item.property]]</code>.
-     * <p>
-     * Note: the webcomponent currently doesn't support changing the item
-     * template after the component is first populated. This method should be
-     * called before setting any items.
-     *
-     * @param template
-     *            the template to be used to render the items inside the list of
-     *            this combo box
+     * Sets the TemplateRenderer responsible to render the individual items in
+     * the list of possible choices of the ComboBox. It doesn't affect how the
+     * selected item is rendered - that can be configured by using
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     * 
+     * @param renderer
+     *            a renderer for the items in the selection list of the
+     *            ComboBox, not <code>null</code>
      */
-    private void setItemTemplate(String template) {
-        getElement().getChildren()
-                .filter(child -> TEMPLATE_TAG_NAME.equals(child.getTag()))
-                .findFirst().ifPresent(element -> element.removeFromParent());
+    public void setItemRenderer(TemplateRenderer<T> renderer) {
+        Objects.requireNonNull(renderer, "The renderer can not be null");
 
-        Element templateElement = new Element(TEMPLATE_TAG_NAME);
-        getElement().appendChild(templateElement);
-        templateElement.setProperty("innerHTML", template);
-    }
-
-    /**
-     * Gets the current item template associated with this combo box.
-     *
-     * @return the current item template, or <code>null</code> if it wasn't set
-     */
-    private String getItemTemplate() {
-        Optional<Element> optionalTemplate = getElement().getChildren()
-                .filter(child -> TEMPLATE_TAG_NAME.equals(child.getTag()))
-                .findFirst();
-
-        if (optionalTemplate.isPresent()) {
-            return optionalTemplate.get().getProperty("innerHTML");
+        if (renderer instanceof ComponentTemplateRenderer) {
+            throw new IllegalArgumentException(
+                    "ComponentTemplateRenderers are not supported yet");
         }
-        return null;
+        this.renderer = renderer;
+        template.setProperty("innerHTML", renderer.getTemplate());
+
+        TemplateRendererUtil.registerEventHandlers(renderer, template,
+                getElement(), key -> keyMapper.get(key));
+        refresh();
     }
 
     @Override
@@ -225,6 +211,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * Sets the item label generator that is used to produce the strings shown
      * in the combo box for each item. By default,
      * {@link String#valueOf(Object)} is used.
+     * <p>
+     * When the {@link #setItemRenderer(TemplateRenderer)} is used, the
+     * ItemLabelGenerator is only used to show the selected item label.
      *
      * @param itemLabelGenerator
      *            the item label provider to use, not null
@@ -232,7 +221,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     public void setItemLabelGenerator(
             ItemLabelGenerator<T> itemLabelGenerator) {
         Objects.requireNonNull(itemLabelGenerator,
-                "Item label generators must not be null");
+                "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
         refresh();
     }
@@ -289,14 +278,19 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         JsonObject json = Json.createObject();
         json.put(KEY_PROPERTY, keyMapper.key(item));
 
-        String text = getItemLabelGenerator().apply(item);
-        if (text == null) {
+        String label = getItemLabelGenerator().apply(item);
+        if (label == null) {
             throw new IllegalStateException(String.format(
                     "Got 'null' as a label value for the item '%s'. "
                             + "'%s' instance may not return 'null' values",
                     item, ItemLabelGenerator.class.getSimpleName()));
         }
-        json.put(ITEM_LABEL_PROPERTY, text);
+        json.put(ITEM_LABEL_PROPERTY, label);
+
+        Map<String, ValueProvider<T, ?>> valueProviders = renderer
+                .getValueProviders();
+        valueProviders.forEach((property, provider) -> json.put(property,
+                JsonSerializer.toJson(provider.apply(item))));
 
         return json;
     }
@@ -314,10 +308,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         keyMapper.removeAll();
         JsonArray array = generateJson(getDataProvider().fetch(new Query<>()));
         setItems(array);
-    }
-
-    private void setItemLabelPath(String path) {
-        getElement().setProperty("itemLabelPath", path == null ? "" : path);
     }
 
     private void setItemValuePath(String path) {

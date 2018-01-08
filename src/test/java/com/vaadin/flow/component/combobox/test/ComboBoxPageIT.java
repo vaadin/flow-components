@@ -82,6 +82,28 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         Assert.assertEquals("MRS", value);
     }
 
+    @Test
+    public void buttonsInsideComboBox_clickOnButton_messageIsUpdated() {
+        WebElement message = findElement(By.id("button-renderer-message"));
+        Assert.assertEquals("Nothing clicked yet...", message.getText());
+
+        WebElement combo = findElement(By.id("button-renderer"));
+        // opens the dropdown
+        combo.click();
+
+        // long trip to the depths of the component to find the button
+        WebElement overlay = findElement(By.id("overlay"));
+        WebElement ironList = findInShadowRoot(overlay, By.id("selector"))
+                .get(0);
+        WebElement item = ironList
+                .findElement(By.tagName("vaadin-combo-box-item"));
+        WebElement button = findInShadowRoot(item, By.cssSelector("button"))
+                .get(0);
+        clickElementWithJs(button);
+
+        Assert.assertEquals("Button clicked: foo", message.getText());
+    }
+
     private List<?> getItems(WebElement combo) {
         List<?> items = (List<?>) getCommandExecutor()
                 .executeScript("return arguments[0].items;", combo);

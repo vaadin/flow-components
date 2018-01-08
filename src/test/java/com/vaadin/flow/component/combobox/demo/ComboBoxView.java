@@ -23,6 +23,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -96,6 +97,7 @@ public class ComboBoxView extends DemoView {
         createStringComboBox();
         createObjectComboBox();
         createComboBoxWithObjectStringSimpleValue();
+        createComboBoxUsingTemplateRenderer();
     }
 
     private void createStringComboBox() {
@@ -180,6 +182,43 @@ public class ComboBoxView extends DemoView {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("value-selection-box");
         addCard("Value selection from objects", comboBox, message);
+    }
+
+    private void createComboBoxUsingTemplateRenderer() {
+        Div message = createMessageDiv("template-selection-message");
+
+        // begin-source-example
+        // source-example-heading: Rendering items using TemplateRenderer
+        ComboBox<Song> comboBox = new ComboBox<>();
+        comboBox.setItemRenderer(TemplateRenderer.<Song> of(
+                "<div>[[item.song]]<br><small>[[item.artist]]</small></div>")
+                .withProperty("song", Song::getName)
+                .withProperty("artist", Song::getArtist));
+
+        List<Song> listOfSongs = createListOfSongs();
+
+        comboBox.setItems(listOfSongs);
+        comboBox.setItemLabelGenerator(Song::getName);
+
+        comboBox.addValueChangeListener(event -> {
+            if (event.getSource().isEmpty()) {
+                message.setText("No artist selected");
+            } else if (event.getOldValue() == null) {
+                message.setText(
+                        "Selected artist: " + event.getValue().getArtist());
+            } else {
+                message.setText(
+                        "Selected artist: " + event.getValue().getArtist()
+                                + "\nThe old selection was: "
+                                + event.getOldValue().getArtist());
+            }
+        });
+        // end-source-example
+
+        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
+        comboBox.setId("template-selection-box");
+        addCard("Using templates", "Rendering items using TemplateRenderer",
+                comboBox, message);
     }
 
     private List<Song> createListOfSongs() {
