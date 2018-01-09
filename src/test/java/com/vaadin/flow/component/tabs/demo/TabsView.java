@@ -42,7 +42,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd.
  */
 @Route("vaadin-tabs")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-progress-bar.html")
 public class TabsView extends DemoView {
 
     @Override
