@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-radio-button-flow</artifactId>
-            <version>LATEST</version>
+            <version>1.0.0.alpha2</version>
         </dependency>
     </dependencies>
 
