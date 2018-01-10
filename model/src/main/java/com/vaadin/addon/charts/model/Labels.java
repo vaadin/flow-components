@@ -188,7 +188,7 @@ public class Labels extends AbstractConfigurationObject {
 
 	/**
 	 * Horizontal axes only. The number of lines to spread the labels over to
-	 * make room or tighter labels. .
+	 * make room or tighter labels.
 	 */
 	public void setStaggerLines(Number staggerLines) {
 		this.staggerLines = staggerLines;

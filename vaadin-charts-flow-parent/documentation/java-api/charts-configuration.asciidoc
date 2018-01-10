@@ -1,0 +1,371 @@
+---
+title: Chart Configuration
+order: 5
+layout: page
+---
+
+[[charts.configuration]]
+= Chart Configuration
+
+All the chart content configuration of charts is defined in a __chart model__ in
+a [classname]#Configuration# object. You can access the model with the
+[methodname]#getConfiguration()# method.
+
+The configuration properties in the [classname]#Configuration# class are
+summarized in the following:
+
+* [methodname]#credits#: [classname]#Credits# (text, position, href, enabled)
+
+* [methodname]#labels#: [classname]#HTMLLabels# (html, style)
+
+* [methodname]#legend#: [classname]#Legend# (see <<charts.configuration.legend>>)
+
+* [methodname]#pane#: [classname]#Pane#
+
+* [methodname]#plotoptions#: [classname]#PlotOptions# (see
+<<charts.configuration.plotoptions>>)
+
+* [methodname]#series#: [interfacename]#Series#
+
+* [methodname]#subtitle#: [classname]#Subtitle#
+
+* [methodname]#title#: [classname]#Title#
+
+* [methodname]#tooltip#: [classname]#Tooltip#
+
+* [methodname]#xAxis#: [classname]#XAxis# (see <<charts.configuration.axes>>)
+
+* [methodname]#yAxis#: [classname]#YAxis# (see <<charts.configuration.axes>>)
+
+
+For data configuration, see <<dummy/../../../charts/java-api/charts-data#charts.data,"Chart Data">>.
+
+[[charts.configuration.plotoptions]]
+== Plot Options
+
+The plot options are used to configure the data series in the chart.
+For example, line color could be specified for each line series.
+Plot options can be set in the configuration of the entire chart or for each data series separately with [methodname]#setPlotOptions()#.
+When the plot options are set to the entire chart, it will be applied to all the series in the chart.
+
+For example, the following enables stacking in column charts:
+
+[source,java]
+----
+Chart chart = new Chart();
+Configuration configuration = chart.getConfiguration();
+PlotOptionsColumn plotOptions = new PlotOptionsColumn();
+plotOptions.setStacking(Stacking.NORMAL);
+configuration.setPlotOptions(plotOptions);
+----
+
+Chart can contain multiple plot options which can be added dynamically with [methodname]#addPlotOptions()#.
+
+The developer can specify also the plot options for the particular data series as follows:
+
+[source,java]
+----
+ListSeries series = new ListSeries(50, 60, 70, 80);
+PlotOptionsColumn plotOptions = new PlotOptionsColumn();
+plotOptions.setStacking(Stacking.NORMAL);
+series.setPlotOptions(plotOptions);
+----
+
+The plot options are defined in type-specific options classes or in a [classname]#PlotOptionsSeries# class which contains general options for all series types.
+Type specific classes are applied to all the series with the same type in the chart.
+If [classname]#PlotOptionsSeries# is used, it will be applied to all the series in the chart regardless of the type.
+
+Chart types are divided into several groups with common properties.
+These groups are presented as abstract classes, that allow to use polymorphism for setting common properties for specific implementations.
+The abstract classes and groups are the following:
+
+* [classname]#AreaOptions# -> [classname]#PlotOptionsArea#, [classname]#PlotOptionsArearange#,
+[classname]#PlotOptionsAreaspline#, [classname]#PlotOptionsAreasplinerange#
+* [classname]#ColumnOptions# -> [classname]#PlotOptionsBar#, [classname]#PlotOptionsColumn#,
+[classname]#PlotOptionsColumnrange#
+* [classname]#GaugeOptions# -> [classname]#PlotOptionsGauge#, [classname]#PlotOptionsSolidgauge#
+* [classname]#PointOptions# -> [classname]#PlotOptionsLine#, [classname]#PlotOptionsSpline#,
+[classname]#PlotOptionsScatter#
+* [classname]#PyramidOptions# -> [classname]#PlotOptionsPyramid#, [classname]#PlotOptionsFunnel#
+* [classname]#OhlcOptions# -> [classname]#PlotOptionsOhlc#, [classname]#PlotOptionsCandlestick#
+
+For example, to set the same [propertyname]#lineWidth# for [classname]#PlotOptionsLine# and [classname]#PlotOptionsSpline# use [classname]#PointOptions#.
+[source, java]
+----
+private void setCommonProperties(PointOptions options) {
+    options.setLineWidth(5);
+    options.setAnimation(false);
+}
+...
+PlotOptionsSpline splineOptions = new PlotOptionsSpline();
+PlotOptionsLine lineOptions = new PlotOptionsLine();
+setCommonProperties(lineOptions);
+setCommonProperties(splineOptions);
+configuration.setPlotOptions(lineOptions, splineOptions);
+----
+
+See the API documentation of each chart type and its plot options class for more information about the chart-specific options.
+
+[[charts.configuration.plotoptions.other]]
+=== Other Options
+
+The following options are supported by some chart types.
+
+[parameter]#width#:: Defines the width of the chart either by pixels or as a percentual proportion of the drawing area.
+[parameter]#height#:: Defines the height of the chart either by pixels or as a percentual proportion of the drawing area.
+[parameter]#depth#:: Specifies the thickness of the chart in 3D mode.
+[parameter]#allowPointSelect#:: Specifies whether data points, in whatever way they are visualized in the particular chart type, can be selected by clicking on them. Defaults to __false__.
+[parameter]#center#:: Defines the center of the chart within the chart area by left and top coordinates, which can be specified either as pixels or as a percentage (as string) of the drawing area. The default is top 50% and left 50%.
+[parameter]#slicedOffset#:: In chart types that support slices, such as pie and pyramid charts, specifies the offset for how far a slice is detached from other items. The amount is given in pixels and defaults to 10 pixels.
+[parameter]#visible#:: Specifies whether or not a chart is visible. Defaults to __true__.
+
+
+
+
+[[charts.configuration.axes]]
+== Axes
+
+Different chart types may have one, two, or three axes; in addition to X and Y
+axes, some chart types may have a color axis. These are represented by
+[classname]#XAxis#, [classname]#YAxis#, and [classname]#ColorAxis#,
+respectively. The X axis is usually horizontal, representing the iteration over
+the data series, and Y vertical, representing the values in the data series.
+Some chart types invert the axes and they can be explicitly inverted with
+[methodname]#getChart().setInverted()# in the chart configuration. An axis has a
+caption and tick marks at intervals indicating either numeric values or symbolic
+categories. Some chart types, such as gauge, have only Y-axis, which is circular
+in the gauge, and some such as a pie chart have none.
+
+The basic elements of X and Y axes are illustrated in
+<<figure.charts.configuration.axes.elements>>.
+
+[[figure.charts.configuration.axes.elements]]
+.Chart Axis Elements
+image::img/charts-axes-lo.png[]
+
+Axis objects are created and added to the configuration object with
+[methodname]#addxAxis()# and [methodname]#addyAxis()#.
+
+[source,java]
+----
+XAxis xaxis = new XAxis();
+xaxis.setTitle("Axis title");
+conf.addxAxis(xaxis);
+----
+
+A chart can have more than one Y-axis, usually when different series displayed
+in a graph have different units or scales. The association of a data series with
+an axis is done in the data series object with [methodname]#setyAxis()#.
+
+For a complete reference of the many configuration parameters for the axes,
+please refer to the JavaDoc API documentation of Vaadin Charts.
+
+[[charts.configuration.axes.type]]
+=== Axis Type
+
+Axes can be one of the following types, which you can set with
+[methodname]#setType()#. The axis types are enumerated under
+[classname]#AxisType#. [parameter]#LINEAR# is the default.
+
+[parameter]#LINEAR# (default):: For numeric values in linear scale.
+[parameter]#LOGARITHMIC#:: For numerical values, as in the linear axis, but the axis will be scaled in the logarithmic scale. The minimum for the axis __must__ be a positive non-zero value ( [methodname]#log(0)# is not defined, as it has limit at negative infinity when the parameter approaches zero).
+[parameter]#DATETIME#:: Enables date/time mode in the axis. The date/time values are expected to be given either as a [classname]#Date# object or in milliseconds since the Java (or Unix) date epoch on January 1st 1970 at 00:00:00 GMT. You can get the millisecond representation of Java [classname]#Date# with [methodname]#getTime()#.
+[parameter]#CATEGORY#:: Enables using categorical data for the axis, as described in more detail later. With this axis type, the category labels are determined from the labels of the data points in the data series, without need to set them explicitly with [methodname]##setCategories()##.
+
+
+
+[[charts.configuration.axes.categories]]
+=== Categories
+
+The axes display, in most chart types, tick marks and labels at some numeric
+interval by default. If the items in a data series have a symbolic meaning
+rather than numeric, you can associate __categories__ with the data items. The
+category label is displayed between two axis tick marks and aligned with the
+data point. In certain charts, such as column chart, where the corresponding
+values in different data series are grouped under the same category. You can set
+the category labels with [methodname]#setCategories()#, which takes the
+categories as (an ellipsis) parameter list, or as an iterable. The list should
+match the items in the data series.
+
+[source,java]
+----
+XAxis xaxis = new XAxis();
+xaxis.setCategories("Mercury", "Venus", "Earth",
+                    "Mars", "Jupiter", "Saturn",
+                    "Uranus", "Neptune");
+----
+
+You can only set the category labels from the data point labels by setting the
+axis type to [parameter]#CATEGORY#, as described earlier.
+
+
+[[charts.configuration.axes.labels]]
+=== Labels
+
+The axes display, in most chart types, tick marks and labels at some numeric
+interval by default. The format and style of labels in an axis is defined in a
+[classname]#Labels# object, which you can get with [methodname]#getLabels()#
+from the axis.
+
+[source,java]
+----
+XAxis xaxis = new XAxis();
+...
+Labels xlabels = xaxis.getLabels();
+xlabels.setAlign(HorizontalAlign.CENTER); // Default
+xlabels.setRotation(-45);
+xlabels.setStep(2); // Every 2 major tick
+// The class highcharts-axis-labels can be used to style further with CSS.
+----
+
+Axis labels have the following configuration properties:
+
+[parameter]#align#:: Defines the alignment of the labels relative to the centers of the ticks. On left alignment, the left edges of labels are aligned at the tickmarks, and correspondingly the right side on right alignment. The default is determined automatically based on the direction of the axis and rotation of the labels.
+[parameter]#distance#(only in polar charts):: Distance of labels from the perimeter of the plot area, in pixels.
+[parameter]#enabled#:: Whether labels are enabled or not. Defaults to [parameter]#true#.
+[parameter]#format#:: Formatting string for labels, as described in <<charts.configuration.format>>. Defaults to " [literal]#++{value}++#".
+[parameter]#formatter#:: A JavaScript formatter for the labels, as described in
+<<charts.configuration.format>>. The value is available in the
+[literal]#++this.value++# property. The [literal]#++this++# object also has
+[literal]#++axis++#, [literal]#++chart++#, [literal]#++isFirst++#, and
+[literal]#++isLast++# properties. Defaults to:
+
+
+[source,java]
+----
+function() {return this.value;}
+----
+[parameter]#rotation#:: Defines rotation of labels in degrees. A positive value indicates rotation in
+clockwise direction. Labels are rotated at their alignment point. Defaults to 0.
+
+
+[source,java]
+----
+Labels xlabels = xaxis.getLabels();
+xlabels.setAlign(HorizontalAlign.RIGHT);
+xlabels.setRotation(-45); // Tilt 45 degrees CCW
+----
+[parameter]#staggerLines#:: Defines number of lines for placing the labels to avoid overlapping. By default undefined, and the number of lines is automatically determined up to [parameter]#maxStaggerLines#.
+[parameter]#step#:: Defines tick interval for showing labels, so that labels are shown at every
+__n__th tick. The default step is automatically determined, along with
+staggering, to avoid overlap.
+
+
+[source,java]
+----
+Labels xlabels = xaxis.getLabels();
+xlabels.setStep(2); // Every 2 major tick
+----
+
+[parameter]#useHTML#:: Allows using HTML in custom label formats. Otherwise, HTML is quoted. Defaults to [literal]#false#.
+[parameter]#x#,[parameter]#y#:: Offsets for the label's position, relative to the tick position.
+X offset defaults to 0, but Y to [literal]#++null++#, which enables automatic positioning based on font size.
+
+
+Gauge, pie, and polar charts allow additional properties.
+
+For a complete reference of the many configuration parameters for the labels,
+please refer to the JavaDoc API documentation of Vaadin Charts.
+
+
+[[charts.configuration.axes.extremes]]
+=== Axis Range
+
+The axis range is normally set automatically to fit the data, but can also be
+set explicitly. The __extremes__ property in the axis configuration defines the
+minimum and maximum values of the axis range. You can set them either
+individually with [methodname]#setMin()# and [methodname]#setMax()#, or together
+with [methodname]#setExtremes()#. Changing the extremes programmatically
+requires redrawing the chart with [methodname]#drawChart()#.
+
+
+
+[[charts.configuration.legend]]
+== Legend
+
+The legend is a box that describes the data series shown in the chart. It is
+enabled by default and is automatically populated with the names of the data
+series as defined in the series objects, and the corresponding color symbol of
+the series.
+
+[parameter]#align#:: Specifies the horizontal alignment of the legend box within the chart area.
+Defaults to [constant]#HorizontalAlign.CENTER#.
+[parameter]#enabled#:: Enables or disables the legend. Defaults to [literal]#true#.
+[parameter]#layout#:: Specifies the layout direction of the legend items. Defaults to [constant]#LayoutDirection.HORIZONTAL#.
+[parameter]#title#:: Specifies the title of the legend.
+[parameter]#verticalAlign#:: Specifies the vertical alignment of the legend box within the chart area.
+Defaults to [constant]#VerticalAlign.BOTTOM#.
+
+[source,java]
+----
+Legend legend = configuration.getLegend();
+legend.getTitle().setText("City");
+legend.setLayout(LayoutDirection.VERTICAL);
+legend.setAlign(HorizontalAlign.LEFT);
+legend.setVerticalAlign(VerticalAlign.TOP);
+----
+
+The result can be seen in <<figure.charts.configuration.legend>>.
+
+[[figure.charts.configuration.legend]]
+.Legend example
+image::img/charts-configuration-legend.png[]
+
+[[charts.configuration.format]]
+== Formatting Labels
+
+Data point values, tooltips, and tick labels are formatted according to
+formatting configuration for the elements, with configuration properties
+described earlier for each element. Formatting can be set up in the overall
+configuration, for a data series, or for individual data points. The format can
+be defined either by a format string or by JavaScript formatter, which are
+described in the following.
+
+[[charts.configuration.format.string]]
+=== Using Format Strings
+
+A formatting string contain free-form text mixed with variables. Variables are
+enclosed in brackets, such as " [literal]#++Here {point.y} is a value at
+{point.x}++#". In different contexts, you have at least the following variables
+available:
+
+* [parameter]#value# in axis labels
+* [parameter]#point.x#, [parameter]#point.x# in data points and tooltips
+* [parameter]#series.name# in data points and tooltips
+
+Values can be formatted according to a formatting string, separated from the
+variable name by a colon.
+
+For numeric values, a subset of C printf formatting specifiers is supported. For
+example, " [literal]#++{point.y:%02.2f}++# would display a floating-point value
+with two decimals and two leading zeroes, such as [literal]#++02.30++#.
+
+For dates, you can use a subset of PHP [methodname]#strftime()# formatting
+specifiers. For example, " [literal]#++{value:%Y-%m-%d %H:%M:%S}++#" would
+format a date and time in the ISO 8601 format.
+
+
+[[charts.configuration.format.formatter]]
+=== Using a JavaScript Formatter
+
+A JavaScript formatter is given in a string that defines a JavaScript function
+that returns the formatted string. The value to be formatted is available in
+[parameter]#this.value# for axis labels, or [parameter]#this.x#,
+[parameter]#this.y# for data points.
+
+For example, to format tick labels on a chart axis, you could have:
+
+[source,java]
+----
+YAxis yaxis = new YAxis();
+Labels ylabels = yaxis.getLabels();
+ylabels.setFormatter("function() {return this.value + ' km';}");
+----
+
+
+[[charts.configuration.format.simplified]]
+=== Simplified Formatting
+
+Some contexts that display labels allow defining simple formatting for the
+labels. For example, data point tooltips allow defining prefix, suffix, and
+floating-point precision for the values.
