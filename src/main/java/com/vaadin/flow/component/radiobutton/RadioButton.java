@@ -15,12 +15,15 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
+import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
+
 /**
  * Server-side component for the {@code vaadin-radio-button} element.
  *
  * @author Vaadin Ltd.
  */
-class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>> {
+class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>>
+        implements ItemComponent<T> {
 
     private T item;
 
@@ -29,7 +32,8 @@ class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>> {
         getElement().setProperty("value", key);
     }
 
-    T getItem() {
+    @Override
+    public T getItem() {
         return item;
     }
 

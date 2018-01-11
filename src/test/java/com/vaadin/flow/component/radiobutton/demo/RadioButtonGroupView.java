@@ -207,7 +207,7 @@ public class RadioButtonGroupView extends DemoView {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
 
         // Note that setting items clear any components
-        group.addComponents(new Label("Foo group"), getFullSizeHr());
+        group.add(new Label("Foo group"), getFullSizeHr());
 
         group.setItems("foo", "bar", "baz");
         group.addComponents("foo", new Label("Not foo selections"),
@@ -253,7 +253,7 @@ public class RadioButtonGroupView extends DemoView {
 
         group.addValueChangeListener(event -> {
             if (below.getParent().isPresent()) {
-                group.removeComponent(below);
+                group.remove(below);
             }
             group.addComponents(event.getValue(), below);
         });

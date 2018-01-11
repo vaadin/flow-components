@@ -17,16 +17,14 @@ package com.vaadin.flow.component.radiobutton;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.renderer.ComponentRenderer;
@@ -40,7 +38,8 @@ import com.vaadin.flow.shared.Registration;
  */
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>>
-        implements SingleSelect<RadioButtonGroup<T>, T>, HasDataProvider<T> {
+        implements HasItemsAndComponents<T>,
+        SingleSelect<RadioButtonGroup<T>, T>, HasDataProvider<T> {
 
     private static final String VALUE = "value";
 
@@ -173,99 +172,5 @@ public class RadioButtonGroup<T>
         T oldValue = keyMapper.get(oldKey == null ? null : oldKey.toString());
         return new ValueChangeEvent<>(this, this, oldValue,
                 event.isUserOriginated());
-    }
-
-    /**
-     * Add components to the end of the current items and components.
-     * <p>
-     * Note! Changing the item set by setting new items or dataprovider will
-     * clear all components.
-     *
-     * @param components
-     *            components to add
-     */
-    public void addComponents(Component... components) {
-        add(components);
-    }
-
-    /**
-     * Remove a component from the group.
-     *
-     * @param component
-     *            component to remove
-     */
-    public void removeComponent(Component component) {
-        remove(component);
-    }
-
-    /**
-     * Adds the components after the given item. The item must have be added to
-     * group via setItems/dataProvider
-     * <p>
-     * Note! Changing the item set by setting new items or dataprovider will
-     * clear all components.
-     *
-     * @param afterItem
-     *            item to add components after
-     * @param components
-     *            components to add after item
-     */
-    public void addComponents(T afterItem, Component... components) {
-        Optional<RadioButton<T>> itemButton = getRadioButtonForItem(afterItem);
-
-        if (itemButton.isPresent()) {
-            int insertPosition = getItemPosition(itemButton);
-
-            for (Component component : components) {
-                insertPosition += 1;
-                getElement().insertChild(insertPosition,
-                        component.getElement());
-            }
-        }
-    }
-
-    /**
-     * Adds the components before the given item. The item must have be added to
-     * group via setItems/dataProvider
-     * <p>
-     * Note! Changing the item set by setting new items or dataprovider will
-     * clear all components.
-     *
-     * @param beforeItem
-     *            item to add components in front of
-     * @param components
-     *            components to add before item
-     */
-    public void prependComponents(T beforeItem, Component... components) {
-        Optional<RadioButton<T>> itemButton = getRadioButtonForItem(beforeItem);
-
-        if (itemButton.isPresent()) {
-            int insertPosition = getItemPosition(itemButton);
-
-            for (Component component : components) {
-                getElement().insertChild(insertPosition,
-                        component.getElement());
-                insertPosition += 1;
-            }
-        }
-    }
-
-    private Optional<RadioButton<T>> getRadioButtonForItem(T item) {
-        return getChildren().filter(RadioButton.class::isInstance)
-                .map(child -> (RadioButton<T>) child)
-                .filter(button -> button.getItem().equals(item)).findFirst();
-    }
-
-    private int getItemPosition(Optional<RadioButton<T>> itemButton) {
-        Element buttonElement = itemButton.get().getElement();
-        int itemPosition = IntStream.range(0, getElement().getChildCount())
-                .filter(i -> getElement().getChild(i).equals(buttonElement))
-                .findFirst().orElse(-1);
-
-        if (itemPosition == -1) {
-            throw new IllegalArgumentException(
-                    "Could not locate item RadioButton element in group to insert components after.");
-        }
-        return itemPosition;
     }
 }
