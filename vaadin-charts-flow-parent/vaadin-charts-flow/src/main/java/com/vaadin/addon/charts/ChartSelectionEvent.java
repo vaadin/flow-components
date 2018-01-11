@@ -2,9 +2,9 @@ package com.vaadin.addon.charts;
 
 import com.vaadin.addon.charts.model.ChartModel;
 import com.vaadin.addon.charts.model.Dimension;
-import com.vaadin.ui.event.ComponentEvent;
-import com.vaadin.ui.event.DomEvent;
-import com.vaadin.ui.event.EventData;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 
 /*
  * #%L

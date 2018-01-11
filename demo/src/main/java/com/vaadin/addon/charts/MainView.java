@@ -9,25 +9,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.polymertemplate.Id;
+import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.WildcardParameter;
+import com.vaadin.flow.templatemodel.TemplateModel;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
-
-import com.vaadin.flow.model.TemplateModel;
-import com.vaadin.router.HasUrlParameter;
-import com.vaadin.router.PageTitle;
-import com.vaadin.router.Route;
-import com.vaadin.router.WildcardParameter;
-import com.vaadin.router.event.BeforeNavigationEvent;
-import com.vaadin.ui.Tag;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.common.HtmlImport;
-import com.vaadin.ui.common.StyleSheet;
-import com.vaadin.ui.event.AttachEvent;
-import com.vaadin.ui.polymertemplate.Id;
-import com.vaadin.ui.polymertemplate.PolymerTemplate;
 
 @Route("")
 @PageTitle("Vaadin Charts for Flow Demo")
@@ -100,7 +99,7 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
     }
 
     @Override
-    public void setParameter(BeforeNavigationEvent event, @WildcardParameter String parameter) {
+    public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
         currentExample = getTargetExample(event, parameter);
 
         try {
@@ -114,13 +113,13 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
             demoArea.setContent(exampleClass.newInstance());
             snippet.setSource(IOUtils.toString(getClass().getResourceAsStream(
                     "/examples/" + category
-                            + "/" + exampleClass.getSimpleName() + ".java")));
+                            + "/" + exampleClass.getSimpleName() + ".java"), "UTF-8"));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private Pair<String, String> getTargetExample(BeforeNavigationEvent event,
+    private Pair<String, String> getTargetExample(BeforeEvent event,
             String route) {
         Pair<String, String> categoryPagePair = new ImmutablePair<>(null, route);
         if (StringUtils.isEmpty(route) || !NAME_INDEXED_SUBTYPES
@@ -136,4 +135,5 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
         String name = clazz.getPackage().getName();
         return name.substring(name.lastIndexOf('.') + 1);
     }
+
 }

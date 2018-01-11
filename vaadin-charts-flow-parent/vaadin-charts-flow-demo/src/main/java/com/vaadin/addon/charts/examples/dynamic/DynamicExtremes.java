@@ -13,8 +13,8 @@ import com.vaadin.addon.charts.model.ListSeries;
 import com.vaadin.addon.charts.model.PlotOptionsLine;
 import com.vaadin.addon.charts.model.VerticalAlign;
 import com.vaadin.addon.charts.model.YAxis;
-import com.vaadin.ui.event.ClickEvent;
-import com.vaadin.ui.html.Input;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.html.Input;
 
 public class DynamicExtremes extends AbstractChartExample {
 

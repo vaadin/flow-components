@@ -10,8 +10,8 @@ import com.vaadin.addon.charts.model.ChartType;
 import com.vaadin.addon.charts.model.Configuration;
 import com.vaadin.addon.charts.model.DataSeries;
 import com.vaadin.addon.charts.model.DataSeriesItem;
-import com.vaadin.ui.event.ClickEvent;
-import com.vaadin.ui.html.Input;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.html.Input;
 
 @SkipFromDemo
 public class DynamicChanges extends AbstractChartExample {

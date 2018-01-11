@@ -17,9 +17,9 @@ package com.vaadin.addon.charts;
  * #L%
  */
 
-import com.vaadin.ui.event.ComponentEvent;
-import com.vaadin.ui.event.DomEvent;
-import com.vaadin.ui.event.EventData;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 
 /**
  * SeriesCheckboxClickEvent triggered when a checkbox in a legend is clicked

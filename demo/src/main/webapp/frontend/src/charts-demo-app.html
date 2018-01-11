@@ -273,7 +273,7 @@
     </style>
 
     <div id="curtain" on-click="_closeMenu"></div>
-    <div id="sideMenu" on-transitionend="_sideMenuTransitionend">
+    <div id="sideMenu">
       <div id="menuHeader">
         <div id="logoandname">
           <img id="logo" src$="[[importPath]]../images/charts-logo.svg">
@@ -320,7 +320,7 @@
   </template>
 
   <script>
-    class MyApp extends Polymer.mixinBehaviors([Polymer.IronResizableBehavior], Polymer.Element) {
+    class MyApp extends Polymer.Element {
       static get is() { return 'charts-demo-app'; }
 
       static get properties() {
@@ -346,11 +346,6 @@
         return [
           '_routePageChanged(category,page)',
         ];
-      }
-
-      _sideMenuTransitionend(el) {
-        //0.3s is set for #sideMenu transition
-        this.debounce('_notifyResize', this.notifyResize, 300);
       }
 
       _routePageChanged(category, page) {

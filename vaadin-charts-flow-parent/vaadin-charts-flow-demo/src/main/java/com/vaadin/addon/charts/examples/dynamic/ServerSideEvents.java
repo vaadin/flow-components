@@ -23,16 +23,16 @@ import com.vaadin.addon.charts.model.Tooltip;
 import com.vaadin.addon.charts.model.XAxis;
 import com.vaadin.addon.charts.model.YAxis;
 import com.vaadin.addon.charts.model.style.SolidColor;
-import com.vaadin.ui.button.Button;
-import com.vaadin.ui.checkbox.Checkbox;
-import com.vaadin.ui.common.HasClickListeners;
-import com.vaadin.ui.event.ComponentEvent;
-import com.vaadin.ui.event.ComponentEventListener;
-import com.vaadin.ui.html.Label;
-import com.vaadin.ui.layout.FlexLayout;
-import com.vaadin.ui.layout.HorizontalLayout;
-import com.vaadin.ui.layout.VerticalLayout;
-import com.vaadin.ui.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasClickListeners;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
 @SkipFromDemo
 public class ServerSideEvents extends AbstractChartExample {
@@ -128,7 +128,7 @@ public class ServerSideEvents extends AbstractChartExample {
         add(chart, layout);
     }
 
-    private FlexLayout createControls() {
+    private Component createControls() {
         visibilityToggling = new Checkbox("Disable series visibility toggling");
         visibilityToggling.setId("visibilityToggler");
         visibilityToggling.addValueChangeListener(e ->

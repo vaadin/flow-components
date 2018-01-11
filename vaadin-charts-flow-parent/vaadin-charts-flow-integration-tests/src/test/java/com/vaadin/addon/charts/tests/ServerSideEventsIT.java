@@ -36,7 +36,7 @@ import com.vaadin.tests.elements.ButtonElement;
 import com.vaadin.tests.elements.ChartElement;
 import com.vaadin.tests.elements.CheckboxElement;
 import com.vaadin.tests.elements.LabelElement;
-import com.vaadin.ui.event.ComponentEvent;
+import com.vaadin.flow.component.ComponentEvent;
 
 public class ServerSideEventsIT extends AbstractTBTest {
 

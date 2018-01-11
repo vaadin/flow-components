@@ -1,7 +1,7 @@
 package com.vaadin.addon.charts;
 
-import com.vaadin.ui.event.ComponentEvent;
-import com.vaadin.ui.event.DomEvent;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.DomEvent;
 
 /**
  * ChartDrillupEvent triggered after all the series  has been drilled up

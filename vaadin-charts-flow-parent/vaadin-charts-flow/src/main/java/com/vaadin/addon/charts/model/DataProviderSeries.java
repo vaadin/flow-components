@@ -8,10 +8,10 @@ package com.vaadin.addon.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -29,10 +29,10 @@ import java.util.Set;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.DataProviderListener;
-import com.vaadin.data.provider.Query;
-import com.vaadin.shared.Registration;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataProviderListener;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * A series which is based on data from a DataProvider.
@@ -85,7 +85,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * {@code y} values but instead {@code high} and {@code low} values.
      * Functions for extracting these are set using {@link #setHigh(Function)}
      * and {@link #setLow(Function)} respectively.
-     * 
+     *
      * @param dataProvider
      *            the data provider which contains the data
      */
@@ -99,7 +99,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
     /**
      * Creates a new series using data from the given data provider and y
      * values.
-     * 
+     *
      * @param dataProvider
      *            the data provider which contains the data
      * @param callBack
@@ -114,7 +114,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
     /**
      * Sets the function used for retrieving the value for the given property
      * name from the given data provider.
-     * 
+     *
      * @param propertyName
      *            the property name
      * @param callBack
@@ -129,7 +129,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * provided by the data provider.
      * <p>
      * How exactly the values are used depends on the used chart type.
-     * 
+     *
      * @param callBack
      *            the function which retrieves the values
      */
@@ -142,7 +142,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * provided by the data provider.
      * <p>
      * How exactly the values are used depends on the used chart type.
-     * 
+     *
      * @param callBack
      *            the function which retrieves the values
      */
@@ -155,7 +155,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * bean provided by the data provider.
      * <p>
      * How exactly the values are used depends on the used chart type.
-     * 
+     *
      * @param callBack
      *            the function which retrieves the values
      */
@@ -168,7 +168,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * bean provided by the data provider.
      * <p>
      * How exactly the values are used depends on the used chart type.
-     * 
+     *
      * @param callBack
      *            the function which retrieves the values
      */
@@ -181,7 +181,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * bean provided by the data provider.
      * <p>
      * How exactly the values are used depends on the used chart type.
-     * 
+     *
      * @param callBack
      *            the function which retrieves the values
      */
@@ -194,7 +194,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * bean provided by the data provider.
      * <p>
      * How exactly the values are used depends on the used chart type.
-     * 
+     *
      * @param callBack
      *            the function which retrieves the values
      */
@@ -207,7 +207,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * bean provided by the data provider.
      * <p>
      * How exactly the values are used depends on the used chart type.
-     * 
+     *
      * @param callBack
      *            the function which retrieves the values
      */
@@ -227,7 +227,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
     /**
      * Returns a list mappings between chart attributes(keys) and values. For
      * example: x->1, x->2, y->2, y->3 for linear chart
-     * 
+     *
      * @return
      */
 
@@ -244,7 +244,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
 
     /**
      * Returns a set of chart attributes(keys).
-     * 
+     *
      * @return
      */
     public Set<String> getChartAttributes() {
@@ -254,7 +254,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
     /**
      * Returns true if the chart is updated automatically when a DataChangeEvent
      * is emitted by the data provider. Default is true.
-     * 
+     *
      * @return
      */
     public boolean isAutomaticChartUpdateEnabled() {
@@ -264,7 +264,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
     /**
      * Sets if the chart should be updated automatically when a DataChangeEvent
      * is emitted by the data provider. Default is true.
-     * 
+     *
      * @param automaticChartUpdateEnabled
      *            True sets the chart updating to enabled, false disables it.
      */
