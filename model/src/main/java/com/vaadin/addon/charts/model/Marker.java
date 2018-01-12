@@ -1,6 +1,4 @@
 package com.vaadin.addon.charts.model;
-
-import com.vaadin.addon.charts.model.style.Color;
 /**
  * In Highcharts 1.0, the appearance of all markers belonging to the hovered
  * series. For settings on the hover state of the individual point, see <a
@@ -9,10 +7,7 @@ import com.vaadin.addon.charts.model.style.Color;
 public class Marker extends AbstractConfigurationObject {
 
 	private Boolean enabled;
-	private Color fillColor;
 	private Number height;
-	private Color lineColor;
-	private Number lineWidth;
 	private Number radius;
 	private States states;
 	private Number width;
@@ -43,21 +38,6 @@ public class Marker extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setFillColor(Color)
-	 */
-	public Color getFillColor() {
-		return fillColor;
-	}
-
-	/**
-	 * The fill color of the point marker. When <code>null</code>, the series'
-	 * or point's color is used.
-	 */
-	public void setFillColor(Color fillColor) {
-		this.fillColor = fillColor;
-	}
-
-	/**
 	 * @see #setHeight(Number)
 	 */
 	public Number getHeight() {
@@ -72,39 +52,6 @@ public class Marker extends AbstractConfigurationObject {
 	 */
 	public void setHeight(Number height) {
 		this.height = height;
-	}
-
-	/**
-	 * @see #setLineColor(Color)
-	 */
-	public Color getLineColor() {
-		return lineColor;
-	}
-
-	/**
-	 * The color of the point marker's outline. When <code>null</code>, the
-	 * series' or point's color is used.
-	 * <p>
-	 * Defaults to: #ffffff
-	 */
-	public void setLineColor(Color lineColor) {
-		this.lineColor = lineColor;
-	}
-
-	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The width of the point marker's outline.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
 	}
 
 	/**

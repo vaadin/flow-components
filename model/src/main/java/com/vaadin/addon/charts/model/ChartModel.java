@@ -1,6 +1,5 @@
 package com.vaadin.addon.charts.model;
 
-import com.vaadin.addon.charts.model.style.Color;
 import com.vaadin.addon.charts.model.style.Style;
 /**
  * Options regarding the chart area and plot area as well as general chart
@@ -10,8 +9,6 @@ public class ChartModel extends AbstractConfigurationObject {
 
 	private Boolean alignTicks;
 	private Boolean animation;
-	private Color backgroundColor;
-	private Color borderColor;
 	private Number borderRadius;
 	private Number borderWidth;
 	private String className;
@@ -29,15 +26,11 @@ public class ChartModel extends AbstractConfigurationObject {
 	private PanKey panKey;
 	private Boolean panning;
 	private Dimension pinchType;
-	private Color plotBackgroundColor;
-	private String plotBackgroundImage;
-	private Color plotBorderColor;
 	private Number plotBorderWidth;
 	private Boolean plotShadow;
 	private Boolean polar;
 	private Boolean reflow;
 	private ResetZoomButton resetZoomButton;
-	private Color selectionMarkerFill;
 	private Boolean shadow;
 	private Boolean showAxes;
 	private Number[] spacing;
@@ -118,38 +111,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	 */
 	public void setAnimation(Boolean animation) {
 		this.animation = animation;
-	}
-
-	/**
-	 * @see #setBackgroundColor(Color)
-	 */
-	public Color getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * The background color or gradient for the outer chart area.
-	 * <p>
-	 * Defaults to: #FFFFFF
-	 */
-	public void setBackgroundColor(Color backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * The color of the outer chart border.
-	 * <p>
-	 * Defaults to: #335cad
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
 	}
 
 	/**
@@ -482,53 +443,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setPlotBackgroundColor(Color)
-	 */
-	public Color getPlotBackgroundColor() {
-		return plotBackgroundColor;
-	}
-
-	/**
-	 * The background color or gradient for the plot area.
-	 */
-	public void setPlotBackgroundColor(Color plotBackgroundColor) {
-		this.plotBackgroundColor = plotBackgroundColor;
-	}
-
-	/**
-	 * @see #setPlotBackgroundImage(String)
-	 */
-	public String getPlotBackgroundImage() {
-		return plotBackgroundImage;
-	}
-
-	/**
-	 * The URL for an image to use as the plot background. To set an image as
-	 * the background for the entire chart, set a CSS background image to the
-	 * container element. Note that for the image to be applied to exported
-	 * charts, its URL needs to be accessible by the export server.
-	 */
-	public void setPlotBackgroundImage(String plotBackgroundImage) {
-		this.plotBackgroundImage = plotBackgroundImage;
-	}
-
-	/**
-	 * @see #setPlotBorderColor(Color)
-	 */
-	public Color getPlotBorderColor() {
-		return plotBorderColor;
-	}
-
-	/**
-	 * The color of the inner chart or plot area border.
-	 * <p>
-	 * Defaults to: #cccccc
-	 */
-	public void setPlotBorderColor(Color plotBorderColor) {
-		this.plotBorderColor = plotBorderColor;
-	}
-
-	/**
 	 * @see #setPlotBorderWidth(Number)
 	 */
 	public Number getPlotBorderWidth() {
@@ -614,23 +528,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	 */
 	public void setResetZoomButton(ResetZoomButton resetZoomButton) {
 		this.resetZoomButton = resetZoomButton;
-	}
-
-	/**
-	 * @see #setSelectionMarkerFill(Color)
-	 */
-	public Color getSelectionMarkerFill() {
-		return selectionMarkerFill;
-	}
-
-	/**
-	 * The background color of the marker square when selecting (zooming in on)
-	 * an area of the chart.
-	 * <p>
-	 * Defaults to: rgba(51,92,173,0.25)
-	 */
-	public void setSelectionMarkerFill(Color selectionMarkerFill) {
-		this.selectionMarkerFill = selectionMarkerFill;
 	}
 
 	/**

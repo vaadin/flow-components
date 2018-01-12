@@ -8,10 +8,10 @@ package com.vaadin.addon.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -110,7 +110,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * the startOnTick and endOnTick options are true, the minimum and maximum
      * values are rounded off to the nearest tick. To prevent this, these
      * options can be set to false before calling setExtremes.
-     * 
+     *
      * @param min
      *            The new minimum value
      * @param max
@@ -131,7 +131,7 @@ public abstract class Axis extends AbstractConfigurationObject {
 
     /**
      * Sets the extremes at runtime.
-     * 
+     *
      * @param min
      *            Minimum.
      * @param max
@@ -154,7 +154,7 @@ public abstract class Axis extends AbstractConfigurationObject {
 
     /**
      * Run-time modification of the axis extremes.
-     * 
+     *
      * @param minimum
      *            New minimum value.
      * @param maximum
@@ -165,7 +165,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      *            Whether or not to animate the rescaling.
      */
     public void setExtremes(Number minimum, Number maximum, boolean redraw,
-            boolean animate) {
+                            boolean animate) {
         min = minimum;
         max = maximum;
         if (configuration != null) {
@@ -180,18 +180,18 @@ public abstract class Axis extends AbstractConfigurationObject {
      * @see #setExtremes(Number, Number, boolean, boolean)
      */
     public void setExtremes(Date minimum, Date maximum, boolean redraw,
-        boolean animate) {
+                            boolean animate) {
         setMin(minimum);
         setMax(maximum);
         if (configuration != null) {
             configuration.fireAxesRescaled(this, min, max, redraw,
-                animate);
+                    animate);
         }
     }
 
     /**
      * Returns the configuration this axis is bound to.
-     * 
+     *
      * @return The configuration.
      */
     public ChartConfiguration getConfiguration() {
@@ -201,7 +201,7 @@ public abstract class Axis extends AbstractConfigurationObject {
     /**
      * Sets the configuration this axis is bound to. This method is
      * automatically called by configuration, when the axis is added to it.
-     * 
+     *
      * @param configuration
      *            Configuration this object is linked to.
      */
@@ -297,7 +297,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * dateFormat.
      */
     public abstract void setDateTimeLabelFormats(
-        DateTimeLabelFormats dateTimeLabelFormats);
+            DateTimeLabelFormats dateTimeLabelFormats);
 
     /**
      * @see #setEndOnTick(Boolean)
@@ -652,16 +652,6 @@ public abstract class Axis extends AbstractConfigurationObject {
      * </p>
      */
     public abstract void setTickAmount(Number tickAmount);
-
-    /**
-     * @see #setTickColor(Color)
-     */
-    public abstract Color getTickColor();
-
-    /**
-     * Color for the main tick marks.
-     */
-    public abstract void setTickColor(Color tickColor);
 
     /**
      * @see #setTickInterval(Number)

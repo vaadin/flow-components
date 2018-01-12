@@ -23,7 +23,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	private ArrayList<Color> colors;
 	private Boolean crisp;
 	private Cursor cursor;
-	private DashStyle dashStyle;
 	private DataLabels dataLabels;
 	private Number depth;
 	private String description;
@@ -37,8 +36,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	private Number groupZPadding;
 	private Boolean grouping;
 	private ArrayList<String> keys;
-	private Color lineColor;
-	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
 	private Number minPointLength;
@@ -344,45 +341,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	}
 
 	/**
-	 * @see #setDashStyle(DashStyle)
-	 */
-	public DashStyle getDashStyle() {
-		return dashStyle;
-	}
-
-	/**
-	 * <p>
-	 * A name for the dash style to use for the line connecting the columns of
-	 * the waterfall series. Possible values:
-	 * <ul>
-	 * <li>Solid</li>
-	 * <li>ShortDash</li>
-	 * <li>ShortDot</li>
-	 * <li>ShortDashDot</li>
-	 * <li>ShortDashDotDot</li>
-	 * <li>Dot</li>
-	 * <li>Dash</li>
-	 * <li>LongDash</li>
-	 * <li>DashDot</li>
-	 * <li>LongDashDot</li>
-	 * <li>LongDashDotDot</li>
-	 * </ul>
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke dash-array can be set with the
-	 * <code>.highcharts-graph</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: Dot
-	 */
-	public void setDashStyle(DashStyle dashStyle) {
-		this.dashStyle = dashStyle;
-	}
-
-	/**
 	 * @see #setDataLabels(DataLabels)
 	 */
 	public DataLabels getDataLabels() {
@@ -662,47 +620,6 @@ public class PlotOptionsWaterfall extends ColumnOptions {
 	 */
 	public void removeKey(String key) {
 		this.keys.remove(key);
-	}
-
-	/**
-	 * @see #setLineColor(Color)
-	 */
-	public Color getLineColor() {
-		return lineColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the line that connects columns in a waterfall series.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke can be set with the
-	 * <code>.highcharts-graph</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: #333333
-	 */
-	public void setLineColor(Color lineColor) {
-		this.lineColor = lineColor;
-	}
-
-	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The width of the line connecting waterfall columns.
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
 	}
 
 	/**

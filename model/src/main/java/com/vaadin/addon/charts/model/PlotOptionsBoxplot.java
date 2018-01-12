@@ -35,12 +35,10 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	private Number groupZPadding;
 	private Boolean grouping;
 	private ArrayList<String> keys;
-	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
 	private Color medianColor;
 	private Number medianWidth;
-	private Color negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -513,26 +511,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The width of the line surrounding the box. If any of <a
-	 * href="#plotOptions.boxplot.stemWidth">stemWidth</a>, <a
-	 * href="#plotOptions.boxplot.medianWidth">medianWidth</a> or <a
-	 * href="#plotOptions.boxplot.whiskerWidth">whiskerWidth</a> are
-	 * <code>null</code>, the lineWidth also applies to these lines.
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -599,23 +577,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	 */
 	public void setMedianWidth(Number medianWidth) {
 		this.medianWidth = medianWidth;
-	}
-
-	/**
-	 * @see #setNegativeColor(Color)
-	 */
-	public Color getNegativeColor() {
-		return negativeColor;
-	}
-
-	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setNegativeColor(Color negativeColor) {
-		this.negativeColor = negativeColor;
 	}
 
 	public String getPointDescriptionFormatter() {

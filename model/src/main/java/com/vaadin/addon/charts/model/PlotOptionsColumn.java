@@ -37,7 +37,6 @@ public class PlotOptionsColumn extends ColumnOptions {
 	private String linkedTo;
 	private Number maxPointWidth;
 	private Number minPointLength;
-	private Color negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -704,23 +703,6 @@ public class PlotOptionsColumn extends ColumnOptions {
 	 */
 	public void setMinPointLength(Number minPointLength) {
 		this.minPointLength = minPointLength;
-	}
-
-	/**
-	 * @see #setNegativeColor(Color)
-	 */
-	public Color getNegativeColor() {
-		return negativeColor;
-	}
-
-	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setNegativeColor(Color negativeColor) {
-		this.negativeColor = negativeColor;
 	}
 
 	public String getPointDescriptionFormatter() {

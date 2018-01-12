@@ -33,12 +33,10 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	private Boolean grouping;
 	private ArrayList<String> keys;
 	private Number legendIndex;
-	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
 	private Number minPointLength;
 	private PlotOptionsSeries navigatorOptions;
-	private Color negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -553,22 +551,6 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	}
 
 	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The pixel width of the line/border. Defaults to <code>1</code>.
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -648,23 +630,6 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	 */
 	public void setNavigatorOptions(PlotOptionsSeries navigatorOptions) {
 		this.navigatorOptions = navigatorOptions;
-	}
-
-	/**
-	 * @see #setNegativeColor(Color)
-	 */
-	public Color getNegativeColor() {
-		return negativeColor;
-	}
-
-	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setNegativeColor(Color negativeColor) {
-		this.negativeColor = negativeColor;
 	}
 
 	public String getPointDescriptionFormatter() {

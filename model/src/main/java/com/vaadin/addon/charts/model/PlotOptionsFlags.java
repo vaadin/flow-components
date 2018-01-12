@@ -2,6 +2,7 @@ package com.vaadin.addon.charts.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import com.vaadin.addon.charts.model.style.Color;
 import com.vaadin.addon.charts.model.style.Style;
 /**
@@ -25,12 +26,9 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
 	private Number legendIndex;
-	private Color lineColor;
-	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
 	private PlotOptionsSeries navigatorOptions;
-	private Color negativeColor;
 	private String onKey;
 	private String onSeries;
 	private String _fn_pointDescriptionFormatter;
@@ -422,48 +420,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setLineColor(Color)
-	 */
-	public Color getLineColor() {
-		return lineColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the line/border of the flag.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke is set in the
-	 * <code>.highcharts-flag-series .highcharts-point</code> rule.
-	 * </p>
-	 * <p>
-	 * Defaults to: #000000
-	 */
-	public void setLineColor(Color lineColor) {
-		this.lineColor = lineColor;
-	}
-
-	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The pixel width of the candlestick line/border. Defaults to
-	 * <code>1</code>.
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -524,23 +480,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	 */
 	public void setNavigatorOptions(PlotOptionsSeries navigatorOptions) {
 		this.navigatorOptions = navigatorOptions;
-	}
-
-	/**
-	 * @see #setNegativeColor(Color)
-	 */
-	public Color getNegativeColor() {
-		return negativeColor;
-	}
-
-	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setNegativeColor(Color negativeColor) {
-		this.negativeColor = negativeColor;
 	}
 
 	/**

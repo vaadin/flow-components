@@ -8,10 +8,10 @@ package com.vaadin.addon.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -94,32 +94,6 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setCursor(Cursor cursor);
 
     /**
-     * @see #setDashStyle(DashStyle)
-     */
-    public abstract DashStyle getDashStyle();
-
-    /**
-     * A name for the dash style to use for the graph. Applies only to series
-     * type having a graph, like <code>line</code>, <code>spline</code>,
-     * <code>area</code> and <code>scatter</code> in case it has a
-     * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
-     * <ul>
-     * <li>Solid</li>
-     * <li>ShortDash</li>
-     * <li>ShortDot</li>
-     * <li>ShortDashDot</li>
-     * <li>ShortDashDotDot</li>
-     * <li>Dot</li>
-     * <li>Dash</li>
-     * <li>LongDash</li>
-     * <li>DashDot</li>
-     * <li>LongDashDot</li>
-     * <li>LongDashDotDot</li>
-     * </ul>
-     */
-    public abstract void setDashStyle(DashStyle dashStyle);
-
-    /**
      * @see #setEnableMouseTracking(Boolean)
      */
     public abstract Boolean getEnableMouseTracking();
@@ -181,7 +155,7 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -190,35 +164,12 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
      */
     public abstract void removeKey(String key);
-
-    /**
-     * @see #setLineColor(Color)
-     */
-    public abstract Color getLineColor();
-
-    /**
-     * A separate color for the graph line. By default the line takes the
-     * <code>color</code> of the series, but the lineColor setting allows
-     * setting a separate color for the line without altering the
-     * <code>fillColor</code>.
-     */
-    public abstract void setLineColor(Color lineColor);
-
-    /**
-     * @see #setLineWidth(Number)
-     */
-    public abstract Number getLineWidth();
-
-    /**
-     * Pixel with of the graph line.
-     */
-    public abstract void setLineWidth(Number lineWidth);
 
     /**
      * @see #setLinecap(String)
@@ -242,17 +193,6 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * also toggles the linked series.
      */
     public abstract void setLinkedTo(String linkedTo);
-
-    /**
-     * @see #setNegativeColor(Color)
-     */
-    public abstract Color getNegativeColor();
-
-    /**
-     * The color for the parts of the graph or points that are below the
-     * threshold.
-     */
-    public abstract void setNegativeColor(Color negativeColor);
 
     /**
      * @see #setNegativeFillColor(Color)
@@ -487,7 +427,7 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -496,7 +436,7 @@ public abstract class AreaOptions extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)
@@ -536,7 +476,7 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * the distance between two points is greater than five times that of the
      * two closest points, the graph will be broken.
      * </p>
-     * 
+     *
      * <p>
      * In practice, this option is most often used to visualize gaps in time
      * series. In a stock chart, intraday data is available for daytime hours,

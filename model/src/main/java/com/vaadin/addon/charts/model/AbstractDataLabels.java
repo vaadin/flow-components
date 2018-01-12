@@ -17,33 +17,10 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
-import com.vaadin.addon.charts.model.style.Color;
-import com.vaadin.addon.charts.model.style.Style;
-
 public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
     public static final String OVERFLOW_JUSTIFY = "justify";
     public static final String OVERFLOW_NONE = "none";
-
-    /**
-     * @see #setBorderRadius(Number)
-     */
-    public abstract Number getBorderRadius();
-
-    /**
-     * The border radius in pixels for the data label.
-     */
-    public abstract void setBorderRadius(Number borderRadius);
-
-    /**
-     * @see #setBorderWidth(Number)
-     */
-    public abstract Number getBorderWidth();
-
-    /**
-     * The border width in pixels for the data label.
-     */
-    public abstract void setBorderWidth(Number borderWidth);
 
     /**
      * @see #setCrop(Boolean)

@@ -20,7 +20,6 @@ public class PlotOptionsArearange extends AreaOptions {
 	private Boolean connectNulls;
 	private Number cropThreshold;
 	private Cursor cursor;
-	private DashStyle dashStyle;
 	private DataLabelsRange dataLabels;
 	private String description;
 	private Boolean enableMouseTracking;
@@ -30,11 +29,8 @@ public class PlotOptionsArearange extends AreaOptions {
 	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
-	private Color lineColor;
-	private Number lineWidth;
 	private String linecap;
 	private String linkedTo;
-	private Color negativeColor;
 	private Color negativeFillColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
@@ -231,38 +227,6 @@ public class PlotOptionsArearange extends AreaOptions {
 	 */
 	public void setCursor(Cursor cursor) {
 		this.cursor = cursor;
-	}
-
-	/**
-	 * @see #setDashStyle(DashStyle)
-	 */
-	public DashStyle getDashStyle() {
-		return dashStyle;
-	}
-
-	/**
-	 * A name for the dash style to use for the graph. Applies only to series
-	 * type having a graph, like <code>line</code>, <code>spline</code>,
-	 * <code>area</code> and <code>scatter</code> in case it has a
-	 * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
-	 * <ul>
-	 * <li>Solid</li>
-	 * <li>ShortDash</li>
-	 * <li>ShortDot</li>
-	 * <li>ShortDashDot</li>
-	 * <li>ShortDashDotDot</li>
-	 * <li>Dot</li>
-	 * <li>Dash</li>
-	 * <li>LongDash</li>
-	 * <li>DashDot</li>
-	 * <li>LongDashDot</li>
-	 * <li>LongDashDotDot</li>
-	 * </ul>
-	 * <p>
-	 * Defaults to: Solid
-	 */
-	public void setDashStyle(DashStyle dashStyle) {
-		this.dashStyle = dashStyle;
 	}
 
 	/**
@@ -476,39 +440,6 @@ public class PlotOptionsArearange extends AreaOptions {
 	}
 
 	/**
-	 * @see #setLineColor(Color)
-	 */
-	public Color getLineColor() {
-		return lineColor;
-	}
-
-	/**
-	 * A separate color for the graph line. By default the line takes the
-	 * <code>color</code> of the series, but the lineColor setting allows
-	 * setting a separate color for the line without altering the
-	 * <code>fillColor</code>.
-	 */
-	public void setLineColor(Color lineColor) {
-		this.lineColor = lineColor;
-	}
-
-	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * Pixel width of the arearange graph line.
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinecap(String)
 	 */
 	public String getLinecap() {
@@ -539,23 +470,6 @@ public class PlotOptionsArearange extends AreaOptions {
 	 */
 	public void setLinkedTo(String linkedTo) {
 		this.linkedTo = linkedTo;
-	}
-
-	/**
-	 * @see #setNegativeColor(Color)
-	 */
-	public Color getNegativeColor() {
-		return negativeColor;
-	}
-
-	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setNegativeColor(Color negativeColor) {
-		this.negativeColor = negativeColor;
 	}
 
 	/**

@@ -2,7 +2,6 @@ package com.vaadin.addon.charts.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import com.vaadin.addon.charts.model.style.Color;
 import java.util.Date;
 import java.time.Instant;
 import com.vaadin.addon.charts.util.Util;
@@ -21,17 +20,14 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 	private Number colorIndex;
 	private Number cropThreshold;
 	private Cursor cursor;
-	private DashStyle dashStyle;
 	private String description;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
 	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
-	private Number lineWidth;
 	private String linkedTo;
 	private Marker marker;
-	private Color negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -210,38 +206,6 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setDashStyle(DashStyle)
-	 */
-	public DashStyle getDashStyle() {
-		return dashStyle;
-	}
-
-	/**
-	 * A name for the dash style to use for the graph. Applies only to series
-	 * type having a graph, like <code>line</code>, <code>spline</code>,
-	 * <code>area</code> and <code>scatter</code> in case it has a
-	 * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
-	 * <ul>
-	 * <li>Solid</li>
-	 * <li>ShortDash</li>
-	 * <li>ShortDot</li>
-	 * <li>ShortDashDot</li>
-	 * <li>ShortDashDotDot</li>
-	 * <li>Dot</li>
-	 * <li>Dash</li>
-	 * <li>LongDash</li>
-	 * <li>DashDot</li>
-	 * <li>LongDashDot</li>
-	 * <li>LongDashDotDot</li>
-	 * </ul>
-	 * <p>
-	 * Defaults to: Solid
-	 */
-	public void setDashStyle(DashStyle dashStyle) {
-		this.dashStyle = dashStyle;
-	}
-
-	/**
 	 * @see #setDescription(String)
 	 */
 	public String getDescription() {
@@ -395,22 +359,6 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 	}
 
 	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The width of the line connecting the data points.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -456,23 +404,6 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 	 */
 	public void setMarker(Marker marker) {
 		this.marker = marker;
-	}
-
-	/**
-	 * @see #setNegativeColor(Color)
-	 */
-	public Color getNegativeColor() {
-		return negativeColor;
-	}
-
-	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setNegativeColor(Color negativeColor) {
-		this.negativeColor = negativeColor;
 	}
 
 	public String getPointDescriptionFormatter() {

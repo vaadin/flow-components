@@ -1,6 +1,4 @@
 package com.vaadin.addon.charts.model;
-
-import com.vaadin.addon.charts.model.style.Style;
 public class Labels extends AbstractConfigurationObject {
 
 	private HorizontalAlign align;
@@ -14,7 +12,6 @@ public class Labels extends AbstractConfigurationObject {
 	private Boolean reserveSpace;
 	private Number staggerLines;
 	private Number step;
-	private Style style;
 	private Boolean useHTML;
 	private Number x;
 	private Number y;
@@ -217,37 +214,6 @@ public class Labels extends AbstractConfigurationObject {
 	 */
 	public void setStep(Number step) {
 		this.step = step;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * <p>
-	 * CSS styles for the label. Use <code>whiteSpace: 'nowrap'</code> to
-	 * prevent wrapping of category labels. Use
-	 * <code>textOverflow: 'none'</code> to prevent ellipsis (dots).
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the labels are styled with the
-	 * <code>.highcharts-axis-labels</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: { "color": "#666666", "cursor": "default", "fontSize":
-	 * "11px" }
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**

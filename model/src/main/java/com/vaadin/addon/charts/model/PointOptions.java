@@ -8,16 +8,14 @@ package com.vaadin.addon.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
-
-import com.vaadin.addon.charts.model.style.Color;
 
 import java.util.Date;
 
@@ -81,39 +79,13 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract void setCursor(Cursor cursor);
 
     /**
-     * @see #setDashStyle(DashStyle)
-     */
-    public abstract DashStyle getDashStyle();
-
-    /**
-     * A name for the dash style to use for the graph. Applies only to series
-     * type having a graph, like <code>line</code>, <code>spline</code>,
-     * <code>area</code> and <code>scatter</code> in case it has a
-     * <code>lineWidth</code>. The value for the <code>dashStyle</code> include:
-     * <ul>
-     * <li>Solid</li>
-     * <li>ShortDash</li>
-     * <li>ShortDot</li>
-     * <li>ShortDashDot</li>
-     * <li>ShortDashDotDot</li>
-     * <li>Dot</li>
-     * <li>Dash</li>
-     * <li>LongDash</li>
-     * <li>DashDot</li>
-     * <li>LongDashDot</li>
-     * <li>LongDashDotDot</li>
-     * </ul>
-     */
-    public abstract void setDashStyle(DashStyle dashStyle);
-
-    /**
      * @see #setDataLabels(DataLabels)
      */
     public abstract DataLabels getDataLabels();
 
     /**
      * Specific data labels configuration for a series type
-     * 
+     *
      * @param dataLabels
      */
     public abstract void setDataLabels(DataLabels dataLabels);
@@ -156,7 +128,7 @@ public abstract class PointOptions extends AbstractPlotOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -165,22 +137,12 @@ public abstract class PointOptions extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
      */
     public abstract void removeKey(String key);
-
-    /**
-     * @see #setLineWidth(Number)
-     */
-    public abstract Number getLineWidth();
-
-    /**
-     * The width of the line connecting the data points.
-     */
-    public abstract void setLineWidth(Number lineWidth);
 
     /**
      * @see #setLinkedTo(String)
@@ -201,17 +163,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract Marker getMarker();
 
     public abstract void setMarker(Marker marker);
-
-    /**
-     * @see #setNegativeColor(Color)
-     */
-    public abstract Color getNegativeColor();
-
-    /**
-     * The color for the parts of the graph or points that are below the
-     * threshold.
-     */
-    public abstract void setNegativeColor(Color negativeColor);
 
     /**
      * @see #setPointInterval(Number)
@@ -315,7 +266,7 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * When this is true, the series will not cause the Y axis to cross the zero
      * plane unless the data actually crosses the plane.
      * </p>
-     * 
+     *
      * <p>
      * For example, if <code>softThreshold</code> is <code>false</code>, a
      * series of 0, 1, 2, 3 will make the Y axis show negative values according
@@ -420,7 +371,7 @@ public abstract class PointOptions extends AbstractPlotOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -429,7 +380,7 @@ public abstract class PointOptions extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)

@@ -31,13 +31,10 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 	private Boolean grouping;
 	private ArrayList<String> keys;
 	private Number legendIndex;
-	private Color lineColor;
-	private Number lineWidth;
 	private String linkedTo;
 	private Number maxPointWidth;
 	private Number minPointLength;
 	private PlotOptionsSeries navigatorOptions;
-	private Color negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -514,57 +511,6 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 	}
 
 	/**
-	 * @see #setLineColor(Color)
-	 */
-	public Color getLineColor() {
-		return lineColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the line/border of the candlestick.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the line stroke can be set with the
-	 * <code>.highcharts-candlestick-series .highcahrts-point</code> rule.
-	 * </p>
-	 * <p>
-	 * Defaults to: #000000
-	 */
-	public void setLineColor(Color lineColor) {
-		this.lineColor = lineColor;
-	}
-
-	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * <p>
-	 * The pixel width of the candlestick line/border. Defaults to
-	 * <code>1</code>.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the line stroke width can be set with the
-	 * <code>.highcharts-candlestick-series .highcahrts-point</code> rule.
-	 * </p>
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
-	}
-
-	/**
 	 * @see #setLinkedTo(String)
 	 */
 	public String getLinkedTo() {
@@ -644,23 +590,6 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 	 */
 	public void setNavigatorOptions(PlotOptionsSeries navigatorOptions) {
 		this.navigatorOptions = navigatorOptions;
-	}
-
-	/**
-	 * @see #setNegativeColor(Color)
-	 */
-	public Color getNegativeColor() {
-		return negativeColor;
-	}
-
-	/**
-	 * The color for the parts of the graph or points that are below the <a
-	 * href="#plotOptions.series.threshold">threshold</a>.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setNegativeColor(Color negativeColor) {
-		this.negativeColor = negativeColor;
 	}
 
 	public String getPointDescriptionFormatter() {

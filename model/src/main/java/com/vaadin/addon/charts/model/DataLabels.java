@@ -20,8 +20,6 @@ public class DataLabels extends AbstractDataLabels {
 
 	private HorizontalAlign align;
 	private Boolean allowOverlap;
-	private Number borderRadius;
-	private Number borderWidth;
 	private String className;
 	private Boolean crop;
 	private Boolean defer;
@@ -86,38 +84,6 @@ public class DataLabels extends AbstractDataLabels {
 	 */
 	public void setAllowOverlap(Boolean allowOverlap) {
 		this.allowOverlap = allowOverlap;
-	}
-
-	/**
-	 * @see #setBorderRadius(Number)
-	 */
-	public Number getBorderRadius() {
-		return borderRadius;
-	}
-
-	/**
-	 * The border radius in pixels for the data label.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setBorderRadius(Number borderRadius) {
-		this.borderRadius = borderRadius;
-	}
-
-	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * The border width in pixels for the data label.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
 	}
 
 	/**
