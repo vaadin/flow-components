@@ -15,8 +15,10 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -45,17 +47,32 @@ public class ComboBoxPage extends Div {
      * Creates a new instance.
      */
     public ComboBoxPage() {
+        createExternalSetValue();
         createWithUpdateProvider();
         createWithValueChangeListener();
         createWithPresetValue();
         createWithButtonRenderer();
     }
 
+    private void createExternalSetValue() {
+        ComboBox<String> comboBox = new ComboBox<>();
+
+        comboBox.setItems("foo", "bar");
+        comboBox.setId("external-selected-item");
+        comboBox.setValue("foo");
+
+        NativeButton changeSelectedItem = new NativeButton(
+                "Changed selected item", evt -> comboBox.setValue(
+                        "bar".equals(comboBox.getValue()) ? "foo" : "bar"));
+        changeSelectedItem.setId("toggle-selected-item");
+
+        add(comboBox, changeSelectedItem);
+    }
+
     private void createWithUpdateProvider() {
         ComboBox<String> comboBox = new ComboBox<>();
 
         comboBox.setItems("foo", "bar");
-
         comboBox.setId("combo");
 
         NativeButton setProvider = new NativeButton("Update data provider",
@@ -69,7 +86,11 @@ public class ComboBoxPage extends Div {
                         item -> String.valueOf(item.length())));
         setItemCaptionGenerator.setId("update-caption-gen");
 
-        add(comboBox, setProvider, setItemCaptionGenerator);
+        NativeButton setValue = new NativeButton("Update value",
+                event -> comboBox.setValue("baz"));
+        setValue.setId("update-value");
+
+        add(comboBox, setProvider, setItemCaptionGenerator, setValue);
     }
 
     private void createWithValueChangeListener() {
@@ -107,7 +128,15 @@ public class ComboBoxPage extends Div {
     }
 
     private void handleSelection(ComboBox<Title> titles) {
-        Title title = titles.getValue();
-        selectedTitle.setText(title.name());
+        selectedTitle.setText(Optional.ofNullable(titles.getValue())
+                .map(Enum::name).orElse(""));
+    }
+
+    @Override
+    public void add(Component... components) {
+        Div div = new Div(components);
+        div.getStyle().set("padding", "10px").set("borderBottom",
+                "1px solid lightgray");
+        super.add(div);
     }
 }

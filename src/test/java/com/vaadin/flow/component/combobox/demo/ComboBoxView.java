@@ -21,8 +21,11 @@ import java.util.List;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.renderer.ComponentTemplateRenderer;
 import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
@@ -33,6 +36,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route("vaadin-combo-box")
 @HtmlImport("bower_components/vaadin-valo-theme/vaadin-combo-box.html")
+@HtmlImport("frontend://flow-component-renderer.html")
 public class ComboBoxView extends DemoView {
 
     /**
@@ -98,6 +102,7 @@ public class ComboBoxView extends DemoView {
         createObjectComboBox();
         createComboBoxWithObjectStringSimpleValue();
         createComboBoxUsingTemplateRenderer();
+        createComboBoxUsingComponentRenderer();
     }
 
     private void createStringComboBox() {
@@ -219,6 +224,55 @@ public class ComboBoxView extends DemoView {
         comboBox.setId("template-selection-box");
         addCard("Using templates", "Rendering items using TemplateRenderer",
                 comboBox, message);
+    }
+
+    private void createComboBoxUsingComponentRenderer() {
+        Div message = createMessageDiv("component-selection-message");
+
+        //@formatter:off
+        // begin-source-example
+        // source-example-heading: Rendering items using ComponentTemplateRenderer
+        ComboBox<Song> comboBox = new ComboBox<>();
+        comboBox.setItemRenderer(new ComponentTemplateRenderer<>(item -> {
+            VerticalLayout container = new VerticalLayout();
+            
+            Label song = new Label(item.getName());
+            container.add(song);
+            
+            Label artist = new Label(item.getArtist());
+            artist.getStyle().set("fontSize", "smaller");
+            container.add(artist);
+            
+            return container;
+        }));
+        
+
+        List<Song> listOfSongs = createListOfSongs();
+
+        comboBox.setItems(listOfSongs);
+        comboBox.setItemLabelGenerator(Song::getName);
+
+        comboBox.addValueChangeListener(event -> {
+            if (event.getSource().isEmpty()) {
+                message.setText("No artist selected");
+            } else if (event.getOldValue() == null) {
+                message.setText(
+                        "Selected artist: " + event.getValue().getArtist());
+            } else {
+                message.setText(
+                        "Selected artist: " + event.getValue().getArtist()
+                                + "\nThe old selection was: "
+                                + event.getOldValue().getArtist());
+            }
+        });
+        // end-source-example
+        //@formatter:on
+
+        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
+        comboBox.setId("component-selection-box");
+        addCard("Using components",
+                "Rendering items using ComponentTemplateRenderer", comboBox,
+                message);
     }
 
     private List<Song> createListOfSongs() {

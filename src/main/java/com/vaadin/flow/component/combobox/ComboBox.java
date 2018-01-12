@@ -19,16 +19,23 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.data.provider.ComponentDataGenerator;
+import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
@@ -64,10 +71,20 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+    private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
-    private Element template;
+    private final Element template;
     private TemplateRenderer<T> renderer;
+
+    private List<T> itemsFromDataProvider = Collections.emptyList();
+    private Registration rendererRegistration;
+    private Registration componentRendererRegistration;
+    private boolean refreshScheduled;
+    private boolean setItemScheduled;
+
+    private T temporarySelectedItem;
+    private List<T> temporaryFilteredItems;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -83,7 +100,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
             oldValue = getValue();
         });
 
-        setItemValuePath(ITEM_LABEL_PROPERTY);
+        setItemValuePath(KEY_PROPERTY);
 
         renderer = TemplateRenderer.of("[[item.label]]");
 
@@ -149,22 +166,45 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     public void setItemRenderer(TemplateRenderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer can not be null");
 
+        unregister(componentRendererRegistration);
+        componentRendererRegistration = null;
         if (renderer instanceof ComponentTemplateRenderer) {
-            throw new IllegalArgumentException(
-                    "ComponentTemplateRenderers are not supported yet");
+            componentRendererRegistration = setupItemComponentRenderer(this,
+                    (ComponentTemplateRenderer<? extends Component, T>) renderer);
         }
         this.renderer = renderer;
         template.setProperty("innerHTML", renderer.getTemplate());
 
         TemplateRendererUtil.registerEventHandlers(renderer, template,
-                getElement(), key -> keyMapper.get(key));
+                getElement(), keyMapper::get);
+
+        unregister(rendererRegistration);
+        rendererRegistration = dataGenerator
+                .addDataGenerator((item, json) -> applyValueProviders(item,
+                        json, renderer.getValueProviders()));
         refresh();
+    }
+
+    private void unregister(Registration registration) {
+        if (registration != null) {
+            registration.remove();
+        }
+    }
+
+    private void applyValueProviders(T item, JsonObject json,
+            Map<String, ValueProvider<T, ?>> valueProviders) {
+        valueProviders.forEach((property, provider) -> json.put(property,
+                JsonSerializer.toJson(provider.apply(item))));
     }
 
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        Objects.requireNonNull(dataProvider);
+        Objects.requireNonNull(dataProvider,
+                "The data provider can not be null");
         this.dataProvider = dataProvider;
+        itemsFromDataProvider = dataProvider.fetch(new Query<>())
+                .collect(Collectors.toList());
+        setValue(getEmptyValue());
         refresh();
     }
 
@@ -178,6 +218,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * @return the list of filtered items, or empty list if none were filtered
      */
     public List<T> getFilteredItems() {
+        if (temporaryFilteredItems != null) {
+            return Collections.unmodifiableList(temporaryFilteredItems);
+        }
         JsonArray items = protectedGetFilteredItems();
         List<T> result = new ArrayList<>(items.length());
         for (int i = 0; i < items.length(); i++) {
@@ -204,7 +247,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      *            the items to show in response of a filter input
      */
     public void setFilteredItems(Collection<T> filteredItems) {
-        setFilteredItems(generateJson(filteredItems.stream()));
+        temporaryFilteredItems = new ArrayList<>(filteredItems);
+
+        runBeforeClientResponse(ui -> {
+            setFilteredItems(generateJson(temporaryFilteredItems.stream()));
+            temporaryFilteredItems = null;
+        });
     }
 
     /**
@@ -243,12 +291,42 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     @Override
     public void setValue(T value) {
-        getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
-                generateJson(value));
+        if (value == null) {
+            temporarySelectedItem = null;
+            if (getValue() != null) {
+                getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
+                        Json.createNull());
+            }
+            return;
+        }
+        if (itemsFromDataProvider.indexOf(value) < 0) {
+            throw new IllegalArgumentException(
+                    "The provided value is not part of ComboBox: " + value);
+        }
+        temporarySelectedItem = value;
+        if (setItemScheduled) {
+            return;
+        }
+        setItemScheduled = true;
+
+        runBeforeClientResponse(ui -> {
+            setItemScheduled = false;
+            if (temporarySelectedItem == null) {
+                return;
+            }
+            int updatedIndex = itemsFromDataProvider
+                    .indexOf(temporarySelectedItem);
+            ui.getPage().executeJavaScript("$0.selectedItem = $0.items[$1];",
+                    this.getElement(), updatedIndex);
+            temporarySelectedItem = null;
+        });
     }
 
     @Override
     public T getValue() {
+        if (temporarySelectedItem != null) {
+            return temporarySelectedItem;
+        }
         Serializable property = getElement()
                 .getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME);
         if (property instanceof JsonObject) {
@@ -274,7 +352,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         return array;
     }
 
-    private JsonValue generateJson(T item) {
+    private JsonObject generateJson(T item) {
         JsonObject json = Json.createObject();
         json.put(KEY_PROPERTY, keyMapper.key(item));
 
@@ -286,12 +364,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
                     item, ItemLabelGenerator.class.getSimpleName()));
         }
         json.put(ITEM_LABEL_PROPERTY, label);
-
-        Map<String, ValueProvider<T, ?>> valueProviders = renderer
-                .getValueProviders();
-        valueProviders.forEach((property, provider) -> json.put(property,
-                JsonSerializer.toJson(provider.apply(item))));
-
+        dataGenerator.generateData(item, json);
         return json;
     }
 
@@ -306,11 +379,39 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     private void refresh() {
         keyMapper.removeAll();
-        JsonArray array = generateJson(getDataProvider().fetch(new Query<>()));
-        setItems(array);
+        if (refreshScheduled) {
+            return;
+        }
+        refreshScheduled = true;
+        runBeforeClientResponse(ui -> {
+            JsonArray array = generateJson(itemsFromDataProvider.stream());
+            setItems(array);
+            refreshScheduled = false;
+        });
+
     }
 
     private void setItemValuePath(String path) {
         getElement().setProperty("itemValuePath", path == null ? "" : path);
+    }
+
+    private Registration setupItemComponentRenderer(Component owner,
+            ComponentTemplateRenderer<? extends Component, T> componentRenderer) {
+
+        Element container = new Element("div", false);
+        owner.getElement().appendVirtualChild(container);
+
+        String appId = UI.getCurrent().getInternals().getAppId();
+
+        componentRenderer.setTemplateAttribute("appid", appId);
+        componentRenderer.setTemplateAttribute("nodeid", "[[item.nodeId]]");
+
+        return dataGenerator.addDataGenerator(new ComponentDataGenerator<>(
+                componentRenderer, container, "nodeId", keyMapper));
+    }
+
+    void runBeforeClientResponse(Consumer<UI> command) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, () -> command.accept(ui)));
     }
 }

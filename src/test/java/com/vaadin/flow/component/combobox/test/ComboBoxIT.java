@@ -115,6 +115,40 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
                 "Selected artist: Haircuts for Men\nThe old selection was: Haywyre"));
     }
 
+    @Test
+    public void openComponentBox() {
+        openTabAndCheckForErrors("using-components");
+
+        WebElement comboBox = layout
+                .findElement(By.id("component-selection-box"));
+        WebElement message = layout
+                .findElement(By.id("component-selection-message"));
+
+        List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
+                "return arguments[0].items", comboBox);
+
+        items.forEach(item -> {
+            Assert.assertNotNull(item.get("key"));
+            Assert.assertNotNull(item.get("label"));
+            Assert.assertNotNull(item.get("nodeId"));
+        });
+
+        Map<String, ?> firstItem = items.get(0);
+        Assert.assertEquals("A V Club Disagrees", firstItem.get("label"));
+
+        executeScript("arguments[0].selectedItem = arguments[0].items[1]",
+                comboBox);
+
+        waitUntil(
+                driver -> message.getText().equals("Selected artist: Haywyre"));
+
+        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
+                comboBox);
+
+        waitUntil(driver -> message.getText().equals(
+                "Selected artist: Haircuts for Men\nThe old selection was: Haywyre"));
+    }
+
     @Override
     protected String getTestPath() {
         return ("/vaadin-combo-box");

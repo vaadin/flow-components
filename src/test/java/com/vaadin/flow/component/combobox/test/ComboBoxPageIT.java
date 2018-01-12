@@ -77,8 +77,7 @@ public class ComboBoxPageIT extends AbstractComponentIT {
     @Test
     public void presetValue() {
         WebElement combo = findElement(By.id("titles-with-preset-value"));
-        String value = String.valueOf(
-                executeScript("return arguments[0].selectedItem.label", combo));
+        String value = getSelectedItemLabel(combo);
         Assert.assertEquals("MRS", value);
     }
 
@@ -104,6 +103,34 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         Assert.assertEquals("Button clicked: foo", message.getText());
     }
 
+    @Test
+    public void setValue_changeDataProvider_valueIsReset() {
+        WebElement combo = findElement(By.id("combo"));
+
+        findElement(By.id("update-provider")).click();
+        waitUntil(driver -> "baz".equals(getItem(getItems(combo), 0)));
+
+        findElement(By.id("update-value")).click();
+        String value = getSelectedItemLabel(combo);
+        Assert.assertEquals("baz", value);
+
+        findElement(By.id("update-provider")).click();
+        Assert.assertNull(
+                executeScript("return arguments[0].selectedItem", combo));
+    }
+
+    @Test
+    public void setValueProgrammatically() {
+        WebElement combo = findElement(By.id("external-selected-item"));
+        Assert.assertEquals("foo", getSelectedItemLabel(combo));
+
+        findElement(By.id("toggle-selected-item")).click();
+        Assert.assertEquals("bar", getSelectedItemLabel(combo));
+
+        findElement(By.id("toggle-selected-item")).click();
+        Assert.assertEquals("foo", getSelectedItemLabel(combo));
+    }
+
     private List<?> getItems(WebElement combo) {
         List<?> items = (List<?>) getCommandExecutor()
                 .executeScript("return arguments[0].items;", combo);
@@ -118,5 +145,10 @@ public class ComboBoxPageIT extends AbstractComponentIT {
     private Object getItem(List<?> items, int index) {
         Map<?, ?> map = (Map<?, ?>) items.get(index);
         return map.get("label");
+    }
+
+    private String getSelectedItemLabel(WebElement combo) {
+        return String.valueOf(
+                executeScript("return arguments[0].selectedItem.label", combo));
     }
 }
