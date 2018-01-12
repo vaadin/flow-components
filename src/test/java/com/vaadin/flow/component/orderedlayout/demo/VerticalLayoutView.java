@@ -15,13 +15,19 @@
  */
 package com.vaadin.flow.component.orderedlayout.demo;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.demo.DemoView;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.impl.ThemeListImpl;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -57,7 +63,12 @@ public class VerticalLayoutView extends DemoView {
 
         layout.setId("default-layout");
 
-        addCard("Default layout", layout);
+        Div themeSettings = new Div(new Label(
+                "Current theme supports 'margin' and 'padding': "),
+                createToggleThemeButton(layout, "margin", layout::setMargin),
+                createToggleThemeButton(layout, "padding", layout::setPadding));
+
+        addCard("Default layout", layout, themeSettings);
     }
 
     private void createLayoutWithSpacing() {
@@ -239,4 +250,20 @@ public class VerticalLayoutView extends DemoView {
         return button;
     }
 
+    private NativeButton createToggleThemeButton(VerticalLayout layout,
+            String themeName, Consumer<Boolean> toggleAction) {
+        NativeButton toggleButton = new NativeButton(
+                String.format("Toggle %s", themeName),
+                event -> toggleAction.accept(hasNoAttributeValue(
+                        layout.getElement(), ThemeListImpl.THEME_ATTRIBUTE_NAME,
+                        themeName)));
+        toggleButton.setId(String.format("toggle-%s", themeName));
+        return toggleButton;
+    }
+
+    private boolean hasNoAttributeValue(Element element, String attribute,
+            String attributeValue) {
+        return Optional.ofNullable(element.getAttribute(attribute))
+                .map(value -> !value.contains(attributeValue)).orElse(true);
+    }
 }

@@ -37,6 +37,22 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
     public void defaultLayout() {
         WebElement vlayout = layout.findElement(By.id("default-layout"));
         assertBasicFlexPropertiesAreSet(vlayout);
+
+        checkThemeChanges("margin", true);
+        checkThemeChanges("padding", true);
+
+        Assert.assertTrue(
+                "After turning on both margin and padding, layout should contain both themes in 'theme' attribute",
+                vlayout.getAttribute("theme").contains("margin")
+                        && layout.findElement(By.id("default-layout"))
+                                .getAttribute("theme").contains("padding"));
+
+        checkThemeChanges("margin", false);
+        checkThemeChanges("padding", false);
+
+        Assert.assertNull(
+                "After turning on both margin and padding, layout should not contain 'theme' attribute",
+                vlayout.getAttribute("theme"));
     }
 
     @Test
@@ -157,4 +173,15 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         Assert.assertEquals("column", vlayout.getCssValue("flex-direction"));
     }
 
+    private void checkThemeChanges(String themeName, boolean shouldPresent) {
+        findElement(By.id(String.format("toggle-%s", themeName))).click();
+        WebElement layout = this.layout.findElement(By.id("default-layout"));
+        if (shouldPresent) {
+            waitUntil(dr -> layout.getAttribute("theme") != null
+                    && layout.getAttribute("theme").contains(themeName));
+        } else {
+            waitUntil(dr -> layout.getAttribute("theme") == null
+                    || !layout.getAttribute("theme").contains(themeName));
+        }
+    }
 }

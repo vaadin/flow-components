@@ -27,7 +27,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 @Tag("vaadin-vertical-layout")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-vertical-layout.html")
 public class VerticalLayout extends Component
-        implements FlexComponent<VerticalLayout> {
+        implements ThemableLayout, FlexComponent<VerticalLayout> {
 
     /**
      * Default constructor. Creates an empty layout.
@@ -125,5 +125,4 @@ public class VerticalLayout extends Component
     public Alignment getDefaultHorizontalComponentAlignment() {
         return getAlignItems();
     }
-
 }
