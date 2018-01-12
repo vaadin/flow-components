@@ -1,0 +1,132 @@
+---
+title: CSS Styling
+order: 6
+layout: page
+---
+
+[[css.styling]]
+= CSS Styling
+
+Chart appearance is primarily controlled by CSS style rules.
+A comprehensive list of the supported style classes can be found https://www.highcharts.com/docs/chart-design-and-style/style-by-css[here].
+
+[[css.styling.steps]]
+== Steps for styling a chart
+
+1. Create a theme file (by convention this should be `webapp/frontend/styles/shared-styles.html`). The theme's dom-module must declare `theme-for=vaadin-chart`.
+2. Declare `include="vaadin-chart-default-theme"` on the theme module's style element to customize Chart's default theme.
+3. Prefix the desired chart elements' selectors with the `:host` selector.
+4. If multiple charts are present, each one can be specifically targeted by the host selector e.g `:host(.first-chart-class)`.
+5. Import the theme file.
+
+[[css.styling.example1]]
+== Example 1: Chart with Yellow Point Markers and Red Labels
+
+shared-styles.html
+
+[source, css]
+----
+<link rel="import" href="../bower_components/vaadin-charts/vaadin-chart-default-theme.html">
+
+<dom-module id="css-style-example" theme-for="vaadin-chart">
+  <template>
+    <style include="vaadin-chart-default-theme">
+      :host(.first-chart) g.highcharts-markers > .highcharts-point {
+        fill: yellow;
+      }
+
+      :host(.first-chart) .highcharts-data-label text {
+        fill: red;
+      }
+    </style>
+  </template>
+</dom-module>
+----
+
+CssStyleExample.java
+
+[source, java]
+----
+@HtmlImport("frontend://styles/shared-styles.html")
+public class CssStyleExample extends Div {
+
+    public CssStyleExample() {
+        Chart chart = new Chart();
+        Configuration configuration = chart.getConfiguration();
+
+        configuration.getChart().setType(ChartType.LINE);
+
+        configuration.getxAxis().setCategories("Jan", "Feb", "Mar", "Apr");
+
+        DataSeries ds = new DataSeries();
+        ds.setData(7.0, 6.9, 9.5, 14.5);
+
+        DataLabels callout = new DataLabels(true);
+        callout.setShape(Shape.CALLOUT);
+        callout.setY(-12);
+        ds.get(1).setDataLabels(callout);
+        ds.get(2).setDataLabels(callout);
+        configuration.addSeries(ds);
+
+        chart.getElement().getClassList().add("first-chart");
+        add(chart);
+    }
+}
+----
+
+{nbsp} +
+[[figure.css.styling.example1]]
+.Chart with Yellow Point Markers and Red Labels
+image::img/css-styling1.png[]
+
+
+[[css.styling.example2]]
+== Example 2: Exposing a Chart element in Java for CSS Styling
+
+shared-styles.html
+
+[source, css]
+----
+<link rel="import" href="../bower_components/vaadin-charts/vaadin-chart-default-theme.html">
+
+<dom-module id="css-style-example" theme-for="vaadin-chart">
+  <template>
+    <style include="vaadin-chart-default-theme">
+      :host .huge-axis {
+        fill: red;
+        font-size: xx-large;
+      }
+    </style>
+  </template>
+</dom-module>
+----
+
+CssStyleExample.java
+
+[source, java]
+----
+@HtmlImport("frontend://styles/shared-styles.html")
+public class CssStyleExample extends Div {
+
+    public CssStyleExample() {
+        Chart chart = new Chart();
+        Configuration configuration = chart.getConfiguration();
+
+        DataSeries ds = new DataSeries();
+        ds.setData(7.0, 6.9, 9.5, 14.5);
+        configuration.addSeries(ds);
+
+        configuration.getxAxis().setCategories("Jan", "Feb", "Mar", "Apr");
+
+        // Expose the X-Axis for CSS targeting.
+        configuration.getxAxis().setClassName("huge-axis");
+
+        add(chart);
+    }
+}
+----
+
+{nbsp} +
+[[figure.css.styling.example2]]
+.Chart with a Huge X-Axis
+image::img/css-styling2.png[]
