@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2017 Vaadin Ltd.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.textfield;
 
-import java.util.Objects;
-
 import javax.annotation.Generated;
+
+import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -143,7 +143,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code autofocus} property from the webcomponent
      */
     public boolean isAutofocus() {
@@ -157,7 +157,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * <p>
      * Specify that this control should have input focus when the page loads.
      * </p>
-     *
+     * 
      * @param autofocus
      *            the boolean value to set
      */
@@ -175,7 +175,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code disabled} property from the webcomponent
      */
     public boolean isDisabled() {
@@ -189,7 +189,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * <p>
      * If true, the user cannot interact with this element.
      * </p>
-     *
+     * 
      * @param disabled
      *            the boolean value to set
      */
@@ -210,7 +210,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code autocomplete} property from the webcomponent
      */
     public String getAutocomplete() {
@@ -227,7 +227,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * https://developer.mozilla.org/en/docs
      * /Web/HTML/Element/input#attr-autocomplete
      * </p>
-     *
+     * 
      * @param autocomplete
      *            the String value to set
      */
@@ -246,7 +246,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code errorMessage} property from the webcomponent
      */
     public String getErrorMessage() {
@@ -260,7 +260,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * <p>
      * Error to show when the input value is invalid.
      * </p>
-     *
+     * 
      * @param errorMessage
      *            the String value to set
      */
@@ -279,7 +279,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code label} property from the webcomponent
      */
     public String getLabel() {
@@ -293,7 +293,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * <p>
      * String used for the label element.
      * </p>
-     *
+     * 
      * @param label
      *            the String value to set
      */
@@ -312,7 +312,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code maxlength} property from the webcomponent
      */
     public double getMaxlength() {
@@ -327,7 +327,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
      * </p>
-     *
+     * 
      * @param maxlength
      *            the double value to set
      */
@@ -346,7 +346,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code minlength} property from the webcomponent
      */
     public double getMinlength() {
@@ -361,7 +361,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
      * </p>
-     *
+     * 
      * @param minlength
      *            the double value to set
      */
@@ -379,7 +379,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code name} property from the webcomponent
      */
     public String getName() {
@@ -393,7 +393,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * <p>
      * The name of the control, which is submitted with the form data.
      * </p>
-     *
+     * 
      * @param name
      *            the String value to set
      */
@@ -411,7 +411,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code placeholder} property from the webcomponent
      */
     public String getPlaceholder() {
@@ -425,7 +425,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * <p>
      * A hint to the user of what can be entered in the control.
      * </p>
-     *
+     * 
      * @param placeholder
      *            the String value to set
      */
@@ -445,7 +445,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code readonly} property from the webcomponent
      */
     public boolean isReadonly() {
@@ -460,7 +460,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This attribute indicates that the user cannot modify the value of the
      * control.
      * </p>
-     *
+     * 
      * @param readonly
      *            the boolean value to set
      */
@@ -478,7 +478,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code required} property from the webcomponent
      */
     public boolean isRequired() {
@@ -492,7 +492,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * <p>
      * Specifies that the user must fill in a value.
      * </p>
-     *
+     * 
      * @param required
      *            the boolean value to set
      */
@@ -511,14 +511,19 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is synchronized automatically from client side when a
      * 'value-changed' event happens.
      * </p>
-     *
+     * 
      * @return the {@code value} property from the webcomponent
      */
     @Synchronize(property = "value", value = "value-changed")
     @Override
     public String getValue() {
-        return getElement().getProperty("value") == null ? getEmptyValue()
-                : getElement().getProperty("value");
+        String value = getElement().getProperty("value");
+        return value == null ? getEmptyValue() : value;
+    }
+
+    @Override
+    public String getEmptyValue() {
+        return "";
     }
 
     /**
@@ -529,14 +534,15 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * The initial value of the control. It can be used for two-way data
      * binding.
      * </p>
-     *
+     * 
      * @param value
      *            the String value to set
      */
     @Override
     public void setValue(String value) {
+        Objects.requireNonNull(value, "value cannot be null");
         if (!Objects.equals(value, getValue())) {
-            getElement().setProperty("value", value == null ? "" : value);
+            getElement().setProperty("value", value);
         }
     }
 
@@ -550,7 +556,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is synchronized automatically from client side when a
      * 'invalid-changed' event happens.
      * </p>
-     *
+     * 
      * @return the {@code invalid} property from the webcomponent
      */
     @Synchronize(property = "invalid", value = "invalid-changed")
@@ -565,7 +571,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * <p>
      * This property is set to true when the control value is invalid.
      * </p>
-     *
+     * 
      * @param invalid
      *            the boolean value to set
      */
@@ -584,7 +590,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code preventInvalidInput} property from the webcomponent
      */
     public boolean isPreventInvalidInput() {
@@ -599,7 +605,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
      * When set to true, user is prevented from typing a value that conflicts
      * with the given {@code pattern}.
      * </p>
-     *
+     * 
      * @param preventInvalidInput
      *            the boolean value to set
      */
@@ -648,10 +654,12 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
     /**
      * Adds a listener for {@code iron-form-element-register} events fired by
      * the webcomponent.
-     *
+     * 
      * @param listener
      *            the listener
+     * @return a {@link Registration} for removing the event listener
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addIronFormElementRegisterListener(
             ComponentEventListener<IronFormElementRegisterEvent<R>> listener) {
         return addListener(IronFormElementRegisterEvent.class,
@@ -669,10 +677,12 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
     /**
      * Adds a listener for {@code iron-form-element-unregister} events fired by
      * the webcomponent.
-     *
+     * 
      * @param listener
      *            the listener
+     * @return a {@link Registration} for removing the event listener
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addIronFormElementUnregisterListener(
             ComponentEventListener<IronFormElementUnregisterEvent<R>> listener) {
         return addListener(IronFormElementUnregisterEvent.class,
@@ -698,10 +708,12 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
     /**
      * Adds a listener for {@code invalid-changed} events fired by the
      * webcomponent.
-     *
+     * 
      * @param listener
      *            the listener
+     * @return a {@link Registration} for removing the event listener
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent<R>> listener) {
         return addListener(InvalidChangeEvent.class,
@@ -711,14 +723,14 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
     /**
      * Adds the given components as children of this component at the slot
      * 'prefix'.
-     *
+     * 
      * @param components
      *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a
+     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a
+     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
@@ -733,14 +745,14 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
     /**
      * Adds the given components as children of this component at the slot
      * 'suffix'.
-     *
+     * 
      * @param components
      *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a
+     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a
+     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
@@ -754,7 +766,7 @@ public class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R>>
 
     /**
      * Removes the given child components from this component.
-     *
+     * 
      * @param components
      *            The components to remove.
      * @throws IllegalArgumentException

@@ -63,7 +63,7 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
      * @param listener
      *            the value change listener
      *
-     * @see #addValueChangeListener(com.vaadin.ui.common.HasValue.ValueChangeListener)
+     * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public PasswordField(ValueChangeListener<PasswordField, String> listener) {
         addValueChangeListener(listener);
@@ -100,17 +100,12 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
      *
      * @see #setLabel(String)
      * @see #setValue(String)
-     * @see #addValueChangeListener(com.vaadin.ui.common.HasValue.ValueChangeListener)
+     * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public PasswordField(String label, String initialValue,
             ValueChangeListener<PasswordField, String> listener) {
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
-    }
-
-    @Override
-    public String getEmptyValue() {
-        return "";
     }
 }

@@ -82,7 +82,7 @@ public class TextField extends GeneratedVaadinTextField<TextField>
      * @param listener
      *            the value change listener
      *
-     * @see #addValueChangeListener(com.vaadin.ui.common.HasValue.ValueChangeListener)
+     * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public TextField(ValueChangeListener<TextField, String> listener) {
         addValueChangeListener(listener);
@@ -97,7 +97,7 @@ public class TextField extends GeneratedVaadinTextField<TextField>
      * @param listener
      *            the value change listener
      * @see #setLabel(String)
-     * @see #addValueChangeListener(com.vaadin.ui.common.HasValue.ValueChangeListener)
+     * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public TextField(String label,
             ValueChangeListener<TextField, String> listener) {
@@ -118,17 +118,12 @@ public class TextField extends GeneratedVaadinTextField<TextField>
      *
      * @see #setLabel(String)
      * @see #setValue(String)
-     * @see #addValueChangeListener(com.vaadin.ui.common.HasValue.ValueChangeListener)
+     * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public TextField(String label, String initialValue,
             ValueChangeListener<TextField, String> listener) {
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
-    }
-
-    @Override
-    public String getEmptyValue() {
-        return "";
     }
 }
