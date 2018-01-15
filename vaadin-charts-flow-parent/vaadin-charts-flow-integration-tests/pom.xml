@@ -30,12 +30,12 @@
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>saucelabs-repository</id>
-            <url>http://repository-saucelabs.forge.cloudbees.com/release</url>
-        </repository>
-    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>vaadin-addons</id>
+            <url>http://maven.vaadin.com/vaadin-addons</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
