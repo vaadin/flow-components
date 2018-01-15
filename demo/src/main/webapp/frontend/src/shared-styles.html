@@ -15,36 +15,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="shared-styles" theme-for="vaadin-chart">
   <template>
     <style include="vaadin-chart-default-theme">
-      :host(.columnlineandpie) g.highcharts-markers > .highcharts-point {
-        fill: white;
-      }
-
-      :host(.basiclinewithcallouts) .highcharts-data-label-box {
+      :host(.BasicLineWithCallouts) .highcharts-data-label-box {
         fill: blanchedalmond;
       }
 
-      :host(.basiclinewithcallouts) .highcharts-data-label text {
+      :host(.BasicLineWithCallouts) .highcharts-data-label text {
         fill: #808080;
       }
 
-      :host(.basiclinewithcallouts) .highcharts-color-1 {
+      :host(.BasicLineWithCallouts) .highcharts-color-1 {
         fill: #ec6464;
         stroke: #ec6464;
       }
 
-      :host(.multipleaxes) .highcharts-color-0, .y2 {
-        fill: #3090f0;
-        stroke: #3090f0;
+      :host(.ColumnlineAndPie) g.highcharts-markers > .highcharts-point {
+        fill: white;
       }
 
-      :host(.multipleaxes) .highcharts-color-1, .y3 {
-        fill: #98df58;
+      :host(.CompareMultipleSeries) .highcharts-color-0 {
+        stroke: #3090F0;
+      }
+
+      :host(.CompareMultipleSeries) .highcharts-color-1 {
+        stroke: #ec6464;
+      }
+
+      :host(.CompareMultipleSeries) .highcharts-color-2 {
         stroke: #98df58;
       }
 
-      :host(.multipleaxes) .highcharts-color-2, .y1 {
-        fill: #ec6464;
-        stroke: #ec6464;
+      :host(.CompareMultipleSeries) .highcharts-plot-lines-0 .highcharts-plot-line {
+        stroke: #c0c0c0;
       }
 
       :host(.GaugeWithDualAxes) .kmh .highcharts-minor-tick {
@@ -82,6 +83,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       :host(.GaugeWithDualAxes) .highcharts-color-0 .highcharts-pivot {
         fill: #000;
         stroke: #000;
+      }
+
+      :host(.MultipleAxes) .highcharts-color-0, .y2 {
+        fill: #3090f0;
+        stroke: #3090f0;
+      }
+
+      :host(.MultipleAxes) .highcharts-color-1, .y3 {
+        fill: #98df58;
+        stroke: #98df58;
+      }
+
+      :host(.MultipleAxes) .highcharts-color-2, .y1 {
+        fill: #ec6464;
+        stroke: #ec6464;
       }
     </style>
   </template>
