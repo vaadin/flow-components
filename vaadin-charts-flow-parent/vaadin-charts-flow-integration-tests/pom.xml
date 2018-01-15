@@ -58,7 +58,7 @@
         <dependency>
             <groupId>com.saucelabs</groupId>
             <artifactId>ci-sauce</artifactId>
-            <version>1.129</version>
+            <version>1.132</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
