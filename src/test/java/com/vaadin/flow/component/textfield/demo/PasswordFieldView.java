@@ -29,8 +29,8 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-password-field")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
+@HtmlImport("frontend://bower_components/vaadin-text-field/theme/lumo/vaadin-password-field.html")
+@HtmlImport("frontend://bower_components/vaadin-button/theme/lumo/vaadin-button.html")
 public class PasswordFieldView extends DemoView {
 
     @Override

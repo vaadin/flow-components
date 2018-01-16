@@ -28,7 +28,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-text-area")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
+@HtmlImport("frontend://bower_components/vaadin-text-field/theme/lumo/vaadin-text-area.html")
 public class TextAreaView extends DemoView {
 
     @Override
