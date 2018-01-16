@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -36,6 +37,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-horizontal-layout")
+@HtmlImport("frontend://bower_components/vaadin-ordered-layout/theme/lumo/vaadin-horizontal-layout.html")
 public class HorizontalLayoutView extends DemoView {
 
     @Override
