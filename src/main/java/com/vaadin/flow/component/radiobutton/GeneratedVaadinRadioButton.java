@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2017 Vaadin Ltd.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,20 +15,19 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentSupplier;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasClickListeners;
+import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.component.HasComponents;
 
 /**
  * <p>
@@ -38,15 +37,10 @@ import com.vaadin.flow.shared.Registration;
  * {@code <vaadin-radio-button>} is a Polymer element for radio buttons.
  * </p>
  * <p>
- * {@code }
- * <code>html &lt;vaadin-radio-button value=&quot;foo&quot;&gt;Foo&lt;/vaadin-radio-button&gt; {@code }</code>
+ * &lt;vaadin-radio-button
+ * value=&quot;foo&quot;&gt;Foo&lt;/vaadin-radio-button&gt;
  * </p>
  * <h3>Styling</h3>
- * <p>
- * <a href=
- * "https://cdn.vaadin.com/vaadin-valo-theme/0.3.1/demo/customization.html"
- * >Generic styling/theming documentation</a>
- * </p>
  * <p>
  * The following shadow DOM parts are available for styling:
  * </p>
@@ -58,21 +52,12 @@ import com.vaadin.flow.shared.Registration;
  * </tr>
  * </thead> <tbody>
  * <tr>
- * <td>{@code wrapper}</td>
- * <td>The {@code <label>} element which wrapps the radio button and
- * [part=&quot;label&quot;]</td>
- * </tr>
- * <tr>
- * <td>{@code native-radio}</td>
- * <td>The {@code <input type="radio">} element</td>
- * </tr>
- * <tr>
  * <td>{@code radio}</td>
- * <td>The {@code <span>} element for a custom graphical radio button</td>
+ * <td>The radio button element</td>
  * </tr>
  * <tr>
  * <td>{@code label}</td>
- * <td>The {@code <span>} element for slotted text/HTML label</td>
+ * <td>The label content element</td>
  * </tr>
  * </tbody>
  * </table>
@@ -109,15 +94,20 @@ import com.vaadin.flow.shared.Registration;
  * </tr>
  * </tbody>
  * </table>
+ * <p>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
+ * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.RadioButtonElement#1.0.0-alpha8",
+        "WebComponent: Vaadin.RadioButtonElement#1.0.0-alpha11",
         "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-radio-button")
-@HtmlImport("frontend://bower_components/vaadin-radio-button/vaadin-radio-button.html")
+@HtmlImport("frontend://bower_components/vaadin-radio-button/src/vaadin-radio-button.html")
 public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
         extends Component
-        implements ComponentSupplier<R>, HasStyle, Focusable<R>, HasComponents {
+        implements HasStyle, Focusable<R>, HasClickListeners<R>, HasComponents {
 
     /**
      * <p>
@@ -129,7 +119,7 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code autofocus} property from the webcomponent
      */
     public boolean isAutofocus() {
@@ -143,7 +133,7 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
      * <p>
      * Specify that this control should have input focus when the page loads.
      * </p>
-     *
+     * 
      * @param autofocus
      *            the boolean value to set
      */
@@ -161,7 +151,7 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code disabled} property from the webcomponent
      */
     public boolean isDisabled() {
@@ -175,7 +165,7 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
      * <p>
      * If true, the user cannot interact with this element.
      * </p>
-     *
+     * 
      * @param disabled
      *            the boolean value to set
      */
@@ -186,7 +176,7 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
     /**
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     *
+     * 
      * @return the {@code name} property from the webcomponent
      */
     public String getName() {
@@ -197,7 +187,7 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
      * @param name
      *            the String value to set
      */
-    public void setName(java.lang.String name) {
+    public void setName(String name) {
         getElement().setProperty("name", name == null ? "" : name);
     }
 
@@ -211,7 +201,7 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
      * This property is synchronized automatically from client side when a
      * 'checked-changed' event happens.
      * </p>
-     *
+     * 
      * @return the {@code checked} property from the webcomponent
      */
     @Synchronize(property = "checked", value = "checked-changed")
@@ -226,7 +216,7 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
      * <p>
      * True if the radio button is checked.
      * </p>
-     *
+     * 
      * @param checked
      *            the boolean value to set
      */
@@ -244,7 +234,7 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code value} property from the webcomponent
      */
     public String getValue() {
@@ -258,11 +248,11 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
      * <p>
      * The value for this element.
      * </p>
-     *
+     * 
      * @param value
      *            the String value to set
      */
-    public void setValue(java.lang.String value) {
+    public void setValue(String value) {
         getElement().setProperty("value", value == null ? "" : value);
     }
 
@@ -277,10 +267,12 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
     /**
      * Adds a listener for {@code checked-changed} events fired by the
      * webcomponent.
-     *
+     * 
      * @param listener
      *            the listener
+     * @return a {@link Registration} for removing the event listener
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addCheckedChangeListener(
             ComponentEventListener<CheckedChangeEvent<R>> listener) {
         return addListener(CheckedChangeEvent.class,
@@ -289,7 +281,7 @@ public class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
 
     /**
      * Adds the given components as children of this component.
-     *
+     * 
      * @param components
      *            the components to add
      * @see HasComponents#add(Component...)
