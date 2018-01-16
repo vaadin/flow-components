@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.button;
 
-import javax.swing.Icon;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
