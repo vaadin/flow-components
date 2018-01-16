@@ -35,7 +35,6 @@ public class CheckBoxPageIT extends AbstractComponentIT {
         open();
 
         WebElement checkbox = findElement(By.id("checkbox"));
-        Assert.assertTrue(getInShadowRoot(checkbox, By.id("nativeCheckbox"))
-                .isSelected());
+        Assert.assertEquals("true", checkbox.getAttribute("checked"));
     }
 }

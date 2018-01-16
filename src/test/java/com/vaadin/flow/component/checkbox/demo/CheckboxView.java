@@ -28,7 +28,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-checkbox")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-checkbox.html")
+@HtmlImport("frontend://bower_components/vaadin-checkbox/theme/lumo/vaadin-checkbox.html")
 public class CheckboxView extends DemoView {
 
     @Override

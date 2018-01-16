@@ -41,8 +41,7 @@ public class CheckboxIT extends ComponentDemoTest {
     @Test
     public void disabledCheckbox() {
         WebElement checkbox = layout.findElement(By.id("disabled-checkbox"));
-        Assert.assertFalse("Disabled checkbox should be disabled",
-                getInShadowRoot(checkbox, By.id("nativeCheckbox")).isEnabled());
+        Assert.assertEquals("true", checkbox.getAttribute("disabled"));
     }
 
     @Test
@@ -51,8 +50,7 @@ public class CheckboxIT extends ComponentDemoTest {
                 .findElement(By.id("value-change-checkbox"));
         WebElement message = layout
                 .findElement(By.id("value-change-checkbox-message"));
-        scrollIntoViewAndClick(
-                getInShadowRoot(checkbox, By.id("nativeCheckbox")));
+        checkbox.click();
         Assert.assertEquals("Clicking checkbox should update message div",
                 "Checkbox value changed from 'false' to 'true'",
                 message.getText());
