@@ -29,7 +29,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd.
  */
 @Route("vaadin-progress-bar")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-progress-bar.html")
+@HtmlImport("frontend://bower_components/vaadin-progress-bar/theme/lumo/vaadin-progress-bar.html")
 public class ProgressBarView extends DemoView {
 
     @Override
