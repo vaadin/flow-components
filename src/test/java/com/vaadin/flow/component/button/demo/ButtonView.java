@@ -30,7 +30,7 @@ import com.vaadin.flow.router.Route;
  * View for {@link Button} demo.
  */
 @Route("vaadin-button")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
+@HtmlImport("frontend://bower_components/vaadin-button/theme/lumo/vaadin-button.html")
 public class ButtonView extends DemoView {
     private Div message;
 
