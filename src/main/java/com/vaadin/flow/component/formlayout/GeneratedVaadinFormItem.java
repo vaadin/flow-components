@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2017 Vaadin Ltd.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,15 +15,14 @@
  */
 package com.vaadin.flow.component.formlayout;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentSupplier;
-import com.vaadin.flow.component.HasClickListeners;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasClickListeners;
+import com.vaadin.flow.component.ComponentSupplier;
+import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.HasComponents;
 
 /**
  * <p>
@@ -38,23 +37,27 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * content, and also has a separate named {@code label} slot:
  * </p>
  * <p>
- * {@code }
- * <code>html &lt;vaadin-form-item&gt; &lt;label slot=&quot;label&quot;&gt;Label aside&lt;/label&gt; &lt;input&gt; &lt;/vaadin-form-item&gt; {@code }</code>
+ * &lt;vaadin-form-item&gt; &lt;label slot=&quot;label&quot;&gt;Label
+ * aside&lt;/label&gt; &lt;input&gt; &lt;/vaadin-form-item&gt;
  * </p>
  * <p>
  * Any content can be used. For instance, you can have multiple input elements
  * with surrounding text. The label can be an element of any type:
  * </p>
  * <p>
- * {@code }
- * <code>html &lt;vaadin-form-item&gt; &lt;span slot=&quot;label&quot;&gt;Date of Birth&lt;/span&gt; &lt;input placeholder=&quot;YYYY&quot; size=&quot;4&quot;&gt; - &lt;input placeholder=&quot;MM&quot; size=&quot;2&quot;&gt; - &lt;input placeholder=&quot;DD&quot; size=&quot;2&quot;&gt;&lt;br&gt; &lt;em&gt;Example: 1900-01-01&lt;/em&gt; &lt;/vaadin-form-item&gt; {@code }</code>
+ * &lt;vaadin-form-item&gt; &lt;span slot=&quot;label&quot;&gt;Date of
+ * Birth&lt;/span&gt; &lt;input placeholder=&quot;YYYY&quot;
+ * size=&quot;4&quot;&gt; - &lt;input placeholder=&quot;MM&quot;
+ * size=&quot;2&quot;&gt; - &lt;input placeholder=&quot;DD&quot;
+ * size=&quot;2&quot;&gt;&lt;br&gt; &lt;em&gt;Example: 1900-01-01&lt;/em&gt;
+ * &lt;/vaadin-form-item&gt;
  * </p>
  * <p>
  * The label is optional and can be omitted:
  * </p>
  * <p>
- * {@code }
- * <code>html &lt;vaadin-form-item&gt; &lt;input type=&quot;checkbox&quot;&gt; Subscribe to our Newsletter &lt;/vaadin-form-item&gt; {@code }</code>
+ * &lt;vaadin-form-item&gt; &lt;input type=&quot;checkbox&quot;&gt; Subscribe to
+ * our Newsletter &lt;/vaadin-form-item&gt;
  * </p>
  * <p>
  * By default, the {@code label} slot content is displayed aside of the input
@@ -62,8 +65,9 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * {@code label} slot content is displayed on top:
  * </p>
  * <p>
- * {@code }
- * <code>html &lt;vaadin-form-item label-position=&quot;top&quot;&gt; &lt;label slot=&quot;label&quot;&gt;Label on top&lt;/label&gt; &lt;input&gt; &lt;/vaadin-form-item&gt; {@code }</code>
+ * &lt;vaadin-form-item label-position=&quot;top&quot;&gt; &lt;label
+ * slot=&quot;label&quot;&gt;Label on top&lt;/label&gt; &lt;input&gt;
+ * &lt;/vaadin-form-item&gt;
  * </p>
  * <p>
  * <strong>Note:</strong> Normally, {@code <vaadin-form-item>} is used as a
@@ -80,15 +84,16 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * {@code full-width} class:
  * </p>
  * <p>
- * {@code }
- * <code>html &lt;vaadin-form-item&gt; &lt;label slot=&quot;label&quot;&gt;Label&lt;/label&gt; &lt;input class=&quot;full-width&quot;&gt; &lt;/vaadin-form-item&gt; {@code }</code>
+ * &lt;vaadin-form-item&gt; &lt;label
+ * slot=&quot;label&quot;&gt;Label&lt;/label&gt; &lt;input
+ * class=&quot;full-width&quot;&gt; &lt;/vaadin-form-item&gt;
  * </p>
  * <h3>Styling</h3>
  * <p>
  * The {@code label-position} host attribute can be used to target the label on
  * top state:
  * </p>
- *
+ * 
  * <pre>
  * <code>
  * &lt;dom-module id="my-form-item-theme" theme-for="vaadin-form-item"&gt;
@@ -97,7 +102,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  *       :host {
  *         /&#42; default state styles, label aside &#42;/
  *       }
- *
+ * 
  *       :host([label-position="top"]) {
  *         /&#42; label on top state styles &#42;/
  *       }
@@ -153,26 +158,32 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * </tr>
  * </tbody>
  * </table>
+ * <p>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
+ * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.FormItemElement#1.0.3", "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.FormItemElement#2.0.0-alpha3",
+        "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-form-item")
-@HtmlImport("frontend://bower_components/vaadin-form-layout/vaadin-form-item.html")
+@HtmlImport("frontend://bower_components/vaadin-form-layout/src/vaadin-form-item.html")
 public class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<R>>
-        extends Component implements ComponentSupplier<R>, HasStyle,
-        HasClickListeners<R>, HasComponents {
+        extends Component implements HasStyle, HasClickListeners<R>,
+        ComponentSupplier<R>, HasComponents {
 
     /**
      * Adds the given components as children of this component at the slot
      * 'label'.
-     *
+     * 
      * @param components
      *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a
+     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a
+     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
@@ -206,7 +217,7 @@ public class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<R>>
 
     /**
      * Adds the given components as children of this component.
-     *
+     * 
      * @param components
      *            the components to add
      * @see HasComponents#add(Component...)

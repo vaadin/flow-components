@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2017 Vaadin Ltd.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,16 +15,14 @@
  */
 package com.vaadin.flow.component.formlayout;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentSupplier;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ComponentSupplier;
+import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-
 import elemental.json.JsonObject;
+import com.vaadin.flow.component.HasComponents;
 
 /**
  * <p>
@@ -35,15 +33,27 @@ import elemental.json.JsonObject;
  * responsive layout for form elements.
  * </p>
  * <p>
- * {@code }`html <vaadin-form-layout>
+ * &lt;vaadin-form-layout&gt;
  * </p>
- * <vaadin-form-item> <label slot="label">First Name</label>
- * <input class="full-width" value="Jane"> </vaadin-form-item>
- * <vaadin-form-item> <label slot="label">Last Name</label>
- * <input class="full-width" value="Doe"> </vaadin-form-item> <vaadin-form-item>
- * <label slot="label">Email</label>
- * <input class="full-width" value="jane.doe@example.com"> </vaadin-form-item>
- * </vaadin-form-layout> {@code }`
+ * <p>
+ * &lt;vaadin-form-item&gt; &lt;label slot=&quot;label&quot;&gt;First
+ * Name&lt;/label&gt; &lt;input class=&quot;full-width&quot;
+ * value=&quot;Jane&quot;&gt; &lt;/vaadin-form-item&gt;
+ * </p>
+ * <p>
+ * &lt;vaadin-form-item&gt; &lt;label slot=&quot;label&quot;&gt;Last
+ * Name&lt;/label&gt; &lt;input class=&quot;full-width&quot;
+ * value=&quot;Doe&quot;&gt; &lt;/vaadin-form-item&gt;
+ * </p>
+ * <p>
+ * &lt;vaadin-form-item&gt; &lt;label
+ * slot=&quot;label&quot;&gt;Email&lt;/label&gt; &lt;input
+ * class=&quot;full-width&quot; value=&quot;jane.doe@example.com&quot;&gt;
+ * &lt;/vaadin-form-item&gt;
+ * </p>
+ * <p>
+ * &lt;/vaadin-form-layout&gt;
+ * </p>
  * <p>
  * It supports any child elements as layout items.
  * </p>
@@ -61,28 +71,49 @@ import elemental.json.JsonObject;
  * first text field spans on two columns:
  * </p>
  * <p>
- * {@code }`html <vaadin-form-layout>
+ * &lt;vaadin-form-layout&gt;
  * </p>
- * <vaadin-form-item colspan="2"> <label slot="label">Address</label>
- * <input class="full-width"> </vaadin-form-item> <vaadin-form-item>
- * <label slot="label">First Name</label>
- * <input class="full-width" value="Jane"> </vaadin-form-item>
- * <vaadin-form-item> <label slot="label">Last Name</label>
- * <input class="full-width" value="Doe"> </vaadin-form-item>
- * </vaadin-form-layout> {@code }`
+ * <p>
+ * &lt;vaadin-form-item colspan=&quot;2&quot;&gt; &lt;label
+ * slot=&quot;label&quot;&gt;Address&lt;/label&gt; &lt;input
+ * class=&quot;full-width&quot;&gt; &lt;/vaadin-form-item&gt;
+ * </p>
+ * <p>
+ * &lt;vaadin-form-item&gt; &lt;label slot=&quot;label&quot;&gt;First
+ * Name&lt;/label&gt; &lt;input class=&quot;full-width&quot;
+ * value=&quot;Jane&quot;&gt; &lt;/vaadin-form-item&gt;
+ * </p>
+ * <p>
+ * &lt;vaadin-form-item&gt; &lt;label slot=&quot;label&quot;&gt;Last
+ * Name&lt;/label&gt; &lt;input class=&quot;full-width&quot;
+ * value=&quot;Doe&quot;&gt; &lt;/vaadin-form-item&gt;
+ * </p>
+ * <p>
+ * &lt;/vaadin-form-layout&gt;
+ * </p>
  * <h3>Explicit New Row</h3>
  * <p>
- * Use the {@code <br>
- * } line break element to wrap the items on a new row:
+ * Use the {@code <br>} line break element to wrap the items on a new row:
  * </p>
  * <p>
- * {@code }`html <vaadin-form-layout>
+ * &lt;vaadin-form-layout&gt;
  * </p>
- * <vaadin-form-item> <label slot="label">Email</label>
- * <input class="full-width"> </vaadin-form-item> <br>
- * <vaadin-form-item> <label slot="label">Confirm Email</label>
- * <input class="full-width"> </vaadin-form-item> </vaadin-form-layout>
- * {@code }`
+ * <p>
+ * &lt;vaadin-form-item&gt; &lt;label
+ * slot=&quot;label&quot;&gt;Email&lt;/label&gt; &lt;input
+ * class=&quot;full-width&quot;&gt; &lt;/vaadin-form-item&gt;
+ * </p>
+ * <p>
+ * &lt;br&gt;
+ * </p>
+ * <p>
+ * &lt;vaadin-form-item&gt; &lt;label slot=&quot;label&quot;&gt;Confirm
+ * Email&lt;/label&gt; &lt;input class=&quot;full-width&quot;&gt;
+ * &lt;/vaadin-form-item&gt;
+ * </p>
+ * <p>
+ * &lt;/vaadin-form-layout&gt;
+ * </p>
  * <h3>CSS Properties Reference</h3>
  * <p>
  * The following custom CSS properties are available on the
@@ -105,12 +136,13 @@ import elemental.json.JsonObject;
  * </table>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.FormLayoutElement#1.0.3", "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.FormLayoutElement#2.0.0-alpha3",
+        "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-form-layout")
-@HtmlImport("frontend://bower_components/vaadin-form-layout/vaadin-form-layout.html")
+@HtmlImport("frontend://bower_components/vaadin-form-layout/src/vaadin-form-layout.html")
 public class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
         extends Component
-        implements ComponentSupplier<R>, HasStyle, HasComponents {
+        implements HasStyle, ComponentSupplier<R>, HasComponents {
 
     /**
      * <p>
@@ -127,54 +159,32 @@ public class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
      * {@code &quot;top&quot;}. At least one item is required.
      * </p>
      * <h4>Examples</h4>
-     * <dl>
-     * <dt>{@code [{columns: 1}]}</dt>
-     * <dd>
      * <p>
-     * The layout is always a single column, labels aside.</dd>
-     * <dt>
-     *
-     * <pre>
-     * <code>[
-     {minWidth: 0, columns: 1},
-     {minWidth: '40em', columns: 2}
-    ]</code>
-     * </pre>
-     *
-     * </dt>
-     * <dd>
+     * {@code javascript formLayout.responsiveSteps = [ columns: 1}]; // The
+     * layout is always a single column, labels aside.}
+     * </p>
      * <p>
-     * Sets two responsive steps:
-     * <ol>
-     * <li>When the layout width is < 40em, one column, labels aside.
-     * <li>Width >= 40em, two columns, labels aside.
-     * </ol>
-     * </dd>
-     * <dt>
-     *
-     * <pre>
-     * <code>[
-     {minWidth: 0, columns: 1, labelsPosition: 'top'},
-     {minWidth: '20em', columns: 1},
-     {minWidth: '40em', columns: 2}
-    ]</code>
-     * </pre>
-     *
-     * </dt>
-     * <dd>
+     * {@code javascript
+    formLayout.responsiveSteps = [
+     * 
+     * {minWidth: 0, columns: 1}, {minWidth: '40em', columns: 2} ]; // Sets two
+     * responsive steps: // 1. When the layout width is &lt; 40em, one column,
+     * labels aside. // 2. Width &gt;= 40em, two columns, labels aside.}
+     * </p>
      * <p>
-     * Default value. Three responsive steps:
-     * <ol>
-     * <li>Width < 20em, one column, labels on top.
-     * <li>20em <= width < 40em, one column, labels aside.
-     * <li>Width >= 40em, two columns, labels aside.
-     * </ol>
-     * </dd>
-     * </dl>
+     * {@code javascript
+    formLayout.responsiveSteps = [
+     * 
+     * {minWidth: 0, columns: 1, labelsPosition: 'top'}, {minWidth: '20em',
+     * columns: 1}, {minWidth: '40em', columns: 2} ]; // Default value. Three
+     * responsive steps: // 1. Width &lt; 20em, one column, labels on top. // 2.
+     * 20em &lt;= width &lt; 40em, one column, labels aside. // 3. Width &gt;=
+     * 40em, two columns, labels aside.}
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     *
+     * </p>
+     * 
      * @return the {@code responsiveSteps} property from the webcomponent
      */
     protected JsonObject protectedGetResponsiveSteps() {
@@ -196,56 +206,33 @@ public class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
      * {@code &quot;top&quot;}. At least one item is required.
      * </p>
      * <h4>Examples</h4>
-     * <dl>
-     * <dt>{@code [{columns: 1}]}</dt>
-     * <dd>
      * <p>
-     * The layout is always a single column, labels aside.</dd>
-     * <dt>
-     *
-     * <pre>
-     * <code>[
-     {minWidth: 0, columns: 1},
-     {minWidth: '40em', columns: 2}
-    ]</code>
-     * </pre>
-     *
-     * </dt>
-     * <dd>
+     * {@code javascript formLayout.responsiveSteps = [ columns: 1}]; // The
+     * layout is always a single column, labels aside.}
+     * </p>
      * <p>
-     * Sets two responsive steps:
-     * <ol>
-     * <li>When the layout width is < 40em, one column, labels aside.
-     * <li>Width >= 40em, two columns, labels aside.
-     * </ol>
-     * </dd>
-     * <dt>
-     *
-     * <pre>
-     * <code>[
-     {minWidth: 0, columns: 1, labelsPosition: 'top'},
-     {minWidth: '20em', columns: 1},
-     {minWidth: '40em', columns: 2}
-    ]</code>
-     * </pre>
-     *
-     * </dt>
-     * <dd>
+     * {@code javascript
+    formLayout.responsiveSteps = [
+     * 
+     * {minWidth: 0, columns: 1}, {minWidth: '40em', columns: 2} ]; // Sets two
+     * responsive steps: // 1. When the layout width is &lt; 40em, one column,
+     * labels aside. // 2. Width &gt;= 40em, two columns, labels aside.}
+     * </p>
      * <p>
-     * Default value. Three responsive steps:
-     * <ol>
-     * <li>Width < 20em, one column, labels on top.
-     * <li>20em <= width < 40em, one column, labels aside.
-     * <li>Width >= 40em, two columns, labels aside.
-     * </ol>
-     * </dd>
-     * </dl>
-     *
+     * {@code javascript
+    formLayout.responsiveSteps = [
+     * 
+     * {minWidth: 0, columns: 1, labelsPosition: 'top'}, {minWidth: '20em',
+     * columns: 1}, {minWidth: '40em', columns: 2} ]; // Default value. Three
+     * responsive steps: // 1. Width &lt; 20em, one column, labels on top. // 2.
+     * 20em &lt;= width &lt; 40em, one column, labels aside. // 3. Width &gt;=
+     * 40em, two columns, labels aside.}
+     * </p>
+     * 
      * @param responsiveSteps
      *            the JsonObject value to set
      */
-    protected void setResponsiveSteps(
-            elemental.json.JsonObject responsiveSteps) {
+    protected void setResponsiveSteps(JsonObject responsiveSteps) {
         getElement().setPropertyJson("responsiveSteps", responsiveSteps);
     }
 
@@ -256,17 +243,17 @@ public class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
      * <p>
      * Set custom CSS property values and update the layout.
      * </p>
-     *
-     * @param ...args
+     * 
+     * @param _Args
      *            Missing documentation!
      */
-    protected void updateStyles(elemental.json.JsonObject _Args) {
+    protected void updateStyles(JsonObject _Args) {
         getElement().callFunction("updateStyles", _Args);
     }
 
     /**
      * Adds the given components as children of this component.
-     *
+     * 
      * @param components
      *            the components to add
      * @see HasComponents#add(Component...)

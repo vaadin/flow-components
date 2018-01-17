@@ -23,16 +23,16 @@ import java.util.stream.Collectors;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Binder.Binding;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
@@ -49,11 +49,11 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-form-layout")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-button.html")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-form-layout.html")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-date-picker.html")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-checkbox.html")
+@HtmlImport("frontend://bower_components/vaadin-text-field/theme/lumo/vaadin-text-field.html")
+@HtmlImport("frontend://bower_components/vaadin-button/theme/lumo/vaadin-button.html")
+@HtmlImport("frontend://bower_components/vaadin-form-layout/theme/lumo/vaadin-form-layout.html")
+@HtmlImport("frontend://bower_components/vaadin-date-picker/theme/lumo/vaadin-date-picker.html")
+@HtmlImport("frontend://bower_components/vaadin-checkbox/theme/lumo/vaadin-checkbox.html")
 public class FormLayoutView extends DemoView {
 
     @Override
