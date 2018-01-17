@@ -15,22 +15,20 @@
  */
 package com.vaadin.flow.component.tabs;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentSupplier;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.ComponentSupplier;
+import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.shared.Registration;
-
 import elemental.json.JsonArray;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.component.HasComponents;
 
 /**
  * <p>
@@ -99,13 +97,13 @@ import elemental.json.JsonArray;
  * </tbody>
  * </table>
  * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.TabsElement#2.0.0-alpha5", "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.TabsElement#2.0.0-alpha6", "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-tabs")
 @HtmlImport("frontend://bower_components/vaadin-tabs/src/vaadin-tabs.html")
 public class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>> extends

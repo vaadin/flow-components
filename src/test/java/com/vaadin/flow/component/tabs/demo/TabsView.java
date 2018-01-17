@@ -42,6 +42,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd.
  */
 @Route("vaadin-tabs")
+@HtmlImport("frontend://bower_components/vaadin-tabs/theme/lumo/vaadin-tab.html")
 public class TabsView extends DemoView {
 
     @Override
