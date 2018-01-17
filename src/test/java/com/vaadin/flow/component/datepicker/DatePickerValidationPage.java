@@ -15,18 +15,50 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.testutil.ValidationTestView;
 
 /**
  * View for testing validation with {@link DatePicker}.
  */
 @Route("date-picker-validation")
-public class DatePickerValidationPage extends ValidationTestView {
+public class DatePickerValidationPage extends Div {
 
-    @Override
-    protected HasValidation getValidationComponent() {
-        return new DatePicker();
+    final String STATUS = "The Invalid state of the DatePicker is ";
+
+    public DatePickerValidationPage() {
+        initView();
+    }
+
+    private void initView() {
+        DatePicker datePicker = new DatePicker();
+        Label label = new Label();
+        datePicker.setId("field");
+        add(datePicker);
+
+        NativeButton button = new NativeButton("Make the input invalid");
+        button.setId("invalidate");
+        button.addClickListener(event -> {
+            datePicker.setErrorMessage("Invalidated from server");
+            datePicker.setInvalid(true);
+            label.setText(STATUS + String.valueOf(datePicker.isInvalid()));
+        });
+        add(button);
+
+        button = new NativeButton("Make the input valid");
+        button.setId("validate");
+        button.addClickListener(event -> {
+            datePicker.setErrorMessage(null);
+            datePicker.setInvalid(false);
+            label.setText(STATUS + String.valueOf(datePicker.isInvalid()));
+        });
+
+        datePicker.addValueChangeListener(event -> {
+            label.setText(STATUS + String.valueOf(datePicker.isInvalid()));
+        });
+        add(button);
+        add(label);
     }
 }

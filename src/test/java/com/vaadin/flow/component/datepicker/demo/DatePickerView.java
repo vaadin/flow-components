@@ -31,7 +31,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-date-picker")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-date-picker.html")
+@HtmlImport("frontend://bower_components/vaadin-date-picker/theme/lumo/vaadin-date-picker.html")
 public class DatePickerView extends DemoView {
 
     @Override

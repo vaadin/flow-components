@@ -15,14 +15,97 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.testutil.AbstractValidationTest;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Integration tests for {@link DatePicker} validation.
  */
 @TestPath("date-picker-validation")
-public class DatePickerValidationPageIT extends AbstractValidationTest {
+public class DatePickerValidationPageIT extends AbstractComponentIT {
+
+    private WebElement field;
+    private WebElement invalidate;
+    private WebElement validate;
+
+    @Before
+    public void init() {
+        open();
+
+        waitForElementPresent(By.id("field"));
+        field = findElement(By.id("field"));
+        invalidate = findElement(By.id("invalidate"));
+        validate = findElement(By.id("validate"));
+    }
+
+    @Test
+    public void invalidateWhenEmpty() {
+        scrollIntoViewAndClick(invalidate);
+        assertInvalid();
+    }
+
+    @Test
+    public void invalidateWhenNotEmpty() {
+        setValue("not-empty");
+        scrollIntoViewAndClick(invalidate);
+        assertInvalid();
+    }
+
+    @Test
+    public void invalidateAndValidateAgain() {
+        scrollIntoViewAndClick(invalidate);
+        assertInvalid();
+        scrollIntoViewAndClick(validate);
+        assertValid();
+        scrollIntoViewAndClick(invalidate);
+        assertInvalid();
+    }
+
+    @Test
+    public void invalidatewhenEmptyAndThenBlur() {
+        scrollIntoViewAndClick(invalidate);
+        scrollIntoViewAndClick(field);
+        setValue("not-empty");
+        assertInvalid();
+    }
+
+    @Test
+    public void invalidateWhenNotEmptyAndThenBlur() {
+        setValue("not-empty");
+        scrollIntoViewAndClick(invalidate);
+        assertInvalid();
+        scrollIntoViewAndClick(field);
+        executeScript("document.body.click()");
+        assertInvalid();
+    }
+
+    private void assertInvalid() {
+        String invalid = field.getAttribute("invalid");
+        Assert.assertTrue("The element should be in invalid state",
+                Boolean.parseBoolean(invalid));
+
+        String errorMessage = field.getAttribute("errorMessage");
+        Assert.assertEquals("Invalidated from server", errorMessage);
+    }
+
+    private void assertValid() {
+        String invalid = field.getAttribute("invalid");
+        Assert.assertFalse("The element should be in valid state",
+                Boolean.parseBoolean(invalid));
+
+        String errorMessage = field.getAttribute("errorMessage");
+        Assert.assertEquals("", errorMessage);
+    }
+
+    private void setValue(String value) {
+        field.sendKeys(value);
+        executeScript("arguments[0].close()", field);
+    }
 
 }
