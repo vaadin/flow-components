@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.upload.demo;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,16 +26,13 @@ import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
-
 import org.apache.commons.io.IOUtils;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
@@ -53,6 +54,7 @@ import com.vaadin.flow.server.StreamResource;
  * @author Vaadin Ltd
  */
 @Route("vaadin-upload")
+@HtmlImport("frontend://bower_components/vaadin-upload/theme/lumo/vaadin-upload.html")
 public class UploadView extends DemoView {
 
     @Override
