@@ -34,6 +34,13 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
     private Component secondaryComponent;
 
     /**
+     * numeration of all available orientation for VaadinSplitLayout component
+     */
+    public enum Orientation {
+        VERTICAL, HORIZONTAL;
+    }
+
+    /**
      * Constructs an empty VaadinSplitLayout.
      */
     public SplitLayout() {
@@ -52,6 +59,17 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
             Component secondaryComponent) {
         addToPrimary(primaryComponent);
         addToSecondary(secondaryComponent);
+    }
+
+    /**
+     * Set the orientation of the SplitLayout.
+     * 
+     * @param orientation
+     *            the orientation of the SplitLayout. Valid enumerate values are
+     *            VERTICAL and HORIZONTAL.
+     */
+    public void setOrientation(Orientation orientation) {
+        this.setOrientation(orientation.toString().toLowerCase());
     }
 
     /**
@@ -136,7 +154,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         double primary = Math.min(Math.max(position, 0), 100);
         double secondary = 100 - primary;
         String styleName;
-        if (isVertical()) {
+        if (getOrientation() == "vertical") {
             styleName = ElementConstants.STYLE_HEIGHT;
         } else {
             styleName = ElementConstants.STYLE_WIDTH;

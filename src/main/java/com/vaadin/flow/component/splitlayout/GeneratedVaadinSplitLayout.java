@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2017 Vaadin Ltd.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.splitlayout;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentSupplier;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasClickListeners;
+import com.vaadin.flow.component.ComponentSupplier;
+import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.dom.Element;
 
 /**
  * <p>
@@ -37,24 +37,24 @@ import com.vaadin.flow.shared.Registration;
  * layout for two content elements with a draggable splitter between them.
  * </p>
  * <p>
- * {@code }`html <vaadin-split-layout>
+ * &lt;vaadin-split-layout&gt; &lt;div&gt;First content element&lt;/div&gt;
+ * &lt;div&gt;Second content element&lt;/div&gt; &lt;/vaadin-split-layout&gt;
  * </p>
- * <div>First content element</div> <div>Second content element</div>
- * </vaadin-split-layout> {@code }`
  * <h3>Horizontal and Vertical Layouts</h3>
  * <p>
- * By default, the split is horizontal, meaning that the content elements are
- * positioned side by side in a flex container with a horizontal layout.
+ * By default, the split's orientation is horizontal, meaning that the content
+ * elements are positioned side by side in a flex container with a horizontal
+ * layout.
  * </p>
  * <p>
- * You can change the split mode to vertical by adding the {@code vertical}
- * attribute:
+ * You can change the split mode to vertical by setting the {@code orientation}
+ * attribute to {@code &quot;vertical&quot;}:
  * </p>
  * <p>
- * {@code }`html <vaadin-split-layout vertical>
+ * &lt;vaadin-split-layout orientation=&quot;vertical&quot;&gt;
+ * &lt;div&gt;Content on the top&lt;/div&gt; &lt;div&gt;Content on the
+ * bottom&lt;/div&gt; &lt;/vaadin-split-layout&gt;
  * </p>
- * <div>Content on the top</div> <div>Content on the bottom</div>
- * </vaadin-split-layout> {@code }`
  * <h3>Layouts Combination</h3>
  * <p>
  * For the layout contents, we usually use {@code <div>} elements in the
@@ -66,14 +66,14 @@ import com.vaadin.flow.shared.Registration;
  * element inside another split layout:
  * </p>
  * <p>
- * {@code }`html <vaadin-split-layout>
+ * &lt;vaadin-split-layout&gt; &lt;div&gt;First content element&lt;/div&gt;
+ * &lt;vaadin-split-layout orientation=&quot;vertical&quot;&gt;
+ * &lt;div&gt;Second content element&lt;/div&gt; &lt;div&gt;Third content
+ * element&lt;/div&gt; &lt;/vaadin-split-layout&gt; &lt;/vaadin-split-layout&gt;
  * </p>
- * <div>First content element</div> <vaadin-split-layout vertical> <div>Second
- * content element</div> <div>Third content element</div> </vaadin-split-layout>
- * </vaadin-split-layout> {@code }`
  * <p>
- * You can also trigger the vertical mode by setting the property:
- * {@code splitLayout.vertical = true;}.
+ * You can also trigger the vertical mode in JavaScript by setting the property:
+ * {@code splitLayout.orientation = &quot;vertical&quot;;}.
  * </p>
  * <h3>Split Layout Element Height</h3>
  * <p>
@@ -86,10 +86,10 @@ import com.vaadin.flow.shared.Registration;
  * any block element:
  * </p>
  * <p>
- * {@code }`html <vaadin-split-layout style="height: 200px;">
+ * &lt;vaadin-split-layout style=&quot;height: 200px;&quot;&gt; &lt;div&gt;First
+ * content element&lt;/div&gt; &lt;div&gt;Second content element&lt;/div&gt;
+ * &lt;/vaadin-split-layout&gt;
  * </p>
- * <div>First content element</div> <div>Second content element</div>
- * </vaadin-split-layout> {@code }`
  * <p>
  * It is possible to define percentage height as well. Note that you have to set
  * the parent height in order to make percentages work correctly. In the
@@ -98,21 +98,21 @@ import com.vaadin.flow.shared.Registration;
  * the {@code <body>}:
  * </p>
  * <p>
- * {@code }`html
+ * &lt;body style=&quot;height: 100vh; margin: 0;&quot;&gt;
+ * &lt;vaadin-split-layout style=&quot;height: 100%;&quot;&gt;
+ * &lt;div&gt;First&lt;/div&gt; &lt;div&gt;Second&lt;/div&gt;
+ * &lt;/vaadin-split-layout&gt; &lt;/body&gt;
  * </p>
- * <body style="height: 100vh; margin: 0;">
- * <vaadin-split-layout style="height: 100%;"> <div>First</div>
- * <div>Second</div> </vaadin-split-layout> </body> {@code }`
  * <p>
  * Alternatively, you can use a flexbox layout to make
  * {@code <vaadin-split-layout>} fill up the parent:
  * </p>
  * <p>
- * {@code }`html
+ * &lt;body style=&quot;height: 100vh; margin: 0; display: flex;&quot;&gt;
+ * &lt;vaadin-split-layout style=&quot;flex: 1;&quot;&gt;
+ * &lt;div&gt;First&lt;/div&gt; &lt;div&gt;Second&lt;/div&gt;
+ * &lt;/vaadin-split-layout&gt; &lt;/body&gt;
  * </p>
- * <body style="height: 100vh; margin: 0; display: flex;">
- * <vaadin-split-layout style="flex: 1;"> <div>First</div> <div>Second</div>
- * </vaadin-split-layout> </body> {@code }`
  * <h3>Initial Splitter Position</h3>
  * <p>
  * The initial splitter position is determined from the sizes of the content
@@ -126,13 +126,13 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  * <p>
  * When setting initial sizes with relative units, such as percentages, it is
- * recommended to assing the size for both content elements:
+ * recommended to assign the size for both content elements:
  * </p>
  * <p>
- * {@code }`html <vaadin-split-layout>
+ * &lt;vaadin-split-layout&gt; &lt;div style=&quot;width: 75%;&quot;&gt;Three
+ * fourths&lt;/div&gt; &lt;div style=&quot;width: 25%;&quot;&gt;One
+ * fourth&lt;/div&gt; &lt;/vaadin-split-layout&gt;
  * </p>
- * <div style="width: 75%;">Three fourths</div> <div style="width: 25%;">One
- * fourth</div> </vaadin-split-layout> {@code }`
  * <h3>Size Limits</h3>
  * <p>
  * The {@code min-width}/{@code min-height}, and {@code max-width}/
@@ -144,10 +144,10 @@ import com.vaadin.flow.shared.Registration;
  * to avoid size conflicts:
  * </p>
  * <p>
- * {@code }`html <vaadin-split-layout>
+ * &lt;vaadin-split-layout&gt; &lt;div style=&quot;min-width: 50px; max-width:
+ * 150px;&quot;&gt;First&lt;/div&gt; &lt;div&gt;Second&lt;/div&gt;
+ * &lt;/vaadin-split-layout&gt;
  * </p>
- * <div style="min-width: 50px; max-width: 150px;">First</div> <div>Second</div>
- * </vaadin-split-layout> {@code }`
  * <h3>Resize Notification</h3>
  * <p>
  * This element implements {@code IronResizableBehavior} to notify the nested
@@ -179,29 +179,37 @@ import com.vaadin.flow.shared.Registration;
  * </tr>
  * </tbody>
  * </table>
+ * <p>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
+ * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.SplitLayoutElement#3.0.0", "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.SplitLayoutElement#4.0.0-alpha4",
+        "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-split-layout")
-@HtmlImport("frontend://bower_components/vaadin-split-layout/vaadin-split-layout.html")
+@HtmlImport("frontend://bower_components/vaadin-split-layout/src/vaadin-split-layout.html")
 public class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
-        extends Component implements ComponentSupplier<R>, HasStyle {
+        extends Component
+        implements HasStyle, HasClickListeners<R>, ComponentSupplier<R> {
 
     /**
      * <p>
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Change the split layout to vertical
+     * The split layout's orientation. Possible values are:
+     * {@code horizontal|vertical}.
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
-     * @return the {@code vertical} property from the webcomponent
+     * 
+     * @return the {@code orientation} property from the webcomponent
      */
-    public boolean isVertical() {
-        return getElement().getProperty("vertical", false);
+    public String getOrientation() {
+        return getElement().getProperty("orientation");
     }
 
     /**
@@ -209,14 +217,16 @@ public class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Change the split layout to vertical
+     * The split layout's orientation. Possible values are:
+     * {@code horizontal|vertical}.
      * </p>
-     *
-     * @param vertical
-     *            the boolean value to set
+     * 
+     * @param orientation
+     *            the String value to set
      */
-    public void setVertical(boolean vertical) {
-        getElement().setProperty("vertical", vertical);
+    public void setOrientation(String orientation) {
+        getElement().setProperty("orientation",
+                orientation == null ? "" : orientation);
     }
 
     @DomEvent("iron-resize")
@@ -227,6 +237,14 @@ public class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
         }
     }
 
+    /**
+     * Adds a listener for {@code iron-resize} events fired by the webcomponent.
+     * 
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addIronResizeListener(
             ComponentEventListener<IronResizeEvent<R>> listener) {
         return addListener(IronResizeEvent.class,
@@ -236,14 +254,14 @@ public class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
     /**
      * Adds the given components as children of this component at the slot
      * 'primary'.
-     *
+     * 
      * @param components
      *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a
+     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a
+     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
@@ -258,14 +276,14 @@ public class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
     /**
      * Adds the given components as children of this component at the slot
      * 'secondary'.
-     *
+     * 
      * @param components
      *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a
+     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a
+     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
@@ -279,7 +297,7 @@ public class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
 
     /**
      * Removes the given child components from this component.
-     *
+     * 
      * @param components
      *            The components to remove.
      * @throws IllegalArgumentException

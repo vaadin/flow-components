@@ -18,8 +18,10 @@ package com.vaadin.flow.component.splitlayout.demo;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -29,6 +31,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-split-layout")
+@HtmlImport("frontend://bower_components/vaadin-split-layout/theme/lumo/vaadin-split-layout.html")
 public class SplitLayoutView extends DemoView {
 
     private static final String FIRST_CONTENT_TEXT = "First content component";
@@ -62,7 +65,7 @@ public class SplitLayoutView extends DemoView {
         // begin-source-example
         // source-example-heading: Vertical Split Layout
         SplitLayout layout = new SplitLayout();
-        layout.setVertical(true);
+        layout.setOrientation(Orientation.VERTICAL);
         layout.addToPrimary(new Label("Top content component"));
         layout.addToSecondary(new Label("Bottom content component"));
         // end-source-example
@@ -78,7 +81,7 @@ public class SplitLayoutView extends DemoView {
         // begin-source-example
         // source-example-heading: Layout Combination
         SplitLayout secondLayout = new SplitLayout();
-        secondLayout.setVertical(true);
+        secondLayout.setOrientation(Orientation.VERTICAL);
         secondLayout.addToPrimary(secondLabel);
         secondLayout.addToSecondary(thirdLabel);
         SplitLayout layout = new SplitLayout();
