@@ -142,15 +142,15 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 .filter(element -> "Select Row"
                         .equals(element.getAttribute("aria-label")))
                 .collect(Collectors.toList());
-        clickCheckbox(checkboxes.get(0));
-        clickCheckbox(checkboxes.get(1));
+        checkboxes.get(0).click();
+        checkboxes.get(1).click();
         Assert.assertEquals(
                 getSelectionMessage(GridView.items.subList(1, 5),
                         GridView.items.subList(2, 5), true),
                 messageDiv.getText());
         assertRowsSelected(grid, 2, 5);
 
-        clickCheckbox(checkboxes.get(5));
+        checkboxes.get(5).click();
         Assert.assertTrue(isRowSelected(grid, 5));
         clickElementWithJs(selectBtn);
         assertRowsSelected(grid, 0, 5);
@@ -677,10 +677,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
     private List<WebElement> getCells(WebElement grid) {
         return grid.findElements(By.tagName("vaadin-grid-cell-content"));
-    }
-
-    private void clickCheckbox(WebElement checkbox) {
-        clickElementWithJs(getInShadowRoot(checkbox, By.id("nativeCheckbox")));
     }
 
     @Override

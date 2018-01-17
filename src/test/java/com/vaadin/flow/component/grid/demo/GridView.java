@@ -58,8 +58,8 @@ import com.vaadin.flow.router.Route;
  * View for {@link Grid} demo.
  */
 @Route("vaadin-grid")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-grid.html")
-@HtmlImport("bower_components/vaadin-valo-theme/vaadin-text-field.html")
+@HtmlImport("frontend://bower_components/vaadin-grid/theme/lumo/vaadin-grid.html")
+@HtmlImport("frontend://bower_components/vaadin-text-field/theme/lumo/vaadin-text-field.html")
 public class GridView extends DemoView {
 
     public static List<Person> items = new ArrayList<>();

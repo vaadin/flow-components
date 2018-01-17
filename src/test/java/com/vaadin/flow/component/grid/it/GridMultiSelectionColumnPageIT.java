@@ -53,7 +53,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         WebElement selectCheckbox = grid
                 .findElements(By.tagName("vaadin-checkbox")).get(5);
         Assert.assertEquals("true", selectCheckbox.getAttribute("checked"));
-        getInShadowRoot(selectCheckbox, By.id("nativeCheckbox")).click();
+        selectCheckbox.click();
         Assert.assertNull(selectCheckbox.getAttribute("checked"));
         Assert.assertNull(selectAllCheckbox.getAttribute("checked"));
         Assert.assertEquals(

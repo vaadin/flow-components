@@ -94,10 +94,10 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@HtmlImport("frontend://bower_components/vaadin-grid/vaadin-grid.html")
-@HtmlImport("frontend://bower_components/vaadin-grid/vaadin-grid-column.html")
-@HtmlImport("frontend://bower_components/vaadin-grid/vaadin-grid-sorter.html")
-@HtmlImport("frontend://bower_components/vaadin-checkbox/vaadin-checkbox.html")
+@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid.html")
+@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column.html")
+@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-sorter.html")
+@HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
 @HtmlImport("frontend://flow-grid-component-renderer.html")
 @JavaScript("frontend://gridConnector.js")
 public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
