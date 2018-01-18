@@ -249,4 +249,25 @@ public class Notification
                 + "></flow-component-renderer>";
         templateElement.setProperty("innerHTML", template);
     }
+
+    /**
+     * Opens or closes the notification.
+     * <p>
+     * Note: You don't need to add the component anywhere before opening it.
+     * Since {@code <vaadin-notification>}'s location in the DOM doesn't really
+     * matter, opening a notification will automatically add it to the
+     * {@code <body>} if it's not yet attached anywhere.
+     * 
+     * @param opened
+     *            {@code true} to open the notification, {@code false} to close
+     *            it
+     */
+    @Override
+    public void setOpened(boolean opened) {
+        if (opened && !getElement().getNode().isAttached()
+                && UI.getCurrent() != null) {
+            UI.getCurrent().add(this);
+        }
+        super.setOpened(opened);
+    }
 }

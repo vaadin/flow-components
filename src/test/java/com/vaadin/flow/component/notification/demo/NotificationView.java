@@ -50,7 +50,7 @@ public class NotificationView extends DemoView {
         // end-source-example
         button.setId("default-notification-button");
         notification.setId("default-notification");
-        addCard("Default Notification", notification, button);
+        addCard("Default Notification", button);
     }
 
     private void createNotificationWithPosition() {
@@ -64,7 +64,7 @@ public class NotificationView extends DemoView {
         // end-source-example
         button.setId("position-notification-button");
         notification.setId("position-notification");
-        addCard("Notification with position", notification, button);
+        addCard("Notification with position", button);
     }
 
     private void createNotificationUsingStaticConvenienceMethod() {
@@ -94,6 +94,6 @@ public class NotificationView extends DemoView {
         notification.setId("component-notification");
         content.setId("label-inside-notification");
         buttonInside.setId("button-inside-notification");
-        addCard("Notification with components", notification, button);
+        addCard("Notification with components", button);
     }
 }
