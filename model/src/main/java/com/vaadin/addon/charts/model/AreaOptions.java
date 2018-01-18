@@ -195,14 +195,14 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setLinkedTo(String linkedTo);
 
     /**
-     * @see #setNegativeFillColor(Color)
+     * @see #setNegativeFillColor(boolean)
      */
-    public abstract Color getNegativeFillColor();
+    public abstract boolean isNegativeFillColor();
 
     /**
      * A separate color for the negative part of the area.
      */
-    public abstract void setNegativeFillColor(Color negativeFillColor);
+    public abstract void setNegativeFillColor(boolean negativeFillColor);
 
     /**
      * @see #setPointInterval(Number)

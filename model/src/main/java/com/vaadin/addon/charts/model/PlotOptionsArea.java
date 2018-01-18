@@ -29,7 +29,7 @@ public class PlotOptionsArea extends AreaOptions {
 	private String linecap;
 	private String linkedTo;
 	private Marker marker;
-	private Color negativeFillColor;
+	private boolean negativeFillColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -528,16 +528,16 @@ public class PlotOptionsArea extends AreaOptions {
 	}
 
 	/**
-	 * @see #setNegativeFillColor(Color)
+	 * @see #setNegativeFillColor(boolean)
 	 */
-	public Color getNegativeFillColor() {
+	public boolean isNegativeFillColor() {
 		return negativeFillColor;
 	}
 
 	/**
 	 * A separate color for the negative part of the area.
 	 */
-	public void setNegativeFillColor(Color negativeFillColor) {
+	public void setNegativeFillColor(boolean negativeFillColor) {
 		this.negativeFillColor = negativeFillColor;
 	}
 
