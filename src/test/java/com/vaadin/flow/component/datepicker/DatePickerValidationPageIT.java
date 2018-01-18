@@ -15,12 +15,18 @@
  */
 package com.vaadin.flow.component.datepicker;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.stream.IntStream;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
+import com.google.common.base.Strings;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -54,6 +60,7 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
     public void invalidateWhenNotEmpty() {
         setValue("not-empty");
         scrollIntoViewAndClick(invalidate);
+        assertServerValueField("null");
         assertInvalid();
     }
 
@@ -68,21 +75,23 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void invalidatewhenEmptyAndThenBlur() {
-        scrollIntoViewAndClick(invalidate);
-        scrollIntoViewAndClick(field);
-        setValue("not-empty");
+    public void validateAndInvalidateAgainWithValues() {
+        setValue("1/1/2018");
+        assertValid();
+        assertServerValueField("2018-01-01");
+        setValue("asfda");
         assertInvalid();
+        assertServerValueField("null");
+        setValue("1/2/2018");
+        assertValid();
+        assertServerValueField("2018-01-02");
     }
 
     @Test
-    public void invalidateWhenNotEmptyAndThenBlur() {
-        setValue("not-empty");
+    public void invalidatewhenEmptyAndThenInputValidValue() {
         scrollIntoViewAndClick(invalidate);
-        assertInvalid();
-        scrollIntoViewAndClick(field);
-        executeScript("document.body.click()");
-        assertInvalid();
+        setValue("1/1/2018");
+        assertValid();
     }
 
     private void assertInvalid() {
@@ -100,12 +109,20 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
                 Boolean.parseBoolean(invalid));
 
         String errorMessage = field.getAttribute("errorMessage");
-        Assert.assertEquals("", errorMessage);
+        Assert.assertTrue("Expected no value for errorMessage",
+                Strings.isNullOrEmpty(errorMessage));
+    }
+
+    private void assertServerValueField(String text) {
+        assertTrue(findElement(By.id("server-side-value")).getText()
+                .contains(text));
     }
 
     private void setValue(String value) {
-        field.sendKeys(value);
-        executeScript("arguments[0].close()", field);
-    }
+        IntStream.range(0, 10).forEach(i -> field.sendKeys(Keys.BACK_SPACE));
 
+        field.sendKeys(value);
+        executeScript("document.body.click()");
+
+    }
 }
