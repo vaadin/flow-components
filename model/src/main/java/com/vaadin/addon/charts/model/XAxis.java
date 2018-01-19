@@ -27,7 +27,6 @@ public class XAxis extends Axis {
 	private String description;
 	private Boolean endOnTick;
 	private Number floor;
-	private DashStyle gridLineDashStyle;
 	private Number gridZIndex;
 	private String id;
 	private Labels labels;
@@ -38,12 +37,9 @@ public class XAxis extends Axis {
 	private Number minPadding;
 	private Number minRange;
 	private Number minTickInterval;
-	private DashStyle minorGridLineDashStyle;
-	private Color minorTickColor;
 	private String minorTickInterval;
 	private Number minorTickLength;
 	private TickPosition minorTickPosition;
-	private Number minorTickWidth;
 	private Number offset;
 	private Boolean opposite;
 	private ArrayList<PlotBand> plotBands;
@@ -62,7 +58,6 @@ public class XAxis extends Axis {
 	private Number tickPixelInterval;
 	private TickPosition tickPosition;
 	private Number[] tickPositions;
-	private Number tickWidth;
 	private TickmarkPlacement tickmarkPlacement;
 	private AxisTitle title;
 	private AxisType type;
@@ -344,25 +339,6 @@ public class XAxis extends Axis {
 	}
 
 	/**
-	 * @see #setGridLineDashStyle(DashStyle)
-	 */
-	public DashStyle getGridLineDashStyle() {
-		return gridLineDashStyle;
-	}
-
-	/**
-	 * The dash or dot style of the grid lines. For possible values, see <a
-	 * href=
-	 * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/series-dashstyle-all/"
-	 * >this demonstration</a>.
-	 * <p>
-	 * Defaults to: Solid
-	 */
-	public void setGridLineDashStyle(DashStyle gridLineDashStyle) {
-		this.gridLineDashStyle = gridLineDashStyle;
-	}
-
-	/**
 	 * @see #setGridZIndex(Number)
 	 */
 	public Number getGridZIndex() {
@@ -573,41 +549,6 @@ public class XAxis extends Axis {
 	}
 
 	/**
-	 * @see #setMinorGridLineDashStyle(DashStyle)
-	 */
-	public DashStyle getMinorGridLineDashStyle() {
-		return minorGridLineDashStyle;
-	}
-
-	/**
-	 * The dash or dot style of the minor grid lines. For possible values, see
-	 * <a href=
-	 * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/series-dashstyle-all/"
-	 * >this demonstration</a>.
-	 * <p>
-	 * Defaults to: Solid
-	 */
-	public void setMinorGridLineDashStyle(DashStyle minorGridLineDashStyle) {
-		this.minorGridLineDashStyle = minorGridLineDashStyle;
-	}
-
-	/**
-	 * @see #setMinorTickColor(Color)
-	 */
-	public Color getMinorTickColor() {
-		return minorTickColor;
-	}
-
-	/**
-	 * Color for the minor tick marks.
-	 * <p>
-	 * Defaults to: #999999
-	 */
-	public void setMinorTickColor(Color minorTickColor) {
-		this.minorTickColor = minorTickColor;
-	}
-
-	/**
 	 * @see #setMinorTickInterval(String)
 	 */
 	public String getMinorTickInterval() {
@@ -673,22 +614,6 @@ public class XAxis extends Axis {
 	 */
 	public void setMinorTickPosition(TickPosition minorTickPosition) {
 		this.minorTickPosition = minorTickPosition;
-	}
-
-	/**
-	 * @see #setMinorTickWidth(Number)
-	 */
-	public Number getMinorTickWidth() {
-		return minorTickWidth;
-	}
-
-	/**
-	 * The pixel width of the minor tick mark.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setMinorTickWidth(Number minorTickWidth) {
-		this.minorTickWidth = minorTickWidth;
 	}
 
 	/**
@@ -1115,31 +1040,6 @@ public class XAxis extends Axis {
 	 */
 	public void setTickPositions(Number[] tickPositions) {
 		this.tickPositions = tickPositions;
-	}
-
-	/**
-	 * @see #setTickWidth(Number)
-	 */
-	public Number getTickWidth() {
-		return tickWidth;
-	}
-
-	/**
-	 * <p>
-	 * The pixel width of the major tick marks.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke width is given in the
-	 * <code>.highcharts-tick</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setTickWidth(Number tickWidth) {
-		this.tickWidth = tickWidth;
 	}
 
 	/**

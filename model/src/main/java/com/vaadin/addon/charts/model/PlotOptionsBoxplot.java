@@ -28,7 +28,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	private Number edgeWidth;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
-	private Color fillColor;
 	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private Number groupPadding;
@@ -353,22 +352,6 @@ public class PlotOptionsBoxplot extends AbstractPlotOptions {
 	 */
 	public void setExposeElementToA11y(Boolean exposeElementToA11y) {
 		this.exposeElementToA11y = exposeElementToA11y;
-	}
-
-	/**
-	 * @see #setFillColor(Color)
-	 */
-	public Color getFillColor() {
-		return fillColor;
-	}
-
-	/**
-	 * The fill color of the box.
-	 * <p>
-	 * Defaults to: #ffffff
-	 */
-	public void setFillColor(Color fillColor) {
-		this.fillColor = fillColor;
 	}
 
 	/**

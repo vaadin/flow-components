@@ -352,16 +352,6 @@ public abstract class Axis extends AbstractConfigurationObject {
     public abstract void setFloor(Number floor);
 
     /**
-     * @see #setGridLineDashStyle(DashStyle)
-     */
-    public abstract DashStyle getGridLineDashStyle();
-
-    /**
-     * The dash or dot style of the grid lines.
-     */
-    public abstract void setGridLineDashStyle(DashStyle gridLineDashStyle);
-
-    /**
      * @see #setGridZIndex(Number)
      */
     public abstract Number getGridZIndex();
@@ -498,26 +488,6 @@ public abstract class Axis extends AbstractConfigurationObject {
     public abstract void setMinTickInterval(Number minTickInterval);
 
     /**
-     * @see #setMinorGridLineDashStyle(DashStyle)
-     */
-    public abstract DashStyle getMinorGridLineDashStyle();
-
-    /**
-     * The dash or dot style of the minor grid lines.
-     */
-    public abstract void setMinorGridLineDashStyle(DashStyle minorGridLineDashStyle);
-
-    /**
-     * @see #setMinorTickColor(Color)
-     */
-    public abstract Color getMinorTickColor();
-
-    /**
-     * Color for the minor tick marks.
-     */
-    public abstract void setMinorTickColor(Color minorTickColor);
-
-    /**
      * @see #setMinorTickInterval(String)
      */
     public abstract String getMinorTickInterval();
@@ -568,16 +538,6 @@ public abstract class Axis extends AbstractConfigurationObject {
      * one of <code>inside</code> and <code>outside</code>.
      */
     public abstract void setMinorTickPosition(TickPosition minorTickPosition);
-
-    /**
-     * @see #setMinorTickWidth(Number)
-     */
-    public abstract Number getMinorTickWidth();
-
-    /**
-     * The pixel width of the minor tick mark.
-     */
-    public abstract void setMinorTickWidth(Number minorTickWidth);
 
     /**
      * @see #setOffset(Number)
@@ -842,16 +802,6 @@ public abstract class Axis extends AbstractConfigurationObject {
      * <code>tickInterval</code>.
      */
     public abstract void setTickPositions(Number[] tickPositions);
-
-    /**
-     * @see #setTickWidth(Number)
-     */
-    public abstract Number getTickWidth();
-
-    /**
-     * The pixel width of the major tick marks.
-     */
-    public abstract void setTickWidth(Number tickWidth);
 
     /**
      * @see #setTickmarkPlacement(TickmarkPlacement)

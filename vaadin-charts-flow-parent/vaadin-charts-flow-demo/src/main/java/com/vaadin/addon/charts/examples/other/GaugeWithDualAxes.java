@@ -13,7 +13,6 @@ import com.vaadin.addon.charts.model.PlotOptionsGauge;
 import com.vaadin.addon.charts.model.SeriesTooltip;
 import com.vaadin.addon.charts.model.TickPosition;
 import com.vaadin.addon.charts.model.YAxis;
-import com.vaadin.addon.charts.model.style.SolidColor;
 
 public class GaugeWithDualAxes extends AbstractChartExample {
 
