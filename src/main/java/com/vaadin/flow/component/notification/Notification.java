@@ -34,7 +34,7 @@ public class Notification
 
     private Element container = new Element("div", false);
     private final Element templateElement = new Element("template");
-    
+
     /**
      * Enumeration of all available positions for notification component
      */
@@ -142,6 +142,12 @@ public class Notification
             Position position) {
         Notification notification = new Notification(text, duration, position);
         notification.open();
+        notification.addOpenedChangeListener(
+                event -> {
+                    if (notification.isOpened() == false) {
+                        notification.getElement().removeFromParent();
+                    }
+                });
         return notification;
     }
 

@@ -55,7 +55,8 @@ public class NotificationIT extends ComponentDemoTest {
     public void notificationWithStaticConvenienceMethod() {
         checkNotificationIsOpen();
         assertNotificationOverlayContent("static");
-        Assert.assertEquals(1,
+        checkNotificationIsClose();
+        Assert.assertEquals(0,
                 findElements(By.id("static-notification")).size());
     }
 
