@@ -17,9 +17,13 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
+import java.time.Instant;
 import java.util.Date;
 
 public abstract class PointOptions extends AbstractPlotOptions {
+
+    @Override
+    public abstract ChartType getChartType();
 
     /**
      * @see #setAllowPointSelect(Boolean)
@@ -50,19 +54,55 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract void setAnimation(Boolean animation);
 
     /**
+     * @see #setAnimationLimit(Number)
+     */
+    public abstract Number getAnimationLimit();
+
+    /**
+     * For some series, there is a limit that shuts down initial animation by
+     * default when the total number of points in the chart is too high. For
+     * example, for a column chart and its derivatives, animation doesn't run if
+     * there is more than 250 points totally. To disable this cap, set
+     * <code>animationLimit</code> to <code>Infinity</code>.
+     */
+    public abstract void setAnimationLimit(Number animationLimit);
+
+    /**
+     * @see #setClassName(String)
+     */
+    public abstract String getClassName();
+
+    /**
+     * A class name to apply to the series' graphical elements.
+     */
+    public abstract void setClassName(String className);
+
+    /**
+     * @see #setColorIndex(Number)
+     */
+    public abstract Number getColorIndex();
+
+    /**
+     * A specific color index to use for the series, so
+     * its graphic representations are given the class name
+     * <code>highcharts-color-{n}</code>.
+     */
+    public abstract void setColorIndex(Number colorIndex);
+
+    /**
      * @see #setCropThreshold(Number)
      */
     public abstract Number getCropThreshold();
 
     /**
      * When the series contains less points than the crop threshold, all points
-     * are drawn, event if the points fall outside the visible plot area at the
+     * are drawn, even if the points fall outside the visible plot area at the
      * current zoom. The advantage of drawing all points (including markers and
      * columns), is that animation is performed on updates. On the other hand,
      * when the series contains more points than the crop threshold, the series
      * data is cropped to only contain points that fall within the plot area.
      * The advantage of cropping away invisible points is to increase
-     * performance on large series. .
+     * performance on large series.
      */
     public abstract void setCropThreshold(Number cropThreshold);
 
@@ -91,6 +131,17 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract void setDataLabels(DataLabels dataLabels);
 
     /**
+     * @see #setDescription(String)
+     */
+    public abstract String getDescription();
+
+    /**
+     * A description of the series to add to the screen reader information about
+     * the series.
+     */
+    public abstract void setDescription(String description);
+
+    /**
      * @see #setEnableMouseTracking(Boolean)
      */
     public abstract Boolean getEnableMouseTracking();
@@ -101,6 +152,40 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * it improves performance.
      */
     public abstract void setEnableMouseTracking(Boolean enableMouseTracking);
+
+    /**
+     * @see #setExposeElementToA11y(Boolean)
+     */
+    public abstract Boolean getExposeElementToA11y();
+
+    /**
+     * By default, series are exposed to screen readers as regions. By enabling
+     * this option, the series element itself will be exposed in the same way as
+     * the data points. This is useful if the series is not used as a grouping
+     * entity in the chart, but you still want to attach a description to the
+     * series.
+     */
+    public abstract void setExposeElementToA11y(Boolean exposeElementToA11y);
+
+    /**
+     * @see #setFindNearestPointBy(Dimension)
+     */
+    public abstract Dimension getFindNearestPointBy();
+
+    /**
+     * <p>
+     * Determines whether the series should look for the nearest point in both
+     * dimensions or just the x-dimension when hovering the series. Defaults to
+     * <code>'xy'</code> for scatter series and <code>'x'</code> for most other
+     * series. If the data has duplicate x-values, it is recommended to set this
+     * to <code>'xy'</code> to allow hovering over all points.
+     * </p>
+     * <p>
+     * Applies only to series types using nearest neighbor search (not direct
+     * hover) for tooltip.
+     * </p>
+     */
+    public abstract void setFindNearestPointBy(Dimension findNearestPointBy);
 
     /**
      * @see #setGetExtremesFromAll(Boolean)
@@ -162,7 +247,15 @@ public abstract class PointOptions extends AbstractPlotOptions {
      */
     public abstract Marker getMarker();
 
+    /**
+     * Options for the point markers of line-like series.
+     */
     public abstract void setMarker(Marker marker);
+
+    public abstract String getPointDescriptionFormatter();
+
+    public abstract void setPointDescriptionFormatter(
+            String _fn_pointDescriptionFormatter);
 
     /**
      * @see #setPointInterval(Number)
@@ -255,6 +348,17 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * <code>false</code> for linked series.
      */
     public abstract void setShowInLegend(Boolean showInLegend);
+
+    /**
+     * @see #setSkipKeyboardNavigation(Boolean)
+     */
+    public abstract Boolean getSkipKeyboardNavigation();
+
+    /**
+     * Whether or not to skip past the
+     * points in this series for keyboard navigation.
+     */
+    public abstract void setSkipKeyboardNavigation(Boolean skipKeyboardNavigation);
 
     /**
      * @see #setSoftThreshold(Boolean)
@@ -403,11 +507,38 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract void setCompare(Compare compare);
 
     /**
+     * @see #setCompareBase(Number)
+     */
+    public abstract Number getCompareBase();
+
+    /**
+     * This option dictates whether to use 0 or 100 as the
+     * base of comparison.
+     */
+    public abstract void setCompareBase(Number compareBase);
+
+    /**
      * @see #setDataGrouping(DataGrouping)
      */
     public abstract DataGrouping getDataGrouping();
 
+    /**
+     * Data grouping is the concept of sampling the data values into larger
+     * blocks in order to ease readability and increase performance of the
+     * charts.
+     */
     public abstract void setDataGrouping(DataGrouping dataGrouping);
+
+    /**
+     * @see #setGapUnit(String)
+     */
+    public abstract String getGapUnit();
+
+    /**
+     * Together with <code>gapSize</code>, this option defines where to draw
+     * gaps in the graph.
+     */
+    public abstract void setGapUnit(String gapUnit);
 
     /**
      * @see #setLegendIndex(Number)
@@ -418,6 +549,17 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * The sequential index of the series within the legend.
      */
     public abstract void setLegendIndex(Number legendIndex);
+
+    /**
+     * @see #setNavigatorOptions(PlotOptionsSeries)
+     */
+    public abstract PlotOptionsSeries getNavigatorOptions();
+
+    /**
+     * Options for the corresponding navigator series if
+     * <code>showInNavigator</code> is <code>true</code> for this series.
+     */
+    public abstract void setNavigatorOptions(PlotOptionsSeries navigatorOptions);
 
     /**
      * @see #setPointPlacement(PointPlacement)
@@ -458,6 +600,16 @@ public abstract class PointOptions extends AbstractPlotOptions {
     public abstract void setPointRange(Number pointRange);
 
     /**
+     * @see #setShowInNavigator(Boolean)
+     */
+    public abstract Boolean getShowInNavigator();
+
+    /**
+     * Whether or not to show the series in the navigator.
+     */
+    public abstract void setShowInNavigator(Boolean showInNavigator);
+
+    /**
      * @see #setStacking(Stacking)
      */
     public abstract Stacking getStacking();
@@ -471,5 +623,11 @@ public abstract class PointOptions extends AbstractPlotOptions {
     /**
      * @see #setPointStart(Number)
      */
+    @Deprecated
     public abstract void setPointStart(Date date);
+
+    /**
+     * @see #setPointStart(Number)
+     */
+    public abstract void setPointStart(Instant instant);
 }

@@ -8,10 +8,10 @@ package com.vaadin.addon.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -20,6 +20,9 @@ package com.vaadin.addon.charts.model;
 import com.vaadin.addon.charts.model.style.Color;
 
 public abstract class PyramidOptions extends AbstractPlotOptions {
+
+    @Override
+    public abstract ChartType getChartType();
 
     /**
      * @see #setAllowPointSelect(Boolean)
@@ -31,6 +34,20 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * or pie slices.
      */
     public abstract void setAllowPointSelect(Boolean allowPointSelect);
+
+    /**
+     * @see #setAnimationLimit(Number)
+     */
+    public abstract Number getAnimationLimit();
+
+    /**
+     * For some series, there is a limit that shuts down initial animation by
+     * default when the total number of points in the chart is too high. For
+     * example, for a column chart and its derivatives, animation doesn't run if
+     * there is more than 250 points totally. To disable this cap, set
+     * <code>animationLimit</code> to <code>Infinity</code>.
+     */
+    public abstract void setAnimationLimit(Number animationLimit);
 
     /**
      * @see #setBorderColor(Color)
@@ -54,7 +71,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * <p>
      * The width of the border surrounding each slice.
      * </p>
-     * 
+     *
      * <p>
      * When setting the border width to 0, there may be small gaps between the
      * slices due to SVG antialiasing artefacts. To work around this, keep the
@@ -71,6 +88,28 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract void setCenter(String[] center);
 
     /**
+     * @see #setClassName(String)
+     */
+    public abstract String getClassName();
+
+    /**
+     * A class name to apply to the series' graphical elements.
+     */
+    public abstract void setClassName(String className);
+
+    /**
+     * @see #setColorIndex(Number)
+     */
+    public abstract Number getColorIndex();
+
+    /**
+     * A specific color index to use for the series, so
+     * its graphic representations are given the class name
+     * <code>highcharts-color-{n}</code>.
+     */
+    public abstract void setColorIndex(Number colorIndex);
+
+    /**
      * @see #setColors(Color...)
      */
     public abstract Color[] getColors();
@@ -83,7 +122,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * Adds color to the colors array
-     * 
+     *
      * @param color
      *            to add
      * @see #setColors(Color...)
@@ -92,7 +131,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of color in colors array
-     * 
+     *
      * @param color
      *            to remove
      * @see #setColors(Color...)
@@ -118,7 +157,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * Specific data labels configuration for a series type
-     * 
+     *
      * @param dataLabels
      */
     public abstract void setDataLabels(DataLabelsFunnel dataLabels);
@@ -134,6 +173,17 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract void setDepth(Number depth);
 
     /**
+     * @see #setDescription(String)
+     */
+    public abstract String getDescription();
+
+    /**
+     * A description of the series to add to the screen reader information about
+     * the series.
+     */
+    public abstract void setDescription(String description);
+
+    /**
      * @see #setEnableMouseTracking(Boolean)
      */
     public abstract Boolean getEnableMouseTracking();
@@ -144,6 +194,40 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * it improves performance.
      */
     public abstract void setEnableMouseTracking(Boolean enableMouseTracking);
+
+    /**
+     * @see #setExposeElementToA11y(Boolean)
+     */
+    public abstract Boolean getExposeElementToA11y();
+
+    /**
+     * By default, series are exposed to screen readers as regions. By enabling
+     * this option, the series element itself will be exposed in the same way as
+     * the data points. This is useful if the series is not used as a grouping
+     * entity in the chart, but you still want to attach a description to the
+     * series.
+     */
+    public abstract void setExposeElementToA11y(Boolean exposeElementToA11y);
+
+    /**
+     * @see #setFindNearestPointBy(Dimension)
+     */
+    public abstract Dimension getFindNearestPointBy();
+
+    /**
+     * <p>
+     * Determines whether the series should look for the nearest point in both
+     * dimensions or just the x-dimension when hovering the series. Defaults to
+     * <code>'xy'</code> for scatter series and <code>'x'</code> for most other
+     * series. If the data has duplicate x-values, it is recommended to set this
+     * to <code>'xy'</code> to allow hovering over all points.
+     * </p>
+     * <p>
+     * Applies only to series types using nearest neighbor search (not direct
+     * hover) for tooltip.
+     * </p>
+     */
+    public abstract void setFindNearestPointBy(Dimension findNearestPointBy);
 
     /**
      * @see #setGetExtremesFromAll(Boolean)
@@ -167,7 +251,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * to what is used in Cascading Style Sheets. Size can be pixels or
      * percentage, otherwise IllegalArgumentException is thrown. The empty
      * string ("") or null will unset the height and set the units to pixels.
-     * 
+     *
      * @param height
      *            CSS style string representation
      */
@@ -187,7 +271,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -196,7 +280,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -227,6 +311,11 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * this size.
      */
     public abstract void setMinSize(Number minSize);
+
+    public abstract String getPointDescriptionFormatter();
+
+    public abstract void setPointDescriptionFormatter(
+            String _fn_pointDescriptionFormatter);
 
     /**
      * @see #setReversed(Boolean)
@@ -270,6 +359,17 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * Whether to display this particular series or series type in the legend.
      */
     public abstract void setShowInLegend(Boolean showInLegend);
+
+    /**
+     * @see #setSkipKeyboardNavigation(Boolean)
+     */
+    public abstract Boolean getSkipKeyboardNavigation();
+
+    /**
+     * Whether or not to skip past the
+     * points in this series for keyboard navigation.
+     */
+    public abstract void setSkipKeyboardNavigation(Boolean skipKeyboardNavigation);
 
     /**
      * @see #setSlicedOffset(Number)
@@ -338,7 +438,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * to what is used in Cascading Style Sheets. Size can be pixels or
      * percentage, otherwise IllegalArgumentException is thrown. The empty
      * string ("") or null will unset the height and set the units to pixels.
-     * 
+     *
      * @param width
      *            CSS style string representation
      */
@@ -368,7 +468,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -377,7 +477,7 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)

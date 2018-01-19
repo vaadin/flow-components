@@ -23,6 +23,16 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
     public static final String OVERFLOW_NONE = "none";
 
     /**
+     * @see #setClassName(String)
+     */
+    public abstract String getClassName();
+
+    /**
+     * A class name for the data label.
+     */
+    public abstract void setClassName(String className);
+
+    /**
      * @see #setCrop(Boolean)
      */
     public abstract Boolean getCrop();
@@ -37,6 +47,7 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * @see #setDefer(Boolean)
      */
     public abstract Boolean getDefer();
+
     /**
      * Whether to defer displaying the data labels until the initial series
      * animation has finished.
@@ -163,6 +174,15 @@ public abstract class AbstractDataLabels extends AbstractConfigurationObject {
      * The vertical alignment of a data label.
      */
     public abstract void setVerticalAlign(VerticalAlign verticalAlign);
+
+    /**
+     * @see #setZIndex(Number)
+     */
+    public abstract Number getZIndex();
+
+    /**
+     * The Z index of the data labels. The default Z index puts it above the
+     * series. Use a Z index of 2 to display it behind the series.
+     */
+    public abstract void setZIndex(Number zIndex);
 }
-
-

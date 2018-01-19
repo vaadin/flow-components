@@ -286,6 +286,27 @@ public abstract class Axis extends AbstractConfigurationObject {
     public abstract void setCeiling(Number ceiling);
 
     /**
+     * @see #setClassName(String)
+     */
+    public abstract String getClassName();
+
+    /**
+     * A class name that opens for styling the axis by CSS.
+     */
+    public abstract void setClassName(String className);
+
+    /**
+     * @see #setCrosshair(Crosshair)
+     */
+    public abstract Crosshair getCrosshair();
+
+    /**
+     * Configure a crosshair that follows either the mouse pointer or the
+     * hovered point.
+     */
+    public abstract void setCrosshair(Crosshair crosshair);
+
+    /**
      * @see #setDateTimeLabelFormats(DateTimeLabelFormats)
      */
     public abstract DateTimeLabelFormats getDateTimeLabelFormats();
@@ -300,6 +321,16 @@ public abstract class Axis extends AbstractConfigurationObject {
             DateTimeLabelFormats dateTimeLabelFormats);
 
     /**
+     * @see #setDescription(String)
+     */
+    public abstract String getDescription();
+
+    /**
+     * Description of the axis to screen reader users.
+     */
+    public abstract void setDescription(String description);
+
+    /**
      * @see #setEndOnTick(Boolean)
      */
     public abstract Boolean getEndOnTick();
@@ -308,7 +339,7 @@ public abstract class Axis extends AbstractConfigurationObject {
      * Whether to force the axis to end on a tick. Use this option with the
      * <code>maxPadding</code> option to control the axis end.
      */
-    protected abstract void setEndOnTick(Boolean endOnTick);
+    public abstract void setEndOnTick(Boolean endOnTick);
 
     /**
      * @see #setFloor(Number)
@@ -331,6 +362,16 @@ public abstract class Axis extends AbstractConfigurationObject {
     public abstract void setGridLineDashStyle(DashStyle gridLineDashStyle);
 
     /**
+     * @see #setGridZIndex(Number)
+     */
+    public abstract Number getGridZIndex();
+
+    /**
+     * The Z index of the grid lines.
+     */
+    public abstract void setGridZIndex(Number gridZIndex);
+
+    /**
      * @see #setId(String)
      */
     public abstract String getId();
@@ -350,6 +391,26 @@ public abstract class Axis extends AbstractConfigurationObject {
      * The axis labels show the number or category for each tick.
      */
     public abstract void setLabels(Labels labels);
+
+    /**
+     * @see #setLineColor(Color)
+     */
+    public abstract Color getLineColor();
+
+    /**
+     * The color of the line marking the axis itself.
+     */
+    public abstract void setLineColor(Color lineColor);
+
+    /**
+     * @see #setLineWidth(Number)
+     */
+    public abstract Number getLineWidth();
+
+    /**
+     * The width of the line marking the axis itself.
+     */
+    public abstract void setLineWidth(Number lineWidth);
 
     /**
      * @see #setLinkedTo(Number)
@@ -391,6 +452,38 @@ public abstract class Axis extends AbstractConfigurationObject {
      * <code>axis.setExtremes()</code>, the minPadding will be ignored.
      */
     public abstract void setMinPadding(Number minPadding);
+
+    /**
+     * @see #setMinRange(Number)
+     */
+    public abstract Number getMinRange();
+
+    /**
+     * <p>
+     * The minimum range to display on this axis. The entire axis will not be
+     * allowed to span over a smaller interval than this. For example, for a
+     * datetime axis the main unit is milliseconds. If minRange is set to
+     * 3600000, you can't zoom in more than to one hour.
+     * </p>
+     *
+     * <p>
+     * The default minRange for the x axis is five times the smallest interval
+     * between any of the data points.
+     * </p>
+     *
+     * <p>
+     * On a logarithmic axis, the unit for the minimum range is the power. So a
+     * minRange of 1 means that the axis can be zoomed to 10-100, 100-1000,
+     * 1000-10000 etc.
+     * </p>
+     *
+     * <p>
+     * Note that the <code>minPadding</code>, <code>maxPadding</code>,
+     * <code>startOnTick</code> and <code>endOnTick</code> settings also affect
+     * how the extremes of the axis are computed.
+     * </p>
+     */
+    public abstract void setMinRange(Number minRange);
 
     /**
      * @see #setMinTickInterval(Number)
@@ -614,6 +707,30 @@ public abstract class Axis extends AbstractConfigurationObject {
     public abstract void setShowLastLabel(Boolean showLastLabel);
 
     /**
+     * @see #setSoftMax(Number)
+     */
+    public abstract Number getSoftMax();
+
+    /**
+     * A soft maximum for the axis. If the series data maximum is less than
+     * this, the axis will stay at this maximum, but if the series data maximum
+     * is higher, the axis will flex to show all data.
+     */
+    public abstract void setSoftMax(Number softMax);
+
+    /**
+     * @see #setSoftMin(Number)
+     */
+    public abstract Number getSoftMin();
+
+    /**
+     * A soft minimum for the axis. If the series data minimum is greater than
+     * this, the axis will stay at this minimum, but if the series data minimum
+     * is lower, the axis will flex to show all data.
+     */
+    public abstract void setSoftMin(Number softMin);
+
+    /**
      * @see #setStartOfWeek(Number)
      */
     public abstract Number getStartOfWeek();
@@ -776,6 +893,23 @@ public abstract class Axis extends AbstractConfigurationObject {
     public abstract void setType(AxisType type);
 
     /**
+     * @see #setUniqueNames(Boolean)
+     */
+    public abstract Boolean getUniqueNames();
+
+    /**
+     * Applies only when the axis <code>type</code> is <code>category</code>.
+     * When <code>uniqueNames</code> is true, points are placed on the X axis
+     * according to their names. If the same point name is repeated in the same
+     * or another series, the point is placed on the same X position as other
+     * points of the same name. When <code>uniqueNames</code> is false, the
+     * points are laid out in increasing X positions regardless of their names,
+     * and the X axis category will take the name of the last point in each
+     * position.
+     */
+    public abstract void setUniqueNames(Boolean uniqueNames);
+
+    /**
      * @see #setUnits(TimeUnitMultiples...)
      */
     public abstract TimeUnitMultiples[] getUnits();
@@ -817,5 +951,4 @@ public abstract class Axis extends AbstractConfigurationObject {
     public abstract void setVisible(Boolean visible);
 
     public abstract void setTitle(String title);
-
 }
