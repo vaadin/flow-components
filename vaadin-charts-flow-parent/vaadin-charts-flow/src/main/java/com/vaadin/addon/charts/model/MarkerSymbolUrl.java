@@ -17,6 +17,10 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
+import com.vaadin.addon.charts.model.AbstractConfigurationObject;
+import com.vaadin.addon.charts.model.ChartEnum;
+import com.vaadin.addon.charts.model.MarkerSymbol;
+
 /**
  * Symbol that is fetched from the url, implementing ChartEnum to provide
  * correct serialization

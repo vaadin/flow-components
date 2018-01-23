@@ -26,15 +26,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vaadin.addon.charts.events.AxisRescaledEvent;
-import com.vaadin.addon.charts.events.ConfigurationChangeListener;
-import com.vaadin.addon.charts.events.DataAddedEvent;
-import com.vaadin.addon.charts.events.DataRemovedEvent;
-import com.vaadin.addon.charts.events.DataUpdatedEvent;
-import com.vaadin.addon.charts.events.ItemSlicedEvent;
-import com.vaadin.addon.charts.events.SeriesAddedEvent;
-import com.vaadin.addon.charts.events.SeriesChangedEvent;
-import com.vaadin.addon.charts.events.SeriesStateEvent;
+import com.vaadin.addon.charts.events.internal.AxisRescaledEvent;
+import com.vaadin.addon.charts.events.internal.ConfigurationChangeListener;
+import com.vaadin.addon.charts.events.internal.DataAddedEvent;
+import com.vaadin.addon.charts.events.internal.DataRemovedEvent;
+import com.vaadin.addon.charts.events.internal.DataUpdatedEvent;
+import com.vaadin.addon.charts.events.internal.ItemSlicedEvent;
+import com.vaadin.addon.charts.events.internal.SeriesAddedEvent;
+import com.vaadin.addon.charts.events.internal.SeriesChangedEvent;
+import com.vaadin.addon.charts.events.internal.SeriesStateEvent;
 
 /**
  * Chart's configuration root object containing all the child objects that are

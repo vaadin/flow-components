@@ -19,6 +19,8 @@ package com.vaadin.addon.charts.model;
 import java.time.Instant;
 import java.util.Date;
 
+import com.vaadin.addon.charts.model.AbstractConfigurationObject;
+import com.vaadin.addon.charts.model.Marker;
 import com.vaadin.addon.charts.model.style.Color;
 import com.vaadin.addon.charts.util.Util;
 

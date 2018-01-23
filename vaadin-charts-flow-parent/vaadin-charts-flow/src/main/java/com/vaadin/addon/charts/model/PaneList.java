@@ -17,6 +17,9 @@ package com.vaadin.addon.charts.model;
  * #L%
  */
 
+import com.vaadin.addon.charts.model.AbstractConfigurationObject;
+import com.vaadin.addon.charts.model.Pane;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,15 +1,15 @@
 package com.vaadin.addon.charts;
 
-import com.vaadin.addon.charts.events.AbstractSeriesEvent;
-import com.vaadin.addon.charts.events.AxisRescaledEvent;
-import com.vaadin.addon.charts.events.ConfigurationChangeListener;
-import com.vaadin.addon.charts.events.DataAddedEvent;
-import com.vaadin.addon.charts.events.DataRemovedEvent;
-import com.vaadin.addon.charts.events.DataUpdatedEvent;
-import com.vaadin.addon.charts.events.ItemSlicedEvent;
-import com.vaadin.addon.charts.events.SeriesAddedEvent;
-import com.vaadin.addon.charts.events.SeriesChangedEvent;
-import com.vaadin.addon.charts.events.SeriesStateEvent;
+import com.vaadin.addon.charts.events.internal.AbstractSeriesEvent;
+import com.vaadin.addon.charts.events.internal.AxisRescaledEvent;
+import com.vaadin.addon.charts.events.internal.ConfigurationChangeListener;
+import com.vaadin.addon.charts.events.internal.DataAddedEvent;
+import com.vaadin.addon.charts.events.internal.DataRemovedEvent;
+import com.vaadin.addon.charts.events.internal.DataUpdatedEvent;
+import com.vaadin.addon.charts.events.internal.ItemSlicedEvent;
+import com.vaadin.addon.charts.events.internal.SeriesAddedEvent;
+import com.vaadin.addon.charts.events.internal.SeriesChangedEvent;
+import com.vaadin.addon.charts.events.internal.SeriesStateEvent;
 import com.vaadin.addon.charts.model.AbstractConfigurationObject;
 import com.vaadin.addon.charts.util.ChartSerialization;
 import elemental.json.impl.JreJsonFactory;
