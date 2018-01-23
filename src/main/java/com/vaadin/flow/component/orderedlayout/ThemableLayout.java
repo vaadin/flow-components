@@ -29,23 +29,70 @@ import com.vaadin.flow.dom.ThemeList;
  */
 public interface ThemableLayout extends HasElement {
     /**
-     * Appends to or removes from {@code theme} attribute the {@code margin} value.
+     * Toggles {@code margin} theme setting for the element.
      * If a theme supports this attribute, it will apply or remove margin to the element.
      *
-     * @param margin adds {@code margin} value to {@code theme} attribute if {@code true} or removes it if {@code false}
+     * @param margin adds {@code margin} theme setting if {@code true} or removes it if {@code false}
      */
     default void setMargin(boolean margin) {
         getThemeList().set("margin", margin);
     }
 
     /**
-     * Appends to or removes from {@code theme} attribute the {@code padding} value.
+     * Shows if {@code margin} theme setting is applied to the component.
+     *
+     * @return {@code true} if theme setting is applied, {@code false} otherwise
+     */
+    default boolean hasMargin() {
+        return getThemeList().contains("margin");
+    }
+
+    /**
+     * Toggles {@code padding} theme setting for the element.
      * If a theme supports this attribute, it will apply or remove padding to the element.
      *
-     * @param padding adds {@code padding} value to {@code theme} attribute if {@code true} or removes it if {@code false}
+     * @param padding adds {@code padding} theme setting if {@code true} or removes it if {@code false}
      */
     default void setPadding(boolean padding) {
         getThemeList().set("padding", padding);
+    }
+
+    /**
+     * Shows if {@code padding} theme setting is applied to the component.
+     *
+     * @return {@code true} if theme setting is applied, {@code false} otherwise
+     */
+    default boolean hasPadding() {
+        return getThemeList().contains("padding");
+    }
+
+    /**
+     * Toggles {@code spacing} theme setting for the element.
+     * If a theme supports this attribute, it will apply or remove spacing to the element.
+     * <p>
+     * This method adds medium spacing to the component theme, to set other options, use {@link ThemableLayout#getThemeList()}.
+     * List of options possible:
+     * <ul>
+     *     <li> spacing-xs
+     *     <li> spacing-s
+     *     <li> spacing
+     *     <li> spacing-l
+     *     <li> spacing-xl
+     * </ul>
+     *
+     * @param spacing adds {@code spacing} theme setting if {@code true} or removes it if {@code false}
+     */
+    default void setSpacing(boolean spacing) {
+        getThemeList().set("spacing-m", spacing);
+    }
+
+    /**
+     * Shows if {@code spacing} theme setting is applied to the component.
+     *
+     * @return {@code true} if theme setting is applied, {@code false} otherwise
+     */
+    default boolean hasSpacing() {
+        return getThemeList().contains("spacing-m");
     }
 
     /**

@@ -38,8 +38,8 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         WebElement vlayout = layout.findElement(By.id("default-layout"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
-        checkThemeChanges("margin", true);
-        checkThemeChanges("padding", true);
+        checkThemeChanges(vlayout, "margin", true);
+        checkThemeChanges(vlayout, "padding", true);
 
         Assert.assertTrue(
                 "After turning on both margin and padding, layout should contain both themes in 'theme' attribute",
@@ -47,8 +47,8 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
                         && layout.findElement(By.id("default-layout"))
                                 .getAttribute("theme").contains("padding"));
 
-        checkThemeChanges("margin", false);
-        checkThemeChanges("padding", false);
+        checkThemeChanges(vlayout, "margin", false);
+        checkThemeChanges(vlayout, "padding", false);
 
         Assert.assertNull(
                 "After turning on both margin and padding, layout should not contain 'theme' attribute",
@@ -89,6 +89,12 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         scrollIntoViewAndClick(button);
         waitUntil(driver -> "space-evenly"
                 .equals(vlayout.getCssValue("justify-content")));
+
+        checkThemeChanges(vlayout, "spacing-xs", true);
+        checkThemeChanges(vlayout, "spacing-s", true);
+        checkThemeChanges(vlayout, "spacing-m", true);
+        checkThemeChanges(vlayout, "spacing-l", true);
+        checkThemeChanges(vlayout, "spacing-xl", true);
     }
 
     @Test
@@ -173,15 +179,14 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         Assert.assertEquals("column", vlayout.getCssValue("flex-direction"));
     }
 
-    private void checkThemeChanges(String themeName, boolean shouldPresent) {
-        findElement(By.id(String.format("toggle-%s", themeName))).click();
-        WebElement layout = this.layout.findElement(By.id("default-layout"));
+    private void checkThemeChanges(WebElement layoutToCheck, String themeName, boolean shouldPresent) {
+        layout.findElement(By.id(String.format("toggle-%s", themeName))).click();
         if (shouldPresent) {
-            waitUntil(dr -> layout.getAttribute("theme") != null
-                    && layout.getAttribute("theme").contains(themeName));
+            waitUntil(dr -> layoutToCheck.getAttribute("theme") != null
+                    && layoutToCheck.getAttribute("theme").contains(themeName));
         } else {
-            waitUntil(dr -> layout.getAttribute("theme") == null
-                    || !layout.getAttribute("theme").contains(themeName));
+            waitUntil(dr -> layoutToCheck.getAttribute("theme") == null
+                    || !layoutToCheck.getAttribute("theme").contains(themeName));
         }
     }
 }

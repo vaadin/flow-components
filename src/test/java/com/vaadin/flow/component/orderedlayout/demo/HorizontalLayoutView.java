@@ -105,9 +105,18 @@ public class HorizontalLayoutView extends DemoView {
         buttons.add(createSpacingButton(layout, "justify-content-evenly-button",
                 JustifyContentMode.EVENLY));
 
+        Div themeSettings = new Div(
+                new Label("Current theme supports 'spacing': "),
+                createToggleThemeButton(layout, "spacing-xs"),
+                createToggleThemeButton(layout, "spacing-s"),
+                createToggleThemeButton(layout, "spacing-m", layout::setSpacing),
+                createToggleThemeButton(layout, "spacing-l"),
+                createToggleThemeButton(layout, "spacing-xl")
+        );
+
         layout.setId("layout-with-justify-content");
 
-        addCard("Layout with justify content", layout, buttons);
+        addCard("Layout with justify content", layout, buttons, themeSettings);
     }
 
     private void createLayoutWithDefaultAlignment() {
@@ -251,6 +260,12 @@ public class HorizontalLayoutView extends DemoView {
         button.setId(id);
         button.addClickListener(event -> layout.setJustifyContentMode(spacing));
         return button;
+    }
+
+    private NativeButton createToggleThemeButton(HorizontalLayout layout,
+                                                 String themeName) {
+        return createToggleThemeButton(layout, themeName,
+                toggle -> layout.getThemeList().set(themeName, toggle));
     }
 
     private NativeButton createToggleThemeButton(HorizontalLayout layout,
