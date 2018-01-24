@@ -110,7 +110,7 @@ public class VerticalLayoutView extends DemoView {
                 new Label("Current theme supports 'spacing': "),
                 createToggleThemeButton(layout, "spacing-xs"),
                 createToggleThemeButton(layout, "spacing-s"),
-                createToggleThemeButton(layout, "spacing-m", layout::setSpacing),
+                createToggleThemeButton(layout, "spacing", layout::setSpacing),
                 createToggleThemeButton(layout, "spacing-l"),
                 createToggleThemeButton(layout, "spacing-xl")
         );

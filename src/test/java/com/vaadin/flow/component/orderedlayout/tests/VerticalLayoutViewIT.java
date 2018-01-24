@@ -92,7 +92,7 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
 
         checkThemeChanges(vlayout, "spacing-xs", true);
         checkThemeChanges(vlayout, "spacing-s", true);
-        checkThemeChanges(vlayout, "spacing-m", true);
+        checkThemeChanges(vlayout, "spacing", true);
         checkThemeChanges(vlayout, "spacing-l", true);
         checkThemeChanges(vlayout, "spacing-xl", true);
     }

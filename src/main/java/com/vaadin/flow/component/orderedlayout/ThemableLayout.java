@@ -83,7 +83,7 @@ public interface ThemableLayout extends HasElement {
      * @param spacing adds {@code spacing} theme setting if {@code true} or removes it if {@code false}
      */
     default void setSpacing(boolean spacing) {
-        getThemeList().set("spacing-m", spacing);
+        getThemeList().set("spacing", spacing);
     }
 
     /**
@@ -92,7 +92,7 @@ public interface ThemableLayout extends HasElement {
      * @return {@code true} if theme setting is applied, {@code false} otherwise
      */
     default boolean hasSpacing() {
-        return getThemeList().contains("spacing-m");
+        return getThemeList().contains("spacing");
     }
 
     /**
