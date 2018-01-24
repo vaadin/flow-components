@@ -1,14 +1,13 @@
 package com.vaadin.tests.elements;
 
-import static org.junit.Assert.assertNotNull;
-
-import java.util.List;
-
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
+import java.util.List;
+
+import static org.junit.Assert.assertNotNull;
 
 @Element("vaadin-chart")
 public class ChartElement extends TestBenchElement {

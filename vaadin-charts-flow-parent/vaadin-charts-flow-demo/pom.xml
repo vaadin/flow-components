@@ -28,7 +28,7 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/java/com/vaadin/addon/charts/examples</directory>
+                <directory>src/main/java/com/vaadin/flow/component/charts/examples</directory>
                 <targetPath>vaadin-charts-flow-demo</targetPath>
                 <filtering>false</filtering>
             </resource>
