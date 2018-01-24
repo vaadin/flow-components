@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 
@@ -48,6 +49,22 @@ public class ComboBoxTest {
         @Override
         void runBeforeClientResponse(Consumer<UI> command) {
             command.accept(new UI());
+        }
+    }
+
+    private enum Category {
+        CATEGORY_1, CATEGORY_2, CATEGORY_3;
+    }
+
+    private static class Bean {
+        Category category;
+
+        public Category getCategory() {
+            return category;
+        }
+
+        public void setCategory(Category category) {
+            this.category = category;
         }
     }
 
@@ -100,6 +117,26 @@ public class ComboBoxTest {
         TestComboBox comboBox = new TestComboBox();
         comboBox.setItemLabelGenerator(obj -> null);
         comboBox.setItems(Arrays.asList("foo", "bar"));
+    }
+
+    @Test
+    public void boxWithBinderAndEnums_readBean_valueIsUpdated() {
+        ComboBox<Category> combo = new ComboBox<>();
+        combo.setItemLabelGenerator(Category::name);
+        combo.setItems(Category.values());
+        Assert.assertNull(combo.getValue());
+
+        Binder<Bean> binder = new Binder<>();
+        binder.forField(combo).bind(Bean::getCategory, Bean::setCategory);
+
+        Bean bean = new Bean();
+        bean.setCategory(Category.CATEGORY_2);
+        binder.readBean(bean);
+        Assert.assertEquals(Category.CATEGORY_2, combo.getValue());
+
+        bean.setCategory(Category.CATEGORY_3);
+        binder.readBean(bean);
+        Assert.assertEquals(Category.CATEGORY_3, combo.getValue());
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {
