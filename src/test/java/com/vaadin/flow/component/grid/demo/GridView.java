@@ -332,8 +332,8 @@ public class GridView extends DemoView {
                 query -> IntStream
                         .range(query.getOffset(),
                                 query.getOffset() + query.getLimit())
-                        .mapToObj(index -> createPerson(index, random)),
-                query -> 10000));
+                        .mapToObj(index -> createPerson(index + 1, random)),
+                query -> 100*1000*1000));
 
         grid.addColumn(Person::getName).setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
