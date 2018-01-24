@@ -175,7 +175,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     @Override
     public void setOpened(boolean opened) {
-        if (opened && !getElement().getNode().isAttached()
+        if (opened && getElement().getNode().getParent() == null
                 && UI.getCurrent() != null) {
             UI.getCurrent().add(this);
         }
@@ -192,3 +192,4 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     }
 
 }
+
