@@ -766,7 +766,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @param pageSize
      *            the page size. Must be greater than zero.
      */
-    public Grid(int pageSize) {
+    private Grid(int pageSize) {
         setPageSize(pageSize);
         setSelectionModel(SelectionMode.SINGLE.createModel(this),
                 SelectionMode.SINGLE);
