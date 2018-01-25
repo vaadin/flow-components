@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
+import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 /**
@@ -7,6 +8,7 @@ import java.util.Arrays;
  * holds general options for the combined X and Y axes set. Each xAxis or yAxis
  * can reference the pane by index.
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Pane extends AbstractConfigurationObject {
 
 	private Integer paneIndex;

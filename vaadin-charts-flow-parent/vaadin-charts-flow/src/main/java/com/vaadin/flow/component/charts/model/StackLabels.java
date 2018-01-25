@@ -1,10 +1,13 @@
 package com.vaadin.flow.component.charts.model;
+
+import javax.annotation.Generated;
 /**
  * The stack labels show the total value for each bar in a stacked column or bar
  * chart. The label will be placed on top of positive columns and below negative
  * columns. In case of an inverted column chart or a bar chart the label is
  * placed to the right of positive bars and to the left of negative bars.
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class StackLabels extends AbstractConfigurationObject {
 
 	private HorizontalAlign align;

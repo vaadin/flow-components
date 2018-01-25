@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
+import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -11,6 +12,7 @@ import com.vaadin.flow.component.charts.util.Util;
  * stroke is applied through <code>lineWidth</code> and <code>lineColor</code>
  * options. Requires the <code>highcharts-more.js</code> file.
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class PlotOptionsPolygon extends AbstractPlotOptions {
 
 	private Boolean allowPointSelect;

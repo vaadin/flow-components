@@ -1,10 +1,13 @@
 package com.vaadin.flow.component.charts.model;
+
+import javax.annotation.Generated;
 /**
  * Options for displaying a message like "No data to display". This feature
  * requires the file <code>no-data-to-display.js</code> to be loaded in the
  * page. The actual text to display is set in the <a
  * href="#lang.noData">lang.noData</a> option.
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class NoData extends AbstractConfigurationObject {
 
 	private Position position;

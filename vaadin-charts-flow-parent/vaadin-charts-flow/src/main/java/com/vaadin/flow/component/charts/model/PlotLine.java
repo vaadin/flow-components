@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
+import javax.annotation.Generated;
 import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * <p>
@@ -15,6 +16,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * <code>className</code> option.
  * </p>
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class PlotLine extends AbstractConfigurationObject {
 
 	private String className;

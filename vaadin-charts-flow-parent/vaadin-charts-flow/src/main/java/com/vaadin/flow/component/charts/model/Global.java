@@ -1,4 +1,6 @@
 package com.vaadin.flow.component.charts.model;
+
+import javax.annotation.Generated;
 /**
  * Global options that don't apply to each chart. These options, like the
  * <code>lang</code> options, must be set using the
@@ -12,6 +14,7 @@ package com.vaadin.flow.component.charts.model;
  * });
  * </pre>
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Global extends AbstractConfigurationObject {
 
 	private String VMLRadialGradientURL;

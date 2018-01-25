@@ -1,9 +1,11 @@
 package com.vaadin.flow.component.charts.model;
 
+import javax.annotation.Generated;
 import com.vaadin.flow.component.charts.model.style.ButtonTheme;
 /**
  * Options for the export button.
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class ContextButton extends AbstractConfigurationObject {
 
 	private HorizontalAlign align;

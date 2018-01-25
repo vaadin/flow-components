@@ -1,9 +1,11 @@
 package com.vaadin.flow.component.charts.model;
 
+import javax.annotation.Generated;
 import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * The top of the frame around a 3D chart.
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Top extends AbstractConfigurationObject {
 
 	private Color color;

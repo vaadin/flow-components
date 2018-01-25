@@ -1,8 +1,11 @@
 package com.vaadin.flow.component.charts.model;
+
+import javax.annotation.Generated;
 /**
  * Provides the option to draw a frame around the charts by defining a bottom,
  * front and back panel.
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Frame extends AbstractConfigurationObject {
 
 	private Back back;

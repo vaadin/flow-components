@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
+import javax.annotation.Generated;
 import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import com.vaadin.flow.component.charts.util.Util;
  * The area range is a cartesian series type with higher and lower Y values
  * along an X axis. Requires <code>highcharts-more.js</code>.
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class PlotOptionsArearange extends AreaOptions {
 
 	private Boolean allowPointSelect;

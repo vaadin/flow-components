@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
+import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import com.vaadin.flow.component.charts.model.style.Color;
@@ -9,6 +10,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * 1 day, 1 week, 1 month etc. It also provides input boxes where min and max
  * dates can be manually input.
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class RangeSelector extends AbstractConfigurationObject {
 
 	private Boolean allButtonsEnabled;

@@ -1,4 +1,6 @@
 package com.vaadin.flow.component.charts.model;
+
+import javax.annotation.Generated;
 /**
  * Options for the paging or navigation appearing when the legend is overflown.
  * Navigation works well on screen, but not in static exported images. One way
@@ -6,6 +8,7 @@ package com.vaadin.flow.component.charts.model;
  * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/legend/navigation-enabled-false/"
  * >increase the chart height in export</a>.
  */
+@Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class LegendNavigation extends AbstractConfigurationObject {
 
 	private Boolean animation;
