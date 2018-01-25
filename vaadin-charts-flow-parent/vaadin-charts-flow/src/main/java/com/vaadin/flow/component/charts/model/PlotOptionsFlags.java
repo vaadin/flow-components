@@ -2,7 +2,6 @@ package com.vaadin.flow.component.charts.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.Style;
 /**
