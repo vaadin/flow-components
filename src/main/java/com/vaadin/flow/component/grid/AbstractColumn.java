@@ -18,8 +18,8 @@ package com.vaadin.flow.component.grid;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.renderer.ComponentTemplateRenderer;
 import com.vaadin.flow.renderer.TemplateRenderer;
 
@@ -82,7 +82,28 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     @Override
-    public T setHeader(TemplateRenderer<?> renderer) {
+    public T setHeader(String labelText) {
+        return setHeader(TemplateRenderer.of(HtmlUtils.escape(labelText)));
+    }
+
+    @Override
+    public T setFooter(String labelText) {
+        return setFooter(TemplateRenderer.of(HtmlUtils.escape(labelText)));
+    }
+
+    @Override
+    public T setHeader(Component headerComponent) {
+        return setHeader(
+                new ComponentTemplateRenderer<>(() -> headerComponent));
+    }
+
+    @Override
+    public T setFooter(Component footerComponent) {
+        return setFooter(
+                new ComponentTemplateRenderer<>(() -> footerComponent));
+    }
+
+    private T setHeader(TemplateRenderer<?> renderer) {
         if (headerTemplate == null) {
             headerTemplate = new Element("template").setAttribute("class",
                     "header");
@@ -93,8 +114,7 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
         return (T) this;
     }
 
-    @Override
-    public T setFooter(TemplateRenderer<?> renderer) {
+    private T setFooter(TemplateRenderer<?> renderer) {
         if (footerTemplate == null) {
             footerTemplate = new Element("template").setAttribute("class",
                     "footer");
@@ -128,14 +148,6 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
         headerOrFooter.setProperty("innerHTML",
                 header ? getHeaderRendererTemplate(renderer)
                         : getFooterRendererTemplate(renderer));
-        DataGenerator dataGenerator = GridTemplateRendererUtil
-                .setupTemplateRenderer((TemplateRenderer) renderer,
-                        headerOrFooter, getElement(),
-
-                        key -> getGrid().getDataCommunicator().getKeyMapper()
-                                .get(key));
-
-        getGrid().getDataGenerator().addDataGenerator(dataGenerator);
     }
 
     protected String getHeaderRendererTemplate(TemplateRenderer<?> renderer) {

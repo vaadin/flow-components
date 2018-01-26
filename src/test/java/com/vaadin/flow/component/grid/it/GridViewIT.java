@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -467,27 +468,27 @@ public class GridViewIT extends TabbedComponentDemoTest {
         WebElement topLevelColumn = grid
                 .findElement(By.tagName("vaadin-grid-column-group"));
 
-        Assert.assertTrue(
+        Assert.assertThat(
                 "There should be a cell with the renderered 'Basic Information' header",
-                topLevelColumn.getAttribute("innerHTML").contains(
-                        "<span style=\"color:orange\" title=\"Basic Information\">Basic Information</span>"));
+                topLevelColumn.getAttribute("innerHTML"),
+                CoreMatchers.containsString("Basic Information"));
 
-        Assert.assertTrue("There should be a cell with the renderered footer",
-                topLevelColumn.getAttribute("innerHTML").contains(
-                        "<span style=\"color:red\">Total: 499 people</span>"));
+        Assert.assertThat("There should be a cell with the renderered footer",
+                topLevelColumn.getAttribute("innerHTML"),
+                CoreMatchers.containsString("Total: 499 people"));
 
         List<WebElement> secondLevelColumns = topLevelColumn
                 .findElements(By.tagName("vaadin-grid-column"));
 
-        Assert.assertTrue(
+        Assert.assertThat(
                 "There should be a cell with the renderered 'Name' header",
-                secondLevelColumns.get(0).getAttribute("innerHTML").contains(
-                        "<span style=\"color:green\" title=\"Name\">Name</span>"));
+                secondLevelColumns.get(0).getAttribute("innerHTML"),
+                CoreMatchers.containsString("Name"));
 
-        Assert.assertTrue(
+        Assert.assertThat(
                 "There should be a cell with the renderered 'Age' header",
-                secondLevelColumns.get(1).getAttribute("innerHTML").contains(
-                        "<span style=\"color:blue\" title=\"Age\">Age</span>"));
+                secondLevelColumns.get(1).getAttribute("innerHTML"),
+                CoreMatchers.containsString("Age"));
     }
 
     @Test
@@ -499,21 +500,19 @@ public class GridViewIT extends TabbedComponentDemoTest {
         Assert.assertTrue(
                 "There should be a cell with the renderered 'Basic Information' header",
                 hasComponentRendereredHeaderCell(grid,
-                        "<label title=\"Basic Information\" style=\"color: orange;\">Basic Information</label>"));
+                        "<label>Basic Information</label>"));
 
         Assert.assertTrue(
                 "There should be a cell with the renderered 'Name' header",
-                hasComponentRendereredHeaderCell(grid,
-                        "<label title=\"Name\" style=\"color: green;\">Name</label>"));
+                hasComponentRendereredHeaderCell(grid, "<label>Name</label>"));
 
         Assert.assertTrue(
                 "There should be a cell with the renderered 'Age' header",
-                hasComponentRendereredHeaderCell(grid,
-                        "<label title=\"Age\" style=\"color: blue;\">Age</label>"));
+                hasComponentRendereredHeaderCell(grid, "<label>Age</label>"));
 
         Assert.assertTrue("There should be a cell with the renderered footer",
                 hasComponentRendereredHeaderCell(grid,
-                        "<label style=\"color: red;\">Total: 499 people</label>"));
+                        "<label>Total: 499 people</label>"));
     }
 
     @Test

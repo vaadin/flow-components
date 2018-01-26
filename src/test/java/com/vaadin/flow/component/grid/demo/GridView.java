@@ -333,7 +333,7 @@ public class GridView extends DemoView {
                         .range(query.getOffset(),
                                 query.getOffset() + query.getLimit())
                         .mapToObj(index -> createPerson(index + 1, random)),
-                query -> 100*1000*1000));
+                query -> 100 * 1000 * 1000));
 
         grid.addColumn(Person::getName).setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
@@ -711,13 +711,10 @@ public class GridView extends DemoView {
         grid.setItems(getItems());
 
         Column<Person> nameColumn = grid.addColumn(Person::getName)
-                .setHeader(TemplateRenderer.of(
-                        "<span style='color:green' title='Name'>Name</span>"))
-                .setComparator((p1, p2) -> p1.getName()
+                .setHeader("Name").setComparator((p1, p2) -> p1.getName()
                         .compareToIgnoreCase(p2.getName()));
         Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
-                .setHeader(TemplateRenderer
-                        .of("<span style='color:blue' title='Age'>Age</span>"));
+                .setHeader("Age");
         Column<Person> streetColumn = grid
                 .addColumn(person -> person.getAddress().getStreet())
                 .setHeader("Street");
@@ -727,14 +724,11 @@ public class GridView extends DemoView {
 
         ColumnGroup informationColumnGroup = grid
                 .mergeColumns(nameColumn, ageColumn)
-                .setHeader(TemplateRenderer.of(
-                        "<span style='color:orange' title='Basic Information'>Basic Information</span>"))
-                .setFooter(TemplateRenderer.of("<span style='color:red'>Total: "
-                        + getItems().size() + " people</span>"));
+                .setHeader("Basic Information")
+                .setFooter("Total: " + getItems().size() + " people");
         ColumnGroup addressColumnGroup = grid
                 .mergeColumns(streetColumn, postalCodeColumn)
-                .setHeader(TemplateRenderer.of(
-                        "<span title='Address Information'>Address Information</span>"));
+                .setHeader("Address Information");
         grid.mergeColumns(informationColumnGroup, addressColumnGroup);
 
         // end-source-example
@@ -750,47 +744,24 @@ public class GridView extends DemoView {
         grid.setItems(getItems());
 
         Column<Person> nameColumn = grid.addColumn(Person::getName)
-                .setHeader(new ComponentTemplateRenderer<>(() -> {
-                    Label label = new Label("Name");
-                    label.getStyle().set("color", "green");
-                    label.setTitle("Name");
-                    return label;
-                })).setComparator((p1, p2) -> p1.getName()
-                        .compareToIgnoreCase(p2.getName()));
+                .setHeader(new Label("Name")).setComparator((p1, p2) -> p1
+                        .getName().compareToIgnoreCase(p2.getName()));
         Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
-                .setHeader(new ComponentTemplateRenderer<>(() -> {
-                    Label label = new Label("Age");
-                    label.getStyle().set("color", "blue");
-                    label.setTitle("Age");
-                    return label;
-                }));
+                .setHeader(new Label("Age"));
         Column<Person> streetColumn = grid
                 .addColumn(person -> person.getAddress().getStreet())
-                .setHeader("Street");
+                .setHeader(new Label("Street"));
         Column<Person> postalCodeColumn = grid
                 .addColumn(person -> person.getAddress().getPostalCode())
-                .setHeader("Postal Code");
+                .setHeader(new Label("Postal Code"));
 
         ColumnGroup informationColumnGroup = grid
                 .mergeColumns(nameColumn, ageColumn)
-                .setHeader(new ComponentTemplateRenderer<>(() -> {
-                    Label label = new Label("Basic Information");
-                    label.getStyle().set("color", "orange");
-                    label.setTitle("Basic Information");
-                    return label;
-                })).setFooter(new ComponentTemplateRenderer<>(() -> {
-                    Label label = new Label(
-                            "Total: " + getItems().size() + " people");
-                    label.getStyle().set("color", "red");
-                    return label;
-                }));
+                .setHeader(new Label("Basic Information")).setFooter(
+                        new Label("Total: " + getItems().size() + " people"));
         ColumnGroup addressColumnGroup = grid
                 .mergeColumns(streetColumn, postalCodeColumn)
-                .setHeader(new ComponentTemplateRenderer<>(() -> {
-                    Label label = new Label("Address Information");
-                    label.setTitle("Address Information");
-                    return label;
-                }));
+                .setHeader(new Label("Address Information"));
         grid.mergeColumns(informationColumnGroup, addressColumnGroup);
 
         // end-source-example
