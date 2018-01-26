@@ -27,6 +27,9 @@
 
         <yarn.build.goal>run install-bower-dependencies</yarn.build.goal>
         <jetty.extra.resource.base>${project.basedir}/${frontend.working.directory}</jetty.extra.resource.base>
+        <jetty.jvm.args></jetty.jvm.args>
+        <war.source.excludes></war.source.excludes>
+        <war.resource.directory>${frontend.working.directory}</war.resource.directory>
     </properties>
 
     <dependencies>
@@ -107,17 +110,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>install-node-and-yarn</id>
-                        <goals>
-                            <goal>install-node-and-yarn</goal>
-                            <goal>yarn</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>${buildtools.directory}</workingDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>run-build</id>
+                        <id>install-tools-then-build</id>
                         <goals>
                             <goal>install-node-and-yarn</goal>
                             <goal>yarn</goal>
@@ -129,34 +122,55 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>${maven.war.plugin.version}</version>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>${war.resource.directory}</directory>
+                        </resource>
+                    </webResources>
+                    <warSourceExcludes>${war.source.excludes}</warSourceExcludes>
+                </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
+                <configuration>
+                    <jvmArgs>${jetty.jvm.args}</jvmArgs>
+                </configuration>
             </plugin>
         </plugins>
     </build>
+
     <profiles>
-      <profile>
-          <id>release</id>
-          <activation>
-              <property>
-                  <name>vaadin.productionMode</name>
-              </property>
-          </activation>
-          <properties>
-              <yarn.build.goal>run build</yarn.build.goal>
-          </properties>
-          <dependencies>
-              <dependency>
-                  <groupId>com.vaadin</groupId>
-                  <artifactId>flow-server-production-mode</artifactId>
-              </dependency>
-          </dependencies>
-      </profile>
+        <profile>
+            <id>productionMode</id>
+            <activation>
+                <property>
+                    <name>vaadin.productionMode</name>
+                </property>
+            </activation>
+
+            <properties>
+                <yarn.build.goal>run build</yarn.build.goal>
+                <war.resource.directory>${frontend.working.directory}/build</war.resource.directory>
+                <war.source.excludes>
+                    **/build/,**/bower.json,**/package.json,.bowerrc,src/**,bower_components/**,images/**,frontend/**
+                </war.source.excludes>
+                <jetty.jvm.args>-Dvaadin.productionMode</jetty.jvm.args>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>flow-server-production-mode</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
     </profiles>
 </project>
