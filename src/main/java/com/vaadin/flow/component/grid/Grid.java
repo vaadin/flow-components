@@ -766,7 +766,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @param pageSize
      *            the page size. Must be greater than zero.
      */
-    private Grid(int pageSize) {
+    public Grid(int pageSize) {
         setPageSize(pageSize);
         setSelectionModel(SelectionMode.SINGLE.createModel(this),
                 SelectionMode.SINGLE);
@@ -1035,6 +1035,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
+
+        // resets the size of the Grid to avoid
+        // https://github.com/vaadin/vaadin-grid/issues/1200
+        getElement().setProperty("size", 0);
+
         getDataCommunicator().setRequestedRange(0, pageSize);
     }
 
