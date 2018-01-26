@@ -1,5 +1,18 @@
 package com.vaadin.flow.component.charts.tests;
 
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.reflect.Type;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -20,22 +33,10 @@ import com.vaadin.flow.component.charts.events.SeriesShowEvent;
 import com.vaadin.flow.component.charts.examples.dynamic.ServerSideEvents;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Series;
-import com.vaadin.testbench.By;
 import com.vaadin.tests.elements.ButtonElement;
 import com.vaadin.tests.elements.ChartElement;
 import com.vaadin.tests.elements.CheckboxElement;
 import com.vaadin.tests.elements.LabelElement;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-
-import java.lang.reflect.Type;
-import java.util.List;
-
-import static org.junit.Assert.assertNotNull;
 
 public class ServerSideEventsIT extends AbstractTBTest {
 
