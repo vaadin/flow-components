@@ -4,13 +4,13 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.vaadin.addon.board.testUI.BasicUI;
+import com.vaadin.addon.board.testUI.BasicBoard;
 
 public class BasicScreenshotIT extends AbstractParallelTest {
 
     @Override
     protected Class<?> getUIClass() {
-        return BasicUI.class;
+        return BasicBoard.class;
     }
 
     @Test

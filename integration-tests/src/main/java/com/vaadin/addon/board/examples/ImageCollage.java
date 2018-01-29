@@ -13,8 +13,8 @@ import com.vaadin.ui.Image;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * This example requires image resources.
- * You need to have files with images in the resource folder:
+ * This example requires image resources. You need to have files with images in
+ * the resource folder:
  * /resources/packagename/image-collage/small/pictureIndex.jpg
  *
  * For example for the package my.example:
@@ -24,57 +24,66 @@ import com.vaadin.ui.VerticalLayout;
  * resources/my/package/image-collage/small/4.jpg
  * resources/my/package/image-collage/small/5.jpg
  */
-public class ImageCollage extends VerticalLayout {
+public class ImageCollage extends Div {
     private FileResource[] resources;
+
     public ImageCollage() {
         Board board = new Board();
         createResources();
 
-        //First row
+        // First row
         Row innerFirstRow = new Row();
         innerFirstRow.addComponents(createImageBox(2), createImageBox(3));
 
         board.addRow(createImageBox(1), innerFirstRow);
 
-        //Second row
+        // Second row
         board.addRow(createImageBox(24));
 
-        //Third row
-        board.addRow(createImageBox(5), createImageBox(6), createImageBox(7), createImageBox(8));
+        // Third row
+        board.addRow(createImageBox(5), createImageBox(6), createImageBox(7),
+                createImageBox(8));
 
-        //Fourth row
+        // Fourth row
         Component twoColumnsFourthRow = createImageBox(10);
-        Row fourthRow = board.addRow(createImageBox(9), twoColumnsFourthRow, createImageBox(11));
+        Row fourthRow = board.addRow(createImageBox(9), twoColumnsFourthRow,
+                createImageBox(11));
         fourthRow.setComponentSpan(twoColumnsFourthRow, 2);
 
-        //Fifth row
+        // Fifth row
         Component threeColumnsFifthRow = createImageBox(12);
 
         Row fifthRow = board.addRow(threeColumnsFifthRow, createImageBox(13));
         fifthRow.setComponentSpan(threeColumnsFifthRow, 3);
 
-        //Sixth row
+        // Sixth row
         Row firstGroupSixthRow = new Row();
-        firstGroupSixthRow.addComponents(createImageBox(14), createImageBox(15));
+        firstGroupSixthRow.addComponents(createImageBox(14),
+                createImageBox(15));
 
         Row secondGroupSixthRow = new Row();
-        secondGroupSixthRow.addComponents(createImageBox(16), createImageBox(17));
+        secondGroupSixthRow.addComponents(createImageBox(16),
+                createImageBox(17));
 
         Row thirdGroupSixthRow = new Row();
-        thirdGroupSixthRow.addComponents(createImageBox(18), createImageBox(19));
+        thirdGroupSixthRow.addComponents(createImageBox(18),
+                createImageBox(19));
 
-        board.addRow(firstGroupSixthRow, secondGroupSixthRow, thirdGroupSixthRow);
+        board.addRow(firstGroupSixthRow, secondGroupSixthRow,
+                thirdGroupSixthRow);
 
-        //Seventh row
+        // Seventh row
         Row firstGroupSeventhRow = new Row();
-        firstGroupSeventhRow.addComponents(createImageBox(20), createImageBox(21));
+        firstGroupSeventhRow.addComponents(createImageBox(20),
+                createImageBox(21));
 
         Component twoColumnsSeventhRow = createImageBox(23);
 
-        Row seventhRow = board.addRow(firstGroupSeventhRow, twoColumnsSeventhRow);
+        Row seventhRow = board.addRow(firstGroupSeventhRow,
+                twoColumnsSeventhRow);
         seventhRow.setComponentSpan(twoColumnsSeventhRow, 2);
 
-        //Eighth row
+        // Eighth row
         board.addRow(createImageBox(4), createImageBox(25));
 
         addComponent(board);
@@ -88,12 +97,15 @@ public class ImageCollage extends VerticalLayout {
         Arrays.sort(fileNames);
         resources = new FileResource[fileNames.length];
         for (int i = 0; i < fileNames.length; i++) {
-            URL resource = ImageCollage.class.getResource(IMAGE_PATH + fileNames[i]);
+            URL resource = ImageCollage.class
+                    .getResource(IMAGE_PATH + fileNames[i]);
             resources[i] = new FileResource(new File(resource.getFile()));
         }
     }
+
     private Component createImageBox(int n) {
-        // IE11 has an issue for calculating flex-basis if element has margin, padding or border
+        // IE11 has an issue for calculating flex-basis if element has margin,
+        // padding or border
         // Adding a wrapper fixes the issue
         CssLayout container = new CssLayout();
 

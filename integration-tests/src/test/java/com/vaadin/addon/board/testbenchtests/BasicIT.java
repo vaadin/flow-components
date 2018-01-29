@@ -3,7 +3,7 @@ package com.vaadin.addon.board.testbenchtests;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.addon.board.testUI.BasicUI;
+import com.vaadin.addon.board.testUI.BasicBoard;
 import com.vaadin.board.elements.BoardElement;
 import com.vaadin.testbench.elements.ButtonElement;
 
@@ -11,7 +11,7 @@ public class BasicIT extends AbstractParallelTest {
 
     @Override
     protected Class<?> getUIClass() {
-        return BasicUI.class;
+        return BasicBoard.class;
     }
 
     @Test
