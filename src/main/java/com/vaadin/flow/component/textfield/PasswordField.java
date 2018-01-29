@@ -18,6 +18,8 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
  * Server-side component for the {@code vaadin-password-field} element.
@@ -25,12 +27,14 @@ import com.vaadin.flow.component.HasValidation;
  * @author Vaadin Ltd.
  */
 public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
-        implements HasSize, HasValidation {
+        implements HasSize, HasValidation, HasValueChangeMode<PasswordField, String> {
+    private ValueChangeMode currentMode;
 
     /**
      * Constructs an empty {@code PasswordField}.
      */
     public PasswordField() {
+        setValueChangeMode(ValueChangeMode.ON_BLUR);
     }
 
     /**
@@ -40,6 +44,7 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
      *            the text to set as the label
      */
     public PasswordField(String label) {
+        this();
         setLabel(label);
     }
 
@@ -66,6 +71,7 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public PasswordField(ValueChangeListener<PasswordField, String> listener) {
+        this();
         addValueChangeListener(listener);
     }
 
@@ -107,5 +113,16 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
+    }
+
+    @Override
+    public ValueChangeMode getValueChangeMode() {
+        return currentMode;
+    }
+
+    @Override
+    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+        currentMode = valueChangeMode;
+        HasValueChangeMode.super.setValueChangeMode(valueChangeMode);
     }
 }

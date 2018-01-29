@@ -22,6 +22,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.demo.ValueChangeModeButtonProvider;
 import com.vaadin.flow.demo.ComponentDemoTest;
 
 /**
@@ -41,11 +42,23 @@ public class PasswordFieldIT extends ComponentDemoTest {
         WebElement passwordField = layout.findElement(
                 By.id("password-field-with-value-change-listener"));
 
+        updateValues(passwordFieldValueDiv, passwordField, true);
+        layout.findElement(By.id(ValueChangeModeButtonProvider.TOGGLE_BUTTON_ID)).click();
+        updateValues(passwordFieldValueDiv, passwordField, false);
+    }
+
+    private void updateValues(WebElement passwordFieldValueDiv, WebElement passwordField, boolean toggleBlur) {
         passwordField.sendKeys("a");
+        if (toggleBlur) {
+            blur();
+        }
         waitUntilTextsEqual("Password field value changed from '' to 'a'",
                 passwordFieldValueDiv.getText());
 
         passwordField.sendKeys(Keys.BACK_SPACE);
+        if (toggleBlur) {
+            blur();
+        }
         waitUntilTextsEqual("Password field value changed from 'a' to ''",
                 passwordFieldValueDiv.getText());
     }
@@ -56,6 +69,11 @@ public class PasswordFieldIT extends ComponentDemoTest {
                 By.id("password-field-with-value-change-listener"));
         Assert.assertEquals(passwordField.getAttribute("placeholder"),
                 "placeholder text");
+    }
+
+    private void blur() {
+        executeScript(
+                "!!document.activeElement ? document.activeElement.blur() : 0");
     }
 
     private void waitUntilTextsEqual(String expected, String actual) {

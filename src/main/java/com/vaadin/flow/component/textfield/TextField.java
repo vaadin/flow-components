@@ -17,6 +17,8 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
  * Server-side component for the {@code vaadin-text-field} element.
@@ -24,12 +26,14 @@ import com.vaadin.flow.component.HasValidation;
  * @author Vaadin Ltd
  */
 public class TextField extends GeneratedVaadinTextField<TextField>
-        implements HasSize, HasValidation {
+        implements HasSize, HasValidation, HasValueChangeMode<TextField, String> {
+    private ValueChangeMode currentMode;
 
     /**
      * Constructs an empty {@code TextField}.
      */
     public TextField() {
+        setValueChangeMode(ValueChangeMode.ON_BLUR);
     }
 
     /**
@@ -39,6 +43,7 @@ public class TextField extends GeneratedVaadinTextField<TextField>
      *            the text to set as the label
      */
     public TextField(String label) {
+        this();
         setLabel(label);
     }
 
@@ -85,6 +90,7 @@ public class TextField extends GeneratedVaadinTextField<TextField>
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public TextField(ValueChangeListener<TextField, String> listener) {
+        this();
         addValueChangeListener(listener);
     }
 
@@ -125,5 +131,16 @@ public class TextField extends GeneratedVaadinTextField<TextField>
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
+    }
+
+    @Override
+    public ValueChangeMode getValueChangeMode() {
+        return currentMode;
+    }
+
+    @Override
+    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+        currentMode = valueChangeMode;
+        HasValueChangeMode.super.setValueChangeMode(valueChangeMode);
     }
 }

@@ -84,6 +84,7 @@ public class TextAreaView extends DemoView {
         textArea.setId("text-area-with-value-change-listener");
         message.setId("text-area-value");
 
-        addCard("Basic text area", textArea, message);
+        addCard("Basic text area", textArea,
+                new ValueChangeModeButtonProvider(textArea).getToggleValueSyncButton(), message);
     }
 }
