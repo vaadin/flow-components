@@ -193,7 +193,7 @@ in the chart.
 
 Plot options for error bar charts have type [classname]#PlotOptionsErrorBar#. See the API documentation for details regarding the plot options.
 
-NOTE: Although most visual styles are defined in CSS, some options like [parameter]#whiskerLength# are set through Java API.
+NOTE: Although most <<dummy/../../../charts/java-api/css-styling#css.styling,visual styles are defined in CSS>>, some options like [parameter]#whiskerLength# are set through Java API.
 
 [[charts.charttypes.boxplot]]
 == Box Plot Charts
@@ -940,8 +940,7 @@ image::img/charts-funnel.png[width="80%"]
 Funnels have chart type [parameter]#FUNNEL#, pyramids have [parameter]#PYRAMID#.
 
 The labels of the funnel blocks are by default placed on the right side of the
-blocks, together with a connector. You can configure their style in the plot
-options.
+blocks, together with a connector.
 ifdef::web[]
 See the following example.
 [source, java]
@@ -1650,7 +1649,7 @@ summarized in the following:
 * [methodname]#format#: [classname]#String# a format string for the label (see more at <<dummy/../../../charts/java-api/charts-configuration#charts.configuration.format.string,"Using Format Strings">>)
 * [methodname]#formatter#: [classname]#String# a format string containing a JavaScript function for the label (see more at <<dummy/../../../charts/java-api/charts-configuration#charts.configuration.format.formatter,"Using a JavaScript Formatter">>)
 
-Also, data label can be styled by CSS with [literal]#.highcharts-data-label-box# and [literal]#.highcharts-data-label# class names.
+Also, data label can be <<dummy/../../../charts/java-api/css-styling#css.styling,styled by CSS>> with [literal]#.highcharts-data-label-box# and [literal]#.highcharts-data-label# class names.
 
 [[charts.charttypes.markers]]
 == Data Point Markers

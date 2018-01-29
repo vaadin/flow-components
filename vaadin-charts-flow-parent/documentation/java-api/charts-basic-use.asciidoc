@@ -25,7 +25,8 @@ layout.addComponent(chart);
 
 The chart types are described in
 <<dummy/../../../charts/java-api/charts-charttypes#charts.charttypes,"Chart Types">>. The
-main parts of a chart are illustrated in <<figure.charts.overview.elements>>.
+main parts of a chart are illustrated in <<figure.charts.overview.elements>>. Styling a
+chart is discussed in <<dummy/../../../charts/java-api/css-styling#css.styling,"CSS Styling">>
 
 [[figure.charts.overview.elements]]
 .Chart Elements
@@ -360,7 +361,7 @@ for (int i=0; i<points.length; i++) {
 conf.addSeries(series);
 ----
 
-Above, we defined 7 orthogonal data points in the 2x2x2 cube centerd in origo.
+Above, we defined 7 orthogonal data points in the 2x2x2 cube centered at the origin.
 The 3D depth was set to 135 earlier. The result is illustrated in
 <<figure.charts.basic-use.3d.scatter>>.
 

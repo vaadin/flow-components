@@ -15,8 +15,8 @@ This necessitated removal of many Java style configuration API among other chang
 * Upgraded to HighCharts 5
 * Styling is now primarily done with CSS
 * Dropped "size with units" sizing properties in favor of strings to take full advantage of browser capabilities
-* ZAxis is now a subclass of Axis
-* Getting PlotOptionsSeries no longer automatically creates a new instance
+* [classname]#ZAxis# is now a subclass of [classname]#Axis#
+* Getting [classname]#PlotOptionsSeries# no longer automatically creates a new instance
 * Gradient is no longer supported
 * Plot background image is no longer supported
 
@@ -25,8 +25,8 @@ This necessitated removal of many Java style configuration API among other chang
 [options="header"]
 |===
 | Old Type | Replaced By
-| PinchType | Dimension
-| ZoomType | Dimension
+| [classname]#PinchType# | [classname]#Dimension#
+| [classname]#ZoomType# | [classname]#Dimension#
 |===
 
 === Dropped types
@@ -34,7 +34,7 @@ This necessitated removal of many Java style configuration API among other chang
 [options="header"]
 |===
 | Type | Used In
-| Handles | Navigator.handles
+| [classname]#Handles# | Navigator.handles
 |===
 
 === Dropped properties
@@ -42,59 +42,59 @@ This necessitated removal of many Java style configuration API among other chang
 [cols="2,5",options="header"]
 |===
 | Type | Properties
-| AbstractDataLabels (and subclasses) | backgroundColor, borderColor, borderRadius, borderWidth, color, reservedSpace, style
-| AreaOptions (and subclasses) | color, dashStyle, lineColor, lineWidth, negativeColor
-| Axis (and subclasses) | gridLineColor, gridLineWidth, minorGridLineColor, minorGridLineWidth, tickColor
-| AxisTitle | reserveSpace
-| AxisStyle | tickWidth, tickColor, gridLineColor, gridLineWidth
-| Background | backgroundColor, borderColor, borderWidth
-| ChartModel | backgroundColor, borderColor, plotBackgroundColor, plotBackgroundImage, plotBorderColor, selectionMarkerFill
-| ChartStyle | backgroundColor, plotBackgroundColor, plotBorderWidth, plotBorderColor, borderWidth, borderColor
-| ColumnOptions (and subclasses) | color
-| ContextButton | symbolFill, symbolSize, symbolStroke, symbolStrokeWidth
-| Credits | style
-| GaugeOptions (and subclasses) | zoneAxis, zones
-| Global | canvasToolsURL
-| Hover | lineWidth, lineWidthPlus, fillColor, lineColor
-| Labels | style
-| Legend | backgroundColor, borderColor, borderWidth, itemHiddenStyle, itemHoverStyle, itemStyle
-| LegendNavigation | activeColor, inactiveColor, style
-| LegendTitle | style
-| Loading | labelStyle, style
-| Marker | fillColor, lineColor, lineWidth
-| Navigation | menuItemHoverStyle, menuItemStyle, menuStyle
-| Navigator | handles, maskFill, outlineColor, outlineWidth
-| NoData | style
-| OhlcOptions (and subclasses) | color,lineWidth
-| PlotOptionsBoxplot | color, lineWidth, negativeColor
-| PlotOptionsBubble | color, dashStyle, lineWidth, negativeColor
-| PlotOptionsCandlestick | lineColor
-| PlotOptionsFlags | color, lineColor, lineWidth
-| PlotOptionsPolygon | color, dashStyle, lineWidth, negativeColor
-| PlotOptionsSeries | color, dashStyle, lineWidth, negativeColor
-| PlotOptionsTreemap | color
-| PlotOptionsWaterfall | dashStyle, lineColor
-| PointOptions (and subclasses) | color, dashStyle, lineWidth, negativeColor
-| PyramidOptions (and subclasses) | heightUnit, widthUnit
-| RangeSelector | buttonTheme, inputStyle, labelStyle
-| Select | fillColor, lineColor, lineWidth
-| StackLabels | style
-| Subtitle | style
-| Title | style
+| [classname]#AbstractDataLabels# (and subclasses) | backgroundColor, borderColor, borderRadius, borderWidth, color, reservedSpace, style
+| [classname]#AreaOptions# (and subclasses) | color, dashStyle, lineColor, lineWidth, negativeColor
+| [classname]#Axis# (and subclasses) | gridLineColor, gridLineWidth, minorGridLineColor, minorGridLineWidth, tickColor
+| [classname]#AxisTitle# | reserveSpace
+| [classname]#AxisStyle# | tickWidth, tickColor, gridLineColor, gridLineWidth
+| [classname]#Background# | backgroundColor, borderColor, borderWidth
+| [classname]#ChartModel# | backgroundColor, borderColor, plotBackgroundColor, plotBackgroundImage, plotBorderColor, selectionMarkerFill
+| [classname]#ChartStyle# | backgroundColor, plotBackgroundColor, plotBorderWidth, plotBorderColor, borderWidth, borderColor
+| [classname]#ColumnOptions# (and subclasses) | color
+| [classname]#ContextButton# | symbolFill, symbolSize, symbolStroke, symbolStrokeWidth
+| [classname]#Credits# | style
+| [classname]#GaugeOptions# (and subclasses) | zoneAxis, zones
+| [classname]#Global# | canvasToolsURL
+| [classname]#Hover# | lineWidth, lineWidthPlus, fillColor, lineColor
+| [classname]#Labels# | style
+| [classname]#Legend# | backgroundColor, borderColor, borderWidth, itemHiddenStyle, itemHoverStyle, itemStyle
+| [classname]#LegendNavigation# | activeColor, inactiveColor, style
+| [classname]#LegendTitle# | style
+| [classname]#Loading# | labelStyle, style
+| [classname]#Marker# | fillColor, lineColor, lineWidth
+| [classname]#Navigation# | menuItemHoverStyle, menuItemStyle, menuStyle
+| [classname]#Navigator# | handles, maskFill, outlineColor, outlineWidth
+| [classname]#NoData# | style
+| [classname]#OhlcOptions# (and subclasses) | color,lineWidth
+| [classname]#PlotOptionsBoxplot# | color, lineWidth, negativeColor
+| [classname]#PlotOptionsBubble# | color, dashStyle, lineWidth, negativeColor
+| [classname]#PlotOptionsCandlestick# | lineColor
+| [classname]#PlotOptionsFlags# | color, lineColor, lineWidth
+| [classname]#PlotOptionsPolygon# | color, dashStyle, lineWidth, negativeColor
+| [classname]#PlotOptionsSeries# | color, dashStyle, lineWidth, negativeColor
+| [classname]#PlotOptionsTreemap# | color
+| [classname]#PlotOptionsWaterfall# | dashStyle, lineColor
+| [classname]#PointOptions# (and subclasses) | color, dashStyle, lineWidth, negativeColor
+| [classname]#PyramidOptions# (and subclasses) | heightUnit, widthUnit
+| [classname]#RangeSelector# | buttonTheme, inputStyle, labelStyle
+| [classname]#Select# | fillColor, lineColor, lineWidth
+| [classname]#StackLabels# | style
+| [classname]#Subtitle# | style
+| [classname]#Title# | style
 |===
 
-More information about Charts styling can be obtained in the _CSS Styling_ chapter.
+More information about Charts styling can be obtained in <<dummy/../../../charts/java-api/css-styling#css.styling,"CSS Styling">>.
 
 === Properties with new types
 
 [options="header"]
 |===
 | Property | New Type
-| ZAxis.title | AxisTitle
-| ZAxis.type | AxisType
-| ColumnOptions.zoneAxis | ZoneAxis
-| Label.textAlign | TextAlign
-| ChartModel.panKey | PanKey
-| Exporting.type | ExportingFileType
-| Background.shape | BackgroundShape
+| ZAxis.title | [classname]#AxisTitle#
+| ZAxis.type | [classname]#AxisType#
+| ColumnOptions.zoneAxis | [classname]#ZoneAxis#
+| Label.textAlign | [classname]#TextAlign#
+| ChartModel.panKey | [classname]#PanKey#
+| Exporting.type | [classname]#ExportingFileType#
+| Background.shape | [classname]#BackgroundShape#
 |===

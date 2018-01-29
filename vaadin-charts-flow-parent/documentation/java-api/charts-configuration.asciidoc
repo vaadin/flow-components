@@ -39,12 +39,12 @@ summarized in the following:
 
 
 For data configuration, see <<dummy/../../../charts/java-api/charts-data#charts.data,"Chart Data">>.
+For styling, see <<dummy/../../../charts/java-api/css-styling#css.styling,"CSS Styling">>
 
 [[charts.configuration.plotoptions]]
 == Plot Options
 
 The plot options are used to configure the data series in the chart.
-For example, line color could be specified for each line series.
 Plot options can be set in the configuration of the entire chart or for each data series separately with [methodname]#setPlotOptions()#.
 When the plot options are set to the entire chart, it will be applied to all the series in the chart.
 
