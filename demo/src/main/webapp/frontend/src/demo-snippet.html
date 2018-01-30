@@ -37,18 +37,21 @@
       static get is() {
         return 'demo-snippet';
       }
+
       static get properties() {
         return {
-          source: {
+          _markdown: {
             value: "No source",
-            type: String
+            type: String,
+            observer: '_setStatus'
           }
         }
       }
+
       ready() {
         super.ready();
 
-        var snippet = this.source;
+        var snippet = this._markdown;
 
         // Boolean properties are displayed as checked="", so remove the ="" bit.
         snippet = snippet.replace(/=""/g, '');
@@ -69,6 +72,11 @@
           return lineIndent < prev ? lineIndent : prev;
         }, null);
         return lines.map(function(l) { return l.substr(indent); }).join('\n');
+      }
+
+      _setStatus(newValue) {
+        this.dispatchEvent(new CustomEvent('snippet-status',
+            {detail: {disabled: newValue === 'No source'}}));
       }
     }
     customElements.define(DemoSnippet.is, DemoSnippet);

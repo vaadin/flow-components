@@ -1,14 +1,5 @@
 package com.vaadin.flow.component.charts;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -22,11 +13,24 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.WildcardParameter;
 import com.vaadin.flow.templatemodel.TemplateModel;
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import io.github.lukehutch.fastclasspathscanner.matchprocessor.FilenameMatchProcessor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @Route("")
 @PageTitle("Vaadin Charts for Flow Demo")
@@ -51,9 +55,13 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
 
     private static final Map<String, Class<? extends AbstractChartExample>> NAME_INDEXED_SUBTYPES;
     private static final List<Category> CATEGORIES;
+    private static final Set<String> STYLE_FILEPATHS;
 
-    @Id("demo-snippet")
-    private DemoSnippet snippet;
+    @Id("java-snippet")
+    private DemoSnippet javaSnippet;
+
+    @Id("style-snippet")
+    private DemoSnippet styleSnippet;
 
     @Id("demo-area")
     private DemoArea demoArea;
@@ -68,7 +76,7 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
                 .getSubTypesOf(AbstractChartExample.class)
                 .stream()
                 .filter(example -> !example.isAnnotationPresent(SkipFromDemo.class))
-                        .collect(toMap(e -> e.getSimpleName(), Function.identity()));
+                        .collect(toMap(Class::getSimpleName, Function.identity()));
 
         CATEGORIES = NAME_INDEXED_SUBTYPES
                 .values()
@@ -87,10 +95,20 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
                 })
                 .sorted(comparing(category -> GROUP_ORDER.indexOf(category.getName())))
                 .collect(toList());
+
+        STYLE_FILEPATHS = new HashSet<>();
+        new FastClasspathScanner()
+                .matchFilenamePattern("examples/.*\\.html",
+                        (FilenameMatchProcessor) (classpathElt, relativePath) ->
+                                STYLE_FILEPATHS.add(relativePath))
+                .scan();
     }
 
     public MainView() {
         getModel().setCategories(CATEGORIES);
+        // Preload all themes because Valo theme engine
+        // does not support live theme reloading.
+        STYLE_FILEPATHS.forEach(style -> UI.getCurrent().getPage().addHtmlImport(style));
     }
 
     @Override
@@ -111,9 +129,19 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
             getModel().setPage(currentExample.getValue());
 
             demoArea.setContent(exampleClass.newInstance());
-            snippet.setSource(IOUtils.toString(getClass().getResourceAsStream(
-                    "/examples/" + category
-                            + "/" + exampleClass.getSimpleName() + ".java"), "UTF-8"));
+
+            final String exampleName = "/examples/" + category
+                    + "/" + exampleClass.getSimpleName();
+
+            javaSnippet.setSource(IOUtils.toString(getClass().getResourceAsStream(
+                    exampleName + ".java"), "UTF-8"));
+
+            try {
+                styleSnippet.setSource(IOUtils.toString(getClass().getResourceAsStream(
+                        exampleName + ".html"), "UTF-8"));
+            } catch (NullPointerException expected) {
+                styleSnippet.setSource(null);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

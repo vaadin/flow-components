@@ -9,6 +9,6 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 public class DemoSnippet extends Component {
 
     public void setSource(String source) {
-        getElement().setProperty("_markdown", source);
+        getElement().setProperty("_markdown", source == null ? "No source" : source);
     }
 }

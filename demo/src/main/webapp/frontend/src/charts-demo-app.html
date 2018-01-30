@@ -24,6 +24,10 @@
         width: 100%;
       }
 
+      .selected-source-tab {
+        font-weight: bold;
+      }
+
       #logoandname {
         display: none;
         margin-bottom: 20px;
@@ -304,8 +308,10 @@
     <div id="content">
       <div class="nav-panel">
         <span id="source-label">Source:</span>
-        <paper-button id="javabutton" class="nav-panel__tabs__button" on-click="_showSource" noink
+        <paper-button id="javabutton" class="nav-panel__tabs__button" on-click="_showJavaSource" noink
                       source-type="java">Java</paper-button>
+        <paper-button id="stylebutton" class="nav-panel__tabs__button" on-click="_showStyleSource" noink
+                      source-type="style">Style</paper-button>
         <paper-button style="display:none;" id="closebutton" on-click="_closeSource" noink
                       icon="vaadin:close-circle-o">
           <iron-icon icon="vaadin:eye-slash" style="padding-right:8px;"></iron-icon> Hide source
@@ -313,7 +319,10 @@
       </div>
 
       <vaadin-split-layout id="layout" vertical>
-        <demo-snippet id="demo-snippet" class="hidden"></demo-snippet>
+        <div>
+          <demo-snippet id="java-snippet" class="hidden"></demo-snippet>
+          <demo-snippet id="style-snippet" class="hidden" on-snippet-status="_setSnippetButtonDisabled"></demo-snippet>
+        </div>
         <demo-area id="demo-area"></demo-area>
       </vaadin-split-layout>
     </div>
@@ -364,14 +373,45 @@
 
       _closeSource() {
         this.classList.add('hiddensplitter');
-        this.$['demo-snippet'].classList.add("hidden");
+        this.$['java-snippet'].classList.add("hidden");
+        this.$['style-snippet'].classList.add("hidden");
+
+        this.$['javabutton'].classList.remove("selected-source-tab");
+        this.$['stylebutton'].classList.remove("selected-source-tab");
         this.$.closebutton.style.display = "none";
       }
 
-      _showSource() {
+      _showJavaSource() {
         this.classList.remove("hiddensplitter");
-        this.$['demo-snippet'].classList.remove("hidden");
+        this.$['style-snippet'].classList.add("hidden");
+        this.$['stylebutton'].classList.remove("selected-source-tab");
+
+        this.$['javabutton'].classList.add("selected-source-tab");
+        this.$['java-snippet'].classList.remove("hidden");
         this.$.closebutton.style.display = "";
+      }
+
+      _showStyleSource() {
+        this.classList.remove("hiddensplitter");
+        this.$['java-snippet'].classList.add("hidden");
+        this.$['javabutton'].classList.remove("selected-source-tab");
+
+        this.$['stylebutton'].classList.add("selected-source-tab");
+        this.$['style-snippet'].classList.remove("hidden");
+        this.$.closebutton.style.display = "";
+      }
+
+      _setSnippetButtonDisabled(e) {
+        const targetElementId = e.target.id === 'java-snippet' ? 'javabutton' : 'stylebutton';
+        const targetElementClassList = this.$[targetElementId].classList;
+        if (e.detail.disabled) {
+          targetElementClassList.add('hidden');
+          if (targetElementClassList.contains('selected-source-tab')) {
+            this._closeSource();
+          }
+        } else {
+          targetElementClassList.remove('hidden');
+        }
       }
     }
 

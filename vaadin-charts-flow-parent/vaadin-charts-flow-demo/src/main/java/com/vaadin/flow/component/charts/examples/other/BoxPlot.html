@@ -1,0 +1,35 @@
+<dom-module id="BoxPlot" theme-for="vaadin-chart">
+  <template>
+    <style>
+      :host(.BoxPlot) .highcharts-plot-lines-0 .highcharts-plot-line {
+        stroke-dasharray: 4,3,1,3;
+        stroke: red;
+      }
+
+      :host(.BoxPlot) .highcharts-plot-lines-500 .highcharts-plot-line {
+        stroke-dasharray: 3,1,1,1,1,1;
+        stroke: blue;
+      }
+
+      :host(.BoxPlot) .highcharts-plot-line-label {
+        fill: gray;
+      }
+
+      :host(.BoxPlot) .custom-style .highcharts-boxplot-median {
+        stroke: cyan;
+        stroke-width: 1;
+      }
+
+      :host(.BoxPlot) .custom-style .highcharts-boxplot-stem {
+        stroke: green;
+        stroke-dasharray: 4,4;
+        stroke-width: 4;
+      }
+
+      :host(.BoxPlot) .custom-style .highcharts-boxplot-whisker {
+        stroke: magenta;
+        stroke-width: 5;
+      }
+    </style>
+  </template>
+</dom-module>
