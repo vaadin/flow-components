@@ -92,4 +92,4 @@ configuration.setPlotOptions(plotOptions);
 image::img/timeline_charts_compare.png[]
 
 You can find more examples in the Timeline section of
-https://vaadin-charts-flow.app.fi/CompareMultipleSeries[Vaadin Charts Demo].
+https://charts.demo.vaadin.com/CompareMultipleSeries[Vaadin Charts Demo].
