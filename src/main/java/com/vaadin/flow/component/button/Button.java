@@ -27,7 +27,8 @@ import com.vaadin.flow.dom.ElementFactory;
  *
  * @author Vaadin Ltd
  */
-public class Button extends GeneratedVaadinButton<Button> implements HasSize {
+public class Button extends GeneratedVaadinButton<Button>
+        implements HasSize {
 
     private static final String THEME_ATTRIBUTE = "theme";
 
@@ -318,9 +319,58 @@ public class Button extends GeneratedVaadinButton<Button> implements HasSize {
      * @param components
      *            the components to add
      */
+    private void add(Component... components) {
+        assert components != null;
+        for (Component component : components) {
+            assert component != null;
+            getElement().appendChild(component.getElement());
+        }
+    }
+
+    /**
+     * Set the button to be input focused when the page loads.
+     * 
+     * @param autofocus
+     *            the boolean value to set
+     */
     @Override
-    public void add(Component... components) {
-        super.add(components);
+    public void setAutofocus(boolean autofocus) {
+        super.setAutofocus(autofocus);
+    }
+
+    /**
+     * Get the state for the auto-focus property of the button.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * 
+     * @return the {@code autofocus} property from the button
+     */
+    public boolean isAutofocus() {
+        return isAutofocusBoolean();
+    }
+
+    /**
+     * Enables or disables this button.
+     * 
+     * @param enabled
+     *            the boolean value to set
+     */
+    public void setEnabled(boolean enabled) {
+        setDisabled(!enabled);
+    }
+
+    /**
+     * Determines whether this button is enabled
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     * 
+     * @return {@code true} if the button is enabled, {@code false} otherwise
+     */
+    public boolean isEnabled() {
+        return !isDisabledBoolean();
     }
 
     private void wrapTextInSpan() {

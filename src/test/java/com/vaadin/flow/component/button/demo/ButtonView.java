@@ -136,7 +136,7 @@ public class ButtonView extends DemoView {
         // begin-source-example
         // source-example-heading: Disabled button
         Button button = new Button("Disabled");
-        button.setDisabled(true);
+        button.setEnabled(false);
         // end-source-example
 
         addCard("Disabled button", button);
