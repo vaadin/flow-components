@@ -5,12 +5,20 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.shared.ui.Dependency;
 import com.vaadin.flow.shared.ui.LoadMode;
 import org.apache.commons.io.IOUtils;
+import org.jsoup.nodes.Element;
 
 public class ApplicationServiceInitListener
         implements VaadinServiceInitListener {
 
     @Override
     public void serviceInit(ServiceInitEvent event) {
+        event.addBootstrapListener((response) -> {
+            Element head = response.getDocument().head();
+            head.append(
+                    "<meta name=\"viewport\" content=\"width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes\">"
+                +   "<meta name=\"theme-color\" content=\"#00B4F0\">");
+        });
+
         event.addDependencyFilter((dependencies, filterContext) -> {
             if (filterContext.getService().getDeploymentConfiguration()
                     .isProductionMode()) {

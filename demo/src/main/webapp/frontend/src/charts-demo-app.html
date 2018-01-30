@@ -6,6 +6,7 @@
 <link rel="import" href="./demo-area.html">
 <link rel="import" href="./demo-menu.html">
 <link rel="import" href="./demo-snippet.html">
+<link rel="import" href="./header-bar.html">
 <link rel="import" href="./my-icons.html">
 
 <dom-module id="charts-demo-app">
@@ -186,6 +187,7 @@
       #layout {
         flex-grow: 1;
         height: 100%;
+        width: 100%;
       }
 
       .nav-panel {
@@ -238,6 +240,12 @@
         }
       }
 
+      @media screen and (max-width: 375px) {
+       .nav-panel {
+         font-size: 12px;
+        }
+      }
+
       @media screen and (max-width: 799px) {
         #sideMenu {
           transform: translateX(-100%);
@@ -273,6 +281,10 @@
         #logoandname {
           display: block;
         }
+
+        #header {
+            transform: translateY(-100%);
+        }
       }
     </style>
 
@@ -303,6 +315,8 @@
         </div>
       </div>
     </div>
+
+    <header-bar id="header" demo=[[page]] on-open-menu="_openMenu"></header-bar>
 
     <!-- Main content -->
     <div id="content">
@@ -359,6 +373,7 @@
 
       _routePageChanged(category, page) {
         this.$.menu.updateSelection();
+        this._closeMenu();
       }
 
       _openMenu() {
