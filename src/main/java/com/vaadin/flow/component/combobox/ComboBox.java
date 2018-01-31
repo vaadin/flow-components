@@ -96,7 +96,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         getElement().synchronizeProperty(SELECTED_ITEM_PROPERTY_NAME, "change");
 
         getElement().addEventListener("selected-item-changed", event -> {
-            fireEvent(new ValueChangeEvent<>(this, this, oldValue, true));
+            fireEvent(new HasValue.ValueChangeEvent<>(this, this, oldValue,
+                    true));
             oldValue = getValue();
         });
 
@@ -221,7 +222,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         if (temporaryFilteredItems != null) {
             return Collections.unmodifiableList(temporaryFilteredItems);
         }
-        JsonArray items = protectedGetFilteredItems();
+        JsonArray items = super.getFilteredItemsJsonArray();
         List<T> result = new ArrayList<>(items.length());
         for (int i = 0; i < items.length(); i++) {
             result.add(getData(items.get(i)));
@@ -285,6 +286,193 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     }
 
     @Override
+    public void setOpened(boolean opened) {
+        super.setOpened(opened);
+    }
+
+    /**
+     * Gets the states of the drop-down.
+     * 
+     * @return {@code true} if the drop-down is opened, {@code false} otherwise
+     */
+    public boolean isOpened() {
+        return isOpenedBoolean();
+    }
+
+    @Override
+    public void setInvalid(boolean invalid) {
+        super.setInvalid(invalid);
+    }
+
+    /**
+     * Gets the validity of the combobox output.
+     * <p>
+     * return true, if the value is invalid.
+     * 
+     * @return the {@code validity} property from the component
+     */
+    public boolean isInvalid() {
+        return isInvalidBoolean();
+    }
+
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        super.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * Gets the current error message from the combobox.
+     * 
+     * @return the current error message
+     */
+    public String getErrorMessage() {
+        return getErrorMessageString();
+    }
+
+    @Override
+    public void setAllowCustomValue(boolean allowCustomValue) {
+        super.setAllowCustomValue(allowCustomValue);
+    }
+
+    /**
+     * If {@code true}, the user can input a value that is not present in the
+     * items list. {@code value} property will be set to the input value in this
+     * case. Also, when {@code value} is set programmatically, the input value
+     * will be set to reflect that value.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     * 
+     * @return the {@code allowCustomValue} property from the combobox
+     */
+    public boolean isAllowCustomValue() {
+        return isAllowCustomValueBoolean();
+    }
+
+    /**
+     * Set the combobox to be input focused when the page loads.
+     * 
+     * @param autofocus
+     *            the boolean value to set
+     */
+    @Override
+    public void setAutofocus(boolean autofocus) {
+        super.setAutofocus(autofocus);
+    }
+
+    /**
+     * Get the state for the auto-focus property of the combobox.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * 
+     * @return the {@code autofocus} property from the combobox
+     */
+    public boolean isAutofocus() {
+        return isAutofocusBoolean();
+    }
+
+    /**
+     * Enables or disables this combobox.
+     * 
+     * @param enabled
+     *            the boolean value to set
+     */
+    public void setEnabled(boolean enabled) {
+        setDisabled(!enabled);
+    }
+
+    /**
+     * Determines whether this combobox is enabled
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     * 
+     * @return {@code true} if the combobox is enabled, {@code false} otherwise
+     */
+    public boolean isEnabled() {
+        return !isDisabledBoolean();
+    }
+
+    @Override
+    public void setPreventInvalidInput(boolean preventInvalidInput) {
+        super.setPreventInvalidInput(preventInvalidInput);
+    }
+
+    /**
+     * Determines whether preventing the user from inputing invalid value.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * 
+     * @return the {@code preventInvalidInput} property of the combobox
+     */
+    public boolean isPreventInvalidInput() {
+        return isPreventInvalidInputBoolean();
+    }
+
+    @Override
+    public void setRequired(boolean required) {
+        super.setRequired(required);
+    }
+
+    /**
+     * Determines whether the combobox is marked as input required.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * 
+     * @return {@code true} if the input is required, {@code false} otherwise
+     */
+    public boolean isRequired() {
+        return isRequiredBoolean();
+    }
+
+    @Override
+    public void setLabel(String label) {
+        super.setLabel(label);
+    }
+
+    /**
+     * Gets the label of the combobox.
+     * 
+     * @return the {@code label} property of the combobox
+     */
+    public String getLabel() {
+        return getLabelString();
+    }
+
+    @Override
+    public void setPlaceholder(String placeholder) {
+        super.setPlaceholder(placeholder);
+    }
+
+    /**
+     * Gets the placeholder of the combobox.
+     * 
+     * @return the {@code placeholder} property of the combobox
+     */
+    public String getPlaceholder() {
+        return getPlaceholderString();
+    }
+
+    @Override
+    public void setPattern(String pattern) {
+        super.setPattern(pattern);
+    }
+
+    /**
+     * Gets the valid input pattern
+     * 
+     * @return the {@code pattern} property of the combobox
+     */
+    public String getPattern() {
+        return getPatternString();
+    }
+
+    @Override
     public T getEmptyValue() {
         return null;
     }
@@ -337,11 +525,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         return getEmptyValue();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Registration addValueChangeListener(
             ValueChangeListener<ComboBox<T>, T> listener) {
 
-        return addListener(ValueChangeEvent.class,
+        return addListener(HasValue.ValueChangeEvent.class,
                 (ValueChangeListener) listener);
     }
 

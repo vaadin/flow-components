@@ -87,8 +87,9 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         Assert.assertEquals("Nothing clicked yet...", message.getText());
 
         WebElement combo = findElement(By.id("button-renderer"));
+        WebElement textField = findInShadowRoot(combo, By.id("input")).get(0);
         // opens the dropdown
-        combo.click();
+        clickElementWithJs(textField);
 
         // long trip to the depths of the component to find the button
         WebElement overlay = findElement(By.id("overlay"));
