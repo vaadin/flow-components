@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.vaadin</groupId>
-	<artifactId>vaadin-board-root</artifactId>
+	<artifactId>vaadin-board-flow-root</artifactId>
 	<packaging>pom</packaging>
 	<version>2.0-SNAPSHOT</version>
 	<name>vaadin-board-root</name>
@@ -15,13 +15,13 @@
 	</organization>
 	
 	<properties>
-        <flow.version>1.0.0.alpha18</flow.version>
+            <flow.version>1.0.0.alpha18</flow.version>
 	</properties>
 
 	<modules>
 		<module>vaadin-board-flow</module>
-		<module>testbench-api</module>
-		<module>integration-tests</module>
+		<module>vaadin-board-testbench</module>
+		<module>vaadin-board-flow-integration-tests</module>
 	</modules>
 	<distributionManagement>
 		<snapshotRepository>
@@ -63,7 +63,7 @@
 		<profile>
 			<id>release</id>
 			<modules>
-				<module>vaadin-board-flow</module>
+				<module>addon</module>
 				<module>testbench-api</module>
 			</modules>
 		</profile>
