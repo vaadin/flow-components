@@ -35,7 +35,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 @HtmlImport("frontend://bower_components/vaadin-board/vaadin-board-row.html")
 public class Row extends Component implements HasComponents, HasStyle, HasSize {
 
-    private static final String COLSPAN_PROPERTY = "boardCols";
+    private static final String COLSPAN_ATTRIBUTE = "board-cols";
 
     /**
      * Creates an empty row.
@@ -109,7 +109,13 @@ public class Row extends Component implements HasComponents, HasStyle, HasSize {
         // throw new IllegalArgumentException(
         // "The given component is not a child of this row");
         // }
-        return component.getElement().getProperty(COLSPAN_PROPERTY, 1);
+        String attr = component.getElement().getAttribute(COLSPAN_ATTRIBUTE);
+        if (attr == null) {
+
+            return 1;
+        } else {
+            return Integer.parseInt(attr);
+        }
     }
 
     /**
@@ -125,7 +131,7 @@ public class Row extends Component implements HasComponents, HasStyle, HasSize {
         // throw new IllegalArgumentException(
         // "The given component is not a child of this row");
         // }
-        component.getElement().setProperty(COLSPAN_PROPERTY, columns);
+        component.getElement().setAttribute(COLSPAN_ATTRIBUTE, "" + columns);
     }
 
 }
