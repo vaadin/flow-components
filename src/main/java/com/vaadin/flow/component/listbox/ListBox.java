@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
@@ -43,7 +45,7 @@ import com.vaadin.flow.shared.Registration;
  */
 public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
         implements HasItemsAndComponents<T>, SingleSelect<ListBox<T>, T>,
-        HasDataProvider<T> {
+        HasDataProvider<T>, HasComponents {
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
     private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>();
@@ -245,5 +247,11 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
         return getChildren().filter(VaadinItem.class::isInstance)
                 .map(component -> (VaadinItem<T>) component)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Registration addItemsChangeListener(
+            ComponentEventListener<ItemsChangeEvent<ListBox<T>>> listener) {
+        return super.addItemsChangeListener(listener);
     }
 }
