@@ -32,7 +32,7 @@ public class Board extends Component implements HasSize, HasStyle {
     /**
      * Creates an empty board.
      * <p>
-     * Use {@link #add(Component...)} to add content to the board.
+     * Use {@link #addRow(Component...)} to add content to the board.
      **/
     public Board() {
         setWidth("100%");
