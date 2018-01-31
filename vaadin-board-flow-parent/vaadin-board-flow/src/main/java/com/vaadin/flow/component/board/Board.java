@@ -2,6 +2,7 @@ package com.vaadin.flow.component.board;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 
@@ -26,7 +27,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  */
 @Tag("vaadin-board")
 @HtmlImport("frontend://bower_components/vaadin-board/vaadin-board.html")
-public class Board extends Component implements HasSize {
+public class Board extends Component implements HasSize, HasStyle {
 
     /**
      * Creates an empty board.
@@ -53,6 +54,20 @@ public class Board extends Component implements HasSize {
         Row row = new Row(components);
         getElement().appendChild(row.getElement());
         return row;
+    }
+
+    /**
+     * Removes the given row from the board.
+     *
+     * @param row
+     *            to be removed
+     **/
+    public void removeRow(Row row) {
+        // if (!ComponentUtil.isDirectChild(this,row)) {
+        // throw new IllegalArgumentException(
+        // "The given component is not a row in this board");
+        // }
+        getElement().removeChild(row.getElement());
     }
 
 }

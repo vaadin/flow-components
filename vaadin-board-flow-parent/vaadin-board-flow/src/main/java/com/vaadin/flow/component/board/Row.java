@@ -2,6 +2,8 @@ package com.vaadin.flow.component.board;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 
@@ -31,7 +33,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  */
 @Tag("vaadin-board-row")
 @HtmlImport("frontend://bower_components/vaadin-board/vaadin-board-row.html")
-public class Row extends Component implements HasComponents {
+public class Row extends Component implements HasComponents, HasStyle, HasSize {
 
     private static final String COLSPAN_PROPERTY = "boardCols";
 
