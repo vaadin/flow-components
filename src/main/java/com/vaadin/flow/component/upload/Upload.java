@@ -17,9 +17,13 @@ package com.vaadin.flow.component.upload;
 
 import java.io.OutputStream;
 import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.dom.Element;
@@ -89,6 +93,219 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
             streamVariable = new DefaultStreamVariable(this);
         }
         return streamVariable;
+    }
+
+    /**
+     * Limit of files to upload, by default it is unlimited. If the value is set
+     * to one, the native file browser will prevent selecting multiple files.
+     * 
+     * @param maxFiles
+     *            the maximum number of files allowed for the user to select
+     */
+    public void setMaxFiles(int maxFiles) {
+        super.setMaxFiles(maxFiles);
+    }
+
+    /**
+     * Gets the maximum number of files allowed for the user to select to
+     * upload.
+     * 
+     * @return the maximum number of files
+     */
+    public int getMaxFiles() {
+        return (int) getMaxFilesDouble();
+    }
+
+    /**
+     * Specifies the maximum file size in bytes allowed to upload. Notice that
+     * it is a client-side constraint, which will be checked before sending the
+     * request.
+     * 
+     * @param maxFileSize
+     *            the maximum file size in bytes
+     */
+    public void setMaxFileSize(int maxFileSize) {
+        super.setMaxFileSize(maxFileSize);
+    }
+
+    /**
+     * Gets the maximum allowed file size in the client-side, in bytes.
+     * 
+     * @return the maximum file size in bytes
+     */
+    public int getMaxFileSize() {
+        return (int) getMaxFileSizeDouble();
+    }
+
+    /**
+     * When <code>false</code>, it prevents uploads from triggering immediately
+     * upon adding file(s). The default is <code>true</code>.
+     * 
+     * @param autoUpload
+     *            <code>true</code> to allow uploads to start immediately after
+     *            selecting files, <code>false</code> otherwise.
+     */
+    public void setAutoUpload(boolean autoUpload) {
+        setNoAuto(!autoUpload);
+    }
+
+    /**
+     * Gets the auto upload status.
+     * 
+     * @return <code>true</code> if the upload of files should start immediately
+     *         after they are selected, <code>false</code> otherwise.
+     */
+    public boolean isAutoUpload() {
+        return isNoAutoBoolean();
+    }
+
+    /**
+     * Define whether the element supports dropping files on it for uploading.
+     * By default it's enabled in desktop and disabled in touch devices because
+     * mobile devices do not support drag events in general. Setting it
+     * <code>true</code> means that drop is enabled even in touch-devices, and
+     * <code>false</code> disables drop in all devices.
+     * 
+     * @param dropAllowed
+     *            <code>true</code> to allow file dropping, <code>false</code>
+     *            otherwise
+     */
+    public void setDropAllowed(boolean dropAllowed) {
+        setNodrop(!dropAllowed);
+    }
+
+    /**
+     * Gets whether file dropping is allowed or not. By default it's enabled in
+     * desktop and disabled in touch devices because mobile devices do not
+     * support drag events in general.
+     * 
+     * @return <code>true</code> if file dropping is allowed, <code>false</code>
+     *         otherwise.
+     */
+    public boolean isDropAllowed() {
+        return !isNodropBoolean();
+    }
+
+    /**
+     * Specifies the types of files that the server accepts. Syntax: a MIME type
+     * pattern (wildcards are allowed) or file extensions. Notice that MIME
+     * types are widely supported, while file extensions are only implemented in
+     * certain browsers, so it should be avoided.
+     * <p>
+     * Example: <code>"video/*","image/tiff"</code> or
+     * <code>".pdf","audio/mp3"</code>
+     * 
+     * @param acceptedFileTypes
+     *            the allowed file types to be uploaded, or <code>null</code> to
+     *            clear any restrictions
+     */
+    public void setAcceptedFileTypes(String... acceptedFileTypes) {
+        String accepted = "";
+        if (acceptedFileTypes != null) {
+            accepted = String.join(",", acceptedFileTypes);
+        }
+        setAccept(accepted);
+    }
+
+    /**
+     * Gets the list of accepted file types for upload.
+     * 
+     * @return a list of allowed file types, never <code>null</code>.
+     */
+    public List<String> getAcceptedFileTypes() {
+        String accepted = getAcceptString();
+        if (accepted == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(accepted.split(","));
+    }
+
+    /**
+     * Sets the component as the actionable button inside the upload component,
+     * that starts the upload of the selected files.
+     * 
+     * @param uploadButton
+     *            the component to be clicked by the user to start the upload,
+     *            or <code>null</code> to clear it
+     */
+    public void setUploadButton(Component uploadButton) {
+        removeElementsAtSlot("add-button");
+        if (uploadButton != null) {
+            addToAddButton(uploadButton);
+        }
+    }
+
+    /**
+     * Gets the component set as the upload button for the upload, if any.
+     * 
+     * @return the actionable button, or <code>null</code> if none was set
+     */
+    public Component getUploadButton() {
+        return getComponentAtSlot("add-button");
+    }
+
+    /**
+     * Sets the component to show as a message to the user to drop files in the
+     * upload component. Despite of the name, the label can be any component.
+     * 
+     * @param dropLabel
+     *            the label to show for the users when it's possible drop files,
+     *            or <code>null</code> to clear it
+     */
+    public void setDropLabel(Component dropLabel) {
+        removeElementsAtSlot("drop-label");
+        if (dropLabel != null) {
+            addToDropLabel(dropLabel);
+        }
+    }
+
+    /**
+     * Gets the component set as the drop label, if any.
+     * 
+     * @return the drop label component, or <code>null</code> if none was set
+     */
+    public Component getDropLabel() {
+        return getComponentAtSlot("drop-label");
+    }
+
+    /**
+     * Sets the component to show as the drop label icon. The icon is visible
+     * when the user can drop files to this upload component. Despite of the
+     * name, the drop label icon can be any component.
+     * 
+     * @param dropLabelIcon
+     *            the label icon to show for the users when it's possible to
+     *            drop files, or <code>null</code> to cleat it
+     */
+    public void setDropLabelIcon(Component dropLabelIcon) {
+        removeElementsAtSlot("drop-label-icon");
+        if (dropLabelIcon != null) {
+            addToDropLabelIcon(dropLabelIcon);
+        }
+    }
+
+    /**
+     * Gets the component set as the drop label icon, if any.
+     * 
+     * @return the drop label icon component, or <code>null</code> if none was
+     *         set
+     */
+    public Component getDropLabelIcon() {
+        return getComponentAtSlot("drop-label-icon");
+    }
+
+    private void removeElementsAtSlot(String slot) {
+        getElement().getChildren()
+                .filter(child -> slot.equals(child.getAttribute("slot")))
+                .forEach(Element::removeFromParent);
+    }
+
+    private Component getComponentAtSlot(String slot) {
+        return getElement().getChildren()
+                .filter(child -> slot.equals(child.getAttribute("slot")))
+                .filter(child -> child.getComponent().isPresent())
+                .map(child -> child.getComponent().get()).findFirst()
+                .orElse(null);
     }
 
     /**

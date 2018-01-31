@@ -44,17 +44,15 @@ public class UploadIT extends ComponentDemoTest {
         File tempFile = createTempFile();
         fillPathToUploadInput(tempFile.getPath());
 
-        WebElement uploadDialog = getDriver()
-                .findElement(By.tagName("paper-dialog"));
-        String actualFileName = uploadDialog.findElement(By.tagName("p"))
+        WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
+        String actualFileName = uploadOutput.findElement(By.tagName("p"))
                 .getText();
         Assert.assertEquals("File name was wrong.", tempFile.getName(),
                 actualFileName);
 
-        String content = uploadDialog.getText();
+        String content = uploadOutput.getText();
 
-        String expectedContent =
-                actualFileName + "\nSimple upload\n" + getTempFileContents();
+        String expectedContent = actualFileName + "\n" + getTempFileContents();
 
         Assert.assertEquals("Upload content does not match expected",
                 expectedContent, content);

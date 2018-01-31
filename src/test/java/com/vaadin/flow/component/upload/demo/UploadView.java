@@ -29,16 +29,15 @@ import java.util.stream.Stream;
 import org.apache.commons.io.IOUtils;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.paper.dialog.GeneratedPaperDialog;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
@@ -68,6 +67,8 @@ public class UploadView extends DemoView {
     }
 
     private void createSimpleUpload() {
+        Div output = new Div();
+
         // begin-source-example
         // source-example-heading: Simple in memory receiver for single file
         // upload
@@ -77,17 +78,20 @@ public class UploadView extends DemoView {
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(), buffer.getInputStream());
-            createAndOpenDialog("Simple upload", event.getFileName(),
-                    component);
+            showOutput(event.getFileName(), component, output);
         });
         // end-source-example
         upload.setMaxFileSize(500 * 1024);
         upload.setId("test-upload");
+        output.setId("test-output");
 
-        addCard("Simple in memory receiver for single file upload", upload);
+        addCard("Simple in memory receiver for single file upload", upload,
+                output);
     }
 
     private void createSimpleMultiFileUpload() {
+        Div output = new Div();
+
         // begin-source-example
         // source-example-heading: Simple in memory receiver for multi file
         // upload
@@ -98,86 +102,89 @@ public class UploadView extends DemoView {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(),
                     buffer.getInputStream(event.getFileName()));
-            createAndOpenDialog("Multi file upload", event.getFileName(),
-                    component);
+            showOutput(event.getFileName(), component, output);
         });
         // end-source-example
         upload.setMaxFileSize(200 * 1024);
 
-        addCard("Simple in memory receiver for multi file upload", upload);
+        addCard("Simple in memory receiver for multi file upload", upload,
+                output);
     }
 
     private void createFilteredMultiFileUpload() {
+        Div output = new Div();
+
         // begin-source-example
         // source-example-heading: Filtered multi file upload for images
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
-        upload.setAccept("image/jpeg,image/png,image/gif");
+        upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(),
                     buffer.getInputStream(event.getFileName()));
-            createAndOpenDialog("Image upload", event.getFileName(), component);
+            showOutput(event.getFileName(), component, output);
         });
         // end-source-example
         upload.setMaxFileSize(200 * 1024);
 
-        addCard("Filtered multi file upload for images", upload);
+        addCard("Filtered multi file upload for images", upload, output);
     }
 
     private void createNonImmediateUpload() {
+        Div output = new Div();
+
         // begin-source-example
         // source-example-heading: Non immediate upload
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
-        upload.setNoAuto(true);
+        upload.setAutoUpload(false);
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(),
                     buffer.getInputStream(event.getFileName()));
-            createAndOpenDialog("Uploaded file", event.getFileName(),
-                    component);
+            showOutput(event.getFileName(), component, output);
         });
         // end-source-example
         upload.setMaxFileSize(200 * 1024);
 
-        addCard("Non immediate upload", upload);
+        addCard("Non immediate upload", upload, output);
     }
 
     private void changeDefaultComponents() {
+        Div output = new Div();
+
         // begin-source-example
         // source-example-heading: Custom components upload demo
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
 
         NativeButton uploadButton = new NativeButton("Upload");
-        uploadButton.getElement().setAttribute("slot", "add-button");
-        upload.add(uploadButton);
+        upload.setUploadButton(uploadButton);
 
         Span dropLabel = new Span("Drag and drop things here!");
-        dropLabel.getElement().setAttribute("slot", "drop-label");
-        upload.add(dropLabel);
+        upload.setDropLabel(dropLabel);
 
         Span dropIcon = new Span("¸¸.•*¨*•♫♪");
-        dropIcon.getElement().setAttribute("slot", "drop-label-icon");
-        upload.add(dropIcon);
+        upload.setDropLabelIcon(dropIcon);
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(),
                     buffer.getInputStream(event.getFileName()));
-            createAndOpenDialog("Uploaded file", event.getFileName(),
-                    component);
+            showOutput(event.getFileName(), component, output);
         });
         // end-source-example
         upload.setMaxFileSize(200 * 1024);
 
-        addCard("Custom components upload demo", upload);
+        addCard("Custom components upload demo", upload, output);
     }
 
     private void i18nSampleUpload() {
+        Div output = new Div();
+
         // begin-source-example
         // source-example-heading: i18n translations example
         MemoryBuffer buffer = new MemoryBuffer();
@@ -186,8 +193,7 @@ public class UploadView extends DemoView {
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(), buffer.getInputStream());
-            createAndOpenDialog("Simple upload", event.getFileName(),
-                    component);
+            showOutput(event.getFileName(), component, output);
         });
 
         UploadI18N i18n = new UploadI18N();
@@ -225,7 +231,7 @@ public class UploadView extends DemoView {
         // end-source-example
         upload.setMaxFileSize(200 * 1024);
 
-        addCard("i18n translations example", upload);
+        addCard("i18n translations example", upload, output);
     }
 
     private Component createComponent(String mimeType, String fileName,
@@ -274,31 +280,11 @@ public class UploadView extends DemoView {
 
     }
 
-    private void createAndOpenDialog(String title, String text,
-            Component content) {
-        addAndOpen(createDialog(title, text, content));
-    }
-
-    private GeneratedPaperDialog createDialog(String title, String text,
-            Component content) {
-        GeneratedPaperDialog dialog = new GeneratedPaperDialog();
-        dialog.setAutoFitOnAttach(true);
-        dialog.setVerticalAlign("top");
-        dialog.setHorizontalAlign("left");
-        dialog.getElement().getStyle().set("maxWidth", "90%");
-        dialog.getElement().getStyle().set("maxHeight", "90%");
-
+    private void showOutput(String text, Component content,
+            HasComponents outputContainer) {
         HtmlComponent p = new HtmlComponent(Tag.P);
         p.getElement().setText(text);
-        dialog.add(p);
-        dialog.add(new H2(title));
-        dialog.add(content);
-
-        return dialog;
-    }
-
-    private void addAndOpen(GeneratedPaperDialog dialog) {
-        getUI().ifPresent(ui -> ui.add(dialog));
-        dialog.open();
+        outputContainer.add(p);
+        outputContainer.add(content);
     }
 }
