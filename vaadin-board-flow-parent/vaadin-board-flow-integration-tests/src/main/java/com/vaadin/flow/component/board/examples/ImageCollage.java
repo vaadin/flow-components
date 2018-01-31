@@ -1,39 +1,34 @@
 package com.vaadin.flow.component.board.examples;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.board.Row;
-import com.vaadin.server.FileResource;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.server.VaadinServlet;
 
 /**
  * This example requires image resources. You need to have files with images in
- * the resource folder:
- * /resources/packagename/image-collage/small/pictureIndex.jpg
- *
- * For example for the package my.example:
- * resources/my/package/image-collage/small/1.jpg
- * resources/my/package/image-collage/small/2.jpg
- * resources/my/package/image-collage/small/3.jpg
- * resources/my/package/image-collage/small/4.jpg
- * resources/my/package/image-collage/small/5.jpg
+ * the webapp folder: <code>src/main/webapp/image-collage/small</code>
  */
 public class ImageCollage extends Div {
-    private FileResource[] resources;
+    private static final String IMAGE_PATH = "image-collage/small/";
+    private List<String> imageUrls = new ArrayList<>();
 
     public ImageCollage() {
         Board board = new Board();
-        createResources();
+        findImages();
 
         // First row
         Row innerFirstRow = new Row();
-        innerFirstRow.addComponents(createImageBox(2), createImageBox(3));
+        innerFirstRow.add(createImageBox(2), createImageBox(3));
 
         board.addRow(createImageBox(1), innerFirstRow);
 
@@ -58,24 +53,20 @@ public class ImageCollage extends Div {
 
         // Sixth row
         Row firstGroupSixthRow = new Row();
-        firstGroupSixthRow.addComponents(createImageBox(14),
-                createImageBox(15));
+        firstGroupSixthRow.add(createImageBox(14), createImageBox(15));
 
         Row secondGroupSixthRow = new Row();
-        secondGroupSixthRow.addComponents(createImageBox(16),
-                createImageBox(17));
+        secondGroupSixthRow.add(createImageBox(16), createImageBox(17));
 
         Row thirdGroupSixthRow = new Row();
-        thirdGroupSixthRow.addComponents(createImageBox(18),
-                createImageBox(19));
+        thirdGroupSixthRow.add(createImageBox(18), createImageBox(19));
 
         board.addRow(firstGroupSixthRow, secondGroupSixthRow,
                 thirdGroupSixthRow);
 
         // Seventh row
         Row firstGroupSeventhRow = new Row();
-        firstGroupSeventhRow.addComponents(createImageBox(20),
-                createImageBox(21));
+        firstGroupSeventhRow.add(createImageBox(20), createImageBox(21));
 
         Component twoColumnsSeventhRow = createImageBox(23);
 
@@ -86,38 +77,39 @@ public class ImageCollage extends Div {
         // Eighth row
         board.addRow(createImageBox(4), createImageBox(25));
 
-        addComponent(board);
+        add(board);
     }
 
-    private void createResources() {
-        final String IMAGE_PATH = "image-collage/small/";
-        URL folderResource = ImageCollage.class.getResource(IMAGE_PATH);
+    private void findImages() {
+        URL folderResource;
+        try {
+            folderResource = VaadinServlet.getCurrent().getServletContext()
+                    .getResource("/" + IMAGE_PATH);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return;
+        }
         File folder = new File((folderResource.getFile()));
         String[] fileNames = folder.list();
         Arrays.sort(fileNames);
-        resources = new FileResource[fileNames.length];
         for (int i = 0; i < fileNames.length; i++) {
-            URL resource = ImageCollage.class
-                    .getResource(IMAGE_PATH + fileNames[i]);
-            resources[i] = new FileResource(new File(resource.getFile()));
+            imageUrls.add(IMAGE_PATH + fileNames[i]);
         }
     }
 
     private Component createImageBox(int n) {
+        n = (n - 1) % imageUrls.size();
+
+        Image image = new Image();
+        image.setSrc(imageUrls.get(n));
+        image.setSizeFull();
+        image.addClassName("image-collage-item");
+
         // IE11 has an issue for calculating flex-basis if element has margin,
         // padding or border
         // Adding a wrapper fixes the issue
-        CssLayout container = new CssLayout();
-
-        n = (n - 1) % resources.length;
-
-        Image image = new Image();
-        image.setSource(resources[n]);
-        image.setSizeFull();
-        image.setStyleName("image-collage-item");
-
-        container.addComponents(image);
-
+        Div container = new Div();
+        container.add(image);
         return container;
     }
 }
