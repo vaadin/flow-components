@@ -58,6 +58,7 @@ public class TextFieldPage extends Div {
         add(required);
 
         TextField valueChangeSource = new TextField();
+        valueChangeSource.getStyle().set("display", "block");
         valueChangeSource.setId("value-change");
         NativeButton valueChange = new NativeButton("Get text field value",
                 event -> handleTextFieldValue(valueChangeSource));

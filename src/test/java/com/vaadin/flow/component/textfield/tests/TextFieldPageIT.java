@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.testutil.AbstractComponentIT;
@@ -77,7 +78,11 @@ public class TextFieldPageIT extends AbstractComponentIT {
         WebElement input = getInShadowRoot(field, By.cssSelector("input"));
         input.sendKeys("foo");
 
-        findElement(By.id("get-value")).click();
+        WebElement button = findElement(By.id("get-value"));
+        new Actions(getDriver())
+                .moveToElement(button, button.getSize().getWidth() / 2,
+                        button.getSize().getHeight() / 2)
+                .click().build().perform();
 
         String value = findElement(By.className("text-field-value")).getText();
         Assert.assertEquals("foo", value);

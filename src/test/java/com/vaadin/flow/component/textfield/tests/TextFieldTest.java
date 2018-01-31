@@ -15,13 +15,14 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.textfield.TextField;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for the {@link TextField}.
@@ -41,5 +42,12 @@ public class TextFieldTest {
         thrown.expectMessage("value cannot be null");
 
         textField.setValue(null);
+    }
+
+    @Test
+    public void initialValuePropertyValue() {
+        TextField textField = new TextField();
+        Assert.assertEquals(textField.getEmptyValue(),
+                textField.getElement().getProperty("value"));
     }
 }
