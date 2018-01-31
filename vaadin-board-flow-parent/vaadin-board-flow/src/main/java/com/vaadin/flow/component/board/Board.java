@@ -49,7 +49,7 @@ public class Board extends Component implements HasSize {
      *             if there are more than 4 components
      * @return a row instance which can be used for further configuration
      **/
-    public Row add(Component... components) {
+    public Row addRow(Component... components) {
         Row row = new Row(components);
         getElement().appendChild(row.getElement());
         return row;
