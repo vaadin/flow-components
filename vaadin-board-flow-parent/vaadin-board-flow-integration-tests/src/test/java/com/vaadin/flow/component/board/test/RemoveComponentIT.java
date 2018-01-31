@@ -6,14 +6,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.board.elements.BoardElement;
-import com.vaadin.flow.component.board.test.RemoveComponentUI;
+import com.vaadin.flow.component.board.test.RemoveComponentView;
 import com.vaadin.testbench.elements.AbstractComponentElement;
 
 public class RemoveComponentIT extends AbstractParallelTest {
 
     @Override
     protected Class<?> getUIClass() {
-        return RemoveComponentUI.class;
+        return RemoveComponentView.class;
     }
 
     @Test

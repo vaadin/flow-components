@@ -17,7 +17,7 @@ public class BasicBoard extends Board {
         btn2.setWidth("100%");
         btn3.setWidth("100%");
         btn4.setWidth("100%");
-        add(btn1, btn2, btn3, btn4);
+        addRow(btn1, btn2, btn3, btn4);
     }
 
 }

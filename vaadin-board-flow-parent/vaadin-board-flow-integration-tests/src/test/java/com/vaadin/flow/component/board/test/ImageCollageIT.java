@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.vaadin.board.elements.RowElement;
-import com.vaadin.flow.component.board.test.ImageCollageUI;
+import com.vaadin.flow.component.board.test.ImageCollageView;
 import com.vaadin.testbench.elements.CssLayoutElement;
 
 public class ImageCollageIT extends AbstractParallelTest {
@@ -17,7 +17,7 @@ public class ImageCollageIT extends AbstractParallelTest {
 
     @Override
     protected Class<?> getUIClass() {
-        return ImageCollageUI.class;
+        return ImageCollageView.class;
     }
 
     @Test

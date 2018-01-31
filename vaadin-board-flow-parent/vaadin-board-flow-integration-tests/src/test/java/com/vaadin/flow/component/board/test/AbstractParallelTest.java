@@ -16,21 +16,20 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.vaadin.flow.component.board.test.AbstractTestCompUI;
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.testbench.annotations.BrowserConfiguration;
 import com.vaadin.testbench.annotations.RunOnHub;
-import com.vaadin.testbench.elements.ButtonElement;
 import com.vaadin.testbench.parallel.ParallelTest;
 
 @RunOnHub("tb3-hub.intra.itmill.com")
 public abstract class AbstractParallelTest extends ParallelTest {
 
-    public Supplier<WebElement> buttonSwitchSupplier = () -> $(ButtonElement.class)
-        .caption(AbstractTestCompUI.SWITCH).first();
+    public Supplier<WebElement> buttonSwitchSupplier = () -> $(
+            ButtonElement.class).id(AbstractComponentTestView.SWITCH);
 
-    public void testGenericWidth(WebElement testedElement)
-        throws Exception {
-        WebElement controlElement = $(ButtonElement.class).caption(AbstractTestCompUI.SWITCH).first();
+    public void testGenericWidth(WebElement testedElement) throws Exception {
+        WebElement controlElement = $(ButtonElement.class)
+                .id(AbstractComponentTestView.SWITCH);
         TestFunctions.assertDimension(controlElement, testedElement, (elem) -> {
             return elem.getSize().width;
         });
@@ -39,12 +38,13 @@ public abstract class AbstractParallelTest extends ParallelTest {
     @Before
     public void setup() throws Exception {
         super.setup();
-        getDriver().manage().window().setSize(new Dimension(1024,768));
+        getDriver().manage().window().setSize(new Dimension(1024, 768));
     }
 
     public void compareScreen(String referenceName) throws IOException {
-        Assert.assertTrue( testBench(getDriver()).compareScreen(referenceName));
+        Assert.assertTrue(testBench().compareScreen(referenceName));
     }
+
     protected List<DesiredCapabilities> allBrowsers = null;
 
     @BrowserConfiguration
@@ -56,7 +56,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
             capabilities = utils.getCapabilitiesFromFile(CONFIG_PATH);
             return Collections.unmodifiableList(capabilities);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException("Could not create capabilities from file");
+            throw new RuntimeException(
+                    "Could not create capabilities from file");
         }
     }
 
@@ -69,34 +70,35 @@ public abstract class AbstractParallelTest extends ParallelTest {
             return "8080";
         } else if (getRunOnHub(getClass()) != null) {
             return "8080";
-        }
-        else {
+        } else {
             // can't find any configuration to setup WebDriver
             throw new IllegalArgumentException(
-                "Can't instantiate WebDriver: No configuration found. Test case was not annotated with @RunLocally annotation nor @RunOnHub annotation, and system variable 'useLocalWebDriver' was not found or not set to true.");
+                    "Can't instantiate WebDriver: No configuration found. Test case was not annotated with @RunLocally annotation nor @RunOnHub annotation, and system variable 'useLocalWebDriver' was not found or not set to true.");
         }
     }
+
     protected String getBaseURL() {
-        //getHubHostname
-        return "http://"+findAutoHostname()+":"+getPort();
+        // getHubHostname
+        return "http://" + findAutoHostname() + ":" + getPort();
     }
 
     private Class<?> uiClass;
-    protected void setUIClass( Class<?> uiClass){
+
+    protected void setUIClass(Class<?> uiClass) {
         this.uiClass = uiClass;
     }
 
-    protected Class<?> getUIClass(){
+    protected Class<?> getUIClass() {
         return this.uiClass;
     }
+
     protected String getDeploymentPath() {
         Class<?> uiClass = getUIClass();
         if (uiClass != null) {
             final Package aPackage = uiClass.getPackage();
             final String aPackageName = aPackage.getName();
-            return uiClass.getName()
-                .replace(aPackageName, "")
-                .replace(".", "/");
+            return uiClass.getName().replace(aPackageName, "").replace(".",
+                    "/");
         }
         return "/";
     }
@@ -113,11 +115,11 @@ public abstract class AbstractParallelTest extends ParallelTest {
     private String findAutoHostname() {
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface
-                .getNetworkInterfaces();
+                    .getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
                 NetworkInterface current = interfaces.nextElement();
                 if (!current.isUp() || current.isLoopback()
-                    || current.isVirtual()) {
+                        || current.isVirtual()) {
                     continue;
                 }
                 Enumeration<InetAddress> addresses = current.getInetAddresses();
@@ -135,9 +137,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
             throw new RuntimeException("Could not enumerate ");
         }
         throw new RuntimeException(
-            "No compatible (192.168.*) ip address found.");
+                "No compatible (192.168.*) ip address found.");
     }
-
 
     protected void openURL() {
         String url = getTestUrl();

@@ -1,15 +1,13 @@
 package com.vaadin.flow.component.board.test;
 
 import com.vaadin.flow.component.board.Board;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
-public class BoardDynamicResizeUI extends AbstractTestUI {
+public class BoardDynamicResizeUI extends AbstractView {
 
-    @Override
-    protected void init(VaadinRequest request) {
+    public BoardDynamicResizeUI() {
         VerticalLayout layout = new VerticalLayout();
         Board board = new Board();
         board.setSizeFull();
@@ -20,11 +18,11 @@ public class BoardDynamicResizeUI extends AbstractTestUI {
         board.addRow(lbl1, lbl2, lbl3);
 
         Button button = new Button("resize");
-        button.addClickListener(e->{
+        button.addClickListener(e -> {
             board.setWidth("300px");
         });
-        layout.addComponents(board, button);
-        setContent(layout);
+        layout.add(board, button);
+        add(layout);
     }
 
 }

@@ -8,7 +8,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.board.elements.RowElement;
-import com.vaadin.flow.component.board.test.RowTypesUI;
+import com.vaadin.flow.component.board.test.RowTypesView;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elements.CssLayoutElement;
 
@@ -21,7 +21,7 @@ public class RowTypesIT extends AbstractParallelTest {
 
     @Override
     protected Class<?> getUIClass() {
-        return RowTypesUI.class;
+        return RowTypesView.class;
     }
 
     @Test

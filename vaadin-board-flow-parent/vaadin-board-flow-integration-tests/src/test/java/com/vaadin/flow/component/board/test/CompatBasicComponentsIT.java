@@ -2,7 +2,7 @@ package com.vaadin.flow.component.board.test;
 
 import org.junit.Test;
 
-import com.vaadin.flow.component.board.test.AbstractTestCompUI;
+import com.vaadin.flow.component.board.test.AbstractComponentTestView;
 import com.vaadin.flow.component.board.test.CompatBasicComponents;
 import com.vaadin.testbench.elements.ButtonElement;
 import com.vaadin.testbench.elements.CheckBoxElement;
@@ -31,7 +31,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.ButtonUI.class);
         openURL();
-        ButtonElement testedElement = $(ButtonElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        ButtonElement testedElement = $(ButtonElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -40,7 +40,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.CheckBoxGroupUI.class);
         openURL();
-        CheckBoxGroupElement testedElement = $(CheckBoxGroupElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        CheckBoxGroupElement testedElement = $(CheckBoxGroupElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -49,7 +49,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.CheckBoxUI.class);
         openURL();
-        CheckBoxElement testedElement = $(CheckBoxElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        CheckBoxElement testedElement = $(CheckBoxElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -58,7 +58,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.ColorPickerUI.class);
         openURL();
-        ColorPickerElement testedElement = $(ColorPickerElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        ColorPickerElement testedElement = $(ColorPickerElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -67,7 +67,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.ComboBoxUI.class);
         openURL();
-        ComboBoxElement testedElement = $(ComboBoxElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        ComboBoxElement testedElement = $(ComboBoxElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -76,7 +76,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.DateFieldUI.class);
         openURL();
-        DateFieldElement testedElement = $(DateFieldElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        DateFieldElement testedElement = $(DateFieldElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -85,7 +85,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.GridUI.class);
         openURL();
-        GridElement testedElement = $(GridElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        GridElement testedElement = $(GridElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -94,7 +94,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.LabelUI.class);
         openURL();
-        LabelElement testedElement = $(LabelElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        LabelElement testedElement = $(LabelElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -103,7 +103,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.LinkUI.class);
         openURL();
-        LinkElement testedElement = $(LinkElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        LinkElement testedElement = $(LinkElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -112,7 +112,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.PanelUI.class);
         openURL();
-        PanelElement testedElement = $(PanelElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        PanelElement testedElement = $(PanelElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -121,7 +121,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.PasswordFieldUI.class);
         openURL();
-        PasswordFieldElement testedElement = $(PasswordFieldElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        PasswordFieldElement testedElement = $(PasswordFieldElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -130,7 +130,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.ProgressBarUI.class);
         openURL();
-        ProgressBarElement testedElement = $(ProgressBarElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        ProgressBarElement testedElement = $(ProgressBarElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -139,7 +139,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.RadioButtonGroupUI.class);
         openURL();
-        RadioButtonGroupElement testedElement = $(RadioButtonGroupElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        RadioButtonGroupElement testedElement = $(RadioButtonGroupElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -148,7 +148,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.SliderUI.class);
         openURL();
-        SliderElement testedElement = $(SliderElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        SliderElement testedElement = $(SliderElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -157,7 +157,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.TwinColSelectUI.class);
         openURL();
-        TwinColSelectElement testedElement = $(TwinColSelectElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        TwinColSelectElement testedElement = $(TwinColSelectElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 
@@ -166,7 +166,7 @@ public class CompatBasicComponentsIT extends AbstractParallelTest {
         throws Exception {
         setUIClass(CompatBasicComponents.VideoUI.class);
         openURL();
-        VideoElement testedElement = $(VideoElement.class).id(AbstractTestCompUI.ID_PREFIX + 1);
+        VideoElement testedElement = $(VideoElement.class).id(AbstractComponentTestView.ID_PREFIX + 1);
         testGenericWidth(testedElement);
     }
 

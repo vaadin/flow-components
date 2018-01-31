@@ -1,11 +1,11 @@
 package com.vaadin.flow.component.board.test;
 
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 
 /**
  *
  */
-public abstract class CompatBasicUI extends AbstractTestCompUI {
+public abstract class CompatBasicView extends AbstractComponentTestView {
 
     abstract protected Component createTestComponent();
 

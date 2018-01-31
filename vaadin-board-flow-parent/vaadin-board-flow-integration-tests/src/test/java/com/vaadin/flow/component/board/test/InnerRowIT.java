@@ -8,7 +8,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.board.elements.BoardElement;
 import com.vaadin.board.elements.RowElement;
-import com.vaadin.flow.component.board.test.InnerRowUI;
+import com.vaadin.flow.component.board.test.InnerRowView;
 import com.vaadin.testbench.By;
 import com.vaadin.testbench.elements.ButtonElement;
 
@@ -16,7 +16,7 @@ public class InnerRowIT extends AbstractParallelTest {
 
     @Override
     protected Class<?> getUIClass() {
-        return InnerRowUI.class;
+        return InnerRowView.class;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class InnerRowIT extends AbstractParallelTest {
     @Test
     public void oneRowBoard_addInnerRow_hasOneInnerRow() {
 
-        ButtonElement addButton = $(ButtonElement.class).id(InnerRowUI.BUTTON_ADD_ID);
+        ButtonElement addButton = $(ButtonElement.class).id(InnerRowView.BUTTON_ADD_ID);
         addButton.click();
 
         BoardElement board = $(BoardElement.class).get(0);
@@ -44,8 +44,8 @@ public class InnerRowIT extends AbstractParallelTest {
     @Test
     public void oneRowBoard_addThenRemoveInnerRow_hasNoInnerRow() {
 
-        ButtonElement addButton = $(ButtonElement.class).id(InnerRowUI.BUTTON_ADD_ID);
-        ButtonElement rmvButton = $(ButtonElement.class).id(InnerRowUI.BUTTON_RMV_ID);
+        ButtonElement addButton = $(ButtonElement.class).id(InnerRowView.BUTTON_ADD_ID);
+        ButtonElement rmvButton = $(ButtonElement.class).id(InnerRowView.BUTTON_RMV_ID);
         addButton.click();
         rmvButton.click();
 

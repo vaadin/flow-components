@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.board.test;
 
-import static com.vaadin.addon.charts.model.Compare.PERCENT;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -8,38 +7,37 @@ import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.addon.charts.Chart;
-import com.vaadin.addon.charts.model.AxisTitle;
-import com.vaadin.addon.charts.model.Background;
-import com.vaadin.addon.charts.model.ChartType;
-import com.vaadin.addon.charts.model.Configuration;
-import com.vaadin.addon.charts.model.Cursor;
-import com.vaadin.addon.charts.model.DataLabels;
-import com.vaadin.addon.charts.model.DataSeries;
-import com.vaadin.addon.charts.model.DataSeriesItem;
-import com.vaadin.addon.charts.model.HorizontalAlign;
-import com.vaadin.addon.charts.model.Labels;
-import com.vaadin.addon.charts.model.LayoutDirection;
-import com.vaadin.addon.charts.model.Legend;
-import com.vaadin.addon.charts.model.ListSeries;
-import com.vaadin.addon.charts.model.Pane;
-import com.vaadin.addon.charts.model.PlotLine;
-import com.vaadin.addon.charts.model.PlotOptionsBar;
-import com.vaadin.addon.charts.model.PlotOptionsColumn;
-import com.vaadin.addon.charts.model.PlotOptionsPie;
-import com.vaadin.addon.charts.model.PlotOptionsSeries;
-import com.vaadin.addon.charts.model.PlotOptionsSpline;
-import com.vaadin.addon.charts.model.RangeSelector;
-import com.vaadin.addon.charts.model.Series;
-import com.vaadin.addon.charts.model.Tooltip;
-import com.vaadin.addon.charts.model.VerticalAlign;
-import com.vaadin.addon.charts.model.XAxis;
-import com.vaadin.addon.charts.model.YAxis;
-import com.vaadin.addon.charts.model.ZoomType;
-import com.vaadin.addon.charts.model.style.Color;
-import com.vaadin.addon.charts.model.style.SolidColor;
-import com.vaadin.addon.charts.model.style.Style;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.AxisTitle;
+import com.vaadin.flow.component.charts.model.Background;
+import com.vaadin.flow.component.charts.model.ChartType;
+import com.vaadin.flow.component.charts.model.Compare;
+import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.Cursor;
+import com.vaadin.flow.component.charts.model.DataLabels;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.HorizontalAlign;
+import com.vaadin.flow.component.charts.model.Labels;
+import com.vaadin.flow.component.charts.model.LayoutDirection;
+import com.vaadin.flow.component.charts.model.Legend;
+import com.vaadin.flow.component.charts.model.ListSeries;
+import com.vaadin.flow.component.charts.model.Pane;
+import com.vaadin.flow.component.charts.model.PlotLine;
+import com.vaadin.flow.component.charts.model.PlotOptionsBar;
+import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsPie;
+import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
+import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
+import com.vaadin.flow.component.charts.model.RangeSelector;
+import com.vaadin.flow.component.charts.model.Series;
+import com.vaadin.flow.component.charts.model.Tooltip;
+import com.vaadin.flow.component.charts.model.VerticalAlign;
+import com.vaadin.flow.component.charts.model.XAxis;
+import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.component.charts.model.style.Style;
 
 /**
  *
@@ -84,8 +82,8 @@ public class CompatChartComponents {
         legend.setX(- 100);
         legend.setY(100);
         legend.setFloating(true);
-        legend.setBorderWidth(1);
-        legend.setBackgroundColor(new SolidColor("#FFFFFF"));
+//        legend.setBorderWidth(1);
+//        legend.setBackgroundColor(new SolidColor("#FFFFFF"));
         legend.setShadow(true);
         conf.setLegend(legend);
 
@@ -97,7 +95,7 @@ public class CompatChartComponents {
         series.add(new ListSeries("Year 2008", 973, 914, 4054, 732, 34));
         conf.setSeries(series);
 
-        chart.drawChart(conf);
+        chart.drawChart();
 
         return chart;
 
@@ -161,9 +159,9 @@ public class CompatChartComponents {
     protected Component getChart() {
       Chart chart = new Chart();
       Configuration conf = chart.getConfiguration();
-      Color[] colors = getThemeColors();
+//      Color[] colors = getThemeColors();
 
-      conf.getChart().setZoomType(ZoomType.XY);
+//      conf.getChart().setZoomType(ZoomType.XY);
       conf.setTitle("Average Monthly Weather Data for Tokyo");
       conf.setSubTitle("Source: WorldClimate.com");
 
@@ -176,45 +174,45 @@ public class CompatChartComponents {
       Labels labels = new Labels();
       labels.setFormatter("return this.value +'°C'");
       Style style = new Style();
-      style.setColor(colors[1]);
-      labels.setStyle(style);
+//      style.setColor(colors[1]);
+//      labels.setStyle(style);
       y1.setLabels(labels);
       y1.setOpposite(true);
       AxisTitle title = new AxisTitle("Temperature");
       style = new Style();
-      style.setColor(colors[1]);
+//      style.setColor(colors[1]);
       y1.setTitle(title);
       conf.addyAxis(y1);
 
       YAxis y2 = new YAxis();
-      y2.setGridLineWidth(0);
+//      y2.setGridLineWidth(0);
       title = new AxisTitle("Rainfall");
       style = new Style();
-      style.setColor(colors[0]);
+//      style.setColor(colors[0]);
       y2.setTitle(title);
       labels = new Labels();
       labels.setFormatter("this.value +' mm'");
       style = new Style();
-      style.setColor(colors[0]);
-      labels.setStyle(style);
+//      style.setColor(colors[0]);
+//      labels.setStyle(style);
       y2.setLabels(labels);
       conf.addyAxis(y2);
 
       YAxis y3 = new YAxis();
-      y3.setGridLineWidth(0);
+//      y3.setGridLineWidth(0);
       conf.addyAxis(y3);
       title = new AxisTitle("Sea-Level Pressure");
       style = new Style();
-      style.setColor(colors[2]);
+//      style.setColor(colors[2]);
       y3.setTitle(title);
       labels = new Labels();
       labels.setFormatter("this.value +' mb'");
       style = new Style();
-      style.setColor(colors[2]);
-      labels.setStyle(style);
+//      style.setColor(colors[2]);
+//      labels.setStyle(style);
       y3.setLabels(labels);
       y3.setOpposite(true);
-      chart.drawChart(conf);
+      chart.drawChart();
 
       Tooltip tooltip = new Tooltip();
       tooltip.setFormatter("function() { "
@@ -233,7 +231,7 @@ public class CompatChartComponents {
 
       DataSeries series = new DataSeries();
       PlotOptionsColumn plotOptionsColumn = new PlotOptionsColumn();
-      plotOptionsColumn.setColor(colors[0]);
+//      plotOptionsColumn.setColor(colors[0]);
       series.setPlotOptions(plotOptionsColumn);
       series.setName("Rainfall");
       series.setyAxis(1);
@@ -243,7 +241,7 @@ public class CompatChartComponents {
 
       series = new DataSeries();
       PlotOptionsSpline plotOptionsSpline = new PlotOptionsSpline();
-      plotOptionsSpline.setColor(colors[2]);
+//      plotOptionsSpline.setColor(colors[2]);
       series.setPlotOptions(plotOptionsSpline);
       series.setName("Sea-Level Pressure");
       series.setyAxis(2);
@@ -253,14 +251,14 @@ public class CompatChartComponents {
 
       series = new DataSeries();
       plotOptionsSpline = new PlotOptionsSpline();
-      plotOptionsSpline.setColor(colors[1]);
+//      plotOptionsSpline.setColor(colors[1]);
       series.setPlotOptions(plotOptionsSpline);
       series.setName("Temperature");
       series.setData(7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3,
           13.9, 9.6);
       conf.addSeries(series);
 
-      chart.drawChart(conf);
+      chart.drawChart();
 
       return chart;
     }
@@ -275,7 +273,7 @@ public class CompatChartComponents {
     @Override
     protected Component nextChartInstance() {
       final Chart chart = new Chart();
-      chart.setWidth(500, Unit.PIXELS);
+      chart.getElement().getStyle().set("width", "500px");
 
       final Configuration configuration = chart.getConfiguration();
       configuration.getChart().setType(ChartType.SOLIDGAUGE);
@@ -292,17 +290,17 @@ public class CompatChartComponents {
       configuration.getTooltip().setEnabled(false);
 
       Background bkg = new Background();
-      bkg.setBackgroundColor(new SolidColor("#eeeeee"));
+//      bkg.setBackgroundColor(new SolidColor("#eeeeee"));
       bkg.setInnerRadius("60%");
       bkg.setOuterRadius("100%");
-      bkg.setShape("arc");
-      bkg.setBorderWidth(0);
+//      bkg.setShape("arc");
+//      bkg.setBorderWidth(0);
       pane.setBackground(bkg);
 
       YAxis yaxis = configuration.getyAxis();
       yaxis.setLineWidth(0);
       yaxis.setTickInterval(200);
-      yaxis.setTickWidth(0);
+//      yaxis.setTickWidth(0);
       yaxis.setMin(0);
       yaxis.setMax(200);
       yaxis.setTitle("");
@@ -313,7 +311,7 @@ public class CompatChartComponents {
       final ListSeries series = new ListSeries("Speed", 80);
       configuration.setSeries(series);
 
-      chart.drawChart(configuration);
+      chart.drawChart();
       return chart;
     }
 
@@ -325,8 +323,8 @@ public class CompatChartComponents {
     @Override
     protected Component nextChartInstance() {
       final Chart chart = new Chart();
-      chart.setHeight("450px");
-      chart.setWidth("100%");
+      chart.getElement().getStyle().set("height", "450px");
+      chart.getElement().getStyle().set("width", "100%");
       chart.setTimeline(true);
 
       Configuration configuration = chart.getConfiguration();
@@ -376,14 +374,14 @@ public class CompatChartComponents {
       configuration.setSeries(aaplSeries, googSeries, msftSeries);
 
       PlotOptionsSeries plotOptionsSeries = new PlotOptionsSeries();
-      plotOptionsSeries.setCompare(PERCENT);
+      plotOptionsSeries.setCompare(Compare.PERCENT);
       configuration.setPlotOptions(plotOptionsSeries);
 
       RangeSelector rangeSelector = new RangeSelector();
       rangeSelector.setSelected(4);
       configuration.setRangeSelector(rangeSelector);
 
-      chart.drawChart(configuration);
+      chart.drawChart();
       return chart;
     }
 

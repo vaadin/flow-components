@@ -4,19 +4,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.board.elements.BoardElement;
-import com.vaadin.flow.component.board.test.BasicBoard;
-import com.vaadin.testbench.elements.ButtonElement;
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 
 public class BasicIT extends AbstractParallelTest {
 
-    @Override
-    protected Class<?> getUIClass() {
-        return BasicBoard.class;
-    }
-
     @Test
     public void basicLayout_boardTabletSize_twoRowsAndTwoItemsInRow() {
-        openURL();
+        openURL(BasicBoard.class);
         BoardElement board = $(BoardElement.class).get(0);
         ButtonElement btn1 = $(ButtonElement.class).caption("Button 1").first();
         ButtonElement btn2 = $(ButtonElement.class).caption("Button 2").first();

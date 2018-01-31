@@ -2,18 +2,14 @@ package com.vaadin.flow.component.board.test;
 
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.board.Row;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 /**
  *
  */
-public class ColsUI extends AbstractTestUI {
-
-    @Override
-    protected void init(VaadinRequest request) {
-
+public class ColsUI extends AbstractView {
+    public ColsUI() {
         Board board = new Board();
         board.setSizeFull();
 
@@ -23,12 +19,14 @@ public class ColsUI extends AbstractTestUI {
         Row row = board.addRow(btnA, btnB, btnC);
         row.setComponentSpan(btnA, 2);
 
-        Button btnRemove = new Button("remove", e -> row.setComponentSpan(btnA, 1));
-        Button btnException = new Button("exception", e -> row.setComponentSpan(btnA, 4));
+        Button btnRemove = new Button("remove",
+                e -> row.setComponentSpan(btnA, 1));
+        Button btnException = new Button("exception",
+                e -> row.setComponentSpan(btnA, 4));
 
         VerticalLayout layout = new VerticalLayout();
-        layout.addComponents(board, btnRemove, btnException);
-        setContent(layout);
+        layout.add(board, btnRemove, btnException);
+        add(layout);
     }
 
 }
