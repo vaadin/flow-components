@@ -57,7 +57,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      *            the tabs to enclose
      */
     public Tabs(Tab... tabs) {
-        super(tabs);
+        add(tabs);
     }
 
     /**
@@ -67,7 +67,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      *            the tabs to enclose
      */
     public void add(Tab... tabs) {
-        super.add(tabs);
+        HasOrderedComponents.super.add(tabs);
     }
 
     /**

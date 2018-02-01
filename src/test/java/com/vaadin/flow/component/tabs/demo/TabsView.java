@@ -125,7 +125,7 @@ public class TabsView extends DemoView {
         Tab tab1 = new Tab("Tab one");
         Tab tab2 = new Tab("Tab two");
         Tab tab3 = new Tab("Disabled tab");
-        tab3.setDisabled(true);
+        tab3.setEnabled(false);
         Tab tab4 = new Tab("Tab four");
         Tab tab5 = new Tab("Tab five");
         tabs.add(tab1, tab2, tab3, tab4, tab5);
