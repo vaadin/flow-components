@@ -92,7 +92,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-board-testbench-api</artifactId>
+            <artifactId>vaadin-board-testbench</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
