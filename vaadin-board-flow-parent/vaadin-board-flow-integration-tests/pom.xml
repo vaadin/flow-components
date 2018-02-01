@@ -203,7 +203,7 @@
                         </goals>
                         <configuration>
                             <files>
-                                <file>local.properties</file>
+                                <file>../local.properties</file>
                             </files>
                             <quiet>true</quiet>
                         </configuration>
