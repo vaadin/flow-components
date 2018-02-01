@@ -43,11 +43,13 @@ public class PasswordFieldIT extends ComponentDemoTest {
                 By.id("password-field-with-value-change-listener"));
 
         updateValues(passwordFieldValueDiv, passwordField, true);
-        layout.findElement(By.id(ValueChangeModeButtonProvider.TOGGLE_BUTTON_ID)).click();
+        layout.findElement(
+                By.id(ValueChangeModeButtonProvider.TOGGLE_BUTTON_ID)).click();
         updateValues(passwordFieldValueDiv, passwordField, false);
     }
 
-    private void updateValues(WebElement passwordFieldValueDiv, WebElement passwordField, boolean toggleBlur) {
+    private void updateValues(WebElement passwordFieldValueDiv,
+            WebElement passwordField, boolean toggleBlur) {
         passwordField.sendKeys("a");
         if (toggleBlur) {
             blur();
@@ -69,11 +71,6 @@ public class PasswordFieldIT extends ComponentDemoTest {
                 By.id("password-field-with-value-change-listener"));
         Assert.assertEquals(passwordField.getAttribute("placeholder"),
                 "placeholder text");
-    }
-
-    private void blur() {
-        executeScript(
-                "!!document.activeElement ? document.activeElement.blur() : 0");
     }
 
     private void waitUntilTextsEqual(String expected, String actual) {

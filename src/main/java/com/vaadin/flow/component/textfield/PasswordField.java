@@ -170,15 +170,7 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * String used for the label element.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code label} property from the webcomponent
      */
@@ -192,15 +184,7 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * A hint to the user of what can be entered in the control.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
+     * A hint to the user of what can be entered in the component.
      *
      * @return the {@code placeholder} property from the webcomponent
      */
@@ -282,19 +266,14 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
-     * </p>
      *
-     * @param maxlength
-     *            the double value to set
+     * @param maxLength
+     *            the maximum length
      */
-    public void setMaxlength(int maxlength) {
-        super.setMaxlength(maxlength);
+    public void setMaxLength(int maxLength) {
+        super.setMaxlength(maxLength);
     }
 
     /**
@@ -311,54 +290,33 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
      *
      * @return the {@code maxlength} property from the webcomponent
      */
-    public int getMaxlength() {
+    public int getMaxLength() {
         return (int) getMaxlengthDouble();
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
-     * </p>
      *
-     * @param minlength
-     *            the double value to set
+     * @param minLength
+     *            the minimum length
      */
-    public void setMinlength(int minlength) {
-        super.setMinlength(minlength);
+    public void setMinLength(int minLength) {
+        super.setMinlength(minLength);
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code minlength} property from the webcomponent
      */
-    public int getMinlength() {
+    public int getMinLength() {
         return (int) getMinlengthDouble();
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Specifies that the user must fill in a value.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code required} property from the webcomponent
      */
@@ -372,17 +330,9 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code pattern}.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
+     * When set to <code>true</code>, user is prevented from typing a value that
+     * conflicts with the given {@code pattern}.
+     * 
      * @return the {@code preventInvalidInput} property from the webcomponent
      */
     public boolean isPreventInvalidInput() {
@@ -395,46 +345,13 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     }
 
     @Override
-    public void setAutocorrect(String autocorrect) {
-        super.setAutocorrect(autocorrect);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * This is a property supported by Safari that is used to control whether
-     * autocorrection should be enabled when the user is entering/editing the
-     * text. Possible values are: on: Enable autocorrection. off: Disable
-     * autocorrection.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code autocorrect} property from the webcomponent
-     */
-    public String getAutocorrect() {
-        return getAutocorrectString();
-    }
-
-    @Override
     public void setPattern(String pattern) {
         super.setPattern(pattern);
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * A regular expression that the value is checked against. The pattern must
      * match the entire value, not just some subset.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code pattern} property from the webcomponent
      */
@@ -443,15 +360,7 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Message to show to the user when validation fails.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code title} property from the webcomponent
      */
@@ -465,42 +374,26 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to hide the eye icon which toggles the password visibility.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
+     * Set to <code>false</code> to hide the eye icon which toggles the password
+     * visibility.
      *
-     * @return the {@code revealButtonHidden} property from the webcomponent
+     * @return <code>true</code> if the button is visible, <code>false</code>
+     *         otherwise
      */
-    public boolean isRevealButtonHidden() {
-        return super.isRevealButtonHiddenBoolean();
-    }
-
-    @Override
-    public void setRevealButtonHidden(boolean revealButtonHidden) {
-        super.setRevealButtonHidden(revealButtonHidden);
+    public boolean isRevealButtonVisible() {
+        return !isRevealButtonHiddenBoolean();
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to hide the eye icon which toggles the password visibility.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code revealButtonHidden} property from the webcomponent
+     * Set to <code>false</code> to hide the eye icon which toggles the password
+     * visibility.
+     * 
+     * @param revealButtonVisible
+     *            <code>true</code> to set the button visible,
+     *            <code>false</code> otherwise
      */
-    public boolean isPasswordVisible() {
-        return super.isPasswordVisibleBoolean();
+    public void setRevealButtonVisible(boolean revealButtonVisible) {
+        setRevealButtonHidden(!revealButtonVisible);
     }
 
     @Override

@@ -44,13 +44,10 @@ public class PasswordFieldView extends DemoView {
         passwordField.addValueChangeListener(event -> message.setText(
                 String.format("Password field value changed from '%s' to '%s'",
                         event.getOldValue(), event.getValue())));
-        NativeButton button = new NativeButton(
-                "Toggle eye icon if password is hidden", event -> {
-                    if (!passwordField.isPasswordVisible()) {
-                        passwordField.setRevealButtonHidden(
-                                !passwordField.isRevealButtonHidden());
-                    }
-                });
+        NativeButton button = new NativeButton("Toggle eye icon", event -> {
+            passwordField.setRevealButtonVisible(
+                    !passwordField.isRevealButtonVisible());
+        });
         // end-source-example
 
         passwordField.setId("password-field-with-value-change-listener");
@@ -58,6 +55,8 @@ public class PasswordFieldView extends DemoView {
         button.setId("toggle-button");
 
         addCard("Basic password field", button, passwordField,
-                new ValueChangeModeButtonProvider(passwordField).getToggleValueSyncButton(), message);
+                new ValueChangeModeButtonProvider(passwordField)
+                        .getToggleValueSyncButton(),
+                message);
     }
 }

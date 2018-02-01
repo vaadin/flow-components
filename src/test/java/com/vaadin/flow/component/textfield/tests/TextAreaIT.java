@@ -45,11 +45,13 @@ public class TextAreaIT extends ComponentDemoTest {
                 .findElement(By.id("text-area-with-value-change-listener"));
 
         updateValues(textFieldValueDiv, textArea, true);
-        layout.findElement(By.id(ValueChangeModeButtonProvider.TOGGLE_BUTTON_ID)).click();
+        layout.findElement(
+                By.id(ValueChangeModeButtonProvider.TOGGLE_BUTTON_ID)).click();
         updateValues(textFieldValueDiv, textArea, false);
     }
 
-    private void updateValues(WebElement textFieldValueDiv, WebElement textArea, boolean toggleBlur) {
+    private void updateValues(WebElement textFieldValueDiv, WebElement textArea,
+            boolean toggleBlur) {
         textArea.sendKeys("a");
         if (toggleBlur) {
             blur();
@@ -96,11 +98,6 @@ public class TextAreaIT extends ComponentDemoTest {
                 .findElement(By.id("text-area-with-value-change-listener"));
         Assert.assertEquals(textField.getAttribute("placeholder"),
                 "placeholder text");
-    }
-
-    private void blur() {
-        executeScript(
-                "!!document.activeElement ? document.activeElement.blur() : 0");
     }
 
     private void waitUntilTextsEqual(String expected, String actual) {

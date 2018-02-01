@@ -43,11 +43,13 @@ public class TextFieldIT extends ComponentDemoTest {
                 .findElement(By.id("text-field-with-value-change-listener"));
 
         updateValues(textFieldValueDiv, textField, true);
-        layout.findElement(By.id(ValueChangeModeButtonProvider.TOGGLE_BUTTON_ID)).click();
+        layout.findElement(
+                By.id(ValueChangeModeButtonProvider.TOGGLE_BUTTON_ID)).click();
         updateValues(textFieldValueDiv, textField, false);
     }
 
-    private void updateValues(WebElement textFieldValueDiv, WebElement textField, boolean toggleBlur) {
+    private void updateValues(WebElement textFieldValueDiv,
+            WebElement textField, boolean toggleBlur) {
         textField.sendKeys("a");
         if (toggleBlur) {
             blur();
@@ -69,11 +71,6 @@ public class TextFieldIT extends ComponentDemoTest {
                 .findElement(By.id("text-field-with-value-change-listener"));
         Assert.assertEquals(textField.getAttribute("placeholder"),
                 "placeholder text");
-    }
-
-    private void blur() {
-        executeScript(
-                "!!document.activeElement ? document.activeElement.blur() : 0");
     }
 
     private void waitUntilTextsEqual(String expected, String actual) {

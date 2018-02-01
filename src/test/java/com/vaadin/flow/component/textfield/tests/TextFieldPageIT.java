@@ -77,6 +77,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
 
         WebElement input = getInShadowRoot(field, By.cssSelector("input"));
         input.sendKeys("foo");
+        blur();
 
         WebElement button = findElement(By.id("get-value"));
         new Actions(getDriver())

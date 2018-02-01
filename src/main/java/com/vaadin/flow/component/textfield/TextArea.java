@@ -187,15 +187,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea> implements
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * String used for the label element.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code label} property from the webcomponent
      */
@@ -209,15 +201,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea> implements
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * A hint to the user of what can be entered in the control.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
+     * A hint to the user of what can be entered in the component.
      *
      * @return the {@code placeholder} property from the webcomponent
      */
@@ -231,15 +215,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea> implements
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Specify that this control should have input focus when the page loads.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code autofocus} property from the webcomponent
      */
@@ -248,9 +224,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea> implements
     }
 
     /**
-     * <p>
-     * If false, the user cannot interact with this element.
-     * </p>
+     * If <code>false</code>, the user cannot interact with this element.
      *
      * @param enabled
      *            the boolean value to set
@@ -260,12 +234,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea> implements
     }
 
     /**
-     * <p>
-     * If false, the user cannot interact with this element.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
+     * If <code>false</code>, the user cannot interact with this element.
      *
      * @return the {@code disabled} property negation from the webcomponent
      */
@@ -279,18 +248,10 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea> implements
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Whether the value of the control can be automatically completed by the
      * browser. List of available options at:
      * https://developer.mozilla.org/en/docs
      * /Web/HTML/Element/input#attr-autocomplete
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code autocomplete} property from the webcomponent
      */
@@ -299,83 +260,49 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea> implements
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
-     * </p>
      *
-     * @param maxlength
-     *            the double value to set
+     * @param maxLength
+     *            the maximum length
      */
-    public void setMaxlength(int maxlength) {
-        super.setMaxlength(maxlength);
+    public void setMaxLength(int maxLength) {
+        super.setMaxlength(maxLength);
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code maxlength} property from the webcomponent
      */
-    public int getMaxlength() {
+    public int getMaxLength() {
         return (int) getMaxlengthDouble();
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
-     * </p>
      *
-     * @param minlength
-     *            the double value to set
+     * @param minLength
+     *            the minimum length
      */
-    public void setMinlength(int minlength) {
-        super.setMinlength(minlength);
+    public void setMinLength(int minLength) {
+        super.setMinlength(minLength);
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code minlength} property from the webcomponent
      */
-    public int getMinlength() {
+    public int getMinLength() {
         return (int) getMinlengthDouble();
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Specifies that the user must fill in a value.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code required} property from the webcomponent
      */
@@ -389,17 +316,9 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea> implements
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code pattern}.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
+     * When set to <code>true</code>, user is prevented from typing a value that
+     * conflicts with the given {@code pattern}.
+     * 
      * @return the {@code preventInvalidInput} property from the webcomponent
      */
     public boolean isPreventInvalidInput() {
@@ -409,31 +328,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea> implements
     @Override
     public void setPreventInvalidInput(boolean preventInvalidInput) {
         super.setPreventInvalidInput(preventInvalidInput);
-    }
-
-    @Override
-    public void setAutocorrect(String autocorrect) {
-        super.setAutocorrect(autocorrect);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * This is a property supported by Safari that is used to control whether
-     * autocorrection should be enabled when the user is entering/editing the
-     * text. Possible values are: on: Enable autocorrection. off: Disable
-     * autocorrection.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code autocorrect} property from the webcomponent
-     */
-    public String getAutocorrect() {
-        return getAutocorrectString();
     }
 
     @Override
