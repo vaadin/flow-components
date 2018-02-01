@@ -1,8 +1,5 @@
 package com.vaadin.flow.component.board;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;

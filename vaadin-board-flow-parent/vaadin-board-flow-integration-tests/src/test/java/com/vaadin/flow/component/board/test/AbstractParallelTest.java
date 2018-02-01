@@ -1,11 +1,5 @@
 package com.vaadin.flow.component.board.test;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
-
 import org.junit.Assert;
 import org.openqa.selenium.Dimension;
 
