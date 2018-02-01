@@ -39,7 +39,7 @@ public class BoardTest {
         DummyComponent c4 = new DummyComponent();
         DummyComponent c5 = new DummyComponent();
         Board board = new Board();
-        Row addedRow = board.addRow(c1, c2, c3, c4, c5);
+        board.addRow(c1, c2, c3, c4, c5);
     }
 
     @Test

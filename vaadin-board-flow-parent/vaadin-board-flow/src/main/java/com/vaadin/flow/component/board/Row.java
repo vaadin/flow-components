@@ -38,7 +38,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 public class Row extends Component
         implements HasStyle, HasSize, HasOrderedComponents<Row> {
 
-    private static final String COLSPAN_ATTRIBUTE = "board-cols";
+    static final String COLSPAN_ATTRIBUTE = "board-cols";
 
     /**
      * Creates an empty row.
@@ -129,7 +129,12 @@ public class Row extends Component
     public void setComponentSpan(Component component, int columns) {
         throwIfNotChild(component);
         throwIfTooManyColumns(columns - getComponentSpan(component));
-        component.getElement().setAttribute(COLSPAN_ATTRIBUTE, "" + columns);
+        if (columns == 1) {
+            component.getElement().removeAttribute(COLSPAN_ATTRIBUTE);
+        } else {
+            component.getElement().setAttribute(COLSPAN_ATTRIBUTE,
+                    "" + columns);
+        }
     }
 
     private void throwIfNotChild(Component component) {

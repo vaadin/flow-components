@@ -92,6 +92,24 @@ public class RowTest {
         Assert.assertEquals(1, row.getComponentSpan(c3));
     }
 
+    @Test
+    public void setColspanUpdatesElement() throws Exception {
+        DummyComponent c1 = new DummyComponent();
+        DummyComponent c2 = new DummyComponent();
+        Row row = new Row();
+        row.add(c1);
+        row.add(c2, 2);
+        Assert.assertNull(c1.getElement().getAttribute(Row.COLSPAN_ATTRIBUTE));
+        Assert.assertEquals("2",
+                c2.getElement().getAttribute(Row.COLSPAN_ATTRIBUTE));
+
+        row.setComponentSpan(c1, 2);
+        row.setComponentSpan(c2, 1);
+        Assert.assertEquals("2",
+                c1.getElement().getAttribute(Row.COLSPAN_ATTRIBUTE));
+        Assert.assertNull(c2.getElement().getAttribute(Row.COLSPAN_ATTRIBUTE));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void setColspanUnrelated() throws Exception {
         new Row().setComponentSpan(new DummyComponent(), 2);
