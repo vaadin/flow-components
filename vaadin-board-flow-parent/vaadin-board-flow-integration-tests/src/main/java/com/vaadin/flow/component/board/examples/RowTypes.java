@@ -3,7 +3,6 @@ package com.vaadin.flow.component.board.examples;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.board.Row;
-import com.vaadin.flow.component.board.test.AbstractView;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -11,7 +10,7 @@ import com.vaadin.flow.router.Route;
 
 @Route("RowTypes")
 @StyleSheet("rowtypes.css")
-public class RowTypes extends AbstractView {
+public class RowTypes extends Div {
     public RowTypes() {
         Board board = new Board();
 

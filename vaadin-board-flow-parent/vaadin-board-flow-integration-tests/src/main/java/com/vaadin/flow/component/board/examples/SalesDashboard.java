@@ -94,6 +94,7 @@ public class SalesDashboard extends Div {
         plotOptionsColumn.setGroupPadding(0);
         plotOptionsColumn.setBorderWidth(1);
         plotOptionsColumn.getDataLabels().setEnabled(true);
+        plotOptionsColumn.setAnimation(false);
         configuration.setPlotOptions(plotOptionsColumn);
 
         configuration.setTitle(title);
@@ -147,18 +148,21 @@ public class SalesDashboard extends Div {
                 840000, 610000);
         PlotOptionsColumn johnSeriesOptions = new PlotOptionsColumn();
         // johnSeriesOptions.setColor(new SolidColor(YELLOW));
+        johnSeriesOptions.setAnimation(false);
         johnSeries.setPlotOptions(johnSeriesOptions);
 
         ListSeries janeSeries = new ListSeries("Jane", 510000, 300000, 520000,
                 840000, 610000);
         PlotOptionsColumn janeSeriesOptions = new PlotOptionsColumn();
         // janeSeriesOptions.setColor(new SolidColor(GREEN));
+        janeSeriesOptions.setAnimation(false);
         janeSeries.setPlotOptions(janeSeriesOptions);
 
         ListSeries joeSeries = new ListSeries("Joe", 980000, 540000, 430000,
                 650000, 610000);
         PlotOptionsColumn joeSeriesOptions = new PlotOptionsColumn();
         // joeSeriesOptions.setColor(new SolidColor(BLUE));
+        joeSeriesOptions.setAnimation(false);
         joeSeries.setPlotOptions(joeSeriesOptions);
 
         ListSeries budgetSeries = new ListSeries("Budget", 2200000, 1300000,
@@ -168,6 +172,7 @@ public class SalesDashboard extends Div {
         budgetSeriesOptions.setPointPadding(0.3f);
         budgetSeriesOptions.setPointPlacement(PointPlacement.ON);
         budgetSeriesOptions.setPointStart(0.45f);
+        budgetSeriesOptions.setAnimation(false);
 
         budgetSeries.setStack("budget");
         budgetSeries.setPlotOptions(budgetSeriesOptions);
@@ -214,6 +219,7 @@ public class SalesDashboard extends Div {
 
         PlotOptionsLine plotOptionsLine = new PlotOptionsLine();
         // plotOptionsLine.setColor(new SolidColor(color));
+        plotOptionsLine.setAnimation(false);
 
         Marker marker = new Marker();
         marker.setEnabled(false);
@@ -262,6 +268,7 @@ public class SalesDashboard extends Div {
         plotOptionsFunnel.setWidth("40%");
         plotOptionsFunnel.setBorderWidth(4);
         plotOptionsFunnel.getDataLabels().setFormat("{point.name}: {point.x}");
+        plotOptionsFunnel.setAnimationLimit(0);
         configuration.setPlotOptions(plotOptionsFunnel);
 
         DataSeries dataSeries = new DataSeries("Unique users");
@@ -320,6 +327,7 @@ public class SalesDashboard extends Div {
                 new SolidColor(YELLOW), new SolidColor(CYAN),
                 new SolidColor(MAGENTA), new SolidColor(PURPLE));
         plotOptionsPie.getDataLabels().setFormat("{point.name}: {point.y}");
+        plotOptionsPie.setAnimation(false);
         configuration.setPlotOptions(plotOptionsPie);
 
         configuration.setTitle("Working Today");

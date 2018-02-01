@@ -5,49 +5,41 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.function.Supplier;
 
 import org.junit.Assert;
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.common.testbench.test.AbstractParallelSauceLabsTest;
 
 public abstract class AbstractParallelTest
         extends AbstractParallelSauceLabsTest {
 
-    public Supplier<WebElement> buttonSwitchSupplier = () -> $(
-            ButtonElement.class).id(AbstractComponentTestView.SWITCH);
-
-    public void testGenericWidth(WebElement testedElement) throws Exception {
-        WebElement controlElement = $(ButtonElement.class)
-                .id(AbstractComponentTestView.SWITCH);
-        TestFunctions.assertDimension(controlElement, testedElement, (elem) -> {
-            return elem.getSize().width;
-        });
-    }
+    public static final Dimension WINDOW_SIZE_LARGE = new Dimension(1920, 1080);
+    public static final Dimension WINDOW_SIZE_MEDIUM = new Dimension(768, 1024);
+    public static final Dimension WINDOW_SIZE_SMALL = new Dimension(375, 667);
 
     public void setup() throws Exception {
         super.setup();
         getDriver().manage().window().setSize(new Dimension(1024, 768));
     }
 
-    public void compareScreen(String screenshotName) throws IOException {
+    public void compareScreen(String screenshotName) throws Exception {
         String prefix = getClass().getSimpleName().replaceAll("IT", "");
         String referenceName = prefix + "_" + screenshotName;
+        Thread.sleep(1000);
         Assert.assertTrue(
                 "Screenshot " + referenceName + " contains differences",
                 testBench().compareScreen(referenceName));
     }
 
-    protected void open(Class<?> viewClass) {
+    protected void open(Class<?> viewClass, Dimension size) {
+        getDriver().manage().window().setSize(size);
         String url = getTestUrl(viewClass);
         getDriver().get(url);
     }
 
     protected String getBaseURL() {
-        return "http://" + findAutoHostname() + ":" + getPort();
+        return "http://localhost:" + getPort();
     }
 
     protected String getTestUrl(Class<?> viewClass) {
@@ -71,34 +63,6 @@ public abstract class AbstractParallelTest
 
     protected String getPort() {
         return "8080";
-    }
-
-    private String findAutoHostname() {
-        try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface
-                    .getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface current = interfaces.nextElement();
-                if (!current.isUp() || current.isLoopback()
-                        || current.isVirtual()) {
-                    continue;
-                }
-                Enumeration<InetAddress> addresses = current.getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    InetAddress current_addr = addresses.nextElement();
-                    if (current_addr.isLoopbackAddress()) {
-                        continue;
-                    }
-                    if (current_addr.isSiteLocalAddress()) {
-                        return current_addr.getHostAddress();
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            throw new RuntimeException("Could not enumerate ");
-        }
-        throw new RuntimeException(
-                "No compatible (192.168.*) ip address found.");
     }
 
 }
