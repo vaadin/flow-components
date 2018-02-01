@@ -39,6 +39,7 @@ public class Row extends Component
         implements HasStyle, HasSize, HasOrderedComponents<Row> {
 
     static final String COLSPAN_ATTRIBUTE = "board-cols";
+    private boolean redrawTriggered;
 
     /**
      * Creates an empty row.
@@ -135,6 +136,23 @@ public class Row extends Component
             component.getElement().setAttribute(COLSPAN_ATTRIBUTE,
                     "" + columns);
         }
+        // <vaadin-board> does not know then the attribute of a child has
+        // changed so we need to call redraw()
+        triggerRedraw();
+    }
+
+    private void triggerRedraw() {
+        if (redrawTriggered) {
+            return;
+        }
+        redrawTriggered = true;
+
+        getElement().callFunction("redraw");
+        getElement().getNode().runWhenAttached(ui -> {
+            ui.beforeClientResponse(this, () -> {
+                redrawTriggered = false;
+            });
+        });
     }
 
     private void throwIfNotChild(Component component) {
