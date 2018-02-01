@@ -39,6 +39,7 @@ import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.validator.StringLengthValidator;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.Route;
@@ -218,9 +219,13 @@ public class FormLayoutView extends DemoView {
 
         // Create the fields
         TextField firstName = new TextField();
+        firstName.setValueChangeMode(ValueChangeMode.EAGER);
         TextField lastName = new TextField();
+        lastName.setValueChangeMode(ValueChangeMode.EAGER);
         TextField phone = new TextField();
+        phone.setValueChangeMode(ValueChangeMode.EAGER);
         TextField email = new TextField();
+        email.setValueChangeMode(ValueChangeMode.EAGER);
         DatePicker birthDate = new DatePicker();
         Checkbox doNotCall = new Checkbox("Do not call");
         Label infoLabel = new Label();

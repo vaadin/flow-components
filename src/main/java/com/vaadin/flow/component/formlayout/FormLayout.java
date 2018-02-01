@@ -40,7 +40,7 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
-        implements HasSize {
+        implements HasSize, HasComponents {
 
     /**
      * A class used in describing the responsive layouting behavior of a
@@ -155,7 +155,8 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
      *
      * @author Vaadin Ltd
      */
-    public static class FormItem extends GeneratedVaadinFormItem<FormItem> {
+    public static class FormItem extends GeneratedVaadinFormItem<FormItem>
+            implements HasComponents {
 
         /**
          * Constructs a FormItem with the given initial components to wrap.
@@ -167,7 +168,22 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
          * @see HasComponents#add(Component...)
          */
         public FormItem(Component... components) {
-            super(components);
+            add(components);
+        }
+
+        @Override
+        protected FormItem addToLabel(Component... components) {
+            return super.addToLabel(components);
+        }
+
+        @Override
+        public void removeAll() {
+            super.removeAll();
+        }
+
+        @Override
+        public void remove(Component... components) {
+            super.remove(components);
         }
     }
 
@@ -188,7 +204,7 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
      * @see HasComponents#add(Component...)
      */
     public FormLayout(Component... components) {
-        super(components);
+        add(components);
     }
 
     /**
