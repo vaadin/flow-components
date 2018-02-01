@@ -18,9 +18,11 @@ package com.vaadin.flow.component.splitlayout;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-split-layout>} element.
@@ -70,6 +72,15 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     public void setOrientation(Orientation orientation) {
         this.setOrientation(orientation.toString().toLowerCase());
+    }
+
+    /**
+     * Get the orientation of the SplitLayout.
+     * 
+     * @return the {@code orientation} property of the SplitLayout.
+     */
+    protected String getOrientation() {
+        return super.getOrientationString();
     }
 
     /**
@@ -203,6 +214,28 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
             super.addToSecondary(secondaryComponent);
         }
         return get();
+    }
+
+    @Override
+    public Registration addIronResizeListener(
+            ComponentEventListener<IronResizeEvent<SplitLayout>> listener) {
+        return super.addIronResizeListener(listener);
+    }
+
+    @Override
+    public void remove(Component... components) {
+        super.remove(components);
+    }
+
+    @Override
+    public void removeAll() {
+        super.removeAll();
+    }
+
+    @Override
+    public Registration addSplitterDragendListener(
+            ComponentEventListener<SplitterDragendEvent<SplitLayout>> listener) {
+        return super.addSplitterDragendListener(listener);
     }
 
     private SplitLayout setInnerComponentStyle(Component innerComponent,
