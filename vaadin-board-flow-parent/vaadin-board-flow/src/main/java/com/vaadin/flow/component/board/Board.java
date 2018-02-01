@@ -1,6 +1,10 @@
 package com.vaadin.flow.component.board;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -27,7 +31,8 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  */
 @Tag("vaadin-board")
 @HtmlImport("frontend://bower_components/vaadin-board/vaadin-board.html")
-public class Board extends Component implements HasSize, HasStyle {
+public class Board extends Component
+        implements HasSize, HasStyle, HasOrderedComponents<Board> {
 
     /**
      * Creates an empty board.

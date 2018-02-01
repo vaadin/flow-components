@@ -1,7 +1,9 @@
 package com.vaadin.flow.component.board;
 
+import java.util.Optional;
+
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -33,7 +35,8 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  */
 @Tag("vaadin-board-row")
 @HtmlImport("frontend://bower_components/vaadin-board/vaadin-board-row.html")
-public class Row extends Component implements HasComponents, HasStyle, HasSize {
+public class Row extends Component
+        implements HasStyle, HasSize, HasOrderedComponents<Row> {
 
     private static final String COLSPAN_ATTRIBUTE = "board-cols";
 
@@ -70,8 +73,8 @@ public class Row extends Component implements HasComponents, HasStyle, HasSize {
      **/
     @Override
     public void add(Component... components) {
-        // Overridden only for javadoc
-        HasComponents.super.add(components);
+        throwIfTooManyColumns(components.length);
+        HasOrderedComponents.super.add(components);
     }
 
     /**
@@ -105,10 +108,7 @@ public class Row extends Component implements HasComponents, HasStyle, HasSize {
      * @return the number of columns the component spans, by default 1.
      **/
     public int getComponentSpan(Component component) {
-        // if (!ComponentUtil.isDirectChild(this,component)) {
-        // throw new IllegalArgumentException(
-        // "The given component is not a child of this row");
-        // }
+        throwIfNotChild(component);
         String attr = component.getElement().getAttribute(COLSPAN_ATTRIBUTE);
         if (attr == null) {
 
@@ -127,11 +127,41 @@ public class Row extends Component implements HasComponents, HasStyle, HasSize {
      *            the number of columns the component spans
      **/
     public void setComponentSpan(Component component, int columns) {
-        // if (!ComponentUtil.isDirectChild(this,component)) {
-        // throw new IllegalArgumentException(
-        // "The given component is not a child of this row");
-        // }
+        throwIfNotChild(component);
+        throwIfTooManyColumns(columns - getComponentSpan(component));
         component.getElement().setAttribute(COLSPAN_ATTRIBUTE, "" + columns);
+    }
+
+    private void throwIfNotChild(Component component) {
+        if (!isDirectChild(this, component)) {
+            throw new IllegalArgumentException(
+                    "The given component is not a child of this row");
+        }
+    }
+
+    private void throwIfTooManyColumns(int aboutToBeAdded) {
+        if (getColumns() + aboutToBeAdded > 4) {
+            throw new IllegalArgumentException(
+                    "A row can only contain 4 columns");
+        }
+
+    }
+
+    /**
+     * Gets the number of columns used, i.e. the total span sum for all
+     * components.
+     * 
+     * @return the number of used columns
+     */
+    private int getColumns() {
+        return getChildren().map(this::getComponentSpan).reduce(Integer::sum)
+                .orElse(0);
+    }
+
+    private static boolean isDirectChild(Component parent,
+            Component component) {
+        Optional<Component> componentParent = component.getParent();
+        return componentParent.isPresent() && componentParent.get() == parent;
     }
 
 }
