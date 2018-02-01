@@ -28,11 +28,11 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
         implements HasSize {
 
     /**
-     * Constructs a new object with a scale of 0 to 1, and an initial value of
+     * Constructs a new object with a scale of 0 to 10, and an initial value of
      * 0.
      */
     public ProgressBar() {
-        this(0.0, 1.0);
+        this(0, 10);
     }
 
     /**
@@ -49,7 +49,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      * @throws IllegalArgumentException
      *             if {@code min} is not less than {@code max}
      */
-    public ProgressBar(double min, double max) {
+    public ProgressBar(int min, int max) {
         this(min, max, min);
     }
 
@@ -71,7 +71,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      *             if {@code min} is not less than {@code max}, or {@code value}
      *             is not between {@code min} and {@code max}
      */
-    public ProgressBar(double min, double max, double value) {
+    public ProgressBar(int min, int max, int value) {
         if (min >= max) {
             throw new IllegalArgumentException("min must be less than max");
         }
@@ -80,12 +80,82 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
         setValue(value);
     }
 
-    @Override
-    public void setValue(double value) {
+    /**
+     * Sets value to the progressbar.
+     * 
+     * @param value
+     *            the int value to set
+     */
+    public void setValue(int value) {
         if (getMin() > value || value > getMax()) {
             throw new IllegalArgumentException(
                     "value must be between min and max");
         }
         super.setValue(value);
+    }
+
+    /**
+     * Gets the current value of the progressbar
+     * 
+     * @return the {@code value} property of the progressbar
+     */
+    public int getValue() {
+        return (int) getValueDouble();
+    }
+
+    /**
+     * Sets the maximum bound of the progressbar.
+     * 
+     * @param max
+     *            the int value to set
+     */
+    public void setMax(int max) {
+        super.setMax(max);
+    }
+
+    /**
+     * Gets the maximum bound of the progressbar.
+     * 
+     * @return the {@code max} property of the progressbar
+     */
+    public int getMax() {
+        return (int) getMaxDouble();
+    }
+
+    /**
+     * Sets the minimum bound of the progressbar
+     * 
+     * @param min
+     *            the int value to set
+     */
+    public void setMin(int min) {
+        super.setMin(min);
+    }
+
+    /**
+     * Gets the minimum bound of the progressbar.
+     * 
+     * @return the {@code min} property of the progressbar
+     */
+    public int getMin() {
+        return (int) getMinDouble();
+    }
+
+    @Override
+    public void setIndeterminate(boolean indeterminate) {
+        super.setIndeterminate(indeterminate);
+    }
+
+    /**
+     * Get the indeterminate state of the progressbar
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     * 
+     * @return the {@code indeterminate} property of the progressbar
+     */
+    public boolean isIndeterminate() {
+        return isIndeterminateBoolean();
     }
 }
