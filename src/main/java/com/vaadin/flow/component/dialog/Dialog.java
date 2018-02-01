@@ -182,6 +182,15 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         super.setOpened(opened);
     }
 
+    /**
+     * Gets the open state from the dialog.
+     * 
+     * @return the {@code opened} property from the dialog
+     */
+    public boolean isOpened() {
+        return super.isOpenedBoolean();
+    }
+
     private void attachComponentRenderer() {
         String appId = UI.getCurrent().getInternals().getAppId();
         int nodeId = container.getNode().getId();
