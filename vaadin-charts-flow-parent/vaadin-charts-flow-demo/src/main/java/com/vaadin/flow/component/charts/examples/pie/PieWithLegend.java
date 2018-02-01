@@ -12,9 +12,11 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 
 public class PieWithLegend extends AbstractChartExample {
 
+    protected Chart chart;
+
     @Override
     public void initDemo() {
-        Chart chart = new Chart(ChartType.PIE);
+        chart = new Chart(ChartType.PIE);
 
         Configuration conf = chart.getConfiguration();
 

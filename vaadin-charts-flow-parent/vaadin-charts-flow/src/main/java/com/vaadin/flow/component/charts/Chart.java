@@ -16,9 +16,14 @@
  */
 package com.vaadin.flow.component.charts;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.charts.events.ChartAddSeriesEvent;
 import com.vaadin.flow.component.charts.events.ChartAfterPrintEvent;
@@ -54,15 +59,13 @@ import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.shared.Registration;
+
 import elemental.json.JsonObject;
 import elemental.json.impl.JreJsonFactory;
 
-import java.util.Arrays;
-import java.util.List;
-
 @Tag("vaadin-chart")
 @HtmlImport("frontend://bower_components/vaadin-charts/vaadin-chart.html")
-public class Chart extends Component {
+public class Chart extends Component implements HasStyle, HasSize {
 
     private Configuration configuration;
     private final JreJsonFactory jsonFactory = new JreJsonFactory();
