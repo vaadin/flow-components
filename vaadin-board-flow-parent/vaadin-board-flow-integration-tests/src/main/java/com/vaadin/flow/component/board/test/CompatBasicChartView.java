@@ -5,7 +5,7 @@ import com.vaadin.flow.component.Component;
 /**
  *
  */
-public abstract class CompatBasicChartUI extends AbstractComponentTestView {
+public abstract class CompatBasicChartView extends AbstractComponentTestView {
 
     protected abstract com.vaadin.flow.component.Component nextChartInstance();
 

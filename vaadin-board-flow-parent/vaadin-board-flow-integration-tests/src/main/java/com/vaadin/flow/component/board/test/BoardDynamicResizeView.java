@@ -5,9 +5,9 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
-public class BoardDynamicResizeUI extends AbstractView {
+public class BoardDynamicResizeView extends AbstractView {
 
-    public BoardDynamicResizeUI() {
+    public BoardDynamicResizeView() {
         VerticalLayout layout = new VerticalLayout();
         Board board = new Board();
         board.setSizeFull();
@@ -18,6 +18,7 @@ public class BoardDynamicResizeUI extends AbstractView {
         board.addRow(lbl1, lbl2, lbl3);
 
         Button button = new Button("resize");
+        button.setId("resize");
         button.addClickListener(e -> {
             board.setWidth("300px");
         });

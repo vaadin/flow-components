@@ -1,28 +1,20 @@
 package com.vaadin.flow.component.board.test;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.board.elements.BoardElement;
-import com.vaadin.flow.component.board.test.RemoveComponentView;
-import com.vaadin.testbench.elements.AbstractComponentElement;
+import com.vaadin.flow.component.board.testbench.BoardElement;
+import com.vaadin.flow.component.board.testbench.RowElement;
 
 public class RemoveComponentIT extends AbstractParallelTest {
 
-    @Override
-    protected Class<?> getUIClass() {
-        return RemoveComponentView.class;
-    }
-
     @Test
     public void basicLayout_removeComponentFromRow_removedComponentsNotShown() {
-        openURL();
-        BoardElement board =$(BoardElement.class).first();
-
-        List<AbstractComponentElement> children = board.getRow(0).$(AbstractComponentElement.class).all();
-        Assert.assertEquals("Board should have 2 children", 2, children.size());
+        open(RemoveComponentView.class);
+        BoardElement board = $(BoardElement.class).first();
+        RowElement row = board.getRow(0);
+        Assert.assertEquals("Board should have 2 children", 2,
+                row.getChildren().size());
 
     }
 

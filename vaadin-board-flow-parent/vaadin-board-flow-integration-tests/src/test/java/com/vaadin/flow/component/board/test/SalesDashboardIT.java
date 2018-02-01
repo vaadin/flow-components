@@ -1,30 +1,27 @@
 package com.vaadin.flow.component.board.test;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.Test;
 
-import com.vaadin.board.elements.RowElement;
-import com.vaadin.flow.component.board.test.SalesDashboardUI;
-import com.vaadin.testbench.elements.CssLayoutElement;
+import com.vaadin.flow.component.board.examples.SalesDashboard;
+import com.vaadin.flow.component.board.testbench.RowElement;
+import com.vaadin.testbench.TestBenchElement;
 
 public class SalesDashboardIT extends AbstractParallelTest {
 
     private void scrollToLastComponent() {
-        $(RowElement.class).last().$(CssLayoutElement.class).last()
-                .scrollIntoView();
-    }
-
-    @Override
-    protected Class<?> getUIClass() {
-        return SalesDashboardUI.class;
+        List<TestBenchElement> children = $(RowElement.class).last()
+                .getChildren();
+        children.get(children.size() - 1).scrollIntoView();
     }
 
     @Test
     public void testSalesDashboardJavaSampleScreenshot_windowSizeSmall()
             throws IOException {
         getDriver().manage().window().setSize(TestUtils.WINDOW_SIZE_SMALL);
-        openURL();
+        open(SalesDashboard.class);
         compareScreen("SalesDashboardJavaSample_small");
     }
 
@@ -32,9 +29,9 @@ public class SalesDashboardIT extends AbstractParallelTest {
     public void testSalesDashboardJavaSampleScrolledMidScreenshot_windowSizeSmall()
             throws IOException {
         getDriver().manage().window().setSize(TestUtils.WINDOW_SIZE_SMALL);
-        openURL();
-        $(RowElement.class).get(1).$(RowElement.class).first()
-                .$(CssLayoutElement.class).first().scrollIntoView();
+        open(SalesDashboard.class);
+        $(RowElement.class).get(1).$(RowElement.class).first().getChildren()
+                .get(0).scrollIntoView();
         compareScreen("SalesDashboardUI_scrollToMid_small");
     }
 
@@ -42,7 +39,7 @@ public class SalesDashboardIT extends AbstractParallelTest {
     public void testSalesDashboardJavaSampleScrolledScreenshot_windowSizeSmall()
             throws IOException {
         getDriver().manage().window().setSize(TestUtils.WINDOW_SIZE_SMALL);
-        openURL();
+        open(SalesDashboard.class);
         scrollToLastComponent();
         compareScreen("SalesDashboardUI_scrollToBottom_small");
     }
@@ -51,7 +48,7 @@ public class SalesDashboardIT extends AbstractParallelTest {
     public void testSalesDashboardJavaSampleScreenshot_windowSizeMedium()
             throws IOException {
         getDriver().manage().window().setSize(TestUtils.WINDOW_SIZE_MEDIUM);
-        openURL();
+        open(SalesDashboard.class);
         compareScreen("SalesDashboardUI_medium");
     }
 
@@ -59,7 +56,7 @@ public class SalesDashboardIT extends AbstractParallelTest {
     public void testSalesDashboardJavaSampleScrolledScreenshot_windowSizeMedium()
             throws IOException {
         getDriver().manage().window().setSize(TestUtils.WINDOW_SIZE_MEDIUM);
-        openURL();
+        open(SalesDashboard.class);
         scrollToLastComponent();
         compareScreen("SalesDashboardUI_scrollToBottom_medium");
     }
@@ -68,7 +65,7 @@ public class SalesDashboardIT extends AbstractParallelTest {
     public void testSalesDashboardJavaSampleScreenshot_windowSizeLarge()
             throws IOException {
         getDriver().manage().window().setSize(TestUtils.WINDOW_SIZE_LARGE);
-        openURL();
+        open(SalesDashboard.class);
         compareScreen("SalesDashboardUI_large");
     }
 
@@ -76,7 +73,7 @@ public class SalesDashboardIT extends AbstractParallelTest {
     public void testSalesDashboardJavaSampleScrolledScreenshot_windowSizeLarge()
             throws IOException {
         getDriver().manage().window().setSize(TestUtils.WINDOW_SIZE_LARGE);
-        openURL();
+        open(SalesDashboard.class);
         scrollToLastComponent();
         compareScreen("SalesDashboardUI_scrollToBottom_large");
     }

@@ -23,7 +23,7 @@ public class TestUtils {
     public static final Dimension WINDOW_SIZE_MEDIUM = new Dimension(768, 1024);
     public static final Dimension WINDOW_SIZE_SMALL = new Dimension(375, 667);
 
-    private static  DesiredCapabilities parseBrowser(String browser) {
+    private static DesiredCapabilities parseBrowser(String browser) {
         switch (browser) {
         case BrowserType.CHROME:
             return DesiredCapabilities.chrome();
@@ -36,8 +36,8 @@ public class TestUtils {
         }
     }
 
-    public  List<DesiredCapabilities> getCapabilitiesFromFile(String path)
-        throws FileNotFoundException {
+    public List<DesiredCapabilities> getCapabilitiesFromFile(String path)
+            throws FileNotFoundException {
         URL url = getClass().getResource(path);
         FileReader config = new FileReader(new File(url.getPath()));
         return createCapabilities(config);
@@ -77,10 +77,12 @@ public class TestUtils {
                             }
 
                         }
-                        DesiredCapabilities cap = TestUtils.parseBrowser(browser);
+                        DesiredCapabilities cap = TestUtils
+                                .parseBrowser(browser);
                         cap.setPlatform(Platform.fromString(platform));
                         cap.setVersion(version);
-                        for (Map.Entry<String, String> pair : noNameProps.entrySet()) {
+                        for (Map.Entry<String, String> pair : noNameProps
+                                .entrySet()) {
                             cap.setCapability(pair.getKey(), pair.getValue());
                         }
                         reader.endObject();

@@ -2,9 +2,10 @@ package com.vaadin.flow.component.board.test;
 
 import com.vaadin.flow.component.board.test.CompatChartComponents;
 
-public class PieIT extends CompatChartsUIIT{
+public class PieIT extends AbstractCompatChartsIT {
+
     @Override
-    protected Class<?> getUIClass() {
-        return CompatChartComponents.PieChartUI.class;
+    protected Class<?> getViewClass() {
+        return CompatChartComponents.PieChartView.class;
     }
 }

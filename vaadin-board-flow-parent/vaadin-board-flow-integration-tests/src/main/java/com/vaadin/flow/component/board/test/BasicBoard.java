@@ -13,6 +13,10 @@ public class BasicBoard extends Board {
         NativeButton btn2 = new NativeButton("Button 2");
         NativeButton btn3 = new NativeButton("Button 3");
         NativeButton btn4 = new NativeButton("Button 4");
+        btn1.setId("1");
+        btn2.setId("2");
+        btn3.setId("3");
+        btn4.setId("4");
         btn1.setWidth("100%");
         btn2.setWidth("100%");
         btn3.setWidth("100%");

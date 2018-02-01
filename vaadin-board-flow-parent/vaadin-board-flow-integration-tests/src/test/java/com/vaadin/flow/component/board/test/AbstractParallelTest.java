@@ -1,28 +1,21 @@
 package com.vaadin.flow.component.board.test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.function.Supplier;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.testbench.annotations.BrowserConfiguration;
-import com.vaadin.testbench.annotations.RunOnHub;
-import com.vaadin.testbench.parallel.ParallelTest;
+import com.vaadin.flow.component.common.testbench.test.AbstractParallelSauceLabsTest;
 
-@RunOnHub("tb3-hub.intra.itmill.com")
-public abstract class AbstractParallelTest extends ParallelTest {
+public abstract class AbstractParallelTest
+        extends AbstractParallelSauceLabsTest {
 
     public Supplier<WebElement> buttonSwitchSupplier = () -> $(
             ButtonElement.class).id(AbstractComponentTestView.SWITCH);
@@ -35,81 +28,49 @@ public abstract class AbstractParallelTest extends ParallelTest {
         });
     }
 
-    @Before
     public void setup() throws Exception {
         super.setup();
         getDriver().manage().window().setSize(new Dimension(1024, 768));
     }
 
-    public void compareScreen(String referenceName) throws IOException {
-        Assert.assertTrue(testBench().compareScreen(referenceName));
+    public void compareScreen(String screenshotName) throws IOException {
+        String prefix = getClass().getSimpleName().replaceAll("IT", "");
+        String referenceName = prefix + "_" + screenshotName;
+        Assert.assertTrue(
+                "Screenshot " + referenceName + " contains differences",
+                testBench().compareScreen(referenceName));
     }
 
-    protected List<DesiredCapabilities> allBrowsers = null;
-
-    @BrowserConfiguration
-    public List<DesiredCapabilities> getBrowserConfiguration() {
-        final String CONFIG_PATH = "./tbconfig.json";
-        List<DesiredCapabilities> capabilities = null;
-        TestUtils utils = new TestUtils();
-        try {
-            capabilities = utils.getCapabilitiesFromFile(CONFIG_PATH);
-            return Collections.unmodifiableList(capabilities);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(
-                    "Could not create capabilities from file");
-        }
-    }
-
-    public AbstractParallelTest() {
-        super();
-    }
-
-    protected String getPort() {
-        if ((getRunLocallyBrowser() != null)) {
-            return "8080";
-        } else if (getRunOnHub(getClass()) != null) {
-            return "8080";
-        } else {
-            // can't find any configuration to setup WebDriver
-            throw new IllegalArgumentException(
-                    "Can't instantiate WebDriver: No configuration found. Test case was not annotated with @RunLocally annotation nor @RunOnHub annotation, and system variable 'useLocalWebDriver' was not found or not set to true.");
-        }
+    protected void open(Class<?> viewClass) {
+        String url = getTestUrl(viewClass);
+        getDriver().get(url);
     }
 
     protected String getBaseURL() {
-        // getHubHostname
         return "http://" + findAutoHostname() + ":" + getPort();
     }
 
-    private Class<?> uiClass;
-
-    protected void setUIClass(Class<?> uiClass) {
-        this.uiClass = uiClass;
-    }
-
-    protected Class<?> getUIClass() {
-        return this.uiClass;
-    }
-
-    protected String getDeploymentPath() {
-        Class<?> uiClass = getUIClass();
-        if (uiClass != null) {
-            final Package aPackage = uiClass.getPackage();
-            final String aPackageName = aPackage.getName();
-            return uiClass.getName().replace(aPackageName, "").replace(".",
-                    "/");
-        }
-        return "/";
-    }
-
-    protected String getTestUrl() {
+    protected String getTestUrl(Class<?> viewClass) {
         String baseUrl = getBaseURL();
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
 
-        return baseUrl + getDeploymentPath();
+        return baseUrl + getDeploymentPath(viewClass);
+    }
+
+    protected String getDeploymentPath(Class<?> viewClass) {
+        if (viewClass == null) {
+            return "/";
+        }
+
+        final Package aPackage = viewClass.getPackage();
+        final String aPackageName = aPackage.getName();
+        return viewClass.getName().replace(aPackageName, "").replace(".", "/");
+    }
+
+    protected String getPort() {
+        return "8080";
     }
 
     private String findAutoHostname() {
@@ -138,16 +99,6 @@ public abstract class AbstractParallelTest extends ParallelTest {
         }
         throw new RuntimeException(
                 "No compatible (192.168.*) ip address found.");
-    }
-
-    protected void openURL() {
-        String url = getTestUrl();
-        getDriver().get(url);
-    }
-
-    protected void openURLWithAppRestart() {
-        String url = getTestUrl() + "?restartApplication";
-        getDriver().get(url);
     }
 
 }

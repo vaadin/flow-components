@@ -4,9 +4,9 @@ import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.board.Row;
 import com.vaadin.flow.component.button.Button;
 
-public class BoardColsUI extends AbstractView {
+public class BoardColsView extends AbstractView {
 
-    public BoardColsUI() {
+    public BoardColsView() {
         // First Button will take 50 % of available space
         Board board = new Board();
         board.setWidth("1400px");
