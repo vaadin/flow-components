@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
@@ -51,6 +52,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      */
     public DatePicker() {
         getElement().synchronizeProperty("value", "value-changed");
+        getElement().synchronizeProperty("invalid", "invalid-changed");
     }
 
     /**
@@ -186,7 +188,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      *         <code>null</code> if there's no minimum
      */
     public LocalDate getMin() {
-        return convertDateFromString(getMinAsString());
+        return convertDateFromString(getMinAsStringString());
     }
 
     /**
@@ -213,7 +215,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      *         <code>null</code> if there's no maximum
      */
     public LocalDate getMax() {
-        return convertDateFromString(getMaxAsString());
+        return convertDateFromString(getMaxAsStringString());
     }
 
     /**
@@ -276,7 +278,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     @Override
     public LocalDate getValue() {
-        return convertDateFromString(getValueAsString());
+        return convertDateFromString(super.getValueAsStringString());
     }
 
     @Override
@@ -290,6 +292,239 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
                                         (String) event.getOldValue()),
                                 event.isUserOriginated())));
     }
+
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        if (errorMessage == null) {
+            super.setErrorMessage("");
+        } else {
+            super.setErrorMessage(errorMessage);
+        }
+    }
+
+    /**
+     * Gets the current error message from the datepicker.
+     * 
+     * @return the current error message
+     */
+    public String getErrorMessage() {
+        return getErrorMessageString();
+    }
+
+    @Override
+    public void setInvalid(boolean invalid) {
+        super.setInvalid(invalid);
+    }
+
+    /**
+     * Gets the validity of the datepicker output.
+     * <p>
+     * return true, if the value is invalid.
+     * 
+     * @return the {@code validity} property from the datepicker
+     */
+    public boolean isInvalid() {
+        return isInvalidBoolean();
+    }
+
+    @Override
+    public void setLabel(String label) {
+        super.setLabel(label);
+    }
+
+    /**
+     * Gets the label of the datepicker.
+     * 
+     * @return the {@code label} property of the datePicker
+     */
+    public String getLabel() {
+        return getLabelString();
+    }
+
+    /**
+     * Enables or disables this datepicker.
+     * 
+     * @param enabled
+     *            the boolean value to set
+     */
+    public void setEnabled(boolean enabled) {
+        setDisabled(!enabled);
+    }
+
+    /**
+     * Determine whether this datepicker is enabled
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     * 
+     * @return {@code true} if the datepicker is enabled, {@code false}
+     *         otherwise
+     */
+    public boolean isEnabled() {
+        return !isDisabledBoolean();
+    }
+
+    @Override
+    public void setPlaceholder(String placeholder) {
+        super.setPlaceholder(placeholder);
+    }
+
+    /**
+     * Gets the placeholder of the datepicker.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     * 
+     * @return the {@code placeholder} property of the datePicker
+     */
+    public String getPlaceholder() {
+        return getPlaceholderString();
+    }
+
+    /**
+     * Date which should be visible when there is no value selected.
+     * <p>
+     * The same date formats as for the {@code value} property are supported.
+     * </p>
+     * 
+     * @param initialPosition
+     *            the LocalDate value to set
+     */
+    public void setInitialPosition(LocalDate initialPosition) {
+        if (initialPosition == null) {
+            setInitialPosition("");
+        } else {
+            setInitialPosition(FORMATTER.format(initialPosition));
+        }
+    }
+
+    /**
+     * Get the visible date when there is no value selected.
+     * <p>
+     * The same date formats as for the {@code value} property are supported.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     * 
+     * @return the {@code initialPosition} property from the datepicker
+     */
+    public LocalDate getInitialPosition() {
+        return convertDateFromString(getInitialPositionString());
+    }
+
+    @Override
+    public void setRequired(boolean required) {
+        super.setRequired(required);
+    }
+
+    /**
+     * Determines whether the datepicker is marked as input required.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * 
+     * @return {@code true} if the input is required, {@code false} otherwise
+     */
+    public boolean isRequired() {
+        return isRequiredBoolean();
+    }
+
+    /**
+     * Set the week number visible in the DatePicker.
+     * <p>
+     * Set true to display ISO-8601 week numbers in the calendar.
+     * <p>
+     * Notice that displaying week numbers is only supported when
+     * i18n.firstDayOfWeek is 1 (Monday).
+     * 
+     * @param showWeekNumbers
+     *            the boolean value to set
+     */
+    public void setWeekNumbersVisible(boolean weekNumbersVisible) {
+        super.setShowWeekNumbers(weekNumbersVisible);
+    }
+
+    /**
+     * Get the state of {@code showWeekNumbers} property of the datepicker
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     * 
+     * @return the {@code showWeekNumbers} property from the datepicker
+     */
+    public boolean isWeekNumbersVisible() {
+        return isShowWeekNumbersBoolean();
+    }
+
+    @Override
+    public void setOpened(boolean opened) {
+        super.setOpened(opened);
+    }
+
+    /**
+     * Gets the states of the drop-down for the datepicker
+     * 
+     * @return {@code true} if the drop-down is opened, {@code false} otherwise
+     */
+    public boolean isOpened() {
+        return isOpenedBoolean();
+    }
+
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+    }
+
+    /**
+     * Gets the name of the DatePicker.
+     * 
+     * @return the {@code name} property from the DatePicker
+     */
+    public String getName() {
+        return getNameString();
+    }
+
+    @Override
+    public void setReadonly(boolean readonly) {
+        super.setReadonly(readonly);
+    }
+
+    /**
+     * Gets the {@code readonly} property from the DatePicker.
+     * 
+     * @return the {@code readonly} property from the DatePicker
+     */
+    public boolean isReadonly() {
+        return isReadonlyBoolean();
+    }
+
+    @Override
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent<DatePicker>> listener) {
+        return super.addOpenedChangeListener(listener);
+    }
+
+    @Override
+    public Registration addInvalidChangeListener(
+            ComponentEventListener<InvalidChangeEvent<DatePicker>> listener) {
+        return super.addInvalidChangeListener(listener);
+    }
+
+    /**
+     * Adds a listener for value-changed events fired by the datePicker.
+     * 
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    // public Registration addValueChangeListener(
+    // ComponentEventListener<ValueAsStringChangeEvent<DatePicker>> listener) {
+    // return addValueAsStringChangeListener(listener);
+    // }
 
     private LocalDate convertDateFromString(String value) {
         if (value == null || value.isEmpty()) {
@@ -509,7 +744,5 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
             this.cancel = cancel;
             return this;
         }
-
     }
-
 }

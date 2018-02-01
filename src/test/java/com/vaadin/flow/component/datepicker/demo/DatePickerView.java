@@ -20,7 +20,6 @@ import java.util.Arrays;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
@@ -31,7 +30,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-date-picker")
-@HtmlImport("frontend://bower_components/vaadin-date-picker/theme/lumo/vaadin-date-picker.html")
 public class DatePickerView extends DemoView {
 
     @Override
@@ -154,7 +152,7 @@ public class DatePickerView extends DemoView {
             if (selectedDate != null) {
                 endDatePicker.setMin(selectedDate.plusDays(1));
                 if (endDate == null) {
-                    endDatePicker.open();
+                    endDatePicker.setOpened(true);
                     message.setText("Select the ending date");
                 } else {
                     message.setText(
