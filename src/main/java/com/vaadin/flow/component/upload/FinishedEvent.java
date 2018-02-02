@@ -92,7 +92,7 @@ public class FinishedEvent extends ComponentEvent<Upload> {
      *
      * @return the length.
      */
-    public long getLength() {
+    public long getContentLength() {
         return length;
     }
 

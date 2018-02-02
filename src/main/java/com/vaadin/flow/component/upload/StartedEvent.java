@@ -64,7 +64,7 @@ public class StartedEvent extends ComponentEvent<Upload> {
      *
      * @return the filename.
      */
-    public String getFilename() {
+    public String getFileName() {
         return filename;
     }
 
