@@ -17,6 +17,7 @@ package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
 
@@ -26,12 +27,15 @@ import elemental.json.Json;
  * @author Vaadin Ltd
  */
 public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
-        implements HasSize {
+        implements HasSize, HasValue<Checkbox, Boolean> {
 
     /**
      * Default constructor.
      */
     public Checkbox() {
+        getElement().synchronizeProperty("indeterminate",
+                "indeterminiate-changed");
+        getElement().synchronizeProperty("checked", "checked-changed");
     }
 
     /**
@@ -42,6 +46,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
      *            the label text to set
      */
     public Checkbox(String labelText) {
+        this();
         setLabel(labelText);
     }
 
@@ -53,6 +58,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
      *            the initial value
      */
     public Checkbox(boolean initialValue) {
+        this();
         setValue(initialValue);
     }
 
@@ -134,14 +140,13 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
      * @param value
      *            the value to set
      */
-    @Override
     public void setValue(Boolean value) {
         if (value == null) {
             setIndeterminate(true);
             getElement().setPropertyJson("checked", Json.createNull());
         } else {
             setIndeterminate(false);
-            super.setValue(value);
+            super.setChecked(value);
         }
     }
 
@@ -152,22 +157,90 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
      * @see #isIndeterminate()
      * @return the checked state of this checkbox
      */
-    @Override
     public Boolean getValue() {
-        if (isEmpty()) {
+        if (isIndeterminate()) {
             return null;
         }
-        return super.getValue();
+        return isCheckedBoolean();
     }
 
     /**
-     * Returns whether the value of this checkbox is indeterminate.
-     *
-     * @see #isIndeterminate()
-     * @return whether the checkbox' value is indeterminate
+     * Set the checkbox to be input focused when the page loads.
+     * 
+     * @param autofocus
+     *            the boolean value to set
      */
     @Override
-    public boolean isEmpty() {
-        return isIndeterminate();
+    public void setAutofocus(boolean autofocus) {
+        super.setAutofocus(autofocus);
+    }
+
+    /**
+     * Get the state for the auto-focus property of the checkbox.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * 
+     * @return the {@code autofocus} property from the checkbox
+     */
+    public boolean isAutofocus() {
+        return isAutofocusBoolean();
+    }
+
+    /**
+     * Set the indeterminate state of the checkbox.
+     * 
+     * @param indeterninate
+     *            the boolean value to set
+     */
+    @Override
+    public void setIndeterminate(boolean indeterminate) {
+        super.setIndeterminate(indeterminate);
+    }
+
+    /**
+     * Get the indeterminate state of the checkbox.
+     * <p>
+     * This property is synchronized automatically from client side when a
+     * 'indeterminate-changed' event happens.
+     * </p>
+     * 
+     * @return the {@code indeterminate} property from the checkbox
+     */
+    public boolean isIndeterminate() {
+        return isIndeterminateBoolean();
+    }
+
+    /**
+     * Enables or disables this checkbox.
+     * 
+     * @param enabled
+     *            the boolean value to set
+     */
+    public void setEnabled(boolean enabled) {
+        setDisabled(!enabled);
+    }
+
+    /**
+     * Determines whether this check is enabled
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     * 
+     * @return {@code true} if the checkbox is enabled, {@code false} otherwise
+     */
+    public boolean isEnabled() {
+        return !isDisabledBoolean();
+    }
+
+    @Override
+    public Registration addValueChangeListener(
+            ValueChangeListener<Checkbox, Boolean> listener) {
+        return getElement().addPropertyChangeListener(
+                "checked",
+                event -> listener.onComponentEvent(new ValueChangeEvent<>(get(),
+                        this, (Boolean) event.getOldValue(),
+                        event.isUserOriginated())));
     }
 }

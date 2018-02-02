@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.checkbox.demo;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.demo.DemoView;
@@ -28,7 +27,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-checkbox")
-@HtmlImport("frontend://bower_components/vaadin-checkbox/theme/lumo/vaadin-checkbox.html")
 public class CheckboxView extends DemoView {
 
     @Override
@@ -55,7 +53,7 @@ public class CheckboxView extends DemoView {
         // source-example-heading: Disabled Checkbox
         Checkbox disabledCheckbox = new Checkbox("Disabled Checkbox");
         disabledCheckbox.setValue(true);
-        disabledCheckbox.setDisabled(true);
+        disabledCheckbox.setEnabled(false);
         // end-source-example
         addCard("Disabled Checkbox", disabledCheckbox);
         disabledCheckbox.setId("disabled-checkbox");
