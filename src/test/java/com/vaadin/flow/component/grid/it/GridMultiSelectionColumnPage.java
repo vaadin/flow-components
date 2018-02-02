@@ -42,9 +42,8 @@ public class GridMultiSelectionColumnPage extends Div {
 
         Grid<String> lazyGrid = new Grid<>();
         lazyGrid.setDataProvider(DataProvider.fromCallbacks(query -> {
-            return IntStream
-                    .range(query.getOffset(),
-                            query.getOffset() + query.getLimit())
+            return IntStream.range(query.getOffset(),
+                    query.getOffset() + query.getLimit())
                     .mapToObj(Integer::toString);
         }, query -> ITEM_COUNT));
         setUp(lazyGrid);

@@ -404,6 +404,9 @@ public class GridView extends DemoView {
         NativeButton selectBtn = new NativeButton("Select first five persons");
         selectBtn.addClickListener(event -> grid.asMultiSelect()
                 .setValue(new LinkedHashSet<>(people.subList(0, 5))));
+        NativeButton deselectBtn = new NativeButton("Deselect first five persons");
+        deselectBtn.addClickListener(event -> grid.asMultiSelect()
+                .setValue(new LinkedHashSet<>()));
         NativeButton selectAllBtn = new NativeButton("Select all");
         selectAllBtn.addClickListener(
                 event -> ((GridMultiSelectionModel<Person>) grid
@@ -413,7 +416,7 @@ public class GridView extends DemoView {
         selectBtn.setId("multi-selection-button");
         messageDiv.setId("multi-selection-message");
         addCard("Selection", "Grid Multi Selection", grid,
-                new HorizontalLayout(selectBtn, selectAllBtn), messageDiv);
+                new HorizontalLayout(selectBtn, deselectBtn, selectAllBtn), messageDiv);
     }
 
     private void createNoneSelect() {

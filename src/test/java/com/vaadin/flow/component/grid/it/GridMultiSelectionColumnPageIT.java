@@ -44,21 +44,22 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
 
         selectAllCheckbox.click();
         WebElement message = findElement(By.id("selected-item-count"));
-        Assert.assertEquals(
-                "Selected item count: "
-                        + GridMultiSelectionColumnPage.ITEM_COUNT,
-                message.getText());
+        Assert.assertEquals("Selected item count: "
+                + GridMultiSelectionColumnPage.ITEM_COUNT, message.getText());
         Assert.assertEquals("true", selectAllCheckbox.getAttribute("checked"));
 
         WebElement selectCheckbox = grid
                 .findElements(By.tagName("vaadin-checkbox")).get(5);
         Assert.assertEquals("true", selectCheckbox.getAttribute("checked"));
         selectCheckbox.click();
-        Assert.assertNull(selectCheckbox.getAttribute("checked"));
-        Assert.assertNull(selectAllCheckbox.getAttribute("checked"));
-        Assert.assertEquals(
-                "Selected item count: "
-                        + (GridMultiSelectionColumnPage.ITEM_COUNT - 1),
+        Assert.assertNull("Item 5 selected even though it shouldn't be",
+                selectCheckbox.getAttribute("checked"));
+        Assert.assertNull("Select all check even though not all items selected",
+                selectAllCheckbox.getAttribute("checked"));
+
+        // On deselected item
+        Assert.assertEquals("Selected item count: " + (
+                        GridMultiSelectionColumnPage.ITEM_COUNT - 1),
                 message.getText());
     }
 

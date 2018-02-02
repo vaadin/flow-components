@@ -34,10 +34,17 @@ window.gridConnector = {
       grid.selectItem(item);
       selectedKeys[item.key] = item;
       if (userOriginated) {
-        item.selected = true;
-        grid.$server.select(item.key);
+          item.selected = true;
+          grid.$server.select(item.key);
+      } else {
+          grid.fire('select', {item: item, userOriginated: userOriginated});
       }
-      grid.fire('select', {item: item, userOriginated: userOriginated});
+
+      if (selectionMode === 'MULTI' && arguments.length > 2) {
+          for (i = 2; i < arguments.length; i++) {
+              grid.$connector.doSelection(arguments[i], userOriginated);
+          }
+      }
     };
 
     grid.$connector.doDeselection = function(item, userOriginated) {
@@ -47,8 +54,15 @@ window.gridConnector = {
         if (userOriginated) {
           delete item.selected;
           grid.$server.deselect(item.key);
+        } else {
+          grid.fire('deselect', {item: item, userOriginated: userOriginated});
         }
-        grid.fire('deselect', {item: item, userOriginated: userOriginated});
+      }
+
+      if (selectionMode === 'MULTI' && arguments.length > 2) {
+          for (i = 2; i < arguments.length; i++) {
+              grid.$connector.doDeselection(arguments[i], userOriginated);
+          }
       }
     };
 
@@ -187,7 +201,7 @@ window.gridConnector = {
           let item = slice[j]
           if (item.selected && !selectedKeys[item.key]) {
             grid.$connector.doSelection(item);
-          } else if (selectedKeys[item.key]) {
+          } else if (!item.selected && selectedKeys[item.key]) {
             grid.$connector.doDeselection(item);
           }
         }

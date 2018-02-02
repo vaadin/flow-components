@@ -35,12 +35,19 @@ public class GridFilteringIT extends AbstractComponentIT {
         WebElement input = getInShadowRoot(filter, By.cssSelector("input"));
         input.sendKeys("w");
 
+        // Blur input to get value change
+        executeScript("arguments[0].blur();", input);
+
+
         WebElement grid = findElement(By.id("data-grid"));
         // empty Grid content
         Object size = executeScript("return arguments[0].size", grid);
         Assert.assertEquals("0", size.toString());
 
         input.sendKeys(Keys.BACK_SPACE);
+
+        // Blur input to get value change
+        executeScript("arguments[0].blur();", input);
 
         waitUntil(driver -> executeScript("return arguments[0].size", grid)
                 .toString().equals("3"));
