@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -140,6 +141,25 @@ public class RadioButtonGroup<T>
         refreshButtons();
     }
 
+    /**
+     * If <code>false</code>, the user cannot interact with this element.
+     *
+     * @param enabled
+     *            the boolean value to set
+     */
+    public void setEnabled(boolean enabled) {
+        setDisabled(!enabled);
+    }
+
+    /**
+     * If <code>false</code>, the user cannot interact with this element.
+     *
+     * @return the {@code disabled} property negation from the webcomponent
+     */
+    public boolean isEnabled() {
+        return !isDisabledBoolean();
+    }
+
     private void refresh() {
         keyMapper.removeAll();
         removeAll();
@@ -166,11 +186,11 @@ public class RadioButtonGroup<T>
         button.add(getItemRenderer().createComponent(button.getItem()));
     }
 
-    private ValueChangeEvent<RadioButtonGroup<T>, T> createValueChangeEvent(
+    private HasValue.ValueChangeEvent<RadioButtonGroup<T>, T> createValueChangeEvent(
             PropertyChangeEvent event) {
         Serializable oldKey = event.getOldValue();
         T oldValue = keyMapper.get(oldKey == null ? null : oldKey.toString());
-        return new ValueChangeEvent<>(this, this, oldValue,
+        return new HasValue.ValueChangeEvent<>(this, this, oldValue,
                 event.isUserOriginated());
     }
 }

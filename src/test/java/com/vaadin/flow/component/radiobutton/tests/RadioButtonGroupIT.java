@@ -38,22 +38,13 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         WebElement group = layout
                 .findElement(By.id("button-group-with-value-change-listener"));
 
-        List<WebElement> buttons = group
-                .findElements(By.tagName("vaadin-radio-button"));
-
-        buttons.get(1).click();
+        executeScript("arguments[0].value=2;", group);
 
         waitUntil(
                 driver -> "Radio button group value changed from 'null' to 'bar'"
                         .equals(valueDiv.getText()));
 
-        buttons.get(0).click();
-
-        waitUntil(
-                driver -> "Radio button group value changed from 'bar' to 'foo'"
-                        .equals(valueDiv.getText()));
-
-        buttons.get(0).click();
+        executeScript("arguments[0].value=1;", group);
 
         waitUntil(
                 driver -> "Radio button group value changed from 'bar' to 'foo'"
@@ -67,11 +58,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         WebElement group = layout
                 .findElement(By.id("button-group-with-item-generator"));
 
-        List<WebElement> buttons = group
-                .findElements(By.tagName("vaadin-radio-button"));
-
-        executeScript("arguments[0].scrollIntoView(true);", group);
-        buttons.get(1).click();
+        executeScript("arguments[0].value=2;", group);
 
         waitUntil(
                 driver -> "Radio button group value changed from 'null' to 'John'"
@@ -95,9 +82,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         List<WebElement> buttons = group
                 .findElements(By.tagName("vaadin-radio-button"));
 
-        executeScript("arguments[0].scrollIntoView(true);", group);
-
-        buttons.get(1).click();
+        executeScript("arguments[0].value=2;", group);
         WebElement anchor = buttons.get(0).findElement(By.tagName("a"));
 
         Assert.assertEquals("http://example.com/1",
@@ -195,11 +180,15 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
             Assert.assertEquals(
                     "Expected second in group " + (i + 1) + " to be a <hr>",
                     "hr", elements.get(firstInGroup + 1).getTagName());
-            Assert.assertEquals("Expected third in group " + (i + 1)
-                            + " to be a <vaadin-radio-button>", "vaadin-radio-button",
+            Assert.assertEquals(
+                    "Expected third in group " + (i + 1)
+                            + " to be a <vaadin-radio-button>",
+                    "vaadin-radio-button",
                     elements.get(firstInGroup + 2).getTagName());
-            Assert.assertEquals("Expected fourth in group " + (i + 1)
-                            + " to be a <vaadin-radio-button>", "vaadin-radio-button",
+            Assert.assertEquals(
+                    "Expected fourth in group " + (i + 1)
+                            + " to be a <vaadin-radio-button>",
+                    "vaadin-radio-button",
                     elements.get(firstInGroup + 3).getTagName());
         });
     }
@@ -220,7 +209,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
                     "vaadin-radio-button", elements.get(i).getTagName());
         }
 
-        elements.get(0).click();
+        executeScript("arguments[0].value=1;", group);
 
         elements = group.findElements(By.xpath("./*"));
 
@@ -232,7 +221,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
                 "Second element should be a label as first element was selected",
                 "label", elements.get(1).getTagName());
 
-        elements.get(4).click();
+        executeScript("arguments[0].value=5;", group);
 
         elements = group.findElements(By.xpath("./*"));
 
@@ -242,7 +231,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
         Assert.assertEquals(
                 "Fifth element should be a label as fourth element was selected",
-                "label", elements.get(4).getTagName());
+                "label", elements.get(5).getTagName());
     }
 
 }

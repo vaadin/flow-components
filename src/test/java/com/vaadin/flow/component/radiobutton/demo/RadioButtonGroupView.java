@@ -156,7 +156,7 @@ public class RadioButtonGroupView extends DemoView {
         // source-example-heading: Disabled radio button group
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar", "baz");
-        group.setDisabled(true);
+        group.setEnabled(false);
         // end-source-example
 
         group.setId("button-group-disabled");

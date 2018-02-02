@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
 
 /**
@@ -23,7 +24,7 @@ import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
  * @author Vaadin Ltd.
  */
 class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>>
-        implements ItemComponent<T> {
+        implements ItemComponent<T>, HasComponents {
 
     private T item;
 
