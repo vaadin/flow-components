@@ -15,12 +15,16 @@
  */
 package com.vaadin.flow.component.notification;
 
+import java.util.Locale;
+
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.HtmlUtils;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the <code>vaadin-notification</code> element.
@@ -32,14 +36,54 @@ public class Notification
         extends GeneratedVaadinNotification<Notification>
         implements HasComponents {
 
-    private Element container = new Element("div", false);
+    private final Element container = new Element("div", false);
     private final Element templateElement = new Element("template");
 
     /**
      * Enumeration of all available positions for notification component
      */
     public enum Position {
-        TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
+        TOP_STRETCH,
+        TOP_START,
+        TOP_CENTER,
+        TOP_END,
+        MIDDLE,
+        BOTTOM_START,
+        BOTTOM_CENTER,
+        BOTTOM_END,
+        BOTTOM_STRETCH,
+        ;
+
+        private final String clientName;
+        
+        Position() {
+            this.clientName = name().toLowerCase(Locale.ENGLISH).replace('_',
+                    '-');
+        }
+
+        /**
+         * Gets name that is used in the client side representation of the
+         * component.
+         *
+         * @return the name used in the client side representation of the
+         *         component.
+         */
+        public String getClientName() {
+            return clientName;
+        }
+
+        /**
+         * Creates {@link Position} from the client side representation property
+         * name
+         * 
+         * @param clientName
+         *            the client side representation of the property
+         * @return corresponding {@link Position}
+         */
+        static Position fromClientName(String clientName) {
+            return Position.valueOf(
+                    clientName.replace('-', '_').toUpperCase(Locale.ENGLISH));
+        }
     }
 
     /**
@@ -144,7 +188,7 @@ public class Notification
         notification.open();
         notification.addOpenedChangeListener(
                 event -> {
-                    if (notification.isOpened() == false) {
+                    if (!notification.isOpened()) {
                         notification.getElement().removeFromParent();
                     }
                 });
@@ -177,12 +221,31 @@ public class Notification
      *            {@code TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH}
      */
     public void setPosition(Position position) {
-        this.setPosition(position.toString().toLowerCase().replace('_', '-'));
+        this.setPosition(position.getClientName());
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Alignment of the notification in the viewport Valid values are
+     * {@code top-stretch|top-start|top-center|top-end|middle|bottom-start|bottom-center|bottom-end|bottom-stretch}
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     *
+     * @return the {@link Position} property from the webcomponent
+     */
+    public Position getPosition() {
+        return Position.fromClientName(getPositionString());
     }
 
     /**
      * Opens the notification.
      */
+    @Override
     public void open() {
         setOpened(true);
     }
@@ -190,6 +253,7 @@ public class Notification
     /**
      * Closes the notification.
      */
+    @Override
     public void close() {
         setOpened(false);
     }
@@ -275,5 +339,62 @@ public class Notification
             UI.getCurrent().add(this);
         }
         super.setOpened(opened);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * True if the notification is currently displayed.
+     * <p>
+     * This property is synchronized automatically from client side when a
+     * 'opened-changed' event happens.
+     * </p>
+     *
+     * @return the {@code opened} property from the webcomponent
+     */
+    public boolean isOpened() {
+        return isOpenedBoolean();
+    }
+
+    @Override
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent<Notification>> listener) {
+        return super.addOpenedChangeListener(listener);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * The duration in milliseconds to show the notification. Set to {@code 0}
+     * or a negative number to disable the notification auto-closing.
+     * </p>
+     *
+     * @param duration
+     *            the value to set
+     */
+    public void setDuration(int duration) {
+        setDuration((double) duration);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * The duration in milliseconds to show the notification. Set to {@code 0}
+     * or a negative number to disable the notification auto-closing.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     *
+     * @return the {@code duration} property from the webcomponent
+     */
+    public int getDuration() {
+        return (int) getDurationDouble();
     }
 }

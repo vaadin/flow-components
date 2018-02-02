@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.notification.tests;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,8 +30,7 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("notification-test")
 public class NotificationTestPageIT extends AbstractComponentIT {
 
-    private static final String DIALOG_OVERLAY_TAG = "vaadin-notification-overlay";
-    private WebElement overlay;
+    private static final String NOTIFICATION_TAG = "vaadin-notification-card";
 
     @Before
     public void init() {
@@ -36,6 +38,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
         waitUntil(driver -> findElements(By.tagName("vaadin-notification"))
                 .size() > 0);
     }
+
     @Test
     public void notificationWithButtonControl() {
         findElement(By.id("notification-open")).click();
@@ -46,16 +49,25 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void twoNotificitonAtSamePosition() {
+    public void twoNotificationAtOnce() {
         findElement(By.id("notification-button-1")).click();
-        clickElementWithJs(findElement(By.id("notification-button-2")));
+        findElement(By.id("notification-button-2")).click();
+
         checkNotificationIsOpen();
-        assertNotificationOverlayContent("1111111");
-        assertNotificationOverlayContent("2222222");
+
+        List<String> notifications = getNotifications().stream().map(WebElement::getText)
+                .collect(Collectors.toList());
+        Assert.assertEquals(
+                "Expect to have two notification pop-ups for two notification buttons clicked",
+                notifications.size(), 2);
+        Assert.assertTrue("Expect to have the first notification shown",
+                notifications.stream().anyMatch(text -> text.contains("1111111")));
+        Assert.assertTrue("Expect to have the second notification shown",
+                notifications.stream().anyMatch(text -> text.contains("2222222")));
     }
 
     @Test
-    public void notificitonAddComponents() {
+    public void notificationAddComponents() {
         findElement(By.id("open-notification-button-add")).click();
         checkNotificationIsOpen();
         assertButtonSize(3);
@@ -64,7 +76,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void notificitonRemoveComponents() {
+    public void notificationRemoveComponents() {
         findElement(By.id("open-notification-button-remove")).click();
         checkNotificationIsOpen();
         assertButtonSize(2);
@@ -74,7 +86,7 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void notificitonRemoveAllComponents() {
+    public void notificationRemoveAllComponents() {
         findElement(By.id("open-notification-button-remove-all")).click();
         checkNotificationIsOpen();
         assertButtonSize(0);
@@ -97,7 +109,8 @@ public class NotificationTestPageIT extends AbstractComponentIT {
         findElement(By.id("Add-Mix-open")).click();
         checkNotificationIsOpen();
         assertButtonSize(1);
-        Assert.assertFalse(getOverlayContent().getText().contains("5555555"));
+        Assert.assertFalse(
+                getNotifications().iterator().next().getText().contains("5555555"));
         clickElementWithJs(findElement(By.id("add-Mix-close")));
         checkNotificationIsClose();
     }
@@ -116,30 +129,35 @@ public class NotificationTestPageIT extends AbstractComponentIT {
         findElement(By.id("add-component-add-text-open")).click();
         checkNotificationIsOpen();
         assertButtonSize(0);
-        assertNotificationOverlayContent("Moi");
+        assertNotificationContent("Moi");
         clickElementWithJs(findElement(By.id("add-component-add-text-close")));
         checkNotificationIsClose();
     }
 
     private void assertButtonSize(int number) {
-        Assert.assertEquals(number,
-                getOverlayContent().findElements(By.tagName("button")).size());
+        Assert.assertEquals(number, getNotifications().iterator().next()
+                .findElements(By.tagName("button")).size());
     }
 
     private void checkNotificationIsClose() {
-        waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
+        waitForElementNotPresent(By.tagName(NOTIFICATION_TAG));
     }
 
     private void checkNotificationIsOpen() {
-        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+        waitForElementPresent(By.tagName(NOTIFICATION_TAG));
     }
 
-    private void assertNotificationOverlayContent(String expected) {
-        String content = getOverlayContent().getText();
-        Assert.assertTrue(content.contains(expected));
+    private void assertNotificationContent(String expected) {
+        List<WebElement> notifications = getNotifications();
+        Assert.assertEquals("Expect to have exactly one notification", 1,
+                notifications.size());
+        String content = notifications.iterator().next().getText();
+        Assert.assertTrue(String.format(
+                "Expected the notification to contain string '%s', but got '%s'",
+                expected, content), content.contains(expected));
     }
 
-    private WebElement getOverlayContent() {
-        return overlay = findElement(By.tagName(DIALOG_OVERLAY_TAG));
+    private List<WebElement> getNotifications() {
+        return findElements(By.tagName(NOTIFICATION_TAG));
     }
 }

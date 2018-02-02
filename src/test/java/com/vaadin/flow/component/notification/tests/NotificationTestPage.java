@@ -33,7 +33,7 @@ public class NotificationTestPage extends Div {
 
     public NotificationTestPage() {
         createNotificationWithButtonControl();
-        createTwoNotificitonAtSamePosition();
+        createTwoNotificationsAtSamePosition();
         createNotificationAddComponent();
         createNotificationRemoveComponent();
         createNotificationRemoveAllComponent();
@@ -58,7 +58,7 @@ public class NotificationTestPage extends Div {
         add(notification, button1, button2);
     }
 
-    private void createTwoNotificitonAtSamePosition() {
+    private void createTwoNotificationsAtSamePosition() {
         NativeButton button1 = new NativeButton(BUTTON_CAPTION + "1");
         button1.setId("notification-button-1");
         NativeButton button2 = new NativeButton(BUTTON_CAPTION + "2");

@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.notification.tests;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -27,35 +31,33 @@ import com.vaadin.flow.demo.ComponentDemoTest;
  * Integration tests for the {@link NotificationView}.
  */
 public class NotificationIT extends ComponentDemoTest {
-
-    private static final String DIALOG_OVERLAY_TAG = "vaadin-notification-overlay";
-    private WebElement overlay;
+    private static final String NOTIFICATION_TAG = "vaadin-notification-card";
 
     @Test
     public void defaultNotification() {
         findElement(By.id("default-notification-button")).click();
         checkNotificationIsOpen();
-        assertNotificationOverlayContent("text content");
+        assertNotificationContent("text content");
         Assert.assertEquals(1,
                 findElements(By.id("default-notification")).size());
-        checkNotificationIsClose();
+        checkNotificationIsClosed();
     }
 
     @Test
     public void notificationWithPosition() {
         findElement(By.id("position-notification-button")).click();
         checkNotificationIsOpen();
-        assertNotificationOverlayContent("Top-Left");
+        assertNotificationContent("Top-Left");
         Assert.assertEquals(1,
                 findElements(By.id("position-notification")).size());
-        checkNotificationIsClose();
+        checkNotificationIsClosed();
     }
 
     @Test
     public void notificationWithStaticConvenienceMethod() {
         checkNotificationIsOpen();
-        assertNotificationOverlayContent("static");
-        checkNotificationIsClose();
+        assertNotificationContent("static");
+        checkNotificationIsClosed();
         Assert.assertEquals(0,
                 findElements(By.id("static-notification")).size());
     }
@@ -67,32 +69,43 @@ public class NotificationIT extends ComponentDemoTest {
         checkNotificationIsOpen();
         Assert.assertEquals(1,
                 findElements(By.id("component-notification")).size());
-        assertNotificationOverlayContent("Bye");
 
-        Assert.assertEquals(1, getOverlayContent()
+        Optional<WebElement> expectedNotification = getNotifications().stream()
+                .filter(notificationElement -> notificationElement.getText()
+                        .contains("Bye"))
+                .findFirst();
+        Assert.assertTrue("Expect to have a notification with 'Bye' word in it",
+                expectedNotification.isPresent());
+        WebElement notification = expectedNotification.get();
+
+        Assert.assertEquals(1, notification
                 .findElements(By.id("button-inside-notification")).size());
-        Assert.assertEquals(1, getOverlayContent()
+        Assert.assertEquals(1, notification
                 .findElements(By.id("label-inside-notification")).size());
-        getOverlayContent().findElement(By.id("button-inside-notification"))
-                .click();
-        checkNotificationIsClose();
+        notification.findElement(By.id("button-inside-notification")).click();
+        checkNotificationIsClosed();
     }
 
-    private void assertNotificationOverlayContent(String expected) {
-        String content = getOverlayContent().getText();
-        Assert.assertTrue(content.contains(expected));
+    private void assertNotificationContent(String expected) {
+        List<String> notifications = getNotifications().stream()
+                .map(WebElement::getText).collect(Collectors.toList());
+        Assert.assertTrue(String.format(
+                "Expected any of the notifications to contain the string '%s' but neither of them did. Notifications: '%s'",
+                expected, notifications),
+                notifications.stream().anyMatch(
+                        notification -> notification.contains(expected)));
     }
 
-    private WebElement getOverlayContent() {
-        return overlay = findElement(By.tagName(DIALOG_OVERLAY_TAG));
+    private List<WebElement> getNotifications() {
+        return findElements(By.tagName(NOTIFICATION_TAG));
     }
 
-    private void checkNotificationIsClose() {
-        waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
+    private void checkNotificationIsClosed() {
+        waitForElementNotPresent(By.tagName(NOTIFICATION_TAG));
     }
 
     private void checkNotificationIsOpen() {
-        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+        waitForElementPresent(By.tagName(NOTIFICATION_TAG));
     }
 
     @Override
