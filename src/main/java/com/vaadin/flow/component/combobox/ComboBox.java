@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
@@ -532,6 +533,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
         return addListener(HasValue.ValueChangeEvent.class,
                 (ValueChangeListener) listener);
+    }
+
+    @Override
+    public Registration addCustomValueSetListener(
+            ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
+        return super.addCustomValueSetListener(listener);
     }
 
     private JsonArray generateJson(Stream<T> data) {

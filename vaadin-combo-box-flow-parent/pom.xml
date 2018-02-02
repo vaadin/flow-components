@@ -51,6 +51,12 @@
 
         <!-- Dependencies for the demo -->
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
             <version>${flow.version}</version>
