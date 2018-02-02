@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -1668,6 +1669,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         // TODO: if !userOriginated update client sort indicators. Should be
         // implemented together with server side sorting (issue #2818).
+
+        if (sortOrder.equals(order)) {
+            return;
+        }
 
         sortOrder.clear();
         if (order.isEmpty()) {

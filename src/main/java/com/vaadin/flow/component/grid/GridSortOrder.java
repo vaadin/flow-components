@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.SortOrder;
@@ -23,7 +25,7 @@ import com.vaadin.flow.data.provider.SortOrder;
  * Sorting information for {@link Grid}.
  *
  * @param <T>
- *            the grid type
+ *         the grid type
  */
 public class GridSortOrder<T> extends SortOrder<Column<T>> {
 
@@ -31,9 +33,9 @@ public class GridSortOrder<T> extends SortOrder<Column<T>> {
      * Construct sorting information for usage in a {@link Grid}.
      *
      * @param column
-     *            the column to be sorted
+     *         the column to be sorted
      * @param direction
-     *            sorting direction
+     *         sorting direction
      */
     public GridSortOrder(Column<T> column, SortDirection direction) {
         super(column, direction);
@@ -54,10 +56,9 @@ public class GridSortOrder<T> extends SortOrder<Column<T>> {
      * direction.
      *
      * @param by
-     *            the column to sort by
+     *         the column to sort by
      * @param <T>
-     *            the grid type
-     *
+     *         the grid type
      * @return the grid sort builder
      */
     public static <T> GridSortOrderBuilder<T> asc(Column<T> by) {
@@ -69,13 +70,27 @@ public class GridSortOrder<T> extends SortOrder<Column<T>> {
      * direction.
      *
      * @param by
-     *            the column to sort by
+     *         the column to sort by
      * @param <T>
-     *            the grid type
-     *
+     *         the grid type
      * @return the grid sort builder
      */
     public static <T> GridSortOrderBuilder<T> desc(Column<T> by) {
         return new GridSortOrderBuilder<T>().thenDesc(by);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof GridSortOrder)) {
+            return false;
+        }
+        return this.getSorted() == ((GridSortOrder) obj).getSorted()
+                && this.getDirection() == ((GridSortOrder) obj).getDirection();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(getSorted()).append(getDirection())
+                .toHashCode();
     }
 }

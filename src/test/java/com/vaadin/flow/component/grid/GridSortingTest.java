@@ -189,6 +189,23 @@ public class GridSortingTest {
     }
 
     @Test
+    public void sort_event_not_sent_for_same_data() {
+        Assert.assertEquals("Sort event list should have been empty at start.",
+                0, testSortListener.events.size());
+        callSortersChanged(Json.createArray());
+        Assert.assertEquals(
+                "No sort event should have been fired for empty initial sort.",
+                0, testSortListener.events.size());
+        setTestSorting();
+        Assert.assertEquals("Setting sort order should have fired event", 1,
+                testSortListener.events.size());
+        setTestSorting();
+        Assert.assertEquals("No sort should have  fired for same sort order", 1,
+                testSortListener.events.size());
+
+    }
+
+    @Test
     public void sort_event_correct() {
         Assert.assertEquals(0, testSortListener.events.size());
         setTestSorting();
