@@ -15,9 +15,6 @@
 
     <properties>
         <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
         <ci-sauce.version>1.132</ci-sauce.version>
