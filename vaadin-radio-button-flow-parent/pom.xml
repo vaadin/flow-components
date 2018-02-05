@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>1.0.0.alpha2</version>
+        <version>1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-radio-button-flow</artifactId>
@@ -20,6 +20,9 @@
         <repository>
             <id>vaadin-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>vaadin-prereleases</id>
