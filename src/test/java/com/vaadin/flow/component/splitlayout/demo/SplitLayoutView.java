@@ -18,7 +18,6 @@ package com.vaadin.flow.component.splitlayout.demo;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
@@ -31,7 +30,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-split-layout")
-@HtmlImport("frontend://bower_components/vaadin-split-layout/theme/lumo/vaadin-split-layout.html")
 public class SplitLayoutView extends DemoView {
 
     private static final String FIRST_CONTENT_TEXT = "First content component";
