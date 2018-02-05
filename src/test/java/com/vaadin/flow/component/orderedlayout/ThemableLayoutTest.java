@@ -22,17 +22,17 @@ public class ThemableLayoutTest {
 
     @Test
     public void checkMargin() {
-        checkThemeToggling("margin", layout::hasMargin, layout::setMargin);
+        checkThemeToggling("margin", layout::isMargin, layout::setMargin);
     }
 
     @Test
     public void checkPadding() {
-        checkThemeToggling("padding", layout::hasPadding, layout::setPadding);
+        checkThemeToggling("padding", layout::isPadding, layout::setPadding);
     }
 
     @Test
     public void checkSpacing() {
-        checkThemeToggling("spacing", layout::hasSpacing, layout::setSpacing);
+        checkThemeToggling("spacing", layout::isSpacing, layout::setSpacing);
     }
 
     private void checkThemeToggling(String themeName, Supplier<Boolean> themeGetter, Consumer<Boolean> themeSetter) {

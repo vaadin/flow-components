@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
-import java.util.Set;
-
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.dom.ThemeList;
+
+import java.util.Set;
 
 /**
  * Common logic for {@link VerticalLayout} and {@link HorizontalLayout} related to dynamic theme adjustment.
@@ -43,7 +43,7 @@ public interface ThemableLayout extends HasElement {
      *
      * @return {@code true} if theme setting is applied, {@code false} otherwise
      */
-    default boolean hasMargin() {
+    default boolean isMargin() {
         return getThemeList().contains("margin");
     }
 
@@ -62,7 +62,7 @@ public interface ThemableLayout extends HasElement {
      *
      * @return {@code true} if theme setting is applied, {@code false} otherwise
      */
-    default boolean hasPadding() {
+    default boolean isPadding() {
         return getThemeList().contains("padding");
     }
 
@@ -91,7 +91,7 @@ public interface ThemableLayout extends HasElement {
      *
      * @return {@code true} if theme setting is applied, {@code false} otherwise
      */
-    default boolean hasSpacing() {
+    default boolean isSpacing() {
         return getThemeList().contains("spacing");
     }
 
