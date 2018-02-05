@@ -18,21 +18,18 @@
 
     <repositories>
         <repository>
-            <id>flow-snapshots</id>
+            <id>vaadin-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
         <repository>
-            <id>flow-component-base</id>
+            <id>vaadin-prereleases</id>
             <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>org.webjars.bower</groupId>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-list</artifactId>
         </dependency>
         <dependency>
@@ -58,6 +55,12 @@
         </dependency>
 
         <!-- Dependencies for the demo -->
+        <dependency>
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-simple</artifactId>
+           <version>1.7.25</version>
+           <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
