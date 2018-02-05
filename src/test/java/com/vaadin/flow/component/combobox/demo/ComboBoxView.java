@@ -35,7 +35,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-combo-box")
-@HtmlImport("frontend://bower_components/vaadin-combo-box/theme/lumo/vaadin-combo-box.html")
 @HtmlImport("frontend://flow-component-renderer.html")
 public class ComboBoxView extends DemoView {
 
