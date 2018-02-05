@@ -22,15 +22,14 @@
             <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
         <repository>
-            <id>flow-component-base-snapshot</id>
-            <name>Vaadin snapshot repository</name>
+            <id>vaadin-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
         </repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>org.webjars.bower</groupId>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-upload</artifactId>
         </dependency>
         <dependency>
@@ -40,6 +39,12 @@
         </dependency>
 
         <!-- Dependencies for the demo -->
+        <dependency>
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-simple</artifactId>
+           <version>1.7.25</version>
+           <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>

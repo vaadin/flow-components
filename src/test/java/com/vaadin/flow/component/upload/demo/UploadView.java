@@ -33,7 +33,6 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.NativeButton;
@@ -53,7 +52,6 @@ import com.vaadin.flow.server.StreamResource;
  * @author Vaadin Ltd
  */
 @Route("vaadin-upload")
-@HtmlImport("frontend://bower_components/vaadin-upload/theme/lumo/vaadin-upload.html")
 public class UploadView extends DemoView {
 
     @Override
