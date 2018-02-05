@@ -1,27 +1,25 @@
 ### Overview
-Vaadin addon allows to create flexible responsive layouts and build nice looking dashboard.
+Vaadin Board allows to create flexible responsive layouts and build nice looking dashboards.
 Vaadin Board key feature is how it effectively reorders UI components on different screen sizes, maximizing the use of space and looking stunning.
 
-**Board requires Vaadin Framework 8.1 or newer.**
+Board 2 is compatible with Vaadin 10 and newer. 
+Board 1 is for Vaadin Framework 8.1 and newer.
 
 ### License & Author
 
-This Add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3).
+This add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3).
 For license terms, see LICENSE.txt.
 
+To purchase a license, visit http://vaadin.com/pricing
+
 ### Installing
-Add vaadin-board and vaadin-board-precompiled to your project:
+Add vaadin-board to your project:
 ```
 <dependencies>
   <dependency>
     <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-board</artifactId>
-    <version>1.0.0</version>
-  </dependency>
-  <dependency>
-    <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-board-precompiled</artifactId>
-    <version>1.0.0</version>
+    <artifactId>vaadin-board-flow</artifactId>
+    <version>2.0.0.alpha1</version>
   </dependency>
 </dependencies>
 ```
@@ -38,7 +36,7 @@ Label lbl3 =  new Label("LABEL3");
 Label lbl4 =  new Label("LABEL4");
 
 board.addRow(lbl1, lbl2, lbl3, lbl4);
-setContent(board);
+add(board);
 ```
 
 [Demo](https://demo.vaadin.com/vaadin-board)
