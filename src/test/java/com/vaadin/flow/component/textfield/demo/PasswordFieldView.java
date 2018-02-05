@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.textfield.demo;
 
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.GeneratedVaadinPasswordField;
@@ -29,7 +28,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-password-field")
-@HtmlImport("frontend://bower_components/vaadin-text-field/theme/lumo/vaadin-password-field.html")
 public class PasswordFieldView extends DemoView {
 
     @Override
