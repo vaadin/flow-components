@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.notification.demo;
 
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;
@@ -27,7 +26,6 @@ import com.vaadin.flow.router.Route;
  * View for {@link Notification} demo.
  */
 @Route("vaadin-notification")
-@HtmlImport("frontend://bower_components/vaadin-notification/theme/lumo/vaadin-notification.html")
 public class NotificationView extends DemoView {
 
     private static final String BUTTON_CAPTION = "Open notification";
