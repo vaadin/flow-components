@@ -17,7 +17,6 @@
 
 package com.vaadin.flow.component.progressbar.demo;
 
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.demo.DemoView;
@@ -29,7 +28,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd.
  */
 @Route("vaadin-progress-bar")
-@HtmlImport("frontend://bower_components/vaadin-progress-bar/theme/lumo/vaadin-progress-bar.html")
 public class ProgressBarView extends DemoView {
 
     @Override
