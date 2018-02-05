@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.dialog.demo;
 
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -28,7 +27,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-dialog")
-@HtmlImport("frontend://bower_components/vaadin-dialog/theme/lumo/vaadin-dialog.html")
 public class DialogView extends DemoView {
 
     private static final String BUTTON_CAPTION = "Open dialog";
