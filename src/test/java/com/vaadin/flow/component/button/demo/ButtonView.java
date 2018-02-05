@@ -18,7 +18,6 @@ package com.vaadin.flow.component.button.demo;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasClickListeners.ClickEvent;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -30,7 +29,6 @@ import com.vaadin.flow.router.Route;
  * View for {@link Button} demo.
  */
 @Route("vaadin-button")
-@HtmlImport("frontend://bower_components/vaadin-button/theme/lumo/vaadin-button.html")
 public class ButtonView extends DemoView {
     private Div message;
 
