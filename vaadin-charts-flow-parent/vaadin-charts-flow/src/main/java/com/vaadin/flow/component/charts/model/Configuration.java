@@ -539,7 +539,7 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * Returns all plot options used by this configuration.
      * 
-     * @see #setPlotOptions(AbstractPlotOptions)
+     * @see #setPlotOptions(AbstractPlotOptions...)
      */
     public Collection<AbstractPlotOptions> getPlotOptions() {
         return plotOptions.values();
@@ -552,7 +552,7 @@ public class Configuration extends AbstractConfigurationObject
      * Returns null if no plot options was found for the type
      * </p>
      *
-     * @see #setPlotOptions(AbstractPlotOptions)
+     * @see #setPlotOptions(AbstractPlotOptions...)
      *
      * @param type
      */
@@ -585,7 +585,7 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * Adds plot options
      * 
-     * @see #setPlotOptions(AbstractPlotOptions)
+     * @see #setPlotOptions(AbstractPlotOptions...)
      * 
      * @param plotOptions
      */
@@ -682,7 +682,7 @@ public class Configuration extends AbstractConfigurationObject
      * Set settings for range selector.
      * <p>
      * This is only valid if the chart is configured to use timeline. See
-     * {@link com.vaadin.flow.component.charts.Chart#setTimeline(boolean)}
+     * {@link com.vaadin.flow.component.charts.Chart#setTimeline(Boolean)}}
      *
      * @param rangeSelector
      * @see RangeSelector

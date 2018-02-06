@@ -56,6 +56,7 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.shared.Registration;
@@ -109,7 +110,7 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Draws a chart with the given configuration as a starting point.
+     * Draws a chart using the current configuration.
      *
      * @see #drawChart(boolean)
      */
@@ -118,7 +119,17 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Draws a chart with the given configuration as a starting point.
+     * Draws a chart using the current configuration.
+     *
+     * <p>
+     * The chart takes the current configuration from {@link #getConfiguration()}.
+     * </p>
+     *
+     * <p>
+     * Note that if you modify the underlying {@link Series}
+     * directly, the chart will automatically be updated.
+     * </p>
+     *
      * <p>
      * Note that you don't need to call this method if {@link Configuration} is
      * ready before element is attached.
@@ -298,8 +309,8 @@ public class Chart extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds a chart selection listener<br />
-     * <br />
+     * Adds a chart selection listener
+     *
      * <p>
      * Note that if a chart selection listener is set, default action for
      * selection is prevented. Most commonly this means that client side zoom
