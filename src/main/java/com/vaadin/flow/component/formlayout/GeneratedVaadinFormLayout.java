@@ -15,14 +15,12 @@
  */
 package com.vaadin.flow.component.formlayout;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentSupplier;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ComponentSupplier;
+import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-
 import elemental.json.JsonObject;
 
 /**
@@ -129,15 +127,15 @@ import elemental.json.JsonObject;
  * </tr>
  * </thead> <tbody>
  * <tr>
- * <td>{@code --vaadin-form-layout-column-gap}</td>
- * <td>Length of the gap between columns</td>
+ * <td>{@code --vaadin-form-layout-column-spacing}</td>
+ * <td>Length of the spacing between columns</td>
  * <td>{@code 2em}</td>
  * </tr>
  * </tbody>
  * </table>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.FormLayoutElement#2.0.0-alpha5",
+        "WebComponent: Vaadin.FormLayoutElement#2.0.0-alpha6",
         "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-form-layout")
 @HtmlImport("frontend://bower_components/vaadin-form-layout/src/vaadin-form-layout.html")
