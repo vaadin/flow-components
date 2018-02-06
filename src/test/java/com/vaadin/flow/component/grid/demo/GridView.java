@@ -30,7 +30,6 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.grid.ColumnGroup;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -58,8 +57,6 @@ import com.vaadin.flow.router.Route;
  * View for {@link Grid} demo.
  */
 @Route("vaadin-grid")
-@HtmlImport("frontend://bower_components/vaadin-grid/theme/lumo/vaadin-grid.html")
-@HtmlImport("frontend://bower_components/vaadin-text-field/theme/lumo/vaadin-text-field.html")
 public class GridView extends DemoView {
 
     public static List<Person> items = new ArrayList<>();
