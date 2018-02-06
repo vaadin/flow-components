@@ -19,7 +19,6 @@
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
-        <frontend.maven.plugin.version>1.4</frontend.maven.plugin.version>
 
         <buildtools.directory>build-tools</buildtools.directory>
         <frontend.working.directory>src/main/webapp/frontend</frontend.working.directory>
@@ -123,6 +122,15 @@
                         <id>install-tools-then-build</id>
                         <goals>
                             <goal>install-node-and-yarn</goal>
+                            <goal>yarn</goal>
+                        </goals>
+                        <configuration>
+                            <workingDirectory>${buildtools.directory}</workingDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>run-build</id>
+                        <goals>
                             <goal>yarn</goal>
                         </goals>
                         <configuration>

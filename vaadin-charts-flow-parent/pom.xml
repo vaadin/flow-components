@@ -41,9 +41,8 @@
         <!-- Frontend -->
         <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
         <frontend.maven.plugin.version>1.6</frontend.maven.plugin.version>
-        <node.version>v7.10.1</node.version>
-        <yarn.version>v0.27.5</yarn.version>
-        <npm.version>5.3.0</npm.version>
+        <node.version>v8.9.0</node.version>
+        <yarn.version>v1.3.2</yarn.version>
     </properties>
 
     <url>http://vaadin.com/charts</url>
