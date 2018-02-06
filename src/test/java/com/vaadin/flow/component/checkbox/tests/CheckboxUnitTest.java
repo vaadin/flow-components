@@ -20,15 +20,43 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 
-public class CheckBoxTest {
+public class CheckboxUnitTest {
 
     @Test
-    public void initialValueCtor() {
-        Checkbox checkbox = new Checkbox(true);
+    public void initialValue() {
+        Checkbox checkbox = new Checkbox();
+        Assert.assertFalse(checkbox.getValue());
+
+        checkbox = new Checkbox(true);
         Assert.assertTrue(checkbox.getValue());
 
         checkbox = new Checkbox(false);
         Assert.assertFalse(checkbox.getValue());
+    }
+
+    @Test
+    public void testIndeterminate() {
+        Checkbox checkbox = new Checkbox();
+        Assert.assertFalse(checkbox.isIndeterminate());
+
+        checkbox = new Checkbox(true);
+        Assert.assertFalse(checkbox.isIndeterminate());
+
+        checkbox.setIndeterminate(true);
+        Assert.assertTrue(checkbox.getValue());
+        Assert.assertTrue(checkbox.isIndeterminate());
+
+        checkbox.setValue(true);
+        Assert.assertTrue(checkbox.getValue());
+        Assert.assertTrue(checkbox.isIndeterminate());
+
+        checkbox.setValue(false);
+        Assert.assertFalse(checkbox.getValue());
+        Assert.assertTrue(checkbox.isIndeterminate());
+
+        checkbox.setIndeterminate(false);
+        Assert.assertFalse(checkbox.getValue());
+        Assert.assertFalse(checkbox.isIndeterminate());
     }
 
     @Test
