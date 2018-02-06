@@ -36,8 +36,7 @@
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
 
-        <vaadin.version>10.0.0.alpha13</vaadin.version>
-        <flow.version>1.0.0.alpha18</flow.version>
+        <flow.version>1.0.0.alpha19</flow.version>
         <jetty.version>9.3.9.v20160517</jetty.version>
         <!-- Frontend -->
         <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
@@ -78,8 +77,8 @@
         <dependencies>
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-bom</artifactId>
-                <version>${vaadin.version}</version>
+                <artifactId>vaadin-webjars-bom</artifactId>
+                <version>${flow.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -91,6 +90,11 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-data</artifactId>
                 <version>${flow.version}</version>
             </dependency>
         </dependencies>
