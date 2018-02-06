@@ -16,7 +16,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * sum of columns stays less than or equal to four.
  * <p>
  * Here is a simple usage example:
- * 
+ *
  * <pre>
  * Board board = new Board();
  * Label lbl1 = new Label("LABEL1");
@@ -54,7 +54,7 @@ public class Board extends Component
      **/
     public Row addRow(Component... components) {
         Row row = new Row(components);
-        getElement().appendChild(row.getElement());
+        add(row);
         return row;
     }
 
@@ -62,14 +62,10 @@ public class Board extends Component
      * Removes the given row from the board.
      *
      * @param row
-     *            to be removed
+     *            the row to be removed
      **/
     public void removeRow(Row row) {
-        // if (!ComponentUtil.isDirectChild(this,row)) {
-        // throw new IllegalArgumentException(
-        // "The given component is not a row in this board");
-        // }
-        getElement().removeChild(row.getElement());
+        remove(row);
     }
 
 }
