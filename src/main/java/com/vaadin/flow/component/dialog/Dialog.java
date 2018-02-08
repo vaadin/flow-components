@@ -16,10 +16,12 @@
 package com.vaadin.flow.component.dialog;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-dialog>} element.
@@ -193,6 +195,19 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     public boolean isOpened() {
         return super.isOpenedBoolean();
+    }
+
+    /**
+     * Add a lister for event fired by the {@code opened-changed} events.
+     * 
+     * @param: listener
+     *             the listener to add;
+     * @return: a Registration for removing the event listener
+     */
+    @Override
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent<Dialog>> listener) {
+        return super.addOpenedChangeListener(listener);
     }
 
     private void attachComponentRenderer() {
