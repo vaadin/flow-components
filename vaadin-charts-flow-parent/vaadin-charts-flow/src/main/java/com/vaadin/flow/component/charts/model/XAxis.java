@@ -32,8 +32,6 @@ public class XAxis extends Axis {
 	private Number gridZIndex;
 	private String id;
 	private Labels labels;
-	private Color lineColor;
-	private Number lineWidth;
 	private Number linkedTo;
 	private Number maxPadding;
 	private Number minPadding;
@@ -386,58 +384,6 @@ public class XAxis extends Axis {
 	 */
 	public void setLabels(Labels labels) {
 		this.labels = labels;
-	}
-
-	/**
-	 * @see #setLineColor(Color)
-	 */
-	public Color getLineColor() {
-		return lineColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the line marking the axis itself.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the line stroke is given in the
-	 * <code>.highcharts-axis-line</code> or <code>.highcharts-xaxis-line</code>
-	 * class.
-	 * </p>
-	 * <p>
-	 * Defaults to: #ccd6eb
-	 */
-	public void setLineColor(Color lineColor) {
-		this.lineColor = lineColor;
-	}
-
-	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * <p>
-	 * The width of the line marking the axis itself.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke width is given in the
-	 * <code>.highcharts-axis-line</code> or <code>.highcharts-xaxis-line</code>
-	 * class.
-	 * </p>
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
 	}
 
 	/**

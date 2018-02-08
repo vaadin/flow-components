@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Style;
 /**
  * Options regarding the chart area and plot area as well as general chart
  * options.
@@ -12,7 +11,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	private Boolean alignTicks;
 	private Boolean animation;
 	private Number borderRadius;
-	private Number borderWidth;
 	private String className;
 	private Number colorCount;
 	private String description;
@@ -28,19 +26,15 @@ public class ChartModel extends AbstractConfigurationObject {
 	private PanKey panKey;
 	private Boolean panning;
 	private Dimension pinchType;
-	private Number plotBorderWidth;
-	private Boolean plotShadow;
 	private Boolean polar;
 	private Boolean reflow;
 	private ResetZoomButton resetZoomButton;
-	private Boolean shadow;
 	private Boolean showAxes;
 	private Number[] spacing;
 	private Number spacingBottom;
 	private Number spacingLeft;
 	private Number spacingRight;
 	private Number spacingTop;
-	private Style style;
 	private ChartType type;
 	private String typeDescription;
 	private Number width;
@@ -129,22 +123,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	 */
 	public void setBorderRadius(Number borderRadius) {
 		this.borderRadius = borderRadius;
-	}
-
-	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * The pixel width of the outer chart border.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
 	}
 
 	/**
@@ -445,41 +423,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setPlotBorderWidth(Number)
-	 */
-	public Number getPlotBorderWidth() {
-		return plotBorderWidth;
-	}
-
-	/**
-	 * The pixel width of the plot area border.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setPlotBorderWidth(Number plotBorderWidth) {
-		this.plotBorderWidth = plotBorderWidth;
-	}
-
-	/**
-	 * @see #setPlotShadow(Boolean)
-	 */
-	public Boolean getPlotShadow() {
-		return plotShadow;
-	}
-
-	/**
-	 * Whether to apply a drop shadow to the plot area. Requires that
-	 * plotBackgroundColor be set. The shadow can be an object configuration
-	 * containing <code>color</code>, <code>offsetX</code>, <code>offsetY</code>
-	 * , <code>opacity</code> and <code>width</code>.
-	 * <p>
-	 * Defaults to: false
-	 */
-	public void setPlotShadow(Boolean plotShadow) {
-		this.plotShadow = plotShadow;
-	}
-
-	/**
 	 * @see #setPolar(Boolean)
 	 */
 	public Boolean getPolar() {
@@ -530,25 +473,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	 */
 	public void setResetZoomButton(ResetZoomButton resetZoomButton) {
 		this.resetZoomButton = resetZoomButton;
-	}
-
-	/**
-	 * @see #setShadow(Boolean)
-	 */
-	public Boolean getShadow() {
-		return shadow;
-	}
-
-	/**
-	 * Whether to apply a drop shadow to the outer chart area. Requires that
-	 * backgroundColor be set. The shadow can be an object configuration
-	 * containing <code>color</code>, <code>offsetX</code>, <code>offsetY</code>
-	 * , <code>opacity</code> and <code>width</code>.
-	 * <p>
-	 * Defaults to: false
-	 */
-	public void setShadow(Boolean shadow) {
-		this.shadow = shadow;
 	}
 
 	/**
@@ -663,29 +587,6 @@ public class ChartModel extends AbstractConfigurationObject {
 	 */
 	public void setSpacingTop(Number spacingTop) {
 		this.spacingTop = spacingTop;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * Additional CSS styles to apply inline to the container <code>div</code>.
-	 * Note that since the default font styles are applied in the renderer, it
-	 * is ignorant of the individual chart options and must be set globally.
-	 * <p>
-	 * Defaults to: {"fontFamily":
-	 * "\"Lucida Grande\", \"Lucida Sans Unicode\", Verdana, Arial, Helvetica, sans-serif"
-	 * ,"fontSize":"12px"}
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**

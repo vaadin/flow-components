@@ -11,7 +11,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
 import com.vaadin.flow.component.charts.model.XAxis;
-import com.vaadin.flow.component.charts.model.style.Style;
+import com.vaadin.flow.component.charts.model.style.LabelStyle;
 
 public class ColumnLineAndPie extends AbstractChartExample {
 
@@ -30,7 +30,7 @@ public class ColumnLineAndPie extends AbstractChartExample {
                 "Plums" });
         conf.addxAxis(x);
 
-        Style labelStyle = new Style();
+        LabelStyle labelStyle = new LabelStyle();
         labelStyle.setTop("8px");
         labelStyle.setLeft("40px");
         conf.setLabels(new HTMLLabels(labelStyle, new HTMLLabelItem(

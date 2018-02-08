@@ -23,29 +23,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
 public class ButtonTheme extends AbstractConfigurationObject {
-    private Color fill;
-    private Color stroke;
     @JsonProperty("stroke-width")
     private Number strokeWidth;
-    private Style style;
     @JsonInclude(Include.NON_DEFAULT)
     private Number width = 32;
-
-    public Color getFill() {
-        return fill;
-    }
-
-    public void setFill(Color fill) {
-        this.fill = fill;
-    }
-
-    public Color getStroke() {
-        return stroke;
-    }
-
-    public void setStroke(Color stroke) {
-        this.stroke = stroke;
-    }
+    private Number r;
 
     public Number getStrokeWidth() {
         return strokeWidth;
@@ -55,19 +37,19 @@ public class ButtonTheme extends AbstractConfigurationObject {
         this.strokeWidth = strokeWidth;
     }
 
-    public Style getStyle() {
-        return style;
-    }
-
-    public void setStyle(Style style) {
-        this.style = style;
-    }
-
     public Number getWidth() {
         return width;
     }
 
     public void setWidth(Number width) {
         this.width = width;
+    }
+
+    public Number getR() {
+        return r;
+    }
+
+    public void setR(Number r) {
+        this.r = r;
     }
 }

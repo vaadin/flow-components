@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.charts.model;
 
+import java.util.Date;
+
 /*
  * #%L
  * Vaadin Charts
@@ -20,8 +22,6 @@ package com.vaadin.flow.component.charts.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
-
-import java.util.Date;
 
 public abstract class Axis extends AbstractConfigurationObject {
 
@@ -381,26 +381,6 @@ public abstract class Axis extends AbstractConfigurationObject {
      * The axis labels show the number or category for each tick.
      */
     public abstract void setLabels(Labels labels);
-
-    /**
-     * @see #setLineColor(Color)
-     */
-    public abstract Color getLineColor();
-
-    /**
-     * The color of the line marking the axis itself.
-     */
-    public abstract void setLineColor(Color lineColor);
-
-    /**
-     * @see #setLineWidth(Number)
-     */
-    public abstract Number getLineWidth();
-
-    /**
-     * The width of the line marking the axis itself.
-     */
-    public abstract void setLineWidth(Number lineWidth);
 
     /**
      * @see #setLinkedTo(Number)

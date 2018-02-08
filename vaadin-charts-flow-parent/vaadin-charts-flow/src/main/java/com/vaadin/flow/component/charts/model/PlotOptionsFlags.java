@@ -4,7 +4,6 @@ import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import com.vaadin.flow.component.charts.model.style.Color;
-import com.vaadin.flow.component.charts.model.style.Style;
 /**
  * 
  */
@@ -45,7 +44,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	private Number stackDistance;
 	private States states;
 	private Boolean stickyTracking;
-	private Style style;
 	private String textAlign;
 	private Number threshold;
 	private SeriesTooltip tooltip;
@@ -754,34 +752,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	 */
 	public void setStickyTracking(Boolean stickyTracking) {
 		this.stickyTracking = stickyTracking;
-	}
-
-	/**
-	 * @see #setStyle(Style)
-	 */
-	public Style getStyle() {
-		if (style == null) {
-			style = new Style();
-		}
-		return style;
-	}
-
-	/**
-	 * <p>
-	 * The text styles of the flag.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the styles are set in the
-	 * <code>.highcharts-flag-series .highcharts-point</code> rule.
-	 * </p>
-	 * <p>
-	 * Defaults to: { "fontSize": "11px", "fontWeight": "bold" }
-	 */
-	public void setStyle(Style style) {
-		this.style = style;
 	}
 
 	/**

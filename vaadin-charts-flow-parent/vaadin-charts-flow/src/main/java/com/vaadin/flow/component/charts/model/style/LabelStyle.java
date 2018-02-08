@@ -23,7 +23,7 @@ import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
  * Style options for CSS styling
  */
 @SuppressWarnings("serial")
-public class Style extends AbstractConfigurationObject {
+public class LabelStyle extends AbstractConfigurationObject {
     private Color color;
     private FontWeight fontWeight;
     private String fontFamily;
@@ -31,7 +31,6 @@ public class Style extends AbstractConfigurationObject {
     private String left;
     private String top;
     private StylePosition position;
-    private String lineHeight;
     private String textShadow;
     /**
      * @see #setColor(Color)
@@ -143,20 +142,6 @@ public class Style extends AbstractConfigurationObject {
      */
     public StylePosition getPosition() {
         return position;
-    }
-
-    /**
-     * Sets the <code>line-height</code> CSS attribute
-     */
-    public void setLineHeight(String lineHeight) {
-        this.lineHeight = lineHeight;
-    }
-
-    /**
-     * @see #setLineHeight(String)
-     */
-    public String getLineHeight() {
-        return lineHeight;
     }
 
     /**

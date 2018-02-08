@@ -33,8 +33,6 @@ public class YAxis extends Axis {
 	private Number gridZIndex;
 	private String id;
 	private Labels labels;
-	private Color lineColor;
-	private Number lineWidth;
 	private Number linkedTo;
 	private Color maxColor;
 	private Number maxPadding;
@@ -428,48 +426,6 @@ public class YAxis extends Axis {
 
 	public void setLabels(Labels labels) {
 		this.labels = labels;
-	}
-
-	/**
-	 * @see #setLineColor(Color)
-	 */
-	public Color getLineColor() {
-		return lineColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the line marking the axis itself.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the line stroke is given in the
-	 * <code>.highcharts-axis-line</code> or <code>.highcharts-xaxis-line</code>
-	 * class.
-	 * </p>
-	 * <p>
-	 * Defaults to: #ccd6eb
-	 */
-	public void setLineColor(Color lineColor) {
-		this.lineColor = lineColor;
-	}
-
-	/**
-	 * @see #setLineWidth(Number)
-	 */
-	public Number getLineWidth() {
-		return lineWidth;
-	}
-
-	/**
-	 * The width of the line marking the axis itself.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setLineWidth(Number lineWidth) {
-		this.lineWidth = lineWidth;
 	}
 
 	/**
