@@ -27,8 +27,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  *
  * @author Vaadin Ltd.
  */
-public class TextArea extends GeneratedVaadinTextArea<TextArea> implements
-        HasSize, HasValidation, HasValueChangeMode<TextArea, String> {
+public class TextArea extends GeneratedVaadinTextArea<TextArea>
+        implements HasSize, HasValidation, HasValueChangeMode<TextArea, String>,
+        HasPrefixAndSuffix {
     private ValueChangeMode currentMode;
 
     /**

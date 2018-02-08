@@ -27,8 +27,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  *
  * @author Vaadin Ltd
  */
-public class TextField extends GeneratedVaadinTextField<TextField> implements
-        HasSize, HasValidation, HasValueChangeMode<TextField, String> {
+public class TextField extends GeneratedVaadinTextField<TextField>
+        implements HasSize, HasValidation,
+        HasValueChangeMode<TextField, String>, HasPrefixAndSuffix {
     private ValueChangeMode currentMode;
 
     /**

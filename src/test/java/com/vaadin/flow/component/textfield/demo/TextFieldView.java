@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.demo;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.GeneratedVaadinTextField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.demo.DemoView;
@@ -31,6 +32,11 @@ public class TextFieldView extends DemoView {
 
     @Override
     public void initView() {
+        addBasicFeatures();
+        addNumberFields();
+    }
+
+    private void addBasicFeatures() {
         Div message = new Div();
 
         // begin-source-example
@@ -47,6 +53,28 @@ public class TextFieldView extends DemoView {
         message.setId("text-field-value");
 
         addCard("Basic text field", textField,
-                new ValueChangeModeButtonProvider(textField).getToggleValueSyncButton(), message);
+                new ValueChangeModeButtonProvider(textField)
+                        .getToggleValueSyncButton(),
+                message);
+    }
+
+    private void addNumberFields() {
+        // begin-source-example
+        // source-example-heading: Number fields
+        TextField dollarField = new TextField("Dollars");
+        dollarField.setPattern("[0-9]*");
+        dollarField.setPreventInvalidInput(true);
+        dollarField.setPrefixComponent(new Span("$"));
+
+        TextField euroField = new TextField("Euros");
+        euroField.setPattern("[0-9]*");
+        euroField.setPreventInvalidInput(true);
+        euroField.setSuffixComponent(new Span("€"));
+        // end-source-example
+
+        dollarField.setId("dollar-field");
+        euroField.setId("euro-field");
+
+        addCard("Number fields", dollarField, euroField);
     }
 }
