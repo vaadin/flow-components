@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * <p>
  * Configure a crosshair that follows either the mouse pointer or the hovered
@@ -21,10 +20,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
 public class Crosshair extends AbstractConfigurationObject {
 
 	private String className;
-	private Color color;
-	private DashStyle dashStyle;
 	private Boolean snap;
-	private Number width;
 	private Number zIndex;
 	private CrosshairLabel label;
 
@@ -46,40 +42,6 @@ public class Crosshair extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * The color of the crosshair. Defaults to <code>#cccccc</code> for numeric
-	 * and datetime axes, and <code>rgba(204,214,235,0.25)</code> for category
-	 * axes, where the crosshair by default highlights the whole category.
-	 */
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	/**
-	 * @see #setDashStyle(DashStyle)
-	 */
-	public DashStyle getDashStyle() {
-		return dashStyle;
-	}
-
-	/**
-	 * The dash style for the crosshair. See <a
-	 * href="#plotOptions.series.dashStyle">series.dashStyle</a> for possible
-	 * values.
-	 * <p>
-	 * Defaults to: Solid
-	 */
-	public void setDashStyle(DashStyle dashStyle) {
-		this.dashStyle = dashStyle;
-	}
-
-	/**
 	 * @see #setSnap(Boolean)
 	 */
 	public Boolean getSnap() {
@@ -94,21 +56,6 @@ public class Crosshair extends AbstractConfigurationObject {
 	 */
 	public void setSnap(Boolean snap) {
 		this.snap = snap;
-	}
-
-	/**
-	 * @see #setWidth(Number)
-	 */
-	public Number getWidth() {
-		return width;
-	}
-
-	/**
-	 * The pixel width of the crosshair. Defaults to 1 for numeric or datetime
-	 * axes, and for one category width for category axes.
-	 */
-	public void setWidth(Number width) {
-		this.width = width;
 	}
 
 	/**

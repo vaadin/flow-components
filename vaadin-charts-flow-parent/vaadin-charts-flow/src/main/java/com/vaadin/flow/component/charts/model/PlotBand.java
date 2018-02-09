@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.Date;
 import java.time.Instant;
 import com.vaadin.flow.component.charts.util.Util;
@@ -11,10 +10,7 @@ import com.vaadin.flow.component.charts.util.Util;
 @Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class PlotBand extends AbstractConfigurationObject {
 
-	private Color borderColor;
-	private Number borderWidth;
 	private String className;
-	private Color color;
 	private Number from;
 	private String id;
 	private String innerRadius;
@@ -25,40 +21,6 @@ public class PlotBand extends AbstractConfigurationObject {
 	private Number zIndex;
 
 	public PlotBand() {
-	}
-
-	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * Border color for the plot band. Also requires <code>borderWidth</code> to
-	 * be set.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
-	}
-
-	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * Border width for the plot band. Also requires <code>borderColor</code> to
-	 * be set.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
 	}
 
 	/**
@@ -74,20 +36,6 @@ public class PlotBand extends AbstractConfigurationObject {
 	 */
 	public void setClassName(String className) {
 		this.className = className;
-	}
-
-	/**
-	 * @see #setColor(Color)
-	 */
-	public Color getColor() {
-		return color;
-	}
-
-	/**
-	 * The color of the plot band.
-	 */
-	public void setColor(Color color) {
-		this.color = color;
 	}
 
 	/**
@@ -256,9 +204,8 @@ public class PlotBand extends AbstractConfigurationObject {
 		this.to = Util.toHighchartsTS(instant);
 	}
 
-	public PlotBand(Number from, Number to, Color color) {
+	public PlotBand(Number from, Number to) {
 		this.from = from;
 		this.to = to;
-		this.color = color;
 	}
 }

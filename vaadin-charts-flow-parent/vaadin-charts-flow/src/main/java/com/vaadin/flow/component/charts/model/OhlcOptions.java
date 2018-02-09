@@ -17,8 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.Color;
-
 import java.time.Instant;
 import java.util.Date;
 
@@ -90,35 +88,6 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
-
-    /**
-     * @see #setColors(Color...)
-     */
-    public abstract Color[] getColors();
-
-    /**
-     * A series specific or series type specific color set to apply instead of
-     * the theme colors.
-     */
-    public abstract void setColors(Color... colors);
-
-    /**
-     * Adds color to the colors array
-     *
-     * @param color
-     *            to add
-     * @see #setColors(Color...)
-     */
-    public abstract void addColor(Color color);
-
-    /**
-     * Removes first occurrence of color in colors array
-     *
-     * @param color
-     *            to remove
-     * @see #setColors(Color...)
-     */
-    public abstract void removeColor(Color color);
 
     /**
      * @see #setCompareBase(Number)
@@ -628,16 +597,6 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * indexing in long series. Set it to <code>0</code> disable.
      */
     public abstract void setTurboThreshold(Number turboThreshold);
-
-    /**
-     * @see #setUpColor(Color)
-     */
-    public abstract Color getUpColor();
-
-    /**
-     * Line color for up points.
-     */
-    public abstract void setUpColor(Color upColor);
 
     /**
      * @see #setVisible(Boolean)

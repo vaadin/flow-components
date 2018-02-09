@@ -17,7 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
 
 import java.time.Instant;
@@ -33,10 +32,12 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
     private Number y;
     private Number x;
     private Boolean sliced;
-    private Color color;
+    private Number colorIndex;
     private Number legendIndex;
     private Marker marker;
     private String id;
+    private String className;
+
 
     /**
      * Returns the name of the item.
@@ -144,24 +145,24 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
     }
 
     /**
-     * Returns the color of the item.
+     * Returns the colorIndex of the item.
      *
-     * @see #setColor(Color)
-     * @return The color of the item.
+     * @see #setColorIndex(Number)
+     * @return The colorIndex of the item.
      */
-    public Color getColor() {
-        return color;
+    public Number getColorIndex() {
+        return colorIndex;
     }
 
     /**
-     * Sets the individual color for the point. Defaults to null. This might not
-     * work for all chart types.
+     * A specific color index to use for the point, so its graphic representations
+     * are given the class name highcharts-color-{n}.
      *
-     * @param color
+     * @param colorIndex
      *            Color of the item.
      */
-    public void setColor(Color color) {
-        this.color = color;
+    public void setColorIndex(Number colorIndex) {
+        this.colorIndex = colorIndex;
     }
 
     /**
@@ -232,5 +233,24 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
      */
     public void setId(String id) {
         this.id = id;
+    }
+
+    /**
+     * Returns the class name of the item
+     *
+     * @see #setClassName(String)
+     * @return The class name of the item
+     */
+    public String getClassName() {
+        return className;
+    }
+
+    /**
+     * An additional, individual class name for the data point's graphic representation.
+     *
+     * @param className new class name of the item
+     */
+    public void setClassName(String className) {
+        this.className = className;
     }
 }

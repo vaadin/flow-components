@@ -19,7 +19,6 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	private String className;
 	private Boolean colorByPoint;
 	private Number colorIndex;
-	private ArrayList<Color> colors;
 	private Compare compare;
 	private Number compareBase;
 	private Number cropThreshold;
@@ -191,52 +190,6 @@ public class PlotOptionsOhlc extends OhlcOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setColors(Color...)
-	 */
-	public Color[] getColors() {
-		if (colors == null) {
-			return new Color[]{};
-		}
-		Color[] arr = new Color[colors.size()];
-		colors.toArray(arr);
-		return arr;
-	}
-
-	/**
-	 * A series specific or series type specific color set to apply instead of
-	 * the global <a href="#colors">colors</a> when <a
-	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
-	 */
-	public void setColors(Color... colors) {
-		this.colors = new ArrayList<Color>(Arrays.asList(colors));
-	}
-
-	/**
-	 * Adds color to the colors array
-	 * 
-	 * @param color
-	 *            to add
-	 * @see #setColors(Color...)
-	 */
-	public void addColor(Color color) {
-		if (this.colors == null) {
-			this.colors = new ArrayList<Color>();
-		}
-		this.colors.add(color);
-	}
-
-	/**
-	 * Removes first occurrence of color in colors array
-	 * 
-	 * @param color
-	 *            to remove
-	 * @see #setColors(Color...)
-	 */
-	public void removeColor(Color color) {
-		this.colors.remove(color);
 	}
 
 	/**

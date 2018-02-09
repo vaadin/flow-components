@@ -3,7 +3,6 @@ package com.vaadin.flow.component.charts.model;
 import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.Date;
 import java.time.Instant;
 import com.vaadin.flow.component.charts.util.Util;
@@ -18,7 +17,6 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 	private Number animationLimit;
 	private String className;
 	private Number colorIndex;
-	private ArrayList<Color> colors;
 	private Number compareBase;
 	private Number cropThreshold;
 	private Cursor cursor;
@@ -57,8 +55,6 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 	private Number threshold;
 	private SeriesTooltip tooltip;
 	private Number turboThreshold;
-	private Color upColor;
-	private Color upLineColor;
 	private Boolean visible;
 	private ZoneAxis zoneAxis;
 	private ArrayList<Zones> zones;
@@ -172,52 +168,6 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setColors(Color...)
-	 */
-	public Color[] getColors() {
-		if (colors == null) {
-			return new Color[]{};
-		}
-		Color[] arr = new Color[colors.size()];
-		colors.toArray(arr);
-		return arr;
-	}
-
-	/**
-	 * A series specific or series type specific color set to apply instead of
-	 * the global <a href="#colors">colors</a> when <a
-	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
-	 */
-	public void setColors(Color... colors) {
-		this.colors = new ArrayList<Color>(Arrays.asList(colors));
-	}
-
-	/**
-	 * Adds color to the colors array
-	 * 
-	 * @param color
-	 *            to add
-	 * @see #setColors(Color...)
-	 */
-	public void addColor(Color color) {
-		if (this.colors == null) {
-			this.colors = new ArrayList<Color>();
-		}
-		this.colors.add(color);
-	}
-
-	/**
-	 * Removes first occurrence of color in colors array
-	 * 
-	 * @param color
-	 *            to remove
-	 * @see #setColors(Color...)
-	 */
-	public void removeColor(Color color) {
-		this.colors.remove(color);
 	}
 
 	/**
@@ -989,48 +939,6 @@ public class PlotOptionsCandlestick extends OhlcOptions {
 	 */
 	public void setTurboThreshold(Number turboThreshold) {
 		this.turboThreshold = turboThreshold;
-	}
-
-	/**
-	 * @see #setUpColor(Color)
-	 */
-	public Color getUpColor() {
-		return upColor;
-	}
-
-	/**
-	 * <p>
-	 * The fill color of the candlestick when values are rising.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the up color can be set with the
-	 * <code>.highcharts-candlestick-series .highcharts-point-up</code> rule.
-	 * </p>
-	 * <p>
-	 * Defaults to: #ffffff
-	 */
-	public void setUpColor(Color upColor) {
-		this.upColor = upColor;
-	}
-
-	/**
-	 * @see #setUpLineColor(Color)
-	 */
-	public Color getUpLineColor() {
-		return upLineColor;
-	}
-
-	/**
-	 * The specific line color for up candle sticks. The default is to inherit
-	 * the general <code>lineColor</code> setting.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setUpLineColor(Color upLineColor) {
-		this.upLineColor = upLineColor;
 	}
 
 	/**

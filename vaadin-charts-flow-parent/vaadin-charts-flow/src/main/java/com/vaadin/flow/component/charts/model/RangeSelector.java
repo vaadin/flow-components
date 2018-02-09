@@ -3,7 +3,6 @@ package com.vaadin.flow.component.charts.model;
 import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
-import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * The range selector is a tool for selecting ranges to display within the
  * chart. It provides buttons to select preconfigured ranges in the chart, like
@@ -19,7 +18,6 @@ public class RangeSelector extends AbstractConfigurationObject {
 	private ArrayList<RangeSelectorButton> buttons;
 	private Boolean enabled;
 	private Number height;
-	private Color inputBoxBorderColor;
 	private Number inputBoxHeight;
 	private Number inputBoxWidth;
 	private String inputDateFormat;
@@ -195,22 +193,6 @@ public class RangeSelector extends AbstractConfigurationObject {
 	 */
 	public void setHeight(Number height) {
 		this.height = height;
-	}
-
-	/**
-	 * @see #setInputBoxBorderColor(Color)
-	 */
-	public Color getInputBoxBorderColor() {
-		return inputBoxBorderColor;
-	}
-
-	/**
-	 * The border color of the date input boxes.
-	 * <p>
-	 * Defaults to: #cccccc
-	 */
-	public void setInputBoxBorderColor(Color inputBoxBorderColor) {
-		this.inputBoxBorderColor = inputBoxBorderColor;
 	}
 
 	/**

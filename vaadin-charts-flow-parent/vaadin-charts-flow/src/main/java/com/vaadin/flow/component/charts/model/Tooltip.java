@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * Options for the tooltip that appears when the user hovers over a series or
  * point.
@@ -10,8 +9,6 @@ import com.vaadin.flow.component.charts.model.style.Color;
 public class Tooltip extends AbstractConfigurationObject {
 
 	private Boolean animation;
-	private Color backgroundColor;
-	private Color borderColor;
 	private Number borderRadius;
 	private Number borderWidth;
 	private DateTimeLabelFormats dateTimeLabelFormats;
@@ -56,48 +53,6 @@ public class Tooltip extends AbstractConfigurationObject {
 	 */
 	public void setAnimation(Boolean animation) {
 		this.animation = animation;
-	}
-
-	/**
-	 * @see #setBackgroundColor(Color)
-	 */
-	public Color getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * <p>
-	 * The background color or gradient for the tooltip.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the stroke width is set in the
-	 * <code>.highcharts-tooltip-box</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: rgba(247,247,247,0.85)
-	 */
-	public void setBackgroundColor(Color backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * The color of the tooltip border. When <code>null</code>, the border takes
-	 * the color of the corresponding series or point.
-	 * <p>
-	 * Defaults to: null
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
 	}
 
 	/**

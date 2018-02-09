@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 /**
@@ -18,7 +17,7 @@ import java.util.Arrays;
 public class YAxis extends Axis {
 
 	private Boolean allowDecimals;
-	private Color alternateGridColor;
+	private Boolean alternateGridColor;
 	private Number angle;
 	private Breaks[] breaks;
 	private ArrayList<String> categories;
@@ -34,9 +33,7 @@ public class YAxis extends Axis {
 	private String id;
 	private Labels labels;
 	private Number linkedTo;
-	private Color maxColor;
 	private Number maxPadding;
-	private Color minColor;
 	private Number minPadding;
 	private Number minRange;
 	private Number minTickInterval;
@@ -99,9 +96,9 @@ public class YAxis extends Axis {
 	}
 
 	/**
-	 * @see #setAlternateGridColor(Color)
+	 * @see #setAlternateGridColor(Boolean)
 	 */
-	public Color getAlternateGridColor() {
+	public Boolean getAlternateGridColor() {
 		return alternateGridColor;
 	}
 
@@ -109,7 +106,7 @@ public class YAxis extends Axis {
 	 * When using an alternate grid color, a band is painted across the plot
 	 * area between every other grid line.
 	 */
-	public void setAlternateGridColor(Color alternateGridColor) {
+	public void setAlternateGridColor(Boolean alternateGridColor) {
 		this.alternateGridColor = alternateGridColor;
 	}
 
@@ -446,23 +443,6 @@ public class YAxis extends Axis {
 	}
 
 	/**
-	 * @see #setMaxColor(Color)
-	 */
-	public Color getMaxColor() {
-		return maxColor;
-	}
-
-	/**
-	 * Solid gauge only. Unless <a href="#yAxis.stops">stops</a> are set, the
-	 * color to represent the maximum value of the Y axis.
-	 * <p>
-	 * Defaults to: #003399
-	 */
-	public void setMaxColor(Color maxColor) {
-		this.maxColor = maxColor;
-	}
-
-	/**
 	 * @see #setMaxPadding(Number)
 	 */
 	public Number getMaxPadding() {
@@ -478,23 +458,6 @@ public class YAxis extends Axis {
 	 */
 	public void setMaxPadding(Number maxPadding) {
 		this.maxPadding = maxPadding;
-	}
-
-	/**
-	 * @see #setMinColor(Color)
-	 */
-	public Color getMinColor() {
-		return minColor;
-	}
-
-	/**
-	 * Solid gauge only. Unless <a href="#yAxis.stops">stops</a> are set, the
-	 * color to represent the minimum value of the Y axis.
-	 * <p>
-	 * Defaults to: #e6ebf5
-	 */
-	public void setMinColor(Color minColor) {
-		this.minColor = minColor;
 	}
 
 	/**

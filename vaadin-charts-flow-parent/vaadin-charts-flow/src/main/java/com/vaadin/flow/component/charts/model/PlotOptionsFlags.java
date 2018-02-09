@@ -3,7 +3,6 @@ package com.vaadin.flow.component.charts.model;
 import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
-import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * 
  */
@@ -14,7 +13,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	private Number animationLimit;
 	private String className;
 	private Number colorIndex;
-	private ArrayList<Color> colors;
 	private Number compareBase;
 	private Number cropThreshold;
 	private Cursor cursor;
@@ -126,52 +124,6 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 	 */
 	public void setColorIndex(Number colorIndex) {
 		this.colorIndex = colorIndex;
-	}
-
-	/**
-	 * @see #setColors(Color...)
-	 */
-	public Color[] getColors() {
-		if (colors == null) {
-			return new Color[]{};
-		}
-		Color[] arr = new Color[colors.size()];
-		colors.toArray(arr);
-		return arr;
-	}
-
-	/**
-	 * A series specific or series type specific color set to apply instead of
-	 * the global <a href="#colors">colors</a> when <a
-	 * href="#plotOptions.column.colorByPoint">colorByPoint</a> is true.
-	 */
-	public void setColors(Color... colors) {
-		this.colors = new ArrayList<Color>(Arrays.asList(colors));
-	}
-
-	/**
-	 * Adds color to the colors array
-	 * 
-	 * @param color
-	 *            to add
-	 * @see #setColors(Color...)
-	 */
-	public void addColor(Color color) {
-		if (this.colors == null) {
-			this.colors = new ArrayList<Color>();
-		}
-		this.colors.add(color);
-	}
-
-	/**
-	 * Removes first occurrence of color in colors array
-	 * 
-	 * @param color
-	 *            to remove
-	 * @see #setColors(Color...)
-	 */
-	public void removeColor(Color color) {
-		this.colors.remove(color);
 	}
 
 	/**

@@ -27,7 +27,6 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
-import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -78,8 +77,6 @@ public class ServerSideEvents extends AbstractChartExample {
         yAxis.setTitle(new AxisTitle("Value"));
         PlotLine plotline = new PlotLine();
         plotline.setValue(0);
-        plotline.setWidth(1);
-        plotline.setColor(new SolidColor("#808080"));
         yAxis.setPlotLines(plotline);
         yAxis.setMinPadding(0.2);
         yAxis.setMaxPadding(0.2);

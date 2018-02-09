@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 /**
@@ -17,7 +16,7 @@ import java.util.Arrays;
 public class ZAxis extends Axis {
 
 	private Boolean allowDecimals;
-	private Color alternateGridColor;
+	private Boolean alternateGridColor;
 	private ArrayList<String> categories;
 	private Number ceiling;
 	private String className;
@@ -84,9 +83,9 @@ public class ZAxis extends Axis {
 	}
 
 	/**
-	 * @see #setAlternateGridColor(Color)
+	 * @see #setAlternateGridColor(Boolean)
 	 */
-	public Color getAlternateGridColor() {
+	public Boolean getAlternateGridColor() {
 		return alternateGridColor;
 	}
 
@@ -94,7 +93,7 @@ public class ZAxis extends Axis {
 	 * When using an alternate grid color, a band is painted across the plot
 	 * area between every other grid line.
 	 */
-	public void setAlternateGridColor(Color alternateGridColor) {
+	public void setAlternateGridColor(Boolean alternateGridColor) {
 		this.alternateGridColor = alternateGridColor;
 	}
 

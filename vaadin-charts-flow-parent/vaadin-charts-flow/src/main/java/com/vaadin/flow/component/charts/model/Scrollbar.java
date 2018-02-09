@@ -22,13 +22,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 @Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Scrollbar extends AbstractConfigurationObject {
 
-	private Color barBackgroundColor;
-	private Color barBorderColor;
 	private Number barBorderRadius;
 	private Number barBorderWidth;
-	private Color buttonArrowColor;
-	private Color buttonBackgroundColor;
-	private Color buttonBorderColor;
 	private Number buttonBorderRadius;
 	private Number buttonBorderWidth;
 	private Boolean enabled;
@@ -45,38 +40,6 @@ public class Scrollbar extends AbstractConfigurationObject {
 	private Number height;
 
 	public Scrollbar() {
-	}
-
-	/**
-	 * @see #setBarBackgroundColor(Color)
-	 */
-	public Color getBarBackgroundColor() {
-		return barBackgroundColor;
-	}
-
-	/**
-	 * The background color of the scrollbar itself.
-	 * <p>
-	 * Defaults to: #cccccc
-	 */
-	public void setBarBackgroundColor(Color barBackgroundColor) {
-		this.barBackgroundColor = barBackgroundColor;
-	}
-
-	/**
-	 * @see #setBarBorderColor(Color)
-	 */
-	public Color getBarBorderColor() {
-		return barBorderColor;
-	}
-
-	/**
-	 * The color of the scrollbar's border.
-	 * <p>
-	 * Defaults to: #cccccc
-	 */
-	public void setBarBorderColor(Color barBorderColor) {
-		this.barBorderColor = barBorderColor;
 	}
 
 	/**
@@ -109,54 +72,6 @@ public class Scrollbar extends AbstractConfigurationObject {
 	 */
 	public void setBarBorderWidth(Number barBorderWidth) {
 		this.barBorderWidth = barBorderWidth;
-	}
-
-	/**
-	 * @see #setButtonArrowColor(Color)
-	 */
-	public Color getButtonArrowColor() {
-		return buttonArrowColor;
-	}
-
-	/**
-	 * The color of the small arrow inside the scrollbar buttons.
-	 * <p>
-	 * Defaults to: #333333
-	 */
-	public void setButtonArrowColor(Color buttonArrowColor) {
-		this.buttonArrowColor = buttonArrowColor;
-	}
-
-	/**
-	 * @see #setButtonBackgroundColor(Color)
-	 */
-	public Color getButtonBackgroundColor() {
-		return buttonBackgroundColor;
-	}
-
-	/**
-	 * The color of scrollbar buttons.
-	 * <p>
-	 * Defaults to: #e6e6e6
-	 */
-	public void setButtonBackgroundColor(Color buttonBackgroundColor) {
-		this.buttonBackgroundColor = buttonBackgroundColor;
-	}
-
-	/**
-	 * @see #setButtonBorderColor(Color)
-	 */
-	public Color getButtonBorderColor() {
-		return buttonBorderColor;
-	}
-
-	/**
-	 * The color of the border of the scrollbar buttons.
-	 * <p>
-	 * Defaults to: #cccccc
-	 */
-	public void setButtonBorderColor(Color buttonBorderColor) {
-		this.buttonBorderColor = buttonBorderColor;
 	}
 
 	/**

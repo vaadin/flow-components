@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * <p>
  * Options for the series data labels, appearing next to each data point.
@@ -39,9 +38,7 @@ public class DataLabels extends AbstractDataLabels {
 	private Number x;
 	private Number y;
 	private Number zIndex;
-	private Color connectorColor;
 	private Number connectorPadding;
-	private Number connectorWidth;
 	private Number distance;
 	private Boolean softConnector;
 
@@ -381,32 +378,6 @@ public class DataLabels extends AbstractDataLabels {
 	}
 
 	/**
-	 * @see #setConnectorColor(Color)
-	 */
-	public Color getConnectorColor() {
-		return connectorColor;
-	}
-
-	/**
-	 * <p>
-	 * The color of the line connecting the data label to the pie slice. The
-	 * default color is the same as the point's color.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the connector stroke is given in the
-	 * <code>.highcharts-data-label-connector</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: {point.color}
-	 */
-	public void setConnectorColor(Color connectorColor) {
-		this.connectorColor = connectorColor;
-	}
-
-	/**
 	 * @see #setConnectorPadding(Number)
 	 */
 	public Number getConnectorPadding() {
@@ -420,31 +391,6 @@ public class DataLabels extends AbstractDataLabels {
 	 */
 	public void setConnectorPadding(Number connectorPadding) {
 		this.connectorPadding = connectorPadding;
-	}
-
-	/**
-	 * @see #setConnectorWidth(Number)
-	 */
-	public Number getConnectorWidth() {
-		return connectorWidth;
-	}
-
-	/**
-	 * <p>
-	 * The width of the line connecting the data label to the pie slice.
-	 * </p>
-	 * 
-	 * <p>
-	 * In <a href=
-	 * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
-	 * >styled mode</a>, the connector stroke width is given in the
-	 * <code>.highcharts-data-label-connector</code> class.
-	 * </p>
-	 * <p>
-	 * Defaults to: 1
-	 */
-	public void setConnectorWidth(Number connectorWidth) {
-		this.connectorWidth = connectorWidth;
 	}
 
 	/**

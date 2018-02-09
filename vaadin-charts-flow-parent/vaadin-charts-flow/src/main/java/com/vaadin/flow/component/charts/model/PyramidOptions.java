@@ -17,8 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.Color;
-
 public abstract class PyramidOptions extends AbstractPlotOptions {
 
     @Override
@@ -50,38 +48,6 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
     public abstract void setAnimationLimit(Number animationLimit);
 
     /**
-     * @see #setBorderColor(Color)
-     */
-    public abstract Color getBorderColor();
-
-    /**
-     * The color of the border surrounding each slice. When <code>null</code>,
-     * the border takes the same color as the slice fill. This can be used
-     * together with a <code>borderWidth</code> to fill drawing gaps created by
-     * antialiazing artefacts in borderless pies.
-     */
-    public abstract void setBorderColor(Color borderColor);
-
-    /**
-     * @see #setBorderWidth(Number)
-     */
-    public abstract Number getBorderWidth();
-
-    /**
-     * <p>
-     * The width of the border surrounding each slice.
-     * </p>
-     *
-     * <p>
-     * When setting the border width to 0, there may be small gaps between the
-     * slices due to SVG antialiasing artefacts. To work around this, keep the
-     * border width at 0.5 or 1, but set the <code>borderColor</code> to
-     * <code>null</code> instead.
-     * </p>
-     */
-    public abstract void setBorderWidth(Number borderWidth);
-
-    /**
      * The center of the series. By default, it is centered in the middle of the
      * plot area, so it fills the plot area height.
      */
@@ -108,35 +74,6 @@ public abstract class PyramidOptions extends AbstractPlotOptions {
      * <code>highcharts-color-{n}</code>.
      */
     public abstract void setColorIndex(Number colorIndex);
-
-    /**
-     * @see #setColors(Color...)
-     */
-    public abstract Color[] getColors();
-
-    /**
-     * A series specific or series type specific color set to use instead of the
-     * theme colors.
-     */
-    public abstract void setColors(Color... colors);
-
-    /**
-     * Adds color to the colors array
-     *
-     * @param color
-     *            to add
-     * @see #setColors(Color...)
-     */
-    public abstract void addColor(Color color);
-
-    /**
-     * Removes first occurrence of color in colors array
-     *
-     * @param color
-     *            to remove
-     * @see #setColors(Color...)
-     */
-    public abstract void removeColor(Color color);
 
     /**
      * @see #setCursor(Cursor)

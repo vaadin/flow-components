@@ -17,8 +17,6 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
-import com.vaadin.flow.component.charts.model.style.Color;
-
 import java.time.Instant;
 import java.util.Date;
 
@@ -168,30 +166,6 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * series.
      */
     public abstract void setExposeElementToA11y(Boolean exposeElementToA11y);
-
-    /**
-     * @see #setFillColor(Color)
-     */
-    public abstract Color getFillColor();
-
-    /**
-     * Fill color or gradient for the area. When <code>null</code>, the series'
-     * <code>color</code> is used with the series' <code>fillOpacity</code>.
-     */
-    public abstract void setFillColor(Color fillColor);
-
-    /**
-     * @see #setFillOpacity(Number)
-     */
-    public abstract Number getFillOpacity();
-
-    /**
-     * Fill opacity for the area. Note that when you set an explicit
-     * <code>fillColor</code>, the <code>fillOpacity</code> is not applied.
-     * Instead, you should define the opacity in the <code>fillColor</code> with
-     * an rgba color definition.
-     */
-    public abstract void setFillOpacity(Number fillOpacity);
 
     /**
      * @see #setFindNearestPointBy(Dimension)

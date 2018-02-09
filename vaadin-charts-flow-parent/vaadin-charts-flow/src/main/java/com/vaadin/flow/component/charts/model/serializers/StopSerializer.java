@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.charts.model.serializers;
 
+import java.io.IOException;
+
 /*
  * #%L
  * Vaadin Charts
@@ -25,8 +27,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.vaadin.flow.component.charts.model.Stop;
 
-import java.io.IOException;
-
 /**
  * Serializer for {@link com.vaadin.flow.component.charts.model.Stop}.
  *
@@ -45,7 +45,6 @@ public class StopSerializer extends JsonSerializer<Stop> {
             throws IOException, JsonProcessingException {
         gen.writeStartArray();
         gen.writeNumber(value.getPosition());
-        gen.writeString(value.getColor().toString());
         gen.writeEndArray();
     }
 }

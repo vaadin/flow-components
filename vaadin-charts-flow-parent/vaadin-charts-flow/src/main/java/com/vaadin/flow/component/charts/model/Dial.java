@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * <p>
  * Options for the dial or arrow pointer of the gauge.
@@ -17,32 +16,13 @@ import com.vaadin.flow.component.charts.model.style.Color;
 @Generated(value = "This class is generated and shouldn't be modified", comments = "Incorrect and missing API should be reported to https://github.com/vaadin/vaadin-charts-flow/issues/new")
 public class Dial extends AbstractConfigurationObject {
 
-	private Color backgroundColor;
 	private String baseLength;
 	private Number baseWidth;
-	private Color borderColor;
-	private Number borderWidth;
 	private String radius;
 	private String rearLength;
 	private Number topWidth;
 
 	public Dial() {
-	}
-
-	/**
-	 * @see #setBackgroundColor(Color)
-	 */
-	public Color getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * The background or fill color of the gauge's dial.
-	 * <p>
-	 * Defaults to: #000000
-	 */
-	public void setBackgroundColor(Color backgroundColor) {
-		this.backgroundColor = backgroundColor;
 	}
 
 	/**
@@ -77,40 +57,6 @@ public class Dial extends AbstractConfigurationObject {
 	 */
 	public void setBaseWidth(Number baseWidth) {
 		this.baseWidth = baseWidth;
-	}
-
-	/**
-	 * @see #setBorderColor(Color)
-	 */
-	public Color getBorderColor() {
-		return borderColor;
-	}
-
-	/**
-	 * The border color or stroke of the gauge's dial. By default, the
-	 * borderWidth is 0, so this must be set in addition to a custom border
-	 * color.
-	 * <p>
-	 * Defaults to: #cccccc
-	 */
-	public void setBorderColor(Color borderColor) {
-		this.borderColor = borderColor;
-	}
-
-	/**
-	 * @see #setBorderWidth(Number)
-	 */
-	public Number getBorderWidth() {
-		return borderWidth;
-	}
-
-	/**
-	 * The width of the gauge dial border in pixels.
-	 * <p>
-	 * Defaults to: 0
-	 */
-	public void setBorderWidth(Number borderWidth) {
-		this.borderWidth = borderWidth;
 	}
 
 	/**

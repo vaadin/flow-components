@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.charts.model;
 
+import com.vaadin.flow.component.charts.model.style.ButtonTheme;
+
 /*
  * #%L
  * Vaadin Charts
@@ -25,7 +27,7 @@ public class DrillUpButton extends AbstractConfigurationObject {
 
     private ButtonPosition position;
     private DrillUpButtonRelativeTo relativeTo;
-    private DrillUpButtonTheme theme;
+    private ButtonTheme theme;
 
     /**
      * @see #setPosition(ButtonPosition)
@@ -66,10 +68,10 @@ public class DrillUpButton extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setTheme(DrillUpButtonTheme)
+     * @see #setTheme(ButtonTheme)
      * @return theme
      */
-    public DrillUpButtonTheme getTheme() {
+    public ButtonTheme getTheme() {
         return theme;
     }
 
@@ -78,7 +80,7 @@ public class DrillUpButton extends AbstractConfigurationObject {
      * 
      * @param theme
      */
-    public void setTheme(DrillUpButtonTheme theme) {
+    public void setTheme(ButtonTheme theme) {
         this.theme = theme;
     }
 

@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,8 +25,6 @@ public class PlotOptionsAreasplinerange extends AreaOptions {
 	private String description;
 	private Boolean enableMouseTracking;
 	private Boolean exposeElementToA11y;
-	private Color fillColor;
-	private Number fillOpacity;
 	private Dimension findNearestPointBy;
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
@@ -313,42 +310,6 @@ public class PlotOptionsAreasplinerange extends AreaOptions {
 	 */
 	public void setExposeElementToA11y(Boolean exposeElementToA11y) {
 		this.exposeElementToA11y = exposeElementToA11y;
-	}
-
-	/**
-	 * @see #setFillColor(Color)
-	 */
-	public Color getFillColor() {
-		return fillColor;
-	}
-
-	/**
-	 * Fill color or gradient for the area. When <code>null</code>, the series'
-	 * <code>color</code> is used with the series' <code>fillOpacity</code>.
-	 */
-	public void setFillColor(Color fillColor) {
-		this.fillColor = fillColor;
-	}
-
-	/**
-	 * @see #setFillOpacity(Number)
-	 */
-	public Number getFillOpacity() {
-		return fillOpacity;
-	}
-
-	/**
-	 * Fill opacity for the area. When you set an explicit
-	 * <code>fillColor</code>, the <code>fillOpacity</code> is not applied.
-	 * Instead, you should define the opacity in the <code>fillColor</code> with
-	 * an rgba color definition. The <code>fillOpacity</code> setting, also the
-	 * default setting, overrides the alpha component of the <code>color</code>
-	 * setting.
-	 * <p>
-	 * Defaults to: 0.75
-	 */
-	public void setFillOpacity(Number fillOpacity) {
-		this.fillOpacity = fillOpacity;
 	}
 
 	/**

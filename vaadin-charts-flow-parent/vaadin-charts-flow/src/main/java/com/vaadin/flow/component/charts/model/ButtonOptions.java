@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.charts.model.style.Color;
 /**
  * <p>
  * A collection of options for buttons appearing in the exporting module.
@@ -21,9 +20,7 @@ public class ButtonOptions extends AbstractConfigurationObject {
 	private HorizontalAlign align;
 	private Boolean enabled;
 	private Number height;
-	private Color symbolFill;
 	private Number symbolSize;
-	private Color symbolStroke;
 	private Number symbolStrokeWidth;
 	private Number symbolX;
 	private Number symbolY;
@@ -88,22 +85,6 @@ public class ButtonOptions extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setSymbolFill(Color)
-	 */
-	public Color getSymbolFill() {
-		return symbolFill;
-	}
-
-	/**
-	 * Fill color for the symbol within the button.
-	 * <p>
-	 * Defaults to: #666666
-	 */
-	public void setSymbolFill(Color symbolFill) {
-		this.symbolFill = symbolFill;
-	}
-
-	/**
 	 * @see #setSymbolSize(Number)
 	 */
 	public Number getSymbolSize() {
@@ -117,22 +98,6 @@ public class ButtonOptions extends AbstractConfigurationObject {
 	 */
 	public void setSymbolSize(Number symbolSize) {
 		this.symbolSize = symbolSize;
-	}
-
-	/**
-	 * @see #setSymbolStroke(Color)
-	 */
-	public Color getSymbolStroke() {
-		return symbolStroke;
-	}
-
-	/**
-	 * The color of the symbol's stroke or line.
-	 * <p>
-	 * Defaults to: #666666
-	 */
-	public void setSymbolStroke(Color symbolStroke) {
-		this.symbolStroke = symbolStroke;
 	}
 
 	/**
