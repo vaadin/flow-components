@@ -31,6 +31,29 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-upload</artifactId>
+            <version>4.0.0-beta1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.vaadin</groupId>
+                    <artifactId>vaadin-button</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.vaadin</groupId>
+                    <artifactId>vaadin-progress-bar</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Remove the exclude and button dependency when we have a release version -->
+        <!-- 2.0.0-beta1 is outside the range [2.0.0,3) -->
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-button</artifactId>
+            <version>2.0.0-beta1</version>       
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-progress-bar</artifactId>
+            <version>1.0.0-beta1</version>       
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
