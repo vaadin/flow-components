@@ -37,6 +37,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-notification</artifactId>
+            <version>1.0.0-beta1</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
