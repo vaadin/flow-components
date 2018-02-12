@@ -66,7 +66,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
-            <version>6.0.0.alpha9</version>
+            <version>6.0.0.alpha11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
