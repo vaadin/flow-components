@@ -31,6 +31,20 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-combo-box</artifactId>
+            <version>4.0.0-beta1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.vaadin</groupId>
+                    <artifactId>vaadin-text-field</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Remove the exclude and text-field dependency when we have a release version -->
+        <!-- 2.0.0-beta1 is outside the range [2.0.0,3) -->
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-text-field</artifactId>
+            <version>2.0.0-beta1</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
