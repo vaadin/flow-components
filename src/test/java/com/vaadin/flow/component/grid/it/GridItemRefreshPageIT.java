@@ -84,6 +84,14 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
 
         assertNotUpdated(grid, 10, 15);
         clickElementWithJs(refreshAll);
+        try {
+            // Sleep for a while so we don't check the dom when the elements
+            // are being removed/disconnected as it leads to Stale Element
+            // Reference exceptions
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // NOOP: thread was woken
+        }
         waitUntilUpdated(grid, 10, 15);
 
         getCommandExecutor().executeScript("arguments[0].scrollToIndex(1000)",
