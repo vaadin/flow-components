@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2017 Vaadin Ltd.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -18,18 +18,10 @@ package com.vaadin.flow.component.tabs;
 import javax.annotation.Generated;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentSupplier;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonArray;
 
 /**
  * <p>
@@ -98,68 +90,19 @@ import elemental.json.JsonArray;
  * </tbody>
  * </table>
  * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.TabsElement#2.0.0-alpha7", "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.TabsElement#2.0.0-beta1", "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-tabs")
 @HtmlImport("frontend://bower_components/vaadin-tabs/src/vaadin-tabs.html")
 public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
         extends Component implements HasStyle, ComponentSupplier<R> {
 
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * The array of list items
-     * <p>
-     * This property is synchronized automatically from client side when a
-     * 'items-changed' event happens.
-     * </p>
-     *
-     * @return the {@code items} property from the webcomponent
-     */
-    @Synchronize(property = "items", value = "items-changed")
-    protected JsonArray getItemsJsonArray() {
-        return (JsonArray) getElement().getPropertyRaw("items");
-    }
-
     protected void focus() {
         getElement().callFunction("focus");
-    }
-
-    @DomEvent("items-changed")
-    public static class ItemsChangeEvent<R extends GeneratedVaadinTabs<R>>
-            extends ComponentEvent<R> {
-        private final JsonArray items;
-
-        public ItemsChangeEvent(R source, boolean fromClient,
-                @EventData("event.items") JsonArray items) {
-            super(source, fromClient);
-            this.items = items;
-        }
-
-        public JsonArray getItems() {
-            return items;
-        }
-    }
-
-    /**
-     * Adds a listener for {@code items-changed} events fired by the
-     * webcomponent.
-     *
-     * @param listener
-     *            the listener
-     * @return a {@link Registration} for removing the event listener
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Registration addItemsChangeListener(
-            ComponentEventListener<ItemsChangeEvent<R>> listener) {
-        return addListener(ItemsChangeEvent.class,
-                (ComponentEventListener) listener);
     }
 }
