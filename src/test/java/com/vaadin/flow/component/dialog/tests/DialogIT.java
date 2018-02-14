@@ -43,7 +43,8 @@ public class DialogIT extends ComponentDemoTest {
 
     @Test
     public void openAndCloseConfirmationDialog_buttonsRenderedWithClickListeners() {
-        WebElement messageLabel = findElement(By.tagName("label"));
+        WebElement messageLabel = findElement(
+                By.id("confirmation-dialog-label"));
 
         findElement(By.id("confirmation-dialog-button")).click();
         getOverlayContent().findElements(By.tagName("button")).get(0).click();

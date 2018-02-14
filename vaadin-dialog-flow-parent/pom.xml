@@ -15,7 +15,7 @@
     <properties>
         <flow.version>1.0-SNAPSHOT</flow.version>
     </properties>
-    
+
     <repositories>
         <repository>
             <id>vaadin-prereleases</id>
@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-server</artifactId>
+            <artifactId>flow-data</artifactId>
             <version>${flow.version}</version>
         </dependency>
         <dependency>
@@ -47,11 +47,11 @@
 
         <!-- Dependencies for the demo -->
         <dependency>
-           <groupId>org.slf4j</groupId>
-           <artifactId>slf4j-simple</artifactId>
-           <version>1.7.25</version>
-           <scope>test</scope>
-       </dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
@@ -59,4 +59,16 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <configuration>
+                    <webAppSourceDirectory>${project.basedir}/src/test/webapp</webAppSourceDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

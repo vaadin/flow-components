@@ -28,7 +28,7 @@ import com.vaadin.flow.shared.Registration;
  * 
  * @author Vaadin Ltd
  */
-@HtmlImport("frontend://flow-component-renderer.html")
+@HtmlImport("flow-component-renderer.html")
 public class Dialog extends GeneratedVaadinDialog<Dialog>
         implements HasComponents {
 
@@ -43,7 +43,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         getElement().appendChild(template);
 
         container = new Element("div", false);
-        getElement().appendVirtualChild(container);
+        getElement().appendChild(container);
 
         // Attach <flow-component-renderer>
         getElement().getNode().runWhenAttached(ui -> ui

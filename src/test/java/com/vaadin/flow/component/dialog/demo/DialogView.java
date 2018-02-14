@@ -76,6 +76,7 @@ public class DialogView extends DemoView {
         // end-source-example
         button.addClickListener(event -> dialog.open());
 
+        messageLabel.setId("confirmation-dialog-label");
         button.setId("confirmation-dialog-button");
         addCard("Confirmation dialog", button, dialog, messageLabel);
     }
