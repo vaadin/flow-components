@@ -136,12 +136,14 @@ public class GridTestPageIT extends AbstractComponentIT {
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
             if ("0".equals(row)) {
-                Assert.assertTrue("Node Id property not found for item 0",
-                        map.get("nodeId") != null && Integer.parseInt(
-                                String.valueOf(map.get("nodeId"))) > 0);
+                Assert.assertTrue("_renderer_* property not found for item 0",
+                        map.keySet().stream()
+                                .anyMatch(key -> key.startsWith("_renderer_")));
             } else {
-                Assert.assertThat(map.keySet(),
-                        CoreMatchers.not(CoreMatchers.hasItem("nodeId")));
+                Assert.assertFalse(
+                        "_renderer_* property should not be present for item 0",
+                        map.keySet().stream()
+                                .anyMatch(key -> key.startsWith("_renderer_")));
             }
         });
     }

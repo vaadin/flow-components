@@ -33,7 +33,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortOrder;
-import com.vaadin.flow.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;

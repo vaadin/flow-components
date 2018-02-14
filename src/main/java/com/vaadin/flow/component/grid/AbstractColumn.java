@@ -18,10 +18,11 @@ package com.vaadin.flow.component.grid;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.Rendering;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.internal.HtmlUtils;
-import com.vaadin.flow.renderer.ComponentTemplateRenderer;
-import com.vaadin.flow.renderer.TemplateRenderer;
 
 /**
  * Base class with common implementation for different types of columns used
@@ -35,8 +36,6 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
         implements ColumnBase<T>, HasStyle {
 
     protected final Grid<?> grid;
-    protected Element headerTemplate;
-    protected Element footerTemplate;
 
     /**
      * Base constructor with the destination Grid.
@@ -83,79 +82,40 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
 
     @Override
     public T setHeader(String labelText) {
-        return setHeader(TemplateRenderer.of(HtmlUtils.escape(labelText)));
+        renderHeader(TemplateRenderer.of(HtmlUtils.escape(labelText)));
+        return (T) this;
     }
 
     @Override
     public T setFooter(String labelText) {
-        return setFooter(TemplateRenderer.of(HtmlUtils.escape(labelText)));
+        renderFooter(TemplateRenderer.of(HtmlUtils.escape(labelText)));
+        return (T) this;
     }
 
     @Override
     public T setHeader(Component headerComponent) {
-        return setHeader(
-                new ComponentTemplateRenderer<>(() -> headerComponent));
+        renderHeader(new ComponentRenderer<>(() -> headerComponent));
+        return (T) this;
     }
 
     @Override
     public T setFooter(Component footerComponent) {
-        return setFooter(
-                new ComponentTemplateRenderer<>(() -> footerComponent));
-    }
-
-    private T setHeader(TemplateRenderer<?> renderer) {
-        if (headerTemplate == null) {
-            headerTemplate = new Element("template").setAttribute("class",
-                    "header");
-            getElement().appendChild(headerTemplate);
-        }
-
-        setupHeaderOrFooter(true, renderer, headerTemplate);
+        renderFooter(new ComponentRenderer<>(() -> footerComponent));
         return (T) this;
     }
 
-    private T setFooter(TemplateRenderer<?> renderer) {
-        if (footerTemplate == null) {
-            footerTemplate = new Element("template").setAttribute("class",
-                    "footer");
-            getElement().appendChild(footerTemplate);
-        }
-
-        setupHeaderOrFooter(false, renderer, footerTemplate);
-        return (T) this;
+    protected Rendering<?> renderHeader(Renderer<?> renderer) {
+        return renderAndSetClass(renderer, "header");
     }
 
-    private void setupHeaderOrFooter(boolean header,
-            TemplateRenderer<?> renderer, Element headerOrFooter) {
-        if (renderer instanceof ComponentTemplateRenderer) {
-            /*
-             * The ComponentTemplateRenderer requires a nodeId to work, and for
-             * that it needs the parent to be attached.
-             */
-            headerOrFooter.getNode().runWhenAttached(ui -> {
-                GridTemplateRendererUtil.setupHeaderOrFooterComponentRenderer(
-                        this, (ComponentTemplateRenderer<?, ?>) renderer);
-                setupHeaderOrFooterTemplate(header, renderer, headerOrFooter);
-            });
-        } else {
-            setupHeaderOrFooterTemplate(header, renderer, headerOrFooter);
-        }
+    protected Rendering<?> renderFooter(Renderer<?> renderer) {
+        return renderAndSetClass(renderer, "footer");
     }
 
-    private void setupHeaderOrFooterTemplate(boolean header,
-            TemplateRenderer<?> renderer, Element headerOrFooter) {
-
-        headerOrFooter.setProperty("innerHTML",
-                header ? getHeaderRendererTemplate(renderer)
-                        : getFooterRendererTemplate(renderer));
+    private Rendering<?> renderAndSetClass(Renderer<?> renderer,
+            String className) {
+        Rendering<?> rendering = renderer.render(getElement(), null);
+        rendering.getTemplateElement().get().setAttribute("class", className);
+        return rendering;
     }
-
-    protected String getHeaderRendererTemplate(TemplateRenderer<?> renderer) {
-        return renderer.getTemplate();
-    }
-
-    protected String getFooterRendererTemplate(TemplateRenderer<?> renderer) {
-        return renderer.getTemplate();
-    }
-
 }

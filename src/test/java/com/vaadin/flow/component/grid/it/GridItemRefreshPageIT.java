@@ -131,7 +131,7 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
         }
         List<WebElement> label = renderer.get(0)
                 .findElements(By.tagName("label"));
-        if (label.isEmpty()) {
+        if (label.isEmpty() || label.get(0) == null) {
             return "";
         }
         return label.get(0).getAttribute("innerHTML");

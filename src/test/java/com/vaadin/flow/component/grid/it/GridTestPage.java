@@ -25,8 +25,8 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.renderer.ComponentTemplateRenderer;
-import com.vaadin.flow.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -76,20 +76,19 @@ public class GridTestPage extends Div {
 
         grid.setItems(firstList);
 
-        grid.addColumn(new ComponentTemplateRenderer<Label, Item>(item -> {
+        grid.addColumn(new ComponentRenderer<Label, Item>(item -> {
             Label label = new Label(item.getName());
             label.setId("grid-with-component-renderers-item-name-"
                     + item.getNumber());
             return label;
-        }).withProperty("id", item -> "grid-with-component-renderers-item-name-"
-                + item.getNumber()));
-        grid.addColumn(new ComponentTemplateRenderer<>(item -> {
+        }));
+        grid.addColumn(new ComponentRenderer<>(item -> {
             Label label = new Label(String.valueOf(item.getNumber()));
             label.setId("grid-with-component-renderers-item-number-"
                     + item.getNumber());
             return label;
         }));
-        grid.addColumn(new ComponentTemplateRenderer<>(item -> {
+        grid.addColumn(new ComponentRenderer<>(item -> {
             NativeButton remove = new NativeButton("Remove", evt -> {
                 if (usingFirstList.get()) {
                     firstList.remove(item);
@@ -142,7 +141,7 @@ public class GridTestPage extends Div {
         grid.setItems(generateItems(20, 0));
 
         grid.addColumn(Item::getName);
-        grid.setItemDetailsRenderer(new ComponentTemplateRenderer<>(
+        grid.setItemDetailsRenderer(new ComponentRenderer<>(
                 item -> new Label("Details opened! " + item.getNumber())));
 
         grid.setId("grid-with-component-details-row");

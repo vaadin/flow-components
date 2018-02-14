@@ -44,13 +44,14 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.IconRenderer;
+import com.vaadin.flow.data.renderer.LocalDateRenderer;
+import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
+import com.vaadin.flow.data.renderer.NativeButtonRenderer;
+import com.vaadin.flow.data.renderer.NumberRenderer;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.flow.renderer.ButtonRenderer;
-import com.vaadin.flow.renderer.ComponentTemplateRenderer;
-import com.vaadin.flow.renderer.LocalDateRenderer;
-import com.vaadin.flow.renderer.LocalDateTimeRenderer;
-import com.vaadin.flow.renderer.NumberRenderer;
-import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -401,9 +402,10 @@ public class GridView extends DemoView {
         NativeButton selectBtn = new NativeButton("Select first five persons");
         selectBtn.addClickListener(event -> grid.asMultiSelect()
                 .setValue(new LinkedHashSet<>(people.subList(0, 5))));
-        NativeButton deselectBtn = new NativeButton("Deselect first five persons");
-        deselectBtn.addClickListener(event -> grid.asMultiSelect()
-                .setValue(new LinkedHashSet<>()));
+        NativeButton deselectBtn = new NativeButton(
+                "Deselect first five persons");
+        deselectBtn.addClickListener(
+                event -> grid.asMultiSelect().setValue(new LinkedHashSet<>()));
         NativeButton selectAllBtn = new NativeButton("Select all");
         selectAllBtn.addClickListener(
                 event -> ((GridMultiSelectionModel<Person>) grid
@@ -413,7 +415,8 @@ public class GridView extends DemoView {
         selectBtn.setId("multi-selection-button");
         messageDiv.setId("multi-selection-message");
         addCard("Selection", "Grid Multi Selection", grid,
-                new HorizontalLayout(selectBtn, deselectBtn, selectAllBtn), messageDiv);
+                new HorizontalLayout(selectBtn, deselectBtn, selectAllBtn),
+                messageDiv);
     }
 
     private void createNoneSelect() {
@@ -485,11 +488,11 @@ public class GridView extends DemoView {
         grid.setItems(createItems());
 
         // You can use a constructor and a separate setter for the renderer
-        grid.addColumn(new ComponentTemplateRenderer<>(PersonComponent::new,
+        grid.addColumn(new ComponentRenderer<>(PersonComponent::new,
                 PersonComponent::setPerson)).setHeader("Person");
 
         // Or you can use an ordinary function to get the component
-        grid.addColumn(new ComponentTemplateRenderer<>(
+        grid.addColumn(new ComponentRenderer<>(
                 item -> new NativeButton("Remove", evt -> {
                     ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) grid
                             .getDataProvider();
@@ -498,8 +501,7 @@ public class GridView extends DemoView {
                 }))).setHeader("Actions");
 
         // Item details can also use components
-        grid.setItemDetailsRenderer(
-                new ComponentTemplateRenderer<>(PersonCard::new));
+        grid.setItemDetailsRenderer(new ComponentRenderer<>(PersonCard::new));
 
         // When items are updated, new components are generated
         TextField idField = new TextField("", "Person id");
@@ -623,8 +625,10 @@ public class GridView extends DemoView {
         // Disable the default way of opening item details:
         grid.setDetailsVisibleOnClick(false);
 
-        grid.addColumn(new ButtonRenderer<>("Toggle details open", item -> grid
-                .setDetailsVisible(item, !grid.isDetailsVisible(item))));
+        grid.addColumn(new NativeButtonRenderer<>("Toggle details open",
+                item -> grid.setDetailsVisible(item,
+                        !grid.isDetailsVisible(item))));
+
         // end-source-example
         grid.setId("grid-with-details-row-2");
         addCard("Item details", "Open details programmatically", grid);
@@ -812,14 +816,21 @@ public class GridView extends DemoView {
                 DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                 .setHeader("Estimated delivery date");
 
+        // Icons
+        grid.addColumn(new IconRenderer<>(
+                item -> item.getPrice() > 50 ? new Label("$$$")
+                        : new Label("$"),
+                item -> ""));
+
         // ButtonRenderer for an easy clickable button,
         // without creating a component
-        grid.addColumn(new ButtonRenderer<>("Remove", item -> {
+        grid.addColumn(new NativeButtonRenderer<>("Remove", item -> {
             ListDataProvider<Item> dataProvider = (ListDataProvider<Item>) grid
                     .getDataProvider();
             dataProvider.getItems().remove(item);
             dataProvider.refreshAll();
         })).setWidth("100px").setFlexGrow(0);
+
         // end-source-example
 
         grid.setId("grid-basic-renderers");

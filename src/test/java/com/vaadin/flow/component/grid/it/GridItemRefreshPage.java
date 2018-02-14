@@ -23,7 +23,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.renderer.ComponentTemplateRenderer;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("grid-item-refresh-page")
@@ -81,10 +81,10 @@ public class GridItemRefreshPage extends Div {
     private void createComponentGrid() {
         Grid<Bean> grid = new Grid<>();
         grid.setHeight("500px");
-        grid.addColumn(new ComponentTemplateRenderer<Label, Bean>(
+        grid.addColumn(new ComponentRenderer<Label, Bean>(
                 item -> new Label(item.getFirstField())))
                 .setHeader("First Field");
-        grid.addColumn(new ComponentTemplateRenderer<Label, Bean>(
+        grid.addColumn(new ComponentRenderer<Label, Bean>(
                 item -> new Label(String.valueOf(item.getSecondField()))))
                 .setHeader("Second Field");
         List<Bean> items = createItems(1000);
