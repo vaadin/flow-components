@@ -756,7 +756,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         setPageSize(pageSize);
         setSelectionModel(SelectionMode.SINGLE.createModel(this),
                 SelectionMode.SINGLE);
-        getElement().addSynchronizedProperty("size");
 
         getElement().getNode()
                 .runWhenAttached(ui -> ui.getPage().executeJavaScript(
@@ -1072,14 +1071,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         selectionModel = model;
         getElement().callFunction("$connector.setSelectionMode",
                 selectionMode.name());
-
-        if (selectionMode.equals(SelectionMode.MULTI)) {
-            getElement().addSynchronizedProperty("selectAll");
-            getElement().addSynchronizedProperty("deselectAll");
-        } else {
-            getElement().removeSynchronizedProperty("selectAll");
-            getElement().removeSynchronizedProperty("deselectAll");
-        }
     }
 
     /**

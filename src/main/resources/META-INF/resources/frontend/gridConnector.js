@@ -117,11 +117,11 @@ window.gridConnector = {
       let lastNeededPage = Math.max(page, grid._getPageForIndex(grid._virtualEnd + grid._vidxOffset));
 
       let first = Math.max(0,  firstNeededPage - extraPageBuffer);
-      let last = Math.min(lastNeededPage + extraPageBuffer, Math.max(0, Math.floor(grid.size / grid.pageSize) + 1));
+      let last = Math.min(lastNeededPage + extraPageBuffer, Math.floor(grid.size / grid.pageSize) + 1);
 
       if (lastRequestedRange[0] != first || lastRequestedRange[1] != last) {
         lastRequestedRange = [first, last];
-        let count = 1 + last - first;
+        let count = Math.max(1, last - first);
         grid.$server.setRequestedRange(first * grid.pageSize, count * grid.pageSize);
       }
     }
