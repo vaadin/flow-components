@@ -22,6 +22,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.HtmlUtils;
 
 /**
@@ -36,6 +37,8 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
         implements ColumnBase<T>, HasStyle {
 
     protected final Grid<?> grid;
+    protected Element headerTemplate;
+    protected Element footerTemplate;
 
     /**
      * Base constructor with the destination Grid.
@@ -105,17 +108,22 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     protected Rendering<?> renderHeader(Renderer<?> renderer) {
-        return renderAndSetClass(renderer, "header");
+        if (headerTemplate != null) {
+            return renderer.render(getElement(), null, headerTemplate);
+        }
+        Rendering<?> rendering = renderer.render(getElement(), null);
+        headerTemplate = rendering.getTemplateElement();
+        headerTemplate.setAttribute("class", "header");
+        return rendering;
     }
 
     protected Rendering<?> renderFooter(Renderer<?> renderer) {
-        return renderAndSetClass(renderer, "footer");
-    }
-
-    private Rendering<?> renderAndSetClass(Renderer<?> renderer,
-            String className) {
+        if (footerTemplate != null) {
+            return renderer.render(getElement(), null, headerTemplate);
+        }
         Rendering<?> rendering = renderer.render(getElement(), null);
-        rendering.getTemplateElement().get().setAttribute("class", className);
+        footerTemplate = rendering.getTemplateElement();
+        footerTemplate.setAttribute("class", "footer");
         return rendering;
     }
 }

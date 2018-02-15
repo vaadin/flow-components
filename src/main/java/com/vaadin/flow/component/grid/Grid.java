@@ -538,7 +538,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         protected Rendering<?> renderHeader(Renderer<?> renderer) {
             Rendering<?> rendering = super.renderHeader(renderer);
 
-            headerTemplate = rendering.getTemplateElement().get();
+            headerTemplate = rendering.getTemplateElement();
             rawHeaderTemplate = headerTemplate.getProperty("innerHTML");
             if (isSortable()) {
                 headerTemplate.setProperty("innerHTML", addGridSorter());
@@ -1230,9 +1230,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            {@code null} to remove the current renderer
      */
     public void setItemDetailsRenderer(Renderer<T> renderer) {
-        if (detailsTemplate != null) {
-            getElement().removeChild(detailsTemplate);
-        }
         detailsManager.destroyAllData();
         if (renderer == null) {
             return;
@@ -1243,17 +1240,23 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                     .setComponentRendererTag(GRID_COMPONENT_RENDERER_TAG);
         }
 
-        Rendering<T> rendering = renderer.render(getElement(),
-                (KeyMapper<T>) getDataCommunicator().getKeyMapper());
+        Rendering<T> rendering;
+        if (detailsTemplate == null) {
+            rendering = renderer.render(getElement(),
+                    (KeyMapper<T>) getDataCommunicator().getKeyMapper());
+            detailsTemplate = rendering.getTemplateElement();
+            detailsTemplate.setAttribute("class", "row-details");
+        } else {
+            rendering = renderer.render(getElement(),
+                    (KeyMapper<T>) getDataCommunicator().getKeyMapper(),
+                    detailsTemplate);
+        }
+
         Optional<DataGenerator<T>> dataGenerator = rendering.getDataGenerator();
 
         if (dataGenerator.isPresent()) {
             itemDetailsDataGenerator = dataGenerator.get();
         }
-
-        Element newDetailsTemplate = rendering.getTemplateElement().get();
-        newDetailsTemplate.setAttribute("class", "row-details");
-        detailsTemplate = newDetailsTemplate;
     }
 
     /**
