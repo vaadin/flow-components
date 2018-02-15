@@ -24,7 +24,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.renderer.ButtonRenderer;
+import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -119,7 +119,7 @@ public class ComboBoxPage extends Div {
         Label message = new Label("Nothing clicked yet...");
         message.setId("button-renderer-message");
 
-        comboBox.setItemRenderer(new ButtonRenderer<>(item -> item,
+        comboBox.setRenderer(new NativeButtonRenderer<>(item -> item,
                 item -> message.setText("Button clicked: " + item)));
         comboBox.setItems("foo", "bar");
         comboBox.setId("button-renderer");

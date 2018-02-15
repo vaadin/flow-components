@@ -23,10 +23,10 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.flow.renderer.ComponentTemplateRenderer;
-import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -194,7 +194,7 @@ public class ComboBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Rendering items using TemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
-        comboBox.setItemRenderer(TemplateRenderer.<Song> of(
+        comboBox.setRenderer(TemplateRenderer.<Song> of(
                 "<div>[[item.song]]<br><small>[[item.artist]]</small></div>")
                 .withProperty("song", Song::getName)
                 .withProperty("artist", Song::getArtist));
@@ -232,7 +232,7 @@ public class ComboBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Rendering items using ComponentTemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
-        comboBox.setItemRenderer(new ComponentTemplateRenderer<>(item -> {
+        comboBox.setRenderer(new ComponentRenderer<>(item -> {
             VerticalLayout container = new VerticalLayout();
             
             Label song = new Label(item.getName());

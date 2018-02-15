@@ -130,7 +130,6 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
         items.forEach(item -> {
             Assert.assertNotNull(item.get("key"));
             Assert.assertNotNull(item.get("label"));
-            Assert.assertNotNull(item.get("nodeId"));
         });
 
         Map<String, ?> firstItem = items.get(0);

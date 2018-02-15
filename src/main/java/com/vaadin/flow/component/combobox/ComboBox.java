@@ -21,13 +21,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
@@ -35,17 +33,14 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.HasDataProvider;
-import com.vaadin.flow.data.provider.ComponentDataGenerator;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.Rendering;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.renderer.ComponentTemplateRenderer;
-import com.vaadin.flow.renderer.TemplateRenderer;
-import com.vaadin.flow.renderer.TemplateRendererUtil;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -66,7 +61,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     private static final String ITEM_LABEL_PROPERTY = "label";
     private static final String KEY_PROPERTY = "key";
     private static final String SELECTED_ITEM_PROPERTY_NAME = "selectedItem";
-    private static final String TEMPLATE_TAG_NAME = "template";
 
     private T oldValue;
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
@@ -75,12 +69,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
-    private final Element template;
-    private TemplateRenderer<T> renderer;
+    private Element template;
 
     private List<T> itemsFromDataProvider = Collections.emptyList();
     private Registration rendererRegistration;
-    private Registration componentRendererRegistration;
     private boolean refreshScheduled;
     private boolean setItemScheduled;
 
@@ -104,11 +96,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
         setItemValuePath(KEY_PROPERTY);
 
-        renderer = TemplateRenderer.of("[[item.label]]");
-
-        template = new Element(TEMPLATE_TAG_NAME);
-        getElement().appendChild(template);
-        setItemRenderer(renderer);
+        setRenderer(TemplateRenderer.of("[[item.label]]"));
     }
 
     /**
@@ -165,38 +153,27 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      *            a renderer for the items in the selection list of the
      *            ComboBox, not <code>null</code>
      */
-    public void setItemRenderer(TemplateRenderer<T> renderer) {
+    public void setRenderer(Renderer<T> renderer) {
         Objects.requireNonNull(renderer, "The renderer can not be null");
-
-        unregister(componentRendererRegistration);
-        componentRendererRegistration = null;
-        if (renderer instanceof ComponentTemplateRenderer) {
-            componentRendererRegistration = setupItemComponentRenderer(this,
-                    (ComponentTemplateRenderer<? extends Component, T>) renderer);
-        }
-        this.renderer = renderer;
-        template.setProperty("innerHTML", renderer.getTemplate());
-
-        TemplateRendererUtil.registerEventHandlers(renderer, template,
-                getElement(), keyMapper::get);
-
         unregister(rendererRegistration);
-        rendererRegistration = dataGenerator
-                .addDataGenerator((item, json) -> applyValueProviders(item,
-                        json, renderer.getValueProviders()));
-        refresh();
+
+        Rendering<T> rendering;
+        if (template == null) {
+            rendering = renderer.render(getElement(), keyMapper);
+            template = rendering.getTemplateElement();
+        } else {
+            rendering = renderer.render(getElement(), keyMapper, template);
+        }
+
+        rendering.getDataGenerator().ifPresent(generator -> {
+            rendererRegistration = dataGenerator.addDataGenerator(generator);
+        });
     }
 
     private void unregister(Registration registration) {
         if (registration != null) {
             registration.remove();
         }
-    }
-
-    private void applyValueProviders(T item, JsonObject json,
-            Map<String, ValueProvider<T, ?>> valueProviders) {
-        valueProviders.forEach((property, provider) -> json.put(property,
-                JsonSerializer.toJson(provider.apply(item))));
     }
 
     @Override
@@ -262,8 +239,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * in the combo box for each item. By default,
      * {@link String#valueOf(Object)} is used.
      * <p>
-     * When the {@link #setItemRenderer(TemplateRenderer)} is used, the
-     * ItemLabelGenerator is only used to show the selected item label.
+     * When the {@link #setRenderer(Renderer)} is used, the ItemLabelGenerator
+     * is only used to show the selected item label.
      *
      * @param itemLabelGenerator
      *            the item label provider to use, not null
@@ -589,21 +566,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     private void setItemValuePath(String path) {
         getElement().setProperty("itemValuePath", path == null ? "" : path);
-    }
-
-    private Registration setupItemComponentRenderer(Component owner,
-            ComponentTemplateRenderer<? extends Component, T> componentRenderer) {
-
-        Element container = new Element("div", false);
-        owner.getElement().appendVirtualChild(container);
-
-        String appId = UI.getCurrent().getInternals().getAppId();
-
-        componentRenderer.setTemplateAttribute("appid", appId);
-        componentRenderer.setTemplateAttribute("nodeid", "[[item.nodeId]]");
-
-        return dataGenerator.addDataGenerator(new ComponentDataGenerator<>(
-                componentRenderer, container, "nodeId", keyMapper));
     }
 
     void runBeforeClientResponse(Consumer<UI> command) {
