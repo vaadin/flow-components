@@ -26,8 +26,9 @@
         <driver.binary.downloader.maven.plugin.version>1.0.14</driver.binary.downloader.maven.plugin.version>
         <maven.failsafe.plugin.version>2.20</maven.failsafe.plugin.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
-        <flow.maven.plugin.version>1.0-SNAPSHOT</flow.maven.plugin.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
+        <frontend.working.directory>${project.basedir}/src/main/webapp/</frontend.working.directory>
+        <jetty.resource.directory>${frontend.working.directory}</jetty.resource.directory>
     </properties>
 
     <pluginRepositories>
@@ -52,7 +53,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench</artifactId>
-            <version>6.0.0.alpha7</version>
+            <version>6.0.0.alpha8</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -84,11 +85,6 @@
                         <sauce.options>${sauce.options}</sauce.options>
                     </systemPropertyVariables>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>${maven.clean.plugin.version}</version>
             </plugin>
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
@@ -124,7 +120,7 @@
                                 <!-- <webInfIncludeJarPattern>.*/flow-.*.jar$|.*/test-resources-.*.jar$</webInfIncludeJarPattern> -->
                                 <containerIncludeJarPattern>^$</containerIncludeJarPattern>
                                 <resourceBases>
-                                    <resourceBase>${project.basedir}/src/main/webapp</resourceBase>
+                                    <resourceBase>${jetty.resource.directory}</resourceBase>
                                 </resourceBases>
                             </webAppConfig>
                         </configuration>
@@ -182,23 +178,40 @@
             </build>
         </profile>
         <profile>
-            <id>debugMode</id>
+            <id>productionMode</id>
             <activation>
                 <property>
-                    <name>!vaadin.productionMode</name>
+                    <name>vaadin.productionMode</name>
                 </property>
             </activation>
+
+            <properties>
+                <jetty.resource.directory>${project.build.directory}/${project.build.finalName}/</jetty.resource.directory>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>flow-server-production-mode</artifactId>
+                </dependency>
+            </dependencies>
 
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <version>${maven.war.plugin.version}</version>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>flow-maven-plugin</artifactId>
                         <configuration>
-                            <packagingExcludes>**/node_modules/,**/node/,**/etc/,**/bower.json,**/package.json
-                            </packagingExcludes>
+                            <frontendWorkingDirectory>${frontend.working.directory}</frontendWorkingDirectory>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>copy-production-files</goal>
+                                    <goal>package-for-production</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
