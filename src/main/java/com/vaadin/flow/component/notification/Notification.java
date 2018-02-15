@@ -32,30 +32,20 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @HtmlImport("frontend://flow-component-renderer.html")
-public class Notification
-        extends GeneratedVaadinNotification<Notification>
+public class Notification extends GeneratedVaadinNotification<Notification>
         implements HasComponents {
 
     private final Element container = new Element("div", false);
-    private final Element templateElement = new Element("template");
+    private final Element templateElement = new Element("template", false);
 
     /**
      * Enumeration of all available positions for notification component
      */
     public enum Position {
-        TOP_STRETCH,
-        TOP_START,
-        TOP_CENTER,
-        TOP_END,
-        MIDDLE,
-        BOTTOM_START,
-        BOTTOM_CENTER,
-        BOTTOM_END,
-        BOTTOM_STRETCH,
-        ;
+        TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH,;
 
         private final String clientName;
-        
+
         Position() {
             this.clientName = name().toLowerCase(Locale.ENGLISH).replace('_',
                     '-');
@@ -94,11 +84,9 @@ public class Notification
      * child components, use the {@link Text} component for the textual parts.
      */
     public Notification() {
-        getElement().appendChild(templateElement);
-        getElement().appendVirtualChild(container);
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        () -> attachComponentTemplate(ui)));
+        appendBaseElements();
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, () -> attachComponentTemplate(ui)));
         setPosition(Position.BOTTOM_START);
         setDuration(0);
     }
@@ -146,8 +134,7 @@ public class Notification
      *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
      */
     public Notification(String text, int duration, Position position) {
-        getElement().appendChild(templateElement);
-        getElement().appendVirtualChild(container);
+        appendBaseElements();
         setText(text);
         setDuration((double) duration);
         setPosition(position);
@@ -168,6 +155,11 @@ public class Notification
         add(components);
     }
 
+    private void appendBaseElements() {
+        getElement().appendChild(templateElement);
+        getElement().appendChild(container);
+    }
+
     /**
      * Shows a notification in the current page with given text, duration and
      * position.
@@ -186,12 +178,11 @@ public class Notification
             Position position) {
         Notification notification = new Notification(text, duration, position);
         notification.open();
-        notification.addOpenedChangeListener(
-                event -> {
-                    if (!notification.isOpened()) {
-                        notification.getElement().removeFromParent();
-                    }
-                });
+        notification.addOpenedChangeListener(event -> {
+            if (!notification.isOpened()) {
+                notification.getElement().removeFromParent();
+            }
+        });
         return notification;
     }
 
@@ -314,9 +305,9 @@ public class Notification
     private void attachComponentTemplate(UI ui) {
         String appId = ui.getInternals().getAppId();
         int nodeId = container.getNode().getId();
-        String template = "<flow-component-renderer appid=" + appId
-                + " nodeid=" + nodeId
-                + "></flow-component-renderer>";
+        String template = String.format(
+                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
+                appId, nodeId);
         templateElement.setProperty("innerHTML", template);
     }
 
