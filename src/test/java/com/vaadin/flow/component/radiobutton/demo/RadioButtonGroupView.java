@@ -21,9 +21,10 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.IconRenderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.flow.renderer.IconRenderer;
-import com.vaadin.flow.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-radio-button")
@@ -93,8 +94,8 @@ public class RadioButtonGroupView extends DemoView {
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person(1, "Joe"), new Person(2, "John"),
                 new Person(3, "Bill"));
-        group.setItemRenderer(person -> new Anchor(
-                "http://example.com/" + person.getId(), person.getName()));
+        group.setRenderer(new ComponentRenderer<>(person -> new Anchor(
+                "http://example.com/" + person.getId(), person.getName())));
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Radio button group value changed from '%s' to '%s'",
                 getName(event.getOldValue()), getName(event.getValue()))));
@@ -114,7 +115,7 @@ public class RadioButtonGroupView extends DemoView {
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person("Joe"), new Person("John"),
                 new Person("Bill"));
-        group.setItemRenderer(new TextRenderer<>(Person::getName));
+        group.setRenderer(new TextRenderer<>(Person::getName));
         group.addValueChangeListener(event -> message.setText(String.format(
                 "Radio button group value changed from '%s' to '%s'",
                 getName(event.getOldValue()), getName(event.getValue()))));
@@ -132,7 +133,7 @@ public class RadioButtonGroupView extends DemoView {
         RadioButtonGroup<Person> group = new RadioButtonGroup<>();
         group.setItems(new Person(1, "Joe"), new Person(2, "John"),
                 new Person(3, "Bill"));
-        group.setItemRenderer(new IconRenderer<>(item -> {
+        group.setRenderer(new IconRenderer<>(item -> {
             Image image = new Image("https://vaadin.com/images/vaadin-logo.svg",
                     "");
             image.getStyle().set("height", "15px");

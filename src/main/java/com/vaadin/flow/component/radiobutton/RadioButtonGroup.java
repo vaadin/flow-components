@@ -25,11 +25,11 @@ import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.renderer.ComponentRenderer;
-import com.vaadin.flow.renderer.TextRenderer;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -132,12 +132,12 @@ public class RadioButtonGroup<T>
      * Sets the item renderer for this radio button group. The renderer is
      * applied to each item to create a component which represents the item.
      *
-     * @param itemRenderer
+     * @param renderer
      *            the item renderer, not {@code null}
      */
-    public void setItemRenderer(
-            ComponentRenderer<? extends Component, T> itemRenderer) {
-        this.itemRenderer = Objects.requireNonNull(itemRenderer);
+    public void setRenderer(
+            ComponentRenderer<? extends Component, T> renderer) {
+        this.itemRenderer = Objects.requireNonNull(renderer);
         refreshButtons();
     }
 
