@@ -25,9 +25,9 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.ironlist.IronList;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.renderer.ComponentTemplateRenderer;
-import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -249,7 +249,7 @@ public class IronListTestPage extends Div {
 
         List<String> items = Arrays.asList("Item 1", "Item 2", "Item 3");
 
-        list.setRenderer(new ComponentTemplateRenderer<>(item -> {
+        list.setRenderer(new ComponentRenderer<>(item -> {
             Label label = new Label(item);
             label.addClassName("component-rendered");
             return label;

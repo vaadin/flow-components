@@ -37,10 +37,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.renderer.ComponentTemplateRenderer;
-import com.vaadin.flow.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
@@ -324,7 +324,7 @@ public class IronListView extends DemoView {
         list.setGridLayout(true);
         
         // Uses the constructor of the PersonCard for each item in the list
-        list.setRenderer(new ComponentTemplateRenderer<>(PersonCard::new));
+        list.setRenderer(new ComponentRenderer<>(PersonCard::new));
         
         // For a smooth scrolling experience use a placeholder item
         Person placeholder = new Person();
