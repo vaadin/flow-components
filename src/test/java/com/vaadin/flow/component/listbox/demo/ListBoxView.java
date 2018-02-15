@@ -19,11 +19,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.listbox.ListBox;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -87,31 +89,33 @@ public class ListBoxView extends DemoView {
         ListBox<Item> listBox = new ListBox<>();
         listBox.setItems(getItems());
 
-        listBox.setItemRenderer(item -> {
-            Label name = new Label("Item: " + item.getName());
-            Label stock = new Label("In stock: " + item.getStock());
-
-            NativeButton button = new NativeButton("Buy", event -> {
-                item.setStock(item.getStock() - 1);
-                listBox.getDataProvider().refreshItem(item);
-            });
-
-            Div labels = new Div(name, stock);
-            Div layout = new Div(labels, button);
-
-            labels.getStyle().set("display", "flex")
-                    .set("flexDirection", "column").set("marginRight", "10px");
-            layout.getStyle().set("display", "flex").set("alignItems",
-                    "center");
-
-            return layout;
-        });
+        listBox.setRenderer(
+                new ComponentRenderer<>(item -> renderItem(item, listBox)));
 
         listBox.setItemEnabledProvider(item -> item.getStock() > 0);
 
         // end-source-example
         addCard("Using item renderer and disabling items", listBox)
                 .setId("list-box-with-renderer");
+    }
+
+    private Component renderItem(Item item, ListBox<Item> listBox) {
+        Label name = new Label("Item: " + item.getName());
+        Label stock = new Label("In stock: " + item.getStock());
+
+        NativeButton button = new NativeButton("Buy", event -> {
+            item.setStock(item.getStock() - 1);
+            listBox.getDataProvider().refreshItem(item);
+        });
+
+        Div labels = new Div(name, stock);
+        Div layout = new Div(labels, button);
+
+        labels.getStyle().set("display", "flex").set("flexDirection", "column")
+                .set("marginRight", "10px");
+        layout.getStyle().set("display", "flex").set("alignItems", "center");
+
+        return layout;
     }
 
     private List<Item> getItems() {

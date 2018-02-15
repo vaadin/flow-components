@@ -28,16 +28,16 @@ import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.renderer.ComponentRenderer;
-import com.vaadin.flow.renderer.TextRenderer;
 import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code vaadin-list-box} element.
- * 
+ *
  * @author Vaadin Ltd
  *
  * @param <T>
@@ -63,7 +63,7 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
 
     /**
      * Gets the selected item.
-     * 
+     *
      * @return the selected item, or {@code null} if none is selected
      */
     @Override
@@ -137,7 +137,7 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
      * @param itemRenderer
      *            the item renderer, not {@code null}
      */
-    public void setItemRenderer(
+    public void setRenderer(
             ComponentRenderer<? extends Component, T> itemRenderer) {
         this.itemRenderer = Objects.requireNonNull(itemRenderer);
         getItemComponents().forEach(this::refreshContent);
@@ -197,7 +197,7 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
      * Not supported by the client-side web-component, see
      * <a href= "https://github.com/vaadin/vaadin-list-box/issues/19">issue in
      * GitHub</a>.
-     * 
+     *
      * @throws UnsupportedOperationException
      */
     @Override
