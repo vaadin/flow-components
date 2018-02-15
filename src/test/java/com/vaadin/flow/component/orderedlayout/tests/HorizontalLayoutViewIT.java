@@ -20,16 +20,15 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.orderedlayout.demo.HorizontalLayoutView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 
 /**
- * Tests for the {@link HorizontalLayoutView}.
+ * Tests for the HorizontalLayout.
  */
 public class HorizontalLayoutViewIT extends ComponentDemoTest {
     @Override
     protected String getTestPath() {
-        return "/vaadin-horizontal-layout";
+        return "/vaadin-ordered-layout/horizontallayout";
     }
 
     @Test

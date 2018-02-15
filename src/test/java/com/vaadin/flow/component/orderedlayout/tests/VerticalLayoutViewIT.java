@@ -20,17 +20,16 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.orderedlayout.demo.VerticalLayoutView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 
 /**
- * Tests for the {@link VerticalLayoutView}.
+ * Tests for the VerticalLayout.
  */
 public class VerticalLayoutViewIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return "/vaadin-vertical-layout";
+        return "/vaadin-ordered-layout/verticallayout";
     }
 
     @Test
