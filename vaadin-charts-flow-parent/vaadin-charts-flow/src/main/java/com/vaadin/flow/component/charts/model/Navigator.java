@@ -34,8 +34,8 @@ public class Navigator extends AbstractConfigurationObject {
 	private Boolean maskInside;
 	private Boolean opposite;
 	private PlotOptionsSeries series;
-	private XAxis[] xAxis;
-	private YAxis[] yAxis;
+	private XAxis xAxis;
+	private YAxis yAxis;
 
 	public Navigator() {
 	}
@@ -191,9 +191,12 @@ public class Navigator extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * @see #setXAxis(XAxis[])
+	 * @see #setXAxis(XAxis)
 	 */
-	public XAxis[] getXAxis() {
+	public XAxis getXAxis() {
+		if (xAxis == null) {
+			xAxis = new XAxis();
+		}
 		return xAxis;
 	}
 
@@ -219,14 +222,17 @@ public class Navigator extends AbstractConfigurationObject {
 	 * 	}
 	 * </pre>
 	 */
-	public void setXAxis(XAxis[] xAxis) {
+	public void setXAxis(XAxis xAxis) {
 		this.xAxis = xAxis;
 	}
 
 	/**
-	 * @see #setYAxis(YAxis[])
+	 * @see #setYAxis(YAxis)
 	 */
-	public YAxis[] getYAxis() {
+	public YAxis getYAxis() {
+		if (yAxis == null) {
+			yAxis = new YAxis();
+		}
 		return yAxis;
 	}
 
@@ -252,7 +258,7 @@ public class Navigator extends AbstractConfigurationObject {
 	 * 	}
 	 * </pre>
 	 */
-	public void setYAxis(YAxis[] yAxis) {
+	public void setYAxis(YAxis yAxis) {
 		this.yAxis = yAxis;
 	}
 }
