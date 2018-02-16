@@ -63,11 +63,6 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-server</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
             <version>${flow.version}</version>
         </dependency>
@@ -131,8 +126,12 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty.version}</version>
                 <configuration>
-                    <!-- To serve Grid's static resources like gridConnector.js -->
-                    <webAppSourceDirectory>${project.basedir}/src/main/resources/META-INF/resources</webAppSourceDirectory>
+                <webApp>
+                    <resourceBases>
+                        <resourceBase>${project.basedir}/src/main/resources/META-INF/resources</resourceBase>
+                        <resourceBase>${project.basedir}/src/test/webapp</resourceBase>
+                    </resourceBases>
+                </webApp>
                 </configuration>
             </plugin>
         </plugins>
