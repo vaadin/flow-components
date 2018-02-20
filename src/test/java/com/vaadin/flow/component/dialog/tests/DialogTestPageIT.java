@@ -32,13 +32,13 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("dialog-test")
 public class DialogTestPageIT extends AbstractComponentIT {
 
-    private static final String DIALOG_TAG = "vaadin-dialog-overlay";
+    static final String DIALOG_TAG = "vaadin-dialog-overlay";
 
     @Before
     public void init() {
         open();
-        waitUntil(driver -> findElements(By.tagName("vaadin-dialog"))
-                .size() > 0);
+        waitUntil(
+                driver -> findElements(By.tagName("vaadin-dialog")).size() > 0);
     }
 
     @Test

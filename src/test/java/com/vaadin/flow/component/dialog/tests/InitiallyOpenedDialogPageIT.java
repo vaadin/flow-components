@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,8 +24,8 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("dialog-template-test")
-public class DialogWithTemplateIT extends AbstractComponentIT {
+@TestPath("initial-dialog-open")
+public class InitiallyOpenedDialogPageIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -35,30 +33,11 @@ public class DialogWithTemplateIT extends AbstractComponentIT {
     }
 
     @Test
-    public void openDialog_clickThreeTimes_containerIsUpdated() {
-        waitForElementPresent(By.id("open"));
-        WebElement open = findElement(By.id("open"));
-        open.click();
-
+    public void openDialogDuringPageLoad() {
         waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_TAG));
         WebElement overlay = findElement(
                 By.tagName(DialogTestPageIT.DIALOG_TAG));
-        WebElement template = findInShadowRoot(overlay, By.id("template"))
-                .get(0);
-
-        WebElement btn = findInShadowRoot(template, By.id("btn")).get(0);
-        WebElement container = findInShadowRoot(template, By.id("container"))
-                .get(0);
-
-        List<WebElement> spans = container.findElements(By.tagName("span"));
-        Assert.assertTrue(spans.isEmpty());
-
-        for (int i = 0; i < 3; i++) {
-            btn.click();
-
-            int size = i + 1;
-            WebElement label = container.findElement(By.id("label-" + size));
-            Assert.assertEquals("Label " + size, label.getText());
-        }
+        Assert.assertTrue(
+                isPresentInShadowRoot(overlay, By.id("nested-component")));
     }
 }

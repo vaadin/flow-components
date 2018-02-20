@@ -25,7 +25,7 @@ import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-dialog>} element.
- * 
+ *
  * @author Vaadin Ltd
  */
 @HtmlImport("flow-component-renderer.html")
@@ -52,7 +52,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Creates a dialog with given components inside.
-     * 
+     *
      * @param components
      *            the components inside the dialog
      * @see #add(Component...)
@@ -103,7 +103,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * Gets whether this dialog can be closed by hitting the esc-key or not.
      * <p>
      * By default, the dialog is closable with esc.
-     * 
+     *
      * @return {@code true} if this dialog can be closed with the esc-key,
      *         {@code false} otherwise
      */
@@ -115,7 +115,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * Sets whether this dialog can be closed by hitting the esc-key or not.
      * <p>
      * By default, the dialog is closable with esc.
-     * 
+     *
      * @param closeOnEsc
      *            {@code true} to enable closing this dialog with the esc-key,
      *            {@code false} to disable it
@@ -128,7 +128,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * Gets whether this dialog can be closed by clicking outside of it or not.
      * <p>
      * By default, the dialog is closable with an outside click.
-     * 
+     *
      * @return {@code true} if this dialog can be closed by an outside click,
      *         {@code false} otherwise
      */
@@ -140,7 +140,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * Sets whether this dialog can be closed by clicking outside of it or not.
      * <p>
      * By default, the dialog is closable with an outside click.
-     * 
+     *
      * @param closeOnOutsideClick
      *            {@code true} to enable closing this dialog with an outside
      *            click, {@code false} to disable it
@@ -175,22 +175,23 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * it. Since {@code <vaadin-dialog>}'s location in the DOM doesn't really
      * matter, opening a dialog will automatically add it to the {@code <body>}
      * if it's not yet attached anywhere.
-     * 
+     *
      * @param opened
      *            {@code true} to open the dialog, {@code false} to close it
      */
     @Override
     public void setOpened(boolean opened) {
+        UI ui = UI.getCurrent();
         if (opened && getElement().getNode().getParent() == null
-                && UI.getCurrent() != null) {
-            UI.getCurrent().add(this);
+                && ui != null) {
+            ui.beforeClientResponse(ui, () -> ui.add(this));
         }
         super.setOpened(opened);
     }
 
     /**
      * Gets the open state from the dialog.
-     * 
+     *
      * @return the {@code opened} property from the dialog
      */
     public boolean isOpened() {
@@ -199,7 +200,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Add a lister for event fired by the {@code opened-changed} events.
-     * 
+     *
      * @param: listener
      *             the listener to add;
      * @return: a Registration for removing the event listener
