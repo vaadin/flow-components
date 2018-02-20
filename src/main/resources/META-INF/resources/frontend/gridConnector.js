@@ -149,6 +149,7 @@ window.gridConnector = {
         }
         if (selectedKeys[item.key]) {
           selectedKeys[item.key] = item;
+          item.selected = true;
           updatedSelectedItem = true;
         }
       }
@@ -199,9 +200,9 @@ window.gridConnector = {
         cache[page] = slice;
         for(let j = 0; j < slice.length; j++) {
           let item = slice[j]
-          if (item.selected && !selectedKeys[item.key]) {
+          if (item.selected && !isSelectedOnGrid(item)) {
             grid.$connector.doSelection(item);
-          } else if (!item.selected && selectedKeys[item.key]) {
+          } else if (!item.selected && (selectedKeys[item.key] || isSelectedOnGrid(item))) {
             grid.$connector.doDeselection(item);
           }
         }
@@ -257,6 +258,17 @@ window.gridConnector = {
         updateGridCache(page);
       }
     };
+    
+    const isSelectedOnGrid = function(item) {
+      const selectedItems = grid.selectedItems;
+      for(let i = 0; i < selectedItems; i++) {
+        let selectedItem = selectedItems[i];
+        if (selectedItem.key === item.key) {
+          return true;
+        }
+      }
+      return false;
+    }
 
     grid.$connector.updateSize = function(newSize) {
       grid.size = newSize;
