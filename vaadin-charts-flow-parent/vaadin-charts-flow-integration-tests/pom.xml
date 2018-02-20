@@ -27,8 +27,9 @@
         <maven.failsafe.plugin.version>2.20</maven.failsafe.plugin.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
-        <frontend.working.directory>${project.basedir}/src/main/webapp/</frontend.working.directory>
+        <frontend.working.directory>${project.basedir}/src/main/webapp</frontend.working.directory>
         <jetty.resource.directory>${frontend.working.directory}</jetty.resource.directory>
+        <jetty.webinf.include.pattern>^.*$</jetty.webinf.include.pattern>
     </properties>
 
     <pluginRepositories>
@@ -78,6 +79,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <trimStackTrace>false</trimStackTrace>
                     <systemPropertyVariables>
                         <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
                         <sauce.user>${sauce.user}</sauce.user>
@@ -107,6 +109,25 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>com.lazerycode.selenium</groupId>
+                        <artifactId>driver-binary-downloader-maven-plugin</artifactId>
+                        <version>1.0.17</version>
+                        <configuration>
+                            <!-- root directory that downloaded driver binaries will be stored
+                                in -->
+                            <onlyGetDriversForHostOperatingSystem>true</onlyGetDriversForHostOperatingSystem>
+                            <rootStandaloneServerDirectory>.driver</rootStandaloneServerDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>selenium</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
                         <configuration>
@@ -114,18 +135,23 @@
                             <stopPort>8081</stopPort>
                             <stopWait>5</stopWait>
                             <stopKey>foo</stopKey>
-                            <!-- Prevent Jetty from scanning the classpath. -->
-                            <!-- Speeds up startup time significantly -->
                             <webAppConfig>
-                                <!-- <webInfIncludeJarPattern>.*/flow-.*.jar$|.*/test-resources-.*.jar$</webInfIncludeJarPattern> -->
+                                <!-- Exclude flow-server-production-mode jar -->
+                                <!-- to prevent duplicate web fragment from -->
+                                <!-- container classpath and WEB-INF/lib -->
+                                <webInfIncludeJarPattern>${jetty.webinf.include.pattern}</webInfIncludeJarPattern>
+
+                                <!-- Prevent Jetty from scanning the classpath. -->
+                                <!-- Speeds up startup time significantly -->
                                 <containerIncludeJarPattern>^$</containerIncludeJarPattern>
+
                                 <resourceBases>
                                     <resourceBase>${jetty.resource.directory}</resourceBase>
                                 </resourceBases>
                             </webAppConfig>
                         </configuration>
                         <executions>
-                            <!-- start and stop jetty (running our app) when running integration 
+                            <!-- start and stop jetty (running our app) when running integration
                                 tests -->
                             <execution>
                                 <id>start-jetty</id>
@@ -163,7 +189,7 @@
                                     <goal>start-sauceconnect</goal>
                                 </goals>
                             </execution>
-                            <!-- Stop the Sauce Connect process after the integration tests have 
+                            <!-- Stop the Sauce Connect process after the integration tests have
                                 finished -->
                             <execution>
                                 <id>stop-sauceconnect</id>
@@ -186,7 +212,8 @@
             </activation>
 
             <properties>
-                <jetty.resource.directory>${project.build.directory}/${project.build.finalName}/</jetty.resource.directory>
+                <jetty.resource.directory>${project.build.directory}/${project.build.finalName}</jetty.resource.directory>
+                <jetty.webinf.include.pattern>^((?!flow-server-production-mode).)*$</jetty.webinf.include.pattern>
             </properties>
 
             <dependencies>
