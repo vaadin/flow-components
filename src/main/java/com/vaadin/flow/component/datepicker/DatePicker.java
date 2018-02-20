@@ -51,8 +51,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * Default constructor.
      */
     public DatePicker() {
-        getElement().synchronizeProperty("value", "value-changed");
-        getElement().synchronizeProperty("invalid", "invalid-changed");
+        this((LocalDate) null);
     }
 
     /**
@@ -63,8 +62,9 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * @see #setValue(LocalDate)
      */
     public DatePicker(LocalDate initialDate) {
-        this();
-        setValue(initialDate);
+        getElement().synchronizeProperty("value", "value-changed");
+        getElement().synchronizeProperty("invalid", "invalid-changed");
+        doSetValue(initialDate);
     }
 
     /**
@@ -269,10 +269,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     @Override
     public void setValue(LocalDate value) {
-        if (value == null) {
-            setValueAsString("");
-        } else {
-            setValueAsString(FORMATTER.format(value));
+        if (!Objects.equals(value, getValue())) {
+            doSetValue(value);
         }
     }
 
@@ -304,9 +302,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     /**
      * Gets the current error message from the datepicker.
-     * 
+     *
      * @return the current error message
      */
+    @Override
     public String getErrorMessage() {
         return getErrorMessageString();
     }
@@ -320,9 +319,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * Gets the validity of the datepicker output.
      * <p>
      * return true, if the value is invalid.
-     * 
+     *
      * @return the {@code validity} property from the datepicker
      */
+    @Override
     public boolean isInvalid() {
         return isInvalidBoolean();
     }
@@ -334,7 +334,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     /**
      * Gets the label of the datepicker.
-     * 
+     *
      * @return the {@code label} property of the datePicker
      */
     public String getLabel() {
@@ -343,7 +343,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     /**
      * Enables or disables this datepicker.
-     * 
+     *
      * @param enabled
      *            the boolean value to set
      */
@@ -357,7 +357,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return {@code true} if the datepicker is enabled, {@code false}
      *         otherwise
      */
@@ -376,7 +376,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code placeholder} property of the datePicker
      */
     public String getPlaceholder() {
@@ -388,7 +388,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * <p>
      * The same date formats as for the {@code value} property are supported.
      * </p>
-     * 
+     *
      * @param initialPosition
      *            the LocalDate value to set
      */
@@ -408,7 +408,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code initialPosition} property from the datepicker
      */
     public LocalDate getInitialPosition() {
@@ -425,7 +425,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
@@ -439,7 +439,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * <p>
      * Notice that displaying week numbers is only supported when
      * i18n.firstDayOfWeek is 1 (Monday).
-     * 
+     *
      * @param showWeekNumbers
      *            the boolean value to set
      */
@@ -453,7 +453,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code showWeekNumbers} property from the datepicker
      */
     public boolean isWeekNumbersVisible() {
@@ -467,7 +467,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     /**
      * Gets the states of the drop-down for the datepicker
-     * 
+     *
      * @return {@code true} if the drop-down is opened, {@code false} otherwise
      */
     public boolean isOpened() {
@@ -481,7 +481,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     /**
      * Gets the name of the DatePicker.
-     * 
+     *
      * @return the {@code name} property from the DatePicker
      */
     public String getName() {
@@ -495,7 +495,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     /**
      * Gets the {@code readonly} property from the DatePicker.
-     * 
+     *
      * @return the {@code readonly} property from the DatePicker
      */
     public boolean isReadonly() {
@@ -516,7 +516,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     /**
      * Adds a listener for value-changed events fired by the datePicker.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -531,6 +531,14 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
             return null;
         }
         return LocalDate.parse(value, FORMATTER);
+    }
+
+    private void doSetValue(LocalDate value) {
+        if (value == null) {
+            setValueAsString("");
+        } else {
+            setValueAsString(FORMATTER.format(value));
+        }
     }
 
     /**
