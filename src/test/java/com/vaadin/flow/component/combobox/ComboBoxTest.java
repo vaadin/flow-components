@@ -18,6 +18,7 @@ package com.vaadin.flow.component.combobox;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.Assert;
@@ -25,6 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -134,9 +136,26 @@ public class ComboBoxTest {
         binder.readBean(bean);
         Assert.assertEquals(Category.CATEGORY_2, combo.getValue());
 
+        Assert.assertFalse(binder.hasChanges());
+
         bean.setCategory(Category.CATEGORY_3);
         binder.readBean(bean);
         Assert.assertEquals(Category.CATEGORY_3, combo.getValue());
+    }
+
+    @Test
+    public void setValue_selectionPropertySet_listenersAreNotified() {
+        ComboBox<Category> combo = new ComboBox<>();
+        combo.setItems(Category.values());
+
+        AtomicReference<Category> selected = new AtomicReference<>();
+        ValueChangeListener<ComboBox<Category>, Category> listener = event -> selected
+                .set(combo.getValue());
+        combo.addValueChangeListener(listener);
+
+        combo.setValue(Category.CATEGORY_2);
+
+        Assert.assertEquals(Category.CATEGORY_2, selected.get());
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {

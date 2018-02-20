@@ -74,9 +74,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     private List<T> itemsFromDataProvider = Collections.emptyList();
     private Registration rendererRegistration;
     private boolean refreshScheduled;
-    private boolean setItemScheduled;
 
-    private T temporarySelectedItem;
     private List<T> temporaryFilteredItems;
 
     /**
@@ -148,7 +146,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * the list of possible choices of the ComboBox. It doesn't affect how the
      * selected item is rendered - that can be configured by using
      * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
-     * 
+     *
      * @param renderer
      *            a renderer for the items in the selection list of the
      *            ComboBox, not <code>null</code>
@@ -270,7 +268,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     /**
      * Gets the states of the drop-down.
-     * 
+     *
      * @return {@code true} if the drop-down is opened, {@code false} otherwise
      */
     public boolean isOpened() {
@@ -286,9 +284,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * Gets the validity of the combobox output.
      * <p>
      * return true, if the value is invalid.
-     * 
+     *
      * @return the {@code validity} property from the component
      */
+    @Override
     public boolean isInvalid() {
         return isInvalidBoolean();
     }
@@ -300,9 +299,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     /**
      * Gets the current error message from the combobox.
-     * 
+     *
      * @return the current error message
      */
+    @Override
     public String getErrorMessage() {
         return getErrorMessageString();
     }
@@ -321,7 +321,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code allowCustomValue} property from the combobox
      */
     public boolean isAllowCustomValue() {
@@ -330,7 +330,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     /**
      * Set the combobox to be input focused when the page loads.
-     * 
+     *
      * @param autofocus
      *            the boolean value to set
      */
@@ -344,7 +344,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return the {@code autofocus} property from the combobox
      */
     public boolean isAutofocus() {
@@ -353,7 +353,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     /**
      * Enables or disables this combobox.
-     * 
+     *
      * @param enabled
      *            the boolean value to set
      */
@@ -367,7 +367,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return {@code true} if the combobox is enabled, {@code false} otherwise
      */
     public boolean isEnabled() {
@@ -384,7 +384,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return the {@code preventInvalidInput} property of the combobox
      */
     public boolean isPreventInvalidInput() {
@@ -401,7 +401,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
@@ -415,7 +415,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     /**
      * Gets the label of the combobox.
-     * 
+     *
      * @return the {@code label} property of the combobox
      */
     public String getLabel() {
@@ -429,7 +429,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     /**
      * Gets the placeholder of the combobox.
-     * 
+     *
      * @return the {@code placeholder} property of the combobox
      */
     public String getPlaceholder() {
@@ -443,7 +443,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     /**
      * Gets the valid input pattern
-     * 
+     *
      * @return the {@code pattern} property of the combobox
      */
     public String getPattern() {
@@ -458,64 +458,51 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     @Override
     public void setValue(T value) {
         if (value == null) {
-            temporarySelectedItem = null;
             if (getValue() != null) {
                 getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
                         Json.createNull());
             }
             return;
         }
-        if (itemsFromDataProvider.indexOf(value) < 0) {
+        int updatedIndex = itemsFromDataProvider.indexOf(value);
+        if (updatedIndex < 0) {
             throw new IllegalArgumentException(
                     "The provided value is not part of ComboBox: " + value);
         }
-        temporarySelectedItem = value;
-        if (setItemScheduled) {
-            return;
-        }
-        setItemScheduled = true;
-
-        runBeforeClientResponse(ui -> {
-            setItemScheduled = false;
-            if (temporarySelectedItem == null) {
-                return;
-            }
-            int updatedIndex = itemsFromDataProvider
-                    .indexOf(temporarySelectedItem);
-            ui.getPage().executeJavaScript("$0.selectedItem = $0.items[$1];",
-                    this.getElement(), updatedIndex);
-            temporarySelectedItem = null;
-        });
+        getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
+                generateJson(itemsFromDataProvider.get(updatedIndex)));
     }
 
     @Override
     public T getValue() {
-        if (temporarySelectedItem != null) {
-            return temporarySelectedItem;
-        }
-        Serializable property = getElement()
-                .getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME);
-        if (property instanceof JsonObject) {
-            JsonObject selected = (JsonObject) property;
-            assert selected.hasKey(KEY_PROPERTY);
-            return keyMapper.get(selected.getString(KEY_PROPERTY));
-        }
-        return getEmptyValue();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Registration addValueChangeListener(
-            ValueChangeListener<ComboBox<T>, T> listener) {
-
-        return addListener(HasValue.ValueChangeEvent.class,
-                (ValueChangeListener) listener);
+        return getValue(
+                getElement().getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME));
     }
 
     @Override
     public Registration addCustomValueSetListener(
             ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
         return super.addCustomValueSetListener(listener);
+    }
+
+    @Override
+    public Registration addValueChangeListener(
+            ValueChangeListener<ComboBox<T>, T> listener) {
+        return getElement().addPropertyChangeListener(
+                SELECTED_ITEM_PROPERTY_NAME,
+                event -> listener
+                        .onComponentEvent(new HasValue.ValueChangeEvent<>(get(),
+                                this, getValue(event.getOldValue()),
+                                event.isUserOriginated())));
+    }
+
+    private T getValue(Serializable value) {
+        if (value instanceof JsonObject) {
+            JsonObject selected = (JsonObject) value;
+            assert selected.hasKey(KEY_PROPERTY);
+            return keyMapper.get(selected.getString(KEY_PROPERTY));
+        }
+        return getEmptyValue();
     }
 
     private JsonArray generateJson(Stream<T> data) {
