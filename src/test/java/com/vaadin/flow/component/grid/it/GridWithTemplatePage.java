@@ -20,6 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
@@ -31,12 +32,14 @@ public class GridWithTemplatePage extends Div {
         createGridInATemplateWithTemplatesInTheCells();
         createGridInATemplateWithTemplatesInTheDetails();
         createGridInATemplateWithTemplatesInTheHeader();
+        createGridInTemplateWithColumnProperties();
 
         getElement().appendChild(new Element("hr", false));
         add(new H2("Standalone Grid"));
         createStandaloneGridWithTemplatesInTheCells();
         createStandaloneGridWithTemplatesInTheDetails();
         createStandaloneGridWithTemplatesInTheHeader();
+        createStandaloneGridWithColumnProperties();
     }
 
     private void createGridInATemplateWithTemplatesInTheCells() {
@@ -79,6 +82,22 @@ public class GridWithTemplatePage extends Div {
                 gridInATemplate);
     }
 
+    private void createGridInTemplateWithColumnProperties() {
+        GridInATemplate gridInATemplate = new GridInATemplate();
+        gridInATemplate.setId("injected-columns-with-properties");
+        Grid<String> grid = gridInATemplate.getGrid();
+        setCommonGridFeatures(grid, gridInATemplate.getId().get());
+
+        grid.addColumn(value -> value).setFlexGrow(2);
+        grid.addColumn(TemplateRenderer.of("[[index]]")).setFlexGrow(0)
+                .setWidth("20px");
+        grid.addColumn(new ComponentRenderer<>(
+                value -> getTestTemplate(value, grid.getId().get())))
+                .setFrozen(true).setResizable(true);
+
+        add(new H3("Grid with column properties"), gridInATemplate);
+    }
+
     private void createStandaloneGridWithTemplatesInTheCells() {
         Grid<String> grid = new Grid<>();
         setCommonGridFeatures(grid, "standalone-template-in-cells");
@@ -110,6 +129,20 @@ public class GridWithTemplatePage extends Div {
                 .setFooter(getTestTemplate("footer", grid.getId().get()));
 
         add(new H3("Grid with templates in the header and footer"), grid);
+    }
+
+    private void createStandaloneGridWithColumnProperties() {
+        Grid<String> grid = new Grid<>();
+        setCommonGridFeatures(grid, "standalone-columns-with-properties");
+
+        grid.addColumn(value -> value).setFlexGrow(2);
+        grid.addColumn(TemplateRenderer.of("[[index]]")).setFlexGrow(0)
+                .setWidth("20px");
+        grid.addColumn(new ComponentRenderer<>(
+                value -> getTestTemplate(value, grid.getId().get())))
+                .setFrozen(true).setResizable(true);
+
+        add(new H3("Grid with column properties"), grid);
     }
 
     private void setCommonGridFeatures(Grid<String> grid, String id) {

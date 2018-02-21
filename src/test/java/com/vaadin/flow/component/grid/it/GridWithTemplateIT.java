@@ -138,6 +138,46 @@ public class GridWithTemplateIT extends AbstractComponentIT {
         }
     }
 
+    @Test
+    public void injectedGrid_columnsWithProperties() {
+        WebElement gridInATemplate = findElement(
+                By.id("injected-columns-with-properties"));
+        WebElement grid = findInShadowRoot(gridInATemplate,
+                By.id("injected-columns-with-properties")).get(0);
+        assertColumnProperties(grid);
+    }
+
+    @Test
+    public void standaloneGrid_columnsWithProperties() {
+        WebElement grid = findElement(
+                By.id("standalone-columns-with-properties"));
+        assertColumnProperties(grid);
+    }
+
+    private void assertColumnProperties(WebElement grid) {
+        scrollToElement(grid);
+        List<WebElement> columns = grid
+                .findElements(By.tagName("vaadin-grid-column"));
+
+        Assert.assertEquals(3, columns.size());
+
+        Assert.assertEquals(
+                "The flexGrow property should be 2 on the first column", "2",
+                columns.get(0).getAttribute("flexGrow"));
+        Assert.assertEquals(
+                "The flexGrow property should be 0 on the second column", "0",
+                columns.get(1).getAttribute("flexGrow"));
+        Assert.assertEquals(
+                "The width property should be 20px on the second column",
+                "20px", columns.get(1).getAttribute("width"));
+        Assert.assertEquals(
+                "The frozen property should be true on the third column",
+                "true", columns.get(2).getAttribute("frozen"));
+        Assert.assertEquals(
+                "The resizable property should be true on the third column",
+                "true", columns.get(2).getAttribute("resizable"));
+    }
+
     private void clickOnTheButtonInsideTheTestTemplate(WebElement grid,
             String id, int numberOfClicks) {
         WebElement template = findTestTemplateElement(grid, id);
