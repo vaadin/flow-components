@@ -57,13 +57,6 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
-                        
-                        <configuration>
-                            <includeDependencySources>true</includeDependencySources>
-                            <dependencySourceIncludes>
-                                <dependencySourceInclude>com.vaadin:vaadin-charts-model</dependencySourceInclude>
-                            </dependencySourceIncludes>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
