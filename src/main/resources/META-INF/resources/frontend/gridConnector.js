@@ -238,6 +238,9 @@ window.gridConnector = {
     };
 
     grid.$connector.clear = function(index, length) {
+      if (Object.keys(cache).length === 0){
+        return;
+      }
       if (index % grid.pageSize != 0) {
         throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
       }
@@ -268,6 +271,21 @@ window.gridConnector = {
         }
       }
       return false;
+    }
+
+    grid.$connector.reset = function() {
+      grid.size = 0;
+      deleteObjectContents(cache);
+      deleteObjectContents(grid._cache.items);
+      lastRequestedRange = [0, 0];
+      grid._assignModels();
+    };
+
+    const deleteObjectContents = function(obj) {
+      let props = Object.keys(obj);
+      for (let i = 0; i < props.length; i++) {
+        delete obj[props[i]];
+      }
     }
 
     grid.$connector.updateSize = function(newSize) {

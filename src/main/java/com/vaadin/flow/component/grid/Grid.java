@@ -996,7 +996,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
-     * Gets the current page size.
+     * Gets the current page size, which is the number of items fetched at a
+     * time from the dataprovider.
      *
      * @return the current page size
      */
@@ -1005,16 +1006,21 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
-     * Sets the page size.
+     * Sets the page size, which is the number of items fetched at a time from
+     * the dataprovider.
      * <p>
-     * This method is private at the moment because the Grid doesn't support
-     * changing the pageSize after the initial load.
+     * Note: the number of items in the server-side memory can be considerably
+     * higher than the page size, since the component can show more than one
+     * page at a time.
+     * <p>
+     * Setting the pageSize after the Grid has been rendered effectively resets
+     * the component, and the current page(s) and sent over again.
      *
      * @param pageSize
      *            the maximum number of items sent per request. Should be
      *            greater than zero
      */
-    private void setPageSize(int pageSize) {
+    public void setPageSize(int pageSize) {
         if (pageSize <= 0) {
             throw new IllegalArgumentException(
                     "The pageSize should be greater than zero. Was "
@@ -1026,7 +1032,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         // https://github.com/vaadin/vaadin-grid/issues/1200
         getElement().setProperty("size", 0);
 
-        getDataCommunicator().setRequestedRange(0, pageSize);
+        getElement().callFunction("$connector.reset");
+        setRequestedRange(0, pageSize);
+        getDataCommunicator().reset();
     }
 
     /**

@@ -129,7 +129,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         while (!getCells(grid).stream()
                 .filter(cell -> "Person 1".equals(cell.getText())).findFirst()
                 .isPresent()) {
-            executeScript("arguments[0].scrollTop -= 1000;", table);
+            executeScript("arguments[0].scrollTop -= 100;", table);
         }
         // scroll the first row so it is visible.
         scroll(grid, 0);

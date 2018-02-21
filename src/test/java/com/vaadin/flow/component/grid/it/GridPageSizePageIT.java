@@ -15,7 +15,10 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.List;
+
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -29,16 +32,61 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("grid-page-size")
 public class GridPageSizePageIT extends AbstractComponentIT {
 
-    @Test
-    public void gridWithPageSize10() {
+    @Before
+    public void init() {
         open();
-
         waitForElementPresent(By.tagName("vaadin-grid"));
+    }
+
+    @Test
+    public void gridWithPageSize10_changeTo80_revertBackTo10() {
         WebElement grid = findElement(By.tagName("vaadin-grid"));
 
-        Object pageSize = executeScript("return arguments[0].pageSize", grid);
-        Assert.assertEquals("The pageSize of the webcomponent should be 10", 10,
-                Integer.parseInt(String.valueOf(pageSize)));
+        assertPageSize(grid, 10);
+        assertCellContents(grid);
+
+        WebElement input = findElement(By.id("size-input"));
+        WebElement button = findElement(By.id("size-submit"));
+
+        input.sendKeys("80");
+        blur();
+        button.click();
+
+        assertPageSize(grid, 80);
+        assertCellContents(grid);
+
+        input.clear();
+        input.sendKeys("10");
+        blur();
+        button.click();
+
+        assertPageSize(grid, 10);
+        assertCellContents(grid);
+    }
+
+    private void assertCellContents(WebElement grid) {
+        /*
+         * Smoke test for the cell contents. The actual contents depends on the
+         * size of the Grid, the window size, and the scroll position. The
+         * headers and footers are also part of the Grid contents.
+         */
+        List<WebElement> cells = grid
+                .findElements(By.tagName("vaadin-grid-cell-content"));
+        assertCellContent("0", cells.get(0));
+        assertCellContent("24", cells.get(48));
+    }
+
+    private void assertCellContent(String expected, WebElement cell) {
+        Assert.assertEquals("Wrong content of the rendered cell", expected,
+                cell.getAttribute("innerHTML"));
+    }
+
+    private void assertPageSize(WebElement grid, int pageSize) {
+        Object pageSizeFromGrid = executeScript("return arguments[0].pageSize",
+                grid);
+        Assert.assertEquals(
+                "The pageSize of the webcomponent should be " + pageSize,
+                pageSize, Integer.parseInt(String.valueOf(pageSizeFromGrid)));
     }
 
 }

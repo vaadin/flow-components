@@ -19,7 +19,9 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
@@ -49,7 +51,15 @@ public class GridPageSizePage extends Div {
         info = new Label();
         info.setId("query-info");
 
-        add(grid, info);
+        Input size = new Input();
+        size.setId("size-input");
+        NativeButton button = new NativeButton("Change page size", event -> {
+            int pageSize = Integer.parseInt(size.getValue());
+            grid.setPageSize(pageSize);
+        });
+        button.setId("size-submit");
+
+        add(grid, info, new Div(size, button));
     }
 
     private IntStream getStream(Query<String, Void> query) {
