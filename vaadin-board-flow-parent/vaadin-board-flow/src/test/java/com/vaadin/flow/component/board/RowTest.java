@@ -3,6 +3,9 @@ package com.vaadin.flow.component.board;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.board.internal.FunctionCallerTest;
+
 public class RowTest {
 
     @Test
@@ -137,7 +140,16 @@ public class RowTest {
         row.add(dummyComponent, 3);
         row.add(dummyComponent2);
         row.setComponentSpan(dummyComponent2, 2);
+    }
 
+    @Test
+    public void redrawCallsRedraw() throws Exception {
+        UI ui = new UI();
+        Board board = new Board();
+        ui.add(board);
+
+        board.redraw();
+        FunctionCallerTest.assertPendingInvocations(ui, "$0.redraw()");
     }
 
 }

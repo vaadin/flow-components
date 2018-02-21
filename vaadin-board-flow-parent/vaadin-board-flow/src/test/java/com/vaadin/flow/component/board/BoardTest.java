@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasOrderedComponents;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.board.internal.FunctionCallerTest;
 
 public class BoardTest {
 
@@ -83,6 +85,16 @@ public class BoardTest {
         Board board = new Board();
         board.addRow(new DummyComponent());
         board.remove(new Row());
+    }
+
+    @Test
+    public void redrawCallsRedraw() throws Exception {
+        UI ui = new UI();
+        Board board = new Board();
+        ui.add(board);
+
+        board.redraw();
+        FunctionCallerTest.assertPendingInvocations(ui, "$0.redraw()");
     }
 
     static void assertChildren(HasOrderedComponents<?> parent,

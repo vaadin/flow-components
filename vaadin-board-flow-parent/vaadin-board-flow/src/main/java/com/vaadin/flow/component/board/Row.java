@@ -7,6 +7,7 @@ import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.board.internal.FunctionCaller;
 import com.vaadin.flow.component.dependency.HtmlImport;
 
 /**
@@ -15,16 +16,16 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * Each Row consists of four columns, and can contain up to four components
  * taking one column each, or fewer components with multiple columns each as
  * long as sum of columns stays less than or equal to four.
- * 
+ *
  * <p>
  * One row might also contain a nested row as shown in the following example:
- * 
+ *
  * <pre>
  * Board board = new Board();
  * Label lbl1 = createLabel("Label 1");
  * Label lbl2 = createLabel("Label 2");
  * Label lbl3 = createLabel("Label 3");
- * 
+ *
  * Label inner1 = createLabel("Inner 1");
  * Label inner3 = createLabel("Inner 3");
  * Label inner4 = createLabel("Inner 4");
@@ -53,7 +54,7 @@ public class Row extends Component
 
     /**
      * Creates an new row with the given components.
-     * 
+     *
      * @param components
      *            initial content of the row
      */
@@ -138,21 +139,7 @@ public class Row extends Component
         }
         // <vaadin-board> does not know then the attribute of a child has
         // changed so we need to call redraw()
-        triggerRedraw();
-    }
-
-    private void triggerRedraw() {
-        if (redrawTriggered) {
-            return;
-        }
-        redrawTriggered = true;
-
-        getElement().callFunction("redraw");
-        getElement().getNode().runWhenAttached(ui -> {
-            ui.beforeClientResponse(this, () -> {
-                redrawTriggered = false;
-            });
-        });
+        FunctionCaller.callOnceOnClientReponse(this, "redraw");
     }
 
     private void throwIfNotChild(Component component) {
@@ -173,7 +160,7 @@ public class Row extends Component
     /**
      * Gets the number of columns used, i.e. the total span sum for all
      * components.
-     * 
+     *
      * @return the number of used columns
      */
     private int getColumns() {

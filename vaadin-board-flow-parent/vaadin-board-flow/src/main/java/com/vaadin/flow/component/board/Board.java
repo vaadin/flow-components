@@ -5,6 +5,7 @@ import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.board.internal.FunctionCaller;
 import com.vaadin.flow.component.dependency.HtmlImport;
 
 /**
@@ -66,6 +67,18 @@ public class Board extends Component
      **/
     public void removeRow(Row row) {
         remove(row);
+    }
+
+    /**
+     * Forces the board to be redrawn.
+     * <p>
+     * This method typically only needs to be called if you change CSS (through
+     * a variable or otherwise) which affects the size of the board or the
+     * breakpoints used. Otherwise, the component will be redrawn automatically
+     * when needed.
+     */
+    public void redraw() {
+        FunctionCaller.callOnceOnClientReponse(this, "redraw");
     }
 
 }
