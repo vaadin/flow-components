@@ -15,8 +15,12 @@
  */
 package com.vaadin.flow.component.dialog;
 
+import java.util.stream.Stream;
+import java.util.stream.Stream.Builder;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -196,6 +200,14 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     public boolean isOpened() {
         return super.isOpenedBoolean();
+    }
+
+    @Override
+    public Stream<Component> getChildren() {
+        Builder<Component> childComponents = Stream.builder();
+        container.getChildren().forEach(childElement -> ComponentUtil
+                .findComponents(childElement, childComponents::add));
+        return childComponents.build();
     }
 
     /**
