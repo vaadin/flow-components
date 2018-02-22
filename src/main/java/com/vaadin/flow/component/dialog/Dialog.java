@@ -38,6 +38,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     private Element template;
     private Element container;
+    private boolean autoAddedToTheUi = false;
 
     /**
      * Creates an empty dialog.
@@ -52,6 +53,13 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         // Attach <flow-component-renderer>
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, () -> attachComponentRenderer()));
+
+        addOpenedChangeListener(event -> {
+            if (autoAddedToTheUi && !isOpened()) {
+                getElement().removeFromParent();
+                autoAddedToTheUi = false;
+            }
+        });
     }
 
     /**
@@ -188,7 +196,10 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         UI ui = UI.getCurrent();
         if (opened && getElement().getNode().getParent() == null
                 && ui != null) {
-            ui.beforeClientResponse(ui, () -> ui.add(this));
+            ui.beforeClientResponse(ui, () -> {
+                ui.add(this);
+                autoAddedToTheUi = true;
+            });
         }
         super.setOpened(opened);
     }

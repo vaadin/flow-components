@@ -40,9 +40,9 @@ public class DialogWithTemplateIT extends AbstractComponentIT {
         WebElement open = findElement(By.id("open"));
         open.click();
 
-        waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_TAG));
+        waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
         WebElement overlay = findElement(
-                By.tagName(DialogTestPageIT.DIALOG_TAG));
+                By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
         WebElement template = findInShadowRoot(overlay, By.id("template"))
                 .get(0);
 

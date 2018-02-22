@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 
 import org.hamcrest.CoreMatchers;
@@ -29,10 +27,12 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
+import static org.junit.Assert.assertTrue;
+
 @TestPath("dialog-test")
 public class DialogTestPageIT extends AbstractComponentIT {
 
-    static final String DIALOG_TAG = "vaadin-dialog-overlay";
+    static final String DIALOG_OVERLAY_TAG = "vaadin-dialog-overlay";
 
     @Before
     public void init() {
@@ -47,23 +47,46 @@ public class DialogTestPageIT extends AbstractComponentIT {
                 .equals(findElement(By.id("message")).getText()));
 
         findElement(By.id("dialog-open")).click();
-        checkDialogIsOpen();
+        checkDialogIsOpened();
         assertTrue("The open state of the dialog is true"
                 .equals(findElement(By.id("message")).getText()));
         assertDialogContent(
                 "There is a opened change listener for this dialog");
         executeScript("document.body.click()");
-        checkDialogIsClose();
+        checkDialogIsClosed();
         assertTrue("The open state of the dialog is false"
                 .equals(findElement(By.id("message")).getText()));
     }
 
-    private void checkDialogIsClose() {
-        waitForElementNotPresent(By.tagName(DIALOG_TAG));
+    @Test
+    public void dialogNotAttachedToThePage_openAndClose_dialogIsAttachedAndRemoved() {
+        WebElement open = findElement(By.id("dialog-outside-ui-open"));
+
+        waitForElementNotPresent(By.id("dialog-outside-ui"));
+        open.click();
+        waitForElementPresent(By.id("dialog-outside-ui"));
+        checkDialogIsOpened();
+        executeScript("document.body.click()");
+        checkDialogIsClosed();
+        waitForElementNotPresent(By.id("dialog-outside-ui"));
+
+        open.click();
+        waitForElementPresent(By.id("dialog-outside-ui"));
+        checkDialogIsOpened();
+        WebElement overlay = findElement(By.tagName(DIALOG_OVERLAY_TAG));
+        WebElement close = findInShadowRoot(overlay,
+                By.id("dialog-outside-ui-close")).get(0);
+        close.click();
+        checkDialogIsClosed();
+        waitForElementNotPresent(By.id("dialog-outside-ui"));
     }
 
-    private void checkDialogIsOpen() {
-        waitForElementPresent(By.tagName(DIALOG_TAG));
+    private void checkDialogIsClosed() {
+        waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
+    }
+
+    private void checkDialogIsOpened() {
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
     }
 
     private void assertDialogContent(String expected) {
@@ -73,6 +96,6 @@ public class DialogTestPageIT extends AbstractComponentIT {
     }
 
     private List<WebElement> getDialogs() {
-        return findElements(By.tagName(DIALOG_TAG));
+        return findElements(By.tagName(DIALOG_OVERLAY_TAG));
     }
 }

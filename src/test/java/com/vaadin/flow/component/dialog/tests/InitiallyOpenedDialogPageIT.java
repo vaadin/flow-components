@@ -34,9 +34,9 @@ public class InitiallyOpenedDialogPageIT extends AbstractComponentIT {
 
     @Test
     public void openDialogDuringPageLoad() {
-        waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_TAG));
+        waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
         WebElement overlay = findElement(
-                By.tagName(DialogTestPageIT.DIALOG_TAG));
+                By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
         Assert.assertTrue(
                 isPresentInShadowRoot(overlay, By.id("nested-component")));
     }

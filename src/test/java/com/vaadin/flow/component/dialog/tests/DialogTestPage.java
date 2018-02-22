@@ -34,6 +34,7 @@ public class DialogTestPage extends Div {
 
     public DialogTestPage() {
         createDialogWithAddOpenedChangeListener();
+        createDialogWithoutAddingToTheUi();
     }
 
     private void createDialogWithAddOpenedChangeListener() {
@@ -51,6 +52,21 @@ public class DialogTestPage extends Div {
         dialog.addOpenedChangeListener(event -> message.setText(
                 "The open state of the dialog is " + dialog.isOpened()));
         add(button, message, dialog);
+    }
+
+    private void createDialogWithoutAddingToTheUi() {
+        NativeButton open = new NativeButton("Open dialog not attached");
+        open.setId("dialog-outside-ui-open");
+        NativeButton close = new NativeButton("Close dialog");
+        close.setId("dialog-outside-ui-close");
+
+        Dialog dialog = new Dialog();
+        dialog.setId("dialog-outside-ui");
+        dialog.add(new Label("Hei! Moika! Moi!"), close);
+
+        open.addClickListener(event -> dialog.open());
+        close.addClickListener(event -> dialog.close());
+        add(open);
     }
 
 }
