@@ -50,6 +50,7 @@ public class ComboBoxPage extends Div {
         createExternalSetValue();
         createWithUpdateProvider();
         createWithValueChangeListener();
+        createWithUpdatableValue();
         createWithPresetValue();
         createWithButtonRenderer();
     }
@@ -125,6 +126,22 @@ public class ComboBoxPage extends Div {
         comboBox.setId("button-renderer");
 
         add(comboBox, message);
+    }
+
+    private void createWithUpdatableValue() {
+        ComboBox<String> combo = new ComboBox<>();
+        combo.setItems("Item 1", "Item 2", "Item 3");
+        Label message = new Label();
+        NativeButton button = new NativeButton("Update value",
+                evt -> combo.setValue("Item 2"));
+
+        combo.addValueChangeListener(event -> message.setText("Value: "
+                + event.getValue() + " isFromClient: " + event.isFromClient()));
+
+        combo.setId("updatable-combo");
+        message.setId("updatable-combo-message");
+        button.setId("updatable-combo-button");
+        add(combo, message, button);
     }
 
     private void handleSelection(ComboBox<Title> titles) {

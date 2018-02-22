@@ -132,6 +132,31 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         Assert.assertEquals("foo", getSelectedItemLabel(combo));
     }
 
+    @Test
+    public void changeValue_IsFromClientIsSetAccordingly() {
+        WebElement combo = findElement(By.id("updatable-combo"));
+        WebElement message = findElement(By.id("updatable-combo-message"));
+        WebElement button = findElement(By.id("updatable-combo-button"));
+
+        Assert.assertEquals("", getSelectedItemLabel(combo));
+
+        button.click();
+        Assert.assertEquals("Item 2", getSelectedItemLabel(combo));
+        Assert.assertEquals("Value: Item 2 isFromClient: false",
+                message.getText());
+
+        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
+                combo);
+        Assert.assertEquals("Item 1", getSelectedItemLabel(combo));
+        Assert.assertEquals("Value: Item 1 isFromClient: true",
+                message.getText());
+
+        button.click();
+        Assert.assertEquals("Item 2", getSelectedItemLabel(combo));
+        Assert.assertEquals("Value: Item 2 isFromClient: false",
+                message.getText());
+    }
+
     private List<?> getItems(WebElement combo) {
         List<?> items = (List<?>) getCommandExecutor()
                 .executeScript("return arguments[0].items;", combo);
@@ -149,7 +174,8 @@ public class ComboBoxPageIT extends AbstractComponentIT {
     }
 
     private String getSelectedItemLabel(WebElement combo) {
-        return String.valueOf(
-                executeScript("return arguments[0].selectedItem.label", combo));
+        return String.valueOf(executeScript(
+                "return arguments[0].selectedItem ? arguments[0].selectedItem.label : \"\"",
+                combo));
     }
 }
