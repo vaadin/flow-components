@@ -41,6 +41,7 @@ public class NotificationTestPage extends Div {
         createNotificationAddMix();
         createNotificationwithTextAndAddComponent();
         createNotificationAddComponentAddText();
+        createNotificationOutsideUi();
     }
 
     private void createNotificationWithButtonControl() {
@@ -63,16 +64,15 @@ public class NotificationTestPage extends Div {
         button1.setId("notification-button-1");
         NativeButton button2 = new NativeButton(BUTTON_CAPTION + "2");
         button2.setId("notification-button-2");
-        Notification notification1 = new Notification(
-                "<h3>11111111111</h3>", 4000);
+        Notification notification1 = new Notification("<h3>11111111111</h3>",
+                4000);
         notification1.setId("notication-1");
-        Notification notification2 = new Notification(
-                "<h3>22222222222</h3>", 4000);
+        Notification notification2 = new Notification("<h3>22222222222</h3>",
+                4000);
         notification1.setId("notication-2");
         button1.addClickListener(event -> notification1.open());
         button2.addClickListener(event -> notification2.open());
-        add(notification1, button1,
-                notification2, button2);
+        add(notification1, button1, notification2, button2);
     }
 
     private void createNotificationAddComponent() {
@@ -186,8 +186,8 @@ public class NotificationTestPage extends Div {
     }
 
     private void createNotificationAddComponentAddText() {
-        Notification notificaiton = new Notification();
-        notificaiton.setId("add-component-add-text");
+        Notification notification = new Notification();
+        notification.setId("add-component-add-text");
         NativeButton button1 = new NativeButton(BUTTON_CAPTION);
         NativeButton button2 = new NativeButton("3333");
         NativeButton button3 = new NativeButton("BYE");
@@ -195,11 +195,26 @@ public class NotificationTestPage extends Div {
         button2.setId("add-component-add-text-two");
         button3.setId("add-component-add-text-close");
 
-        notificaiton.add(button2);
-        notificaiton.setText("Moi");
-        button1.addClickListener(event -> notificaiton.open());
-        button3.addClickListener(event -> notificaiton.close());
-        add(notificaiton, button1, button3);
+        notification.add(button2);
+        notification.setText("Moi");
+        button1.addClickListener(event -> notification.open());
+        button3.addClickListener(event -> notification.close());
+        add(notification, button1, button3);
+    }
+
+    private void createNotificationOutsideUi() {
+        Notification notification = new Notification();
+        notification.setDuration(4000);
+        notification.setId("notification-outside-ui");
+        NativeButton open = new NativeButton("Open detached");
+        NativeButton close = new NativeButton("Close detached");
+        open.setId("notification-outside-ui-open");
+        close.setId("notification-outside-ui-close");
+
+        notification.setText("Moi");
+        open.addClickListener(event -> notification.open());
+        close.addClickListener(event -> notification.close());
+        add(open, close);
     }
 
 }

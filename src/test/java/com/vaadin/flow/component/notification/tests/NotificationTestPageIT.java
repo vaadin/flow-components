@@ -30,7 +30,7 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("notification-test")
 public class NotificationTestPageIT extends AbstractComponentIT {
 
-    private static final String NOTIFICATION_TAG = "vaadin-notification-card";
+    private static final String NOTIFICATION_CARD_TAG = "vaadin-notification-card";
 
     @Before
     public void init() {
@@ -55,15 +55,17 @@ public class NotificationTestPageIT extends AbstractComponentIT {
 
         checkNotificationIsOpen();
 
-        List<String> notifications = getNotifications().stream().map(WebElement::getText)
-                .collect(Collectors.toList());
+        List<String> notifications = getNotifications().stream()
+                .map(WebElement::getText).collect(Collectors.toList());
         Assert.assertEquals(
                 "Expect to have two notification pop-ups for two notification buttons clicked",
                 notifications.size(), 2);
         Assert.assertTrue("Expect to have the first notification shown",
-                notifications.stream().anyMatch(text -> text.contains("1111111")));
+                notifications.stream()
+                        .anyMatch(text -> text.contains("1111111")));
         Assert.assertTrue("Expect to have the second notification shown",
-                notifications.stream().anyMatch(text -> text.contains("2222222")));
+                notifications.stream()
+                        .anyMatch(text -> text.contains("2222222")));
     }
 
     @Test
@@ -109,8 +111,8 @@ public class NotificationTestPageIT extends AbstractComponentIT {
         findElement(By.id("Add-Mix-open")).click();
         checkNotificationIsOpen();
         assertButtonSize(1);
-        Assert.assertFalse(
-                getNotifications().iterator().next().getText().contains("5555555"));
+        Assert.assertFalse(getNotifications().iterator().next().getText()
+                .contains("5555555"));
         clickElementWithJs(findElement(By.id("add-Mix-close")));
         checkNotificationIsClose();
     }
@@ -134,17 +136,60 @@ public class NotificationTestPageIT extends AbstractComponentIT {
         checkNotificationIsClose();
     }
 
+    @Test
+    public void notificationNotAttachedToThePage_openAndClose_notificationIsAttachedAndRemoved() {
+        WebElement open = findElement(By.id("notification-outside-ui-open"));
+
+        waitForElementNotPresent(By.id("notification-outside-ui"));
+        open.click();
+        waitForElementPresent(By.id("notification-outside-ui"));
+        checkNotificationIsOpen();
+        try {
+            // wait for the notification to disappear
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        checkNotificationIsClose();
+        waitForElementNotPresent(By.id("notification-outside-ui"));
+
+        open.click();
+        waitForElementPresent(By.id("notification-outside-ui"));
+        checkNotificationIsOpen();
+        WebElement close = findElement(By.id("notification-outside-ui-close"));
+        close.click();
+        checkNotificationIsClose();
+        waitForElementNotPresent(By.id("notification-outside-ui"));
+    }
+
+    @Test
+    public void notificationWithButtonControl_isNotRemovedOnClose() {
+        List<WebElement> notification = findElements(
+                By.id("notification-with-button-control"));
+        Assert.assertEquals(1, notification.size());
+
+        findElement(By.id("notification-open")).click();
+        checkNotificationIsOpen();
+        clickElementWithJs(findElement(By.id("notification-close")));
+        checkNotificationIsClose();
+
+        // since the notification was added manually in the DOM, it shouldn't be
+        // removed after close
+        notification = findElements(By.id("notification-with-button-control"));
+        Assert.assertEquals(1, notification.size());
+    }
+
     private void assertButtonSize(int number) {
         Assert.assertEquals(number, getNotifications().iterator().next()
                 .findElements(By.tagName("button")).size());
     }
 
     private void checkNotificationIsClose() {
-        waitForElementNotPresent(By.tagName(NOTIFICATION_TAG));
+        waitForElementNotPresent(By.tagName(NOTIFICATION_CARD_TAG));
     }
 
     private void checkNotificationIsOpen() {
-        waitForElementPresent(By.tagName(NOTIFICATION_TAG));
+        waitForElementPresent(By.tagName(NOTIFICATION_CARD_TAG));
     }
 
     private void assertNotificationContent(String expected) {
@@ -158,6 +203,6 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     }
 
     private List<WebElement> getNotifications() {
-        return findElements(By.tagName(NOTIFICATION_TAG));
+        return findElements(By.tagName(NOTIFICATION_CARD_TAG));
     }
 }
