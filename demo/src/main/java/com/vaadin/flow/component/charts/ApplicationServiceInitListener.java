@@ -27,7 +27,7 @@ public class ApplicationServiceInitListener
                         && !e.getUrl().contains("examples"));
 
                 dependencies.add(new Dependency(Dependency.Type.HTML_IMPORT,
-                        "src/charts-demo-app.html", LoadMode.EAGER));
+                        "vaadin-flow-bundle.html", LoadMode.EAGER));
             }
 
             return dependencies;

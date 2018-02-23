@@ -36,13 +36,8 @@
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
 
-        <flow.version>1.0.0.alpha21</flow.version>
+        <flow.version>1.0.0.alpha22</flow.version>
         <jetty.version>9.3.9.v20160517</jetty.version>
-        <!-- Frontend -->
-        <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
-        <frontend.maven.plugin.version>1.6</frontend.maven.plugin.version>
-        <node.version>v8.9.0</node.version>
-        <yarn.version>v1.3.2</yarn.version>
     </properties>
 
     <url>http://vaadin.com/charts</url>

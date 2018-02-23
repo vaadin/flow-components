@@ -20,15 +20,12 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
 
-        <buildtools.directory>build-tools</buildtools.directory>
-        <frontend.working.directory>src/main/webapp/frontend</frontend.working.directory>
-        <vaadin.frontend.path>VAADIN/static/frontend</vaadin.frontend.path>
+        <frontend.working.directory>${project.basedir}/src/main/webapp</frontend.working.directory>
 
-        <yarn.build.goal>run install-bower-dependencies</yarn.build.goal>
-        <jetty.extra.resource.base>${project.basedir}/${frontend.working.directory}</jetty.extra.resource.base>
-        <jetty.jvm.args></jetty.jvm.args>
         <war.source.excludes></war.source.excludes>
-        <war.resource.directory>${frontend.working.directory}</war.resource.directory>
+
+        <jetty.jvm.args></jetty.jvm.args>
+        <jetty.resource.directory>${frontend.working.directory}</jetty.resource.directory>
     </properties>
 
     <dependencies>
@@ -38,12 +35,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
@@ -58,6 +49,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.12</version>
         </dependency>
     </dependencies>
 
@@ -93,52 +89,10 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>src/main/webapp/frontend-es5</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>src/main/webapp/frontend-es6</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/bower_components</directory>
-                        </fileset>
-                        <fileset>
-                            <directory>${frontend.working.directory}/build</directory>
+                            <directory>${frontend.working.directory}/frontend/bower_components</directory>
                         </fileset>
                     </filesets>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>${frontend.maven.plugin.version}</version>
-                <configuration>
-                    <nodeVersion>${node.version}</nodeVersion>
-                    <yarnVersion>${yarn.version}</yarnVersion>
-                    <workingDirectory>${buildtools.directory}</workingDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>install-tools-then-build</id>
-                        <goals>
-                            <goal>install-node-and-yarn</goal>
-                            <goal>yarn</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>${buildtools.directory}</workingDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>run-build</id>
-                        <goals>
-                            <goal>yarn</goal>
-                        </goals>
-                        <configuration>
-                            <workingDirectory>${buildtools.directory}</workingDirectory>
-                            <arguments>${yarn.build.goal}</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
@@ -146,11 +100,6 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>${maven.war.plugin.version}</version>
                 <configuration>
-                    <webResources>
-                        <resource>
-                            <directory>${war.resource.directory}</directory>
-                        </resource>
-                    </webResources>
                     <warSourceExcludes>${war.source.excludes}</warSourceExcludes>
                 </configuration>
             </plugin>
@@ -160,12 +109,201 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <configuration>
                     <jvmArgs>${jetty.jvm.args}</jvmArgs>
+                    <webAppConfig>
+                        <containerIncludeJarPattern>^$</containerIncludeJarPattern>
+                        <resourceBases>
+                            <resourceBase>${jetty.resource.directory}</resourceBase>
+                        </resourceBases>
+                    </webAppConfig>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
+        <!--This profile is only present for quick testing againt the element from GitHub-->
+        <!--Do not use with production mode-->
+        <profile>
+            <id>bower</id>
+            <activation>
+                <property>
+                    <name>useBower</name>
+                </property>
+            </activation>
+
+            <properties>
+                <buildtools.directory>build-tools</buildtools.directory>
+
+                <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
+                <frontend.maven.plugin.version>1.6</frontend.maven.plugin.version>
+                <node.version>v8.9.0</node.version>
+                <yarn.version>v1.3.2</yarn.version>
+            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${frontend.maven.plugin.version}</version>
+
+                        <configuration>
+                            <nodeVersion>${node.version}</nodeVersion>
+                            <yarnVersion>${yarn.version}</yarnVersion>
+                            <workingDirectory>${buildtools.directory}</workingDirectory>
+                        </configuration>
+
+                        <executions>
+                            <execution>
+                                <id>install-tools-then-build</id>
+                                <goals>
+                                    <goal>install-node-and-yarn</goal>
+                                    <goal>yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <workingDirectory>${buildtools.directory}</workingDirectory>
+                                    <arguments>run install-bower-dependencies</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>webjars</id>
+            <activation>
+                <property>
+                    <name>!useBower</name>
+                </property>
+            </activation>
+
+            <repositories>
+                <repository>
+                    <id>bintray</id>
+                    <url>https://dl.bintray.com/webjars/maven/</url>
+                </repository>
+            </repositories>
+
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>vaadin-webjars-bom</artifactId>
+                        <type>pom</type>
+                        <scope>import</scope>
+                        <version>${flow.version}</version>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
+
+            <dependencies>
+                <!--VAADIN ELEMENTS-->
+                <dependency>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-icons-flow</artifactId>
+                    <version>1.0.0.alpha8</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin-split-layout-flow</artifactId>
+                    <version>1.0.0.alpha7</version>
+                </dependency>
+
+                <!--PAPER ELEMENTS-->
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>paper-button</artifactId>
+                    <version>2.0.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>paper-dialog</artifactId>
+                    <version>2.0.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>paper-icon-button</artifactId>
+                    <version>2.1.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>paper-styles</artifactId>
+                    <version>2.0.0</version>
+                </dependency>
+
+                <!--IRON ELEMENTS-->
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-collapse</artifactId>
+                    <version>2.1.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-flex-layout</artifactId>
+                    <version>2.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-icon</artifactId>
+                    <version>2.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-icons</artifactId>
+                    <version>2.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-iconset-svg</artifactId>
+                    <version>2.1.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-image</artifactId>
+                    <version>2.1.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-localstorage</artifactId>
+                    <version>2.1.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-media-query</artifactId>
+                    <version>2.0.0</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-pages</artifactId>
+                    <version>2.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-resizable-behavior</artifactId>
+                    <version>2.0.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-selector</artifactId>
+                    <version>2.0.1</version>
+                </dependency>
+
+                <!--APP ELEMENTS-->
+                <dependency>
+                    <groupId>org.webjars.bowergithub.oyeharry</groupId>
+                    <artifactId>app-menu</artifactId>
+                    <version>2.1.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>app-route</artifactId>
+                    <version>2.0.3</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
         <profile>
             <id>productionMode</id>
             <activation>
@@ -175,12 +313,9 @@
             </activation>
 
             <properties>
-                <yarn.build.goal>run build</yarn.build.goal>
-                <war.resource.directory>${frontend.working.directory}/build</war.resource.directory>
-                <war.source.excludes>
-                    **/build/,**/bower.json,**/package.json,.bowerrc,src/**,bower_components/**,images/**,frontend/**
-                </war.source.excludes>
                 <jetty.jvm.args>-Dvaadin.productionMode</jetty.jvm.args>
+                <jetty.resource.directory>${project.build.directory}/${project.build.finalName}</jetty.resource.directory>
+                <war.source.excludes>frontend/**</war.source.excludes>
             </properties>
 
             <dependencies>
@@ -189,6 +324,26 @@
                     <artifactId>flow-server-production-mode</artifactId>
                 </dependency>
             </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>flow-maven-plugin</artifactId>
+                        <configuration>
+                            <frontendWorkingDirectory>${frontend.working.directory}/frontend</frontendWorkingDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>copy-production-files</goal>
+                                    <goal>package-for-production</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
