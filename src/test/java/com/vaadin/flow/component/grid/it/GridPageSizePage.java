@@ -25,11 +25,13 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.NoTheme;
 
 /**
  * Test view that uses Grid with different pageSize settings.
  */
 @Route("grid-page-size")
+@NoTheme
 public class GridPageSizePage extends Div {
 
     private DataProvider<String, ?> dataProvider = DataProvider.fromCallbacks(

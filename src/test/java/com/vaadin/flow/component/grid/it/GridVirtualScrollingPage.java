@@ -17,19 +17,20 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.stream.IntStream;
 
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.NoTheme;
 
 /**
  * @author Vaadin Ltd.
  */
 @Route("grid-virtual-scrolling")
-public class GridVirtualScrolling extends Div {
+@NoTheme
+public class GridVirtualScrollingPage extends Div {
 
     private DataProvider<String, ?> dataProvider = DataProvider.fromCallbacks(
             query -> getStream(query).mapToObj(Integer::toString),
@@ -37,7 +38,7 @@ public class GridVirtualScrolling extends Div {
 
     private Label info;
 
-    public GridVirtualScrolling() {
+    public GridVirtualScrollingPage() {
         Grid<String> grid = new Grid<>();
 
         grid.setDataProvider(dataProvider);

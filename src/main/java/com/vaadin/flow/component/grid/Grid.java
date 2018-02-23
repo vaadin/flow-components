@@ -648,7 +648,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             if (!visible) {
                 refresh = detailsVisible.remove(item);
             } else {
-                refresh = detailsVisible.add(item);
+                detailsVisible.add(item);
+                refresh = true;
             }
 
             if (itemDetailsDataGenerator != null && refresh) {
@@ -672,7 +673,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         @Override
         public void generateData(T item, JsonObject jsonObject) {
-            if (isDetailsVisible(item)) {
+            if (itemDetailsDataGenerator != null && isDetailsVisible(item)) {
                 jsonObject.put("detailsOpened", true);
                 itemDetailsDataGenerator.generateData(item, jsonObject);
             }
@@ -691,6 +692,13 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             detailsVisible.clear();
             if (itemDetailsDataGenerator != null) {
                 itemDetailsDataGenerator.destroyAllData();
+            }
+        }
+
+        @Override
+        public void refreshData(T item) {
+            if (itemDetailsDataGenerator != null && isDetailsVisible(item)) {
+                itemDetailsDataGenerator.refreshData(item);
             }
         }
 
@@ -1230,6 +1238,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public void setItemDetailsRenderer(Renderer<T> renderer) {
         detailsManager.destroyAllData();
+        itemDetailsDataGenerator = null;
         if (renderer == null) {
             return;
         }

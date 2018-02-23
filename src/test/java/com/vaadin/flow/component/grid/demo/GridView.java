@@ -238,6 +238,30 @@ public class GridView extends DemoView {
             text = "Hi, I'm " + person.getName() + "!";
             setText(text);
         }
+
+        @Override
+        public int hashCode() {
+            return text == null ? 0 : text.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof PersonComponent)) {
+                return false;
+            }
+            PersonComponent other = (PersonComponent) obj;
+            if (text == null) {
+                if (other.text != null) {
+                    return false;
+                }
+            } else if (!text.equals(other.text)) {
+                return false;
+            }
+            return true;
+        }
     }
 
     /**
@@ -271,6 +295,7 @@ public class GridView extends DemoView {
             hlayout.getStyle().set("border", "1px solid gray")
                     .set("padding", "10px").set("boxSizing", "border-box")
                     .set("width", "100%");
+
             this.add(hlayout);
         }
     }

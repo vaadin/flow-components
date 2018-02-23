@@ -22,11 +22,13 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.NoTheme;
 
 /**
  * Test view for grid's multi selection column.
  */
 @Route("grid-multi-selection-column")
+@NoTheme
 public class GridMultiSelectionColumnPage extends Div {
 
     public static final int ITEM_COUNT = 1000;
@@ -42,8 +44,9 @@ public class GridMultiSelectionColumnPage extends Div {
 
         Grid<String> lazyGrid = new Grid<>();
         lazyGrid.setDataProvider(DataProvider.fromCallbacks(query -> {
-            return IntStream.range(query.getOffset(),
-                    query.getOffset() + query.getLimit())
+            return IntStream
+                    .range(query.getOffset(),
+                            query.getOffset() + query.getLimit())
                     .mapToObj(Integer::toString);
         }, query -> ITEM_COUNT));
         setUp(lazyGrid);
