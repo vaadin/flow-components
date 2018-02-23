@@ -46,6 +46,7 @@ public class TextAreaView extends DemoView {
         textArea.getStyle().set("maxHeight", "125px");
         // end-source-example
 
+        textArea.getStyle().set("padding", "0");
         textArea.setId("text-area-with-max-height");
 
         addCard("Text area with max-height", textArea, message);
@@ -61,6 +62,7 @@ public class TextAreaView extends DemoView {
         textArea.getStyle().set("minHeight", "125px");
         // end-source-example
 
+        textArea.getStyle().set("padding", "0");
         textArea.setId("text-area-with-min-height");
 
         addCard("Text area with min-height", textArea, message);
