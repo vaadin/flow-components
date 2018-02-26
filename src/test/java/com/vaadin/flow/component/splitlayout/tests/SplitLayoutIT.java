@@ -67,9 +67,13 @@ public class SplitLayoutIT extends ComponentDemoTest {
                 .moveByOffset(200, 0).release().build().perform();
 
         Assert.assertTrue("Resize events fired",
-                resizeMessage.getText().matches("Resized \\d+ times."));
-        Assert.assertTrue("More than 1 resize events fired",
-                !resizeMessage.getText().matches("Resized 1 times."));
+                resizeMessage.getText().matches("SplitLayout Resized 1 times."));
+
+        new Actions(getDriver()).dragAndDropBy(splitter, 1, 1).clickAndHold()
+                .moveByOffset(200, 0).release().build().perform();
+
+        Assert.assertTrue("Resize events fired",
+                resizeMessage.getText().matches("SplitLayout Resized 2 times."));
     }
 
     @Test
