@@ -1387,7 +1387,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Gets a {@link Column} of this grid by its key.
      *
-     * @see Column#setKey()
+     * @see Column#setKey(String)
      *
      * @param columnKey
      *            the identifier key of the column to get
@@ -1480,7 +1480,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @param detailsVisibleOnClick
      *            {@code true} to enable opening and closing item details by
      *            clicking the rows, {@code false} to disable this functionality
-     * @see #setItemDetailsRenderer(TemplateRenderer)
+     * @see #setItemDetailsRenderer(Renderer)
      */
     public void setDetailsVisibleOnClick(boolean detailsVisibleOnClick) {
         if (this.detailsVisibleOnClick != detailsVisibleOnClick) {
@@ -1496,7 +1496,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * 
      * @return {@code true} if clicking the rows opens and closes their item
      *         details, {@code false} otherwise
-     * @see #setItemDetailsRenderer(TemplateRenderer)
+     * @see #setItemDetailsRenderer(Renderer)
      */
     public boolean isDetailsVisibleOnClick() {
         return detailsVisibleOnClick;
@@ -1530,7 +1530,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            client-side, {@code false} to disable
      */
     public void setMultiSort(boolean multiSort) {
-        getElement().setProperty("multiSort", multiSort);
+        getElement().setAttribute("multi-sort", multiSort);
     }
 
     /**
@@ -1542,7 +1542,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *         {@code false} otherwise
      */
     public boolean isMultiSort() {
-        return getElement().getProperty("multiSort", false);
+        String multiSort = getElement().getAttribute("multi-sort");
+        return multiSort == null ? false : Boolean.valueOf(multiSort);
     }
 
     private List<Column<T>> fetchChildColumns(ColumnGroup columnGroup) {
