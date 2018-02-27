@@ -20,7 +20,7 @@ Chart chart = new Chart(ChartType.COLUMN);
 Chart chart = new Chart();
 chart.getConfiguration().getChart().setType(ChartType.COLUMN);
 ...
-layout.addComponent(chart);
+layout.add(chart);
 ----
 
 The chart types are described in
