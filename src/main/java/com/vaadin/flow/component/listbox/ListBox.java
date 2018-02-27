@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
@@ -243,15 +242,10 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
                 !itemEnabledProvider.test(itemComponent.getItem()));
     }
 
+    @SuppressWarnings("unchecked")
     private List<VaadinItem<T>> getItemComponents() {
         return getChildren().filter(VaadinItem.class::isInstance)
                 .map(component -> (VaadinItem<T>) component)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public Registration addItemsChangeListener(
-            ComponentEventListener<ItemsChangeEvent<ListBox<T>>> listener) {
-        return super.addItemsChangeListener(listener);
     }
 }
