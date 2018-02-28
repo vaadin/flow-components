@@ -91,8 +91,9 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      */
     public Notification() {
         initBaseElementsAndListeners();
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, () -> attachComponentTemplate(ui)));
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        context -> attachComponentTemplate(ui)));
         setPosition(Position.BOTTOM_START);
         setDuration(0);
     }
@@ -165,12 +166,13 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         getElement().appendChild(templateElement);
         getElement().appendChild(container);
 
-        addOpenedChangeListener(event -> {
+        getElement().addEventListener("opened-changed", event -> {
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
             }
         });
+
     }
 
     /**
@@ -207,7 +209,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     public void setText(String text) {
         removeAll();
         getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, () -> templateElement
+                ui -> ui.beforeClientResponse(this, context -> templateElement
                         .setProperty("innerHTML", HtmlUtils.escape(text))));
     }
 
@@ -282,8 +284,9 @@ public class Notification extends GeneratedVaadinNotification<Notification>
             assert component != null;
             container.appendChild(component.getElement());
         }
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, () -> attachComponentTemplate(ui)));
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        context -> attachComponentTemplate(ui)));
     }
 
     /**
@@ -347,7 +350,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         UI ui = UI.getCurrent();
         if (opened && getElement().getNode().getParent() == null
                 && ui != null) {
-            ui.beforeClientResponse(ui, () -> {
+            ui.beforeClientResponse(ui, context -> {
                 ui.add(this);
                 autoAddedToTheUi = true;
             });
