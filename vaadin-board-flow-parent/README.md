@@ -17,7 +17,7 @@ Add vaadin-board to your project:
   <dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-board-flow</artifactId>
-    <version>1.0.0.alpha1</version>
+    <version>1.0.0.beta1</version>
   </dependency>
 </dependencies>
 ```
@@ -37,6 +37,6 @@ board.addRow(lbl1, lbl2, lbl3, lbl4);
 add(board);
 ```
 
-[Demo](https://demo.vaadin.com/vaadin-board)
+[Demo](https://vaadin.com/elements/vaadin-board/java-examples)
 
-[Documentation](https://vaadin.com/docs/v10/board/board-overview.html)
+[Documentation](https://vaadin.com/elements/vaadin-board)
