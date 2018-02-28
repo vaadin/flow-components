@@ -29,9 +29,9 @@ Board board = new Board();
 board.setSizeFull();
 
 Div child1 = new Div(); child1.setText("This could be chart 1");
-Div child2 = new Div(); child1.setText("This could be chart 2");
-Div child3 = new Div(); child1.setText("This could be chart 3");
-Div child4 = new Div(); child1.setText("This could be chart 4");
+Div child2 = new Div(); child2.setText("This could be chart 2");
+Div child3 = new Div(); child3.setText("This could be chart 3");
+Div child4 = new Div(); child4.setText("This could be chart 4");
 
 board.addRow(child1, child2, child3, child4);
 add(board);
