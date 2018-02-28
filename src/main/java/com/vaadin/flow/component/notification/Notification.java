@@ -19,9 +19,11 @@ import java.util.Locale;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -249,6 +251,9 @@ public class Notification extends GeneratedVaadinNotification<Notification>
 
     /**
      * Closes the notification.
+     * <p>
+     * Note: This method also removes the notification component from the DOM
+     * after closing it, unless you have added the component manually.
      */
     @Override
     public void close() {
@@ -405,5 +410,30 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      */
     public int getDuration() {
         return (int) getDurationDouble();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Note: To listen for opening the notification, you should use
+     * {@link #addOpenedChangeListener(ComponentEventListener)}.
+     */
+    @Override
+    public Registration addAttachListener(
+            ComponentEventListener<AttachEvent> listener) {
+        return super.addAttachListener(listener);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Note: To listen for closing the notification, you should use
+     * {@link #addOpenedChangeListener(ComponentEventListener)}, as the
+     * component is not necessarily removed from the DOM when closing.
+     */
+    @Override
+    public Registration addDetachListener(
+            ComponentEventListener<DetachEvent> listener) {
+        return super.addDetachListener(listener);
     }
 }
