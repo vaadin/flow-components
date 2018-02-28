@@ -15,7 +15,7 @@
 	</organization>
 	
 	<properties>
-            <flow.version>1.0.0.alpha20</flow.version>
+            <flow.version>1.0.0.alpha22</flow.version>
             <maven.compiler.source>1.8</maven.compiler.source>
             <maven.compiler.target>1.8</maven.compiler.target>
             <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,6 +26,7 @@
 		<module>vaadin-board-flow</module>
 		<module>vaadin-board-testbench</module>
 		<module>vaadin-board-flow-integration-tests</module>
+		<module>vaadin-board-flow-vaadincom-demo</module>
 	</modules>
 	<distributionManagement>
 		<snapshotRepository>
