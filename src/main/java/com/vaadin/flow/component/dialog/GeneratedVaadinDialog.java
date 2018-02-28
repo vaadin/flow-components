@@ -22,7 +22,6 @@ import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.shared.Registration;
@@ -32,7 +31,7 @@ import com.vaadin.flow.shared.Registration;
  * Description copied from corresponding location in WebComponent:
  * </p>
  * <p>
- * {@code <vaadin-dialog>} is a Polymer 2 element for customised modal dialogs.
+ * {@code <vaadin-dialog>} is a Polymer 2 element for customized modal dialogs.
  * </p>
  * <p>
  * &lt;vaadin-dialog opened&gt; &lt;template&gt; Sample dialog &lt;/template&gt;
@@ -52,7 +51,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.VaadinDialog#null", "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.DialogElement#null", "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-dialog")
 @HtmlImport("frontend://bower_components/vaadin-dialog/src/vaadin-dialog.html")
 public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
@@ -91,11 +90,17 @@ public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
         getElement().setProperty("opened", opened);
     }
 
-    @DomEvent("opened-changed")
     public static class OpenedChangeEvent<R extends GeneratedVaadinDialog<R>>
             extends ComponentEvent<R> {
+        private final boolean opened;
+
         public OpenedChangeEvent(R source, boolean fromClient) {
             super(source, fromClient);
+            this.opened = source.isOpenedBoolean();
+        }
+
+        public boolean isOpened() {
+            return opened;
         }
     }
 
@@ -107,10 +112,12 @@ public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
      *            the listener
      * @return a {@link Registration} for removing the event listener
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent<R>> listener) {
-        return addListener(OpenedChangeEvent.class,
-                (ComponentEventListener) listener);
+        return getElement()
+                .addPropertyChangeListener("opened",
+                        event -> listener.onComponentEvent(
+                                new OpenedChangeEvent<R>(get(),
+                                        event.isUserOriginated())));
     }
 }

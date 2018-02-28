@@ -27,8 +27,6 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-import static org.junit.Assert.assertTrue;
-
 @TestPath("dialog-test")
 public class DialogTestPageIT extends AbstractComponentIT {
 
@@ -43,19 +41,37 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
     @Test
     public void dialogWithOpenedChangeListener() {
-        assertTrue("The open state of the dialog is false"
-                .equals(findElement(By.id("message")).getText()));
+        WebElement message = findElement(By.id("message"));
+        WebElement eventCounterMessage = findElement(
+                By.id("event-counter-message"));
+        WebElement eventSourceMessage = findElement(
+                By.id("event-source-message"));
+
+        Assert.assertEquals("The open state of the dialog is false",
+                message.getText());
 
         findElement(By.id("dialog-open")).click();
         checkDialogIsOpened();
-        assertTrue("The open state of the dialog is true"
-                .equals(findElement(By.id("message")).getText()));
+
+        Assert.assertEquals("The open state of the dialog is true",
+                message.getText());
+        Assert.assertEquals(
+                "There should not be initial events before opening the dialog",
+                "Number of event is 0", eventCounterMessage.getText());
+        Assert.assertEquals("The event came from server",
+                eventSourceMessage.getText());
+
         assertDialogContent(
                 "There is a opened change listener for this dialog");
+
         executeScript("document.body.click()");
         checkDialogIsClosed();
-        assertTrue("The open state of the dialog is false"
-                .equals(findElement(By.id("message")).getText()));
+        Assert.assertEquals("The open state of the dialog is false",
+                message.getText());
+        Assert.assertEquals("Number of event is 1",
+                eventCounterMessage.getText());
+        Assert.assertEquals("The event came from client",
+                eventSourceMessage.getText());
     }
 
     @Test

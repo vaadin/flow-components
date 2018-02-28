@@ -32,6 +32,8 @@ public class DialogTestPage extends Div {
 
     private static final String BUTTON_CAPTION = "Open dialog";
 
+    private int eventCounter;
+
     public DialogTestPage() {
         createDialogWithAddOpenedChangeListener();
         createDialogWithoutAddingToTheUi();
@@ -40,8 +42,15 @@ public class DialogTestPage extends Div {
     private void createDialogWithAddOpenedChangeListener() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
         button.setId("dialog-open");
+
         Div message = new Div();
         message.setId("message");
+
+        Div eventCounterMessage = new Div();
+        eventCounterMessage.setId("event-counter-message");
+
+        Div eventSourceMessage = new Div();
+        eventSourceMessage.setId("event-source-message");
 
         Dialog dialog = new Dialog();
         message.setText("The open state of the dialog is " + dialog.isOpened());
@@ -49,9 +58,15 @@ public class DialogTestPage extends Div {
                 new Label("There is a opened change listener for this dialog"));
         button.addClickListener(event -> dialog.open());
 
-        dialog.addOpenedChangeListener(event -> message.setText(
-                "The open state of the dialog is " + dialog.isOpened()));
-        add(button, message, dialog);
+        eventCounter = 0;
+        dialog.addOpenedChangeListener(event -> {
+            message.setText(
+                    "The open state of the dialog is " + dialog.isOpened());
+            eventCounterMessage.setText("Number of event is " + eventCounter++);
+            eventSourceMessage.setText("The event came from "
+                    + (event.isFromClient() ? "client" : "server"));
+        });
+        add(button, message, eventCounterMessage, eventSourceMessage, dialog);
     }
 
     private void createDialogWithoutAddingToTheUi() {

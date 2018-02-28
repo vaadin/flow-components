@@ -49,7 +49,7 @@ public class DialogView extends DemoView {
         // end-source-example
 
         button.setId("basic-dialog-button");
-        addCard("Basic dialog", button, dialog);
+        addCard("Basic dialog", button);
     }
 
     private void addConfirmationDialog() {
@@ -78,6 +78,6 @@ public class DialogView extends DemoView {
 
         messageLabel.setId("confirmation-dialog-label");
         button.setId("confirmation-dialog-button");
-        addCard("Confirmation dialog", button, dialog, messageLabel);
+        addCard("Confirmation dialog", button, messageLabel);
     }
 }

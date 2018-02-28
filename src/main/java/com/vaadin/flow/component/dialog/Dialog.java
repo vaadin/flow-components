@@ -53,10 +53,14 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         getElement().appendChild(container);
 
         // Attach <flow-component-renderer>
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, () -> attachComponentRenderer()));
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        context -> attachComponentRenderer()));
 
-        addOpenedChangeListener(event -> {
+        // Workaround for: https://github.com/vaadin/flow/issues/3496
+        setOpened(false);
+
+        getElement().addEventListener("opened-changed", event -> {
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
@@ -201,7 +205,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         UI ui = UI.getCurrent();
         if (opened && getElement().getNode().getParent() == null
                 && ui != null) {
-            ui.beforeClientResponse(ui, () -> {
+            ui.beforeClientResponse(ui, context -> {
                 ui.add(this);
                 autoAddedToTheUi = true;
             });
