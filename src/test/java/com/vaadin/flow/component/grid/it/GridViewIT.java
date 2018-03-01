@@ -591,6 +591,21 @@ public class GridViewIT extends TabbedComponentDemoTest {
         assertCellContent("<button>Remove</button>", cells.get(11));
     }
 
+    @Test
+    public void heightByRows_allRowsAreFetched() {
+        openTabAndCheckForErrors("height-by-rows");
+        WebElement grid = findElement(By.id("grid-height-by-rows"));
+        scrollToElement(grid);
+        waitUntilCellHasText(grid, "Person 49");
+
+        Assert.assertEquals("Grid should have heightByRows set to true", "true",
+                grid.getAttribute("heightByRows"));
+
+        List<WebElement> rows = getInShadowRoot(grid, By.id("items"))
+                .findElements(By.cssSelector("tr"));
+        Assert.assertEquals("Grid should have 49 rows", 49, rows.size());
+    }
+
     private void assertRendereredContent(String expected, WebElement cell) {
         Assert.assertThat(cell.getAttribute("innerHTML"), CoreMatchers.allOf(
                 CoreMatchers.startsWith("<flow-grid-component-renderer"),

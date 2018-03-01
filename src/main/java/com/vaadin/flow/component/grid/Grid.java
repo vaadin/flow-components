@@ -1744,4 +1744,28 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 order -> order.getSorted().getComparator(order.getDirection()))
                 .reduce(operator).orElse(null);
     }
+
+    /**
+     * If <code>true</code>, the grid's height is defined by the number of its
+     * rows. All items are fetched from the {@link DataProvider}, and the Grid
+     * shows no vertical scroll bar.
+     * 
+     * @param heightByRows
+     *            <code>true</code> to make Grid compute its height by the
+     *            number of rows, <code>false</code> for the default behavior
+     */
+    public void setHeightByRows(boolean heightByRows) {
+        getElement().setProperty("heightByRows", heightByRows);
+    }
+
+    /**
+     * Gets whether grid's height is defined by the number of its rows.
+     * 
+     * @return <code>true</code> if Grid computes its height by the number of
+     *         rows, <code>false</code> otherwise
+     */
+    @Synchronize("height-by-rows-changed")
+    public boolean isHeightByRows() {
+        return getElement().getProperty("heightByRows", false);
+    }
 }

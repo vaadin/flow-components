@@ -319,6 +319,7 @@ public class GridView extends DemoView {
         createHeaderAndFooterUsingTemplates();
         createHeaderAndFooterUsingComponents();
         createBeanGrid();
+        createHeightByRows();
 
         addCard("Grid example model",
                 new Label("These objects are used in the examples above"));
@@ -872,13 +873,39 @@ public class GridView extends DemoView {
         addCard("Using renderers", "Using basic renderers", grid);
     }
 
+    private void createHeightByRows() {
+        // begin-source-example
+        // source-example-heading: Using height by rows
+        Grid<Person> grid = new Grid<>();
+
+        // When using heightByRows, all items are fetched and
+        // Grid uses all the space needed to render everything.
+        grid.setHeightByRows(true);
+
+        List<Person> people = createItems(50);
+        grid.setItems(people);
+
+        grid.addColumn(Person::getName).setHeader("Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+
+        grid.setSelectionMode(SelectionMode.NONE);
+        // end-source-example
+
+        grid.setId("grid-height-by-rows");
+        addCard("Height by Rows", "Using height by rows", grid);
+    }
+
     private List<Person> getItems() {
         return items;
     }
 
     private static List<Person> createItems() {
+        return createItems(500);
+    }
+
+    private static List<Person> createItems(int number) {
         Random random = new Random(0);
-        return IntStream.range(1, 500)
+        return IntStream.range(1, number)
                 .mapToObj(index -> createPerson(index, random))
                 .collect(Collectors.toList());
     }
