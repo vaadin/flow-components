@@ -115,7 +115,9 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 isRowSelected(grid, 0));
 
         // scroll to bottom
-        scroll(grid, 495);
+        for (int i = 0; i < 10; i++) {
+            scroll(grid, 100 + (100 * i));
+        }
         waitUntilCellHasText(grid, "Person 499");
         // select item that is not in cache
         clickElementWithJs(toggleButton);

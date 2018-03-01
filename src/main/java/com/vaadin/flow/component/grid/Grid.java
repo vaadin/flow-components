@@ -77,11 +77,13 @@ import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
@@ -728,6 +730,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     private int nextColumnId = 0;
 
     private GridSelectionModel<T> selectionModel;
+    private SelectionMode selectionMode;
 
     private final DetailsManager detailsManager = new DetailsManager(this);
     private Element detailsTemplate;
@@ -761,13 +764,31 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            the page size. Must be greater than zero.
      */
     public Grid(int pageSize) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, this::initConnector));
         setPageSize(pageSize);
         setSelectionModel(SelectionMode.SINGLE.createModel(this),
                 SelectionMode.SINGLE);
 
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.getPage().executeJavaScript(
-                        "window.gridConnector.initLazy($0)", getElement()));
+        getElement().addAttachListener(event -> getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        this::resetWhenClientSideNotInitialized)));
+    }
+
+    private void resetWhenClientSideNotInitialized(ExecutionContext context) {
+        // If the client is already initialized, there's no need to reset
+        // everything
+        if (context.isClientSideInitialized()) {
+            return;
+        }
+        initConnector(context);
+        updateSelectionModeOnClient();
+        getDataCommunicator().reset();
+    }
+
+    private void initConnector(ExecutionContext context) {
+        context.getUI().getPage().executeJavaScript(
+                "window.gridConnector.initLazy($0)", getElement());
     }
 
     /**
@@ -982,6 +1003,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
+        deselectAll();
         getDataCommunicator().setDataProvider(dataProvider, null);
     }
 
@@ -1085,6 +1107,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             ((AbstractGridExtension<?>) selectionModel).remove();
         }
         selectionModel = model;
+        this.selectionMode = selectionMode;
+        updateSelectionModeOnClient();
+    }
+
+    private void updateSelectionModeOnClient() {
         getElement().callFunction("$connector.setSelectionMode",
                 selectionMode.name());
     }
@@ -1204,6 +1231,33 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public void deselectAll() {
         getSelectionModel().deselectAll();
+    }
+
+    void doClientSideSelection(Set<T> items) {
+        callSelectionFunctionForItems("doSelection", items);
+    }
+
+    void doClientSideDeselection(Set<T> items) {
+        callSelectionFunctionForItems("doDeselection", items);
+    }
+
+    private void callSelectionFunctionForItems(String function, Set<T> items) {
+        if (items.isEmpty()) {
+            return;
+        }
+        Serializable[] values = new Serializable[items.size() + 1];
+        List<Serializable> collect = items.stream()
+                .map(item -> generateJsonForSelection(item))
+                .map(item -> (Serializable) item).collect(Collectors.toList());
+        collect.add(1, false);
+        collect.toArray(values);
+        getElement().callFunction("$connector." + function, values);
+    }
+
+    private JsonObject generateJsonForSelection(T item) {
+        JsonObject json = Json.createObject();
+        json.put("key", getDataCommunicator().getKeyMapper().key(item));
+        return json;
     }
 
     /**

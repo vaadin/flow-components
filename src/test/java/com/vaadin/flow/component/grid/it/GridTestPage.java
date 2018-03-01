@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Div;
@@ -28,7 +29,8 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
  * Page created for testing purposes. Not suitable for demos.
@@ -37,7 +39,7 @@ import com.vaadin.flow.theme.NoTheme;
  *
  */
 @Route("vaadin-grid-test")
-@NoTheme
+@Theme(Lumo.class)
 public class GridTestPage extends Div {
 
     private static class Item implements Serializable {
@@ -66,6 +68,7 @@ public class GridTestPage extends Div {
         createGridWithTemplateDetailsRow();
         createGridWithComponentDetailsRow();
         createGridWithRemovableColumns();
+        createDetachableGrid();
     }
 
     private void createGridWithComponentRenderers() {
@@ -176,6 +179,39 @@ public class GridTestPage extends Div {
         removeNameColumn.setId("remove-name-column-button");
         add(grid);
         add(removeNameColumn);
+    }
+
+    private void createDetachableGrid() {
+        Div container1 = new Div(new Label("Container 1"));
+        container1.setId("detachable-grid-container-1");
+        Div container2 = new Div(new Label("Container 2"));
+        container2.setId("detachable-grid-container-2");
+
+        Grid<Item> grid = new Grid<>();
+        grid.setId("detachable-grid");
+
+        grid.setItems(generateItems(20, 0));
+        grid.addColumn(Item::getName);
+        container1.add(grid);
+        add(container1);
+        NativeButton detach = new NativeButton("Detach grid",
+                e -> grid.getParent().ifPresent(
+                        parent -> ((HasComponents) parent).remove(grid)));
+        detach.setId("detachable-grid-detach");
+        NativeButton attach1 = new NativeButton("Attach grid to container 1",
+                e -> container1.add(grid));
+        attach1.setId("detachable-grid-attach-1");
+        NativeButton attach2 = new NativeButton("Attach grid to container 2",
+                e -> container2.add(grid));
+        attach2.setId("detachable-grid-attach-2");
+        NativeButton invisible = new NativeButton("Set grid invisble",
+                e -> grid.setVisible(false));
+        invisible.setId("detachable-grid-invisible");
+        NativeButton visible = new NativeButton("Set grid visible",
+                e -> grid.setVisible(true));
+        visible.setId("detachable-grid-visible");
+        add(container1, container2, detach, attach1, attach2, invisible,
+                visible);
     }
 
     private List<Item> generateItems(int amount, int startingIndex) {

@@ -183,6 +183,190 @@ public class GridTestPageIT extends AbstractComponentIT {
         });
     }
 
+    @Test
+    public void detachableGrid_changeContainers_itemsAreStillShown() {
+        WebElement container1 = findElement(
+                By.id("detachable-grid-container-1"));
+        WebElement container2 = findElement(
+                By.id("detachable-grid-container-2"));
+        WebElement attach1 = findElement(By.id("detachable-grid-attach-1"));
+        WebElement attach2 = findElement(By.id("detachable-grid-attach-2"));
+
+        WebElement grid = container1.findElement(By.id("detachable-grid"));
+        Map<String, Map<String, ?>> items = getItems(driver, grid);
+        Assert.assertEquals(20, items.size());
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+        });
+        // sets a property on the $connector, to validate that the connector
+        // is not reset when changing containers
+        executeScript("arguments[0].$connector._isUsingTheSameInstance = true",
+                grid);
+
+        attach2.click();
+        grid = container2.findElement(By.id("detachable-grid"));
+        items = getItems(driver, grid);
+        Assert.assertEquals(20, items.size());
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+        });
+        Assert.assertTrue("The $connector instance should be preserved",
+                (Boolean) executeScript(
+                        "return arguments[0].$connector._isUsingTheSameInstance",
+                        grid));
+
+        attach1.click();
+        grid = container1.findElement(By.id("detachable-grid"));
+        items = getItems(driver, grid);
+        Assert.assertEquals(20, items.size());
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+        });
+        Assert.assertTrue("The $connector instance should be preserved",
+                (Boolean) executeScript(
+                        "return arguments[0].$connector._isUsingTheSameInstance",
+                        grid));
+    }
+
+    @Test
+    public void selectItemOnGrid_changeContainers_itemIsStillSelected() {
+        WebElement container1 = findElement(
+                By.id("detachable-grid-container-1"));
+        WebElement container2 = findElement(
+                By.id("detachable-grid-container-2"));
+        WebElement attach1 = findElement(By.id("detachable-grid-attach-1"));
+        WebElement attach2 = findElement(By.id("detachable-grid-attach-2"));
+
+        WebElement grid = container1.findElement(By.id("detachable-grid"));
+        scrollToElement(grid);
+
+        // click to select the first item
+        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
+        assertSelection(grid, "Item 0");
+
+        attach2.click();
+        grid = container2.findElement(By.id("detachable-grid"));
+        assertSelection(grid, "Item 0");
+        // click to select the second item
+        clickElementWithJs(getRow(grid, 1).findElement(By.tagName("td")));
+        assertSelection(grid, "Item 1");
+
+        attach1.click();
+        grid = container1.findElement(By.id("detachable-grid"));
+        assertSelection(grid, "Item 1");
+    }
+
+    @Test
+    public void detachableGrid_detachAndReattach_itemsAreStillShown() {
+        WebElement container1 = findElement(
+                By.id("detachable-grid-container-1"));
+        WebElement attach1 = findElement(By.id("detachable-grid-attach-1"));
+        WebElement detach = findElement(By.id("detachable-grid-detach"));
+
+        WebElement grid = container1.findElement(By.id("detachable-grid"));
+        scrollToElement(grid);
+
+        Map<String, Map<String, ?>> items = getItems(driver, grid);
+        Assert.assertEquals(20, items.size());
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+        });
+
+        detach.click();
+        waitForElementNotPresent(By.id("detachable-grid"));
+        attach1.click();
+        grid = container1.findElement(By.id("detachable-grid"));
+        items = getItems(driver, grid);
+        Assert.assertEquals(20, items.size());
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+        });
+    }
+
+    @Test
+    public void selectItemOnGrid_detachAndReattach_itemIsStillSelected() {
+        WebElement container1 = findElement(
+                By.id("detachable-grid-container-1"));
+        WebElement attach1 = findElement(By.id("detachable-grid-attach-1"));
+        WebElement detach = findElement(By.id("detachable-grid-detach"));
+
+        WebElement grid = container1.findElement(By.id("detachable-grid"));
+        scrollToElement(grid);
+
+        // click to select the first item
+        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
+        assertSelection(grid, "Item 0");
+
+        detach.click();
+        waitForElementNotPresent(By.id("detachable-grid"));
+        attach1.click();
+        grid = container1.findElement(By.id("detachable-grid"));
+        assertSelection(grid, "Item 0");
+    }
+
+    @Test
+    public void detachableGrid_setInvisibleAndVisible_itemsAreStillShown() {
+        WebElement container1 = findElement(
+                By.id("detachable-grid-container-1"));
+        WebElement invisible = findElement(By.id("detachable-grid-invisible"));
+        WebElement visible = findElement(By.id("detachable-grid-visible"));
+
+        WebElement grid = container1.findElement(By.id("detachable-grid"));
+        scrollToElement(grid);
+
+        Map<String, Map<String, ?>> items = getItems(driver, grid);
+        Assert.assertEquals(20, items.size());
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+        });
+        // sets a property on the $connector, to validate that the connector
+        // is not reset when changing visibility
+        executeScript("arguments[0].$connector._isUsingTheSameInstance = true",
+                grid);
+
+        invisible.click();
+        waitUntil(driver -> "true".equals(grid.getAttribute("hidden")));
+        visible.click();
+        waitUntil(driver -> grid.getAttribute("hidden") == null);
+        items = getItems(driver, grid);
+        Assert.assertEquals(20, items.size());
+        items.forEach((row, map) -> {
+            Assert.assertEquals("Item " + row, map.get("col0"));
+        });
+        Assert.assertTrue("The $connector instance should be preserved",
+                (Boolean) executeScript(
+                        "return arguments[0].$connector._isUsingTheSameInstance",
+                        grid));
+    }
+
+    @Test
+    public void detachableGrid_setInvisibleAndVisible_itemIsStillSelected() {
+        WebElement container1 = findElement(
+                By.id("detachable-grid-container-1"));
+        WebElement invisible = findElement(By.id("detachable-grid-invisible"));
+        WebElement visible = findElement(By.id("detachable-grid-visible"));
+
+        WebElement grid = container1.findElement(By.id("detachable-grid"));
+        scrollToElement(grid);
+
+        // click to select the first item
+        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
+        assertSelection(grid, "Item 0");
+
+        invisible.click();
+        waitUntil(driver -> "true".equals(grid.getAttribute("hidden")));
+        visible.click();
+        waitUntil(driver -> grid.getAttribute("hidden") == null);
+        assertSelection(grid, "Item 0");
+    }
+
+    private void assertSelection(WebElement grid, String value) {
+        Assert.assertTrue(value + " should be selected",
+                (Boolean) executeScript(
+                        "return arguments[0].selectedItems[0].col0 === arguments[1]",
+                        grid, value));
+    }
+
     private void assertItemsArePresent(WebElement grid, String itemIdPrefix,
             int startingIndex, int length) {
         for (int i = 0; i < length; i++) {

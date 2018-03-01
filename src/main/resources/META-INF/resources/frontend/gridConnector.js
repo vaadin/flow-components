@@ -1,5 +1,10 @@
 window.gridConnector = {
   initLazy: function(grid) {
+    
+    // Check whether the connector was already initialized for the grid
+    if (grid.$connector){
+      return;
+    }
     const extraPageBuffer = 2;
     const pageCallbacks = {};
     const cache = {};
