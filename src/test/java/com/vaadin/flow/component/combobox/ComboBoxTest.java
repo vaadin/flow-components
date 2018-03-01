@@ -26,6 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
@@ -156,6 +157,13 @@ public class ComboBoxTest {
         combo.setValue(Category.CATEGORY_2);
 
         Assert.assertEquals(Category.CATEGORY_2, selected.get());
+    }
+
+    // Ensure https://github.com/vaadin/vaadin-combo-box-flow/issues/36 does not reoccur
+    @Test
+    public void ensureComboBoxIsFocusable() {
+        Assert.assertTrue("ComboBox should be focusable",
+                Focusable.class.isAssignableFrom(ComboBox.class));
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {
