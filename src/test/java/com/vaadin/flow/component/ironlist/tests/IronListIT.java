@@ -186,6 +186,95 @@ public class IronListIT extends AbstractComponentIT {
         }
     }
 
+    @Test
+    public void detachableList_changeContainers_itemsAreStillShown() {
+        WebElement container1 = findElement(
+                By.id("detachable-list-container-1"));
+        WebElement container2 = findElement(
+                By.id("detachable-list-container-2"));
+        WebElement attach1 = findElement(By.id("detachable-list-attach-1"));
+        WebElement attach2 = findElement(By.id("detachable-list-attach-2"));
+
+        WebElement list = container1.findElement(By.id("detachable-list"));
+        assertItemsArePresent(list, 20);
+
+        // sets a property on the $connector, to validate that the connector
+        // is not reset when changing containers
+        executeScript("arguments[0].$connector._isUsingTheSameInstance = true",
+                list);
+
+        attach2.click();
+        list = container2.findElement(By.id("detachable-list"));
+        assertItemsArePresent(list, 20);
+        Assert.assertTrue("The $connector instance should be preserved",
+                (Boolean) executeScript(
+                        "return arguments[0].$connector._isUsingTheSameInstance",
+                        list));
+
+        attach1.click();
+        list = container1.findElement(By.id("detachable-list"));
+        assertItemsArePresent(list, 20);
+        Assert.assertTrue("The $connector instance should be preserved",
+                (Boolean) executeScript(
+                        "return arguments[0].$connector._isUsingTheSameInstance",
+                        list));
+    }
+
+    @Test
+    public void detachableList_detachAndReattach_itemsAreStillShown() {
+        WebElement container1 = findElement(
+                By.id("detachable-list-container-1"));
+        WebElement attach1 = findElement(By.id("detachable-list-attach-1"));
+        WebElement detach = findElement(By.id("detachable-list-detach"));
+
+        WebElement list = container1.findElement(By.id("detachable-list"));
+        scrollToElement(list);
+
+        assertItemsArePresent(list, 20);
+
+        detach.click();
+        waitForElementNotPresent(By.id("detachable-list"));
+        attach1.click();
+        list = container1.findElement(By.id("detachable-list"));
+        assertItemsArePresent(list, 20);
+    }
+
+    @Test
+    public void detachableList_setInvisibleAndVisible_itemsAreStillShown() {
+        WebElement container1 = findElement(
+                By.id("detachable-list-container-1"));
+        WebElement invisible = findElement(By.id("detachable-list-invisible"));
+        WebElement visible = findElement(By.id("detachable-list-visible"));
+
+        WebElement list = container1.findElement(By.id("detachable-list"));
+        scrollToElement(list);
+
+        assertItemsArePresent(list, 20);
+        // sets a property on the $connector, to validate that the connector
+        // is not reset when changing visibility
+        executeScript("arguments[0].$connector._isUsingTheSameInstance = true",
+                list);
+
+        invisible.click();
+        waitUntil(driver -> "true".equals(list.getAttribute("hidden")));
+        visible.click();
+        waitUntil(driver -> list.getAttribute("hidden") == null);
+        assertItemsArePresent(list, 20);
+        Assert.assertTrue("The $connector instance should be preserved",
+                (Boolean) executeScript(
+                        "return arguments[0].$connector._isUsingTheSameInstance",
+                        list));
+    }
+
+    private void assertItemsArePresent(WebElement list, int length) {
+        JsonArray items = getItems(driver, list);
+        Assert.assertEquals(length, items.length());
+        for (int i = 0; i < items.length(); i++) {
+            JsonObject obj = items.getObject(i);
+            Assert.assertEquals("Person " + (i + 1), obj.getString("label"));
+        }
+    }
+
     private void assertItemsArePresent(JsonArray items, int startingIndex,
             int endingIndex, String itemLabelprefix) {
 

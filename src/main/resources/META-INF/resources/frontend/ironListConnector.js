@@ -1,5 +1,11 @@
 window.ironListConnector = {
   initLazy: function(list) {
+      
+    // Check whether the connector was already initialized for the Iron list
+    if (list.$connector){
+      return;
+    }
+      
     const extraItemsBuffer = 20;
 
     let lastRequestedRange = [0, 0];
