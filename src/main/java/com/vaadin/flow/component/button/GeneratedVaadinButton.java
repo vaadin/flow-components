@@ -15,13 +15,12 @@
  */
 package com.vaadin.flow.component.button;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasClickListeners;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasClickListeners;
 import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Focusable;
+import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
@@ -92,14 +91,13 @@ import com.vaadin.flow.dom.Element;
  * </tbody>
  * </table>
  * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.ButtonElement#2.0.0-alpha6",
-        "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.ButtonElement#2.0.0-beta3", "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-button")
 @HtmlImport("frontend://bower_components/vaadin-button/src/vaadin-button.html")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
@@ -176,11 +174,11 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * 
      * @param components
      *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a
+     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a
+     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
@@ -198,11 +196,11 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * 
      * @param components
      *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a
+     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a
+     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      * @return this instance, for method chaining
      */
