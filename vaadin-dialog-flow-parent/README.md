@@ -22,7 +22,7 @@ add the following dependency to your `pom.xml`:
 ```
 
 ## Flow documentation
-Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow/blob/master/flow-documentation/Overview.asciidoc).
+Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow-and-components-documentation/blob/master/Overview.asciidoc).
 
 ## Contributing
 - Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/master/eclipse)
