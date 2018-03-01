@@ -231,12 +231,12 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         Assert.assertEquals("First width is fixed", "75px",
                 getCommandExecutor().executeScript(
-                        "return arguments[0].shadowRoot.querySelectorAll('th')[0].style.width;",
+                        "return arguments[0].shadowRoot.querySelectorAll('th')[1].style.width;",
                         grid));
 
         WebElement toggleIdColumnVisibility = findElement(
                 By.id("toggle-id-column-visibility"));
-        String firstCellHiddenScript = "return arguments[0].shadowRoot.querySelectorAll('td')[0].hidden;";
+        String firstCellHiddenScript = "return arguments[0].shadowRoot.querySelectorAll('td')[1].hidden;";
         Assert.assertNotEquals(true, getCommandExecutor()
                 .executeScript(firstCellHiddenScript, grid));
         clickElementWithJs(toggleIdColumnVisibility);
@@ -258,19 +258,12 @@ public class GridViewIT extends TabbedComponentDemoTest {
         Assert.assertNotEquals("true",
                 grid.getAttribute("columnReorderingAllowed"));
 
-        String idColumnFrozenStatusScript = "return arguments[0].frozen";
-        WebElement toggleIdColumnFrozen = findElement(
-                By.id("toggle-id-column-frozen"));
-        WebElement idColumn = grid
-                .findElements(By.tagName("vaadin-grid-column")).get(0);
-        Assert.assertEquals(false, getCommandExecutor()
-                .executeScript(idColumnFrozenStatusScript, idColumn));
-        clickElementWithJs(toggleIdColumnFrozen);
-        Assert.assertEquals(true, getCommandExecutor()
-                .executeScript(idColumnFrozenStatusScript, idColumn));
-        clickElementWithJs(toggleIdColumnFrozen);
-        Assert.assertEquals(false, getCommandExecutor()
-                .executeScript(idColumnFrozenStatusScript, idColumn));
+        String frozenStatusScript = "return arguments[0].frozen";
+        assertFrozenColumn(grid, frozenStatusScript, "toggle-id-column-frozen",
+                "vaadin-grid-column");
+        assertFrozenColumn(grid, frozenStatusScript,
+                "toggle-selection-column-frozen",
+                "vaadin-grid-flow-selection-column");
     }
 
     @Test
@@ -717,6 +710,20 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
     private List<WebElement> getCells(WebElement grid) {
         return grid.findElements(By.tagName("vaadin-grid-cell-content"));
+    }
+
+    private void assertFrozenColumn(WebElement grid, String frozenStatusScript,
+            String buttonId, String columnTag) {
+        WebElement toggleIdColumnFrozen = findElement(By.id(buttonId));
+        WebElement idColumn = grid.findElements(By.tagName(columnTag)).get(0);
+        Assert.assertEquals(false, getCommandExecutor()
+                .executeScript(frozenStatusScript, idColumn));
+        clickElementWithJs(toggleIdColumnFrozen);
+        Assert.assertEquals(true, getCommandExecutor()
+                .executeScript(frozenStatusScript, idColumn));
+        clickElementWithJs(toggleIdColumnFrozen);
+        Assert.assertEquals(false, getCommandExecutor()
+                .executeScript(frozenStatusScript, idColumn));
     }
 
     @Override

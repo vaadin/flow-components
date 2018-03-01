@@ -122,4 +122,19 @@ public interface GridMultiSelectionModel<T>
      * @see #setSelectAllCheckboxVisibility(SelectAllCheckboxVisibility)
      */
     boolean isSelectAllCheckboxVisible();
+
+    /**
+     * Sets the selection column's frozen state.
+     *
+     * @param frozen
+     *            whether to freeze or unfreeze the selection column
+     */
+    void setSelectionColumnFrozen(boolean frozen);
+
+    /**
+     * Gets the the selection column's frozen state.
+     *
+     * @return whether the selection column is frozen
+     */
+    boolean isSelectionColumnFrozen();
 }

@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid;
 
 import com.vaadin.flow.component.ClientDelegate;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.function.SerializableRunnable;
@@ -68,6 +69,26 @@ public class GridSelectionColumn extends Component {
      */
     public void setSelectAllCheckBoxVisibility(boolean visible) {
         getElement().setProperty("selectAllHidden", !visible);
+    }
+
+    /**
+     * Sets this column's frozen state.
+     *
+     * @param frozen
+     *            whether to freeze or unfreeze this column
+     */
+    public void setFrozen(boolean frozen) {
+        getElement().setProperty("frozen", frozen);
+    }
+
+    /**
+     * Gets the this column's frozen state.
+     *
+     * @return whether this column is frozen
+     */
+    @Synchronize("frozen-changed")
+    public boolean isFrozen() {
+        return getElement().getProperty("frozen", false);
     }
 
     @ClientDelegate

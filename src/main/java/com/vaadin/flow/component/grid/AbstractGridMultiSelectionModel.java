@@ -263,6 +263,16 @@ public abstract class AbstractGridMultiSelectionModel<T>
         }
     }
 
+    @Override
+    public void setSelectionColumnFrozen(boolean frozen) {
+        selectionColumn.setFrozen(frozen);
+    }
+
+    @Override
+    public boolean isSelectionColumnFrozen() {
+        return selectionColumn.isFrozen();
+    }
+
     /**
      * Method for handling the firing of selection events.
      *

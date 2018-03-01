@@ -563,6 +563,8 @@ public class GridView extends DemoView {
         // begin-source-example
         // source-example-heading: Column API example
         Grid<Person> grid = new Grid<>();
+        GridSelectionModel<Person> selectionMode = grid
+                .setSelectionMode(SelectionMode.MULTI);
         grid.setItems(getItems());
 
         Column<Person> idColumn = grid.addColumn(Person::getId).setHeader("ID")
@@ -589,6 +591,13 @@ public class GridView extends DemoView {
         freezeIdColumn.addClickListener(
                 event -> idColumn.setFrozen(!idColumn.isFrozen()));
 
+        NativeButton freezeSelectionColumn = new NativeButton(
+                "Toggle frozen state of selection column");
+        GridMultiSelectionModel<?> multiSlection = (GridMultiSelectionModel<?>) selectionMode;
+        freezeSelectionColumn.addClickListener(
+                event -> multiSlection.setSelectionColumnFrozen(
+                        !multiSlection.isSelectionColumnFrozen()));
+
         NativeButton merge = new NativeButton("Merge ID and name columns");
         merge.addClickListener(event -> {
             grid.mergeColumns(idColumn, nameColumn)
@@ -603,9 +612,10 @@ public class GridView extends DemoView {
         idColumnVisibility.setId("toggle-id-column-visibility");
         userReordering.setId("toggle-user-reordering");
         freezeIdColumn.setId("toggle-id-column-frozen");
+        freezeSelectionColumn.setId("toggle-selection-column-frozen");
         addCard("Configuring columns", "Column API example", grid,
                 new VerticalLayout(idColumnVisibility, userReordering,
-                        freezeIdColumn, merge));
+                        freezeIdColumn, freezeSelectionColumn, merge));
     }
 
     private Grid<Person> createGridWithDetails() {
