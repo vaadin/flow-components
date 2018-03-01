@@ -21,7 +21,7 @@ The Maven dependency for Vaadin Charts is as follows:
 <dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow</artifactId>
-    <version>6.0.0.alpha6</version>
+    <version>6.0.0.alpha16</version>
 </dependency>
 ----
 You also need to define the Vaadin add-ons repository if not already defined:

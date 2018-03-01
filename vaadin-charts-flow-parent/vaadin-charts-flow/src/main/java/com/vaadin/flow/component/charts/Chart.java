@@ -99,7 +99,7 @@ public class Chart extends Component implements HasStyle, HasSize {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        attachEvent.getUI().beforeClientResponse(this, () -> {
+        attachEvent.getUI().beforeClientResponse(this, context -> {
             drawChart();
             if (configuration != null) {
                 // Start listening to data series events once the chart has been
