@@ -99,14 +99,14 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     }
 
     /**
-     * Creates a Notification with the given String rendered as its HTML text.
-     * The default duration for the notification is 4000 milliseconds
+     * Creates a Notification with the given String rendered as its HTML text,
+     * that does not close automatically.
      * 
      * @param text
      *            the text of the Notification
      */
     public Notification(String text) {
-        this(text, 4000, Position.BOTTOM_START);
+        this(text, 0, Position.BOTTOM_START);
     }
 
     /**

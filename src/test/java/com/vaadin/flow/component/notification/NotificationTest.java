@@ -15,8 +15,12 @@
  */
 package com.vaadin.flow.component.notification;
 
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -79,4 +83,36 @@ public class NotificationTest {
                 CoreMatchers.not(CoreMatchers.hasItem(container1)));
     }
 
+    @Test
+    public void constructorsWithNoDurationCreateNotCloseableNotifications() {
+        final long constructorsWithoutDurationParameter = 3L;
+
+        long constructorsWithNoIntParameter = Stream
+                .of(Notification.class.getConstructors())
+                .filter(constructor -> Stream
+                        .of(constructor.getParameterTypes())
+                        .noneMatch(int.class::equals))
+                .count();
+        Assert.assertEquals(
+                "Unexpected number of constructors without duration parameter, please test that it has default duration and increment the number",
+                constructorsWithoutDurationParameter,
+                constructorsWithNoIntParameter);
+
+        Collection<Notification> notificationsToCheck = Arrays.asList(
+                new Notification(), new Notification("test"),
+                new Notification(new Label("one"), new Label("two")));
+
+        Assert.assertEquals(
+                "Not all of the Notification constructors without duration parameter are tested",
+                constructorsWithoutDurationParameter,
+                notificationsToCheck.size());
+
+        final int expectedDuration = 0;
+        for (Notification notification : notificationsToCheck) {
+            Assert.assertEquals(String.format(
+                    "Each Notification object created with the constructor that has no 'duration' parameter should have duration set as '%d'",
+                    expectedDuration), expectedDuration,
+                    notification.getDuration());
+        }
+    }
 }
