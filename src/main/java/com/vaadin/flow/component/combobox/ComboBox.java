@@ -556,7 +556,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     }
 
     void runBeforeClientResponse(Consumer<UI> command) {
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, () -> command.accept(ui)));
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 }
