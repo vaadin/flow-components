@@ -42,7 +42,7 @@ public class FunctionCaller {
 
         element.callFunction(function);
         element.getNode().runWhenAttached(ui -> {
-            ui.beforeClientResponse(component, () -> {
+            ui.beforeClientResponse(component, context -> {
                 element.removeProperty(trackingProperty);
             });
         });

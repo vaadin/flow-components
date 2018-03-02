@@ -91,7 +91,6 @@ public class SalesDashboard extends Div {
         // plotOptionsColumn.setColor(new SolidColor(color));
         plotOptionsColumn.setShowInLegend(true);
         plotOptionsColumn.setGroupPadding(0);
-        plotOptionsColumn.setBorderWidth(1);
         plotOptionsColumn.getDataLabels().setEnabled(true);
         plotOptionsColumn.setAnimation(false);
         configuration.setPlotOptions(plotOptionsColumn);
@@ -103,8 +102,6 @@ public class SalesDashboard extends Div {
         // titleStyle.setFontSize("14");
 
         configuration.getLegend().setEnabled(false);
-
-        configuration.getxAxis().setLineWidth(0);
 
         YAxis yAxis = configuration.getyAxis();
         yAxis.getLabels().setEnabled(false);
@@ -265,7 +262,6 @@ public class SalesDashboard extends Div {
         plotOptionsFunnel.setNeckWidth("5%");
         plotOptionsFunnel.setNeckHeight("0%");
         plotOptionsFunnel.setWidth("40%");
-        plotOptionsFunnel.setBorderWidth(4);
         plotOptionsFunnel.getDataLabels().setFormat("{point.name}: {point.x}");
         plotOptionsFunnel.setAnimationLimit(0);
         configuration.setPlotOptions(plotOptionsFunnel);
@@ -322,17 +318,11 @@ public class SalesDashboard extends Div {
         configuration.getChart().setType(ChartType.PIE);
 
         PlotOptionsPie plotOptionsPie = new PlotOptionsPie();
-        plotOptionsPie.setColors(new SolidColor(BLUE), new SolidColor(GREEN),
-                new SolidColor(YELLOW), new SolidColor(CYAN),
-                new SolidColor(MAGENTA), new SolidColor(PURPLE));
         plotOptionsPie.getDataLabels().setFormat("{point.name}: {point.y}");
         plotOptionsPie.setAnimation(false);
         configuration.setPlotOptions(plotOptionsPie);
 
         configuration.setTitle("Working Today");
-        // Style titleStyle = configuration.getTitle().getStyle();
-        // titleStyle.setFontSize("14");
-        // titleStyle.setColor(new SolidColor(GRAY));
 
         DataSeries dataSeries = new DataSeries();
         dataSeries.add(new DataSeriesItem("Sales", 3));
