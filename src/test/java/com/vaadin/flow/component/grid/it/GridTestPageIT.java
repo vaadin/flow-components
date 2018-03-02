@@ -87,6 +87,20 @@ public class GridTestPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void grid_does_not_loose_data_on_new_property_sync() {
+        int size = Integer
+                .valueOf(findElement(By.id("grid-with-component-renderers"))
+                        .getAttribute("size"));
+        findElement(By.id("toggle-column-ordering")).click();
+        int updatedSize = Integer
+                .valueOf(findElement(By.id("grid-with-component-renderers"))
+                        .getAttribute("size"));
+        Assert.assertEquals(
+                "When some property is synced, grid size property should stay the same",
+                size, updatedSize);
+    }
+
+    @Test
     public void openGridWithTemplateDetailsRow_clickOnItems_dataIsTransmitted() {
         WebElement grid = findElement(By.id("grid-with-template-details-row"));
 

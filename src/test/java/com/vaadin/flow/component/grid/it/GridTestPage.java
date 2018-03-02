@@ -81,7 +81,7 @@ public class GridTestPage extends Div {
 
         grid.setItems(firstList);
 
-        grid.addColumn(new ComponentRenderer<Label, Item>(item -> {
+        grid.addColumn(new ComponentRenderer<>(item -> {
             Label label = new Label(item.getName());
             label.setId("grid-with-component-renderers-item-name-"
                     + item.getNumber());
@@ -120,7 +120,11 @@ public class GridTestPage extends Div {
             usingFirstList.set(!usingFirstList.get());
         });
         changeList.setId("grid-with-component-renderers-change-list");
-        add(grid, changeList);
+        NativeButton toggleColumnOrdering = new NativeButton("Toggle column ordering", evt -> {
+            grid.setColumnReorderingAllowed(!grid.isColumnReorderingAllowed());
+        });
+        toggleColumnOrdering.setId("toggle-column-ordering");
+        add(grid, changeList, toggleColumnOrdering);
     }
 
     private void createGridWithTemplateDetailsRow() {

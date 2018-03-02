@@ -113,7 +113,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         private List<Runnable> queue = new ArrayList<>();
 
         private UpdateQueue(int size) {
+            // 'size' property is not synchronized by the web component since
+            // there are no events for it, but we
+            // need to sync it otherwise server will overwrite client value with
+            // the old server one
             enqueue("$connector.updateSize", size);
+            getElement().setProperty("size", size);
         }
 
         @Override
@@ -1057,11 +1062,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
-
-        // resets the size of the Grid to avoid
-        // https://github.com/vaadin/vaadin-grid/issues/1200
-        getElement().setProperty("size", 0);
-
         getElement().callFunction("$connector.reset");
         setRequestedRange(0, pageSize);
         getDataCommunicator().reset();
