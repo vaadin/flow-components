@@ -36,7 +36,7 @@
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
 
-        <flow.version>1.0.0.alpha23</flow.version>
+        <flow.version>1.0.0.beta1</flow.version>
         <jetty.version>9.3.9.v20160517</jetty.version>
     </properties>
 
