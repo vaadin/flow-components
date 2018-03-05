@@ -77,7 +77,6 @@ import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
@@ -724,7 +723,18 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
     }
 
-    private final ArrayUpdater arrayUpdater = UpdateQueue::new;
+    private final ArrayUpdater arrayUpdater = new ArrayUpdater() {
+        @Override
+        public Update startUpdate(int sizeChange) {
+            return new UpdateQueue(sizeChange);
+        }
+
+        @Override
+        public void initialize() {
+            initConnector();
+            updateSelectionModeOnClient();
+        }
+    };
 
     private final CompositeDataGenerator<T> gridDataGenerator = new CompositeDataGenerator<>();
     private final DataCommunicator<T> dataCommunicator = new DataCommunicator<>(
@@ -769,31 +779,16 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            the page size. Must be greater than zero.
      */
     public Grid(int pageSize) {
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, this::initConnector));
         setPageSize(pageSize);
         setSelectionModel(SelectionMode.SINGLE.createModel(this),
                 SelectionMode.SINGLE);
-
-        getElement().addAttachListener(event -> getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        this::resetWhenClientSideNotInitialized)));
     }
 
-    private void resetWhenClientSideNotInitialized(ExecutionContext context) {
-        // If the client is already initialized, there's no need to reset
-        // everything
-        if (context.isClientSideInitialized()) {
-            return;
-        }
-        initConnector(context);
-        updateSelectionModeOnClient();
-        getDataCommunicator().reset();
-    }
-
-    private void initConnector(ExecutionContext context) {
-        context.getUI().getPage().executeJavaScript(
-                "window.gridConnector.initLazy($0)", getElement());
+    private void initConnector() {
+        getUI().orElseThrow(() -> new IllegalStateException(
+                "Connector can only be initialized for an attached Grid"))
+                .getPage().executeJavaScript(
+                        "window.gridConnector.initLazy($0)", getElement());
     }
 
     /**
@@ -1305,13 +1300,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         Rendering<T> rendering;
         if (detailsTemplate == null) {
             rendering = renderer.render(getElement(),
-                    (KeyMapper<T>) getDataCommunicator().getKeyMapper());
+                    getDataCommunicator().getKeyMapper());
             detailsTemplate = rendering.getTemplateElement();
             detailsTemplate.setAttribute("class", "row-details");
         } else {
             rendering = renderer.render(getElement(),
-                    (KeyMapper<T>) getDataCommunicator().getKeyMapper(),
-                    detailsTemplate);
+                    getDataCommunicator().getKeyMapper(), detailsTemplate);
         }
 
         Optional<DataGenerator<T>> dataGenerator = rendering.getDataGenerator();
@@ -1454,7 +1448,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Removes a column with the given column key from the Grid.
-     * 
+     *
      * @param columnKey
      *            the key of the column, assigned by
      *            {@link Column#setKey(String)}, or automatically created when
@@ -1475,7 +1469,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Removes a column from the Grid.
-     * 
+     *
      * @param column
      *            the column to be removed, not <code>null</code>
      * @throws IllegalArgumentException
@@ -1530,7 +1524,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Sets whether the item details can be opened and closed by clicking the
      * rows or not.
-     * 
+     *
      * @param detailsVisibleOnClick
      *            {@code true} to enable opening and closing item details by
      *            clicking the rows, {@code false} to disable this functionality
@@ -1547,7 +1541,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Gets whether the item details are opened and closed by clicking the rows
      * or not.
-     * 
+     *
      * @return {@code true} if clicking the rows opens and closes their item
      *         details, {@code false} otherwise
      * @see #setItemDetailsRenderer(Renderer)
@@ -1749,7 +1743,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * If <code>true</code>, the grid's height is defined by the number of its
      * rows. All items are fetched from the {@link DataProvider}, and the Grid
      * shows no vertical scroll bar.
-     * 
+     *
      * @param heightByRows
      *            <code>true</code> to make Grid compute its height by the
      *            number of rows, <code>false</code> for the default behavior
@@ -1760,7 +1754,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets whether grid's height is defined by the number of its rows.
-     * 
+     *
      * @return <code>true</code> if Grid computes its height by the number of
      *         rows, <code>false</code> otherwise
      */
