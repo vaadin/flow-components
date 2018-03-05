@@ -21,13 +21,13 @@ import java.io.OutputStream;
  * Class containing file information for upload.
  */
 public class FileData {
-    private final String mimeType, fileName;
+    private final String fileName, mimeType;
     private final OutputStream outputBuffer;
 
-    public FileData(String mimeType, String fileName,
+    public FileData(String fileName, String mimeType,
             OutputStream outputBuffer) {
-        this.mimeType = mimeType;
         this.fileName = fileName;
+        this.mimeType = mimeType;
         this.outputBuffer = outputBuffer;
     }
 
