@@ -55,7 +55,7 @@ Chart chart = new Chart();
 chart.setTimeline(true);
 Configuration configuration = chart.getConfiguration();
 configuration.setRangeSelector(rangeSelector);
-chart.drawChart(configuration);
+chart.drawChart();
 ----
 You can customize the date format for the time range input fields by specifying formatter strings
 for displaying and editing the dates, as well as a corresponding JavaScript parser
