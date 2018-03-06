@@ -1579,7 +1579,7 @@ for (StockPrices.OhlcData data : StockPrices.fetchAaplOhlcPrice()) {
     dataSeries.add(item);
 }
 configuration.setSeries(dataSeries);
-chart.drawChart(configuration);
+chart.drawChart();
 
 ----
 
