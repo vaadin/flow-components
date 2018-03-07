@@ -45,6 +45,25 @@ public class CheckboxIT extends ComponentDemoTest {
     }
 
     @Test
+    public void indeterminateCheckbox() {
+        WebElement checkbox = layout
+                .findElement(By.id("indeterminate-checkbox"));
+        WebElement button = layout.findElement(By.id("reset-indeterminate"));
+        Assert.assertEquals("This checkbox should be in indeterminate state",
+                "true", checkbox.getAttribute("indeterminate"));
+
+        checkbox.click();
+        Assert.assertNotEquals(
+                "Checkbox should not be in indeterminate state after clicking it",
+                "true", checkbox.getAttribute("indeterminate"));
+
+        clickElementWithJs(button);
+        Assert.assertEquals(
+                "This checkbox should be in indeterminate state after resetting",
+                "true", checkbox.getAttribute("indeterminate"));
+    }
+
+    @Test
     public void valueChangeCheckbox() {
         WebElement checkbox = layout
                 .findElement(By.id("value-change-checkbox"));

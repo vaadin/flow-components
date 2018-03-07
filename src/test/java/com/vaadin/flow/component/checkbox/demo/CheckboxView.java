@@ -66,8 +66,10 @@ public class CheckboxView extends DemoView {
         indeterminateCheckbox.setIndeterminate(true);
         // end-source-example
 
-        NativeButton button = new NativeButton("Reset",
-                event -> indeterminateCheckbox.setValue(null));
+        NativeButton button = new NativeButton("Reset", event -> {
+            indeterminateCheckbox.setValue(false);
+            indeterminateCheckbox.setIndeterminate(true);
+        });
         button.setId("reset-indeterminate");
 
         addCard("Indeterminate Checkbox", indeterminateCheckbox, button);
