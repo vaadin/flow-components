@@ -54,7 +54,7 @@ public class GridLoadsItemsIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "There should be one query fetching two previous pages, the current page, and two upcoming pages",
-                messages, Arrays.asList("Fetch 400 - 650"));
+                Arrays.asList("Fetch 400 - 700"), messages);
     }
 
     private List<String> getMessages() {

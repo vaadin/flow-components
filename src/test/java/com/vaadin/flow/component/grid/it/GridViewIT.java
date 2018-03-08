@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -33,8 +32,11 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.demo.GridView;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.demo.TabbedComponentDemoTest;
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Integration tests for the {@link GridView}.
@@ -44,35 +46,31 @@ public class GridViewIT extends TabbedComponentDemoTest {
     @Test
     public void dataIsShown() throws InterruptedException {
         openTabAndCheckForErrors("");
-        WebElement grid = findElement(By.id("basic"));
+        GridElement grid = $(GridElement.class).id("basic");
 
-        Assert.assertTrue(hasCell(grid, "Name"));
-
-        Assert.assertTrue(hasCell(grid, "Person 1"));
-
+        Assert.assertEquals("Name", grid.getHeaderCell(0).getText());
+        Assert.assertEquals("Person 1", grid.getCell(0, 0).getText());
         scroll(grid, 185);
-
-        waitUntil(driver -> hasCell(grid, "Person 189"));
+        waitUntil(driver -> grid.getFirstVisibleRowIndex() >= 185);
+        Assert.assertEquals("Person 186", grid.getCell(185, 0).getText());
     }
 
     @Test
     public void lazyDataIsShown() throws InterruptedException {
         openTabAndCheckForErrors("");
-        WebElement grid = findElement(By.id("lazy-loading"));
-
+        GridElement grid = $(GridElement.class).id("lazy-loading");
         scrollToElement(grid);
 
-        Assert.assertTrue(hasCell(grid, "Name"));
-
+        Assert.assertEquals("Name", grid.getHeaderCell(0).getText());
         scroll(grid, 1010);
-
-        Assert.assertTrue(hasCell(grid, "Person 1020"));
+        waitUntil(driver -> grid.getFirstVisibleRowIndex() >= 1010);
+        Assert.assertEquals("Person 1011", grid.getCell(1010, 0).getText());
     }
 
     @Test
     public void gridAsSingleSelect() {
         openTabAndCheckForErrors("selection");
-        WebElement grid = findElement(By.id("single-selection"));
+        GridElement grid = $(GridElement.class).id("single-selection");
         scrollToElement(grid);
 
         WebElement toggleButton = findElement(By.id("single-selection-toggle"));
@@ -145,7 +143,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     @Test
     public void gridAsMultiSelect() {
         openTabAndCheckForErrors("selection");
-        WebElement grid = findElement(By.id("multi-selection"));
+        GridElement grid = $(GridElement.class).id("multi-selection");
         scrollToElement(grid);
 
         WebElement selectBtn = findElement(By.id("multi-selection-button"));
@@ -158,20 +156,18 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 messageDiv.getText());
         assertRowsSelected(grid, 0, 5);
 
-        List<WebElement> checkboxes = grid
-                .findElements(By.tagName("vaadin-checkbox")).stream()
-                .filter(element -> "Select Row"
-                        .equals(element.getAttribute("aria-label")))
-                .collect(Collectors.toList());
-        checkboxes.get(0).click();
-        checkboxes.get(1).click();
+        WebElement checkbox = getCellContent(grid.getCell(0, 0));
+        checkbox.click();
+        checkbox = getCellContent(grid.getCell(1, 0));
+        checkbox.click();
         Assert.assertEquals(
                 getSelectionMessage(GridView.items.subList(1, 5),
                         GridView.items.subList(2, 5), true),
                 messageDiv.getText());
         assertRowsSelected(grid, 2, 5);
 
-        checkboxes.get(5).click();
+        checkbox = getCellContent(grid.getCell(5, 0));
+        checkbox.click();
         Assert.assertTrue(isRowSelected(grid, 5));
         clickElementWithJs(selectBtn);
         assertRowsSelected(grid, 0, 5);
@@ -181,7 +177,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     @Test
     public void gridWithDisabledSelection() {
         openTabAndCheckForErrors("selection");
-        WebElement grid = findElement(By.id("none-selection"));
+        GridElement grid = $(GridElement.class).id("none-selection");
         scrollToElement(grid);
         clickElementWithJs(grid
                 .findElements(By.tagName("vaadin-grid-cell-content")).get(3));
@@ -191,31 +187,35 @@ public class GridViewIT extends TabbedComponentDemoTest {
     @Test
     public void gridWithColumnTemplate() {
         openTabAndCheckForErrors("using-templates");
-        WebElement grid = findElement(By.id("template-renderer"));
+        GridElement grid = $(GridElement.class).id("template-renderer");
         scrollToElement(grid);
-        Assert.assertTrue(hasHtmlCell(grid, "0"));
-        Assert.assertTrue(hasHtmlCell(grid,
-                "<div title=\"Person 1\">Person 1<br><small>23 years old</small></div>"));
-        Assert.assertTrue(hasHtmlCell(grid,
-                "<div>Street S, number 30<br><small>16142</small></div>"));
 
-        WebElement buttonsCell = getHtmlCell(grid,
-                "<button>Update</button><button>Remove</button>");
-        List<WebElement> buttons = buttonsCell
-                .findElements(By.tagName("button"));
+        Assert.assertEquals("0", grid.getCell(0, 0).getText());
+        Assert.assertEquals(
+                "<div title=\"Person 1\">Person 1<br><small>23 years old</small></div>",
+                grid.getCell(0, 1).getInnerHTML());
+        Assert.assertEquals(
+                "<div>Street S, number 30<br><small>16142</small></div>",
+                grid.getCell(0, 2).getInnerHTML());
+        Assert.assertEquals("<button>Update</button><button>Remove</button>",
+                grid.getCell(0, 3).getInnerHTML());
+
+        List<TestBenchElement> buttons = grid.getCell(0, 3).$("button").all();
         Assert.assertEquals(2, buttons.size());
 
-        clickElementWithJs(buttons.get(0));
-        waitUntil(driver -> hasHtmlCell(grid,
-                "<div title=\"Person 1 Updated\">Person 1 Updated<br><small>23 years old</small></div>"));
+        buttons.get(0).click();
+        Assert.assertEquals(
+                "<div title=\"Person 1 Updated\">Person 1 Updated<br><small>23 years old</small></div>",
+                grid.getCell(0, 1).getInnerHTML());
+        buttons.get(0).click();
+        Assert.assertEquals(
+                "<div title=\"Person 1 Updated Updated\">Person 1 Updated Updated<br><small>23 years old</small></div>",
+                grid.getCell(0, 1).getInnerHTML());
 
-        clickElementWithJs(buttons.get(0));
-        waitUntil(driver -> hasHtmlCell(grid,
-                "<div title=\"Person 1 Updated Updated\">Person 1 Updated Updated<br><small>23 years old</small></div>"));
-
-        clickElementWithJs(buttons.get(1));
-        waitUntilNot(driver -> hasHtmlCell(grid,
-                "<div title=\"Person 1 Updated Updated\">Person 1 Updated Updated<br><small>23 years old</small></div>"));
+        buttons.get(1).click();
+        Assert.assertEquals(
+                "<div title=\"Person 2\">Person 2<br><small>28 years old</small></div>",
+                grid.getCell(0, 1).getInnerHTML());
     }
 
     @Test
@@ -269,7 +269,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     @Test
     public void gridDetailsRowTests() {
         openTabAndCheckForErrors("item-details");
-        WebElement grid = findElement(By.id("grid-with-details-row"));
+        GridElement grid = $(GridElement.class).id("grid-with-details-row");
         scrollToElement(grid);
 
         clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
@@ -301,33 +301,29 @@ public class GridViewIT extends TabbedComponentDemoTest {
     @Test
     public void gridDetailsRowServerAPI() {
         openTabAndCheckForErrors("item-details");
-        WebElement grid = findElement(By.id("grid-with-details-row-2"));
+        GridElement grid = $(GridElement.class).id("grid-with-details-row-2");
         scrollToElement(grid);
 
-        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
-
-        List<WebElement> toggleDetailsButtons = grid
-                .findElements(By.tagName("button"));
-
-        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
         assertAmountOfOpenDetails(grid, 0);
 
-        clickElementWithJs(toggleDetailsButtons.get(1));
+        getCellContent(grid.getCell(1, 2)).click();
         assertAmountOfOpenDetails(grid, 1);
+        Assert.assertThat(
+                grid.findElement(By.className("custom-details"))
+                        .getAttribute("innerHTML"),
+                CoreMatchers.containsString("Hi! My name is <b>Person 2!</b>"));
 
-        Assert.assertTrue(grid.findElement(By.className("custom-details"))
-                .getAttribute("innerHTML")
-                .contains("Hi! My name is <b>Person 2!</b>"));
-
-        clickElementWithJs(toggleDetailsButtons.get(3));
+        getCellContent(grid.getCell(3, 2)).click();
         assertAmountOfOpenDetails(grid, 2);
 
-        clickElementWithJs(toggleDetailsButtons.get(1));
-        Assert.assertFalse(
+        getCellContent(grid.getCell(1, 2)).click();
+        getCellContent(grid.getCell(3, 2)).click();
+        Assert.assertThat(
                 "Details should be closed after clicking the button again",
                 grid.findElement(By.className("custom-details"))
-                        .getAttribute("innerHTML")
-                        .contains("Hi! My name is <b>Person 2!</b>"));
+                        .getAttribute("innerHTML"),
+                CoreMatchers.not(CoreMatchers
+                        .containsString("Hi! My name is <b>Person 2!</b>")));
     }
 
     private void assertAmountOfOpenDetails(WebElement grid,
@@ -433,31 +429,24 @@ public class GridViewIT extends TabbedComponentDemoTest {
     @Test
     public void gridWidthSorting() {
         openTabAndCheckForErrors("sorting");
-        WebElement grid = findElement(By.id("grid-sortable-columns"));
+        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
         scrollToElement(grid);
 
-        WebElement nameColumnSorter = getCell(grid, "Name")
-                .findElement(By.tagName("vaadin-grid-sorter"));
-        WebElement ageColumnSorter = getCell(grid, "Age")
-                .findElement(By.tagName("vaadin-grid-sorter"));
-        WebElement addressColumnSorter = getCell(grid, "Address")
-                .findElement(By.tagName("vaadin-grid-sorter"));
-
-        clickElementWithJs(nameColumnSorter);
+        getCellContent(grid.getHeaderCell(0)).click();
         assertSortMessageEquals(QuerySortOrder.asc("name").build(), true);
-        clickElementWithJs(addressColumnSorter);
+        getCellContent(grid.getHeaderCell(2)).click();
         assertSortMessageEquals(
                 QuerySortOrder.asc("street").thenAsc("number").build(), true);
-        clickElementWithJs(addressColumnSorter);
+        getCellContent(grid.getHeaderCell(2)).click();
         assertSortMessageEquals(
                 QuerySortOrder.desc("street").thenDesc("number").build(), true);
-        clickElementWithJs(addressColumnSorter);
+        getCellContent(grid.getHeaderCell(2)).click();
         assertSortMessageEquals(Collections.emptyList(), true);
 
         // enable multi sort
         clickElementWithJs(findElement(By.id("grid-multi-sort-toggle")));
-        clickElementWithJs(nameColumnSorter);
-        clickElementWithJs(ageColumnSorter);
+        getCellContent(grid.getHeaderCell(0)).click();
+        getCellContent(grid.getHeaderCell(1)).click();
         assertSortMessageEquals(
                 QuerySortOrder.asc("age").thenAsc("name").build(), true);
     }
@@ -535,23 +524,16 @@ public class GridViewIT extends TabbedComponentDemoTest {
     @Test
     public void beanGrid_columnsForPropertiesAddedWithCorrectHeaders() {
         openTabAndCheckForErrors("configuring-columns");
-        WebElement grid = findElement(By.id("bean-grid"));
+        GridElement grid = $(GridElement.class).id("bean-grid");
         scrollToElement(grid);
 
         Assert.assertEquals("Unexpected amount of columns", 4,
                 grid.findElements(By.tagName("vaadin-grid-column")).size());
 
-        List<WebElement> cells = getCells(grid);
-
-        WebElement firstHeader = getCell(grid, "Address");
-
-        int index = cells.indexOf(firstHeader);
-        for (String header : Arrays.asList("Address", "Name", "Age",
-                "Postal Code")) {
-            Assert.assertEquals("Missing expected column header " + header,
-                    header, cells.get(index).getText());
-            index++;
-        }
+        Assert.assertEquals("Address", grid.getHeaderCell(0).getText());
+        Assert.assertEquals("Name", grid.getHeaderCell(1).getText());
+        Assert.assertEquals("Age", grid.getHeaderCell(2).getText());
+        Assert.assertEquals("Postal Code", grid.getHeaderCell(3).getText());
     }
 
     @Test
@@ -576,34 +558,54 @@ public class GridViewIT extends TabbedComponentDemoTest {
         List<WebElement> cells = grid
                 .findElements(By.tagName("vaadin-grid-cell-content"));
 
-        assertCellContent("Item 1", cells.get(0));
-        assertCellContent("$ 72.76", cells.get(1));
-        assertCellContent("1/10/18 11:19:11 AM", cells.get(2));
-        assertCellContent("Jan 25, 2018", cells.get(3));
-        assertRendereredContent("$$$", cells.get(4));
-        assertCellContent("<button>Remove</button>", cells.get(5));
+        int offset = getCellsOffsetFromTheHeaders(grid, cells);
 
-        assertCellContent("Item 2", cells.get(6));
-        assertCellContent("$ 30.87", cells.get(7));
-        assertCellContent("1/10/18 11:14:54 AM", cells.get(8));
-        assertCellContent("Jan 19, 2018", cells.get(9));
-        assertRendereredContent("$", cells.get(10));
-        assertCellContent("<button>Remove</button>", cells.get(11));
+        assertCellContent("Item 1", cells.get(offset));
+        assertCellContent("$ 72.76", cells.get(offset + 1));
+        assertCellContent("1/10/18 11:19:11 AM", cells.get(offset + 2));
+        assertCellContent("Jan 25, 2018", cells.get(offset + 3));
+        assertRendereredContent("$$$", cells.get(offset + 4));
+        assertCellContent("<button>Remove</button>", cells.get(offset + 5));
+
+        assertCellContent("Item 2", cells.get(offset + 6));
+        assertCellContent("$ 30.87", cells.get(offset + 7));
+        assertCellContent("1/10/18 11:14:54 AM", cells.get(offset + 8));
+        assertCellContent("Jan 19, 2018", cells.get(offset + 9));
+        assertRendereredContent("$", cells.get(offset + 10));
+        assertCellContent("<button>Remove</button>", cells.get(offset + 11));
     }
 
     @Test
     public void heightByRows_allRowsAreFetched() {
         openTabAndCheckForErrors("height-by-rows");
-        WebElement grid = findElement(By.id("grid-height-by-rows"));
+        GridElement grid = $(GridElement.class).id("grid-height-by-rows");
         scrollToElement(grid);
-        waitUntilCellHasText(grid, "Person 49");
+        waitUntil(driver -> grid.getRowCount() == 49);
 
         Assert.assertEquals("Grid should have heightByRows set to true", "true",
                 grid.getAttribute("heightByRows"));
+    }
 
-        List<WebElement> rows = getInShadowRoot(grid, By.id("items"))
-                .findElements(By.cssSelector("tr"));
-        Assert.assertEquals("Grid should have 49 rows", 49, rows.size());
+    private WebElement getCellContent(GridTHTDElement cell) {
+        return (WebElement) executeScript(
+                "return arguments[0].firstElementChild.assignedNodes()[0].firstElementChild;",
+                cell);
+    }
+
+    private int getCellsOffsetFromTheHeaders(WebElement grid,
+            List<WebElement> cells) {
+        int numberOfColumns = grid
+                .findElements(By.tagName("vaadin-grid-column")).size();
+        for (int i = numberOfColumns; i < cells.size(); i++) {
+            WebElement cell = cells.get(i);
+            String content = cell.getAttribute("innerHTML");
+            if (!content.trim().isEmpty()
+                    && !content.startsWith("<flow-grid-component-renderer ")
+                    && !content.startsWith("<button>")) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     private void assertRendereredContent(String expected, WebElement cell) {
@@ -636,7 +638,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 .isPresent());
     }
 
-    private void assertRowsSelected(WebElement grid, int first, int last) {
+    private void assertRowsSelected(GridElement grid, int first, int last) {
         IntStream.range(first, last).forEach(
                 rowIndex -> Assert.assertTrue(isRowSelected(grid, rowIndex)));
     }
@@ -646,28 +648,16 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 .findElements(By.cssSelector("tr")).get(row);
     }
 
-    private boolean isRowSelected(WebElement grid, int row) {
-        return getRow(grid, row).getAttribute("selected") != null;
+    private boolean isRowSelected(GridElement grid, int row) {
+        return grid.getRow(row).isSelected();
     }
 
-    private boolean hasCell(WebElement grid, String text) {
+    private boolean hasCell(GridElement grid, String text) {
         return getCell(grid, text) != null;
     }
 
-    private WebElement getCell(WebElement grid, String text) {
-        return getCells(grid).stream()
-                .filter(cell -> text.equals(cell.getText())).findAny()
-                .orElse(null);
-    }
-
-    private boolean hasHtmlCell(WebElement grid, String html) {
-        return getHtmlCell(grid, html) != null;
-    }
-
-    private WebElement getHtmlCell(WebElement grid, String text) {
-        return getCells(grid).stream()
-                .filter(cell -> text.equals(cell.getAttribute("innerHTML")))
-                .findAny().orElse(null);
+    private WebElement getCell(GridElement grid, String text) {
+        return grid.getCell(text);
     }
 
     private boolean hasComponentRendereredCell(WebElement grid, String text) {

@@ -72,8 +72,25 @@ public class GridPageSizePageIT extends AbstractComponentIT {
          */
         List<WebElement> cells = grid
                 .findElements(By.tagName("vaadin-grid-cell-content"));
-        assertCellContent("0", cells.get(0));
-        assertCellContent("24", cells.get(48));
+
+        int offset = getCellsOffsetFromTheHeaders(grid, cells);
+
+        assertCellContent("0", cells.get(offset));
+        assertCellContent("24", cells.get(offset + 48));
+    }
+
+    private int getCellsOffsetFromTheHeaders(WebElement grid,
+            List<WebElement> cells) {
+        int numberOfColumns = grid
+                .findElements(By.tagName("vaadin-grid-column")).size();
+        for (int i = numberOfColumns; i < cells.size(); i++) {
+            WebElement cell = cells.get(i);
+            String content = cell.getAttribute("innerHTML");
+            if (!content.trim().isEmpty()) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     private void assertCellContent(String expected, WebElement cell) {
