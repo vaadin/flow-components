@@ -34,11 +34,19 @@ public class GridLoadsItemsIT extends AbstractComponentIT {
     public void initialRender_twoQueries() {
         open();
 
+        // waits for Grid to fetch the items after it is loaded. This process is
+        // asynchronous - without this wait, the test might fail.
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         List<String> messages = getMessages();
 
         Assert.assertEquals(
                 "There should be two queries, one for eagerly fetched data and one to fill the buffer based on the size of the Grid",
-                messages, Arrays.asList("Fetch 0 - 50", "Fetch 50 - 150"));
+                Arrays.asList("Fetch 0 - 50", "Fetch 50 - 150"), messages);
     }
 
     @Test
@@ -54,7 +62,7 @@ public class GridLoadsItemsIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "There should be one query fetching two previous pages, the current page, and two upcoming pages",
-                Arrays.asList("Fetch 400 - 700"), messages);
+                Arrays.asList("Fetch 400 - 650"), messages);
     }
 
     private List<String> getMessages() {

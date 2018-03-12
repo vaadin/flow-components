@@ -966,11 +966,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 item -> String.valueOf(property.getGetter().apply(item)))
                         .setHeader(property.getCaption());
         try {
-            return column.setKey(property.getFullName());
+            return column.setKey(property.getName());
         } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException(
                     "Multiple columns for the same property: "
-                            + property.getFullName());
+                            + property.getName());
         }
     }
 
