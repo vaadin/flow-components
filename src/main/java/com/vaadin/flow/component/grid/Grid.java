@@ -817,15 +817,43 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * Adds a new text column to this {@link Grid} with a value provider. The
      * value is converted to a JSON value by using
      * {@link JsonSerializer#toJson(Object)}.
+     * <p>
+     * <em>NOTE:</em> For displaying components, see
+     * {@link #addComponentColumn(ValueProvider)}. For using build-in
+     * renderers, see {@link #addColumn(Renderer)}.
      *
      * @param valueProvider
      *            the value provider
      * @return the created column
+     * @see #addComponentColumn(ValueProvider)
+     * @see #addColumn(Renderer)
      */
     public Column<T> addColumn(ValueProvider<T, ?> valueProvider) {
         String columnId = createColumnId(false);
         return addColumn(TemplateRenderer.<T> of("[[item." + columnId + "]]")
                 .withProperty(columnId, valueProvider));
+    }
+
+    /**
+     * Adds a new column that shows components.
+     * <p>
+     * This is a shorthand for {@link #addColumn(Renderer)} with a
+     * {@link ComponentRenderer}.
+     * <p>
+     * <em>NOTE:</em> Using {@link ComponentRenderer} is not as efficient as the
+     * built in renderers or using {@link TemplateRenderer}.
+     *
+     * @param componentProvider
+     *            a value provider that will return a component for the given
+     *            item
+     * @param <V>
+     *            the component type
+     * @return the new column
+     * @see #addColumn(Renderer)
+     */
+    public <V extends Component> Column<T> addComponentColumn(
+            ValueProvider<T, V> componentProvider) {
+        return addColumn(new ComponentRenderer<>(componentProvider));
     }
 
     /**
@@ -854,15 +882,23 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
-     * Adds a new text column to this {@link Grid} with a template renderer. The
-     * values inside the renderer are converted to JSON values by using
-     * {@link JsonSerializer#toJson(Object)}.
-     *
+     * Adds a new text column to this {@link Grid} with a renderer.
+     * <p>
+     * See implementations of the {@link Renderer} interface for built-in
+     * renderer options with type safe APIs. For a renderer using template
+     * binding, use {@link TemplateRenderer#of(String)}.
+     * <p>
+     * </><em>NOTE:</em> You can add component columns easily using the
+     * {@link #addComponentColumn(ValueProvider)}, but using
+     * {@link ComponentRenderer} is not as efficient as the built in renderers
+     * or using {@link TemplateRenderer}.
+     * 
      * @param renderer
      *            the renderer used to create the grid cell structure
      * @return the created column
      *
      * @see TemplateRenderer#of(String)
+     * @see #addComponentColumn(ValueProvider)
      */
     public Column<T> addColumn(Renderer<T> renderer) {
         String columnId = createColumnId(true);
@@ -880,6 +916,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * Adds a new text column to this {@link Grid} with a template renderer and
      * sorting properties. The values inside the renderer are converted to JSON
      * values by using {@link JsonSerializer#toJson(Object)}.
+     * <p>
+     * <em>NOTE:</em> You can add component columns easily using the
+     * {@link #addComponentColumn(ValueProvider)}, but using
+     * {@link ComponentRenderer} is not as efficient as the built in renderers
+     * or using {@link TemplateRenderer}.
      * <p>
      * This constructor attempts to automatically configure both in-memory and
      * backend sorting using the given sorting properties and matching those

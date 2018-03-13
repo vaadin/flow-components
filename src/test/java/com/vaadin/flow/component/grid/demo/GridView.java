@@ -219,13 +219,16 @@ public class GridView extends DemoView {
         private int timesClicked;
 
         /**
-         * Zero-args constructor.
+         * Creates a new component with the given item.
+         *
+         * @param person the person to set
          */
-        public PersonComponent() {
+        public PersonComponent(Person person) {
             this.addClickListener(event -> {
                 timesClicked++;
                 setText(text + "\nClicked " + timesClicked);
             });
+            setPerson(person);
         }
 
         /**
@@ -513,18 +516,17 @@ public class GridView extends DemoView {
         Grid<Person> grid = new Grid<>();
         grid.setItems(createItems());
 
-        // You can use a constructor and a separate setter for the renderer
-        grid.addColumn(new ComponentRenderer<>(PersonComponent::new,
-                PersonComponent::setPerson)).setHeader("Person");
+        // Use the component constructor that accepts an item ->
+        // new PersonComponent(Person person)
+        grid.addComponentColumn(PersonComponent::new).setHeader("Person");
 
-        // Or you can use an ordinary function to get the component
-        grid.addColumn(new ComponentRenderer<>(
-                item -> new NativeButton("Remove", evt -> {
-                    ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) grid
-                            .getDataProvider();
-                    dataProvider.getItems().remove(item);
-                    dataProvider.refreshAll();
-                }))).setHeader("Actions");
+        // Or you can use an ordinary function to setup the component
+        grid.addComponentColumn(item -> new NativeButton("Remove", evt -> {
+            ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) grid
+                    .getDataProvider();
+            dataProvider.getItems().remove(item);
+            dataProvider.refreshAll();
+        })).setHeader("Actions");
 
         // Item details can also use components
         grid.setItemDetailsRenderer(new ComponentRenderer<>(PersonCard::new));
@@ -858,7 +860,7 @@ public class GridView extends DemoView {
                         : new Label("$"),
                 item -> ""));
 
-        // ButtonRenderer for an easy clickable button,
+        // NativeButtonRenderer for an easy clickable button,
         // without creating a component
         grid.addColumn(new NativeButtonRenderer<>("Remove", item -> {
             ListDataProvider<Item> dataProvider = (ListDataProvider<Item>) grid
