@@ -78,7 +78,7 @@ public class RadioButtonGroup<T>
     @Override
     public Registration addValueChangeListener(
             ValueChangeListener<RadioButtonGroup<T>, T> listener) {
-        return get().getElement().addPropertyChangeListener(
+        return getElement().addPropertyChangeListener(
                 getClientValuePropertyName(), event -> listener
                         .onComponentEvent(createValueChangeEvent(event)));
     }

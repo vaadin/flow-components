@@ -17,11 +17,9 @@ package com.vaadin.flow.component.radiobutton;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.ComponentSupplier;
 import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.shared.Registration;
@@ -69,12 +67,12 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.RadioGroupElement#1.0.0-alpha12",
+        "WebComponent: Vaadin.RadioGroupElement#1.0.0-beta1",
         "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-radio-group")
 @HtmlImport("frontend://bower_components/vaadin-radio-button/src/vaadin-radio-group.html")
 public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGroup<R>>
-        extends Component implements HasStyle, ComponentSupplier<R> {
+        extends Component implements HasStyle {
 
     /**
      * <p>
@@ -110,7 +108,6 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
         getElement().setProperty("disabled", disabled);
     }
 
-    @DomEvent("value-changed")
     public static class ValueChangeEvent<R extends GeneratedVaadinRadioGroup<R>>
             extends ComponentEvent<R> {
         public ValueChangeEvent(R source, boolean fromClient) {
@@ -126,10 +123,12 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *            the listener
      * @return a {@link Registration} for removing the event listener
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addValueChangeListener(
             ComponentEventListener<ValueChangeEvent<R>> listener) {
-        return addListener(ValueChangeEvent.class,
-                (ComponentEventListener) listener);
+        return getElement()
+                .addPropertyChangeListener("value",
+                        event -> listener.onComponentEvent(
+                                new ValueChangeEvent<R>((R) this,
+                                        event.isUserOriginated())));
     }
 }
