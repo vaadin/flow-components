@@ -17,7 +17,6 @@ package com.vaadin.flow.component.upload;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.ComponentSupplier;
 import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -114,12 +113,11 @@ import com.vaadin.flow.dom.Element;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.UploadElement#4.0.0-alpha4",
-        "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.UploadElement#4.0.0-beta1", "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-upload")
 @HtmlImport("frontend://bower_components/vaadin-upload/src/vaadin-upload.html")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
-        extends Component implements HasStyle, ComponentSupplier<R> {
+        extends Component implements HasStyle {
 
     /**
      * <p>
@@ -330,7 +328,7 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * <li>{@code error}: Error message in case the upload failed.</li>
      * <li>{@code abort}: True if the file was canceled by the user.</li>
      * <li>{@code complete}: True when the file was transferred to the server.</li>
-     * <li>{@code uploading}: True while trasferring data to the server.
+     * <li>{@code uploading}: True while transferring data to the server.
      * <p>
      * This property is synchronized automatically from client side when a
      * 'files-changed' event happens.</li>
@@ -374,7 +372,7 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * <li>{@code error}: Error message in case the upload failed.</li>
      * <li>{@code abort}: True if the file was canceled by the user.</li>
      * <li>{@code complete}: True when the file was transferred to the server.</li>
-     * <li>{@code uploading}: True while trasferring data to the server.</li>
+     * <li>{@code uploading}: True while transferring data to the server.</li>
      * </ul>
      * 
      * @param files
@@ -1225,11 +1223,17 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
                 (ComponentEventListener) listener);
     }
 
-    @DomEvent("files-changed")
     public static class FilesChangeEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
+        private final JsonArray files;
+
         public FilesChangeEvent(R source, boolean fromClient) {
             super(source, fromClient);
+            this.files = source.getFilesJsonArray();
+        }
+
+        public JsonArray getFiles() {
+            return files;
         }
     }
 
@@ -1241,18 +1245,26 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *            the listener
      * @return a {@link Registration} for removing the event listener
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addFilesChangeListener(
             ComponentEventListener<FilesChangeEvent<R>> listener) {
-        return addListener(FilesChangeEvent.class,
-                (ComponentEventListener) listener);
+        return getElement()
+                .addPropertyChangeListener("files",
+                        event -> listener.onComponentEvent(
+                                new FilesChangeEvent<R>((R) this,
+                                        event.isUserOriginated())));
     }
 
-    @DomEvent("max-files-reached-changed")
     public static class MaxFilesReachedChangeEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
+        private final boolean maxFilesReached;
+
         public MaxFilesReachedChangeEvent(R source, boolean fromClient) {
             super(source, fromClient);
+            this.maxFilesReached = source.isMaxFilesReachedBoolean();
+        }
+
+        public boolean isMaxFilesReached() {
+            return maxFilesReached;
         }
     }
 
@@ -1264,11 +1276,12 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *            the listener
      * @return a {@link Registration} for removing the event listener
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addMaxFilesReachedChangeListener(
             ComponentEventListener<MaxFilesReachedChangeEvent<R>> listener) {
-        return addListener(MaxFilesReachedChangeEvent.class,
-                (ComponentEventListener) listener);
+        return getElement().addPropertyChangeListener("maxFilesReached",
+                event -> listener.onComponentEvent(
+                        new MaxFilesReachedChangeEvent<R>((R) this,
+                                event.isUserOriginated())));
     }
 
     /**
@@ -1283,14 +1296,12 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @see <a
      *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
-     * @return this instance, for method chaining
      */
-    protected R addToAddButton(Component... components) {
+    protected void addToAddButton(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "add-button");
             getElement().appendChild(component.getElement());
         }
-        return get();
     }
 
     /**
@@ -1305,14 +1316,12 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @see <a
      *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
-     * @return this instance, for method chaining
      */
-    protected R addToDropLabelIcon(Component... components) {
+    protected void addToDropLabelIcon(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "drop-label-icon");
             getElement().appendChild(component.getElement());
         }
-        return get();
     }
 
     /**
@@ -1327,14 +1336,12 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @see <a
      *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
-     * @return this instance, for method chaining
      */
-    protected R addToDropLabel(Component... components) {
+    protected void addToDropLabel(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "drop-label");
             getElement().appendChild(component.getElement());
         }
-        return get();
     }
 
     /**
@@ -1349,14 +1356,12 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @see <a
      *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
-     * @return this instance, for method chaining
      */
-    protected R addToFileList(Component... components) {
+    protected void addToFileList(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "file-list");
             getElement().appendChild(component.getElement());
         }
-        return get();
     }
 
     /**

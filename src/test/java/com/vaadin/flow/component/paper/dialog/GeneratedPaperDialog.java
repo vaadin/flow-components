@@ -20,7 +20,6 @@ import javax.annotation.Generated;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentSupplier;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
@@ -110,7 +109,7 @@ import elemental.json.JsonObject;
 @Tag("paper-dialog")
 @HtmlImport("frontend://bower_components/paper-dialog/paper-dialog.html")
 public class GeneratedPaperDialog<R extends GeneratedPaperDialog<R>> extends
-        Component implements ComponentSupplier<R>, HasStyle, HasComponents {
+        Component implements HasStyle, HasComponents {
 
     /**
      * <p>

@@ -482,9 +482,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *
      * @param i18n
      *            the internationalized properties, not <code>null</code>
-     * @return this instance for method chaining
      */
-    public Upload setI18n(UploadI18N i18n) {
+    public void setI18n(UploadI18N i18n) {
         Objects.requireNonNull(i18n,
                 "The I18N properties object should not be null");
         JsonObject json = (JsonObject) JsonSerializer.toJson(i18n);
@@ -492,7 +491,6 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         for (String key : json.keys()) {
             element.setPropertyJson(I18N_PROPERTY + "." + key, json.get(key));
         }
-        return get();
     }
 
     /**
