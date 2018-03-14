@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.splitlayout;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.shared.Registration;
-
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * <p>
@@ -211,11 +211,10 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * will move the secondary component to the primary split, causing this
      * layout to desync with the server. This is a known issue.
      *
-     * @return this instance, for method chaining
      * @see #setOrientation(Orientation)
      */
     @Override
-    public SplitLayout addToPrimary(Component... components) {
+    public void addToPrimary(Component... components) {
         if (components.length == 1) {
             primaryComponent = components[0];
         } else {
@@ -223,7 +222,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
             container.add(components);
             primaryComponent = container;
         }
-        return setComponents();
+        setComponents();
     }
 
     /**
@@ -243,11 +242,10 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * <b>Note:</b> Calling this method with multiple arguments will wrap the
      * components inside a {@code <div>} element.
      *
-     * @return this instance, for method chaining
      * @see #setOrientation(Orientation)
      */
     @Override
-    public SplitLayout addToSecondary(Component... components) {
+    public void addToSecondary(Component... components) {
         if (components.length == 1) {
             secondaryComponent = components[0];
         } else {
@@ -255,7 +253,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
             container.add(components);
             secondaryComponent = container;
         }
-        return setComponents();
+        setComponents();
     }
 
     /**
@@ -309,7 +307,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         setInnerComponentStyle(secondaryComponent, styleName, value);
     }
 
-    private SplitLayout setComponents() {
+    private void setComponents() {
         removeAll();
         if (primaryComponent == null) {
             super.addToPrimary(new Div());
@@ -321,7 +319,6 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         } else {
             super.addToSecondary(secondaryComponent);
         }
-        return get();
     }
 
     @Override
@@ -350,10 +347,9 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         return super.addSplitterDragendListener(listener);
     }
 
-    private SplitLayout setInnerComponentStyle(Component innerComponent,
+    private void setInnerComponentStyle(Component innerComponent,
                                                String styleName, String value) {
         Optional.ofNullable(innerComponent).ifPresent(component -> component
                 .getElement().getStyle().set(styleName, value));
-        return get();
     }
 }
