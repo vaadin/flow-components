@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.checkbox;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValue;
-
-import java.util.Objects;
 
 /**
  * Server-side component for the {@code vaadin-checkbox} element.
@@ -111,9 +111,8 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
      * @param label the label text to set
      * @return this instance, for method chaining
      */
-    public Checkbox setLabel(String label) {
+    public void setLabel(String label) {
         getElement().setText(label);
-        return get();
     }
 
     /**
@@ -125,9 +124,8 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
      * "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute"
      * >aria-label at MDN</a>
      */
-    public Checkbox setAriaLabel(String ariaLabel) {
+    public void setAriaLabel(String ariaLabel) {
         getElement().setAttribute("aria-label", ariaLabel);
-        return get();
     }
 
     /**

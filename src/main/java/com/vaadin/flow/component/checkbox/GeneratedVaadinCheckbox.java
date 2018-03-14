@@ -15,18 +15,16 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasClickListeners;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Synchronize;
+import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -98,13 +96,13 @@ import com.vaadin.flow.shared.Registration;
  * </tbody>
  * </table>
  * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.CheckboxElement#2.0.0-alpha7",
+        "WebComponent: Vaadin.CheckboxElement#2.0.0-beta1",
         "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-checkbox")
 @HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
@@ -300,11 +298,17 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
         getElement().setProperty("value", postValue == null ? "" : postValue);
     }
 
-    @DomEvent("checked-changed")
     public static class CheckedChangeEvent<R extends GeneratedVaadinCheckbox<R>>
             extends ComponentEvent<R> {
+        private final boolean checked;
+
         public CheckedChangeEvent(R source, boolean fromClient) {
             super(source, fromClient);
+            this.checked = source.isCheckedBoolean();
+        }
+
+        public boolean isChecked() {
+            return checked;
         }
     }
 
@@ -316,18 +320,26 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *            the listener
      * @return a {@link Registration} for removing the event listener
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addCheckedChangeListener(
             ComponentEventListener<CheckedChangeEvent<R>> listener) {
-        return addListener(CheckedChangeEvent.class,
-                (ComponentEventListener) listener);
+        return getElement()
+                .addPropertyChangeListener("checked",
+                        event -> listener.onComponentEvent(
+                                new CheckedChangeEvent<R>((R) this,
+                                        event.isUserOriginated())));
     }
 
-    @DomEvent("indeterminate-changed")
     public static class IndeterminateChangeEvent<R extends GeneratedVaadinCheckbox<R>>
             extends ComponentEvent<R> {
+        private final boolean indeterminate;
+
         public IndeterminateChangeEvent(R source, boolean fromClient) {
             super(source, fromClient);
+            this.indeterminate = source.isIndeterminateBoolean();
+        }
+
+        public boolean isIndeterminate() {
+            return indeterminate;
         }
     }
 
@@ -339,10 +351,11 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *            the listener
      * @return a {@link Registration} for removing the event listener
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addIndeterminateChangeListener(
             ComponentEventListener<IndeterminateChangeEvent<R>> listener) {
-        return addListener(IndeterminateChangeEvent.class,
-                (ComponentEventListener) listener);
+        return getElement().addPropertyChangeListener("indeterminate",
+                event -> listener.onComponentEvent(
+                        new IndeterminateChangeEvent<R>((R) this,
+                                event.isUserOriginated())));
     }
 }
