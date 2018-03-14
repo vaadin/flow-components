@@ -172,11 +172,6 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
         }
 
         @Override
-        protected FormItem addToLabel(Component... components) {
-            return super.addToLabel(components);
-        }
-
-        @Override
         public void removeAll() {
             super.removeAll();
         }
@@ -231,9 +226,8 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
      *
      * @param steps
      *            list of {@link ResponsiveStep}s to set
-     * @return this instance, for method chaining
      */
-    public FormLayout setResponsiveSteps(List<ResponsiveStep> steps) {
+    public void setResponsiveSteps(List<ResponsiveStep> steps) {
         AtomicInteger index = new AtomicInteger();
         getElement().setPropertyJson("responsiveSteps",
                 steps.stream().map(ResponsiveStep::toJson).collect(
@@ -246,7 +240,6 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
                                 arr.set(startIndex + i, value);
                             }
                         }));
-        return get();
     }
 
     /**
@@ -256,10 +249,9 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
      *
      * @param steps
      *            the {@link ResponsiveStep}s to set
-     * @return this instance, for method chaining
      */
-    public FormLayout setResponsiveSteps(ResponsiveStep... steps) {
-        return setResponsiveSteps(Arrays.asList(steps));
+    public void setResponsiveSteps(ResponsiveStep... steps) {
+        setResponsiveSteps(Arrays.asList(steps));
     }
 
     /**
