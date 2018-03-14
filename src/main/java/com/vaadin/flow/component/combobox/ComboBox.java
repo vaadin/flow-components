@@ -491,7 +491,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         return getElement().addPropertyChangeListener(
                 SELECTED_ITEM_PROPERTY_NAME,
                 event -> listener
-                        .onComponentEvent(new HasValue.ValueChangeEvent<>(get(),
+                        .onComponentEvent(new HasValue.ValueChangeEvent<>(this,
                                 this, getValue(event.getOldValue()),
                                 event.isUserOriginated())));
     }
