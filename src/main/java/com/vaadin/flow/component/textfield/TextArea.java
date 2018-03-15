@@ -37,7 +37,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea>
      */
     public TextArea() {
         super.setValue(getEmptyValue());
-        setValueChangeMode(ValueChangeMode.ON_BLUR);
+        setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 
     /**
@@ -137,6 +137,11 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea>
         addValueChangeListener(listener);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The default value is {@link ValueChangeMode#ON_CHANGE}.
+     */
     @Override
     public ValueChangeMode getValueChangeMode() {
         return currentMode;

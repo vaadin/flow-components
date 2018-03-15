@@ -24,15 +24,18 @@ public class ValueChangeModeButtonProvider {
 
     private final HasValueChangeMode<?, ?> elementWithChangeMode;
 
-    ValueChangeModeButtonProvider(HasValueChangeMode<?, ?> elementWithChangeMode) {
+    ValueChangeModeButtonProvider(
+            HasValueChangeMode<?, ?> elementWithChangeMode) {
         this.elementWithChangeMode = elementWithChangeMode;
     }
 
     NativeButton getToggleValueSyncButton() {
-        NativeButton toggleValueSync = new NativeButton(getToggleButtonText(elementWithChangeMode.getValueChangeMode()));
+        NativeButton toggleValueSync = new NativeButton(getToggleButtonText(
+                elementWithChangeMode.getValueChangeMode()));
         toggleValueSync.setId(TOGGLE_BUTTON_ID);
         toggleValueSync.addClickListener(event -> {
-            ValueChangeMode newMode = getDifferentMode(elementWithChangeMode.getValueChangeMode());
+            ValueChangeMode newMode = getDifferentMode(
+                    elementWithChangeMode.getValueChangeMode());
             elementWithChangeMode.setValueChangeMode(newMode);
             toggleValueSync.setText(getToggleButtonText(newMode));
         });
@@ -42,22 +45,24 @@ public class ValueChangeModeButtonProvider {
     private ValueChangeMode getDifferentMode(ValueChangeMode valueChangeMode) {
         switch (valueChangeMode) {
             case EAGER:
-                return ValueChangeMode.ON_BLUR;
-            case ON_BLUR:
+                return ValueChangeMode.ON_CHANGE;
+            case ON_CHANGE:
                 return ValueChangeMode.EAGER;
             default:
-                throw new IllegalArgumentException("Unexpected value change mode: " + valueChangeMode);
+                throw new IllegalArgumentException(
+                        "Unexpected value change mode: " + valueChangeMode);
         }
     }
 
     private String getToggleButtonText(ValueChangeMode valueChangeMode) {
         switch (valueChangeMode) {
             case EAGER:
-                return "Sync value on blur event";
-            case ON_BLUR:
-                return "Sync value on each change";
+                return "Sync value only on committed changes";
+            case ON_CHANGE:
+                return "Sync value eagerly on each change";
             default:
-                throw new IllegalArgumentException("Unexpected value change mode: " + valueChangeMode);
+                throw new IllegalArgumentException(
+                        "Unexpected value change mode: " + valueChangeMode);
         }
     }
 }
