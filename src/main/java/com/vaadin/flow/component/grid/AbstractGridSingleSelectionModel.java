@@ -26,6 +26,7 @@ import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionEvent;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -133,8 +134,8 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
             }
 
             @Override
-            public Grid<T> get() {
-                return getGrid();
+            public Element getElement() {
+                return getGrid().getElement();
             }
         };
     }

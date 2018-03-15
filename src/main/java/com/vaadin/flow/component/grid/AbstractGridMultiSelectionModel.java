@@ -31,6 +31,7 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -196,13 +197,13 @@ public abstract class AbstractGridMultiSelectionModel<T>
             }
 
             @Override
-            public Grid<T> get() {
-                return getGrid();
+            public Set<T> getEmptyValue() {
+                return Collections.emptySet();
             }
 
             @Override
-            public Set<T> getEmptyValue() {
-                return Collections.emptySet();
+            public Element getElement() {
+                return getGrid().getElement();
             }
         };
     }
