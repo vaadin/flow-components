@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.orderedlayout;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 
@@ -58,10 +59,10 @@ public class HorizontalLayout extends Component
      * The default alignment for individual components is
      * {@link Alignment#AUTO}.
      * <p>
-     * It's the same as the {@link #setAlignSelf(Alignment, Component...)}
+     * It's the same as the {@link #setAlignSelf(Alignment, HasElement...)}
      * method
      *
-     * @see #setAlignSelf(Alignment, Component...)
+     * @see #setAlignSelf(Alignment, HasElement...)
      *
      * @param alignment
      *            the individual alignment for the children components. Setting
@@ -80,9 +81,9 @@ public class HorizontalLayout extends Component
      * The default alignment for individual components is
      * {@link Alignment#AUTO}.
      * <p>
-     * It's the same as the {@link #getAlignSelf(Component)} method.
+     * It's the same as the {@link #getAlignSelf(HasElement)} method.
      *
-     * @see #getAlignSelf(Component)
+     * @see #getAlignSelf(HasElement)
      *
      * @param component
      *            The component which individual layout should be read

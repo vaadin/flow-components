@@ -18,6 +18,7 @@ package com.vaadin.flow.component.orderedlayout;
 import java.util.Arrays;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -180,9 +181,9 @@ public interface FlexComponent<C extends Component>
     }
 
     /**
-     * Sets an alignment for individual components inside the layout. This
-     * individual alignment for the component overrides any alignment set at the
-     * {@link #setAlignItems(Alignment)}.
+     * Sets an alignment for individual element container inside the layout.
+     * This individual alignment for the element container overrides any
+     * alignment set at the {@link #setAlignItems(Alignment)}.
      * <p>
      * It effectively sets the {@code "alignSelf"} style value.
      * <p>
@@ -192,19 +193,20 @@ public interface FlexComponent<C extends Component>
      * @param alignment
      *            the individual alignment for the children components. Setting
      *            <code>null</code> will reset the alignment to its default
-     * @param components
-     *            The components to which the individual alignment should be set
+     * @param elementContainers
+     *            The element containers (components) to which the individual
+     *            alignment should be set
      */
     default public void setAlignSelf(Alignment alignment,
-            Component... components) {
+            HasElement... elementContainers) {
         if (alignment == null) {
-            for (Component component : components) {
-                component.getElement().getStyle()
+            for (HasElement container : elementContainers) {
+                container.getElement().getStyle()
                         .remove(FlexConstants.ALIGN_SELF_CSS_PROPERTY);
             }
         } else {
-            for (Component component : components) {
-                component.getElement().getStyle().set(
+            for (HasElement container : elementContainers) {
+                container.getElement().getStyle().set(
                         FlexConstants.ALIGN_SELF_CSS_PROPERTY,
                         alignment.getFlexValue());
             }
@@ -212,17 +214,18 @@ public interface FlexComponent<C extends Component>
     }
 
     /**
-     * Gets the individual alignment of a given component.
+     * Gets the individual alignment of a given element container.
      * <p>
-     * The default alignment for individual components is
+     * The default alignment for individual element containers is
      * {@link Alignment#AUTO}.
      *
-     * @param component
-     *            The component which individual layout should be read
-     * @return the alignment of the component, never <code>null</code>
+     * @param container
+     *            The element container (component) which individual layout
+     *            should be read
+     * @return the alignment of the container, never <code>null</code>
      */
-    default public Alignment getAlignSelf(Component component) {
-        return Alignment.toAlignment(component.getElement().getStyle()
+    default public Alignment getAlignSelf(HasElement container) {
+        return Alignment.toAlignment(container.getElement().getStyle()
                 .get(FlexConstants.ALIGN_SELF_CSS_PROPERTY), Alignment.AUTO);
     }
 
@@ -239,27 +242,28 @@ public interface FlexComponent<C extends Component>
      * other components, and so on.
      * <p>
      * Setting to flex grow property value 0 disables the expansion of the
-     * component. Negative values are not allowed.
+     * element container. Negative values are not allowed.
      *
      * @param flexGrow
-     *            the proportion of the available space the components should
-     *            take up
-     * @param components
-     *            the components to apply the flex grow property
+     *            the proportion of the available space the element container
+     *            should take up
+     * @param elementContainers
+     *            the containers (components) to apply the flex grow property
      */
-    default public void setFlexGrow(double flexGrow, Component... components) {
+    default public void setFlexGrow(double flexGrow,
+            HasElement... elementContainers) {
         if (flexGrow < 0) {
             throw new IllegalArgumentException(
                     "Flex grow property cannot be negative");
         }
         if (flexGrow == 0) {
-            for (Component component : components) {
-                component.getElement().getStyle()
+            for (HasElement container : elementContainers) {
+                container.getElement().getStyle()
                         .remove(FlexConstants.FLEX_GROW_CSS_PROPERTY);
             }
         } else {
-            for (Component component : components) {
-                component.getElement().getStyle().set(
+            for (HasElement container : elementContainers) {
+                container.getElement().getStyle().set(
                         FlexConstants.FLEX_GROW_CSS_PROPERTY,
                         String.valueOf(flexGrow));
             }
@@ -267,14 +271,14 @@ public interface FlexComponent<C extends Component>
     }
 
     /**
-     * Gets the flex grow property of a given component.
+     * Gets the flex grow property of a given element container.
      *
-     * @param component
-     *            the component to read the flex grow property from
+     * @param elementContainer
+     *            the element container to read the flex grow property from
      * @return the flex grow property, or 0 if none was set
      */
-    default public double getFlexGrow(Component component) {
-        String ratio = component.getElement().getStyle()
+    default public double getFlexGrow(HasElement elementContainer) {
+        String ratio = elementContainer.getElement().getStyle()
                 .get(FlexConstants.FLEX_GROW_CSS_PROPERTY);
         if (ratio == null || ratio.isEmpty()) {
             return 0;
@@ -283,7 +287,7 @@ public interface FlexComponent<C extends Component>
             return Double.parseDouble(ratio);
         } catch (Exception e) {
             throw new IllegalStateException(
-                    "The flex grow property of the component is not parseable to double: "
+                    "The flex grow property of the element container is not parseable to double: "
                             + ratio,
                     e);
         }
