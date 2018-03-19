@@ -15,17 +15,33 @@
  */
 package com.vaadin.flow.component.notification.tests;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 
+import net.jcip.annotations.NotThreadSafe;
+
+@NotThreadSafe
 public class NotificationTest {
 
     private Notification notification;
+
+    @Before
+    public void setUp() {
+        UI.setCurrent(new UI());
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void stringAndDurationCtor() {

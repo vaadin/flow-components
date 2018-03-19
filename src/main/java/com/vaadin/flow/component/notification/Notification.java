@@ -71,7 +71,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         /**
          * Creates {@link Position} from the client side representation property
          * name
-         * 
+         *
          * @param clientName
          *            the client side representation of the property
          * @return corresponding {@link Position}
@@ -101,7 +101,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     /**
      * Creates a Notification with the given String rendered as its HTML text,
      * that does not close automatically.
-     * 
+     *
      * @param text
      *            the text of the Notification
      */
@@ -115,7 +115,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      * <p>
      * Set to {@code 0} or a negative number to disable the notification
      * auto-closing.
-     * 
+     *
      * @param text
      *            the text of the Notification
      * @param duration
@@ -130,7 +130,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      * <P>
      * Set to {@code 0} or a negative number to disable the notification
      * auto-closing.
-     * 
+     *
      * @param text
      *            the text of the notification
      * @param duration
@@ -152,7 +152,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      * <p>
      * Note: To mix text and child components in a component that also supports
      * child components, use the {@link Text} component for the textual parts.
-     * 
+     *
      * @param components
      *            the components inside the notification
      * @see #add(Component...)
@@ -178,7 +178,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     /**
      * Shows a notification in the current page with given text, duration and
      * position.
-     * 
+     *
      * @param text
      *            the text of the Notification
      * @param duration
@@ -202,7 +202,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      * NOTE: When mixing this method with {@link #Notification()} and
      * {@link #Notification(Component...)}. Method will remove all the
      * components from the notification.
-     * 
+     *
      * @param text
      *            the text of the Notification
      */
@@ -216,7 +216,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     /**
      * Set position of the notification.
      * <P>
-     * 
+     *
      * @param position
      *            the position of the notification. Valid enumerate values are
      *            {@code TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH}
@@ -291,7 +291,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
 
     /**
      * Remove the given components from this notification.
-     * 
+     *
      * @param components
      *            the components to remove
      */
@@ -340,7 +340,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      * Since {@code <vaadin-notification>}'s location in the DOM doesn't really
      * matter, opening a notification will automatically add it to the
      * {@code <body>} if it's not yet attached anywhere.
-     * 
+     *
      * @param opened
      *            {@code true} to open the notification, {@code false} to close
      *            it
@@ -348,8 +348,14 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     @Override
     public void setOpened(boolean opened) {
         UI ui = UI.getCurrent();
-        if (opened && getElement().getNode().getParent() == null
-                && ui != null) {
+        if (ui == null) {
+            throw new IllegalStateException("UI instance is not available. "
+                    + "It means that you are calling this method "
+                    + "out of a normal workflow where it's always implicitely set. "
+                    + "That may happen if you call the method from the custom thread without "
+                    + "'UI::access' or from tests without proper initialization.");
+        }
+        if (opened && getElement().getNode().getParent() == null) {
             ui.beforeClientResponse(ui, context -> {
                 ui.add(this);
                 autoAddedToTheUi = true;

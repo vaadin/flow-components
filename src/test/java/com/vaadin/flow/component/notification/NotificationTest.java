@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.notification;
 
-import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -23,17 +22,33 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hamcrest.CoreMatchers;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+
+import net.jcip.annotations.NotThreadSafe;
 
 /**
  * Unit tests for the Notification.
  */
+@NotThreadSafe
 public class NotificationTest {
+
+    @Before
+    public void setUp() {
+        UI.setCurrent(new UI());
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void createNotificationWithComponents_componentsArePartOfGetChildren() {
@@ -114,5 +129,12 @@ public class NotificationTest {
                     expectedDuration), expectedDuration,
                     notification.getDuration());
         }
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void setOpened_noUiInstance() {
+        UI.setCurrent(null);
+        Notification notification = new Notification();
+        notification.setOpened(true);
     }
 }
