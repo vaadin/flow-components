@@ -512,18 +512,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
         return super.addInvalidChangeListener(listener);
     }
 
-    /**
-     * Adds a listener for value-changed events fired by the datePicker.
-     *
-     * @param listener
-     *            the listener
-     * @return a {@link Registration} for removing the event listener
-     */
-    // public Registration addValueChangeListener(
-    // ComponentEventListener<ValueAsStringChangeEvent<DatePicker>> listener) {
-    // return addValueAsStringChangeListener(listener);
-    // }
-
     private LocalDate convertDateFromString(String value) {
         if (value == null || value.isEmpty()) {
             return null;
