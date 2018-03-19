@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Label;
 
 /**
@@ -32,36 +33,46 @@ public class DialogTest {
 
     @Test
     public void createDialogWithComponents_componentsArePartOfGetChildren() {
-        Label label1 = new Label("Label 1");
-        Label label2 = new Label("Label 2");
-        Label label3 = new Label("Label 3");
+        UI.setCurrent(new UI());
+        try {
+            Label label1 = new Label("Label 1");
+            Label label2 = new Label("Label 2");
+            Label label3 = new Label("Label 3");
 
-        Dialog dialog = new Dialog(label1, label2);
+            Dialog dialog = new Dialog(label1, label2);
 
-        List<Component> children = dialog.getChildren()
-                .collect(Collectors.toList());
-        Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label2));
+            List<Component> children = dialog.getChildren()
+                    .collect(Collectors.toList());
+            Assert.assertEquals(2, children.size());
+            Assert.assertThat(children, CoreMatchers.hasItems(label1, label2));
 
-        dialog.add(label3);
-        children = dialog.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(3, children.size());
-        Assert.assertThat(children,
-                CoreMatchers.hasItems(label1, label2, label3));
+            dialog.add(label3);
+            children = dialog.getChildren().collect(Collectors.toList());
+            Assert.assertEquals(3, children.size());
+            Assert.assertThat(children,
+                    CoreMatchers.hasItems(label1, label2, label3));
 
-        dialog.remove(label2);
-        children = dialog.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label3));
+            dialog.remove(label2);
+            children = dialog.getChildren().collect(Collectors.toList());
+            Assert.assertEquals(2, children.size());
+            Assert.assertThat(children, CoreMatchers.hasItems(label1, label3));
 
-        label1.getElement().removeFromParent();
-        children = dialog.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label3));
+            label1.getElement().removeFromParent();
+            children = dialog.getChildren().collect(Collectors.toList());
+            Assert.assertEquals(1, children.size());
+            Assert.assertThat(children, CoreMatchers.hasItems(label3));
 
-        dialog.removeAll();
-        children = dialog.getChildren().collect(Collectors.toList());
-        Assert.assertEquals(0, children.size());
+            dialog.removeAll();
+            children = dialog.getChildren().collect(Collectors.toList());
+            Assert.assertEquals(0, children.size());
+        } finally {
+            UI.setCurrent(null);
+        }
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void setOpened_noUi() {
+        Dialog dialog = new Dialog();
+        dialog.setOpened(true);
+    }
 }

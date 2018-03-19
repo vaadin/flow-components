@@ -203,8 +203,14 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     @Override
     public void setOpened(boolean opened) {
         UI ui = UI.getCurrent();
-        if (opened && getElement().getNode().getParent() == null
-                && ui != null) {
+        if (ui == null) {
+            throw new IllegalStateException("UI instance is not available. "
+                    + "It means that you are calling this method "
+                    + "out of a normal workflow where it's always implicitely set. "
+                    + "That may happen if you call the method from the custom thread without "
+                    + "'UI::access' or from tests without proper initialization.");
+        }
+        if (opened && getElement().getNode().getParent() == null) {
             ui.beforeClientResponse(ui, context -> {
                 ui.add(this);
                 autoAddedToTheUi = true;
