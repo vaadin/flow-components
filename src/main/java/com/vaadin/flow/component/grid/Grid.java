@@ -165,7 +165,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 return new AbstractGridSingleSelectionModel<T>(grid) {
 
                     @Override
-                    protected void fireSelectionEvent(SelectionEvent<T> event) {
+                    protected void fireSelectionEvent(
+                            SelectionEvent<Grid<T>, T> event) {
                         grid.fireEvent((ComponentEvent<Grid>) event);
                     }
                 };
@@ -184,7 +185,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 return new AbstractGridMultiSelectionModel<T>(grid) {
 
                     @Override
-                    protected void fireSelectionEvent(SelectionEvent<T> event) {
+                    protected void fireSelectionEvent(
+                            SelectionEvent<Grid<T>, T> event) {
                         grid.fireEvent((ComponentEvent<Grid<?>>) event);
                     }
                 };
@@ -819,8 +821,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * {@link JsonSerializer#toJson(Object)}.
      * <p>
      * <em>NOTE:</em> For displaying components, see
-     * {@link #addComponentColumn(ValueProvider)}. For using build-in
-     * renderers, see {@link #addColumn(Renderer)}.
+     * {@link #addComponentColumn(ValueProvider)}. For using build-in renderers,
+     * see {@link #addColumn(Renderer)}.
      *
      * @param valueProvider
      *            the value provider
@@ -892,7 +894,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
      * or using {@link TemplateRenderer}.
-     * 
+     *
      * @param renderer
      *            the renderer used to create the grid cell structure
      * @return the created column
@@ -1314,7 +1316,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *             if selection has been disabled with
      *             {@link SelectionMode#NONE}
      */
-    public Registration addSelectionListener(SelectionListener<T> listener) {
+    public Registration addSelectionListener(
+            SelectionListener<Grid<T>, T> listener) {
         return getSelectionModel().addSelectionListener(listener);
     }
 

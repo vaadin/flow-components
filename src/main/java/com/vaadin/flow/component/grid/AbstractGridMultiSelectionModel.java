@@ -210,7 +210,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public Registration addSelectionListener(SelectionListener<T> listener) {
+    public Registration addSelectionListener(
+            SelectionListener<Grid<T>, T> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
         return getGrid().addListener(MultiSelectionEvent.class,
                 (ComponentEventListener) (event -> listener
@@ -280,7 +281,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
      * @param event
      *            the selection event to fire
      */
-    protected abstract void fireSelectionEvent(SelectionEvent<T> event);
+    protected abstract void fireSelectionEvent(
+            SelectionEvent<Grid<T>, T> event);
 
     private void clientSelectAll() {
         doUpdateSelection(

@@ -31,7 +31,7 @@ import com.vaadin.flow.shared.Registration;
  *            the type of items in grid
  */
 public interface GridMultiSelectionModel<T>
-        extends GridSelectionModel<T>, SelectionModel.Multi<T> {
+        extends GridSelectionModel<T>, SelectionModel.Multi<Grid<T>, T> {
 
     /**
      * State for showing the select all checkbox in the grid's default header

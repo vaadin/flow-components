@@ -68,7 +68,8 @@ public class GridNoneSelectionModel<T> implements GridSelectionModel<T> {
     }
 
     @Override
-    public Registration addSelectionListener(SelectionListener<T> listener) {
+    public Registration addSelectionListener(
+            SelectionListener<Grid<T>, T> listener) {
         throw new UnsupportedOperationException(
                 "This selection model doesn't allow selection, cannot add selection listeners to it");
     }

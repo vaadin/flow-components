@@ -142,7 +142,8 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public Registration addSelectionListener(SelectionListener<T> listener) {
+    public Registration addSelectionListener(
+            SelectionListener<Grid<T>, T> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
         return getGrid().addListener(SingleSelectionEvent.class,
                 (ComponentEventListener) (event -> listener
@@ -178,7 +179,8 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
      * @param event
      *            the selection event to fire
      */
-    protected abstract void fireSelectionEvent(SelectionEvent<T> event);
+    protected abstract void fireSelectionEvent(
+            SelectionEvent<Grid<T>, T> event);
 
     private void doSelect(T item, boolean userOriginated) {
         T oldValue = selectedItem;

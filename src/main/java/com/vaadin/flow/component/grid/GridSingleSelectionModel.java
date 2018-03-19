@@ -30,7 +30,7 @@ import com.vaadin.flow.shared.Registration;
  *            the type of items in grid
  */
 public interface GridSingleSelectionModel<T>
-        extends GridSelectionModel<T>, SelectionModel.Single<T> {
+        extends GridSelectionModel<T>, SelectionModel.Single<Grid<T>, T> {
 
     /**
      * Gets a wrapper to use this single selection model as a single select in
