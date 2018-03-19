@@ -19,6 +19,7 @@ This necessitated removal of many Java style configuration API among other chang
 * Getting [classname]#PlotOptionsSeries# no longer automatically creates a new instance
 * Gradient is no longer supported
 * Plot background image is no longer supported
+* SVG Generator is no longer supported
 
 === Replaced types
 
