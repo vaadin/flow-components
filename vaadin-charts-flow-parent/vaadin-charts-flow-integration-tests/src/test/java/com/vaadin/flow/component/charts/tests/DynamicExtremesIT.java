@@ -18,7 +18,7 @@ package com.vaadin.flow.component.charts.tests;
 
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.dynamic.DynamicExtremes;
-import com.vaadin.tests.elements.ChartElement;
+import com.vaadin.flow.component.charts.testbench.ChartElement;
 import org.junit.Test;
 import org.openqa.selenium.By;
 

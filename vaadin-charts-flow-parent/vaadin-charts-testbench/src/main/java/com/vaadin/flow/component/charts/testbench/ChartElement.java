@@ -1,4 +1,4 @@
-package com.vaadin.tests.elements;
+package com.vaadin.flow.component.charts.testbench;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;

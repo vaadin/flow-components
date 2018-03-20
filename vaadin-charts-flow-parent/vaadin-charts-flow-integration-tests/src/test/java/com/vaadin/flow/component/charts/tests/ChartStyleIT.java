@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.pie.PieWithClassName;
-import com.vaadin.tests.elements.ChartElement;
+import com.vaadin.flow.component.charts.testbench.ChartElement;
 
 public class ChartStyleIT extends AbstractTBTest {
 

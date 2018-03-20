@@ -45,7 +45,18 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
-            <version>6.0.0.alpha15</version>
+            <version>${testbench.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-components-testbench</artifactId>
+            <version>1.0.0.beta1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts-flow-testbench</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

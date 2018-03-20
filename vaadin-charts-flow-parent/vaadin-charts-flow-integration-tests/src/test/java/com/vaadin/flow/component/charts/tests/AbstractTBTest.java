@@ -18,6 +18,7 @@ package com.vaadin.flow.component.charts.tests;
 
 import com.saucelabs.ci.sauceconnect.AbstractSauceTunnelManager;
 import com.vaadin.flow.component.charts.AbstractChartExample;
+import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.testbench.annotations.BrowserConfiguration;
 import com.vaadin.testbench.annotations.RunOnHub;
 import com.vaadin.testbench.parallel.Browser;
@@ -25,7 +26,6 @@ import com.vaadin.testbench.parallel.BrowserUtil;
 import com.vaadin.testbench.parallel.DefaultBrowserFactory;
 import com.vaadin.testbench.parallel.ParallelTest;
 import com.vaadin.testbench.parallel.TestBenchBrowserFactory;
-import com.vaadin.tests.elements.ChartElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebElement;
