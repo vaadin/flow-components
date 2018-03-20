@@ -433,7 +433,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 ValueProvider<T, V> keyExtractor) {
             Objects.requireNonNull(keyExtractor,
                     "Key extractor must not be null");
-            setComparator(Comparator.comparing(keyExtractor));
+            setComparator(Comparator.comparing(keyExtractor,
+                    Comparator.nullsLast(Comparator.naturalOrder())));
             return this;
         }
 

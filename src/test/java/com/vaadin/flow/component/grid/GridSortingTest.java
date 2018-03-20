@@ -32,8 +32,10 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.SortOrder;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.function.SerializableComparator;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -168,6 +170,18 @@ public class GridSortingTest {
                 .withProperty("number",
                         person -> person.getAddress().getNumber()),
                 "street", "number").setHeader("Address");
+    }
+
+    @Test
+    public void columnComparator_comaratorHandlesNullValues() {
+        nameColumn.setComparator(Person::getName);
+
+        Person person = new Person();
+        person.setName("foo");
+
+        SerializableComparator<Person> comparator = nameColumn
+                .getComparator(SortDirection.ASCENDING);
+        Assert.assertEquals(1, comparator.compare(new Person(), person));
     }
 
     @Test
