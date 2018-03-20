@@ -458,9 +458,44 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
         return isShowWeekNumbersBoolean();
     }
 
+    /**
+     * Sets the opened property of the datepicker to open or close its overlay.
+     * 
+     * @param opened
+     *            {@code true} to open the datepicker overlay, {@code false} to
+     *            close it
+     */
     @Override
     public void setOpened(boolean opened) {
-        super.setOpened(opened);
+        // The open() and close() functions are used because of
+        // https://github.com/vaadin/vaadin-date-picker/issues/524
+        if (opened) {
+            open();
+        } else {
+            close();
+        }
+    }
+
+    /**
+     * Opens the datepicker overlay.
+     */
+    @Override
+    public void open() {
+        super.open();
+
+        // To update the server-side property synchronously
+        super.setOpened(true);
+    }
+
+    /**
+     * Closes the datepicker overlay.
+     */
+    @Override
+    protected void close() {
+        super.close();
+
+        // To update the server-side property synchronously
+        super.setOpened(false);
     }
 
     /**

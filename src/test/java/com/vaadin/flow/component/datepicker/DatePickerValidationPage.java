@@ -72,5 +72,10 @@ public class DatePickerValidationPage extends Div {
         });
         add(button);
         add(label, value);
+
+        button = new NativeButton("Open DatePicker");
+        button.setId("open");
+        button.addClickListener(event -> datePicker.open());
+        add(button);
     }
 }

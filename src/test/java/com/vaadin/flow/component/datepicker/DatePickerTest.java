@@ -16,13 +16,17 @@
 package com.vaadin.flow.component.datepicker;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
 public class DatePickerTest {
+
+    private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
 
     @Test
     public void defaultCtor_valueIsSetImplicitely() {
@@ -38,6 +42,26 @@ public class DatePickerTest {
         assertEquals(1, valueSetCount.get());
         assertNull(picker.getValue());
         assertEquals("", picker.getValueAsStringString());
+    }
+
+    @Test
+    public void setOpened_openedPropertyIsUpdated() {
+        DatePicker picker = new DatePicker();
+        assertFalse("Initially DatePicker should be closed", picker.isOpened());
+        picker.setOpened(true);
+        assertTrue(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
+        picker.setOpened(false);
+        assertFalse(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
+    }
+
+    @Test
+    public void openAndClose_openedPropertyIsUpdated() {
+        DatePicker picker = new DatePicker();
+        assertFalse("Initially DatePicker should be closed", picker.isOpened());
+        picker.open();
+        assertTrue(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
+        picker.close();
+        assertFalse(OPENED_PROPERTY_NOT_UPDATED, picker.isOpened());
     }
 
 }

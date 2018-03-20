@@ -39,6 +39,7 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
     private WebElement field;
     private WebElement invalidate;
     private WebElement validate;
+    private WebElement open;
 
     @Before
     public void init() {
@@ -48,6 +49,7 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
         field = findElement(By.id("field"));
         invalidate = findElement(By.id("invalidate"));
         validate = findElement(By.id("validate"));
+        open = findElement(By.id("open"));
     }
 
     @Test
@@ -92,6 +94,12 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
         scrollIntoViewAndClick(invalidate);
         setValue("1/1/2018");
         assertValid();
+    }
+
+    @Test
+    public void openFromServer_overlayVisible() {
+        scrollIntoViewAndClick(open);
+        waitForElementVisible(By.tagName("vaadin-date-picker-overlay"));
     }
 
     private void assertInvalid() {
