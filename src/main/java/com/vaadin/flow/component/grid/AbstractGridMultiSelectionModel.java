@@ -201,10 +201,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 return Collections.emptySet();
             }
 
-            @Override
-            public Element getElement() {
-                return getGrid().getElement();
-            }
         };
     }
 
