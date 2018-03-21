@@ -111,29 +111,10 @@ public class PlotOptionsAreaspline extends AreaOptions {
 	}
 
 	/**
-	 * <p>
-	 * Enable or disable the initial animation when a series is displayed. The
-	 * animation can also be set as a configuration object. Please note that
-	 * this option only applies to the initial animation of the series itself.
-	 * For other animations, see <a href="#chart.animation">chart.animation</a>
-	 * and the animation parameter under the API methods. The following
-	 * properties are supported:
-	 * </p>
-	 * <dl>
-	 * <dt>duration</dt>
-	 * <dd>The duration of the animation in milliseconds.</dd>
-	 * <dt>easing</dt>
-	 * <dd>A string reference to an easing function set on the <code>Math</code>
-	 * object. See <a href=
-	 * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/series-animation-easing/"
-	 * >the easing demo</a>.</dd>
-	 * </dl>
-	 * <p>
-	 * Due to poor performance, animation is disabled in old IE browsers for
-	 * column charts and polar charts.
-	 * </p>
-	 * <p>
-	 * Defaults to: true
+	 * Enable or disable the initial animation when a series is displayed.
+	 * Please note that this option only applies to the initial animation of the
+	 * series itself. For other animations, see
+	 * {@link ChartModel#setAnimation(Boolean)}
 	 */
 	public void setAnimation(Boolean animation) {
 		this.animation = animation;

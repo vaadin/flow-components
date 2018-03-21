@@ -95,31 +95,11 @@ public class ChartModel extends AbstractConfigurationObject {
 	}
 
 	/**
-	 * <p>
 	 * Set the overall animation for all chart updating. Animation can be
-	 * disabled throughout the chart by setting it to false here. It can be
-	 * overridden for each individual API method as a function parameter. The
-	 * only animation not affected by this option is the initial series
-	 * animation, see <a class="internal"
-	 * href="#plotOptions.series.animation">plotOptions.series.animation</a>.
-	 * </p>
-	 * 
+	 * disabled throughout the chart by setting it to false here
 	 * <p>
-	 * The animation can either be set as a boolean or a configuration object.
-	 * If <code>true</code>, it will use the 'swing' jQuery easing and a
-	 * duration of 500 ms. If used as a configuration object, the following
-	 * properties are supported:
-	 * </p>
-	 * <dl>
-	 * <dt>duration</dt>
-	 * <dd>The duration of the animation in milliseconds.</dd>
-	 * 
-	 * <dt>easing</dt>
-	 * <dd>A string reference to an easing function set on the <code>Math</code>
-	 * object. See <a href=
-	 * "http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/series-animation-easing/"
-	 * >the easing demo</a>.</dd>
-	 * </dl>
+	 * The only animation not affected by this option is the initial series
+	 * animation, see <code>setAnimation</code> method in plot option classes
 	 * <p>
 	 * Defaults to: true
 	 */
