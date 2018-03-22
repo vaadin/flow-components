@@ -51,13 +51,13 @@ public abstract class AbstractLayout extends DemoView {
         return button;
     }
 
-    protected NativeButton createToggleThemeButton(ThemableLayout layout,
+    public static NativeButton createToggleThemeButton(ThemableLayout layout,
             String themeName) {
         return createToggleThemeButton(layout, themeName,
                 toggle -> layout.getThemeList().set(themeName, toggle));
     }
 
-    protected NativeButton createToggleThemeButton(ThemableLayout layout,
+    public static NativeButton createToggleThemeButton(ThemableLayout layout,
             String themeName, Consumer<Boolean> toggleAction) {
         NativeButton toggleButton = new NativeButton(
                 String.format("Toggle %s", themeName), event -> toggleAction
@@ -67,7 +67,7 @@ public abstract class AbstractLayout extends DemoView {
         return toggleButton;
     }
 
-    protected boolean hasNoAttributeValue(Element element, String attribute,
+    protected static boolean hasNoAttributeValue(Element element, String attribute,
             String attributeValue) {
         return Optional.ofNullable(element.getAttribute(attribute))
                 .map(value -> !value.contains(attributeValue)).orElse(true);

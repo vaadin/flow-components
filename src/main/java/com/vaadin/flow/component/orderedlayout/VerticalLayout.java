@@ -31,9 +31,11 @@ public class VerticalLayout extends Component
         implements ThemableLayout, FlexComponent<VerticalLayout> {
 
     /**
-     * Default constructor. Creates an empty layout.
+     * Constructs an empty layout with spacing and padding on by default.
      */
     public VerticalLayout() {
+        setSpacing(true);
+        setPadding(true);
     }
 
     /**
@@ -47,6 +49,30 @@ public class VerticalLayout extends Component
     public VerticalLayout(Component... children) {
         this();
         add(children);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Spacing is enabled by default for vertical layout.
+     *
+     * @param spacing adds {@code spacing} theme setting if {@code true} or removes it if {@code false}
+     */
+    @Override
+    public void setSpacing(boolean spacing) {
+        ThemableLayout.super.setSpacing(spacing);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Padding is enabled by default for vertical layout.
+     *
+     * @param padding adds {@code padding} theme setting if {@code true} or removes it if {@code false}
+     */
+    @Override
+    public void setPadding(boolean padding) {
+        ThemableLayout.super.setPadding(padding);
     }
 
     /**

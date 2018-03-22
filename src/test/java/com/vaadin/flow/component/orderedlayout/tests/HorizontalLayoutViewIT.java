@@ -33,66 +33,64 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void defaultLayout() {
-        WebElement vlayout = layout.findElement(By.id("default-layout"));
-        assertBasicFlexPropertiesAreSet(vlayout);
-
-        checkThemeChanges(vlayout, "margin", true);
-        checkThemeChanges(vlayout, "padding", true);
+        WebElement hLayout = layout.findElement(By.id("default-layout"));
+        assertBasicFlexPropertiesAreSet(hLayout);
 
         Assert.assertTrue(
-                "After turning on both margin and padding, layout should contain both themes in 'theme' attribute",
-                vlayout.getAttribute("theme").contains("margin")
-                        && layout.findElement(By.id("default-layout"))
-                        .getAttribute("theme").contains("padding"));
+                "By default layout should contain spacing theme in 'theme' attribute",
+                hLayout.getAttribute("theme").contains("spacing"));
 
-        checkThemeChanges(vlayout, "margin", false);
-        checkThemeChanges(vlayout, "padding", false);
+        checkThemeChanges(hLayout, "spacing", false);
 
         Assert.assertNull(
-                "After turning on both margin and padding, layout should not contain 'theme' attribute",
-                vlayout.getAttribute("theme"));
+                "After turning off spacing, layout should not contain 'theme' attribute",
+                hLayout.getAttribute("theme"));
+
+        checkThemeChanges(hLayout, "padding", true);
+        checkThemeChanges(hLayout, "margin", true);
+
+        checkThemeChanges(hLayout, "padding", false);
+        checkThemeChanges(hLayout, "margin", false);
+
+        Assert.assertNull(
+                "After turning off everything, layout should not contain 'theme' attribute",
+                hLayout.getAttribute("theme"));
     }
 
     @Test
     public void layoutWithJustifyContent() {
-        WebElement vlayout = layout
+        WebElement hLayout = layout
                 .findElement(By.id("layout-with-justify-content"));
-        assertBasicFlexPropertiesAreSet(vlayout);
+        assertBasicFlexPropertiesAreSet(hLayout);
 
         Assert.assertEquals("space-between",
-                vlayout.getCssValue("justify-content"));
+                hLayout.getCssValue("justify-content"));
 
         WebElement button = layout
                 .findElement(By.id("justify-content-start-button"));
         scrollIntoViewAndClick(button);
         waitUntil(driver -> "flex-start"
-                .equals(vlayout.getCssValue("justify-content")));
+                .equals(hLayout.getCssValue("justify-content")));
 
         button = layout.findElement(By.id("justify-content-end-button"));
         scrollIntoViewAndClick(button);
         waitUntil(driver -> "flex-end"
-                .equals(vlayout.getCssValue("justify-content")));
+                .equals(hLayout.getCssValue("justify-content")));
 
         button = layout.findElement(By.id("justify-content-between-button"));
         scrollIntoViewAndClick(button);
         waitUntil(driver -> "space-between"
-                .equals(vlayout.getCssValue("justify-content")));
+                .equals(hLayout.getCssValue("justify-content")));
 
         button = layout.findElement(By.id("justify-content-around-button"));
         scrollIntoViewAndClick(button);
         waitUntil(driver -> "space-around"
-                .equals(vlayout.getCssValue("justify-content")));
+                .equals(hLayout.getCssValue("justify-content")));
 
         button = layout.findElement(By.id("justify-content-evenly-button"));
         scrollIntoViewAndClick(button);
         waitUntil(driver -> "space-evenly"
-                .equals(vlayout.getCssValue("justify-content")));
-
-        checkThemeChanges(vlayout, "spacing-xs", true);
-        checkThemeChanges(vlayout, "spacing-s", true);
-        checkThemeChanges(vlayout, "spacing", true);
-        checkThemeChanges(vlayout, "spacing-l", true);
-        checkThemeChanges(vlayout, "spacing-xl", true);
+                .equals(hLayout.getCssValue("justify-content")));
     }
 
     @Test
@@ -181,14 +179,17 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
         Assert.assertEquals("row", vlayout.getCssValue("flex-direction"));
     }
 
-    private void checkThemeChanges(WebElement layoutToCheck, String themeName, boolean shouldPresent) {
-        layout.findElement(By.id(String.format("toggle-%s", themeName))).click();
+    private void checkThemeChanges(WebElement layoutToCheck, String themeName,
+            boolean shouldPresent) {
+        layout.findElement(By.id(String.format("toggle-%s", themeName)))
+                .click();
         if (shouldPresent) {
             waitUntil(dr -> layoutToCheck.getAttribute("theme") != null
                     && layoutToCheck.getAttribute("theme").contains(themeName));
         } else {
             waitUntil(dr -> layoutToCheck.getAttribute("theme") == null
-                    || !layoutToCheck.getAttribute("theme").contains(themeName));
+                    || !layoutToCheck.getAttribute("theme")
+                            .contains(themeName));
         }
     }
 }

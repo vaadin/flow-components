@@ -34,24 +34,28 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void defaultLayout() {
-        WebElement vlayout = layout.findElement(By.id("default-layout"));
-        assertBasicFlexPropertiesAreSet(vlayout);
-
-        checkThemeChanges(vlayout, "margin", true);
-        checkThemeChanges(vlayout, "padding", true);
+        WebElement vLayout = layout.findElement(By.id("default-layout"));
+        assertBasicFlexPropertiesAreSet(vLayout);
 
         Assert.assertTrue(
-                "After turning on both margin and padding, layout should contain both themes in 'theme' attribute",
-                vlayout.getAttribute("theme").contains("margin")
-                        && layout.findElement(By.id("default-layout"))
-                                .getAttribute("theme").contains("padding"));
+                "By default layout should contain both spacing and padding themes in 'theme' attribute",
+                vLayout.getAttribute("theme").contains("spacing")
+                        && vLayout.getAttribute("theme").contains("padding"));
 
-        checkThemeChanges(vlayout, "margin", false);
-        checkThemeChanges(vlayout, "padding", false);
+        checkThemeChanges(vLayout, "padding", false);
+        checkThemeChanges(vLayout, "spacing", false);
 
         Assert.assertNull(
-                "After turning on both margin and padding, layout should not contain 'theme' attribute",
-                vlayout.getAttribute("theme"));
+                "After turning off spacing and padding, layout should not contain 'theme' attribute",
+                vLayout.getAttribute("theme"));
+
+        checkThemeChanges(vLayout, "margin", true);
+
+        checkThemeChanges(vLayout, "margin", false);
+
+        Assert.assertNull(
+                "After turning off everything, layout should not contain 'theme' attribute",
+                vLayout.getAttribute("theme"));
     }
 
     @Test
@@ -88,12 +92,6 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         scrollIntoViewAndClick(button);
         waitUntil(driver -> "space-evenly"
                 .equals(vlayout.getCssValue("justify-content")));
-
-        checkThemeChanges(vlayout, "spacing-xs", true);
-        checkThemeChanges(vlayout, "spacing-s", true);
-        checkThemeChanges(vlayout, "spacing", true);
-        checkThemeChanges(vlayout, "spacing-l", true);
-        checkThemeChanges(vlayout, "spacing-xl", true);
     }
 
     @Test
@@ -164,8 +162,7 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void centerComponent() {
-        WebElement vlayout = layout
-                .findElement(By.id("layout-with-center"));
+        WebElement vlayout = layout.findElement(By.id("layout-with-center"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-around",
@@ -178,14 +175,17 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         Assert.assertEquals("column", vlayout.getCssValue("flex-direction"));
     }
 
-    private void checkThemeChanges(WebElement layoutToCheck, String themeName, boolean shouldPresent) {
-        layout.findElement(By.id(String.format("toggle-%s", themeName))).click();
+    private void checkThemeChanges(WebElement layoutToCheck, String themeName,
+            boolean shouldPresent) {
+        layout.findElement(By.id(String.format("toggle-%s", themeName)))
+                .click();
         if (shouldPresent) {
             waitUntil(dr -> layoutToCheck.getAttribute("theme") != null
                     && layoutToCheck.getAttribute("theme").contains(themeName));
         } else {
             waitUntil(dr -> layoutToCheck.getAttribute("theme") == null
-                    || !layoutToCheck.getAttribute("theme").contains(themeName));
+                    || !layoutToCheck.getAttribute("theme")
+                            .contains(themeName));
         }
     }
 }

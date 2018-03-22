@@ -37,14 +37,14 @@ public class OrderedLayoutView extends AbstractLayout {
     @Override
     protected void initView() {
         createDefaultHorizontalLayout();
-        createHorizontalLayoutWithSpacing();
+        createHorizontalLayoutWithJustifyContent();
         createHorizontalLayoutWithDefaultAlignment();
         createHorizontalLayoutWithIndividualAlignments();
         createHorizontalLayoutWithExpandRatios();
         createHorizontalLayoutWithCenterComponent();
 
         createDefaultVerticalLayout();
-        createVerticalLayoutWithSpacing();
+        createVerticalLayoutWithJustifyContent();
         createVerticalLayoutWithDefaultAlignment();
         createVerticalLayoutWithIndividualAlignments();
         createVerticalLayoutWithExpandRatios();
@@ -56,6 +56,7 @@ public class OrderedLayoutView extends AbstractLayout {
     private void createDefaultHorizontalLayout() {
         // begin-source-example
         // source-example-heading: Default horizontal layout
+        // by default, spacing is on
         HorizontalLayout layout = new HorizontalLayout();
         layout.getStyle().set("border", "1px solid #9E9E9E");
 
@@ -69,15 +70,16 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setId("default-layout");
 
         Div themeSettings = new Div(
-                new Label("Current theme supports 'margin' and 'padding': "),
+                new Label("Current theme supports 'padding', 'margin' and 'spacing: "),
+                createToggleThemeButton(layout, "padding", layout::setPadding),
                 createToggleThemeButton(layout, "margin", layout::setMargin),
-                createToggleThemeButton(layout, "padding", layout::setPadding));
+                createToggleThemeButton(layout, "spacing", layout::setSpacing));
 
         addCard("HorizontalLayout", "Default horizontal layout", layout,
                 themeSettings);
     }
 
-    private void createHorizontalLayoutWithSpacing() {
+    private void createHorizontalLayoutWithJustifyContent() {
         // begin-source-example
         // source-example-heading: HorizontalLayout with justify content
         HorizontalLayout layout = new HorizontalLayout();
@@ -110,18 +112,10 @@ public class OrderedLayoutView extends AbstractLayout {
         buttons.add(createSpacingButton(layout, "justify-content-evenly-button",
                 FlexComponent.JustifyContentMode.EVENLY));
 
-        Div themeSettings = new Div(
-                new Label("Current theme supports 'spacing': "),
-                createToggleThemeButton(layout, "spacing-xs"),
-                createToggleThemeButton(layout, "spacing-s"),
-                createToggleThemeButton(layout, "spacing", layout::setSpacing),
-                createToggleThemeButton(layout, "spacing-l"),
-                createToggleThemeButton(layout, "spacing-xl"));
-
         layout.setId("layout-with-justify-content");
 
         addCard("HorizontalLayout", "HorizontalLayout with justify content",
-                layout, buttons, themeSettings);
+                layout, buttons);
     }
 
     private void createHorizontalLayoutWithDefaultAlignment() {
@@ -256,6 +250,7 @@ public class OrderedLayoutView extends AbstractLayout {
     private void createDefaultVerticalLayout() {
         // begin-source-example
         // source-example-heading: Default vertical layout
+        // padding and spacing is on by default
         VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("border", "1px solid #9E9E9E");
 
@@ -269,15 +264,16 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.setId("default-layout");
 
         Div themeSettings = new Div(
-                new Label("Current theme supports 'margin' and 'padding': "),
+                new Label("Current theme supports 'padding', 'margin' and 'spacing: "),
+                createToggleThemeButton(layout, "padding", layout::setPadding),
                 createToggleThemeButton(layout, "margin", layout::setMargin),
-                createToggleThemeButton(layout, "padding", layout::setPadding));
+                createToggleThemeButton(layout, "spacing", layout::setSpacing));
 
         addCard("VerticalLayout", "Default vertical layout", layout,
                 themeSettings);
     }
 
-    private void createVerticalLayoutWithSpacing() {
+    private void createVerticalLayoutWithJustifyContent() {
         // begin-source-example
         // source-example-heading: VerticalLayout with justify content
         VerticalLayout layout = new VerticalLayout();
@@ -311,18 +307,10 @@ public class OrderedLayoutView extends AbstractLayout {
         buttons.add(createSpacingButton(layout, "justify-content-evenly-button",
                 FlexComponent.JustifyContentMode.EVENLY));
 
-        Div themeSettings = new Div(
-                new Label("Current theme supports 'spacing': "),
-                createToggleThemeButton(layout, "spacing-xs"),
-                createToggleThemeButton(layout, "spacing-s"),
-                createToggleThemeButton(layout, "spacing", layout::setSpacing),
-                createToggleThemeButton(layout, "spacing-l"),
-                createToggleThemeButton(layout, "spacing-xl"));
-
         layout.setId("layout-with-justify-content");
 
         addCard("VerticalLayout", "VerticalLayout with justify content", layout,
-                buttons, themeSettings);
+                buttons);
     }
 
     private void createVerticalLayoutWithDefaultAlignment() {

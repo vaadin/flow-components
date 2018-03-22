@@ -31,9 +31,10 @@ public class HorizontalLayout extends Component
         implements ThemableLayout, FlexComponent<HorizontalLayout> {
 
     /**
-     * Default constructor. Creates an empty layout.
+     * Constructs an empty layout with spacing on by default.
      */
     public HorizontalLayout() {
+        setSpacing(true);
     }
 
     /**
@@ -47,6 +48,18 @@ public class HorizontalLayout extends Component
     public HorizontalLayout(Component... children) {
         this();
         add(children);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Spacing is enabled by default for horizontal layout.
+     *
+     * @param spacing adds {@code spacing} theme setting if {@code true} or removes it if {@code false}
+     */
+    @Override
+    public void setSpacing(boolean spacing) {
+        ThemableLayout.super.setSpacing(spacing);
     }
 
     /**
