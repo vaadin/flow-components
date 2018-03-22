@@ -2,6 +2,8 @@ package com.vaadin.flow.component.board.test;
 
 import org.junit.Assert;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.remote.BrowserType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.flow.component.common.testbench.test.AbstractParallelSauceLabsTest;
 
@@ -12,6 +14,7 @@ public abstract class AbstractParallelTest
     public static final Dimension WINDOW_SIZE_MEDIUM = new Dimension(768, 1024);
     public static final Dimension WINDOW_SIZE_SMALL = new Dimension(375, 667);
 
+    @Override
     public void setup() throws Exception {
         super.setup();
         getDriver().manage().window().setSize(new Dimension(1024, 768));
@@ -57,6 +60,15 @@ public abstract class AbstractParallelTest
 
     protected String getPort() {
         return "8080";
+    }
+
+    @Override
+    public void setDesiredCapabilities(
+            DesiredCapabilities desiredCapabilities) {
+        super.setDesiredCapabilities(desiredCapabilities);
+        if (desiredCapabilities.getBrowserName().equals(BrowserType.FIREFOX)) {
+            desiredCapabilities.setVersion("58.0");
+        }
     }
 
 }
