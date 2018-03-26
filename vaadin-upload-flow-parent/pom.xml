@@ -31,7 +31,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-upload</artifactId>
-            <version>4.0.0-beta1</version>
+            <version>4.0.0-beta2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.webjars.bowergithub.vaadin</groupId>
