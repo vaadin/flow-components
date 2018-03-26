@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -32,6 +31,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.function.SerializableConsumer;
+
 
 public class ComboBoxTest {
 
@@ -50,7 +51,7 @@ public class ComboBoxTest {
         }
 
         @Override
-        void runBeforeClientResponse(Consumer<UI> command) {
+        void runBeforeClientResponse(SerializableConsumer<UI> command) {
             command.accept(new UI());
         }
     }
