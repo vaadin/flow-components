@@ -31,7 +31,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-combo-box</artifactId>
-            <version>4.0.0-beta4</version>
+            <version>4.0.0-beta5</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.webjars.bowergithub.vaadin</groupId>
