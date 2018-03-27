@@ -17,6 +17,7 @@ package com.vaadin.flow.component.datepicker;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -44,7 +45,6 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-
         waitForElementPresent(By.id("field"));
         field = findElement(By.id("field"));
         invalidate = findElement(By.id("invalidate"));
@@ -101,6 +101,21 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
         scrollIntoViewAndClick(open);
         waitForElementVisible(By.tagName("vaadin-date-picker-overlay"));
     }
+
+    @Test
+    public void invalidLocale() {
+        String logList = getLogEntries(Level.WARNING).toString();
+        Assert.assertFalse(logList.contains(
+                "The locale is not supported, use default locale setting(en-US)."));
+
+        WebElement changeLocale = findElement(By.id("change-locale"));
+        scrollIntoViewAndClick(changeLocale);
+
+        String logList1 = getLogEntries(Level.WARNING).toString();
+        waitUntil(driver -> logList1.contains(
+                "The locale is not supported, use default locale setting(en-US)."));
+    }
+
 
     private void assertInvalid() {
         String invalid = field.getAttribute("invalid");

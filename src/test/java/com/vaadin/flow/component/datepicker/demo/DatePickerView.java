@@ -17,10 +17,12 @@ package com.vaadin.flow.component.datepicker.demo;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Locale;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -38,6 +40,7 @@ public class DatePickerView extends DemoView {
         createMinAndMaxDatePicker();
         createFinnishDatePicker();
         createStartAndEndDatePickers();
+        createLocaleChangeDatePicker();
     }
 
     private void createSimpleDatePicker() {
@@ -193,6 +196,37 @@ public class DatePickerView extends DemoView {
         addCard("Two linked date pickers", startDatePicker, endDatePicker,
                 message);
 
+    }
+
+    private void createLocaleChangeDatePicker() {
+        Div message = createMessageDiv("Customize-locale-picker-message");
+        // begin-source-example
+        // source-example-heading: Date picker with customize locales
+        DatePicker datePicker = new DatePicker();
+        NativeButton locale1 = new NativeButton("Locale: US");
+        NativeButton locale2 = new NativeButton("Locale: UK");
+        NativeButton locale3 = new NativeButton("Locale: CHINA");
+
+        locale1.addClickListener(e -> datePicker.setLocale(Locale.US));
+        locale2.addClickListener(e -> datePicker.setLocale(Locale.UK));
+        locale3.addClickListener(e -> datePicker.setLocale(Locale.CHINA));
+
+        datePicker.addValueChangeListener(event -> {
+            LocalDate selectedDate = event.getValue();
+            if (selectedDate != null) {
+                message.setText("Day: " + selectedDate.getDayOfMonth()
+                        + "\nMonth: " + selectedDate.getMonthValue()
+                        + "\nYear: " + selectedDate.getYear());
+            } else {
+                message.setText("No date is selected");
+            }
+        });
+        // end-source-example
+        locale1.setId("Locale-US");
+        locale2.setId("Locale-UK");
+        datePicker.setId("locale-change-picker");
+        addCard("Date picker with customize locales", datePicker, locale1,
+                locale2, locale3, message);
     }
 
     private Div createMessageDiv(String id) {

@@ -130,6 +130,42 @@ public class DatePickerIT extends ComponentDemoTest {
                 driver -> "Select the starting date".equals(message.getText()));
     }
 
+    @Test
+    public void selectDatesOnCustomLocaleDatePickers() {
+        WebElement localePicker = layout
+                .findElement(By.id("locale-change-picker"));
+        WebElement message = layout
+                .findElement(By.id("Customize-locale-picker-message"));
+        WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
+                .get(0);
+        executeScript("arguments[0].value = '2018-03-27'", localePicker);
+        waitUntil(driver -> "Day: 27\nMonth: 3\nYear: 2018"
+                .equals(message.getText()));
+        Assert.assertEquals(
+                "The format of the displayed date should be MM/DD/YYYY.", true,
+                executeScript("return arguments[0].value === '3/27/2018'",
+                        displayText));
+
+        layout.findElement(By.id("Locale-UK")).click();
+        executeScript("arguments[0].value = '2018-03-26'", localePicker);
+        waitUntil(driver -> "Day: 26\nMonth: 3\nYear: 2018"
+                .equals(message.getText()));
+
+        Assert.assertEquals(
+                "The format of the displayed date should be DD/MM/YYYY.", true,
+                executeScript("return arguments[0].value === '26/03/2018'",
+                        displayText));
+
+        layout.findElement(By.id("Locale-US")).click();
+        executeScript("arguments[0].value = '2018-03-25'", localePicker);
+        waitUntil(driver -> "Day: 25\nMonth: 3\nYear: 2018"
+                .equals(message.getText()));
+        Assert.assertEquals(
+                "The format of the displayed date should be MM/DD/YYYY.", true,
+                executeScript("return arguments[0].value === '3/25/2018'",
+                        displayText));
+    }
+
     @Override
     protected String getTestPath() {
         return ("/vaadin-date-picker");

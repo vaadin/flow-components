@@ -22,11 +22,28 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.UI;
+
+import net.jcip.annotations.NotThreadSafe;
+
+@NotThreadSafe
 public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
+
+    @Before
+    public void setUp() {
+        UI.setCurrent(new UI());
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void defaultCtor_valueIsSetImplicitely() {
