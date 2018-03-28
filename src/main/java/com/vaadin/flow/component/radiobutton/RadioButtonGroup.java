@@ -48,7 +48,7 @@ public class RadioButtonGroup<T>
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
 
-    private SerializablePredicate<T> itemEnabledProvider = item -> true;
+    private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
     private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>();
 
@@ -122,7 +122,7 @@ public class RadioButtonGroup<T>
      * Returns the item component renderer.
      *
      * @return the item renderer
-     * @see #setItemRenderer
+     * @see #setRenderer(ComponentRenderer)
      */
     public ComponentRenderer<? extends Component, T> getItemRenderer() {
         return itemRenderer;
@@ -149,6 +149,7 @@ public class RadioButtonGroup<T>
      */
     public void setEnabled(boolean enabled) {
         setDisabled(!enabled);
+        refreshButtons();
     }
 
     /**
