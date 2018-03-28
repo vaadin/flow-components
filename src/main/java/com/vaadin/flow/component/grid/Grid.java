@@ -101,12 +101,10 @@ import elemental.json.JsonValue;
 @HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column.html")
 @HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-sorter.html")
 @HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
-@HtmlImport("frontend://flow-grid-component-renderer.html")
+@HtmlImport("frontend://flow-component-renderer.html")
 @JavaScript("frontend://gridConnector.js")
 public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>> {
-
-    private static final String GRID_COMPONENT_RENDERER_TAG = "flow-grid-component-renderer";
 
     private final class UpdateQueue implements Update {
         private List<Runnable> queue = new ArrayList<>();
@@ -264,11 +262,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             comparator = (a, b) -> 0;
 
             HasDataGenerators<T> gridDataGenerator = grid.getDataGenerator();
-
-            if (renderer instanceof ComponentRenderer) {
-                ((ComponentRenderer<?, ?>) renderer)
-                        .setComponentRendererTag(GRID_COMPONENT_RENDERER_TAG);
-            }
 
             Rendering<T> rendering = renderer.render(getElement(),
                     (KeyMapper<T>) getGrid().getDataCommunicator()
@@ -1335,11 +1328,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         itemDetailsDataGenerator = null;
         if (renderer == null) {
             return;
-        }
-
-        if (renderer instanceof ComponentRenderer) {
-            ((ComponentRenderer<?, ?>) renderer)
-                    .setComponentRendererTag(GRID_COMPONENT_RENDERER_TAG);
         }
 
         Rendering<T> rendering;

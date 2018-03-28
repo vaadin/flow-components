@@ -600,7 +600,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
             WebElement cell = cells.get(i);
             String content = cell.getAttribute("innerHTML");
             if (!content.trim().isEmpty()
-                    && !content.startsWith("<flow-grid-component-renderer ")
+                    && !content.startsWith("<flow-component-renderer ")
                     && !content.startsWith("<button>")) {
                 return i;
             }
@@ -609,10 +609,11 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     private void assertRendereredContent(String expected, WebElement cell) {
-        Assert.assertThat(cell.getAttribute("innerHTML"), CoreMatchers.allOf(
-                CoreMatchers.startsWith("<flow-grid-component-renderer"),
-                CoreMatchers.containsString(expected),
-                CoreMatchers.endsWith("</flow-grid-component-renderer>")));
+        Assert.assertThat(cell.getAttribute("innerHTML"),
+                CoreMatchers.allOf(
+                        CoreMatchers.startsWith("<flow-component-renderer"),
+                        CoreMatchers.containsString(expected),
+                        CoreMatchers.endsWith("</flow-component-renderer>")));
     }
 
     private void assertCellContent(String expected, WebElement cell) {
@@ -662,7 +663,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
     private boolean hasComponentRendereredCell(WebElement grid, String text) {
         return hasComponentRendereredCell(grid, text,
-                "flow-grid-component-renderer");
+                "flow-component-renderer");
     }
 
     private boolean hasComponentRendereredHeaderCell(WebElement grid,
