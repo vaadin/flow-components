@@ -59,12 +59,6 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.saucelabs</groupId>
-            <artifactId>ci-sauce</artifactId>
-            <version>1.132</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>

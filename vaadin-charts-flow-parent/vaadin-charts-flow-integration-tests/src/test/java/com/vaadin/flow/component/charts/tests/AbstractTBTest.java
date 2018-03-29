@@ -16,33 +16,28 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import com.saucelabs.ci.sauceconnect.AbstractSauceTunnelManager;
-import com.vaadin.flow.component.charts.AbstractChartExample;
-import com.vaadin.flow.component.charts.testbench.ChartElement;
-import com.vaadin.testbench.annotations.BrowserConfiguration;
-import com.vaadin.testbench.annotations.RunOnHub;
-import com.vaadin.testbench.parallel.Browser;
-import com.vaadin.testbench.parallel.BrowserUtil;
-import com.vaadin.testbench.parallel.DefaultBrowserFactory;
-import com.vaadin.testbench.parallel.ParallelTest;
-import com.vaadin.testbench.parallel.TestBenchBrowserFactory;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import java.util.Arrays;
-import java.util.List;
+import com.vaadin.flow.component.charts.AbstractChartExample;
+import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.testbench.annotations.BrowserConfiguration;
+import com.vaadin.testbench.parallel.Browser;
+import com.vaadin.testbench.parallel.BrowserUtil;
+import com.vaadin.testbench.parallel.DefaultBrowserFactory;
+import com.vaadin.testbench.parallel.ParallelTest;
+import com.vaadin.testbench.parallel.TestBenchBrowserFactory;
 
-import static org.junit.Assert.assertNotNull;
-
-@RunOnHub
 public abstract class AbstractTBTest extends ParallelTest {
 
     private static final String PROPERTY_TEST_ALL_BROWSERS = "test.allBrowsers";
-    private static final String PROPERTY_SAUCE_OPTIONS = "sauce.options";
-    private static final String PROPERTY_SAUCE_SAUCE_ACCESS_KEY = "sauce.sauceAccessKey";
-    private static final String PROPERTY_SAUCE_USER = "sauce.user";
 
     @Override
     public void setup() throws Exception {
@@ -89,38 +84,8 @@ public abstract class AbstractTBTest extends ParallelTest {
                 DesiredCapabilities.ipad(),
                 browserFactory.create(Browser.SAFARI, "11.0", Platform.SIERRA),
                 browserFactory.create(Browser.EDGE, "16", Platform.WIN10),
-                browserFactory.create(Browser.IE11, "11", Platform.WIN10),
-                browserFactory.create(Browser.IE11, "11", Platform.WINDOWS));
-    }
-
-    @Override
-    public void setDesiredCapabilities(
-            DesiredCapabilities desiredCapabilities) {
-        String tunnelId = AbstractSauceTunnelManager
-                .getTunnelIdentifier(System.getProperty(PROPERTY_SAUCE_OPTIONS), null);
-        if (tunnelId != null) {
-            desiredCapabilities.setCapability("tunnelIdentifier", tunnelId);
-        }
-        super.setDesiredCapabilities(desiredCapabilities);
-    }
-
-    @Override
-    protected String getHubURL() {
-        String username = System.getProperty(PROPERTY_SAUCE_USER);
-        String accessKey = System.getProperty(PROPERTY_SAUCE_SAUCE_ACCESS_KEY);
-
-        if (username == null) {
-            throw new IllegalArgumentException(
-                    "You must give a Sauce Labs user name using -Dsauce.user=<username> "
-                            + "or by adding sauce.user=<username> to local.properties");
-        }
-        if (accessKey == null) {
-            throw new IllegalArgumentException(
-                    "You must give a Sauce Labs access key using -Dsauce.sauceAccessKey=<accesskey> "
-                            + "or by adding sauce.sauceAccessKey=<accesskey> to local.properties");
-        }
-        return "http://" + username + ":" + accessKey
-                + "@localhost:4445/wd/hub";
+                browserFactory.create(Browser.IE11, "11", Platform.WIN10)
+                );
     }
 
     protected void openTestURL() {
