@@ -2,7 +2,6 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 
@@ -37,9 +36,8 @@ public class ConditionalFormattingBasedOnFormulaTest
         spreadsheetPage.setCellValue("A2", VALUE);
         assertEquals(TRUE_CONDITION_COLOR, spreadsheetPage.getCellColor("A2"));
     }
-
+    
     @Test
-    @Ignore("Regression after POI 3.17 update")
     public void loadSpreadsheetWithConditionalFormattingRulesInRow10_EvaluateFormatting_CheckColorOfCells(){
         String a10WithConditionEqualsToOne = spreadsheetPage.getCellColor("A10");
         String b10WithConditionEqualsToZero = spreadsheetPage.getCellColor("B10");

@@ -498,9 +498,6 @@ public class SpreadsheetStyleFactory implements Serializable {
      * Reloads all styles for the currently active sheet.
      */
     public void reloadActiveSheetCellStyles() {
-        // conditional formatting, needs to be run first, or shifted borders may not get displayed.
-        spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
-
         // need to remove the cell identifiers (css selectors from the shifted
         // border style rules
         for (Entry<Integer, String> entry : shiftedBorderLeftStyles.entrySet()) {
@@ -552,6 +549,9 @@ public class SpreadsheetStyleFactory implements Serializable {
                             entry.getValue()));
 
         }
+
+        // conditional formatting
+        spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
 
     }
 

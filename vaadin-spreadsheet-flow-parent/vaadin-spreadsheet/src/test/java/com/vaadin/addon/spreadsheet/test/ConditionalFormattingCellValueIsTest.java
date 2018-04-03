@@ -2,7 +2,6 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 
@@ -68,7 +67,6 @@ public class ConditionalFormattingCellValueIsTest extends AbstractSpreadsheetTes
     }
 
     @Test
-    @Ignore("Regression after POI 3.17 update")
     public void loadSpreadsheetWithNotEqualConditionFormattingInB4_insertIncoherentValue_CellB4FilledRed() {
         spreadsheetPage.setCellValue("B2", STRING_VALUE);
         spreadsheetPage.setCellValue("B4", NUMBER_VALUE);
