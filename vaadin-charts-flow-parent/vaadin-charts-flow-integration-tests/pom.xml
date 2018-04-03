@@ -19,7 +19,6 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
 
         <!-- Plugins -->
-        <jetty.version>9.3.7.v20160115</jetty.version>
         <driver.binary.downloader.maven.plugin.version>1.0.14</driver.binary.downloader.maven.plugin.version>
         <maven.failsafe.plugin.version>2.20</maven.failsafe.plugin.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
@@ -51,7 +50,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-components-testbench</artifactId>
-            <version>1.0.0.beta1</version>
+            <version>1.0.0.beta2</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>

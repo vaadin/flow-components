@@ -215,12 +215,12 @@
                 <dependency>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-icons-flow</artifactId>
-                    <version>1.0.0.alpha9</version>
+                    <version>1.0.0.beta2</version>
                 </dependency>
                 <dependency>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-split-layout-flow</artifactId>
-                    <version>1.0.0.alpha9</version>
+                    <version>1.0.0.beta2</version>
                 </dependency>
 
                 <!--PAPER ELEMENTS-->
