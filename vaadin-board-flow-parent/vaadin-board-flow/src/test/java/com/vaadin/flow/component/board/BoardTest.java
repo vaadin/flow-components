@@ -21,7 +21,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.board.internal.FunctionCallerTest;
 
@@ -114,12 +113,12 @@ public class BoardTest {
         FunctionCallerTest.assertPendingInvocations(ui, "$0.redraw()");
     }
 
-    static void assertChildren(HasOrderedComponents<?> parent,
+    static void assertChildren(Component parent,
             Component... expectedChildren) {
         Assert.assertEquals(expectedChildren.length,
-                parent.getComponentCount());
+                parent.getChildren().count());
         Assert.assertArrayEquals(expectedChildren,
-                parent.get().getChildren().toArray());
+                parent.getChildren().toArray());
     }
 
 }
