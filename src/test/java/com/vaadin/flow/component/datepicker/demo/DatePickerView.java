@@ -217,7 +217,8 @@ public class DatePickerView extends DemoView {
             if (selectedDate != null) {
                 message.setText("Day: " + selectedDate.getDayOfMonth()
                         + "\nMonth: " + selectedDate.getMonthValue()
-                        + "\nYear: " + selectedDate.getYear());
+                        + "\nYear: " + selectedDate.getYear() + "\nLocale: "
+                        + datePicker.getLocale());
             } else {
                 message.setText("No date is selected");
             }

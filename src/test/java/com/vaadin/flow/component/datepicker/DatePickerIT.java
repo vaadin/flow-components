@@ -139,7 +139,7 @@ public class DatePickerIT extends ComponentDemoTest {
         WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
                 .get(0);
         executeScript("arguments[0].value = '2018-03-27'", localePicker);
-        waitUntil(driver -> "Day: 27\nMonth: 3\nYear: 2018"
+        waitUntil(driver -> "Day: 27\nMonth: 3\nYear: 2018\nLocale: en_US"
                 .equals(message.getText()));
         Assert.assertEquals(
                 "The format of the displayed date should be MM/DD/YYYY.", true,
@@ -148,7 +148,7 @@ public class DatePickerIT extends ComponentDemoTest {
 
         layout.findElement(By.id("Locale-UK")).click();
         executeScript("arguments[0].value = '2018-03-26'", localePicker);
-        waitUntil(driver -> "Day: 26\nMonth: 3\nYear: 2018"
+        waitUntil(driver -> "Day: 26\nMonth: 3\nYear: 2018\nLocale: en_GB"
                 .equals(message.getText()));
 
         Assert.assertEquals(
@@ -158,7 +158,7 @@ public class DatePickerIT extends ComponentDemoTest {
 
         layout.findElement(By.id("Locale-US")).click();
         executeScript("arguments[0].value = '2018-03-25'", localePicker);
-        waitUntil(driver -> "Day: 25\nMonth: 3\nYear: 2018"
+        waitUntil(driver -> "Day: 25\nMonth: 3\nYear: 2018\nLocale: en_US"
                 .equals(message.getText()));
         Assert.assertEquals(
                 "The format of the displayed date should be MM/DD/YYYY.", true,
