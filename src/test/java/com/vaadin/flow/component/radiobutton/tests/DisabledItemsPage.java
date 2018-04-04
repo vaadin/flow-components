@@ -13,20 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.radiobutton.demo;
+package com.vaadin.flow.component.radiobutton.tests;
 
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 @Route("disabled-items")
-@Theme(Lumo.class)
-public class DisabledItemsPage extends Div {
+public class DisabledItemsPage extends DemoView {
 
-    public DisabledItemsPage() {
+    @Override
+    protected void initView() {
+        DisabledItemsPage();
+    }
+
+    public void DisabledItemsPage() {
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup();
         radioButtonGroup.setId("button-group");
         radioButtonGroup.setEnabled(false);

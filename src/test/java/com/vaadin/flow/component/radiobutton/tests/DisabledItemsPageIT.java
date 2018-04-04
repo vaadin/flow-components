@@ -24,7 +24,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.demo.ComponentDemoTest;
 
-public class DisabledItemsIT extends ComponentDemoTest {
+public class DisabledItemsPageIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
@@ -42,7 +42,7 @@ public class DisabledItemsIT extends ComponentDemoTest {
         // Click button to add items
         layout.findElement(By.id("add-button")).click();
 
-
+        waitForElementPresent(By.tagName("vaadin-radio-button"));
         buttons = group.findElements(By.tagName("vaadin-radio-button"));
         Assert.assertEquals("Group should have buttons", 2, buttons.size());
 
