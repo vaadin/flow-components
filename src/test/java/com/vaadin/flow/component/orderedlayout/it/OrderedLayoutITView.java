@@ -1,15 +1,16 @@
 package com.vaadin.flow.component.orderedlayout.it;
 
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.demo.AbstractLayout;
+import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
 @Route("ordered-layout-tests")
-public class OrderedLayoutITView extends Div {
+public class OrderedLayoutITView extends DemoView {
 
-    public OrderedLayoutITView() {
+    @Override
+    protected void initView() {
         createSpacingToggles();
     }
 
