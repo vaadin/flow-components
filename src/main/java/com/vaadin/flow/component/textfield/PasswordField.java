@@ -34,7 +34,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
         implements HasSize, HasValidation,
         HasValueChangeMode<PasswordField, String>, HasPrefixAndSuffix,
-        InputNotifier, KeyNotifier, CompositionNotifier {
+        InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
+        HasAutocapitalize, HasAutocorrect {
     private ValueChangeMode currentMode;
 
     /**
@@ -249,31 +250,6 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
         return !isDisabledBoolean();
     }
 
-    @Override
-    public void setAutocomplete(String autocomplete) {
-        super.setAutocomplete(autocomplete);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Whether the value of the control can be automatically completed by the
-     * browser. List of available options at:
-     * https://developer.mozilla.org/en/docs
-     * /Web/HTML/Element/input#attr-autocomplete
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code autocomplete} property from the webcomponent
-     */
-    public String getAutocomplete() {
-        return getAutocompleteString();
-    }
-
     /**
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
@@ -341,7 +317,7 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     /**
      * When set to <code>true</code>, user is prevented from typing a value that
      * conflicts with the given {@code pattern}.
-     * 
+     *
      * @return the {@code preventInvalidInput} property from the webcomponent
      */
     public boolean isPreventInvalidInput() {
@@ -396,7 +372,7 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     /**
      * Set to <code>false</code> to hide the eye icon which toggles the password
      * visibility.
-     * 
+     *
      * @param revealButtonVisible
      *            <code>true</code> to set the button visible,
      *            <code>false</code> otherwise

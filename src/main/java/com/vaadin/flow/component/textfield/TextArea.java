@@ -32,7 +32,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  */
 public class TextArea extends GeneratedVaadinTextArea<TextArea>
         implements HasSize, HasValidation, HasValueChangeMode<TextArea, String>,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier {
+        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect {
     private ValueChangeMode currentMode;
 
     /**
@@ -251,23 +252,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea>
         return !isDisabledBoolean();
     }
 
-    @Override
-    public void setAutocomplete(String autocomplete) {
-        super.setAutocomplete(autocomplete);
-    }
-
-    /**
-     * Whether the value of the control can be automatically completed by the
-     * browser. List of available options at:
-     * https://developer.mozilla.org/en/docs
-     * /Web/HTML/Element/input#attr-autocomplete
-     *
-     * @return the {@code autocomplete} property from the webcomponent
-     */
-    public String getAutocomplete() {
-        return getAutocompleteString();
-    }
-
     /**
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
@@ -327,7 +311,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea>
     /**
      * When set to <code>true</code>, user is prevented from typing a value that
      * conflicts with the given {@code pattern}.
-     * 
+     *
      * @return the {@code preventInvalidInput} property from the webcomponent
      */
     public boolean isPreventInvalidInput() {
