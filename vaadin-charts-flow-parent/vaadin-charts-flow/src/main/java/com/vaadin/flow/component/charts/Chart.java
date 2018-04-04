@@ -51,6 +51,8 @@ import com.vaadin.flow.component.charts.events.SeriesLegendItemClickEvent;
 import com.vaadin.flow.component.charts.events.SeriesMouseOutEvent;
 import com.vaadin.flow.component.charts.events.SeriesMouseOverEvent;
 import com.vaadin.flow.component.charts.events.SeriesShowEvent;
+import com.vaadin.flow.component.charts.events.XAxesExtremesSetEvent;
+import com.vaadin.flow.component.charts.events.YAxesExtremesSetEvent;
 import com.vaadin.flow.component.charts.events.internal.ConfigurationChangeListener;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -498,4 +500,27 @@ public class Chart extends Component implements HasStyle, HasSize {
             ComponentEventListener<PointUpdateEvent> listener) {
         return addListener(PointUpdateEvent.class, listener);
     }
+
+    /**
+     * Adds a x axes extremes set listener, which will be notified when an x
+     * axis extremes are set
+     *
+     * @param listener
+     */
+    public Registration addXAxesExtremesSetListener(
+            ComponentEventListener<XAxesExtremesSetEvent> listener) {
+        return addListener(XAxesExtremesSetEvent.class, listener);
+    }
+
+    /**
+     * Adds a y axes extremes set listener, which will be notified when an y
+     * axis extremes are set
+     *
+     * @param listener
+     */
+    public Registration addYAxesExtremesSetListener(
+            ComponentEventListener<YAxesExtremesSetEvent> listener) {
+        return addListener(YAxesExtremesSetEvent.class, listener);
+    }
+
 }

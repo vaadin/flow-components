@@ -44,6 +44,7 @@ public class ServerSideEvents extends AbstractChartExample {
     private int eventNumber;
     private DataSeriesItem firstDataPoint;
     private Checkbox visibilityToggling;
+    private boolean setExtremes = true;
 
     @Override
     public void initDemo() {
@@ -111,6 +112,7 @@ public class ServerSideEvents extends AbstractChartExample {
         chart.addSeriesShowListener(event -> logEvent(event));
         chart.addPointSelectListener(event -> logEvent(event));
         chart.addPointUnselectListener(event -> logEvent(event));
+        chart.addYAxesExtremesSetListener(event -> logEvent(event));
         chart.drawChart();
 
         chart.setVisibilityTogglingDisabled(false);
@@ -156,10 +158,24 @@ public class ServerSideEvents extends AbstractChartExample {
         });
 
         Button resetHistory = new Button("Reset history");
+        resetHistory.setId("resetHistory");
         resetHistory.addClickListener(event -> {
             lastEvent.setText(null);
             eventDetails.setText(null);
             historyLayout.removeAll();
+            eventNumber = 0;
+        });
+
+        Button toggleExtremes = new Button("Toggle Extremes");
+        toggleExtremes.setId("toggleExtremes");
+        toggleExtremes.addClickListener(e -> {
+            if (setExtremes) {
+                chart.getConfiguration().getyAxes().getAxis(0).setExtremes(9,
+                        15);
+            } else {
+                chart.getConfiguration().resetZoom();
+            }
+            setExtremes = !setExtremes;
         });
 
         HorizontalLayout controls = new HorizontalLayout();
@@ -168,6 +184,7 @@ public class ServerSideEvents extends AbstractChartExample {
         controls.add(firstSeriesVisible);
         controls.add(zoomLevels);
         controls.add(resetHistory);
+        controls.add(toggleExtremes);
         return controls;
     }
 

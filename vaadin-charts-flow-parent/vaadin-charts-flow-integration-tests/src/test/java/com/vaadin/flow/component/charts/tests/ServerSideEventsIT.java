@@ -30,6 +30,7 @@ import com.vaadin.flow.component.charts.events.SeriesCheckboxClickEvent;
 import com.vaadin.flow.component.charts.events.SeriesHideEvent;
 import com.vaadin.flow.component.charts.events.SeriesLegendItemClickEvent;
 import com.vaadin.flow.component.charts.events.SeriesShowEvent;
+import com.vaadin.flow.component.charts.events.YAxesExtremesSetEvent;
 import com.vaadin.flow.component.charts.examples.dynamic.ServerSideEvents;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Series;
@@ -45,6 +46,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
     public void setup() throws Exception {
         super.setup();
         driver.manage().window().setSize(new Dimension(1600, 1600));
+        resetHistory();
     }
 
     @Override
@@ -177,6 +179,14 @@ public class ServerSideEventsIT extends AbstractTBTest {
         assertNthHistoryEventIsType(PointSelectEvent.class, 1);
     }
 
+    @Test
+    public void toggle_extremes_eventIsFired() {
+        WebElement toggleExtremesButton = findToggleButton();
+        toggleExtremesButton.click();
+
+        assertFirstHistoryEventIsType(YAxesExtremesSetEvent.class);
+    }
+
     private void assertLastEventIsType(
             Class<? extends ComponentEvent<Chart>> expectedEvent) {
         getCommandExecutor().waitForVaadin();
@@ -201,6 +211,12 @@ public class ServerSideEventsIT extends AbstractTBTest {
         assertNotNull(eventHistory);
         String eventType = eventHistory.split(":")[0];
         Assert.assertEquals(expectedEvent.getSimpleName(), eventType);
+    }
+
+    private void resetHistory() {
+        WebElement resetHistoryButton = $(ButtonElement.class).id("resetHistory");
+        resetHistoryButton.click();
+
     }
 
     private SeriesCheckboxClickEvent readCheckboxEventDetails() {
@@ -238,6 +254,10 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
     private WebElement findDisableVisibityToggle() {
         return $(CheckboxElement.class).id("visibilityToggler");
+    }
+
+    private WebElement findToggleButton() {
+        return $(ButtonElement.class).id("toggleExtremes");
     }
 
     private static class DataSeriesDeserializer implements
