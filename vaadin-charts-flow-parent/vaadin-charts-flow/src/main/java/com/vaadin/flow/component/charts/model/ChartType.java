@@ -25,7 +25,7 @@ package com.vaadin.flow.component.charts.model;
  * Own custom extensions can be made by extending this class.
  * <p>
  * Configuration specific to each ChartType can be set using
- * {@link Configuration#setPlotOptions(AbstractPlotOptions)} or for a
+ * {@link Configuration#setPlotOptions(AbstractPlotOptions...)} or for a
  * single series using
  * {@link AbstractSeries#setPlotOptions(AbstractPlotOptions)}
  */
@@ -81,11 +81,11 @@ public class ChartType implements ChartEnum {
     public static final ChartType AREASPLINERANGE = new ChartType(
             "areasplinerange");
     /**
-     * @see PlotOptionsBoxPlot
+     * @see PlotOptionsBoxplot
      */
     public static final ChartType BOXPLOT = new ChartType("boxplot");
     /**
-     * @see PlotOptionsErrorBar
+     * @see PlotOptionsErrorbar
      */
     public static final ChartType ERRORBAR = new ChartType("errorbar");
     /**
