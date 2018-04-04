@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
@@ -59,7 +60,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
     }
 
     /**
-     * Convenience constructor to create a date picker with a pre-selected date.
+     * Convenience constructor to create a date picker with a pre-selected date
+     * in current UI locale format.
      *
      * @param initialDate
      *            the pre-selected date in the picker
@@ -69,7 +71,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
         getElement().synchronizeProperty("value", "value-changed");
         getElement().synchronizeProperty("invalid", "invalid-changed");
         doSetValue(initialDate);
-        addAttachListener(event -> initConnector());
         setLocale(UI.getCurrent().getLocale());
     }
 
@@ -87,7 +88,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     /**
      * Convenience constructor to create a date picker with a pre-selected date
-     * and a label.
+     * in current UI locale format and a label.
      *
      * @param label
      *            the label describing the date picker
@@ -134,7 +135,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     /**
      * Convenience constructor to create a date picker with a pre-selected date
-     * and a {@link ValueChangeListener}.
+     * in current UI locale format and a {@link ValueChangeListener}.
      *
      * @param initialDate
      *            the pre-selected date in the picker
@@ -150,8 +151,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
     }
 
     /**
-     * Convenience constructor to create a date picker with a pre-selected date,
-     * a {@link ValueChangeListener} and a label.
+     * Convenience constructor to create a date picker with a pre-selected date
+     * in current UI locale format, a {@link ValueChangeListener} and a label.
      *
      * @param label
      *            the label describing the date picker
@@ -242,17 +243,24 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * Set the Locale for the Date Picker. The displayed date will be matched to
      * the format used in that locale.
      * <p>
-     * NOTE:Supported formats are MM/DD/YYYY(default), DD/MM/YYYY and
-     * YYYY/MM/DD. Browser compatibility can be different based on the browser
-     * and mobile devices, you can check here for more details: <a href=
+     * NOTE:Supported formats are MM/DD/YYYY, DD/MM/YYYY and YYYY/MM/DD. Browser
+     * compatibility can be different based on the browser and mobile devices,
+     * you can check here for more details: <a href=
      * "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString</a>
      * 
      * @param locale
-     *            the locale set to the date picker
+     *            the locale set to the date picker, cannot be null
      */
     public void setLocale(Locale locale) {
+        Objects.requireNonNull(locale, "Locale must not be null.");
         String languageTag = locale.getLanguage() + "-" + locale.getCountry();
         getElement().callFunction("$connector.setLocale", languageTag);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        initConnector();
     }
 
     private void initConnector() {

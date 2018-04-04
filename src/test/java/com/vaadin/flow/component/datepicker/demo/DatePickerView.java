@@ -202,6 +202,7 @@ public class DatePickerView extends DemoView {
         Div message = createMessageDiv("Customize-locale-picker-message");
         // begin-source-example
         // source-example-heading: Date picker with customize locales
+        // By default, the datePicker uses the current UI locale
         DatePicker datePicker = new DatePicker();
         NativeButton locale1 = new NativeButton("Locale: US");
         NativeButton locale2 = new NativeButton("Locale: UK");
