@@ -35,6 +35,7 @@ public class DialogView extends DemoView {
     public void initView() {
         addBasicDialog();
         addConfirmationDialog();
+        addCloseFromServerSideDialog();
     }
 
     private void addBasicDialog() {
@@ -79,5 +80,28 @@ public class DialogView extends DemoView {
         messageLabel.setId("confirmation-dialog-label");
         button.setId("confirmation-dialog-button");
         addCard("Confirmation dialog", button, messageLabel);
+    }
+
+    private void addCloseFromServerSideDialog() {
+        NativeButton button = new NativeButton(BUTTON_CAPTION);
+
+        // begin-source-example
+        // source-example-heading: Close from server-side
+        Label messageLabel = new Label();
+
+        Dialog dialog = new Dialog(new Label("Close me with the esc-key"));
+        dialog.setCloseOnOutsideClick(false);
+
+        dialog.addDialogCloseActionListener(e -> {
+            messageLabel.setText("Closed from server-side");
+            dialog.close();
+        });
+        // end-source-example
+
+        button.addClickListener(event -> dialog.open());
+
+        messageLabel.setId("server-side-close-dialog-label");
+        button.setId("server-side-close-dialog-button");
+        addCard("Close from server-side", button, messageLabel);
     }
 }

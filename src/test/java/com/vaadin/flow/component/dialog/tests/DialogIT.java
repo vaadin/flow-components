@@ -57,6 +57,21 @@ public class DialogIT extends ComponentDemoTest {
         Assert.assertEquals("Cancelled...", messageLabel.getText());
     }
 
+    @Test
+    public void validateClosingFromServerSide() {
+        findElement(By.id("server-side-close-dialog-button")).click();
+        verifyDialogOpened();
+
+        executeScript("document.body.click()");
+        verifyDialogOpened();
+
+        new Actions(getDriver()).sendKeys(Keys.ESCAPE).perform();
+        verifyDialogClosed();
+
+        Assert.assertEquals("Closed from server-side",
+                findElement(By.id("server-side-close-dialog-label")).getText());
+    }
+
     private WebElement getOverlayContent() {
         WebElement overlay = findElement(By.tagName(DIALOG_OVERLAY_TAG));
         return getInShadowRoot(overlay, By.id("content"));
@@ -64,6 +79,10 @@ public class DialogIT extends ComponentDemoTest {
 
     private void verifyDialogClosed() {
         waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
+    }
+
+    private void verifyDialogOpened() {
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
     }
 
     @Override
