@@ -26,7 +26,7 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @HtmlImport("src/grid-in-a-template.html")
 public class GridInATemplate extends PolymerTemplate<TemplateModel> {
 
-    @Id("grid")
+    @Id
     Grid<String> grid;
 
     public Grid<String> getGrid() {

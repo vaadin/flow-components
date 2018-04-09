@@ -21,13 +21,16 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("grid-on-flex-layout")
-public class GridOnFlexLayoutIT extends GridSizeIT {
+@TestPath("grid-with-full-size-in-template")
+public class GridFullSizeInATemplateIT extends GridSizeIT {
 
     @Test
     public void gridOccupies100PercentOfThePage() {
         open();
-        WebElement grid = findElement(By.id("full-size-grid"));
+        WebElement gridInATemplate = findElement(
+                By.tagName("grid-in-a-template"));
+        WebElement grid = findInShadowRoot(gridInATemplate, By.id("grid"))
+                .get(0);
         assertGridOccupies100PercentOfThePage(grid);
     }
 

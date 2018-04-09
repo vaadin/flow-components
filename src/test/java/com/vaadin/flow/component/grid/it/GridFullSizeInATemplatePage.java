@@ -15,20 +15,19 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import java.util.Arrays;
 
-import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.NoTheme;
 
-@TestPath("grid-on-flex-layout")
-public class GridOnFlexLayoutIT extends GridSizeIT {
+@Route("grid-with-full-size-in-template")
+@NoTheme
+public class GridFullSizeInATemplatePage extends GridInATemplate {
 
-    @Test
-    public void gridOccupies100PercentOfThePage() {
-        open();
-        WebElement grid = findElement(By.id("full-size-grid"));
-        assertGridOccupies100PercentOfThePage(grid);
+    public GridFullSizeInATemplatePage() {
+        grid.setItems(Arrays.asList("Item 1", "Item 2", "Item 3"));
+        grid.addColumn(ValueProvider.identity());
+        grid.setSizeFull();
     }
-
 }
