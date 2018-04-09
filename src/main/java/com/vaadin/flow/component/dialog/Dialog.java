@@ -20,9 +20,11 @@ import java.util.stream.Stream.Builder;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -40,7 +42,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     private Element template;
     private Element container;
-    private boolean autoAddedToTheUi = false;
+    private boolean autoAddedToTheUi, onCloseConfigured;
 
     /**
      * Creates an empty dialog.
@@ -66,6 +68,30 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
                 autoAddedToTheUi = false;
             }
         });
+    }
+
+    /**
+     * `vaadin-dialog-close-action` is sent when the user clicks outside the
+     * overlay or presses the escape key.
+     */
+    @DomEvent("vaadin-dialog-close-action")
+    public static class DialogCloseActionEvent extends ComponentEvent<Dialog> {
+        public DialogCloseActionEvent(Dialog source, boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
+    /**
+     * Add a listener that informs when the user wants to close the dialog by
+     * clicking outside the dialog, or by pressing escape. Then you can decide
+     * whether to close or to keep opened the dialog.
+     *
+     * @param listener
+     * @return registration for removal of listener
+     */
+    public Registration addDialogCloseActionListener(ComponentEventListener<DialogCloseActionEvent> listener) {
+        ensureOnCloseConfigured();
+        return addListener(DialogCloseActionEvent.class, listener);
     }
 
     /**
@@ -189,6 +215,45 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         setOpened(false);
     }
 
+    private UI getCurrentUI() {
+        UI ui = UI.getCurrent();
+        if (ui == null) {
+            throw new IllegalStateException("UI instance is not available. "
+                    + "It means that you are calling this method "
+                    + "out of a normal workflow where it's always implicitely set. "
+                    + "That may happen if you call the method from the custom thread without "
+                    + "'UI::access' or from tests without proper initialization.");
+        }
+        return ui;
+    }
+
+    private void ensureAttached() {
+        if (getElement().getNode().getParent() == null) {
+            UI ui = getCurrentUI();
+            ui.beforeClientResponse(ui, context -> {
+                ui.add(this);
+                autoAddedToTheUi = true;
+            });
+        }
+    }
+
+    private void ensureOnCloseConfigured() {
+        if (!onCloseConfigured) {
+            ensureAttached();
+            getCurrentUI().getPage().executeJavaScript(
+                "var f = function(e) {"
+              + "  if (e.type == 'vaadin-overlay-escape-press' && !$0.noCloseOnEsc ||"
+              + "      e.type == 'vaadin-overlay-outside-click' && !$0.noCloseOnOutsideClick) {"
+              + "    e.preventDefault();"
+              + "    $0.dispatchEvent(new CustomEvent('vaadin-dialog-close-action'));"
+              + "  }"
+              + "};"
+              + "$0.$.overlay.addEventListener('vaadin-overlay-outside-click', f);"
+              + "$0.$.overlay.addEventListener('vaadin-overlay-escape-press', f);", getElement());
+            onCloseConfigured = true;
+        }
+    }
+
     /**
      * Opens or closes the dialog.
      * <p>
@@ -202,19 +267,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     @Override
     public void setOpened(boolean opened) {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitely set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        if (opened && getElement().getNode().getParent() == null) {
-            ui.beforeClientResponse(ui, context -> {
-                ui.add(this);
-                autoAddedToTheUi = true;
-            });
+        if (opened) {
+            ensureAttached();
         }
         super.setOpened(opened);
     }

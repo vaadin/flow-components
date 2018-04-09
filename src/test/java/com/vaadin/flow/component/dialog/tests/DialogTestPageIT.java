@@ -70,6 +70,12 @@ public class DialogTestPageIT extends AbstractComponentIT {
                 message.getText());
         Assert.assertEquals("Number of event is 1",
                 eventCounterMessage.getText());
+        Assert.assertEquals("The event came from server",
+                eventSourceMessage.getText());
+
+        findElement(By.id("dialog-open")).click();
+        checkDialogIsOpened();
+        executeScript("arguments[0].opened = false", findElement(By.id("dialog")));
         Assert.assertEquals("The event came from client",
                 eventSourceMessage.getText());
     }

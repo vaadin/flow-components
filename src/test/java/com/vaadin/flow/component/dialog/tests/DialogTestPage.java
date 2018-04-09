@@ -53,6 +53,9 @@ public class DialogTestPage extends Div {
         eventSourceMessage.setId("event-source-message");
 
         Dialog dialog = new Dialog();
+        dialog.setId("dialog");
+        dialog.addDialogCloseActionListener(e -> dialog.close());
+
         message.setText("The open state of the dialog is " + dialog.isOpened());
         dialog.add(
                 new Label("There is a opened change listener for this dialog"));
