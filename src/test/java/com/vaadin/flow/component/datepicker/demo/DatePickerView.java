@@ -38,6 +38,7 @@ public class DatePickerView extends DemoView {
     public void initView() {
         createSimpleDatePicker();
         createMinAndMaxDatePicker();
+        createDisabledDatePicker();
         createFinnishDatePicker();
         createStartAndEndDatePickers();
         createLocaleChangeDatePicker();
@@ -53,9 +54,10 @@ public class DatePickerView extends DemoView {
         datePicker.addValueChangeListener(event -> {
             LocalDate selectedDate = event.getValue();
             if (selectedDate != null) {
-                message.setText("Day: " + selectedDate.getDayOfMonth()
-                        + "\nMonth: " + selectedDate.getMonthValue()
-                        + "\nYear: " + selectedDate.getYear());
+                message.setText(
+                        "Day: " + selectedDate.getDayOfMonth() + "\nMonth: "
+                                + selectedDate.getMonthValue() + "\nYear: "
+                                + selectedDate.getYear());
             } else {
                 message.setText("No date is selected");
             }
@@ -83,9 +85,10 @@ public class DatePickerView extends DemoView {
         datePicker.addValueChangeListener(event -> {
             LocalDate selectedDate = event.getValue();
             if (selectedDate != null) {
-                message.setText("Day: " + selectedDate.getDayOfMonth()
-                        + "\nMonth: " + selectedDate.getMonthValue()
-                        + "\nYear: " + selectedDate.getYear());
+                message.setText(
+                        "Day: " + selectedDate.getDayOfMonth() + "\nMonth: "
+                                + selectedDate.getMonthValue() + "\nYear: "
+                                + selectedDate.getYear());
             } else {
                 message.setText("No date is selected");
             }
@@ -94,6 +97,23 @@ public class DatePickerView extends DemoView {
 
         datePicker.setId("min-and-max-picker");
         addCard("Date picker with min and max", datePicker, message);
+    }
+
+    private void createDisabledDatePicker() {
+        Div message = createMessageDiv("disabled-picker-message");
+
+        // begin-source-example
+        // source-example-heading: Disabled date picker
+        DatePicker datePicker = new DatePicker();
+        datePicker.setEnabled(false);
+        // end-source-example
+
+        datePicker.addValueChangeListener(event -> {
+            message.setText("This event should not have happened");
+        });
+
+        datePicker.setId("disabled-picker");
+        addCard("Disabled date picker", datePicker, message);
     }
 
     private void createFinnishDatePicker() {
@@ -105,16 +125,19 @@ public class DatePickerView extends DemoView {
         datePicker.setLabel("Finnish date picker");
         datePicker.setPlaceholder("Syntymäpäivä");
 
-        datePicker.setI18n(new DatePickerI18n().setWeek("viikko")
-                .setCalendar("kalenteri").setClear("tyhjennä")
-                .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
-                .setMonthNames(Arrays.asList("tammiku", "helmikuu", "maaliskuu",
-                        "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",
-                        "syyskuu", "lokakuu", "marraskuu", "joulukuu"))
-                .setWeekdays(Arrays.asList("sunnuntai", "maanantai", "tiistai",
-                        "keskiviikko", "torstai", "perjantai", "lauantai"))
-                .setWeekdaysShort(Arrays.asList("su", "ma", "ti", "ke", "to",
-                        "pe", "la")));
+        datePicker.setI18n(
+                new DatePickerI18n().setWeek("viikko").setCalendar("kalenteri")
+                        .setClear("tyhjennä").setToday("tänään")
+                        .setCancel("peruuta").setFirstDayOfWeek(1)
+                        .setMonthNames(Arrays.asList("tammiku", "helmikuu",
+                                "maaliskuu", "huhtikuu", "toukokuu", "kesäkuu",
+                                "heinäkuu", "elokuu", "syyskuu", "lokakuu",
+                                "marraskuu", "joulukuu")).setWeekdays(
+                        Arrays.asList("sunnuntai", "maanantai", "tiistai",
+                                "keskiviikko", "torstai", "perjantai",
+                                "lauantai")).setWeekdaysShort(
+                        Arrays.asList("su", "ma", "ti", "ke", "to", "pe",
+                                "la")));
 
         datePicker.addValueChangeListener(event -> {
             LocalDate selectedDate = event.getValue();
@@ -215,10 +238,11 @@ public class DatePickerView extends DemoView {
         datePicker.addValueChangeListener(event -> {
             LocalDate selectedDate = event.getValue();
             if (selectedDate != null) {
-                message.setText("Day: " + selectedDate.getDayOfMonth()
-                        + "\nMonth: " + selectedDate.getMonthValue()
-                        + "\nYear: " + selectedDate.getYear() + "\nLocale: "
-                        + datePicker.getLocale());
+                message.setText(
+                        "Day: " + selectedDate.getDayOfMonth() + "\nMonth: "
+                                + selectedDate.getMonthValue() + "\nYear: "
+                                + selectedDate.getYear() + "\nLocale: "
+                                + datePicker.getLocale());
             } else {
                 message.setText("No date is selected");
             }

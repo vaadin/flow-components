@@ -403,16 +403,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
     }
 
     /**
-     * Enables or disables this datepicker.
-     *
-     * @param enabled
-     *            the boolean value to set
-     */
-    public void setEnabled(boolean enabled) {
-        setDisabled(!enabled);
-    }
-
-    /**
      * Determine whether this datepicker is enabled
      * <p>
      * This property is not synchronized automatically from the client side, so
@@ -501,7 +491,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * Notice that displaying week numbers is only supported when
      * i18n.firstDayOfWeek is 1 (Monday).
      *
-     * @param showWeekNumbers
+     * @param weekNumbersVisible
      *            the boolean value to set
      */
     public void setWeekNumbersVisible(boolean weekNumbersVisible) {
