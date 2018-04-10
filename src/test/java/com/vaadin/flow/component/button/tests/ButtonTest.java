@@ -200,6 +200,16 @@ public class ButtonTest {
         assertOnlyChildIsIcon();
     }
 
+    @Test
+    public void setEnabled() {
+        button = new Button();
+        button.setEnabled(true);
+        Assert.assertTrue(button.isEnabled());
+
+        button.setEnabled(false);
+        Assert.assertFalse(button.isEnabled());
+    }
+
     private void assertOnlyChildIsText() {
         Assert.assertEquals(1, button.getElement().getChildCount());
         Element child = getButtonChild(0);

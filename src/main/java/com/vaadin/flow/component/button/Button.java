@@ -17,6 +17,7 @@ package com.vaadin.flow.component.button;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.dom.Element;
@@ -28,7 +29,7 @@ import com.vaadin.flow.dom.ElementFactory;
  * @author Vaadin Ltd
  */
 public class Button extends GeneratedVaadinButton<Button>
-        implements HasSize {
+        implements HasSize, HasEnabled {
 
     private static final String THEME_ATTRIBUTE = "theme";
 
@@ -348,29 +349,6 @@ public class Button extends GeneratedVaadinButton<Button>
      */
     public boolean isAutofocus() {
         return isAutofocusBoolean();
-    }
-
-    /**
-     * Enables or disables this button.
-     * 
-     * @param enabled
-     *            the boolean value to set
-     */
-    public void setEnabled(boolean enabled) {
-        setDisabled(!enabled);
-    }
-
-    /**
-     * Determines whether this button is enabled
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     * 
-     * @return {@code true} if the button is enabled, {@code false} otherwise
-     */
-    public boolean isEnabled() {
-        return !isDisabledBoolean();
     }
 
     private void wrapTextInSpan() {

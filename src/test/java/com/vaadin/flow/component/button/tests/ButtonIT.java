@@ -121,6 +121,13 @@ public class ButtonIT extends ComponentDemoTest {
 
         WebElement message = layout.findElement(By.id("buttonMessage"));
         Assert.assertEquals("", message.getText());
+
+        // Remove disabled Attribute and click again from client side, click
+        // message should not been shown in the dom
+        executeScript("arguments[0].removeAttribute(\"disabled\");"
+                + "arguments[0].click();", button);
+        message = layout.findElement(By.id("buttonMessage"));
+        Assert.assertEquals("", message.getText());
     }
 
     private void waitUntilMessageIsChangedForClickedButton(
