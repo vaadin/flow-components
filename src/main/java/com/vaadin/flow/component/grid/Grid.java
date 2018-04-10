@@ -811,8 +811,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Adds a new text column to this {@link Grid} with a value provider. The
-     * value is converted to a JSON value by using
-     * {@link JsonSerializer#toJson(Object)}.
+     * value is converted to String when sent to the client by using
+     * {@link String#valueOf(Object)}.
      * <p>
      * <em>NOTE:</em> For displaying components, see
      * {@link #addComponentColumn(ValueProvider)}. For using build-in renderers,
@@ -827,7 +827,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     public Column<T> addColumn(ValueProvider<T, ?> valueProvider) {
         String columnId = createColumnId(false);
         return addColumn(TemplateRenderer.<T> of("[[item." + columnId + "]]")
-                .withProperty(columnId, valueProvider));
+                .withProperty(columnId,
+                        value -> String.valueOf(valueProvider.apply(value))));
     }
 
     /**
