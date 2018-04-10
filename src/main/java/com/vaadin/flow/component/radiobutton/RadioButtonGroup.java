@@ -141,13 +141,8 @@ public class RadioButtonGroup<T>
         refreshButtons();
     }
 
-    /**
-     * If <code>false</code>, the user cannot interact with this element.
-     *
-     * @param enabled
-     *            the boolean value to set
-     */
-    public void setEnabled(boolean enabled) {
+    @Override
+    public void onEnabledStateChange(boolean enabled) {
         setDisabled(!enabled);
         refreshButtons();
     }
