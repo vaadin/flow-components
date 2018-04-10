@@ -33,6 +33,7 @@ public class DatePickerValidationPage extends Div {
 
     public DatePickerValidationPage() {
         initView();
+        createPickerInsideDiv();
     }
 
     private void initView() {
@@ -85,5 +86,20 @@ public class DatePickerValidationPage extends Div {
                 event -> datePicker.setLocale(new Locale("i", "i", "i")));
         localeChange.setId("change-locale");
         add(localeChange);
+    }
+
+    private void createPickerInsideDiv() {
+        Div parent = new Div();
+        DatePicker datePicker = new DatePicker();
+        datePicker.setId("picker-inside-div");
+
+        parent.add(datePicker);
+        parent.setEnabled(false);
+
+        NativeButton button = new NativeButton("set Div Enabled");
+        button.setId("set-enabled");
+        button.addClickListener(event -> parent.setEnabled(true));
+
+        add(parent, button);
     }
 }

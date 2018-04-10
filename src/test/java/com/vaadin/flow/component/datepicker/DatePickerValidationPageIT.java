@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.logging.Level;
 import java.util.stream.IntStream;
 
@@ -30,6 +28,8 @@ import org.openqa.selenium.WebElement;
 import com.google.common.base.Strings;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for {@link DatePicker} validation.
@@ -114,6 +114,19 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
         String logList1 = getLogEntries(Level.WARNING).toString();
         waitUntil(driver -> logList1.contains(
                 "The locale is not supported, use default locale setting(en-US)."));
+    }
+
+    @Test
+    public void disabledDatePicker() {
+        WebElement disabledPicker = findElement(By.id("picker-inside-div"));
+        Assert.assertFalse(
+                "The date picker should be disabled, when the parent component is disabled.",
+                disabledPicker.isEnabled());
+
+        findElement(By.id("set-enabled")).click();
+        Assert.assertTrue(
+                "The date picker should be enabled after parent component is enabled.",
+                disabledPicker.isEnabled());
     }
 
 

@@ -402,20 +402,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
         return getLabelString();
     }
 
-    /**
-     * Determine whether this datepicker is enabled
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return {@code true} if the datepicker is enabled, {@code false}
-     *         otherwise
-     */
-    public boolean isEnabled() {
-        return !isDisabledBoolean();
-    }
-
     @Override
     public void setPlaceholder(String placeholder) {
         super.setPlaceholder(placeholder);
