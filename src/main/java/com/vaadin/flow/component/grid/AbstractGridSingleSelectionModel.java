@@ -132,6 +132,11 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
                 return getGrid().addListener(SingleSelectionEvent.class,
                         (ComponentEventListener) listener);
             }
+
+            @Override
+            public Element getElement() {
+                return getComponent().getElement();
+            }
         };
     }
 
