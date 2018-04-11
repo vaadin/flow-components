@@ -70,4 +70,12 @@ public class CheckboxUnitTest {
         Assert.assertEquals("foo", checkbox.getLabel());
     }
 
+    @Test
+    public void setEnable() {
+        Checkbox checkbox = new Checkbox("foo", true);
+        checkbox.setEnabled(true);
+        Assert.assertTrue(checkbox.isEnabled());
+        checkbox.setEnabled(false);
+        Assert.assertFalse(checkbox.isEnabled());
+    }
 }

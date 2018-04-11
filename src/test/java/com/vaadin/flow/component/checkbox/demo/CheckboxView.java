@@ -31,6 +31,7 @@ public class CheckboxView extends DemoView {
 
     @Override
     public void initView() {
+
         addDefaultCheckbox();
         addDisabledCheckbox();
         addIndeterminateCheckbox();
@@ -49,13 +50,18 @@ public class CheckboxView extends DemoView {
     }
 
     private void addDisabledCheckbox() {
+        Div message = new Div();
+        message.setId("disabled-checkbox-message");
         // begin-source-example
         // source-example-heading: Disabled Checkbox
         Checkbox disabledCheckbox = new Checkbox("Disabled Checkbox");
         disabledCheckbox.setValue(true);
         disabledCheckbox.setEnabled(false);
         // end-source-example
-        addCard("Disabled Checkbox", disabledCheckbox);
+        disabledCheckbox.addClickListener(evt -> message.setText("Checkbox "
+                + evt.getSource().getLabel()
+                + " was clicked, but the component is disabled and this shouldn't happen!"));
+        addCard("Disabled Checkbox", disabledCheckbox, message);
         disabledCheckbox.setId("disabled-checkbox");
     }
 

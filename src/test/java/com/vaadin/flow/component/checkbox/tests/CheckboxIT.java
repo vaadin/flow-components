@@ -42,6 +42,14 @@ public class CheckboxIT extends ComponentDemoTest {
     public void disabledCheckbox() {
         WebElement checkbox = layout.findElement(By.id("disabled-checkbox"));
         Assert.assertEquals("true", checkbox.getAttribute("disabled"));
+        WebElement message = layout
+                .findElement(By.id("disabled-checkbox-message"));
+        Assert.assertEquals("", message.getText());
+
+        executeScript("arguments[0].removeAttribute(\"disabled\");"
+                + "arguments[0].click();", checkbox);
+        message = layout.findElement(By.id("disabled-checkbox-message"));
+        Assert.assertEquals("", message.getText());
     }
 
     @Test

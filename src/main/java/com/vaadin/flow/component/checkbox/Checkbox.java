@@ -207,24 +207,6 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
         return isIndeterminateBoolean();
     }
 
-    /**
-     * Enables or disables this checkbox.
-     *
-     * @param enabled the boolean value to set
-     */
-    public void setEnabled(boolean enabled) {
-        setDisabled(!enabled);
-    }
-
-    /**
-     * Determines whether this check is enabled. Default is <code>true</code>.
-     *
-     * @return {@code true} if the checkbox is enabled, {@code false} otherwise
-     */
-    public boolean isEnabled() {
-        return !isDisabledBoolean();
-    }
-
     @Override
     public String getClientValuePropertyName() {
         return "checked";
