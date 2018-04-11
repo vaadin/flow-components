@@ -108,4 +108,19 @@ public class TextFieldIT extends ComponentDemoTest {
                 "The euro sign should be located on the right side of the text field",
                 spanX > middleX);
     }
+
+    @Test
+    public void disabledTextFieldNotUpdating() {
+        WebElement textField = layout.findElement(By.id("disabled-text-field"));
+        WebElement message = layout
+                .findElement(By.id("disabled-text-field-message"));
+        Assert.assertEquals("", message.getText());
+
+        executeScript("arguments[0].removeAttribute(\"disabled\");", textField);
+        textField.sendKeys("abc");
+        blur();
+
+        message = layout.findElement(By.id("disabled-text-field-message"));
+        Assert.assertEquals("", message.getText());
+    }
 }

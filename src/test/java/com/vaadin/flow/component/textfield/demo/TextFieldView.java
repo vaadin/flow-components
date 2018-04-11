@@ -34,6 +34,7 @@ public class TextFieldView extends DemoView {
     public void initView() {
         addBasicFeatures();
         addNumberFields();
+        addDisabledField();
     }
 
     private void addBasicFeatures() {
@@ -76,5 +77,23 @@ public class TextFieldView extends DemoView {
         euroField.setId("euro-field");
 
         addCard("Number fields", dollarField, euroField);
+    }
+
+    private void addDisabledField() {
+
+        // begin-source-example
+        // source-example-heading: Disabled text field
+        TextField textField = new TextField();
+        textField.setLabel("Text field label");
+        textField.setPlaceholder("placeholder text");
+        textField.setEnabled(false);
+        // end-source-example
+
+        textField.setId("disabled-text-field");
+        Div message = new Div();
+        message.setId("disabled-text-field-message");
+        textField.addValueChangeListener(change -> message.setText("Value changed"));
+
+        addCard("Disabled text field", textField, message);
     }
 }

@@ -73,6 +73,21 @@ public class PasswordFieldIT extends ComponentDemoTest {
                 "placeholder text");
     }
 
+    @Test
+    public void disabledPasswordFieldNotUpdating() {
+        WebElement passwordField = layout.findElement(By.id("disabled-password-field"));
+        WebElement message = layout
+                .findElement(By.id("disabled-password-field-message"));
+        Assert.assertEquals("", message.getText());
+
+        executeScript("arguments[0].removeAttribute(\"disabled\");", passwordField);
+        passwordField.sendKeys("abc");
+        blur();
+
+        message = layout.findElement(By.id("disabled-password-field-message"));
+        Assert.assertEquals("", message.getText());
+    }
+
     private void waitUntilTextsEqual(String expected, String actual) {
         waitUntil(driver -> expected.equals(actual));
     }

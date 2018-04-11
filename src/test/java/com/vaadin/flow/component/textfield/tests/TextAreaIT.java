@@ -100,6 +100,21 @@ public class TextAreaIT extends ComponentDemoTest {
                 "placeholder text");
     }
 
+    @Test
+    public void disabledTextAreaNotUpdating() {
+        WebElement textArea = layout.findElement(By.id("disabled-text-area"));
+        WebElement message = layout
+                .findElement(By.id("disabled-text-area-message"));
+        Assert.assertEquals("", message.getText());
+
+        executeScript("arguments[0].removeAttribute(\"disabled\");", textArea);
+        textArea.sendKeys("abc");
+        blur();
+        
+        message = layout.findElement(By.id("disabled-text-area-message"));
+        Assert.assertEquals("", message.getText());
+    }
+
     private void waitUntilTextsEqual(String expected, String actual) {
         waitUntil(driver -> expected.equals(actual));
     }

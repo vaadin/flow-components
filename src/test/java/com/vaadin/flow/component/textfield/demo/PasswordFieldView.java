@@ -32,6 +32,11 @@ public class PasswordFieldView extends DemoView {
 
     @Override
     public void initView() {
+        addBasicField();
+        addDisabledField();
+    }
+
+    private void addBasicField() {
         Div message = new Div();
 
         // begin-source-example
@@ -56,5 +61,22 @@ public class PasswordFieldView extends DemoView {
                 new ValueChangeModeButtonProvider(passwordField)
                         .getToggleValueSyncButton(),
                 message);
+    }
+
+    private void addDisabledField() {
+        // begin-source-example
+        // source-example-heading: Disabled password field
+        PasswordField passwordField = new PasswordField();
+        passwordField.setLabel("Password field label");
+        passwordField.setPlaceholder("placeholder text");
+        passwordField.setEnabled(false);
+        // end-source-example
+
+        passwordField.setId("disabled-password-field");
+        Div message = new Div();
+        message.setId("disabled-password-field-message");
+        passwordField.addValueChangeListener(change -> message.setText("password changed"));
+
+        addCard("Disabled password field", passwordField, message);
     }
 }

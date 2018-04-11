@@ -34,6 +34,7 @@ public class TextAreaView extends DemoView {
         addBasicFeatures();
         addMaxHeightFeature();
         addMinHeightFeature();
+        addDisabledField();
     }
 
     private void addMaxHeightFeature() {
@@ -86,5 +87,22 @@ public class TextAreaView extends DemoView {
 
         addCard("Basic text area", textArea,
                 new ValueChangeModeButtonProvider(textArea).getToggleValueSyncButton(), message);
+    }
+
+    private void addDisabledField() {
+        // begin-source-example
+        // source-example-heading: Disabled text area
+        TextArea textArea = new TextArea();
+        textArea.setLabel("Text area label");
+        textArea.setPlaceholder("placeholder text");
+        textArea.setEnabled(false);
+        // end-source-example
+
+        textArea.setId("disabled-text-area");
+        Div message = new Div();
+        message.setId("disabled-text-area-message");
+        textArea.addValueChangeListener(change -> message.setText("Value changed"));
+
+        addCard("Disabled text area", textArea, message);
     }
 }

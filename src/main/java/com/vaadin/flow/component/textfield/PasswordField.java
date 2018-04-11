@@ -225,32 +225,6 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField>
     }
 
     /**
-     * <p>
-     * If false, the user cannot interact with this element.
-     * </p>
-     *
-     * @param enabled
-     *            the boolean value to set
-     */
-    public void setEnabled(boolean enabled) {
-        setDisabled(!enabled);
-    }
-
-    /**
-     * <p>
-     * If false, the user cannot interact with this element.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code disabled} property negation from the webcomponent
-     */
-    public boolean isEnabled() {
-        return !isDisabledBoolean();
-    }
-
-    /**
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
      *

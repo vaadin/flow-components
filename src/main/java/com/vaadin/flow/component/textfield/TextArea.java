@@ -234,25 +234,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea>
     }
 
     /**
-     * If <code>false</code>, the user cannot interact with this element.
-     *
-     * @param enabled
-     *            the boolean value to set
-     */
-    public void setEnabled(boolean enabled) {
-        setDisabled(!enabled);
-    }
-
-    /**
-     * If <code>false</code>, the user cannot interact with this element.
-     *
-     * @return the {@code disabled} property negation from the webcomponent
-     */
-    public boolean isEnabled() {
-        return !isDisabledBoolean();
-    }
-
-    /**
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
      *
