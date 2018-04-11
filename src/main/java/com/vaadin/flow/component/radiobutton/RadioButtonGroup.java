@@ -147,15 +147,6 @@ public class RadioButtonGroup<T>
         refreshButtons();
     }
 
-    /**
-     * If <code>false</code>, the user cannot interact with this element.
-     *
-     * @return the {@code disabled} property negation from the webcomponent
-     */
-    public boolean isEnabled() {
-        return !isDisabledBoolean();
-    }
-
     private void refresh() {
         keyMapper.removeAll();
         removeAll();
