@@ -586,11 +586,24 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 grid.getAttribute("heightByRows"));
     }
 
+    @Test
+    public void basicFeature() {
+        openTabAndCheckForErrors("basic-features");
+        GridElement grid = $(GridElement.class).id("grid-basic-feature");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getAllColumns().size() == 11);
+
+        Assert.assertEquals(
+                "The first header should be \"Company\" in the Grid",
+                "Company", grid.getHeaderCell(0).getInnerHTML());
+    }
+
     private WebElement getCellContent(GridTHTDElement cell) {
         return (WebElement) executeScript(
                 "return arguments[0].firstElementChild.assignedNodes()[0].firstElementChild;",
                 cell);
     }
+
 
     private int getCellsOffsetFromTheHeaders(WebElement grid,
             List<WebElement> cells) {
