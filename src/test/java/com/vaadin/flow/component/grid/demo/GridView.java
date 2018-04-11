@@ -911,7 +911,7 @@ public class GridView extends DemoView {
         final int numberOfYears = 5;
 
         // begin-source-example
-        // source-example-heading: Gird Basic Features Demo
+        // source-example-heading: Grid Basic Features Demo
         DecimalFormat dollarFormat = new DecimalFormat("$#,##0.00");
         Grid<CompanyBudgetHistory> grid = new Grid<>();
         ListDataProvider<CompanyBudgetHistory> list = CompanyBudgetHistory
@@ -1059,7 +1059,7 @@ public class GridView extends DemoView {
             "Oeyovee", "Ceisic", "Terufix", "Meistijo", "Iedeofix", "Sekazu" };
 
     // begin-source-example
-    // source-example-heading: Gird Basic Features Demo
+    // source-example-heading: Grid Basic Features Demo
     /**
      * Example Object for Basic Features Demo
      */
