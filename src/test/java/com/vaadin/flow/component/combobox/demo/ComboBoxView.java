@@ -98,6 +98,7 @@ public class ComboBoxView extends DemoView {
     @Override
     public void initView() {
         createStringComboBox();
+        createDisabledComboBox();
         createObjectComboBox();
         createComboBoxWithObjectStringSimpleValue();
         createComboBoxUsingTemplateRenderer();
@@ -186,6 +187,27 @@ public class ComboBoxView extends DemoView {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("value-selection-box");
         addCard("Value selection from objects", comboBox, message);
+    }
+
+    private void createDisabledComboBox() {
+        Div message = createMessageDiv("disabled-combobox-message");
+        // begin-source-example
+        // source-example-heading: Disabled ComboBox
+        ComboBox<String> comboBox = new ComboBox<>("Disabled ComboBox");
+        comboBox.setEnabled(false);
+        // end-source-example
+        comboBox.setItems("Google Chrome", "Mozilla Firefox", "Opera",
+                "Apple Safari", "Microsoft Edge");
+        comboBox.addValueChangeListener(event -> {
+            if (event.getSource().isEmpty()) {
+                message.setText("No browser selected");
+            } else {
+                message.setText("Selected browser: " + event.getValue());
+            }
+        });
+        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
+        comboBox.setId("disabled-combo-box");
+        addCard("Disabled ComboBox", comboBox, message);
     }
 
     private void createComboBoxUsingTemplateRenderer() {

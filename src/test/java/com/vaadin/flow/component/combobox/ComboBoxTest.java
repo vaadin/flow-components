@@ -167,6 +167,15 @@ public class ComboBoxTest {
                 Focusable.class.isAssignableFrom(ComboBox.class));
     }
 
+    @Test
+    public void setEnabled() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setEnabled(true);
+        Assert.assertTrue(comboBox.isEnabled());
+        comboBox.setEnabled(false);
+        Assert.assertFalse(comboBox.isEnabled());
+    }
+
     private void assertItem(TestComboBox comboBox, int index, String caption) {
         String value1 = comboBox.items.get(index);
         Assert.assertEquals(caption, value1);

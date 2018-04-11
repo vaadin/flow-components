@@ -59,6 +59,22 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    public void setEnabledCombobox() {
+        openTabAndCheckForErrors("");
+        WebElement comboBox = layout.findElement(By.id("disabled-combo-box"));
+        WebElement message = layout
+                .findElement(By.id("value-selection-message"));
+        Assert.assertEquals("", message.getText());
+
+        executeScript(
+                "arguments[0].removeAttribute(\"disabled\");"
+                        + "arguments[0].selectedItem = arguments[0].items[1]",
+                comboBox);
+        message = layout.findElement(By.id("value-selection-message"));
+        Assert.assertEquals("", message.getText());
+    }
+
+    @Test
     public void openValueBoxSelectTwoItems() {
         openTabAndCheckForErrors("");
         WebElement comboBox = layout.findElement(By.id("value-selection-box"));

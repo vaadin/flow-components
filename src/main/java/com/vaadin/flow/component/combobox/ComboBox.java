@@ -351,29 +351,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         return isAutofocusBoolean();
     }
 
-    /**
-     * Enables or disables this combobox.
-     *
-     * @param enabled
-     *            the boolean value to set
-     */
-    public void setEnabled(boolean enabled) {
-        setDisabled(!enabled);
-    }
-
-    /**
-     * Determines whether this combobox is enabled
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return {@code true} if the combobox is enabled, {@code false} otherwise
-     */
-    public boolean isEnabled() {
-        return !isDisabledBoolean();
-    }
-
     @Override
     public void setPreventInvalidInput(boolean preventInvalidInput) {
         super.setPreventInvalidInput(preventInvalidInput);
