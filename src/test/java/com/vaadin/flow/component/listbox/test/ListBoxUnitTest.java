@@ -49,8 +49,13 @@ public class ListBoxUnitTest {
     }
 
     private void assertDisabledItem(int index, boolean disabled) {
-        Assert.assertEquals(disabled, listBox.getElement().getChild(index)
-                .getProperty("disabled", false));
+        if (disabled) {
+            Assert.assertNotNull(listBox.getElement().getChild(index)
+                    .getAttribute("disabled"));
+        } else {
+            Assert.assertNull(listBox.getElement().getChild(index)
+                    .getAttribute("disabled"));
+        }
     }
 
 }

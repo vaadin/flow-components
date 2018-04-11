@@ -48,7 +48,7 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
     private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>();
-    private SerializablePredicate<T> itemEnabledProvider = item -> true;
+    private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
     public ListBox() {
         getElement().synchronizeProperty(getClientValuePropertyName(),
@@ -123,7 +123,7 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
      * Returns the item component renderer.
      *
      * @return the item renderer
-     * @see #setItemRenderer
+     * @see #setRenderer
      */
     public ComponentRenderer<? extends Component, T> getItemRenderer() {
         return itemRenderer;
@@ -237,9 +237,15 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
                 .add(itemRenderer.createComponent(itemComponent.getItem()));
     }
 
+    @Override
+    public void onEnabledStateChange(boolean enabled) {
+        super.onEnabledStateChange(enabled);
+        getItemComponents().forEach(this::refreshEnabled);
+    }
+
     private void refreshEnabled(VaadinItem<T> itemComponent) {
-        itemComponent.setDisabled(
-                !itemEnabledProvider.test(itemComponent.getItem()));
+        itemComponent.setEnabled(
+                itemEnabledProvider.test(itemComponent.getItem()));
     }
 
     @SuppressWarnings("unchecked")

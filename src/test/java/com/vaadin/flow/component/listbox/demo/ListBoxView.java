@@ -41,6 +41,7 @@ public class ListBoxView extends DemoView {
         addListboxWithSelection();
         addComponentsBetween();
         addItemRenderer();
+        addDisabledListBox();
 
         addCard("Example object used in the demo");
     }
@@ -102,8 +103,8 @@ public class ListBoxView extends DemoView {
 
             labels.getStyle().set("display", "flex")
                     .set("flexDirection", "column").set("marginRight", "10px");
-            layout.getStyle().set("display", "flex").set("alignItems",
-                    "center");
+            layout.getStyle().set("display", "flex")
+                    .set("alignItems", "center");
 
             return layout;
         }));
@@ -113,6 +114,31 @@ public class ListBoxView extends DemoView {
         // end-source-example
         addCard("Using item renderer and disabling items", listBox)
                 .setId("list-box-with-renderer");
+    }
+
+    private void addDisabledListBox() {
+        Label message = new Label("-");
+        message.setId("message-label");
+
+        // begin-source-example
+        // source-example-heading: Disabled ListBox and selection
+        ListBox<String> listBox = new ListBox<>();
+        listBox.setItems("Bread", "Butter", "Milk");
+        listBox.setEnabled(false);
+        listBox.addValueChangeListener(event -> message.setText(String.format(
+                "Selection changed from %s to %s, selection is from client: %s",
+                event.getOldValue(), event.getValue(), event.isFromClient())));
+
+        NativeButton button = new NativeButton("Select Milk",
+                event -> listBox.setValue("Milk"));
+        // end-source-example
+
+        Label note = new Label(
+                "Note! Even though updating from the client doesn't work, "
+                        + "the server may push a new status for the component.");
+
+        addCard("Disabled ListBox and selection", listBox, button, message,
+                note).setId("disabled-list-box");
     }
 
     private List<Item> getItems() {

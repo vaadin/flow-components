@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.listbox.test;
 
-import static org.hamcrest.CoreMatchers.containsString;
-
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -26,6 +24,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.demo.ComponentDemoTest;
+
+import static org.hamcrest.CoreMatchers.containsString;
 
 public class ListBoxIT extends ComponentDemoTest {
 
@@ -76,13 +76,14 @@ public class ListBoxIT extends ComponentDemoTest {
             boolean fromClient) {
         Assert.assertThat(
                 "The label should show the old and new values of the ListBox "
-                        + "after selection changes",
-                messageLabel.getText(), containsString(
+                        + "after selection changes", messageLabel.getText(),
+                containsString(
                         String.format("from %s to %s", oldValue, newValue)));
         Assert.assertThat(
-                "The label should indicate that the event is from "
-                        + (fromClient ? "client" : "server"),
-                messageLabel.getText(),
+                "The label should indicate that the event is from " + (
+                        fromClient ?
+                                "client" :
+                                "server"), messageLabel.getText(),
                 containsString("from client: " + fromClient));
     }
 
@@ -91,8 +92,9 @@ public class ListBoxIT extends ComponentDemoTest {
         init("list-box-with-components-between");
         List<WebElement> children = listBox.findElements(By.xpath("child::*"));
         Object[] texts = children.stream().map(WebElement::getText).toArray();
-        Assert.assertArrayEquals(new Object[] { "Before bread", BREAD, BUTTER,
-                "After butter", MILK, "After all the items" }, texts);
+        Assert.assertArrayEquals(
+                new Object[] { "Before bread", BREAD, BUTTER, "After butter",
+                        MILK, "After all the items" }, texts);
     }
 
     @Test
@@ -101,6 +103,22 @@ public class ListBoxIT extends ComponentDemoTest {
         assertItem(items.get(0), BREAD);
         assertItem(items.get(1), BUTTER);
         assertItem(items.get(2), MILK);
+    }
+
+    @Test
+    public void disabledListBox() {
+        init("disabled-list-box");
+        messageLabel = layout.findElement(By.id("message-label"));
+
+        Object[] texts = items.stream().map(WebElement::getText).toArray();
+        Assert.assertArrayEquals(new Object[] { BREAD, BUTTER, MILK }, texts);
+
+        executeScript("arguments[0].click(); return true;", items.get(1));
+        Assert.assertEquals("Item should not have been selectable", "-",
+                messageLabel.getText());
+
+        card.findElement(By.tagName("button")).click();
+        assertMessage(null, MILK, false);
     }
 
     private void assertItem(WebElement item, String itemName) {

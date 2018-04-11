@@ -52,25 +52,4 @@ class VaadinItem<T> extends Component
         return item;
     }
 
-    /**
-     * Sets whether the user can interact with the component or not.
-     * 
-     * @param disabled
-     *            {@code true} to disable interaction, {@code false} to enable
-     *            it
-     */
-    public void setDisabled(boolean disabled) {
-        getElement().setProperty("disabled", disabled);
-    }
-
-    /**
-     * Gets whether user interaction with the component is disabled.
-     * 
-     * @return {@code true} if the user cannot interact with the component,
-     *         {@code false} otherwise
-     */
-    public boolean isDisabled() {
-        return getElement().getProperty("disabled", false);
-    }
-
 }
