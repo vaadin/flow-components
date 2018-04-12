@@ -536,4 +536,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
     }
+
+    @Override
+    public void onEnabledStateChanged(boolean enabled) {
+        super.onEnabledStateChanged(enabled);
+        refresh();
+    }
 }
