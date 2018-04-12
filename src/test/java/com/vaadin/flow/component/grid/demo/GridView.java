@@ -67,7 +67,6 @@ import com.vaadin.flow.router.Route;
 public class GridView extends DemoView {
 
     public static List<Person> items = new ArrayList<>();
-
     static {
         items = createItems();
     }
@@ -228,7 +227,8 @@ public class GridView extends DemoView {
         /**
          * Creates a new component with the given item.
          *
-         * @param person the person to set
+         * @param person
+         *            the person to set
          */
         public PersonComponent(Person person) {
             this.addClickListener(event -> {
@@ -309,7 +309,6 @@ public class GridView extends DemoView {
             this.add(hlayout);
         }
     }
-
     // end-source-example
 
     @Override
@@ -332,6 +331,7 @@ public class GridView extends DemoView {
         createBeanGrid();
         createHeightByRows();
         createBasicFeatures();
+        createDisabledGrid();
 
         addCard("Grid example model",
                 new Label("These objects are used in the examples above"));
@@ -966,6 +966,34 @@ public class GridView extends DemoView {
 
         grid.setId("grid-basic-feature");
         addCard("Basic Features", "Grid Basic Features Demo", grid);
+    }
+
+    private void createDisabledGrid() {
+        // begin-source-example
+        // source-example-heading: Disabled grid
+        Grid<Person> grid = new Grid<>();
+
+        List<Person> people = createItems(500);
+        grid.setItems(people);
+
+        grid.addColumn(Person::getName).setHeader("Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+        grid.addColumn(new NativeButtonRenderer<>("Button"))
+                .setHeader("Action");
+
+        grid.setSelectionMode(SelectionMode.SINGLE);
+
+        // The selection and action button won't work, but the scrolling will
+        grid.setEnabled(false);
+        // end-source-example
+
+        NativeButton toggleEnable = new NativeButton("Toggle enable",
+                evt -> grid.setEnabled(!grid.isEnabled()));
+        toggleEnable.setId("disabled-grid-toggle-enable");
+        Div div = new Div(toggleEnable);
+
+        grid.setId("disabled-grid");
+        addCard("Disabled grid", grid, div);
     }
 
     private List<Person> getItems() {

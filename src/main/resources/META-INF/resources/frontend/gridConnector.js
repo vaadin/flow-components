@@ -22,6 +22,9 @@ window.gridConnector = {
       if (selectionMode === 'NONE') {
         return;
       }
+      if (userOriginated && (grid.getAttribute('disabled') || grid.getAttribute('disabled') === '')) {
+          return;
+      }
       if (selectionMode === 'SINGLE') {
         grid.selectedItems = [];
         selectedKeys = {};

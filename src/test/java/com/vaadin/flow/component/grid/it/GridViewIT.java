@@ -34,6 +34,7 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.grid.demo.GridView;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.demo.TabbedComponentDemoTest;
 import com.vaadin.testbench.TestBenchElement;
@@ -596,6 +597,32 @@ public class GridViewIT extends TabbedComponentDemoTest {
         Assert.assertEquals(
                 "The first header should be \"Company\" in the Grid",
                 "Company", grid.getHeaderCell(0).getInnerHTML());
+    }
+    
+    @Test
+    public void disabledGrid_itemsAreDisabled() {
+        openTabAndCheckForErrors("");
+        GridElement grid = $(GridElement.class).id("disabled-grid");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+        Assert.assertFalse("Grid should be disabled", grid.isEnabled());
+
+        GridTRElement row = grid.getRow(0);
+        GridTHTDElement cell = row.getCell(grid.getColumn("Action"));
+        WebElement button = cell.getContext().findElement(By.tagName("button"));
+
+        Assert.assertFalse("The rendered button should be disabled",
+                button.isEnabled());
+
+        grid.scrollToRow(498);
+        waitUntil(driver -> grid.getRowCount() == 499);
+
+        row = grid.getRow(498);
+        cell = row.getCell(grid.getColumn("Action"));
+        button = cell.getContext().findElement(By.tagName("button"));
+
+        Assert.assertFalse("The rendered button should be disabled",
+                button.isEnabled());
     }
 
     private WebElement getCellContent(GridTHTDElement cell) {
