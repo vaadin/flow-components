@@ -238,8 +238,8 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
     }
 
     @Override
-    public void onEnabledStateChange(boolean enabled) {
-        super.onEnabledStateChange(enabled);
+    public void onEnabledStateChanged(boolean enabled) {
+        super.onEnabledStateChanged(enabled);
         getItemComponents().forEach(this::refreshEnabled);
     }
 
