@@ -1799,8 +1799,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     @Override
-    public void onEnabledStateChange(boolean enabled) {
-        super.onEnabledStateChange(enabled);
+    public void onEnabledStateChanged(boolean enabled) {
+        super.onEnabledStateChanged(enabled);
 
         /*
          * The DataCommunicator needs to be reset so components rendered inside
