@@ -142,7 +142,7 @@ public class RadioButtonGroup<T>
     }
 
     @Override
-    public void onEnabledStateChange(boolean enabled) {
+    public void onEnabledStateChanged(boolean enabled) {
         setDisabled(!enabled);
         refreshButtons();
     }
