@@ -27,7 +27,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.github.javafaker.Faker;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
@@ -109,35 +108,35 @@ public class IronListView extends DemoView {
             setAlignItems(Alignment.CENTER);
             getStyle().set("minWidth", "250px").set("padding", "10px")
                     .set("display", "flex");
-            
+
             Image picture = new Image();
             picture.setWidth("40px");
             picture.setHeight("40px");
             picture.getStyle().set("borderRadius", "50%");
             picture.getStyle().set("backgroundColor", "lightgray");
-            
+
             Div pictureContainer = new Div(picture);
             pictureContainer.getStyle().set("marginRight", "10px");
             pictureContainer.setWidth("40px");
             pictureContainer.setHeight("40px");
-            
+
             Label name = new Label();
             Label email = new Label();
             email.getStyle().set("fontSize", "13px");
-            
+
             VerticalLayout nameContainer = new VerticalLayout(name, email);
 
             add(pictureContainer, nameContainer);
-            
+
             boolean isPlaceHolder = person.getPicture() == null;
-            
+
             if (isPlaceHolder) {
                 picture.setSrc("//:0");
                 name.setText(person.getFirstName());
             } else {
-                picture.setSrc(person.getPicture());                
+                picture.setSrc(person.getPicture());
                 name.setText(person.getFirstName() + " " + person.getLastName());
-                email.setText(person.getEmail());                
+                email.setText(person.getEmail());
             }
         }
     }
@@ -151,6 +150,7 @@ public class IronListView extends DemoView {
         createPeopleListWithDataProvider();
         createChuckNorrisFacts();
         createRankedListWithEventHandling();
+        createDisabledStringsList();
         createPeopleListWithDataProviderAndComponentRenderer();
     }
 
@@ -236,7 +236,7 @@ public class IronListView extends DemoView {
                 .withProperty("lastName", Person::getLastName)
                 .withProperty("email", Person::getEmail)
                 .withProperty("picture", Person::getPicture));
-        
+
         // For a smooth scrolling experience use a placeholder item
         Person placeholder = new Person();
         placeholder.setFirstName("-----");
@@ -308,6 +308,51 @@ public class IronListView extends DemoView {
                 }));
     }
 
+    private void createDisabledStringsList() {
+        // begin-source-example
+        // source-example-heading: Disabled list with events from template
+        IronList<String> list = new IronList<>();
+        list.setHeight("400px");
+        list.getStyle().set("border", "1px solid lightgray");
+
+        Div removalResult = new Div();
+        removalResult.setId("disabled-removal-result");
+
+        DataProvider<String, ?> dataProvider = DataProvider.fromCallbacks(
+                query -> queryStringsFromDatabase(query),
+                query -> countStringsFromDatabase(query));
+
+        list.setDataProvider(dataProvider);
+
+        // Disable the list so that scrolling still works but events are not
+        // handled
+        list.setEnabled(false);
+
+        /*
+         * The name of the event handlers defined at 'on-click' are used inside
+         * the 'withEventHandler' calls.
+         */
+        list.setRenderer(TemplateRenderer.<String> of(
+                "<div style='display:flex; justify-content:space-between; padding:10px;'>"
+                        + "<div style='flex-grow:1'>[[item.name]]</div>"
+                        + "<div><button on-click='remove' style='color:red'>X</button></div>"
+                        + "<div>")
+                .withProperty("name", ValueProvider.identity())
+                .withEventHandler("remove", item -> {
+                    removalResult.setText(item);
+                }));
+        NativeButton switchEnabled = new NativeButton("Switch enabled state",
+                event -> list.setEnabled(!list.isEnabled()));
+        // end-source-example
+
+        list.setId("disabled-list-with-templates");
+        switchEnabled.setId("switch-enabled-state-string-list");
+        addCard("Using templates", "Using disabled list with templates",
+                new Label(
+                        "Rank up/down your favorite Lord of the Rings characters"),
+                list, removalResult, switchEnabled);
+    }
+
     private void createPeopleListWithDataProviderAndComponentRenderer() {
         //@formatter:off
         // begin-source-example
@@ -322,21 +367,26 @@ public class IronListView extends DemoView {
 
         list.setDataProvider(dataProvider);
         list.setGridLayout(true);
-        
+
         // Uses the constructor of the PersonCard for each item in the list
         list.setRenderer(new ComponentRenderer<>(PersonCard::new));
-        
+
         // For a smooth scrolling experience use a placeholder item
         Person placeholder = new Person();
         placeholder.setFirstName("-----");
         list.setPlaceholderItem(placeholder);
+
+        NativeButton switchEnabled = new NativeButton("Switch enabled state",
+                event-> list.setEnabled(!list.isEnabled()));
         // end-source-example
         //@formatter:on
 
         list.setId("list-of-people-with-dataprovider-and-component-renderer");
+        switchEnabled.setId("switch-enabled-people-list");
         addCard("Using components",
                 "List of people with DataProvider and ComponentRenderer",
-                new Label("List of people with grid layout"), list);
+                new Label("List of people with grid layout"), list,
+                switchEnabled);
     }
 
     private Stream<String> queryStringsFromDatabase(Query<String, Void> query) {

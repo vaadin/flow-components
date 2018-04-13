@@ -38,6 +38,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -139,8 +140,8 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
         dataGenerator.addDataGenerator(
                 (item, jsonObject) -> renderer.getValueProviders()
                         .forEach((property, provider) -> jsonObject.put(
-                                property, JsonSerializer
-                                        .toJson(provider.apply(item)))));
+                                property,
+                                JsonSerializer.toJson(provider.apply(item)))));
 
         template = new Element("template");
         getElement().appendChild(template);
@@ -279,6 +280,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
             ComponentRenderer<?, T> componentRenderer = (ComponentRenderer<?, T>) renderer;
             Component component = componentRenderer
                     .createComponent(placeholderItem);
+            component.getElement().setEnabled(isEnabled());
             placeholderTemplate = component.getElement().getOuterHTML();
         } else {
             placeholderTemplate = originalTemplate;
@@ -289,15 +291,14 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
          * elements that are populated on demand (when the user scrolls to that
          * item).
          */
-        template.setProperty("innerHTML",
-                String.format(
+        template.setProperty("innerHTML", String.format(
         //@formatter:off
             "<span>"
                 + "<template is='dom-if' if='[[item.__placeholder]]'>%s</template>"
                 + "<template is='dom-if' if='[[!item.__placeholder]]'>%s</template>"
             + "</span>",
         //@formatter:on
-                        placeholderTemplate, originalTemplate));
+                placeholderTemplate, originalTemplate));
     }
 
     /**
@@ -324,7 +325,18 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
         getElement().setProperty("grid", gridLayout);
     }
 
-    @ClientDelegate
+    @Override
+    public void onEnabledStateChanged(boolean enabled) {
+        super.onEnabledStateChanged(enabled);
+
+        /*
+         * Rendered component's enabled state needs to be updated via
+         * rerendering
+         */
+        setRenderer(renderer);
+    }
+
+    @ClientDelegate(DisabledUpdateMode.ALWAYS)
     private void setRequestedRange(int start, int length) {
         getDataCommunicator().setRequestedRange(start, length);
     }
