@@ -33,18 +33,16 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("grid-page")
 public class GridUpdateDataProviderIT extends AbstractComponentIT {
 
-    private WebElement grid;
-
     @Before
     public void init() {
         open();
 
         waitForElementPresent(By.tagName("vaadin-grid"));
-        grid = findElement(By.tagName("vaadin-grid"));
     }
 
     @Test
     public void basicGrid() {
+        WebElement grid = findElement(By.id("basic-grid"));
         hasCell(grid, "text");
         hasCell(grid, "0");
         hasCell(grid, "1");
@@ -56,7 +54,8 @@ public class GridUpdateDataProviderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void defaultPageSize() {
+    public void basicGrid_defaultPageSize() {
+        WebElement grid = findElement(By.id("basic-grid"));
         Object pageSize = executeScript("return arguments[0].pageSize", grid);
         Assert.assertEquals(
                 "The default pageSize of the webcomponent should be 50", 50,
@@ -64,14 +63,24 @@ public class GridUpdateDataProviderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void changeDataProvider() {
+    public void basicGrid_changeDataProvider() {
+        WebElement grid = findElement(By.id("basic-grid"));
         // change data provider
-        findElement(By.id("update-provider")).click();
+        findElement(By.id("update-basic-provider")).click();
         waitUntil(driver -> hasData());
 
         // change data provider again
-        findElement(By.id("update-provider")).click();
+        findElement(By.id("update-basic-provider")).click();
         waitUntil(driver -> hasCell(grid, "text"));
+    }
+
+    @Test
+    public void beanGrid_changeDataProvider() {
+        WebElement grid = findElement(By.id("bean-grid"));
+        waitUntil(driver -> hasCell(grid, "foo"));
+
+        findElement(By.id("update-bean-provider")).click();
+        waitUntil(driver -> hasCell(grid, "FOOBAR"));
     }
 
     private void scrollDown(WebElement grid, int index) {
