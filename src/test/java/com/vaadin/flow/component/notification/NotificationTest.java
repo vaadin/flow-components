@@ -31,6 +31,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.notification.Notification.Position;
 
 import net.jcip.annotations.NotThreadSafe;
 
@@ -136,5 +137,27 @@ public class NotificationTest {
         UI.setCurrent(null);
         Notification notification = new Notification();
         notification.setOpened(true);
+    }
+
+    @Test
+    public void defaultPositionValue() {
+        Notification notification = new Notification();
+
+        // default CTOR sets position explicitly (as any other CTOR)
+        Assert.assertEquals(Position.BOTTOM_START, notification.getPosition());
+
+        // There is no API to reset position, so set position to null as a
+        // property, the default client side value is bottom start
+        notification.getElement().setProperty("position", null);
+
+        Assert.assertEquals(Position.BOTTOM_START, notification.getPosition());
+    }
+
+    @Test
+    public void showNotification_defaultPositionAndDurationValues() {
+        Notification notification = Notification.show("foo");
+
+        Assert.assertEquals(Position.BOTTOM_START, notification.getPosition());
+        Assert.assertEquals(5000, notification.getDuration());
     }
 }

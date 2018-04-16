@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.notification;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -39,6 +40,9 @@ import com.vaadin.flow.shared.Registration;
 @HtmlImport("frontend://flow-component-renderer.html")
 public class Notification extends GeneratedVaadinNotification<Notification>
         implements HasComponents {
+
+    private static final int DEFAULT_DURATION = 5000;
+    private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
 
     private final Element container = new Element("div", false);
     private final Element templateElement = new Element("template", false);
@@ -77,8 +81,9 @@ public class Notification extends GeneratedVaadinNotification<Notification>
          * @return corresponding {@link Position}
          */
         static Position fromClientName(String clientName) {
-            return Position.valueOf(
-                    clientName.replace('-', '_').toUpperCase(Locale.ENGLISH));
+            return clientName == null ? null
+                    : Position.valueOf(clientName.replace('-', '_')
+                            .toUpperCase(Locale.ENGLISH));
         }
     }
 
@@ -94,7 +99,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(this,
                         context -> attachComponentTemplate(ui)));
-        setPosition(Position.BOTTOM_START);
+        setPosition(DEFAULT_POSITION);
         setDuration(0);
     }
 
@@ -106,7 +111,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      *            the text of the Notification
      */
     public Notification(String text) {
-        this(text, 0, Position.BOTTOM_START);
+        this(text, 0, DEFAULT_POSITION);
     }
 
     /**
@@ -122,7 +127,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      *            the duration in milliseconds to show the notification
      */
     public Notification(String text, int duration) {
-        this(text, duration, Position.BOTTOM_START);
+        this(text, duration, DEFAULT_POSITION);
     }
 
     /**
@@ -187,13 +192,29 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      *            the position of the notification. Valid enumerate values are
      *            TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE,
      *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
-     * @return The notification
+     * @return the notification
      */
     public static Notification show(String text, int duration,
             Position position) {
         Notification notification = new Notification(text, duration, position);
         notification.open();
         return notification;
+    }
+
+    /**
+     * Shows a notification in the current page with given text.
+     * <p>
+     * This is the convenience method for {@link #show(String, int, Position)}
+     * which uses default web-component values for duration (which is 5000 ms)
+     * and position ({@literal Position.BOTTOM_START}).
+     *
+     *
+     * @param text
+     *            the text of the Notification
+     * @return the notification
+     */
+    public static Notification show(String text) {
+        return show(text, DEFAULT_DURATION, DEFAULT_POSITION);
     }
 
     /**
@@ -219,10 +240,11 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      *
      * @param position
      *            the position of the notification. Valid enumerate values are
-     *            {@code TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH}
+     *            {@code TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH},
+     *            not {@code null}
      */
     public void setPosition(Position position) {
-        this.setPosition(position.getClientName());
+        setPosition(position.getClientName());
     }
 
     /**
@@ -236,11 +258,15 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
+     * <p>
+     * The default position value is {@literal Position.BOTTOM_START}.
      *
      * @return the {@link Position} property from the webcomponent
      */
     public Position getPosition() {
-        return Position.fromClientName(getPositionString());
+        String position = getPositionString();
+        return Optional.ofNullable(position).map(Position::fromClientName)
+                .orElse(DEFAULT_POSITION);
     }
 
     /**
