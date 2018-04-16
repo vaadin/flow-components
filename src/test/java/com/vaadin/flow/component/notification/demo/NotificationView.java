@@ -56,8 +56,8 @@ public class NotificationView extends DemoView {
         // begin-source-example
         // source-example-heading: Notification with position
         Notification notification = new Notification(
-                "This notification is located on Top-Left",
-                3000, Position.TOP_START);
+                "This notification is located on Top-Left", 3000,
+                Position.TOP_START);
         button.addClickListener(event -> notification.open());
         // end-source-example
         button.setId("position-notification-button");
@@ -69,8 +69,7 @@ public class NotificationView extends DemoView {
         // begin-source-example
         // source-example-heading: Notification using static convenience method
         Notification notification = Notification.show(
-                "This is a notification created with static convenience method",
-                4000, Position.TOP_STRETCH);
+                "This is a notification created with static convenience method");
         // end-source-example
         notification.setId("static-notification");
         addCard("Notification using static convenience method", notification);
