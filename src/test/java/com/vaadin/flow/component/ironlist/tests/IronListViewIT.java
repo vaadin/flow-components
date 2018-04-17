@@ -44,7 +44,7 @@ public class IronListViewIT extends TabbedComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return "/";
+        return "/iron-list";
     }
 
     @Test

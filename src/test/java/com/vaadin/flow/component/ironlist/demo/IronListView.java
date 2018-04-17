@@ -43,8 +43,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
-@Route("")
-@RouteAlias("iron-list")
+@Route("iron-list")
 public class IronListView extends DemoView {
 
     private static final List<String> LIST_OF_BOOKS;
