@@ -20,9 +20,11 @@ import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
 @Route("SalesDashboard")
+@BodySize
 public class SalesDashboard extends Div {
 
     private final String YELLOW = "#F9DD51";

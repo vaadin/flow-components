@@ -6,7 +6,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.openqa.selenium.Dimension;
-import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.testbench.RetryRule;
@@ -18,7 +17,6 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     @Rule
     public RetryRule maxAttempts = new RetryRule(2);
-
 
     public static final Dimension WINDOW_SIZE_LARGE = new Dimension(1920, 1080);
     public static final Dimension WINDOW_SIZE_MEDIUM = new Dimension(768, 1024);
@@ -75,17 +73,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
     @BrowserConfiguration
     public List<DesiredCapabilities> getBrowserConfiguration() {
         return Arrays.asList(BrowserUtil.ie11(), BrowserUtil.firefox(),
-                BrowserUtil.chrome(), BrowserUtil.edge()
-        );
-    }
-
-    @Override
-    public void setDesiredCapabilities(
-            DesiredCapabilities desiredCapabilities) {
-        super.setDesiredCapabilities(desiredCapabilities);
-        if (desiredCapabilities.getBrowserName().equals(BrowserType.FIREFOX)) {
-            desiredCapabilities.setVersion("58.0");
-        }
+                BrowserUtil.chrome(), BrowserUtil.edge());
     }
 
 }
