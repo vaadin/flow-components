@@ -41,7 +41,7 @@ public class ProgressBarView extends DemoView {
         // begin-source-example
         // source-example-heading: Progress bar
         ProgressBar progressBar = new ProgressBar();
-        progressBar.setValue(3);
+        progressBar.setValue(0.345);
         // end-source-example
 
         progressBar.setId("default-progress-bar");
@@ -53,7 +53,7 @@ public class ProgressBarView extends DemoView {
         // source-example-heading: Progress bar with custom bounds
         ProgressBar progressBar = new ProgressBar(10, 100, 20);
         NativeButton progressButton = new NativeButton("Make progress", e -> {
-            int value = progressBar.getValue() + 10;
+            double value = progressBar.getValue() + 10;
             if (value > progressBar.getMax()) {
                 value = progressBar.getMin();
             }

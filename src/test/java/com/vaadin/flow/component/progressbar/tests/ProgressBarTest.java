@@ -17,14 +17,15 @@
 
 package com.vaadin.flow.component.progressbar.tests;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.progressbar.ProgressBar;
+
+import static org.hamcrest.CoreMatchers.is;
+
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Vaadin Ltd.
@@ -39,15 +40,15 @@ public class ProgressBarTest {
 
         ProgressBar progressBar = new ProgressBar();
 
-        assertThat("initial min is wrong", progressBar.getMin(), is(0));
-        assertThat("initial max is wrong", progressBar.getMax(), is(10));
-        assertThat("initial value is wrong", progressBar.getValue(), is(0));
+        assertThat("initial min is wrong", progressBar.getMin(), is(0.0));
+        assertThat("initial max is wrong", progressBar.getMax(), is(1.0));
+        assertThat("initial value is wrong", progressBar.getValue(), is(0.0));
     }
 
     @Test
     public void minMaxConstructorShouldInitializeMinAndMax() {
-        int min = 1;
-        int max = 3;
+        double min = 1.8312;
+        double max = 3.1415927;
 
         ProgressBar progressBar = new ProgressBar(min, max);
 
@@ -58,9 +59,9 @@ public class ProgressBarTest {
 
     @Test
     public void fullConstructorShouldInitializeAllFields() {
-        int min = 1;
-        int max = 3;
-        int value = 2;
+        double min = 1.8312;
+        double max = 3.1415927;
+        double value = 2.25;
 
         ProgressBar progressBar = new ProgressBar(min, max, value);
 
@@ -84,7 +85,7 @@ public class ProgressBarTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("min must be less than max");
 
-        new ProgressBar(2, 1);
+        new ProgressBar(1.01, 1.0);
 
         // Nothing to assert here
     }
@@ -94,7 +95,7 @@ public class ProgressBarTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("value must be between min and max");
 
-        new ProgressBar(1, 5, 0);
+        new ProgressBar(0.0, 1.0, -0.01);
 
         // Nothing to assert here
     }
@@ -104,16 +105,16 @@ public class ProgressBarTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("value must be between min and max");
 
-        new ProgressBar(0, 1, 2);
+        new ProgressBar(0.0, 1.0, 1.01);
 
         // Nothing to assert here
     }
 
     @Test
     public void setValueShouldUpdateValue() {
-        int min = 10;
-        int max = 100;
-        int value = 25;
+        double min = 10;
+        double max = 100;
+        double value = 25;
 
         ProgressBar progressBar = new ProgressBar(min, max);
         assertThat("initial value is wrong", progressBar.getValue(), is(min));
@@ -126,9 +127,9 @@ public class ProgressBarTest {
 
     @Test
     public void setValueShouldUpdateValueToMin() {
-        int min = 10;
-        int max = 100;
-        int value = 42;
+        double min = 10;
+        double max = 100;
+        double value = 42;
 
         ProgressBar progressBar = new ProgressBar(min, max, value);
         assertThat("initial value is wrong", progressBar.getValue(), is(value));
@@ -141,9 +142,9 @@ public class ProgressBarTest {
 
     @Test
     public void setValueShouldUpdateValueToMax() {
-        int min = 1;
-        int max = 99;
-        int value = 66;
+        double min = 1;
+        double max = 99;
+        double value = 66;
 
         ProgressBar progressBar = new ProgressBar(min, max, value);
         assertThat("initial value is wrong", progressBar.getValue(), is(value));
