@@ -59,7 +59,7 @@ public class CheckboxView extends DemoView {
         disabledCheckbox.setEnabled(false);
         // end-source-example
         disabledCheckbox.addClickListener(evt -> message.setText("Checkbox "
-                + ((Checkbox) evt.getSource()).getLabel()
+                + evt.getSource().getLabel()
                 + " was clicked, but the component is disabled and this shouldn't happen!"));
         addCard("Disabled Checkbox", disabledCheckbox, message);
         disabledCheckbox.setId("disabled-checkbox");
