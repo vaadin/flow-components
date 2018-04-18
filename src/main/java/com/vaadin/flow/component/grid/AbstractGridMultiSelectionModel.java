@@ -108,7 +108,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public Set<T> getSelectedItems() {
-        return Collections.unmodifiableSet(selected);
+        /*
+         * A new LinkedHashSet is created to avoid
+         * ConcurrentModificationExceptions when changing the selection during
+         * an iteration
+         */
+        return Collections.unmodifiableSet(new LinkedHashSet<>(selected));
     }
 
     @Override
@@ -174,19 +179,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
     public MultiSelect<Grid<T>, T> asMultiSelect() {
         return new MultiSelect<Grid<T>, T>() {
 
-            @Override
-            public void setValue(Set<T> value) {
-                Objects.requireNonNull(value);
-                Set<T> copy = value.stream().map(Objects::requireNonNull)
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
-                updateSelection(copy, new LinkedHashSet<>(getSelectedItems()));
-            }
-
-            @Override
-            public Set<T> getValue() {
-                return getSelectedItems();
-            }
-
             @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
             public Registration addValueChangeListener(
@@ -197,8 +189,16 @@ public abstract class AbstractGridMultiSelectionModel<T>
             }
 
             @Override
-            public Set<T> getEmptyValue() {
-                return Collections.emptySet();
+            public Registration addSelectionListener(
+                    MultiSelectionListener<Grid<T>, T> listener) {
+                return addMultiSelectionListener(listener);
+            }
+
+            @Override
+            public void updateSelection(Set<T> addedItems,
+                    Set<T> removedItems) {
+                AbstractGridMultiSelectionModel.this.updateSelection(addedItems,
+                        removedItems);
             }
 
             @Override
@@ -206,6 +206,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 return getComponent().getElement();
             }
 
+            @Override
+            public Set<T> getSelectedItems() {
+                return AbstractGridMultiSelectionModel.this.getSelectedItems();
+            }
         };
     }
 

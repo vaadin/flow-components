@@ -25,7 +25,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -132,7 +131,7 @@ public class GridView extends DemoView {
 
         @Override
         public String toString() {
-            return String.format("Person [name=%s, age=%s]", name, age);
+            return name;
         }
     }
 
@@ -286,7 +285,8 @@ public class GridView extends DemoView {
          *            the person to be used inside the card
          */
         public PersonCard(Person person) {
-            this.addClassName("custom-details");
+            addClassName("custom-details");
+            setId("person-card-" + person.getId());
 
             VerticalLayout layout1 = new VerticalLayout();
             layout1.add(new Label("Name: " + person.getName()));
@@ -306,7 +306,7 @@ public class GridView extends DemoView {
                     .set("padding", "10px").set("boxSizing", "border-box")
                     .set("width", "100%");
 
-            this.add(hlayout);
+            add(hlayout);
         }
     }
     // end-source-example
@@ -322,7 +322,7 @@ public class GridView extends DemoView {
         createBasicRenderers();
         createColumnTemplate();
         createColumnGroup();
-        createColumnComponentTemplateRenderer();
+        createColumnComponentRenderer();
         createItemDetails();
         createItemDetailsOpenedProgrammatically();
         createSorting();
@@ -431,19 +431,21 @@ public class GridView extends DemoView {
 
         grid.setSelectionMode(SelectionMode.MULTI);
 
-        grid.asMultiSelect().addValueChangeListener(
-                event -> messageDiv.setText(String.format(
+        grid.asMultiSelect()
+                .addSelectionListener(event -> messageDiv.setText(String.format(
                         "Selection changed from %s to %s, selection is from client: %s",
                         event.getOldValue(), event.getValue(),
                         event.isFromClient())));
 
+        // You can pre-select items
+        grid.asMultiSelect().select(people.get(0), people.get(1));
+
         NativeButton selectBtn = new NativeButton("Select first five persons");
         selectBtn.addClickListener(event -> grid.asMultiSelect()
-                .setValue(new LinkedHashSet<>(people.subList(0, 5))));
-        NativeButton deselectBtn = new NativeButton(
-                "Deselect first five persons");
-        deselectBtn.addClickListener(
-                event -> grid.asMultiSelect().setValue(new LinkedHashSet<>()));
+                .select(people.subList(0, 5).toArray(new Person[5])));
+        NativeButton deselectBtn = new NativeButton("Deselect all");
+        deselectBtn
+                .addClickListener(event -> grid.asMultiSelect().deselectAll());
         NativeButton selectAllBtn = new NativeButton("Select all");
         selectAllBtn.addClickListener(
                 event -> ((GridMultiSelectionModel<Person>) grid
@@ -519,7 +521,7 @@ public class GridView extends DemoView {
                 grid);
     }
 
-    private void createColumnComponentTemplateRenderer() {
+    private void createColumnComponentRenderer() {
         // begin-source-example
         // source-example-heading: Grid with columns using component renderer
         Grid<Person> grid = new Grid<>();
@@ -924,11 +926,11 @@ public class GridView extends DemoView {
 
         grid.setSelectionMode(SelectionMode.SINGLE);
 
-        IntStream.range(baseYear, baseYear+numberOfYears).forEach(year ->{
+        IntStream.range(baseYear, baseYear + numberOfYears).forEach(year -> {
             BigDecimal firstHalfSum = list.fetch(new Query<>())
                     .collect(Collectors.toList()).stream()
-                    .map(
-                    budgetHistory -> budgetHistory.getFirstHalfOfYear(year))
+                    .map(budgetHistory -> budgetHistory
+                            .getFirstHalfOfYear(year))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             BigDecimal secondHalfSum = list.fetch(new Query<>())
@@ -945,7 +947,7 @@ public class GridView extends DemoView {
                                     dollarFormat))
                     .setHeader("H1")
                     .setFooter(dollarFormat.format(firstHalfSum))
-             .setComparator((p1, p2) -> p1.getFirstHalfOfYear(year)
+                    .setComparator((p1, p2) -> p1.getFirstHalfOfYear(year)
                             .compareTo(p2.getFirstHalfOfYear(year)));
 
             Column<?> secondHalfColumn = grid

@@ -152,7 +152,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         clickElementWithJs(selectBtn);
         Assert.assertEquals(
-                getSelectionMessage(Collections.emptySet(),
+                getSelectionMessage(GridView.items.subList(0, 2),
                         GridView.items.subList(0, 5), false),
                 messageDiv.getText());
         assertRowsSelected(grid, 0, 5);
@@ -171,8 +171,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
         checkbox.click();
         Assert.assertTrue(isRowSelected(grid, 5));
         clickElementWithJs(selectBtn);
-        assertRowsSelected(grid, 0, 5);
-        Assert.assertFalse(isRowSelected(grid, 5));
+        assertRowsSelected(grid, 0, 6);
+        Assert.assertFalse(isRowSelected(grid, 6));
     }
 
     @Test
@@ -595,10 +595,10 @@ public class GridViewIT extends TabbedComponentDemoTest {
         waitUntil(driver -> grid.getAllColumns().size() == 11);
 
         Assert.assertEquals(
-                "The first header should be \"Company\" in the Grid",
-                "Company", grid.getHeaderCell(0).getInnerHTML());
+                "The first header should be \"Company\" in the Grid", "Company",
+                grid.getHeaderCell(0).getInnerHTML());
     }
-    
+
     @Test
     public void disabledGrid_itemsAreDisabled() {
         openTabAndCheckForErrors("");
@@ -630,7 +630,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 "return arguments[0].firstElementChild.assignedNodes()[0].firstElementChild;",
                 cell);
     }
-
 
     private int getCellsOffsetFromTheHeaders(WebElement grid,
             List<WebElement> cells) {
@@ -725,14 +724,30 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
     private void assertComponentRendereredDetails(WebElement grid, int rowIndex,
             String personName) {
+        try {
+            /*
+             * Wait a bit for the changes to propagate from the server to the
+             * client. Without this wait, some elements can be stale when this
+             * method is executed, causing instability on the tests.
+             */
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         waitUntil(driver -> {
             List<WebElement> elements = grid
                     .findElements(By.className("custom-details"));
-            return elements.size() > rowIndex;
+            return elements.stream()
+                    .filter(el -> el.getAttribute("id")
+                            .equals("person-card-" + (rowIndex + 1)))
+                    .findAny().isPresent();
         });
-        List<WebElement> elements = grid
-                .findElements(By.className("custom-details"));
-        WebElement element = elements.get(rowIndex);
+        WebElement element = grid.findElements(By.className("custom-details"))
+                .stream()
+                .filter(el -> el.getAttribute("id")
+                        .equals("person-card-" + (rowIndex + 1)))
+                .findFirst().get();
 
         element = element.findElement(By.tagName("vaadin-horizontal-layout"));
         Assert.assertNotNull(element);
