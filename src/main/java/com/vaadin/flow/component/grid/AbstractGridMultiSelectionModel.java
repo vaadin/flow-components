@@ -290,6 +290,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
             SelectionEvent<Grid<T>, T> event);
 
     private void clientSelectAll() {
+        if (!isSelectAllCheckboxVisible()) {
+            // ignore event if the checkBox was meant to be hidden
+            return;
+        }
         doUpdateSelection(
                 getGrid().getDataCommunicator().getDataProvider()
                         .fetch(new Query<>()).collect(Collectors.toSet()),
@@ -298,6 +302,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     private void clientDeselectAll() {
+        if (!isSelectAllCheckboxVisible()) {
+            // ignore event if the checkBox was meant to be hidden
+            return;
+        }
         doUpdateSelection(Collections.emptySet(), getSelectedItems(), true);
         selectionColumn.setSelectAllCheckboxState(false);
     }

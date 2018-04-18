@@ -1044,6 +1044,17 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
         deselectAll();
         getDataCommunicator().setDataProvider(dataProvider, null);
+
+        /*
+         * The visibility of the selectAll checkbox depends on whether the
+         * DataProvider is inMemory or not. When changing the DataProvider, its
+         * visibility needs to be revalidated.
+         */
+        if (getSelectionModel() instanceof GridMultiSelectionModel) {
+            GridMultiSelectionModel<T> model = (GridMultiSelectionModel<T>) getSelectionModel();
+            model.setSelectAllCheckboxVisibility(
+                    model.getSelectAllCheckboxVisibility());
+        }
     }
 
     /**
