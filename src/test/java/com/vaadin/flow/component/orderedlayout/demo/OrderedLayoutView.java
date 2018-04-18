@@ -18,6 +18,7 @@ package com.vaadin.flow.component.orderedlayout.demo;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -26,8 +27,8 @@ import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 
 /**
- * View for the orderred layouts {@link HorizontalLayout} and {@link
- * VerticalLayout}.
+ * View for the orderred layouts {@link HorizontalLayout} and
+ * {@link VerticalLayout}.
  *
  * @author Vaadin Ltd
  */
@@ -42,6 +43,7 @@ public class OrderedLayoutView extends AbstractLayout {
         createHorizontalLayoutWithIndividualAlignments();
         createHorizontalLayoutWithExpandRatios();
         createHorizontalLayoutWithCenterComponent();
+        createHorizontalLayoutWithBoxSizing();
 
         createDefaultVerticalLayout();
         createVerticalLayoutWithJustifyContent();
@@ -49,6 +51,7 @@ public class OrderedLayoutView extends AbstractLayout {
         createVerticalLayoutWithIndividualAlignments();
         createVerticalLayoutWithExpandRatios();
         createVerticalLayoutWithCenterComponent();
+        createVerticalLayoutWithBoxSizing();
     }
 
     /* HorizontalLayout demos */
@@ -69,8 +72,8 @@ public class OrderedLayoutView extends AbstractLayout {
 
         layout.setId("default-layout");
 
-        Div themeSettings = new Div(
-                new Label("Current theme supports 'padding', 'margin' and 'spacing: "),
+        Div themeSettings = new Div(new Label(
+                "Current theme supports 'padding', 'margin' and 'spacing: "),
                 createToggleThemeButton(layout, "padding", layout::setPadding),
                 createToggleThemeButton(layout, "margin", layout::setMargin),
                 createToggleThemeButton(layout, "spacing", layout::setSpacing));
@@ -245,6 +248,33 @@ public class OrderedLayoutView extends AbstractLayout {
                 "HorizontalLayout with component in the center", layout);
     }
 
+    private void createHorizontalLayoutWithBoxSizing() {
+        // begin-source-example
+        // source-example-heading: HorizontalLayout with box-sizing settings
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setWidth("300px");
+        layout.getStyle().set("border", "1px solid #9E9E9E");
+        layout.setPadding(true);
+
+        /*
+         * Makes the component consider border and paddings when computing the
+         * size
+         */
+        layout.setBoxSizing(BoxSizing.BORDER_BOX);
+
+        Div component1 = createComponent(1, "#78909C");
+        component1.setWidth("50%");
+        Div component2 = createComponent(2, "#546E7A");
+        component2.setWidth("50%");
+        layout.add(component1, component2);
+        // end-source-example
+
+        layout.setId("horizontal-layout-with-box-sizing");
+
+        addCard("HorizontalLayout", "HorizontalLayout with box-sizing settings",
+                layout, createBoxSizingButtons(layout, layout.getId().get()));
+    }
+
     /* VerticalLayout demos */
 
     private void createDefaultVerticalLayout() {
@@ -263,8 +293,8 @@ public class OrderedLayoutView extends AbstractLayout {
 
         layout.setId("default-layout");
 
-        Div themeSettings = new Div(
-                new Label("Current theme supports 'padding', 'margin' and 'spacing: "),
+        Div themeSettings = new Div(new Label(
+                "Current theme supports 'padding', 'margin' and 'spacing: "),
                 createToggleThemeButton(layout, "padding", layout::setPadding),
                 createToggleThemeButton(layout, "margin", layout::setMargin),
                 createToggleThemeButton(layout, "spacing", layout::setSpacing));
@@ -290,8 +320,8 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.add(component1, component2, component3);
         // end-source-example
 
-        component2.getElement()
-                .setProperty("innerHTML", "Component 2<br>With long text");
+        component2.getElement().setProperty("innerHTML",
+                "Component 2<br>With long text");
         component3.getElement().getStyle().set("fontSize", "9px");
 
         Div buttons = new Div();
@@ -439,11 +469,37 @@ public class OrderedLayoutView extends AbstractLayout {
                 layout);
     }
 
+    private void createVerticalLayoutWithBoxSizing() {
+        // begin-source-example
+        // source-example-heading: VerticalLayout with box-sizing settings
+        VerticalLayout layout = new VerticalLayout();
+        layout.setHeight("200px");
+        layout.getStyle().set("border", "1px solid #9E9E9E");
+        layout.setPadding(true);
+
+        /*
+         * Makes the component consider border and paddings when computing the
+         * size
+         */
+        layout.setBoxSizing(BoxSizing.BORDER_BOX);
+
+        Div component1 = createComponent(1, "#78909C");
+        component1.setHeight("50%");
+        Div component2 = createComponent(2, "#546E7A");
+        component2.setHeight("50%");
+        layout.add(component1, component2);
+        // end-source-example
+
+        layout.setId("vertical-layout-with-box-sizing");
+
+        addCard("VerticalLayout", "VerticalLayout with box-sizing settings",
+                layout, createBoxSizingButtons(layout, layout.getId().get()));
+    }
+
     /* Override setParameter to redirect to horizontal tab */
     @Override
     public void setParameter(BeforeEvent event,
-            @OptionalParameter
-                    String parameter) {
+            @OptionalParameter String parameter) {
         super.setParameter(event,
                 parameter == null ? "horizontallayout" : parameter);
     }

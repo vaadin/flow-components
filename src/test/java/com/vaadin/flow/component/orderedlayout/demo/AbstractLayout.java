@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
@@ -35,7 +36,7 @@ import com.vaadin.flow.dom.impl.ThemeListImpl;
  */
 public abstract class AbstractLayout extends DemoView {
 
-    protected Component createComponent(int index, String color) {
+    protected Div createComponent(int index, String color) {
         Div component = new Div();
         component.setText("Component " + index);
         component.getStyle().set("backgroundColor", color).set("color", "white")
@@ -60,21 +61,22 @@ public abstract class AbstractLayout extends DemoView {
     public static NativeButton createToggleThemeButton(ThemableLayout layout,
             String themeName, Consumer<Boolean> toggleAction) {
         NativeButton toggleButton = new NativeButton(
-                String.format("Toggle %s", themeName), event -> toggleAction
-                .accept(hasNoAttributeValue(layout.getElement(),
-                        ThemeListImpl.THEME_ATTRIBUTE_NAME, themeName)));
+                String.format("Toggle %s", themeName),
+                event -> toggleAction.accept(hasNoAttributeValue(
+                        layout.getElement(), ThemeListImpl.THEME_ATTRIBUTE_NAME,
+                        themeName)));
         toggleButton.setId(String.format("toggle-%s", themeName));
         return toggleButton;
     }
 
-    protected static boolean hasNoAttributeValue(Element element, String attribute,
-            String attributeValue) {
+    protected static boolean hasNoAttributeValue(Element element,
+            String attribute, String attributeValue) {
         return Optional.ofNullable(element.getAttribute(attribute))
                 .map(value -> !value.contains(attributeValue)).orElse(true);
     }
 
-    protected Component createAlignmentButton(HorizontalLayout layout, String id,
-            FlexComponent.Alignment alignment) {
+    protected Component createAlignmentButton(HorizontalLayout layout,
+            String id, FlexComponent.Alignment alignment) {
         NativeButton button = new NativeButton(alignment.name());
         button.setId(id);
         button.addClickListener(event -> layout
@@ -89,5 +91,20 @@ public abstract class AbstractLayout extends DemoView {
         button.addClickListener(event -> layout
                 .setDefaultHorizontalComponentAlignment(alignment));
         return button;
+    }
+
+    protected Component createBoxSizingButtons(ThemableLayout layout,
+            String idPrefix) {
+        NativeButton contentBox = new NativeButton("Use content-box");
+        contentBox.setId(idPrefix + "-content-box");
+        contentBox.addClickListener(
+                event -> layout.setBoxSizing(BoxSizing.CONTENT_BOX));
+
+        NativeButton borderBox = new NativeButton("Use border-box");
+        borderBox.setId(idPrefix + "-border-box");
+        borderBox.addClickListener(
+                event -> layout.setBoxSizing(BoxSizing.BORDER_BOX));
+
+        return new Div(contentBox, borderBox);
     }
 }

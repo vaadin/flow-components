@@ -68,29 +68,28 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
         WebElement button = layout
                 .findElement(By.id("justify-content-start-button"));
-        scrollIntoViewAndClick(button);
-        waitUntil(driver -> "flex-start"
-                .equals(hLayout.getCssValue("justify-content")));
+        button.click();
+        Assert.assertEquals("flex-start",
+                hLayout.getCssValue("justify-content"));
 
         button = layout.findElement(By.id("justify-content-end-button"));
-        scrollIntoViewAndClick(button);
-        waitUntil(driver -> "flex-end"
-                .equals(hLayout.getCssValue("justify-content")));
+        button.click();
+        Assert.assertEquals("flex-end", hLayout.getCssValue("justify-content"));
 
         button = layout.findElement(By.id("justify-content-between-button"));
-        scrollIntoViewAndClick(button);
-        waitUntil(driver -> "space-between"
-                .equals(hLayout.getCssValue("justify-content")));
+        button.click();
+        Assert.assertEquals("space-between",
+                hLayout.getCssValue("justify-content"));
 
         button = layout.findElement(By.id("justify-content-around-button"));
-        scrollIntoViewAndClick(button);
-        waitUntil(driver -> "space-around"
-                .equals(hLayout.getCssValue("justify-content")));
+        button.click();
+        Assert.assertEquals("space-around",
+                hLayout.getCssValue("justify-content"));
 
         button = layout.findElement(By.id("justify-content-evenly-button"));
-        scrollIntoViewAndClick(button);
-        waitUntil(driver -> "space-evenly"
-                .equals(hLayout.getCssValue("justify-content")));
+        button.click();
+        Assert.assertEquals("space-evenly",
+                hLayout.getCssValue("justify-content"));
     }
 
     @Test
@@ -101,17 +100,17 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
         Assert.assertEquals("center", vlayout.getCssValue("align-items"));
 
         WebElement button = layout.findElement(By.id("align-end-button"));
-        scrollIntoViewAndClick(button);
+        button.click();
         waitUntil(driver -> "flex-end"
                 .equals(vlayout.getCssValue("align-items")));
 
         button = layout.findElement(By.id("align-center-button"));
-        scrollIntoViewAndClick(button);
+        button.click();
         waitUntil(
                 driver -> "center".equals(vlayout.getCssValue("align-items")));
 
         button = layout.findElement(By.id("align-stretch-button"));
-        scrollIntoViewAndClick(button);
+        button.click();
         waitUntil(
                 driver -> "stretch".equals(vlayout.getCssValue("align-items")));
 
@@ -173,6 +172,18 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
                 hlayout.getCssValue("justify-content"));
 
         Assert.assertTrue(isElementPresent(By.id("center")));
+    }
+
+    @Test
+    public void boxSizing() {
+        WebElement hlayout = layout
+                .findElement(By.id("horizontal-layout-with-box-sizing"));
+        Assert.assertEquals("border-box", hlayout.getCssValue("box-sizing"));
+
+        WebElement button = layout.findElement(
+                By.id("horizontal-layout-with-box-sizing-content-box"));
+        button.click();
+        Assert.assertEquals("content-box", hlayout.getCssValue("box-sizing"));
     }
 
     private void assertBasicFlexPropertiesAreSet(WebElement vlayout) {

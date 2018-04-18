@@ -15,24 +15,29 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
-import com.vaadin.flow.component.HasElement;
-import com.vaadin.flow.dom.ThemeList;
-
 import java.util.Set;
 
+import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.dom.ThemeList;
+
 /**
- * Common logic for {@link VerticalLayout} and {@link HorizontalLayout} related to dynamic theme adjustment.
+ * Common logic for {@link VerticalLayout} and {@link HorizontalLayout} related
+ * to dynamic theme adjustment.
  * <p>
- * <b>Note:</b> Dynamic adjustment have effect only if the corresponding component theme supports it.
+ * <b>Note:</b> Dynamic adjustment have effect only if the corresponding
+ * component theme supports it.
  *
  * @author Vaadin Ltd.
  */
 public interface ThemableLayout extends HasElement {
     /**
-     * Toggles {@code margin} theme setting for the element.
-     * If a theme supports this attribute, it will apply or remove margin to the element.
+     * Toggles {@code margin} theme setting for the element. If a theme supports
+     * this attribute, it will apply or remove margin to the element.
      *
-     * @param margin adds {@code margin} theme setting if {@code true} or removes it if {@code false}
+     * @param margin
+     *            adds {@code margin} theme setting if {@code true} or removes
+     *            it if {@code false}
      */
     default void setMargin(boolean margin) {
         getThemeList().set("margin", margin);
@@ -48,10 +53,12 @@ public interface ThemableLayout extends HasElement {
     }
 
     /**
-     * Toggles {@code padding} theme setting for the element.
-     * If a theme supports this attribute, it will apply or remove padding to the element.
+     * Toggles {@code padding} theme setting for the element. If a theme
+     * supports this attribute, it will apply or remove padding to the element.
      *
-     * @param padding adds {@code padding} theme setting if {@code true} or removes it if {@code false}
+     * @param padding
+     *            adds {@code padding} theme setting if {@code true} or removes
+     *            it if {@code false}
      */
     default void setPadding(boolean padding) {
         getThemeList().set("padding", padding);
@@ -67,20 +74,23 @@ public interface ThemableLayout extends HasElement {
     }
 
     /**
-     * Toggles {@code spacing} theme setting for the element.
-     * If a theme supports this attribute, it will apply or remove spacing to the element.
+     * Toggles {@code spacing} theme setting for the element. If a theme
+     * supports this attribute, it will apply or remove spacing to the element.
      * <p>
-     * This method adds medium spacing to the component theme, to set other options, use {@link ThemableLayout#getThemeList()}.
-     * List of options possible:
+     * This method adds medium spacing to the component theme, to set other
+     * options, use {@link ThemableLayout#getThemeList()}. List of options
+     * possible:
      * <ul>
-     *     <li> spacing-xs
-     *     <li> spacing-s
-     *     <li> spacing
-     *     <li> spacing-l
-     *     <li> spacing-xl
+     * <li>spacing-xs
+     * <li>spacing-s
+     * <li>spacing
+     * <li>spacing-l
+     * <li>spacing-xl
      * </ul>
      *
-     * @param spacing adds {@code spacing} theme setting if {@code true} or removes it if {@code false}
+     * @param spacing
+     *            adds {@code spacing} theme setting if {@code true} or removes
+     *            it if {@code false}
      */
     default void setSpacing(boolean spacing) {
         getThemeList().set("spacing", spacing);
@@ -109,5 +119,52 @@ public interface ThemableLayout extends HasElement {
      */
     default ThemeList getThemeList() {
         return getElement().getThemeList();
+    }
+
+    /**
+     * Sets the {@code box-sizing} CSS property of the layout.
+     * 
+     * @param boxSizing
+     *            the box-sizing of the layout. <code>null</code> is interpreted
+     *            as {@link BoxSizing#UNDEFINED}
+     * @see BoxSizing
+     */
+    default void setBoxSizing(BoxSizing boxSizing) {
+        Style style = getElement().getStyle();
+        if (boxSizing == null || boxSizing == BoxSizing.UNDEFINED) {
+            style.remove("boxSizing");
+        } else {
+            switch (boxSizing) {
+            case CONTENT_BOX:
+                style.set("boxSizing", "content-box");
+                break;
+            case BORDER_BOX:
+                style.set("boxSizing", "border-box");
+                break;
+            }
+        }
+    }
+
+    /**
+     * Gets the box-sizing defined for the layout, or
+     * {@link BoxSizing#UNDEFINED} if none was defined on the server-side.
+     * 
+     * @return the box-sizing, never <code>null</code>
+     * @see BoxSizing
+     */
+    default BoxSizing getBoxSizing() {
+        Style style = getElement().getStyle();
+        String boxSizing = style.get("boxSizing");
+        if (boxSizing == null) {
+            return BoxSizing.UNDEFINED;
+        }
+        switch (boxSizing) {
+        case "content-box":
+            return BoxSizing.CONTENT_BOX;
+        case "border-box":
+            return BoxSizing.BORDER_BOX;
+        default:
+            return BoxSizing.UNDEFINED;
+        }
     }
 }

@@ -69,29 +69,28 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
 
         WebElement button = layout
                 .findElement(By.id("justify-content-start-button"));
-        scrollIntoViewAndClick(button);
-        waitUntil(driver -> "flex-start"
-                .equals(vlayout.getCssValue("justify-content")));
+        button.click();
+        Assert.assertEquals("flex-start",
+                vlayout.getCssValue("justify-content"));
 
         button = layout.findElement(By.id("justify-content-end-button"));
-        scrollIntoViewAndClick(button);
-        waitUntil(driver -> "flex-end"
-                .equals(vlayout.getCssValue("justify-content")));
+        button.click();
+        Assert.assertEquals("flex-end", vlayout.getCssValue("justify-content"));
 
         button = layout.findElement(By.id("justify-content-between-button"));
-        scrollIntoViewAndClick(button);
-        waitUntil(driver -> "space-between"
-                .equals(vlayout.getCssValue("justify-content")));
+        button.click();
+        Assert.assertEquals("space-between",
+                vlayout.getCssValue("justify-content"));
 
         button = layout.findElement(By.id("justify-content-around-button"));
-        scrollIntoViewAndClick(button);
-        waitUntil(driver -> "space-around"
-                .equals(vlayout.getCssValue("justify-content")));
+        button.click();
+        Assert.assertEquals("space-around",
+                vlayout.getCssValue("justify-content"));
 
         button = layout.findElement(By.id("justify-content-evenly-button"));
-        scrollIntoViewAndClick(button);
-        waitUntil(driver -> "space-evenly"
-                .equals(vlayout.getCssValue("justify-content")));
+        button.click();
+        Assert.assertEquals("space-evenly",
+                vlayout.getCssValue("justify-content"));
     }
 
     @Test
@@ -102,17 +101,17 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         Assert.assertEquals("stretch", vlayout.getCssValue("align-items"));
 
         WebElement button = layout.findElement(By.id("align-end-button"));
-        scrollIntoViewAndClick(button);
+        button.click();
         waitUntil(driver -> "flex-end"
                 .equals(vlayout.getCssValue("align-items")));
 
         button = layout.findElement(By.id("align-center-button"));
-        scrollIntoViewAndClick(button);
+        button.click();
         waitUntil(
                 driver -> "center".equals(vlayout.getCssValue("align-items")));
 
         button = layout.findElement(By.id("align-stretch-button"));
-        scrollIntoViewAndClick(button);
+        button.click();
         waitUntil(
                 driver -> "stretch".equals(vlayout.getCssValue("align-items")));
 
@@ -169,6 +168,18 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
                 vlayout.getCssValue("justify-content"));
         WebElement component = layout.findElement(By.id("center"));
         Assert.assertEquals("center", component.getCssValue("align-self"));
+    }
+
+    @Test
+    public void boxSizing() {
+        WebElement vlayout = layout
+                .findElement(By.id("vertical-layout-with-box-sizing"));
+        Assert.assertEquals("border-box", vlayout.getCssValue("box-sizing"));
+
+        WebElement button = layout.findElement(
+                By.id("vertical-layout-with-box-sizing-content-box"));
+        button.click();
+        Assert.assertEquals("content-box", vlayout.getCssValue("box-sizing"));
     }
 
     private void assertBasicFlexPropertiesAreSet(WebElement vlayout) {
