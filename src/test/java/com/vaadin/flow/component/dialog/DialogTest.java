@@ -40,6 +40,8 @@ public class DialogTest {
             Label label3 = new Label("Label 3");
 
             Dialog dialog = new Dialog(label1, label2);
+            dialog.setWidth("200px");
+            dialog.setHeight("100px");
 
             List<Component> children = dialog.getChildren()
                     .collect(Collectors.toList());
@@ -65,6 +67,9 @@ public class DialogTest {
             dialog.removeAll();
             children = dialog.getChildren().collect(Collectors.toList());
             Assert.assertEquals(0, children.size());
+
+            Assert.assertEquals(dialog.getWidth(), "200px");
+            Assert.assertEquals(dialog.getHeight(), "100px");
         } finally {
             UI.setCurrent(null);
         }

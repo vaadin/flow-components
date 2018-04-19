@@ -26,9 +26,11 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -38,7 +40,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @HtmlImport("flow-component-renderer.html")
 public class Dialog extends GeneratedVaadinDialog<Dialog>
-        implements HasComponents {
+        implements HasComponents, HasSize {
 
     private Element template;
     private Element container;
@@ -48,10 +50,10 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * Creates an empty dialog.
      */
     public Dialog() {
-        template = new Element("template", false);
+        template = new Element("template");
         getElement().appendChild(template);
 
-        container = new Element("div", false);
+        container = new Element("div");
         getElement().appendChild(container);
 
         // Attach <flow-component-renderer>
@@ -79,6 +81,26 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         public DialogCloseActionEvent(Dialog source, boolean fromClient) {
             super(source, fromClient);
         }
+    }
+
+    @Override
+    public void setWidth(String value) {
+        container.getStyle().set(ElementConstants.STYLE_WIDTH, value);
+    }
+
+    @Override
+    public void setHeight(String value) {
+        container.getStyle().set(ElementConstants.STYLE_HEIGHT, value);
+    }
+
+    @Override
+    public String getWidth() {
+        return container.getStyle().get(ElementConstants.STYLE_WIDTH);
+    }
+
+    @Override
+    public String getHeight() {
+        return container.getStyle().get(ElementConstants.STYLE_HEIGHT);
     }
 
     /**

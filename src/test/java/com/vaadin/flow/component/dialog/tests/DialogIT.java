@@ -35,7 +35,10 @@ public class DialogIT extends ComponentDemoTest {
     @Test
     public void openAndCloseBasicDialog_labelRendered() {
         findElement(By.id("basic-dialog-button")).click();
-        getOverlayContent().findElement(By.tagName("label"));
+
+        WebElement container = getOverlayContent().findElement(By.tagName("div"));
+        Assert.assertEquals("400px", container.getCssValue("width"));
+        Assert.assertEquals("150px", container.getCssValue("height"));
 
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).perform();
         verifyDialogClosed();

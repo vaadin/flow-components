@@ -42,15 +42,18 @@ public class DialogView extends DemoView {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
 
         // begin-source-example
-        // source-example-heading: Basic dialog
+        // source-example-heading: Sized dialog
         Dialog dialog = new Dialog();
         dialog.add(new Label("Close me with the esc-key or an outside click"));
+
+        dialog.setWidth("400px");
+        dialog.setHeight("150px");
 
         button.addClickListener(event -> dialog.open());
         // end-source-example
 
         button.setId("basic-dialog-button");
-        addCard("Basic dialog", button);
+        addCard("Sized dialog", button);
     }
 
     private void addConfirmationDialog() {
