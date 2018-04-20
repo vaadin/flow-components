@@ -155,7 +155,10 @@ public class Button extends GeneratedVaadinButton<Button>
      */
     @Override
     public void setText(String text) {
-        getElement().removeChild(getTextNodes());
+        Element[] nonTextNodes = getNonTextNodes();
+        removeAll();
+
+        getElement().appendChild(nonTextNodes);
 
         if (text == null || text.isEmpty()) {
             if (span != null) {
@@ -364,6 +367,12 @@ public class Button extends GeneratedVaadinButton<Button>
         } else {
             getElement().appendChild(span);
         }
+    }
+
+    private Element[] getNonTextNodes() {
+        return getElement().getChildren()
+                .filter(element -> !element.isTextNode())
+                .toArray(Element[]::new);
     }
 
     private Element[] getTextNodes() {
