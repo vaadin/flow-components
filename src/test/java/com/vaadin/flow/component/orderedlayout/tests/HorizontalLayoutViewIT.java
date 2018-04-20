@@ -168,7 +168,7 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
         WebElement hlayout = layout.findElement(By.id("layout-with-center"));
         assertBasicFlexPropertiesAreSet(hlayout);
 
-        Assert.assertEquals("space-around",
+        Assert.assertEquals("center",
                 hlayout.getCssValue("justify-content"));
 
         Assert.assertTrue(isElementPresent(By.id("center")));

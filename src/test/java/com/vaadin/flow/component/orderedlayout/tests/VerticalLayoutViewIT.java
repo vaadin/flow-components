@@ -164,7 +164,7 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         WebElement vlayout = layout.findElement(By.id("layout-with-center"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
-        Assert.assertEquals("space-around",
+        Assert.assertEquals("center",
                 vlayout.getCssValue("justify-content"));
         WebElement component = layout.findElement(By.id("center"));
         Assert.assertEquals("center", component.getCssValue("align-self"));

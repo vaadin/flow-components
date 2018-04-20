@@ -134,13 +134,77 @@ public class HorizontalLayout extends Component
      * <p>
      * The default alignment is {@link Alignment#STRETCH}.
      * <p>
-     * It's the same as the {@link #getAlignItems()} method.
-     *
-     * @see #getAlignItems()
+     * This is the same as the {@link #getAlignItems()} method.
      *
      * @return the general alignment used by the layout, never <code>null</code>
      */
     public Alignment getDefaultVerticalComponentAlignment() {
         return getAlignItems();
+    }
+
+    /**
+     * This is the same as
+     * {@link #setDefaultVerticalComponentAlignment(Alignment)}.
+     *
+     * @param alignment
+     *            the alignment to apply to the components. Setting
+     *            <code>null</code> will reset the alignment to its default
+     * @see #setDefaultVerticalComponentAlignment(Alignment)
+     */
+    @Override
+    public void setAlignItems(Alignment alignment) {
+        // this method is overridden to make javadocs point to the correct
+        // method to be used, and since FlexComponent has different default
+        // value.
+        FlexComponent.super.setAlignItems(alignment);
+    }
+
+    /**
+     * This is the same as {@link #getDefaultVerticalComponentAlignment()}.
+     *
+     * @return the general alignment used by the layout, never <code>null</code>
+     */
+    @Override
+    public Alignment getAlignItems() {
+        // this method is overridden to make javadocs point to the correct
+        // method to be used, and since FlexComponent has different default
+        // value.
+        return FlexComponent.super.getAlignItems();
+    }
+
+    /**
+     * This is the same as
+     * {@link #setVerticalComponentAlignment(Alignment, Component...)}.
+     *
+     * @param alignment
+     *            the individual alignment for the children components. Setting
+     *            <code>null</code> will reset the alignment to its default
+     * @param elementContainers
+     *            The element containers (components) to which the individual
+     *            alignment should be set
+     * @see #setVerticalComponentAlignment(Alignment, Component...)
+     */
+    @Override
+    public void setAlignSelf(Alignment alignment,
+                             HasElement... elementContainers) {
+        // this method is overridden to have javadocs that point to the method
+        // that should be used and has better javadocs.
+        FlexComponent.super.setAlignSelf(alignment, elementContainers);
+    }
+
+    /**
+     * This is the same as {@link #getVerticalComponentAlignment(Component)}.
+     *
+     * @param container
+     *            The element container (component) which individual layout
+     *            should be read
+     * @return the alignment of the container, never <code>null</code>
+     * @see #getVerticalComponentAlignment(Component)
+     */
+    @Override
+    public Alignment getAlignSelf(HasElement container) {
+        // this method is overridden to have javadocs that point to the method
+        // that should be used and has better javadocs.
+        return FlexComponent.super.getAlignSelf(container);
     }
 }

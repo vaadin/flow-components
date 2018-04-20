@@ -146,7 +146,7 @@ public interface FlexComponent<C extends Component>
     /**
      * Sets the default alignment to be used by all components without
      * individual alignments inside the layout. Individual components can be
-     * aligned by using the {@link #setAlignSelf(Alignment, Component...)}
+     * aligned by using the {@link #setAlignSelf(Alignment, HasElement...)}
      * method.
      * <p>
      * It effectively sets the {@code "alignItems"} style value.

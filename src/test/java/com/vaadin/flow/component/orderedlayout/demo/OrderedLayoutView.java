@@ -237,7 +237,7 @@ public class OrderedLayoutView extends AbstractLayout {
 
         Component component = createComponent(1, "#78909C");
         layout.add(component);
-        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.AROUND);
+        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
         // end-source-example
 
@@ -307,7 +307,6 @@ public class OrderedLayoutView extends AbstractLayout {
         // begin-source-example
         // source-example-heading: VerticalLayout with justify content
         VerticalLayout layout = new VerticalLayout();
-        layout.setHeight("150px");
         layout.getStyle().set("border", "1px solid #9E9E9E");
 
         // the default is JustifyContentMode.START
@@ -347,7 +346,6 @@ public class OrderedLayoutView extends AbstractLayout {
         // begin-source-example
         // source-example-heading: VerticalLayout with general alignment
         VerticalLayout layout = new VerticalLayout();
-        layout.setHeight("150px");
         layout.getStyle().set("border", "1px solid #9E9E9E");
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 
@@ -385,7 +383,6 @@ public class OrderedLayoutView extends AbstractLayout {
         // begin-source-example
         // source-example-heading: VerticalLayout with individual alignments
         VerticalLayout layout = new VerticalLayout();
-        layout.setHeight("150px");
         layout.getStyle().set("border", "1px solid #9E9E9E");
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 
@@ -458,7 +455,7 @@ public class OrderedLayoutView extends AbstractLayout {
         layout.add(component);
         layout.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER,
                 component);
-        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.AROUND);
+        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
         // end-source-example
 
