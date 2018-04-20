@@ -20,6 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
@@ -63,6 +64,7 @@ public class RadioButtonGroupView extends DemoView {
         addDisabled();
         addDisabledItems();
         addComponentAfterItems();
+        addReadOnlyGroup();
         insertComponentsBetweenItems();
         prependAndInsertComponents();
         dynamicComponents();
@@ -161,6 +163,28 @@ public class RadioButtonGroupView extends DemoView {
         group.setId("button-group-disabled");
 
         addCard("Disabled radio button group", group);
+    }
+
+    private void addReadOnlyGroup() {
+        // begin-source-example
+        // source-example-heading: Read-only radio button group
+        Div valueInfo = new Div();
+
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("foo", "bar", "baz");
+        group.setReadOnly(true);
+
+        NativeButton button = new NativeButton("Switch read-only state",
+                event -> group.setReadOnly(!group.isReadOnly()));
+        group.addValueChangeListener(
+                event -> valueInfo.setText(group.getValue()));
+        // end-source-example
+
+        group.setId("button-group-read-only");
+        valueInfo.setId("selected-value-info");
+        button.setId("switch-read-only");
+
+        addCard("Read-only radio button group", group, button, valueInfo);
     }
 
     private void addDisabledItems() {

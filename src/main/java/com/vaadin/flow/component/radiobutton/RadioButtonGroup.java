@@ -52,6 +52,8 @@ public class RadioButtonGroup<T>
 
     private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>();
 
+    private boolean isReadOnly;
+
     public RadioButtonGroup() {
         getElement().synchronizeProperty(VALUE, "value-changed");
     }
@@ -143,8 +145,25 @@ public class RadioButtonGroup<T>
 
     @Override
     public void onEnabledStateChanged(boolean enabled) {
-        setDisabled(!enabled);
+        if (isReadOnly()) {
+            setDisabled(true);
+        } else {
+            setDisabled(!enabled);
+        }
         refreshButtons();
+    }
+
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        isReadOnly = readOnly;
+        if (isEnabled()) {
+            setDisabled(readOnly);
+        }
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return isReadOnly;
     }
 
     private void refresh() {
