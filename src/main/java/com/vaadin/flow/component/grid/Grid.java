@@ -241,7 +241,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         private SerializableComparator<T> comparator;
 
-        private Element headerTemplate;
         private String rawHeaderTemplate;
 
         private Registration columnDataGeneratorRegistration;
@@ -528,32 +527,64 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
             if (headerTemplate != null) {
                 headerTemplate.setProperty("innerHTML",
-                        sortable ? addGridSorter() : rawHeaderTemplate);
+                        sortable ? addGridSorter(rawHeaderTemplate)
+                                : rawHeaderTemplate);
             }
             return this;
         }
 
+        /**
+         * Gets whether this column is sortable (e.g. shows the sorting
+         * indicators at the client-side).
+         * 
+         * @return <code>true</code> if the column is sortable,
+         *         <code>false</code> otherwise
+         */
         public boolean isSortable() {
             return sortingEnabled;
         }
 
         @Override
+        public Column<T> setHeader(Component headerComponent) {
+            /*
+             * Uses the special renderer to take care of the vaadin-grid-sorter.
+             */
+            super.renderHeader(
+                    new GridSorterComponentRenderer<>(this, headerComponent));
+            return this;
+        }
+
+        /*
+         * This method is invoked only for TemplateRenderers.
+         */
+        @Override
         protected Rendering<?> renderHeader(Renderer<?> renderer) {
             Rendering<?> rendering = super.renderHeader(renderer);
 
-            headerTemplate = rendering.getTemplateElement();
-            rawHeaderTemplate = headerTemplate.getProperty("innerHTML");
+            setBaseHeaderTemplate(headerTemplate.getProperty("innerHTML"));
             if (isSortable()) {
-                headerTemplate.setProperty("innerHTML", addGridSorter());
+                headerTemplate.setProperty("innerHTML",
+                        addGridSorter(rawHeaderTemplate));
             }
             return rendering;
         }
 
-        private String addGridSorter() {
+        /*
+         * The original header template is needed for when sorting is enabled or
+         * disabled in a column.
+         */
+        void setBaseHeaderTemplate(String headerTemplate) {
+            rawHeaderTemplate = headerTemplate;
+        }
+
+        /*
+         * Adds the sorting webcomponent markup to an existing template.
+         */
+        String addGridSorter(String templateInnerHtml) {
             String escapedColumnId = HtmlUtils.escape(columnInternalId);
             return String.format(
                     "<vaadin-grid-sorter path='%s'>%s</vaadin-grid-sorter>",
-                    escapedColumnId, rawHeaderTemplate);
+                    escapedColumnId, templateInnerHtml);
         }
     }
 

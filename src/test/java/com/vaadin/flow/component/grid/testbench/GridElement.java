@@ -269,7 +269,7 @@ public class GridElement extends TestBenchElement {
      *            the index of the column
      * @return a cell element for the footer cell
      */
-    public TestBenchElement getFooterCell(int columnIndex) {
+    public GridTHTDElement getFooterCell(int columnIndex) {
         return getVisibleColumns().get(columnIndex).getFooterCell();
     }
 

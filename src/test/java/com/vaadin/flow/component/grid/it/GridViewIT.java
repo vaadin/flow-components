@@ -501,22 +501,32 @@ public class GridViewIT extends TabbedComponentDemoTest {
     @Test
     public void gridWithHeaderWithComponentRenderer_headerAndFooterAreRenderered() {
         openTabAndCheckForErrors("using-components");
-        WebElement grid = findElement(By.id("grid-header-with-components"));
+
+        GridElement grid = $(GridElement.class)
+                .id("grid-header-with-components");
         scrollToElement(grid);
 
+        GridTHTDElement headerCell = grid.getHeaderCell(0);
+        assertComponentRendereredHeaderCell(headerCell, "<label>Name</label>",
+                true);
+
+        headerCell = grid.getHeaderCell(1);
+        assertComponentRendereredHeaderCell(headerCell, "<label>Age</label>",
+                true);
+
+        headerCell = grid.getHeaderCell(2);
+        assertComponentRendereredHeaderCell(headerCell, "<label>Street</label>",
+                false);
+
+        headerCell = grid.getHeaderCell(3);
+        assertComponentRendereredHeaderCell(headerCell,
+                "<label>Postal Code</label>", false);
+        
         Assert.assertTrue(
                 "There should be a cell with the renderered 'Basic Information' header",
                 hasComponentRendereredHeaderCell(grid,
                         "<label>Basic Information</label>"));
-
-        Assert.assertTrue(
-                "There should be a cell with the renderered 'Name' header",
-                hasComponentRendereredHeaderCell(grid, "<label>Name</label>"));
-
-        Assert.assertTrue(
-                "There should be a cell with the renderered 'Age' header",
-                hasComponentRendereredHeaderCell(grid, "<label>Age</label>"));
-
+        
         Assert.assertTrue("There should be a cell with the renderered footer",
                 hasComponentRendereredHeaderCell(grid,
                         "<label>Total: 499 people</label>"));
@@ -705,6 +715,22 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 "flow-component-renderer");
     }
 
+    private void assertComponentRendereredHeaderCell(GridTHTDElement headerCell,
+            String text, boolean withSorter) {
+
+        String html = headerCell.getInnerHTML();
+        if (withSorter) {
+            Assert.assertThat(html,
+                    CoreMatchers.containsString("<vaadin-grid-sorter"));
+        } else {
+            Assert.assertThat(html, CoreMatchers
+                    .not(CoreMatchers.containsString("<vaadin-grid-sorter")));
+        }
+        Assert.assertThat(html,
+                CoreMatchers.containsString("<flow-component-renderer"));
+        Assert.assertThat(html, CoreMatchers.containsString(text));
+    }
+    
     private boolean hasComponentRendereredHeaderCell(WebElement grid,
             String text) {
         return hasComponentRendereredCell(grid, text,
