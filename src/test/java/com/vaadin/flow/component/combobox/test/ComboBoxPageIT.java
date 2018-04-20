@@ -92,8 +92,10 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         clickElementWithJs(textField);
 
         // long trip to the depths of the component to find the button
-        WebElement overlay = findElement(By.id("overlay"));
-        WebElement ironList = findInShadowRoot(overlay, By.id("selector"))
+        WebElement overlay = findElement(
+                By.tagName("vaadin-combo-box-overlay"));
+        WebElement content = findInShadowRoot(overlay, By.id("content")).get(0);
+        WebElement ironList = findInShadowRoot(content, By.id("selector"))
                 .get(0);
         WebElement item = ironList
                 .findElement(By.tagName("vaadin-combo-box-item"));
