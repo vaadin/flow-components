@@ -96,8 +96,8 @@ public class DialogTestPageIT extends AbstractComponentIT {
         waitForElementPresent(By.id("dialog-outside-ui"));
         checkDialogIsOpened();
         WebElement overlay = findElement(By.tagName(DIALOG_OVERLAY_TAG));
-        WebElement close = findInShadowRoot(overlay,
-                By.id("dialog-outside-ui-close")).get(0);
+        WebElement close = overlay
+                .findElement(By.id("dialog-outside-ui-close"));
         close.click();
         checkDialogIsClosed();
         waitForElementNotPresent(By.id("dialog-outside-ui"));

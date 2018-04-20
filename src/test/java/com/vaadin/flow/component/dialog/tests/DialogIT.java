@@ -76,8 +76,7 @@ public class DialogIT extends ComponentDemoTest {
     }
 
     private WebElement getOverlayContent() {
-        WebElement overlay = findElement(By.tagName(DIALOG_OVERLAY_TAG));
-        return getInShadowRoot(overlay, By.id("content"));
+        return findElement(By.tagName(DIALOG_OVERLAY_TAG));
     }
 
     private void verifyDialogClosed() {
