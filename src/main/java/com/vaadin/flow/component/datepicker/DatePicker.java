@@ -278,7 +278,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached DatePicker"))
                         .getPage()
-                        .executeJavaScript("window.datepickerConnector.initLazy($0)",
+                .executeJavaScript(
+                        "window.Vaadin.Flow.datepickerConnector.initLazy($0)",
                                 getElement());
     }
     /**

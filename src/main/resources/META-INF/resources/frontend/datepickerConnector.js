@@ -1,4 +1,4 @@
-window.datepickerConnector = {
+window.Vaadin.Flow.datepickerConnector = {
     initLazy: function(datepicker) {    
         // Check whether the connector was already initialized for the datepicker
         if (datepicker.$connector){
