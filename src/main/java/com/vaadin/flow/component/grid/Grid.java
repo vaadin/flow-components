@@ -816,7 +816,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached Grid"))
                 .getPage().executeJavaScript(
-                        "window.gridConnector.initLazy($0)", getElement());
+                        "window.Vaadin.Flow.gridConnector.initLazy($0)",
+                        getElement());
     }
 
     /**

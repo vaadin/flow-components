@@ -1,4 +1,4 @@
-window.gridConnector = {
+window.Vaadin.Flow.gridConnector = {
   initLazy: function(grid) {    
     // Check whether the connector was already initialized for the grid
     if (grid.$connector){
