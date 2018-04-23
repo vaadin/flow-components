@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -34,7 +33,7 @@ import com.vaadin.flow.internal.HtmlUtils;
  *            the subclass type
  */
 public class AbstractColumn<T extends AbstractColumn<T>> extends Component
-        implements ColumnBase<T>, HasStyle {
+        implements ColumnBase<T> {
 
     protected final Grid<?> grid;
     protected Element headerTemplate;
