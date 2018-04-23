@@ -507,13 +507,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      */
     @Override
     public void setOpened(boolean opened) {
-        // The open() and close() functions are used because of
-        // https://github.com/vaadin/vaadin-date-picker/issues/524
-        if (opened) {
-            open();
-        } else {
-            close();
-        }
+        super.setOpened(opened);
     }
 
     /**
@@ -521,9 +515,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      */
     @Override
     public void open() {
-        super.open();
-
-        // To update the server-side property synchronously
         super.setOpened(true);
     }
 
@@ -532,9 +523,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      */
     @Override
     protected void close() {
-        super.close();
-
-        // To update the server-side property synchronously
         super.setOpened(false);
     }
 
