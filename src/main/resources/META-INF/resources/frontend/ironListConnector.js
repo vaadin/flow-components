@@ -1,4 +1,4 @@
-window.ironListConnector = {
+window.Vaadin.Flow.ironListConnector = {
   initLazy: function(list) {
       
     // Check whether the connector was already initialized for the Iron list

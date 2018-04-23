@@ -152,7 +152,8 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached Grid"))
                 .getPage().executeJavaScript(
-                        "window.ironListConnector.initLazy($0)", getElement());
+                        "window.Vaadin.Flow.ironListConnector.initLazy($0)",
+                        getElement());
     }
 
     @Override
