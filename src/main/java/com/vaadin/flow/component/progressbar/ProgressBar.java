@@ -73,7 +73,8 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      */
     public ProgressBar(double min, double max, double value) {
         if (min >= max) {
-            throw new IllegalArgumentException("min must be less than max");
+            throw new IllegalArgumentException(String.format(
+                    "min ('%s') must be less than max ('%s')", min, max));
         }
         setMin(min);
         setMax(max);
@@ -87,9 +88,12 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      *            the double value to set
      */
     public void setValue(double value) {
-        if (getMin() > value || value > getMax()) {
-            throw new IllegalArgumentException(
-                    "value must be between min and max");
+        double min = getMin();
+        double max = getMax();
+        if (min > value || value > max) {
+            throw new IllegalArgumentException(String.format(
+                    "value must be between min ('%s') and max ('%s')", min,
+                    max));
         }
         super.setValue(value);
     }

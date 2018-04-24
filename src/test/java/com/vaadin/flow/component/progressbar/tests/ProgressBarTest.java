@@ -72,42 +72,46 @@ public class ProgressBarTest {
 
     @Test
     public void constructorShouldThrowIfMinEqualsMax() {
+        double min = 42.0;
+        double max = 42.0;
+
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("min must be less than max");
+        thrown.expectMessage(String.format("min ('%s') must be less than max ('%s')", min, max));
 
-        new ProgressBar(42, 42);
-
-        // Nothing to assert here
+        new ProgressBar(min, max);
     }
 
     @Test
     public void constructorShouldThrowIfMinGreaterThanMax() {
+        double min = 1.01;
+        double max = 1.0;
+
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("min must be less than max");
+        thrown.expectMessage(String.format("min ('%s') must be less than max ('%s')", min, max));
 
-        new ProgressBar(1.01, 1.0);
-
-        // Nothing to assert here
+        new ProgressBar(min, max);
     }
 
     @Test
     public void constructorShouldThrowIfValueLessThanMin() {
+        double min = 0.0;
+        double max = 1.0;
+
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("value must be between min and max");
+        thrown.expectMessage(String.format("value must be between min ('%s') and max ('%s')", min, max));
 
-        new ProgressBar(0.0, 1.0, -0.01);
-
-        // Nothing to assert here
+        new ProgressBar(min, max, -0.01);
     }
 
     @Test
     public void constructorShouldThrowIfValueGreaterThanMax() {
+        double min = 0.0;
+        double max = 1.0;
+
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("value must be between min and max");
+        thrown.expectMessage(String.format("value must be between min ('%s') and max ('%s')", min, max));
 
-        new ProgressBar(0.0, 1.0, 1.01);
-
-        // Nothing to assert here
+        new ProgressBar(min, max, 1.01);
     }
 
     @Test
@@ -157,23 +161,25 @@ public class ProgressBarTest {
 
     @Test
     public void setValueShouldThrowIfValueLessThanMin() {
+        double min = 10.0;
+        double max = 100.0;
+
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("value must be between min and max");
+        thrown.expectMessage(String.format("value must be between min ('%s') and max ('%s')", min, max));
 
-        ProgressBar progressBar = new ProgressBar(10, 100);
+        ProgressBar progressBar = new ProgressBar(min, max);
         progressBar.setValue(9);
-
-        // Nothing to assert here
     }
 
     @Test
     public void setValueShouldThrowIfValueGreaterThanMax() {
+        double min = 10.0;
+        double max = 100.0;
+
         thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("value must be between min and max");
+        thrown.expectMessage(String.format("value must be between min ('%s') and max ('%s')", min, max));
 
-        ProgressBar progressBar = new ProgressBar(10, 100);
+        ProgressBar progressBar = new ProgressBar(min, max);
         progressBar.setValue(101);
-
-        // Nothing to assert here
     }
 }
