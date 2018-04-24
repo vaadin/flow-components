@@ -75,6 +75,15 @@ public class DialogIT extends ComponentDemoTest {
                 findElement(By.id("server-side-close-dialog-label")).getText());
     }
 
+    @Test
+    public void focusElementOnOpen() {
+        findElement(By.id("focus-dialog-button")).click();
+
+        WebElement element = getOverlayContent().findElement(By.tagName("input"));
+
+        Assert.assertTrue(element.equals(driver.switchTo().activeElement()));
+    }
+
     private WebElement getOverlayContent() {
         return findElement(By.tagName(DIALOG_OVERLAY_TAG));
     }

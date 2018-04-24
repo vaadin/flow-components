@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.dialog.demo;
 
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.demo.DemoView;
@@ -36,6 +37,7 @@ public class DialogView extends DemoView {
         addBasicDialog();
         addConfirmationDialog();
         addCloseFromServerSideDialog();
+        addDialogWithFocusedElement();
     }
 
     private void addBasicDialog() {
@@ -106,5 +108,25 @@ public class DialogView extends DemoView {
         messageLabel.setId("server-side-close-dialog-label");
         button.setId("server-side-close-dialog-button");
         addCard("Close from server-side", button, messageLabel);
+    }
+
+    private void addDialogWithFocusedElement() {
+        NativeButton button = new NativeButton(BUTTON_CAPTION);
+
+        // begin-source-example
+        // source-example-heading: Focus internal Element
+        Dialog dialog = new Dialog();
+        Input input = new Input();
+
+        dialog.add(input);
+
+        button.addClickListener(event -> {
+            dialog.open();
+            input.getElement().callFunction("focus");
+        });
+        // end-source-example
+
+        button.setId("focus-dialog-button");
+        addCard("Focus internal Element", button);
     }
 }
