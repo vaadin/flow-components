@@ -36,7 +36,8 @@ public class DialogIT extends ComponentDemoTest {
     public void openAndCloseBasicDialog_labelRendered() {
         findElement(By.id("basic-dialog-button")).click();
 
-        WebElement container = getOverlayContent().findElement(By.tagName("div"));
+        WebElement container = getOverlayContent()
+                .findElement(By.tagName("div"));
         Assert.assertEquals("400px", container.getCssValue("width"));
         Assert.assertEquals("150px", container.getCssValue("height"));
 
@@ -79,9 +80,21 @@ public class DialogIT extends ComponentDemoTest {
     public void focusElementOnOpen() {
         findElement(By.id("focus-dialog-button")).click();
 
-        WebElement element = getOverlayContent().findElement(By.tagName("input"));
+        WebElement element = getOverlayContent()
+                .findElement(By.tagName("input"));
 
         Assert.assertTrue(element.equals(driver.switchTo().activeElement()));
+    }
+
+    @Test
+    public void styleDialogContent() {
+        scrollIntoViewAndClick(
+                findElement(By.id("styled-content-dialog-button")));
+
+        WebElement element = getOverlayContent()
+                .findElement(By.className("my-style"));
+
+        Assert.assertEquals("rgba(255, 0, 0, 1)", element.getCssValue("color"));
     }
 
     private WebElement getOverlayContent() {
