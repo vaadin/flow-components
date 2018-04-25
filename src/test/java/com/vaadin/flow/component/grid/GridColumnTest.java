@@ -15,11 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -66,33 +61,6 @@ public class GridColumnTest {
     public void duplicateKey_throws() {
         firstColumn.setKey("foo");
         secondColumn.setKey("foo");
-    }
-
-    @Test
-    public void merged_column_order() {
-        Assert.assertEquals(
-                Arrays.asList(firstColumn, secondColumn, thirdColumn),
-                getTopLevelColumns());
-        ColumnGroup merged = grid.mergeColumns(firstColumn, thirdColumn);
-        Assert.assertEquals(Arrays.asList(merged, secondColumn),
-                getTopLevelColumns());
-        ColumnGroup secondMerge = grid.mergeColumns(merged, secondColumn);
-        Assert.assertEquals(Arrays.asList(secondMerge), getTopLevelColumns());
-        Assert.assertEquals(
-                Arrays.asList(firstColumn, thirdColumn, secondColumn),
-                grid.getColumns());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void cant_merge_columns_not_in_grid() {
-        Column<String> otherColumn = new Grid<String>().addColumn(str -> str);
-        grid.mergeColumns(firstColumn, otherColumn);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void cant_merge_already_merged_columns() {
-        grid.mergeColumns(firstColumn, secondColumn);
-        grid.mergeColumns(firstColumn, thirdColumn);
     }
 
     @Test
@@ -161,49 +129,6 @@ public class GridColumnTest {
     }
 
     @Test
-    public void removeMergedColumn() {
-        ColumnGroup merged = grid.mergeColumns(firstColumn, secondColumn);
-
-        firstColumn.setKey("first");
-        grid.removeColumn(firstColumn);
-
-        Assert.assertThat(merged.getChildColumns(),
-                CoreMatchers.not(CoreMatchers.hasItem(firstColumn)));
-        Assert.assertNull(grid.getColumnByKey("first"));
-    }
-
-    @Test
-    public void removeMergedColumns_columnGroupIsRemoved() {
-        ColumnGroup merged = grid.mergeColumns(firstColumn, secondColumn);
-        Assert.assertEquals(grid.getElement(), merged.getElement().getParent());
-
-        grid.removeColumn(firstColumn);
-        grid.removeColumn(secondColumn);
-
-        Assert.assertEquals(0, merged.getChildColumns().size());
-        Assert.assertNull(merged.getElement().getParent());
-    }
-
-    @Test
-    public void removeAllMergedColumns_columnGroupsAreRemoved() {
-        ColumnGroup merged = grid.mergeColumns(firstColumn, thirdColumn);
-        ColumnGroup secondMerge = grid.mergeColumns(merged, secondColumn);
-        Assert.assertEquals(secondMerge.getElement(),
-                merged.getElement().getParent());
-        Assert.assertEquals(grid.getElement(),
-                secondMerge.getElement().getParent());
-
-        grid.removeColumn(firstColumn);
-        grid.removeColumn(secondColumn);
-        grid.removeColumn(thirdColumn);
-
-        Assert.assertEquals(0, merged.getChildColumns().size());
-        Assert.assertNull(merged.getElement().getParent());
-        Assert.assertEquals(0, secondMerge.getChildColumns().size());
-        Assert.assertNull(secondMerge.getElement().getParent());
-    }
-
-    @Test
     public void addColumn_defaultComparator() {
         Grid<Person> grid = new Grid<>();
 
@@ -237,15 +162,6 @@ public class GridColumnTest {
         Assert.assertEquals(
                 "The first person toString() result greater than the the second person toString() result",
                 -1, result);
-    }
-
-    private List<ColumnBase<?>> getTopLevelColumns() {
-        return grid.getElement().getChildren()
-                .map(element -> element.getComponent())
-                .filter(component -> component.isPresent()
-                        && component.get() instanceof ColumnBase<?>)
-                .map(component -> (ColumnBase<?>) component.get())
-                .collect(Collectors.toList());
     }
 
     private void expectNullPointerException(String message) {

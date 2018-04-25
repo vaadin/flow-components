@@ -42,6 +42,12 @@ public class DisabledGridPage extends Div {
                         "ERROR!!! This listener should not be triggered!!!")))
                 .setHeader("Button renderer");
 
+        NativeButton headerButton = new NativeButton("Button in header",
+                event -> message.setText(
+                        "ERROR!!! This listener should not be triggered!!!"));
+        headerButton.setId("header-button");
+        grid.prependHeaderRow().getCells().get(0).setComponent(headerButton);
+
         NativeButton toggleEnabled = new NativeButton("Toggle enabled",
                 event -> grid.setEnabled(!grid.isEnabled()));
         toggleEnabled.setId("toggleEnabled");

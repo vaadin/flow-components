@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid.it;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -25,6 +26,7 @@ import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("disabled-grid")
 public class DisabledGridIT extends AbstractComponentIT {
@@ -57,6 +59,44 @@ public class DisabledGridIT extends AbstractComponentIT {
 
         Assert.assertTrue("The message should be empty",
                 message.getText().isEmpty());
+    }
+
+    @Test
+    public void gridIsDisabled_componentsInHeaderAreDisabled() {
+        open();
+        WebElement message = findElement(By.id("message"));
+        GridElement grid = $(GridElement.class).id("grid");
+        TestBenchElement headerButton = grid
+                .findElement(By.id("header-button"));
+
+        Assert.assertTrue("Button in the header should be enabled",
+                headerButton.isEnabled());
+
+        findElement(By.id("toggleEnabled")).click();
+
+        executeScript("arguments[0].disabled = false", headerButton);
+        headerButton.click();
+
+        Assert.assertTrue("The message should be empty",
+                message.getText().isEmpty());
+    }
+
+    @Ignore // https://github.com/vaadin/flow/issues/3998
+    @Test
+    public void gridIsDisabled_componentsInHeaderHaveDisabledAttribute() {
+        open();
+        GridElement grid = $(GridElement.class).id("grid");
+        TestBenchElement headerButton = grid
+                .findElement(By.id("header-button"));
+
+        Assert.assertTrue("Button in the header should be enabled",
+                headerButton.isEnabled());
+
+        findElement(By.id("toggleEnabled")).click();
+
+        Assert.assertFalse(
+                "Button in the header should have 'disabled' attribute",
+                headerButton.isEnabled());
     }
 
 }

@@ -25,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,14 +33,16 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.vaadin.flow.component.HasComponents;
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.grid.ColumnGroup;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridSelectionModel;
+import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -56,7 +59,9 @@ import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -321,13 +326,13 @@ public class GridView extends DemoView {
         createColumnApiExample();
         createBasicRenderers();
         createColumnTemplate();
-        createColumnGroup();
         createColumnComponentRenderer();
         createItemDetails();
         createItemDetailsOpenedProgrammatically();
         createSorting();
-        createHeaderAndFooterUsingTemplates();
+        createGridWithHeaderAndFooterRows();
         createHeaderAndFooterUsingComponents();
+        createGridWithFilters();
         createBeanGrid();
         createHeightByRows();
         createBasicFeatures();
@@ -573,6 +578,120 @@ public class GridView extends DemoView {
                 nameField, updateButton);
     }
 
+    private void createGridWithHeaderAndFooterRows() {
+        // begin-source-example
+        // source-example-heading: Adding header and footer rows
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(createItems());
+
+        Column<Person> nameColumn = grid.addColumn(Person::getName)
+                .setHeader("Name").setComparator((p1, p2) -> p1.getName()
+                        .compareToIgnoreCase(p2.getName()));
+        Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
+                .setHeader("Age");
+        Column<Person> streetColumn = grid
+                .addColumn(person -> person.getAddress().getStreet())
+                .setHeader("Street");
+        Column<Person> postalCodeColumn = grid
+                .addColumn(person -> person.getAddress().getPostalCode())
+                .setHeader("Postal Code");
+
+        HeaderRow topRow = grid.prependHeaderRow();
+
+        HeaderCell informationCell = topRow.join(nameColumn, ageColumn);
+        informationCell.setText("Basic Information");
+
+        HeaderCell addressCell = topRow.join(streetColumn, postalCodeColumn);
+        addressCell.setText("Address Information");
+
+        grid.appendFooterRow().getCell(nameColumn)
+                .setText("Total: " + getItems().size() + " people");
+        // end-source-example
+        grid.setId("grid-with-header-and-footer-rows");
+        addCard("Header and footer rows", "Adding header and footer rows",
+                grid);
+    }
+
+    private void createHeaderAndFooterUsingComponents() {
+        // begin-source-example
+        // source-example-heading: Header and footer using components
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(getItems());
+
+        Column<Person> nameColumn = grid.addColumn(Person::getName)
+                .setHeader(new Label("Name")).setComparator((p1, p2) -> p1
+                        .getName().compareToIgnoreCase(p2.getName()));
+        Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
+                .setHeader(new Label("Age"));
+        Column<Person> streetColumn = grid
+                .addColumn(person -> person.getAddress().getStreet())
+                .setHeader(new Label("Street"));
+        Column<Person> postalCodeColumn = grid
+                .addColumn(person -> person.getAddress().getPostalCode())
+                .setHeader(new Label("Postal Code"));
+
+        HeaderRow topRow = grid.prependHeaderRow();
+
+        HeaderCell informationCell = topRow.join(nameColumn, ageColumn);
+        informationCell.setComponent(new Label("Basic Information"));
+
+        HeaderCell addressCell = topRow.join(streetColumn, postalCodeColumn);
+        addressCell.setComponent(new Label("Address Information"));
+
+        grid.appendFooterRow().getCell(nameColumn).setComponent(
+                new Label("Total: " + getItems().size() + " people"));
+        // end-source-example
+        grid.setId("grid-header-with-components");
+        addCard("Header and footer rows", "Header and footer using components",
+                grid);
+    }
+
+    private void createGridWithFilters() {
+        // begin-source-example
+        // source-example-heading: Using text fields for filtering items
+        Grid<Person> grid = new Grid<>();
+        ListDataProvider<Person> dataProvider = new ListDataProvider<>(
+                createItems());
+        grid.setDataProvider(dataProvider);
+
+        List<ValueProvider<Person, String>> valueProviders = new ArrayList<>();
+        valueProviders.add(Person::getName);
+        valueProviders.add(person -> String.valueOf(person.getAge()));
+        valueProviders.add(person -> person.getAddress().getStreet());
+        valueProviders.add(person -> person.getAddress().getPostalCode());
+
+        Iterator<ValueProvider<Person, String>> iterator = valueProviders
+                .iterator();
+
+        grid.addColumn(iterator.next()).setHeader("Name");
+        grid.addColumn(iterator.next()).setHeader("Age");
+        grid.addColumn(iterator.next()).setHeader("Street");
+        grid.addColumn(iterator.next()).setHeader("Postal Code");
+
+        HeaderRow filterRow = grid.appendHeaderRow();
+
+        Iterator<ValueProvider<Person, String>> iterator2 = valueProviders
+                .iterator();
+
+        grid.getColumns().forEach(column -> {
+            TextField field = new TextField();
+            ValueProvider<Person, String> valueProvider = iterator2.next();
+
+            field.addValueChangeListener(event -> dataProvider
+                    .addFilter(person -> StringUtils.containsIgnoreCase(
+                            valueProvider.apply(person), field.getValue())));
+
+            field.setValueChangeMode(ValueChangeMode.EAGER);
+
+            filterRow.getCell(column).setComponent(field);
+            field.setSizeFull();
+            field.setPlaceholder("Filter");
+        });
+        // end-source-example
+        grid.setId("grid-with-filters");
+        addCard("Filtering", "Using text fields for filtering items", grid);
+    }
+
     private void createColumnApiExample() {
         // begin-source-example
         // source-example-heading: Column API example
@@ -611,15 +730,6 @@ public class GridView extends DemoView {
         freezeSelectionColumn.addClickListener(
                 event -> multiSlection.setSelectionColumnFrozen(
                         !multiSlection.isSelectionColumnFrozen()));
-
-        NativeButton merge = new NativeButton("Merge ID and name columns");
-        merge.addClickListener(event -> {
-            grid.mergeColumns(idColumn, nameColumn)
-                    .setHeader("ID, Name column group");
-            // Remove this button from the layout
-            merge.getParent().ifPresent(
-                    component -> ((HasComponents) component).remove(merge));
-        });
         // end-source-example
 
         grid.setId("column-api-example");
@@ -629,7 +739,7 @@ public class GridView extends DemoView {
         freezeSelectionColumn.setId("toggle-selection-column-frozen");
         addCard("Configuring columns", "Column API example", grid,
                 new VerticalLayout(idColumnVisibility, userReordering,
-                        freezeIdColumn, freezeSelectionColumn, merge));
+                        freezeIdColumn, freezeSelectionColumn));
     }
 
     private Grid<Person> createGridWithDetails() {
@@ -683,36 +793,6 @@ public class GridView extends DemoView {
         addCard("Item details", "Open details programmatically", grid);
     }
 
-    private void createColumnGroup() {
-        // begin-source-example
-        // source-example-heading: Column grouping example
-        Grid<Person> grid = new Grid<>();
-        grid.setItems(getItems());
-
-        Column<Person> nameColumn = grid.addColumn(Person::getName)
-                .setHeader("Name");
-        Column<Person> ageColumn = grid.addColumn(Person::getAge)
-                .setHeader("Age");
-        Column<Person> streetColumn = grid
-                .addColumn(person -> person.getAddress().getStreet())
-                .setHeader("Street");
-        Column<Person> postalCodeColumn = grid
-                .addColumn(person -> person.getAddress().getPostalCode())
-                .setHeader("Postal Code");
-
-        ColumnGroup informationColumnGroup = grid
-                .mergeColumns(nameColumn, ageColumn)
-                .setHeader("Basic Information")
-                .setFooter("Total: " + getItems().size() + " people");
-        ColumnGroup addressColumnGroup = grid
-                .mergeColumns(streetColumn, postalCodeColumn)
-                .setHeader("Address Information");
-        grid.mergeColumns(informationColumnGroup, addressColumnGroup);
-        // end-source-example
-        grid.setId("grid-column-grouping");
-        addCard("Configuring columns", "Column grouping example", grid);
-    }
-
     private void createSorting() {
         Div messageDiv = new Div();
         // begin-source-example
@@ -755,72 +835,6 @@ public class GridView extends DemoView {
         messageDiv.setId("grid-sortable-columns-message");
         addCard("Sorting", "Grid with sortable columns", grid, multiSort,
                 messageDiv);
-    }
-
-    private void createHeaderAndFooterUsingTemplates() {
-        // begin-source-example
-        // source-example-heading: Column header and footer using templates
-        Grid<Person> grid = new Grid<>();
-        grid.setItems(getItems());
-
-        Column<Person> nameColumn = grid.addColumn(Person::getName)
-                .setHeader("Name").setComparator((p1, p2) -> p1.getName()
-                        .compareToIgnoreCase(p2.getName()));
-        Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
-                .setHeader("Age");
-        Column<Person> streetColumn = grid
-                .addColumn(person -> person.getAddress().getStreet())
-                .setHeader("Street");
-        Column<Person> postalCodeColumn = grid
-                .addColumn(person -> person.getAddress().getPostalCode())
-                .setHeader("Postal Code");
-
-        ColumnGroup informationColumnGroup = grid
-                .mergeColumns(nameColumn, ageColumn)
-                .setHeader("Basic Information")
-                .setFooter("Total: " + getItems().size() + " people");
-        ColumnGroup addressColumnGroup = grid
-                .mergeColumns(streetColumn, postalCodeColumn)
-                .setHeader("Address Information");
-        grid.mergeColumns(informationColumnGroup, addressColumnGroup);
-
-        // end-source-example
-        grid.setId("grid-header-with-templates");
-        addCard("Using templates", "Column header and footer using templates",
-                grid);
-    }
-
-    private void createHeaderAndFooterUsingComponents() {
-        // begin-source-example
-        // source-example-heading: Column header and footer using components
-        Grid<Person> grid = new Grid<>();
-        grid.setItems(getItems());
-
-        Column<Person> nameColumn = grid.addColumn(Person::getName)
-                .setHeader(new Label("Name")).setComparator((p1, p2) -> p1
-                        .getName().compareToIgnoreCase(p2.getName()));
-        Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
-                .setHeader(new Label("Age"));
-        Column<Person> streetColumn = grid
-                .addColumn(person -> person.getAddress().getStreet())
-                .setHeader(new Label("Street"));
-        Column<Person> postalCodeColumn = grid
-                .addColumn(person -> person.getAddress().getPostalCode())
-                .setHeader(new Label("Postal Code"));
-
-        ColumnGroup informationColumnGroup = grid
-                .mergeColumns(nameColumn, ageColumn)
-                .setHeader(new Label("Basic Information")).setFooter(
-                        new Label("Total: " + getItems().size() + " people"));
-        ColumnGroup addressColumnGroup = grid
-                .mergeColumns(streetColumn, postalCodeColumn)
-                .setHeader(new Label("Address Information"));
-        grid.mergeColumns(informationColumnGroup, addressColumnGroup);
-
-        // end-source-example
-        grid.setId("grid-header-with-components");
-        addCard("Using components", "Column header and footer using components",
-                grid);
     }
 
     private void createBeanGrid() {
@@ -926,6 +940,8 @@ public class GridView extends DemoView {
 
         grid.setSelectionMode(SelectionMode.SINGLE);
 
+        HeaderRow topHeader = grid.prependHeaderRow();
+
         IntStream.range(baseYear, baseYear + numberOfYears).forEach(year -> {
             BigDecimal firstHalfSum = list.fetch(new Query<>())
                     .collect(Collectors.toList()).stream()
@@ -961,8 +977,8 @@ public class GridView extends DemoView {
                     .setComparator((p1, p2) -> p1.getSecondHalfOfYear(year)
                             .compareTo(p2.getSecondHalfOfYear(year)));
 
-            grid.mergeColumns(firstHalfColumn, secondHalfColumn)
-                    .setHeader(year + "");
+            topHeader.join(firstHalfColumn, secondHalfColumn)
+                    .setText(year + "");
         });
         // end-source-example
 

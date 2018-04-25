@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.dom.Element;
@@ -77,56 +76,6 @@ public interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
     default boolean isFrozen() {
         return getElement().getProperty("frozen", false);
     }
-
-    /**
-     * Sets a header text to the column.
-     * <p>
-     * Calling this method after {@link #setHeader(Component)} will remove the
-     * component previously set.
-     *
-     * @param labelText
-     *            the text to be shown at the column header
-     * @return this column, for method chaining
-     */
-    T setHeader(String labelText);
-
-    /**
-     * Sets a header component to the column.
-     * <p>
-     * Calling this method after {@link #setHeader(String)} will remove the text
-     * previously set. Calling this method twice will remove the previous
-     * component.
-     *
-     * @param headerComponent
-     *            the component to be used in the header of the column
-     * @return this column, for method chaining
-     */
-    T setHeader(Component headerComponent);
-
-    /**
-     * Sets a footer text to the column.
-     * <p>
-     * Calling this method after {@link #setFooter(Component)} will remove the
-     * component previously set.
-     *
-     * @param labelText
-     *            the text to be shown at the column footer
-     * @return this column, for method chaining
-     */
-    T setFooter(String labelText);
-
-    /**
-     * Sets a footer component to the column.
-     * <p>
-     * Calling this method after {@link #setFooter(String)} will remove the text
-     * previously set. Calling this method twice will remove the previous
-     * component.
-     *
-     * @param footerComponent
-     *            the component to be used in the footer of the column
-     * @return this column, for method chaining
-     */
-    T setFooter(Component footerComponent);
 
     /**
      * Gets the underlying column element.

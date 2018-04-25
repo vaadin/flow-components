@@ -336,25 +336,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
-    public void groupedColumns() {
-        openTabAndCheckForErrors("configuring-columns");
-        WebElement grid = findElement(By.id("grid-column-grouping"));
-        scrollToElement(grid);
-
-        String columnGroupTag = "vaadin-grid-column-group";
-        WebElement topLevelColumn = grid
-                .findElement(By.tagName(columnGroupTag));
-        List<WebElement> secondLevelColumns = topLevelColumn
-                .findElements(By.tagName(columnGroupTag));
-        Assert.assertEquals(2, secondLevelColumns.size());
-        secondLevelColumns.forEach(columnGroup -> {
-            List<WebElement> childColumns = columnGroup
-                    .findElements(By.tagName("vaadin-grid-column"));
-            Assert.assertEquals(2, childColumns.size());
-        });
-    }
-
-    @Test
     public void gridWithComponentRenderer_cellsAreRenderered() {
         openTabAndCheckForErrors("using-components");
         WebElement grid = findElement(By.id("component-renderer"));
@@ -467,69 +448,90 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
-    public void gridWithHeaderWithTemplateRenderer_headerAndFooterAreRenderered() {
-        openTabAndCheckForErrors("using-templates");
-        WebElement grid = findElement(By.id("grid-header-with-templates"));
+    public void gridWithHeaderAndFooterRows_headerAndFooterAreRenderered() {
+        openTabAndCheckForErrors("header-and-footer-rows");
+
+        GridElement grid = $(GridElement.class)
+                .id("grid-with-header-and-footer-rows");
         scrollToElement(grid);
 
-        WebElement topLevelColumn = grid
-                .findElement(By.tagName("vaadin-grid-column-group"));
+        assertRendereredHeaderCell(grid.getHeaderCell(0), "Name", false, true);
+        assertRendereredHeaderCell(grid.getHeaderCell(1), "Age", false, true);
+        assertRendereredHeaderCell(grid.getHeaderCell(2), "Street", false,
+                false);
+        assertRendereredHeaderCell(grid.getHeaderCell(3), "Postal Code", false,
+                false);
+
+        List<WebElement> columnGroups = grid
+                .findElements(By.tagName("vaadin-grid-column-group"));
 
         Assert.assertThat(
-                "There should be a cell with the renderered 'Basic Information' header",
-                topLevelColumn.getAttribute("innerHTML"),
+                "The first column group should have 'Basic Information' header text",
+                columnGroups.get(0).getAttribute("innerHTML"),
                 CoreMatchers.containsString("Basic Information"));
 
-        Assert.assertThat("There should be a cell with the renderered footer",
-                topLevelColumn.getAttribute("innerHTML"),
-                CoreMatchers.containsString("Total: 499 people"));
+        Assert.assertThat(
+                "The second column group should have 'Address Information' header text",
+                columnGroups.get(1).getAttribute("innerHTML"),
+                CoreMatchers.containsString("Address Information"));
 
-        List<WebElement> secondLevelColumns = topLevelColumn
+        List<WebElement> columns = grid
                 .findElements(By.tagName("vaadin-grid-column"));
 
-        Assert.assertThat(
-                "There should be a cell with the renderered 'Name' header",
-                secondLevelColumns.get(0).getAttribute("innerHTML"),
-                CoreMatchers.containsString("Name"));
-
-        Assert.assertThat(
-                "There should be a cell with the renderered 'Age' header",
-                secondLevelColumns.get(1).getAttribute("innerHTML"),
-                CoreMatchers.containsString("Age"));
+        Assert.assertThat("There should be a cell with the renderered footer",
+                columns.get(0).getAttribute("innerHTML"),
+                CoreMatchers.containsString("Total: 499 people"));
     }
 
     @Test
     public void gridWithHeaderWithComponentRenderer_headerAndFooterAreRenderered() {
-        openTabAndCheckForErrors("using-components");
+        openTabAndCheckForErrors("header-and-footer-rows");
 
         GridElement grid = $(GridElement.class)
                 .id("grid-header-with-components");
         scrollToElement(grid);
 
         GridTHTDElement headerCell = grid.getHeaderCell(0);
-        assertComponentRendereredHeaderCell(headerCell, "<label>Name</label>",
+        assertRendereredHeaderCell(headerCell, "<label>Name</label>", true,
                 true);
 
         headerCell = grid.getHeaderCell(1);
-        assertComponentRendereredHeaderCell(headerCell, "<label>Age</label>",
+        assertRendereredHeaderCell(headerCell, "<label>Age</label>", true,
                 true);
 
         headerCell = grid.getHeaderCell(2);
-        assertComponentRendereredHeaderCell(headerCell, "<label>Street</label>",
+        assertRendereredHeaderCell(headerCell, "<label>Street</label>", true,
                 false);
 
         headerCell = grid.getHeaderCell(3);
-        assertComponentRendereredHeaderCell(headerCell,
-                "<label>Postal Code</label>", false);
-        
+        assertRendereredHeaderCell(headerCell, "<label>Postal Code</label>",
+                true, false);
+
         Assert.assertTrue(
                 "There should be a cell with the renderered 'Basic Information' header",
                 hasComponentRendereredHeaderCell(grid,
                         "<label>Basic Information</label>"));
-        
+
         Assert.assertTrue("There should be a cell with the renderered footer",
                 hasComponentRendereredHeaderCell(grid,
                         "<label>Total: 499 people</label>"));
+    }
+
+    @Test
+    public void gridWithFiltering() {
+        openTabAndCheckForErrors("filtering");
+
+        GridElement grid = $(GridElement.class).id("grid-with-filters");
+        scrollToElement(grid);
+
+        IntStream.range(0, 4).forEach(i -> {
+            GridTHTDElement headerCell = grid.getHeaderCell(i);
+            assertRendereredHeaderCell(headerCell, "<vaadin-text-field", true,
+                    false);
+        });
+
+        grid.findElement(By.tagName("vaadin-text-field")).sendKeys("6");
+        waitUntil(driver -> grid.getCell(0, 0).getText().contains("Person 6"));
     }
 
     @Test
@@ -715,8 +717,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 "flow-component-renderer");
     }
 
-    private void assertComponentRendereredHeaderCell(GridTHTDElement headerCell,
-            String text, boolean withSorter) {
+    private void assertRendereredHeaderCell(GridTHTDElement headerCell,
+            String text, boolean componentRenderer, boolean withSorter) {
 
         String html = headerCell.getInnerHTML();
         if (withSorter) {
@@ -726,11 +728,13 @@ public class GridViewIT extends TabbedComponentDemoTest {
             Assert.assertThat(html, CoreMatchers
                     .not(CoreMatchers.containsString("<vaadin-grid-sorter")));
         }
-        Assert.assertThat(html,
-                CoreMatchers.containsString("<flow-component-renderer"));
+        if (componentRenderer) {
+            Assert.assertThat(html,
+                    CoreMatchers.containsString("<flow-component-renderer"));
+        }
         Assert.assertThat(html, CoreMatchers.containsString(text));
     }
-    
+
     private boolean hasComponentRendereredHeaderCell(WebElement grid,
             String text) {
         return hasComponentRendereredCell(grid, text,
