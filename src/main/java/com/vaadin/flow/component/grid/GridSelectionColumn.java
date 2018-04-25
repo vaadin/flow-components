@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
-import com.vaadin.flow.component.ClientDelegate;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -91,12 +91,12 @@ public class GridSelectionColumn extends Component {
         return getElement().getProperty("frozen", false);
     }
 
-    @ClientDelegate
+    @ClientCallable
     private void selectAll() {
         selectAllCallback.run();
     }
 
-    @ClientDelegate
+    @ClientCallable
     private void deselectAll() {
         deselectAllCallback.run();
     }

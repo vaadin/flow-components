@@ -33,7 +33,7 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.ClientDelegate;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -1688,12 +1688,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
     }
 
-    @ClientDelegate
+    @ClientCallable
     private void select(int key) {
         getSelectionModel().selectFromClient(findByKey(key));
     }
 
-    @ClientDelegate
+    @ClientCallable
     private void deselect(int key) {
         getSelectionModel().deselectFromClient(findByKey(key));
     }
@@ -1706,17 +1706,17 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         return item;
     }
 
-    @ClientDelegate(DisabledUpdateMode.ALWAYS)
+    @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void confirmUpdate(int id) {
         getDataCommunicator().confirmUpdate(id);
     }
 
-    @ClientDelegate(DisabledUpdateMode.ALWAYS)
+    @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setRequestedRange(int start, int length) {
         getDataCommunicator().setRequestedRange(start, length);
     }
 
-    @ClientDelegate
+    @ClientCallable
     private void setDetailsVisible(String key) {
         if (key == null) {
             detailsManager.setDetailsVisibleFromClient(Collections.emptySet());
@@ -1726,7 +1726,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
     }
 
-    @ClientDelegate
+    @ClientCallable
     private void sortersChanged(JsonArray sorters) {
         GridSortOrderBuilder<T> sortOrderBuilder = new GridSortOrderBuilder<>();
         for (int i = 0; i < sorters.length(); ++i) {
