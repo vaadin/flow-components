@@ -21,6 +21,7 @@ import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -122,6 +123,35 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
         Assert.assertEquals(Boolean.TRUE.toString(),
                 buttons.get(1).getAttribute("disabled"));
+
+        scrollToElement(group);
+        getCommandExecutor().executeScript("window.scrollBy(0,50);");
+
+        new Actions(getDriver()).moveToElement(buttons.get(0)).click().build()
+                .perform();
+
+        WebElement infoLabel = layout
+                .findElement(By.id("button-group-disabled-items-info"));
+
+        Assert.assertEquals("'foo' should be selected", "foo",
+                infoLabel.getText());
+
+        executeScript("arguments[0].removeAttribute(\"disabled\");",
+                buttons.get(1));
+
+        new Actions(getDriver()).moveToElement(buttons.get(1)).click().build()
+                .perform();
+
+        try {
+            waitUntil(driver ->
+                    group.findElements(By.tagName("vaadin-radio-button")).get(1)
+                            .getAttribute("disabled") != null);
+        } catch (WebDriverException wde) {
+            Assert.fail("Server should have disabled the button again.");
+        }
+
+        Assert.assertEquals("Value 'foo' should have been re-selected", "foo",
+                infoLabel.getText());
     }
 
     @Test
@@ -223,15 +253,11 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
             Assert.assertEquals(
                     "Expected second in group " + (i + 1) + " to be a <hr>",
                     "hr", elements.get(firstInGroup + 1).getTagName());
-            Assert.assertEquals(
-                    "Expected third in group " + (i + 1)
-                            + " to be a <vaadin-radio-button>",
-                    "vaadin-radio-button",
+            Assert.assertEquals("Expected third in group " + (i + 1)
+                            + " to be a <vaadin-radio-button>", "vaadin-radio-button",
                     elements.get(firstInGroup + 2).getTagName());
-            Assert.assertEquals(
-                    "Expected fourth in group " + (i + 1)
-                            + " to be a <vaadin-radio-button>",
-                    "vaadin-radio-button",
+            Assert.assertEquals("Expected fourth in group " + (i + 1)
+                            + " to be a <vaadin-radio-button>", "vaadin-radio-button",
                     elements.get(firstInGroup + 3).getTagName());
         });
     }

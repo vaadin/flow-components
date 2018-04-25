@@ -42,8 +42,6 @@ public class RadioButtonGroup<T>
         implements HasItemsAndComponents<T>,
         SingleSelect<RadioButtonGroup<T>, T>, HasDataProvider<T> {
 
-    private static final String VALUE = "value";
-
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
@@ -55,7 +53,21 @@ public class RadioButtonGroup<T>
     private boolean isReadOnly;
 
     public RadioButtonGroup() {
-        getElement().synchronizeProperty(VALUE, "value-changed");
+        getElement().synchronizeProperty(getClientValuePropertyName(),
+                getClientPropertyChangeEventName());
+        getElement().addPropertyChangeListener(getClientValuePropertyName(),
+                this::validateSelectionEnabledState);
+    }
+
+    private void validateSelectionEnabledState(PropertyChangeEvent event) {
+        if (!itemEnabledProvider
+                .test(keyMapper.get(event.getValue().toString()))) {
+
+            Serializable oldKey = event.getOldValue();
+            T oldValue = keyMapper
+                    .get(oldKey == null ? null : oldKey.toString());
+            setValue(oldValue);
+        }
     }
 
     @Override
@@ -63,12 +75,14 @@ public class RadioButtonGroup<T>
         if (!keyMapper.has(value)) {
             return;
         }
-        getElement().setProperty(VALUE, keyMapper.key(value));
+        getElement().setProperty(getClientValuePropertyName(),
+                keyMapper.key(value));
     }
 
     @Override
     public T getValue() {
-        return keyMapper.get(getElement().getProperty(VALUE));
+        return keyMapper
+                .get(getElement().getProperty(getClientValuePropertyName()));
     }
 
     @Override
@@ -80,9 +94,10 @@ public class RadioButtonGroup<T>
     @Override
     public Registration addValueChangeListener(
             ValueChangeListener<RadioButtonGroup<T>, T> listener) {
-        return getElement().addPropertyChangeListener(
-                getClientValuePropertyName(), event -> listener
-                        .onComponentEvent(createValueChangeEvent(event)));
+        return getElement()
+                .addPropertyChangeListener(getClientValuePropertyName(),
+                        event -> listener.onComponentEvent(
+                                createValueChangeEvent(event)));
     }
 
     /**
@@ -112,7 +127,7 @@ public class RadioButtonGroup<T>
      * predicate always returns true (all the items are enabled).
      *
      * @param itemEnabledProvider
-     *            the item enable predicate, not {@code null}
+     *         the item enable predicate, not {@code null}
      */
     public void setItemEnabledProvider(
             SerializablePredicate<T> itemEnabledProvider) {
@@ -135,7 +150,7 @@ public class RadioButtonGroup<T>
      * applied to each item to create a component which represents the item.
      *
      * @param renderer
-     *            the item renderer, not {@code null}
+     *         the item renderer, not {@code null}
      */
     public void setRenderer(
             ComponentRenderer<? extends Component, T> renderer) {

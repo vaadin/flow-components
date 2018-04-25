@@ -189,6 +189,7 @@ public class RadioButtonGroupView extends DemoView {
 
     private void addDisabledItems() {
 
+        Div valueInfo = new Div();
         // begin-source-example
         // source-example-heading: Radio button group with item enabled provider
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
@@ -196,9 +197,13 @@ public class RadioButtonGroupView extends DemoView {
         group.setItemEnabledProvider(item -> !"bar".equals(item));
         // end-source-example
 
-        group.setId("button-group-disabled-items");
+        group.addValueChangeListener(
+                event -> valueInfo.setText(group.getValue()));
 
-        addCard("Radio button group with item enabled provider", group);
+        group.setId("button-group-disabled-items");
+        valueInfo.setId("button-group-disabled-items-info");
+
+        addCard("Radio button group with item enabled provider", group, valueInfo);
     }
 
     private String getName(Person person) {
