@@ -26,10 +26,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.grid.ColumnBase;
-import com.vaadin.flow.component.grid.ColumnGroup;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.function.SerializableComparator;
 
 public class GridColumnTest {
 
@@ -202,6 +201,42 @@ public class GridColumnTest {
         Assert.assertNull(merged.getElement().getParent());
         Assert.assertEquals(0, secondMerge.getChildColumns().size());
         Assert.assertNull(secondMerge.getElement().getParent());
+    }
+
+    @Test
+    public void addColumn_defaultComparator() {
+        Grid<Person> grid = new Grid<>();
+
+        Column<Person> nameColumn = grid.addColumn(Person::getName);
+        SerializableComparator<Person> nameComparator = nameColumn
+                .getComparator(SortDirection.ASCENDING);
+
+        Person person1 = new Person("a", 1970);
+        Person person2 = new Person("b", 1960);
+        int result = nameComparator.compare(person1, person2);
+
+        Assert.assertEquals(
+                "The first person name should be less than the name of the second person",
+                -1, result);
+
+        Column<Person> ageColumn = grid.addColumn(Person::getBorn);
+        SerializableComparator<Person> ageComparator = ageColumn
+                .getComparator(SortDirection.ASCENDING);
+        result = ageComparator.compare(person1, person2);
+
+        Assert.assertEquals(
+                "The first person year of born should be greater than the year of born of the second person",
+                1, result);
+
+        // comparator which uses toString
+        Column<Person> identityColumn = grid.addColumn(person -> person);
+        SerializableComparator<Person> personComparator = identityColumn
+                .getComparator(SortDirection.ASCENDING);
+        result = personComparator.compare(person1, person2);
+
+        Assert.assertEquals(
+                "The first person toString() result greater than the the second person toString() result",
+                -1, result);
     }
 
     private List<ColumnBase<?>> getTopLevelColumns() {

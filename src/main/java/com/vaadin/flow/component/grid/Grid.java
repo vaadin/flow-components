@@ -81,6 +81,7 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -536,7 +537,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         /**
          * Gets whether this column is sortable (e.g. shows the sorting
          * indicators at the client-side).
-         * 
+         *
          * @return <code>true</code> if the column is sortable,
          *         <code>false</code> otherwise
          */
@@ -586,6 +587,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                     "<vaadin-grid-sorter path='%s'>%s</vaadin-grid-sorter>",
                     escapedColumnId, templateInnerHtml);
         }
+
     }
 
     /**
@@ -859,9 +861,13 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public Column<T> addColumn(ValueProvider<T, ?> valueProvider) {
         String columnId = createColumnId(false);
-        return addColumn(TemplateRenderer.<T> of("[[item." + columnId + "]]")
-                .withProperty(columnId,
+
+        Column<T> column = addColumn(TemplateRenderer
+                .<T> of("[[item." + columnId + "]]").withProperty(columnId,
                         value -> String.valueOf(valueProvider.apply(value))));
+        column.comparator = ((a, b) -> compareMaybeComparables(
+                valueProvider.apply(a), valueProvider.apply(b)));
+        return column;
     }
 
     /**
@@ -1851,5 +1857,41 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          * is passed as a property to the client via DataGenerators.
          */
         getDataCommunicator().reset();
+    }
+
+    private static int compareMaybeComparables(Object a, Object b) {
+        if (hasCommonComparableBaseType(a, b)) {
+            return compareComparables(a, b);
+        }
+        return compareComparables(Objects.toString(a, ""),
+                Objects.toString(b, ""));
+    }
+
+    private static boolean hasCommonComparableBaseType(Object a, Object b) {
+        if (a instanceof Comparable<?> && b instanceof Comparable<?>) {
+            Class<?> aClass = a.getClass();
+            Class<?> bClass = b.getClass();
+
+            if (aClass == bClass) {
+                return true;
+            }
+
+            Class<?> baseType = ReflectTools.findCommonBaseType(aClass, bClass);
+            if (Comparable.class.isAssignableFrom(baseType)) {
+                return true;
+            }
+        }
+        if ((a == null && b instanceof Comparable<?>)
+                || (b == null && a instanceof Comparable<?>)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static int compareComparables(Object a, Object b) {
+        return ((Comparator) Comparator.nullsLast(Comparator.naturalOrder()))
+                .compare(a, b);
     }
 }
