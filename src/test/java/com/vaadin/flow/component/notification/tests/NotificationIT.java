@@ -86,6 +86,26 @@ public class NotificationIT extends ComponentDemoTest {
         checkNotificationIsClosed();
     }
 
+    @Test
+    public void styleNotificationContent() {
+        scrollIntoViewAndClick(
+                findElement(By.id("styled-content-notification-button")));
+
+        WebElement content = null;
+        for (WebElement notification : getNotifications()) {
+            List<WebElement> nestedElements = notification
+                    .findElements(By.className("my-style"));
+            if (!nestedElements.isEmpty()) {
+                content = nestedElements.get(0);
+                break;
+            }
+        }
+
+        Assert.assertNotNull("Notification content element is not found",
+                content);
+        Assert.assertEquals("rgba(255, 0, 0, 1)", content.getCssValue("color"));
+    }
+
     private void assertNotificationContent(String expected) {
         List<String> notifications = getNotifications().stream()
                 .map(WebElement::getText).collect(Collectors.toList());

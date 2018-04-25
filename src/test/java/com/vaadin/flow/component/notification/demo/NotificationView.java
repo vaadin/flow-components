@@ -15,12 +15,19 @@
  */
 package com.vaadin.flow.component.notification.demo;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResource;
 
 /**
  * View for {@link Notification} demo.
@@ -36,6 +43,7 @@ public class NotificationView extends DemoView {
         createNotificationWithPosition();
         createNotificationUsingStaticConvenienceMethod();
         createNotificationWithComponents();
+        addStyledNotificationContent();
     }
 
     private void createDefaultNotificaiton() {
@@ -92,5 +100,43 @@ public class NotificationView extends DemoView {
         content.setId("label-inside-notification");
         buttonInside.setId("button-inside-notification");
         addCard("Notification with components", button);
+    }
+
+    private void addStyledNotificationContent() {
+        NativeButton button = new NativeButton(BUTTON_CAPTION);
+
+        // begin-source-example
+        // source-example-heading: Notification with styled content
+        Div content = new Div();
+        content.addClassName("my-style");
+        content.setText("This component is styled using global styles");
+
+        Notification notification = new Notification(content);
+
+        // @formatter:off
+        String styles = ".my-style { "
+                + "  color: red;"
+                + " }";
+        // @formatter:on
+
+        /*
+         * The code below register the style file dynamically. Normally you
+         * use @StyleSheet annotation for the component class. This way is
+         * chosen just to show the style file source code.
+         */
+        StreamRegistration resource = UI.getCurrent().getSession()
+                .getResourceRegistry()
+                .registerResource(new StreamResource("styles.css", () -> {
+                    byte[] bytes = styles.getBytes(StandardCharsets.UTF_8);
+                    return new ByteArrayInputStream(bytes);
+                }));
+        UI.getCurrent().getPage().addStyleSheet(
+                "base://" + resource.getResourceUri().toString());
+
+        button.addClickListener(event -> notification.open());
+        // end-source-example
+
+        button.setId("styled-content-notification-button");
+        addCard("Notification with styled content", button);
     }
 }
