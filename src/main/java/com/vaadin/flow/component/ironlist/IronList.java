@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.vaadin.flow.component.ClientDelegate;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
@@ -337,7 +337,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
         setRenderer(renderer);
     }
 
-    @ClientDelegate(DisabledUpdateMode.ALWAYS)
+    @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setRequestedRange(int start, int length) {
         getDataCommunicator().setRequestedRange(start, length);
     }
