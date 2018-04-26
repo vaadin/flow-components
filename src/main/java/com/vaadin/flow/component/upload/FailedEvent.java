@@ -34,7 +34,7 @@ public class FailedEvent extends FinishedEvent {
      * @param MIMEType
      *            the MIME type of the received file.
      * @param length
-     *            the length of the received file.
+     *            the number of uploaded bytes
      * @param reason
      *            exception that failed the upload
      */
@@ -53,7 +53,7 @@ public class FailedEvent extends FinishedEvent {
      * @param MIMEType
      *            the MIME type of the received file.
      * @param length
-     *            the length of the received file.
+     *            the number of uploaded bytes
      */
     public FailedEvent(Upload source, String filename, String MIMEType,
             long length) {
@@ -67,6 +67,16 @@ public class FailedEvent extends FinishedEvent {
      */
     public Exception getReason() {
         return reason;
+    }
+
+    /**
+     * Gets the number of uploaded bytes.
+     *
+     * @return the number of uploaded bytes
+     */
+    @Override
+    public long getContentLength() {
+        return super.getContentLength();
     }
 
 }
