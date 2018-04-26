@@ -20,7 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.time.LocalDate;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,19 +46,47 @@ public class DatePickerTest {
     }
 
     @Test
-    public void defaultCtor_valueIsSetImplicitely() {
-        AtomicInteger valueSetCount = new AtomicInteger();
-        DatePicker picker = new DatePicker() {
-            @Override
-            protected void setValueAsString(String valueAsString) {
-                valueSetCount.incrementAndGet();
-                super.setValueAsString(valueAsString);
-            }
-        };
+    public void datePicker_basicCases() {
+        DatePicker picker = new DatePicker();
 
-        assertEquals(1, valueSetCount.get());
+        assertEquals(null, picker.getValue());
+        assertFalse(picker.getElement().hasProperty("value"));
+
+        picker.setValue(LocalDate.of(2018, 4, 25));
+        assertEquals("2018-04-25", picker.getElement().getProperty("value"));
+
+        picker.getElement().setProperty("value", "2017-03-24");
+        assertEquals(LocalDate.of(2017, 3, 24), picker.getValue());
+
+        // Cannot do removeProperty because
+        // https://github.com/vaadin/flow/issues/3994
+        picker.getElement().setProperty("value", null);
+        assertEquals(null, picker.getValue());
+    }
+
+    @Test
+    public void defaultCtor_does_not_update_values() {
+        DatePicker picker = new DatePicker();
         assertNull(picker.getValue());
-        assertEquals("", picker.getValueAsStringString());
+        assertEquals(null, picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void setInitialValue() {
+        DatePicker picker = new DatePicker(LocalDate.of(2018, 4, 25));
+        assertEquals(LocalDate.of(2018, 4, 25), picker.getValue());
+        assertEquals("2018-04-25", picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void updatingToNullValue_displaysEmptyString() {
+        DatePicker picker = new DatePicker();
+
+        picker.setValue(LocalDate.now());
+        picker.setValue(null);
+
+        assertNull(picker.getValue());
+        assertEquals("", picker.getElement().getProperty("value"));
     }
 
     @Test

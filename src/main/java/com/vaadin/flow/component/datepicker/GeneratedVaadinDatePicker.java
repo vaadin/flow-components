@@ -15,19 +15,21 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Focusable;
 import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.Synchronize;
 import elemental.json.JsonObject;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 
 /**
  * <p>
@@ -234,12 +236,12 @@ import com.vaadin.flow.dom.Element;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.DatePickerElement#3.0.0-beta6",
-        "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.DatePickerElement#3.0.0", "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-date-picker")
 @HtmlImport("frontend://bower_components/vaadin-date-picker/src/vaadin-date-picker.html")
-public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePicker<R>>
-        extends Component implements HasStyle, Focusable<R> {
+public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePicker<R, T>, T>
+        extends AbstractSinglePropertyField<R, T>
+        implements HasStyle, Focusable<R> {
 
     /**
      * <p>
@@ -303,56 +305,6 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      */
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * The value for this element.
-     * </p>
-     * <p>
-     * Supported date formats:
-     * </p>
-     * <ul>
-     * <li>ISO 8601 {@code &quot;YYYY-MM-DD&quot;} (default)</li>
-     * <li>6-digit extended ISO 8601 {@code &quot;+YYYYYY-MM-DD&quot;},
-     * {@code &quot;-YYYYYY-MM-DD&quot;}
-     * <p>
-     * This property is synchronized automatically from client side when a
-     * 'value-changed' event happens.</li>
-     * </ul>
-     * 
-     * @return the {@code value} property from the webcomponent
-     */
-    @Synchronize(property = "value", value = "value-changed")
-    protected String getValueAsStringString() {
-        return getElement().getProperty("value");
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * The value for this element.
-     * </p>
-     * <p>
-     * Supported date formats:
-     * </p>
-     * <ul>
-     * <li>ISO 8601 {@code &quot;YYYY-MM-DD&quot;} (default)</li>
-     * <li>6-digit extended ISO 8601 {@code &quot;+YYYYYY-MM-DD&quot;},
-     * {@code &quot;-YYYYYY-MM-DD&quot;}</li>
-     * </ul>
-     * 
-     * @param valueAsString
-     *            the String value to set
-     */
-    protected void setValueAsString(String valueAsString) {
-        getElement().setProperty("value",
-                valueAsString == null ? "" : valueAsString);
     }
 
     /**
@@ -574,71 +526,71 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * 
      * <pre>
      * <code>        {
-     * 	          // An array with the full names of months starting
-     * 	          // with January.
-     * 	          monthNames: [
-     * 	            'January', 'February', 'March', 'April', 'May',
-     * 	            'June', 'July', 'August', 'September',
-     * 	            'October', 'November', 'December'
-     * 	          ],
+     *            // An array with the full names of months starting
+     *            // with January.
+     *            monthNames: [
+     *              'January', 'February', 'March', 'April', 'May',
+     *              'June', 'July', 'August', 'September',
+     *              'October', 'November', 'December'
+     *            ],
      * 
-     * 	          // An array of weekday names starting with Sunday. Used
-     * 	          // in screen reader announcements.
-     * 	          weekdays: [
-     * 	            'Sunday', 'Monday', 'Tuesday', 'Wednesday',
-     * 	            'Thursday', 'Friday', 'Saturday'
-     * 	          ],
+     *            // An array of weekday names starting with Sunday. Used
+     *            // in screen reader announcements.
+     *            weekdays: [
+     *              'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+     *              'Thursday', 'Friday', 'Saturday'
+     *            ],
      * 
-     * 	          // An array of short weekday names starting with Sunday.
-     * 	          // Displayed in the calendar.
-     * 	          weekdaysShort: [
-     * 	            'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
-     * 	          ],
+     *            // An array of short weekday names starting with Sunday.
+     *            // Displayed in the calendar.
+     *            weekdaysShort: [
+     *              'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+     *            ],
      * 
-     * 	          // An integer indicating the first day of the week
-     * 	          // (0 = Sunday, 1 = Monday, etc.).
-     * 	          firstDayOfWeek: 0,
+     *            // An integer indicating the first day of the week
+     *            // (0 = Sunday, 1 = Monday, etc.).
+     *            firstDayOfWeek: 0,
      * 
-     * 	          // Used in screen reader announcements along with week
-     * 	          // numbers, if they are displayed.
-     * 	          week: 'Week',
+     *            // Used in screen reader announcements along with week
+     *            // numbers, if they are displayed.
+     *            week: 'Week',
      * 
-     * 	          // Translation of the Calendar icon button title.
-     * 	          calendar: 'Calendar',
+     *            // Translation of the Calendar icon button title.
+     *            calendar: 'Calendar',
      * 
-     * 	          // Translation of the Clear icon button title.
-     * 	          clear: 'Clear',
+     *            // Translation of the Clear icon button title.
+     *            clear: 'Clear',
      * 
-     * 	          // Translation of the Today shortcut button text.
-     * 	          today: 'Today',
+     *            // Translation of the Today shortcut button text.
+     *            today: 'Today',
      * 
-     * 	          // Translation of the Cancel button text.
-     * 	          cancel: 'Cancel',
+     *            // Translation of the Cancel button text.
+     *            cancel: 'Cancel',
      * 
-     * 	          // A function to format given {@code Object} as
-     * 	          // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
-     * 	          formatDate: d =&gt; {
-     * 	            // returns a string representation of the given
-     * 	            // object in 'MM/DD/YYYY' -format
-     * 	          },
+     *            // A function to format given {@code Object} as
+     *            // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
+     *            formatDate: d =&gt; {
+     *              // returns a string representation of the given
+     *              // object in 'MM/DD/YYYY' -format
+     *            },
      * 
-     * 	          // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     * 	          // Must properly parse (at least) text
-     * 	          // formatted by {@code formatDate}.
-     * 	          // Setting the property to null will disable
-     * 	          // keyboard input feature.
-     * 	          parseDate: text =&gt; {
-     * 	            // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
-     * 	            // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     * 	          }
+     *            // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
+     *            // Must properly parse (at least) text
+     *            // formatted by {@code formatDate}.
+     *            // Setting the property to null will disable
+     *            // keyboard input feature.
+     *            parseDate: text =&gt; {
+     *              // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
+     *              // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
+     *            }
      * 
-     * 	          // A function to format given {@code monthName} and
-     * 	          // {@code fullYear} integer as calendar title string.
-     * 	          formatTitle: (monthName, fullYear) =&gt; {
-     * 	            return monthName + ' ' + fullYear;
-     * 	          }
-     * 	        }&lt;p&gt;This property is not synchronized automatically from the client side, so the returned value may not be the same as in client side.
-     * 	</code>
+     *            // A function to format given {@code monthName} and
+     *            // {@code fullYear} integer as calendar title string.
+     *            formatTitle: (monthName, fullYear) =&gt; {
+     *              return monthName + ' ' + fullYear;
+     *            }
+     *          }&lt;p&gt;This property is not synchronized automatically from the client side, so the returned value may not be the same as in client side.
+     *  </code>
      * </pre>
      * 
      * @return the {@code i18n} property from the webcomponent
@@ -662,71 +614,71 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * 
      * <pre>
      * <code>        {
-     * 	          // An array with the full names of months starting
-     * 	          // with January.
-     * 	          monthNames: [
-     * 	            'January', 'February', 'March', 'April', 'May',
-     * 	            'June', 'July', 'August', 'September',
-     * 	            'October', 'November', 'December'
-     * 	          ],
+     *            // An array with the full names of months starting
+     *            // with January.
+     *            monthNames: [
+     *              'January', 'February', 'March', 'April', 'May',
+     *              'June', 'July', 'August', 'September',
+     *              'October', 'November', 'December'
+     *            ],
      * 
-     * 	          // An array of weekday names starting with Sunday. Used
-     * 	          // in screen reader announcements.
-     * 	          weekdays: [
-     * 	            'Sunday', 'Monday', 'Tuesday', 'Wednesday',
-     * 	            'Thursday', 'Friday', 'Saturday'
-     * 	          ],
+     *            // An array of weekday names starting with Sunday. Used
+     *            // in screen reader announcements.
+     *            weekdays: [
+     *              'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+     *              'Thursday', 'Friday', 'Saturday'
+     *            ],
      * 
-     * 	          // An array of short weekday names starting with Sunday.
-     * 	          // Displayed in the calendar.
-     * 	          weekdaysShort: [
-     * 	            'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
-     * 	          ],
+     *            // An array of short weekday names starting with Sunday.
+     *            // Displayed in the calendar.
+     *            weekdaysShort: [
+     *              'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+     *            ],
      * 
-     * 	          // An integer indicating the first day of the week
-     * 	          // (0 = Sunday, 1 = Monday, etc.).
-     * 	          firstDayOfWeek: 0,
+     *            // An integer indicating the first day of the week
+     *            // (0 = Sunday, 1 = Monday, etc.).
+     *            firstDayOfWeek: 0,
      * 
-     * 	          // Used in screen reader announcements along with week
-     * 	          // numbers, if they are displayed.
-     * 	          week: 'Week',
+     *            // Used in screen reader announcements along with week
+     *            // numbers, if they are displayed.
+     *            week: 'Week',
      * 
-     * 	          // Translation of the Calendar icon button title.
-     * 	          calendar: 'Calendar',
+     *            // Translation of the Calendar icon button title.
+     *            calendar: 'Calendar',
      * 
-     * 	          // Translation of the Clear icon button title.
-     * 	          clear: 'Clear',
+     *            // Translation of the Clear icon button title.
+     *            clear: 'Clear',
      * 
-     * 	          // Translation of the Today shortcut button text.
-     * 	          today: 'Today',
+     *            // Translation of the Today shortcut button text.
+     *            today: 'Today',
      * 
-     * 	          // Translation of the Cancel button text.
-     * 	          cancel: 'Cancel',
+     *            // Translation of the Cancel button text.
+     *            cancel: 'Cancel',
      * 
-     * 	          // A function to format given {@code Object} as
-     * 	          // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
-     * 	          formatDate: d =&gt; {
-     * 	            // returns a string representation of the given
-     * 	            // object in 'MM/DD/YYYY' -format
-     * 	          },
+     *            // A function to format given {@code Object} as
+     *            // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
+     *            formatDate: d =&gt; {
+     *              // returns a string representation of the given
+     *              // object in 'MM/DD/YYYY' -format
+     *            },
      * 
-     * 	          // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     * 	          // Must properly parse (at least) text
-     * 	          // formatted by {@code formatDate}.
-     * 	          // Setting the property to null will disable
-     * 	          // keyboard input feature.
-     * 	          parseDate: text =&gt; {
-     * 	            // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
-     * 	            // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     * 	          }
+     *            // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
+     *            // Must properly parse (at least) text
+     *            // formatted by {@code formatDate}.
+     *            // Setting the property to null will disable
+     *            // keyboard input feature.
+     *            parseDate: text =&gt; {
+     *              // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
+     *              // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
+     *            }
      * 
-     * 	          // A function to format given {@code monthName} and
-     * 	          // {@code fullYear} integer as calendar title string.
-     * 	          formatTitle: (monthName, fullYear) =&gt; {
-     * 	            return monthName + ' ' + fullYear;
-     * 	          }
-     * 	        }
-     * 	</code>
+     *            // A function to format given {@code monthName} and
+     *            // {@code fullYear} integer as calendar title string.
+     *            formatTitle: (monthName, fullYear) =&gt; {
+     *              return monthName + ' ' + fullYear;
+     *            }
+     *          }
+     *  </code>
      * </pre>
      * 
      * @param i18n
@@ -1034,7 +986,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
     protected void checkValidity(String value) {
     }
 
-    public static class InvalidChangeEvent<R extends GeneratedVaadinDatePicker<R>>
+    public static class InvalidChangeEvent<R extends GeneratedVaadinDatePicker<R, ?>>
             extends ComponentEvent<R> {
         private final boolean invalid;
 
@@ -1065,37 +1017,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
                                         event.isUserOriginated())));
     }
 
-    public static class ValueAsStringChangeEvent<R extends GeneratedVaadinDatePicker<R>>
-            extends ComponentEvent<R> {
-        private final String valueAsString;
-
-        public ValueAsStringChangeEvent(R source, boolean fromClient) {
-            super(source, fromClient);
-            this.valueAsString = source.getValueAsStringString();
-        }
-
-        public String getValueAsString() {
-            return valueAsString;
-        }
-    }
-
-    /**
-     * Adds a listener for {@code value-changed} events fired by the
-     * webcomponent.
-     * 
-     * @param listener
-     *            the listener
-     * @return a {@link Registration} for removing the event listener
-     */
-    protected Registration addValueAsStringChangeListener(
-            ComponentEventListener<ValueAsStringChangeEvent<R>> listener) {
-        return getElement().addPropertyChangeListener("value",
-                event -> listener.onComponentEvent(
-                        new ValueAsStringChangeEvent<R>((R) this,
-                                event.isUserOriginated())));
-    }
-
-    public static class OpenedChangeEvent<R extends GeneratedVaadinDatePicker<R>>
+    public static class OpenedChangeEvent<R extends GeneratedVaadinDatePicker<R, ?>>
             extends ComponentEvent<R> {
         private final boolean opened;
 
@@ -1175,5 +1097,40 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
         getElement().removeAllChildren();
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param elementPropertyType
+     *            the type of the element property
+     * @param presentationToModel
+     *            a function that converts a string value to a model value
+     * @param modelToPresentation
+     *            a function that converts a model value to a string value
+     * @param <P>
+     *            the property type
+     */
+    public <P> GeneratedVaadinDatePicker(T initialValue, T defaultValue,
+            Class<P> elementPropertyType,
+            SerializableFunction<P, T> presentationToModel,
+            SerializableFunction<T, P> modelToPresentation) {
+        super("value", defaultValue, elementPropertyType, presentationToModel,
+                modelToPresentation);
+        if (initialValue != null) {
+            setModelValue(initialValue, false);
+            setPresentationValue(initialValue);
+        }
+    }
+
+    /**
+     * Default constructor.
+     */
+    public GeneratedVaadinDatePicker() {
+        this(null, null, null, null, null);
     }
 }

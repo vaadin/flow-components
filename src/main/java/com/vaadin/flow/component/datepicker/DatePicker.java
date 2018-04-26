@@ -17,7 +17,6 @@ package com.vaadin.flow.component.datepicker;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -30,6 +29,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
@@ -46,11 +46,19 @@ import elemental.json.JsonObject;
  *
  */
 @JavaScript("frontend://datepickerConnector.js")
-public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
-        implements HasValue<DatePicker, LocalDate>, HasSize, HasValidation {
+public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
+        implements HasSize, HasValidation {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_DATE;
     private static final String I18N_PROPERTY = "i18n";
+
+    private final static SerializableFunction<String, LocalDate> PARSER = s -> {
+        return s == null || s.isEmpty() ? null : LocalDate.parse(s);
+    };
+
+    private final static SerializableFunction<LocalDate, String> FORMATTER = d -> {
+        return d == null ? "" : d.toString();
+    };
+
     private Locale locale;
 
     /**
@@ -69,9 +77,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * @see #setValue(LocalDate)
      */
     public DatePicker(LocalDate initialDate) {
-        getElement().synchronizeProperty("value", "value-changed");
+        super(initialDate, null, String.class, PARSER, FORMATTER);
         getElement().synchronizeProperty("invalid", "invalid-changed");
-        doSetValue(initialDate);
         setLocale(UI.getCurrent().getLocale());
     }
 
@@ -195,11 +202,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      *            <code>null</code> to remove any minimum constraints
      */
     public void setMin(LocalDate min) {
-        if (min == null) {
-            setMinAsString("");
-        } else {
-            setMinAsString(FORMATTER.format(min));
-        }
+        setMinAsString(FORMATTER.apply(min));
     }
 
     /**
@@ -210,7 +213,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      *         <code>null</code> if there's no minimum
      */
     public LocalDate getMin() {
-        return convertDateFromString(getMinAsStringString());
+        return PARSER.apply(getMinAsStringString());
     }
 
     /**
@@ -222,11 +225,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      *            <code>null</code> to remove any maximum constraints
      */
     public void setMax(LocalDate max) {
-        if (max == null) {
-            setMaxAsString("");
-        } else {
-            setMaxAsString(FORMATTER.format(max));
-        }
+        setMaxAsString(FORMATTER.apply(max));
     }
 
     /**
@@ -237,7 +236,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      *         <code>null</code> if there's no maximum
      */
     public LocalDate getMax() {
-        return convertDateFromString(getMaxAsStringString());
+        return PARSER.apply(getMaxAsStringString());
     }
 
     /**
@@ -248,7 +247,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * compatibility can be different based on the browser and mobile devices,
      * you can check here for more details: <a href=
      * "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleDateString</a>
-     * 
+     *
      * @param locale
      *            the locale set to the date picker, cannot be null
      */
@@ -330,30 +329,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
     }
 
     @Override
-    public void setValue(LocalDate value) {
-        if (!Objects.equals(value, getValue())) {
-            doSetValue(value);
-        }
-    }
-
-    @Override
-    public LocalDate getValue() {
-        return convertDateFromString(super.getValueAsStringString());
-    }
-
-    @Override
-    public Registration addValueChangeListener(
-            ValueChangeListener<DatePicker, LocalDate> listener) {
-        return getElement().addPropertyChangeListener(
-                getClientValuePropertyName(),
-                event -> listener
-                        .onComponentEvent(new ValueChangeEvent<>(this, this,
-                                convertDateFromString(
-                                        (String) event.getOldValue()),
-                                event.isUserOriginated())));
-    }
-
-    @Override
     public void setErrorMessage(String errorMessage) {
         if (errorMessage == null) {
             super.setErrorMessage("");
@@ -431,11 +406,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      *            the LocalDate value to set
      */
     public void setInitialPosition(LocalDate initialPosition) {
-        if (initialPosition == null) {
-            setInitialPosition("");
-        } else {
-            setInitialPosition(FORMATTER.format(initialPosition));
-        }
+        setInitialPosition(FORMATTER.apply(initialPosition));
     }
 
     /**
@@ -450,7 +421,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
      * @return the {@code initialPosition} property from the datepicker
      */
     public LocalDate getInitialPosition() {
-        return convertDateFromString(getInitialPositionString());
+        return PARSER.apply(getInitialPositionString());
     }
 
     @Override
@@ -500,7 +471,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
 
     /**
      * Sets the opened property of the datepicker to open or close its overlay.
-     * 
+     *
      * @param opened
      *            {@code true} to open the datepicker overlay, {@code false} to
      *            close it
@@ -550,20 +521,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
     }
 
     @Override
-    public void setReadonly(boolean readonly) {
-        super.setReadonly(readonly);
-    }
-
-    /**
-     * Gets the {@code readonly} property from the DatePicker.
-     *
-     * @return the {@code readonly} property from the DatePicker
-     */
-    public boolean isReadonly() {
-        return isReadonlyBoolean();
-    }
-
-    @Override
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent<DatePicker>> listener) {
         return super.addOpenedChangeListener(listener);
@@ -573,21 +530,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker>
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent<DatePicker>> listener) {
         return super.addInvalidChangeListener(listener);
-    }
-
-    private LocalDate convertDateFromString(String value) {
-        if (value == null || value.isEmpty()) {
-            return null;
-        }
-        return LocalDate.parse(value, FORMATTER);
-    }
-
-    private void doSetValue(LocalDate value) {
-        if (value == null) {
-            setValueAsString("");
-        } else {
-            setValueAsString(FORMATTER.format(value));
-        }
     }
 
     /**
