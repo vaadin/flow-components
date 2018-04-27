@@ -16,11 +16,10 @@
 package com.vaadin.flow.component.tabs;
 
 import javax.annotation.Generated;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Component;
 
 /**
  * <p>
@@ -87,7 +86,7 @@ Tab 1
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.TabElement#2.0.0-beta3", "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.TabElement#2.0.0", "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-tab")
 @HtmlImport("frontend://bower_components/vaadin-tabs/src/vaadin-tab.html")
 public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
