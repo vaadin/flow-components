@@ -39,7 +39,7 @@ public class TextFieldTest {
                 textField.getValue());
 
         thrown.expect(NullPointerException.class);
-        thrown.expectMessage("value cannot be null");
+        thrown.expectMessage("Null value is not supported");
 
         textField.setValue(null);
     }

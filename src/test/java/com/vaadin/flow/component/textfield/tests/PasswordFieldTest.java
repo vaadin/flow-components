@@ -39,7 +39,7 @@ public class PasswordFieldTest {
                 passwordField.getValue());
 
         thrown.expect(NullPointerException.class);
-        thrown.expectMessage("value cannot be null");
+        thrown.expectMessage("Null value is not supported");
 
         passwordField.setValue(null);
     }
