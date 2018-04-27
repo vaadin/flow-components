@@ -10,7 +10,7 @@ layout: page
 Vaadin Charts 6 comes with some good enhancements, most notably: CSS styling.
 This necessitated removal of many Java style configuration API among other changes.
 
-=== Summary
+== Summary
 
 * Upgraded to HighCharts 5
 * Styling is now primarily done with CSS
@@ -21,7 +21,7 @@ This necessitated removal of many Java style configuration API among other chang
 * Plot background image is no longer supported
 * SVG Generator is no longer supported
 
-=== Replaced types
+== Replaced types
 
 [options="header"]
 |===
@@ -30,7 +30,7 @@ This necessitated removal of many Java style configuration API among other chang
 | [classname]#ZoomType# | [classname]#Dimension#
 |===
 
-=== Dropped types
+== Dropped types
 
 [options="header"]
 |===
@@ -38,7 +38,7 @@ This necessitated removal of many Java style configuration API among other chang
 | [classname]#Handles# | Navigator.handles
 |===
 
-=== Dropped properties
+== Dropped properties
 
 [cols="2,5",options="header"]
 |===
@@ -86,7 +86,7 @@ This necessitated removal of many Java style configuration API among other chang
 
 More information about Charts styling can be obtained in <<dummy/../../../charts/java-api/css-styling#css.styling,"CSS Styling">>.
 
-=== Properties with new types
+== Properties with new types
 
 [options="header"]
 |===
