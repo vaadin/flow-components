@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.component.upload;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasStyle;
 import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.HasStyle;
 import elemental.json.JsonObject;
 import elemental.json.JsonArray;
 import com.vaadin.flow.component.Synchronize;
@@ -28,6 +27,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -113,7 +113,7 @@ import com.vaadin.flow.dom.Element;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.UploadElement#4.0.0-beta2", "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.UploadElement#4.0.0", "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-upload")
 @HtmlImport("frontend://bower_components/vaadin-upload/src/vaadin-upload.html")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
@@ -423,12 +423,13 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * <p>
      * Specifies if the maximum number of files have been uploaded
      * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
+     * This property is synchronized automatically from client side when a
+     * 'max-files-reached-changed' event happens.
      * </p>
      * 
      * @return the {@code maxFilesReached} property from the webcomponent
      */
+    @Synchronize(property = "maxFilesReached", value = "max-files-reached-changed")
     protected boolean isMaxFilesReachedBoolean() {
         return getElement().getProperty("maxFilesReached", false);
     }
@@ -612,6 +613,40 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      */
     protected void setWithCredentials(boolean withCredentials) {
         getElement().setProperty("withCredentials", withCredentials);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Pass-through to input's capture attribute. Allows user to trigger device
+     * inputs such as camera or microphone immediately.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     * 
+     * @return the {@code capture} property from the webcomponent
+     */
+    protected String getCaptureString() {
+        return getElement().getProperty("capture");
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Pass-through to input's capture attribute. Allows user to trigger device
+     * inputs such as camera or microphone immediately.
+     * </p>
+     * 
+     * @param capture
+     *            the String value to set
+     */
+    protected void setCapture(String capture) {
+        getElement().setProperty("capture", capture == null ? "" : capture);
     }
 
     /**
