@@ -38,12 +38,7 @@ You also need to define the Vaadin add-ons repository if not already defined:
 [[charts.installing.license]]
 == Installing a License Key
 
-You need to have a valid license in order to develop your application with Vaadin Charts.
-
-You can purchase Vaadin Charts or obtain a free trial key from the link:https://vaadin.com/pro/licenses[license section] in Vaadin website.
-You need to be a registered user to obtain the key.
-
-24 hours after you open the application with Vaadin Charts in a local browser, you will see a pop-up that asks you to validate your subscription.
+You need to have a valid license in order to develop your application with Vaadin Charts. 24 hours after you open the application with Vaadin Charts in a local browser, you will see a pop-up that asks you to validate your subscription.
 This popup will open a new tab where you will have to login using your Vaadin account.
 If the license is valid, it will be saved to the local storage of the browser and you will not see the pop-up again.
 
