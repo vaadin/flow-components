@@ -15,10 +15,8 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import java.util.Objects;
-
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasValue;
 
 /**
  * Server-side component for the {@code vaadin-checkbox} element.
@@ -29,21 +27,23 @@ import com.vaadin.flow.component.HasValue;
  *
  * @author Vaadin Ltd
  */
-public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
-        implements HasSize, HasValue<Checkbox, Boolean> {
+public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
+        implements HasSize {
 
     /**
      * Default constructor.
      */
     public Checkbox() {
+        // set initial value to false is a temporal fix for
+        // https://github.com/vaadin/vaadin-checkbox-flow/issues/22
+        // until the underlying flow issue is fixed
+        // https://github.com/vaadin/flow/issues/3496
+        super(false, false, false);
         getElement().synchronizeProperty("indeterminate",
                 "indeterminate-changed");
         getElement().synchronizeProperty("checked", "checked-changed");
         // https://github.com/vaadin/vaadin-checkbox/issues/25
         setIndeterminate(false);
-        // temporal fix for https://github.com/vaadin/vaadin-checkbox-flow/issues/22
-        // until the underlying flow issue is fixed https://github.com/vaadin/flow/issues/3496
-        setValue(false);
     }
 
     /**
@@ -85,13 +85,15 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
      * Constructs a checkbox with the initial label text and value change
      * listener.
      *
-     * @param label    the label text to set
-     * @param listener the value change listener to add
+     * @param label
+     *            the label text to set
+     * @param listener
+     *            the value change listener to add
      * @see #setLabel(String)
-     * @see #addValueChangeListener(HasValue.ValueChangeListener)
+     * @see #addValueChangeListener(AbstractField.ValueChangeListener)
      */
     public Checkbox(String label,
-                    ValueChangeListener<Checkbox, Boolean> listener) {
+            ValueChangeListener<Checkbox, Boolean> listener) {
         this(label);
         addValueChangeListener(listener);
     }
@@ -126,32 +128,6 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox>
      */
     public void setAriaLabel(String ariaLabel) {
         getElement().setAttribute("aria-label", ariaLabel);
-    }
-
-    /**
-     * Set whether this checkbox should be checked. Default value is <code>false</code>.
-     *
-     * @param value the value to set, never <code>null</code>
-     * @see #isIndeterminate()
-     */
-    public void setValue(Boolean value) {
-        Objects.requireNonNull(value, "Null value not accepted for Checkbox.");
-        super.setChecked(value);
-    }
-
-    /**
-     * Get the current checked state of this checkbox. The default value is <code>false</code>.
-     *
-     * @return the checked state of this checkbox, never <code>null</code>
-     * @see #isIndeterminate()
-     */
-    public Boolean getValue() {
-        return isCheckedBoolean();
-    }
-
-    @Override
-    public Boolean getEmptyValue() {
-        return Boolean.FALSE;
     }
 
     /**
