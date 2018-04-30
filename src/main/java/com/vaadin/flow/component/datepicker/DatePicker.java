@@ -118,7 +118,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *            the listener to receive value change events
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
-    public DatePicker(ValueChangeListener<DatePicker, LocalDate> listener) {
+    public DatePicker(
+            ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
         this();
         addValueChangeListener(listener);
     }
@@ -136,7 +137,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(String label,
-            ValueChangeListener<DatePicker, LocalDate> listener) {
+            ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
         this(label);
         addValueChangeListener(listener);
     }
@@ -153,7 +154,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(LocalDate initialDate,
-            ValueChangeListener<DatePicker, LocalDate> listener) {
+            ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
         this(initialDate);
         addValueChangeListener(listener);
     }
@@ -173,7 +174,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(String label, LocalDate initialDate,
-            ValueChangeListener<DatePicker, LocalDate> listener) {
+            ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
         this(initialDate);
         setValue(initialDate);
         addValueChangeListener(listener);
@@ -276,11 +277,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private void initConnector() {
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached DatePicker"))
-                        .getPage()
-                .executeJavaScript(
+                .getPage().executeJavaScript(
                         "window.Vaadin.Flow.datepickerConnector.initLazy($0)",
-                                getElement());
+                        getElement());
     }
+
     /**
      * Gets the internationalization properties previously set for this
      * component.
