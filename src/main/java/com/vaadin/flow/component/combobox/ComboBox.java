@@ -56,13 +56,13 @@ import elemental.json.JsonValue;
  * @param <T>
  *            the type of the items to be inserted in the combo box
  */
-public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
-        HasSize, HasValidation, HasValue<ComboBox<T>, T>, HasDataProvider<T> {
+public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
+        implements HasSize, HasValidation, HasValue<ComboBox<T>, T>,
+        HasDataProvider<T> {
     private static final String ITEM_LABEL_PROPERTY = "label";
     private static final String KEY_PROPERTY = "key";
     private static final String SELECTED_ITEM_PROPERTY_NAME = "selectedItem";
 
-    private T oldValue;
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
@@ -77,20 +77,34 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
 
     private List<T> temporaryFilteredItems;
 
+    private static <T> T presentationToModel(ComboBox<T> comboBox,
+            JsonValue presentation) {
+        return comboBox.getValue(presentation);
+    }
+
+    private static <T> JsonValue modelToPresentation(ComboBox<T> comboBox,
+            T model) {
+
+        if (model == null) {
+            return Json.createNull();
+        }
+        int updatedIndex = comboBox.itemsFromDataProvider.indexOf(model);
+        if (updatedIndex < 0) {
+            throw new IllegalArgumentException(
+                    "The provided value is not part of ComboBox: " + model);
+        }
+        return comboBox
+                .generateJson(comboBox.itemsFromDataProvider.get(updatedIndex));
+    }
+
     /**
      * Default constructor. Creates an empty combo box.
      *
      */
     public ComboBox() {
-        getElement().synchronizeProperty(SELECTED_ITEM_PROPERTY_NAME,
-                "selected-item-changed");
+        super(null, null, JsonValue.class, ComboBox::presentationToModel,
+                ComboBox::modelToPresentation);
         getElement().synchronizeProperty(SELECTED_ITEM_PROPERTY_NAME, "change");
-
-        getElement().addEventListener("selected-item-changed", event -> {
-            fireEvent(new HasValue.ValueChangeEvent<>(this, this, oldValue,
-                    true));
-            oldValue = getValue();
-        });
 
         setItemValuePath(KEY_PROPERTY);
 
@@ -428,49 +442,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>> implements
     }
 
     @Override
-    public T getEmptyValue() {
-        return null;
-    }
-
-    @Override
-    public void setValue(T value) {
-        if (value == null) {
-            if (getValue() != null) {
-                getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
-                        Json.createNull());
-            }
-            return;
-        }
-        int updatedIndex = itemsFromDataProvider.indexOf(value);
-        if (updatedIndex < 0) {
-            throw new IllegalArgumentException(
-                    "The provided value is not part of ComboBox: " + value);
-        }
-        getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
-                generateJson(itemsFromDataProvider.get(updatedIndex)));
-    }
-
-    @Override
-    public T getValue() {
-        return getValue(
-                getElement().getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME));
-    }
-
-    @Override
     public Registration addCustomValueSetListener(
             ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
         return super.addCustomValueSetListener(listener);
-    }
-
-    @Override
-    public Registration addValueChangeListener(
-            ValueChangeListener<ComboBox<T>, T> listener) {
-        return getElement().addPropertyChangeListener(
-                SELECTED_ITEM_PROPERTY_NAME,
-                event -> listener
-                        .onComponentEvent(new HasValue.ValueChangeEvent<>(this,
-                                this, getValue(event.getOldValue()),
-                                event.isUserOriginated())));
     }
 
     private T getValue(Serializable value) {
