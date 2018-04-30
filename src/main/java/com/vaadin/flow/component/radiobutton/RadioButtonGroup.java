@@ -18,8 +18,8 @@ package com.vaadin.flow.component.radiobutton;
 import java.io.Serializable;
 import java.util.Objects;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -38,7 +38,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 public class RadioButtonGroup<T>
-        extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>>
+        extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemsAndComponents<T>,
         SingleSelect<RadioButtonGroup<T>, T>, HasDataProvider<T> {
 
@@ -52,10 +52,27 @@ public class RadioButtonGroup<T>
 
     private boolean isReadOnly;
 
+    private static <T> T presentationToModel(
+            RadioButtonGroup<T> radioButtonGroup, String presentation) {
+        if (!radioButtonGroup.keyMapper.containsKey(presentation)) {
+            return null;
+        }
+        return radioButtonGroup.keyMapper.get(presentation);
+    };
+
+    private static <T> String modelToPresentation(
+            RadioButtonGroup<T> radioButtonGroup, T model) {
+        if (!radioButtonGroup.keyMapper.has(model)) {
+            return null;
+        }
+        return radioButtonGroup.keyMapper.key(model);
+    };
+
     public RadioButtonGroup() {
-        getElement().synchronizeProperty(getClientValuePropertyName(),
-                getClientPropertyChangeEventName());
-        getElement().addPropertyChangeListener(getClientValuePropertyName(),
+        super(null, null, String.class, RadioButtonGroup::presentationToModel,
+                RadioButtonGroup::modelToPresentation);
+
+        getElement().addPropertyChangeListener("value",
                 this::validateSelectionEnabledState);
     }
 
@@ -71,21 +88,6 @@ public class RadioButtonGroup<T>
     }
 
     @Override
-    public void setValue(T value) {
-        if (!keyMapper.has(value)) {
-            return;
-        }
-        getElement().setProperty(getClientValuePropertyName(),
-                keyMapper.key(value));
-    }
-
-    @Override
-    public T getValue() {
-        return keyMapper
-                .get(getElement().getProperty(getClientValuePropertyName()));
-    }
-
-    @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider = dataProvider;
         refresh();
@@ -93,11 +95,10 @@ public class RadioButtonGroup<T>
 
     @Override
     public Registration addValueChangeListener(
-            ValueChangeListener<RadioButtonGroup<T>, T> listener) {
-        return getElement()
-                .addPropertyChangeListener(getClientValuePropertyName(),
-                        event -> listener.onComponentEvent(
-                                createValueChangeEvent(event)));
+            ValueChangeListener<? super ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
+        return getElement().addPropertyChangeListener(
+                getClientValuePropertyName(),
+                event -> listener.valueChanged(createValueChangeEvent(event)));
     }
 
     /**
@@ -207,11 +208,11 @@ public class RadioButtonGroup<T>
         button.add(getItemRenderer().createComponent(button.getItem()));
     }
 
-    private HasValue.ValueChangeEvent<RadioButtonGroup<T>, T> createValueChangeEvent(
+    private AbstractField.ComponentValueChangeEvent<RadioButtonGroup<T>, T> createValueChangeEvent(
             PropertyChangeEvent event) {
         Serializable oldKey = event.getOldValue();
         T oldValue = keyMapper.get(oldKey == null ? null : oldKey.toString());
-        return new HasValue.ValueChangeEvent<>(this, this, oldValue,
-                event.isUserOriginated());
+        return new ComponentValueChangeEvent<RadioButtonGroup<T>, T>(this, this,
+                oldValue, event.isUserOriginated());
     }
 }
