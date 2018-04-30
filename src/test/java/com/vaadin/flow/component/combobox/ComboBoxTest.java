@@ -26,13 +26,11 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
-
 
 public class ComboBoxTest {
 
@@ -151,16 +149,15 @@ public class ComboBoxTest {
         combo.setItems(Category.values());
 
         AtomicReference<Category> selected = new AtomicReference<>();
-        ValueChangeListener<ComboBox<Category>, Category> listener = event -> selected
-                .set(combo.getValue());
-        combo.addValueChangeListener(listener);
+        combo.addValueChangeListener(event -> selected.set(combo.getValue()));
 
         combo.setValue(Category.CATEGORY_2);
 
         Assert.assertEquals(Category.CATEGORY_2, selected.get());
     }
 
-    // Ensure https://github.com/vaadin/vaadin-combo-box-flow/issues/36 does not reoccur
+    // Ensure https://github.com/vaadin/vaadin-combo-box-flow/issues/36 does not
+    // reoccur
     @Test
     public void ensureComboBoxIsFocusable() {
         Assert.assertTrue("ComboBox should be focusable",
