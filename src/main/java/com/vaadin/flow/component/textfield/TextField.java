@@ -29,7 +29,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @author Vaadin Ltd
  */
 public class TextField extends GeneratedVaadinTextField<TextField, String> implements
-        HasSize, HasValidation, HasValueChangeMode<TextField, String>,
+        HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect {
     private ValueChangeMode currentMode;
@@ -78,7 +78,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String> imple
      * @param placeholder
      *            the placeholder text to set
      *
-     * @see #setValue(String)
+     * @see #setValue(Object)
      * @see #setPlaceholder(String)
      */
     public TextField(String label, String initialValue, String placeholder) {
@@ -95,7 +95,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String> imple
      *
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public TextField(ValueChangeListener<TextField, String> listener) {
+    public TextField(ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
         this();
         addValueChangeListener(listener);
     }
@@ -112,7 +112,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String> imple
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public TextField(String label,
-            ValueChangeListener<TextField, String> listener) {
+            ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
         this(label);
         addValueChangeListener(listener);
     }
@@ -129,11 +129,11 @@ public class TextField extends GeneratedVaadinTextField<TextField, String> imple
      *            the value change listener
      *
      * @see #setLabel(String)
-     * @see #setValue(String)
+     * @see #setValue(Object)
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public TextField(String label, String initialValue,
-            ValueChangeListener<TextField, String> listener) {
+            ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
@@ -152,7 +152,6 @@ public class TextField extends GeneratedVaadinTextField<TextField, String> imple
     @Override
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         currentMode = valueChangeMode;
-        HasValueChangeMode.super.setValueChangeMode(valueChangeMode);
     }
 
     @Override

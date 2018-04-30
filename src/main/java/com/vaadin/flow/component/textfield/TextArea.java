@@ -29,7 +29,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @author Vaadin Ltd.
  */
 public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
-        implements HasSize, HasValidation, HasValueChangeMode<TextArea, String>,
+        implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect {
     private ValueChangeMode currentMode;
@@ -78,7 +78,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @param placeholder
      *            the placeholder text to set
      *
-     * @see #setValue(String)
+     * @see #setValue(Object)
      * @see #setPlaceholder(String)
      */
     public TextArea(String label, String initialValue, String placeholder) {
@@ -95,7 +95,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public TextArea(ValueChangeListener<TextArea, String> listener) {
+    public TextArea(ValueChangeListener<? super ComponentValueChangeEvent<TextArea, String>> listener) {
         this();
         addValueChangeListener(listener);
     }
@@ -112,7 +112,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public TextArea(String label,
-            ValueChangeListener<TextArea, String> listener) {
+            ValueChangeListener<? super ComponentValueChangeEvent<TextArea, String>> listener) {
         this(label);
         addValueChangeListener(listener);
     }
@@ -129,11 +129,11 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *            the value change listener
      *
      * @see #setLabel(String)
-     * @see #setValue(String)
+     * @see #setValue(Object)
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public TextArea(String label, String initialValue,
-            ValueChangeListener<TextArea, String> listener) {
+            ValueChangeListener<? super ComponentValueChangeEvent<TextArea, String>> listener) {
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
@@ -152,7 +152,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     @Override
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         currentMode = valueChangeMode;
-        HasValueChangeMode.super.setValueChangeMode(valueChangeMode);
     }
 
     @Override

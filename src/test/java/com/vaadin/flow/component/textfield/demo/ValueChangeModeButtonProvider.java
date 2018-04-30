@@ -22,10 +22,10 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class ValueChangeModeButtonProvider {
     public static final String TOGGLE_BUTTON_ID = "toggleValueChangeMode";
 
-    private final HasValueChangeMode<?, ?> elementWithChangeMode;
+    private final HasValueChangeMode elementWithChangeMode;
 
     ValueChangeModeButtonProvider(
-            HasValueChangeMode<?, ?> elementWithChangeMode) {
+            HasValueChangeMode elementWithChangeMode) {
         this.elementWithChangeMode = elementWithChangeMode;
     }
 

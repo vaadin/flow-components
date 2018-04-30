@@ -31,7 +31,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  */
 public class PasswordField extends GeneratedVaadinPasswordField<PasswordField, String>
         implements HasSize, HasValidation,
-        HasValueChangeMode<PasswordField, String>, HasPrefixAndSuffix,
+        HasValueChangeMode, HasPrefixAndSuffix,
         InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
         HasAutocapitalize, HasAutocorrect {
     private ValueChangeMode currentMode;
@@ -77,7 +77,7 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField, S
      *
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public PasswordField(ValueChangeListener<PasswordField, String> listener) {
+    public PasswordField(ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
         this();
         addValueChangeListener(listener);
     }
@@ -95,7 +95,7 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField, S
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public PasswordField(String label,
-            ValueChangeListener<PasswordField, String> listener) {
+            ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
         this(label);
         addValueChangeListener(listener);
     }
@@ -112,11 +112,11 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField, S
      *            the value change listener
      *
      * @see #setLabel(String)
-     * @see #setValue(String)
+     * @see #setValue(Object)
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
     public PasswordField(String label, String initialValue,
-            ValueChangeListener<PasswordField, String> listener) {
+            ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
@@ -135,7 +135,6 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField, S
     @Override
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         currentMode = valueChangeMode;
-        HasValueChangeMode.super.setValueChangeMode(valueChangeMode);
     }
 
     @Override
