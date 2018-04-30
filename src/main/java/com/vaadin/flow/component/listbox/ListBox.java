@@ -20,6 +20,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -170,13 +172,13 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
 
     @Override
     public Registration addValueChangeListener(
-            ValueChangeListener<ListBox<T>, T> listener) {
+            ValueChangeListener<? super ComponentValueChangeEvent<ListBox<T>, T>> listener) {
         return getElement().addPropertyChangeListener(
                 getClientValuePropertyName(), event -> listener
-                        .onComponentEvent(createValueChangeEvent(event)));
+                        .valueChanged(createValueChangeEvent(event)));
     }
 
-    private ValueChangeEvent<ListBox<T>, T> createValueChangeEvent(
+    private AbstractField.ComponentValueChangeEvent<ListBox<T>, T> createValueChangeEvent(
             PropertyChangeEvent event) {
         T oldValue = null;
         if (event.getOldValue() != null) {
@@ -186,7 +188,7 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
                         .getItem();
             }
         }
-        return new ValueChangeEvent<>(this, this, oldValue,
+        return new ComponentValueChangeEvent<>(this, this, oldValue,
                 event.isUserOriginated());
     }
 
