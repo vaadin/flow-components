@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
 import com.vaadin.flow.data.provider.Query;
@@ -182,10 +183,15 @@ public abstract class AbstractGridMultiSelectionModel<T>
             @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
             public Registration addValueChangeListener(
-                    ValueChangeListener<Grid<T>, Set<T>> listener) {
+                    ValueChangeListener<? super ComponentValueChangeEvent<Grid<T>, Set<T>>> listener) {
                 Objects.requireNonNull(listener, "listener cannot be null");
+
+                ComponentEventListener componentEventListener = event -> listener
+                        .valueChanged(
+                                (ComponentValueChangeEvent<Grid<T>, Set<T>>) event);
+
                 return getGrid().addListener(MultiSelectionEvent.class,
-                        (ComponentEventListener) listener);
+                        componentEventListener);
             }
 
             @Override
@@ -203,7 +209,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
             @Override
             public Element getElement() {
-                return getComponent().getElement();
+                return getGrid().getElement();
             }
 
             @Override

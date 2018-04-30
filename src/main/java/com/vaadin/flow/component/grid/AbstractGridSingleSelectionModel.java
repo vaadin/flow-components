@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
 import com.vaadin.flow.data.selection.SelectionEvent;
@@ -127,15 +128,19 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
             @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
             public Registration addValueChangeListener(
-                    ValueChangeListener<Grid<T>, T> listener) {
+                    ValueChangeListener<? super ComponentValueChangeEvent<Grid<T>, T>> listener) {
                 Objects.requireNonNull(listener, "listener cannot be null");
+                ComponentEventListener componentEventListener = event -> listener
+                        .valueChanged(
+                                (ComponentValueChangeEvent<Grid<T>, T>) event);
+
                 return getGrid().addListener(SingleSelectionEvent.class,
-                        (ComponentEventListener) listener);
+                        componentEventListener);
             }
 
             @Override
             public Element getElement() {
-                return getComponent().getElement();
+                return getGrid().getElement();
             }
         };
     }
