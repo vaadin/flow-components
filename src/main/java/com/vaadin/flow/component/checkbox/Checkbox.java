@@ -21,9 +21,11 @@ import com.vaadin.flow.component.HasSize;
 /**
  * Server-side component for the {@code vaadin-checkbox} element.
  * <p>
- * Checkbox is a value component that can be checked or unchecked. The default value is unchecked.
+ * Checkbox is a value component that can be checked or unchecked. The default
+ * value is unchecked.
  * <p>
- * Checkbox also has a indeterminate mode, see {@link #isIndeterminate()} for more info.
+ * Checkbox also has a indeterminate mode, see {@link #isIndeterminate()} for
+ * more info.
  *
  * @author Vaadin Ltd
  */
@@ -49,7 +51,8 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     /**
      * Constructs a checkbox with the initial label text.
      *
-     * @param labelText the label text to set
+     * @param labelText
+     *            the label text to set
      * @see #setLabel(String)
      */
     public Checkbox(String labelText) {
@@ -60,7 +63,8 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     /**
      * Constructs a checkbox with the initial value.
      *
-     * @param initialValue the initial value
+     * @param initialValue
+     *            the initial value
      * @see #setValue(Boolean)
      */
     public Checkbox(boolean initialValue) {
@@ -71,8 +75,10 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     /**
      * Constructs a checkbox with the initial value.
      *
-     * @param labelText    the label text to set
-     * @param initialValue the initial value
+     * @param labelText
+     *            the label text to set
+     * @param initialValue
+     *            the initial value
      * @see #setLabel(String)
      * @see #setValue(Boolean)
      */
@@ -93,7 +99,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      * @see #addValueChangeListener(AbstractField.ValueChangeListener)
      */
     public Checkbox(String label,
-            ValueChangeListener<Checkbox, Boolean> listener) {
+            ValueChangeListener<ComponentValueChangeEvent<Checkbox, Boolean>> listener) {
         this(label);
         addValueChangeListener(listener);
     }
@@ -110,7 +116,8 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     /**
      * Set the current label text of this checkbox.
      *
-     * @param label the label text to set
+     * @param label
+     *            the label text to set
      * @return this instance, for method chaining
      */
     public void setLabel(String label) {
@@ -120,11 +127,12 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     /**
      * Set the accessibility label of this checkbox.
      *
-     * @param ariaLabel the accessibility label to set
+     * @param ariaLabel
+     *            the accessibility label to set
      * @return this instance, for method chaining
      * @see <a href=
-     * "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute"
-     * >aria-label at MDN</a>
+     *      "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute"
+     *      >aria-label at MDN</a>
      */
     public void setAriaLabel(String ariaLabel) {
         getElement().setAttribute("aria-label", ariaLabel);
@@ -133,7 +141,8 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     /**
      * Set the checkbox to be input focused when the page loads.
      *
-     * @param autofocus the boolean value to set
+     * @param autofocus
+     *            the boolean value to set
      */
     @Override
     public void setAutofocus(boolean autofocus) {
@@ -155,10 +164,11 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     /**
      * Set the indeterminate state of the checkbox.
      * <p>
-     * <em>NOTE: As according to the HTML5 standard, this has only effect on the visual appearance,
-     * not on the checked value!</em>
+     * <em>NOTE: As according to the HTML5 standard, this has only effect on the
+     * visual appearance, not on the checked value!</em>
      *
-     * @param indeterminate the boolean value to set
+     * @param indeterminate
+     *            the boolean value to set
      * @see #isIndeterminate()
      */
     @Override
@@ -167,15 +177,16 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     }
 
     /**
-     * Get the indeterminate state of the checkbox. The default value is <code>false</code>.
+     * Get the indeterminate state of the checkbox. The default value is
+     * <code>false</code>.
      * <p>
-     * An indeterminate checkbox is neither checked nor unchecked.
-     * A typical use case is a “Select All” checkbox indicating that some,
-     * but not all, items are selected. When the user clicks an indeterminate checkbox, it is no longer indeterminate,
-     * and the <code>checked</code> value also changes.
+     * An indeterminate checkbox is neither checked nor unchecked. A typical use
+     * case is a “Select All” checkbox indicating that some, but not all, items
+     * are selected. When the user clicks an indeterminate checkbox, it is no
+     * longer indeterminate, and the <code>checked</code> value also changes.
      * <p>
-     * <em>NOTE: As according to the HTML5 standard, this has only effect on the visual appearance,
-     * not on the checked value!</em>
+     * <em>NOTE: As according to the HTML5 standard, this has only effect on the
+     * visual appearance, not on the checked value!</em>
      *
      * @return the {@code indeterminate} property from the checkbox
      */
