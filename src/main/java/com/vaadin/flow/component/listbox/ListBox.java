@@ -20,10 +20,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
@@ -32,9 +33,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code vaadin-list-box} element.
@@ -44,7 +43,10 @@ import com.vaadin.flow.shared.Registration;
  * @param <T>
  *            the type of the items contained by this component
  */
-public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
+// Not extending the generated class since it adds no value
+@Tag("vaadin-list-box")
+@HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
+public class ListBox<T> extends AbstractSinglePropertyField<ListBox<T>, T>
         implements HasItemsAndComponents<T>, SingleSelect<ListBox<T>, T>,
         HasDataProvider<T>, HasComponents {
 
@@ -53,50 +55,32 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
     public ListBox() {
-        getElement().synchronizeProperty(getClientValuePropertyName(),
-                getClientPropertyChangeEventName());
+        super("selected", null, Integer.class, ListBox::presentationToModel,
+                ListBox::modelToPresentation);
     }
 
-    @Override
-    public String getClientValuePropertyName() {
-        return "selected";
-    }
-
-    /**
-     * Gets the selected item.
-     *
-     * @return the selected item, or {@code null} if none is selected
-     */
-    @Override
-    public T getValue() {
-        int selectedIndex = getElement()
-                .getProperty(getClientValuePropertyName(), -1);
-        if (selectedIndex == -1) {
+    private static <T> T presentationToModel(ListBox<T> listBox,
+            Integer selectedIndex) {
+        if (selectedIndex == null || selectedIndex.intValue() == -1) {
             return null;
         }
-        return getItemComponents().get(selectedIndex).getItem();
+
+        return listBox.getItemComponents().get(selectedIndex.intValue())
+                .getItem();
     }
 
-    /**
-     * Selects the given item.
-     *
-     * @param value
-     *            the item to select, {@code null} to undo selection
-     * @throws IllegalArgumentException
-     *             if this component doesn't contain the item
-     */
-    @Override
-    public void setValue(T value) {
-        if (value == null) {
-            getElement().setProperty(getClientValuePropertyName(), -1);
-            return;
+    private static <T> Integer modelToPresentation(ListBox<T> listBox,
+            T selectedItem) {
+        if (selectedItem == null) {
+            return Integer.valueOf(-1);
         }
-        List<VaadinItem<T>> itemComponents = getItemComponents();
-        int newSelected = IntStream.range(0, itemComponents.size())
-                .filter(i -> value.equals(itemComponents.get(i).getItem()))
+
+        List<VaadinItem<T>> itemComponents = listBox.getItemComponents();
+        int itemIndex = IntStream.range(0, itemComponents.size()).filter(
+                i -> selectedItem.equals(itemComponents.get(i).getItem()))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException(
                         "Could not find given value from the item set"));
-        getElement().setProperty(getClientValuePropertyName(), newSelected);
+        return Integer.valueOf(itemIndex);
     }
 
     @Override
@@ -170,28 +154,6 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
         return itemEnabledProvider;
     }
 
-    @Override
-    public Registration addValueChangeListener(
-            ValueChangeListener<? super ComponentValueChangeEvent<ListBox<T>, T>> listener) {
-        return getElement().addPropertyChangeListener(
-                getClientValuePropertyName(), event -> listener
-                        .valueChanged(createValueChangeEvent(event)));
-    }
-
-    private AbstractField.ComponentValueChangeEvent<ListBox<T>, T> createValueChangeEvent(
-            PropertyChangeEvent event) {
-        T oldValue = null;
-        if (event.getOldValue() != null) {
-            Double oldSelectedIndex = (Double) event.getOldValue();
-            if (oldSelectedIndex >= 0) {
-                oldValue = getItemComponents().get(oldSelectedIndex.intValue())
-                        .getItem();
-            }
-        }
-        return new ComponentValueChangeEvent<>(this, this, oldValue,
-                event.isUserOriginated());
-    }
-
     /**
      * <b>Not supported!</b>
      * <p>
@@ -246,8 +208,8 @@ public class ListBox<T> extends GeneratedVaadinListBox<ListBox<T>>
     }
 
     private void refreshEnabled(VaadinItem<T> itemComponent) {
-        itemComponent.setEnabled(
-                itemEnabledProvider.test(itemComponent.getItem()));
+        itemComponent
+                .setEnabled(itemEnabledProvider.test(itemComponent.getItem()));
     }
 
     @SuppressWarnings("unchecked")
