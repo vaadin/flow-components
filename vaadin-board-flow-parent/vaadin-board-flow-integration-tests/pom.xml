@@ -86,6 +86,11 @@
             <version>${ci-sauce.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.webcomponents</groupId>
+            <artifactId>webcomponentsjs</artifactId>
+            <version>1.2.0</version>
+        </dependency>
     </dependencies>
 
     <build>
