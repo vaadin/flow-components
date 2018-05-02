@@ -36,10 +36,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      * Default constructor.
      */
     public Checkbox() {
-        // set initial value to false is a temporal fix for
-        // https://github.com/vaadin/vaadin-checkbox-flow/issues/22
-        // until the underlying flow issue is fixed
-        // https://github.com/vaadin/flow/issues/3496
+        // initial value, default value, accept null value
         super(false, false, false);
         getElement().synchronizeProperty("indeterminate",
                 "indeterminate-changed");
@@ -192,10 +189,5 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      */
     public boolean isIndeterminate() {
         return isIndeterminateBoolean();
-    }
-
-    @Override
-    public String getClientValuePropertyName() {
-        return "checked";
     }
 }
