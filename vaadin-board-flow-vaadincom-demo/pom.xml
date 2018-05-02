@@ -16,17 +16,6 @@
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>
     </properties>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-webjars-bom</artifactId>
-                <version>${flow.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>

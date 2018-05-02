@@ -5,11 +5,13 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.flow.server.VaadinSession;
 
 public class FunctionCallerTest {
 
@@ -69,6 +71,8 @@ public class FunctionCallerTest {
     public static void assertPendingInvocations(UI ui, String expectedJS)
             throws Exception {
         UIInternals internals = ui.getInternals();
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        internals.setSession(session);
         internals.getStateTree().runExecutionsBeforeClientResponse();
         Method method = UIInternals.class
                 .getDeclaredMethod("getPendingJavaScriptInvocations");
