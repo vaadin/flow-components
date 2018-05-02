@@ -23,11 +23,17 @@ public class RadioButtonGroupTest {
     @Test
     public void setReadOnlyRadioGroup_groupIsReadOnlyAndDisabled() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("foo", "bar");
         group.setReadOnly(true);
         Assert.assertTrue(group.isReadOnly());
 
         Assert.assertEquals(Boolean.TRUE.toString(),
                 group.getElement().getProperty("disabled"));
+
+        long disabledChildCount = group.getChildren().filter(
+                child -> child.getElement().getProperty("disabled", false))
+                .count();
+        Assert.assertEquals(group.getChildren().count(), disabledChildCount);
     }
 
     @Test

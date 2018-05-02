@@ -174,6 +174,7 @@ public class RadioButtonGroup<T>
         isReadOnly = readOnly;
         if (isEnabled()) {
             setDisabled(readOnly);
+            refreshButtons();
         }
     }
 
@@ -203,7 +204,9 @@ public class RadioButtonGroup<T>
     }
 
     private void updateButton(RadioButton<T> button) {
-        button.setDisabled(!getItemEnabledProvider().test(button.getItem()));
+        boolean disabled = isDisabledBoolean()
+                || !getItemEnabledProvider().test(button.getItem());
+        button.setDisabled(disabled);
         button.removeAll();
         button.add(getItemRenderer().createComponent(button.getItem()));
     }
