@@ -39,7 +39,7 @@
 
         <flow.version>1.0.0.beta9</flow.version>
         <jetty.version>9.3.9.v20160517</jetty.version>
-        <testbench.version>6.0.0.beta6</testbench.version>
+        <testbench.version>6.0.0.beta7</testbench.version>
     </properties>
 
     <url>http://vaadin.com/charts</url>
