@@ -186,18 +186,6 @@
                 </repository>
             </repositories>
 
-            <dependencyManagement>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.vaadin</groupId>
-                        <artifactId>vaadin-webjars-bom</artifactId>
-                        <type>pom</type>
-                        <scope>import</scope>
-                        <version>${flow.version}</version>
-                    </dependency>
-                </dependencies>
-            </dependencyManagement>
-
             <dependencies>
                 <!-- ADD THESE DEPENDENCIES AS A WORKAROUND FOR  <https://github.com/vaadin/flow/issues/3630> -->
                 <dependency>
@@ -211,16 +199,16 @@
                     <version>${flow.version}</version>
                 </dependency>
                 <!-- END OF WORKAROUND -->
-                <!--VAADIN ELEMENTS-->
+                <!--VAADIN COMPONENTS-->
                 <dependency>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-icons-flow</artifactId>
-                    <version>1.0.0.beta2</version>
+                    <version>1.0.0.beta5</version>
                 </dependency>
                 <dependency>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-split-layout-flow</artifactId>
-                    <version>1.0.0.beta2</version>
+                    <version>1.0.0.beta5</version>
                 </dependency>
 
                 <!--PAPER ELEMENTS-->

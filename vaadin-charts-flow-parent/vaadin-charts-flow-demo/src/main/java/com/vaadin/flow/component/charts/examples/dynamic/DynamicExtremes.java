@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.charts.examples.dynamic;
 
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AxisTitle;
@@ -81,15 +82,16 @@ public class DynamicExtremes extends AbstractChartExample {
         toggleExtremesButton.setValue("Toggle extremes");
         toggleExtremesButton.setId("toggleExtremesButton");
         toggleExtremesButton.setType("button");
-        toggleExtremesButton.addListener(ClickEvent.class, e -> {
-            if (setExtremes) {
-                chart.getConfiguration().getyAxes().getAxis(0).setExtremes(10,
-                        15);
-            } else {
-                chart.getConfiguration().resetZoom();
-            }
-            setExtremes = !setExtremes;
-        });
+        toggleExtremesButton.addListener(ClickEvent.class,
+                (ComponentEventListener) e -> {
+                    if (setExtremes) {
+                        chart.getConfiguration().getyAxes().getAxis(0)
+                                .setExtremes(10, 15);
+                    } else {
+                        chart.getConfiguration().resetZoom();
+                    }
+                    setExtremes = !setExtremes;
+                });
 
         add(chart, toggleExtremesButton);
     }
