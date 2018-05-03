@@ -43,6 +43,61 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
     }
 
     @Test
+    public void appendHeader_headerTemplatesAdded() {
+        clickButton("append-header");
+        assertColumnsHaveTemplates("header", true);
+        assertColumnsHaveTemplates("footer", false);
+    }
+
+    @Test
+    public void prependHeader_headerTemplatesAdded() {
+        clickButton("prepend-header");
+        assertColumnsHaveTemplates("header", true);
+        assertColumnsHaveTemplates("footer", false);
+    }
+
+    @Test
+    public void appendFooter_footerTemplatesAdded() {
+        clickButton("append-footer");
+        assertColumnsHaveTemplates("header", false);
+        assertColumnsHaveTemplates("footer", true);
+    }
+
+    @Test
+    public void prependFooter_footerTemplatesAdded() {
+        clickButton("prepend-footer");
+        assertColumnsHaveTemplates("header", false);
+        assertColumnsHaveTemplates("footer", true);
+    }
+
+    @Test
+    public void appendHeader_appendFooter_headerAndFooterTemplatesAdded() {
+        clickButton("append-header");
+        clickButton("append-footer");
+        assertColumnsHaveTemplates("header", true);
+        assertColumnsHaveTemplates("footer", true);
+    }
+
+    private void assertColumnsHaveTemplates(String className,
+            boolean haveTemplates) {
+        List<WebElement> columns = grid
+                .findElements(By.className("vaadin-grid-column"));
+        columns.forEach(col -> {
+            List<WebElement> templates = col
+                    .findElements(By.tagName("template"));
+            if (haveTemplates) {
+                Assert.assertTrue(
+                        templates.stream().allMatch(template -> template
+                                .getAttribute("class").contains(className)));
+            } else {
+                Assert.assertTrue(
+                        templates.stream().noneMatch(template -> template
+                                .getAttribute("class").contains(className)));
+            }
+        });
+    }
+
+    @Test
     public void addHeadersAfterGridIsRendered_cellsAreRenderedInCorrectOrder() {
         clickButton("append-header");
         assertHeaderOrder(0);

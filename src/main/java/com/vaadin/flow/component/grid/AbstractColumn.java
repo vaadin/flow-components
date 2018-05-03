@@ -84,50 +84,60 @@ public class AbstractColumn<T extends AbstractColumn<T>> extends Component
         return !getElement().getProperty("hidden", false);
     }
 
-    protected Rendering<?> renderHeader(Renderer<?> renderer) {
+    protected void setHeaderRenderer(Renderer<?> renderer) {
         headerRenderer = renderer;
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> renderHeader()));
+    }
+
+    protected Rendering<?> renderHeader() {
         if (headerTemplate != null) {
             headerTemplate.removeFromParent();
             headerTemplate = null;
         }
-        if (renderer == null) {
+        if (headerRenderer == null) {
             return null;
         }
-        Rendering<?> rendering = renderer.render(getElement(), null);
+        Rendering<?> rendering = headerRenderer.render(getElement(), null);
         headerTemplate = rendering.getTemplateElement();
         headerTemplate.setAttribute("class", "header");
         return rendering;
     }
 
-    protected Rendering<?> renderFooter(Renderer<?> renderer) {
+    protected void setFooterRenderer(Renderer<?> renderer) {
         footerRenderer = renderer;
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> renderFooter()));
+    }
+
+    protected Rendering<?> renderFooter() {
         if (footerTemplate != null) {
             footerTemplate.removeFromParent();
             footerTemplate = null;
         }
-        if (renderer == null) {
+        if (footerRenderer == null) {
             return null;
         }
-        Rendering<?> rendering = renderer.render(getElement(), null);
+        Rendering<?> rendering = footerRenderer.render(getElement(), null);
         footerTemplate = rendering.getTemplateElement();
         footerTemplate.setAttribute("class", "footer");
         return rendering;
     }
 
     protected void setHeaderText(String text) {
-        renderHeader(TemplateRenderer.of(HtmlUtils.escape(text)));
+        setHeaderRenderer(TemplateRenderer.of(HtmlUtils.escape(text)));
     }
 
     protected void setFooterText(String text) {
-        renderFooter(TemplateRenderer.of(HtmlUtils.escape(text)));
+        setFooterRenderer(TemplateRenderer.of(HtmlUtils.escape(text)));
     }
 
     protected void setHeaderComponent(Component component) {
-        renderHeader(new ComponentRenderer<>(() -> component));
+        setHeaderRenderer(new ComponentRenderer<>(() -> component));
     }
 
     protected void setFooterComponent(Component component) {
-        renderFooter(new ComponentRenderer<>(() -> component));
+        setFooterRenderer(new ComponentRenderer<>(() -> component));
     }
 
     protected Renderer<?> getHeaderRenderer() {

@@ -90,40 +90,6 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void prependHeaderRow_headerLayerAdded() {
-        grid.prependHeaderRow();
-        List<List<Element>> layers = getColumnLayersAndAssertCount(1);
-        Assert.assertTrue("Columns should have headers but no footers",
-                isHeaderRow(layers.get(0)) && !isFooterRow(layers.get(0)));
-    }
-
-    @Test
-    public void appendHeaderRow_headerLayerAdded() {
-        grid.appendHeaderRow();
-        List<List<Element>> layers = getColumnLayersAndAssertCount(1);
-        Assert.assertTrue("Columns should have headers but no footers",
-                isHeaderRow(layers.get(0)) && !isFooterRow(layers.get(0)));
-    }
-
-    @Test
-    public void addHeaderAndFooterRow_oneLayerWithBothTemplatesAdded() {
-        grid.appendHeaderRow();
-        grid.appendFooterRow();
-        assertOneLayerWithHeaderAndFooter();
-
-        init();
-        grid.prependHeaderRow();
-        grid.prependFooterRow();
-        assertOneLayerWithHeaderAndFooter();
-    }
-
-    private void assertOneLayerWithHeaderAndFooter() {
-        List<List<Element>> layers = getColumnLayersAndAssertCount(1);
-        Assert.assertTrue("Columns should have headers but no footers",
-                isHeaderRow(layers.get(0)) && isFooterRow(layers.get(0)));
-    }
-
-    @Test
     public void appendHeaderRows_firstOnTop() {
         HeaderRow first = grid.appendHeaderRow();
         HeaderRow second = grid.appendHeaderRow();

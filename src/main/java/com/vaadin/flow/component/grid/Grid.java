@@ -622,7 +622,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             /*
              * Uses the special renderer to take care of the vaadin-grid-sorter.
              */
-            super.renderHeader(
+            super.setHeaderRenderer(
                     new GridSorterComponentRenderer<>(this, headerComponent));
         }
 
@@ -630,8 +630,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          * This method is invoked only for TemplateRenderers.
          */
         @Override
-        protected Rendering<?> renderHeader(Renderer<?> renderer) {
-            Rendering<?> rendering = super.renderHeader(renderer);
+        protected Rendering<?> renderHeader() {
+            Rendering<?> rendering = super.renderHeader();
             if (rendering == null) {
                 return null;
             }
@@ -1282,12 +1282,13 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         IntStream.range(0, groups.size()).forEach(i -> {
             // Move templates from columns to column-groups
             if (forFooterRow) {
-                groups.get(i).renderFooter(columns.get(i).getFooterRenderer());
-                columns.get(i).renderFooter(null);
+                groups.get(i).setFooterRenderer(columns.get(i).getFooterRenderer());
+                columns.get(i).setFooterRenderer(null);
             }
             if (forHeaderRow) {
-                groups.get(i).renderHeader(columns.get(i).getHeaderRenderer());
-                columns.get(i).renderHeader(null);
+                groups.get(i)
+                        .setHeaderRenderer(columns.get(i).getHeaderRenderer());
+                columns.get(i).setHeaderRenderer(null);
             }
         });
 
