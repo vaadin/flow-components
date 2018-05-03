@@ -15,8 +15,16 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 
 public class RadioButtonGroupTest {
 
@@ -90,6 +98,34 @@ public class RadioButtonGroupTest {
         Assert.assertTrue(group.isEnabled());
         Assert.assertEquals(Boolean.FALSE.toString(),
                 group.getElement().getProperty("disabled"));
+    }
+
+    @Test
+    public void selectDisabledItem_noRedundantEvent() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("enabled", "disabled");
+        group.setItemEnabledProvider("enabled"::equals);
+
+        List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
+        group.addValueChangeListener(events::add);
+
+        List<String> keys = group.getChildren().map(Component::getElement)
+                .map(element -> element.getProperty("value"))
+                .collect(Collectors.toList());
+        String enabledKey = keys.get(0);
+        String disabledKey = keys.get(1);
+
+        group.getElement().setProperty("value", disabledKey);
+        Assert.assertNull(group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        group.getElement().setProperty("value", enabledKey);
+        Assert.assertEquals("enabled", group.getValue());
+        Assert.assertEquals(1, events.size());
+
+        ValueChangeEvent<String> event = events.get(0);
+        Assert.assertNull(event.getOldValue());
+        Assert.assertEquals("enabled", event.getValue());
     }
 
 }

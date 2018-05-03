@@ -15,10 +15,8 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import java.io.Serializable;
 import java.util.Objects;
 
-import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
@@ -28,9 +26,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code vaadin-radio-group} element.
@@ -58,7 +54,7 @@ public class RadioButtonGroup<T>
             return null;
         }
         return radioButtonGroup.keyMapper.get(presentation);
-    };
+    }
 
     private static <T> String modelToPresentation(
             RadioButtonGroup<T> radioButtonGroup, T model) {
@@ -66,39 +62,23 @@ public class RadioButtonGroup<T>
             return null;
         }
         return radioButtonGroup.keyMapper.key(model);
-    };
+    }
 
     public RadioButtonGroup() {
         super(null, null, String.class, RadioButtonGroup::presentationToModel,
                 RadioButtonGroup::modelToPresentation);
-
-        getElement().addPropertyChangeListener("value",
-                this::validateSelectionEnabledState);
     }
 
-    private void validateSelectionEnabledState(PropertyChangeEvent event) {
-        if (!itemEnabledProvider
-                .test(keyMapper.get(event.getValue().toString()))) {
-
-            Serializable oldKey = event.getOldValue();
-            T oldValue = keyMapper
-                    .get(oldKey == null ? null : oldKey.toString());
-            setValue(oldValue);
-        }
+    @Override
+    protected boolean hasValidValue() {
+        String selectedKey = getElement().getProperty("value");
+        return itemEnabledProvider.test(keyMapper.get(selectedKey));
     }
 
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider = dataProvider;
         refresh();
-    }
-
-    @Override
-    public Registration addValueChangeListener(
-            ValueChangeListener<? super ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
-        return getElement().addPropertyChangeListener(
-                getClientValuePropertyName(),
-                event -> listener.valueChanged(createValueChangeEvent(event)));
     }
 
     /**
@@ -128,7 +108,7 @@ public class RadioButtonGroup<T>
      * predicate always returns true (all the items are enabled).
      *
      * @param itemEnabledProvider
-     *         the item enable predicate, not {@code null}
+     *            the item enable predicate, not {@code null}
      */
     public void setItemEnabledProvider(
             SerializablePredicate<T> itemEnabledProvider) {
@@ -151,7 +131,7 @@ public class RadioButtonGroup<T>
      * applied to each item to create a component which represents the item.
      *
      * @param renderer
-     *         the item renderer, not {@code null}
+     *            the item renderer, not {@code null}
      */
     public void setRenderer(
             ComponentRenderer<? extends Component, T> renderer) {
@@ -209,13 +189,5 @@ public class RadioButtonGroup<T>
         button.setDisabled(disabled);
         button.removeAll();
         button.add(getItemRenderer().createComponent(button.getItem()));
-    }
-
-    private AbstractField.ComponentValueChangeEvent<RadioButtonGroup<T>, T> createValueChangeEvent(
-            PropertyChangeEvent event) {
-        Serializable oldKey = event.getOldValue();
-        T oldValue = keyMapper.get(oldKey == null ? null : oldKey.toString());
-        return new ComponentValueChangeEvent<RadioButtonGroup<T>, T>(this, this,
-                oldValue, event.isUserOriginated());
     }
 }
