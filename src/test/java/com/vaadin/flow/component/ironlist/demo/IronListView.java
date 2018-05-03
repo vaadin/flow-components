@@ -194,7 +194,7 @@ public class IronListView extends DemoView {
         list.setHeight("400px");
 
         DataProvider<String, ?> dataProvider = DataProvider.fromCallbacks(
-                query -> createFacts(query.getLimit()), query -> 1000);
+                query -> createFacts(query.getLimit()-query.getOffset()), query -> 1000);
 
         list.setDataProvider(dataProvider);
         list.setRenderer(TemplateRenderer.<String> of(
@@ -397,6 +397,7 @@ public class IronListView extends DemoView {
     }
 
     private int countStringsFromDatabase(Query<String, Void> query) {
+        query.getOffset();
         return LIST_OF_BOOKS.size();
     }
 
