@@ -126,6 +126,16 @@ abstract class AbstractRow<CELL extends AbstractCell> {
         cells.add(index, cellCtor.apply(column));
     }
 
+    protected void removeCell(AbstractColumn<?> columnComponent) {
+        CELL cellToRemove = cells.stream()
+                .filter(cell -> cell.getColumn().equals(columnComponent))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "removeCell() should never be called for a column component "
+                                + "that doesn't have a corresponding cell in this row."));
+        cells.remove(cellToRemove);
+    }
+
     /**
      * Gets the cells that belong to this row as an unmodifiable list.
      * 

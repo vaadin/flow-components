@@ -323,6 +323,47 @@ public class HeaderFooterTest {
         assertFooterRowOrder(row2, row1, row3);
     }
 
+    @Test
+    public void addHeadersAndFooters_removeColumn_cellsAreRemoved() {
+        HeaderRow header = grid.prependHeaderRow();
+        FooterRow footer = grid.appendFooterRow();
+        grid.removeColumn(secondColumn);
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(1);
+        assertRowWrapsLayer(header, layers.get(0));
+        assertRowWrapsLayer(footer, layers.get(0));
+
+        grid.removeColumn(thirdColumn);
+        layers = getColumnLayersAndAssertCount(1);
+        assertRowWrapsLayer(header, layers.get(0));
+        assertRowWrapsLayer(footer, layers.get(0));
+    }
+
+    @Test
+    public void addHeader_joinCells_removeColumn_joinedCellRemains() {
+        HeaderRow bottomHeader = grid.prependHeaderRow();
+        HeaderRow topHeader = grid.prependHeaderRow();
+
+        HeaderCell joinedCell = topHeader.join(firstColumn, secondColumn);
+        Assert.assertEquals(
+                "Top row should have two cells after joining two of three", 2,
+                topHeader.getCells().size());
+
+        grid.removeColumn(secondColumn);
+        Assert.assertEquals(
+                "The joined header cell should remain when only one of the child columns is removed",
+                2, topHeader.getCells().size());
+
+        Assert.assertSame(
+                "The joined cell should still be linked to the remaining child column, "
+                        + "after removing the other child column",
+                joinedCell, topHeader.getCell(firstColumn));
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(2);
+        assertRowWrapsLayer(bottomHeader, layers.get(0));
+        assertRowWrapsLayer(topHeader, layers.get(1));
+    }
+
     private void assertHeaderRowOrder(HeaderRow... rows) {
         Assert.assertEquals("Grid returned unexpected amount of header rows",
                 rows.length, grid.getHeaderRows().size());
