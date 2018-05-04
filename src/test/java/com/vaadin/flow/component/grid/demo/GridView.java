@@ -930,13 +930,17 @@ public class GridView extends DemoView {
         // source-example-heading: Grid Basic Features Demo
         DecimalFormat dollarFormat = new DecimalFormat("$#,##0.00");
         Grid<CompanyBudgetHistory> grid = new Grid<>();
+
         ListDataProvider<CompanyBudgetHistory> list = CompanyBudgetHistory
                 .getBudgetDataProvider(baseYear, numberOfYears);
+        grid.setDataProvider(list);
 
         grid.setColumnReorderingAllowed(true);
 
-        grid.setDataProvider(list);
-        grid.addColumn(CompanyBudgetHistory::getCompany).setHeader("Company");
+        Column<CompanyBudgetHistory> companyNameColumn = grid
+                .addColumn(CompanyBudgetHistory::getCompany)
+                .setHeader("Company");
+        companyNameColumn.setWidth("200px");
 
         grid.setSelectionMode(SelectionMode.SINGLE);
 
@@ -980,6 +984,26 @@ public class GridView extends DemoView {
             topHeader.join(firstHalfColumn, secondHalfColumn)
                     .setText(year + "");
         });
+
+        HeaderRow filteringHeader = grid.appendHeaderRow();
+
+        TextField filteringField = new TextField();
+        filteringField.addValueChangeListener(event -> {
+            list.setFilter(CompanyBudgetHistory::getCompany, company -> {
+                if (company == null) {
+                    return false;
+                }
+                String companyLower = company.toLowerCase(Locale.ENGLISH);
+                String filterLower = event.getValue()
+                        .toLowerCase(Locale.ENGLISH);
+                return companyLower.contains(filterLower);
+            });
+        });
+        filteringField.setPlaceholder("Filter");
+        filteringField.setWidth("100%");
+
+        filteringHeader.getCell(companyNameColumn).setComponent(filteringField);
+
         // end-source-example
 
         grid.setId("grid-basic-feature");

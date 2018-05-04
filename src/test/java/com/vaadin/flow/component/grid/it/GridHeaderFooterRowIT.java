@@ -22,7 +22,6 @@ import java.util.stream.IntStream;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -130,20 +129,85 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
                 lastHeaderContent.isEmpty());
     }
 
-    @Ignore // https://github.com/vaadin/vaadin-grid-flow/issues/167
     @Test
-    public void makeSortableAfterGridIsRendered_sorterIsRendered() {
+    public void addHeader_makeSortable_sorterIsRendered() {
         clickButton("append-header");
         clickButton("set-sortable");
-        assertBottomHeaderHasGridSorter();
+        assertHeaderHasGridSorter(0);
     }
 
     @Test
-    public void makeSortableAndAppendHeaderAfterGridIsRendered_sorterIsRendered() {
+    public void makeSortable_addHeader_sorterIsRendered() {
+        clickButton("set-sortable");
+        clickButton("append-header");
+        assertHeaderHasGridSorter(0);
+    }
+
+    @Test
+    public void appendHeader_makeSortable_appendHeader_sorterIsRenderedOnTheUpperHeader() {
         clickButton("append-header");
         clickButton("set-sortable");
         clickButton("append-header");
-        assertBottomHeaderHasGridSorter();
+        assertHeaderHasGridSorter(0);
+    }
+
+    @Test
+    public void addHeaders_makeSortable_sorterIsRenderedOnTheFirstCreatedHeader() {
+        clickButton("prepend-header");
+        clickButton("prepend-header");
+        clickButton("prepend-header");
+        clickButton("set-sortable");
+        assertHeaderHasGridSorter(2);
+
+        init();
+        clickButton("append-header");
+        clickButton("append-header");
+        clickButton("append-header");
+        clickButton("set-sortable");
+        assertHeaderHasGridSorter(0);
+
+        init();
+        clickButton("append-header");
+        clickButton("prepend-header");
+        clickButton("append-header");
+        clickButton("set-sortable");
+        assertHeaderHasGridSorter(1);
+    }
+
+    @Test
+    public void makeSortable_changeHeaderContents_contentsChangeButSortersRemain() {
+        clickButton("append-header");
+        clickButton("append-header");
+        clickButton("prepend-header");
+        clickButton("set-sortable");
+        clickButton("set-texts-for-headers");
+        clickButton("set-components-for-headers");
+        assertHeaderComponentsAreRendered();
+        assertHeaderHasGridSorter(1);
+        clickButton("set-texts-for-headers");
+        assertHeaderTextsAreRendered();
+        assertHeaderHasGridSorter(1);
+    }
+
+    private void assertHeaderComponentsAreRendered() {
+        List<String> headerContents = getHeaderContents();
+        headerContents.forEach(content -> Assert.assertThat(
+                "Label components should be rendered in the headers", content,
+                CoreMatchers.containsString("<label>foo</label>")));
+        headerContents.forEach(content -> Assert.assertThat(
+                "Header components should have overridden the header texts",
+                content, CoreMatchers.not(CoreMatchers.containsString("bar"))));
+    }
+
+    private void assertHeaderTextsAreRendered() {
+        List<String> headerContents = getHeaderContents();
+        headerContents.forEach(content -> Assert.assertThat(
+                "The text that was set should be rendered in the headers",
+                content, CoreMatchers.containsString("bar")));
+        headerContents.forEach(content -> Assert.assertThat(
+                "The text should override the previously set components",
+                content,
+                CoreMatchers.not(CoreMatchers.containsString("label"))));
     }
 
     @Test
@@ -174,11 +238,31 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
                 "0", headerCells.get(0).getText());
     }
 
-    private void assertBottomHeaderHasGridSorter() {
+    @Test
+    public void columnSetHeader_alwaysTargetsTheFirstCreatedHeader() {
+        clickButton("column-set-header");
+        assertHeaderOrder(0);
+        clickButton("append-header");
+        assertHeaderOrder(0, 1);
+        clickButton("column-set-header");
+        assertHeaderOrder(2, 1);
+        clickButton("prepend-header");
+        assertHeaderOrder(3, 2, 1);
+        clickButton("column-set-header");
+        assertHeaderOrder(3, 4, 1);
+    }
+
+    private void assertHeaderHasGridSorter(int headerIndexFromTop) {
         List<WebElement> headerCells = getHeaderCells();
-        WebElement bottomCell = headerCells.get(headerCells.size() - 1);
-        Assert.assertThat(bottomCell.getAttribute("innerHTML"),
+        WebElement cellWithSorter = headerCells.get(headerIndexFromTop);
+        Assert.assertThat(cellWithSorter.getAttribute("innerHTML"),
                 CoreMatchers.containsString("vaadin-grid-sorter"));
+
+        Assert.assertTrue("Only one header should have the sorting indicators",
+                headerCells.stream()
+                        .filter(cell -> !cell.equals(cellWithSorter))
+                        .noneMatch(cell -> cell.getAttribute("innerHTML")
+                                .contains("vaadin-grid-sorter")));
     }
 
     private void assertHeaderOrder(int... numbers) {
@@ -205,6 +289,12 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
                 .collect(Collectors.toList());
 
         return headerCells;
+    }
+
+    private List<String> getHeaderContents() {
+        return getHeaderCells().stream()
+                .map(cell -> cell.getAttribute("innerHTML"))
+                .collect(Collectors.toList());
     }
 
     private void assertFooterOrder(int... numbers) {

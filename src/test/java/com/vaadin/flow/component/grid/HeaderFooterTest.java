@@ -90,6 +90,26 @@ public class HeaderFooterTest {
     }
 
     @Test
+    public void setHeader_firstHeaderRowCreated() {
+        firstColumn.setHeader("foo");
+        Assert.assertEquals(
+                "There should be one HeaderRow after setting a header for a column",
+                1, grid.getHeaderRows().size());
+        assertRowWrapsLayer(grid.getHeaderRows().get(0),
+                getColumnLayersAndAssertCount(1).get(0));
+    }
+
+    @Test
+    public void setFooter_firstFooterRowCreated() {
+        firstColumn.setFooter("foo");
+        Assert.assertEquals(
+                "There should be one FooterRow after setting a footer for a column",
+                1, grid.getFooterRows().size());
+        assertRowWrapsLayer(grid.getFooterRows().get(0),
+                getColumnLayersAndAssertCount(1).get(0));
+    }
+
+    @Test
     public void appendHeaderRows_firstOnTop() {
         HeaderRow first = grid.appendHeaderRow();
         HeaderRow second = grid.appendHeaderRow();

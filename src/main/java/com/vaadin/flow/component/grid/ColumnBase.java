@@ -27,7 +27,7 @@ import com.vaadin.flow.dom.Element;
  *
  * @author Vaadin Ltd.
  */
-public interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
+interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
 
     /**
      * When set to {@code true}, the column is user-resizable. By default this

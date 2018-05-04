@@ -19,7 +19,6 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.data.provider.ComponentDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
@@ -38,7 +37,7 @@ import com.vaadin.flow.dom.Element;
 class GridSorterComponentRenderer<SOURCE>
         extends ComponentRenderer<Component, SOURCE> {
 
-    private final Column<?> column;
+    private final AbstractColumn<?> column;
     private final Component component;
 
     /**
@@ -50,7 +49,8 @@ class GridSorterComponentRenderer<SOURCE>
      * @param component
      *            The component to be used by the renderer
      */
-    public GridSorterComponentRenderer(Column<?> column, Component component) {
+    public GridSorterComponentRenderer(AbstractColumn<?> column,
+            Component component) {
         this.column = column;
         this.component = component;
     }
@@ -99,7 +99,7 @@ class GridSorterComponentRenderer<SOURCE>
          * knows how to add or remove the grid sorter.
          */
         column.setBaseHeaderTemplate(templateInnerHtml);
-        if (column.isSortable()) {
+        if (column.hasSortingIndicators()) {
             templateInnerHtml = column.addGridSorter(templateInnerHtml);
         }
 

@@ -600,15 +600,20 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
-    public void basicFeature() {
+    public void basicFeatures() {
         openTabAndCheckForErrors("basic-features");
         GridElement grid = $(GridElement.class).id("grid-basic-feature");
         scrollToElement(grid);
         waitUntil(driver -> grid.getAllColumns().size() == 11);
 
-        Assert.assertEquals(
-                "The first header should be \"Company\" in the Grid", "Company",
-                grid.getHeaderCell(0).getInnerHTML());
+        TestBenchElement filteringField = grid
+                .findElement(By.tagName("vaadin-text-field"));
+        filteringField.sendKeys("sek");
+
+        Assert.assertThat(
+                "The first company name should contain the applied filter string",
+                grid.getCell(0, 0).getInnerHTML().toLowerCase(),
+                CoreMatchers.containsString("sek"));
     }
 
     @Test

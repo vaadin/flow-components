@@ -78,7 +78,6 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
@@ -241,8 +240,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         };
 
         private SerializableComparator<T> comparator;
-
-        private String rawHeaderTemplate;
 
         private Registration columnDataGeneratorRegistration;
 
@@ -526,11 +523,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             }
             this.sortingEnabled = sortable;
 
-            if (headerTemplate != null) {
-                headerTemplate.setProperty("innerHTML",
-                        sortable ? addGridSorter(rawHeaderTemplate)
-                                : rawHeaderTemplate);
+            HeaderRow defaultHeaderRow = getGrid().getDefaultHeaderRow();
+            if (defaultHeaderRow != null) {
+                defaultHeaderRow.getCell(this).getColumn()
+                        .setSortingIndicators(sortable);
             }
+
             return this;
         }
 
@@ -550,16 +548,19 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          * <p>
          * If there are no header rows when calling this method, the first
          * header row will be created. If there are header rows, the header will
-         * be set on the bottom header row and it will override any existing
-         * header.
+         * be set on the first created header row and it will override any
+         * existing header.
          *
          * @param labelText
          *            the text to be shown at the column header
          * @return this column, for method chaining
          */
         public Column<T> setHeader(String labelText) {
-            getGrid().getColumnLayers().get(0).asHeaderRow().getCell(this)
-                    .setText(labelText);
+            HeaderRow defaultHeaderRow = getGrid().getDefaultHeaderRow();
+            if (defaultHeaderRow == null) {
+                defaultHeaderRow = getGrid().addFirstHeaderRow();
+            }
+            defaultHeaderRow.getCell(this).setText(labelText);
             return this;
         }
 
@@ -586,16 +587,19 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          * <p>
          * If there are no header rows when calling this method, the first
          * header row will be created. If there are header rows, the header will
-         * be set on the bottom header row and it will override any existing
-         * header.
+         * be set on the first created header row and it will override any
+         * existing header.
          *
          * @param headerComponent
          *            the component to be used in the header of the column
          * @return this column, for method chaining
          */
         public Column<T> setHeader(Component headerComponent) {
-            getGrid().getColumnLayers().get(0).asHeaderRow().getCell(this)
-                    .setComponent(headerComponent);
+            HeaderRow defaultHeaderRow = getGrid().getDefaultHeaderRow();
+            if (defaultHeaderRow == null) {
+                defaultHeaderRow = getGrid().addFirstHeaderRow();
+            }
+            defaultHeaderRow.getCell(this).setComponent(headerComponent);
             return this;
         }
 
@@ -618,48 +622,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
 
         @Override
-        protected void setHeaderComponent(Component headerComponent) {
-            /*
-             * Uses the special renderer to take care of the vaadin-grid-sorter.
-             */
-            super.setHeaderRenderer(
-                    new GridSorterComponentRenderer<>(this, headerComponent));
-        }
-
-        /*
-         * This method is invoked only for TemplateRenderers.
-         */
-        @Override
-        protected Rendering<?> renderHeader() {
-            Rendering<?> rendering = super.renderHeader();
-            if (rendering == null) {
-                return null;
-            }
-
-            setBaseHeaderTemplate(headerTemplate.getProperty("innerHTML"));
-            if (isSortable()) {
-                headerTemplate.setProperty("innerHTML",
-                        addGridSorter(rawHeaderTemplate));
-            }
-            return rendering;
-        }
-
-        /*
-         * The original header template is needed for when sorting is enabled or
-         * disabled in a column.
-         */
-        void setBaseHeaderTemplate(String headerTemplate) {
-            rawHeaderTemplate = headerTemplate;
-        }
-
-        /*
-         * Adds the sorting webcomponent markup to an existing template.
-         */
-        String addGridSorter(String templateInnerHtml) {
-            String escapedColumnId = HtmlUtils.escape(columnInternalId);
-            return String.format(
-                    "<vaadin-grid-sorter path='%s'>%s</vaadin-grid-sorter>",
-                    escapedColumnId, templateInnerHtml);
+        protected Column<?> getBottomLevelColumn() {
+            return this;
         }
 
     }
@@ -869,6 +833,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * layers are in order from innermost to outmost.
      */
     private List<ColumnLayer> columnLayers = new ArrayList<>();
+    private HeaderRow defaultHeaderRow;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -892,6 +857,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         setPageSize(pageSize);
         setSelectionModel(SelectionMode.SINGLE.createModel(this),
                 SelectionMode.SINGLE);
+
         columnLayers.add(new ColumnLayer(this));
     }
 
@@ -1176,7 +1142,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public HeaderRow prependHeaderRow() {
         if (getHeaderRows().size() == 0) {
-            return columnLayers.get(0).asHeaderRow();
+            return addFirstHeaderRow();
         }
         return insertColumnLayer(columnLayers.size()).asHeaderRow();
     }
@@ -1190,9 +1156,19 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public HeaderRow appendHeaderRow() {
         if (getHeaderRows().size() == 0) {
-            return columnLayers.get(0).asHeaderRow();
+            return addFirstHeaderRow();
         }
         return insertInmostColumnLayer(true, false).asHeaderRow();
+    }
+
+    protected HeaderRow addFirstHeaderRow() {
+        defaultHeaderRow = columnLayers.get(0).asHeaderRow();
+        columnLayers.get(0).updateSortingIndicators(true);
+        return defaultHeaderRow;
+    }
+
+    protected HeaderRow getDefaultHeaderRow() {
+        return defaultHeaderRow;
     }
 
     /**
@@ -1282,7 +1258,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         IntStream.range(0, groups.size()).forEach(i -> {
             // Move templates from columns to column-groups
             if (forFooterRow) {
-                groups.get(i).setFooterRenderer(columns.get(i).getFooterRenderer());
+                groups.get(i)
+                        .setFooterRenderer(columns.get(i).getFooterRenderer());
                 columns.get(i).setFooterRenderer(null);
             }
             if (forHeaderRow) {
@@ -1306,6 +1283,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         bottomLayer.setColumns(groups);
 
         columnLayers.add(0, newBottomLayer);
+
+        if (bottomLayer.isHeaderRow()
+                && bottomLayer.asHeaderRow().equals(defaultHeaderRow)) {
+            bottomLayer.updateSortingIndicators(true);
+            newBottomLayer.updateSortingIndicators(false);
+        }
 
         return newBottomLayer;
     }

@@ -223,4 +223,17 @@ class ColumnLayer {
         return columns;
     }
 
+    /**
+     * Sets whether components on this layer should display the sorting
+     * indicators if the underlying column is sortable.
+     * 
+     * @param sortingIndicators
+     *            {@code true} to make components on this layer to have the
+     *            sorting indicators if the column is sortable, {@code false} to
+     *            not have sorting indicators
+     */
+    protected void updateSortingIndicators(boolean sortingIndicators) {
+        columns.forEach(col -> col.updateSortingIndicators(sortingIndicators));
+    }
+
 }

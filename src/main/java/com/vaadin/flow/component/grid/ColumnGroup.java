@@ -18,10 +18,12 @@ package com.vaadin.flow.component.grid;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -86,5 +88,24 @@ class ColumnGroup extends AbstractColumn<ColumnGroup> {
     @Override
     public Element getElement() {
         return super.getElement();
+    }
+
+    @Override
+    protected Column<?> getBottomLevelColumn() {
+        return (Column<?>) findBottomLevelColumnElement(getElement())
+                .getComponent().get();
+    }
+
+    private Element findBottomLevelColumnElement(Element element) {
+        Optional<Element> columnGroup = element.getChildren().filter(
+                child -> "vaadin-grid-column-group".equals(child.getTag()))
+                .findFirst();
+        if (columnGroup.isPresent()) {
+            return findBottomLevelColumnElement(columnGroup.get());
+        } else {
+            return element.getChildren().filter(
+                    child -> "vaadin-grid-column".equals(child.getTag()))
+                    .findFirst().get();
+        }
     }
 }

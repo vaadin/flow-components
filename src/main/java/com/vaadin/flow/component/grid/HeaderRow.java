@@ -112,6 +112,13 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
      */
     public HeaderCell join(Collection<HeaderCell> cells) {
         Grid<?> grid = layer.getGrid();
+        if (equals(grid.getDefaultHeaderRow())) {
+            throw new UnsupportedOperationException(
+                    "Cells cannot be joined on the first created header row. "
+                            + "This row is used as the default row for setting column "
+                            + "headers and for displaying sorting indicators, so the cells "
+                            + "need to have 1-1 relationship with the columns.");
+        }
         if (!isOutmostRow()) {
             throw new IllegalArgumentException(
                     "Cells can be joined only on the out-most row");

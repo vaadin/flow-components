@@ -22,6 +22,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
@@ -42,7 +43,6 @@ public class GridHeaderFooterRowPage extends Div {
         grid.setItems(Arrays.asList("Item 1", "Item 2", "Item 3"));
         Column<String> column = grid.addColumn(ValueProvider.identity());
         add(grid);
-
         NativeButton button = new NativeButton("Prepend header", event -> grid
                 .prependHeaderRow().getCell(column).setText("" + (counter++)));
         button.setId("prepend-header");
@@ -81,6 +81,25 @@ public class GridHeaderFooterRowPage extends Div {
         button = new NativeButton("Disable selection",
                 event -> grid.setSelectionMode(SelectionMode.NONE));
         button.setId("disable-selection");
+        add(button);
+
+        button = new NativeButton("Set components for headers",
+                event -> grid.getHeaderRows().stream()
+                        .flatMap(row -> row.getCells().stream())
+                        .forEach(cell -> cell.setComponent(new Label("foo"))));
+        button.setId("set-components-for-headers");
+        add(button);
+
+        button = new NativeButton("Set text for headers",
+                event -> grid.getHeaderRows().stream()
+                        .flatMap(row -> row.getCells().stream())
+                        .forEach(cell -> cell.setText("bar")));
+        button.setId("set-texts-for-headers");
+        add(button);
+
+        button = new NativeButton("Column::setHeader",
+                event -> column.setHeader("" + (counter++)));
+        button.setId("column-set-header");
         add(button);
     }
 
