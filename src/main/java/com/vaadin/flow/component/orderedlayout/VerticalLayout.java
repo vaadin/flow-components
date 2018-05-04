@@ -34,6 +34,7 @@ public class VerticalLayout extends Component
      * Constructs an empty layout with spacing and padding on by default.
      */
     public VerticalLayout() {
+        setWidth("100%");
         setSpacing(true);
         setPadding(true);
     }
