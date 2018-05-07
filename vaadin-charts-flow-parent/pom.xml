@@ -91,6 +91,13 @@
                 <artifactId>flow-server-production-mode</artifactId>
                 <version>${flow.version}</version>
             </dependency>
+
+            <!--PIN webcomponentsjs AS A WORKAROND FOR https://github.com/webjars/webjars/issues/1763-->
+            <dependency>
+                <groupId>org.webjars.bowergithub.webcomponents</groupId>
+                <artifactId>webcomponentsjs</artifactId>
+                <version>[1.0.0,1.999.999)</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

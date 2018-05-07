@@ -179,13 +179,6 @@
                 </property>
             </activation>
 
-            <repositories>
-                <repository>
-                    <id>bintray</id>
-                    <url>https://dl.bintray.com/webjars/maven/</url>
-                </repository>
-            </repositories>
-
             <dependencies>
                 <!-- ADD THESE DEPENDENCIES AS A WORKAROUND FOR  <https://github.com/vaadin/flow/issues/3630> -->
                 <dependency>
@@ -219,11 +212,6 @@
                 </dependency>
                 <dependency>
                     <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                    <artifactId>paper-dialog</artifactId>
-                    <version>2.0.0</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
                     <artifactId>paper-icon-button</artifactId>
                     <version>2.1.0</version>
                 </dependency>
@@ -238,11 +226,6 @@
                     <groupId>org.webjars.bowergithub.polymerelements</groupId>
                     <artifactId>iron-collapse</artifactId>
                     <version>2.1.0</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                    <artifactId>iron-flex-layout</artifactId>
-                    <version>2.0.1</version>
                 </dependency>
                 <dependency>
                     <groupId>org.webjars.bowergithub.polymerelements</groupId>
@@ -261,32 +244,7 @@
                 </dependency>
                 <dependency>
                     <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                    <artifactId>iron-image</artifactId>
-                    <version>2.1.2</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                    <artifactId>iron-localstorage</artifactId>
-                    <version>2.1.0</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                    <artifactId>iron-media-query</artifactId>
-                    <version>2.0.0</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                    <artifactId>iron-pages</artifactId>
-                    <version>2.0.1</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
                     <artifactId>iron-resizable-behavior</artifactId>
-                    <version>2.0.1</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                    <artifactId>iron-selector</artifactId>
                     <version>2.0.1</version>
                 </dependency>
 
@@ -294,12 +252,7 @@
                 <dependency>
                     <groupId>org.webjars.bowergithub.oyeharry</groupId>
                     <artifactId>app-menu</artifactId>
-                    <version>2.1.1</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                    <artifactId>app-route</artifactId>
-                    <version>2.0.3</version>
+                    <version>2.1.2</version>
                 </dependency>
             </dependencies>
         </profile>

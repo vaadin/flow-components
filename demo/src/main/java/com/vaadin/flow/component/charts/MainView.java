@@ -40,15 +40,9 @@ import static java.util.stream.Collectors.toMap;
 public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlParameter<String> {
 
     public interface Model extends TemplateModel {
-        String getCategory();
-
         void setCategory(String category);
 
-        String getPage();
-
         void setPage(String page);
-
-        List<Category> getCategories();
 
         void setCategories(List<Category> categories);
     }
