@@ -35,8 +35,9 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-server</artifactId>
+            <artifactId>flow</artifactId>
             <version>${flow.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Dependencies for the demo -->
