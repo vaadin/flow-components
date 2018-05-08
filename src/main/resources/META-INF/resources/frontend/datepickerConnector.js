@@ -5,8 +5,6 @@ window.Vaadin.Flow.datepickerConnector = {
             return;
         }
 
-        console.log("Initializing DatePicker Connector");
-
         datepicker.$connector = {};
 
         datepicker.$connector.setLocale = function(locale){
