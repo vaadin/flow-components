@@ -84,11 +84,9 @@ class ColumnLayer {
     protected void addColumn(int index, AbstractColumn<?> column) {
         this.columns.add(index, column);
         if (isHeaderRow()) {
-            column.setHeaderText("");
             headerRow.addCell(index, column);
         }
         if (isFooterRow()) {
-            column.setFooterText("");
             footerRow.addCell(index, column);
         }
     }

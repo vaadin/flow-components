@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.vaadin.flow.component.Component;
@@ -37,6 +38,9 @@ public class FooterRow extends AbstractRow<FooterCell> {
 
         FooterCell(AbstractColumn<?> column) {
             super(column);
+            if (column.getFooterRenderer() == null) {
+                column.setFooterText("");
+            }
         }
 
         @Override
@@ -58,6 +62,18 @@ public class FooterRow extends AbstractRow<FooterCell> {
      */
     FooterRow(ColumnLayer layer) {
         super(layer, FooterCell::new);
+    }
+
+    @Override
+    public FooterCell join(Collection<FooterCell> cells) {
+        if (layer.getGrid().getColumnLayers().indexOf(layer) == 0) {
+            throw new UnsupportedOperationException(
+                    "Cells cannot be joined on the top-most footer row. "
+                            + "This row is used as the default row for setting column "
+                            + "footers, so the cells need to have 1-1 relationship "
+                            + "with the columns.");
+        }
+        return super.join(cells);
     }
 
     @Override

@@ -66,6 +66,22 @@ class ColumnGroupHelpers {
     }
 
     /**
+     * Wraps the given columns inside a column group and places this wrapper on
+     * the first wrapped column's place.
+     * 
+     * @param grid
+     *            the grid that has the columns
+     * @param columns
+     *            the columns to wrap
+     * @return the new column group that wraps the given columns
+     */
+    public static ColumnGroup wrapInColumnGroup(Grid<?> grid,
+            List<AbstractColumn<?>> columns) {
+        return wrapInColumnGroup(grid,
+                columns.toArray(new AbstractColumn<?>[columns.size()]));
+    }
+
+    /**
      * Wraps the given column inside a column group and places this wrapper
      * group to the original column's place.
      * 

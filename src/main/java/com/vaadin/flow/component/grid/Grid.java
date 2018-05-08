@@ -38,6 +38,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -1144,7 +1145,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         if (getHeaderRows().size() == 0) {
             return addFirstHeaderRow();
         }
-        return insertColumnLayer(columnLayers.size()).asHeaderRow();
+        return insertColumnLayer(getLastHeaderLayerIndex() + 1).asHeaderRow();
     }
 
     /**
@@ -1243,6 +1244,50 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         columnLayers.add(index, layer);
 
         return layer;
+    }
+
+    /**
+     * Creates a new layer from the provided columns, inserts the layer into
+     * given index and returns the new layer.
+     * <p>
+     * The user of this method should make sure that the DOM corresponds the
+     * column layer structure.
+     * 
+     * @param index
+     *            the index to insert
+     * @param columns
+     *            the column components that the new layer will wrap
+     * @return the new layer
+     */
+    protected ColumnLayer insertColumnLayer(int index,
+            List<AbstractColumn<?>> columns) {
+        ColumnLayer layer = new ColumnLayer(this, columns);
+        columnLayers.add(index, layer);
+        return layer;
+    }
+
+    /**
+     * Removes the given layer and moves the columns on the lower level to its
+     * place.
+     * 
+     * @param layer
+     *            the layer to remove, not the bottom layer
+     */
+    protected void removeColumnLayer(ColumnLayer layer) {
+        if (layer.equals(columnLayers.get(0))) {
+            throw new IllegalArgumentException(
+                    "The bottom column layer cannot be removed");
+        }
+        layer.getColumns().forEach(column -> {
+            Element parent = column.getElement().getParent();
+            int insertIndex = parent.indexOfChild(column.getElement());
+            parent.insertChild(insertIndex,
+                    ((ColumnGroup) column).getChildColumns().stream()
+                            .map(HasElement::getElement)
+                            .toArray(Element[]::new));
+            column.getElement().removeFromParent();
+        });
+        columnLayers.remove(layer);
     }
 
     private ColumnLayer insertInmostColumnLayer(boolean forHeaderRow,

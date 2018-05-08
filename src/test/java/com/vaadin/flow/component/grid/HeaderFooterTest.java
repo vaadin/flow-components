@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,6 +30,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.google.common.collect.Lists;
+import com.vaadin.flow.component.grid.FooterRow.FooterCell;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
@@ -168,7 +170,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addFooterRows_addHeaderRows_footersOnLowerLayer() {
+    public void addFooterRows_addHeaderRows_headersOnLowerLayer() {
         FooterRow f1 = grid.appendFooterRow();
         FooterRow f2 = grid.appendFooterRow();
 
@@ -181,8 +183,8 @@ public class HeaderFooterTest {
         assertRowWrapsLayer(h1, layers.get(0));
         assertRowWrapsLayer(f1, layers.get(0));
 
-        assertRowWrapsLayer(f2, layers.get(1));
-        assertRowWrapsLayer(h2, layers.get(2));
+        assertRowWrapsLayer(h2, layers.get(1));
+        assertRowWrapsLayer(f2, layers.get(2));
     }
 
     @Test
@@ -249,6 +251,247 @@ public class HeaderFooterTest {
         Assert.assertEquals(
                 "The first cell should not be affected after joining two last cells",
                 firstCell, top.getCells().get(0));
+    }
+
+    @Test
+    public void joinTwoFirstFooterCells() {
+        FooterRow bottom = grid.prependFooterRow();
+        FooterRow top = grid.prependFooterRow();
+        FooterCell lastCell = bottom.getCells().get(2);
+        FooterCell joined = bottom.join(firstColumn, secondColumn);
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(2);
+        assertRowWrapsLayer(top, layers.get(0));
+        assertRowWrapsLayer(bottom, layers.get(1));
+
+        Assert.assertEquals(
+                "FooterRow should have two cells after joining two of three cells",
+                2, bottom.getCells().size());
+        Assert.assertEquals(
+                "The joined cell should be the first cell of the row after joining two first cells",
+                joined, bottom.getCells().get(0));
+        Assert.assertEquals(
+                "The last cell should not be affected after joining two first cells",
+                lastCell, bottom.getCells().get(1));
+    }
+
+    @Test
+    public void joinTwoLastFooterCells() {
+        FooterRow bottom = grid.prependFooterRow();
+        FooterRow top = grid.prependFooterRow();
+        FooterCell firstCell = bottom.getCells().get(0);
+        FooterCell joined = bottom.join(secondColumn, thirdColumn);
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(2);
+        assertRowWrapsLayer(top, layers.get(0));
+        assertRowWrapsLayer(bottom, layers.get(1));
+
+        Assert.assertEquals(
+                "FooterRow should have two cells after joining two of three cells",
+                2, bottom.getCells().size());
+        Assert.assertEquals(
+                "The joined cell should be the last cell of the row after joining two last cells",
+                joined, bottom.getCells().get(1));
+        Assert.assertEquals(
+                "The first cell should not be affected after joining two last cells",
+                firstCell, bottom.getCells().get(0));
+    }
+
+    @Test
+    public void joinTwoFirstHeaderCellsOnLowerLayer_layerMovedToTop() {
+        grid.appendFooterRow();
+        grid.prependHeaderRow();
+
+        FooterRow footer = grid.appendFooterRow();
+        HeaderRow header = grid.prependHeaderRow();
+
+        HeaderCell lastCell = header.getCells().get(2);
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(header, layers.get(1), 3);
+        assertRowWrapsLayer(footer, layers.get(2), 3);
+
+        header.join(firstColumn, secondColumn);
+
+        layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(footer, layers.get(1), 3);
+        assertRowWrapsLayer(header, layers.get(2), 2);
+        Assert.assertEquals(
+                "The last cell should not be affected after joining two first cells",
+                lastCell, header.getCells().get(1));
+    }
+
+    @Test
+    public void joinTwoLastHeaderCellsOnLowerLayer_layerMovedToTop() {
+        grid.appendFooterRow();
+        grid.prependHeaderRow();
+
+        FooterRow footer = grid.appendFooterRow();
+        HeaderRow header = grid.prependHeaderRow();
+
+        HeaderCell firstCell = header.getCells().get(0);
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(header, layers.get(1), 3);
+        assertRowWrapsLayer(footer, layers.get(2), 3);
+
+        header.join(secondColumn, thirdColumn);
+
+        layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(footer, layers.get(1), 3);
+        assertRowWrapsLayer(header, layers.get(2), 2);
+        Assert.assertEquals(
+                "The first cell should not be affected after joining two last cells",
+                firstCell, header.getCells().get(0));
+    }
+
+    @Test
+    public void joinAllHeaderCellsOnLowerLayer_layerMovedToTop() {
+        grid.appendFooterRow();
+        grid.prependHeaderRow();
+
+        FooterRow footer = grid.appendFooterRow();
+        HeaderRow header = grid.prependHeaderRow();
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(header, layers.get(1), 3);
+        assertRowWrapsLayer(footer, layers.get(2), 3);
+
+        header.join(firstColumn, secondColumn, thirdColumn);
+
+        layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(footer, layers.get(1), 3);
+        assertRowWrapsLayer(header, layers.get(2), 1);
+    }
+
+    @Test
+    public void joinAllFooterCellsOnLowerLayer_layerMovedToTop() {
+        grid.appendFooterRow();
+        grid.prependHeaderRow();
+
+        HeaderRow header = grid.prependHeaderRow();
+        FooterRow footer = grid.appendFooterRow();
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(footer, layers.get(1), 3);
+        assertRowWrapsLayer(header, layers.get(2), 3);
+
+        footer.join(firstColumn, secondColumn, thirdColumn);
+
+        layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(header, layers.get(1), 3);
+        assertRowWrapsLayer(footer, layers.get(2), 1);
+    }
+
+    @Test
+    public void joinFooters_joinHeadersForSameColumns_headersNotMoved() {
+        grid.appendFooterRow();
+        grid.prependHeaderRow();
+
+        HeaderRow header = grid.prependHeaderRow();
+        FooterRow footer = grid.appendFooterRow();
+
+        footer.join(firstColumn, secondColumn);
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(header, layers.get(1), 3);
+        assertRowWrapsLayer(footer, layers.get(2), 2);
+
+        header.join(firstColumn, secondColumn);
+
+        layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(header, layers.get(1), 2);
+        assertRowWrapsLayer(footer, layers.get(2), 2);
+    }
+
+    @Test
+    public void joinFooters_joinHeadersForMoreColumns_headersMovedToTop() {
+        grid.appendFooterRow();
+        grid.prependHeaderRow();
+
+        HeaderRow header = grid.prependHeaderRow();
+        FooterRow footer = grid.appendFooterRow();
+
+        footer.join(firstColumn, secondColumn);
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(header, layers.get(1), 3);
+        assertRowWrapsLayer(footer, layers.get(2), 2);
+
+        header.join(firstColumn, secondColumn, thirdColumn);
+
+        layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(footer, layers.get(1), 2);
+        assertRowWrapsLayer(header, layers.get(2), 1);
+    }
+
+    @Test
+    public void joinFooters_joinHeadersForConflictingColumns_throws() {
+        grid.appendFooterRow();
+        grid.prependHeaderRow();
+
+        HeaderRow header = grid.prependHeaderRow();
+        FooterRow footer = grid.appendFooterRow();
+
+        footer.join(firstColumn, secondColumn);
+
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("cells can not be joined");
+
+        header.join(secondColumn, thirdColumn);
+    }
+
+    @Test
+    public void joinHeaders_prependRow_newRowHasJoinedCellAlso() {
+        grid.prependHeaderRow();
+        HeaderRow header = grid.prependHeaderRow();
+        header.join(firstColumn, secondColumn);
+
+        HeaderRow topHeader = grid.prependHeaderRow();
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(3);
+        assertRowWrapsLayer(header, layers.get(1), 2);
+        assertRowWrapsLayer(topHeader, layers.get(2), 2);
+
+        List<Column<?>> bottomChildColumns = topHeader.getCells().get(0)
+                .getColumn().getBottomChildColumns();
+        Assert.assertEquals(
+                "The cell prepended on top of a joined cell should be "
+                        + "a parent for the same column elements",
+                2, bottomChildColumns.size());
+        Assert.assertThat(
+                "The cell prepended on top of a joined cell should be "
+                        + "a parent for the same column elements",
+                bottomChildColumns,
+                CoreMatchers.hasItems(firstColumn, secondColumn));
+    }
+
+    @Test
+    public void addHeaderRow_joinHeaderCells_addFooterRow_joinFooterCells_repeat() {
+        FooterRow footer0 = grid.appendFooterRow();
+        HeaderRow header0 = grid.prependHeaderRow();
+
+        HeaderRow header1 = grid.prependHeaderRow();
+        header1.join(firstColumn, secondColumn);
+
+        FooterRow footer1 = grid.appendFooterRow();
+        footer1.join(firstColumn, secondColumn);
+
+        HeaderRow header2 = grid.prependHeaderRow();
+        header2.join(firstColumn, thirdColumn);
+
+        FooterRow footer2 = grid.appendFooterRow();
+        footer2.join(firstColumn, thirdColumn);
+
+        List<List<Element>> layers = getColumnLayersAndAssertCount(5);
+        assertRowWrapsLayer(header0, layers.get(0), 3);
+        assertRowWrapsLayer(footer0, layers.get(0), 3);
+
+        assertRowWrapsLayer(footer1, layers.get(1), 2);
+        assertRowWrapsLayer(header1, layers.get(2), 2);
+
+        assertRowWrapsLayer(footer2, layers.get(3), 1);
+        assertRowWrapsLayer(header2, layers.get(4), 1);
     }
 
     @Test
@@ -389,7 +632,7 @@ public class HeaderFooterTest {
                 rows.length, grid.getHeaderRows().size());
         IntStream.range(0, rows.length).forEach(i -> {
             Assert.assertSame(
-                    "Grid did no return expected header rows in order from top to bottom",
+                    "Grid did not return expected header rows in order from top to bottom",
                     rows[i], grid.getHeaderRows().get(i));
         });
     }
@@ -399,9 +642,16 @@ public class HeaderFooterTest {
                 rows.length, grid.getFooterRows().size());
         IntStream.range(0, rows.length).forEach(i -> {
             Assert.assertSame(
-                    "Grid did no return expected footer rows in order from top to bottom",
+                    "Grid did not return expected footer rows in order from top to bottom",
                     rows[i], grid.getFooterRows().get(i));
         });
+    }
+
+    private void assertRowWrapsLayer(AbstractRow<?> row, List<Element> layer,
+            int expectedCellCount) {
+        Assert.assertEquals("The row contains unexpected amount of cells",
+                expectedCellCount, row.getCells().size());
+        assertRowWrapsLayer(row, layer);
     }
 
     private void assertRowWrapsLayer(AbstractRow<?> row, List<Element> layer) {

@@ -17,13 +17,17 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.NoTheme;
@@ -101,6 +105,55 @@ public class GridHeaderFooterRowPage extends Div {
                 event -> column.setHeader("" + (counter++)));
         button.setId("column-set-header");
         add(button);
+
+        getElement().appendChild(new Element("hr"));
+        /*
+         * Another grid for joining cells
+         */
+        Grid<String> grid2 = new Grid<>();
+        grid2.setId("grid2");
+        grid2.setItems(Arrays.asList("Item 1", "Item 2", "Item 3"));
+        add(grid2);
+
+        IntStream.range(0, 4)
+                .forEach(i -> grid2.addColumn(ValueProvider.identity()));
+
+        button = new NativeButton("Prepend header",
+                event -> grid2.prependHeaderRow().getCells()
+                        .forEach(cell -> cell.setText("" + (counter++))));
+        button.setId("prepend-header-2");
+        add(button);
+
+        button = new NativeButton("Append footer",
+                event -> grid2.appendFooterRow().getCells()
+                        .forEach(cell -> cell.setText("" + (counter++))));
+        button.setId("append-footer-2");
+        add(button);
+
+        IntStream.range(0, grid2.getColumns().size() - 1).forEach(i -> {
+            NativeButton b = new NativeButton(
+                    "Join header cells " + i + " and " + (i + 1), event -> {
+                        HeaderRow topRow = grid2.getHeaderRows().get(0);
+                        topRow.join(topRow.getCells().get(i),
+                                topRow.getCells().get(i + 1))
+                                .setText("" + (counter++));
+                    });
+            b.setId("join-headers-" + i + (i + 1));
+            add(b);
+        });
+        IntStream.range(0, grid2.getColumns().size() - 1).forEach(i -> {
+            NativeButton b = new NativeButton(
+                    "Join footer cells " + i + " and " + (i + 1), event -> {
+                        FooterRow bottomRow = grid2.getFooterRows()
+                                .get(grid2.getFooterRows().size() - 1);
+                        bottomRow
+                                .join(bottomRow.getCells().get(i),
+                                        bottomRow.getCells().get(i + 1))
+                                .setText("" + (counter++));
+                    });
+            b.setId("join-footers-" + i + (i + 1));
+            add(b);
+        });
     }
 
 }

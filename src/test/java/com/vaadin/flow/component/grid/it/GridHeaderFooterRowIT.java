@@ -252,6 +252,54 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         assertHeaderOrder(3, 4, 1);
     }
 
+    /*
+     * Creates step-by-step a hierarchical structure with three rows for both
+     * header and footer, with in-most row having 4 cells, the middle one 2
+     * cells and the out-most row 1 cell.
+     */
+    @Test
+    public void joinCells() {
+        grid = $(GridElement.class).id("grid2");
+        clickButton("prepend-header-2");
+        clickButton("prepend-header-2");
+        clickButton("append-footer-2");
+        clickButton("append-footer-2");
+        assertHeaderOrder(4, 5, 6, 7, 0, 1, 2, 3);
+        assertFooterOrder(8, 9, 10, 11, 12, 13, 14, 15);
+
+        clickButton("join-headers-01");
+        assertHeaderOrder(16, 6, 7, 0, 1, 2, 3);
+        assertFooterOrder(8, 9, 10, 11, 12, 13, 14, 15);
+
+        clickButton("join-headers-12");
+        assertHeaderOrder(16, 17, 0, 1, 2, 3);
+        assertFooterOrder(8, 9, 10, 11, 12, 13, 14, 15);
+
+        clickButton("join-footers-23");
+        assertFooterOrder(8, 9, 10, 11, 12, 13, 18);
+        assertHeaderOrder(16, 17, 0, 1, 2, 3);
+
+        clickButton("join-footers-01");
+        assertFooterOrder(8, 9, 10, 11, 19, 18);
+        assertHeaderOrder(16, 17, 0, 1, 2, 3);
+
+        clickButton("prepend-header-2");
+        assertHeaderOrder(20, 21, 16, 17, 0, 1, 2, 3);
+        assertFooterOrder(8, 9, 10, 11, 19, 18);
+
+        clickButton("append-footer-2");
+        assertFooterOrder(8, 9, 10, 11, 19, 18, 22, 23);
+        assertHeaderOrder(20, 21, 16, 17, 0, 1, 2, 3);
+
+        clickButton("join-footers-01");
+        assertFooterOrder(8, 9, 10, 11, 19, 18, 24);
+        assertHeaderOrder(20, 21, 16, 17, 0, 1, 2, 3);
+
+        clickButton("join-headers-01");
+        assertHeaderOrder(25, 16, 17, 0, 1, 2, 3);
+        assertFooterOrder(8, 9, 10, 11, 19, 18, 24);
+    }
+
     private void assertHeaderHasGridSorter(int headerIndexFromTop) {
         List<WebElement> headerCells = getHeaderCells();
         WebElement cellWithSorter = headerCells.get(headerIndexFromTop);
@@ -277,7 +325,11 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
 
     private List<WebElement> getHeaderCells() {
         WebElement thead = findInShadowRoot(grid, By.id("header")).get(0);
-        List<WebElement> headers = thead.findElements(By.tagName("th"));
+
+        List<WebElement> headers = thead.findElements(By.tagName("tr")).stream()
+                .filter(tr -> tr.getAttribute("hidden") == null)
+                .flatMap(tr -> tr.findElements(By.tagName("th")).stream())
+                .collect(Collectors.toList());
 
         List<String> cellNames = headers.stream().map(header -> header
                 .findElement(By.tagName("slot")).getAttribute("name"))
@@ -309,8 +361,12 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
     }
 
     private List<WebElement> getFooterCells() {
-        WebElement thead = findInShadowRoot(grid, By.id("footer")).get(0);
-        List<WebElement> footers = thead.findElements(By.tagName("td"));
+        WebElement tfoot = findInShadowRoot(grid, By.id("footer")).get(0);
+
+        List<WebElement> footers = tfoot.findElements(By.tagName("tr")).stream()
+                .filter(tr -> tr.getAttribute("hidden") == null)
+                .flatMap(tr -> tr.findElements(By.tagName("td")).stream())
+                .collect(Collectors.toList());
 
         List<String> cellNames = footers.stream().map(footer -> footer
                 .findElement(By.tagName("slot")).getAttribute("name"))

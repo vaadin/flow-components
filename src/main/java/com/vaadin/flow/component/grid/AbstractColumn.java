@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -258,5 +261,24 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
      * @return the bottom column component
      */
     protected abstract Column<?> getBottomLevelColumn();
+
+    /**
+     * Gets recursively the child components of this component that are
+     * instances of Column.
+     * 
+     * @return the Column children of this component
+     */
+    protected List<Column<?>> getBottomChildColumns() {
+        List<Column<?>> columnChildren = getChildren()
+                .filter(child -> child instanceof Column<?>)
+                .map(child -> (Column<?>) child).collect(Collectors.toList());
+
+        columnChildren.addAll(
+                getChildren().filter(child -> child instanceof ColumnGroup)
+                        .flatMap(child -> ((ColumnGroup) child)
+                                .getBottomChildColumns().stream())
+                        .collect(Collectors.toList()));
+        return columnChildren;
+    }
 
 }

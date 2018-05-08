@@ -15,7 +15,11 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -25,6 +29,7 @@ import java.util.stream.IntStream;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.AbstractRow.AbstractCell;
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.dom.Element;
 
 /**
  * Base class for header and footer rows
@@ -118,10 +123,6 @@ abstract class AbstractRow<CELL extends AbstractCell> {
         });
     }
 
-    protected void addCell(AbstractColumn<?> column) {
-        cells.add(cellCtor.apply(column));
-    }
-
     protected void addCell(int index, AbstractColumn<?> column) {
         cells.add(index, cellCtor.apply(column));
     }
@@ -171,6 +172,247 @@ abstract class AbstractRow<CELL extends AbstractCell> {
                                         + "correspond to the given column");
                     }
                 });
+    }
+
+    /**
+     * Joins the cells corresponding the given columns in the row.
+     * <p>
+     * The columns must be adjacent, and this row must be the out-most row.
+     * <p>
+     * The way that the client-side web component works also causes some
+     * limitations to which cells can be joined. For example, if you join the
+     * first and second cell in the header, you cannot join the second and third
+     * cell in the footer. This is because the headers and footers use the same
+     * elements in the client-side and it's not possible to create a
+     * hierarchical DOM structure to support this case. You can, however, join
+     * all three cells in the footer, because then it's again possible to
+     * organize the client-side elements in a hierarchical structure.
+     * 
+     * @param columns
+     *            the columns of the cells that should be joined
+     * @return the merged cell
+     * @see #join(Collection)
+     * @throws IllegalArgumentException
+     *             if it's not possible to join the given cells
+     */
+    public CELL join(Column<?>... columns) {
+        return join(Arrays.stream(columns).map(this::getCell)
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * Replaces the given cells with a new cell that takes the full space of the
+     * joined cells.
+     * <p>
+     * The cells to join must be adjacent cells in this row, and this row must
+     * be the out-most row.
+     * <p>
+     * The way that the client-side web component works also causes some
+     * limitations to which cells can be joined. For example, if you join the
+     * first and second cell in the header, you cannot join the second and third
+     * cell in the footer. This is because the headers and footers use the same
+     * elements in the client-side and it's not possible to create a
+     * hierarchical DOM structure to support this case. You can, however, join
+     * all three cells in the footer, because then it's again possible to
+     * organize the client-side elements in a hierarchical structure.
+     * 
+     * @param cells
+     *            the cells to join
+     * @return the merged cell
+     * @throws IllegalArgumentException
+     *             if it's not possible to join the given cells
+     */
+    public CELL join(CELL... cells) {
+        return join(Arrays.asList(cells));
+    }
+
+    /**
+     * Replaces the given cells with a new cell that takes the full space of the
+     * joined cells.
+     * <p>
+     * The cells to join must be adjacent cells in this row, and this row must
+     * be the out-most row.
+     * <p>
+     * The way that the client-side web component works also causes some
+     * limitations to which cells can be joined. For example, if you join the
+     * first and second cell in the header, you cannot join the second and third
+     * cell in the footer. This is because the headers and footers use the same
+     * elements in the client-side and it's not possible to create a
+     * hierarchical DOM structure to support this case. You can, however, join
+     * all three cells in the footer, because then it's again possible to
+     * organize the client-side elements in a hierarchical structure.
+     * 
+     * @param cells
+     *            the cells to join
+     * @return the merged cell
+     * @throws IllegalArgumentException
+     *             if it's not possible to join the given cells
+     */
+    public CELL join(Collection<CELL> cells) {
+        Grid<?> grid = layer.getGrid();
+        if (!isOutmostRow()) {
+            throw new IllegalArgumentException(
+                    "Cells can be joined only on the out-most row");
+        }
+        if (cells.size() < 2) {
+            throw new IllegalArgumentException("Cannot join less than 2 cells");
+        }
+        if (!this.cells.containsAll(cells)) {
+            throw new IllegalArgumentException(
+                    "Cannot join cells that don't belong to this row");
+        }
+
+        List<CELL> sortedCells = cells.stream().sorted((c1, c2) -> Integer
+                .compare(this.cells.indexOf(c1), this.cells.indexOf(c2)))
+                .collect(Collectors.toList());
+
+        int cellInsertIndex = this.cells.indexOf(sortedCells.get(0));
+        IntStream.range(0, sortedCells.size()).forEach(i -> {
+            if (this.cells.indexOf(sortedCells.get(i)) != cellInsertIndex + i) {
+                throw new IllegalArgumentException(
+                        "Cannot join cells that are not adjacent");
+            }
+        });
+
+        List<AbstractColumn<?>> columnsToJoin = sortedCells.stream()
+                .map(CELL::getColumn).collect(Collectors.toList());
+
+        List<Column<?>> bottomColumnsToJoin = columnsToJoin.stream()
+                .flatMap(col -> col.getBottomChildColumns().stream())
+                .collect(Collectors.toList());
+
+        List<ColumnLayer> layers = grid.getColumnLayers();
+
+        int layerInsertIndex = findFirstPossibleInsertIndex(bottomColumnsToJoin,
+                layers);
+
+        if (layerInsertIndex == layers.indexOf(layer) + 1) {
+            /*
+             * The cells can be joined in place, without re-ordering the column
+             * layers
+             */
+            return joinCellsInPlace(cells, columnsToJoin, cellInsertIndex);
+        }
+        /*
+         * We need to move the column layer up in the hierarchy
+         */
+        return moveColumnLayerAndJoinCells(cells, columnsToJoin,
+                bottomColumnsToJoin, layers, layerInsertIndex, grid);
+    }
+
+    /*
+     * Finds a place in the column-layers where the layer corresponding to this
+     * row could be inserted with the given columns joined.
+     */
+    private int findFirstPossibleInsertIndex(
+            List<Column<?>> bottomColumnsToJoin, List<ColumnLayer> layers) {
+
+        for (int i = layers.indexOf(layer) + 1; i < layers.size(); i++) {
+            ColumnLayer possibleParentLayer = layers.get(i);
+
+            boolean hasCommonParentColumnForColumnsToJoin = possibleParentLayer
+                    .getColumns().stream()
+                    .anyMatch(column -> column.getBottomChildColumns()
+                            .containsAll(bottomColumnsToJoin));
+            if (hasCommonParentColumnForColumnsToJoin) {
+                return i;
+            }
+
+            List<AbstractColumn<?>> joinedColumns = possibleParentLayer
+                    .getColumns().stream().filter(col -> ((ColumnGroup) col)
+                            .getChildColumns().size() > 1)
+                    .collect(Collectors.toList());
+            boolean otherColumnsJoined = joinedColumns.stream()
+                    .flatMap(col -> col.getBottomChildColumns().stream())
+                    .anyMatch(col -> !bottomColumnsToJoin.contains(col));
+            if (otherColumnsJoined) {
+                throw new IllegalArgumentException(
+                        "This set of cells can not be joined because of the hierarchical "
+                                + "column group structure of the client-side web component.");
+            }
+        }
+        return layers.size();
+    }
+
+    private CELL joinCellsInPlace(Collection<CELL> cellsToJoin,
+            List<AbstractColumn<?>> columnsToJoin, int cellInsertIndex) {
+        Element parent = columnsToJoin.get(0).getElement().getParent();
+        int elementInsertIndex = columnsToJoin.stream()
+                .mapToInt(col -> parent.indexOfChild(col.getElement())).min()
+                .getAsInt();
+        columnsToJoin.forEach(col -> col.getElement().removeFromParent());
+
+        List<AbstractColumn<?>> childColumns = new ArrayList<>();
+        columnsToJoin.forEach(col -> childColumns
+                .addAll(((ColumnGroup) col).getChildColumns()));
+
+        ColumnGroup group = new ColumnGroup(layer.getGrid(), childColumns);
+
+        parent.insertChild(elementInsertIndex, group.getElement());
+        layer.addColumn(cellInsertIndex, group);
+
+        layer.getColumns().removeAll(columnsToJoin);
+
+        this.cells.removeAll(cellsToJoin);
+
+        return this.cells.get(cellInsertIndex);
+    }
+
+    private CELL moveColumnLayerAndJoinCells(Collection<CELL> cellsToJoin,
+            List<AbstractColumn<?>> columnsToJoin,
+            List<Column<?>> bottomColumnsToJoin, List<ColumnLayer> layers,
+            int layerInsertIndex, Grid<?> grid) {
+        grid.removeColumnLayer(layer);
+        layerInsertIndex--;
+
+        ColumnLayer lowerLayer = layers.get(layerInsertIndex - 1);
+        List<AbstractColumn<?>> childColumns = lowerLayer.getColumns().stream()
+                .filter(col -> bottomColumnsToJoin
+                        .containsAll(col.getBottomChildColumns()))
+                .collect(Collectors.toList());
+
+        List<AbstractColumn<?>> newColumns = new ArrayList<AbstractColumn<?>>();
+        Iterator<AbstractColumn<?>> leftColumns = layer.getColumns().stream()
+                .filter(column -> !columnsToJoin.contains(column)).iterator();
+
+        ArrayList<CELL> newCells = new ArrayList<>();
+        Iterator<CELL> leftCells = this.cells.stream()
+                .filter(cell -> !cellsToJoin.contains(cell)).iterator();
+
+        CELL newCell = null;
+        for (AbstractColumn<?> col : lowerLayer.getColumns()) {
+            if (childColumns.contains(col)) {
+                if (newCell == null) {
+                    ColumnGroup groupForNewCell = ColumnGroupHelpers
+                            .wrapInColumnGroup(grid, childColumns);
+                    newColumns.add(groupForNewCell);
+
+                    newCell = cellCtor.apply(groupForNewCell);
+                    newCells.add(newCell);
+                }
+            } else {
+                ColumnGroup group = ColumnGroupHelpers.wrapInColumnGroup(grid,
+                        col);
+                AbstractColumn<?> oldGroup = leftColumns.next();
+                group.setHeaderRenderer(oldGroup.getHeaderRenderer());
+                group.setFooterRenderer(oldGroup.getFooterRenderer());
+                newColumns.add(group);
+
+                CELL next = leftCells.next();
+                next.setColumn(group);
+                newCells.add(next);
+            }
+        }
+        ColumnLayer newLayer = grid.insertColumnLayer(layerInsertIndex,
+                newColumns);
+        this.cells = newCells;
+        if (layer.isHeaderRow()) {
+            newLayer.setHeaderRow(layer.asHeaderRow());
+        }
+        if (layer.isFooterRow()) {
+            newLayer.setFooterRow(layer.asFooterRow());
+        }
+        return newCell;
     }
 
     /**
