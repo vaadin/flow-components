@@ -94,7 +94,7 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
         }
         waitUntilUpdated(grid, 10, 15);
 
-        getCommandExecutor().executeScript("arguments[0].scrollToIndex(1000)",
+        getCommandExecutor().executeScript("arguments[0].scrollToIndex(1000);",
                 grid);
         // rows at the bottom (outside of the initial cache) should also be
         // updated
@@ -129,11 +129,10 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
         if (renderer.isEmpty()) {
             return cell.getAttribute("innerHTML");
         }
-        List<WebElement> label = renderer.get(0)
-                .findElements(By.tagName("label"));
-        if (label.isEmpty() || label.get(0) == null) {
-            return "";
-        }
-        return label.get(0).getAttribute("innerHTML");
+        return getCommandExecutor().executeScript(
+                "var lbl = arguments[0].querySelector('label'); " + "if (lbl) {"
+                        + "return lbl.innerHTML;" + "} else { return ''};",
+                renderer.get(0)).toString();
     }
+
 }
