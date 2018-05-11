@@ -206,7 +206,7 @@
                 <dependency>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-split-layout-flow</artifactId>
-                    <version>1.0.0.beta5</version>
+                    <version>1.0.0.beta6</version>
                 </dependency>
 
                 <!--PAPER ELEMENTS-->
