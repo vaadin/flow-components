@@ -75,6 +75,32 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private List<T> temporaryFilteredItems;
 
+
+    private int customValueListenersCount;
+
+    private class CustomValueRegistraton implements Registration {
+
+        private Registration delegate;
+
+        private CustomValueRegistraton(Registration delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void remove() {
+            if (delegate != null) {
+                delegate.remove();
+                customValueListenersCount--;
+
+                if (customValueListenersCount == 0) {
+                    setAllowCustomValue(false);
+                }
+                delegate = null;
+            }
+        }
+    }
+
+
     private static <T> T presentationToModel(ComboBox<T> comboBox,
             JsonValue presentation) {
         return comboBox.getValue(presentation);
@@ -440,9 +466,63 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     @Override
+    public T getEmptyValue() {
+        return null;
+    }
+
+    @Override
+    public void setValue(T value) {
+        if (value == null) {
+            if (getValue() != null) {
+                getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
+                        Json.createNull());
+            }
+            return;
+        }
+        int updatedIndex = itemsFromDataProvider.indexOf(value);
+        if (updatedIndex < 0) {
+            throw new IllegalArgumentException(
+                    "The provided value is not part of ComboBox: " + value);
+        }
+        getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
+                generateJson(itemsFromDataProvider.get(updatedIndex)));
+    }
+
+    @Override
+    public T getValue() {
+        return getValue(
+                getElement().getPropertyRaw(SELECTED_ITEM_PROPERTY_NAME));
+    }
+
+    /**
+     * Adds a listener for CustomValueSetEvent which is fired when user types in
+     * a value that don't already exist in the ComboBox.
+     *
+     * <p>
+     * As a side effect makes the ComboBox allow custom values. If you don't
+     * want to allow a user to add new values to the list once the listener is
+     * added please disable it explicitly via the
+     * {@link #setAllowCustomValue(boolean)} method.
+     * </p>
+     *
+     * <p>
+     * The custom value becomes disallowed automatically once the last custom
+     * value set listener is removed.
+     * </p>
+     *
+     * @see #setAllowCustomValue(boolean)
+     *
+     * @param listener
+     *            the listener to be notified when a new value is filled
+     * @return a {@link Registration} for removing the event listener
+     */
+    @Override
     public Registration addCustomValueSetListener(
             ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
-        return super.addCustomValueSetListener(listener);
+        setAllowCustomValue(true);
+        customValueListenersCount++;
+        Registration registration = super.addCustomValueSetListener(listener);
+        return new CustomValueRegistraton(registration);
     }
 
     private T getValue(Serializable value) {
@@ -514,4 +594,5 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         super.onEnabledStateChanged(enabled);
         refresh();
     }
+
 }
