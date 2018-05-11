@@ -14,16 +14,25 @@ Using Vaadin Charts requires a license key, which will be prompted on developmen
 [[charts.installing.maven]]
 == Maven Dependency
 
-The Maven dependency for Vaadin Charts is as follows:
+Install vaadin-charts by adding the dependency to the project (here as a Maven dependency in pom.xml):
 
 [source,xml]
 ----
 <dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow</artifactId>
-    <version>6.0.0.beta1</version>
 </dependency>
 ----
+
+You do not need to specify the version number as long as you have vaadin-bom imported. Otherwise add
+
+[source,xml]
+----
+<version>6.0.0</version>
+----
+
+Update the version number to the one you want
+
 You also need to define the Vaadin add-ons repository if not already defined:
 
 [source,xml]
