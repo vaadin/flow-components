@@ -28,8 +28,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  *
  * @author Vaadin Ltd
  */
-public class TextField extends GeneratedVaadinTextField<TextField, String> implements
-        HasSize, HasValidation, HasValueChangeMode,
+public class TextField extends GeneratedVaadinTextField<TextField, String>
+        implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect {
     private ValueChangeMode currentMode;
@@ -95,7 +95,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String> imple
      *
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public TextField(ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
+    public TextField(
+            ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
         this();
         addValueChangeListener(listener);
     }
@@ -152,6 +153,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String> imple
     @Override
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         currentMode = valueChangeMode;
+        setSynchronizedEvent(
+                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
     }
 
     @Override

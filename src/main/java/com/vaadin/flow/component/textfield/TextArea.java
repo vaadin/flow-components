@@ -95,7 +95,8 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public TextArea(ValueChangeListener<? super ComponentValueChangeEvent<TextArea, String>> listener) {
+    public TextArea(
+            ValueChangeListener<? super ComponentValueChangeEvent<TextArea, String>> listener) {
         this();
         addValueChangeListener(listener);
     }
@@ -152,6 +153,8 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     @Override
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         currentMode = valueChangeMode;
+        setSynchronizedEvent(
+                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
     }
 
     @Override

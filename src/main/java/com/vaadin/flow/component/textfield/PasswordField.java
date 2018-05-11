@@ -29,11 +29,11 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  *
  * @author Vaadin Ltd.
  */
-public class PasswordField extends GeneratedVaadinPasswordField<PasswordField, String>
-        implements HasSize, HasValidation,
-        HasValueChangeMode, HasPrefixAndSuffix,
-        InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
-        HasAutocapitalize, HasAutocorrect {
+public class PasswordField
+        extends GeneratedVaadinPasswordField<PasswordField, String>
+        implements HasSize, HasValidation, HasValueChangeMode,
+        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect {
     private ValueChangeMode currentMode;
 
     /**
@@ -77,7 +77,8 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField, S
      *
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public PasswordField(ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
+    public PasswordField(
+            ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
         this();
         addValueChangeListener(listener);
     }
@@ -135,6 +136,8 @@ public class PasswordField extends GeneratedVaadinPasswordField<PasswordField, S
     @Override
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         currentMode = valueChangeMode;
+        setSynchronizedEvent(
+                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
     }
 
     @Override
