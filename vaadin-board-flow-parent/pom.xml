@@ -16,7 +16,7 @@
 	
 	<properties>
             <flow.version>1.0.0.beta10</flow.version>
-            <testbench.version>6.0.0.beta7</testbench.version>
+            <testbench.version>6.0.0.beta8</testbench.version>
             <maven.compiler.source>1.8</maven.compiler.source>
             <maven.compiler.target>1.8</maven.compiler.target>
             <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
