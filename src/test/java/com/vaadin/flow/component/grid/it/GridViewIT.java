@@ -609,6 +609,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         TestBenchElement filteringField = grid
                 .findElement(By.tagName("vaadin-text-field"));
         filteringField.sendKeys("sek");
+        blur();
 
         Assert.assertThat(
                 "The first company name should contain the applied filter string",
