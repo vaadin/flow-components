@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
@@ -134,8 +135,8 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
                         .valueChanged(
                                 (ComponentValueChangeEvent<Grid<T>, T>) event);
 
-                return getGrid().addListener(SingleSelectionEvent.class,
-                        componentEventListener);
+                return ComponentUtil.addListener(getGrid(),
+                        SingleSelectionEvent.class, componentEventListener);
             }
 
             @Override
@@ -150,7 +151,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     public Registration addSelectionListener(
             SelectionListener<Grid<T>, T> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
-        return getGrid().addListener(SingleSelectionEvent.class,
+        return ComponentUtil.addListener(getGrid(), SingleSelectionEvent.class,
                 (ComponentEventListener) (event -> listener
                         .selectionChange((SelectionEvent) event)));
     }
@@ -160,7 +161,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     public Registration addSingleSelectionListener(
             SingleSelectionListener<Grid<T>, T> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
-        return getGrid().addListener(SingleSelectionEvent.class,
+        return ComponentUtil.addListener(getGrid(), SingleSelectionEvent.class,
                 (ComponentEventListener) (event -> listener
                         .selectionChange((SingleSelectionEvent) event)));
     }

@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -190,8 +191,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
                         .valueChanged(
                                 (ComponentValueChangeEvent<Grid<T>, Set<T>>) event);
 
-                return getGrid().addListener(MultiSelectionEvent.class,
-                        componentEventListener);
+                return ComponentUtil.addListener(getGrid(),
+                        MultiSelectionEvent.class, componentEventListener);
             }
 
             @Override
@@ -224,7 +225,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     public Registration addSelectionListener(
             SelectionListener<Grid<T>, T> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
-        return getGrid().addListener(MultiSelectionEvent.class,
+        return ComponentUtil.addListener(getGrid(), MultiSelectionEvent.class,
                 (ComponentEventListener) (event -> listener
                         .selectionChange((SelectionEvent) event)));
     }
@@ -234,7 +235,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     public Registration addMultiSelectionListener(
             MultiSelectionListener<Grid<T>, T> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
-        return getGrid().addListener(MultiSelectionEvent.class,
+        return ComponentUtil.addListener(getGrid(), MultiSelectionEvent.class,
                 (ComponentEventListener) (event -> listener
                         .selectionChange((MultiSelectionEvent) event)));
     }
