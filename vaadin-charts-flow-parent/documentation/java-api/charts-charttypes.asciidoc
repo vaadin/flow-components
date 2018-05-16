@@ -543,6 +543,10 @@ A __solid gauge__ is otherwise like a regular gauge, except that a solid color
 arc is used to indicate current value instead of a pointer. The color of the
 indicator arc can be configured to change according to color stops.
 
+NOTE: Gauge and solid gauge series should not be combined with series of other types.
+
+NOTE: A bar series inverts the entire chart, combine with care.
+
 Let us consider the following gauge:
 
 [source, java]
