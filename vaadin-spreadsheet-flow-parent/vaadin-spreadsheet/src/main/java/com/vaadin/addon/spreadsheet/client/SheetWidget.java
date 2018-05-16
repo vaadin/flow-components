@@ -619,6 +619,7 @@ public class SheetWidget extends Panel {
         super.onUnload();
         hyperlinkTooltip.hide();
         resizeTooltip.hide();
+        copyPasteBox.onDestroy();
     }
 
     protected void requestCells() {

@@ -31,6 +31,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
@@ -183,6 +184,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private Set<String> currentOverlays = new HashSet<String>();
 
+    private HandlerRegistration contextMenuHandler;
+
     @Override
     protected void init() {
         super.init();
@@ -233,7 +236,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             }
         });
         // Prevent context menu on context menu
-        getConnection().getContextMenu().addDomHandler(
+        contextMenuHandler = getConnection().getContextMenu().addDomHandler(
                 new ContextMenuHandler() {
 
                     @Override
@@ -257,6 +260,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             currentOverlays.clear();
         }
         visibleCellCommentKeys.clear();
+
+        if (contextMenuHandler != null) {
+            contextMenuHandler.removeHandler();
+        }
     }
 
     @Override

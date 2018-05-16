@@ -23,6 +23,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Event.NativePreviewHandler;
@@ -76,13 +77,14 @@ public class CopyPasteTextBox extends TextArea implements NativePreviewHandler {
 
     private SheetWidget widget;
     private CopyPasteHandler handler;
+    private HandlerRegistration nativePreviewHandler;
 
     public CopyPasteTextBox(SheetWidget widget, CopyPasteHandler handler) {
 
         this.widget = widget;
         this.handler = handler;
 
-        Event.addNativePreviewHandler(this);
+        nativePreviewHandler = Event.addNativePreviewHandler(this);
 
         getElement().getStyle().setPosition(Position.ABSOLUTE);
         getElement().getStyle().setZIndex(100);
@@ -172,4 +174,11 @@ public class CopyPasteTextBox extends TextArea implements NativePreviewHandler {
             // paste happens here
         }
     }
+
+    public void onDestroy() {
+        if (nativePreviewHandler != null) {
+            nativePreviewHandler.removeHandler();
+        }
+    }
+
 }
