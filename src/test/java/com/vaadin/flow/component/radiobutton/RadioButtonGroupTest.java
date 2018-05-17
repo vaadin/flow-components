@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public class RadioButtonGroupTest {
 
@@ -128,4 +128,23 @@ public class RadioButtonGroupTest {
         Assert.assertEquals("enabled", event.getValue());
     }
 
+    @Test
+    public void changeItems_selectionIsReset() {
+        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
+        radioButtonGroup.setItems("Foo","Bar");
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        radioButtonGroup.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        radioButtonGroup.setValue("Foo");
+
+        Assert.assertEquals("Foo", capture.get());
+
+        Assert.assertEquals("Foo", radioButtonGroup.getValue());
+
+        radioButtonGroup.setItems("Foo", "Baz");
+
+        Assert.assertEquals(null, radioButtonGroup.getValue());
+        Assert.assertEquals(null, capture.get());
+    }
 }

@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import java.util.Objects;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
@@ -28,8 +26,14 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.function.SerializablePredicate;
 
+import java.util.Objects;
+
 /**
- * Server-side component for the {@code vaadin-radio-group} element.
+ * A single select component using radio buttons as options.
+ * <p>
+ * This is a server side Java integration for the {@code vaadin-radio-group} element.
+ * <p>
+ * Usage examples, see <a href="https://vaadin.com/components/vaadin-radio-button/java-examples">the demo in vaadin.com</a>.
  *
  * @author Vaadin Ltd.
  */
@@ -78,7 +82,7 @@ public class RadioButtonGroup<T>
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider = dataProvider;
-        refresh();
+        reset();
     }
 
     /**
@@ -163,9 +167,10 @@ public class RadioButtonGroup<T>
         return isReadOnly;
     }
 
-    private void refresh() {
+    private void reset() {
         keyMapper.removeAll();
         removeAll();
+        clear();
         getDataProvider().fetch(new Query<>()).map(this::createRadioButton)
                 .forEach(this::add);
     }
