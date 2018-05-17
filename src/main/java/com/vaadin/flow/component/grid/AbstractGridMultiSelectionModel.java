@@ -86,12 +86,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (isSelected(item)) {
             return;
         }
-        doSelect(item, true);
-        Set<T> selected = new HashSet<>();
-        if (item != null) {
-            selected.add(item);
+        Set<T> oldSelection = new LinkedHashSet<>(selected);
+        boolean added = selected.add(item);
+        if (added) {
+            fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+                    getGrid().asMultiSelect(), oldSelection, true));
         }
-        doUpdateSelection(selected, Collections.emptySet(), false);
     }
 
     @Override
@@ -99,12 +99,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelected(item)) {
             return;
         }
-        doDeselect(item, true);
-        Set<T> deselected = new HashSet<>();
-        if (item != null) {
-            deselected.add(item);
+        Set<T> oldSelection = new LinkedHashSet<>(selected);
+        boolean removed = selected.remove(item);
+        if (removed) {
+            fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
+                    getGrid().asMultiSelect(), oldSelection, true));
         }
-        doUpdateSelection(Collections.emptySet(), deselected, false);
         selectionColumn.setSelectAllCheckboxState(false);
     }
 
@@ -128,7 +128,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (isSelected(item)) {
             return;
         }
-        doSelect(item, false);
         Set<T> selected = new HashSet<>();
         if (item != null) {
             selected.add(item);
@@ -141,7 +140,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (!isSelected(item)) {
             return;
         }
-        doDeselect(item, false);
         Set<T> deselected = new HashSet<>();
         if (item != null) {
             deselected.add(item);
@@ -315,24 +313,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
         }
         doUpdateSelection(Collections.emptySet(), getSelectedItems(), true);
         selectionColumn.setSelectAllCheckboxState(false);
-    }
-
-    private void doSelect(T item, boolean userOriginated) {
-        Set<T> oldSelection = new LinkedHashSet<>(selected);
-        boolean added = selected.add(item);
-        if (added) {
-            fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
-                    getGrid().asMultiSelect(), oldSelection, userOriginated));
-        }
-    }
-
-    private void doDeselect(T item, boolean userOriginated) {
-        Set<T> oldSelection = new LinkedHashSet<>(selected);
-        boolean removed = selected.remove(item);
-        if (removed) {
-            fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
-                    getGrid().asMultiSelect(), oldSelection, userOriginated));
-        }
     }
 
     private void doUpdateSelection(Set<T> addedItems, Set<T> removedItems,
