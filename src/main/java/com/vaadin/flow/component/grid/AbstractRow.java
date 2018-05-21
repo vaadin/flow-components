@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,14 +37,14 @@ import com.vaadin.flow.dom.Element;
  * 
  * @author Vaadin Ltd.
  */
-abstract class AbstractRow<CELL extends AbstractCell> {
+abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
     /**
      * Base class for header and footer cells.
      * 
      * @author Vaadin Ltd.
      */
-    public static abstract class AbstractCell {
+    public static abstract class AbstractCell implements Serializable {
 
         /*
          * This is the <vaadin-grid-column> or <vaadin-grid-column-group> that

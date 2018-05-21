@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ import java.util.List;
  * 
  * @author Vaadin Ltd.
  */
-class ColumnLayer {
+class ColumnLayer implements Serializable {
 
     private Grid<?> grid;
     private List<AbstractColumn<?>> columns;
