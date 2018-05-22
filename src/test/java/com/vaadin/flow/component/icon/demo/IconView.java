@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.icon.demo;
 
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcons;
@@ -31,7 +30,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-icons")
-@StyleSheet("styles.css")
 public class IconView extends DemoView {
 
     @Override
@@ -71,19 +69,26 @@ public class IconView extends DemoView {
 
     private void createAllIconsView() {
         HorizontalLayout iconLayout = new HorizontalLayout();
-        iconLayout.addClassName("all-icons-layout");
+        iconLayout.getStyle().set("flexWrap", "wrap");
+
         iconLayout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
 
         for (VaadinIcons icon : VaadinIcons.values()) {
-            VerticalLayout iconWithName = new VerticalLayout(icon.create(),
+            Icon iconComponent = icon.create();
+            iconComponent.setSize("50px");
+            iconComponent.getStyle().set("color", "#00b4f0").set("marginBottom",
+                    "3px");
+            VerticalLayout iconWithName = new VerticalLayout(iconComponent,
                     new Label(icon.name()));
             iconWithName.setSizeUndefined();
             iconWithName
                     .setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-            iconWithName.addClassName("icon-with-name");
+            iconWithName.getStyle().set("margin", "5px").set("width", "140px")
+                    .set("fontSize", "12px");
             iconLayout.add(iconWithName);
         }
 
+        iconLayout.setId("all-icons");
         addCard("All available icons", iconLayout);
     }
 }
