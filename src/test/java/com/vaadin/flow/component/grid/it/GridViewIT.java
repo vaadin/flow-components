@@ -562,6 +562,39 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    public void beanGrid_setColumns_columnsChanged() {
+        openTabAndCheckForErrors("configuring-columns");
+        GridElement grid = $(GridElement.class).id("bean-grid");
+        scrollToElement(grid);
+
+        findElement(By.id("show-address-information")).click();
+
+        Assert.assertEquals(
+                "Grid should have three columnsa after calling "
+                        + "setColumns() with three properties",
+                3, grid.getAllColumns().size());
+        Assert.assertEquals("Street", grid.getHeaderCell(0).getText());
+        Assert.assertEquals("Number", grid.getHeaderCell(1).getText());
+        Assert.assertEquals("Postal Code", grid.getHeaderCell(2).getText());
+        Assert.assertTrue(
+                "The cells on the first column should display street names",
+                grid.getCell(0, 0).getText().startsWith("Street"));
+
+        findElement(By.id("show-basic-information")).click();
+
+        Assert.assertEquals(
+                "Grid should have three columnsa after calling "
+                        + "setColumns() with three properties",
+                3, grid.getAllColumns().size());
+        Assert.assertEquals("Name", grid.getHeaderCell(0).getText());
+        Assert.assertEquals("Age", grid.getHeaderCell(1).getText());
+        Assert.assertEquals("Address", grid.getHeaderCell(2).getText());
+        Assert.assertTrue(
+                "The cells on the first column should display person names",
+                grid.getCell(0, 0).getText().startsWith("Person"));
+    }
+
+    @Test
     public void basicRenderers_rowsAreRenderedAsExpected() {
         openTabAndCheckForErrors("using-renderers");
         WebElement grid = findElement(By.id("grid-basic-renderers"));

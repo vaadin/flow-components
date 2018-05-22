@@ -21,7 +21,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 
 public class BeanGridTest {
@@ -96,6 +95,23 @@ public class BeanGridTest {
     public void addPropertyColumnForGridWithoutPropertySet_throws() {
         Grid<Person> nonBeanGrid = new Grid<Person>();
         nonBeanGrid.addColumn("friend.name");
+    }
+
+    @Test
+    public void setColumns_columnsForPropertiesAddedWithCorrectKeys() {
+        String[] properties = new String[] { "grades", "born" };
+        grid.setColumns(properties);
+
+        Object[] columnKeys = grid.getColumns().stream().map(Column::getKey)
+                .toArray();
+        Assert.assertArrayEquals("Unexpected columns or column-keys",
+                properties, columnKeys);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void setColumnsForGridWithoutPropertySet_throws() {
+        Grid<Person> nonBeanGrid = new Grid<Person>();
+        nonBeanGrid.setColumns("name");
     }
 
 }

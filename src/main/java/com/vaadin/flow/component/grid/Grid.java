@@ -1109,6 +1109,32 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
+     * <strong>Note:</strong> This method can only be used for a Grid created
+     * from a bean type with {@link #Grid(Class)}.
+     * <p>
+     * Sets the columns and their order based on the given properties.
+     * <p>
+     * This is a shortcut for removing all columns and then calling
+     * {@link #addColumn(String)} for each of the given propertyNames.
+     * <p>
+     * You can add columns for nested properties with dot notation, eg.
+     * <code>"property.nestedProperty"</code>
+     * <p>
+     * Note that this also resets the headers and footers.
+     * 
+     * @param propertyNames
+     *            the properties to create columns for
+     */
+    public void setColumns(String... propertyNames) {
+        if (propertySet == null) {
+            throw new UnsupportedOperationException(
+                    "This method can't be used for a Grid that isn't constructed from a bean type");
+        }
+        getColumns().forEach(this::removeColumn);
+        Stream.of(propertyNames).forEach(this::addColumn);
+    }
+
+    /**
      * Sets a user-defined identifier for given column.
      *
      * @see Column#setKey(String)

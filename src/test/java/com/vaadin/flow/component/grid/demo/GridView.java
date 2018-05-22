@@ -851,9 +851,21 @@ public class GridView extends DemoView {
         // Columns for sub-properties can be added easily
         grid.addColumn("address.postalCode");
 
+        // You can also configure the included properties and their order with
+        // a single method call
+        NativeButton showBasicInformation = new NativeButton(
+                "Show basic information",
+                event -> grid.setColumns("name", "age", "address"));
+        NativeButton showAddressInformation = new NativeButton(
+                "Show address information",
+                event -> grid.setColumns("address.street", "address.number",
+                        "address.postalCode"));
         // end-source-example
         grid.setId("bean-grid");
-        addCard("Configuring Columns", "Automatically adding columns", grid);
+        showBasicInformation.setId("show-basic-information");
+        showAddressInformation.setId("show-address-information");
+        addCard("Configuring Columns", "Automatically adding columns", grid,
+                showBasicInformation, showAddressInformation);
     }
 
     private void createBasicRenderers() {
