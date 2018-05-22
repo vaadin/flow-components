@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.upload;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * The I18N helper file for the upload component.
  */
-public class UploadI18N {
+public class UploadI18N implements Serializable {
     private DropFiles dropFiles;
     private AddFiles addFiles;
     private String cancel;
@@ -31,7 +32,7 @@ public class UploadI18N {
     /**
      * Translations for dropping files.
      */
-    public static class DropFiles extends SingleMulti {
+    public static class DropFiles extends SingleMulti implements Serializable {
         @Override
         public DropFiles setOne(String one) {
             super.setOne(one);
@@ -48,7 +49,7 @@ public class UploadI18N {
     /**
      * Translations for adding files.
      */
-    public static class AddFiles extends SingleMulti {
+    public static class AddFiles extends SingleMulti implements Serializable{
         @Override
         public AddFiles setOne(String one) {
             super.setOne(one);
@@ -65,7 +66,7 @@ public class UploadI18N {
     /**
      * Exception translations.
      */
-    public static class Error {
+    public static class Error implements Serializable {
         private String tooManyFiles;
         private String fileIsTooBig;
         private String incorrectFileType;
@@ -138,7 +139,7 @@ public class UploadI18N {
     /**
      * Upload time translation strings.
      */
-    public static class Uploading {
+    public static class Uploading implements Serializable{
         private Status status;
         private RemainingTime remainingTime;
         private Error error;
@@ -209,7 +210,7 @@ public class UploadI18N {
         /**
          * Upload status strings.
          */
-        public static class Status {
+        public static class Status implements Serializable {
             private String connecting;
             private String stalled;
             private String processing;
@@ -303,7 +304,7 @@ public class UploadI18N {
         /**
          * Time remaining translations.
          */
-        public static class RemainingTime {
+        public static class RemainingTime implements Serializable {
             private String prefix;
             private String unknown;
 
@@ -353,7 +354,7 @@ public class UploadI18N {
         /**
          * Communication error translations.
          */
-        public static class Error {
+        public static class Error implements Serializable {
             private String serverUnavailable;
             private String unexpectedServerError;
             private String forbidden;
@@ -415,7 +416,7 @@ public class UploadI18N {
     /**
      * Abstract translation class for single and multi mode translations.
      */
-    public static abstract class SingleMulti {
+    public static abstract class SingleMulti implements Serializable {
         private String one;
         private String many;
 

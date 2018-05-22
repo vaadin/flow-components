@@ -18,13 +18,14 @@ package com.vaadin.flow.component.upload.receivers;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Abstract class for common file receiver buffers.
  */
-public abstract class AbstractFileBuffer {
+public abstract class AbstractFileBuffer implements Serializable {
 
     private FileFactory factory;
 

@@ -17,11 +17,12 @@ package com.vaadin.flow.component.upload.receivers;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * File factory interface for generating file to store the uploaded data into.
  */
-public interface FileFactory {
+public interface FileFactory extends Serializable {
 
     /**
      * Create a new file for given file name.

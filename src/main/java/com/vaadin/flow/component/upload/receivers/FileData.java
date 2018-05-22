@@ -16,11 +16,12 @@
 package com.vaadin.flow.component.upload.receivers;
 
 import java.io.OutputStream;
+import java.io.Serializable;
 
 /**
  * Class containing file information for upload.
  */
-public class FileData {
+public class FileData implements Serializable {
     private final String fileName, mimeType;
     private final OutputStream outputBuffer;
 
