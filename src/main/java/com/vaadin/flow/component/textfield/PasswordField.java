@@ -21,6 +21,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
@@ -35,6 +36,8 @@ public class PasswordField
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect {
     private ValueChangeMode currentMode;
+
+    private boolean isConnectorAttached;
 
     /**
      * Constructs an empty {@code PasswordField}.
@@ -344,5 +347,17 @@ public class PasswordField
     @Override
     public String getEmptyValue() {
         return "";
+    }
+
+    @Override
+    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
+        if (!isConnectorAttached) {
+            UI.getCurrent().getPage()
+                    .addJavaScript("frontend://textConnector.js");
+            isConnectorAttached = true;
+        }
+        RequiredValidationUtil.updateClientValidation(requiredIndicatorVisible,
+                this);
     }
 }
