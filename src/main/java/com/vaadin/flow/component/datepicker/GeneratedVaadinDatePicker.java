@@ -237,7 +237,7 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.DatePickerElement#3.0.0", "Flow#1.0-SNAPSHOT" })
+        "WebComponent: Vaadin.DatePickerElement#3.0.1", "Flow#1.0-SNAPSHOT" })
 @Tag("vaadin-date-picker")
 @HtmlImport("frontend://bower_components/vaadin-date-picker/src/vaadin-date-picker.html")
 public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePicker<R, T>, T>
@@ -1101,7 +1101,8 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
     }
 
     /**
-     * Constructor.
+     * Constructs a new GeneratedVaadinDatePicker component with the given
+     * arguments.
      * 
      * @param initialValue
      *            the initial value to set to the value
@@ -1129,7 +1130,8 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
     }
 
     /**
-     * Constructor.
+     * Constructs a new GeneratedVaadinDatePicker component with the given
+     * arguments.
      * 
      * @param initialValue
      *            the initial value to set to the value
@@ -1148,7 +1150,8 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
     }
 
     /**
-     * Constructor.
+     * Constructs a new GeneratedVaadinDatePicker component with the given
+     * arguments.
      * 
      * @param initialValue
      *            the initial value to set to the value
