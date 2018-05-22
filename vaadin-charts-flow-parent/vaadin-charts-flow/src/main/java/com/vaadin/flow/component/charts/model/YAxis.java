@@ -88,7 +88,7 @@ public class YAxis extends Axis {
 	private Boolean ordinal;
 	private Number range;
 	private Scrollbar scrollbar;
-	private Top top;
+	private String top;
 	private Number pane;
 	private ArrayList<Stop> stops;
 
@@ -1314,12 +1314,9 @@ public class YAxis extends Axis {
 	}
 
 	/**
-	 * @see #setTop(Top)
+	 * @see #setTop(String)
 	 */
-	public Top getTop() {
-		if (top == null) {
-			top = new Top();
-		}
+	public String getTop() {
 		return top;
 	}
 
@@ -1335,7 +1332,7 @@ public class YAxis extends Axis {
 	 * <p>
 	 * Defaults to: null
 	 */
-	public void setTop(Top top) {
+	public void setTop(String top) {
 		this.top = top;
 	}
 
@@ -1347,7 +1344,7 @@ public class YAxis extends Axis {
 		this.pane = pane;
 	}
 
-	public void setPane(com.vaadin.flow.component.charts.model.Pane pane) {
+	public void setPane(Pane pane) {
 		if (pane.getPaneIndex() == null) {
 			throw new IllegalStateException(
 					"Pane must be attached to configuration");

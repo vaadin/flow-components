@@ -1224,7 +1224,7 @@ public class XAxis extends Axis {
 		this.pane = pane;
 	}
 
-	public void setPane(com.vaadin.flow.component.charts.model.Pane pane) {
+	public void setPane(Pane pane) {
 		if (pane.getPaneIndex() == null) {
 			throw new IllegalStateException(
 					"Pane must be attached to configuration");
