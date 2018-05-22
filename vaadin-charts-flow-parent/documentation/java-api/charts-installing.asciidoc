@@ -51,4 +51,4 @@ You need to have a valid license in order to develop your application with Vaadi
 This popup will open a new tab where you will have to login using your Vaadin account.
 If the license is valid, it will be saved to the local storage of the browser and you will not see the pop-up again.
 
-More information can be found at <<dummy/../../../bakeryflow/validating-license,"Validating Vaadin Subscription">>.
+More information can be found at <<dummy/../../../bakeryflow/validating-license.asciidoc#,"Validating Vaadin Subscription">>.
