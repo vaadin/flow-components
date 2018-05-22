@@ -189,6 +189,25 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         assertHeaderHasGridSorter(1);
     }
 
+    @Test
+    public void addHeadersAndFooters_removeColumn_columnGroupsRemoved() {
+        clickButton("prepend-header");
+        clickButton("append-footer");
+        clickButton("prepend-header");
+        clickButton("append-footer");
+
+        clickButton("remove-column");
+
+        List<WebElement> columns = grid
+                .findElements(By.tagName("vaadin-grid-column"));
+        List<WebElement> groups = grid
+                .findElements(By.tagName("vaadin-grid-column-group"));
+
+        Assert.assertEquals(
+                "There should be no column or column-group elements after removing the only column",
+                0, columns.size() + groups.size());
+    }
+
     private void assertHeaderComponentsAreRendered() {
         List<String> headerContents = getHeaderContents();
         headerContents.forEach(content -> Assert.assertThat(

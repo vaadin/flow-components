@@ -593,13 +593,13 @@ public class HeaderFooterTest {
         grid.removeColumn(secondColumn);
 
         List<List<Element>> layers = getColumnLayersAndAssertCount(1);
-        assertRowWrapsLayer(header, layers.get(0));
-        assertRowWrapsLayer(footer, layers.get(0));
+        assertRowWrapsLayer(header, layers.get(0), 2);
+        assertRowWrapsLayer(footer, layers.get(0), 2);
 
         grid.removeColumn(thirdColumn);
         layers = getColumnLayersAndAssertCount(1);
-        assertRowWrapsLayer(header, layers.get(0));
-        assertRowWrapsLayer(footer, layers.get(0));
+        assertRowWrapsLayer(header, layers.get(0), 1);
+        assertRowWrapsLayer(footer, layers.get(0), 1);
     }
 
     @Test

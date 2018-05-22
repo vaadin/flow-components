@@ -106,6 +106,11 @@ public class GridHeaderFooterRowPage extends Div {
         button.setId("column-set-header");
         add(button);
 
+        button = new NativeButton("Remove column",
+                event -> grid.removeColumn(column));
+        button.setId("remove-column");
+        add(button);
+
         getElement().appendChild(new Element("hr"));
         /*
          * Another grid for joining cells
