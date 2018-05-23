@@ -28,7 +28,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -221,7 +221,7 @@ public class TabsView extends DemoView {
         layout1.getStyle().set("alignItems", "center");
         Tab tab1 = new Tab(layout1);
         Tab tab2 = new Tab(new Checkbox("What?"));
-        Tab tab3 = new Tab(new Icon(VaadinIcons.COG));
+        Tab tab3 = new Tab(new Icon(VaadinIcon.COG));
         Tabs tabs = new Tabs(tab1, tab2, tab3);
         // end-source-example
 
