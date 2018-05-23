@@ -21,7 +21,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -61,14 +61,13 @@ public class ButtonView extends DemoView {
     private void createButtonsWithIcons() {
         // begin-source-example
         // source-example-heading: Buttons with icons
-        Button leftButton = new Button("Left",
-                new Icon(VaadinIcons.ARROW_LEFT));
+        Button leftButton = new Button("Left", new Icon(VaadinIcon.ARROW_LEFT));
 
         Button rightButton = new Button("Right",
-                new Icon(VaadinIcons.ARROW_RIGHT));
+                new Icon(VaadinIcon.ARROW_RIGHT));
         rightButton.setIconAfterText(true);
 
-        Button thumbsUpButton = new Button(new Icon(VaadinIcons.THUMBS_UP));
+        Button thumbsUpButton = new Button(new Icon(VaadinIcon.THUMBS_UP));
         // end-source-example
 
         leftButton.addClickListener(this::showButtonClickedMessage);
