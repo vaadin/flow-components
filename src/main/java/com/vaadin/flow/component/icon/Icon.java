@@ -26,7 +26,7 @@ import com.vaadin.flow.dom.ElementConstants;
  * <a href="https://vaadin.com/icons">Vaadin Icons</a> collection.
  *
  * @author Vaadin Ltd
- * @see VaadinIcons
+ * @see VaadinIcon
  */
 @Tag("iron-icon")
 @HtmlImport("frontend://bower_components/vaadin-icons/vaadin-icons.html")
@@ -39,17 +39,17 @@ public class Icon extends Component implements HasStyle {
      * Creates an Icon component that displays a Vaadin logo.
      */
     public Icon() {
-        this(VaadinIcons.VAADIN_H);
+        this(VaadinIcon.VAADIN_H);
     }
 
     /**
      * Creates an Icon component that displays the given icon from
-     * {@link VaadinIcons}.
+     * {@link VaadinIcon}.
      *
      * @param icon
      *            the icon to display
      */
-    public Icon(VaadinIcons icon) {
+    public Icon(VaadinIcon icon) {
         this(ICON_COLLECTION_NAME, icon.name().toLowerCase().replace('_', '-'));
     }
 

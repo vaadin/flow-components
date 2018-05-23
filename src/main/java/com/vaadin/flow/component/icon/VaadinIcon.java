@@ -25,7 +25,7 @@ package com.vaadin.flow.component.icon;
  * @author Vaadin Ltd
  *
  */
-public enum VaadinIcons {
+public enum VaadinIcon {
 
     ABACUS,
     ABSOLUTE_POSITION,

@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.icon.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.icon.demo.IconView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 
@@ -55,13 +55,13 @@ public class IconIT extends ComponentDemoTest {
         List<WebElement> children = allIcons
                 .findElements(By.tagName("vaadin-vertical-layout"));
 
-        Assert.assertEquals(VaadinIcons.values().length, children.size());
+        Assert.assertEquals(VaadinIcon.values().length, children.size());
 
         for (int i = 0; i < children.size(); i++) {
             WebElement icon = children.get(i)
                     .findElement(By.tagName("iron-icon"));
             WebElement label = children.get(i).findElement(By.tagName("label"));
-            String enumName = VaadinIcons.values()[i].name();
+            String enumName = VaadinIcon.values()[i].name();
 
             Assert.assertEquals(enumName, label.getText());
 

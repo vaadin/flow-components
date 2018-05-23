@@ -17,7 +17,7 @@ package com.vaadin.flow.component.icon.demo;
 
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcons;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -42,8 +42,8 @@ public class IconView extends DemoView {
     private void createBasicIconsView() {
         // begin-source-example
         // source-example-heading: Two ways to create a new icon
-        Icon edit = new Icon(VaadinIcons.EDIT);
-        Icon close = VaadinIcons.CLOSE.create();
+        Icon edit = new Icon(VaadinIcon.EDIT);
+        Icon close = VaadinIcon.CLOSE.create();
         // end-source-example
 
         edit.getStyle().set("marginRight", "5px");
@@ -57,7 +57,7 @@ public class IconView extends DemoView {
     private void createStyledIconView() {
         // begin-source-example
         // source-example-heading: Styling an icon
-        Icon logo = new Icon(VaadinIcons.VAADIN_H);
+        Icon logo = new Icon(VaadinIcon.VAADIN_H);
         logo.setSize("100px");
         logo.setColor("orange");
         // end-source-example
@@ -73,7 +73,7 @@ public class IconView extends DemoView {
 
         iconLayout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
 
-        for (VaadinIcons icon : VaadinIcons.values()) {
+        for (VaadinIcon icon : VaadinIcon.values()) {
             Icon iconComponent = icon.create();
             iconComponent.setSize("50px");
             iconComponent.getStyle().set("color", "#00b4f0").set("marginBottom",
