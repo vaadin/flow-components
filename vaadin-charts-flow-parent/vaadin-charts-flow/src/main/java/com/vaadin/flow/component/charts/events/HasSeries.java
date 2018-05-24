@@ -17,13 +17,15 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Series;
 
 /**
  * Indicates that an event has an associated series
  */
-public interface HasSeries {
+public interface HasSeries extends Serializable {
 
     Chart getSource();
 

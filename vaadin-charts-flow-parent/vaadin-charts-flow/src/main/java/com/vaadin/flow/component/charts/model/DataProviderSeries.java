@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
 import java.util.HashMap;
@@ -37,7 +38,7 @@ import static java.util.stream.Collectors.toMap;
 /**
  * A series which is based on data from a DataProvider.
  * <p>
- * You must use {@link #setY(Function)} to define which part of the data bean to
+ * You must use {@link #setY(SerializableFunction)} to define which part of the data bean to
  * use as <code>y</code> values.
  * <p>
  * Note that even if you use a lazy loading {@link DataProvider}, this series
@@ -58,7 +59,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
     public static final String CLOSE_PROPERTY = "close";
 
     @JsonIgnore
-    private final Map<String, Function<T, Object>> chartAttributeToCallback;
+    private final Map<String, SerializableFunction<T, Object>> chartAttributeToCallback;
 
     @JsonIgnore
     private boolean automaticChartUpdateEnabled = true;
@@ -77,14 +78,14 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * Many chart types such as {@link ChartType#BAR}, {@link ChartType#LINE},
      * {@link ChartType#AREA} etc use {@code y} values to define the data points
      * to show in the chart. For these chart types you should use either
-     * {@link #DataProviderSeries(DataProvider, Function)} or
-     * {@link #setY(Function)} to define the function (lambda) which extracts
+     * {@link #DataProviderSeries(DataProvider, SerializableFunction)} or
+     * {@link #setY(SerializableFunction)} to define the function (lambda) which extracts
      * the values from the bean in the provider.
      * <p>
      * Other chart types such as {@link ChartType#ERRORBAR} do not require
      * {@code y} values but instead {@code high} and {@code low} values.
-     * Functions for extracting these are set using {@link #setHigh(Function)}
-     * and {@link #setLow(Function)} respectively.
+     * Functions for extracting these are set using {@link #setHigh(SerializableFunction)}
+     * and {@link #setLow(SerializableFunction)} respectively.
      *
      * @param dataProvider
      *            the data provider which contains the data
@@ -106,7 +107,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      *            the function which retrieves the y values
      */
     public DataProviderSeries(DataProvider<T, ?> dataProvider,
-            Function<T, Object> callBack) {
+            SerializableFunction<T, Object> callBack) {
         this(dataProvider);
         setY(callBack);
     }
@@ -120,7 +121,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param callBack
      *            the function which retrieves the value for the property
      */
-    public void setProperty(String propertyName, Function<T, Object> callBack) {
+    public void setProperty(String propertyName, SerializableFunction<T, Object> callBack) {
         chartAttributeToCallback.put(propertyName, callBack);
     }
 
@@ -133,7 +134,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param callBack
      *            the function which retrieves the values
      */
-    public void setX(Function<T, Object> callBack) {
+    public void setX(SerializableFunction<T, Object> callBack) {
         setProperty(X_ATTRIBUTE, callBack);
     }
 
@@ -146,7 +147,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param callBack
      *            the function which retrieves the values
      */
-    public void setY(Function<T, Object> callBack) {
+    public void setY(SerializableFunction<T, Object> callBack) {
         setProperty(Y_ATTRIBUTE, callBack);
     }
 
@@ -159,7 +160,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param callBack
      *            the function which retrieves the values
      */
-    public void setPointName(Function<T, Object> callBack) {
+    public void setPointName(SerializableFunction<T, Object> callBack) {
         setProperty(NAME_ATTRIBUTE, callBack);
     }
 
@@ -172,7 +173,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param callBack
      *            the function which retrieves the values
      */
-    public void setLow(Function<T, Object> callBack) {
+    public void setLow(SerializableFunction<T, Object> callBack) {
         setProperty(LOW_PROPERTY, callBack);
     }
 
@@ -185,7 +186,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param callBack
      *            the function which retrieves the values
      */
-    public void setHigh(Function<T, Object> callBack) {
+    public void setHigh(SerializableFunction<T, Object> callBack) {
         setProperty(HIGH_PROPERTY, callBack);
     }
 
@@ -198,7 +199,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param callBack
      *            the function which retrieves the values
      */
-    public void setOpen(Function<T, Object> callBack) {
+    public void setOpen(SerializableFunction<T, Object> callBack) {
         setProperty(OPEN_PROPERTY, callBack);
     }
 
@@ -211,7 +212,7 @@ public class DataProviderSeries<T> extends AbstractSeries {
      * @param callBack
      *            the function which retrieves the values
      */
-    public void setClose(Function<T, Object> callBack) {
+    public void setClose(SerializableFunction<T, Object> callBack) {
         setProperty(CLOSE_PROPERTY, callBack);
     }
 

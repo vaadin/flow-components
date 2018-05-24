@@ -17,9 +17,11 @@ package com.vaadin.flow.component.charts.events;
  * #L%
  */
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.charts.util.Util;
 
-public interface ClickEvent {
+public interface ClickEvent extends Serializable {
 
     /**
      * Gets the mouse click details

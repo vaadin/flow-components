@@ -17,9 +17,11 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+import java.io.Serializable;
+
 /**
  * Interface for all marker symbols
  */
-public interface MarkerSymbol {
+public interface MarkerSymbol extends Serializable {
 
 }
