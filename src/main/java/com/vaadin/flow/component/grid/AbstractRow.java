@@ -31,6 +31,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.AbstractRow.AbstractCell;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * Base class for header and footer rows
@@ -90,9 +91,9 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
     protected ColumnLayer layer;
     protected List<CELL> cells;
 
-    private Function<AbstractColumn<?>, CELL> cellCtor;
+    private SerializableFunction<AbstractColumn<?>, CELL> cellCtor;
 
-    AbstractRow(ColumnLayer layer, Function<AbstractColumn<?>, CELL> cellCtor) {
+    AbstractRow(ColumnLayer layer, SerializableFunction<AbstractColumn<?>, CELL> cellCtor) {
         this.layer = layer;
         this.cellCtor = cellCtor;
         cells = layer.getColumns().stream().map(cellCtor)
