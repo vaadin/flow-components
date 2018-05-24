@@ -22,6 +22,7 @@ import java.util.Locale;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
@@ -42,6 +43,8 @@ public class DatePickerView extends DemoView {
         createFinnishDatePicker();
         createStartAndEndDatePickers();
         createLocaleChangeDatePicker();
+        addCard("Additional code used in the demo",
+                new Label("These methods are used in the demo."));
     }
 
     private void createSimpleDatePicker() {
@@ -51,17 +54,8 @@ public class DatePickerView extends DemoView {
         // source-example-heading: Simple date picker
         DatePicker datePicker = new DatePicker();
 
-        datePicker.addValueChangeListener(event -> {
-            LocalDate selectedDate = event.getValue();
-            if (selectedDate != null) {
-                message.setText(
-                        "Day: " + selectedDate.getDayOfMonth() + "\nMonth: "
-                                + selectedDate.getMonthValue() + "\nYear: "
-                                + selectedDate.getYear());
-            } else {
-                message.setText("No date is selected");
-            }
-        });
+        datePicker.addValueChangeListener(
+                event -> UpdateMessage(message, datePicker));
         // end-source-example
 
         datePicker.setId("simple-picker");
@@ -82,17 +76,8 @@ public class DatePickerView extends DemoView {
         datePicker.setMin(now.withDayOfMonth(1));
         datePicker.setMax(now.withDayOfMonth(now.lengthOfMonth()));
 
-        datePicker.addValueChangeListener(event -> {
-            LocalDate selectedDate = event.getValue();
-            if (selectedDate != null) {
-                message.setText(
-                        "Day: " + selectedDate.getDayOfMonth() + "\nMonth: "
-                                + selectedDate.getMonthValue() + "\nYear: "
-                                + selectedDate.getYear());
-            } else {
-                message.setText("No date is selected");
-            }
-        });
+        datePicker.addValueChangeListener(
+                event -> UpdateMessage(message, datePicker));
         // end-source-example
 
         datePicker.setId("min-and-max-picker");
@@ -231,22 +216,21 @@ public class DatePickerView extends DemoView {
         NativeButton locale2 = new NativeButton("Locale: UK");
         NativeButton locale3 = new NativeButton("Locale: CHINA");
 
-        locale1.addClickListener(e -> datePicker.setLocale(Locale.US));
-        locale2.addClickListener(e -> datePicker.setLocale(Locale.UK));
-        locale3.addClickListener(e -> datePicker.setLocale(Locale.CHINA));
-
-        datePicker.addValueChangeListener(event -> {
-            LocalDate selectedDate = event.getValue();
-            if (selectedDate != null) {
-                message.setText(
-                        "Day: " + selectedDate.getDayOfMonth() + "\nMonth: "
-                                + selectedDate.getMonthValue() + "\nYear: "
-                                + selectedDate.getYear() + "\nLocale: "
-                                + datePicker.getLocale());
-            } else {
-                message.setText("No date is selected");
-            }
+        locale1.addClickListener(e -> {
+            datePicker.setLocale(Locale.US);
+            UpdateMessage(message, datePicker);
         });
+        locale2.addClickListener(e -> {
+            datePicker.setLocale(Locale.UK);
+            UpdateMessage(message, datePicker);
+        });
+        locale3.addClickListener(e -> {
+            datePicker.setLocale(Locale.CHINA);
+            UpdateMessage(message, datePicker);
+        });
+
+        datePicker.addValueChangeListener(
+                event -> UpdateMessage(message, datePicker));
         // end-source-example
         locale1.setId("Locale-US");
         locale2.setId("Locale-UK");
@@ -255,11 +239,29 @@ public class DatePickerView extends DemoView {
                 locale2, locale3, message);
     }
 
+    // begin-source-example
+    // source-example-heading: Additional code used in the demo
+    /**
+     * Additional code used in the demo
+     */
+    private void UpdateMessage(Div message, DatePicker datePicker) {
+        LocalDate selectedDate = datePicker.getValue();
+        if (selectedDate != null) {
+            message.setText(
+                    "Day: " + selectedDate.getDayOfMonth() + "\nMonth: "
+                            + selectedDate.getMonthValue() + "\nYear: "
+                            + selectedDate.getYear() + "\nLocale: "
+                            + datePicker.getLocale());
+        } else {
+            message.setText("No date is selected");
+        }
+    }
+
     private Div createMessageDiv(String id) {
         Div message = new Div();
         message.setId(id);
         message.getStyle().set("whiteSpace", "pre");
         return message;
     }
-
+    // end-source-example
 }
