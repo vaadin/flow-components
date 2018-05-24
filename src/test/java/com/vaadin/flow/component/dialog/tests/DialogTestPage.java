@@ -37,6 +37,7 @@ public class DialogTestPage extends Div {
     public DialogTestPage() {
         createDialogWithAddOpenedChangeListener();
         createDialogWithoutAddingToTheUi();
+        createEmptyDialog();
     }
 
     private void createDialogWithAddOpenedChangeListener() {
@@ -85,6 +86,16 @@ public class DialogTestPage extends Div {
         open.addClickListener(event -> dialog.open());
         close.addClickListener(event -> dialog.close());
         add(open);
+    }
+
+    private void createEmptyDialog() {
+        Dialog dialog = new Dialog();
+        dialog.setId("empty-dialog");
+
+        NativeButton button = new NativeButton("empty-dialog", event -> dialog.open());
+        button.setId("open-button");
+
+        add(button);
     }
 
 }
