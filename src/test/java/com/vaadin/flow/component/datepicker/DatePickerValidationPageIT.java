@@ -129,6 +129,44 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
                 disabledPicker.isEnabled());
     }
 
+    @Test
+    public void testDifferentLocales() {
+        WebElement localePicker = findElement(By.id("locale-picker"));
+        WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
+                .get(0);
+        findElement(By.id("polish-locale")).click();
+
+        executeScript("arguments[0].value = '2018-03-26'", localePicker);
+        Assert.assertEquals("Polish Locale is using DD.MM.YYYY format ", true,
+                executeScript("return arguments[0].value === '26.03.2018'",
+                        displayText));
+
+        findElement(By.id("swedish-locale")).click();
+        executeScript("arguments[0].value = '2018-03-25'", localePicker);
+        Assert.assertEquals("Swedish Locale is using YYYY-MM-DD format ", true,
+                executeScript("return arguments[0].value === '2018-03-25'",
+                        displayText));
+    }
+
+    @Test
+    public void testPickerWithValueAndLocaleFromServerSide() {
+        WebElement localePicker = findElement(By.id("locale-picker-server"));
+        WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
+                .get(0);
+
+        Assert.assertEquals("Initial date is 5/23/2018", true, executeScript(
+                "return arguments[0].value === '5/23/2018'", displayText));
+
+        findElement(By.id("polish-locale-server")).click();
+        Assert.assertEquals("Polish locale date is 23.05.2018", true,
+                executeScript("return arguments[0].value === '23.05.2018'",
+                        displayText));
+
+        findElement(By.id("swedish-locale-server")).click();
+        Assert.assertEquals("Swedish locale date is 2018-05-23", true,
+                executeScript("return arguments[0].value === '2018-05-23'",
+                        displayText));
+    }
 
     private void assertInvalid() {
         String invalid = field.getAttribute("invalid");
