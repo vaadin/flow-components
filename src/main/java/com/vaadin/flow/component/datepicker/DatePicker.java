@@ -74,7 +74,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *
      * @param initialDate
      *            the pre-selected date in the picker
-     * @see #setValue(LocalDate)
+     * @see #setValue(Object)
      */
     public DatePicker(LocalDate initialDate) {
         super(initialDate, null, String.class, PARSER, FORMATTER);
@@ -102,7 +102,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *            the label describing the date picker
      * @param initialDate
      *            the pre-selected date in the picker
-     * @see #setValue(LocalDate)
+     * @see #setValue(Object)
      * @see #setLabel(String)
      */
     public DatePicker(String label, LocalDate initialDate) {
@@ -150,7 +150,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *            the pre-selected date in the picker
      * @param listener
      *            the listener to receive value change events
-     * @see #setValue(LocalDate)
+     * @see #setValue(Object)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(LocalDate initialDate,
@@ -170,13 +170,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @param listener
      *            the listener to receive value change events
      * @see #setLabel(String)
-     * @see #setValue(LocalDate)
+     * @see #setValue(Object)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(String label, LocalDate initialDate,
             ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
         this(initialDate);
-        setValue(initialDate);
+        setLabel(label);
         addValueChangeListener(listener);
     }
 
