@@ -40,6 +40,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Dependencies for the test -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-generic</artifactId>
+            <version>${flow.version}</version>
+            <scope>test</scope>
+        </dependency>
         <!-- Dependencies for the demo -->
         <dependency>
            <groupId>org.slf4j</groupId>
