@@ -1096,15 +1096,23 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     private Column<T> addColumn(PropertyDefinition<T, ?> property) {
-        Column<T> column = addColumn(
-                item -> String.valueOf(property.getGetter().apply(item)))
-                        .setHeader(property.getCaption());
+        Column<T> column = addColumn(item -> formatPropertyValue(property, item))
+                .setHeader(property.getCaption());
         try {
             return column.setKey(property.getName());
         } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException(
                     "Multiple columns for the same property: "
                             + property.getName());
+        }
+    }
+
+    private Object formatPropertyValue(PropertyDefinition<T, ?> property, T item) {
+        Object value = property.getGetter().apply(item);
+        if(value == null) {
+            return "";
+        } else {
+            return String.valueOf(value);
         }
     }
 
