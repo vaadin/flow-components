@@ -6,8 +6,8 @@ The repository contains implementations for `FlexLayout`, `HorizontalLayout` and
 
 ## Running the component demo
 Run from the command line:
-- `mvn clean install`
-- `mvn jetty:run`
+- `mvn clean install -PrunTests`
+- `mvn jetty:run -PrunTests`
 
 Then navigate to `http://localhost:9998/vaadin-horizontal-layout` for the demo of HorizontalLayout and to `http://localhost:9998/vaadin-vertical-layout` for the demo of VerticalLayout
 
