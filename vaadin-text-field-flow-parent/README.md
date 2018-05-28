@@ -7,12 +7,15 @@ The repository contains implementations for `TextField`, `PasswordField` and `Te
 
 ## Running the component demo
 Run from the command line:
-- `mvn clean install`
-- `mvn jetty:run`
+- `mvn jetty:run -PrunTests`
 
 Then navigate to `http://localhost:9998/vaadin-text-field` for the demo of TextField,
 to `http://localhost:9998/vaadin-password-field` for the demo of PasswordField and to
 `http://localhost:9998/vaadin-text-area` for the demo of TextArea 
+
+## Installing the component
+Run from the command line:
+- `mvn clean install -DskipTests`
 
 ## Using the component in a Flow application
 To use the component in an application using maven,
