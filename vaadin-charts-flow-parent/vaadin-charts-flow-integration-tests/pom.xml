@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-components-testbench</artifactId>
-            <version>1.0.0.beta4</version>
+            <version>1.0.0.beta5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
