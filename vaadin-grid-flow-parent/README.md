@@ -6,7 +6,7 @@ for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 ## Running the component demo
 Run from the command line:
 - `mvn clean install`
-- `mvn jetty:run`
+- `mvn jetty:run -PrunTests`
 
 Then navigate to `http://localhost:9998/vaadin-grid`
 
