@@ -52,5 +52,11 @@
             <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-generic</artifactId>
+            <version>${flow.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
