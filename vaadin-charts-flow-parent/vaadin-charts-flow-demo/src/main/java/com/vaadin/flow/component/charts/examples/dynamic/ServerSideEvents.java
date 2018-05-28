@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.charts.examples.dynamic;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,6 +33,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.server.Command;
 
 @SkipFromDemo
 public class ServerSideEvents extends AbstractChartExample {
@@ -219,7 +221,8 @@ public class ServerSideEvents extends AbstractChartExample {
                 .setVisibility(PropertyAccessor.ALL,
                         JsonAutoDetect.Visibility.NONE)
                 .setVisibility(PropertyAccessor.FIELD,
-                        JsonAutoDetect.Visibility.ANY);
+                        JsonAutoDetect.Visibility.ANY)
+                .addMixIn(Command.class, JacksonMixinForIgnoreCommand.class);
 
         try {
             return mapper.writeValueAsString(event);
@@ -228,4 +231,7 @@ public class ServerSideEvents extends AbstractChartExample {
             return "";
         }
     }
+
+    @JsonIgnoreType
+    static class JacksonMixinForIgnoreCommand { }
 }
