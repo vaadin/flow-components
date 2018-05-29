@@ -37,6 +37,7 @@ public class CheckboxView extends DemoView {
         addIndeterminateCheckbox();
         addValueChangeCheckbox();
         addAccessibleCheckbox();
+        addCheckboxWithHtmlLabel();
     }
 
     private void addDefaultCheckbox() {
@@ -108,5 +109,15 @@ public class CheckboxView extends DemoView {
         // end-source-example
         addCard("Checkbox with Custom Accessible Label", accessibleCheckbox);
         accessibleCheckbox.setId("accessible-checkbox");
+    }
+
+    private void addCheckboxWithHtmlLabel() {
+        // begin-source-example
+        // source-example-heading: Checkbox with simple html markup in the label
+        Checkbox checkbox = new Checkbox();
+        checkbox.setLabelAsHtml("Accept the <a href='https://vaadin.com/privacy-policy'>privacy policy</a>");
+        // end-source-example
+        addCard("Checkbox with simple html markup in the label", checkbox);
+        checkbox.setId("html-checkbox");
     }
 }
