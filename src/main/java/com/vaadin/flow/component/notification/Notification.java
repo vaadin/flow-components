@@ -169,7 +169,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
 
     private void initBaseElementsAndListeners() {
         getElement().appendChild(templateElement);
-        getElement().appendChild(container);
+        getElement().appendVirtualChild(container);
 
         getElement().addEventListener("opened-changed", event -> {
             if (autoAddedToTheUi && !isOpened()) {
