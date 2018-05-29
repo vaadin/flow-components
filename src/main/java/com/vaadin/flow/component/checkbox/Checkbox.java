@@ -62,7 +62,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *
      * @param initialValue
      *            the initial value
-     * @see #setValue(Boolean)
+     * @see AbstractField#setValue(Object)
      */
     public Checkbox(boolean initialValue) {
         this();
@@ -77,7 +77,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      * @param initialValue
      *            the initial value
      * @see #setLabel(String)
-     * @see #setValue(Boolean)
+     * @see AbstractField#setValue(Object)
      */
     public Checkbox(String labelText, boolean initialValue) {
         this(labelText);
@@ -93,7 +93,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      * @param listener
      *            the value change listener to add
      * @see #setLabel(String)
-     * @see #addValueChangeListener(AbstractField.ValueChangeListener)
+     * @see #addValueChangeListener(ValueChangeListener)
      */
     public Checkbox(String label,
             ValueChangeListener<ComponentValueChangeEvent<Checkbox, Boolean>> listener) {
@@ -115,7 +115,6 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *
      * @param label
      *            the label text to set
-     * @return this instance, for method chaining
      */
     public void setLabel(String label) {
         getElement().setText(label);
@@ -126,7 +125,6 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *
      * @param ariaLabel
      *            the accessibility label to set
-     * @return this instance, for method chaining
      * @see <a href=
      *      "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute"
      *      >aria-label at MDN</a>
