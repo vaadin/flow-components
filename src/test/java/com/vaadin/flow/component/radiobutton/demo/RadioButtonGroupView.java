@@ -203,7 +203,8 @@ public class RadioButtonGroupView extends DemoView {
         group.setId("button-group-disabled-items");
         valueInfo.setId("button-group-disabled-items-info");
 
-        addCard("Radio button group with item enabled provider", group, valueInfo);
+        addCard("Radio button group with item enabled provider", group,
+                valueInfo);
     }
 
     private String getName(Person person) {

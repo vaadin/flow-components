@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
@@ -24,16 +29,20 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
+import com.vaadin.flow.dom.PropertyChangeEvent;
+import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializablePredicate;
-
-import java.util.Objects;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * A single select component using radio buttons as options.
  * <p>
- * This is a server side Java integration for the {@code vaadin-radio-group} element.
+ * This is a server side Java integration for the {@code vaadin-radio-group}
+ * element.
  * <p>
- * Usage examples, see <a href="https://vaadin.com/components/vaadin-radio-button/java-examples">the demo in vaadin.com</a>.
+ * Usage examples, see
+ * <a href="https://vaadin.com/components/vaadin-radio-button/java-examples">the
+ * demo in vaadin.com</a>.
  *
  * @author Vaadin Ltd.
  */
@@ -51,6 +60,9 @@ public class RadioButtonGroup<T>
     private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>();
 
     private boolean isReadOnly;
+
+    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
+    private Registration validationRegistration;
 
     private static <T> T presentationToModel(
             RadioButtonGroup<T> radioButtonGroup, String presentation) {
@@ -71,6 +83,8 @@ public class RadioButtonGroup<T>
     public RadioButtonGroup() {
         super(null, null, String.class, RadioButtonGroup::presentationToModel,
                 RadioButtonGroup::modelToPresentation);
+
+        registerValidation();
     }
 
     @Override
@@ -181,18 +195,68 @@ public class RadioButtonGroup<T>
         return button;
     }
 
-    @SuppressWarnings("unchecked")
     private void refreshButtons() {
-        getChildren().filter(RadioButton.class::isInstance)
-                .map(child -> (RadioButton<T>) child)
-                .forEach(this::updateButton);
+        getRadioButtons().forEach(this::updateButton);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Stream<RadioButton<T>> getRadioButtons() {
+        return getChildren().filter(RadioButton.class::isInstance)
+                .map(child -> (RadioButton<T>) child);
     }
 
     private void updateButton(RadioButton<T> button) {
-        boolean disabled = isDisabledBoolean()
-                || !getItemEnabledProvider().test(button.getItem());
-        button.setDisabled(disabled);
+        updateEnabled(button);
         button.removeAll();
         button.add(getItemRenderer().createComponent(button.getItem()));
+    }
+
+    private void validateSelectionEnabledState(PropertyChangeEvent event) {
+        if (!hasValidValue()) {
+            T oldValue = getValue(event.getOldValue());
+            // return the value back on the client side
+            try {
+                validationRegistration.remove();
+                getElement().setProperty("value", keyMapper.key(oldValue));
+            } finally {
+                registerValidation();
+            }
+            // Now make sure that the button is still in the correct state
+            Optional<RadioButton<T>> selectedButton = getRadioButtons().filter(
+                    button -> button.getItem() == getValue(event.getValue()))
+                    .findFirst();
+
+            selectedButton.ifPresent(this::updateEnabled);
+        }
+    }
+
+    private void updateEnabled(RadioButton<T> button) {
+        boolean disabled = isDisabledBoolean()
+                || !getItemEnabledProvider().test(button.getItem());
+        Serializable rawValue = button.getElement().getPropertyRaw("disabled");
+        if (rawValue instanceof Boolean) {
+            // convert the boolean value to a String to force update the
+            // property value. Otherwise since the provided value is the same as
+            // the current one the update don't do anything.
+            button.getElement().setProperty("disabled",
+                    disabled ? Boolean.TRUE.toString() : null);
+        } else {
+            button.setDisabled(disabled);
+        }
+    }
+
+    private T getValue(Serializable key) {
+        if (key == null) {
+            return null;
+        }
+        return keyMapper.get(key.toString());
+    }
+
+    private void registerValidation() {
+        if (validationRegistration != null) {
+            validationRegistration.remove();
+        }
+        validationRegistration = getElement().addPropertyChangeListener("value",
+                validationListener);
     }
 }

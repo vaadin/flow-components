@@ -143,15 +143,19 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
                 .perform();
 
         try {
-            waitUntil(driver ->
-                    group.findElements(By.tagName("vaadin-radio-button")).get(1)
-                            .getAttribute("disabled") != null);
+            waitUntil(driver -> group
+                    .findElements(By.tagName("vaadin-radio-button")).get(1)
+                    .getAttribute("disabled") != null);
         } catch (WebDriverException wde) {
             Assert.fail("Server should have disabled the button again.");
         }
 
         Assert.assertEquals("Value 'foo' should have been re-selected", "foo",
                 infoLabel.getText());
+
+        Assert.assertTrue(
+                "Value 'foo' should have been re-selected on the client side",
+                Boolean.valueOf(buttons.get(0).getAttribute("checked")));
     }
 
     @Test
@@ -253,11 +257,15 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
             Assert.assertEquals(
                     "Expected second in group " + (i + 1) + " to be a <hr>",
                     "hr", elements.get(firstInGroup + 1).getTagName());
-            Assert.assertEquals("Expected third in group " + (i + 1)
-                            + " to be a <vaadin-radio-button>", "vaadin-radio-button",
+            Assert.assertEquals(
+                    "Expected third in group " + (i + 1)
+                            + " to be a <vaadin-radio-button>",
+                    "vaadin-radio-button",
                     elements.get(firstInGroup + 2).getTagName());
-            Assert.assertEquals("Expected fourth in group " + (i + 1)
-                            + " to be a <vaadin-radio-button>", "vaadin-radio-button",
+            Assert.assertEquals(
+                    "Expected fourth in group " + (i + 1)
+                            + " to be a <vaadin-radio-button>",
+                    "vaadin-radio-button",
                     elements.get(firstInGroup + 3).getTagName());
         });
     }
