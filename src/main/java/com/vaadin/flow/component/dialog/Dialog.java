@@ -54,7 +54,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         getElement().appendChild(template);
 
         container = new Element("div");
-        getElement().appendChild(container);
+        getElement().appendVirtualChild(container);
 
         // Attach <flow-component-renderer>
         getElement().getNode()
