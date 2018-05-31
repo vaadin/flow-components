@@ -6,7 +6,16 @@ window.Vaadin.Flow.datepickerConnector = {
         }
 
         datepicker.$connector = {};
-        let oldLocale;
+
+        const getDefaultLang = function () {
+            if (navigator.languages && navigator.languages.length) {
+                return navigator.languages[0];
+            }
+            return navigator.language;
+        };
+
+        // Old locale should always be the default locale at first
+        let oldLocale = getDefaultLang();
 
         datepicker.addEventListener('blur', e => {
             if (!e.target.value && e.target.invalid) {
@@ -23,7 +32,7 @@ window.Vaadin.Flow.datepickerConnector = {
         };
 
         // Create a Date from our dateObject that doesn't contain setters/getters
-        const generateDate = function(dateObject) {
+        const generateDate = function (dateObject) {
             let dateString = `${dateObject.year}-${dateObject.month + 1}-${dateObject.day}`;
             var parts = /^([-+]\d{1}|\d{2,4}|[-+]\d{6})-(\d{1,2})-(\d{1,2})$/.exec(dateString);
             if (!parts) {
@@ -40,7 +49,7 @@ window.Vaadin.Flow.datepickerConnector = {
             return date;
         };
 
-        const updateFormat = function() {
+        const updateFormat = function () {
             let inputValue = datepicker._inputValue || '';
             if (inputValue !== "" && datepicker.i18n.parseDate) {
                 let selectedDate = datepicker.i18n.parseDate(inputValue);
@@ -56,9 +65,6 @@ window.Vaadin.Flow.datepickerConnector = {
             try {
                 // Check weather the locale is supported or not
                 new Date().toLocaleDateString(locale);
-                if (typeof oldLocale === "undefined") {
-                    oldLocale = locale;
-                }
             } catch (e) {
                 locale = "en-US";
                 console.warn("The locale is not supported, use default locale setting(en-US).");
