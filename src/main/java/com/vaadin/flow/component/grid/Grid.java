@@ -877,8 +877,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * {@link Column#setKey(String) column keys} and the property captions will
      * be used as the {@link Column#setHeader(String) column headers}.
      * <p>
-     * You can add columns for nested properties of the bean with
-     * {@link #addColumn(String)}.
+     * By default, only the direct properties of the bean are included and they
+     * will be in alphabetical order. Use {@link Grid#setColumns(String...)} to
+     * define which properties to include and in which order. You can also add a
+     * column for an individual property with {@link #addColumn(String)}. Both
+     * of these methods support also sub-properties with dot-notation, eg.
+     * <code>"property.nestedProperty"</code>.
      *
      * @param beanType
      *            the bean type to use, not <code>null</code>
@@ -888,7 +892,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         Objects.requireNonNull(beanType, "Bean type can't be null");
         propertySet = BeanPropertySet.get(beanType);
         propertySet.getProperties()
-                .filter(property -> !property.isSubProperty())
+                .filter(property -> !property.isSubProperty()).sorted((prop1,
+                        prop2) -> prop1.getName().compareTo(prop2.getName()))
                 .forEach(this::addColumn);
     }
 

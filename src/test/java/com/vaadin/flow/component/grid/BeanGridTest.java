@@ -36,9 +36,9 @@ public class BeanGridTest {
     }
 
     @Test
-    public void beanGrid_columnsForPropertiesAddedWithCorrectKeys() {
-        String[] expectedKeys = new String[] { "born", "name", "friend",
-                "grades", "items" };
+    public void beanGrid_columnsForPropertiesAddedWithCorrectKeysInAlphabeticalOrder() {
+        String[] expectedKeys = new String[] { "born", "friend", "grades",
+                "items", "name" };
         Object[] keys = grid.getColumns().stream().map(Column::getKey)
                 .toArray();
 

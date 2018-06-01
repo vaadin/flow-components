@@ -544,8 +544,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 grid.findElements(By.tagName("vaadin-grid-column")).size());
 
         Assert.assertEquals("Address", grid.getHeaderCell(0).getText());
-        Assert.assertEquals("Name", grid.getHeaderCell(1).getText());
-        Assert.assertEquals("Age", grid.getHeaderCell(2).getText());
+        Assert.assertEquals("Age", grid.getHeaderCell(1).getText());
+        Assert.assertEquals("Name", grid.getHeaderCell(2).getText());
         Assert.assertEquals("Postal Code", grid.getHeaderCell(3).getText());
     }
 
