@@ -162,7 +162,10 @@ window.Vaadin.Flow.gridConnector = {
       }
       grid.detailsOpenedItems = detailsOpenedItems;
       if (updatedSelectedItem) {
-        grid.selectedItems = Object.values(selectedKeys);
+        // IE 11 Object doesn't support method values
+        grid.selectedItems = Object.keys(selectedKeys).map(function(e) {
+          return selectedKeys[e]
+        });
       }
     }
 
@@ -239,7 +242,9 @@ window.Vaadin.Flow.gridConnector = {
           }
         }
       }
-      for (let page of pagesToUpdate) {
+      // IE11 doesn't work with the transpiled version of the forEach.
+      for (var i = 0; i< pagesToUpdate.length; i++) {
+          let page = pagesToUpdate[i];
         updateGridCache(page);
       }
     };
