@@ -7,15 +7,11 @@ window.Vaadin.Flow.datepickerConnector = {
 
         datepicker.$connector = {};
 
-        const getDefaultLang = function () {
-            if (navigator.languages && navigator.languages.length) {
-                return navigator.languages[0];
-            }
-            return navigator.language;
-        };
-
-        // Old locale should always be the default locale at first
-        let oldLocale = getDefaultLang();
+        // Old locale should always be the default vaadin-date-picker component
+        // locale {English/US} as we init lazily and the date-picker formats
+        // the date using the default i18n settings and we need to use the input
+        // value as we may need to parse user input so we can't use the _selectedDate value.
+        let oldLocale = "en-us";
 
         datepicker.addEventListener('blur', e => {
             if (!e.target.value && e.target.invalid) {
