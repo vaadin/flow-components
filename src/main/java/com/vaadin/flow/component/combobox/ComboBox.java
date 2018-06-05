@@ -567,12 +567,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void refresh() {
-        keyMapper.removeAll();
         if (refreshScheduled) {
             return;
         }
         refreshScheduled = true;
         runBeforeClientResponse(ui -> {
+            keyMapper.removeAll();
             JsonArray array = generateJson(itemsFromDataProvider.stream());
             setItems(array);
             refreshScheduled = false;

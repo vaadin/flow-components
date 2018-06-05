@@ -27,6 +27,8 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
+import static org.junit.Assert.assertFalse;
+
 @TestPath("combo-box-test")
 public class ComboBoxPageIT extends AbstractComponentIT {
 
@@ -57,6 +59,20 @@ public class ComboBoxPageIT extends AbstractComponentIT {
 
         waitUntil(driver -> "3".equals(getItem(getItems(combo), 0)));
         assertItem(getItems(combo), 1, "6");
+    }
+
+    @Test
+    public void createExternalDisableTest() {
+        WebElement combo = findElement(By.id("client-test"));
+        WebElement message = findElement(By.id("get-value"));
+        waitUntil(driver -> "Nothing clicked yet...".equals(message.getText()));
+
+        findElement(By.id("set-value")).click();
+        Assert.assertEquals("bar", message.getText());
+
+        findElement(By.id("disable-combo-box")).click();
+        assertFalse("the combobox should be disabled", combo.isEnabled());
+        Assert.assertEquals("bar", message.getText());
     }
 
     @Test

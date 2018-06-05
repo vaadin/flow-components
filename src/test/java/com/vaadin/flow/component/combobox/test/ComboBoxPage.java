@@ -48,6 +48,7 @@ public class ComboBoxPage extends Div {
      */
     public ComboBoxPage() {
         createExternalSetValue();
+        createExternalDisableTest();
         createWithUpdateProvider();
         createWithValueChangeListener();
         createWithUpdatableValue();
@@ -68,6 +69,28 @@ public class ComboBoxPage extends Div {
         changeSelectedItem.setId("toggle-selected-item");
 
         add(comboBox, changeSelectedItem);
+    }
+
+    private void createExternalDisableTest() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setId("client-test");
+        Label message = new Label("Nothing clicked yet...");
+        message.setId("get-value");
+        comboBox.setItems("foo", "bar", "paa");
+        NativeButton valueSet = new NativeButton("Set Value");
+        valueSet.setId("set-value");
+        valueSet.addClickListener(event -> {
+            comboBox.setValue("bar");
+            message.setText(comboBox.getValue());
+        });
+
+        NativeButton disableCB = new NativeButton("Set Disabled");
+        disableCB.setId("disable-combo-box");
+        disableCB.addClickListener(event -> {
+            comboBox.setEnabled(false);
+            message.setText(comboBox.getValue());
+            });
+        add(comboBox, valueSet, disableCB, message);
     }
 
     private void createWithUpdateProvider() {

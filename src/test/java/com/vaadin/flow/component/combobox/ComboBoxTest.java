@@ -33,6 +33,8 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
+import static org.junit.Assert.assertEquals;
+
 public class ComboBoxTest {
 
     @Rule
@@ -97,6 +99,14 @@ public class ComboBoxTest {
         Assert.assertEquals("bar", comboBox.getValue());
         comboBox.setItems(Arrays.asList("foo", "bar"));
         Assert.assertNull(comboBox.getValue());
+    }
+
+    @Test
+    public void setValue_disableComboBox_getValue() {
+        ComboBox<String> comboBox = new ComboBox<>("foo", "bar", "paa");
+        comboBox.setValue("bar");
+        comboBox.setEnabled(false);
+        assertEquals("bar", comboBox.getValue());
     }
 
     @Test
