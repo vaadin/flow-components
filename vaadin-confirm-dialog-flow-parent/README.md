@@ -1,2 +1,1 @@
-# vaadin-confirm-dialog-flow
-Confirm Dialog Component for Vaadin Flow
+# Confirm Dialog Component for Vaadin Flow
