@@ -26,7 +26,9 @@ import java.util.Objects;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.NoInputStreamException;
 import com.vaadin.flow.server.NoOutputStreamException;
@@ -34,7 +36,6 @@ import com.vaadin.flow.server.StreamReceiver;
 import com.vaadin.flow.server.StreamVariable;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonArray;
 import elemental.json.JsonNull;
 import elemental.json.JsonObject;
 
@@ -51,6 +52,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     private int activeUploads = 0;
 
     private static final String I18N_PROPERTY = "i18n";
+    private UploadI18N i18n;
 
     /**
      * The output of the upload is redirected to this receiver.
@@ -486,77 +488,37 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     public void setI18n(UploadI18N i18n) {
         Objects.requireNonNull(i18n,
                 "The I18N properties object should not be null");
-        JsonObject json = (JsonObject) JsonSerializer.toJson(i18n);
-        Element element = getElement();
-        for (String key : json.keys()) {
-            element.setPropertyJson(I18N_PROPERTY + "." + key, json.get(key));
-        }
+        this.i18n = i18n;
+
+        runBeforeClientResponse(ui -> {
+            if (i18n == this.i18n) {
+                JsonObject i18nObject = (JsonObject) JsonSerializer
+                    .toJson(this.i18n);
+                for (String key : i18nObject.keys()) {
+                    ui.getPage().executeJavaScript(
+                            "$0.set('i18n." + key + "', $1)", getElement(),
+                            i18nObject.get(key));
+                }
+            }
+        });
+    }
+
+    void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     /**
-     * Gets the internationalization properties previously set for this
-     * component.
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * Note: updating the object content that is gotten from this method will
+     * not update the language on the component if not set back using
+     * {@link Upload#setI18n(UploadI18N)}
      *
-     * @return the object with the i18n properties, never <code>null</code>. If
-     *         the i18n properties weren't set, the internal properties of the
-     *         object will be <code>null</code>, but not the object itself.
+     * @return the object with the i18n properties. If the i18n properties
+     *         weren't set, the object will return <code>null</code>.
      */
     public UploadI18N getI18n() {
-        UploadI18N i18n = new UploadI18N();
-        Element element = getElement();
-
-        UploadI18N.DropFiles dropFiles = new UploadI18N.DropFiles();
-        dropFiles.setOne(getStringObject(I18N_PROPERTY + ".dropFiles", "one"));
-        dropFiles
-                .setMany(getStringObject(I18N_PROPERTY + ".dropFiles", "many"));
-        i18n.setDropFiles(dropFiles);
-
-        UploadI18N.AddFiles addFiles = new UploadI18N.AddFiles();
-        addFiles.setOne(getStringObject(I18N_PROPERTY + ".addFiles", "one"));
-        addFiles.setMany(getStringObject(I18N_PROPERTY + ".addFiles", "many"));
-        i18n.setAddFiles(addFiles);
-
-        i18n.setCancel(element.getProperty(I18N_PROPERTY + ".cancel"));
-
-        UploadI18N.Error error = new UploadI18N.Error();
-        error.setTooManyFiles(
-                getStringObject(I18N_PROPERTY + ".error", "tooManyFiles"));
-        error.setFileIsTooBig(
-                getStringObject(I18N_PROPERTY + ".error", "fileIsTooBig"));
-        error.setIncorrectFileType(
-                getStringObject(I18N_PROPERTY + ".error", "incorrectFileType"));
-        i18n.setError(error);
-
-        UploadI18N.Uploading uploading = new UploadI18N.Uploading();
-        String uploadingBase = I18N_PROPERTY + ".uploading";
-        UploadI18N.Uploading.Status status = new UploadI18N.Uploading.Status();
-        status.setConnecting(
-                getStringObject(uploadingBase, "status", "connecting"));
-        status.setStalled(getStringObject(uploadingBase, "status", "stalled"));
-        status.setProcessing(
-                getStringObject(uploadingBase, "status", "processing"));
-        status.setHeld(getStringObject(uploadingBase, "status", "held"));
-
-        UploadI18N.Uploading.RemainingTime remainingTime = new UploadI18N.Uploading.RemainingTime();
-        remainingTime.setPrefix(
-                getStringObject(uploadingBase, "remainingTime", "prefix"));
-        remainingTime.setUnknown(
-                getStringObject(uploadingBase, "remainingTime", "unknown"));
-        UploadI18N.Uploading.Error uploadingError = new UploadI18N.Uploading.Error();
-        uploadingError.setServerUnavailable(
-                getStringObject(uploadingBase, "error", "serverUnavailable"));
-        uploadingError.setUnexpectedServerError(getStringObject(uploadingBase,
-                "error", "unexpectedServerError"));
-        uploadingError.setForbidden(
-                getStringObject(uploadingBase, "error", "forbidden"));
-
-        uploading.setStatus(status).setRemainingTime(remainingTime)
-                .setError(uploadingError);
-        i18n.setUploading(uploading);
-
-        i18n.setUnits(JsonSerializer.toObjects(String.class,
-                (JsonArray) element.getPropertyRaw(I18N_PROPERTY + ".units")));
-
         return i18n;
     }
 

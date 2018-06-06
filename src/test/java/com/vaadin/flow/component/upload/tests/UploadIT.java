@@ -58,6 +58,17 @@ public class UploadIT extends ComponentDemoTest {
                 expectedContent, content);
     }
 
+    @Test
+    public void i18nUploadTest() {
+        open();
+        waitUntil(driver -> getUpload().isDisplayed());
+
+        WebElement upload = findElement(By.id("i18n-upload"));
+        WebElement dropLabel = findInShadowRoot(upload, By.id("dropLabel"))
+                .get(0);
+        Assert.assertEquals("Перетащите файл сюда...", dropLabel.getText());
+    }
+
     /**
      * @return The generated temp file handle
      * @throws IOException

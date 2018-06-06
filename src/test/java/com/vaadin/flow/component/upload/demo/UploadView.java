@@ -187,6 +187,7 @@ public class UploadView extends DemoView {
         // source-example-heading: i18n translations example
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
+        upload.setId("i18n-upload");
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
