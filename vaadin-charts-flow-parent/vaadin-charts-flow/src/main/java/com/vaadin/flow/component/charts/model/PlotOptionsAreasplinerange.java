@@ -48,7 +48,7 @@ public class PlotOptionsAreasplinerange extends AreaOptions {
 	private ArrayList<String> keys;
 	private String linecap;
 	private String linkedTo;
-	private boolean negativeFillColor;
+	private boolean negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -433,17 +433,20 @@ public class PlotOptionsAreasplinerange extends AreaOptions {
 	}
 
 	/**
-	 * @see #setNegativeFillColor(boolean)
+	 * @see #setNegativeColor(boolean)
 	 */
-	public boolean isNegativeFillColor() {
-		return negativeFillColor;
+	public boolean isNegativeColor() {
+		return negativeColor;
 	}
 
 	/**
-	 * A separate color for the negative part of the area.
+	 * Enable or disable the color for parts of the graph that are bellow
+	 * {@link #getThreshold()}. A negative color is applied by setting this
+	 * option to <code>true</code> combined with the
+	 * <code>.highcharts-negative</code> class name.
 	 */
-	public void setNegativeFillColor(boolean negativeFillColor) {
-		this.negativeFillColor = negativeFillColor;
+	public void setNegativeColor(boolean negativeColor) {
+		this.negativeColor = negativeColor;
 	}
 
 	public String getPointDescriptionFormatter() {

@@ -252,14 +252,17 @@ public abstract class AreaOptions extends AbstractPlotOptions {
     public abstract void setLinkedTo(String linkedTo);
 
     /**
-     * @see #setNegativeFillColor(boolean)
+     * @see #setNegativeColor(boolean)
      */
-    public abstract boolean isNegativeFillColor();
+    public abstract boolean isNegativeColor();
 
     /**
-     * A separate color for the negative part of the area.
+     * Enable or disable the color for parts of the graph that are bellow
+     * <code>threshold</code>. A negative color is applied by setting this
+     * option to <code>true</code> combined with the
+     * <code>.highcharts-negative</code> class name.
      */
-    public abstract void setNegativeFillColor(boolean negativeFillColor);
+    public abstract void setNegativeColor(boolean negativeColor);
 
     public abstract String getPointDescriptionFormatter();
 

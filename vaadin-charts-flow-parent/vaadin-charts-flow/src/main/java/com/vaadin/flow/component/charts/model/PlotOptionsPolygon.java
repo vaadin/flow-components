@@ -48,6 +48,7 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 	private ArrayList<String> keys;
 	private String linkedTo;
 	private Marker marker;
+	private boolean negativeColor;
 	private String _fn_pointDescriptionFormatter;
 	private Number pointInterval;
 	private IntervalUnit pointIntervalUnit;
@@ -405,6 +406,23 @@ public class PlotOptionsPolygon extends AbstractPlotOptions {
 	 */
 	public void setMarker(Marker marker) {
 		this.marker = marker;
+	}
+
+	/**
+	 * @see #setNegativeColor(boolean)
+	 */
+	public boolean isNegativeColor() {
+		return negativeColor;
+	}
+
+	/**
+	 * Enable or disable the color for parts of the graph that are bellow
+	 * {@link #getThreshold()}. A negative color is applied by setting this
+	 * option to <code>true</code> combined with the
+	 * <code>.highcharts-negative</code> class name.
+	 */
+	public void setNegativeColor(boolean negativeColor) {
+		this.negativeColor = negativeColor;
 	}
 
 	public String getPointDescriptionFormatter() {

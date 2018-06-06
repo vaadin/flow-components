@@ -42,6 +42,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 	private Boolean getExtremesFromAll;
 	private ArrayList<String> keys;
 	private String linkedTo;
+	private boolean negativeColor;
 	private Number overshoot;
 	private Pivot pivot;
 	private String _fn_pointDescriptionFormatter;
@@ -358,6 +359,23 @@ public class PlotOptionsGauge extends GaugeOptions {
 	 */
 	public void setLinkedTo(String linkedTo) {
 		this.linkedTo = linkedTo;
+	}
+
+	/**
+	 * @see #setNegativeColor(boolean)
+	 */
+	public boolean isNegativeColor() {
+		return negativeColor;
+	}
+
+	/**
+	 * Enable or disable the color for parts of the graph that are bellow
+	 * {@link #getThreshold()}. A negative color is applied by setting this
+	 * option to <code>true</code> combined with the
+	 * <code>.highcharts-negative</code> class name.
+	 */
+	public void setNegativeColor(boolean negativeColor) {
+		this.negativeColor = negativeColor;
 	}
 
 	/**
