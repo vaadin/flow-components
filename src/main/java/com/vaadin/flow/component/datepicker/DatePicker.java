@@ -28,12 +28,11 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
-import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 /**
@@ -50,6 +49,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation {
 
     private static final String I18N_PROPERTY = "i18n";
+    private DatePickerI18n i18n;
 
     private final static SerializableFunction<String, LocalDate> PARSER = s -> {
         return s == null || s.isEmpty() ? null : LocalDate.parse(s);
@@ -283,33 +283,16 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     /**
-     * Gets the internationalization properties previously set for this
-     * component.
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * Note: updating the object content that is gotten from this method will
+     * not update the lang on the component if not set back using
+     * {@link DatePicker#setI18n(DatePickerI18n)}
      *
-     * @return the object with the i18n properties, never <code>null</code>. If
-     *         the i18n properties weren't set, the internal properties of the
-     *         object will be <code>null</code>, but not the object itself.
+     * @return the i18n object. It will be <code>null</code>, If the i18n
+     *         properties weren't set.
      */
     public DatePickerI18n getI18n() {
-        DatePickerI18n i18n = new DatePickerI18n();
-        Element element = getElement();
-        i18n.setCalendar(element.getProperty(I18N_PROPERTY + ".calendar"));
-        i18n.setCancel(element.getProperty(I18N_PROPERTY + ".cancel"));
-        i18n.setClear(element.getProperty(I18N_PROPERTY + ".clear"));
-        i18n.setFirstDayOfWeek(
-                element.getProperty(I18N_PROPERTY + ".firstDayOfWeek", 0));
-        i18n.setMonthNames(
-                JsonSerializer.toObjects(String.class, (JsonArray) element
-                        .getPropertyRaw(I18N_PROPERTY + ".monthNames")));
-        i18n.setToday(element.getProperty(I18N_PROPERTY + ".today"));
-        i18n.setWeek(element.getProperty(I18N_PROPERTY + ".week"));
-        i18n.setWeekdays(
-                JsonSerializer.toObjects(String.class, (JsonArray) element
-                        .getPropertyRaw(I18N_PROPERTY + ".weekdays")));
-        i18n.setWeekdaysShort(
-                JsonSerializer.toObjects(String.class, (JsonArray) element
-                        .getPropertyRaw(I18N_PROPERTY + ".weekdaysShort")));
-
         return i18n;
     }
 
@@ -322,11 +305,23 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public void setI18n(DatePickerI18n i18n) {
         Objects.requireNonNull(i18n,
                 "The I18N properties object should not be null");
-        JsonObject json = (JsonObject) JsonSerializer.toJson(i18n);
-        Element element = getElement();
-        for (String key : json.keys()) {
-            element.setPropertyJson(I18N_PROPERTY + "." + key, json.get(key));
-        }
+        this.i18n = i18n;
+        runBeforeClientResponse(ui -> {
+            if (i18n == this.i18n) {
+                JsonObject i18nObject = (JsonObject) JsonSerializer
+                        .toJson(this.i18n);
+                for (String key : i18nObject.keys()) {
+                    ui.getPage().executeJavaScript(
+                            "$0.set('i18n." + key + "', $1)", getElement(),
+                            i18nObject.get(key));
+                }
+            }
+        });
+    }
+
+    void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     @Override

@@ -33,6 +33,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class DatePickerIT extends ComponentDemoTest {
     
+    private static final String DATEPICKER_OVERLAY = "vaadin-date-picker-overlay";
+
     @Before
     public void init() {
         waitForElementPresent(By.tagName("vaadin-date-picker"));
@@ -99,6 +101,18 @@ public class DatePickerIT extends ComponentDemoTest {
         executeScript("arguments[0].value = ''", picker);
 
         waitUntil(driver -> "No date is selected".equals(message.getText()));
+
+        executeScript("arguments[0].setAttribute(\"opened\", true)", picker);
+        waitForElementPresent(By.tagName(DATEPICKER_OVERLAY));
+
+        WebElement overlay = findElement(By.tagName(DATEPICKER_OVERLAY));
+        WebElement content = findInShadowRoot(overlay, By.id("content")).get(0);
+        WebElement overlayContent = findInShadowRoot(content,
+                By.id("overlay-content")).get(0);
+        WebElement todayButton = findInShadowRoot(overlayContent,
+                By.id("todayButton")).get(0);
+
+        waitUntil(driver -> "tänään".equals(todayButton.getText()));
     }
 
     @Test
