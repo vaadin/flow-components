@@ -19,16 +19,22 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.internal.WrapsElement;
+import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebElement;
 
 import com.vaadin.flow.demo.ComponentDemoTest;
+
+import static org.junit.Assert.assertThat;
 
 /**
  * Upload component test class.
@@ -56,6 +62,25 @@ public class UploadIT extends ComponentDemoTest {
 
         Assert.assertEquals("Upload content does not match expected",
                 expectedContent, content);
+    }
+
+    @Test
+    public void uploadFileAndNoErrorThrown() throws Exception {
+        open();
+        waitUntil(driver -> getUpload().isDisplayed());
+
+        File tempFile = createTempFile();
+        fillPathToUploadInput(tempFile.getPath());
+
+        List<LogEntry> logList1 = getLogEntries(Level.SEVERE);
+        assertThat("There should have no severe message in the console",
+                logList1.size(), CoreMatchers.is(0));
+
+        WebElement upload = getUpload();
+        executeScript("arguments[0]._removeFile()", upload);
+        List<LogEntry> logList2 = getLogEntries(Level.SEVERE);
+        assertThat("There should have no severe message in the console",
+                logList2.size(), CoreMatchers.is(0));
     }
 
     @Test
