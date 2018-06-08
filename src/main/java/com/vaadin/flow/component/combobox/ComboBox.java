@@ -75,7 +75,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private List<T> temporaryFilteredItems;
 
-
     private int customValueListenersCount;
 
     private class CustomValueRegistraton implements Registration {
@@ -99,7 +98,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             }
         }
     }
-
 
     private static <T> T presentationToModel(ComboBox<T> comboBox,
             JsonValue presentation) {
@@ -572,9 +570,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
         refreshScheduled = true;
         runBeforeClientResponse(ui -> {
+            T value = getValue();
             keyMapper.removeAll();
             JsonArray array = generateJson(itemsFromDataProvider.stream());
             setItems(array);
+            /*
+             * The value is stored as a JsonObject with a key in keyMapper.
+             * Since keyMapper is reset we have to regenerate the JsonObject
+             * based on new keyMapper.
+             */
+            setValue(value);
             refreshScheduled = false;
         });
 
