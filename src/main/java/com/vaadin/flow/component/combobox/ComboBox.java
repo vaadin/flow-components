@@ -30,6 +30,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -55,6 +56,7 @@ import elemental.json.JsonValue;
  * @param <T>
  *            the type of the items to be inserted in the combo box
  */
+@HtmlImport("frontend://flow-component-renderer.html")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation, HasDataProvider<T> {
     private static final String ITEM_LABEL_PROPERTY = "label";

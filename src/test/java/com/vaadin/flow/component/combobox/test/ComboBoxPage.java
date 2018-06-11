@@ -89,7 +89,7 @@ public class ComboBoxPage extends Div {
         disableCB.addClickListener(event -> {
             comboBox.setEnabled(false);
             message.setText(comboBox.getValue());
-            });
+        });
         add(comboBox, valueSet, disableCB, message);
     }
 

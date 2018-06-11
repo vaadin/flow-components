@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -35,7 +34,6 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-combo-box")
-@HtmlImport("frontend://flow-component-renderer.html")
 public class ComboBoxView extends DemoView {
 
     /**
@@ -256,17 +254,17 @@ public class ComboBoxView extends DemoView {
         ComboBox<Song> comboBox = new ComboBox<>();
         comboBox.setRenderer(new ComponentRenderer<>(item -> {
             VerticalLayout container = new VerticalLayout();
-            
+
             Label song = new Label(item.getName());
             container.add(song);
-            
+
             Label artist = new Label(item.getArtist());
             artist.getStyle().set("fontSize", "smaller");
             container.add(artist);
-            
+
             return container;
         }));
-        
+
 
         List<Song> listOfSongs = createListOfSongs();
 
