@@ -194,7 +194,7 @@
                                 </goals>
                                 <configuration>
                                     <workingDirectory>${buildtools.directory}</workingDirectory>
-                                    <arguments>run install-bower-dependencies</arguments>
+                                    <arguments>install-bower-and-dependencies</arguments>
                                 </configuration>
                             </execution>
                         </executions>

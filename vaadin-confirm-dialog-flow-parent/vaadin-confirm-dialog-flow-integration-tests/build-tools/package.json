@@ -8,7 +8,7 @@
     "bower": "1.8.2"
   },
   "scripts": {
-    "install-bower-dependencies": "cd ../src/main/webapp/frontend && bower install",
+    "install-bower-and-dependencies": "npm install && cd ../src/main/webapp/frontend && bower install",
     "build": "cd ../src/main/webapp/frontend && bower install && polymer build"
   },
   "dependencies": {
