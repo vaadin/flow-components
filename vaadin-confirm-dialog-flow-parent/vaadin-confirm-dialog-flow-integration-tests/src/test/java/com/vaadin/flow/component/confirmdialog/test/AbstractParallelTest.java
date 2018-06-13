@@ -29,11 +29,6 @@ public abstract class AbstractParallelTest extends ParallelTest {
         getDriver().manage().window().setSize(new Dimension(1024, 768));
     }
 
-    @After
-    public void teardown() {
-        getDriver().quit();
-    }
-
     public void compareScreen(String screenshotName) throws Exception {
         String prefix = getClass().getSimpleName().replaceAll("IT", "");
         String referenceName = prefix + "_" + screenshotName;
