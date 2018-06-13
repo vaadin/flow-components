@@ -206,7 +206,7 @@
             <id>production</id>
             <activation>
                 <property>
-                    <name>vaadin.productionMode</name>
+                    <name>!skipFrontend</name>
                 </property>
             </activation>
             <build>
