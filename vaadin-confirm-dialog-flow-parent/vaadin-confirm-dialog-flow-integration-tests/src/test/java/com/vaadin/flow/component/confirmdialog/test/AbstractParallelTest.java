@@ -3,6 +3,7 @@ package com.vaadin.flow.component.confirmdialog.test;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.openqa.selenium.Dimension;
@@ -28,6 +29,11 @@ public abstract class AbstractParallelTest extends ParallelTest {
         getDriver().manage().window().setSize(new Dimension(1024, 768));
     }
 
+    @After
+    public void teardown() {
+        getDriver().quit();
+    }
+
     public void compareScreen(String screenshotName) throws Exception {
         String prefix = getClass().getSimpleName().replaceAll("IT", "");
         String referenceName = prefix + "_" + screenshotName;
@@ -37,7 +43,7 @@ public abstract class AbstractParallelTest extends ParallelTest {
                 testBench().compareScreen(referenceName));
     }
 
-    protected void open(Class<?> viewClass, Dimension size) {
+    public void open(Class<?> viewClass, Dimension size) {
         getDriver().manage().window().setSize(size);
         String url = getTestUrl(viewClass);
         getDriver().get(url);

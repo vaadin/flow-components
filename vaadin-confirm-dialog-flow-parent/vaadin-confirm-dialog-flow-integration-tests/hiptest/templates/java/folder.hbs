@@ -1,0 +1,21 @@
+package {{{ context.package }}}{{{ relative_package }}};
+
+import org.junit.Test;
+
+import com.vaadin.flow.component.confirmdialog.test.AbstractParallelTest;
+{{#if needs_to_import_actionwords? }}import {{{ context.package }}}.Actionwords;
+{{/if}}
+public class {{{ clear_extension context.filename }}} extends AbstractParallelTest {{#curly}}
+{{#indent}}{{#if has_tags?}}{{#comment '//'}}Tags: {{join rendered_children.tags ' '}}
+{{/comment}}{{/if}}
+public Actionwords {{{ context.call_prefix }}} = new Actionwords(this);
+
+{{#unless is_empty?}}protected void setUp() throws Exception {{#curly}}{{#indent}}
+super.setUp();{{/indent}}
+{{> body}}
+{{/curly}}
+
+{{/unless}}{{#each rendered_children.scenarios}}{{{this}}}
+{{/each}}
+{{/indent}}
+{{/curly}}

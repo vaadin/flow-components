@@ -38,8 +38,23 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-lumo-theme</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>flow-server-production-mode</artifactId>
             <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-button-flow</artifactId>
+            <version>1.0.0.rc1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dialog-flow</artifactId>
+            <version>1.0.0.rc1</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -55,7 +70,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-charts-flow</artifactId>
-            <version>6.0.0.rc1</version>
+            <version>6.0.0.rc2</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -73,19 +88,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
-                <version>${flow.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>copy-production-files</goal>
-                            <goal>package-for-production</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty.plugin.version}</version>
@@ -95,7 +97,7 @@
                     <stopPort>8005</stopPort>
                 </configuration>
                 <executions>
-                    <!-- start and stop jetty (running our app) when running 
+                    <!-- start and stop jetty (running our app) when running
                         integration tests -->
                     <execution>
                         <id>start-jetty</id>
@@ -119,59 +121,7 @@
             </plugin>
 
             <!-- plugins for tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.20</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <systemPropertyVariables>
-                        <sauce.user>${sauce.user}</sauce.user>
-                        <sauce.sauceAccessKey>${sauce.sauceAccessKey}</sauce.sauceAccessKey>
-                        <sauce.options>${sauce.options}</sauce.options>
-                    </systemPropertyVariables>
-                    <trimStackTrace>false</trimStackTrace>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.saucelabs.maven.plugin</groupId>
-                <artifactId>sauce-connect-plugin</artifactId>
-                <version>2.1.23</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.saucelabs</groupId>
-                        <artifactId>ci-sauce</artifactId>
-                        <version>${ci-sauce.version}</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <!-- Start Sauce Connect prior to running the integration 
-                        tests -->
-                    <execution>
-                        <id>start-sauceconnect</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start-sauceconnect</goal>
-                        </goals>
-                    </execution>
-                    <!-- Stop the Sauce Connect process after the integration 
-                        tests have finished -->
-                    <execution>
-                        <id>stop-sauceconnect</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop-sauceconnect</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
@@ -202,5 +152,199 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <!--This profile is only present for quick testing againt the element from GitHub-->
+        <!--Do not use with production mode-->
+        <profile>
+            <id>bower</id>
+            <activation>
+                <property>
+                    <name>!useWebjar</name>
+                </property>
+            </activation>
 
+            <properties>
+                <buildtools.directory>build-tools</buildtools.directory>
+
+                <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
+                <frontend.maven.plugin.version>1.6</frontend.maven.plugin.version>
+                <node.version>v8.9.0</node.version>
+                <yarn.version>v1.3.2</yarn.version>
+            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${frontend.maven.plugin.version}</version>
+
+                        <configuration>
+                            <nodeVersion>${node.version}</nodeVersion>
+                            <yarnVersion>${yarn.version}</yarnVersion>
+                            <workingDirectory>${buildtools.directory}</workingDirectory>
+                        </configuration>
+
+                        <executions>
+                            <execution>
+                                <id>install-tools-then-build</id>
+                                <goals>
+                                    <goal>install-node-and-yarn</goal>
+                                    <goal>yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <workingDirectory>${buildtools.directory}</workingDirectory>
+                                    <arguments>run install-bower-dependencies</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>production</id>
+            <activation>
+                <property>
+                    <name>vaadin.productionMode</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>flow-maven-plugin</artifactId>
+                        <version>${flow.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>copy-production-files</goal>
+                                    <goal>package-for-production</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>saucelabs-it</id>
+            <activation>
+                <property>
+                    <name>!runLocally</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.20</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <sauce.user>${sauce.user}</sauce.user>
+                                <sauce.sauceAccessKey>${sauce.sauceAccessKey}</sauce.sauceAccessKey>
+                                <sauce.options>${sauce.options}</sauce.options>
+                            </systemPropertyVariables>
+                            <trimStackTrace>false</trimStackTrace>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.saucelabs.maven.plugin</groupId>
+                        <artifactId>sauce-connect-plugin</artifactId>
+                        <version>2.1.23</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.saucelabs</groupId>
+                                <artifactId>ci-sauce</artifactId>
+                                <version>${ci-sauce.version}</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <!-- Start Sauce Connect prior to running the integration
+                                tests -->
+                            <execution>
+                                <id>start-sauceconnect</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start-sauceconnect</goal>
+                                </goals>
+                            </execution>
+                            <!-- Stop the Sauce Connect process after the integration
+                                tests have finished -->
+                            <execution>
+                                <id>stop-sauceconnect</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop-sauceconnect</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>local-it</id>
+            <activation>
+                <property>
+                    <name>runLocally</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <trimStackTrace>false</trimStackTrace>
+                            <systemPropertyVariables>
+                                <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
+                                <webdriver.edge.driver>${webdriver.edge.driver}</webdriver.edge.driver>
+                                <com.vaadin.testbench.Parameters.runLocally>${runLocally}</com.vaadin.testbench.Parameters.runLocally>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                    <!-- Plugin for automatically download Chrome Driver for tests -->
+                    <plugin>
+                        <groupId>com.lazerycode.selenium</groupId>
+                        <artifactId>driver-binary-downloader-maven-plugin</artifactId>
+                        <version>1.0.17</version>
+                        <configuration>
+                            <!-- root directory that downloaded driver binaries will be stored
+                                in -->
+                            <onlyGetDriversForHostOperatingSystem>true</onlyGetDriversForHostOperatingSystem>
+                            <overwriteFilesThatExist>true</overwriteFilesThatExist>
+                            <rootStandaloneServerDirectory>.driver</rootStandaloneServerDirectory>
+                            <customRepositoryMap>${project.basedir}/webdrivers.xml</customRepositoryMap>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>selenium</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

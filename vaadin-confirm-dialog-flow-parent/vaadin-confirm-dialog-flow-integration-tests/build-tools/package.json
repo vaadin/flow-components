@@ -1,0 +1,18 @@
+{
+  "name": "vaadin-confirm-dialog-flow-demo",
+  "description": "Frontend dependencies for vaadin-confirm-dialog-flow demo",
+  "version": "1.0.0",
+  "author": "Vaadin Ltd",
+  "license": "SEE LICENSE IN https://vaadin.com/license/cval-3.0",
+  "devDependencies": {
+    "bower": "1.8.2"
+  },
+  "scripts": {
+    "install-bower-dependencies": "cd ../src/main/webapp/frontend && bower install",
+    "build": "cd ../src/main/webapp/frontend && bower install && polymer build"
+  },
+  "dependencies": {
+    "polymer-cli": "^1.5.7",
+    "rimraf": "^2.6.2"
+  }
+}
