@@ -43,6 +43,7 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
             <version>${flow.version}</version>
+            <type>pom</type>
             <scope>provided</scope>
         </dependency>
         <dependency>
