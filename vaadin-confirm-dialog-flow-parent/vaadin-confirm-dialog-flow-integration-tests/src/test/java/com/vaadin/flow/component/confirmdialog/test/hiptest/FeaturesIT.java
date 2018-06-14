@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.confirmdialog.test.hiptest;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.confirmdialog.test.AbstractParallelTest;
@@ -17,6 +18,7 @@ public class FeaturesIT extends AbstractParallelTest {
         actionwords.confirmEventIsFired();
     }
 
+    @Ignore("not implemented yet")
     @Test
     public void testReminderDialogBasicUid56bdf3b7f1a14bec8a6691ab5acd8c82() {
         reminderDialog("SampleConfirmDialog");
@@ -36,6 +38,7 @@ public class FeaturesIT extends AbstractParallelTest {
         actionwords.cancelEventIsFired();
     }
 
+    @Ignore("not implemented yet")
     @Test
     public void testConfirmDeleteDialogBasicUid73a333b73ac94e83a079bdb9725411ce() {
         confirmDeleteDialog("SampleConfirmDeleteDialog");
@@ -55,6 +58,7 @@ public class FeaturesIT extends AbstractParallelTest {
         actionwords.cancelEventIsFired();
     }
 
+    @Ignore("not implemented yet")
     @Test
     public void testAreYouSureYouWantToPublishDialogBasicUid4eb6bd3dd8bc4324b05c1d96c4972ca8() {
         areYouSureYouWantToPublishDialog("SampleConfirmPublishDialog");
@@ -78,6 +82,7 @@ public class FeaturesIT extends AbstractParallelTest {
         actionwords.cancelEventIsFired();
     }
 
+    @Ignore("not implemented yet")
     @Test
     public void testUnsavedChangesDialogBasicUid6064e2706c3d4e8993a17c07bcc49f7f() {
         unsavedChangesDialog("SampleUnsavedChangesDialog");
