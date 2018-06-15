@@ -197,6 +197,12 @@
                     <version>${flow.version}</version>
                 </dependency>
                 <!-- END OF WORKAROUND -->
+                <!-- Shadycss 1.3.0 causing error on transpilation -->
+                <dependency>
+                    <groupId>org.webjars.bowergithub.webcomponents</groupId>
+                    <artifactId>shadycss</artifactId>
+                    <version>1.2.1</version>
+                </dependency>
                 <!--VAADIN COMPONENTS-->
                 <dependency>
                     <groupId>com.vaadin</groupId>
