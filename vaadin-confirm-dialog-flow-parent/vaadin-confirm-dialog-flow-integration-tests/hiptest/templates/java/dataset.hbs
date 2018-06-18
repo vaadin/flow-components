@@ -1,4 +1,4 @@
 @Test
-public void test{{{ camelize scenario_name}}}{{{ camelize rendered_children.name}}}{{#if rendered_children.test_snapshot_uid}}Uid{{{ normalize rendered_children.test_snapshot_uid}}}{{/if}}() {{#curly}}
+public void test{{{ camelize scenario_name}}}{{{ camelize rendered_children.name}}}{{#if rendered_children.test_snapshot_uid}}Uid{{{ normalize rendered_children.test_snapshot_uid}}}{{/if}}() throws Exception {{#curly}}
 {{#indent}}{{{ camelize_lower scenario_name }}}({{{ join rendered_children.arguments ', '}}});{{/indent}}
 {{/curly}}
