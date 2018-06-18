@@ -1031,27 +1031,37 @@ ifdef::web[]
 [source, java]
 ----
 Chart chart = new Chart(ChartType.WATERFALL);
-chart.setWidth("500px");
-chart.setHeight("350px");
 
-// Modify the default configuration a bit
-Configuration conf = chart.getConfiguration();
-conf.setTitle("Changes in Reindeer Population in 2011");
-conf.getLegend().setEnabled(false);
+DataSeries dataSeries = new DataSeries();
 
-// Configure X axis
-XAxis xaxis = new XAxis();
-xaxis.setCategories("Start", "Predators", "Slaughter",
-    "Reproduction", "End");
-conf.addxAxis(xaxis);
+dataSeries.add(new DataSeriesItem("Start", 120000));
+dataSeries.add(new DataSeriesItem("Product Revenue", 569000));
+dataSeries.add(new DataSeriesItem("Service Revenue", 231000));
+WaterFallSum positiveBalance = new WaterFallSum("Positive Balance");
+positiveBalance.setIntermediate(true);
+dataSeries.add(positiveBalance);
 
-// Configure Y axis
-YAxis yaxis = new YAxis();
-yaxis.setTitle("Population (thousands)");
-conf.addyAxis(yaxis);
+dataSeries.add(new DataSeriesItem("Fixed Costs", -342000));
+dataSeries.add(new DataSeriesItem("Variable Costs", -233000));
+WaterFallSum balance = new WaterFallSum("Balance");
+dataSeries.add(balance);
+
+PlotOptionsWaterfall opts = new PlotOptionsWaterfall();
+DataLabels dataLabels = new DataLabels(true);
+dataLabels.setVerticalAlign(VerticalAlign.TOP);
+dataLabels.setY(-30);
+dataLabels.setFormatter("function() { return this.y / 1000 + 'k'; }");
+opts.setDataLabels(dataLabels);
+
+dataSeries.setPlotOptions(opts);
+
+Configuration configuration = chart.getConfiguration();
+configuration.addSeries(dataSeries);
+configuration.getxAxis().setType(AxisType.CATEGORY);
 ...
 ----
 endif::web[]
+Waterfall charts can be <<dummy/../../../charts/java-api/css-styling#css.styling,styled by CSS>> using the following classes: [literal]#.highcharts-waterfall-series#, [literal]#.highcharts-point#, [literal]#.highcharts-negative#, [literal]#.highcharts-sum#, [literal]#.highcharts-intermediate-sum#.
 
 ifdef::web[]
 The example continues in the following subsections.
