@@ -14,13 +14,13 @@ import com.vaadin.testbench.parallel.ParallelTest;
 public abstract class AbstractParallelTest extends ParallelTest {
 
     public static final Dimension WINDOW_SIZE_LARGE = new Dimension(1920, 1080);
-    public static final Dimension WINDOW_SIZE_MEDIUM = new Dimension(768, 1024);
+    public static final Dimension WINDOW_SIZE_MEDIUM = new Dimension(1024, 768);
     public static final Dimension WINDOW_SIZE_SMALL = new Dimension(375, 667);
 
     @Override
     public void setup() throws Exception {
         super.setup();
-        getDriver().manage().window().setSize(new Dimension(1024, 768));
+        getDriver().manage().window().setSize(WINDOW_SIZE_MEDIUM);
     }
 
     public void compareScreen(String screenshotName) throws Exception {
