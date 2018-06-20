@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 
 /**
@@ -31,12 +32,14 @@ import com.vaadin.flow.component.html.Label;
 public class ContextMenuTest {
 
     @Test
-    public void createContextMenuWithComponents_componentsArePartOfGetChildren() {
+    public void createContextMenuWithTargetAndChildren_getChildrenReturnsChildren() {
         Label label1 = new Label("Label 1");
         Label label2 = new Label("Label 2");
         Label label3 = new Label("Label 3");
 
         ContextMenu contextMenu = new ContextMenu();
+        contextMenu.setTarget(new Label("target"));
+
         contextMenu.add(label1, label2);
 
         List<Component> children = contextMenu.getChildren()
@@ -66,13 +69,22 @@ public class ContextMenuTest {
     }
 
     @Test
-    public void addComponents_removeAll_getChildrenReturnsEmpty() {
+    public void setTarget_removeAll_targetNotMoved() {
+        Label target = new Label("target");
+        Div div = new Div(target);
+
         ContextMenu contextMenu = new ContextMenu();
-        contextMenu.add(new Label("1"), new Label("2"));
-        contextMenu.removeAll();
+        contextMenu.setTarget(target);
+
         Assert.assertEquals(
-                "getChildren() should not return any components after calling removeAll()",
-                0, contextMenu.getChildren().count());
+                "The target component should be attached to its original parent",
+                div, target.getParent().get());
+
+        contextMenu.removeAll();
+
+        Assert.assertEquals(
+                "The target component should be attached to its original parent",
+                div, target.getParent().get());
     }
 
 }
