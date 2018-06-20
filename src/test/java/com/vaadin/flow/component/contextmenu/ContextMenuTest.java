@@ -65,4 +65,14 @@ public class ContextMenuTest {
         Assert.assertEquals(0, children.size());
     }
 
+    @Test
+    public void addComponents_removeAll_getChildrenReturnsEmpty() {
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.add(new Label("1"), new Label("2"));
+        contextMenu.removeAll();
+        Assert.assertEquals(
+                "getChildren() should not return any components after calling removeAll()",
+                0, contextMenu.getChildren().count());
+    }
+
 }
