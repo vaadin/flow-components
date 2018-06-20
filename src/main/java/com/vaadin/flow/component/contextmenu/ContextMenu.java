@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -94,17 +95,21 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
      */
     @Override
     public void add(Component... components) {
-        assert components != null;
+        Objects.requireNonNull(components, "Components to add cannot be null");
         for (Component component : components) {
-            assert component != null;
+            Objects.requireNonNull(component,
+                    "Component to add cannot be null");
             container.appendChild(component.getElement());
         }
     }
 
     @Override
     public void remove(Component... components) {
+        Objects.requireNonNull(components,
+                "Components to remove cannot be null");
         for (Component component : components) {
-            assert component != null;
+            Objects.requireNonNull(component,
+                    "Component to remove cannot be null");
             if (container.equals(component.getElement().getParent())) {
                 container.removeChild(component.getElement());
             } else {
