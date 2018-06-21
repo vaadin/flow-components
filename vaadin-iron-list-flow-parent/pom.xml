@@ -71,6 +71,12 @@
             <artifactId>vaadin-ordered-layout-flow</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-flex-layout</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.github.javafaker</groupId>
