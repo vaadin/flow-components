@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -32,6 +33,17 @@
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-combo-box</artifactId>
             <version>4.0.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-flex-layout</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-flex-layout</artifactId>
+            <version>2.0.3</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -65,6 +77,12 @@
             <artifactId>vaadin-ordered-layout-flow</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-flex-layout</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -73,8 +91,8 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
-        <profiles>
+
+    <profiles>
         <profile>
             <id>runTests</id>
             <dependencies>
@@ -87,5 +105,5 @@
             </dependencies>
         </profile>
     </profiles>
-    
+
 </project>
