@@ -25,7 +25,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow</artifactId>
+            <artifactId>flow-client</artifactId>
             <version>${flow.version}</version>
         </dependency>
         <dependency>
@@ -48,6 +48,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
             <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-button-flow</artifactId>
+            <version>1.0.0.rc1</version>
         </dependency>
     </dependencies>
 
