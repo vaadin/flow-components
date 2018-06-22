@@ -79,6 +79,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private int customValueListenersCount;
 
+    private Registration dataProviderListenerRegistration;
+
     private class CustomValueRegistraton implements Registration {
 
         private Registration delegate;
@@ -217,10 +219,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(dataProvider,
                 "The data provider can not be null");
         this.dataProvider = dataProvider;
-        itemsFromDataProvider = dataProvider.fetch(new Query<>())
-                .collect(Collectors.toList());
+        refreshDataProvider();
         setValue(getEmptyValue());
-        refresh();
+        if (dataProviderListenerRegistration != null) {
+            dataProviderListenerRegistration.remove();
+        }
+        dataProviderListenerRegistration = dataProvider
+                .addDataProviderListener(event -> refreshDataProvider());
     }
 
     public DataProvider<T, ?> getDataProvider() {
@@ -564,6 +569,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         assert item.hasKey(KEY_PROPERTY);
         JsonValue key = item.get(KEY_PROPERTY);
         return keyMapper.get(key.asString());
+    }
+
+    private void refreshDataProvider() {
+        itemsFromDataProvider = dataProvider.fetch(new Query<>())
+                .collect(Collectors.toList());
+        refresh();
     }
 
     private void refresh() {
