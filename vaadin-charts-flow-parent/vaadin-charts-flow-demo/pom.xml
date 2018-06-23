@@ -27,22 +27,22 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>1.0.0.rc1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-checkbox-flow</artifactId>
-            <version>1.0.0.rc1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>1.0.0.rc1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-radio-button-flow</artifactId>
-            <version>1.0.0.rc1</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 
