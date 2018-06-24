@@ -78,13 +78,17 @@
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>flow</artifactId>
+                <artifactId>flow-client</artifactId>
                 <version>${flow.version}</version>
-                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-data</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-html-components</artifactId>
                 <version>${flow.version}</version>
             </dependency>
             <dependency>
