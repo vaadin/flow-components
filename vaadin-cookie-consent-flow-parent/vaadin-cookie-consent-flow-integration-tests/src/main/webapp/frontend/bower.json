@@ -1,0 +1,19 @@
+{
+  "name": "vaadin-cookie-consent",
+  "homepage": "https://github.com/vaadin/vaadin-cookie-consent",
+  "authors": [],
+  "description": "",
+  "main": "",
+  "license": "CVAL3",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+  	"vaadin-cookie-consent": "vaadin/vaadin-cookie-consent"
+  }
+}
