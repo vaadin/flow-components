@@ -1,16 +1,16 @@
 package com.vaadin.flow.component.confirmdialog.test.hiptest;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.confirmdialog.test.ConfirmDialogElement;
-import com.vaadin.testbench.ElementQuery;
-import com.vaadin.testbench.TestBenchElement;
+import java.util.Optional;
+
 import org.junit.Assert;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.confirmdialog.examples.Features;
 import com.vaadin.flow.component.confirmdialog.test.AbstractParallelTest;
-
-import java.util.Optional;
+import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
+import com.vaadin.testbench.ElementQuery;
+import com.vaadin.testbench.TestBenchElement;
 
 public class Actionwords {
 
@@ -19,7 +19,7 @@ public class Actionwords {
 
     public Actionwords(AbstractParallelTest test) {
         this.test = test;
-        this.testView = Features.class;
+        testView = Features.class;
     }
 
     public Actionwords(AbstractParallelTest test, Class testView) {
