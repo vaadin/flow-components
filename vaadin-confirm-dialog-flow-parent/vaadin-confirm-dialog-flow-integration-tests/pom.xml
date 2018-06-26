@@ -28,7 +28,12 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow</artifactId>
+            <artifactId>flow-client</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-data</artifactId>
             <version>${flow.version}</version>
         </dependency>
         <dependency>
@@ -49,12 +54,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>1.0.0.rc1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-dialog-flow</artifactId>
-            <version>1.0.0.rc1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -64,12 +69,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons-flow</artifactId>
-            <version>1.0.0.rc1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-charts-flow</artifactId>
-            <version>6.0.0.rc2</version>
+            <version>6.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
