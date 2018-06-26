@@ -14,10 +14,15 @@
         <name>Vaadin Ltd</name>
         <url>http://vaadin.com/</url>
     </organization>
-
+  	<licenses>
+        <license>
+            <name>cval3</name>
+            <url>https://vaadin.com/license/cval-3</url>
+        </license>
+    </licenses>
     <properties>
-        <flow.version>1.0.0.rc4</flow.version>
-        <testbench.version>6.0.0.rc1</testbench.version>
+        <flow.version>1.0.0</flow.version>
+        <testbench.version>6.0.0</testbench.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,7 +33,7 @@
         <module>vaadin-cookie-consent-flow-integration-tests</module>
     </modules>
 
-    <distributionManagement>
+   <distributionManagement>
         <snapshotRepository>
             <id>vaadin-snapshots</id>
             <name>Vaadin snapshot repository</name>
@@ -37,31 +42,58 @@
         <repository>
             <id>vaadin-addons</id>
             <name>Vaadin add-ons repository</name>
-            <url>https://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
+            <url>http://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
         </repository>
     </distributionManagement>
-    <repositories>
-        <repository>
-            <id>vaadin-snapshots</id>
-            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-        </repository>
-        <repository>
+	<repositories>
+	    <repository>
             <id>vaadin-addons</id>
-            <url>http://maven.vaadin.com/vaadin-addons</url>
+            <name>Vaadin add-ons repository</name>
+            <url>http://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
         </repository>
-        <repository>
-            <id>vaadin-prereleases</id>
-            <url>http://maven.vaadin.com/vaadin-prereleases</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>vaadin-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>vaadin-prereleases</id>
-            <url>http://maven.vaadin.com/vaadin-prereleases</url>
-        </pluginRepository>
-    </pluginRepositories>
+	</repositories>
+ <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-charts-flow</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-client</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-data</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-html-components</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-server-production-mode</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+
+            <!--PIN webcomponentsjs AS A WORKAROND FOR https://github.com/webjars/webjars/issues/1763-->
+            <dependency>
+                <groupId>org.webjars.bowergithub.webcomponents</groupId>
+                <artifactId>webcomponentsjs</artifactId>
+                <version>[1.0.0,1.999.999)</version>
+            </dependency>
+            <!--PIN shadycss to 1.2.1 as 1.3.0 causes a transpilation error-->
+            <dependency>
+                <groupId>org.webjars.bowergithub.webcomponents</groupId>
+                <artifactId>shadycss</artifactId>
+                <version>1.2.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
 </project>
