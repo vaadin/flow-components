@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -30,15 +29,6 @@ import com.vaadin.flow.testutil.TestPath;
 public class ButtonInGridIT extends AbstractComponentIT {
 
     @Test
-    @Ignore
-    /**
-     * The test is disabled due #4268. The test is for grid#122 (which is
-     * actually an issue in the flow-component-renderer inside flow-data
-     * module).
-     *
-     * At the moment the bug is not fixed. So the test fails. Should be enabled
-     * back once the gird#122 is fixed.
-     */
     public void pressButtonUsingKeyboard() {
         open();
 
