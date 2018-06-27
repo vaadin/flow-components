@@ -25,6 +25,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.vaadin.webjar</groupId>
+            <artifactId>vaadin-cookie-consent</artifactId>
+            <version>1.0.0-beta1</version>
+        </dependency>
+        <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
             <version>${flow.version}</version>
