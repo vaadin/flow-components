@@ -40,6 +40,20 @@ public class GridTRElement extends TestBenchElement {
     }
 
     /**
+     * Gets the row details for this row.
+     * 
+     * @return the details cell
+     */
+    public GridTHTDElement getDetails() {
+        TestBenchElement e = (TestBenchElement) executeScript(
+                "const grid = arguments[0];" //
+                        + "return Array.from(grid.children)."
+                        + "filter(function(cell) { return cell.getAttribute('part') && cell.getAttribute('part').includes('cell details-cell');})[0]",
+                this);
+        return e.wrap(GridTHTDElement.class);
+    }
+
+    /**
      * Checks if the row is selected
      *
      * @return <code>true</code> if the row is selected, <code>false</code>

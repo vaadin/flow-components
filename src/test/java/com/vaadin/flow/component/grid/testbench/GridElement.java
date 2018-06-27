@@ -141,7 +141,7 @@ public class GridElement extends TestBenchElement {
      *
      * @return the index of the last visible row
      */
-    private int getLastVisibleRowIndex() {
+    public int getLastVisibleRowIndex() {
         // Private for now because this seems to be slightly incorrect
         return ((Long) executeScript(
                 "return arguments[0]._lastVisibleIndex+arguments[0]._vidxOffset",

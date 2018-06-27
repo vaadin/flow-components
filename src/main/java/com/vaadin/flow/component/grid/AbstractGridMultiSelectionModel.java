@@ -18,16 +18,21 @@ package com.vaadin.flow.component.grid;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -299,11 +304,56 @@ public abstract class AbstractGridMultiSelectionModel<T>
             // ignore event if the checkBox was meant to be hidden
             return;
         }
-        doUpdateSelection(
-                getGrid().getDataCommunicator().getDataProvider()
-                        .fetch(new Query<>()).collect(Collectors.toSet()),
+        Stream<T> allItemsStream;
+        DataProvider<T, ?> dataProvider = getGrid().getDataCommunicator()
+                .getDataProvider();
+        if (dataProvider instanceof HierarchicalDataProvider) {
+            allItemsStream = fetchAllHierarchical(
+                    (HierarchicalDataProvider<T, ?>) dataProvider);
+        } else {
+            allItemsStream = dataProvider.fetch(new Query<>());
+        }
+        doUpdateSelection(allItemsStream.collect(Collectors.toSet()),
                 Collections.emptySet(), true);
         selectionColumn.setSelectAllCheckboxState(true);
+    }
+
+    /**
+     * Fetch all items from the given hierarchical data provider.
+     *
+     * @param dataProvider
+     *            the data provider to fetch from
+     * @return all items in the data provider
+     */
+    private Stream<T> fetchAllHierarchical(
+            HierarchicalDataProvider<T, ?> dataProvider) {
+        return fetchAllDescendants(null, dataProvider);
+    }
+
+    /**
+     * Fetch all the descendants of the given parent item from the given data
+     * provider.
+     *
+     * @param parent
+     *            the parent item to fetch descendants for
+     * @param dataProvider
+     *            the data provider to fetch from
+     * @return the stream of all descendant items
+     */
+    private Stream<T> fetchAllDescendants(T parent,
+            HierarchicalDataProvider<T, ?> dataProvider) {
+        if (parent != null && !dataProvider.hasChildren(parent)) {
+            return Stream.empty();
+        }
+        List<T> children = dataProvider
+                .fetchChildren(new HierarchicalQuery<>(null, parent))
+                .collect(Collectors.toList());
+        if (children.isEmpty()) {
+            return Stream.empty();
+        }
+        return children.stream()
+                .flatMap(child -> Stream.concat(Stream.of(child),
+                        fetchAllDescendants(child, dataProvider)));
     }
 
     private void clientDeselectAll() {
