@@ -4,8 +4,9 @@ This project is the Component wrapper implementation of [`<vaadin-grid>`](https:
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 This branch is Vaadin 11 compatible. See other branches for other framework versions:
-* master branch is Vaadin 11 (Flow version 1.1)
-* 1.0 branch is Vaadin 10 (Flow version 1.0)
+* master branch is Vaadin 11 compatible (Flow version 1.1)
+* 1.0 branch is Vaadin 10 compatible (Flow version 1.0)
+* 1.1 branch is Vaadin 10 compatible with TreeGrid (Flow version 1.0)
 
 ## Running the component demo
 Run from the command line:
