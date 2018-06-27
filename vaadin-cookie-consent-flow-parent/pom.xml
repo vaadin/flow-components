@@ -1,103 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-cookie-consent-flow-root</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
-    <name>vaadin-cookie-consent-flow-root</name>
-    <inceptionYear>2018</inceptionYear>
-    <organization>
-        <name>Vaadin Ltd</name>
-        <url>http://vaadin.com/</url>
-    </organization>
-  	<licenses>
-        <license>
-            <name>cval3</name>
-            <url>https://vaadin.com/license/cval-3</url>
-        </license>
-    </licenses>
-    <properties>
-        <flow.version>1.0.0</flow.version>
-        <testbench.version>6.0.0</testbench.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
-    <modules>
-        <module>vaadin-cookie-consent-flow</module>
-        <module>vaadin-cookie-consent-flow-integration-tests</module>
-    </modules>
+	<groupId>com.vaadin</groupId>
+	<artifactId>vaadin-cookie-consent-flow-root</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>vaadin-cookie-consent-flow-root</name>
+	<inceptionYear>2018</inceptionYear>
+	<organization>
+		<name>Vaadin Ltd</name>
+		<url>http://vaadin.com/</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>cval3</name>
+			<url>https://vaadin.com/license/cval-3</url>
+		</license>
+	</licenses>
+	<properties>
+		<flow.version>1.0.0</flow.version>
+		<testbench.version>6.0.0</testbench.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+	<modules>
+		<module>vaadin-cookie-consent-flow</module>
+		<module>vaadin-cookie-consent-flow-integration-tests</module>
+	</modules>
 
-   <distributionManagement>
-        <snapshotRepository>
-            <id>vaadin-snapshots</id>
-            <name>Vaadin snapshot repository</name>
-            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>vaadin-addons</id>
-            <name>Vaadin add-ons repository</name>
-            <url>http://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
-        </repository>
-    </distributionManagement>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>vaadin-snapshots</id>
+			<name>Vaadin snapshot repository</name>
+			<url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>vaadin-addons</id>
+			<name>Vaadin add-ons repository</name>
+			<url>http://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
+		</repository>
+	</distributionManagement>
 	<repositories>
-	    <repository>
-            <id>vaadin-addons</id>
-            <name>Vaadin add-ons repository</name>
-            <url>http://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
-        </repository>
+		<repository>
+			<id>vaadin-addons</id>
+			<name>Vaadin add-ons repository</name>
+			<url>http://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
+		</repository>
 		<repository>
 			<id>vaadin-prereleases</id>
 			<url>http://maven.vaadin.com/vaadin-prereleases</url>
 		</repository>
 	</repositories>
- <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-charts-flow</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-client</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-data</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-html-components</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-server-production-mode</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.vaadin</groupId>
+				<artifactId>vaadin-charts-flow</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vaadin</groupId>
+				<artifactId>flow-client</artifactId>
+				<version>${flow.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vaadin</groupId>
+				<artifactId>flow-data</artifactId>
+				<version>${flow.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vaadin</groupId>
+				<artifactId>flow-html-components</artifactId>
+				<version>${flow.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.vaadin</groupId>
+				<artifactId>flow-server-production-mode</artifactId>
+				<version>${flow.version}</version>
+			</dependency>
 
-            <!--PIN webcomponentsjs AS A WORKAROND FOR https://github.com/webjars/webjars/issues/1763-->
-            <dependency>
-                <groupId>org.webjars.bowergithub.webcomponents</groupId>
-                <artifactId>webcomponentsjs</artifactId>
-                <version>[1.0.0,1.999.999)</version>
-            </dependency>
-            <!--PIN shadycss to 1.2.1 as 1.3.0 causes a transpilation error-->
-            <dependency>
-                <groupId>org.webjars.bowergithub.webcomponents</groupId>
-                <artifactId>shadycss</artifactId>
-                <version>1.2.1</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+			<!--PIN webcomponentsjs AS A WORKAROND FOR https://github.com/webjars/webjars/issues/1763 -->
+			<dependency>
+				<groupId>org.webjars.bowergithub.webcomponents</groupId>
+				<artifactId>webcomponentsjs</artifactId>
+				<version>[1.0.0,1.999.999)</version>
+			</dependency>
+			<!--PIN shadycss to 1.2.1 as 1.3.0 causes a transpilation error -->
+			<dependency>
+				<groupId>org.webjars.bowergithub.webcomponents</groupId>
+				<artifactId>shadycss</artifactId>
+				<version>1.2.1</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 
 </project>
