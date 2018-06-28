@@ -100,10 +100,6 @@ public class ConfirmDialog extends Component
         getElement().setProperty("cancel", cancelable);
     }
 
-    public void setConfirmable(boolean confirmable) {
-        getElement().setProperty("confirm", confirmable);
-    }
-
     public void setRejectable(boolean rejectable) {
         getElement().setProperty("reject", rejectable);
     }
@@ -146,7 +142,6 @@ public class ConfirmDialog extends Component
 
     public void setConfirmButton(String buttonText,
             ComponentEventListener<ConfirmEvent> confirmListener) {
-        setConfirmable(true);
         setConfirmText(buttonText);
         addConfirmListener(confirmListener);
     }

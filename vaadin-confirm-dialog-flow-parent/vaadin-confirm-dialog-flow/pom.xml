@@ -30,7 +30,7 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-confirm-dialog</artifactId>
-            <version>1.0.0-beta1</version>
+            <version>1.0.0-beta2</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
