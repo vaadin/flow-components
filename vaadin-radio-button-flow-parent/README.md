@@ -5,6 +5,11 @@ for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 The repository contains implementations for `RadionButtonGroup`.
 
+This branch is for Vaadin 11 development. See other branches for other framework versions:
+
+ - `master` branch is Vaadin 11 (Flow/Flow-component version 1.1)
+ - `1.0` branch is Vaadin 10 (Flow/Flow-component version 1.0)
+
 ## Running the component demo
 Run from the command line:
 - `mvn jetty:run -PrunTests`
