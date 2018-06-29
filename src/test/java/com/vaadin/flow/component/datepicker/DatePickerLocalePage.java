@@ -28,14 +28,17 @@ public class DatePickerLocalePage extends Div {
 
         locale.addClickListener(e -> datePicker.setLocale(Locale.UK));
 
-
         DatePicker frenchLocale = new DatePicker();
         frenchLocale.setId("french-locale-date-picker");
 
         frenchLocale.setLocale(Locale.FRANCE);
         frenchLocale.setValue(may30th);
 
-        add(datePicker, locale, frenchLocale);
+        DatePicker german = new DatePicker();
+        german.setLocale(Locale.GERMANY);
+        german.setId("german-locale-date-picker");
+
+        add(datePicker, locale, frenchLocale, german);
     }
 
     private void addHungarianLocale() {

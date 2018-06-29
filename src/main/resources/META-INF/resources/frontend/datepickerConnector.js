@@ -116,7 +116,12 @@ window.Vaadin.Flow.datepickerConnector = {
                 };
             };
 
-            updateFormat();
+            let inputValue = datepicker._inputValue || '';
+            if (inputValue === "") {
+                oldLocale = locale;
+            } else {
+                updateFormat();
+            }
         }
     }
 }

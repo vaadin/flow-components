@@ -64,6 +64,12 @@
 
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-components-testbench</artifactId>
+            <version>1.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
             <version>${flow.version}</version>
             <scope>test</scope>
