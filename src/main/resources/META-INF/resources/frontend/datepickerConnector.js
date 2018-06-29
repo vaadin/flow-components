@@ -77,7 +77,7 @@ window.Vaadin.Flow.datepickerConnector = {
                 }
 
                 //checking separator which is used in the date
-                let regexMatcher = /[0-9]+(.)[0-9]+\1[0-9]+/;
+                let regexMatcher = /[0-9]+(.\s?)[0-9]+\1[0-9]+\1?/;
                 let match = regexMatcher.exec(dateString);
 
                 if (match === null || match.length != 2) {
@@ -92,13 +92,13 @@ window.Vaadin.Flow.datepickerConnector = {
                 let targetLocaleDate = cleanString(new Date(sample).toLocaleDateString(oldLocale).toString());
 
                 let date;
-                if (targetLocaleDate === sample) {
+                if (targetLocaleDate.startsWith(sample)) {
                     //Date format "YYYY/MM/DD"
                     date = new Date(dateString);
-                } else if (targetLocaleDate === sample.split(separator).reverse().join(separator)) {
+                } else if (targetLocaleDate.startsWith(sample.split(separator).reverse().join(separator))) {
                     //Date format "DD/MM/YYYY"
                     date = new Date(dateString.split(separator).reverse().join(separator));
-                } else if (targetLocaleDate === [sample_parts[1], sample_parts[2], sample_parts[0]].join(separator)) {
+                } else if (targetLocaleDate.startsWith([sample_parts[1], sample_parts[2], sample_parts[0]].join(separator))) {
                     //Date format "MM/DD/YYYY"
                     const parts = dateString.split(separator);
                     date = new Date([parts[2], parts[0], parts[1]].join(separator));
