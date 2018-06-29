@@ -111,8 +111,7 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
         WebElement changeLocale = findElement(By.id("change-locale"));
         scrollIntoViewAndClick(changeLocale);
 
-        String logList1 = getLogEntries(Level.WARNING).toString();
-        waitUntil(driver -> logList1.contains(
+        waitUntil(driver -> getLogEntries(Level.WARNING).toString().contains(
                 "The locale is not supported, use default locale setting(en-US)."));
     }
 
