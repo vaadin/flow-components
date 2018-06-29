@@ -9,6 +9,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.confirmdialog.examples.Features;
+import com.vaadin.flow.component.cookieconsent.testbench.CookieConsentElement;
 
 public class FeaturesIT extends AbstractParallelTest {
 

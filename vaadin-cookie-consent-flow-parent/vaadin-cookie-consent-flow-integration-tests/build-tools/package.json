@@ -1,6 +1,6 @@
 {
-  "name": "vaadin-confirm-dialog-flow-demo",
-  "description": "Frontend dependencies for vaadin-confirm-dialog-flow demo",
+  "name": "vaadin-cookie-consent-flow-demo",
+  "description": "Frontend dependencies for vaadin-cookie-consent-flow demo",
   "version": "1.0.0",
   "author": "Vaadin Ltd",
   "license": "SEE LICENSE IN https://vaadin.com/license/cval-3.0",

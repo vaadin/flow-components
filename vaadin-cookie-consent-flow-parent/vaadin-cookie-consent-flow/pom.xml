@@ -98,11 +98,11 @@
 
 							<!-- Add-on specific fields to update -->
 							<AdVaaLicen>cval</AdVaaLicen>
-							<AdVaaName>vaadin-confirm-dialog</AdVaaName>
-							<AdVaaPkg>com.vaadin.confirmdialog</AdVaaPkg>
+							<AdVaaName>vaadin-cookie-consent</AdVaaName>
+							<AdVaaPkg>com.vaadin.cookieconsent</AdVaaPkg>
 							<!-- Implementation-Title and Implementation-Version come from the 
 								POM by default -->
-							<Implementation-Title>Vaadin Confirm Dialog</Implementation-Title>
+							<Implementation-Title>Vaadin Cookie Consent</Implementation-Title>
 						</manifestEntries>
 					</archive>
 				</configuration>

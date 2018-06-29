@@ -53,6 +53,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-cookie-consent-testbench</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-testbench-core</artifactId>
 			<version>${testbench.version}</version>
 			<scope>test</scope>
