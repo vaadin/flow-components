@@ -5,11 +5,11 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
-@Route("Features")
+@Route("DefaultSettings")
 @BodySize
-public class Features extends Div {
+public class DefaultSettings extends Div {
 
-    public Features() {
+    public DefaultSettings() {
     	add(new CookieConsent());
     }
 
