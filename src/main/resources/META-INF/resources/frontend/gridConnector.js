@@ -371,7 +371,7 @@ window.Vaadin.Flow.gridConnector = {
       }
     }
 
-    const sorterChangeListener = function(event) {
+    const sorterChangeListener = function() {
       grid.$server.sortersChanged(grid._sorters.map(function(sorter) {
         return {
           path: sorter.path,
@@ -379,7 +379,7 @@ window.Vaadin.Flow.gridConnector = {
         };
       }));
     }
-    grid.addEventListener('sorter-changed', sorterChangeListener);
+    grid._createPropertyObserver("_previousSorters", sorterChangeListener);
 
     grid._updateItem = function(row, item) {
       Vaadin.GridElement.prototype._updateItem.call(grid, row, item);
