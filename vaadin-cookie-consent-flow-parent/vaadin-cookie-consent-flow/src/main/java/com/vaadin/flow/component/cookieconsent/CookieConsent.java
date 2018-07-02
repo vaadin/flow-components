@@ -26,44 +26,45 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 @HtmlImport("frontend://bower_components/vaadin-cookie-consent/vaadin-cookie-consent.html")
 public class CookieConsent extends Component {
 
-	
-	public CookieConsent() {
-	}
+    public CookieConsent() {
+    }
 
-	public CookieConsent(String message, String dismissLabel, String learnMoreLabel, String learnMoreLink, Position position) {
-		setMessage(message);
-		setDismissLabel(dismissLabel);
-		setLearnMoreLabel(learnMoreLabel);
-		setLearnMoreLink(learnMoreLink);
-		setPosition(position);
-	}
+    public CookieConsent(String message, String dismissLabel,
+            String learnMoreLabel, String learnMoreLink, Position position) {
+        setMessage(message);
+        setDismissLabel(dismissLabel);
+        setLearnMoreLabel(learnMoreLabel);
+        setLearnMoreLink(learnMoreLink);
+        setPosition(position);
+    }
 
-	public void setMessage(String message) {
-		getElement().setProperty("message", message);
-	}
+    public void setMessage(String message) {
+        getElement().setProperty("message", message);
+    }
 
-	public void setDismissLabel(String dismissLabel) {
-		getElement().setProperty("dismiss", dismissLabel);
-	}
+    public void setDismissLabel(String dismissLabel) {
+        getElement().setProperty("dismiss", dismissLabel);
+    }
 
-	public void setLearnMoreLabel(String learnMoreLabel) {
-		getElement().setProperty("learnMore", learnMoreLabel);
-	}
+    public void setLearnMoreLabel(String learnMoreLabel) {
+        getElement().setProperty("learnMore", learnMoreLabel);
+    }
 
-	public void setLearnMoreLink(String learnMoreLink) {
-		getElement().setProperty("learnMoreLink", learnMoreLink);
-	}
+    public void setLearnMoreLink(String learnMoreLink) {
+        getElement().setProperty("learnMoreLink", learnMoreLink);
+    }
 
-	public void setPosition(Position position) {
-		getElement().setProperty("position", position.name().toLowerCase().replace('_', '-'));
-	}
+    public void setPosition(Position position) {
+        getElement().setProperty("position",
+                position.name().toLowerCase().replace('_', '-'));
+    }
 
-	public void setCookieName(String cookieName) {
-		getElement().setProperty("cookieName", cookieName);
-	}
+    public void setCookieName(String cookieName) {
+        getElement().setProperty("cookieName", cookieName);
+    }
 
-	public enum Position {
-		TOP, BOTTOM, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT;
+    public enum Position {
+        TOP, BOTTOM, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT;
 
-	}
+    }
 }

@@ -10,15 +10,16 @@ import com.vaadin.flow.router.Route;
 @BodySize
 public class CustomMessages extends Div {
 
-	public CustomMessages() {
-		final String message = "We are using cookies to make your visit here awesome!";
-		final String dismissLabel = "Cool!";
-		final String learnMoreLabel = "Why?";
-		final String learnMoreLink = "https://vaadin.com/terms-of-service";
-		final Position position = Position.BOTTOM_RIGHT;
-		final CookieConsent consent = new CookieConsent(message, dismissLabel, learnMoreLabel, learnMoreLink, position);
-		consent.setCookieName("vaadinconsent-custom-cookiename");
-		add(consent);
-	}
+    public CustomMessages() {
+        final String message = "We are using cookies to make your visit here awesome!";
+        final String dismissLabel = "Cool!";
+        final String learnMoreLabel = "Why?";
+        final String learnMoreLink = "https://vaadin.com/terms-of-service";
+        final Position position = Position.BOTTOM_RIGHT;
+        final CookieConsent consent = new CookieConsent(message, dismissLabel,
+                learnMoreLabel, learnMoreLink, position);
+        consent.setCookieName("vaadinconsent-custom-cookiename");
+        add(consent);
+    }
 
 }

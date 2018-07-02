@@ -10,7 +10,7 @@ import com.vaadin.flow.router.Route;
 public class DefaultSettings extends Div {
 
     public DefaultSettings() {
-    	add(new CookieConsent());
+        add(new CookieConsent());
     }
 
 }

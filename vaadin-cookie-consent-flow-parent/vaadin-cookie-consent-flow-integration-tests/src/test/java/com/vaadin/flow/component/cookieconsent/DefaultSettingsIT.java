@@ -13,19 +13,22 @@ import com.vaadin.flow.component.cookieconsent.testbench.CookieConsentElement;
 
 public class DefaultSettingsIT extends AbstractParallelTest {
 
-	@Test
-	public void test() throws Exception {
-		open(DefaultSettings.class, WINDOW_SIZE_SMALL);
-		final CookieConsentElement element = $(CookieConsentElement.class).get(0);
-		assertNotNull(element);
-		WebElement container = getDriver().findElement(By.className("cc-window"));
-		final WebElement dismiss = container.findElement(By.className("cc-dismiss"));
-		assertNotNull(dismiss);
-		assertEquals("Got it!", dismiss.getText());
-		dismiss.click();
-		Thread.sleep(1000);
-		container = getDriver().findElement(By.className("cc-window"));
-		assertFalse(container.isDisplayed());
-	}
-	
+    @Test
+    public void test() throws Exception {
+        open(DefaultSettings.class, WINDOW_SIZE_SMALL);
+        final CookieConsentElement element = $(CookieConsentElement.class)
+                .get(0);
+        assertNotNull(element);
+        WebElement container = getDriver()
+                .findElement(By.className("cc-window"));
+        final WebElement dismiss = container
+                .findElement(By.className("cc-dismiss"));
+        assertNotNull(dismiss);
+        assertEquals("Got it!", dismiss.getText());
+        dismiss.click();
+        Thread.sleep(1000);
+        container = getDriver().findElement(By.className("cc-window"));
+        assertFalse(container.isDisplayed());
+    }
+
 }
