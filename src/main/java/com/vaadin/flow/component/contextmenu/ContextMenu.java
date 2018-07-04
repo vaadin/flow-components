@@ -20,11 +20,13 @@ import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for {@code <vaadin-context-menu>}
@@ -130,6 +132,28 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
         container.getChildren().forEach(childElement -> ComponentUtil
                 .findComponents(childElement, childComponents::add));
         return childComponents.build();
+    }
+
+    /**
+     * Gets the open state from the context menu.
+     *
+     * @return the {@code opened} property from the context menu
+     */
+    public boolean isOpened() {
+        return super.isOpenedBoolean();
+    }
+
+    /**
+     * Add a lister for event fired by the {@code opened-changed} events.
+     *
+     * @param: listener
+     *             the listener to add;
+     * @return: a Registration for removing the event listener
+     */
+    @Override
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent<ContextMenu>> listener) {
+        return super.addOpenedChangeListener(listener);
     }
 
     private void attachComponentRenderer() {
