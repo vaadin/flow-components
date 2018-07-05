@@ -21,9 +21,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializableFunction;
 
 public class GridColumnTest {
 
@@ -31,6 +35,9 @@ public class GridColumnTest {
     Column<String> firstColumn;
     Column<String> secondColumn;
     Column<String> thirdColumn;
+    Column<String> fourthColumn;
+
+    IconRenderer<String> renderer;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -41,6 +48,8 @@ public class GridColumnTest {
         firstColumn = grid.addColumn(str -> str);
         secondColumn = grid.addColumn(str -> str);
         thirdColumn = grid.addColumn(str -> str);
+        renderer = new IconRenderer<String>(generator -> new Label(":D"));
+        fourthColumn = grid.addColumn(renderer);
     }
 
     @Test
@@ -164,6 +173,11 @@ public class GridColumnTest {
                 -1, result);
     }
 
+    @Test
+    public void testRenderer() {
+        assert renderer!= null;
+        Assert.assertEquals(renderer, fourthColumn.getRenderer());
+    }
     private void expectNullPointerException(String message) {
         thrown.expect(NullPointerException.class);
         thrown.expectMessage(message);
