@@ -87,4 +87,84 @@ public class ContextMenuTest {
                 div, target.getParent().get());
     }
 
+    @Test
+    public void addItem_getChildren_returnsMenuItem() {
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.addItem("foo", null);
+        List<Component> children = contextMenu.getChildren()
+                .collect(Collectors.toList());
+        Assert.assertEquals(1, children.size());
+        assertComponentIsMenuItem(children.get(0), "foo");
+    }
+
+    @Test
+    public void addItem_getItems_returnsMenuItem() {
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.addItem("foo", null);
+        List<MenuItem> children = contextMenu.getItems();
+        Assert.assertEquals(1, children.size());
+        assertComponentIsMenuItem(children.get(0), "foo");
+    }
+
+    @Test
+    public void addItem_remove_noChildrenNorItems() {
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem item = contextMenu.addItem("foo", null);
+        contextMenu.remove(item);
+        Assert.assertEquals(0, contextMenu.getChildren().count());
+        Assert.assertEquals(0, contextMenu.getItems().size());
+    }
+
+    @Test
+    public void addItemsAndComponents_getChildrenReturnsAllInOrder() {
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem item1 = contextMenu.addItem("foo", null);
+
+        Label label1 = new Label("foo");
+        contextMenu.add(label1);
+
+        MenuItem item2 = contextMenu.addItem("bar", null);
+
+        Label label2 = new Label("bar");
+        contextMenu.add(label2);
+
+        List<Component> children = contextMenu.getChildren()
+                .collect(Collectors.toList());
+        Assert.assertEquals(4, children.size());
+
+        Assert.assertEquals(item1, children.get(0));
+        Assert.assertEquals(label1, children.get(1));
+        Assert.assertEquals(item2, children.get(2));
+        Assert.assertEquals(label2, children.get(3));
+    }
+
+    @Test
+    public void addItemsAndComponents_getItemsReturnsItemsOnly() {
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem item1 = contextMenu.addItem("foo", null);
+
+        Label label1 = new Label("foo");
+        contextMenu.add(label1);
+
+        MenuItem item2 = contextMenu.addItem("bar", null);
+
+        Label label2 = new Label("bar");
+        contextMenu.add(label2);
+
+        List<MenuItem> items = contextMenu.getItems();
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals(item1, items.get(0));
+        Assert.assertEquals(item2, items.get(1));
+    }
+
+    private void assertComponentIsMenuItem(Component component,
+            String expectedText) {
+        Assert.assertTrue(
+                "Component is not an instance of " + MenuItem.class.getName(),
+                MenuItem.class.isInstance(component));
+        Assert.assertEquals(expectedText, ((MenuItem) component).getText());
+    }
+
 }

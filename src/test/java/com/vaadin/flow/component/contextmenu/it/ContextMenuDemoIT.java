@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.contextmenu.it;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -38,11 +40,39 @@ public class ContextMenuDemoIT extends ComponentDemoTest {
         rightClickOn(By.id("basic-context-menu-target"));
         verifyOpened();
 
-        Assert.assertEquals("Close the context menu by clicking anywhere",
-                getOverlay().getText());
+        Assert.assertArrayEquals(new String[] { "First menu item",
+                "Second menu item", "Disabled menu item" },
+                getMenuItemCaptions());
+
+        Assert.assertEquals("The last item is supposed to be disabled", "true",
+                getMenuItems().get(2).getAttribute("disabled"));
 
         getOverlay().click();
         verifyClosed();
+    }
+
+    @Test
+    public void openAndCloseContextMenuWithComponents_contentIsRendered() {
+        verifyClosed();
+
+        rightClickOn(By.id("context-menu-with-components-target"));
+        verifyOpened();
+
+        Assert.assertArrayEquals(new String[] { "First menu item", "Checkbox" },
+                getMenuItemCaptions());
+        WebElement checkbox = getMenuItems().get(1)
+                .findElement(By.tagName("vaadin-checkbox"));
+
+        getOverlay().findElement(By.tagName("hr"));
+        WebElement label = getOverlay().findElement(By.tagName("label"));
+        Assert.assertEquals("This is not a menu item", label.getText());
+
+        checkbox.click();
+        verifyClosed();
+        WebElement message = findElement(
+                By.id("context-menu-with-components-message"));
+        Assert.assertEquals("Clicked on checkbox with value: true",
+                message.getText());
     }
 
     private void rightClickOn(By by) {
@@ -61,6 +91,15 @@ public class ContextMenuDemoIT extends ComponentDemoTest {
 
     private void verifyOpened() {
         waitForElementPresent(By.tagName(OVERLAY_TAG));
+    }
+
+    private String[] getMenuItemCaptions() {
+        return getMenuItems().stream().map(WebElement::getText)
+                .toArray(String[]::new);
+    }
+
+    private List<WebElement> getMenuItems() {
+        return getOverlay().findElements(By.tagName("vaadin-item"));
     }
 
     @Override

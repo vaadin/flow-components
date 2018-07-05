@@ -15,10 +15,13 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -35,6 +38,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @SuppressWarnings("serial")
 @HtmlImport("flow-component-renderer.html")
+@HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
 public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
         implements HasComponents {
 
@@ -50,12 +54,24 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
         template = new Element("template");
         getElement().appendChild(template);
 
-        container = new Element("div");
+        container = new Element("vaadin-list-box");
         getElement().appendVirtualChild(container);
 
         getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(this,
                         context -> attachComponentRenderer()));
+    }
+
+    /**
+     * Creates an empty context menu with the given target component.
+     * 
+     * @param target
+     *            the target component for this context menu
+     * @see #setTarget(Component)
+     */
+    public ContextMenu(Component target) {
+        this();
+        setTarget(target);
     }
 
     /**
@@ -86,14 +102,89 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
     }
 
     /**
-     * Adds the given components into this context menu.
+     * Closes this context menu if it is currently open.
+     */
+    @Override
+    public void close() {
+        super.close();
+    }
+
+    /**
+     * Adds a new item component with the given text content and click listener
+     * to the context menu overlay.
      * <p>
-     * The elements in the DOM will not be children of the
+     * This is a convenience method for the use case where you have a list of
+     * high-lightable {@link MenuItem}s inside the overlay. If you want to
+     * configure the contents of the overlay without wrapping them inside
+     * {@link MenuItem}s, or if you just want to add some non-high-lightable
+     * components between the items, use the {@link #add(Component...)} method.
+     * 
+     * @param text
+     *            the text content for the new item
+     * @param clickListener
+     *            the handler for clicking the new item, can be {@code null} to
+     *            not add listener
+     * @return the added {@link MenuItem} component
+     * @see #addItem(Component, ComponentEventListener)
+     * @see #add(Component...)
+     */
+    public MenuItem addItem(String text,
+            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+        MenuItem menuItem = new MenuItem();
+        add(menuItem);
+        menuItem.setText(text);
+        if (clickListener != null) {
+            menuItem.addClickListener(clickListener);
+        }
+        return menuItem;
+    }
+
+    /**
+     * Adds a new item component with the given component and click listener to
+     * the context menu overlay.
+     * <p>
+     * This is a convenience method for the use case where you have a list of
+     * high-lightable {@link MenuItem}s inside the overlay. If you want to
+     * configure the contents of the overlay without wrapping them inside
+     * {@link MenuItem}s, or if you just want to add some non-high-lightable
+     * components between the items, use the {@link #add(Component...)} method.
+     * 
+     * @param component
+     *            the component inside the new item
+     * @param clickListener
+     *            the handler for clicking the new item, can be {@code null} to
+     *            not add listener
+     * @return the added {@link MenuItem} component
+     * @see #addItem(String, ComponentEventListener)
+     * @see #add(Component...)
+     */
+    public MenuItem addItem(Component component,
+            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+        MenuItem menuItem = new MenuItem();
+        add(menuItem);
+        menuItem.add(component);
+        if (clickListener != null) {
+            menuItem.addClickListener(clickListener);
+        }
+        return menuItem;
+    }
+
+    /**
+     * Adds the given components into the context menu overlay.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the overlay, you can use the
+     * {@link #addItem(Component, ComponentEventListener)} convenience methods
+     * instead.
+     * <p>
+     * The added elements in the DOM will not be children of the
      * {@code <vaadin-context-menu>} element, but will be inserted into an
      * overlay that is attached into the {@code <body>}.
      *
      * @param components
      *            the components to add
+     * @see #addItem(String, ComponentEventListener)
+     * @see #addItem(Component, ComponentEventListener)
      */
     @Override
     public void add(Component... components) {
@@ -121,17 +212,40 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
         }
     }
 
+    /**
+     * {@inheritDoc} This also removes all the items added with
+     * {@link #addItem(String)} and its overload methods.
+     */
     @Override
     public void removeAll() {
         container.removeAllChildren();
     }
 
+    /**
+     * Gets the child components of this component. This includes components
+     * added with {@link #add(Component...)} and the {@link MenuItem} components
+     * created with {@link #addItem(String)} and its overload methods.
+     *
+     * @return the child components of this component
+     */
     @Override
     public Stream<Component> getChildren() {
         Builder<Component> childComponents = Stream.builder();
         container.getChildren().forEach(childElement -> ComponentUtil
                 .findComponents(childElement, childComponents::add));
         return childComponents.build();
+    }
+
+    /**
+     * Gets the items added to this component (the children of this component
+     * that are instances of {@link MenuItem}).
+     * 
+     * @return the {@link MenuItem} components in this context menu
+     * @see #addItem(String, ComponentEventListener)
+     */
+    public List<MenuItem> getItems() {
+        return getChildren().filter(MenuItem.class::isInstance)
+                .map(child -> (MenuItem) child).collect(Collectors.toList());
     }
 
     /**
@@ -144,11 +258,12 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
     }
 
     /**
-     * Add a lister for event fired by the {@code opened-changed} events.
+     * Adds a listener for the {@code opened-changed} events fired by the web
+     * component.
      *
-     * @param: listener
-     *             the listener to add;
-     * @return: a Registration for removing the event listener
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
      */
     @Override
     public Registration addOpenedChangeListener(
