@@ -60,6 +60,9 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
         getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(this,
                         context -> attachComponentRenderer()));
+
+        // Workaround for: https://github.com/vaadin/flow/issues/3496
+        getElement().setProperty("opened", false);
     }
 
     /**

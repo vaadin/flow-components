@@ -43,7 +43,9 @@ public class ContextMenuPageIT extends AbstractComponentIT {
         verifyClosed();
         String string = "The open state of the context menu is ";
         String messageId = "message";
-        assertMessage(string, false, messageId);
+
+        Assert.assertEquals("No OpenedChangeEvents should be fired initially",
+                "", findElement(By.id(messageId)).getText());
 
         rightClickOn(By.id("context-menu-test"));
         verifyOpened();
@@ -93,8 +95,7 @@ public class ContextMenuPageIT extends AbstractComponentIT {
     }
 
     private void assertMessage(String string, Boolean state, String id) {
-        Assert.assertEquals(string + state,
-                findElement(By.id(id)).getText());
+        Assert.assertEquals(string + state, findElement(By.id(id)).getText());
     }
 
     private void rightClickOn(By by) {
