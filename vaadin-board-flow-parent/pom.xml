@@ -2,8 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-	<groupId>com.vaadin</groupId>
+	<parent>
+		<groupId>com.vaadin</groupId>
+		<artifactId>vaadin-parent</artifactId>
+		<version>2.0.0</version>
+		<relativePath />
+	</parent>
 	<artifactId>vaadin-board-flow-root</artifactId>
 	<packaging>pom</packaging>
 	<version>2.0-SNAPSHOT</version>
@@ -16,7 +20,7 @@
 	
 	<properties>
             <flow.version>1.0.0</flow.version>
-            <testbench.version>6.0.0</testbench.version>
+            <testbench.version>6.0.1</testbench.version>
             <maven.compiler.source>1.8</maven.compiler.source>
             <maven.compiler.target>1.8</maven.compiler.target>
             <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -29,26 +33,10 @@
 		<module>vaadin-board-flow-integration-tests</module>
 		<module>vaadin-board-flow-vaadincom-demo</module>
 	</modules>
-	<distributionManagement>
-		<snapshotRepository>
-			<id>vaadin-snapshots</id>
-			<name>Vaadin snapshot repository</name>
-			<url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-		</snapshotRepository>
-		<repository>
-			<id>vaadin-addons</id>
-			<name>Vaadin add-ons repository</name>
-			<url>https://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
-		</repository>
-	</distributionManagement>
 	<repositories>
 		<repository>
 			<id>vaadin-snapshots</id>
 			<url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-		</repository>
-		<repository>
-			<id>vaadin-addons</id>
-			<url>http://maven.vaadin.com/vaadin-addons</url>
 		</repository>
 		<repository>
 			<id>vaadin-prereleases</id>
@@ -65,13 +53,4 @@
 			<url>http://maven.vaadin.com/vaadin-prereleases</url>
 		</pluginRepository>
 	</pluginRepositories>
-	<profiles>
-		<profile>
-			<id>release</id>
-			<modules>
-				<module>addon</module>
-				<module>testbench-api</module>
-			</modules>
-		</profile>
-	</profiles>
 </project>
