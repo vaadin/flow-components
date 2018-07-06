@@ -102,6 +102,35 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
     }
 
     /**
+     * Determines the way for opening the context menu.
+     * <p>
+     * By default, the context menu can be opened with a right click or a long
+     * touch on the target component.
+     * 
+     * @param openOnClick
+     *            if {@code true}, the context menu can be opened with left
+     *            click only. Otherwise the context menu follows the default
+     *            behavior.
+     */
+    public void setOpenOnClick(boolean openOnClick) {
+        String value = (openOnClick) ? "click" : "vaadin-contextmenu";
+        setOpenOn(value);
+    }
+
+    /**
+     * Gets whether the context menu can be opened via left click.
+     * <p>
+     * By default, this will return {@code false} and context menu can be opened
+     * with a right click or a long touch on the target component.
+     * 
+     * @return {@code true} if the context menu can be opened with left click
+     *         only. Otherwise the context menu follows the default behavior.
+     */
+    public boolean isOpenOnClick() {
+        return "click".equals(getOpenOnString());
+    }
+
+    /**
      * Closes this context menu if it is currently open.
      */
     @Override

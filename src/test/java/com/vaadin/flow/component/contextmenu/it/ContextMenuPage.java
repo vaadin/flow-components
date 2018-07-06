@@ -18,6 +18,7 @@ package com.vaadin.flow.component.contextmenu.it;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
@@ -32,6 +33,7 @@ public class ContextMenuPage extends Div {
 
     public ContextMenuPage() {
         addContextMenuWithOpenedChangeListener();
+        addContextMenuWithSetOpenOnClick();
     }
 
     private void addContextMenuWithOpenedChangeListener() {
@@ -51,7 +53,35 @@ public class ContextMenuPage extends Div {
         });
 
         add(target, contextMenu, message);
+    }
 
+    private void addContextMenuWithSetOpenOnClick() {
+        ContextMenu contextMenu = new ContextMenu();
+        Label target = new Label("add ContextMenu With SetOpenOnClick");
+        target.setId("context-menu-open-on-click");
+        contextMenu.setTarget(target);
+
+        Paragraph content = new Paragraph("Context menu With SetOpenOnClick.");
+        contextMenu.add(content);
+
+        Label message = new Label("");
+        message.setId("message-on-click");
+        message.setText("Current state is " + contextMenu.isOpenOnClick());
+
+        NativeButton on = new NativeButton("setOpenOnClick");
+        on.setId("on");
+        on.addClickListener(event -> {
+            contextMenu.setOpenOnClick(true);
+            message.setText("Current state is " + contextMenu.isOpenOnClick());
+        });
+
+        NativeButton off = new NativeButton("setOpenOnClick-off");
+        off.setId("off");
+        off.addClickListener(event -> {
+            contextMenu.setOpenOnClick(false);
+            message.setText("Current state is " + contextMenu.isOpenOnClick());
+        });
+        add(contextMenu, target, message, on, off);
     }
 
 }

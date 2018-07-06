@@ -41,21 +41,60 @@ public class ContextMenuPageIT extends AbstractComponentIT {
     @Test
     public void openedChangeListenerIsCalled_isOpenedReturnsCorrectValue() {
         verifyClosed();
-        assertMessage(false);
+        String string = "The open state of the context menu is ";
+        String messageId = "message";
+        assertMessage(string, false, messageId);
 
         rightClickOn(By.id("context-menu-test"));
         verifyOpened();
         Assert.assertEquals("Context menu test.", getOverlay().getText());
-        assertMessage(true);
+        assertMessage(string, true, messageId);
 
         getOverlay().click();
         verifyClosed();
-        assertMessage(false);
+        assertMessage(string, false, messageId);
     }
 
-    private void assertMessage(Boolean state) {
-        Assert.assertEquals("The open state of the context menu is " + state,
-                findElement(By.id("message")).getText());
+    @Test
+    public void setOpenOnClick_opensCorrectlyWithEitherLeftOrRightClick_getterReturnsCorrect() {
+        String string = "Current state is ";
+        String messageId = "message-on-click";
+        verifyClosed();
+        assertMessage(string, false, messageId);
+
+        rightClickOn(By.id("context-menu-open-on-click"));
+        verifyOpened();
+        getOverlay().click();
+        verifyClosed();
+        leftClickOn("context-menu-open-on-click");
+        verifyClosed();
+
+        findElement(By.id("on")).click();
+        assertMessage(string, true, messageId);
+        leftClickOn("context-menu-open-on-click");
+        verifyOpened();
+        getOverlay().click();
+        verifyClosed();
+        rightClickOn(By.id("context-menu-open-on-click"));
+        verifyClosed();
+
+        findElement(By.id("off")).click();
+        assertMessage(string, false, messageId);
+        rightClickOn(By.id("context-menu-open-on-click"));
+        verifyOpened();
+        getOverlay().click();
+        verifyClosed();
+        leftClickOn("context-menu-open-on-click");
+        verifyClosed();
+    }
+
+    private void leftClickOn(String id) {
+        findElement(By.id(id)).click();
+    }
+
+    private void assertMessage(String string, Boolean state, String id) {
+        Assert.assertEquals(string + state,
+                findElement(By.id(id)).getText());
     }
 
     private void rightClickOn(By by) {
