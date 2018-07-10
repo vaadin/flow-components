@@ -62,6 +62,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String ITEM_LABEL_PROPERTY = "label";
     private static final String KEY_PROPERTY = "key";
     private static final String SELECTED_ITEM_PROPERTY_NAME = "selectedItem";
+    private static final String VALUE_PROPERTY_NAME = "value";
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
@@ -132,6 +133,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         super(null, null, JsonValue.class, ComboBox::presentationToModel,
                 ComboBox::modelToPresentation);
         getElement().synchronizeProperty(SELECTED_ITEM_PROPERTY_NAME, "change");
+        getElement().synchronizeProperty(VALUE_PROPERTY_NAME, "change");
 
         setItemValuePath(KEY_PROPERTY);
 
@@ -509,10 +511,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @Override
     public void setValue(T value) {
-        if (value == null) {
+        if (value == null || Objects.equals(value, getEmptyValue())) {
             if (getValue() != null) {
-                getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
-                        Json.createNull());
+                cleanValueAndSelection();
             }
             return;
         }
@@ -523,6 +524,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
         getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
                 generateJson(itemsFromDataProvider.get(updatedIndex)));
+    }
+
+    private void cleanValueAndSelection() {
+        getElement().setProperty(VALUE_PROPERTY_NAME, "");
+        getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
+                Json.createNull());
     }
 
     @Override
