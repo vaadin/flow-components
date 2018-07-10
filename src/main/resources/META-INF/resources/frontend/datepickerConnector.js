@@ -95,6 +95,8 @@ window.Vaadin.Flow.datepickerConnector = {
                 if (targetLocaleDate.startsWith(sample)) {
                     //Date format "YYYY/MM/DD"
                     const parts = dateString.split(separator);
+                    // #108: With Firefox, the Date object does not accept date string with dots,
+                    //dots and space and more as a separator, so date = new Date(dateString) has been replaced
                     date = new Date(parts[0], parts[1] - 1, parts[2]);
                 } else if (targetLocaleDate.startsWith(sample.split(separator).reverse().join(separator))) {
                     //Date format "DD/MM/YYYY"
@@ -106,7 +108,8 @@ window.Vaadin.Flow.datepickerConnector = {
                     date = new Date(parts[2], parts[0] - 1, parts[1]);
                 } else {
                     console.warn("Selected locale is using unsupported date format, which might affect the parsing date.");
-                    date = new Date(dateString);
+                    const parts = dateString.split(separator);
+                    date = new Date(parts[0], parts[1] - 1, parts[2]);
                 }
 
                 oldLocale = locale;
