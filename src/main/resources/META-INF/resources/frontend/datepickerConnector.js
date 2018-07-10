@@ -89,19 +89,21 @@ window.Vaadin.Flow.datepickerConnector = {
 
                 const sample = ["2009", "12", "31"].join(separator);
                 const sample_parts = sample.split(separator);
-                let targetLocaleDate = cleanString(new Date(sample).toLocaleDateString(oldLocale).toString());
+                let targetLocaleDate = cleanString(new Date(2009,11,31).toLocaleDateString(oldLocale).toString());
 
                 let date;
                 if (targetLocaleDate.startsWith(sample)) {
                     //Date format "YYYY/MM/DD"
-                    date = new Date(dateString);
+                    const parts = dateString.split(separator);
+                    date = new Date(parts[0], parts[1] - 1, parts[2]);
                 } else if (targetLocaleDate.startsWith(sample.split(separator).reverse().join(separator))) {
                     //Date format "DD/MM/YYYY"
-                    date = new Date(dateString.split(separator).reverse().join(separator));
+                    const parts = dateString.split(separator);
+                    date = new Date(parts[2], parts[1] - 1, parts[0]);
                 } else if (targetLocaleDate.startsWith([sample_parts[1], sample_parts[2], sample_parts[0]].join(separator))) {
                     //Date format "MM/DD/YYYY"
                     const parts = dateString.split(separator);
-                    date = new Date([parts[2], parts[0], parts[1]].join(separator));
+                    date = new Date(parts[2], parts[0] - 1, parts[1]);
                 } else {
                     console.warn("Selected locale is using unsupported date format, which might affect the parsing date.");
                     date = new Date(dateString);
