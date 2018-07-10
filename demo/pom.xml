@@ -27,6 +27,12 @@
         <jetty.jvm.args></jetty.jvm.args>
         <jetty.resource.directory>${frontend.working.directory}</jetty.resource.directory>
     </properties>
+    <repositories>
+        <repository>
+            <id>webjars</id>
+            <url>https://dl.bintray.com/webjars/maven</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -82,9 +88,10 @@
 
         <plugins>
             <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
 
