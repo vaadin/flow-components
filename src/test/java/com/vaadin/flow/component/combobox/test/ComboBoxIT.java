@@ -25,6 +25,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.demo.ComboBoxView;
 import com.vaadin.flow.demo.TabbedComponentDemoTest;
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Integration tests for the {@link ComboBoxView}.
@@ -92,6 +93,30 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
         waitUntil(driver -> message.getText().equals(
                 "Selected artist: Haircuts for Men\nThe old selection was: Haywyre"));
+    }
+
+    @Test
+    public void openNullRepresentationBox() {
+        openTabAndCheckForErrors("");
+        TestBenchElement comboBox = $(TestBenchElement.class).id("null-representation-box");
+        TestBenchElement message = $(TestBenchElement.class)
+                .id("null-representation-message");
+        comboBox.$(TestBenchElement.class).id("input").click();
+        waitForElementPresent(By.tagName("vaadin-combo-box-overlay"));
+        
+        TestBenchElement item = $(TestBenchElement.class).id("overlay")
+                .$(TestBenchElement.class).id("content")
+                .$(TestBenchElement.class).id("selector")
+                .$("vaadin-combo-box-item").get(3);
+        Assert.assertEquals(
+                "Displayed item should use the null representation.",
+                "Missing Value", item.getText());
+
+        executeScript("arguments[0].selectedItem = arguments[0].items[3]",
+                comboBox);
+
+        waitUntil(
+                driver -> message.getText().equals("Selected artist: null"));
     }
 
     @Test

@@ -124,15 +124,6 @@ public class ComboBoxTest {
     }
 
     @Test
-    public void labelItemGeneratorReturnsNull_throw() {
-        expectIllegalStateException(
-                "Got 'null' as a label value for the item 'foo'. 'ItemLabelGenerator' instance may not return 'null' values");
-        TestComboBox comboBox = new TestComboBox();
-        comboBox.setItemLabelGenerator(obj -> null);
-        comboBox.setItems(Arrays.asList("foo", "bar"));
-    }
-
-    @Test
     public void boxWithBinderAndEnums_readBean_valueIsUpdated() {
         ComboBox<Category> combo = new ComboBox<>();
         combo.setItemLabelGenerator(Category::name);
@@ -245,6 +236,18 @@ public class ComboBoxTest {
         // removes the second listener
         registration2.remove();
         Assert.assertFalse(comboBox.isAllowCustomValue());
+    }
+
+    @Test
+    public void nullRepresentation() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assert.assertEquals(
+                "By default, null representation string should be empty", "",
+                comboBox.getNullRepresentation());
+        comboBox.setNullRepresentation("Missing Value");
+        Assert.assertEquals(
+                "The null representation string should be \"Missing Value\"",
+                "Missing Value", comboBox.getNullRepresentation());
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {
