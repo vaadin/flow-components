@@ -19,19 +19,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
  * @author Vaadin Ltd
  */
 @TestPath("context-menu-test")
-public class ContextMenuPageIT extends AbstractComponentIT {
-
-    private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
+public class ContextMenuPageIT extends AbstractContextMenuIT {
 
     @Before
     public void init() {
@@ -47,7 +42,7 @@ public class ContextMenuPageIT extends AbstractComponentIT {
         Assert.assertEquals("No OpenedChangeEvents should be fired initially",
                 "", findElement(By.id(messageId)).getText());
 
-        rightClickOn(By.id("context-menu-test"));
+        rightClickOn("context-menu-test");
         verifyOpened();
         Assert.assertEquals("Context menu test.", getOverlay().getText());
         assertMessage(string, true, messageId);
@@ -64,55 +59,82 @@ public class ContextMenuPageIT extends AbstractComponentIT {
         verifyClosed();
         assertMessage(string, false, messageId);
 
-        rightClickOn(By.id("context-menu-open-on-click"));
+        rightClickOn("context-menu-with-controls");
         verifyOpened();
         getOverlay().click();
         verifyClosed();
-        leftClickOn("context-menu-open-on-click");
+        leftClickOn("context-menu-with-controls");
         verifyClosed();
 
         findElement(By.id("on")).click();
         assertMessage(string, true, messageId);
-        leftClickOn("context-menu-open-on-click");
+        leftClickOn("context-menu-with-controls");
         verifyOpened();
         getOverlay().click();
         verifyClosed();
-        rightClickOn(By.id("context-menu-open-on-click"));
+        rightClickOn("context-menu-with-controls");
         verifyClosed();
 
         findElement(By.id("off")).click();
         assertMessage(string, false, messageId);
-        rightClickOn(By.id("context-menu-open-on-click"));
+        rightClickOn("context-menu-with-controls");
         verifyOpened();
         getOverlay().click();
         verifyClosed();
-        leftClickOn("context-menu-open-on-click");
+        leftClickOn("context-menu-with-controls");
         verifyClosed();
     }
 
-    private void leftClickOn(String id) {
-        findElement(By.id(id)).click();
+    @Test
+    public void changeTarget_opensByRightClickingNewTarget() {
+        leftClickOn("change-target");
+        verifyClosed();
+
+        rightClickOn("context-menu-with-controls");
+        verifyClosed();
+
+        rightClickOn("alt-target");
+        verifyOpened();
+    }
+
+    @Test
+    public void setOpenOnClick_changeTarget_opensByClickingNewTarget() {
+        leftClickOn("on");
+        leftClickOn("change-target");
+        verifyClosed();
+
+        rightClickOn("context-menu-with-controls");
+        verifyClosed();
+        leftClickOn("context-menu-with-controls");
+        verifyClosed();
+
+        rightClickOn("alt-target");
+        verifyClosed();
+        leftClickOn("alt-target");
+        verifyOpened();
+    }
+
+    @Test
+    public void setOpenOnClick_setTargetNull_doesntOpen_changeTarget_opensByClickingNewTarget() {
+        leftClickOn("on");
+        leftClickOn("remove-target");
+        verifyClosed();
+
+        rightClickOn("context-menu-with-controls");
+        verifyClosed();
+        leftClickOn("context-menu-with-controls");
+        verifyClosed();
+        rightClickOn("alt-target");
+        verifyClosed();
+        leftClickOn("alt-target");
+        verifyClosed();
+
+        leftClickOn("change-target");
+        leftClickOn("alt-target");
+        verifyOpened();
     }
 
     private void assertMessage(String string, Boolean state, String id) {
         Assert.assertEquals(string + state, findElement(By.id(id)).getText());
-    }
-
-    private void rightClickOn(By by) {
-        Actions action = new Actions(getDriver());
-        WebElement element = findElement(by);
-        action.contextClick(element).perform();
-    }
-
-    private WebElement getOverlay() {
-        return findElement(By.tagName(OVERLAY_TAG));
-    }
-
-    private void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
-    }
-
-    private void verifyOpened() {
-        waitForElementPresent(By.tagName(OVERLAY_TAG));
     }
 }

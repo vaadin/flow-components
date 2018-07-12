@@ -28,6 +28,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
@@ -39,6 +40,7 @@ import com.vaadin.flow.shared.Registration;
 @SuppressWarnings("serial")
 @HtmlImport("flow-component-renderer.html")
 @HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
+@JavaScript("frontend://contextMenuConnector.js")
 public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
         implements HasComponents {
 
@@ -46,6 +48,11 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
 
     private Element template;
     private Element container;
+
+    private String openOnEventName = "vaadin-contextmenu";
+    private Registration targetBeforeOpenRegistration;
+
+    private boolean autoAddedToTheUi;
 
     /**
      * Creates an empty context menu.
@@ -63,6 +70,17 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
+
+        // Don't open the overlay immediately with any event, let
+        // contextMenuConnector.js make a server round-trip first.
+        setOpenOn("none");
+
+        getElement().addEventListener("opened-changed", event -> {
+            if (autoAddedToTheUi && !isOpened()) {
+                getElement().removeFromParent();
+                autoAddedToTheUi = false;
+            }
+        });
     }
 
     /**
@@ -80,17 +98,76 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
     /**
      * Sets the target component for this context menu.
      * <p>
-     * The context menu can be opened with a right click or a long touch on the
-     * target component.
+     * By default, the context menu can be opened with a right click or a long
+     * touch on the target component.
      * 
      * @param target
-     *            the target component for this context menu
+     *            the target component for this context menu, can be
+     *            {@code null} to remove the target
      */
     public void setTarget(Component target) {
+        if (getTarget() != null) {
+            targetBeforeOpenRegistration.remove();
+            getTarget().getElement()
+                    .callFunction("$contextMenuConnector.removeConnector");
+        }
+
         this.target = target;
         getElement().getNode().runWhenAttached(
                 ui -> ui.beforeClientResponse(this, context -> ui.getPage()
                         .executeJavaScript("$0.listenOn=$1", this, target)));
+
+        if (target == null) {
+            return;
+        }
+
+        target.getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(target, context -> {
+                    ui.getInternals()
+                            .addComponentDependencies(ContextMenu.class);
+                    ui.getPage().executeJavaScript(
+                            "window.Vaadin.Flow.contextMenuConnector.init($0)",
+                            target.getElement());
+                }));
+
+        updateOpenOn();
+
+        // Server round-trip before opening the overlay
+        targetBeforeOpenRegistration = target.getElement()
+                .addEventListener("vaadin-context-menu-before-open", event -> {
+                    beforeOpen();
+                    target.getElement().callFunction(
+                            "$contextMenuConnector.openMenu", getElement());
+                });
+    }
+
+    private void updateOpenOn() {
+        if (target != null) {
+            target.getElement().callFunction(
+                    "$contextMenuConnector.updateOpenOn", openOnEventName);
+        }
+    }
+
+    private void beforeOpen() {
+        if (getElement().getNode().getParent() == null) {
+            UI ui = getCurrentUI();
+            ui.beforeClientResponse(ui, context -> {
+                ui.add(this);
+                autoAddedToTheUi = true;
+            });
+        }
+    }
+
+    private UI getCurrentUI() {
+        UI ui = UI.getCurrent();
+        if (ui == null) {
+            throw new IllegalStateException("UI instance is not available. "
+                    + "It means that you are calling this method "
+                    + "out of a normal workflow where it's always implicitly set. "
+                    + "That may happen if you call the method from the custom thread without "
+                    + "'UI::access' or from tests without proper initialization.");
+        }
+        return ui;
     }
 
     /**
@@ -116,8 +193,8 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
      *            behavior.
      */
     public void setOpenOnClick(boolean openOnClick) {
-        String value = (openOnClick) ? "click" : "vaadin-contextmenu";
-        setOpenOn(value);
+        openOnEventName = openOnClick ? "click" : "vaadin-contextmenu";
+        updateOpenOn();
     }
 
     /**
@@ -130,7 +207,7 @@ public class ContextMenu extends GeneratedVaadinContextMenu<ContextMenu>
      *         only. Otherwise the context menu follows the default behavior.
      */
     public boolean isOpenOnClick() {
-        return "click".equals(getOpenOnString());
+        return "click".equals(openOnEventName);
     }
 
     /**

@@ -20,6 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
@@ -33,11 +34,17 @@ public class ContextMenuPage extends Div {
 
     public ContextMenuPage() {
         addContextMenuWithOpenedChangeListener();
-        addContextMenuWithSetOpenOnClick();
+        addSeparator();
+        addContextMenuWithControls();
+    }
+
+    private void addSeparator() {
+        getElement().appendChild(new Element("hr"));
     }
 
     private void addContextMenuWithOpenedChangeListener() {
-        Label target = new Label("Target");
+        Label target = new Label(
+                "Target for context menu with opened change listener");
         target.setId("context-menu-test");
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setTarget(target);
@@ -55,16 +62,17 @@ public class ContextMenuPage extends Div {
         add(target, contextMenu, message);
     }
 
-    private void addContextMenuWithSetOpenOnClick() {
+    private void addContextMenuWithControls() {
         ContextMenu contextMenu = new ContextMenu();
-        Label target = new Label("add ContextMenu With SetOpenOnClick");
-        target.setId("context-menu-open-on-click");
+        Label target = new Label(
+                "Target for context menu with setOpenOnClick() and setTarget()");
+        target.setId("context-menu-with-controls");
         contextMenu.setTarget(target);
 
         Paragraph content = new Paragraph("Context menu With SetOpenOnClick.");
         contextMenu.add(content);
 
-        Label message = new Label("");
+        Div message = new Div();
         message.setId("message-on-click");
         message.setText("Current state is " + contextMenu.isOpenOnClick());
 
@@ -81,7 +89,20 @@ public class ContextMenuPage extends Div {
             contextMenu.setOpenOnClick(false);
             message.setText("Current state is " + contextMenu.isOpenOnClick());
         });
-        add(contextMenu, target, message, on, off);
+
+        Label altTarget = new Label("Alternative target");
+        altTarget.setId("alt-target");
+
+        NativeButton changeTarget = new NativeButton("Change target",
+                event -> contextMenu.setTarget(altTarget));
+        changeTarget.setId("change-target");
+
+        NativeButton removeTarget = new NativeButton("Remove target",
+                event -> contextMenu.setTarget(null));
+        removeTarget.setId("remove-target");
+
+        add(contextMenu, target, altTarget, message, on, off, changeTarget,
+                removeTarget);
     }
 
 }

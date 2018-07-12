@@ -67,7 +67,7 @@ public class ContextMenuView extends DemoView {
 
         // end-source-example
 
-        addCard("Basic ContextMenu", target, message, contextMenu);
+        addCard("Basic ContextMenu", target, message);
         target.setId("basic-context-menu-target");
         contextMenu.setId("basic-context-menu");
     }
@@ -95,7 +95,7 @@ public class ContextMenuView extends DemoView {
 
         // end-source-example
 
-        addCard("ContextMenu With Components", target, message, contextMenu);
+        addCard("ContextMenu With Components", target, message);
         target.setId("context-menu-with-components-target");
         contextMenu.setId("context-menu-with-components");
         message.setId("context-menu-with-components-message");
