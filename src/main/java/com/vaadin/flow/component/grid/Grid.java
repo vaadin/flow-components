@@ -336,6 +336,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         /**
          * Get the renderer used for this column.
          *
+         * Note: Mutating the renderer after the Grid has been rendered
+         * on the client will not change the column, and can lead to
+         * undefined behavior.
+         *
          * @return the renderer used for this column, should never be {@code null}
          */
         public Renderer<T> getRenderer() {
