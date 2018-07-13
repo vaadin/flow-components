@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2018 Vaadin Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,13 +16,17 @@
 package com.vaadin.flow.component.button;
 
 import javax.annotation.Generated;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.vaadin.flow.component.ClickNotifier;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.ClickNotifier;
-import com.vaadin.flow.component.HasText;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -35,6 +39,9 @@ import com.vaadin.flow.dom.Element;
  * </p>
  * <p>
  * &lt;vaadin-button&gt; &lt;/vaadin-button&gt;
+ * </p>
+ * <p>
+ * {@code document.querySelector('vaadin-button').addEventListener('click', () =&gt; alert('Hello World!'));}
  * </p>
  * <h3>Styling</h3>
  * <p>
@@ -96,13 +103,38 @@ import com.vaadin.flow.dom.Element;
  * how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.ButtonElement#2.0.1", "Flow#1.0-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
+        "WebComponent: Vaadin.ButtonElement#2.1.0-alpha3",
+        "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-button")
 @HtmlImport("frontend://bower_components/vaadin-button/src/vaadin-button.html")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component
-        implements HasStyle, ClickNotifier<R>, HasText, Focusable<R> {
+        implements HasStyle, ClickNotifier<R>, HasText, Focusable<R>, HasTheme {
+
+    /**
+     * Adds theme variants to the component.
+     * 
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(ButtonVariant... variants) {
+        getThemeNames()
+                .addAll(Stream.of(variants).map(ButtonVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     * 
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(ButtonVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(ButtonVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
 
     /**
      * <p>
@@ -166,6 +198,10 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      */
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
+    }
+
+    protected void updateStyles() {
+        getElement().callFunction("updateStyles");
     }
 
     /**
