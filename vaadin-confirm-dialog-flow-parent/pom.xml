@@ -3,7 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.vaadin</groupId>
+	<parent>
+		<groupId>com.vaadin</groupId>
+		<artifactId>vaadin-parent</artifactId>
+		<version>2.0.0</version>
+		<relativePath />
+	</parent>
 	<artifactId>vaadin-confirm-dialog-flow-root</artifactId>
 	<packaging>pom</packaging>
 	<version>1.0-SNAPSHOT</version>
@@ -15,12 +20,12 @@
 	</organization>
 
 	<properties>
-            <flow.version>1.0.0</flow.version>
-            <testbench.version>6.0.0</testbench.version>
-            <maven.compiler.source>1.8</maven.compiler.source>
-            <maven.compiler.target>1.8</maven.compiler.target>
-            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-            <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<flow.version>1.0.0</flow.version>
+		<testbench.version>6.0.1</testbench.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
 	<modules>
@@ -29,37 +34,13 @@
 		<module>vaadin-confirm-dialog-flow-integration-tests</module>
 		<module>vaadin-confirm-dialog-flow-vaadincom-demo</module>
 	</modules>
-	<distributionManagement>
-		<snapshotRepository>
-			<id>vaadin-snapshots</id>
-			<name>Vaadin snapshot repository</name>
-			<url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-		</snapshotRepository>
-		<repository>
-			<id>vaadin-addons</id>
-			<name>Vaadin add-ons repository</name>
-			<url>https://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
-		</repository>
-	</distributionManagement>
 	<repositories>
-		<repository>
-			<id>vaadin-snapshots</id>
-			<url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-		</repository>
-		<repository>
-			<id>vaadin-addons</id>
-			<url>http://maven.vaadin.com/vaadin-addons</url>
-		</repository>
 		<repository>
 			<id>vaadin-prereleases</id>
 			<url>http://maven.vaadin.com/vaadin-prereleases</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
-		<pluginRepository>
-			<id>vaadin-snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/vaadin-snapshots</url>
-		</pluginRepository>
 		<pluginRepository>
 			<id>vaadin-prereleases</id>
 			<url>http://maven.vaadin.com/vaadin-prereleases</url>
