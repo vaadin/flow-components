@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.testbench.annotations.BrowserConfiguration;
@@ -67,7 +68,9 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     @BrowserConfiguration
     public List<DesiredCapabilities> getBrowserConfiguration() {
-        return Arrays.asList(BrowserUtil.ie11(), BrowserUtil.firefox(),
+        DesiredCapabilities ie11Capabilities = BrowserUtil.ie11();
+        ie11Capabilities.setPlatform(Platform.WIN8_1);
+        return Arrays.asList(ie11Capabilities, BrowserUtil.firefox(),
                 BrowserUtil.chrome(), BrowserUtil.edge());
     }
 
