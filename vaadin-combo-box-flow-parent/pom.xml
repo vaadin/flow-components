@@ -32,7 +32,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-combo-box</artifactId>
-            <version>4.0.1</version>
+            <version>4.1.0-alpha3</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.webjars.bowergithub.polymerelements</groupId>
