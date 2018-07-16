@@ -809,29 +809,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                     && detailsVisible.contains(item);
         }
 
-        /**
-         * Adds theme variants to the component.
-         * 
-         * @param variants
-         *            theme variants to add
-         */
-        public void addThemeVariants(GridVariant... variants) {
-            getThemeNames()
-                    .addAll(Stream.of(variants).map(GridVariant::getVariantName)
-                            .collect(Collectors.toList()));
-        }
-
-        /**
-         * Removes theme variants from the component.
-         * 
-         * @param variants
-         *            theme variants to remove
-         */
-        public void removeThemeVariants(GridVariant... variants) {
-            getThemeNames().removeAll(
-                    Stream.of(variants).map(GridVariant::getVariantName)
-                            .collect(Collectors.toList()));
-        }
 
         @Override
         public void generateData(T item, JsonObject jsonObject) {
@@ -1495,6 +1472,28 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     public List<FooterRow> getFooterRows() {
         return columnLayers.stream().filter(ColumnLayer::isFooterRow)
                 .map(ColumnLayer::asFooterRow).collect(Collectors.toList());
+    }
+
+    /**
+     * Adds theme variants to the component.
+     * 
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(GridVariant... variants) {
+        getThemeNames().addAll(Stream.of(variants)
+                .map(GridVariant::getVariantName).collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     * 
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(GridVariant... variants) {
+        getThemeNames().removeAll(Stream.of(variants)
+                .map(GridVariant::getVariantName).collect(Collectors.toList()));
     }
 
     /**
