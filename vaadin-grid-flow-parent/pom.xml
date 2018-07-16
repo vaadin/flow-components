@@ -6,14 +6,14 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-grid-flow</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
 
     <properties>
-        <flow.version>1.0-SNAPSHOT</flow.version>
+        <flow.version>1.1-SNAPSHOT</flow.version>
     </properties>
 
     <repositories>
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-grid</artifactId>
-            <version>5.0.4</version>
+            <version>5.1.0-alpha3</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.webjars.bowergithub.polymerelements</groupId>
@@ -94,7 +94,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -106,7 +106,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -118,7 +118,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -130,7 +130,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-checkbox-flow</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -142,7 +142,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-radio-button-flow</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>

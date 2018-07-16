@@ -106,7 +106,8 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
         GridColumnElement column = grid.getVisibleColumns().get(cellIndex);
         try {
             waitUntil(test -> grid.hasRow(rowIndex) && expectedText
-                    .equals(grid.getRow(rowIndex).getCell(column).getText()));
+                    .equals(grid.getRow(rowIndex).getCell(column).getText()),
+                    20);
         } catch (Exception e) {
             Assert.fail(
                     String.format(
