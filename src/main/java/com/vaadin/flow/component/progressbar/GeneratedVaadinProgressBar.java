@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2018 Vaadin Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,9 +15,13 @@
  */
 package com.vaadin.flow.component.progressbar;
 
+import javax.annotation.Generated;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
-import javax.annotation.Generated;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 
@@ -95,12 +99,37 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * </tbody>
  * </table>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.ProgressBarElement#1.0.0", "Flow#1.0-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
+        "WebComponent: Vaadin.ProgressBarElement#1.1.0-alpha3",
+        "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-progress-bar")
 @HtmlImport("frontend://bower_components/vaadin-progress-bar/src/vaadin-progress-bar.html")
 public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
-        extends Component implements HasStyle {
+        extends Component implements HasStyle, HasTheme {
+
+    /**
+     * Adds theme variants to the component.
+     * 
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(ProgressBarVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(ProgressBarVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     * 
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(ProgressBarVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(ProgressBarVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
 
     /**
      * <p>
@@ -230,5 +259,9 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      */
     protected void setIndeterminate(boolean indeterminate) {
         getElement().setProperty("indeterminate", indeterminate);
+    }
+
+    protected void updateStyles() {
+        getElement().callFunction("updateStyles");
     }
 }
