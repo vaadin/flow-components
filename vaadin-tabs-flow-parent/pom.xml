@@ -31,15 +31,15 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-tabs</artifactId>
-            <version>2.0.0</version>
-             <exclusions>
+            <version>2.1.0-alpha3</version>
+            <exclusions>
                 <exclusion>
                     <groupId>org.webjars.bowergithub.polymerelements</groupId>
                     <artifactId>iron-flex-layout</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-flex-layout</artifactId>
             <version>2.0.3</version>
@@ -54,10 +54,10 @@
 
         <!-- Dependencies for the demo -->
         <dependency>
-           <groupId>org.slf4j</groupId>
-           <artifactId>slf4j-simple</artifactId>
-           <version>1.7.25</version>
-           <scope>test</scope>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>

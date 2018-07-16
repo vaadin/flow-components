@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2018 Vaadin Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,10 +16,14 @@
 package com.vaadin.flow.component.tabs;
 
 import javax.annotation.Generated;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Component;
 
 /**
  * <p>
@@ -85,12 +89,34 @@ Tab 1
  * how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.TabElement#2.0.0", "Flow#1.0-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
+        "WebComponent: Vaadin.TabElement#2.1.0-alpha3", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-tab")
 @HtmlImport("frontend://bower_components/vaadin-tabs/src/vaadin-tab.html")
 public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
-        extends Component implements HasStyle {
+        extends Component implements HasStyle, HasTheme {
+
+    /**
+     * Adds theme variants to the component.
+     * 
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(TabVariant... variants) {
+        getThemeNames().addAll(Stream.of(variants)
+                .map(TabVariant::getVariantName).collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     * 
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(TabVariant... variants) {
+        getThemeNames().removeAll(Stream.of(variants)
+                .map(TabVariant::getVariantName).collect(Collectors.toList()));
+    }
 
     /**
      * <p>
@@ -188,5 +214,9 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      */
     protected void setSelected(boolean selected) {
         getElement().setProperty("selected", selected);
+    }
+
+    protected void updateStyles() {
+        getElement().callFunction("updateStyles");
     }
 }
