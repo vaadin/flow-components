@@ -31,8 +31,20 @@
         <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-list</artifactId>
-            <version>2.0.12</version>
         </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-resizable-behavior</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-a11y-keys-behavior</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-scroll-target-behavior</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
@@ -78,6 +90,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <dependency>
             <groupId>com.github.javafaker</groupId>
             <artifactId>javafaker</artifactId>
@@ -105,8 +118,8 @@
             </plugin>
         </plugins>
     </build>
-    
-        <profiles>
+
+    <profiles>
         <profile>
             <id>runTests</id>
             <dependencies>
@@ -119,5 +132,5 @@
             </dependencies>
         </profile>
     </profiles>
-    
+
 </project>
