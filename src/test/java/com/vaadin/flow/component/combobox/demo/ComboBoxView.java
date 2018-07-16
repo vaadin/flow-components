@@ -99,7 +99,6 @@ public class ComboBoxView extends DemoView {
         createDisabledComboBox();
         createObjectComboBox();
         createComboBoxWithObjectStringSimpleValue();
-        createComboBoxWithNullRepresentation();
         createComboBoxUsingTemplateRenderer();
         createComboBoxUsingComponentRenderer();
     }
@@ -207,36 +206,6 @@ public class ComboBoxView extends DemoView {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("disabled-combo-box");
         addCard("Disabled ComboBox", comboBox, message);
-    }
-
-    private void createComboBoxWithNullRepresentation() {
-        Div message = createMessageDiv("null-representation-message");
-        // begin-source-example
-        // source-example-heading: ComboBox with null representation
-        ComboBox<Song> comboBox = new ComboBox<>();
-        List<Song> listOfSongs = createListOfSongs();
-        listOfSongs.add(new Song(null, null, null));
-
-        comboBox.setItems(listOfSongs);
-        comboBox.setNullRepresentation("Missing Value");
-        comboBox.setItemLabelGenerator(item -> item.getName());
-        comboBox.addValueChangeListener(event -> {
-            if (event.getSource().isEmpty()) {
-                message.setText("No artist selected");
-            } else if (event.getOldValue() == null) {
-                message.setText(
-                        "Selected artist: " + event.getValue().getArtist());
-            } else {
-                message.setText(
-                        "Selected artist: " + event.getValue().getArtist()
-                                + "\nThe old selection was: "
-                                + event.getOldValue().getArtist());
-            }
-        });
-        // end-source-example
-        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
-        comboBox.setId("null-representation-box");
-        addCard("ComboBox with null representation", comboBox, message);
     }
 
     private void createComboBoxUsingTemplateRenderer() {
