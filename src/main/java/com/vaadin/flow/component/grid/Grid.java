@@ -109,12 +109,12 @@ import elemental.json.JsonValue;
 @HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
 @HtmlImport("frontend://flow-component-renderer.html")
 @JavaScript("frontend://gridConnector.js")
-public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
-        HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
-        HasTheme {
+public class Grid<T> extends Component
+        implements HasDataProvider<T>, HasStyle, HasSize, Focusable<Grid<T>>,
+        SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme {
 
     protected static class UpdateQueue implements TreeUpdate {
-        private List<Runnable> queue = new ArrayList<>();
+        private final ArrayList<Runnable> queue = new ArrayList<>();
         private final UpdateQueueData data;
 
         protected UpdateQueue(UpdateQueueData data, int size) {
@@ -159,18 +159,20 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         @Override
         public void commit(int updateId, String parentKey, int levelSize) {
-            throw new UnsupportedOperationException(
-                    "This method can't be used for a Grid. Use TreeGrid instead.");
+            onlySupportedOnTreeGrid();
         }
 
         @Override
         public void set(int start, List<JsonValue> items, String parentKey) {
-            throw new UnsupportedOperationException(
-                    "This method can't be used for a Grid. Use TreeGrid instead.");
+            onlySupportedOnTreeGrid();
         }
 
         @Override
         public void clear(int start, int length, String parentKey) {
+            onlySupportedOnTreeGrid();
+        }
+
+        private void onlySupportedOnTreeGrid() {
             throw new UnsupportedOperationException(
                     "This method can't be used for a Grid. Use TreeGrid instead.");
         }
@@ -300,7 +302,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          * @param columnId
          *            unique identifier of this column
          * @param renderer
-         *            the renderer to use in this column, must not be {@code null}
+         *            the renderer to use in this column, must not be
+         *            {@code null}
          */
         public Column(Grid<T> grid, String columnId, Renderer<T> renderer) {
             super(grid);
@@ -338,11 +341,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         /**
          * Get the renderer used for this column.
          *
-         * Note: Mutating the renderer after the Grid has been rendered
-         * on the client will not change the column, and can lead to
-         * undefined behavior.
+         * Note: Mutating the renderer after the Grid has been rendered on the
+         * client will not change the column, and can lead to undefined
+         * behavior.
          *
-         * @return the renderer used for this column, should never be {@code null}
+         * @return the renderer used for this column, should never be
+         *         {@code null}
          */
         public Renderer<T> getRenderer() {
             return renderer;
@@ -760,7 +764,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     private class DetailsManager extends AbstractGridExtension<T> {
 
-        private final Set<T> detailsVisible = new HashSet<>();
+        private final HashSet<T> detailsVisible = new HashSet<>();
 
         /**
          * Constructs a new details manager for the given grid.
@@ -808,7 +812,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             return itemDetailsDataGenerator != null
                     && detailsVisible.contains(item);
         }
-
 
         @Override
         public void generateData(T item, JsonObject jsonObject) {
@@ -959,8 +962,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @param <B>
      *            the data communicator builder type
      */
-    protected <B extends DataCommunicatorBuilder<T>> Grid(
-            Class<T> beanType,
+    protected <B extends DataCommunicatorBuilder<T>> Grid(Class<T> beanType,
             SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuidler,
             B dataCommunicatorBuilder) {
         this(50, updateQueueBuidler, dataCommunicatorBuilder);
@@ -993,23 +995,21 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            the data communicator builder type
      * 
      */
-    protected <B extends DataCommunicatorBuilder<T>> Grid(
-            int pageSize,
+    protected <B extends DataCommunicatorBuilder<T>> Grid(int pageSize,
             SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuidler,
             B dataCommunicatorBuilder) {
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
-        arrayUpdater = createDefaultArrayUpdater(Optional
-                .ofNullable(updateQueueBuidler)
-                .orElseGet(() -> UpdateQueue::new));
+        arrayUpdater = createDefaultArrayUpdater(
+                Optional.ofNullable(updateQueueBuidler)
+                        .orElseGet(() -> UpdateQueue::new));
         arrayUpdater.setUpdateQueueData(
                 new UpdateQueueData(getElement(), getUniqueKeyProperty()));
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
 
-        dataCommunicator = dataCommunicatorBuilder.build(
-                getElement(), gridDataGenerator, arrayUpdater,
-                this::getUniqueKeyProvider);
+        dataCommunicator = dataCommunicatorBuilder.build(getElement(),
+                gridDataGenerator, arrayUpdater, this::getUniqueKeyProvider);
 
         detailsManager = new DetailsManager(this);
         setPageSize(pageSize);
@@ -1044,7 +1044,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            the grid bean type
      */
     protected static class DataCommunicatorBuilder<T> implements Serializable {
-    
+
         /**
          * Build a new {@link DataCommunicator} object for the given Grid
          * instance.
@@ -1065,10 +1065,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 CompositeDataGenerator<T> dataGenerator,
                 GridArrayUpdater arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-            return new DataCommunicator<>(
-                    dataGenerator, arrayUpdater,
-                    data -> element
-                            .callFunction("$connector.updateData", data),
+            return new DataCommunicator<>(dataGenerator, arrayUpdater,
+                    data -> element.callFunction("$connector.updateData", data),
                     element.getNode());
         }
     }
@@ -1101,7 +1099,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             }
         };
     }
-    
+
     /**
      * Adds a new text column to this {@link Grid} with a value provider. The
      * value is converted to String when sent to the client by using
@@ -1306,8 +1304,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     private Column<T> addColumn(PropertyDefinition<T, ?> property) {
-        Column<T> column = addColumn(item -> formatPropertyValue(property, item))
-                .setHeader(property.getCaption());
+        Column<T> column = addColumn(
+                item -> formatPropertyValue(property, item))
+                        .setHeader(property.getCaption());
         try {
             return column.setKey(property.getName());
         } catch (IllegalArgumentException exception) {
@@ -1317,9 +1316,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
     }
 
-    private Object formatPropertyValue(PropertyDefinition<T, ?> property, T item) {
+    private Object formatPropertyValue(PropertyDefinition<T, ?> property,
+            T item) {
         Object value = property.getGetter().apply(item);
-        if(value == null) {
+        if (value == null) {
             return "";
         } else {
             return String.valueOf(value);
