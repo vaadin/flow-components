@@ -1,0 +1,19 @@
+{
+  "name": "vaadin-app-layout",
+  "homepage": "https://github.com/vaadin/vaadin-app-layout",
+  "authors": [],
+  "description": "",
+  "main": "",
+  "license": "CVAL3",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vaadin-app-layout": "vaadin/vaadin-app-layout#master"
+  }
+}
