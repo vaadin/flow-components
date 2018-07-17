@@ -734,39 +734,5 @@ window.Vaadin.Flow.gridConnector = {
       }
     }
 
-    const contextMenuListener = function(e) {
-      // https://github.com/vaadin/vaadin-grid/issues/1318
-      const path = e.composedPath();
-      const cell = path[path.indexOf(grid.$.table) - 3]; // <td> element in shadow dom
-      var key;
-      if (cell && cell._instance.item) {
-        key = cell._instance.item.key;
-      }
-      grid.$server.updateContextMenuTargetItem(key);
-    }
-
-    grid.addEventListener('vaadin-context-menu-before-open', function(e) {
-      contextMenuListener(grid.$contextMenuConnector.openEvent);
-    });
-
-    document.addEventListener('vaadin-overlay-open', function(e) {
-      if (!grid.$contextMenuConnector) {
-        return;
-      }
-      const overlay = e.target;
-      if (overlay && overlay.tagName === 'VAADIN-CONTEXT-MENU-OVERLAY') {
-        if (!overlay._gridsHandled) {
-          overlay._gridsHandled = [grid];
-        } else if (overlay._gridsHandled.indexOf(grid) < 0) {
-          overlay._gridsHandled.push(grid);
-        } else {
-          return;
-        }
-        overlay.addEventListener('opened-changed', function(e) {
-          grid.$server.updateContextMenuOpened(overlay.opened);
-        });
-        grid.$server.updateContextMenuOpened(true);
-      }
-    });
   }
 }

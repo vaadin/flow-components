@@ -890,9 +890,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private ValueProvider<T, String> uniqueKeyProvider;
 
-    private String contextMenuTargetItemKey;
-    private boolean contextMenuOpened;
-
     /**
      * Creates a new instance, with page size of 50.
      */
@@ -2174,46 +2171,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     public boolean isMultiSort() {
         String multiSort = getElement().getAttribute("multi-sort");
         return multiSort == null ? false : Boolean.valueOf(multiSort);
-    }
-
-    @ClientCallable
-    private void updateContextMenuTargetItem(String key) {
-        contextMenuTargetItemKey = key;
-    }
-
-    @ClientCallable
-    private void updateContextMenuOpened(boolean opened) {
-        contextMenuOpened = opened;
-    }
-
-    /*
-     * This API is implemented like this to avoid having a dependency between
-     * Grid and ContextMenu.
-     */
-    /**
-     * Gets the item corresponding to the row which was targeted by an open
-     * {@code ContextMenu}.
-     * <p>
-     * <strong>Note:</strong> This method can be called only when using a
-     * {@code ContextMenu} component for this {@code Grid} and the context menu
-     * is currently open. Otherwise an exception will be thrown.
-     * 
-     * @return the item targeted by the {@code ContextMenu}, or {@code null} if
-     *         the event opening the {@code ContextMenu} didn't target any item
-     *         (eg. when targeting a header).
-     * @throws IllegalStateException
-     *             if called when the {@code ContextMenu} is not opened
-     */
-    public T getContextMenuTargetItem() {
-        if (!contextMenuOpened) {
-            throw new IllegalStateException(
-                    "Context menu target item is available only when a context menu is open");
-        }
-        if (contextMenuTargetItemKey == null) {
-            return null;
-        } else {
-            return findByKey(contextMenuTargetItemKey);
-        }
     }
 
     private List<Column<T>> fetchChildColumns(ColumnGroup columnGroup) {
