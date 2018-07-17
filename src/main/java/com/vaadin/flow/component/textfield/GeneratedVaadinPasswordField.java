@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2018 Vaadin Ltd.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,12 +16,12 @@
 package com.vaadin.flow.component.textfield;
 
 import javax.annotation.Generated;
+
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * <p>
@@ -81,9 +81,9 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.PasswordFieldElement#2.0.1",
-        "Flow#1.0-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
+        "WebComponent: Vaadin.PasswordFieldElement#2.1.0-alpha3",
+        "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-password-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-password-field.html")
 public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPasswordField<R, T>, T>
@@ -139,7 +139,8 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
     }
 
     /**
-     * Constructor.
+     * Constructs a new GeneratedVaadinPasswordField component with the given
+     * arguments.
      * 
      * @param initialValue
      *            the initial value to set to the value
@@ -163,7 +164,8 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
     }
 
     /**
-     * Constructor.
+     * Constructs a new GeneratedVaadinPasswordField component with the given
+     * arguments.
      * 
      * @param initialValue
      *            the initial value to set to the value
@@ -178,7 +180,8 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
     }
 
     /**
-     * Constructor.
+     * Constructs a new GeneratedVaadinPasswordField component with the given
+     * arguments.
      * 
      * @param initialValue
      *            the initial value to set to the value
