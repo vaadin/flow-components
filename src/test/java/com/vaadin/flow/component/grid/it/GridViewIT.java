@@ -811,7 +811,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
                     .filter(el -> el.getAttribute("id")
                             .equals("person-card-" + (rowIndex + 1)))
                     .findAny().isPresent();
-        });
+        }, 20);
         WebElement element = grid.findElements(By.className("custom-details"))
                 .stream()
                 .filter(el -> el.getAttribute("id")
