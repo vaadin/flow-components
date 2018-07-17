@@ -26,6 +26,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 import static org.junit.Assert.assertFalse;
 
@@ -173,6 +174,47 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         Assert.assertEquals("Item 2", getSelectedItemLabel(combo));
         Assert.assertEquals("Value: Item 2 isFromClient: false",
                 message.getText());
+    }
+
+    @Test
+    public void openNullRepresentationBox() {
+        TestBenchElement comboBox = $(TestBenchElement.class)
+                .id("null-representation-box");
+        TestBenchElement message = $(TestBenchElement.class)
+                .id("null-representation-message");
+        comboBox.$(TestBenchElement.class).id("input").click();
+        waitForElementPresent(By.tagName("vaadin-combo-box-overlay"));
+
+        TestBenchElement item1 = getItemFromBox(1);
+        Assert.assertEquals(
+                "Displayed item should use the null representation.",
+                "Missing Value", item1.getText());
+
+        TestBenchElement item4 = getItemFromBox(4);
+        Assert.assertEquals(
+                "Displayed item should use the null representation.",
+                "Missing Value", item4.getText());
+
+        executeScript("arguments[0].selectedItem = arguments[0].items[1]",
+                comboBox);
+
+        waitUntil(driver -> message.getText().equals("Selected item is null"));
+        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
+                comboBox);
+
+        waitUntil(driver -> message.getText()
+                .equals("Selected artist: Haircuts for Men"));
+        executeScript("arguments[0].selectedItem = arguments[0].items[4]",
+                comboBox);
+
+        waitUntil(driver -> message.getText().equals("Selected item is null"));
+    }
+
+    private TestBenchElement getItemFromBox(int index) {
+        return $(TestBenchElement.class).id("overlay")
+                .$(TestBenchElement.class).id("content")
+                .$(TestBenchElement.class).id("selector")
+                .$("vaadin-combo-box-item").get(index);
     }
 
     private List<?> getItems(WebElement combo) {

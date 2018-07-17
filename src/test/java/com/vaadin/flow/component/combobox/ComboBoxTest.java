@@ -247,6 +247,18 @@ public class ComboBoxTest {
         Assert.assertFalse(comboBox.isAllowCustomValue());
     }
 
+    @Test
+    public void nullRepresentation() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assert.assertEquals(
+                "By default, null representation string should be empty", "",
+                comboBox.getNullRepresentation());
+        comboBox.setNullRepresentation("Missing Value");
+        Assert.assertEquals(
+                "The null representation string should be \"Missing Value\"",
+                "Missing Value", comboBox.getNullRepresentation());
+    }
+
     private void assertItem(TestComboBox comboBox, int index, String caption) {
         String value1 = comboBox.items.get(index);
         Assert.assertEquals(caption, value1);

@@ -15,11 +15,14 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.demo.ComboBoxView.Song;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -54,6 +57,7 @@ public class ComboBoxPage extends Div {
         createWithUpdatableValue();
         createWithPresetValue();
         createWithButtonRenderer();
+        createComboBoxWithMultiNullItems();
     }
 
     private void createExternalSetValue() {
@@ -167,6 +171,32 @@ public class ComboBoxPage extends Div {
         add(combo, message, button);
     }
 
+    private void createComboBoxWithMultiNullItems() {
+        ComboBox<Song> comboBox = new ComboBox<>();
+        List<Song> listOfSongs = createListOfSongsWithMultiNull();
+        Div message = new Div();
+        message.setId("null-representation-message");
+        comboBox.setItems(listOfSongs);
+        comboBox.setNullRepresentation("Missing Value");
+        comboBox.setItemLabelGenerator(item -> item.getName());
+        comboBox.setValue(listOfSongs.get(0));
+        comboBox.addValueChangeListener(event -> {
+            if (event.getSource().isEmpty()) {
+                message.setText("Selected item is null");
+            } else if (event.getOldValue() == null) {
+                message.setText(
+                        "Selected artist: " + event.getValue().getArtist());
+            } else {
+                message.setText(
+                        "Selected artist: " + event.getValue().getArtist()
+                                + "\nThe old selection was: "
+                                + event.getOldValue().getArtist());
+            }
+        });
+        comboBox.setId("null-representation-box");
+        add(comboBox, message);
+    }
+
     private void handleSelection(ComboBox<Title> titles) {
         selectedTitle.setText(Optional.ofNullable(titles.getValue())
                 .map(Enum::name).orElse(""));
@@ -178,5 +208,17 @@ public class ComboBoxPage extends Div {
         div.getStyle().set("padding", "10px").set("borderBottom",
                 "1px solid lightgray");
         super.add(div);
+    }
+
+    private List<Song> createListOfSongsWithMultiNull() {
+        List<Song> listOfSongs = new ArrayList<>();
+        listOfSongs.add(new Song("A V Club Disagrees", "Haircuts for Men",
+                "Physical Fitness"));
+        listOfSongs.add(null);
+        listOfSongs.add(new Song("Sculpted", "Haywyre", "Two Fold Pt.1"));
+        listOfSongs.add(
+                new Song("Voices of a Distant Star", "Killigrew", "Animus II"));
+        listOfSongs.add(null);
+        return listOfSongs;
     }
 }

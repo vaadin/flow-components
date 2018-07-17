@@ -99,6 +99,7 @@ public class ComboBoxView extends DemoView {
         createDisabledComboBox();
         createObjectComboBox();
         createComboBoxWithObjectStringSimpleValue();
+        createComboBoxWithNullRepresentation();
         createComboBoxUsingTemplateRenderer();
         createComboBoxUsingComponentRenderer();
     }
@@ -136,7 +137,7 @@ public class ComboBoxView extends DemoView {
         comboBox.setItemLabelGenerator(Song::getName);
 
         List<Song> listOfSongs = createListOfSongs();
-
+        
         comboBox.setItems(listOfSongs);
         comboBox.addValueChangeListener(event -> {
             Song song = comboBox.getValue();
@@ -206,6 +207,37 @@ public class ComboBoxView extends DemoView {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("disabled-combo-box");
         addCard("Disabled ComboBox", comboBox, message);
+    }
+
+    private void createComboBoxWithNullRepresentation() {       
+        Div message = createMessageDiv("null-representation-message");
+        // begin-source-example
+        // source-example-heading: ComboBox with null representation
+        ComboBox<Song> comboBox = new ComboBox<>();
+        List<Song> listOfSongs = createListOfSongs();
+        listOfSongs.add(null);
+
+        comboBox.setItems(listOfSongs);
+        comboBox.setNullRepresentation("Missing Value");
+        comboBox.setItemLabelGenerator(item -> item.getName());
+        comboBox.setValue(listOfSongs.get(0));
+        comboBox.addValueChangeListener(event -> {
+            if (event.getSource().isEmpty()) {
+                message.setText("Selected item is null");
+            } else if (event.getOldValue() == null) {
+                message.setText(
+                        "Selected artist: " + event.getValue().getArtist());
+            } else {
+                message.setText(
+                        "Selected artist: " + event.getValue().getArtist()
+                                + "\nThe old selection was: "
+                                + event.getOldValue().getArtist());
+            }
+        });
+        // end-source-example
+        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
+        comboBox.setId("null-representation-box");
+        addCard("ComboBox with null representation", comboBox, message);
     }
 
     private void createComboBoxUsingTemplateRenderer() {
