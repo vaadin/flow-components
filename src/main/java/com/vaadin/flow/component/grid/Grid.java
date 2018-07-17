@@ -109,9 +109,9 @@ import elemental.json.JsonValue;
 @HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
 @HtmlImport("frontend://flow-component-renderer.html")
 @JavaScript("frontend://gridConnector.js")
-public class Grid<T> extends Component
-        implements HasDataProvider<T>, HasStyle, HasSize, Focusable<Grid<T>>,
-        SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme {
+public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
+        HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
+        HasTheme, HasDataGenerators<T> {
 
     protected static class UpdateQueue implements TreeUpdate {
         private final ArrayList<Runnable> queue = new ArrayList<>();
@@ -313,8 +313,6 @@ public class Grid<T> extends Component
 
             comparator = (a, b) -> 0;
 
-            HasDataGenerators<T> gridDataGenerator = grid.getDataGenerator();
-
             Rendering<T> rendering = renderer.render(getElement(),
                     (KeyMapper<T>) getGrid().getDataCommunicator()
                             .getKeyMapper());
@@ -322,7 +320,7 @@ public class Grid<T> extends Component
                     .getDataGenerator();
 
             if (dataGenerator.isPresent()) {
-                columnDataGeneratorRegistration = gridDataGenerator
+                columnDataGeneratorRegistration = grid
                         .addDataGenerator(dataGenerator.get());
             }
         }
@@ -736,14 +734,14 @@ public class Grid<T> extends Component
          */
         protected void extend(Grid<T> grid) {
             this.grid = grid;
-            getGrid().getDataGenerator().addDataGenerator(this);
+            getGrid().addDataGenerator(this);
         }
 
         /**
          * Remove this extension from its target.
          */
         protected void remove() {
-            getGrid().getDataGenerator().removeDataGenerator(this);
+            getGrid().removeDataGenerator(this);
         }
 
         /**
@@ -2252,13 +2250,6 @@ public class Grid<T> extends Component
         setSortOrder(sortOrderBuilder.build(), true);
     }
 
-    /*
-     * This method is not private because AbstractColumn uses it.
-     */
-    CompositeDataGenerator<T> getDataGenerator() {
-        return gridDataGenerator;
-    }
-
     private void setSortOrder(List<GridSortOrder<T>> order,
             boolean userOriginated) {
         Objects.requireNonNull(order, "Sort order list cannot be null");
@@ -2352,6 +2343,46 @@ public class Grid<T> extends Component
          * is passed as a property to the client via DataGenerators.
          */
         getDataCommunicator().reset();
+    }
+
+    /**
+     * Adds a ValueProvider to this Grid that is not tied to a Column. This is
+     * specially useful when the columns are defined via a template file instead
+     * of the Java API.
+     * <p>
+     * The properties added to by this method are global to the Grid - they can
+     * be used in any column.
+     * <p>
+     * ValueProviders are registered as {@link DataGenerator}s in the Grid. See
+     * {@link #addDataGenerator(DataGenerator)}.
+     * 
+     * @param property
+     *            the property name used in the template. For example, in a
+     *            template the uses {@code [[item.name]]}, the property is
+     *            {@code name}. Not <code>null</code>
+     * @param valueProvider
+     *            the provider for values for the property, not
+     *            <code>null</code>
+     * @return a registration that can be used to remove the ValueProvider from
+     *         the Grid
+     */
+    public Registration addValueProvider(String property,
+            ValueProvider<T, ?> valueProvider) {
+        Objects.requireNonNull(property);
+        Objects.requireNonNull(valueProvider);
+
+        return addDataGenerator((item, data) -> data.put(property,
+                JsonSerializer.toJson(valueProvider.apply(item))));
+    }
+
+    @Override
+    public Registration addDataGenerator(DataGenerator<T> dataGenerator) {
+        return gridDataGenerator.addDataGenerator(dataGenerator);
+    }
+
+    @Override
+    public void removeDataGenerator(DataGenerator<T> dataGenerator) {
+        gridDataGenerator.removeDataGenerator(dataGenerator);
     }
 
     protected static int compareMaybeComparables(Object a, Object b) {
