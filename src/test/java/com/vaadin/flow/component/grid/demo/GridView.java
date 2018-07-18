@@ -47,6 +47,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridSelectionModel;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
 import com.vaadin.flow.component.grid.HierarchicalTestBean;
@@ -369,9 +370,29 @@ public class GridView extends DemoView {
         createDisabledGrid();
         createBasicTreeGridUsage();
         createLazyLoadingTreeGridUsage();
+        addVariantFeature();
 
         addCard("Grid example model",
                 new Label("These objects are used in the examples above"));
+    }
+
+    private void addVariantFeature() {
+        // begin-source-example
+        // source-example-heading: Theme variants usage
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(createItems(50));
+        grid.addColumn(Person::getName).setHeader("NAME");
+        grid.addColumn(Person::getAge).setHeader("AGE");
+        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER,
+                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
+        // end-source-example
+
+        addVariantsDemo(() -> {
+            return grid;
+        }, Grid::addThemeVariants,
+                Grid::removeThemeVariants, GridVariant::getVariantName,
+                GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS,
+                GridVariant.LUMO_ROW_STRIPES);
     }
 
     private void createBasicUsage() {
