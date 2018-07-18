@@ -137,6 +137,11 @@ public class ButtonIT extends ComponentDemoTest {
                 .equals("Button " + messageString + " was clicked."));
     }
 
+    @Test
+    public void assertVariants() {
+        verifyThemeVariantsBeingToggled();
+    }
+
     private int getCenterX(WebElement element) {
         return element.getLocation().getX() + element.getSize().getWidth() / 2;
     }

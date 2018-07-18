@@ -18,6 +18,8 @@ package com.vaadin.flow.component.button.demo;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.button.GeneratedVaadinButton;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -40,6 +42,7 @@ public class ButtonView extends DemoView {
         createImageButtonWithAccessibleLabel();
         createButtonsWithTabIndex();
         createDisabledButton();
+        addVariantsFeature();
 
         message = new Div();
         message.setId("buttonMessage");
@@ -141,6 +144,20 @@ public class ButtonView extends DemoView {
                 + evt.getSource().getText()
                 + " was clicked, but the button is disabled and this shouldn't happen!"));
         button.setId("disabled-button");
+    }
+
+    private void addVariantsFeature() {
+        // begin-source-example
+        // source-example-heading: Theme variants usage
+        Button button = new Button();
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        // end-source-example
+
+        addVariantsDemo(Button::new,
+                GeneratedVaadinButton::addThemeVariants,
+                GeneratedVaadinButton::removeThemeVariants,
+                ButtonVariant::getVariantName, ButtonVariant.LUMO_SMALL,
+                ButtonVariant.LUMO_PRIMARY);
     }
 
     private void showButtonClickedMessage(ClickEvent<Button> evt) {
