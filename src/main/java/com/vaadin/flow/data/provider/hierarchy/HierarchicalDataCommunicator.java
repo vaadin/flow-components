@@ -26,12 +26,12 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
+import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.data.provider.CommunicationController;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.GridArrayUpdater;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.function.SerializableComparator;
