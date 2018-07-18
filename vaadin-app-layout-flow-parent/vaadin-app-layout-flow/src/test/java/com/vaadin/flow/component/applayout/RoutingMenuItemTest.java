@@ -16,11 +16,11 @@ import static org.mockito.Mockito.times;
 @PrepareForTest(UI.class)
 public class RoutingMenuItemTest {
 
-    private RoutingMenuItem sut;
+    private RoutingMenuItem systemUnderTest;
 
     @Before
     public void setUp() {
-        sut = new RoutingMenuItem("Home", "");
+        systemUnderTest = new RoutingMenuItem("Home", "");
     }
 
     @Test
@@ -30,13 +30,13 @@ public class RoutingMenuItemTest {
         UI ui = Mockito.mock(UI.class);
         BDDMockito.given(UI.getCurrent()).willReturn(ui);
 
-        click(sut);
+        click(systemUnderTest);
 
         // Verify that clicking causes a UI navigation to home.
         Mockito.verify(ui, times(1)).navigate("");
 
-        sut.setRoute("Admin");
-        click(sut);
+        systemUnderTest.setRoute("Admin");
+        click(systemUnderTest);
 
         // Verify that clicking causes a UI navigation to the updated route.
         Mockito.verify(ui, times(1)).navigate("Admin");
@@ -44,7 +44,7 @@ public class RoutingMenuItemTest {
 
     @Test(expected = NullPointerException.class)
     public void setRoute_null() {
-        sut.setRoute(null);
+        systemUnderTest.setRoute(null);
     }
 
     private void click(MenuItem menuItem) {

@@ -25,10 +25,8 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.dom.Element;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Tag("vaadin-app-layout")
 @HtmlImport("frontend://bower_components/vaadin-app-layout/src/vaadin-app-layout.html")
@@ -75,7 +73,7 @@ public class AppLayout extends Component {
     }
 
     public void setBranding(Element branding) {
-        Objects.requireNonNull(branding);
+        Objects.requireNonNull(branding, "Branding cannot be null");
 
         removeBranding();
 
@@ -115,7 +113,7 @@ public class AppLayout extends Component {
     /**
      * Gets the first {@link RoutingMenuItem} targeting a route.
      */
-    public Optional<MenuItem> getMenuItemTargetingRoute(String route) {
+    Optional<MenuItem> getMenuItemTargetingRoute(String route) {
         return menuTabs.getChildren()
                 .map(e -> (MenuItem) e)
                 .filter(e -> e instanceof RoutingMenuItem)
@@ -147,7 +145,7 @@ public class AppLayout extends Component {
      * @param content
      */
     public void setContent(Element content) {
-        Objects.requireNonNull(content);
+        Objects.requireNonNull(content, "Content cannot be null");
 
         removeContent();
 
@@ -160,14 +158,9 @@ public class AppLayout extends Component {
      * Removes the displayed content.
      */
     public void removeContent() {
-        List<Element> children = getElement().getChildren().collect(Collectors.toList());
-        if (this.content == null || !children.contains(content)) {
-            return;
+        if (this.content != null) {
+            this.content.removeFromParent();
         }
-
-        getElement().removeChild(this.content);
-
-        this.content = null;
     }
 
     @VisibleForTesting

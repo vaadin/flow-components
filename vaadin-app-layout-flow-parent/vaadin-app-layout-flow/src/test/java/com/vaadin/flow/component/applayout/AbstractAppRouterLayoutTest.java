@@ -44,11 +44,11 @@ public class AbstractAppRouterLayoutTest {
 
     private final List<String> events = new ArrayList<>();
 
-    private AbstractAppRouterLayout sut;
+    private AbstractAppRouterLayout systemUnderTest;
 
     @Before
     public void setup() {
-        sut = new TestAppRouterLayout();
+        systemUnderTest = new TestAppRouterLayout();
     }
 
     @Test
@@ -64,26 +64,30 @@ public class AbstractAppRouterLayoutTest {
         setupFlowRouting();
 
         RoutingMenuItem route1MenuItem = new RoutingMenuItem("Route 1", "route1");
-        sut.getAppLayout().addMenuItem(route1MenuItem);
-        sut.getAppLayout().addMenuItem(new RoutingMenuItem("Dummy", "dummy"));
+        systemUnderTest.getAppLayout().addMenuItem(route1MenuItem);
+        systemUnderTest.getAppLayout().addMenuItem(
+                new RoutingMenuItem("Dummy", "dummy"));
 
         Route1 route1 = new Route1();
 
         // Simulate navigation to Route1 (which has a matching menu item)
-        sut.showRouterLayoutContent(route1);
+        systemUnderTest.showRouterLayoutContent(route1);
 
         // Ensure onNavigate() hook gets called
         Assert.assertEquals("Navigated to route1", events.get(events.size() - 1));
 
         // Ensure the matching menu item is selected
-        Assert.assertEquals(route1MenuItem, sut.getAppLayout().getSelectedMenuItem());
-        Assert.assertEquals(route1.getElement(), sut.getAppLayout().getContent());
+        Assert.assertEquals(route1MenuItem,
+                systemUnderTest.getAppLayout().getSelectedMenuItem());
+        Assert.assertEquals(route1.getElement(),
+                systemUnderTest.getAppLayout().getContent());
 
         // Simulate navigation to Route2 (which has no matching menu item)
-        sut.showRouterLayoutContent(new Route2());
+        systemUnderTest.showRouterLayoutContent(new Route2());
 
         // Ensure selected menu item remains unchanged
-        Assert.assertEquals(route1MenuItem, sut.getAppLayout().getSelectedMenuItem());
+        Assert.assertEquals(route1MenuItem,
+                systemUnderTest.getAppLayout().getSelectedMenuItem());
     }
 
     private void setupFlowRouting() {

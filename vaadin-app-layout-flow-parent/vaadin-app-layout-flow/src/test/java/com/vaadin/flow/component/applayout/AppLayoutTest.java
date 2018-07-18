@@ -15,43 +15,43 @@ import java.util.stream.Stream;
 
 public class AppLayoutTest {
 
-    private AppLayout sut;
+    private AppLayout systemUnderTest;
 
     @Before
     public void setUp() {
-        sut = new AppLayout();
+        systemUnderTest = new AppLayout();
     }
 
     @Test
     public void onAttach_noMenuItem() {
-        sut.onAttach(new AttachEvent(sut, true));
+        systemUnderTest.onAttach(new AttachEvent(systemUnderTest, true));
 
-        long menuCount = sut.getChildren()
+        long menuCount = systemUnderTest.getChildren()
                 .map(Component::getElement)
                 .filter(e -> e.getAttribute("slot").equals("menu"))
                 .count();
 
         Assert.assertEquals(1, menuCount);
-        Assert.assertNull(sut.getSelectedMenuItem());
+        Assert.assertNull(systemUnderTest.getSelectedMenuItem());
     }
 
     @Test
     public void onAttach_withMenuItems() {
-        sut.addMenuItem(new ActionMenuItem("Go offline"));
-        sut.addMenuItem(new RoutingMenuItem("Logout", "Logout"));
-        sut.onAttach(new AttachEvent(sut, true));
+        systemUnderTest.addMenuItem(new ActionMenuItem("Go offline"));
+        systemUnderTest.addMenuItem(new RoutingMenuItem("Logout", "Logout"));
+        systemUnderTest.onAttach(new AttachEvent(systemUnderTest, true));
 
         // A menu item is selected by default.
-        Assert.assertNotNull(sut.getSelectedMenuItem());
+        Assert.assertNotNull(systemUnderTest.getSelectedMenuItem());
     }
 
     @Test
     public void setBranding() {
         Element branding = new H2("Vaadin").getElement();
-        sut.setBranding(branding);
+        systemUnderTest.setBranding(branding);
 
         // Verify that branding goes to the branding slot.
-        long brandingCount = sut.getElement().getChildren()
+        long brandingCount = systemUnderTest.getElement().getChildren()
                 .filter(e -> e.getAttribute("slot").equals("branding"))
                 .count();
         Assert.assertEquals(1, brandingCount);
@@ -60,11 +60,11 @@ public class AppLayoutTest {
     @Test
     public void removeBranding() {
         Element branding = new H2("Vaadin").getElement();
-        sut.setBranding(branding);
+        systemUnderTest.setBranding(branding);
 
-        sut.removeBranding();
+        systemUnderTest.removeBranding();
 
-        Assert.assertTrue(sut.getElement().getChildren()
+        Assert.assertTrue(systemUnderTest.getElement().getChildren()
                 .noneMatch(e -> e.getAttribute("slot").equals("branding")));
     }
 
@@ -72,14 +72,14 @@ public class AppLayoutTest {
     public void setMenuItems() {
         Assert.assertEquals(0, getMenu().getChildCount());
 
-        sut.addMenuItem(new RoutingMenuItem("Home", ""));
+        systemUnderTest.addMenuItem(new RoutingMenuItem("Home", ""));
 
         MenuItem[] newMenuItems = Stream
                 .generate(() -> new RoutingMenuItem("Route", "route"))
                 .limit(3)
                 .toArray(MenuItem[]::new);
 
-        sut.setMenuItems(newMenuItems);
+        systemUnderTest.setMenuItems(newMenuItems);
 
         Assert.assertEquals(newMenuItems.length, getMenu().getChildCount());
     }
@@ -88,12 +88,12 @@ public class AppLayoutTest {
     public void addMenuItem() {
         Assert.assertEquals(0, getMenu().getChildCount());
 
-        sut.addMenuItem(new RoutingMenuItem("Home", ""));
+        systemUnderTest.addMenuItem(new RoutingMenuItem("Home", ""));
         Assert.assertEquals(1, getMenu().getChildCount());
     }
 
     private Element getMenu() {
-        return sut.getChildren()
+        return systemUnderTest.getChildren()
                 .map(Component::getElement)
                 .filter(e -> e.getAttribute("slot").equals("menu"))
                 .findFirst()
@@ -103,99 +103,106 @@ public class AppLayoutTest {
     @Test
     public void removeMenuItem() {
         RoutingMenuItem home = new RoutingMenuItem("Home", "");
-        sut.addMenuItem(home);
+        systemUnderTest.addMenuItem(home);
 
-        sut.removeMenuItem(home);
+        systemUnderTest.removeMenuItem(home);
         Assert.assertEquals(0, getMenu().getChildCount());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void removeMenuItem_invalidItem() {
         RoutingMenuItem home = new RoutingMenuItem("Home", "");
-        sut.addMenuItem(home);
+        systemUnderTest.addMenuItem(home);
 
-        sut.removeMenuItem(new RoutingMenuItem("Profile", "profile"));
+        systemUnderTest.removeMenuItem(new RoutingMenuItem("Profile", "profile"));
     }
 
     @Test
     public void getMenuItemTargetingRoute() {
         RoutingMenuItem home = new RoutingMenuItem("Home", "");
-        sut.addMenuItem(home);
+        systemUnderTest.addMenuItem(home);
 
         RoutingMenuItem profile = new RoutingMenuItem("Profile", "profile");
-        sut.addMenuItem(profile);
+        systemUnderTest.addMenuItem(profile);
 
         RoutingMenuItem settings = new RoutingMenuItem("Settings", "settings");
-        sut.addMenuItem(settings);
+        systemUnderTest.addMenuItem(settings);
 
-        Assert.assertEquals(profile, sut.getMenuItemTargetingRoute("profile").get());
+        Assert.assertEquals(profile,
+                systemUnderTest.getMenuItemTargetingRoute("profile").get());
     }
 
     @Test
     public void getMenuItemTargetingRoute_none() {
         RoutingMenuItem home = new RoutingMenuItem("Home", "");
-        sut.addMenuItem(home);
+        systemUnderTest.addMenuItem(home);
 
         RoutingMenuItem profile = new RoutingMenuItem("Profile", "profile");
-        sut.addMenuItem(profile);
+        systemUnderTest.addMenuItem(profile);
 
-        Assert.assertFalse(sut.getMenuItemTargetingRoute("dashboard").isPresent());
+        Assert.assertFalse(
+                systemUnderTest.getMenuItemTargetingRoute("dashboard").isPresent());
     }
 
     @Test
     public void getMenuItemTargetingRoute_duplicate() {
         RoutingMenuItem profile = new RoutingMenuItem("Profile", "profile");
-        sut.addMenuItem(profile);
+        systemUnderTest.addMenuItem(profile);
 
         RoutingMenuItem settings = new RoutingMenuItem("Settings", "profile");
-        sut.addMenuItem(settings);
+        systemUnderTest.addMenuItem(settings);
 
-        Assert.assertEquals(profile, sut.getMenuItemTargetingRoute("profile").get());
+        Assert.assertEquals(profile,
+                systemUnderTest.getMenuItemTargetingRoute("profile").get());
     }
 
     @Test
     public void selectMenuItem() {
         RoutingMenuItem home = new RoutingMenuItem("Home", "");
-        sut.addMenuItem(home);
+        systemUnderTest.addMenuItem(home);
 
         RoutingMenuItem profile = new RoutingMenuItem("Profile", "profile");
-        sut.addMenuItem(profile);
+        systemUnderTest.addMenuItem(profile);
 
         ActionMenuItem logout = new ActionMenuItem("Logout");
-        sut.addMenuItem(logout);
+        systemUnderTest.addMenuItem(logout);
 
-        sut.onAttach(new AttachEvent(sut, false));
+        systemUnderTest.onAttach(new AttachEvent(systemUnderTest, false));
 
-        Assert.assertFalse(sut.getMenu().getElement().hasProperty("selected"));
+        Assert.assertFalse(
+                systemUnderTest.getMenu().getElement().hasProperty("selected"));
 
-        sut.selectMenuItem(profile);
+        systemUnderTest.selectMenuItem(profile);
 
         // Behavior of an ActionMenuItem selection cannot be unit-tested
         // because Tabs for Flow doesn't trigger the selection server-side.
-        Assert.assertEquals("1", sut.getMenu().getElement().getProperty("selected"));
+        Assert.assertEquals("1",
+                systemUnderTest.getMenu().getElement().getProperty("selected"));
     }
 
     @Test
     public void setContent() {
         Element content = new Div().getElement();
-        sut.setContent(content);
+        systemUnderTest.setContent(content);
 
         Assert.assertEquals("content", content.getAttribute("role"));
 
-        List<Element> children = sut.getElement().getChildren().collect(Collectors.toList());
+        List<Element> children = systemUnderTest.getElement().getChildren()
+                .collect(Collectors.toList());
         Assert.assertTrue(children.contains(content));
     }
 
     @Test
     public void removeContent() {
-        sut.removeContent(); // No NPE.
+        systemUnderTest.removeContent(); // No NPE.
 
         Element content = new Div().getElement();
-        sut.setContent(content);
+        systemUnderTest.setContent(content);
 
-        sut.removeContent();
+        systemUnderTest.removeContent();
 
-        List<Element> children = sut.getElement().getChildren().collect(Collectors.toList());
+        List<Element> children = systemUnderTest.getElement().getChildren()
+                .collect(Collectors.toList());
         Assert.assertFalse(children.contains(content));
     }
 }

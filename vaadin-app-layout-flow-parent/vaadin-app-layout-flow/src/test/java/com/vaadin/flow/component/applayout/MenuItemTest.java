@@ -14,20 +14,21 @@ import java.util.stream.Collectors;
 
 public class MenuItemTest {
 
-    private MenuItem sut;
+    private MenuItem systemUnderTest;
 
     @Before
     public void setUp() {
-        sut = new RoutingMenuItem("Home", "");
+        systemUnderTest = new RoutingMenuItem("Home", "");
     }
 
     @Test
     public void setIcon() {
         Icon icon = new Icon();
-        sut.setIcon(icon);
+        systemUnderTest.setIcon(icon);
         Assert.assertEquals("icon", icon.getElement().getAttribute("role"));
 
-        List<Component> children = sut.getChildren().collect(Collectors.toList());
+        List<Component> children = systemUnderTest.getChildren()
+                .collect(Collectors.toList());
 
         Assert.assertEquals(2, children.size());
         Assert.assertTrue(children.get(0) instanceof Icon);
@@ -36,10 +37,11 @@ public class MenuItemTest {
 
     @Test
     public void setIcon_null() {
-        sut.setIcon(new Icon());
-        sut.setIcon(null);
+        systemUnderTest.setIcon(new Icon());
+        systemUnderTest.setIcon(null);
 
-        List<Component> children = sut.getChildren().collect(Collectors.toList());
+        List<Component> children = systemUnderTest.getChildren()
+                .collect(Collectors.toList());
 
         Assert.assertEquals(1, children.size());
         Assert.assertEquals("Home", ((Span) children.get(0)).getText());
@@ -47,11 +49,13 @@ public class MenuItemTest {
 
     @Test
     public void setTitle() {
-        sut.setTitle("Logout");
+        systemUnderTest.setTitle("Logout");
 
-        Assert.assertEquals("Logout", sut.getElement().getAttribute("title"));
+        Assert.assertEquals("Logout",
+                systemUnderTest.getElement().getAttribute("title"));
 
-        List<Component> children = sut.getChildren().collect(Collectors.toList());
+        List<Component> children = systemUnderTest.getChildren()
+                .collect(Collectors.toList());
 
         Assert.assertEquals(1, children.size());
         Assert.assertEquals("Logout", ((Span) children.get(0)).getText());
@@ -59,30 +63,32 @@ public class MenuItemTest {
 
     @Test(expected = NullPointerException.class)
     public void setTitle_null() {
-        sut.setTitle(null);
+        systemUnderTest.setTitle(null);
     }
 
     @Test
     public void setListener() {
-        ComponentEventListener<MenuItemClickEvent> defaultListener = sut.getListener();
+        ComponentEventListener<MenuItemClickEvent> defaultListener
+                = systemUnderTest.getListener();
         List<String> actionResults = new ArrayList<>();
-        sut.setListener(e -> actionResults.add("Executed"));
+        systemUnderTest.setListener(e -> actionResults.add("Executed"));
 
-        Assert.assertNotEquals(defaultListener, sut.getListener());
+        Assert.assertNotEquals(defaultListener, systemUnderTest.getListener());
 
-        click(sut);
+        click(systemUnderTest);
         Assert.assertEquals(1, actionResults.size());
         Assert.assertEquals("Executed", actionResults.get(0));
     }
 
     @Test
     public void setListener_null() {
-        ComponentEventListener<MenuItemClickEvent> defaultListener = sut.getListener();
-        sut.setListener(null);
-        Assert.assertNotEquals(defaultListener, sut.getListener());
+        ComponentEventListener<MenuItemClickEvent> defaultListener
+                = systemUnderTest.getListener();
+        systemUnderTest.setListener(null);
+        Assert.assertNotEquals(defaultListener, systemUnderTest.getListener());
 
         // No NullPointerException
-        click(sut);
+        click(systemUnderTest);
     }
 
     private void click(MenuItem menuItem) {

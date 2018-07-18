@@ -53,7 +53,7 @@ public class RoutingMenuItem extends MenuItem {
      * @param route
      */
     public void setRoute(String route) {
-        Objects.requireNonNull(route);
+        Objects.requireNonNull(route, "Route required");
         this.route = route;
     }
 }

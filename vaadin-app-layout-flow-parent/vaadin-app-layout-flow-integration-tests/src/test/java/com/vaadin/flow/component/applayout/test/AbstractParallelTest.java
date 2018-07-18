@@ -67,7 +67,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     @BrowserConfiguration
     public List<DesiredCapabilities> getBrowserConfiguration() {
-        return Arrays.asList(BrowserUtil.chrome());
+        return Arrays.asList(BrowserUtil.ie11(), BrowserUtil.firefox(),
+                BrowserUtil.chrome(), BrowserUtil.edge(), BrowserUtil.safari());
     }
 
 }
