@@ -39,11 +39,15 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
         Assert.assertTrue(
                 "By default layout should contain spacing theme in 'theme' attribute",
                 hLayout.getAttribute("theme").contains("spacing"));
+        Assert.assertTrue(
+                "By default layout should contain margin theme in 'theme' attribute",
+                hLayout.getAttribute("theme").contains("margin"));
 
         checkThemeChanges(hLayout, "spacing", false);
+        checkThemeChanges(hLayout, "margin", false);
 
         Assert.assertNull(
-                "After turning off spacing, layout should not contain 'theme' attribute",
+                "After turning off spacing and margin, layout should not contain 'theme' attribute",
                 hLayout.getAttribute("theme"));
 
         checkThemeChanges(hLayout, "padding", true);

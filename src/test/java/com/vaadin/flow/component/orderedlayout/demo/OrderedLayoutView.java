@@ -59,7 +59,6 @@ public class OrderedLayoutView extends AbstractLayout {
     private void createDefaultHorizontalLayout() {
         // begin-source-example
         // source-example-heading: Default horizontal layout
-        // by default, spacing is on
         HorizontalLayout layout = new HorizontalLayout();
         layout.getStyle().set("border", "1px solid #9E9E9E");
 
@@ -68,6 +67,12 @@ public class OrderedLayoutView extends AbstractLayout {
         Component component3 = createComponent(3, "#37474F");
 
         layout.add(component1, component2, component3);
+
+        // shorthand methods for changing the component theme variants
+        layout.setPadding(false);
+        layout.setMargin(true);
+        // just a demonstration of the API, by default the spacing is on
+        layout.setSpacing(true);
         // end-source-example
 
         layout.setId("default-layout");
@@ -289,6 +294,12 @@ public class OrderedLayoutView extends AbstractLayout {
         Component component3 = createComponent(3, "#37474F");
 
         layout.add(component1, component2, component3);
+
+        // shorthand methods for changing the component theme variants
+        layout.setPadding(false);
+        layout.setMargin(true);
+        // just a demonstration of the API, by default the spacing is on
+        layout.setSpacing(true);
         // end-source-example
 
         layout.setId("default-layout");

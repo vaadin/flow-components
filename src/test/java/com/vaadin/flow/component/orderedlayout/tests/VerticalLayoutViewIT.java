@@ -38,12 +38,14 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         assertBasicFlexPropertiesAreSet(vLayout);
 
         Assert.assertTrue(
-                "By default layout should contain both spacing and padding themes in 'theme' attribute",
-                vLayout.getAttribute("theme").contains("spacing")
-                        && vLayout.getAttribute("theme").contains("padding"));
+                "By default layout should contain spacing theme in 'theme' attribute",
+                vLayout.getAttribute("theme").contains("spacing"));
+        Assert.assertTrue(
+                "By default layout should contain margin theme in 'theme' attribute",
+                vLayout.getAttribute("theme").contains("margin"));
 
-        checkThemeChanges(vLayout, "padding", false);
         checkThemeChanges(vLayout, "spacing", false);
+        checkThemeChanges(vLayout, "margin", false);
 
         Assert.assertNull(
                 "After turning off spacing and padding, layout should not contain 'theme' attribute",
