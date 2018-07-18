@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.applayout;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
@@ -33,19 +32,17 @@ public class AbstractAppRouterLayoutTest {
 
         @Override
         protected void onNavigate(String route, HasElement content) {
-            events.add("Navigate to " + route);
+            events.add("Navigated to " + route);
         }
     }
 
     @Route("route1")
-    public class Route1 extends Div {
-    }
+    private static class Route1 extends Div { }
 
     @Route("route2")
-    public class Route2 extends Div {
-    }
+    private static class Route2 extends Div { }
 
-    private List<String> events = new ArrayList<>();
+    private final List<String> events = new ArrayList<>();
 
     private AbstractAppRouterLayout sut;
 
@@ -58,7 +55,7 @@ public class AbstractAppRouterLayoutTest {
     public void init() {
         Assert.assertEquals(1, events.size());
 
-        // Ensure configure() called
+        // Ensure configure() hook gets called
         Assert.assertEquals("Configured", events.get(0));
     }
 
@@ -71,32 +68,39 @@ public class AbstractAppRouterLayoutTest {
         sut.getAppLayout().addMenuItem(new RoutingMenuItem("Dummy", "dummy"));
 
         Route1 route1 = new Route1();
+
+        // Simulate navigation to Route1 (which has a matching menu item)
         sut.showRouterLayoutContent(route1);
 
-        // Ensure onNavigate() called
-        Assert.assertEquals("Navigate to route1", events.get(events.size() - 1));
+        // Ensure onNavigate() hook gets called
+        Assert.assertEquals("Navigated to route1", events.get(events.size() - 1));
 
-        // Ensure matching menu item is selected if present
+        // Ensure the matching menu item is selected
         Assert.assertEquals(route1MenuItem, sut.getAppLayout().getSelectedMenuItem());
         Assert.assertEquals(route1.getElement(), sut.getAppLayout().getContent());
 
+        // Simulate navigation to Route2 (which has no matching menu item)
         sut.showRouterLayoutContent(new Route2());
 
-        // Ensure selected menu item remains unchanged if route does not match
+        // Ensure selected menu item remains unchanged
         Assert.assertEquals(route1MenuItem, sut.getAppLayout().getSelectedMenuItem());
     }
 
     private void setupFlowRouting() {
+        // Isolate Flow's UI and routing mechanism for testing
         PowerMockito.mockStatic(UI.class);
         UI ui = Mockito.mock(UI.class);
+        BDDMockito.given(UI.getCurrent()).willReturn(ui);
 
         RouteRegistry registry = Mockito.mock(RouteRegistry.class);
         Router router = Mockito.spy(new Router(registry));
-
-        Mockito.doReturn("route1").when(router).getUrl(Route1.class);
-        Mockito.doReturn("route2").when(router).getUrl(Route2.class);
-
-        BDDMockito.given(UI.getCurrent()).willReturn(ui);
         Mockito.when(ui.getRouter()).thenReturn(router);
+
+        // Let Flow resolve route URLs
+        Mockito.doAnswer(invocationOnMock -> {
+            Class routeClass = (Class) invocationOnMock.getArguments()[0];
+            Route route = (Route) routeClass.getDeclaredAnnotation(Route.class);
+            return route.value();
+        }).when(router).getUrl(Mockito.any(Class.class));
     }
 }
