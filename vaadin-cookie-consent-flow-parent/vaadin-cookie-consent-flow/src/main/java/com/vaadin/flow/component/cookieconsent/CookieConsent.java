@@ -23,7 +23,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 
 @SuppressWarnings("serial")
 @Tag("vaadin-cookie-consent")
-@HtmlImport("frontend://bower_components/vaadin-cookie-consent/vaadin-cookie-consent.html")
+@HtmlImport("frontend://bower_components/vaadin-cookie-consent/src/vaadin-cookie-consent.html")
 public class CookieConsent extends Component {
 
     public CookieConsent() {
