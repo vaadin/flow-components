@@ -19,6 +19,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.GeneratedVaadinTextField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -35,6 +36,20 @@ public class TextFieldView extends DemoView {
         addBasicFeatures();
         addNumberFields();
         addDisabledField();
+        addVariantsFeature();
+    }
+
+    private void addVariantsFeature() {
+        // begin-source-example
+        // source-example-heading: Theme variants usage
+        TextField textField = new TextField();
+        textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        // end-source-example
+
+        addVariantsDemo(TextField::new,
+                GeneratedVaadinTextField::addThemeVariants,
+                GeneratedVaadinTextField::removeThemeVariants,
+                TextFieldVariant::getVariantName, TextFieldVariant.LUMO_SMALL);
     }
 
     private void addBasicFeatures() {
@@ -92,7 +107,8 @@ public class TextFieldView extends DemoView {
         textField.setId("disabled-text-field");
         Div message = new Div();
         message.setId("disabled-text-field-message");
-        textField.addValueChangeListener(change -> message.setText("Value changed"));
+        textField.addValueChangeListener(
+                change -> message.setText("Value changed"));
 
         addCard("Disabled text field", textField, message);
     }

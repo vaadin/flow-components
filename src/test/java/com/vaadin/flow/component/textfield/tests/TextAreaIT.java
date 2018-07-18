@@ -118,4 +118,9 @@ public class TextAreaIT extends ComponentDemoTest {
     private void waitUntilTextsEqual(String expected, String actual) {
         waitUntil(driver -> expected.equals(actual));
     }
+
+    @Test
+    public void assertVariants() {
+        verifyThemeVariantsBeingToggled();
+    }
 }

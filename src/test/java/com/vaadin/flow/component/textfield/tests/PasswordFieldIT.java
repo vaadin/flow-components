@@ -88,6 +88,11 @@ public class PasswordFieldIT extends ComponentDemoTest {
         Assert.assertEquals("", message.getText());
     }
 
+    @Test
+    public void assertVariants() {
+        verifyThemeVariantsBeingToggled();
+    }
+
     private void waitUntilTextsEqual(String expected, String actual) {
         waitUntil(driver -> expected.equals(actual));
     }

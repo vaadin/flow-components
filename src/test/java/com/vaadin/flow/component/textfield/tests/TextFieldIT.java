@@ -123,4 +123,9 @@ public class TextFieldIT extends ComponentDemoTest {
         message = layout.findElement(By.id("disabled-text-field-message"));
         Assert.assertEquals("", message.getText());
     }
+
+    @Test
+    public void assertVariants() {
+        verifyThemeVariantsBeingToggled();
+    }
 }
