@@ -24,8 +24,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.shared.Registration;
 
-import java.util.Objects;
-
 /**
  * Base class representing menu items.
  */
@@ -39,6 +37,10 @@ public abstract class MenuItem extends Tab {
 
     public MenuItem(String  title) {
         this(null, title);
+    }
+
+    public MenuItem(Component icon) {
+        this(icon, null);
     }
 
     public MenuItem(Component icon, String title) {
@@ -65,7 +67,10 @@ public abstract class MenuItem extends Tab {
             add(icon);
         }
 
-        add(new Span(title));
+        if (title != null) {
+            add(new Span(title));
+        }
+
         this.icon = icon;
     }
 
@@ -74,15 +79,19 @@ public abstract class MenuItem extends Tab {
     }
 
     public void setTitle(String title) {
-        Objects.requireNonNull(title, "Menu item title required");
         removeAll();
 
         if (icon != null) {
             add(icon);
         }
 
-        add(new Span(title));
-        getElement().setAttribute("title", title);
+        if (title != null) {
+            add(new Span(title));
+            getElement().setAttribute("title", title);
+        } else {
+            getElement().removeAttribute("title");
+        }
+
         this.title = title;
     }
 

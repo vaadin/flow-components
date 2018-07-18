@@ -61,9 +61,11 @@ public class MenuItemTest {
         Assert.assertEquals("Logout", ((Span) children.get(0)).getText());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void setTitle_null() {
         systemUnderTest.setTitle(null);
+
+        Assert.assertFalse(systemUnderTest.getElement().hasAttribute("title"));
     }
 
     @Test

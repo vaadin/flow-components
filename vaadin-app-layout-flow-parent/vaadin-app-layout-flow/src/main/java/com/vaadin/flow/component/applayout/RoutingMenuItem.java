@@ -33,6 +33,10 @@ public class RoutingMenuItem extends MenuItem {
         this(null, title, route);
     }
 
+    public RoutingMenuItem(Component icon, String route) {
+        this(icon, null, route);
+    }
+
     public RoutingMenuItem(Component icon, String title, String route) {
         super(icon, title);
 

@@ -29,6 +29,10 @@ public class ActionMenuItem extends MenuItem {
         super(title);
     }
 
+    public ActionMenuItem(Component icon) {
+        super(icon);
+    }
+
     public ActionMenuItem(Component icon, String title) {
         super(icon, title);
     }
