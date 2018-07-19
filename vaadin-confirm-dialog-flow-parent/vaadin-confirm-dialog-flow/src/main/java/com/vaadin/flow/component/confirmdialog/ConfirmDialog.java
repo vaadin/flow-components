@@ -33,7 +33,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-confirm-dialog")
-@HtmlImport("frontend://bower_components/vaadin-confirm-dialog/vaadin-confirm-dialog.html")
+@HtmlImport("frontend://bower_components/vaadin-confirm-dialog/src/vaadin-confirm-dialog.html")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents<ConfirmDialog> {
 
