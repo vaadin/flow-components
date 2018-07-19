@@ -14,13 +14,12 @@
     <name>Vaadin App Layout Integration Tests</name>
 
     <properties>
-        <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
+        <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
         <ci-sauce.version>1.138</ci-sauce.version>
 
         <frontend.working.directory>${project.basedir}/src/main/webapp/frontend</frontend.working.directory>
-        <jetty.resource.directory>${project.basedir}/src/main/webapp</jetty.resource.directory>
     </properties>
 
     <dependencies>
@@ -55,11 +54,11 @@
             <artifactId>vaadin-lumo-theme</artifactId>
             <version>${flow.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.vaadin</groupId>-->
-            <!--<artifactId>flow-server-production-mode</artifactId>-->
-            <!--<version>${flow.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-server-production-mode</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
@@ -129,7 +128,7 @@
                     <webAppConfig>
                         <containerIncludeJarPattern>^$</containerIncludeJarPattern>
                         <resourceBases>
-                            <resourceBase>${jetty.resource.directory}</resourceBase>
+                            <resourceBase>${project.build.directory}/${project.build.finalName}</resourceBase>
                         </resourceBases>
                     </webAppConfig>
                 </configuration>
@@ -140,9 +139,10 @@
                         <id>start-jetty</id>
                         <phase>pre-integration-test</phase>
                         <goals>
-                            <goal>start</goal>
+                            <goal>deploy-war</goal>
                         </goals>
                         <configuration>
+                            <daemon>true</daemon>
                             <scanIntervalSeconds>0</scanIntervalSeconds>
                         </configuration>
                     </execution>
@@ -223,10 +223,6 @@
                     <name>!skipFrontend</name>
                 </property>
             </activation>
-
-            <properties>
-                <jetty.resource.directory>${frontend.working.directory}</jetty.resource.directory>
-            </properties>
 
             <build>
                 <plugins>

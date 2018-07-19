@@ -11,6 +11,6 @@ public class MenuItemElement extends TestBenchElement {
     }
 
     public TestBenchElement getIcon() {
-        return $(TestBenchElement.class).attribute("role", "icon").first();
+        return $(TestBenchElement.class).attribute("role", "img").first();
     }
 }

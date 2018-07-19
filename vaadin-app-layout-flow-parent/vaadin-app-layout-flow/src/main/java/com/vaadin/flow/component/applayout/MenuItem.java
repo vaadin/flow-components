@@ -63,7 +63,7 @@ public abstract class MenuItem extends Tab {
         removeAll();
 
         if (icon != null) {
-            icon.getElement().setAttribute("role", "icon");
+            icon.getElement().setAttribute("role", "img");
             add(icon);
         }
 

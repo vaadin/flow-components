@@ -30,7 +30,7 @@ public class AppLayoutElement extends TestBenchElement {
     }
 
     public TestBenchElement getContent() {
-        return $(TestBenchElement.class).attribute("role", "content").first();
+        return $(TestBenchElement.class).attribute("role", "main").first();
     }
 
     public TestBenchElement getMenu() {

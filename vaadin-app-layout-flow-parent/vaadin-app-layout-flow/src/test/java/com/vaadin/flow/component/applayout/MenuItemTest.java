@@ -25,7 +25,7 @@ public class MenuItemTest {
     public void setIcon() {
         Icon icon = new Icon();
         systemUnderTest.setIcon(icon);
-        Assert.assertEquals("icon", icon.getElement().getAttribute("role"));
+        Assert.assertEquals("img", icon.getElement().getAttribute("role"));
 
         List<Component> children = systemUnderTest.getChildren()
                 .collect(Collectors.toList());

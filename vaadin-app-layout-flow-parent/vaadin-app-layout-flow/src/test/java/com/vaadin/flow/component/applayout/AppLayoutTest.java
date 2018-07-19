@@ -185,7 +185,7 @@ public class AppLayoutTest {
         Element content = new Div().getElement();
         systemUnderTest.setContent(content);
 
-        Assert.assertEquals("content", content.getAttribute("role"));
+        Assert.assertEquals("main", content.getAttribute("role"));
 
         List<Element> children = systemUnderTest.getElement().getChildren()
                 .collect(Collectors.toList());
@@ -204,5 +204,6 @@ public class AppLayoutTest {
         List<Element> children = systemUnderTest.getElement().getChildren()
                 .collect(Collectors.toList());
         Assert.assertFalse(children.contains(content));
+        Assert.assertNull(systemUnderTest.getContent());
     }
 }
