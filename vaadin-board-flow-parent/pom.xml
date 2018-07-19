@@ -17,14 +17,21 @@
 		<name>Vaadin Ltd</name>
 		<url>http://vaadin.com/</url>
 	</organization>
-	
+	<licenses>
+		<license>
+			<name>cval3</name>
+			<url>https://vaadin.com/license/cval-3</url>
+		</license>
+	</licenses>
+
 	<properties>
-            <flow.version>1.0.1</flow.version>
-            <testbench.version>6.0.1</testbench.version>
-            <maven.compiler.source>1.8</maven.compiler.source>
-            <maven.compiler.target>1.8</maven.compiler.target>
-            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-            <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<flow.component.base.version>1.0.4</flow.component.base.version>
+		<flow.version>1.0.2</flow.version>
+		<testbench.version>6.0.1</testbench.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
 	<modules>
@@ -33,6 +40,18 @@
 		<module>vaadin-board-flow-integration-tests</module>
 		<module>vaadin-board-flow-vaadincom-demo</module>
 	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.vaadin</groupId>
+				<artifactId>flow-component-base</artifactId>
+				<version>${flow.component.base.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<repositories>
 		<repository>
 			<id>vaadin-snapshots</id>
