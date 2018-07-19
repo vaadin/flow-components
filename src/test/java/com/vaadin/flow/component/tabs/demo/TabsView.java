@@ -30,8 +30,10 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.GeneratedVaadinTabs;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -54,6 +56,24 @@ public class TabsView extends DemoView {
         createPreselectedTabs();
         createTabsWithPages();
         createTabsWithCustomContent();
+        createTebsWithThemeVariants();
+    }
+
+    private void createTebsWithThemeVariants() {
+        // begin-source-example
+        // source-example-heading: Theme variants usage
+        Tab tab1 = new Tab("Tab one");
+        Tab tab2 = new Tab("Tab two");
+        Tab tab3 = new Tab("Tab three");
+        Tabs tabs = new Tabs(tab1, tab2, tab3);
+        tabs.addThemeVariants(TabsVariant.LUMO_SMALL);
+        // end-source-example
+        
+        addVariantsDemo(() -> {
+            return tabs;
+        }, GeneratedVaadinTabs::addThemeVariants,
+                GeneratedVaadinTabs::removeThemeVariants,
+                TabsVariant::getVariantName, TabsVariant.LUMO_SMALL);
     }
 
     private void createHorizontalTabs() {

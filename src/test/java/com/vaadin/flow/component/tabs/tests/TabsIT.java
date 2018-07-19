@@ -24,6 +24,7 @@ import com.vaadin.flow.component.tabs.demo.TabsView;
 import com.vaadin.flow.demo.ComponentDemoTest;
 
 import static org.hamcrest.CoreMatchers.is;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
@@ -46,6 +47,11 @@ public class TabsIT extends ComponentDemoTest {
         waitUntil(driver -> "true".equals(page1.getAttribute("hidden")));
         WebElement page3 = layout.findElement(By.id("page3"));
         assertThat(page3.getCssValue("display"), is("block"));
+    }
+
+    @Test
+    public void assertThemeVariant() {
+        verifyThemeVariantsBeingToggled();
     }
 
     @Override
