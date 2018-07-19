@@ -52,10 +52,6 @@
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-control-state-mixin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-themable-mixin</artifactId>
         </dependency>
         <dependency>
