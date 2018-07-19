@@ -27,6 +27,38 @@
             <version>6.0.1</version>
         </dependency>
         <dependency>
+            <groupId>org.webjars.bowergithub.polymer</groupId>
+            <artifactId>polymer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.webcomponents</groupId>
+            <artifactId>webcomponentsjs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.webcomponents</groupId>
+            <artifactId>shadycss</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-element-mixin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-usage-statistics</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-development-mode-detector</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-control-state-mixin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-themable-mixin</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
             <scope>provided</scope>

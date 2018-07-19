@@ -192,28 +192,16 @@
             </activation>
 
             <dependencies>
-                <!-- ADD THESE DEPENDENCIES AS A WORKAROUND FOR  <https://github.com/vaadin/flow/issues/3630> -->
-                <dependency>
-                    <groupId>com.vaadin</groupId>
-                    <artifactId>flow-server</artifactId>
-                    <version>${flow.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.vaadin</groupId>
-                    <artifactId>flow-html-components</artifactId>
-                    <version>${flow.version}</version>
-                </dependency>
-                <!-- END OF WORKAROUND -->
                 <!--VAADIN COMPONENTS-->
                 <dependency>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-icons-flow</artifactId>
-                    <version>1.0.0</version>
+                    <version>1.0.1</version>
                 </dependency>
                 <dependency>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-split-layout-flow</artifactId>
-                    <version>1.0.0</version>
+                    <version>1.0.1</version>
                 </dependency>
 
                 <!--PAPER ELEMENTS-->

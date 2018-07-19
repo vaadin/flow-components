@@ -42,7 +42,8 @@
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
 
-        <flow.version>1.0.1</flow.version>
+        <flow.component.base.version>1.0.4</flow.component.base.version>
+        <flow.version>1.0.2</flow.version>
         <jetty.version>9.3.9.v20160517</jetty.version>
         <testbench.version>6.0.1</testbench.version>
     </properties>
@@ -63,6 +64,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-component-base</artifactId>
+                <version>${flow.component.base.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-charts-flow</artifactId>
