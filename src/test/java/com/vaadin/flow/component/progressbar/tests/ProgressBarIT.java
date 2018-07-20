@@ -17,15 +17,16 @@
 
 package com.vaadin.flow.component.progressbar.tests;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.progressbar.demo.ProgressBarView;
 import com.vaadin.flow.demo.ComponentDemoTest;
+
+import static org.hamcrest.CoreMatchers.is;
+
+import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests for the {@link ProgressBarView}.
@@ -43,6 +44,11 @@ public class ProgressBarIT extends ComponentDemoTest {
         scrollIntoViewAndClick(button);
 
         waitUntil(driver -> valueOf(progressBar).equals("30"));
+    }
+
+    @Test
+    public void assertVariants() {
+        verifyThemeVariantsBeingToggled();
     }
 
     private String valueOf(WebElement progressBar) {

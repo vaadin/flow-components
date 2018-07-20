@@ -18,7 +18,9 @@
 package com.vaadin.flow.component.progressbar.demo;
 
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.progressbar.GeneratedVaadinProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.progressbar.ProgressBarVariant;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -35,6 +37,23 @@ public class ProgressBarView extends DemoView {
         createBasicProgressBar();
         createProgressBarWithCustomBounds();
         createIndeterminateProgressBar();
+        createProgressBarWithThemeVariant();
+    }
+
+    private void createProgressBarWithThemeVariant() {
+        // begin-source-example
+        // source-example-heading: Theme variants usage
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setValue(0.345);
+        progressBar.addThemeVariants(ProgressBarVariant.LUMO_ERROR);
+        // end-source-example
+
+        addVariantsDemo(() -> {
+            return progressBar;
+        }, GeneratedVaadinProgressBar::addThemeVariants,
+                GeneratedVaadinProgressBar::removeThemeVariants,
+                ProgressBarVariant::getVariantName,
+                ProgressBarVariant.LUMO_ERROR);
     }
 
     private void createBasicProgressBar() {
