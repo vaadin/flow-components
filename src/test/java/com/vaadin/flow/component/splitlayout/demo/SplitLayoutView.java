@@ -15,14 +15,16 @@
  */
 package com.vaadin.flow.component.splitlayout.demo;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.splitlayout.GeneratedVaadinSplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
+import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * View for {@link SplitLayout} demo.
@@ -40,6 +42,24 @@ public class SplitLayoutView extends DemoView {
         addResizeNotificationLayout();
         addInitialSplitterPositionLayout();
         addMinMaxWidthLayout();
+        addComponentWithThemeVariant();
+    }
+
+    private void addComponentWithThemeVariant() {
+        // begin-source-example
+        // source-example-heading: Theme variants usage
+        SplitLayout layout = new SplitLayout(
+                new Label("First content component"),
+                new Label("Second content component"));
+        layout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
+        // end-source-example
+
+        addVariantsDemo(() -> {
+            return layout;
+        }, GeneratedVaadinSplitLayout::addThemeVariants,
+                GeneratedVaadinSplitLayout::removeThemeVariants,
+                SplitLayoutVariant::getVariantName,
+                SplitLayoutVariant.LUMO_SMALL);
     }
 
     private void addHorizontalLayout() {
@@ -108,7 +128,7 @@ public class SplitLayoutView extends DemoView {
 
         message.setId("resize-message");
         setMinHeightForLayout(layout);
-        addCard("Resize Events", layout, message);
+        addCard("Resize Event", layout, message);
     }
 
     private void addInitialSplitterPositionLayout() {

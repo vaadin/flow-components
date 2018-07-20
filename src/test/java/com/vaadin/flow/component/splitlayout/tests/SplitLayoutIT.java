@@ -112,6 +112,11 @@ public class SplitLayoutIT extends ComponentDemoTest {
                 150, primaryComponent.getSize().width);
     }
 
+    @Test
+    public void assertVariants() {
+        verifyThemeVariantsBeingToggled();
+    }
+
     @Override
     protected String getTestPath() {
         return "/vaadin-split-layout";
