@@ -21,7 +21,9 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.radiobutton.GeneratedVaadinRadioGroup;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -68,6 +70,23 @@ public class RadioButtonGroupView extends DemoView {
         insertComponentsBetweenItems();
         prependAndInsertComponents();
         dynamicComponents();
+        addComponentWithThemeVariant();
+    }
+
+    private void addComponentWithThemeVariant() {
+        // begin-source-example
+        // source-example-heading: Theme variants usage
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("foo", "bar", "baz");
+        group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        // end-source-example
+
+        addVariantsDemo(() -> {
+            return group;
+        }, GeneratedVaadinRadioGroup::addThemeVariants,
+                GeneratedVaadinRadioGroup::removeThemeVariants,
+                RadioGroupVariant::getVariantName,
+                RadioGroupVariant.LUMO_VERTICAL);
     }
 
     private void addBasicFeatures() {

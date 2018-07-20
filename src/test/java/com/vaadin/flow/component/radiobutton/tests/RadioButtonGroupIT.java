@@ -311,4 +311,9 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
                 "label", elements.get(5).getTagName());
     }
 
+    @Test
+    public void assertThemeVariant() {
+        verifyThemeVariantsBeingToggled();
+    }
+
 }
