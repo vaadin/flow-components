@@ -150,7 +150,7 @@ public class ButtonView extends DemoView {
         // begin-source-example
         // source-example-heading: Theme variants usage
         Button button = new Button();
-        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        button.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
         // end-source-example
 
         addVariantsDemo(Button::new,
