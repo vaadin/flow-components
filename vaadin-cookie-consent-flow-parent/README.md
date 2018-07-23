@@ -16,8 +16,8 @@ Add Cookie Consent to your project:
 <dependencies>
   <dependency>
     <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-cookie-consent</artifactId>
-    <version>1.0.0</version>
+    <artifactId>vaadin-cookie-consent-flow</artifactId>
+    <version>1.0.0.beta1</version>
   </dependency>
 </dependencies>
 ```
