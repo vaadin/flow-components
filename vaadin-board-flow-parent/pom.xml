@@ -25,7 +25,7 @@
 	</licenses>
 
 	<properties>
-		<flow.component.base.version>1.0.4</flow.component.base.version>
+		<flow.component.base.version>1.0.5</flow.component.base.version>
 		<flow.version>1.0.2</flow.version>
 		<testbench.version>6.0.1</testbench.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
