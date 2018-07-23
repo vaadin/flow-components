@@ -54,6 +54,7 @@ import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.event.SortEvent.SortNotifier;
+import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -63,7 +64,6 @@ import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
-import com.vaadin.flow.data.provider.hierarchy.TreeUpdate;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
@@ -112,7 +112,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
         HasTheme, HasDataGenerators<T> {
 
-    protected static class UpdateQueue implements TreeUpdate {
+    protected static class UpdateQueue implements Update {
         private final ArrayList<Runnable> queue = new ArrayList<>();
         private final UpdateQueueData data;
 

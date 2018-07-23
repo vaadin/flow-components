@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
@@ -37,6 +35,8 @@ import com.vaadin.flow.data.bean.Gender;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
+
+import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
 
 public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
         implements HasUrlParameter<String> {
@@ -106,7 +106,8 @@ public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
         person.setRent(new BigDecimal(random.nextLong()));
         person.setSalary(random.nextInt());
         person.setSalaryDouble(random.nextDouble());
-        person.setGender(Gender.values()[random.nextInt(Gender.values().length)]);
+        person.setGender(
+                Gender.values()[random.nextInt(Gender.values().length)]);
 
         Address address = new Address();
         person.setAddress(address);
