@@ -99,12 +99,44 @@ public class BeanGridSortingTest {
     }
 
     @Test
+    public void setSortableColumns_onlyTheReferencedColumnsAreSortable() {
+        grid.setColumns("string", "integer", "bool", "number");
+
+        Assert.assertFalse(grid.getColumnByKey("string").isSortable());
+        Assert.assertFalse(grid.getColumnByKey("integer").isSortable());
+        Assert.assertFalse(grid.getColumnByKey("bool").isSortable());
+        Assert.assertFalse(grid.getColumnByKey("number").isSortable());
+
+        grid.setSortableColumns("string");
+
+        Assert.assertTrue(grid.getColumnByKey("string").isSortable());
+        Assert.assertFalse(grid.getColumnByKey("integer").isSortable());
+        Assert.assertFalse(grid.getColumnByKey("bool").isSortable());
+        Assert.assertFalse(grid.getColumnByKey("number").isSortable());
+
+        grid.setSortableColumns("bool", "number");
+
+        Assert.assertFalse(grid.getColumnByKey("string").isSortable());
+        Assert.assertFalse(grid.getColumnByKey("integer").isSortable());
+        Assert.assertTrue(grid.getColumnByKey("bool").isSortable());
+        Assert.assertTrue(grid.getColumnByKey("number").isSortable());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void setSortableColumnsForNonBeanGrid_throws() {
+        Grid<SortableBean> nonBeanGrid = new Grid<>();
+        nonBeanGrid.setSortableColumns("string");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setSortableColumnsForNonExistingProperty_throws() {
+        grid.setSortableColumns("nonExisting");
+    }
+
+    @Test
     public void basicPropertiesAreSortedAsComparables() {
         grid.setColumns("string", "integer", "bool", "number");
-        grid.getColumnByKey("string").setSortable(true);
-        grid.getColumnByKey("integer").setSortable(true);
-        grid.getColumnByKey("bool").setSortable(true);
-        grid.getColumnByKey("number").setSortable(true);
+        grid.setSortableColumns("string", "integer", "bool", "number");
 
         callSortersChanged("string", "asc");
         assertInMemorySorting(
@@ -139,10 +171,8 @@ public class BeanGridSortingTest {
     public void innerPropertiesAreSortedAsComparables() {
         grid.setColumns("innerBean.string", "innerBean.integer",
                 "innerBean.bool", "innerBean.number");
-        grid.getColumnByKey("innerBean.string").setSortable(true);
-        grid.getColumnByKey("innerBean.integer").setSortable(true);
-        grid.getColumnByKey("innerBean.bool").setSortable(true);
-        grid.getColumnByKey("innerBean.number").setSortable(true);
+        grid.setSortableColumns("innerBean.string", "innerBean.integer",
+                "innerBean.bool", "innerBean.number");
 
         callSortersChanged("innerBean.string", "asc");
         assertInMemorySorting((b1, b2) -> b1.getInnerBean().getString()
