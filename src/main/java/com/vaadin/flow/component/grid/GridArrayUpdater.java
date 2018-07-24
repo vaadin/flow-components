@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid;
 
 import java.io.Serializable;
 
+import com.vaadin.flow.component.treegrid.TreeGridArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableSupplier;
@@ -30,7 +31,7 @@ import com.vaadin.flow.function.SerializableSupplier;
 public interface GridArrayUpdater extends ArrayUpdater {
 
     /**
-     * Data object for {@link GridArrayUpdater}.
+     * Data object for {@link TreeGridArrayUpdater}.
      */
     public static class UpdateQueueData implements Serializable {
         private final Element element;

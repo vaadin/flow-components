@@ -54,6 +54,7 @@ import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.event.SortEvent.SortNotifier;
+import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -154,26 +155,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         public void enqueue(String name, Serializable... arguments) {
             queue.add(() -> getElement().callFunction(name, arguments));
-        }
-
-        @Override
-        public void commit(int updateId, String parentKey, int levelSize) {
-            onlySupportedOnTreeGrid();
-        }
-
-        @Override
-        public void set(int start, List<JsonValue> items, String parentKey) {
-            onlySupportedOnTreeGrid();
-        }
-
-        @Override
-        public void clear(int start, int length, String parentKey) {
-            onlySupportedOnTreeGrid();
-        }
-
-        private void onlySupportedOnTreeGrid() {
-            throw new UnsupportedOperationException(
-                    "This method can't be used for a Grid. Use TreeGrid instead.");
         }
 
         protected Element getElement() {
@@ -856,6 +837,38 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
     }
 
+    private class GridArrayUpdaterImpl implements GridArrayUpdater {
+        private UpdateQueueData data;
+        private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
+
+        public GridArrayUpdaterImpl(
+                SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
+            this.updateQueueFactory = updateQueueFactory;
+        }
+
+        @Override
+        public UpdateQueue startUpdate(int sizeChange) {
+            return updateQueueFactory.apply(data, sizeChange);
+        }
+
+        @Override
+        public void initialize() {
+            initConnector();
+            updateSelectionModeOnClient();
+        }
+
+        @Override
+        public void setUpdateQueueData(UpdateQueueData data) {
+            this.data = data;
+        }
+
+        @Override
+        public UpdateQueueData getUpdateQueueData() {
+            return data;
+        }
+
+    }
+
     private final GridArrayUpdater arrayUpdater;
 
     private final CompositeDataGenerator<T> gridDataGenerator;
@@ -958,8 +971,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            uses to handle all data communication.
      * @param <B>
      *            the data communicator builder type
+     * @param <U>
+     *            the GridArrayUpdater type
      */
-    protected <B extends DataCommunicatorBuilder<T>> Grid(Class<T> beanType,
+    protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
+            Class<T> beanType,
             SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuidler,
             B dataCommunicatorBuilder) {
         this(50, updateQueueBuidler, dataCommunicatorBuilder);
@@ -990,9 +1006,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            uses to handle all data communication.
      * @param <B>
      *            the data communicator builder type
+     * @param <U>
+     *            the GridArrayUpdater type
      * 
      */
-    protected <B extends DataCommunicatorBuilder<T>> Grid(int pageSize,
+    protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
+            int pageSize,
             SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuidler,
             B dataCommunicatorBuilder) {
         Objects.requireNonNull(dataCommunicatorBuilder,
@@ -1006,7 +1025,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
 
         dataCommunicator = dataCommunicatorBuilder.build(getElement(),
-                gridDataGenerator, arrayUpdater, this::getUniqueKeyProvider);
+                gridDataGenerator, (U) arrayUpdater,
+                this::getUniqueKeyProvider);
 
         detailsManager = new DetailsManager(this);
         setPageSize(pageSize);
@@ -1039,8 +1059,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * 
      * @param <T>
      *            the grid bean type
+     * 
+     * @param <U>
+     *            the ArrayUpdater type
      */
-    protected static class DataCommunicatorBuilder<T> implements Serializable {
+    protected static class DataCommunicatorBuilder<T, U extends ArrayUpdater>
+            implements Serializable {
 
         /**
          * Build a new {@link DataCommunicator} object for the given Grid
@@ -1052,15 +1076,14 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          *            the {@link CompositeDataGenerator} for the data
          *            communicator
          * @param arrayUpdater
-         *            the {@link GridArrayUpdater} for the data communicator
+         *            the {@link ArrayUpdater} for the data communicator
          * @param uniqueKeyProviderSupplier
          *            the unique key value provider supplier for the data
          *            communicator
          * @return the build data communicator object
          */
         protected DataCommunicator<T> build(Element element,
-                CompositeDataGenerator<T> dataGenerator,
-                GridArrayUpdater arrayUpdater,
+                CompositeDataGenerator<T> dataGenerator, U arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
             return new DataCommunicator<>(dataGenerator, arrayUpdater,
                     data -> element.callFunction("$connector.updateData", data),
@@ -1070,31 +1093,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     protected GridArrayUpdater createDefaultArrayUpdater(
             SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
-        return new GridArrayUpdater() {
-
-            private UpdateQueueData data;
-
-            @Override
-            public UpdateQueue startUpdate(int sizeChange) {
-                return updateQueueFactory.apply(data, sizeChange);
-            }
-
-            @Override
-            public void initialize() {
-                initConnector();
-                updateSelectionModeOnClient();
-            }
-
-            @Override
-            public void setUpdateQueueData(UpdateQueueData data) {
-                this.data = data;
-            }
-
-            @Override
-            public UpdateQueueData getUpdateQueueData() {
-                return data;
-            }
-        };
+        return new GridArrayUpdaterImpl(updateQueueFactory);
     }
 
     /**

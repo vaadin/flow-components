@@ -37,12 +37,14 @@ import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater.HierarchicalUpdate;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
@@ -65,18 +67,17 @@ import elemental.json.JsonValue;
 public class TreeGrid<T> extends Grid<T>
         implements HasHierarchicalDataProvider<T> {
 
-    private static final class UpdateQueue extends Grid.UpdateQueue {
+    private static final class TreeGridUpdateQueue extends UpdateQueue
+            implements HierarchicalUpdate {
 
-        private UpdateQueue(UpdateQueueData data, int size) {
+        private TreeGridUpdateQueue(UpdateQueueData data, int size) {
             super(data, size);
         }
 
         @Override
-        public void set(int start, List<JsonValue> items,
-                String parentKey) {
+        public void set(int start, List<JsonValue> items, String parentKey) {
             enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()),
-                    parentKey);
+                    items.stream().collect(JsonUtils.asArray()), parentKey);
         }
 
         @Override
@@ -92,12 +93,42 @@ public class TreeGrid<T> extends Grid<T>
             enqueue("$connector.clear", start, length, parentKey);
         }
 
-
         @Override
         public void commit(int updateId, String parentKey, int levelSize) {
-            enqueue("$connector.confirmParent", updateId, parentKey,
-                    levelSize);
+            enqueue("$connector.confirmParent", updateId, parentKey, levelSize);
             commit();
+        }
+    }
+
+    private class TreeGridArrayUpdaterImpl implements TreeGridArrayUpdater {
+        private UpdateQueueData data;
+        private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
+
+        public TreeGridArrayUpdaterImpl(
+                SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
+            this.updateQueueFactory = updateQueueFactory;
+        }
+
+        @Override
+        public TreeGridUpdateQueue startUpdate(int sizeChange) {
+            return (TreeGridUpdateQueue) updateQueueFactory.apply(data,
+                    sizeChange);
+        }
+
+        @Override
+        public void initialize() {
+            initConnector();
+            updateSelectionModeOnClient();
+        }
+
+        @Override
+        public void setUpdateQueueData(UpdateQueueData data) {
+            this.data = data;
+        }
+
+        @Override
+        public UpdateQueueData getUpdateQueueData() {
+            return data;
         }
     }
 
@@ -111,7 +142,7 @@ public class TreeGrid<T> extends Grid<T>
      * automatically sets up columns based on the type of presented data.
      */
     public TreeGrid() {
-        super(50, UpdateQueue::new,
+        super(50, TreeGridUpdateQueue::new,
                 new TreeDataCommunicatorBuilder<T>());
 
         setUniqueKeyProperty("key");
@@ -130,11 +161,18 @@ public class TreeGrid<T> extends Grid<T>
      *            the bean type to use, not {@code null}
      */
     public TreeGrid(Class<T> beanType) {
-        super(beanType, UpdateQueue::new, new TreeDataCommunicatorBuilder<T>());
+        super(beanType, TreeGridUpdateQueue::new,
+                new TreeDataCommunicatorBuilder<T>());
 
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
+    }
+
+    @Override
+    protected GridArrayUpdater createDefaultArrayUpdater(
+            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
+        return new TreeGridArrayUpdaterImpl(updateQueueFactory);
     }
 
     /**
@@ -151,21 +189,20 @@ public class TreeGrid<T> extends Grid<T>
         this();
         setDataProvider(dataProvider);
     }
-    
+
     private static class TreeDataCommunicatorBuilder<T>
-            extends DataCommunicatorBuilder<T> {
+            extends DataCommunicatorBuilder<T, TreeGridArrayUpdater> {
 
         @Override
         protected DataCommunicator<T> build(Element element,
                 CompositeDataGenerator<T> dataGenerator,
-                GridArrayUpdater arrayUpdater,
+                TreeGridArrayUpdater arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
 
             return new HierarchicalDataCommunicator<>(dataGenerator,
                     arrayUpdater,
                     data -> element.callFunction("$connector.updateData", data),
-                    element.getNode(),
-                    uniqueKeyProviderSupplier);
+                    element.getNode(), uniqueKeyProviderSupplier);
         }
     }
 
@@ -425,8 +462,7 @@ public class TreeGrid<T> extends Grid<T>
             String parentKey) {
         T item = getDataCommunicator().getKeyMapper().get(parentKey);
         if (item != null) {
-            getDataCommunicator().setParentRequestedRange(start, length,
-                    item);
+            getDataCommunicator().setParentRequestedRange(start, length, item);
         }
     }
 
@@ -537,8 +573,8 @@ public class TreeGrid<T> extends Grid<T>
      * @since 8.4
      */
     public void expandRecursively(Collection<T> items, int depth) {
-        getDataCommunicator().expand(
-                getItemsWithChildrenRecursively(items, depth));
+        getDataCommunicator()
+                .expand(getItemsWithChildrenRecursively(items, depth));
     }
 
     /**
@@ -648,15 +684,13 @@ public class TreeGrid<T> extends Grid<T>
         }
         items.stream().filter(getDataCommunicator()::hasChildren)
                 .forEach(item -> {
-                itemsWithChildren.add(item);
-                itemsWithChildren
-                        .addAll(getItemsWithChildrenRecursively(
-                                getDataProvider()
-                                        .fetchChildren(new HierarchicalQuery<>(
-                                                null, item))
-                                        .collect(Collectors.toList()),
-                                depth - 1));
-        });
+                    itemsWithChildren.add(item);
+                    itemsWithChildren.addAll(
+                            getItemsWithChildrenRecursively(getDataProvider()
+                                    .fetchChildren(
+                                            new HierarchicalQuery<>(null, item))
+                                    .collect(Collectors.toList()), depth - 1));
+                });
         return itemsWithChildren;
     }
 
