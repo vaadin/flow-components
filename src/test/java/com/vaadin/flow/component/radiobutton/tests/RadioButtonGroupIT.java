@@ -26,6 +26,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.testbench.TestBenchElement;
 
 public class RadioButtonGroupIT extends ComponentDemoTest {
 
@@ -316,4 +317,45 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         verifyThemeVariantsBeingToggled();
     }
 
+    @Test
+    public void groupHasLabelAndErrorMessage_setInvalidShowEM_setValueRemoveEM() {
+        TestBenchElement group = $(TestBenchElement.class)
+                .id("group-with-label-and-error-message");
+
+        Assert.assertEquals("Label Attribute should present with correct text",
+                group.getAttribute("label"), "Group label");
+
+        TestBenchElement errorMessage = group.$(TestBenchElement.class)
+                .id("vaadin-radio-group-error-1");
+        verifyGroupValid(group, errorMessage);
+
+        layout.findElement(By.id("group-with-label-button")).click();
+        verifyGroupInvalid(group, errorMessage);
+
+        Assert.assertEquals(
+                "Correct error message should be shown after the button clicks",
+                "Field has been set to invalid from server side",
+                errorMessage.getText());
+
+        executeScript("arguments[0].value=2;", group);
+        verifyGroupValid(group, errorMessage);
+    }
+
+    private void verifyGroupInvalid(TestBenchElement group,
+            TestBenchElement errorMessage) {
+        Assert.assertEquals("Radio button group is invalid.",
+                true, group.getPropertyBoolean("invalid"));
+        Assert.assertEquals("Error message should be shown.",
+                Boolean.FALSE.toString(),
+                errorMessage.getAttribute("aria-hidden"));
+    }
+
+    private void verifyGroupValid(TestBenchElement group,
+            TestBenchElement errorMessage) {
+        Assert.assertEquals("Radio button group is not invalid.",
+                false, group.getPropertyBoolean("invalid"));
+        Assert.assertEquals("Error message should be hidden.",
+                Boolean.TRUE.toString(),
+                errorMessage.getAttribute("aria-hidden"));
+    }
 }

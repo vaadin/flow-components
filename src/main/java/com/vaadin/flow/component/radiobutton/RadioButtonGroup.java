@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -49,7 +50,8 @@ import com.vaadin.flow.shared.Registration;
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemsAndComponents<T>,
-        SingleSelect<RadioButtonGroup<T>, T>, HasDataProvider<T> {
+        SingleSelect<RadioButtonGroup<T>, T>, HasDataProvider<T>,
+        HasValidation {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
@@ -179,6 +181,70 @@ public class RadioButtonGroup<T>
     @Override
     public boolean isReadOnly() {
         return isReadOnly;
+    }
+
+    /**
+     * Specifies that the user must select in a value.
+     * <p>
+     * NOTE: The required indicator will not be visible, if there is no
+     * {@code label} property set for the radiobutton group.
+     * 
+     * @param required
+     *            the boolean value to set
+     */
+    @Override
+    public void setRequired(boolean required) {
+        super.setRequired(required);
+    }
+
+    /**
+     * Specifies that the user must select a value
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * 
+     * @return the {@code required} property from the webcomponent
+     */
+    public boolean isRequired() {
+        return super.isRequiredBoolean();
+    }
+
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        super.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * Gets the current error message from the radio button group.
+     * 
+     * @return the current error message
+     */
+    public String getErrorMessage() {
+        return super.getErrorMessageString();
+    }
+
+    @Override
+    public void setLabel(String label) {
+        super.setLabel(label);
+    }
+
+    /**
+     * String used for the label element.
+     * 
+     * @return the {@code label} property from the webcomponent
+     */
+    public String getLabel() {
+        return super.getLabelString();
+    }
+
+    @Override
+    public boolean isInvalid() {
+        return isInvalidBoolean();
+    }
+
+    @Override
+    public void setInvalid(boolean invalid) {
+        super.setInvalid(invalid);
     }
 
     private void reset() {

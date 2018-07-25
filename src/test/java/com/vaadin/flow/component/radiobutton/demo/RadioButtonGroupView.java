@@ -60,6 +60,7 @@ public class RadioButtonGroupView extends DemoView {
     @Override
     protected void initView() {
         addBasicFeatures();
+        addComponentWithLabelAndErrorMessage();
         addItemRenderer();
         addItemLabelGenerator();
         addItemIconGenerator();
@@ -71,6 +72,23 @@ public class RadioButtonGroupView extends DemoView {
         prependAndInsertComponents();
         dynamicComponents();
         addComponentWithThemeVariant();
+    }
+
+    private void addComponentWithLabelAndErrorMessage() {
+        // begin-source-example
+        // source-example-heading: Group with label and error message
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("foo", "bar", "baz");
+        group.setLabel("Group label");
+        group.setErrorMessage("Field has been set to invalid from server side");
+        NativeButton button = new NativeButton("Switch validity state",
+                event -> group.setInvalid(!group.isInvalid()));
+
+        // end-source-example
+        group.setId("group-with-label-and-error-message");
+        button.setId("group-with-label-button");
+        addCard("Group with label and error message", group,
+                button);
     }
 
     private void addComponentWithThemeVariant() {
