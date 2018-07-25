@@ -34,4 +34,20 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 public class MenuItem extends Component
         implements HasText, HasComponents, ClickNotifier<MenuItem>, HasEnabled {
 
+    private ContextMenuBase<?> contextMenu;
+
+    MenuItem(ContextMenuBase<?> contextMenu) {
+        assert contextMenu != null;
+        this.contextMenu = contextMenu;
+    }
+
+    /**
+     * Gets the context-menu component that this item belongs to.
+     * 
+     * @return the context-menu component
+     */
+    public ContextMenuBase<?> getContextMenu() {
+        return contextMenu;
+    }
+
 }
