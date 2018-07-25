@@ -23,6 +23,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.dom.Element;
 
 public class ButtonTest {
@@ -208,6 +209,18 @@ public class ButtonTest {
 
         button.setEnabled(false);
         Assert.assertFalse(button.isEnabled());
+    }
+
+    @Test
+    public void setText_slotAttributeIsPreserved() {
+        button = new Button();
+        button.setText("foo");
+        Icon icon = new Icon(VaadinIcon.BULLSEYE);
+        icon.getElement().setAttribute("slot", "prefix");
+        button.setIcon(icon);
+
+        button.setText("bar");
+        Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
     }
 
     private void assertOnlyChildIsText() {

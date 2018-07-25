@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.button;
 
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -155,10 +160,7 @@ public class Button extends GeneratedVaadinButton<Button>
      */
     @Override
     public void setText(String text) {
-        Element[] nonTextNodes = getNonTextNodes();
-        removeAll();
-
-        getElement().appendChild(nonTextNodes);
+        removeAll(getNonTextNodes());
 
         if (text == null || text.isEmpty()) {
             if (span != null) {
@@ -334,7 +336,7 @@ public class Button extends GeneratedVaadinButton<Button>
 
     /**
      * Set the button to be input focused when the page loads.
-     * 
+     *
      * @param autofocus
      *            the boolean value to set
      */
@@ -348,11 +350,29 @@ public class Button extends GeneratedVaadinButton<Button>
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return the {@code autofocus} property from the button
      */
     public boolean isAutofocus() {
         return isAutofocusBoolean();
+    }
+
+    /**
+     * Removes all contents from this component except elements in
+     * {@code exclusion} array. This includes child components, text content as
+     * well as child elements that have been added directly to this component
+     * using the {@link Element} API.
+     *
+     * @see Button#removeAll()
+     */
+    private void removeAll(Element... exclusion) {
+        Set<Element> toExclude = Stream.of(exclusion)
+                .collect(Collectors.toSet());
+        Predicate<Element> filter = toExclude::contains;
+        getElement().getChildren().filter(filter.negate())
+                .forEach(child -> child.removeAttribute("slot"));
+        getElement().removeAllChildren();
+        getElement().appendChild(exclusion);
     }
 
     private void wrapTextInSpan() {
