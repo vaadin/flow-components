@@ -677,6 +677,31 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    public void contextMenu() {
+        openTabAndCheckForErrors("context-menu");
+        GridElement grid = $(GridElement.class).id("context-menu-grid");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        assertFirstCells(grid, "Person 1", "Person 2", "Person 3", "Person 4");
+
+        grid.getCell(2, 0).contextClick();
+        $("vaadin-item").first().click(); // Update button
+        assertFirstCells(grid, "Person 1", "Person 2", "Person 3 Updated",
+                "Person 4");
+
+        grid.getCell(1, 0).contextClick();
+        $("vaadin-item").get(1).click(); // Remove button
+        assertFirstCells(grid, "Person 1", "Person 3 Updated", "Person 4",
+                "Person 5");
+    }
+
+    private void assertFirstCells(GridElement grid, String... cellContents) {
+        IntStream.range(0, cellContents.length).forEach(i -> {
+            Assert.assertEquals(cellContents[i], grid.getCell(i, 0).getText());
+        });
+    }
+
     public void assertVariants() {
         openTabAndCheckForErrors("");
         verifyThemeVariantsBeingToggled();

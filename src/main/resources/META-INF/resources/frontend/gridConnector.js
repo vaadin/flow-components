@@ -734,5 +734,20 @@ window.Vaadin.Flow.gridConnector = {
       }
     }
 
+    const contextMenuListener = function(e) {
+      // https://github.com/vaadin/vaadin-grid/issues/1318
+      const path = e.composedPath();
+      const cell = path[path.indexOf(grid.$.table) - 3]; // <td> element in shadow dom
+      var key;
+      if (cell && cell._instance.item) {
+        key = cell._instance.item.key;
+      }
+      grid.$server.updateContextMenuTargetItem(key);
+    }
+
+    grid.addEventListener('vaadin-context-menu-before-open', function(e) {
+      contextMenuListener(grid.$contextMenuConnector.openEvent);
+    });
+
   }
 }

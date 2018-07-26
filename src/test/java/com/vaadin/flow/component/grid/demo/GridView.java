@@ -45,6 +45,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.grid.GridContextMenu;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -370,6 +371,7 @@ public class GridView extends DemoView {
         createDisabledGrid();
         createBasicTreeGridUsage();
         createLazyLoadingTreeGridUsage();
+        createContextMenu();
         addVariantFeature();
 
         addCard("Grid example model",
@@ -1229,6 +1231,36 @@ public class GridView extends DemoView {
                                 null, null))
                         .collect(Collectors.toList()),
                         grid, message));
+    }
+
+    private void createContextMenu() {
+        // begin-source-example
+        // source-example-heading: Using ContextMenu With Grid
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(getItems());
+        grid.addColumn(Person::getName).setHeader("Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+        GridContextMenu<Person> contextMenu = new GridContextMenu<>(grid);
+        contextMenu.addItem("Update", event -> {
+            event.getItem().ifPresent(person -> {
+                person.setName(person.getName() + " Updated");
+                ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) event
+                        .getGrid().getDataProvider();
+                dataProvider.refreshItem(person);
+            });
+        });
+        contextMenu.addItem("Remove", event -> {
+            event.getItem().ifPresent(person -> {
+                ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) grid
+                        .getDataProvider();
+                dataProvider.getItems().remove(person);
+                dataProvider.refreshAll();
+            });
+        });
+        // end-source-example
+        grid.setId("context-menu-grid");
+        addCard("Context Menu", "Using ContextMenu With Grid", grid,
+                contextMenu);
     }
 
     private <T> Component[] withTreeGridToggleButtons(List<T> roots,
