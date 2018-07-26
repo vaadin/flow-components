@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.dialog;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -140,17 +141,20 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     @Override
     public void add(Component... components) {
-        assert components != null;
+        Objects.requireNonNull(components, "Components should not be null");
         for (Component component : components) {
-            assert component != null;
+            Objects.requireNonNull(component,
+                    "Component to add cannot be null");
             container.appendChild(component.getElement());
         }
     }
 
     @Override
     public void remove(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
         for (Component component : components) {
-            assert component != null;
+            Objects.requireNonNull(component,
+                    "Component to remove cannot be null");
             if (container.equals(component.getElement().getParent())) {
                 container.removeChild(component.getElement());
             } else {
@@ -163,6 +167,33 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     @Override
     public void removeAll() {
         container.removeAllChildren();
+    }
+
+    /**
+     * Adds the given component into this dialog at the given index.
+     * <p>
+     * The element in the DOM will not be child of the {@code <vaadin-dialog>}
+     * element, but will be inserted into an overlay that is attached into the
+     * {@code <body>}.
+     *
+     * @param index
+     *            the index, where the component will be added.
+     *
+     * @param component
+     *            the component to add
+     */
+    @Override
+    public void addComponentAtIndex(int index, Component component) {
+        Objects.requireNonNull(component, "Component should not be null");
+        int indexCheck;
+        if (index < 0) {
+            indexCheck = 0;
+        } else if (index > container.getChildCount()) {
+            indexCheck = container.getChildCount();
+        } else {
+            indexCheck = index;
+        }
+        container.insertChild(indexCheck, component.getElement());
     }
 
     /**
