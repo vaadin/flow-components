@@ -936,6 +936,42 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * generated columns will be sortable by default, if the property is
      * {@link Comparable}.
      * <p>
+     * When autoCreateColumns is <code>true</code>, only the direct properties
+     * of the bean are included and they will be in alphabetical order. Use
+     * {@link Grid#setColumns(String...)} to define which properties to include
+     * and in which order. You can also add a column for an individual property
+     * with {@link #addColumn(String)}. Both of these methods support also
+     * sub-properties with dot-notation, eg.
+     * <code>"property.nestedProperty"</code>.
+     *
+     * @param beanType
+     *            the bean type to use, not <code>null</code>
+     * @param autoCreateColumns
+     *            when <code>true</code>, columns are created automatically for
+     *            the properties of the beanType
+     */
+    public Grid(Class<T> beanType, boolean autoCreateColumns) {
+        this();
+        Objects.requireNonNull(beanType, "Bean type can't be null");
+        propertySet = BeanPropertySet.get(beanType);
+        if (autoCreateColumns) {
+            propertySet.getProperties()
+                    .filter(property -> !property.isSubProperty())
+                    .sorted((prop1, prop2) -> prop1.getName()
+                            .compareTo(prop2.getName()))
+                    .forEach(this::addColumn);
+        }
+    }
+
+    /**
+     * Creates a new grid with an initial set of columns for each of the bean's
+     * properties. The property-values of the bean will be converted to Strings.
+     * Full names of the properties will be used as the
+     * {@link Column#setKey(String) column keys} and the property captions will
+     * be used as the {@link Column#setHeader(String) column headers}. The
+     * generated columns will be sortable by default, if the property is
+     * {@link Comparable}.
+     * <p>
      * By default, only the direct properties of the bean are included and they
      * will be in alphabetical order. Use {@link Grid#setColumns(String...)} to
      * define which properties to include and in which order. You can also add a
@@ -947,13 +983,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            the bean type to use, not <code>null</code>
      */
     public Grid(Class<T> beanType) {
-        this();
-        Objects.requireNonNull(beanType, "Bean type can't be null");
-        propertySet = BeanPropertySet.get(beanType);
-        propertySet.getProperties()
-                .filter(property -> !property.isSubProperty()).sorted((prop1,
-                        prop2) -> prop1.getName().compareTo(prop2.getName()))
-                .forEach(this::addColumn);
+        this(beanType, true);
     }
 
     /**
@@ -1333,6 +1363,33 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     private Object runPropertyValueGetter(PropertyDefinition<T, ?> property,
             T item) {
         return property.getGetter().apply(item);
+    }
+
+    /**
+     * Adds a new columns for the given property names. The property values are
+     * converted to Strings in the grid cells. The properties' full names will
+     * be used as the {@link Column#setKey(String) column key} and the
+     * properties' caption will be used as the {@link Column#setHeader(String)
+     * column header}.
+     * <p>
+     * You can add columns for nested properties with dot notation, eg.
+     * <code>"property.nestedProperty"</code>
+     * <p>
+     * If the property is {@link Comparable}, the created column is sortable by
+     * default. This can be changed with the {@link Column#setSortable(boolean)}
+     * method.
+     * <p>
+     * <strong>Note:</strong> This method can only be used for a Grid created
+     * from a bean type with {@link #Grid(Class)}.
+     *
+     * @param propertyNames
+     *            the property names of the new columns, not <code>null</code>
+     * @see #addColumn(String)
+     */
+    public void addColumns(String... propertyNames) {
+        checkForBeanGrid();
+        Objects.requireNonNull(propertyNames, "Property names can't be null");
+        Stream.of(propertyNames).forEach(this::addColumn);
     }
 
     /**

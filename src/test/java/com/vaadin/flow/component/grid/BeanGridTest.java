@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.Collections;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -112,6 +114,50 @@ public class BeanGridTest {
     public void setColumnsForGridWithoutPropertySet_throws() {
         Grid<Person> nonBeanGrid = new Grid<Person>();
         nonBeanGrid.setColumns("name");
+    }
+
+    @Test
+    public void beanGridWithNoAutoColumns_columnsAreNotAdded() {
+        Grid<Person> nonAutoGrid = new Grid<>(Person.class, false);
+        Assert.assertEquals(Collections.emptyList(), nonAutoGrid.getColumns());
+        Assert.assertNull(nonAutoGrid.getColumnByKey("name"));
+    }
+
+    @Test
+    public void addColumnsForProperties_columnsAddedWithCorrectKeys() {
+        grid.setColumns(); // cleans up all columns
+        String[] expectedKeys = new String[] { "name", "born" };
+        grid.addColumns(expectedKeys);
+        Object[] keys = grid.getColumns().stream().map(Column::getKey)
+                .toArray();
+
+        Assert.assertArrayEquals("Unexpected columns or column-keys",
+                expectedKeys, keys);
+    }
+
+    @Test
+    public void addColumnsForSubProperties_columnsAddedWithCorrectKeys() {
+        grid.setColumns(); // cleans up all columns
+        String[] expectedKeys = new String[] { "friend.name",
+                "friend.friend.friend", "friend.friend.friend.born" };
+        grid.addColumns(expectedKeys);
+        Object[] keys = grid.getColumns().stream().map(Column::getKey)
+                .toArray();
+
+        Assert.assertArrayEquals("Unexpected columns or column-keys",
+                expectedKeys, keys);
+    }
+
+    @Test
+    public void addColumnsForNonExistingProperty_throws() {
+        expectIllegalArgumentException("Can't resolve property name");
+        grid.addColumns("friend.foobar");
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void addColumnsForGridWithoutPropertySet_throws() {
+        Grid<Person> nonBeanGrid = new Grid<>();
+        nonBeanGrid.addColumns("name");
     }
 
 }
