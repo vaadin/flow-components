@@ -18,6 +18,7 @@ package com.vaadin.flow.component.notification.tests;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -33,15 +34,87 @@ public class NotificationTestPage extends Div {
 
     public NotificationTestPage() {
         createNotificationWithButtonControl();
+        addSeparator();
         createTwoNotificationsAtSamePosition();
+        addSeparator();
         createNotificationAddComponent();
+        addSeparator();
         createNotificationRemoveComponent();
+        addSeparator();
         createNotificationRemoveAllComponent();
+        addSeparator();
         createNotificationAddTwoComponents();
+        addSeparator();
         createNotificationAddMix();
+        addSeparator();
         createNotificationwithTextAndAddComponent();
+        addSeparator();
         createNotificationAddComponentAddText();
+        addSeparator();
         createNotificationOutsideUi();
+        addSeparator();
+        createNotificationAndAddComponentAtIndex();
+        addSeparator();
+        createNotificationWithComponentsAndAddComponentAfterOpen();
+    }
+
+    private void addSeparator() {
+        getElement().appendChild(new Element("hr"));
+    }
+
+    private void createNotificationAndAddComponentAtIndex() {
+        Notification notification = new Notification();
+        notification.setId("notification-add-component-at-index");
+        notification.add(new NativeButton(), new NativeButton(),
+                new NativeButton());
+
+        NativeButton buttonOn = new NativeButton("open notification",
+                event -> notification.open());
+        buttonOn.setId("open-notification-add-component-at-index");
+
+        NativeButton buttonOff = new NativeButton("open notification",
+                event -> notification.close());
+        buttonOff.setId("close-notification-add-component-at-index");
+
+        NativeButton addedButton = new NativeButton("Added Button");
+        addedButton.setId("added-button");
+        NativeButton addFirst = new NativeButton("Add to the first", event -> {
+            notification.addComponentAsFirst(addedButton);
+            notification.open();
+        });
+        addFirst.setId("button-to-first");
+
+        NativeButton addAtSecond = createTestButton(notification, addedButton,
+                "button-to-second", 1);
+
+        NativeButton addOverIndex = createTestButton(notification, addedButton,
+                "button-over-index", 10);
+
+        NativeButton addNegativeIndex = createTestButton(notification,
+                addedButton,
+                "button-negative-index", -10);
+
+        add(buttonOn, buttonOff, addFirst, addAtSecond, addOverIndex,
+                addNegativeIndex);
+    }
+
+    private void createNotificationWithComponentsAndAddComponentAfterOpen() {
+        Notification notification = new Notification();
+        notification.setId("notification-add-component-after-open");
+
+        NativeButton buttonOn = new NativeButton("open notification",
+                event -> notification.open());
+        buttonOn.setId("Open-notification-add-component");
+
+        NativeButton addButton = new NativeButton("add a new button", event -> {
+            notification.addComponentAtIndex(1, new NativeButton("text"));
+        });
+        addButton.setId("Add-component-to-notification");
+
+        notification.add(new NativeButton(), new NativeButton(),
+                new NativeButton(), addButton);
+
+        add(buttonOn);
     }
 
     private void createNotificationWithButtonControl() {
@@ -215,6 +288,16 @@ public class NotificationTestPage extends Div {
         open.addClickListener(event -> notification.open());
         close.addClickListener(event -> notification.close());
         add(open, close);
+    }
+
+    private NativeButton createTestButton(Notification notification,
+            NativeButton addedButton, String buttonId, int index) {
+        NativeButton button = new NativeButton(buttonId, event -> {
+            notification.addComponentAtIndex(index, addedButton);
+            notification.open();
+        });
+        button.setId(buttonId);
+        return button;
     }
 
 }

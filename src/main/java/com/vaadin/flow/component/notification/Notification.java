@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.notification;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
@@ -305,9 +306,10 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      */
     @Override
     public void add(Component... components) {
-        assert components != null;
+        Objects.requireNonNull(components, "Components should not be null");
         for (Component component : components) {
-            assert component != null;
+            Objects.requireNonNull(component,
+                    "Component to add cannot be null");
             container.appendChild(component.getElement());
         }
         getElement().getNode()
@@ -324,7 +326,8 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     @Override
     public void remove(Component... components) {
         for (Component component : components) {
-            assert component != null;
+            Objects.requireNonNull(component,
+                    "Component to remove cannot be null");
             if (container.equals(component.getElement().getParent())) {
                 container.removeChild(component.getElement());
             } else {
@@ -332,6 +335,41 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                         + component + ") is not a child of this component");
             }
         }
+    }
+
+    /**
+     * Adds the given component into this notification at the given index.
+     * <p>
+     * The element in the DOM will not be child of the
+     * {@code <vaadin-notification>} element, but will be inserted into an
+     * overlay that is attached into the {@code <body>}.
+     * <p>
+     * NOTE: When mixing this method with {@link #Notification(String)},
+     * {@link #Notification(String, int)} and
+     * {@link #Notification(String, int, Position)} method will remove the text
+     * content.
+     * 
+     * @param index
+     *            the index, where the component will be added.
+     * @param component
+     *            the component to add
+     */
+    @Override
+    public void addComponentAtIndex(int index, Component component) {
+        Objects.requireNonNull(component, "Component should not be null");
+        int indexCheck;
+        if (index < 0) {
+            indexCheck = 0;
+        } else if (index > container.getChildCount()) {
+            indexCheck = container.getChildCount();
+        } else {
+            indexCheck = index;
+        }
+        container.insertChild(indexCheck, component.getElement());
+
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        context -> attachComponentTemplate(ui)));
     }
 
     /**

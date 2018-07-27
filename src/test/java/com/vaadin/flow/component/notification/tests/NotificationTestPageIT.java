@@ -179,6 +179,74 @@ public class NotificationTestPageIT extends AbstractComponentIT {
         Assert.assertEquals(1, notification.size());
     }
 
+    @Test
+    public void openNotificationAddComponentAtFirst() {
+        verifyInitialNotification(3);
+        findElement(By.id("button-to-first")).click();
+        assertButtonNumberInNotification(4);
+        assertButtonText(0, "Added Button");
+    }
+
+    @Test
+    public void openNotificationAddComponentAtIndex() {
+        verifyInitialNotification(3);
+        findElement(By.id("button-to-second")).click();
+        assertButtonNumberInNotification(4);
+        assertButtonText(1, "Added Button");
+    }
+
+    @Test
+    public void openNotificationAddComponentOverIndex() {
+        verifyInitialNotification(3);
+        findElement(By.id("button-over-index")).click();
+        assertButtonNumberInNotification(4);
+        assertButtonText(3, "Added Button");
+    }
+
+    @Test
+    public void openNotificationAddComponentNegativeIndex() {
+        verifyInitialNotification(3);
+        findElement(By.id("button-negative-index")).click();
+        assertButtonNumberInNotification(4);
+        assertButtonText(0, "Added Button");
+    }
+
+    @Test
+    public void addComponentToOpenedNotification() {
+        waitForElementNotPresent(
+                By.id("notification-add-component-after-open"));
+        findElement(By.id("Open-notification-add-component")).click();
+        waitForElementPresent(By.id("notification-add-component-after-open"));
+        assertButtonNumberInNotification(4);
+        findElement(By.id("Add-component-to-notification")).click();
+        assertButtonNumberInNotification(5);
+        assertButtonText(1, "text");
+    }
+
+    private void assertButtonText(int indexOfButton, String expectedText) {
+        Assert.assertEquals("Button Text is not correct", expectedText,
+                findElements(By.tagName(NOTIFICATION_CARD_TAG)).get(0)
+                        .findElements(By.tagName("button")).get(indexOfButton)
+                        .getText());
+    }
+
+    private void verifyInitialNotification(int initialNumber) {
+        waitForElementNotPresent(By.id("notification-add-component-at-index"));
+        findElement(By.id("open-notification-add-component-at-index")).click();
+        waitForElementPresent(By.id("notification-add-component-at-index"));
+        assertButtonNumberInNotification(initialNumber);
+        findElement(By.id("close-notification-add-component-at-index")).click();
+        waitForElementNotPresent(By.id(NOTIFICATION_CARD_TAG));
+    }
+
+    private void assertButtonNumberInNotification(int expectedButtonNumber) {
+        Assert.assertEquals(
+                "Number of buttons in the notification overlay is not correct.",
+                expectedButtonNumber,
+                findElement(By.tagName(NOTIFICATION_CARD_TAG))
+                        .findElements(By.tagName("button")).size());
+    }
+
     private void assertButtonSize(int number) {
         Assert.assertEquals(number, getNotifications().iterator().next()
                 .findElements(By.tagName("button")).size());
