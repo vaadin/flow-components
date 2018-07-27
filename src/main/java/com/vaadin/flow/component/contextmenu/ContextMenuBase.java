@@ -262,6 +262,32 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
     }
 
     /**
+     * Adds the given component into this context menu at the given index.
+     * <p>
+     * The added elements in the DOM will not be children of the
+     * {@code <vaadin-context-menu>} element, but will be inserted into an
+     * overlay that is attached into the {@code <body>}.
+     * 
+     * @param index
+     *            the index, where the component will be added.
+     * @param component
+     *            the component to add
+     */
+    @Override
+    public void addComponentAtIndex(int index, Component component) {
+        Objects.requireNonNull(component, "Component should not be null");
+        int indexCheck;
+        if (index < 0) {
+            indexCheck = 0;
+        } else if (index > container.getChildCount()) {
+            indexCheck = container.getChildCount();
+        } else {
+            indexCheck = index;
+        }
+        container.insertChild(indexCheck, component.getElement());
+    }
+
+    /**
      * Gets the child components of this component. This includes components
      * added with {@link #add(Component...)} and the {@link MenuItem} components
      * created with {@link #addItem(String)} and its overload methods.

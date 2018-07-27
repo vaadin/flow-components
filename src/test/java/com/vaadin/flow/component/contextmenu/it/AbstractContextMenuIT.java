@@ -27,12 +27,6 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
 
     public static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
 
-    protected void rightClickOn(By by) {
-        Actions action = new Actions(getDriver());
-        WebElement element = findElement(by);
-        action.contextClick(element).perform();
-    }
-
     protected void rightClickOn(String id) {
         Actions action = new Actions(getDriver());
         WebElement element = findElement(By.id(id));

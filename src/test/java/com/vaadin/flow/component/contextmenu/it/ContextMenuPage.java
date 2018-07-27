@@ -36,6 +36,48 @@ public class ContextMenuPage extends Div {
         addContextMenuWithOpenedChangeListener();
         addSeparator();
         addContextMenuWithControls();
+        addSeparator();
+        createContextMenuAndAddComponentAtIndex();
+    }
+
+    private void createContextMenuAndAddComponentAtIndex() {
+        Label target = new Label(
+                "Target for context menu with opened change listener");
+        target.setId("context-menu-add-component-target");
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.setTarget(target);
+
+        contextMenu.setId("menu-add-component-at-index");
+        contextMenu.add(new NativeButton(), new NativeButton(),
+                new NativeButton());
+
+        NativeButton addedButton = new NativeButton("Added Button");
+        addedButton.setId("added-button");
+        NativeButton addFirst = new NativeButton("Add to the first", event -> {
+            contextMenu.addComponentAsFirst(addedButton);
+        });
+        addFirst.setId("button-to-first");
+
+        NativeButton addAtSecond = createTestButton(contextMenu, addedButton,
+                "button-to-second", 1);
+
+        NativeButton addOverIndex = createTestButton(contextMenu, addedButton,
+                "button-over-index", 10);
+
+        NativeButton addNegativeIndex = createTestButton(contextMenu,
+                addedButton,
+                "button-negative-index", -10);
+
+        add(target, addFirst, addAtSecond, addOverIndex, addNegativeIndex);
+    }
+
+    private NativeButton createTestButton(ContextMenu menu,
+            NativeButton addedButton, String buttonId, int index) {
+        NativeButton button = new NativeButton(buttonId, event -> {
+            menu.addComponentAtIndex(index, addedButton);
+        });
+        button.setId(buttonId);
+        return button;
     }
 
     private void addSeparator() {

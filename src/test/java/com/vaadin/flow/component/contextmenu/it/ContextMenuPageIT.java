@@ -28,6 +28,8 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("context-menu-test")
 public class ContextMenuPageIT extends AbstractContextMenuIT {
 
+    static final String CONTEXT_MENU_OVERLAY_TAG = "vaadin-context-menu-overlay";
+
     @Before
     public void init() {
         open();
@@ -132,6 +134,66 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         leftClickOn("change-target");
         leftClickOn("alt-target");
         verifyOpened();
+    }
+
+    @Test
+    public void openMenuAddComponentAtFirst() {
+        verifyInitialMenu(3);
+        findElement(By.id("button-to-first")).click();
+        rightClickOn("context-menu-add-component-target");
+        assertButtonNumberInMenu(4);
+        assertButtonText(0);
+    }
+
+    @Test
+    public void openMenuAddComponentAtIndex() {
+        verifyInitialMenu(3);
+        findElement(By.id("button-to-second")).click();
+        rightClickOn("context-menu-add-component-target");
+        assertButtonNumberInMenu(4);
+        assertButtonText(1);
+    }
+
+    @Test
+    public void openMenuAddComponentOverIndex() {
+        verifyInitialMenu(3);
+        findElement(By.id("button-over-index")).click();
+        rightClickOn("context-menu-add-component-target");
+        assertButtonNumberInMenu(4);
+        assertButtonText(3);
+    }
+
+    @Test
+    public void openMenuAddComponentNegativeIndex() {
+        verifyInitialMenu(3);
+        findElement(By.id("button-negative-index")).click();
+        rightClickOn("context-menu-add-component-target");
+        assertButtonNumberInMenu(4);
+        assertButtonText(0);
+    }
+
+    private void assertButtonText(int index) {
+        Assert.assertEquals("Button Text is not correct", "Added Button",
+                findElements(By.tagName(CONTEXT_MENU_OVERLAY_TAG)).get(0)
+                        .findElements(By.tagName("button")).get(index)
+                        .getText());
+    }
+
+    private void verifyInitialMenu(int initialNumber) {
+        waitForElementNotPresent(By.id("menu-add-component-at-index"));
+        rightClickOn("context-menu-add-component-target");
+        waitForElementPresent(By.id("menu-add-component-at-index"));
+        assertButtonNumberInMenu(initialNumber);
+        leftClickOn("context-menu-add-component-target");
+        waitForElementNotPresent(By.id("menu-add-component-at-index"));
+    }
+
+    private void assertButtonNumberInMenu(int expectedButtonNumber) {
+        Assert.assertEquals(
+                "Number of buttons in the menu overlay is not correct.",
+                expectedButtonNumber,
+                findElement(By.tagName(CONTEXT_MENU_OVERLAY_TAG))
+                        .findElements(By.tagName("button")).size());
     }
 
     private void assertMessage(String string, Boolean state, String id) {
