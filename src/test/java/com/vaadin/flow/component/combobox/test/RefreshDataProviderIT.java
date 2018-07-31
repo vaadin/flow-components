@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,11 @@ public class RefreshDataProviderIT extends AbstractComponentIT {
 
     private List<String> getItems() {
         findElement(By.tagName("vaadin-combo-box")).sendKeys(Keys.ARROW_DOWN);
+
+        if (!isElementPresent(By.tagName("vaadin-combo-box-overlay"))) {
+            return new ArrayList<String>();
+        }
+
         WebElement overlay = findElement(
                 By.tagName("vaadin-combo-box-overlay"));
         WebElement content = getInShadowRoot(overlay, By.id("content"));
