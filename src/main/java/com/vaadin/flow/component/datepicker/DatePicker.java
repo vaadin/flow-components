@@ -48,7 +48,6 @@ import elemental.json.JsonObject;
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation {
 
-    private static final String I18N_PROPERTY = "i18n";
     private DatePickerI18n i18n;
 
     private final static SerializableFunction<String, LocalDate> PARSER = s -> {
@@ -256,7 +255,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         Objects.requireNonNull(locale, "Locale must not be null.");
         this.locale = locale;
         String languageTag = locale.getLanguage() + "-" + locale.getCountry();
-        getElement().callFunction("$connector.setLocale", languageTag);
+        runBeforeClientResponse(ui -> getElement()
+                .callFunction("$connector.setLocale", languageTag));
     }
 
     /**
@@ -264,6 +264,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *
      * @return the locale used for this picker
      */
+    @Override
     public Locale getLocale() {
         return locale;
     }
@@ -275,11 +276,9 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private void initConnector() {
-        getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached DatePicker"))
-                .getPage().executeJavaScript(
-                        "window.Vaadin.Flow.datepickerConnector.initLazy($0)",
-                        getElement());
+        runBeforeClientResponse(ui -> ui.getPage().executeJavaScript(
+                "window.Vaadin.Flow.datepickerConnector.initLazy($0)",
+                getElement()));
     }
 
     /**

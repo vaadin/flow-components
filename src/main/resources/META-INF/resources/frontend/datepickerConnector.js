@@ -46,7 +46,7 @@ window.Vaadin.Flow.datepickerConnector = {
         };
 
         const updateFormat = function () {
-            let inputValue = datepicker._inputValue || '';
+            let inputValue = getInputValue();
             if (inputValue !== "" && datepicker.i18n.parseDate) {
                 let selectedDate = datepicker.i18n.parseDate(inputValue);
                 if (!selectedDate) {
@@ -56,6 +56,14 @@ window.Vaadin.Flow.datepickerConnector = {
                 datepicker._selectedDate = selectedDate && generateDate(selectedDate);
             }
         };
+        
+        const getInputValue = function () {
+            let inputValue = '';
+            if (datepicker.value) {
+                inputValue = datepicker._inputValue || '';                
+            }
+            return inputValue;
+        }
 
         datepicker.$connector.setLocale = function (locale) {
             try {
@@ -121,7 +129,7 @@ window.Vaadin.Flow.datepickerConnector = {
                 };
             };
 
-            let inputValue = datepicker._inputValue || '';
+            let inputValue = getInputValue();
             if (inputValue === "") {
                 oldLocale = locale;
             } else {
