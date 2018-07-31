@@ -33,11 +33,11 @@ public class TimePicker
         extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation {
 
-    private final static SerializableFunction<String, LocalTime> PARSER = s -> {
+    private static final SerializableFunction<String, LocalTime> PARSER = s -> {
         return s == null || s.isEmpty() ? null : LocalTime.parse(s);
     };
 
-    private final static SerializableFunction<LocalTime, String> FORMATTER = d -> {
+    private static final SerializableFunction<LocalTime, String> FORMATTER = d -> {
         return d == null ? "" : d.toString();
     };
 
