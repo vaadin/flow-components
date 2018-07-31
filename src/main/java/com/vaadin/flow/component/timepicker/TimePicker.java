@@ -18,6 +18,7 @@ package com.vaadin.flow.component.timepicker;
 import java.time.LocalTime;
 
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
@@ -31,7 +32,7 @@ import com.vaadin.flow.shared.Registration;
  */
 public class TimePicker
         extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
-        implements HasSize, HasValidation {
+        implements HasSize, HasValidation, HasEnabled {
 
     private static final SerializableFunction<String, LocalTime> PARSER = s -> {
         return s == null || s.isEmpty() ? null : LocalTime.parse(s);
@@ -113,20 +114,6 @@ public class TimePicker
     }
 
     @Override
-    public void setName(String name) {
-        super.setName(name);
-    }
-
-    /**
-     * Gets the name of the time picker.
-     *
-     * @return the {@code name} property from the time picker
-     */
-    public String getName() {
-        return getNameString();
-    }
-
-    @Override
     public void setErrorMessage(String errorMessage) {
         super.setErrorMessage(errorMessage);
     }
@@ -136,6 +123,7 @@ public class TimePicker
      *
      * @return the current error message
      */
+    @Override
     public String getErrorMessage() {
         return getErrorMessageString();
     }
@@ -152,6 +140,7 @@ public class TimePicker
      *
      * @return the {@code validity} property from the time picker
      */
+    @Override
     public boolean isInvalid() {
         return isInvalidBoolean();
     }
@@ -191,31 +180,23 @@ public class TimePicker
         return isRequiredBoolean();
     }
 
-    @Override
-    public void setDisabled(boolean disabled) {
-        super.setDisabled(disabled);
-    }
-
-    public boolean isDisabled() {
-        return super.isDisabledBoolean();
-    }
-
     /**
+     * Sets the {@code step} property of the time picker. It specifies the
+     * intervals for the displayed items in the time picker dropdown.
      * <p>
-     * Specifies the number of valid intervals in a day or in an hour used for
-     * configuring the items displayed in the selection box.
-     * </p>
-     * <p>
-     * It also configures the precission of the value string. By default the
-     * component formats values as {@code hh:mm} but setting a step value lower
-     * than one minute or one second, format resolution changes to
-     * {@code hh:mm:ss} and {@code hh:mm:ss.fff} respectively.
+     * Note: the displayed time format can be affected by changing the
+     * {@code step} property. By default, the format is {@code hh:mm}, but if
+     * the step is less than 60 seconds, the format will be changed to
+     * {@code hh:mm:ss} and it can be in {@code hh:mm:ss.fff} format, when the
+     * step is less than 1 second.
      * </p>
      * <p>
      * Unit must be set in seconds, and for correctly configuring intervals in
      * the dropdown, it need to evenly divide a day or an hour.
      * </p>
-     * NOTE: If the step is less than 900 seconds, the dropdown is hidden.
+     * <p>
+     * If the step is less than 900 seconds, the dropdown is hidden.
+     * </p>
      * 
      * @param step
      *            the step to set, unit seconds

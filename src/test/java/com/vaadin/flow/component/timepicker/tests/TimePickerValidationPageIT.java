@@ -15,13 +15,12 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import java.awt.TextField;
-
+import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.testutil.AbstractValidationTest;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
- * Integration tests for {@link TextField} validation.
+ * Integration tests for {@link TimePicker} validation.
  */
 @TestPath("time-picker-validation")
 public class TimePickerValidationPageIT extends AbstractValidationTest {
