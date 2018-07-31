@@ -45,15 +45,15 @@
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-themable-mixin</artifactId>
         </dependency>
-	    <dependency>
+        <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-material-styles</artifactId>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-lumo-styles</artifactId>
-		</dependency>
-		<dependency>
+        </dependency>
+        <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-element-mixin</artifactId>
         </dependency>
@@ -61,7 +61,7 @@
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-a11y-keys-behavior</artifactId>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-control-state-mixin</artifactId>
         </dependency>
