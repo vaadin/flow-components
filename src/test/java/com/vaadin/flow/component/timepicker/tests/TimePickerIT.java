@@ -23,6 +23,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.timepicker.demo.TimePickerView;
 import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Integration tests for the {@link TimePickerView}.
@@ -61,6 +62,64 @@ public class TimePickerIT extends ComponentDemoTest {
         Assert.assertEquals(
                 "The message should not be shown for the disabled picker", true,
                 message.getText().isEmpty());
+    }
+
+    @Test
+    public void TimePickerWithDifferentStep() {
+        TestBenchElement picker = $(TestBenchElement.class)
+                .id("step-setting-picker");
+        openPickerDropDown(picker);
+        waitForElementPresent(By.tagName("vaadin-combo-box-overlay"));
+        Assert.assertEquals("Item in the dropdown is not correct", "01:00",
+                findItemText(1));
+        closePickerDropDown(picker);
+        executeScript("arguments[0].value = '12:31'", picker);
+        
+        clickButtonAndAssertText(0.5, "12:31:00.000", picker);
+        openPickerDropDown(picker);
+        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
+
+        clickButtonAndAssertText(6.0, "12:31:00", picker);
+        openPickerDropDown(picker);
+        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
+
+        clickButtonAndAssertText(900.0, "12:31", picker);
+        openPickerDropDown(picker);
+        waitForElementPresent(By.tagName("vaadin-combo-box-overlay"));
+        Assert.assertEquals("Item in the dropdown is not correct", "00:15",
+                findItemText(1));
+        closePickerDropDown(picker);
+    }
+
+    private String findItemText(int index) {
+        return $("vaadin-combo-box-overlay").first()
+                .$(TestBenchElement.class).id("content")
+                .$(TestBenchElement.class).id("selector")
+                .$("vaadin-combo-box-item").get(index)
+                .$(TestBenchElement.class).id("content").getText();
+    }
+
+    private void openPickerDropDown(TestBenchElement picker) {
+        TestBenchElement comboLight = picker.$("vaadin-combo-box-light").get(0);
+        executeScript("arguments[0].open()", comboLight);
+    }
+
+    private void closePickerDropDown(TestBenchElement picker) {
+        TestBenchElement comboLight = picker.$("vaadin-combo-box-light").get(0);
+        executeScript("arguments[0].close()", comboLight);
+        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
+    }
+
+    private void clickButtonAndAssertText(double step, String expectedString,
+            TestBenchElement picker) {
+        findElement(By.id("step-" + step)).click();
+        WebElement message = findElement(By.id("step-setting-picker-message"));
+        Assert.assertEquals("The current step is incorrect",
+                "Current Step:" + step, message.getText());
+        Assert.assertEquals(
+                "When step is " + step + ", the value should be "
+                        + expectedString,
+                expectedString, picker.getAttribute("value"));
     }
 
     @Override

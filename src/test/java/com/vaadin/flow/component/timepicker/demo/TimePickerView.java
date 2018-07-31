@@ -18,6 +18,8 @@ package com.vaadin.flow.component.timepicker.demo;
 import java.time.LocalTime;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
@@ -33,6 +35,7 @@ public class TimePickerView extends DemoView {
     public void initView() {
         createDefaultTimePicker();
         createDisabledTimePicker();
+        createTimePickerWithStepSetting();
     }
 
     private void createDefaultTimePicker() {
@@ -46,15 +49,46 @@ public class TimePickerView extends DemoView {
         // end-source-example
 
         timePicker.setId("simple-picker");
-        message.setId("simple-picker-message");
         addCard("Default Time Picker", timePicker, message);
+    }
+
+    private void createTimePickerWithStepSetting() {
+        Div message = createMessageDiv("step-setting-picker-message");
+        Label label = new Label(
+                "The first two steps will not show the dropdown.\n Different step setting will affect the displayed time pattern.");
+        // begin-source-example
+        // source-example-heading: Time Picker With Step Setting
+        TimePicker timePicker = new TimePicker();
+
+        NativeButton button1 = new NativeButton("Time Pattern: hh:mm:ss.fff", 
+                event-> { 
+                    timePicker.setStep(0.5);
+                    message.setText("Current Step:" + timePicker.getStep());
+                });
+        NativeButton button2 = new NativeButton("Time Pattern: hh:mm:ss",
+                event -> {
+                    timePicker.setStep(6.0);
+                    message.setText("Current Step:" + timePicker.getStep());
+                });
+        NativeButton button3 = new NativeButton("Time Pattern: hh:mm",
+                event -> {
+                    timePicker.setStep(900.0);
+                    message.setText("Current Step:" + timePicker.getStep());
+                });
+        // end-source-example
+        timePicker.setId("step-setting-picker");
+        button1.setId("step-0.5");
+        button2.setId("step-6.0");
+        button3.setId("step-900.0");
+        addCard("Time Picker With Step Setting", label, timePicker, button1,
+                button2, button3, message);
     }
 
     private void createDisabledTimePicker() {
         Div message = createMessageDiv("disabled-picker-message");
 
         // begin-source-example
-        // source-example-heading: Disabled time picker
+        // source-example-heading: Disabled Time Picker
         TimePicker timePicker = new TimePicker();
         timePicker.setEnabled(false);
         // end-source-example
@@ -64,8 +98,7 @@ public class TimePickerView extends DemoView {
         });
 
         timePicker.setId("disabled-picker");
-        message.setId("disabled-picker-message");
-        addCard("Disabled time picker", timePicker, message);
+        addCard("Disabled Time Picker", timePicker, message);
     }
 
     private Div createMessageDiv(String id) {

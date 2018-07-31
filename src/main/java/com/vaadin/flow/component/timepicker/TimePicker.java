@@ -200,6 +200,44 @@ public class TimePicker
         return super.isDisabledBoolean();
     }
 
+    /**
+     * <p>
+     * Specifies the number of valid intervals in a day or in an hour used for
+     * configuring the items displayed in the selection box.
+     * </p>
+     * <p>
+     * It also configures the precission of the value string. By default the
+     * component formats values as {@code hh:mm} but setting a step value lower
+     * than one minute or one second, format resolution changes to
+     * {@code hh:mm:ss} and {@code hh:mm:ss.fff} respectively.
+     * </p>
+     * <p>
+     * Unit must be set in seconds, and for correctly configuring intervals in
+     * the dropdown, it need to evenly divide a day or an hour.
+     * </p>
+     * NOTE: If the step is less than 900 seconds, the dropdown is hidden.
+     * 
+     * @param step
+     *            the step to set, unit seconds
+     */
+    @Override
+    public void setStep(double step) {
+        super.setStep(step);
+    }
+
+    /**
+     * Gets the step of the time picker.
+     * 
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * 
+     * @return the {@code step} property from the picker, unit seconds
+     */
+    public double getStep() {
+        return super.getStepDouble();
+    }
+
     @Override
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent<TimePicker>> listener) {
