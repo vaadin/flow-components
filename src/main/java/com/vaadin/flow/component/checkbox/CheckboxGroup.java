@@ -1,0 +1,371 @@
+/*
+ * Copyright 2000-2018 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.checkbox;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.data.binder.HasItemsAndComponents;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.selection.MultiSelect;
+import com.vaadin.flow.data.selection.MultiSelectionEvent;
+import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.dom.PropertyChangeEvent;
+import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.shared.Registration;
+
+import elemental.json.Json;
+import elemental.json.JsonArray;
+import elemental.json.JsonValue;
+
+/**
+ * Server-side component for the {@code vaadin-checkbox-group} element.
+ * <p>
+ * CheckBoxGroup is a multiselection component where items are displayed as
+ * check boxes.
+ *
+ * @author Vaadin Ltd
+ */
+public class CheckboxGroup<T>
+        extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
+        implements HasItemsAndComponents<T>, HasSize, HasValidation,
+        MultiSelect<CheckboxGroup<T>, T>, HasDataProvider<T> {
+
+    private static final String VALUE = "value";
+
+    private final KeyMapper<T> keyMapper = new KeyMapper<>();
+
+    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+
+    private boolean isReadOnly;
+
+    private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
+
+    private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+
+    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
+    private Registration validationRegistration;
+
+    private static class CheckBoxItem<T> extends Checkbox
+            implements ItemComponent<T> {
+
+        private final T item;
+
+        private CheckBoxItem(String id, T item) {
+            this.item = item;
+            getElement().setProperty(VALUE, id);
+        }
+
+        @Override
+        public T getItem() {
+            return item;
+        }
+
+    }
+
+    public CheckboxGroup() {
+        super(Collections.emptySet(), Collections.emptySet(), JsonValue.class,
+                CheckboxGroup::presentationToModel,
+                CheckboxGroup::modelToPresentation);
+        registerValidation();
+    }
+
+    @Override
+    public void setDataProvider(DataProvider<T, ?> dataProvider) {
+        this.dataProvider = dataProvider;
+        reset();
+    }
+
+    @Override
+    public void updateSelection(Set<T> addedItems, Set<T> removedItems) {
+        Set<T> value = new HashSet<>(getValue());
+        value.addAll(addedItems);
+        value.removeAll(removedItems);
+        setValue(value);
+    }
+
+    @Override
+    public Set<T> getSelectedItems() {
+        return getValue();
+    }
+
+    @Override
+    public Registration addSelectionListener(
+            MultiSelectionListener<CheckboxGroup<T>, T> listener) {
+        return addValueChangeListener(event -> new MultiSelectionEvent<>(this,
+                this, event.getOldValue(), event.isFromClient()));
+    }
+
+    /**
+     * Gets the data provider.
+     *
+     * @return the data provider, not {@code null}
+     */
+    public DataProvider<T, ?> getDataProvider() {
+        return dataProvider;
+    }
+
+    @Override
+    public void onEnabledStateChanged(boolean enabled) {
+        if (isReadOnly()) {
+            setDisabled(true);
+        } else {
+            setDisabled(!enabled);
+        }
+        refreshCheckboxes();
+    }
+
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        isReadOnly = readOnly;
+        if (isEnabled()) {
+            setDisabled(readOnly);
+            refreshCheckboxes();
+        }
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return isReadOnly;
+    }
+
+    /**
+     * Returns the item enabled predicate.
+     *
+     * @return the item enabled predicate
+     * @see #setItemEnabledProvider
+     */
+    public SerializablePredicate<T> getItemEnabledProvider() {
+        return itemEnabledProvider;
+    }
+
+    /**
+     * Sets the item enabled predicate for this checkbox group. The predicate is
+     * applied to each item to determine whether the item should be enabled
+     * ({@code true}) or disabled ({@code false}). Disabled items are displayed
+     * as grayed out and the user cannot select them. The default predicate
+     * always returns true (all the items are enabled).
+     *
+     * @param itemEnabledProvider
+     *            the item enable predicate, not {@code null}
+     */
+    public void setItemEnabledProvider(
+            SerializablePredicate<T> itemEnabledProvider) {
+        this.itemEnabledProvider = Objects.requireNonNull(itemEnabledProvider);
+        refreshCheckboxes();
+    }
+
+    /**
+     * Sets the item label generator that is used to produce the strings shown
+     * in the checkbox group for each item. By default,
+     * {@link String#valueOf(Object)} is used.
+     *
+     * @param itemLabelGenerator
+     *            the item label provider to use, not null
+     */
+    public void setItemLabelGenerator(
+            ItemLabelGenerator<T> itemLabelGenerator) {
+        Objects.requireNonNull(itemLabelGenerator,
+                "The item label generator can not be null");
+        this.itemLabelGenerator = itemLabelGenerator;
+        reset();
+    }
+
+    /**
+     * Gets the item label generator that is used to produce the strings shown
+     * in the checkbox group for each item.
+     *
+     * @return the item label generator used, not null
+     */
+    public ItemLabelGenerator<T> getItemLabelGenerator() {
+        return itemLabelGenerator;
+    }
+
+    @Override
+    public void setLabel(String label) {
+        super.setLabel(label);
+    }
+
+    /**
+     * Gets the label of the checkbox group.
+     *
+     * @return the {@code label} property of the checkbox group
+     */
+    public String getLabel() {
+        return super.getLabelString();
+    }
+
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        super.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * Gets the current error message from the checkbox group.
+     *
+     * @return the current error message
+     */
+    @Override
+    public String getErrorMessage() {
+        return getErrorMessageString();
+    }
+
+    @Override
+    public void setRequired(boolean required) {
+        super.setRequired(required);
+    }
+
+    /**
+     * Determines whether the checkbox group is marked as input required.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     *
+     * @return {@code true} if the input is required, {@code false} otherwise
+     */
+    public boolean isRequired() {
+        return isRequiredBoolean();
+    }
+
+    @Override
+    public boolean isInvalid() {
+        return isInvalidBoolean();
+    }
+
+    @Override
+    public void setInvalid(boolean invalid) {
+        super.setInvalid(invalid);
+    }
+
+    @Override
+    protected boolean hasValidValue() {
+        Set<T> selectedItems = presentationToModel(this,
+                (JsonArray) getElement().getPropertyRaw(VALUE));
+        if (selectedItems == null || selectedItems.isEmpty()) {
+            return true;
+        }
+        return selectedItems.stream().allMatch(itemEnabledProvider);
+    }
+
+    private void reset() {
+        keyMapper.removeAll();
+        removeAll();
+        clear();
+        getDataProvider().fetch(new Query<>()).map(this::createCheckBox)
+                .forEach(this::add);
+    }
+
+    private void refreshCheckboxes() {
+        getCheckboxItems().forEach(this::updateCheckbox);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Stream<CheckBoxItem<T>> getCheckboxItems() {
+        return getChildren().filter(CheckBoxItem.class::isInstance)
+                .map(child -> (CheckBoxItem<T>) child);
+    }
+
+    private Checkbox createCheckBox(T item) {
+        CheckBoxItem<T> checkbox = new CheckBoxItem<>(keyMapper.key(item),
+                item);
+        updateCheckbox(checkbox);
+        return checkbox;
+    }
+
+    private void updateCheckbox(CheckBoxItem<T> checkbox) {
+        checkbox.setLabel(getItemLabelGenerator().apply(checkbox.getItem()));
+        updateEnabled(checkbox);
+    }
+
+    private void updateEnabled(CheckBoxItem<T> checkbox) {
+        boolean disabled = isDisabledBoolean()
+                || !getItemEnabledProvider().test(checkbox.getItem());
+        Serializable rawValue = checkbox.getElement()
+                .getPropertyRaw("disabled");
+        if (rawValue instanceof Boolean) {
+            // convert the boolean value to a String to force update the
+            // property value. Otherwise since the provided value is the same as
+            // the current one the update don't do anything.
+            checkbox.getElement().setProperty("disabled",
+                    disabled ? Boolean.TRUE.toString() : null);
+        } else {
+            checkbox.setDisabled(disabled);
+        }
+    }
+
+    private void validateSelectionEnabledState(PropertyChangeEvent event) {
+        if (!hasValidValue()) {
+            Set<T> oldValue = presentationToModel(this,
+                    (JsonValue) event.getOldValue());
+            // return the value back on the client side
+            try {
+                validationRegistration.remove();
+                getElement().setPropertyJson(VALUE,
+                        modelToPresentation(this, oldValue));
+            } finally {
+                registerValidation();
+            }
+            // Now make sure that the button is still in the correct state
+            Set<T> value = presentationToModel(this,
+                    (JsonValue) event.getValue());
+            getCheckboxItems()
+                    .filter(checkbox -> value.contains(checkbox.getItem()))
+                    .forEach(this::updateEnabled);
+        }
+    }
+
+    private void registerValidation() {
+        if (validationRegistration != null) {
+            validationRegistration.remove();
+        }
+        validationRegistration = getElement().addPropertyChangeListener(VALUE,
+                validationListener);
+    }
+
+    private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
+            JsonValue presentation) {
+        assert presentation instanceof JsonArray;
+        JsonArray array = (JsonArray) presentation;
+        Set<T> set = new HashSet<>();
+        for (int i = 0; i < array.length(); i++) {
+            set.add(group.keyMapper.get(array.getString(i)));
+        }
+        return set;
+    }
+
+    private static <T> JsonValue modelToPresentation(CheckboxGroup<T> group,
+            Set<T> model) {
+        JsonArray array = Json.createArray();
+        if (model.isEmpty()) {
+            return array;
+        }
+
+        model.stream().map(group.keyMapper::key)
+                .forEach(key -> array.set(array.length(), key));
+        return array;
+    }
+}
