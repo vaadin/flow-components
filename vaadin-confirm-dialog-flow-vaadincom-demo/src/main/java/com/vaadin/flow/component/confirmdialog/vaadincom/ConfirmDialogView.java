@@ -1,8 +1,12 @@
 package com.vaadin.flow.component.confirmdialog.vaadincom;
 
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -11,73 +15,107 @@ public class ConfirmDialogView extends DemoView {
 
     @Override
     protected void initView() {
-        unsavedChangesDialog();
-        confirmPublishDialog();
-        confirmDeleteDialog();
-        meetingStartingAlert();
+        alertDialog();
+        confirmationDialog();
+        confirmationDialogForDangerousAction();
+        confirmationDialogWithRejectOption();
+        customButtons();
     }
 
     private void createCard(String heading, String buttonText, ConfirmDialog dialog) {
-        Div messageDiv = createMessageDiv();
+        Span message = new Span();
+        message.getStyle().set("margin-left", "var(--lumo-space-m)");
+
         Button button = new Button(buttonText);
-        button.addClickListener(event -> dialog.open());
-        dialog.addConfirmListener(event -> messageDiv.setText("Confirmed"));
-        dialog.addRejectListener(event -> messageDiv.setText("Rejected"));
-        dialog.addCancelListener(event -> messageDiv.setText("Cancelled"));
-        addCard(heading, button, messageDiv);
+        button.addClickListener(event -> {
+            message.setText("");
+            dialog.open();
+        });
+
+        dialog.addConfirmListener(event -> message.setText("Confirmed"));
+        dialog.addRejectListener(event -> message.setText("Rejected"));
+        dialog.addCancelListener(event -> message.setText("Cancelled"));
+
+        addCard(heading, new Div(button, message));
     }
 
-    private void meetingStartingAlert() {
+    private void alertDialog() {
         // @formatter:off
         // begin-source-example
-        // source-example-heading: Basic Alert Dialog Example
+        // source-example-heading: Alert Dialog
         ConfirmDialog dialog = new ConfirmDialog("Meeting starting",
                 "Your next meeting starts in 5 minutes", "OK", this::onOK);
         // end-source-example
         // @formatter:on
 
-        createCard("Basic Alert Dialog Example", "Open dialog", dialog);
+        createCard("Alert Dialog", "Open dialog", dialog);
     }
 
-    private void confirmDeleteDialog() {
+    private void confirmationDialog() {
         // @formatter:off
         // begin-source-example
-        // source-example-heading: Confirm Delete Dialog Example
-        ConfirmDialog dialog = new ConfirmDialog("Delete product",
-                "Are you sure you want to delete? This operation can not be undone.",
+        // source-example-heading: Confirmation Dialog
+        ConfirmDialog dialog = new ConfirmDialog("Confirm publish",
+                "Are you sure you want to publish the article?", "Publish", this::onPublish,
+                "Cancel", this::onCancel);
+        // end-source-example
+        // @formatter:on
+
+        createCard("Confirmation Dialog", "Open dialog", dialog);
+    }
+
+    private void confirmationDialogForDangerousAction() {
+        // @formatter:off
+        // begin-source-example
+        // source-example-heading: Confirmation Dialog for Dangerous Actions
+        ConfirmDialog dialog = new ConfirmDialog("Confirm delete",
+                "Are you sure you want to delete the item?",
                 "Delete", this::onDelete, "Cancel", this::onCancel);
         dialog.setConfirmButtonTheme("error primary");
         // end-source-example
         // @formatter:on
 
-        createCard("Confirm Delete Dialog Example", "Open dialog", dialog);
+        createCard("Confirmation Dialog for Dangerous Actions", "Open dialog", dialog);
     }
 
-    private void confirmPublishDialog() {
+    private void confirmationDialogWithRejectOption() {
         // @formatter:off
         // begin-source-example
-        // source-example-heading: Confirmation Dialog Example
-        ConfirmDialog dialog = new ConfirmDialog("Ready to publish?",
-                "Do you want to publish this post?", "Publish", this::onPublish,
-                "Cancel", this::onCancel);
-        // end-source-example
-        // @formatter:on
-
-        createCard("Confirmation Dialog Example", "Open dialog", dialog);
-    }
-
-    private void unsavedChangesDialog() {
-        // @formatter:off
-        // begin-source-example
-        // source-example-heading: Save or Discard Dialog Example
+        // source-example-heading: Confirmation Dialog with a Reject Option
         ConfirmDialog dialog = new ConfirmDialog("Unsaved changes",
                 "Do you want to save or discard your changes before navigating away?",
-                "Save", this::onSave, "Discard", this::onDiscard, "Cancel",
-                this::onCancel);
+                "Save", this::onSave, "Discard", this::onDiscard, "Cancel", this::onCancel);
         // end-source-example
         // @formatter:on
 
-        createCard("Save or Discard Dialog Example", "Open dialog", dialog);
+        createCard("Confirmation Dialog with a Reject Option", "Open dialog", dialog);
+    }
+
+    private void customButtons() {
+        // @formatter:off
+        // begin-source-example
+        // source-example-heading: Custom Buttons
+        ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setHeader("Unsaved changes");
+        String textHtml = "<p>Do you want to <b>save</b> or <b>discard</b> " +
+                "your changes before navigating away?</p>";
+        dialog.setText(new Html(textHtml).getElement());
+
+        Button saveButton = new Button("Save", new Icon(VaadinIcon.ENVELOPE_OPEN));
+        saveButton.addClickListener(e -> dialog.close());
+        saveButton.getElement().setAttribute("theme", "primary");
+        dialog.setConfirmButton(saveButton.getElement());
+
+        Button rejectButton = new Button("Discard", new Icon(VaadinIcon.TRASH));
+        rejectButton.addClickListener(e -> dialog.close());
+        rejectButton.getElement().setAttribute("theme", "error tertiary");
+        dialog.setRejectButton(rejectButton.getElement());
+
+        dialog.setCancelButton("Cancel", this::onCancel);
+        // end-source-example
+        // @formatter:on
+
+        createCard("Custom Buttons", "Open dialog", dialog);
     }
 
     private void onOK(ConfirmDialog.ConfirmEvent event) {
@@ -96,11 +134,5 @@ public class ConfirmDialogView extends DemoView {
     }
 
     private void onCancel(ConfirmDialog.CancelEvent event) {
-    }
-
-    private Div createMessageDiv() {
-        Div message = new Div();
-        message.getStyle().set("whiteSpace", "pre");
-        return message;
     }
 }

@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-components-testbench</artifactId>
-            <version>1.0.0.rc1</version>
+            <version>1.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -52,7 +52,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>1.0.0.rc1</version>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-icons-flow</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 
