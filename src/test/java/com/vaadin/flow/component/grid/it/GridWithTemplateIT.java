@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -88,10 +87,8 @@ public class GridWithTemplateIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore
     /*
-     * Ignored due to the issue
-     * https://github.com/vaadin/vaadin-grid-flow/issues/71
+     * Test for the issue https://github.com/vaadin/vaadin-grid-flow/issues/71
      */
     public void injectedGrid_detailsWithTemplates_buttonIsClicked_detailIsUpdated() {
         WebElement gridInATemplate = findElement(
