@@ -29,7 +29,7 @@ import com.vaadin.testbench.TestBenchElement;
  * Integration tests for the {@link TimePickerView}.
  */
 public class TimePickerIT extends ComponentDemoTest {
-    
+
     private static final String TIMEPICKER_OVERLAY = "vaadin-combo-box-overlay";
 
     @Before
@@ -60,8 +60,8 @@ public class TimePickerIT extends ComponentDemoTest {
 
         executeScript("arguments[0].value = '10:15'", picker);
         Assert.assertEquals(
-                "The message should not be shown for the disabled picker", true,
-                message.getText().isEmpty());
+                "The message should not be shown for the disabled picker", "",
+                message.getText());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class TimePickerIT extends ComponentDemoTest {
                 findItemText(1));
         closePickerDropDown(picker);
         executeScript("arguments[0].value = '12:31'", picker);
-        
+
         clickButtonAndAssertText(0.5, "12:31:00.000", picker);
         openPickerDropDown(picker);
         waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
