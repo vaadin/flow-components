@@ -89,6 +89,8 @@ window.Vaadin.Flow.gridConnector = {
 
     let detailsVisibleOnClick = true;
 
+    let sorterDirectionsSetFromServer = false;
+
     grid.size = 0; // To avoid NaN here and there before we get proper data
     grid.itemIdPath = 'key';
 
@@ -372,12 +374,33 @@ window.Vaadin.Flow.gridConnector = {
     }
 
     const sorterChangeListener = function() {
-      grid.$server.sortersChanged(grid._sorters.map(function(sorter) {
-        return {
-          path: sorter.path,
-          direction: sorter.direction
-        };
-      }));
+      if (!sorterDirectionsSetFromServer) {
+        grid.$server.sortersChanged(grid._sorters.map(function(sorter) {
+          return {
+            path: sorter.path,
+            direction: sorter.direction
+          };
+        }));
+      }
+    }
+
+    grid.$connector.setSorterDirections = function(directions) {
+      try {
+        sorterDirectionsSetFromServer = true;
+
+        let allSorters = grid.querySelectorAll("vaadin-grid-sorter");
+        allSorters.forEach(sorter => sorter.direction = null);
+
+        for (let i = directions.length - 1; i >= 0; i--) {
+          const columnId = directions[i].column;
+          let sorter = grid.querySelector("vaadin-grid-sorter[path='" + columnId + "']");
+          if (sorter) {
+            sorter.direction = directions[i].direction;
+          }
+        }
+      } finally {
+        sorterDirectionsSetFromServer = false;
+      }
     }
     grid._createPropertyObserver("_previousSorters", sorterChangeListener);
 

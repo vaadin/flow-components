@@ -48,6 +48,7 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridContextMenu;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridSelectionModel;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
@@ -171,9 +172,9 @@ public class GridView extends DemoView {
      * Example object.
      */
     public static class PersonWithLevel extends Person {
-        
+
         private int level;
-        
+
         public int getLevel() {
             return level;
         }
@@ -182,6 +183,7 @@ public class GridView extends DemoView {
             this.level = level;
         }
     }
+
     /**
      * Example object.
      */
@@ -401,10 +403,9 @@ public class GridView extends DemoView {
 
         addVariantsDemo(() -> {
             return grid;
-        }, Grid::addThemeVariants,
-                Grid::removeThemeVariants, GridVariant::getVariantName,
-                GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_NO_ROW_BORDERS,
-                GridVariant.LUMO_ROW_STRIPES);
+        }, Grid::addThemeVariants, Grid::removeThemeVariants,
+                GridVariant::getVariantName, GridVariant.LUMO_NO_BORDER,
+                GridVariant.LUMO_NO_ROW_BORDERS, GridVariant.LUMO_ROW_STRIPES);
     }
 
     private void createBasicUsage() {
@@ -894,12 +895,30 @@ public class GridView extends DemoView {
                     "Current sort order: %s. Sort originates from the client: %s.",
                     currentSortOrder, event.isFromClient()));
         });
+
+        // you can set the sort order from server-side with the grid.sort method
+        NativeButton invertAllSortings = new NativeButton(
+                "Invert all sort directions", event -> {
+                    List<GridSortOrder<Person>> orderList = grid.getSortOrder();
+                    List<GridSortOrder<Person>> newOrderList = new ArrayList<>(
+                            orderList.size());
+                    for (GridSortOrder<Person> sort : orderList) {
+                        newOrderList.add(new GridSortOrder<>(sort.getSorted(),
+                                sort.getDirection().getOpposite()));
+                    }
+                    grid.sort(newOrderList);
+                });
+
+        NativeButton resetAllSortings = new NativeButton("Reset all sortings",
+                event -> grid.sort(null));
         // end-source-example
         grid.setId("grid-sortable-columns");
         multiSort.setId("grid-multi-sort-toggle");
+        invertAllSortings.setId("grid-sortable-columns-invert-sortings");
+        resetAllSortings.setId("grid-sortable-columns-reset-sortings");
         messageDiv.setId("grid-sortable-columns-message");
         addCard("Sorting", "Grid with sortable columns", grid, multiSort,
-                messageDiv);
+                invertAllSortings, resetAllSortings, messageDiv);
     }
 
     private void createBeanGrid() {
@@ -1142,9 +1161,9 @@ public class GridView extends DemoView {
         grid.addExpandListener(event -> message.setValue(
                 String.format("Expanded %s item(s)", event.getItems().size())
                         + "\n" + message.getValue()));
-        grid.addCollapseListener(event -> message
-                .setValue(String.format("Collapsed %s item(s)",
-                        event.getItems().size()) + "\n" + message.getValue()));
+        grid.addCollapseListener(event -> message.setValue(
+                String.format("Collapsed %s item(s)", event.getItems().size())
+                        + "\n" + message.getValue()));
 
         // end-source-example
         grid.setId("treegridbasic");
@@ -1152,19 +1171,16 @@ public class GridView extends DemoView {
         TextField name = new TextField("Name of selected person");
         grid.addSelectionListener(event -> name.setValue(
                 event.getFirstSelectedItem().map(Person::getName).orElse("")));
-        NativeButton save = new NativeButton("Save",
-                event -> {
-                    grid.getSelectionModel().getFirstSelectedItem().ifPresent(
-                            person -> person.setName(name.getValue()));
-                    grid.getSelectionModel().getFirstSelectedItem()
-                            .ifPresent(person -> grid.getDataProvider()
-                                    .refreshItem(person));
-                });
+        NativeButton save = new NativeButton("Save", event -> {
+            grid.getSelectionModel().getFirstSelectedItem()
+                    .ifPresent(person -> person.setName(name.getValue()));
+            grid.getSelectionModel().getFirstSelectedItem().ifPresent(
+                    person -> grid.getDataProvider().refreshItem(person));
+        });
         HorizontalLayout nameEditor = new HorizontalLayout(name, save);
 
-        addCard("TreeGrid", "TreeGrid Basics",
-                withTreeGridToggleButtons(getRootItems(), grid, nameEditor,
-                        message));
+        addCard("TreeGrid", "TreeGrid Basics", withTreeGridToggleButtons(
+                getRootItems(), grid, nameEditor, message));
     }
 
     private void createLazyLoadingTreeGridUsage() {
@@ -1183,64 +1199,68 @@ public class GridView extends DemoView {
         grid.setDataProvider(
                 new AbstractBackEndHierarchicalDataProvider<HierarchicalTestBean, Void>() {
 
-            private final int nodesPerLevel = 3;
-            private final int depth = 2;
+                    private final int nodesPerLevel = 3;
+                    private final int depth = 2;
 
                     @Override
-            public int getChildCount(
-                    HierarchicalQuery<HierarchicalTestBean, Void> query) {
+                    public int getChildCount(
+                            HierarchicalQuery<HierarchicalTestBean, Void> query) {
 
-                Optional<Integer> count = query.getParentOptional()
-                        .flatMap(parent -> Optional.of(Integer.valueOf(
-                                (internalHasChildren(parent) ? nodesPerLevel : 0))));
+                        Optional<Integer> count = query.getParentOptional()
+                                .flatMap(parent -> Optional.of(Integer
+                                        .valueOf((internalHasChildren(parent)
+                                                ? nodesPerLevel
+                                                : 0))));
 
-                return count.orElse(nodesPerLevel);
-            }
+                        return count.orElse(nodesPerLevel);
+                    }
 
-            @Override
-            public boolean hasChildren(HierarchicalTestBean item) {
-                return internalHasChildren(item);
-            }
+                    @Override
+                    public boolean hasChildren(HierarchicalTestBean item) {
+                        return internalHasChildren(item);
+                    }
 
-            private boolean internalHasChildren(HierarchicalTestBean node) {
-                return node.getDepth() < depth;
-            }
+                    private boolean internalHasChildren(
+                            HierarchicalTestBean node) {
+                        return node.getDepth() < depth;
+                    }
 
-            @Override
-            protected Stream<HierarchicalTestBean> fetchChildrenFromBackEnd(
-                    HierarchicalQuery<HierarchicalTestBean, Void> query) {
-                final int depth = query.getParentOptional().isPresent()
-                        ? query.getParent().getDepth() + 1
-                        : 0;
-                final Optional<String> parentKey = query.getParentOptional()
-                        .flatMap(parent -> Optional.of(parent.getId()));
+                    @Override
+                    protected Stream<HierarchicalTestBean> fetchChildrenFromBackEnd(
+                            HierarchicalQuery<HierarchicalTestBean, Void> query) {
+                        final int depth = query.getParentOptional().isPresent()
+                                ? query.getParent().getDepth() + 1
+                                : 0;
+                        final Optional<String> parentKey = query
+                                .getParentOptional()
+                                .flatMap(parent -> Optional.of(parent.getId()));
 
-                List<HierarchicalTestBean> list = new ArrayList<>();
-                int limit = Math.min(query.getLimit(), nodesPerLevel);
-                for (int i = 0; i < limit; i++) {
-                    list.add(new HierarchicalTestBean(parentKey.orElse(null), depth,
-                            i + query.getOffset()));
-                }
-                return list.stream();
-            }
-        });
+                        List<HierarchicalTestBean> list = new ArrayList<>();
+                        int limit = Math.min(query.getLimit(), nodesPerLevel);
+                        for (int i = 0; i < limit; i++) {
+                            list.add(new HierarchicalTestBean(
+                                    parentKey.orElse(null), depth,
+                                    i + query.getOffset()));
+                        }
+                        return list.stream();
+                    }
+                });
 
         // end-source-example
         grid.setId("treegridlazy");
 
         grid.addExpandListener(event -> message.setValue(
-                String.format("Expanded %s item(s)",
-                        event.getItems().size()) + "\n" + message.getValue()));
-        grid.addCollapseListener(event -> message
-                .setValue(String.format("Collapsed %s item(s)",
-                        event.getItems().size()) + "\n" + message.getValue()));
+                String.format("Expanded %s item(s)", event.getItems().size())
+                        + "\n" + message.getValue()));
+        grid.addCollapseListener(event -> message.setValue(
+                String.format("Collapsed %s item(s)", event.getItems().size())
+                        + "\n" + message.getValue()));
 
         addCard("TreeGrid", "TreeGrid with lazy loading",
                 withTreeGridToggleButtons(grid.getDataProvider().fetch(
                         new HierarchicalQuery<HierarchicalTestBean, SerializablePredicate<HierarchicalTestBean>>(
                                 null, null))
-                        .collect(Collectors.toList()),
-                        grid, message));
+                        .collect(Collectors.toList()), grid, message));
     }
 
     private void createContextMenu() {
@@ -1285,20 +1305,19 @@ public class GridView extends DemoView {
                 });
         toggleFirstItem.setId("treegrid-toggle-first-item");
         Div div1 = new Div(toggleFirstItem);
-        
+
         NativeButton toggleSeveralItems = new NativeButton(
-                "Toggle first three items",
-                evt -> {
+                "Toggle first three items", evt -> {
                     List<T> collapse = new ArrayList<>();
                     List<T> expand = new ArrayList<>();
                     roots.stream().limit(3).collect(Collectors.toList())
                             .forEach(p -> {
-                        if (grid.isExpanded(p)) {
-                            collapse.add(p);
-                        } else {
-                            expand.add(p);
-                        }
-                    });
+                                if (grid.isExpanded(p)) {
+                                    collapse.add(p);
+                                } else {
+                                    expand.add(p);
+                                }
+                            });
                     if (!expand.isEmpty()) {
                         grid.expand(expand);
                     }
@@ -1308,31 +1327,29 @@ public class GridView extends DemoView {
                 });
         toggleSeveralItems.setId("treegrid-toggle-first-five-item");
         Div div2 = new Div(toggleSeveralItems);
-    
+
         NativeButton toggleRecursivelyFirstItem = new NativeButton(
                 "Toggle first item recursively", evt -> {
                     if (grid.isExpanded(roots.get(0))) {
-                        grid.collapseRecursively(roots.stream().limit(1),
-                                2);
+                        grid.collapseRecursively(roots.stream().limit(1), 2);
                     } else {
                         grid.expandRecursively(roots.stream().limit(1), 2);
                     }
                 });
         toggleFirstItem.setId("treegrid-toggle-first-item-recur");
         Div div3 = new Div(toggleRecursivelyFirstItem);
-    
+
         NativeButton toggleAllRecursively = new NativeButton(
                 "Toggle all recursively", evt -> {
                     List<T> collapse = new ArrayList<>();
                     List<T> expand = new ArrayList<>();
-                    roots
-                            .forEach(p -> {
-                                if (grid.isExpanded(p)) {
-                                    collapse.add(p);
-                                } else {
-                                    expand.add(p);
-                                }
-                            });
+                    roots.forEach(p -> {
+                        if (grid.isExpanded(p)) {
+                            collapse.add(p);
+                        } else {
+                            expand.add(p);
+                        }
+                    });
                     if (!expand.isEmpty()) {
                         grid.expandRecursively(expand, 2);
                     }
@@ -1342,7 +1359,7 @@ public class GridView extends DemoView {
                 });
         toggleAllRecursively.setId("treegrid-toggle-all-recur");
         Div div4 = new Div(toggleAllRecursively);
-        
+
         return Stream.concat(Stream.of(grid, div1, div2, div3, div4),
                 Stream.of(other)).toArray(Component[]::new);
     }
@@ -1370,12 +1387,10 @@ public class GridView extends DemoView {
                 .collect(Collectors.toList());
     }
 
-    private static List<PersonWithLevel> createSubItems(int number,
-            int level) {
+    private static List<PersonWithLevel> createSubItems(int number, int level) {
         Random random = new Random(0);
         return IntStream.range(1, number)
-                .mapToObj(index -> createPersonWithLevel(index,
-                        random, level))
+                .mapToObj(index -> createPersonWithLevel(index, random, level))
                 .collect(Collectors.toList());
     }
 
@@ -1384,8 +1399,7 @@ public class GridView extends DemoView {
     }
 
     private static <T extends Person> T createPerson(Supplier<T> constructor,
-            int index, int id,
-            Random random) {
+            int index, int id, Random random) {
         T person = constructor.get();
         person.setId(id);
         person.setName("Person " + index);
@@ -1401,11 +1415,9 @@ public class GridView extends DemoView {
     }
 
     private static PersonWithLevel createPersonWithLevel(int index,
-            Random random,
-            int level) {
+            Random random, int level) {
         PersonWithLevel person = createPerson(PersonWithLevel::new, index,
-                treeIds.getAndIncrement(),
-                random);
+                treeIds.getAndIncrement(), random);
         person.setLevel(level);
         return person;
     }

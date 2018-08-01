@@ -409,7 +409,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
-    public void gridWidthSorting() {
+    public void gridWithSorting() {
         openTabAndCheckForErrors("sorting");
         GridElement grid = $(GridElement.class).id("grid-sortable-columns");
         scrollToElement(grid);
@@ -431,6 +431,44 @@ public class GridViewIT extends TabbedComponentDemoTest {
         getCellContent(grid.getHeaderCell(1)).click();
         assertSortMessageEquals(
                 QuerySortOrder.asc("age").thenAsc("name").build(), true);
+    }
+
+    @Test
+    public void gridWithSorting_invertAndResetSortings() {
+        openTabAndCheckForErrors("sorting");
+        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
+        scrollToElement(grid);
+
+        WebElement invertButton = findElement(
+                By.id("grid-sortable-columns-invert-sortings"));
+        WebElement resetButton = findElement(
+                By.id("grid-sortable-columns-reset-sortings"));
+
+        getCellContent(grid.getHeaderCell(0)).click();
+        assertSortMessageEquals(QuerySortOrder.asc("name").build(), true);
+
+        clickElementWithJs(invertButton);
+        assertSortMessageEquals(QuerySortOrder.desc("name").build(), false);
+
+        clickElementWithJs(invertButton);
+        assertSortMessageEquals(QuerySortOrder.asc("name").build(), false);
+
+        clickElementWithJs(resetButton);
+        assertSortMessageEquals(Collections.emptyList(), false);
+
+        // enable multi sort
+        clickElementWithJs(findElement(By.id("grid-multi-sort-toggle")));
+        getCellContent(grid.getHeaderCell(0)).click();
+        getCellContent(grid.getHeaderCell(1)).click();
+        assertSortMessageEquals(
+                QuerySortOrder.asc("age").thenAsc("name").build(), true);
+        clickElementWithJs(invertButton);
+        assertSortMessageEquals(
+                QuerySortOrder.desc("age").thenDesc("name").build(), false);
+
+        clickElementWithJs(resetButton);
+        assertSortMessageEquals(Collections.emptyList(), false);
+
     }
 
     private void assertSortMessageEquals(List<QuerySortOrder> querySortOrders,

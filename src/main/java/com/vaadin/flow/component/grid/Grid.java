@@ -2380,15 +2380,38 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         setSortOrder(sortOrderBuilder.build(), true);
     }
 
+    /**
+     * Forces a defined sort order for the columns in the Grid. Setting
+     * <code>null</code> or an empty list resets the ordering of all columns.
+     * Columns not mentioned in the list are reset to the unsorted state.
+     * <p>
+     * For Grids with multi-sorting, the index of a given column inside the list
+     * defines the sort priority. For example, the column at index 0 of the list
+     * is sorted first, then on the index 1, and so on.
+     * 
+     * @param order
+     *            the list of sort orders to set on the client, or
+     *            <code>null</code> to reset any sort orders.
+     * @see #setMultiSort(boolean)
+     * @see #getSortOrder()
+     */
+    public void sort(List<GridSortOrder<T>> order) {
+        if (order == null) {
+            order = Collections.emptyList();
+        }
+        setSortOrder(order, false);
+    }
+
     private void setSortOrder(List<GridSortOrder<T>> order,
             boolean userOriginated) {
         Objects.requireNonNull(order, "Sort order list cannot be null");
 
-        // TODO: if !userOriginated update client sort indicators. Should be
-        // implemented together with server side sorting (issue #2818).
-
         if (sortOrder.equals(order)) {
             return;
+        }
+
+        if (!userOriginated) {
+            updateClientSideSorterIndicators(order);
         }
 
         sortOrder.clear();
@@ -2402,6 +2425,44 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
         sortOrder.addAll(order);
         sort(userOriginated);
+    }
+
+    /**
+     * Gets an list of the current sort orders in the Grid.
+     * 
+     * @return an unmodifiable list of sort orders
+     */
+    public List<GridSortOrder<T>> getSortOrder() {
+        return Collections.unmodifiableList(sortOrder);
+    }
+
+    private void updateClientSideSorterIndicators(
+            List<GridSortOrder<T>> order) {
+        JsonArray directions = Json.createArray();
+
+        for (int i = 0; i < order.size(); i++) {
+            GridSortOrder<T> gridSortOrder = order.get(i);
+            JsonObject direction = Json.createObject();
+
+            String columnId = gridSortOrder.getSorted().getInternalId();
+            direction.put("column", columnId);
+
+            if (gridSortOrder.getDirection() != null) {
+                switch (gridSortOrder.getDirection()) {
+                case ASCENDING:
+                    direction.put("direction", "asc");
+                    break;
+                case DESCENDING:
+                    direction.put("direction", "desc");
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown gridSortOrder: "
+                            + gridSortOrder.getDirection());
+                }
+            }
+            directions.set(i, direction);
+        }
+        getElement().callFunction("$connector.setSorterDirections", directions);
     }
 
     private void sort(boolean userOriginated) {
