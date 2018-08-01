@@ -97,7 +97,7 @@ public class GridView extends DemoView {
     /**
      * Example object.
      */
-    public static class Person {
+    public static class Person implements Cloneable {
         private int id;
         private int age;
         private String name;
@@ -154,6 +154,16 @@ public class GridView extends DemoView {
         @Override
         public String toString() {
             return name;
+        }
+
+        @Override
+        public Person clone() {
+            try {
+                return (Person) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(
+                        "The Person object could not be cloned.", e);
+            }
         }
     }
 
@@ -1338,7 +1348,7 @@ public class GridView extends DemoView {
     }
 
     private List<Person> getItems() {
-        return items;
+        return items.stream().map(Person::clone).collect(Collectors.toList());
     }
 
     private List<PersonWithLevel> getRootItems() {
