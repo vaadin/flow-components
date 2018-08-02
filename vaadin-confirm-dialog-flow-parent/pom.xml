@@ -20,7 +20,8 @@
 	</organization>
 
 	<properties>
-		<flow.version>1.0.0</flow.version>
+		<flow.component.base.version>1.0.6</flow.component.base.version>
+		<flow.version>1.0.3</flow.version>
 		<testbench.version>6.0.1</testbench.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -46,4 +47,15 @@
 			<url>http://maven.vaadin.com/vaadin-prereleases</url>
 		</pluginRepository>
 	</pluginRepositories>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.vaadin</groupId>
+				<artifactId>flow-component-base</artifactId>
+				<version>${flow.component.base.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
