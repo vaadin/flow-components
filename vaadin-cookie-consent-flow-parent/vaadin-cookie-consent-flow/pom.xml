@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>com.vaadin.webjar</groupId>
 			<artifactId>vaadin-cookie-consent</artifactId>
-			<version>1.0.0-beta2</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars.bowergithub.polymer</groupId>
