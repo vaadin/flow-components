@@ -35,6 +35,8 @@ import com.vaadin.flow.shared.Registration;
 public class Tabs extends GeneratedVaadinTabs<Tabs>
         implements HasOrderedComponents<Tabs>, HasSize {
 
+    private static final String SELECTED = "selected";
+
     /**
      * The valid orientations of {@link Tabs} instances.
      */
@@ -47,6 +49,11 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * HORIZONTAL} orientation.
      */
     public Tabs() {
+        getElement().addPropertyChangeListener(SELECTED, event -> {
+            getChildren().filter(Tab.class::isInstance).map(Tab.class::cast)
+                    .forEach(tab -> tab.setSelected(false));
+            getSelectedTab().setSelected(true);
+        });
     }
 
     /**
@@ -57,6 +64,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      *            the tabs to enclose
      */
     public Tabs(Tab... tabs) {
+        this();
         add(tabs);
     }
 
@@ -97,9 +105,9 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      *
      * @return the zero-based index of the selected tab
      */
-    @Synchronize(property = "selected", value = "selected-changed")
+    @Synchronize(property = SELECTED, value = "selected-changed")
     public int getSelectedIndex() {
-        return getElement().getProperty("selected", 0);
+        return getElement().getProperty(SELECTED, 0);
     }
 
     /**
@@ -109,7 +117,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      *            the zero-based index of the selected tab
      */
     public void setSelectedIndex(int selectedIndex) {
-        getElement().setProperty("selected", selectedIndex);
+        getElement().setProperty(SELECTED, selectedIndex);
     }
 
     /**
@@ -141,7 +149,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
             throw new IllegalArgumentException(
                     "Tab to select must be a child: " + selectedTab);
         }
-        getElement().setProperty("selected", selectedIndex);
+        getElement().setProperty(SELECTED, selectedIndex);
     }
 
     /**

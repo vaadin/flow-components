@@ -16,15 +16,16 @@
 
 package com.vaadin.flow.component.tabs.tests;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Vaadin Ltd.
@@ -134,5 +135,18 @@ public class TabsTest {
         tabs.setFlexGrowForEnclosedTabs(-1);
 
         // Exception expected - nothing to assert
+    }
+
+    @Test
+    public void selectTab_tabIsSelected() {
+        Tabs tabs = new Tabs();
+        Tab tab1 = new Tab("foo");
+        Tab tab2 = new Tab("foo");
+        tabs.add(tab1, tab2);
+
+        tabs.setSelectedTab(tab2);
+
+        Assert.assertFalse(tab1.isSelected());
+        Assert.assertTrue(tab2.isSelected());
     }
 }
