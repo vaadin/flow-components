@@ -30,7 +30,7 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-confirm-dialog</artifactId>
-            <version>1.0.0-beta3</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.polymer</groupId>
