@@ -131,6 +131,7 @@ public class Tab extends GeneratedVaadinTab<Tab> implements HasComponents {
      * @param enabled
      *            the boolean value to set
      */
+    @Override
     public void setEnabled(boolean enabled) {
         setDisabled(!enabled);
     }
@@ -146,6 +147,7 @@ public class Tab extends GeneratedVaadinTab<Tab> implements HasComponents {
      * @return the negation of {@code disabled} property value from the
      *         webcomponent
      */
+    @Override
     public boolean isEnabled() {
         return !isDisabledBoolean();
     }
@@ -156,15 +158,16 @@ public class Tab extends GeneratedVaadinTab<Tab> implements HasComponents {
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * If true, the item is in selected state.
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
+     * If a {@link Tab} instance is used inside {@link Tabs} component then
+     * selected state is updated based on currently selected tab. So the value
+     * is the same as {@link Tabs#getSelectedTab()}.
+     *
+     * @see Tabs#getSelectedTab()
      *
      * @return the {@code selected} property from the webcomponent
      */
