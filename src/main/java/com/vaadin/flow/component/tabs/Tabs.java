@@ -17,7 +17,10 @@
 package com.vaadin.flow.component.tabs;
 
 import java.util.Locale;
+import java.util.Objects;
 
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -37,6 +40,8 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
 
     private static final String SELECTED = "selected";
 
+    private transient Tab selectedTab;
+
     /**
      * The valid orientations of {@link Tabs} instances.
      */
@@ -50,9 +55,10 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      */
     public Tabs() {
         getElement().addPropertyChangeListener(SELECTED, event -> {
+            selectedTab = getSelectedTab();
             getChildren().filter(Tab.class::isInstance).map(Tab.class::cast)
                     .forEach(tab -> tab.setSelected(false));
-            getSelectedTab().setSelected(true);
+            selectedTab.setSelected(true);
         });
     }
 
@@ -86,6 +92,16 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
         public SelectedChangeEvent(Tabs source, boolean fromClient) {
             super(source, fromClient);
         }
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
+                this,
+                context -> ui.getPage().executeJavaScript(
+                        "$0.addEventListener('items-changed', "
+                                + "function(){ this.$server.itemsChanged(); });",
+                        getElement())));
     }
 
     /**
@@ -203,4 +219,14 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
         }
         getChildren().forEach(tab -> ((Tab) tab).setFlexGrow(flexGrow));
     }
+
+    @ClientCallable
+    private void itemsChanged() {
+        Tab currentlySelected = getSelectedTab();
+        if (!Objects.equals(currentlySelected, selectedTab)) {
+            selectedTab = currentlySelected;
+            fireEvent(new SelectedChangeEvent(this, true));
+        }
+    }
+
 }
