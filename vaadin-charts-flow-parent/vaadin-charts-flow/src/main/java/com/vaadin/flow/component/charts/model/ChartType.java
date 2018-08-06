@@ -17,6 +17,8 @@ package com.vaadin.flow.component.charts.model;
  * #L%
  */
 
+import java.util.Objects;
+
 /**
  * The default series type for the chart. Can be one of LINE, SPLINE, AREA,
  * AREASPLINE, COLUMN, BAR, PIE, SCATTER, AREARANGE, AREASPLINERANGE, and
@@ -149,11 +151,27 @@ public class ChartType implements ChartEnum {
      *            the actual type string passed for client side
      */
     protected ChartType(String type) {
+        Objects.requireNonNull(type, "Chart type required");
         this.type = type;
     }
 
     @Override
     public String toString() {
         return type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChartType)) return false;
+
+        ChartType chartType = (ChartType) o;
+
+        return type.equals(chartType.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return type.hashCode();
     }
 }
