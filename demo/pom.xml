@@ -9,7 +9,6 @@
         <version>6.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.vaadin</groupId>
     <artifactId>vaadin-charts-flow-demo</artifactId>
     <version>6.1-SNAPSHOT</version>
     <packaging>war</packaging>
