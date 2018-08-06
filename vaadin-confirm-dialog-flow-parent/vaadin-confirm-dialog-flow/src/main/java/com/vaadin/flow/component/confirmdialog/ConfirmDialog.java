@@ -32,11 +32,19 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
+/**
+ * Server-side component for the {@code <vaadin-confirm-dialog>} element.
+ * 
+ * @author Vaadin Ltd
+ */
 @Tag("vaadin-confirm-dialog")
 @HtmlImport("frontend://bower_components/vaadin-confirm-dialog/src/vaadin-confirm-dialog.html")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents<ConfirmDialog> {
 
+    /**
+     * `confirm` is sent when the user clicks Confirm button
+     */
     @DomEvent("confirm")
     public static class ConfirmEvent extends ComponentEvent<ConfirmDialog> {
         public ConfirmEvent(ConfirmDialog source, boolean fromClient) {
@@ -44,6 +52,9 @@ public class ConfirmDialog extends Component
         }
     }
 
+    /**
+     * `reject` is sent when the user clicks Reject button
+     */
     @DomEvent("reject")
     public static class RejectEvent extends ComponentEvent<ConfirmDialog> {
         public RejectEvent(ConfirmDialog source, boolean fromClient) {
@@ -51,6 +62,11 @@ public class ConfirmDialog extends Component
         }
     }
 
+    /**
+     * `cancel` is sent when the user clicks Cancel button
+     * or presses Escape key. `cancel` is not sent if Cancel
+     * button is hidden
+     */
     @DomEvent("cancel")
     public static class CancelEvent extends ComponentEvent<ConfirmDialog> {
         public CancelEvent(ConfirmDialog source, boolean fromClient) {
@@ -60,6 +76,9 @@ public class ConfirmDialog extends Component
 
     private boolean autoAddedToTheUi;
 
+    /**
+     * Creates an empty dialog with a Confirm button
+     */
     public ConfirmDialog() {
         getElement().addEventListener("opened-changed", event -> {
             if (autoAddedToTheUi && !isOpened()) {
@@ -69,6 +88,22 @@ public class ConfirmDialog extends Component
         });
     }
 
+    /**
+     * Creates a dialog with a Confirm button with its click listener
+     * and a given texts
+     * 
+     * @param header
+     *            the header text
+     * @param text
+     *            the confirmation message text
+     * @param confirmText
+     *            the text inside Confirm button
+     * @param confirmListener
+     *            the event listener for `confirm` event
+     * @see #setHeader(String)
+     * @see #setText(String)
+     * @see #setConfirmButton(String, ComponentEventListener)
+     */
     public ConfirmDialog(String header, String text, String confirmText,
             ComponentEventListener<ConfirmEvent> confirmListener) {
         this();
@@ -77,6 +112,26 @@ public class ConfirmDialog extends Component
         setConfirmButton(confirmText, confirmListener);
     }
 
+    /**
+     * Creates a two button dialog with Confirm and Cancel buttons
+     * 
+     * @param header
+     *            the header text
+     * @param text
+     *            the confirmation message text
+     * @param confirmText
+     *            the text inside Confirm button
+     * @param confirmListener
+     *            the event listener for `confirm` event
+     * @param cancelText
+     *            the text inside Cancel button
+     * @param cancelListener
+     *            the event listener for `cancel` event
+     * @see #setHeader(String)
+     * @see #setText(String)
+     * @see #setConfirmButton(String, ComponentEventListener)
+     * @see #setCancelButton(String, ComponentEventListener)
+     */
     public ConfirmDialog(String header, String text, String confirmText,
             ComponentEventListener<ConfirmEvent> confirmListener,
             String cancelText,
@@ -85,6 +140,31 @@ public class ConfirmDialog extends Component
         setCancelButton(cancelText, cancelListener);
     }
 
+    /**
+     * Creates a three button dialog with Confirm, Reject and Cancel buttons
+     * 
+     * @param header
+     *            the header text
+     * @param text
+     *            the confirmation message text
+     * @param confirmText
+     *            the text inside Confirm button
+     * @param confirmListener
+     *            the event listener for `confirm` event
+     * @param rejectText
+     *            the text inside Reject button
+     * @param rejectListener
+     *            the event listener for `reject` event
+     * @param cancelText
+     *            the text inside Cancel button
+     * @param cancelListener
+     *            the event listener for `cancel` event
+     * @see #setHeader(String)
+     * @see #setText(String)
+     * @see #setConfirmButton(String, ComponentEventListener)
+     * @see #setCancelButton(String, ComponentEventListener)
+     * @see #setRejectButton(String, ComponentEventListener)
+     */
     public ConfirmDialog(String header, String text, String confirmText,
             ComponentEventListener<ConfirmEvent> confirmListener,
             String rejectText,
@@ -96,14 +176,29 @@ public class ConfirmDialog extends Component
         setRejectButton(rejectText, rejectListener);
     }
 
+    /**
+     * Whether to show or hide Cancel button.
+     */
     public void setCancelable(boolean cancelable) {
         getElement().setProperty("cancel", cancelable);
     }
 
+    /**
+     * Whether to show or hide Reject button.
+     */
     public void setRejectable(boolean rejectable) {
         getElement().setProperty("reject", rejectable);
     }
 
+    /**
+     * Sets Reject button text and `reject` event listener.
+     * Makes Reject button visible
+     * 
+     * @param buttonText
+     *            the text inside Reject button
+     * @param rejectListener
+     *            the event listener for `reject` event
+     */
     public void setRejectButton(String buttonText,
             ComponentEventListener<RejectEvent> rejectListener) {
         setRejectable(true);
@@ -111,6 +206,17 @@ public class ConfirmDialog extends Component
         addRejectListener(rejectListener);
     }
 
+    /**
+     * Sets Reject button text, `reject` event listener,
+     * Reject button theme. Makes Reject button visible
+     * 
+     * @param buttonText
+     *            the text inside Reject button
+     * @param rejectListener
+     *            the event listener for `reject` event
+     * @param theme
+     *            the theme applied for a Reject button
+     */
     public void setRejectButton(String buttonText,
             ComponentEventListener<RejectEvent> rejectListener,
             String theme) {
@@ -118,10 +224,25 @@ public class ConfirmDialog extends Component
         setRejectButtonTheme(theme);
     }
 
+    /**
+     * Sets custom Reject button
+     * 
+     * @param element
+     *            the element to display instead of default Reject button
+     */
     public void setRejectButton(Element element) {
         addToSlot("reject-button", element);
     }
 
+    /**
+     * Sets Cancel button text and `cancel` event listener.
+     * Makes Cancel button visible
+     * 
+     * @param buttonText
+     *            the text inside Cancel button
+     * @param cancelListener
+     *            the event listener for `cancel` event
+     */
     public void setCancelButton(String buttonText,
             ComponentEventListener<CancelEvent> cancelListener) {
         setCancelable(true);
@@ -129,6 +250,17 @@ public class ConfirmDialog extends Component
         addCancelListener(cancelListener);
     }
 
+    /**
+     * Sets Cancel button text, `cancel` event listener and
+     * Cancel button theme. Makes Cancel button visible
+     * 
+     * @param buttonText
+     *            the text inside Cancel button
+     * @param cancelListener
+     *            the event listener for `cancel` event
+     * @param theme
+     *            the theme applied for a Cancel button
+     */
     public void setCancelButton(String buttonText,
             ComponentEventListener<CancelEvent> cancelListener,
             String theme) {
@@ -136,16 +268,41 @@ public class ConfirmDialog extends Component
         setCancelButtonTheme(theme);
     }
 
+    /**
+     * Sets custom cancel button
+     * 
+     * @param element
+     *            the element to display instead of default Cancel button
+     */
     public void setCancelButton(Element element) {
         addToSlot("cancel-button", element);
     }
 
+    /**
+     * Sets Confirm button text and `confirm` event listener
+     * 
+     * @param buttonText
+     *            the text inside Confirm button
+     * @param confirmListener
+     *            the event listener for `confirm` event
+     */
     public void setConfirmButton(String buttonText,
             ComponentEventListener<ConfirmEvent> confirmListener) {
         setConfirmText(buttonText);
         addConfirmListener(confirmListener);
     }
 
+    /**
+     * Sets Confirm button text, `confirm` event listener and
+     * Confirm button theme
+     * 
+     * @param buttonText
+     *            the text inside Confirm button
+     * @param confirmListener
+     *            the event listener for `confirm` event
+     * @param theme
+     *            the theme applied for a Confirm button
+     */
     public void setConfirmButton(String buttonText,
             ComponentEventListener<ConfirmEvent> confirmListener,
             String theme) {
@@ -153,6 +310,12 @@ public class ConfirmDialog extends Component
         setConfirmButtonTheme(theme);
     }
 
+    /**
+     * Sets custom confirm button
+     * 
+     * @param element
+     *            the element to display instead of default Confirm button
+     */
     public void setConfirmButton(Element element) {
         addToSlot("confirm-button", element);
     }
@@ -162,68 +325,127 @@ public class ConfirmDialog extends Component
         getElement().appendChild(element);
     }
 
+    /**
+     * Sets confirmation message text
+     */
     public void setText(String message) {
         getElement().setProperty("message", message);
     }
 
+    /**
+     * Sets custom confirmation message element
+     * 
+     * @param element
+     *            the element to display instead of default 
+     *            confirmation text node
+     */
     public void setText(Element element) {
         getElement().appendChild(element);
     }
 
+    /**
+     * Sets Confirm button text
+     */
     public void setConfirmText(String confirmText) {
         getElement().setProperty("confirmText", confirmText);
 
     }
 
+    /**
+     * Sets Confirm button theme
+     */
     public void setConfirmButtonTheme(String confirmTheme) {
         getElement().setProperty("confirmTheme", confirmTheme);
     }
 
+    /**
+     * Adds `confirm` event listener
+     */
     public Registration addConfirmListener(
             ComponentEventListener<ConfirmEvent> listener) {
         return ComponentUtil.addListener(this, ConfirmEvent.class, listener);
     }
 
+    /**
+     * Sets Cancel button text
+     */
     public void setCancelText(String cancelText) {
         getElement().setProperty("cancelText", cancelText);
 
     }
 
+    /**
+     * Sets Cancel button theme
+     */
     public void setCancelButtonTheme(String cancelTheme) {
         getElement().setProperty("cancelTheme", cancelTheme);
     }
 
+    /**
+     * Adds `cancel` event listener
+     */
     public Registration addCancelListener(
             ComponentEventListener<CancelEvent> listener) {
         return ComponentUtil.addListener(this, CancelEvent.class, listener);
     }
 
+    /**
+     * Sets Reject button text
+     */
     public void setRejectText(String rejectText) {
         getElement().setProperty("rejectText", rejectText);
 
     }
 
+    /**
+     * Sets Reject button theme
+     */
     public void setRejectButtonTheme(String rejectTheme) {
         getElement().setProperty("rejectTheme", rejectTheme);
     }
 
+    /**
+     * Adds `reject` event listener
+     */
     public Registration addRejectListener(
             ComponentEventListener<RejectEvent> listener) {
         return ComponentUtil.addListener(this, RejectEvent.class, listener);
     }
 
+    /**
+     * Sets confirmation dialog header text
+     */
     public void setHeader(String header) {
         getElement().setProperty("header", header);
     }
 
+    /**
+     * Sets confirmation dialog custom header element
+     * 
+     * @param element
+     *            the element to display instead of default header text
+     */
     public void setHeader(Element element) {
         addToSlot("header", element);
     }
 
+    /**
+     * Opens the dialog.
+     * <p>
+     * Note: You don't need to add the dialog component before opening it,
+     * cause opening a dialog will automatically add it to the {@code <body>}
+     * if it's not yet attached anywhere.
+     */
     public void open() {
         setOpened(true);
     }
 
+    /**
+     * Closes the dialog.
+     * <p>
+     * Note: This method also removes the dialog component from the DOM after
+     * closing it, unless you have added the component manually.
+     */
     public void close() {
         setOpened(false);
     }
@@ -233,6 +455,15 @@ public class ConfirmDialog extends Component
         return getElement().getProperty("opened", false);
     }
 
+    /**
+     * Opens or closes the dialog.
+     * <p>
+     * Note: Confirm-dialog will be attached or detached from the DOM automatically,
+     * if it was not added manually. 
+     *
+     * @param opened
+     *            {@code true} to open the confirm-dialog, {@code false} to close it
+     */
     public void setOpened(boolean opened) {
         if (opened) {
             ensureAttached();
