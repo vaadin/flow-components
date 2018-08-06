@@ -67,9 +67,9 @@ public class UploadView extends DemoView {
     private void createSimpleUpload() {
         Div output = new Div();
 
+        //@formatter:off
         // begin-source-example
-        // source-example-heading: Simple in memory receiver for single file
-        // upload
+        // source-example-heading: Simple in memory receiver for single file upload
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
 
@@ -79,6 +79,7 @@ public class UploadView extends DemoView {
             showOutput(event.getFileName(), component, output);
         });
         // end-source-example
+        //@formatter:on
         upload.setMaxFileSize(500 * 1024);
         upload.setId("test-upload");
         output.setId("test-output");
@@ -90,9 +91,9 @@ public class UploadView extends DemoView {
     private void createSimpleMultiFileUpload() {
         Div output = new Div();
 
+        //@formatter:off
         // begin-source-example
-        // source-example-heading: Simple in memory receiver for multi file
-        // upload
+        // source-example-heading: Simple in memory receiver for multi file upload
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
 
@@ -103,6 +104,7 @@ public class UploadView extends DemoView {
             showOutput(event.getFileName(), component, output);
         });
         // end-source-example
+        //@formatter:on
         upload.setMaxFileSize(200 * 1024);
 
         addCard("Simple in memory receiver for multi file upload", upload,
