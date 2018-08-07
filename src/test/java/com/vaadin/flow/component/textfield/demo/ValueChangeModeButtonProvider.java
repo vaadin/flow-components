@@ -57,9 +57,9 @@ public class ValueChangeModeButtonProvider {
     private String getToggleButtonText(ValueChangeMode valueChangeMode) {
         switch (valueChangeMode) {
             case EAGER:
-                return "Sync value only on committed changes";
+            return "Switch to sync value only on committed changes";
             case ON_CHANGE:
-                return "Sync value eagerly on each change";
+            return "Switch to sync value eagerly on each change";
             default:
                 throw new IllegalArgumentException(
                         "Unexpected value change mode: " + valueChangeMode);
