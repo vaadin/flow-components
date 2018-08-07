@@ -21,6 +21,7 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
@@ -296,6 +297,33 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     @Override
     public String getEmptyValue() {
         return "";
+    }
+
+    /**
+     * Sets the value of this text area. If the new value is not equal to
+     * {@code getValue()}, fires a value change event. Throws
+     * {@code NullPointerException}, if the value is null.
+     * <p>
+     * Note: {@link Binder} will take care of the {@code null} conversion when
+     * integrates with text area, as long as no new converter is defined.
+     * 
+     * @param value
+     *            the new value, not {@code null}
+     */
+    @Override
+    public void setValue(String value) {
+        super.setValue(value);
+    }
+
+    /**
+     * Returns the current value of the text area. By default, the empty text
+     * area will return an empty string.
+     * 
+     * @return the current value.
+     */
+    @Override
+    public String getValue() {
+        return super.getValue();
     }
 
     @Override
