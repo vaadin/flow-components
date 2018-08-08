@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
@@ -54,6 +55,7 @@ class SlotHelpers {
      */
     public static void clearSlot(HasElement parent, String slot) {
         getElementsInSlot(parent, slot)
+                .collect(Collectors.toList())
                 .forEach(parent.getElement()::removeChild);
     }
 
