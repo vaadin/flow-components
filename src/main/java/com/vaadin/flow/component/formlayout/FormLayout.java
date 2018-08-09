@@ -159,6 +159,15 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
             implements HasComponents {
 
         /**
+         * Constructs an empty FormItem. Components to wrap can be added after
+         * construction with {@link #add(Component...)}.
+         *
+         * @see HasComponents#add(Component...)
+         */
+        public FormItem() {
+        }
+
+        /**
          * Constructs a FormItem with the given initial components to wrap.
          * Additional components can be added after construction with
          * {@link #add(Component...)}.
