@@ -32,6 +32,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.dom.Element;
 
 import net.jcip.annotations.NotThreadSafe;
 
@@ -41,9 +42,11 @@ import net.jcip.annotations.NotThreadSafe;
 @NotThreadSafe
 public class NotificationTest {
 
+    private UI ui = new UI();
+
     @Before
     public void setUp() {
-        UI.setCurrent(new UI());
+        UI.setCurrent(ui);
     }
 
     @After
@@ -159,5 +162,42 @@ public class NotificationTest {
 
         Assert.assertEquals(Position.BOTTOM_START, notification.getPosition());
         Assert.assertEquals(5000, notification.getDuration());
+    }
+
+    @Test
+    public void setText_notifictionHasAddedComponents_innerHtmlIsTextValue() {
+        Notification notification = new Notification();
+
+        notification.add(new Div());
+        notification.setText("foo");
+
+        notification.open();
+
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+
+        Element templateElement = notification.getElement().getChildren()
+                .findFirst().get();
+
+        String innerHtml = templateElement.getProperty("innerHTML");
+        Assert.assertEquals("foo", innerHtml);
+    }
+
+    @Test
+    public void add_notifictionHasText_innerHtmlIsTemplateValue() {
+        Notification notification = new Notification();
+
+        notification.setText("foo");
+        notification.add(new Div());
+
+        notification.open();
+
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+
+        Element templateElement = notification.getElement().getChildren()
+                .findFirst().get();
+
+        String innerHtml = templateElement.getProperty("innerHTML");
+        Assert.assertThat(innerHtml,
+                CoreMatchers.startsWith("<flow-component-renderer"));
     }
 }

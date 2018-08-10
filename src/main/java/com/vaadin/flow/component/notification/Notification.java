@@ -27,9 +27,12 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementFactory;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.shared.Registration;
 
@@ -45,9 +48,29 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
 
-    private final Element container = new Element("div", false);
-    private final Element templateElement = new Element("template", false);
+    private static final SerializableConsumer<UI> NO_OP = ui -> {
+    };
+
+    private final Element container = ElementFactory.createDiv();
+    private final Element templateElement = new Element("template");
     private boolean autoAddedToTheUi = false;
+
+    private SerializableConsumer<UI> deferredJob = new AttachComponentTemplate();
+
+    private class AttachComponentTemplate implements SerializableConsumer<UI> {
+
+        @Override
+        public void accept(UI ui) {
+            if (this == deferredJob) {
+                String appId = ui.getInternals().getAppId();
+                int nodeId = container.getNode().getId();
+                String template = String.format(
+                        "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
+                        appId, nodeId);
+                templateElement.setProperty("innerHTML", template);
+            }
+        }
+    }
 
     /**
      * Enumeration of all available positions for notification component
@@ -97,9 +120,8 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      */
     public Notification() {
         initBaseElementsAndListeners();
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        context -> attachComponentTemplate(ui)));
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> deferredJob.accept(ui)));
         setPosition(DEFAULT_POSITION);
         setDuration(0);
     }
@@ -230,9 +252,8 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      */
     public void setText(String text) {
         removeAll();
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> templateElement
-                        .setProperty("innerHTML", HtmlUtils.escape(text))));
+        deferredJob = NO_OP;
+        templateElement.setProperty("innerHTML", HtmlUtils.escape(text));
     }
 
     /**
@@ -312,9 +333,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                     "Component to add cannot be null");
             container.appendChild(component.getElement());
         }
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        context -> attachComponentTemplate(ui)));
+        attachComponentTemplate();
     }
 
     /**
@@ -348,7 +367,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      * {@link #Notification(String, int)} and
      * {@link #Notification(String, int, Position)} method will remove the text
      * content.
-     * 
+     *
      * @param index
      *            the index, where the component will be added.
      * @param component
@@ -367,9 +386,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         }
         container.insertChild(indexCheck, component.getElement());
 
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        context -> attachComponentTemplate(ui)));
+        attachComponentTemplate();
     }
 
     /**
@@ -386,15 +403,6 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         container.getChildren().forEach(childElement -> ComponentUtil
                 .findComponents(childElement, childComponents::add));
         return childComponents.build();
-    }
-
-    private void attachComponentTemplate(UI ui) {
-        String appId = ui.getInternals().getAppId();
-        int nodeId = container.getNode().getId();
-        String template = String.format(
-                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
-                appId, nodeId);
-        templateElement.setProperty("innerHTML", template);
     }
 
     /**
@@ -508,5 +516,11 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     public Registration addDetachListener(
             ComponentEventListener<DetachEvent> listener) {
         return super.addDetachListener(listener);
+    }
+
+    private void attachComponentTemplate() {
+        deferredJob = new AttachComponentTemplate();
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> deferredJob.accept(ui)));
     }
 }
