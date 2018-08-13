@@ -22,7 +22,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 
 /**
- * Server-side component for the <code>vaadin-cookie-consent</code> element.
+ * Server-side component for the <code>vaadin-cookie-consent</code> element,
+ * used for showing a cookie consent banner the first time a user visits the
+ * application, until the banner is dismissed.
  *
  * @author Vaadin Ltd
  */
@@ -41,7 +43,7 @@ public class CookieConsent extends Component {
      * Creates a banner with the specified data
      * 
      * @param message
-     *            The message to show in the popup.
+     *            The message to show in the banner.
      * @param dismissLabel
      *            The text to show on the dismiss/consent button.
      * @param learnMoreLabel
@@ -61,22 +63,28 @@ public class CookieConsent extends Component {
     }
 
     /**
+     * Sets the consent message to show in the banner.
+     *
      * @param message
-     *            The message to show in the popup.
+     *            The message to show in the banner.
      */
     public void setMessage(String message) {
         getElement().setProperty("message", message);
     }
 
     /**
+     * Sets the dismiss/consent button's text
+     *
      * @param dismissLabel
-     *            The text to show on the dismiss/consent button.
+     *            The text of the button.
      */
     public void setDismissLabel(String dismissLabel) {
         getElement().setProperty("dismiss", dismissLabel);
     }
 
     /**
+     * Sets the label of the 'learn more' link
+     *
      * @param learnMoreLabel
      *            The text to show on the 'learn more' link.
      */
@@ -85,6 +93,8 @@ public class CookieConsent extends Component {
     }
 
     /**
+     * Sets the URL of the 'learn more' link
+     *
      * @param learnMoreLink
      *            The URL the 'learn more' link should open.
      */
@@ -93,6 +103,8 @@ public class CookieConsent extends Component {
     }
 
     /**
+     * Sets the position of the banner on the page.
+     *
      * @param position
      *            Determines the position of the banner.
      * @throws NullPointerException
@@ -104,9 +116,12 @@ public class CookieConsent extends Component {
     }
 
     /**
-     * The name of the cookie to set to remember that the user has consented.
+     * Sets the name of the cookie to remember that the user has consented.
      *
      * This rarely needs to be changed.
+     *
+     * @param cookieName
+     *            The name of the cookie.
      */
     public void setCookieName(String cookieName) {
         getElement().setProperty("cookieName", cookieName);
