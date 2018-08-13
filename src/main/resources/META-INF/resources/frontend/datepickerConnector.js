@@ -67,7 +67,7 @@ window.Vaadin.Flow.datepickerConnector = {
 
         datepicker.$connector.setLocale = function (locale) {
             try {
-                // Check weather the locale is supported or not
+                // Check whether the locale is supported or not
                 new Date().toLocaleDateString(locale);
             } catch (e) {
                 locale = "en-US";
