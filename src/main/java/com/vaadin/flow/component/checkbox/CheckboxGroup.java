@@ -40,7 +40,6 @@ import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
-import elemental.json.JsonValue;
 
 /**
  * Server-side component for the {@code vaadin-checkbox-group} element.
@@ -88,7 +87,7 @@ public class CheckboxGroup<T>
     }
 
     public CheckboxGroup() {
-        super(Collections.emptySet(), Collections.emptySet(), JsonValue.class,
+        super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation);
         registerValidation();
@@ -320,7 +319,7 @@ public class CheckboxGroup<T>
     private void validateSelectionEnabledState(PropertyChangeEvent event) {
         if (!hasValidValue()) {
             Set<T> oldValue = presentationToModel(this,
-                    (JsonValue) event.getOldValue());
+                    (JsonArray) event.getOldValue());
             // return the value back on the client side
             try {
                 validationRegistration.remove();
@@ -331,7 +330,7 @@ public class CheckboxGroup<T>
             }
             // Now make sure that the button is still in the correct state
             Set<T> value = presentationToModel(this,
-                    (JsonValue) event.getValue());
+                    (JsonArray) event.getValue());
             getCheckboxItems()
                     .filter(checkbox -> value.contains(checkbox.getItem()))
                     .forEach(this::updateEnabled);
@@ -347,9 +346,8 @@ public class CheckboxGroup<T>
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
-            JsonValue presentation) {
-        assert presentation instanceof JsonArray;
-        JsonArray array = (JsonArray) presentation;
+            JsonArray presentation) {
+        JsonArray array = presentation;
         Set<T> set = new HashSet<>();
         for (int i = 0; i < array.length(); i++) {
             set.add(group.keyMapper.get(array.getString(i)));
@@ -357,7 +355,7 @@ public class CheckboxGroup<T>
         return set;
     }
 
-    private static <T> JsonValue modelToPresentation(CheckboxGroup<T> group,
+    private static <T> JsonArray modelToPresentation(CheckboxGroup<T> group,
             Set<T> model) {
         JsonArray array = Json.createArray();
         if (model.isEmpty()) {
