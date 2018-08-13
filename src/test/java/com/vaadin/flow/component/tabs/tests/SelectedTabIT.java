@@ -24,6 +24,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("selected-tab")
 public class SelectedTabIT extends AbstractComponentIT {
@@ -62,5 +63,25 @@ public class SelectedTabIT extends AbstractComponentIT {
         findElement(By.id("add")).click();
 
         Assert.assertEquals("baz", selectionEvent.getText());
+    }
+
+    @Test
+    public void selectDisabledTab_selectionIsResetAndRedisabled() {
+        open();
+
+        List<TestBenchElement> tabs = $("vaadin-tabs").first().$("vaadin-tab")
+                .all();
+        TestBenchElement lastTab = tabs.get(tabs.size() - 1);
+
+        getCommandExecutor().executeScript("arguments[0].disabled=false;",
+                lastTab);
+
+        lastTab.click();
+
+        WebElement selectionEvent = findElement(By.id("selection-event"));
+        Assert.assertEquals("foo", selectionEvent.getText());
+
+        Assert.assertEquals(Boolean.TRUE.toString(),
+                lastTab.getAttribute("disabled"));
     }
 }

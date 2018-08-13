@@ -32,6 +32,11 @@ public class SelectedTabPage extends Div {
         tabs.add(tab2);
         tab2.setId("second");
 
+        Tab tab3 = new Tab("baz");
+        tabs.add(tab3);
+        tab3.setId("third");
+        tab3.setEnabled(false);
+
         NativeButton button = new NativeButton("Show tabs selection", event -> {
             Div div = new Div();
             div.addClassName("first");

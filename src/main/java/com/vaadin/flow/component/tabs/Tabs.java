@@ -16,6 +16,7 @@
 
 package com.vaadin.flow.component.tabs;
 
+import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -54,12 +55,8 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * HORIZONTAL} orientation.
      */
     public Tabs() {
-        getElement().addPropertyChangeListener(SELECTED, event -> {
-            selectedTab = getSelectedTab();
-            getChildren().filter(Tab.class::isInstance).map(Tab.class::cast)
-                    .forEach(tab -> tab.setSelected(false));
-            selectedTab.setSelected(true);
-        });
+        getElement().addPropertyChangeListener(SELECTED,
+                event -> updateSelectedTab());
     }
 
     /**
@@ -245,6 +242,34 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
         if (!Objects.equals(currentlySelected, selectedTab)) {
             selectedTab = currentlySelected;
             fireEvent(new SelectedChangeEvent(this, true));
+        }
+    }
+
+    private void updateSelectedTab() {
+        Tab selected = getSelectedTab();
+
+        if (selected.isEnabled()) {
+            selectedTab = selected;
+            getChildren().filter(Tab.class::isInstance).map(Tab.class::cast)
+                    .forEach(tab -> tab.setSelected(false));
+            selectedTab.setSelected(true);
+        } else {
+            updateEnabled(selected);
+            setSelectedTab(selectedTab);
+        }
+    }
+
+    private void updateEnabled(Tab tab) {
+        boolean enabled = tab.isEnabled();
+        Serializable rawValue = tab.getElement().getPropertyRaw("disabled");
+        if (rawValue instanceof Boolean) {
+            // convert the boolean value to a String to force update the
+            // property value. Otherwise since the provided value is the same as
+            // the current one the update don't do anything.
+            tab.getElement().setProperty("disabled",
+                    enabled ? null : Boolean.TRUE.toString());
+        } else {
+            tab.setEnabled(enabled);
         }
     }
 
