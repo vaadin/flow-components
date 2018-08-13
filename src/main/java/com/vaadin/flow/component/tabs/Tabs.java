@@ -106,6 +106,25 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
 
     /**
      * Adds a listener for {@link SelectedChangeEvent}.
+     * <p>
+     * <b>NOTE:</b> This method adds a listener for {@link SelectedChangeEvent}
+     * which is a {@link DomEvent}. It means in particular that the listener
+     * will be notified <b><em>ONLY</em></b> when event is fired from the
+     * client-side. Even though the server-side may be the originator of the
+     * event (via selection methods) the even will be fired only after the
+     * client-side round-trip.
+     * <p>
+     * It means that you should not expect the event fired immediately when you
+     * call e.g. {@link #setSelectedTab(Tab)} on the server-side. If you want to
+     * get an event immediately on the server side then you should add a
+     * property change listener for {@literal "selected"} property:
+     * 
+     * <pre>
+     * <code>
+     * Tabs tab =...;
+     * tabs.getElement().addPropertyChangeListener("selected", event->{});
+     * </code>
+     * </pre>
      *
      * @param listener
      *            the listener to add, not <code>null</code>
