@@ -3,10 +3,8 @@
 This project is the Component wrapper implementation of [`<vaadin-button>`](https://github.com/vaadin/vaadin-button) element
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
-This branch is for Vaadin 11 development. See other branches for other framework versions:
-
- - `master` branch is Vaadin 11 (Flow/Flow-component version 1.1)
- - `1.0` branch is Vaadin 10 (Flow/Flow-component version 1.0)
+`master` branch is the latest version that will at some point be released in the [Vaadin platform](https://github.com/vaadin/platform). See other branches for other framework versions:
+ - `1.0` branch is Vaadin 10 LTS (Flow/Flow-component version 1.0)
 
 ## Running the component demo
 Run from the command line:
@@ -33,6 +31,7 @@ add the following dependency to your `pom.xml`:
 Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow-and-components-documentation/blob/master/Overview.asciidoc).
 
 ## Contributing
+- All contributions should be made for `master` branch, from where those will be picked into any platform LTS versions if necessary.
 - Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/master/eclipse)
 - [Submit a pull request](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github) with detailed title and description
 - Wait for response from one of Vaadin Flow team members
