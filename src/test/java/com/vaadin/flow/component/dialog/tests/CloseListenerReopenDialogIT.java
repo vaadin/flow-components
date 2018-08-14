@@ -84,7 +84,7 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
         closeDialog();
 
         // Dialog should be closed
-        waitUntil(driver -> isElementPresent(
+        waitUntilNot(driver -> isElementPresent(
                 By.tagName("vaadin-dialog-overlay")));
     }
 
