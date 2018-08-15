@@ -92,6 +92,7 @@ public class NotificationView extends DemoView {
                 "Hello, I am a notification with components!");
         NativeButton buttonInside = new NativeButton("Bye");
         Notification notification = new Notification(content, buttonInside);
+        notification.setDuration(3000);
         buttonInside.addClickListener(event -> notification.close());
         notification.setPosition(Position.MIDDLE);
         button.addClickListener(event -> notification.open());
@@ -112,6 +113,7 @@ public class NotificationView extends DemoView {
         content.setText("This component is styled using global styles");
 
         Notification notification = new Notification(content);
+        notification.setDuration(3000);
 
         // @formatter:off
         String styles = ".my-style { "
