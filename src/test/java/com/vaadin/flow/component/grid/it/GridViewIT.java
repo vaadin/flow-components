@@ -434,6 +434,21 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    public void gridWithSorting_switchColumnSorting() {
+        openTabAndCheckForErrors("sorting");
+        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
+        scrollToElement(grid);
+
+        getCellContent(grid.getHeaderCell(0)).click();
+        getCellContent(grid.getHeaderCell(0)).click();
+        getCellContent(grid.getHeaderCell(0)).click();
+
+        Assert.assertEquals(
+                "Current sort order: . Sort originates from the client: true.",
+                findElement(By.id("grid-sortable-columns-message")).getText());
+    }
+
+    @Test
     public void gridWithSorting_invertAndResetSortings() {
         openTabAndCheckForErrors("sorting");
         GridElement grid = $(GridElement.class).id("grid-sortable-columns");

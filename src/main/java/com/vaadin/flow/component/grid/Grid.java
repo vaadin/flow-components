@@ -163,7 +163,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         /**
          * Gets {@link UpdateQueueData} for this queue.
-         * 
+         *
          * @return the {@link UpdateQueueData} object.
          */
         public UpdateQueueData getData() {
@@ -319,9 +319,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         /**
          * Get the renderer used for this column.
          * <p>
-         * <strong>Note:</strong> Mutating the renderer after the Grid has been rendered on the
-         * client will not change the column, and can lead to undefined
-         * behavior.
+         * <strong>Note:</strong> Mutating the renderer after the Grid has been
+         * rendered on the client will not change the column, and can lead to
+         * undefined behavior.
          *
          * @return the renderer used for this column, should never be
          *         {@code null}
@@ -1042,7 +1042,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
-     * 
+     *
      */
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             int pageSize,
@@ -1090,10 +1090,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Builder for {@link DataCommunicator} object.
-     * 
+     *
      * @param <T>
      *            the grid bean type
-     * 
+     *
      * @param <U>
      *            the ArrayUpdater type
      */
@@ -1103,7 +1103,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         /**
          * Build a new {@link DataCommunicator} object for the given Grid
          * instance.
-         * 
+         *
          * @param element
          *            the target grid element
          * @param dataGenerator
@@ -1405,7 +1405,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * <p>
      * <strong>Note:</strong> This method can only be used for a Grid created
      * from a bean type with {@link #Grid(Class)}.
-     * 
+     *
      * @param propertyNames
      *            the properties to create columns for
      */
@@ -1427,13 +1427,13 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * <p>
      * <strong>Note:</strong> This method can only be used for a Grid created
      * from a bean type with {@link #Grid(Class)}.
-     * 
+     *
      * @param propertyNames
      *            the property names used to reference the columns
-     * 
+     *
      * @throws IllegalArgumentException
      *             if any of the propertyNames refers to a non-existing column
-     * 
+     *
      * @see #setColumns(String...)
      * @see #getColumnByKey(String)
      */
@@ -1488,7 +1488,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * Adds a new header row on the top of the existing header rows.
      * <p>
      * If there are no existing header rows, this will create the first row.
-     * 
+     *
      * @return the created header row
      */
     public HeaderRow prependHeaderRow() {
@@ -1502,7 +1502,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * Adds a new header row to the bottom of the existing header rows.
      * <p>
      * If there are no existing header rows, this will create the first row.
-     * 
+     *
      * @return the created header row
      */
     public HeaderRow appendHeaderRow() {
@@ -1526,7 +1526,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * Adds a new footer row on the top of the existing footer rows.
      * <p>
      * If there are no existing footer rows, this will create the first row.
-     * 
+     *
      * @return the created footer row
      */
     public FooterRow prependFooterRow() {
@@ -1540,7 +1540,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * Adds a new footer row to the bottom of the existing footer rows.
      * <p>
      * If there are no existing footer rows, this will create the first row.
-     * 
+     *
      * @return the created header row
      */
     public FooterRow appendFooterRow() {
@@ -1556,7 +1556,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets all of the header rows in the Grid, in order from top to bottom.
-     * 
+     *
      * @return the header rows of the Grid
      */
     public List<HeaderRow> getHeaderRows() {
@@ -1569,7 +1569,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets all of the footer rows in the Grid, in order from top to bottom.
-     * 
+     *
      * @return the footer rows of the Grid
      */
     public List<FooterRow> getFooterRows() {
@@ -1579,7 +1579,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Adds theme variants to the component.
-     * 
+     *
      * @param variants
      *            theme variants to add
      */
@@ -1590,7 +1590,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Removes theme variants from the component.
-     * 
+     *
      * @param variants
      *            theme variants to remove
      */
@@ -1602,7 +1602,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Creates a new layer containing same amount of column-groups as the next
      * inner layer, adds it to layers list and returns the layer.
-     * 
+     *
      * @param index
      *            index to insert to, must be > 0
      */
@@ -1624,7 +1624,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * <p>
      * The user of this method should make sure that the DOM corresponds the
      * column layer structure.
-     * 
+     *
      * @param index
      *            the index to insert
      * @param columns
@@ -1641,7 +1641,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Removes the given layer and moves the columns on the lower level to its
      * place.
-     * 
+     *
      * @param layer
      *            the layer to remove, not the bottom layer
      */
@@ -2294,7 +2294,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Adds a new context-menu for this grid.
-     * 
+     *
      * @return the added context-menu
      */
     public GridContextMenu<T> addContextMenu() {
@@ -2365,16 +2365,18 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
-            switch (sorter.getString("direction")) {
-            case "asc":
-                sortOrderBuilder.thenAsc(column);
-                break;
-            case "desc":
-                sortOrderBuilder.thenDesc(column);
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "Received a sorters changed call from the client containing an invalid sorting direction");
+            if (sorter.hasKey("direction")) {
+                switch (sorter.getString("direction")) {
+                case "asc":
+                    sortOrderBuilder.thenAsc(column);
+                    break;
+                case "desc":
+                    sortOrderBuilder.thenDesc(column);
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Received a sorters changed call from the client containing an invalid sorting direction");
+                }
             }
         }
         setSortOrder(sortOrderBuilder.build(), true);
@@ -2388,7 +2390,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * For Grids with multi-sorting, the index of a given column inside the list
      * defines the sort priority. For example, the column at index 0 of the list
      * is sorted first, then on the index 1, and so on.
-     * 
+     *
      * @param order
      *            the list of sort orders to set on the client, or
      *            <code>null</code> to reset any sort orders.
@@ -2429,7 +2431,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets an list of the current sort orders in the Grid.
-     * 
+     *
      * @return an unmodifiable list of sort orders
      */
     public List<GridSortOrder<T>> getSortOrder() {
@@ -2546,7 +2548,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * <p>
      * ValueProviders are registered as {@link DataGenerator}s in the Grid. See
      * {@link #addDataGenerator(DataGenerator)}.
-     * 
+     *
      * @param property
      *            the property name used in the template. For example, in a
      *            template the uses {@code [[item.name]]}, the property is
@@ -2587,7 +2589,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Returns {@link PropertySet} of bean this Grid is constructed with via
      * {@link #Grid(Class)}. Or null if not constructed from a bean type.
-     * 
+     *
      * @return the {@link PropertySet} of bean this Grid is constructed with
      */
     public PropertySet<T> getPropertySet() {
@@ -2596,7 +2598,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets optional value provider for unique key in row's generated JSON.
-     * 
+     *
      * @return ValueProvider for unique key for row or null if not set
      */
     protected ValueProvider<T, String> getUniqueKeyProvider() {
@@ -2607,7 +2609,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * Sets value provider for unique key in row's generated JSON.
      * <p>
      * <code>null</code> by default.
-     * 
+     *
      * @param uniqueKeyProvider
      *            ValueProvider for unique key for row
      */
@@ -2618,7 +2620,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets property name for unique key in row's generated JSON.
-     * 
+     *
      * @return the optional property name for unique key
      */
     protected String getUniqueKeyProperty() {
@@ -2627,7 +2629,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Sets property name for unique key in row's generated JSON.
-     * 
+     *
      * @param uniqueKeyProperty
      *            the new optional property name for unique key
      */
