@@ -39,7 +39,7 @@ public abstract class AbstractAppRouterLayout implements RouterLayout {
 
     /**
      * This hook is called when this router layout is being constructed
-     * and provides an opportunity to configure the AppLayout.
+     * and provides an opportunity to configure the AppLayout in use.
      *
      * @param appLayout
      */
@@ -47,7 +47,7 @@ public abstract class AbstractAppRouterLayout implements RouterLayout {
 
     /**
      * This hook is called when a navigation is being made into a route
-     * which has this router layout has it's parent layout.
+     * which has this router layout as its parent layout.
      *
      * @param route
      * @param content
