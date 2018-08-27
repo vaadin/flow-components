@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.vaadin.flow.component.combobox.bean.TestItem;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -257,6 +258,35 @@ public class ComboBoxTest {
         Assert.assertEquals(
                 "The null representation string should be \"Missing Value\"",
                 "Missing Value", comboBox.getNullRepresentation());
+    }
+
+    @Test
+    public void setValue_nonMatchingId_IllegalArgumentException() {
+        List<TestItem> list = Arrays.asList(new TestItem(1, "a", "First"),
+                new TestItem(2, "b", "Second"), new TestItem(3, "c", "Third"));
+
+        expectIllegalArgumentException(
+                "The provided value is not part of ComboBox:");
+        ComboBox comboBox = new ComboBox();
+        comboBox.setDataProvider(new ListDataProvider<TestItem>(list) {
+            @Override
+            public Object getId(TestItem item) {
+                return item.getId();
+            }
+        });
+        comboBox.setValue(new TestItem(0, "b", ""));
+    }
+
+    @Test
+    public void setValue_nonExistingObject_IllegalArgumentException() {
+        List<TestItem> list = Arrays.asList(new TestItem(1, "a", "First"),
+                new TestItem(2, "b", "Second"), new TestItem(3, "c", "Third"));
+
+        expectIllegalArgumentException(
+                "The provided value is not part of ComboBox:");
+        ComboBox comboBox = new ComboBox();
+        comboBox.setItems(list);
+        comboBox.setValue(new TestItem(2, "bbb", ""));
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {

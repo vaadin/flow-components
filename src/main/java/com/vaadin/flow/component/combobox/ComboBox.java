@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -518,13 +519,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             }
             return;
         }
-        int updatedIndex = itemsFromDataProvider.indexOf(value);
-        if (updatedIndex < 0) {
+        Optional<T> item = itemsFromDataProvider.stream()
+                .filter(object -> Objects.equals(dataProvider.getId(value)
+                        , dataProvider.getId(object)))
+                .findFirst();
+        if (!item.isPresent()) {
             throw new IllegalArgumentException(
                     "The provided value is not part of ComboBox: " + value);
         }
         getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
-                generateJson(itemsFromDataProvider.get(updatedIndex)));
+                generateJson(item.get()));
     }
 
     private void cleanValueAndSelection() {
