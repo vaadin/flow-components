@@ -11,7 +11,7 @@
 	</parent>
 	<artifactId>vaadin-confirm-dialog-flow-root</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.1-SNAPSHOT</version>
 	<name>vaadin-confirm-dialog-root</name>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
@@ -20,8 +20,8 @@
 	</organization>
 
 	<properties>
-		<flow.component.base.version>1.0.6</flow.component.base.version>
-		<flow.version>1.0.3</flow.version>
+		<flow.component.base.version>1.1.0.beta1</flow.component.base.version>
+		<flow.version>1.1.0.beta2</flow.version>
 		<testbench.version>6.0.1</testbench.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -55,6 +55,46 @@
 				<version>${flow.component.base.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bowergithub.vaadin</groupId>
+				<artifactId>vaadin-element-mixin</artifactId>
+				<version>2.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bowergithub.vaadin</groupId>
+				<artifactId>vaadin-usage-statistics</artifactId>
+				<version>2.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bowergithub.vaadin</groupId>
+				<artifactId>vaadin-development-mode-detector</artifactId>
+				<version>2.0.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bowergithub.vaadin</groupId>
+				<artifactId>vaadin-lumo-styles</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bowergithub.vaadin</groupId>
+				<artifactId>vaadin-button</artifactId>
+				<version>2.1.0-beta2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bowergithub.vaadin</groupId>
+				<artifactId>vaadin-dialog</artifactId>
+				<version>2.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bowergithub.vaadin</groupId>
+				<artifactId>vaadin-overlay</artifactId>
+				<version>3.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.bowergithub.vaadin</groupId>
+				<artifactId>license-checker</artifactId>
+				<version>2.1.0-alpha2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
