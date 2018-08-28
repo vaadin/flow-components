@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-charts-flow-parent</artifactId>
-        <version>6.1-SNAPSHOT</version>
+        <version>6.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-charts-flow-demo</artifactId>
-    <version>6.1-SNAPSHOT</version>
+    <version>6.2-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>Vaadin Charts for Flow Demo</name>
