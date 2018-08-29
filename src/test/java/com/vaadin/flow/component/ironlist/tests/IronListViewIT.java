@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -144,7 +145,10 @@ public class IronListViewIT extends TabbedComponentDemoTest {
                 .id("list-of-people-with-dataprovider-and-component-renderer"));
 
         List<WebElement> content = list
-                .findElements(By.cssSelector("vaadin-vertical-layout"));
+                .findElements(By.cssSelector("vaadin-vertical-layout")).stream()
+                .filter(element -> !element.getAttribute("innerHTML")
+                        .contains("-----")) // placeholders
+                .collect(Collectors.toList());
 
         waitUntil(driver -> content.get(0).getAttribute("disabled") != null);
         Optional<WebElement> notDisabled = content.stream()

@@ -44,6 +44,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonValue;
@@ -125,6 +126,8 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
     private final Element template;
     private Renderer<T> renderer;
     private String originalTemplate;
+    private boolean rendererChanged;
+    private boolean templateUpdateRegistered;
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
@@ -219,15 +222,15 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
 
         Rendering<T> rendering = renderer.render(getElement(),
                 dataCommunicator.getKeyMapper(), template);
-        originalTemplate = rendering.getTemplateElement()
-                .getProperty("innerHTML");
         if (rendering.getDataGenerator().isPresent()) {
             dataGeneratorRegistration = dataGenerator
                     .addDataGenerator(rendering.getDataGenerator().get());
         }
 
         this.renderer = renderer;
-        updateTemplateInnerHtml();
+
+        rendererChanged = true;
+        registerTemplateUpdate();
 
         getDataCommunicator().reset();
     }
@@ -257,7 +260,8 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
         this.placeholderItem = placeholderItem;
         getElement().callFunction("$connector.setPlaceholderItem",
                 JsonSerializer.toJson(placeholderItem));
-        updateTemplateInnerHtml();
+
+        registerTemplateUpdate();
     }
 
     /**
@@ -270,7 +274,36 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
         return placeholderItem;
     }
 
+    private void registerTemplateUpdate() {
+        if (templateUpdateRegistered) {
+            return;
+        }
+        templateUpdateRegistered = true;
+
+        /*
+         * The actual registration is done inside another beforeClientResponse
+         * registration to make sure it runs last, after ComponentRenderer and
+         * BasicRenderes have executed their rendering operations, which also
+         * happen beforeClientResponse and might be registered after this.
+         */
+        runBeforeClientResponse(
+                () -> runBeforeClientResponse(() -> updateTemplateInnerHtml()));
+    }
+
+    private void runBeforeClientResponse(Command command) {
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.getInternals().getStateTree()
+                        .beforeClientResponse(getElement().getNode(),
+                                context -> command.execute()));
+    }
+
     private void updateTemplateInnerHtml() {
+        templateUpdateRegistered = false;
+        if (rendererChanged) {
+            originalTemplate = template.getProperty("innerHTML");
+            rendererChanged = false;
+        }
+
         String placeholderTemplate;
         if (placeholderItem == null) {
             /*

@@ -17,6 +17,7 @@ package com.vaadin.flow.component.ironlist.tests;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -130,8 +131,7 @@ public class IronListIT extends AbstractComponentIT {
                     CoreMatchers.instanceOf(JsonNull.class));
         }
 
-        // scrolls all the way down
-        executeScript("arguments[0].scrollBy(0,10000);", list);
+        scrollToBottom(list);
         waitUntil(driver -> getItems(driver, list).get(0) instanceof JsonNull);
 
         items = getItems(getDriver(), list);
@@ -177,7 +177,8 @@ public class IronListIT extends AbstractComponentIT {
 
         List<WebElement> items = list
                 .findElements(By.className("component-rendered"));
-        Assert.assertEquals(3, items.size());
+
+        assertListContainsMaxItems(items.size(), 25);
 
         for (int i = 0; i < items.size(); i++) {
             WebElement item = items.get(i);
@@ -185,6 +186,68 @@ public class IronListIT extends AbstractComponentIT {
             Assert.assertEquals("Item " + (i + 1),
                     item.getAttribute("innerHTML"));
         }
+
+        scrollToBottom(list);
+
+        waitUntil(
+                driver -> list.getAttribute("innerHTML").contains("Item 100"));
+
+        items = list.findElements(By.className("component-rendered"));
+
+        assertListContainsMaxItems(items.size(), 25);
+    }
+
+    @Test
+    public void listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown() {
+        WebElement list = findElement(By.id("component-renderer-with-beans"));
+        List<WebElement> items = list
+                .findElements(By.className("component-rendered"));
+
+        assertListContainsMaxItems(items.size(), 25);
+
+        Assert.assertThat(list.getAttribute("innerText"), CoreMatchers
+                .not(CoreMatchers.containsString("the-placeholder")));
+
+        // Scroll to bottom and set an attribute when a placeholder becomes
+        // visible.
+        executeScript(
+        //@formatter:off
+            "let ironList = arguments[0];"
+          + "ironList.scrollBy(0,10000);"
+          + "let count = 0;"
+          + "function isPlaceholderVisible() {"
+          + "  placeholderVisible = ironList.innerText.indexOf('the-placeholder') >= 0;"
+          + "  count++;"
+          + "  if(placeholderVisible) {"
+          + "    ironList.setAttribute('placeholderWasHere', 'true');"
+          + "  }"
+          + "  else if(count < 30) {"
+          + "    setTimeout(isPlaceholderVisible, 20);"
+          + "  }"
+          + "}"
+          + "isPlaceholderVisible();",
+        //@formatter:on
+                list);
+
+        waitUntil(driver -> "true"
+                .equals(list.getAttribute("placeholderWasHere")));
+
+        waitUntil(driver -> list.getAttribute("innerText")
+                .contains("Person 100"));
+
+        Assert.assertThat(
+                "The IronList shouldn't display any placeholders after the data is loaded",
+                list.getAttribute("innerText"), CoreMatchers
+                        .not(CoreMatchers.containsString("the-placeholder")));
+
+        assertListContainsMaxItems(items.size(), 25);
+    }
+
+    private void assertListContainsMaxItems(int numOfItems, int maxItems) {
+        Assert.assertTrue(String.format(
+                "IronList shouldn't load this many items at once. "
+                        + "Expected at most %s, but got %s.",
+                maxItems, numOfItems), numOfItems <= maxItems);
     }
 
     @Test
@@ -268,6 +331,48 @@ public class IronListIT extends AbstractComponentIT {
     }
 
     @Test
+    public void nativeButtonRenderer() {
+        List<TestBenchElement> buttons = $("iron-list").id("list-with-buttons")
+                .$("button").all();
+        Assert.assertEquals(3, buttons.size());
+        IntStream.range(0, 3).forEach(i -> {
+            Assert.assertEquals("Person " + (i + 1), buttons.get(i).getText());
+        });
+    }
+
+    @Test
+    public void numberRenderer() {
+        List<TestBenchElement> items = $("iron-list").id("list-with-numbers")
+                .$("span").all();
+        Assert.assertEquals(3, items.size());
+        IntStream.range(0, 3).forEach(i -> {
+            Assert.assertEquals("" + (i + 1), items.get(i).getText());
+        });
+    }
+
+    @Test
+    public void localDateRenderer() {
+        List<TestBenchElement> items = $("iron-list")
+                .id("list-with-local-dates").$("span").all();
+        Assert.assertEquals(3, items.size());
+
+        Assert.assertEquals("January 1, 2001", items.get(0).getText());
+        Assert.assertEquals("February 2, 2002", items.get(1).getText());
+        Assert.assertEquals("March 3, 2003", items.get(2).getText());
+    }
+
+    @Test
+    public void localDateTimeRenderer() {
+        List<TestBenchElement> items = $("iron-list")
+                .id("list-with-local-date-times").$("span").all();
+        Assert.assertEquals(3, items.size());
+
+        Assert.assertEquals("January 1, 2001 1:01 AM", items.get(0).getText());
+        Assert.assertEquals("February 2, 2002 2:02 AM", items.get(1).getText());
+        Assert.assertEquals("March 3, 2003 3:03 AM", items.get(2).getText());
+    }
+
+    @Test
     public void ironListInsideFlexContainer_hasNonZeroWidthAndHeight() {
         TestBenchElement ironList = $("iron-list")
                 .id("list-inside-flex-container");
@@ -288,6 +393,10 @@ public class IronListIT extends AbstractComponentIT {
                 "IronList should not have zero height by default "
                         + "when used inside a flex container.",
                 ironList.getPropertyInteger("clientHeight") > 0);
+    }
+
+    private void scrollToBottom(WebElement ironList) {
+        executeScript("arguments[0].scrollBy(0,10000);", ironList);
     }
 
     private void assertItemsArePresent(WebElement list, int length) {

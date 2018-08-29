@@ -105,7 +105,7 @@ public class IronListView extends DemoView {
 
         public PersonCard(Person person) {
             setAlignItems(Alignment.CENTER);
-            getStyle().set("minWidth", "250px").set("padding", "10px")
+            getStyle().set("minWidth", "300px").set("padding", "10px")
                     .set("display", "flex");
 
             Image picture = new Image();
