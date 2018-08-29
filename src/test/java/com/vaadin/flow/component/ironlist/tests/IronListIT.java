@@ -29,6 +29,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -264,6 +265,29 @@ public class IronListIT extends AbstractComponentIT {
                 (Boolean) executeScript(
                         "return arguments[0].$connector._isUsingTheSameInstance",
                         list));
+    }
+
+    @Test
+    public void ironListInsideFlexContainer_hasNonZeroWidthAndHeight() {
+        TestBenchElement ironList = $("iron-list")
+                .id("list-inside-flex-container");
+
+        assertWidthAndHeightInFlexContainer(ironList);
+
+        $("button").id("set-flex-direction-column").click();
+        assertWidthAndHeightInFlexContainer(ironList);
+    }
+
+    private void assertWidthAndHeightInFlexContainer(
+            TestBenchElement ironList) {
+        Assert.assertTrue(
+                "IronList should not have zero width by default "
+                        + "when used inside a flex container.",
+                ironList.getPropertyInteger("clientWidth") > 0);
+        Assert.assertTrue(
+                "IronList should not have zero height by default "
+                        + "when used inside a flex container.",
+                ironList.getPropertyInteger("clientHeight") > 0);
     }
 
     private void assertItemsArePresent(WebElement list, int length) {
