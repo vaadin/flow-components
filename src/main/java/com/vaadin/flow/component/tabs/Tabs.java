@@ -19,13 +19,13 @@ package com.vaadin.flow.component.tabs;
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Synchronize;
@@ -33,6 +33,18 @@ import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code vaadin-tabs} element.
+ * <p>
+ * {@link Tab} components can be added to this component with the
+ * {@link #add(Tab...)} method or the {@link #Tabs(Tab...)} constructor. The Tab
+ * components added to it can be selected with the
+ * {@link #setSelectedIndex(int)} or {@link #setSelectedTab(Tab)} methods.
+ * Removing the selected tab from the component changes the selection to the
+ * next available tab.
+ * <p>
+ * <strong>Note:</strong> Adding or removing Tab components via the Element API,
+ * eg. {@code tabs.getElement().insertChild(0, tab.getElement()); }, doesn't
+ * update the selected index, so it may cause the selected tab to change
+ * unexpectedly.
  *
  * @author Vaadin Ltd.
  */
@@ -56,7 +68,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      */
     public Tabs() {
         getElement().addPropertyChangeListener(SELECTED,
-                event -> updateSelectedTab());
+                event -> updateSelectedTab(event.isUserOriginated()));
     }
 
     /**
@@ -79,12 +91,91 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      */
     public void add(Tab... tabs) {
         HasOrderedComponents.super.add(tabs);
+        updateSelectedTab(false);
+    }
+
+    @Override
+    public void add(Component... components) {
+        HasOrderedComponents.super.add(components);
+        updateSelectedTab(false);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Removing components before the selected tab will decrease the
+     * {@link #getSelectedIndex() selected index} to avoid changing the selected
+     * tab. Removing the selected tab will select the next available tab.
+     */
+    @Override
+    public void remove(Component... components) {
+        int lowerIndices = (int) Stream.of(components).map(this::indexOf)
+                .filter(index -> index >= 0 && index < getSelectedIndex())
+                .count();
+
+        HasOrderedComponents.super.remove(components);
+
+        // Prevents changing the selected tab
+        int newSelectedIndex = getSelectedIndex() - lowerIndices;
+
+        // In case the last tab was removed
+        if (newSelectedIndex > 0 && newSelectedIndex >= getComponentCount()) {
+            newSelectedIndex = getComponentCount() - 1;
+        }
+
+        if (newSelectedIndex != getSelectedIndex()) {
+            setSelectedIndex(newSelectedIndex);
+        } else {
+            updateSelectedTab(false);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This will reset the {@link #getSelectedIndex() selected index} to zero.
+     */
+    @Override
+    public void removeAll() {
+        HasOrderedComponents.super.removeAll();
+        if (getSelectedIndex() > 0) {
+            setSelectedIndex(0);
+        } else {
+            updateSelectedTab(false);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Adding a component before the currently selected tab will increment the
+     * {@link #getSelectedIndex() selected index} to avoid changing the selected
+     * tab.
+     */
+    @Override
+    public void addComponentAtIndex(int index, Component component) {
+        HasOrderedComponents.super.addComponentAtIndex(index, component);
+
+        if (index <= getSelectedIndex()) {
+            // Prevents changing the selected tab
+            setSelectedIndex(getSelectedIndex() + 1);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Replacing the currently selected tab will make the new tab selected.
+     */
+    @Override
+    public void replace(Component oldComponent, Component newComponent) {
+        HasOrderedComponents.super.replace(oldComponent, newComponent);
+        updateSelectedTab(false);
     }
 
     /**
      * An event to mark that the selected tab has changed.
      */
-    @DomEvent("selected-changed")
     public static class SelectedChangeEvent extends ComponentEvent<Tabs> {
         public SelectedChangeEvent(Tabs source, boolean fromClient) {
             super(source, fromClient);
@@ -97,32 +188,13 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
                 this,
                 context -> ui.getPage().executeJavaScript(
                         "$0.addEventListener('items-changed', "
-                                + "function(){ this.$server.itemsChanged(); });",
+                                + "function(){ this.$server.updateSelectedTab(true); });",
                         getElement())));
     }
 
     /**
      * Adds a listener for {@link SelectedChangeEvent}.
-     * <p>
-     * <b>NOTE:</b> This method adds a listener for {@link SelectedChangeEvent}
-     * which is a {@link DomEvent}. It means in particular that the listener
-     * will be notified <b><em>ONLY</em></b> when event is fired from the
-     * client-side. Even though the server-side may be the originator of the
-     * event (via selection methods) the even will be fired only after the
-     * client-side round-trip.
-     * <p>
-     * It means that you should not expect the event fired immediately when you
-     * call e.g. {@link #setSelectedTab(Tab)} on the server-side. If you want to
-     * get an event immediately on the server side then you should add a
-     * property change listener for {@literal "selected"} property:
      * 
-     * <pre>
-     * <code>
-     * Tabs tab =...;
-     * tabs.getElement().addPropertyChangeListener("selected", event->{});
-     * </code>
-     * </pre>
-     *
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
@@ -158,6 +230,11 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * @return the selected tab
      */
     public Tab getSelectedTab() {
+        if (getChildren().count() == 0) {
+            assert getSelectedIndex() == 0;
+            return null;
+        }
+
         int selectedIndex = getSelectedIndex();
         Component selectedComponent = getComponentAt(selectedIndex);
         if (!(selectedComponent instanceof Tab)) {
@@ -237,24 +314,27 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
     }
 
     @ClientCallable
-    private void itemsChanged() {
+    private void updateSelectedTab(boolean changedFromClient) {
         Tab currentlySelected = getSelectedTab();
-        if (!Objects.equals(currentlySelected, selectedTab)) {
-            selectedTab = currentlySelected;
-            fireEvent(new SelectedChangeEvent(this, true));
+
+        if (Objects.equals(currentlySelected, selectedTab)) {
+            return;
         }
-    }
 
-    private void updateSelectedTab() {
-        Tab selected = getSelectedTab();
+        if (currentlySelected == null) {
+            fireEvent(new SelectedChangeEvent(this, changedFromClient));
+            return;
+        }
 
-        if (selected.isEnabled()) {
-            selectedTab = selected;
+        if (currentlySelected.isEnabled()) {
+            selectedTab = currentlySelected;
             getChildren().filter(Tab.class::isInstance).map(Tab.class::cast)
                     .forEach(tab -> tab.setSelected(false));
             selectedTab.setSelected(true);
+
+            fireEvent(new SelectedChangeEvent(this, changedFromClient));
         } else {
-            updateEnabled(selected);
+            updateEnabled(currentlySelected);
             setSelectedTab(selectedTab);
         }
     }

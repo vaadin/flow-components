@@ -18,6 +18,7 @@ package com.vaadin.flow.component.tabs.tests;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -29,10 +30,13 @@ import com.vaadin.testbench.TestBenchElement;
 @TestPath("selected-tab")
 public class SelectedTabIT extends AbstractComponentIT {
 
+    @Before
+    public void init() {
+        open();
+    }
+
     @Test
     public void verifyTabIsSelected() {
-        open();
-
         findElement(By.id("second")).click();
         findElement(By.id("show-selection")).click();
 
@@ -51,24 +55,27 @@ public class SelectedTabIT extends AbstractComponentIT {
     }
 
     @Test
-    public void selectionEventOnItemsChange() {
-        open();
-
+    public void removeSelectedTabFromServer_changeEventFromServer() {
         findElement(By.id("delete")).click();
-
-        WebElement selectionEvent = findElement(By.id("selection-event"));
-
-        Assert.assertEquals("bar", selectionEvent.getText());
-
-        findElement(By.id("add")).click();
-
-        Assert.assertEquals("baz", selectionEvent.getText());
+        assertSelectionEvent(1, "bar server");
     }
 
     @Test
-    public void selectDisabledTab_selectionIsResetAndRedisabled() {
-        open();
+    public void selectSecondTab_eventFromClient_deleteFirstTab_noEvent() {
+        findElement(By.id("second")).click();
+        assertSelectionEvent(1, "bar client");
+        findElement(By.id("delete-first")).click();
+        assertSelectionEvent(1, "bar client");
+    }
 
+    @Test
+    public void addTabAsFirst_noEvent() {
+        findElement(By.id("add-first")).click();
+        assertSelectionEvent(0, null);
+    }
+
+    @Test
+    public void selectDisabledTab_noSelectionEvent_tabIsRedisabled() {
         List<TestBenchElement> tabs = $("vaadin-tabs").first().$("vaadin-tab")
                 .all();
         TestBenchElement lastTab = tabs.get(tabs.size() - 1);
@@ -78,10 +85,35 @@ public class SelectedTabIT extends AbstractComponentIT {
 
         lastTab.click();
 
-        WebElement selectionEvent = findElement(By.id("selection-event"));
-        Assert.assertEquals("foo", selectionEvent.getText());
+        assertSelectionEvent(0, null);
 
         Assert.assertEquals(Boolean.TRUE.toString(),
                 lastTab.getAttribute("disabled"));
+    }
+
+    @Test // https://github.com/vaadin/vaadin-tabs-flow/issues/69
+    public void addTabAsFirstWithElementAPI_selectionIsChanged_eventFromClient() {
+        findElement(By.id("add-first-with-element-api")).click();
+        assertSelectionEvent(1, "asdf client");
+    }
+
+    private void assertSelectionEvent(int amountOfEvents,
+            String expectedLatestMessage) {
+        List<WebElement> selectionEventMessages = findElements(
+                By.className("selection-event"));
+
+        Assert.assertEquals(
+                "Unexpected amount of selection events have been fired",
+                amountOfEvents, selectionEventMessages.size());
+
+        if (amountOfEvents == 0) {
+            return;
+        }
+
+        WebElement lastMessage = selectionEventMessages
+                .get(selectionEventMessages.size() - 1);
+
+        Assert.assertEquals("Unexpected message for the latest selection event",
+                expectedLatestMessage, lastMessage.getText());
     }
 }

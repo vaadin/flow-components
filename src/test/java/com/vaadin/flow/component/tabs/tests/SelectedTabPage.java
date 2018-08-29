@@ -17,6 +17,7 @@ package com.vaadin.flow.component.tabs.tests;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.Route;
@@ -54,16 +55,39 @@ public class SelectedTabPage extends Div {
                 event -> tabs.remove(tabs.getSelectedTab()));
         delete.setId("delete");
 
-        NativeButton add = new NativeButton("Add new tab as the first",
+        NativeButton addFirst = new NativeButton("Add new tab as the first",
                 event -> tabs.addComponentAsFirst(new Tab("baz")));
-        add.setId("add");
+        addFirst.setId("add-first");
 
-        Div selectedTab = new Div();
-        tabs.addSelectedChangeListener(
-                event -> selectedTab.setText(tabs.getSelectedTab().getLabel()));
+        NativeButton setSelectedIndex = new NativeButton("setSelectedIndex(1)",
+                event -> tabs.setSelectedIndex(1));
+        setSelectedIndex.setId("set-selected-index");
 
-        selectedTab.setId("selection-event");
+        NativeButton setSelectedTab = new NativeButton("setSelectedTab(tab2)",
+                event -> tabs.setSelectedTab(tab2));
+        setSelectedTab.setId("set-selected-tab");
 
-        add(tabs, button, delete, add, selectedTab);
+        NativeButton deleteFirst = new NativeButton("Delete first tab",
+                event -> tabs.remove(tabs.getChildren().findFirst().get()));
+        deleteFirst.setId("delete-first");
+
+        NativeButton addFirstWithElementAPI = new NativeButton(
+                "Add new tab as the first using Element API",
+                event -> tabs.getElement().insertChild(0,
+                        new Tab("asdf").getElement()));
+        addFirstWithElementAPI.setId("add-first-with-element-api");
+
+        tabs.addSelectedChangeListener(event -> addEventMessage(
+                tabs.getSelectedTab().getLabel(), event.isFromClient()));
+
+        add(tabs, button, delete, deleteFirst, addFirst, addFirstWithElementAPI,
+                setSelectedIndex, setSelectedTab);
+    }
+
+    private void addEventMessage(String tabLabel, boolean isFromClient) {
+        Paragraph message = new Paragraph(
+                tabLabel + (isFromClient ? " client" : " server"));
+        message.setClassName("selection-event");
+        add(message);
     }
 }
