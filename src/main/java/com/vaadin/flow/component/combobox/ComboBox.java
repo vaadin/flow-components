@@ -532,7 +532,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void cleanValueAndSelection() {
-        getElement().setProperty(VALUE_PROPERTY_NAME, "");
+        /* in certain use case, leaving the value property
+           will enforce value refresh with empty value, even though
+           actual value was set. */
+        getElement().removeProperty(VALUE_PROPERTY_NAME);
         getElement().setPropertyJson(SELECTED_ITEM_PROPERTY_NAME,
                 Json.createNull());
     }
