@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.crud;
 
-import com.vaadin.flow.component.AttachEvent;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,13 +10,21 @@ public class CrudTest {
 
     @Before
     public void setUp() {
-        systemUnderTest = new Crud();
+        systemUnderTest = new Crud(CrudTest.class, new CrudEditor<CrudTest>() {
+            @Override
+            public boolean isValid() {
+                return false;
+            }
+
+            @Override
+            public boolean isDirty() {
+                return false;
+            }
+        });
     }
 
     @Test
     public void onAttach_init() {
-        systemUnderTest.onAttach(new AttachEvent(systemUnderTest, true));
-
         Assert.assertTrue(true);
     }
 }

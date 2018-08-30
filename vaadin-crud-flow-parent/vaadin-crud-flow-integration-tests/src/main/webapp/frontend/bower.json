@@ -14,6 +14,6 @@
     "tests"
   ],
   "dependencies": {
-    "vaadin-crud": "vaadin/vaadin-crud#master"
+    "vaadin-crud": "vaadin/vaadin-crud#events"
   }
 }

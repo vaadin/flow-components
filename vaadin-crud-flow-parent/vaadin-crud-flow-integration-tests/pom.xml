@@ -132,6 +132,7 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty.plugin.version}</version>
                 <configuration>
+                    <skip>${skipTests}</skip>
                     <scanIntervalSeconds>2</scanIntervalSeconds>
                     <stopKey>STOP</stopKey>
                     <stopPort>8005</stopPort>
@@ -209,6 +210,7 @@
                             <nodeVersion>${node.version}</nodeVersion>
                             <yarnVersion>${yarn.version}</yarnVersion>
                             <workingDirectory>${buildtools.directory}</workingDirectory>
+                            <skip>${skipFrontend}</skip>
                         </configuration>
 
                         <executions>

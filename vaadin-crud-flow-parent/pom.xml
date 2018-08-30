@@ -9,11 +9,15 @@
 		<version>2.0.0</version>
 		<relativePath />
 	</parent>
+
 	<artifactId>vaadin-crud-flow-root</artifactId>
-	<packaging>pom</packaging>
 	<version>1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
 	<name>Vaadin Crud Root</name>
+
 	<inceptionYear>2018</inceptionYear>
+
 	<organization>
 		<name>Vaadin Ltd</name>
 		<url>http://vaadin.com/</url>
@@ -34,12 +38,14 @@
 		<module>vaadin-crud-flow-integration-tests</module>
 		<module>vaadin-crud-flow-vaadincom-demo</module>
 	</modules>
+
 	<repositories>
 		<repository>
 			<id>vaadin-prereleases</id>
 			<url>http://maven.vaadin.com/vaadin-prereleases</url>
 		</repository>
 	</repositories>
+
 	<pluginRepositories>
 		<pluginRepository>
 			<id>vaadin-prereleases</id>
