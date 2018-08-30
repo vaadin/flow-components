@@ -40,12 +40,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                 "23/04/2018",
                 executeScript("return arguments[0].value", displayText));
 
-        localePicker = $(DatePickerElement.class)
-                .id("french-locale-date-picker");
-        displayText = localePicker.$(TestBenchElement.class).id("input");
-
-        Assert.assertEquals("French locale date had wrong format", "30/05/2018",
-                executeScript("return arguments[0].value", displayText));
+        assertText($(DatePickerElement.class).id("french-locale-date-picker"),
+                "03/05/2018");
 
         List<LogEntry> logs = getWarningEntries();
         Assert.assertEquals(
@@ -64,11 +60,22 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         Assert.assertTrue("No new warnings should have appeared in the logs",
                 logs.isEmpty());
 
-        displayText = localePicker.$(TestBenchElement.class).id("input");
-        Assert.assertEquals("Didn't have expected German locale date.",
-                "10.1.1985",
-                executeScript("return arguments[0].value", displayText));
+        assertText(localePicker, "10.1.1985");
 
+        assertText($(DatePickerElement.class).id("korean-locale-date-picker"),
+                "2018. 5. 3.");
+
+        assertText($(DatePickerElement.class).id("polish-locale-date-picker"),
+                "3.05.2018");
+
+    }
+
+    private void assertText(DatePickerElement datePickerElement,
+            String expected) {
+        WebElement displayText = datePickerElement.$(TestBenchElement.class).id("input");
+        Assert.assertEquals("Didn't have expected locale date.",
+                expected,
+                executeScript("return arguments[0].value", displayText));
     }
 
     private List<LogEntry> getWarningEntries() {
@@ -79,14 +86,14 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
     }
 
     @Test
-    public void hungarianLocaleTest() {
+    public void polishLocaleTest() {
         open();
 
         checkLogsForErrors();
-        WebElement hungarianPicker = findElement(
-                By.id("hungarian-locale-date-picker"));
+        WebElement polishPicker = findElement(
+                By.id("polish-locale-date-picker"));
         // trigger the validation on the from clientside
-        hungarianPicker.click();
+        polishPicker.click();
         executeScript("document.body.click()");
 
         checkLogsForErrors();

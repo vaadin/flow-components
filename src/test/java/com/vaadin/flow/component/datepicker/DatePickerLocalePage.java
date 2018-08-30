@@ -11,15 +11,10 @@ import com.vaadin.flow.router.Route;
 @Route("date-picker-locale")
 public class DatePickerLocalePage extends Div {
 
-    private final LocalDate may30th = LocalDate.of(2018, Month.MAY, 30);
+    private final LocalDate may3rd = LocalDate.of(2018, Month.MAY, 3);
     private final LocalDate april23rd = LocalDate.of(2018, Month.APRIL, 23);
 
     public DatePickerLocalePage() {
-        createPickerWithValueAndLocaleViaDifferentCtor();
-        addHungarianLocale();
-    }
-
-    private void createPickerWithValueAndLocaleViaDifferentCtor() {
         DatePicker datePicker = new DatePicker(april23rd, Locale.CHINA);
         datePicker.setId("locale-picker-server-with-value");
 
@@ -32,18 +27,22 @@ public class DatePickerLocalePage extends Div {
         frenchLocale.setId("french-locale-date-picker");
 
         frenchLocale.setLocale(Locale.FRANCE);
-        frenchLocale.setValue(may30th);
+        frenchLocale.setValue(may3rd);
 
         DatePicker german = new DatePicker();
         german.setLocale(Locale.GERMANY);
         german.setId("german-locale-date-picker");
 
         add(datePicker, locale, frenchLocale, german);
+
+        DatePicker polandDatePicker = new DatePicker(may3rd, new Locale("pl", "PL"));
+        polandDatePicker.setId("polish-locale-date-picker");
+        add(polandDatePicker);
+
+        DatePicker korean = new DatePicker(may3rd, new Locale("ko", "KR"));
+        korean.setId("korean-locale-date-picker");
+        add(korean);
+
     }
 
-    private void addHungarianLocale() {
-        DatePicker datePicker = new DatePicker(may30th, new Locale("hu", "HU"));
-        datePicker.setId("hungarian-locale-date-picker");
-        add(datePicker);
-    }
 }
