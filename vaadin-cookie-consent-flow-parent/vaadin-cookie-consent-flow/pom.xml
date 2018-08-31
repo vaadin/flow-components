@@ -47,6 +47,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.webjars.bowergithub.vaadin</groupId>
+			<artifactId>vaadin-lumo-styles</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars.bowergithub.vaadin</groupId>
+			<artifactId>vaadin-material-styles</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars.bowergithub.vaadin</groupId>
 			<artifactId>vaadin-usage-statistics</artifactId>
 		</dependency>
 		<dependency>
