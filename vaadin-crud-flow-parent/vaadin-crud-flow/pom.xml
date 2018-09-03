@@ -19,6 +19,17 @@
         <powermock.version>1.7.1</powermock.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-component-base</artifactId>
+                <version>1.0.7</version>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!--Provided scoped-->
         <dependency>

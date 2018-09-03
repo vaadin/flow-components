@@ -17,10 +17,10 @@ package com.vaadin.flow.component.crud;
  * #L%
  */
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.dom.Element;
 
-public abstract class CrudEditor<E> extends Component implements HasValidator<E> {
+public abstract class CrudEditor<E> implements HasValidator<E> {
 
     protected E item;
 
@@ -35,4 +35,6 @@ public abstract class CrudEditor<E> extends Component implements HasValidator<E>
     public abstract boolean isValid();
 
     public abstract boolean isDirty();
+
+    public abstract Element getView();
 }

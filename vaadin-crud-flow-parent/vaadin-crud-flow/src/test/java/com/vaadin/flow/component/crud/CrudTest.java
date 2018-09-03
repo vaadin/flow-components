@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.crud;
 
-import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.dom.Element;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,7 +12,7 @@ public class CrudTest {
 
     @Before
     public void setUp() {
-        systemUnderTest = new Crud(DummyBean.class, new DummyCrudEditor());
+        systemUnderTest = new Crud<>(DummyBean.class, new DummyCrudEditor());
     }
 
     @Test
@@ -19,7 +20,6 @@ public class CrudTest {
         Assert.assertTrue(true);
     }
 
-    @Tag("div")
     public static class DummyCrudEditor extends CrudEditor<DummyBean> {
         @Override
         public boolean isValid() {
@@ -29,6 +29,11 @@ public class CrudTest {
         @Override
         public boolean isDirty() {
             return false;
+        }
+
+        @Override
+        public Element getView() {
+            return new Div().getElement();
         }
     }
 

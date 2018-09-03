@@ -17,6 +17,7 @@ package com.vaadin.flow.component.crud;
  * #L%
  */
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -27,6 +28,7 @@ import com.vaadin.flow.component.crud.event.EditEvent;
 import com.vaadin.flow.component.crud.event.NewEvent;
 import com.vaadin.flow.component.crud.event.SaveEvent;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.shared.Registration;
@@ -36,57 +38,90 @@ import java.util.Set;
 
 @Tag("vaadin-crud")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
+@JavaScript("frontend://crudConnector.js")
 public class Crud<E> extends Component {
 
+    private final Class<E> beanType;
     private final Grid<E> grid;
     private final CrudEditor<E> editor;
 
     private final Set<ComponentEventListener<NewEvent>> newListeners = new LinkedHashSet<>();
-    private final Set<ComponentEventListener<EditEvent>> editListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<SaveEvent>> saveListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<CancelEvent>> cancelListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<DeleteEvent>> deleteListeners = new LinkedHashSet<>();
 
-    public Crud(Class<E> clazz, CrudEditor<E> editor) {
-        this(new SimpleCrudGrid<>(clazz, true), editor);
+    public Crud(Class<E> beanType, CrudEditor<E> editor) {
+        this(beanType, new SimpleCrudGrid<>(beanType, true), editor);
     }
 
-    public Crud(Grid<E> grid, CrudEditor<E> editor) {
+    public Crud(Class<E> beanType, Grid<E> grid, CrudEditor<E> editor) {
+        this.beanType = beanType;
+
         this.grid = grid;
         this.grid.getElement().setAttribute("slot", "grid");
 
         this.editor = editor;
-        this.editor.getElement().setAttribute("slot", "form");
+        this.editor.getView().setAttribute("slot", "form");
 
         registerHandlers();
 
-        getElement().appendChild(grid.getElement(), editor.getElement());
+        getElement().appendChild(grid.getElement(), editor.getView());
     }
 
     private void registerHandlers() {
-        ComponentUtil.addListener(this, NewEvent.class, (ComponentEventListener<NewEvent>)
-                e -> newListeners.forEach(listener -> listener.onComponentEvent(e)));
+        ComponentUtil.addListener(this, NewEvent.class, (ComponentEventListener<NewEvent>) e -> {
+            try {
+                editor.setItem(beanType.newInstance());
+            } catch (Exception ex) {
+                throw new RuntimeException("Unable to instantiate new bean", ex);
+            }
+            newListeners.forEach(listener -> listener.onComponentEvent(e));
+            setDialogOpened(true);
+        });
 
-        ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener<EditEvent>)
-                e -> editListeners.forEach(listener -> listener.onComponentEvent(e)));
+        ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener)
+                ((ComponentEventListener<EditEvent<E>>) e -> {
+                    editor.setItem(e.getItem());
+                    editListeners.forEach(listener -> listener.onComponentEvent(e));
+                    setDialogOpened(true);
+                }));
 
         ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener<SaveEvent>) e -> {
             saveListeners.forEach(listener -> listener.onComponentEvent(e));
             // Show notification.
-//            dialog.close();
+            getEditor().setItem(null);
+            getGrid().getDataProvider().refreshAll();
+            setDialogOpened(false);
         });
 
         ComponentUtil.addListener(this, CancelEvent.class, (ComponentEventListener<CancelEvent>) e -> {
             cancelListeners.forEach(listener -> listener.onComponentEvent(e));
             // Show notification.
-//            dialog.close();
+            getEditor().setItem(null);
+            setDialogOpened(false);
         });
 
         ComponentUtil.addListener(this, DeleteEvent.class, (ComponentEventListener<DeleteEvent>) e -> {
             deleteListeners.forEach(listener -> listener.onComponentEvent(e));
             // Show notification.
-//            dialog.close();
+            getEditor().setItem(null);
+            getGrid().getDataProvider().refreshAll();
+            setDialogOpened(false);
         });
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        getUI().orElseThrow(() -> new IllegalStateException(
+                "Connector can only be initialized for an attached Grid"))
+                .getPage().executeJavaScript(
+                "window.Vaadin.Flow.crudConnector.initLazy($0)",
+                getElement());
+    }
+
+    private void setDialogOpened(boolean isOpen) {
+        getElement().callFunction("__setDialogOpened", isOpen);
     }
 
     public Grid<E> getGrid() {
@@ -102,7 +137,7 @@ public class Crud<E> extends Component {
         return () -> newListeners.remove(listener);
     }
 
-    public Registration addEditListener(ComponentEventListener<EditEvent> listener) {
+    public Registration addEditListener(ComponentEventListener<EditEvent<E>> listener) {
         editListeners.add(listener);
         return () -> editListeners.remove(listener);
     }

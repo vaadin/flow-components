@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.crud.examples;
 
-import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudEditor;
 import com.vaadin.flow.component.crud.SimpleCrudFilter;
@@ -8,12 +7,19 @@ import com.vaadin.flow.component.crud.SimpleCrudGrid;
 import com.vaadin.flow.component.crud.Util;
 import com.vaadin.flow.component.crud.annotation.Hidden;
 import com.vaadin.flow.component.crud.annotation.Order;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.BodySize;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
@@ -22,6 +28,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -34,18 +41,36 @@ import java.util.stream.Stream;
 public class Home extends VerticalLayout {
 
     // Dummy DB. A real app will hook up something like JPA.
-    private static final List<Person> DB = IntStream.range(0, 20000)
-            .mapToObj(i -> new Person(randomName() + " " + i, i, new Stuff()))
+    private static final List<Person> DB = IntStream.range(0, 5)
+            .mapToObj(i -> new Person(i, randomName() + " " + i, new Stuff()))
             .collect(Collectors.toList());
 
     public Home() {
-        Crud<Person> crud = new Crud<>(new SimpleCrudGrid<>(Person.class, true), new DummyCrudEditor<>());
+        Crud<Person> crud = new Crud<>(Person.class,
+                new SimpleCrudGrid<>(Person.class, true), new DummyCrudEditor());
 
         crud.addNewListener(e -> System.out.println("New event!"));
+
         crud.addEditListener(e -> System.out.println("Edit event!\n" + e.getItem()));
-        crud.addSaveListener(e -> System.out.println("Save event!"));
+
         crud.addCancelListener(e -> System.out.println("Cancel event!"));
-        crud.addDeleteListener(e -> System.out.println("Delete event!"));
+
+        crud.addSaveListener(e -> {
+            System.out.println("Save event! " + crud.getEditor().getItem());
+            Person newPerson = crud.getEditor().getItem();
+            if (newPerson.getId() == null) {
+                newPerson.setId(DB.stream().map(Person::getId).max(Comparator.naturalOrder()).orElse(0) + 1);
+            }
+            DB.add(newPerson);
+        });
+
+        crud.addDeleteListener(e -> {
+            System.out.println("Delete event!");
+            Optional<Person> backendBean = DB.stream()
+                    .filter(bean -> bean.getId() == crud.getEditor().getItem().getId())
+                    .findFirst();
+            backendBean.ifPresent(DB::remove);
+        });
 
         // Just a proof-of-concept.
         crud.setDataProvider(new AbstractBackEndDataProvider<Person, SimpleCrudFilter>() {
@@ -146,11 +171,11 @@ public class Home extends VerticalLayout {
 
     public static class Person {
 
+        @Order
+        private Integer id;
+
         @Order(1)
         private String name;
-
-        @Order
-        private int age;
 
         @Hidden
         private Stuff stuff;
@@ -160,9 +185,9 @@ public class Home extends VerticalLayout {
         public Person() {
         }
 
-        public Person(String name, int age, Stuff stuff) {
+        public Person(Integer id, String name, Stuff stuff) {
             this.name = name;
-            this.age = age;
+            this.id = id;
             this.stuff = stuff;
         }
 
@@ -174,12 +199,12 @@ public class Home extends VerticalLayout {
             this.name = name;
         }
 
-        public int getAge() {
-            return age;
+        public Integer getId() {
+            return id;
         }
 
-        public void setAge(int age) {
-            this.age = age;
+        public void setId(Integer id) {
+            this.id = id;
         }
 
         public Stuff getStuff() {
@@ -196,6 +221,15 @@ public class Home extends VerticalLayout {
 
         public static void setStaticProp(String staticProp) {
             Person.staticProp = staticProp;
+        }
+
+        @Override
+        public String toString() {
+            return "Person{" +
+                    "name='" + name + '\'' +
+                    ", id=" + id +
+                    ", stuff=" + stuff +
+                    '}';
         }
     }
 
@@ -234,11 +268,19 @@ public class Home extends VerticalLayout {
         }
     }
 
-    @Tag("div")
-    public static class DummyCrudEditor<E> extends CrudEditor<E> {
+    public static class DummyCrudEditor extends CrudEditor<Person> {
+
+        private H2 heading = new H2("Edit Person");
+        private TextField nameField = new TextField("Name");
+        private TextField ageField = new TextField("Age");
+
+        private VerticalLayout view = new VerticalLayout();
+
+        private Person workingCopy;
+        private Binder<Person> binder;
 
         public DummyCrudEditor() {
-            getElement().appendChild(new H1("The form").getElement());
+            view.add(heading, new Hr(), nameField, ageField);
         }
 
         @Override
@@ -249,6 +291,54 @@ public class Home extends VerticalLayout {
         @Override
         public boolean isDirty() {
             return false;
+        }
+
+        @Override
+        public Element getView() {
+            return view.getElement();
+        }
+
+        @Override
+        public Person getItem() {
+            return workingCopy;
+        }
+
+        @Override
+        public void setItem(Person item) {
+            super.setItem(item);
+
+            if (item == null) {
+                if (binder != null) {
+                    binder.removeBinding("id");
+                    binder.removeBinding("name");
+                    binder.removeBean();
+                    binder = null;
+                }
+
+                workingCopy = null;
+                return;
+            }
+
+            workingCopy = new Person();
+            workingCopy.setId(item.getId());
+            workingCopy.setName(item.getName());
+
+            binder = new Binder<>(Person.class);
+            binder.bind(nameField, Person::getName, Person::setName);
+            binder.forField(ageField)
+                    .withConverter(new Converter<String, Integer>() {
+                        @Override
+                        public Result<Integer> convertToModel(String value, ValueContext context) {
+                            return Result.ok(value.isEmpty() ? null : Integer.parseInt(value));
+                        }
+
+                        @Override
+                        public String convertToPresentation(Integer value, ValueContext context) {
+                            return value == null ? "" : Integer.toString(value);
+                        }
+                    })
+                    .bind(Person::getId, Person::setId);
+            binder.setBean(workingCopy);
         }
     }
 }

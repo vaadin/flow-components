@@ -24,9 +24,9 @@ import com.vaadin.flow.component.crud.Crud;
 import elemental.json.JsonObject;
 
 @DomEvent("edit")
-public class EditEvent extends ComponentEvent<Crud<?>> {
+public class EditEvent<E> extends ComponentEvent<Crud<E>> {
 
-    private final JsonObject item;
+    private E item;
 
     /**
      * Creates a new event using the given source and indicator whether the
@@ -35,13 +35,16 @@ public class EditEvent extends ComponentEvent<Crud<?>> {
      * @param source     the source component
      * @param fromClient <code>true</code> if the event originated from the client
      */
-    public EditEvent(Crud<?> source, boolean fromClient,
+    public EditEvent(Crud<E> source, boolean fromClient,
                      @EventData("event.detail.item") JsonObject item) {
         super(source, fromClient);
-        this.item = item;
+        try {
+            this.item = source.getGrid().getDataCommunicator()
+                    .getKeyMapper().get(item.getString("key"));
+        } catch (NullPointerException ex) { } // Remove when WC no longer fires edit event on grid active item change
     }
 
-    public JsonObject getItem() {
+    public E getItem() {
         return item;
     }
 }
