@@ -17,6 +17,7 @@ package com.vaadin.flow.component.crud;
  * #L%
  */
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
@@ -26,26 +27,19 @@ import com.vaadin.flow.component.crud.event.EditEvent;
 import com.vaadin.flow.component.crud.event.NewEvent;
 import com.vaadin.flow.component.crud.event.SaveEvent;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.polymertemplate.Id;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.templatemodel.TemplateModel;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Tag("vaadin-crud")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
-public class Crud<E> extends PolymerTemplate<TemplateModel> {
+public class Crud<E> extends Component {
 
     private final Grid<E> grid;
     private final CrudEditor<E> editor;
-
-    @Id
-    private Dialog dialog;
 
     private final Set<ComponentEventListener<NewEvent>> newListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<EditEvent>> editListeners = new LinkedHashSet<>();
@@ -79,19 +73,19 @@ public class Crud<E> extends PolymerTemplate<TemplateModel> {
         ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener<SaveEvent>) e -> {
             saveListeners.forEach(listener -> listener.onComponentEvent(e));
             // Show notification.
-            dialog.close();
+//            dialog.close();
         });
 
         ComponentUtil.addListener(this, CancelEvent.class, (ComponentEventListener<CancelEvent>) e -> {
             cancelListeners.forEach(listener -> listener.onComponentEvent(e));
             // Show notification.
-            dialog.close();
+//            dialog.close();
         });
 
         ComponentUtil.addListener(this, DeleteEvent.class, (ComponentEventListener<DeleteEvent>) e -> {
             deleteListeners.forEach(listener -> listener.onComponentEvent(e));
             // Show notification.
-            dialog.close();
+//            dialog.close();
         });
     }
 

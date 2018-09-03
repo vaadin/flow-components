@@ -10,6 +10,7 @@ import com.vaadin.flow.component.crud.annotation.Hidden;
 import com.vaadin.flow.component.crud.annotation.Order;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -29,6 +30,7 @@ import java.util.stream.Stream;
 
 @Route(value = "")
 @Theme(Lumo.class)
+@BodySize(height = "100vh", width = "100vw")
 public class Home extends Div {
 
     // Dummy DB. A real app will hook up something like JPA.
@@ -126,6 +128,8 @@ public class Home extends Div {
             }
         });
 
+        setWidth("100%");
+        setHeight("100%");
         add(crud);
     }
 

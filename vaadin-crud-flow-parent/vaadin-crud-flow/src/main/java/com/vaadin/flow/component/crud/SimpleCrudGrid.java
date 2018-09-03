@@ -41,7 +41,6 @@ public class SimpleCrudGrid<E> extends Grid<E> {
         this.beanType = beanType;
         this.enableDefaultFilters = enableDefaultFilters;
 
-        setMultiSort(true);
         setup();
     }
 
@@ -83,6 +82,7 @@ public class SimpleCrudGrid<E> extends Grid<E> {
     }
 
     private void setupSorting() {
+        setMultiSort(true);
         this.addSortListener(event -> {
             filter.getSortOrders().clear();
             event.getSortOrder().forEach(e ->
