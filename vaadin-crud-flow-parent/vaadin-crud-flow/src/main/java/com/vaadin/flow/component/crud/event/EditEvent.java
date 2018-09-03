@@ -21,11 +21,12 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.crud.Crud;
+import elemental.json.JsonObject;
 
 @DomEvent("edit")
-public class EditEvent<E> extends ComponentEvent<Crud<E>> {
+public class EditEvent extends ComponentEvent<Crud<?>> {
 
-    private final E data;
+    private final JsonObject item;
 
     /**
      * Creates a new event using the given source and indicator whether the
@@ -34,13 +35,13 @@ public class EditEvent<E> extends ComponentEvent<Crud<E>> {
      * @param source     the source component
      * @param fromClient <code>true</code> if the event originated from the client
      */
-    public EditEvent(Crud<E> source, boolean fromClient,
-                     @EventData("event.detail.item") E data) {
+    public EditEvent(Crud<?> source, boolean fromClient,
+                     @EventData("event.detail.item") JsonObject item) {
         super(source, fromClient);
-        this.data = data;
+        this.item = item;
     }
 
-    public E getData() {
-        return data;
+    public JsonObject getItem() {
+        return item;
     }
 }

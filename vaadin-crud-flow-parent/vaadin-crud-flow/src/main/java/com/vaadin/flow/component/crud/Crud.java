@@ -48,7 +48,7 @@ public class Crud<E> extends PolymerTemplate<TemplateModel> {
     private Dialog dialog;
 
     private final Set<ComponentEventListener<NewEvent>> newListeners = new LinkedHashSet<>();
-    private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<EditEvent>> editListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<SaveEvent>> saveListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<CancelEvent>> cancelListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<DeleteEvent>> deleteListeners = new LinkedHashSet<>();
@@ -66,16 +66,15 @@ public class Crud<E> extends PolymerTemplate<TemplateModel> {
 
         registerHandlers();
 
-        getElement().appendChild(grid.getElement());
+        getElement().appendChild(grid.getElement(), editor.getElement());
     }
 
     private void registerHandlers() {
         ComponentUtil.addListener(this, NewEvent.class, (ComponentEventListener<NewEvent>)
                 e -> newListeners.forEach(listener -> listener.onComponentEvent(e)));
 
-        ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener)
-                (ComponentEventListener<EditEvent<E>>) event -> editListeners.forEach(
-                        listener -> listener.onComponentEvent(event)));
+        ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener<EditEvent>)
+                e -> editListeners.forEach(listener -> listener.onComponentEvent(e)));
 
         ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener<SaveEvent>) e -> {
             saveListeners.forEach(listener -> listener.onComponentEvent(e));
@@ -109,7 +108,7 @@ public class Crud<E> extends PolymerTemplate<TemplateModel> {
         return () -> newListeners.remove(listener);
     }
 
-    public Registration addEditListener(ComponentEventListener<EditEvent<E>> listener) {
+    public Registration addEditListener(ComponentEventListener<EditEvent> listener) {
         editListeners.add(listener);
         return () -> editListeners.remove(listener);
     }

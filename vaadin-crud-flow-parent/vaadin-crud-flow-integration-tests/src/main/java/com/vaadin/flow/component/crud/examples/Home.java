@@ -9,6 +9,7 @@ import com.vaadin.flow.component.crud.Util;
 import com.vaadin.flow.component.crud.annotation.Hidden;
 import com.vaadin.flow.component.crud.annotation.Order;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -18,11 +19,12 @@ import com.vaadin.flow.theme.lumo.Lumo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.Random;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Route(value = "")
@@ -30,21 +32,18 @@ import java.util.stream.Stream;
 public class Home extends Div {
 
     // Dummy DB. A real app will hook up something like JPA.
-    private static final Set<Person> DB = new LinkedHashSet<>(Arrays.asList(
-            new Person("Mario", 1, new Stuff(2, "Mario")),
-            new Person("Luigi", 2, new Stuff(2, "Luigi")),
-            new Person("Sayo", 3, new Stuff(2, "Sayo")),
-            new Person("Kingsley", 4, new Stuff(2, "Kingsley")),
-            new Person("Dami", 5, new Stuff(2, "Dami")),
-            new Person("Tobi", 6, new Stuff(2, "Tobi")),
-            new Person("Andrew", 7, new Stuff(2, "Andrew")),
-            new Person("Eno", 8, new Stuff(2, "Eno")),
-            new Person("Isau", 9, new Stuff(2, "Isau")),
-            new Person("Ronaldo", 10, new Stuff(1, "Ronaldo"))
-    ));
+    private static final List<Person> DB = IntStream.range(0, 20000)
+            .mapToObj(i -> new Person(randomName() + " " + i, i, new Stuff()))
+            .collect(Collectors.toList());
 
     public Home() {
         Crud<Person> crud = new Crud<>(new SimpleCrudGrid<>(Person.class, true), new DummyCrudEditor<>());
+
+        crud.addNewListener(e -> System.out.println("New event!"));
+        crud.addEditListener(e -> System.out.println("Edit event!\n" + e.getItem()));
+        crud.addSaveListener(e -> System.out.println("Save event!"));
+        crud.addCancelListener(e -> System.out.println("Cancel event!"));
+        crud.addDeleteListener(e -> System.out.println("Delete event!"));
 
         // Just a proof-of-concept.
         crud.setDataProvider(new AbstractBackEndDataProvider<Person, SimpleCrudFilter>() {
@@ -130,6 +129,17 @@ public class Home extends Div {
         add(crud);
     }
 
+    private static String randomName() {
+        Random random = new Random();
+        int length = 4 + random.nextInt(6);
+        StringBuilder result = new StringBuilder();
+        for (int a = 0; a < length; a++) {
+            char c = (char) ('A' + random.nextInt(26));
+            result.append(c);
+        }
+        return result.toString();
+    }
+
     public static class Person {
 
         @Order(1)
@@ -190,6 +200,9 @@ public class Home extends Div {
         private int thingId;
         private String thing;
 
+        public Stuff() {
+        }
+
         public Stuff(int thingId, String thing) {
             this.thingId = thingId;
             this.thing = thing;
@@ -219,6 +232,10 @@ public class Home extends Div {
 
     @Tag("div")
     public static class DummyCrudEditor<E> extends CrudEditor<E> {
+
+        public DummyCrudEditor() {
+            getElement().appendChild(new H1("The form").getElement());
+        }
 
         @Override
         public boolean isValid() {

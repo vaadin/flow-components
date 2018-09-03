@@ -19,10 +19,11 @@ package com.vaadin.flow.component.crud;
 
 import com.vaadin.flow.data.provider.SortDirection;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class SimpleCrudFilter {
+public class SimpleCrudFilter implements Serializable {
 
     private final Map<String, String> constraints = new LinkedHashMap<>();
     private final Map<String, SortDirection> sortOrders = new LinkedHashMap<>();

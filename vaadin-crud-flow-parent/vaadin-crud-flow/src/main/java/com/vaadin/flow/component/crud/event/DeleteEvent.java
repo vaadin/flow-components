@@ -19,10 +19,10 @@ package com.vaadin.flow.component.crud.event;
 
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.crud.CrudEditor;
+import com.vaadin.flow.component.crud.Crud;
 
 @DomEvent("delete")
-public class DeleteEvent extends ComponentEvent<CrudEditor<?>> {
+public class DeleteEvent extends ComponentEvent<Crud<?>> {
 
     /**
      * Creates a new event using the given source and indicator whether the
@@ -31,7 +31,7 @@ public class DeleteEvent extends ComponentEvent<CrudEditor<?>> {
      * @param source     the source component
      * @param fromClient <code>true</code> if the event originated from the client
      */
-    public DeleteEvent(CrudEditor<?> source, boolean fromClient) {
+    public DeleteEvent(Crud<?> source, boolean fromClient) {
         super(source, fromClient);
     }
 }
