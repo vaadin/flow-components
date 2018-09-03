@@ -8,8 +8,8 @@ import com.vaadin.flow.component.crud.SimpleCrudGrid;
 import com.vaadin.flow.component.crud.Util;
 import com.vaadin.flow.component.crud.annotation.Hidden;
 import com.vaadin.flow.component.crud.annotation.Order;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 @Route(value = "")
 @Theme(Lumo.class)
 @BodySize(height = "100vh", width = "100vw")
-public class Home extends Div {
+public class Home extends VerticalLayout {
 
     // Dummy DB. A real app will hook up something like JPA.
     private static final List<Person> DB = IntStream.range(0, 20000)
