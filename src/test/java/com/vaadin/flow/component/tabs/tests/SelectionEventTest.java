@@ -16,7 +16,6 @@
 
 package com.vaadin.flow.component.tabs.tests;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -114,7 +113,7 @@ public class SelectionEventTest {
     }
 
     @Test
-    public void removeAllTabs_selectionChangedToNull_selectedIndexZero() {
+    public void removeAllTabs_selectionChangedToNull_selectedIndexMinusOne() {
         tabs.remove(tab1, tab2);
 
         Assert.assertEquals(
@@ -122,7 +121,7 @@ public class SelectionEventTest {
                 1, eventCount);
 
         Assert.assertEquals(
-                "The selected index should be 0 when there are no tabs", 0,
+                "The selected index should be -1 when there are no tabs", -1,
                 tabs.getSelectedIndex());
 
         Assert.assertEquals(
@@ -131,7 +130,7 @@ public class SelectionEventTest {
     }
 
     @Test
-    public void selectSecondTab_removeAll_selectionChangedToNull_selectedIndexZero() {
+    public void selectSecondTab_removeAll_selectionChangedToNull_selectedIndexMinusOne() {
         tabs.setSelectedIndex(1);
         Assert.assertEquals(1, eventCount);
 
@@ -142,7 +141,7 @@ public class SelectionEventTest {
                 2, eventCount);
 
         Assert.assertEquals(
-                "The selected index should be 0 when there are no tabs", 0,
+                "The selected index should be -1 when there are no tabs", -1,
                 tabs.getSelectedIndex());
 
         Assert.assertEquals(
@@ -209,14 +208,61 @@ public class SelectionEventTest {
                 tab2, tabs.getSelectedTab());
     }
 
-    @After
-    public void checkThatOnlyOneTabIsSelected() {
-        if (tabs.getComponentCount() > 0) {
-            long selectedTabs = tabs.getChildren().map(Tab.class::cast)
-                    .filter(Tab::isSelected).count();
-            Assert.assertEquals("Exactly one of the tabs should be selected", 1,
-                    selectedTabs);
-        }
+    @Test
+    public void unselect_eventFired_selectedIndexMinusOne() {
+        tabs.setSelectedTab(null);
+        Assert.assertEquals("Unselecting the selected tab should fire event", 1,
+                eventCount);
+        Assert.assertEquals("The selected tab should be null after unselecting",
+                null, tabs.getSelectedTab());
+        Assert.assertEquals("The selected index is -1 when no tab is selected",
+                -1, tabs.getSelectedIndex());
+    }
+
+    @Test
+    public void unselectWithIndex() {
+        tabs.setSelectedIndex(-1);
+        Assert.assertEquals("Unselecting the selected tab should fire event", 1,
+                eventCount);
+        Assert.assertEquals("The selected tab should be null after unselecting",
+                null, tabs.getSelectedTab());
+    }
+
+    @Test
+    public void unselectWithAnyNegativeIndex_selectedIndexMinusOne() {
+        tabs.setSelectedIndex(-100);
+        Assert.assertEquals("Unselecting the selected tab should fire event", 1,
+                eventCount);
+        Assert.assertEquals("The selected tab should be null after unselecting",
+                null, tabs.getSelectedTab());
+        Assert.assertEquals(
+                "The selected index should return -1 when no tab is selected, even "
+                        + "when the index was set as some other negative number",
+                -1, tabs.getSelectedIndex());
+    }
+
+    @Test
+    public void unselect_selectOldSelection_eventFired() {
+        tabs.setSelectedTab(null);
+        tabs.setSelectedTab(tab1);
+        Assert.assertEquals("Selection event should have been fired", 2,
+                eventCount);
+        Assert.assertEquals("Selected tab should be the one which was selected",
+                tab1, tabs.getSelectedTab());
+    }
+
+    @Test
+    public void unselectMultipleTimes_noEvent() {
+        tabs.setSelectedTab(null);
+        Assert.assertEquals(1, eventCount);
+        tabs.setSelectedTab(null);
+        Assert.assertEquals(
+                "Selection was not changed, no event should've been fired", 1,
+                eventCount);
+        tabs.setSelectedIndex(-1);
+        Assert.assertEquals(
+                "Selection was not changed, no event should've been fired", 1,
+                eventCount);
     }
 
 }

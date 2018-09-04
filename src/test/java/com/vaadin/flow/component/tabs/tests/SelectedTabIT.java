@@ -97,6 +97,27 @@ public class SelectedTabIT extends AbstractComponentIT {
         assertSelectionEvent(1, "asdf client");
     }
 
+    @Test
+    public void testUnselectingAndReselecting() {
+        List<TestBenchElement> tabs = $("vaadin-tabs").first().$("vaadin-tab")
+                .all();
+
+        clickElementWithJs("unselect");
+        assertSelectionEvent(1, "null server");
+
+        tabs.get(0).click();
+        assertSelectionEvent(2, "foo client");
+
+        clickElementWithJs("unselect-with-index");
+        assertSelectionEvent(3, "null server");
+
+        clickElementWithJs("unselect");
+        assertSelectionEvent(3, "null server"); // no event
+
+        clickElementWithJs("set-selected-tab");
+        assertSelectionEvent(4, "bar server");
+    }
+
     private void assertSelectionEvent(int amountOfEvents,
             String expectedLatestMessage) {
         List<WebElement> selectionEventMessages = findElements(

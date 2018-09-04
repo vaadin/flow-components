@@ -67,6 +67,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * HORIZONTAL} orientation.
      */
     public Tabs() {
+        setSelectedIndex(-1);
         getElement().addPropertyChangeListener(SELECTED,
                 event -> updateSelectedTab(event.isUserOriginated()));
     }
@@ -90,14 +91,19 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      *            the tabs to enclose
      */
     public void add(Tab... tabs) {
-        HasOrderedComponents.super.add(tabs);
-        updateSelectedTab(false);
+        add((Component[]) tabs);
     }
 
     @Override
     public void add(Component... components) {
+        boolean wasEmpty = getComponentCount() == 0;
         HasOrderedComponents.super.add(components);
-        updateSelectedTab(false);
+        if (wasEmpty) {
+            assert getSelectedIndex() == -1;
+            setSelectedIndex(0);
+        } else {
+            updateSelectedTab(false);
+        }
     }
 
     /**
@@ -123,6 +129,10 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
             newSelectedIndex = getComponentCount() - 1;
         }
 
+        if (getComponentCount() == 0) {
+            newSelectedIndex = -1;
+        }
+
         if (newSelectedIndex != getSelectedIndex()) {
             setSelectedIndex(newSelectedIndex);
         } else {
@@ -138,8 +148,8 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
     @Override
     public void removeAll() {
         HasOrderedComponents.super.removeAll();
-        if (getSelectedIndex() > 0) {
-            setSelectedIndex(0);
+        if (getSelectedIndex() > -1) {
+            setSelectedIndex(-1);
         } else {
             updateSelectedTab(false);
         }
@@ -207,18 +217,19 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
     /**
      * Gets the zero-based index of the currently selected tab.
      *
-     * @return the zero-based index of the selected tab
+     * @return the zero-based index of the selected tab, or -1 if none of the
+     *         tabs is selected
      */
     @Synchronize(property = SELECTED, value = "selected-changed")
     public int getSelectedIndex() {
-        return getElement().getProperty(SELECTED, 0);
+        return getElement().getProperty(SELECTED, -1);
     }
 
     /**
      * Selects a tab based on its zero-based index.
      *
      * @param selectedIndex
-     *            the zero-based index of the selected tab
+     *            the zero-based index of the selected tab, -1 to unselect all
      */
     public void setSelectedIndex(int selectedIndex) {
         getElement().setProperty(SELECTED, selectedIndex);
@@ -227,15 +238,14 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
     /**
      * Gets the currently selected tab.
      *
-     * @return the selected tab
+     * @return the selected tab, or {@code null} if none is selected
      */
     public Tab getSelectedTab() {
-        if (getChildren().count() == 0) {
-            assert getSelectedIndex() == 0;
+        int selectedIndex = getSelectedIndex();
+        if (selectedIndex < 0) {
             return null;
         }
 
-        int selectedIndex = getSelectedIndex();
         Component selectedComponent = getComponentAt(selectedIndex);
         if (!(selectedComponent instanceof Tab)) {
             throw new IllegalStateException(
@@ -248,17 +258,22 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * Selects the given tab.
      *
      * @param selectedTab
-     *            the tab to select
+     *            the tab to select, {@code null} to unselect all
      * @throws IllegalArgumentException
      *             if {@code selectedTab} is not a child of this component
      */
     public void setSelectedTab(Tab selectedTab) {
+        if (selectedTab == null) {
+            setSelectedIndex(-1);
+            return;
+        }
+
         int selectedIndex = indexOf(selectedTab);
         if (selectedIndex < 0) {
             throw new IllegalArgumentException(
                     "Tab to select must be a child: " + selectedTab);
         }
-        getElement().setProperty(SELECTED, selectedIndex);
+        setSelectedIndex(selectedIndex);
     }
 
     /**
@@ -315,22 +330,25 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
 
     @ClientCallable
     private void updateSelectedTab(boolean changedFromClient) {
+        if (getSelectedIndex() < -1) {
+            setSelectedIndex(-1);
+            return;
+        }
+
         Tab currentlySelected = getSelectedTab();
 
         if (Objects.equals(currentlySelected, selectedTab)) {
             return;
         }
 
-        if (currentlySelected == null) {
-            fireEvent(new SelectedChangeEvent(this, changedFromClient));
-            return;
-        }
-
-        if (currentlySelected.isEnabled()) {
+        if (currentlySelected == null || currentlySelected.isEnabled()) {
             selectedTab = currentlySelected;
             getChildren().filter(Tab.class::isInstance).map(Tab.class::cast)
                     .forEach(tab -> tab.setSelected(false));
-            selectedTab.setSelected(true);
+
+            if (selectedTab != null) {
+                selectedTab.setSelected(true);
+            }
 
             fireEvent(new SelectedChangeEvent(this, changedFromClient));
         } else {

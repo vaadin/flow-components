@@ -19,6 +19,7 @@ package com.vaadin.flow.component.tabs.tests;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,6 +44,10 @@ public class TabsTest {
                 is(0));
         assertThat("Initial orientation is invalid", tabs.getOrientation(),
                 is(Tabs.Orientation.HORIZONTAL));
+        assertThat("Initial selected index is invalid", tabs.getSelectedIndex(),
+                is(-1));
+        assertThat("Initial child count is invalid", tabs.getSelectedTab(),
+                CoreMatchers.nullValue());
     }
 
     @Test

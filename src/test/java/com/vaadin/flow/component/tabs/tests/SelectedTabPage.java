@@ -78,10 +78,20 @@ public class SelectedTabPage extends Div {
         addFirstWithElementAPI.setId("add-first-with-element-api");
 
         tabs.addSelectedChangeListener(event -> addEventMessage(
-                tabs.getSelectedTab().getLabel(), event.isFromClient()));
+                tabs.getSelectedTab() == null ? "null"
+                        : tabs.getSelectedTab().getLabel(),
+                event.isFromClient()));
+
+        NativeButton unselect = new NativeButton("Unselect",
+                event -> tabs.setSelectedTab(null));
+        unselect.setId("unselect");
+
+        NativeButton unselectWithIndex = new NativeButton("Unselect with index",
+                event -> tabs.setSelectedIndex(-1));
+        unselectWithIndex.setId("unselect-with-index");
 
         add(tabs, button, delete, deleteFirst, addFirst, addFirstWithElementAPI,
-                setSelectedIndex, setSelectedTab);
+                setSelectedIndex, setSelectedTab, unselect, unselectWithIndex);
     }
 
     private void addEventMessage(String tabLabel, boolean isFromClient) {
