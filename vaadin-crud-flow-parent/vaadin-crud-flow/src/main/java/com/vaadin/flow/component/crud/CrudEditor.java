@@ -17,10 +17,9 @@ package com.vaadin.flow.component.crud;
  * #L%
  */
 
-import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.dom.Element;
 
-public interface CrudEditor<E> extends HasValidator<E> {
+public interface CrudEditor<E> {
 
     void createWorkingCopyFrom(E item);
 
