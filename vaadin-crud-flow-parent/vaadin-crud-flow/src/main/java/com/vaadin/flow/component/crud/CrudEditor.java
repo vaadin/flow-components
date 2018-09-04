@@ -20,21 +20,17 @@ package com.vaadin.flow.component.crud;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.dom.Element;
 
-public abstract class CrudEditor<E> implements HasValidator<E> {
+public interface CrudEditor<E> extends HasValidator<E> {
 
-    protected E item;
+    void createWorkingCopyFrom(E item);
 
-    public E getItem() {
-        return item;
-    }
+    E getWorkingCopy();
 
-    public void setItem(E item) {
-        this.item = item;
-    }
+    void clear();
 
-    public abstract boolean isValid();
+    boolean isValid();
 
-    public abstract boolean isDirty();
+    boolean isDirty();
 
-    public abstract Element getView();
+    Element getView();
 }

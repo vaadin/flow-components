@@ -21,7 +21,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.crud.Crud;
 
-@DomEvent("new")
+@DomEvent("crud-new")
 public class NewEvent extends ComponentEvent<Crud<?>> {
 
     /**

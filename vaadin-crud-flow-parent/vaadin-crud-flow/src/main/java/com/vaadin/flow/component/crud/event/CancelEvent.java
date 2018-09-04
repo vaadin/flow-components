@@ -21,7 +21,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.crud.Crud;
 
-@DomEvent("cancel")
+@DomEvent("crud-cancel")
 public class CancelEvent extends ComponentEvent<Crud<?>> {
 
     /**

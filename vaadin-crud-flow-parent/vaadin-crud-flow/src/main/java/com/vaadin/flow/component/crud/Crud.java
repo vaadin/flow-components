@@ -72,56 +72,51 @@ public class Crud<E> extends Component {
     private void registerHandlers() {
         ComponentUtil.addListener(this, NewEvent.class, (ComponentEventListener<NewEvent>) e -> {
             try {
-                editor.setItem(beanType.newInstance());
+                editor.createWorkingCopyFrom(beanType.newInstance());
             } catch (Exception ex) {
                 throw new RuntimeException("Unable to instantiate new bean", ex);
             }
             newListeners.forEach(listener -> listener.onComponentEvent(e));
-            setDialogOpened(true);
         });
 
         ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<EditEvent<E>>) e -> {
-                    editor.setItem(e.getItem());
+                    editor.createWorkingCopyFrom(e.getItem());
                     editListeners.forEach(listener -> listener.onComponentEvent(e));
-                    setDialogOpened(true);
                 }));
-
-        ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener<SaveEvent>) e -> {
-            saveListeners.forEach(listener -> listener.onComponentEvent(e));
-            // Show notification.
-            getEditor().setItem(null);
-            getGrid().getDataProvider().refreshAll();
-            setDialogOpened(false);
-        });
 
         ComponentUtil.addListener(this, CancelEvent.class, (ComponentEventListener<CancelEvent>) e -> {
             cancelListeners.forEach(listener -> listener.onComponentEvent(e));
-            // Show notification.
-            getEditor().setItem(null);
-            setDialogOpened(false);
+            getEditor().createWorkingCopyFrom(null);
+            closeDialog();
+        });
+
+        ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener<SaveEvent>) e -> {
+            saveListeners.forEach(listener -> listener.onComponentEvent(e));
+            getEditor().createWorkingCopyFrom(null);
+            getGrid().getDataProvider().refreshAll();
+            closeDialog();
         });
 
         ComponentUtil.addListener(this, DeleteEvent.class, (ComponentEventListener<DeleteEvent>) e -> {
             deleteListeners.forEach(listener -> listener.onComponentEvent(e));
-            // Show notification.
-            getEditor().setItem(null);
+            getEditor().createWorkingCopyFrom(null);
             getGrid().getDataProvider().refreshAll();
-            setDialogOpened(false);
+            closeDialog();
         });
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached Grid"))
+                "Connector can only be initialized for an attached Crud"))
                 .getPage().executeJavaScript(
                 "window.Vaadin.Flow.crudConnector.initLazy($0)",
                 getElement());
     }
 
-    private void setDialogOpened(boolean isOpen) {
-        getElement().callFunction("__setDialogOpened", isOpen);
+    private void closeDialog() {
+        getElement().callFunction("__setDialogOpened", false);
     }
 
     public Grid<E> getGrid() {

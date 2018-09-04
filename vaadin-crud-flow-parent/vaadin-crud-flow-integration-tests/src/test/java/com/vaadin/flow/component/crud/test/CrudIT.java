@@ -13,6 +13,6 @@ public class CrudIT extends AbstractParallelTest {
 
     @Test
     public void pass() {
-        Assert.assertEquals("Hello Crud!", $("h1").first().getText());
+        Assert.assertTrue($("vaadin-crud").exists());
     }
 }

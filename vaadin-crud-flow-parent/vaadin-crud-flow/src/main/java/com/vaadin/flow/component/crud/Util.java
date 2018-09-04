@@ -34,7 +34,7 @@ public class Util {
                 .toUpperCase() + name.substring(1);
     }
 
-    public static Field[] visiblePropertiesIn(Class<?> clazz) {
+    static Field[] visiblePropertiesIn(Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredFields())
                 .filter(e -> !Modifier.isStatic(e.getModifiers()))
                 .filter(e -> !e.isAnnotationPresent(Hidden.class))
@@ -46,7 +46,6 @@ public class Util {
                 .toArray(Field[]::new);
     }
 
-    @VisibleForTesting
     public static Method getterFor(Field field, Class<?> clazz) {
         try {
             return clazz.getMethod("get" + capitalize(field.getName()));

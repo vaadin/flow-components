@@ -23,7 +23,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.crud.Crud;
 import elemental.json.JsonObject;
 
-@DomEvent("edit")
+@DomEvent("crud-edit")
 public class EditEvent<E> extends ComponentEvent<Crud<E>> {
 
     private E item;
@@ -41,7 +41,9 @@ public class EditEvent<E> extends ComponentEvent<Crud<E>> {
         try {
             this.item = source.getGrid().getDataCommunicator()
                     .getKeyMapper().get(item.getString("key"));
-        } catch (NullPointerException ex) { } // Remove when WC no longer fires edit event on grid active item change
+        } catch (NullPointerException ex) {
+            // TODO(oluwasayo): Remove when WC no longer fires edit event on grid active item change
+        }
     }
 
     public E getItem() {

@@ -20,7 +20,21 @@ public class CrudTest {
         Assert.assertTrue(true);
     }
 
-    public static class DummyCrudEditor extends CrudEditor<DummyBean> {
+    public static class DummyCrudEditor implements CrudEditor<DummyBean> {
+
+        @Override
+        public void createWorkingCopyFrom(DummyBean item) {
+        }
+
+        @Override
+        public DummyBean getWorkingCopy() {
+            return null;
+        }
+
+        @Override
+        public void clear() {
+        }
+
         @Override
         public boolean isValid() {
             return false;
@@ -38,6 +52,7 @@ public class CrudTest {
     }
 
     public static class DummyBean {
+
         private String name;
 
         public String getName() {
