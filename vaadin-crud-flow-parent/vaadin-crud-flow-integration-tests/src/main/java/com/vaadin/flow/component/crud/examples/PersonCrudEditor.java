@@ -10,8 +10,8 @@ import com.vaadin.flow.dom.Element;
 
 public class PersonCrudEditor implements CrudEditor<Person> {
 
+    private final TextField idField = new TextField("Id");
     private final TextField nameField = new TextField("Name");
-    private final TextField ageField = new TextField("Age");
 
     private final VerticalLayout view = new VerticalLayout();
 
@@ -19,11 +19,20 @@ public class PersonCrudEditor implements CrudEditor<Person> {
     private Binder<Person> binder;
 
     PersonCrudEditor() {
-        ageField.setMaxLength(2);
-        ageField.setPattern("\\d+");
-        ageField.setPreventInvalidInput(true);
+        idField.setMaxLength(2);
+        idField.setPattern("\\d+");
+        idField.setPreventInvalidInput(true);
 
-        view.add(new H2("Edit Person"), new Hr(), nameField, ageField);
+        idField.setWidth("100%");
+        nameField.setWidth("100%");
+
+        view.setPadding(false);
+        view.setMargin(false);
+
+        final H2 heading = new H2("Edit Person");
+        heading.getElement().getStyle().set("margin-top", "0.5em");
+
+        view.add(heading, new Hr(), idField, nameField);
     }
 
     @Override
@@ -44,7 +53,7 @@ public class PersonCrudEditor implements CrudEditor<Person> {
         binder = new Binder<>(Person.class);
         binder.setBean(workingCopy);
         binder.bind(nameField, Person::getName, Person::setName);
-        binder.forField(ageField)
+        binder.forField(idField)
                 .withConverter(
                         string -> string.isEmpty() ? null : Integer.parseInt(string),
                         number -> number == null ? "" : Integer.toString(number))
@@ -70,7 +79,7 @@ public class PersonCrudEditor implements CrudEditor<Person> {
         workingCopy = null;
 
         nameField.clear();
-        ageField.clear();
+        idField.clear();
     }
 
     @Override

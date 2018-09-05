@@ -21,6 +21,14 @@ public class PersonView extends VerticalLayout {
         crud.addSaveListener(e -> dataProvider.persist(crud.getEditor().getWorkingCopy()));
         crud.addDeleteListener(e -> dataProvider.delete(crud.getEditor().getWorkingCopy().getId()));
 
+        crud.getElement().getStyle().set("width", "600px");
+        crud.getElement().getStyle().set("height", "100%");
+        crud.getGrid().getElement().setAttribute("theme", "no-border");
+
+        setWidth("100%");
+        setHeight("100%");
+        setHorizontalComponentAlignment(Alignment.CENTER, crud);
+
         add(crud);
     }
 }

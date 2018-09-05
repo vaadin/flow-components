@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -22,7 +23,7 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, SimpleC
 
     // A real app should hook up something like JPA
     private static final List<Person> DATABASE = IntStream
-            .range(0, 5)
+            .rangeClosed(1, 10)
             .mapToObj(i -> new Person(i, randomName() + " " + i))
             .collect(toList());
 
@@ -105,8 +106,6 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, SimpleC
     }
 
     void persist(Person item) {
-        delete(item.getId());
-
         if (item.getId() == null) {
             item.setId(DATABASE
                     .stream()
@@ -115,7 +114,21 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, SimpleC
                     .orElse(0) + 1);
         }
 
-        DATABASE.add(item);
+        final Optional<Person> existingItem = find(item.getId());
+        if (existingItem.isPresent()) {
+            int position = DATABASE.indexOf(existingItem.get());
+            DATABASE.remove(existingItem.get());
+            DATABASE.add(position, item);
+        } else {
+            DATABASE.add(item);
+        }
+    }
+
+    Optional<Person> find(Integer id) {
+        return DATABASE
+                .stream()
+                .filter(entity -> entity.getId().equals(id))
+                .findFirst();
     }
 
     void delete(Integer id) {

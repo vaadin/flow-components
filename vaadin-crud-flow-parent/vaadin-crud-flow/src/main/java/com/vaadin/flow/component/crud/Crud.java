@@ -77,12 +77,14 @@ public class Crud<E> extends Component {
                 throw new RuntimeException("Unable to instantiate new bean", ex);
             }
             newListeners.forEach(listener -> listener.onComponentEvent(e));
+            getElement().setProperty("_dirty", false);
         });
 
         ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<EditEvent<E>>) e -> {
                     editor.createWorkingCopyFrom(e.getItem());
                     editListeners.forEach(listener -> listener.onComponentEvent(e));
+                    getElement().setProperty("_dirty", false);
                 }));
 
         ComponentUtil.addListener(this, CancelEvent.class, (ComponentEventListener<CancelEvent>) e -> {

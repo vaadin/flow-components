@@ -46,11 +46,11 @@ public class SimpleCrudGrid<E> extends Grid<E> {
 
     private void setup() {
         this.setSelectionMode(SelectionMode.NONE);
-        this.getColumns().forEach(this::removeColumn);
-
-        Arrays.stream(visiblePropertiesIn(beanType))
-                .forEach(e -> this.addColumn(e.getName())
-                            .setHeader(capitalize(e.getName())));
+//        this.getColumns().forEach(this::removeColumn);
+//
+//        Arrays.stream(visiblePropertiesIn(beanType))
+//                .forEach(e -> this.addColumn(e.getName())
+//                            .setHeader(capitalize(e.getName())));
 
         setupSorting();
         if (enableDefaultFilters) {
