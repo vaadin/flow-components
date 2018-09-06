@@ -1,8 +1,10 @@
 package com.vaadin.flow.component.applayout.vaadincom;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.ActionMenuItem;
 import com.vaadin.flow.component.applayout.RoutingMenuItem;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -14,22 +16,9 @@ public class AppLayoutView extends DemoView {
 
     @Override
     protected void initView() {
-        emptyAppLayout();
-        appLayoutWithBrandingText();
         appLayoutWithBrandingLogo();
+        appLayoutWithBrandingText();
         appLayoutWithMenus();
-        appLayoutAsARouterLayout();
-    }
-
-    private void emptyAppLayout() {
-        // @formatter:off
-        // begin-source-example
-        // source-example-heading: Basic App Layout Example
-        AppLayout appLayout = new AppLayout();
-        // end-source-example
-        // @formatter:on
-
-        addCard("Basic App Layout Example", appLayout);
     }
 
     private void appLayoutWithBrandingText() {
@@ -37,31 +26,40 @@ public class AppLayoutView extends DemoView {
         // begin-source-example
         // source-example-heading: Basic App Layout with text branding
         AppLayout appLayout = new AppLayout();
-        appLayout.setBranding(new Span("App Company").getElement());
+        appLayout.setBranding(new H3("App Company").getElement());
+
         // end-source-example
         // @formatter:on
 
-        addCard("Using text branding", appLayout);
+        addCard("Basic App Layout with text branding");
     }
 
     private void appLayoutWithBrandingLogo() {
         // @formatter:off
         // begin-source-example
-        // source-example-heading: Basic App Layout with text branding
+        // source-example-heading: Simple App Layout with brand logo
         AppLayout appLayout = new AppLayout();
-        appLayout.setBranding(
-                new Image("https://imgur.com/a/hkhePn5", "Vaadin Logo")
-                        .getElement());
+        Image img = new Image("https://i.imgur.com/GPpnszs.png", "Vaadin Logo");
+        img.setHeight("44px");
+        appLayout.setBranding(img.getElement());
+
+        appLayout.addMenuItem(new RoutingMenuItem("Page 1", "page1"));
+        appLayout.addMenuItem(new RoutingMenuItem("Page 2", "page2"));
+        appLayout.addMenuItem(new RoutingMenuItem("Page 3", "page3"));
+        appLayout.addMenuItem(new RoutingMenuItem("Page 4", "page4"));
+
+        Component content = new Span(new H3("Page title"), new Span("Page content"));
+        appLayout.setContent(content.getElement());
         // end-source-example
         // @formatter:on
 
-        addCard("Using logo branding", appLayout);
+        addCard("Simple App Layout with brand logo");
     }
 
     private void appLayoutWithMenus() {
         // @formatter:off
         // begin-source-example
-        // source-example-heading: App Layout with Menus
+        // source-example-heading: App Layout with Action Menu Item
         AppLayout appLayout = new AppLayout();
 
         appLayout.addMenuItem(new RoutingMenuItem(
@@ -75,20 +73,10 @@ public class AppLayoutView extends DemoView {
         // end-source-example
         // @formatter:on
 
-        addCard("Adding menus", appLayout);
+        addCard("App Layout with Action Menu Item");
     }
 
     private void logout() {
     }
 
-    private void appLayoutAsARouterLayout() {
-        // @formatter:off
-        // begin-source-example
-        // source-example-heading: App Layout as a router layout
-        AppLayout appLayout = new AppLayout();
-        // end-source-example
-        // @formatter:on
-
-        addCard("AppLayout as a router layout", appLayout);
-    }
 }

@@ -44,6 +44,7 @@ public class AppLayout extends Component {
     public AppLayout() {
         menuTabs = new Tabs();
         menuTabs.getElement().setAttribute("slot", "menu");
+        menuTabs.getElement().setAttribute("theme", "minimal");
         getElement().appendChild(menuTabs.getElement());
 
         menuTabs.addSelectedChangeListener(event -> {
