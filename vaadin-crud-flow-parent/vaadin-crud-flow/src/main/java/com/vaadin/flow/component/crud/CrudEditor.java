@@ -21,9 +21,9 @@ import com.vaadin.flow.dom.Element;
 
 public interface CrudEditor<E> {
 
-    void createWorkingCopyFrom(E item);
+    void setItem(E item);
 
-    E getWorkingCopy();
+    E getItem();
 
     void clear();
 

@@ -10,8 +10,9 @@ import com.vaadin.flow.dom.Element;
 
 public class PersonCrudEditor implements CrudEditor<Person> {
 
-    private final TextField idField = new TextField("Id");
-    private final TextField nameField = new TextField("Name");
+    private final H2 heading = new H2("Edit Person");
+    private final TextField firstNameField = new TextField("First name");
+    private final TextField lastNameField = new TextField("Last name");
 
     private final VerticalLayout view = new VerticalLayout();
 
@@ -19,67 +20,51 @@ public class PersonCrudEditor implements CrudEditor<Person> {
     private Binder<Person> binder;
 
     PersonCrudEditor() {
-        idField.setMaxLength(2);
-        idField.setPattern("\\d+");
-        idField.setPreventInvalidInput(true);
-
-        idField.setWidth("100%");
-        nameField.setWidth("100%");
-
-        view.setPadding(false);
-        view.setMargin(false);
-
-        final H2 heading = new H2("Edit Person");
-        heading.getElement().getStyle().set("margin-top", "0.5em");
-
-        view.add(heading, new Hr(), idField, nameField);
+        view.add(heading, new Hr(), firstNameField, lastNameField);
     }
 
     @Override
-    public Person getWorkingCopy() {
+    public Person getItem() {
         return workingCopy;
     }
 
     @Override
-    public void createWorkingCopyFrom(Person item) {
+    public void setItem(Person item) {
         // TODO(oluwasayo): Remove when WC no longer fires edit event on grid active item change
         if (item == null) {
             clear();
             return;
         }
 
-        workingCopy = copyOf(item);
-
         binder = new Binder<>(Person.class);
+        binder.bind(firstNameField, Person::getFirstName, Person::setFirstName);
+        binder.bind(lastNameField, Person::getLastName, Person::setLastName);
+
+        workingCopy = copyOf(item);
         binder.setBean(workingCopy);
-        binder.bind(nameField, Person::getName, Person::setName);
-        binder.forField(idField)
-                .withConverter(
-                        string -> string.isEmpty() ? null : Integer.parseInt(string),
-                        number -> number == null ? "" : Integer.toString(number))
-                .bind(Person::getId, Person::setId);
     }
 
     private Person copyOf(Person item) {
         final Person copy = new Person();
         copy.setId(item.getId());
-        copy.setName(item.getName());
+        copy.setFirstName(item.getFirstName());
+        copy.setLastName(item.getLastName());
         return copy;
     }
 
     @Override
     public void clear() {
         if (binder != null) {
-            binder.removeBinding("id");
-            binder.removeBinding("name");
+            binder.removeBinding("firstName");
+            binder.removeBinding("lastName");
             binder.removeBean();
             binder = null;
         }
 
         workingCopy = null;
 
-        nameField.clear();
-        idField.clear();
+        firstNameField.clear();
+        lastNameField.clear();
     }
 
     @Override

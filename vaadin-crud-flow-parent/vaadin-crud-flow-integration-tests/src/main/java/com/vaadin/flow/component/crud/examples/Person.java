@@ -1,31 +1,34 @@
 package com.vaadin.flow.component.crud.examples;
 
-import com.vaadin.flow.component.crud.annotation.Order;
-
 public class Person {
 
-    @Order
     private Integer id;
-
-    @Order(1)
-    private String name;
-
-    private static String staticProp = "This should not show";
+    private String firstName;
+    private String lastName;
 
     public Person() {
     }
 
-    public Person(Integer id, String name) {
-        this.name = name;
+    public Person(Integer id, String firstName, String lastName) {
         this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Integer getId() {
@@ -36,19 +39,12 @@ public class Person {
         this.id = id;
     }
 
-    public static String getStaticProp() {
-        return staticProp;
-    }
-
-    public static void setStaticProp(String staticProp) {
-        Person.staticProp = staticProp;
-    }
-
     @Override
     public String toString() {
         return "Person{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 '}';
     }
 }

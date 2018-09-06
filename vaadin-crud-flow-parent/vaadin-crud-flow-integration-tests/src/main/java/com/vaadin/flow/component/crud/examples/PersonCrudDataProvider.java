@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.crud.examples;
 
-import com.vaadin.flow.component.crud.SimpleCrudFilter;
-import com.vaadin.flow.component.crud.Util;
+import com.vaadin.flow.component.crud.CrudFilter;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -19,16 +18,30 @@ import java.util.stream.Stream;
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toList;
 
-class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, SimpleCrudFilter> {
+class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFilter> {
 
     // A real app should hook up something like JPA
     private static final List<Person> DATABASE = IntStream
             .rangeClosed(1, 10)
-            .mapToObj(i -> new Person(i, randomName() + " " + i))
+            .mapToObj(i -> new Person(i, randomName(), randomName()))
             .collect(toList());
 
+    private static String randomName() {
+        Random random = new Random();
+        StringBuilder result = new StringBuilder();
+
+        int length = 4 + random.nextInt(6);
+
+        for (int a = 0; a < length; a++) {
+            result.append((char) ('a' + random.nextInt(26)));
+        }
+
+        return result.replace(0, 1,
+                result.substring(0, 1).toUpperCase()).toString();
+    }
+
     @Override
-    protected Stream<Person> fetchFromBackEnd(Query<Person, SimpleCrudFilter> query) {
+    protected Stream<Person> fetchFromBackEnd(Query<Person, CrudFilter> query) {
         int offset = query.getOffset();
         int limit = query.getLimit();
 
@@ -44,12 +57,12 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, SimpleC
     }
 
     @Override
-    protected int sizeInBackEnd(Query<Person, SimpleCrudFilter> query) {
+    protected int sizeInBackEnd(Query<Person, CrudFilter> query) {
         // For RDBMS just execute a SELECT COUNT(*) ... WHERE query
         return (int) fetchFromBackEnd(query).count();
     }
 
-    private Predicate<Person> predicate(SimpleCrudFilter filter) {
+    private Predicate<Person> predicate(CrudFilter filter) {
         // For RDBMS just generate a WHERE clause
         return filter.getConstraints().entrySet().stream()
                 .map(constraint -> (Predicate<Person>) person -> {
@@ -65,7 +78,7 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, SimpleC
                 .orElse(e -> true);
     }
 
-    private Comparator<Person> comparator(SimpleCrudFilter filter) {
+    private Comparator<Person> comparator(CrudFilter filter) {
         // For RDBMS just generate an ORDER BY clause
         return filter.getSortOrders().entrySet().stream()
                 .map(sortClause -> {
@@ -92,7 +105,7 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, SimpleC
             Field field = Person.class.getDeclaredField(fieldName);
             Object value;
             try {
-                Method getter = Util.getterFor(field, Person.class);
+                Method getter = getterFor(field, Person.class);
                 value = getter.invoke(person);
             } catch (Exception ex) {
                 field.setAccessible(true);
@@ -103,6 +116,25 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, SimpleC
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private static String capitalize(String name) {
+        return Character.toString(name.charAt(0))
+                .toUpperCase() + name.substring(1);
+    }
+
+    private static Method getterFor(Field field, Class<?> clazz) {
+        try {
+            return clazz.getMethod("get" + capitalize(field.getName()));
+        } catch (NoSuchMethodException e1) {
+            if (field.getType() == Boolean.class || field.getType() == boolean.class) {
+                try {
+                    return clazz.getMethod("is" + capitalize(field.getName()));
+                } catch (NoSuchMethodException ignored) { }
+            }
+        }
+
+        return null;
     }
 
     void persist(Person item) {
@@ -131,19 +163,7 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, SimpleC
                 .findFirst();
     }
 
-    void delete(Integer id) {
-        DATABASE.removeIf(entity -> entity.getId().equals(id));
-    }
-
-    private static String randomName() {
-        Random random = new Random();
-        int length = 4 + random.nextInt(6);
-        StringBuilder result = new StringBuilder();
-
-        for (int a = 0; a < length; a++) {
-            result.append((char) ('A' + random.nextInt(26)));
-        }
-
-        return result.toString();
+    void delete(Person item) {
+        DATABASE.removeIf(entity -> entity.getId().equals(item.getId()));
     }
 }

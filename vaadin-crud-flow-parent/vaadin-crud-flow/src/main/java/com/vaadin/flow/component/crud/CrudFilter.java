@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class SimpleCrudFilter implements Serializable {
+public class CrudFilter implements Serializable {
 
     private final Map<String, String> constraints = new LinkedHashMap<>();
     private final Map<String, SortDirection> sortOrders = new LinkedHashMap<>();

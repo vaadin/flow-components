@@ -10,7 +10,10 @@ window.Vaadin.Flow.crudConnector = {
       })
     );
 
-    crud.__setDialogOpened = isOpen => crud.$.dialog.opened = isOpen;
+    // Mark editor as clean on new and edit
+    ['new', 'edit'].forEach(e => crud.addEventListener(e, () => crud._dirty = false));
+
+    crud.closeDialog = () => crud.__closeEditor();
 
     crud.$connector = true;
   }

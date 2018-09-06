@@ -19,19 +19,18 @@ package com.vaadin.flow.component.crud;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.crud.event.CancelEvent;
-import com.vaadin.flow.component.crud.event.DeleteEvent;
-import com.vaadin.flow.component.crud.event.EditEvent;
-import com.vaadin.flow.component.crud.event.NewEvent;
-import com.vaadin.flow.component.crud.event.SaveEvent;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.shared.Registration;
+import elemental.json.JsonObject;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -52,7 +51,7 @@ public class Crud<E> extends Component {
     private final Set<ComponentEventListener<DeleteEvent>> deleteListeners = new LinkedHashSet<>();
 
     public Crud(Class<E> beanType, CrudEditor<E> editor) {
-        this(beanType, new SimpleCrudGrid<>(beanType, true), editor);
+        this(beanType, new CrudGrid<>(beanType, true), editor);
     }
 
     public Crud(Class<E> beanType, Grid<E> grid, CrudEditor<E> editor) {
@@ -72,39 +71,42 @@ public class Crud<E> extends Component {
     private void registerHandlers() {
         ComponentUtil.addListener(this, NewEvent.class, (ComponentEventListener<NewEvent>) e -> {
             try {
-                editor.createWorkingCopyFrom(beanType.newInstance());
+                editor.setItem(beanType.newInstance());
             } catch (Exception ex) {
                 throw new RuntimeException("Unable to instantiate new bean", ex);
             }
+
             newListeners.forEach(listener -> listener.onComponentEvent(e));
-            getElement().setProperty("_dirty", false);
         });
 
         ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<EditEvent<E>>) e -> {
-                    editor.createWorkingCopyFrom(e.getItem());
+                    editor.setItem(e.getItem());
+
                     editListeners.forEach(listener -> listener.onComponentEvent(e));
-                    getElement().setProperty("_dirty", false);
                 }));
 
         ComponentUtil.addListener(this, CancelEvent.class, (ComponentEventListener<CancelEvent>) e -> {
             cancelListeners.forEach(listener -> listener.onComponentEvent(e));
-            getEditor().createWorkingCopyFrom(null);
-            closeDialog();
+
+            getEditor().setItem(null);
+            closeEditor();
         });
 
         ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener<SaveEvent>) e -> {
             saveListeners.forEach(listener -> listener.onComponentEvent(e));
-            getEditor().createWorkingCopyFrom(null);
+
+            getEditor().setItem(null);
             getGrid().getDataProvider().refreshAll();
-            closeDialog();
+            closeEditor();
         });
 
         ComponentUtil.addListener(this, DeleteEvent.class, (ComponentEventListener<DeleteEvent>) e -> {
             deleteListeners.forEach(listener -> listener.onComponentEvent(e));
-            getEditor().createWorkingCopyFrom(null);
+
+            getEditor().setItem(null);
             getGrid().getDataProvider().refreshAll();
-            closeDialog();
+            closeEditor();
         });
     }
 
@@ -117,8 +119,8 @@ public class Crud<E> extends Component {
                 getElement());
     }
 
-    private void closeDialog() {
-        getElement().callFunction("__setDialogOpened", false);
+    private void closeEditor() {
+        getElement().callFunction("closeDialog");
     }
 
     public Grid<E> getGrid() {
@@ -160,5 +162,93 @@ public class Crud<E> extends Component {
 
     public void setDataProvider(DataProvider<E, ?> provider) {
         grid.setDataProvider(provider);
+    }
+
+    @DomEvent("crud-cancel")
+    public static class CancelEvent extends ComponentEvent<Crud<?>> {
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the client
+         */
+        public CancelEvent(Crud<?> source, boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
+    @DomEvent("crud-delete")
+    public static class DeleteEvent extends ComponentEvent<Crud<?>> {
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the client
+         */
+        public DeleteEvent(Crud<?> source, boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
+    @DomEvent("crud-edit")
+    public static class EditEvent<E> extends ComponentEvent<Crud<E>> {
+
+        private E item;
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the client
+         */
+        public EditEvent(Crud<E> source, boolean fromClient,
+                         @EventData("event.detail.item") JsonObject item) {
+            super(source, fromClient);
+            try {
+                this.item = source.getGrid().getDataCommunicator()
+                        .getKeyMapper().get(item.getString("key"));
+            } catch (NullPointerException ex) {
+                // TODO(oluwasayo): Remove when WC no longer fires edit event on grid active item change
+            }
+        }
+
+        public E getItem() {
+            return item;
+        }
+    }
+
+    @DomEvent("crud-new")
+    public static class NewEvent extends ComponentEvent<Crud<?>> {
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the client
+         */
+        public NewEvent(Crud<?> source, boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
+    @DomEvent("crud-save")
+    public static class SaveEvent extends ComponentEvent<Crud<?>> {
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the client
+         */
+        public SaveEvent(Crud<?> source, boolean fromClient) {
+            super(source, fromClient);
+        }
     }
 }

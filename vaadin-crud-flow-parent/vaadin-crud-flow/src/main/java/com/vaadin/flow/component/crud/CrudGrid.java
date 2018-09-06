@@ -24,18 +24,13 @@ import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
-import java.util.Arrays;
-
-import static com.vaadin.flow.component.crud.Util.visiblePropertiesIn;
-import static com.vaadin.flow.component.crud.Util.capitalize;
-
-public class SimpleCrudGrid<E> extends Grid<E> {
+public class CrudGrid<E> extends Grid<E> {
 
     private final Class<E> beanType;
     private final boolean enableDefaultFilters;
-    private final SimpleCrudFilter filter = new SimpleCrudFilter();
+    private final CrudFilter filter = new CrudFilter();
 
-    public SimpleCrudGrid(Class<E> beanType, boolean enableDefaultFilters) {
+    public CrudGrid(Class<E> beanType, boolean enableDefaultFilters) {
         super(beanType);
 
         this.beanType = beanType;
@@ -46,12 +41,6 @@ public class SimpleCrudGrid<E> extends Grid<E> {
 
     private void setup() {
         this.setSelectionMode(SelectionMode.NONE);
-//        this.getColumns().forEach(this::removeColumn);
-//
-//        Arrays.stream(visiblePropertiesIn(beanType))
-//                .forEach(e -> this.addColumn(e.getName())
-//                            .setHeader(capitalize(e.getName())));
-
         setupSorting();
         if (enableDefaultFilters) {
             setupFiltering();
@@ -91,30 +80,30 @@ public class SimpleCrudGrid<E> extends Grid<E> {
         });
     }
 
-    private ConfigurableFilterDataProvider<E, Void, SimpleCrudFilter> getConfigurableDataProvider() {
-        return (ConfigurableFilterDataProvider<E, Void, SimpleCrudFilter>) getDataProvider();
+    private ConfigurableFilterDataProvider<E, Void, CrudFilter> getConfigurableDataProvider() {
+        return (ConfigurableFilterDataProvider<E, Void, CrudFilter>) getDataProvider();
     }
 
     /**
-     * Sets a DataProvider&lt;E, SimpleCrudFilter&gt;
+     * Sets a DataProvider&lt;E, CrudFilter&gt;
      *
      * @param dataProvider a {@link DataProvider}
-     * @see SimpleCrudFilter
+     * @see CrudFilter
      */
     @Override
     public void setDataProvider(DataProvider<E, ?> dataProvider) {
-        // Attempt a cast to ensure that the captured ? is actually a SimpleCrudFilter
+        // Attempt a cast to ensure that the captured ? is actually a CrudFilter
         // Unfortunately this cannot be enforced by the compiler
         try {
-            ConfigurableFilterDataProvider<E, Void, SimpleCrudFilter> provider
-                    = ((DataProvider<E, SimpleCrudFilter>) dataProvider).withConfigurableFilter();
+            ConfigurableFilterDataProvider<E, Void, CrudFilter> provider
+                    = ((DataProvider<E, CrudFilter>) dataProvider).withConfigurableFilter();
 
             provider.setFilter(filter);
 
             super.setDataProvider(provider);
         } catch (ClassCastException ex) {
             throw new IllegalArgumentException("DataProvider<" + beanType.getSimpleName()
-                    + ", SimpleCrudFilter expected", ex);
+                    + ", CrudFilter expected", ex);
         }
     }
 }
