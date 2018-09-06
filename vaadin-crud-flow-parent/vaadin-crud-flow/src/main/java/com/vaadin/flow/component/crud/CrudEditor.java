@@ -19,7 +19,9 @@ package com.vaadin.flow.component.crud;
 
 import com.vaadin.flow.dom.Element;
 
-public interface CrudEditor<E> {
+import java.io.Serializable;
+
+public interface CrudEditor<E> extends Serializable {
 
     void setItem(E item);
 
