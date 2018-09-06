@@ -103,7 +103,7 @@ public class CrudGrid<E> extends Grid<E> {
             super.setDataProvider(provider);
         } catch (ClassCastException ex) {
             throw new IllegalArgumentException("DataProvider<" + beanType.getSimpleName()
-                    + ", CrudFilter expected", ex);
+                    + ", CrudFilter> expected", ex);
         }
     }
 }
