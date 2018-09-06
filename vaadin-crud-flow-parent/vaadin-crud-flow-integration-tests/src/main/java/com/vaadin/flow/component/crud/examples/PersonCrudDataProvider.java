@@ -103,38 +103,11 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFil
     private Object valueOf(String fieldName, Person person) {
         try {
             Field field = Person.class.getDeclaredField(fieldName);
-            Object value;
-            try {
-                Method getter = getterFor(field, Person.class);
-                value = getter.invoke(person);
-            } catch (Exception ex) {
-                field.setAccessible(true);
-                value = field.get(person);
-            }
-
-            return value;
+            field.setAccessible(true);
+            return field.get(person);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    private static String capitalize(String name) {
-        return Character.toString(name.charAt(0))
-                .toUpperCase() + name.substring(1);
-    }
-
-    private static Method getterFor(Field field, Class<?> clazz) {
-        try {
-            return clazz.getMethod("get" + capitalize(field.getName()));
-        } catch (NoSuchMethodException e1) {
-            if (field.getType() == Boolean.class || field.getType() == boolean.class) {
-                try {
-                    return clazz.getMethod("is" + capitalize(field.getName()));
-                } catch (NoSuchMethodException ignored) { }
-            }
-        }
-
-        return null;
     }
 
     void persist(Person item) {

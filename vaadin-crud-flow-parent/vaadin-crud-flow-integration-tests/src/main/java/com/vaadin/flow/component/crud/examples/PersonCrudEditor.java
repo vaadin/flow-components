@@ -16,7 +16,7 @@ public class PersonCrudEditor implements CrudEditor<Person> {
 
     private final VerticalLayout view = new VerticalLayout();
 
-    private Person workingCopy;
+    private Person editableItem;
     private Binder<Person> binder;
 
     PersonCrudEditor() {
@@ -25,7 +25,7 @@ public class PersonCrudEditor implements CrudEditor<Person> {
 
     @Override
     public Person getItem() {
-        return workingCopy;
+        return editableItem;
     }
 
     @Override
@@ -40,8 +40,8 @@ public class PersonCrudEditor implements CrudEditor<Person> {
         binder.bind(firstNameField, Person::getFirstName, Person::setFirstName);
         binder.bind(lastNameField, Person::getLastName, Person::setLastName);
 
-        workingCopy = copyOf(item);
-        binder.setBean(workingCopy);
+        editableItem = copyOf(item);
+        binder.setBean(editableItem);
     }
 
     private Person copyOf(Person item) {
@@ -61,7 +61,7 @@ public class PersonCrudEditor implements CrudEditor<Person> {
             binder = null;
         }
 
-        workingCopy = null;
+        editableItem = null;
 
         firstNameField.clear();
         lastNameField.clear();
