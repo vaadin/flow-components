@@ -37,7 +37,7 @@ public class SheetTabSheetTest extends AbstractSpreadsheetTestCase {
         // Force sheet initial focus
         cell.click();
         verifySheetFocused();
-        spreadsheet.addSheet("");
+        spreadsheet.addSheet();
         verifySheetFocused();
     }
 
@@ -48,8 +48,8 @@ public class SheetTabSheetTest extends AbstractSpreadsheetTestCase {
         // Force sheet initial focus
         cell.click();
         verifySheetFocused();
-        spreadsheet.addSheet("2");
-        spreadsheet.addSheet("3");
+        spreadsheet.addSheet();
+        spreadsheet.addSheet();
         verifySheetFocused();
         spreadsheet.selectSheetAt(0);
         verifySheetFocused();
@@ -64,7 +64,7 @@ public class SheetTabSheetTest extends AbstractSpreadsheetTestCase {
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
         SheetCellElement cell = spreadsheet.getCellAt("C8");
         cell.click();
-        spreadsheet.addSheet("2");
+        spreadsheet.addSheet();
         spreadsheet.selectSheetAt(1);
         sheetController.selectRegion("C3", "G14");
         spreadsheet.selectSheetAt(0);
@@ -87,8 +87,8 @@ public class SheetTabSheetTest extends AbstractSpreadsheetTestCase {
     @Test
     public void cellFocus_selectCellThenDeleteSheetAndMoveToNextSheet_cellSelectionIsDefault() {
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
-        spreadsheet.addSheet("2");
-        spreadsheet.addSheet("3");
+        spreadsheet.addSheet();
+        spreadsheet.addSheet();
         spreadsheet.selectSheetAt(1);
         spreadsheet.getCellAt("C4").click();
 

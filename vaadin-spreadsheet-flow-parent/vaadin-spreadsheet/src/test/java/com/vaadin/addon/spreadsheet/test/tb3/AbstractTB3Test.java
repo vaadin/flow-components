@@ -346,27 +346,6 @@ public abstract class AbstractTB3Test extends ParallelTest {
     }
 
     /**
-     * Generates the application id based on the URL in a way compatible with
-     * VaadinServletService.
-     *
-     * @param pathWithQueryParameters
-     *            The path part of the URL, possibly still containing query
-     *            parameters
-     * @return The application ID string used in Vaadin locators
-     */
-    private String getApplicationId(String pathWithQueryParameters) {
-        // Remove any possible URL parameters
-        String pathWithoutQueryParameters = pathWithQueryParameters.replaceAll(
-                "\\?.*", "");
-        if ("".equals(pathWithoutQueryParameters)) {
-            return "ROOT";
-        }
-
-        // Retain only a-z and numbers
-        return pathWithoutQueryParameters.replaceAll("[^a-zA-Z0-9]", "");
-    }
-
-    /**
      * Called by the test runner whenever there is an exception in the test that
      * will cause termination of the test
      *

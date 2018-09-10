@@ -34,7 +34,7 @@ public class MultipleSheetTest extends AbstractSpreadsheetTestCase {
         Assert.assertEquals("sheet0 value",
                 sheetController.getCellContent("B2"));
 
-        spreadsheet.addSheet("new sheet");
+        spreadsheet.addSheet();
         spreadsheet.selectSheet("new sheet");
 
         Assert.assertEquals("", spreadsheet.getCellAt("B2").getValue());

@@ -75,7 +75,7 @@ public class GenericTest extends AbstractSpreadsheetTestCase {
         Assert.assertEquals("19.00%", spreadsheetPage.getCellValue("A3"));
 
         // force reload of the sheet
-        spreadsheetPage.addSheet("new sheet");
+        spreadsheetPage.addSheet();
         spreadsheetPage.selectSheetAt(0);
 
         Assert.assertEquals("19", spreadsheetPage.getCellValue("A2"));
@@ -96,7 +96,7 @@ public class GenericTest extends AbstractSpreadsheetTestCase {
         Assert.assertEquals("19", spreadsheetPage.getCellValue("A3"));
 
         // force reload of the sheet
-        spreadsheetPage.addSheet("new sheet");
+        spreadsheetPage.addSheet();
         spreadsheetPage.selectSheetAt(0);
 
         Assert.assertEquals("19.00%", spreadsheetPage.getCellValue("A2"));

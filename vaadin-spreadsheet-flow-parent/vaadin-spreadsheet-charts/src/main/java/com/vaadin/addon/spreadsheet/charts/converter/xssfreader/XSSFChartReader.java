@@ -248,7 +248,7 @@ public class XSSFChartReader {
         final CTChart ctChart = chart.getCTChart();
 
         if (ctChart.isSetTitle()) {
-            title = "" + chart.getTitle();
+            title = "" + chart.getTitleText();
 
             // default title
             if (title.isEmpty() && plotData.size() > 0

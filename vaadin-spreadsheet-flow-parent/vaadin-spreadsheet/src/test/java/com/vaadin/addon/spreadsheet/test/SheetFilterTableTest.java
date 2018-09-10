@@ -29,7 +29,7 @@ public class SheetFilterTableTest extends AbstractSpreadsheetTestCase {
     public void filter_changeSheet_hideFilter() {
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
         headerPage.loadTestFixture(TestFixtures.SpreadsheetTable);
-        spreadsheet.addSheet("2");
+        spreadsheet.addSheet();
         spreadsheet.selectSheetAt(1);
         assertFalse("Cell B2 should not have a filter",
                 spreadsheet.getCellAt(2, 2).hasPopupButton());

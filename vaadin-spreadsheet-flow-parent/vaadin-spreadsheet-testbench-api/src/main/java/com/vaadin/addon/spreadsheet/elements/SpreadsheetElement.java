@@ -233,13 +233,9 @@ public class SpreadsheetElement extends AbstractElement {
     }
 
     /**
-     * Adds a new sheet with the given name. Sheet names should be unique within
-     * a spreadsheet.
-     * 
-     * @param sheetName
-     *            Name of the new sheet.
+     * Adds a new sheet.
      */
-    public void addSheet(String sheetName) {
+    public void addSheet() {
         findElement(By.className("add-new-tab")).click();
     }
 
@@ -322,23 +318,6 @@ public class SpreadsheetElement extends AbstractElement {
         int rightW = sRight.getSize().getWidth();
         sSize = new Dimension(rightX + rightW - sLocation.getX(), bottomY
                 + bottomH - sLocation.getY());
-    }
-
-    private boolean intersectsSelection(Point location, Dimension size) {
-        // Test top left corner
-        if (location.getX() < sLocation.getX()
-                || location.getY() < sLocation.getY()) {
-            return false;
-        }
-        // Test lower right corner
-        if (location.getX() + size.getWidth() > sLocation.getX()
-                + sSize.getWidth()
-                || location.getY() + size.getHeight() > sLocation.getY()
-                        + sSize.getHeight()) {
-            return false;
-        }
-        // Everything is inside the selection
-        return true;
     }
 
     private boolean isInSelection(Point location) {

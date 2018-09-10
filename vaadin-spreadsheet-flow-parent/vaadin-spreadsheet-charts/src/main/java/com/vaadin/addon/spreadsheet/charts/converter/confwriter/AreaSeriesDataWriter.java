@@ -19,7 +19,6 @@ package com.vaadin.addon.spreadsheet.charts.converter.confwriter;
 
 import com.vaadin.addon.charts.model.AbstractPlotOptions;
 import com.vaadin.addon.charts.model.DataSeries;
-import com.vaadin.addon.charts.model.Marker;
 import com.vaadin.addon.charts.model.PlotOptionsArea;
 import com.vaadin.addon.charts.model.Stacking;
 import com.vaadin.addon.spreadsheet.charts.converter.Utils;

@@ -24,7 +24,7 @@
         <testbench.version>5.1.0</testbench.version>
         <testbench.api.version>${vaadin.version}</testbench.api.version>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
-        <poi.version>3.15</poi.version>
+        <poi.version>3.17</poi.version>
         <jetty.plugin.version>9.2.3.v20140905</jetty.plugin.version>
         <tb.hub>testbench-hub.intra.itmill.com</tb.hub>
     </properties>

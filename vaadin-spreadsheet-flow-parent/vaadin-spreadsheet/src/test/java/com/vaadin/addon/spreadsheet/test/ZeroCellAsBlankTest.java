@@ -1,10 +1,10 @@
 package com.vaadin.addon.spreadsheet.test;
 
-import com.vaadin.addon.spreadsheet.elements.SpreadsheetElement;
-import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.vaadin.addon.spreadsheet.test.pageobjects.SpreadsheetPage;
 
 public class ZeroCellAsBlankTest extends AbstractSpreadsheetTestCase {
 

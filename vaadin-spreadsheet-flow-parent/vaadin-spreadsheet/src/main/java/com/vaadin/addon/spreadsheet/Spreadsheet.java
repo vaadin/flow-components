@@ -107,11 +107,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         Action.Container, Focusable {
 
     /**
-     * Minimum row height for rows containing components (in points).
-     */
-    private static final int MINIMUM_ROW_HEIGHT_FOR_COMPONENTS = 30;
-
-    /**
      * This is a style which hides the top (address and formula) bar.
      */
     public static final String HIDE_FUNCTION_BAR_STYLE = "hidefunctionbar";
@@ -1873,7 +1868,13 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public void autofitColumn(int columnIndex) {
         final Sheet activeSheet = getActiveSheet();
-        activeSheet.autoSizeColumn(columnIndex);
+        try {
+            activeSheet.autoSizeColumn(columnIndex);
+        }catch(NullPointerException e) {
+            // NullPointerException is being thrown in POI. Catch to prevent breaking the UI.
+            LOGGER.log(Level.FINEST, "Poi threw NullPointerException when trying to autofit column", e);
+            return;
+        }
         int columnPixelWidth = getColumnAutofitPixelWidth(columnIndex, AbstractExcelUtils
             .getColumnWidthInPx(activeSheet.getColumnWidth(columnIndex)));
 

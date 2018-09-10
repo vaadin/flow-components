@@ -190,9 +190,9 @@ public class SpreadsheetPage extends Page {
         spreadsheet.selectSheetAt(sheetIndex);
     }
 
-    public void addSheet(String sheetName) {
+    public void addSheet() {
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
-        spreadsheet.addSheet(sheetName);
+        spreadsheet.addSheet();
     }
 
     private SheetCellElement getCellAt(String address) {

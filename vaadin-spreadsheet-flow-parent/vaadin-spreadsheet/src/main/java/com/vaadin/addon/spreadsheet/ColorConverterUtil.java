@@ -7,7 +7,6 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTColors;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRgbColor;
-import org.w3c.dom.DOMException;
 
 public class ColorConverterUtil implements Serializable {
 

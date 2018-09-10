@@ -2,13 +2,12 @@ package com.vaadin.addon.spreadsheet.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.testbench.annotations.RunLocally;
-import com.vaadin.testbench.parallel.Browser;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,13 +18,12 @@ public class NamedRangeTests extends AbstractSpreadsheetTestCase {
     private SpreadsheetPage spreadsheetPage;
     
     // named ranges defined in the xlsx
-    private Map<String, String> sheet1ranges = new HashMap<String, String>() {
-        {
-            put("john", "G7:M16");
-            put("local", "G2:H3");
-            put("numbers", "C3:C9");
-        }
-    };
+    private Map<String, String> sheet1ranges = new HashMap<String, String>();
+    {
+        sheet1ranges.put("john", "G7:M16");
+        sheet1ranges.put("local", "G2:H3");
+        sheet1ranges.put("numbers", "C3:C9");
+    }
 
     private List<String> selectableRangesOnSheet1 = Arrays
         .asList("", "john", "local", "numbers", "sheet2");
