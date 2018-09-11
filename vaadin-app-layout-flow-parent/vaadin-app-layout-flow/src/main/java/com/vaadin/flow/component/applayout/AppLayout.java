@@ -151,7 +151,6 @@ public class AppLayout extends Component {
         removeContent();
 
         this.content = content;
-        content.setAttribute("role", "main");
         getElement().appendChild(content);
     }
 

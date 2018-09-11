@@ -4,6 +4,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.dom.Element;
 import org.junit.Assert;
 import org.junit.Before;
@@ -114,7 +115,11 @@ public class AppLayoutTest {
         RoutingMenuItem home = new RoutingMenuItem("Home", "");
         systemUnderTest.addMenuItem(home);
 
-        systemUnderTest.removeMenuItem(new RoutingMenuItem("Profile", "profile"));
+        Tabs otherTabs = new Tabs();
+        RoutingMenuItem otherMenuItem = new RoutingMenuItem("Profile", "profile");
+        otherTabs.add(otherMenuItem);
+
+        systemUnderTest.removeMenuItem(otherMenuItem);
     }
 
     @Test
@@ -184,8 +189,6 @@ public class AppLayoutTest {
     public void setContent() {
         Element content = new Div().getElement();
         systemUnderTest.setContent(content);
-
-        Assert.assertEquals("main", content.getAttribute("role"));
 
         List<Element> children = systemUnderTest.getElement().getChildren()
                 .collect(Collectors.toList());

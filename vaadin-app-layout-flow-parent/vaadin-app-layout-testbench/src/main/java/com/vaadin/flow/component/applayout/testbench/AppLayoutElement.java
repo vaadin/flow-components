@@ -30,7 +30,10 @@ public class AppLayoutElement extends TestBenchElement {
     }
 
     public TestBenchElement getContent() {
-        return $(TestBenchElement.class).attribute("role", "main").first();
+        TestBenchElement contentPlaceholder = $(TestBenchElement.class).attribute("part", "content").first();
+
+        return (TestBenchElement) executeScript("return arguments[0].firstElementChild.assignedNodes()[0];",
+                contentPlaceholder);
     }
 
     public TestBenchElement getMenu() {
