@@ -29,14 +29,40 @@ public class RoutingMenuItem extends MenuItem {
 
     private String route;
 
+    /**
+     * Constructs a new object with the given title and route.
+     *
+     * @param title
+     *            the title to display
+     * @param route
+     *            the route to navigate on click
+     */
     public RoutingMenuItem(String title, String route) {
         this(null, title, route);
     }
 
+    /**
+     * Constructs a new object with the given icon and route.
+     *
+     * @param icon
+     *            the icon to display
+     * @param route
+     *            the route to navigate on click
+     */
     public RoutingMenuItem(Component icon, String route) {
         this(icon, null, route);
     }
 
+    /**
+     * Constructs a new object with the given icon, title and route.
+     *
+     * @param icon
+     *            the icon to display
+     * @param title
+     *            the title to display
+     * @param route
+     *            the route to navigate on click
+     */
     public RoutingMenuItem(Component icon, String title, String route) {
         super(icon, title);
 

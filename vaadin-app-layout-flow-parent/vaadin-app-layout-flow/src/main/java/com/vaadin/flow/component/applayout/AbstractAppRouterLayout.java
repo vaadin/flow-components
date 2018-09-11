@@ -72,6 +72,9 @@ public abstract class AbstractAppRouterLayout implements RouterLayout {
         return getAppLayout().getElement();
     }
 
+    /**
+     * Returns an application layout instance
+     */
     public AppLayout getAppLayout() {
         return appLayout;
     }

@@ -25,18 +25,48 @@ import com.vaadin.flow.component.ComponentEventListener;
  */
 public class ActionMenuItem extends MenuItem {
 
+    /**
+     * Constructs a new object with the given title.
+     *
+     * @param title
+     *            the title to display
+     */
     public ActionMenuItem(String title) {
         super(title);
     }
 
+    /**
+     * Constructs a new object with the given icon.
+     *
+     * @param icon
+     *            the icon to display
+     */
     public ActionMenuItem(Component icon) {
         super(icon);
     }
 
+    /**
+     * Constructs a new object with the given icon and title.
+     *
+     * @param icon
+     *            the icon to display
+     * @param title
+     *            the title to display
+     */
     public ActionMenuItem(Component icon, String title) {
         super(icon, title);
     }
 
+    /**
+     * Constructs a new object with the given icon, title and action.
+     *
+     * @param icon
+     *            the icon to display
+     * @param title
+     *            the title to display
+     * @param action
+     *            the action to execute on click
+     */
     public ActionMenuItem(Component icon, String title,
                           ComponentEventListener<MenuItemClickEvent> action) {
         super(icon, title, action);

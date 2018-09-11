@@ -28,6 +28,10 @@ import com.vaadin.flow.dom.Element;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Server-side component for the {@code <vaadin-app-layout>} element.
+ * Provides a quick and easy way to get a common application layout.
+ */
 @Tag("vaadin-app-layout")
 @HtmlImport("frontend://bower_components/vaadin-app-layout/src/vaadin-app-layout.html")
 public class AppLayout extends Component {
@@ -73,6 +77,12 @@ public class AppLayout extends Component {
         } catch (IllegalArgumentException noMenuItemPresent) { }
     }
 
+    /**
+     * Sets the element into branding area
+     *
+     * @param branding
+     *            the element to set into branding area
+     */
     public void setBranding(Element branding) {
         Objects.requireNonNull(branding, "Branding cannot be null");
 
@@ -84,6 +94,9 @@ public class AppLayout extends Component {
         getElement().appendChild(branding);
     }
 
+    /**
+     * Clears the branding area
+     */
     public void removeBranding() {
         if (this.branding == null) {
             return;
@@ -103,10 +116,19 @@ public class AppLayout extends Component {
         menuTabs.add(menuItems);
     }
 
+    /**
+     * Adds menu item to the menu
+     *
+     * @param menuItem
+     *              Menu Item to add
+     */
     public void addMenuItem(MenuItem menuItem) {
         menuTabs.add(menuItem);
     }
 
+    /**
+     * Removes menu item from the menu
+     */
     public void removeMenuItem(MenuItem menuItem) {
         menuTabs.remove(menuItem);
     }
@@ -137,13 +159,18 @@ public class AppLayout extends Component {
         selectedMenuItem = menuItem;
     }
 
+    /**
+     * Returns a content
+     */
     public Element getContent() {
         return content;
     }
 
     /**
      * Sets the displayed content.
+     *
      * @param content
+     *              Element to display in the content area
      */
     public void setContent(Element content) {
         Objects.requireNonNull(content, "Content cannot be null");

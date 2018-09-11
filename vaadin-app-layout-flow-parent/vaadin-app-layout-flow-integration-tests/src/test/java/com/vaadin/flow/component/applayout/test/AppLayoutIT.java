@@ -61,7 +61,7 @@ public class AppLayoutIT extends AbstractParallelTest {
                 $(AppLayoutElement.class).waitForFirst().getMenuItemWithTitle("Action 1");
         action1.click();
         Assert.assertEquals("Action 1 executed!",
-                $(NotificationElement.class).first().getText().trim());
+                $(NotificationElement.class).waitForFirst().getText().trim());
 
         MenuItemElement action2 =
                 $(AppLayoutElement.class).waitForFirst().getMenuItemWithTitle("Action 2");
