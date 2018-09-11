@@ -37,7 +37,6 @@ import java.util.Set;
 
 @Tag("vaadin-crud")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
-@JavaScript("frontend://crudConnector.js")
 public class Crud<E> extends Component {
 
     private final Class<E> beanType;
@@ -56,6 +55,8 @@ public class Crud<E> extends Component {
 
     public Crud(Class<E> beanType, Grid<E> grid, CrudEditor<E> editor) {
         this.beanType = beanType;
+
+        setEntityName(beanType.getSimpleName());
 
         this.grid = grid;
         this.grid.getElement().setAttribute("slot", "grid");
@@ -110,17 +111,12 @@ public class Crud<E> extends Component {
         });
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached Crud"))
-                .getPage().executeJavaScript(
-                "window.Vaadin.Flow.crudConnector.initLazy($0)",
-                getElement());
+    private void closeEditor() {
+        getElement().callFunction("__closeEditor");
     }
 
-    private void closeEditor() {
-        getElement().callFunction("closeDialog");
+    public void setEntityName(String entityName) {
+        getElement().setProperty("entityName", entityName);
     }
 
     public Grid<E> getGrid() {
@@ -164,7 +160,7 @@ public class Crud<E> extends Component {
         grid.setDataProvider(provider);
     }
 
-    @DomEvent("crud-cancel")
+    @DomEvent("cancel")
     public static class CancelEvent extends ComponentEvent<Crud<?>> {
 
         /**
@@ -174,12 +170,13 @@ public class Crud<E> extends Component {
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
          */
-        public CancelEvent(Crud<?> source, boolean fromClient) {
+        public CancelEvent(Crud<?> source, boolean fromClient,
+                           @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
         }
     }
 
-    @DomEvent("crud-delete")
+    @DomEvent("delete")
     public static class DeleteEvent extends ComponentEvent<Crud<?>> {
 
         /**
@@ -189,12 +186,13 @@ public class Crud<E> extends Component {
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
          */
-        public DeleteEvent(Crud<?> source, boolean fromClient) {
+        public DeleteEvent(Crud<?> source, boolean fromClient,
+                           @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
         }
     }
 
-    @DomEvent("crud-edit")
+    @DomEvent("edit")
     public static class EditEvent<E> extends ComponentEvent<Crud<E>> {
 
         private E item;
@@ -207,7 +205,8 @@ public class Crud<E> extends Component {
          * @param fromClient <code>true</code> if the event originated from the client
          */
         public EditEvent(Crud<E> source, boolean fromClient,
-                         @EventData("event.detail.item") JsonObject item) {
+                         @EventData("event.detail.item") JsonObject item,
+                         @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
             try {
                 this.item = source.getGrid().getDataCommunicator()
@@ -222,7 +221,7 @@ public class Crud<E> extends Component {
         }
     }
 
-    @DomEvent("crud-new")
+    @DomEvent("new")
     public static class NewEvent extends ComponentEvent<Crud<?>> {
 
         /**
@@ -232,12 +231,13 @@ public class Crud<E> extends Component {
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
          */
-        public NewEvent(Crud<?> source, boolean fromClient) {
+        public NewEvent(Crud<?> source, boolean fromClient,
+                        @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
         }
     }
 
-    @DomEvent("crud-save")
+    @DomEvent("save")
     public static class SaveEvent extends ComponentEvent<Crud<?>> {
 
         /**
@@ -247,7 +247,8 @@ public class Crud<E> extends Component {
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
          */
-        public SaveEvent(Crud<?> source, boolean fromClient) {
+        public SaveEvent(Crud<?> source, boolean fromClient,
+                         @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
         }
     }

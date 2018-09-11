@@ -10,7 +10,6 @@ import com.vaadin.flow.dom.Element;
 
 public class PersonCrudEditor implements CrudEditor<Person> {
 
-    private final H2 heading = new H2("Edit Person");
     private final TextField firstNameField = new TextField("First name");
     private final TextField lastNameField = new TextField("Last name");
 
@@ -20,7 +19,8 @@ public class PersonCrudEditor implements CrudEditor<Person> {
     private Binder<Person> binder;
 
     PersonCrudEditor() {
-        view.add(heading, new Hr(), firstNameField, lastNameField);
+        view.add(firstNameField, lastNameField);
+        view.setPadding(false);
     }
 
     @Override
