@@ -14,6 +14,6 @@
     "tests"
   ],
   "dependencies": {
-    "vaadin-crud": "vaadin/vaadin-crud#fixes-and-doc"
+    "vaadin-crud": "vaadin/vaadin-crud#master"
   }
 }
