@@ -146,8 +146,8 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
         Pair<String, String> categoryPagePair = new ImmutablePair<>(null, route);
         if (StringUtils.isEmpty(route) || !NAME_INDEXED_SUBTYPES
                 .containsKey(categoryPagePair.getValue())) {
-            UI.getCurrent().navigate("ColumnChart");
-            return new ImmutablePair<>("column", "ColumnChart");
+            UI.getCurrent().navigate("Column");
+            return new ImmutablePair<>("column", "Column");
         }
 
         return categoryPagePair;

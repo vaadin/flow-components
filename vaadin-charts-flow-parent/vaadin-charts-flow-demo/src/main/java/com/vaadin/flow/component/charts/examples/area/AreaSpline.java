@@ -16,7 +16,6 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
-import com.vaadin.flow.component.charts.model.style.SolidColor;
 
 public class AreaSpline extends AbstractChartExample {
 
@@ -51,8 +50,8 @@ public class AreaSpline extends AbstractChartExample {
 
         Tooltip tooltip = new Tooltip();
         // Customize tooltip formatting
-        tooltip.setHeaderFormat("");
-        tooltip.setPointFormat("{series.name}: {point.y} units");
+        tooltip.setShared(true);
+        tooltip.setValueSuffix(" units");
         conf.setTooltip(tooltip);
 
         PlotOptionsArea plotOptions = new PlotOptionsArea();

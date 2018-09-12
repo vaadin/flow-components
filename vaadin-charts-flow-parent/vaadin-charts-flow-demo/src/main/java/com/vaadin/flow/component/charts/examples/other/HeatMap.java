@@ -35,7 +35,7 @@ public class HeatMap extends AbstractChartExample {
 
         config.getColorAxis().setMin(0);
         config.getColorAxis().setMinColor(SolidColor.WHITE);
-        SolidColor lightBlue = new SolidColor(68, 170, 213, .2);
+        SolidColor lightBlue = new SolidColor(22, 118, 243);
         config.getColorAxis().setMaxColor(lightBlue);
 
         config.getLegend().setLayout(LayoutDirection.VERTICAL);

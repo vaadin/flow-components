@@ -13,7 +13,7 @@ import com.vaadin.flow.component.charts.model.RangeSelector;
 import com.vaadin.flow.component.charts.model.TimeUnit;
 import com.vaadin.flow.component.charts.model.TimeUnitMultiples;
 
-public class Ohlc extends AbstractChartExample {
+public class OHLC extends AbstractChartExample {
 
     @Override
     public void initDemo() {

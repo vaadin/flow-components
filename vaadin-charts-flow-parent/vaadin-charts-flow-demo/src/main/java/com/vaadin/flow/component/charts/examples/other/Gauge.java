@@ -4,9 +4,10 @@ import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
-import com.vaadin.flow.component.charts.model.DataLabels;
 import com.vaadin.flow.component.charts.model.Labels;
 import com.vaadin.flow.component.charts.model.ListSeries;
+import com.vaadin.flow.component.charts.model.Pane;
+import com.vaadin.flow.component.charts.model.PlotBand;
 import com.vaadin.flow.component.charts.model.PlotOptionsGauge;
 import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.TickPosition;
@@ -14,7 +15,7 @@ import com.vaadin.flow.component.charts.model.YAxis;
 
 import java.util.Random;
 
-public class GaugeWithDualAxes extends AbstractChartExample {
+public class Gauge extends AbstractChartExample {
 
     @Override
     public void initDemo() {
@@ -23,53 +24,52 @@ public class GaugeWithDualAxes extends AbstractChartExample {
 
         final Configuration configuration = chart.getConfiguration();
         configuration.getChart().setType(ChartType.GAUGE);
-        configuration.setTitle("Speedometer with dual axes");
+        configuration.setTitle("Speedometer");
         configuration.getChart().setWidth(500);
 
-        configuration.getPane().setStartAngle(-150);
-        configuration.getPane().setEndAngle(150);
+        Pane pane = configuration.getPane();
+        pane.setStartAngle(-150);
+        pane.setEndAngle(150);
 
         YAxis yAxis = new YAxis();
-        yAxis.setClassName("kmh");
+        yAxis.setTitle("km/h");
         yAxis.setMin(0);
         yAxis.setMax(200);
-        yAxis.setOffset(-25);
+        yAxis.setTickLength(10);
+        yAxis.setTickPixelInterval(30);
+        yAxis.setTickPosition(TickPosition.INSIDE);
+        yAxis.setMinorTickLength(10);
+        yAxis.setMinorTickInterval("auto");
+        yAxis.setMinorTickPosition(TickPosition.INSIDE);
+
         Labels labels = new Labels();
-        labels.setDistance(-20);
+        labels.setStep(2);
         labels.setRotation("auto");
         yAxis.setLabels(labels);
-        yAxis.setTickLength(5);
-        yAxis.setMinorTickLength(5);
-        yAxis.setEndOnTick(false);
 
-        YAxis yAxis2 = new YAxis();
-        yAxis2.setClassName("mph");
-        yAxis2.setMin(0);
-        yAxis2.setMax(124);
-        yAxis2.setOffset(-20);
-        labels = new Labels();
-        labels.setDistance(12);
-        labels.setRotation("auto");
-        yAxis2.setLabels(labels);
-        yAxis2.setTickPosition(TickPosition.OUTSIDE);
-        yAxis2.setMinorTickPosition(TickPosition.OUTSIDE);
-        yAxis2.setTickLength(5);
-        yAxis2.setMinorTickLength(5);
-        yAxis2.setEndOnTick(false);
+        PlotBand[] bands = new PlotBand[3];
+        bands[0] = new PlotBand();
+        bands[0].setFrom(0);
+        bands[0].setTo(120);
+        bands[0].setClassName("band-0");
+        bands[1] = new PlotBand();
+        bands[1].setFrom(120);
+        bands[1].setTo(160);
+        bands[1].setClassName("band-1");
+        bands[2] = new PlotBand();
+        bands[2].setFrom(160);
+        bands[2].setTo(200);
+        bands[2].setClassName("band-2");
+        yAxis.setPlotBands(bands);
 
         configuration.addyAxis(yAxis);
-        configuration.addyAxis(yAxis2);
 
-        final ListSeries series = new ListSeries("Speed", 80);
+        final ListSeries series = new ListSeries("Speed", 89);
 
         PlotOptionsGauge plotOptionsGauge = new PlotOptionsGauge();
-        plotOptionsGauge.setDataLabels(new DataLabels());
-        plotOptionsGauge
-                .getDataLabels()
-                .setFormatter(
-                        "function() {return '<span class=\"kmh\">'+ this.y + ' km/h</span><br/>' + '<span class=\"mph\">' + Math.round(this.y * 0.621) + ' mph</span>';}");
-        plotOptionsGauge.setTooltip(new SeriesTooltip());
-        plotOptionsGauge.getTooltip().setValueSuffix(" km/h");
+        SeriesTooltip tooltip = new SeriesTooltip();
+        tooltip.setValueSuffix(" km/h");
+        plotOptionsGauge.setTooltip(tooltip);
         series.setPlotOptions(plotOptionsGauge);
 
         configuration.addSeries(series);
@@ -79,8 +79,6 @@ public class GaugeWithDualAxes extends AbstractChartExample {
             Integer newValue = (int) (oldValue + (random.nextDouble() - 0.5) * 20.0);
             series.updatePoint(0, newValue);
         }, 5000, 12000);
-
-        chart.drawChart();
 
         add(chart);
     }

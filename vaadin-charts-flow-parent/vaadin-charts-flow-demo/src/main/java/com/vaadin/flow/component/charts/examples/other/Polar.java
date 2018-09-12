@@ -14,7 +14,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 
-public class PolarChart extends AbstractChartExample {
+public class Polar extends AbstractChartExample {
 
     @Override
     public void initDemo() {

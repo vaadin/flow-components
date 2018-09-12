@@ -1,35 +1,32 @@
 <dom-module id="GaugeWithDualAxes" theme-for="vaadin-chart">
   <template>
     <style>
-      :host(.GaugeWithDualAxes) .kmh .highcharts-minor-tick {
-        stroke: #339;
-        stroke-width: 1;
+      :host(.GaugeWithDualAxes) .highcharts-yaxis .highcharts-axis-line {
+        stroke-width: 2;
       }
 
-      :host(.GaugeWithDualAxes) .kmh .highcharts-tick, :host(.GaugeWithDualAxes) .kmh .highcharts-axis-line  {
+      :host(.GaugeWithDualAxes) .kmh .highcharts-axis-line,
+      :host(.GaugeWithDualAxes) .kmh .highcharts-tick,
+      :host(.GaugeWithDualAxes) .kmh .highcharts-minor-tick {
         stroke: #339;
-        stroke-width: 2;
       }
 
       :host(.GaugeWithDualAxes) .highcharts-label .kmh {
         fill: #339;
       }
 
+      :host(.GaugeWithDualAxes) .mph .highcharts-axis-line,
+      :host(.GaugeWithDualAxes) .mph .highcharts-tick,
       :host(.GaugeWithDualAxes) .mph .highcharts-minor-tick {
         stroke: #933;
-        stroke-width: 1;
-      }
-
-      :host(.GaugeWithDualAxes) .mph .highcharts-tick, :host(.GaugeWithDualAxes) .mph .highcharts-axis-line {
-        stroke: #933;
-        stroke-width: 2;
       }
 
       :host(.GaugeWithDualAxes) .highcharts-label .mph {
         fill: #933;
       }
 
-      :host(.GaugeWithDualAxes) .highcharts-grid-line, :host(.GaugeWithDualAxes) .highcharts-minor-grid-line {
+      :host(.GaugeWithDualAxes) .highcharts-grid-line,
+      :host(.GaugeWithDualAxes) .highcharts-minor-grid-line {
         stroke: none;
       }
 
