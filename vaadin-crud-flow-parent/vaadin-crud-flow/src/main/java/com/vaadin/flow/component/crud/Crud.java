@@ -112,7 +112,7 @@ public class Crud<E> extends Component {
     }
 
     private void closeEditor() {
-        getElement().callFunction("__closeEditor");
+        getElement().removeProperty("opened");
     }
 
     public void setEntityName(String entityName) {
