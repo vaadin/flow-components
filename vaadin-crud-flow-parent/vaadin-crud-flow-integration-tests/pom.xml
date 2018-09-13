@@ -83,27 +83,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dialog-flow</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-notification-flow</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-icons-flow</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.3</version>
         </dependency>
 
         <!--Webjars-->
@@ -128,6 +113,19 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/main/webapp/frontend</directory>
+                            <includes>
+                                <include>bower_components/</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
@@ -187,7 +185,7 @@
             <id>bower</id>
             <activation>
                 <property>
-                    <name>!useWebjar</name>
+                    <name>useBower</name>
                 </property>
             </activation>
 
@@ -211,7 +209,6 @@
                             <nodeVersion>${node.version}</nodeVersion>
                             <yarnVersion>${yarn.version}</yarnVersion>
                             <workingDirectory>${buildtools.directory}</workingDirectory>
-                            <skip>${skipFrontend}</skip>
                         </configuration>
 
                         <executions>
