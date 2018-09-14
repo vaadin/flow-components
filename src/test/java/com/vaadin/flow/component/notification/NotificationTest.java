@@ -200,4 +200,21 @@ public class NotificationTest {
         Assert.assertThat(innerHtml,
                 CoreMatchers.startsWith("<flow-component-renderer"));
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addComponentAtIndex_negativeIndex() {
+        addDivAtIndex(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addComponentAtIndex_indexIsBiggerThanChildrenCount() {
+        addDivAtIndex(1);
+    }
+
+    private void addDivAtIndex(int index) {
+        Notification notification = new Notification();
+
+        Div div = new Div();
+        notification.addComponentAtIndex(index, div);
+    }
 }

@@ -196,22 +196,6 @@ public class NotificationTestPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void openNotificationAddComponentOverIndex() {
-        verifyInitialNotification(3);
-        findElement(By.id("button-over-index")).click();
-        assertButtonNumberInNotification(4);
-        assertButtonText(3, "Added Button");
-    }
-
-    @Test
-    public void openNotificationAddComponentNegativeIndex() {
-        verifyInitialNotification(3);
-        findElement(By.id("button-negative-index")).click();
-        assertButtonNumberInNotification(4);
-        assertButtonText(0, "Added Button");
-    }
-
-    @Test
     public void addComponentToOpenedNotification() {
         waitForElementNotPresent(
                 By.id("notification-add-component-after-open"));

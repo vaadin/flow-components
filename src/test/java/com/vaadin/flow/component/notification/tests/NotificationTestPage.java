@@ -23,7 +23,7 @@ import com.vaadin.flow.router.Route;
 
 /**
  * Page created for testing purposes. Not suitable for demos.
- * 
+ *
  * @author Vaadin Ltd.
  *
  */
@@ -87,15 +87,7 @@ public class NotificationTestPage extends Div {
         NativeButton addAtSecond = createTestButton(notification, addedButton,
                 "button-to-second", 1);
 
-        NativeButton addOverIndex = createTestButton(notification, addedButton,
-                "button-over-index", 10);
-
-        NativeButton addNegativeIndex = createTestButton(notification,
-                addedButton,
-                "button-negative-index", -10);
-
-        add(buttonOn, buttonOff, addFirst, addAtSecond, addOverIndex,
-                addNegativeIndex);
+        add(buttonOn, buttonOff, addFirst, addAtSecond);
     }
 
     private void createNotificationWithComponentsAndAddComponentAfterOpen() {

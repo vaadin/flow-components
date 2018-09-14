@@ -376,15 +376,13 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     @Override
     public void addComponentAtIndex(int index, Component component) {
         Objects.requireNonNull(component, "Component should not be null");
-        int indexCheck;
         if (index < 0) {
-            indexCheck = 0;
-        } else if (index > container.getChildCount()) {
-            indexCheck = container.getChildCount();
-        } else {
-            indexCheck = index;
+            throw new IllegalArgumentException(
+                    "Cannot add a component with a negative index");
         }
-        container.insertChild(indexCheck, component.getElement());
+        // The case when the index is bigger than the children count is handled
+        // inside the method below
+        container.insertChild(index, component.getElement());
 
         attachComponentTemplate();
     }
