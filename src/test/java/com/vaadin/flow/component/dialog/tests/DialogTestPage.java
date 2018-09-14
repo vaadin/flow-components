@@ -23,7 +23,7 @@ import com.vaadin.flow.router.Route;
 
 /**
  * Page created for testing purposes. Not suitable for demos.
- * 
+ *
  * @author Vaadin Ltd.
  *
  */
@@ -93,7 +93,8 @@ public class DialogTestPage extends Div {
         Dialog dialog = new Dialog();
         dialog.setId("empty-dialog");
 
-        NativeButton button = new NativeButton("empty-dialog", event -> dialog.open());
+        NativeButton button = new NativeButton("empty-dialog",
+                event -> dialog.open());
         button.setId("open-button");
 
         add(button);
@@ -103,39 +104,31 @@ public class DialogTestPage extends Div {
         Dialog dialog = new Dialog();
         dialog.setId("dialog-add-component-at-index");
         dialog.add(new NativeButton(), new NativeButton(), new NativeButton());
-        
+
         NativeButton button = new NativeButton("open Dialog",
                 event -> dialog.open());
         button.setId("open-dialog-add-component-at-index");
 
         NativeButton addedButton = new NativeButton("Added Button");
         addedButton.setId("added-button");
-        NativeButton addFirst = new NativeButton("Add to the first",
-                event -> {
-                    dialog.addComponentAsFirst(addedButton);
-                    dialog.open();
-                });
+        NativeButton addFirst = new NativeButton("Add to the first", event -> {
+            dialog.addComponentAsFirst(addedButton);
+            dialog.open();
+        });
         addFirst.setId("button-to-first");
 
         NativeButton addAtSecond = createTestButton(dialog, addedButton,
                 "button-to-second", 1);
 
-        NativeButton addOverIndex = createTestButton(dialog, addedButton,
-                "button-over-index", 10);
-
-        NativeButton addNegativeIndex = createTestButton(dialog, addedButton,
-                "button-negative-index", -10);
-
-        add(button, addFirst, addAtSecond, addOverIndex, addNegativeIndex);
+        add(button, addFirst, addAtSecond);
     }
 
     private NativeButton createTestButton(Dialog dialog,
             NativeButton addedButton, String buttonId, int index) {
-        NativeButton button = new NativeButton(buttonId,
-                event -> {
-                    dialog.addComponentAtIndex(index, addedButton);
-                    dialog.open();
-                });
+        NativeButton button = new NativeButton(buttonId, event -> {
+            dialog.addComponentAtIndex(index, addedButton);
+            dialog.open();
+        });
         button.setId(buttonId);
         return button;
     }

@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+
 import java.util.List;
 
 import org.hamcrest.CoreMatchers;
@@ -25,12 +28,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
 
 @TestPath("dialog-test")
 public class DialogTestPageIT extends AbstractComponentIT {
@@ -125,26 +126,10 @@ public class DialogTestPageIT extends AbstractComponentIT {
         assertButtonText(1);
     }
 
-    @Test
-    public void openDialogAddComponentOverIndex() {
-        verifyInitialDialog(3);
-        findElement(By.id("button-over-index")).click();
-        assertButtonNumberInDialog(4);
-        assertButtonText(3);
-    }
-
-    @Test
-    public void openDialogAddComponentNegativeIndex() {
-        verifyInitialDialog(3);
-        findElement(By.id("button-negative-index")).click();
-        assertButtonNumberInDialog(4);
-        assertButtonText(0);
-    }
-
     private void assertButtonText(int index) {
-        Assert.assertEquals("Button Text is not correct","Added Button",
-                findElements(By.tagName(DIALOG_OVERLAY_TAG)).get(0)
-                        .findElements(By.tagName("button")).get(index)
+        Assert.assertEquals("Button Text is not correct", "Added Button",
+                findElements(By.cssSelector(DIALOG_OVERLAY_TAG)).get(0)
+                        .findElements(By.cssSelector("button")).get(index)
                         .getText());
     }
 
@@ -156,13 +141,10 @@ public class DialogTestPageIT extends AbstractComponentIT {
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).perform();
         waitForElementNotPresent(By.id("dialog-add-component-at-index"));
     }
-    
+
     private void assertButtonNumberInDialog(int expectedButtonNumber) {
-        Assert.assertEquals(
-                "Number of buttons in the dialog overlay is not correct.",
-                expectedButtonNumber,
-                findElement(By.tagName(DIALOG_OVERLAY_TAG))
-                        .findElements(By.tagName("button")).size());
+        waitUntil(driver -> ExpectedConditions.numberOfElementsToBe(
+                By.cssSelector(DIALOG_OVERLAY_TAG), expectedButtonNumber));
     }
 
     private void checkDialogIsClosed() {
@@ -195,15 +177,13 @@ public class DialogTestPageIT extends AbstractComponentIT {
         Assert.assertFalse("Couldn't find content for dialog",
                 content.isEmpty());
 
-        Long contentPadding =
-                getLongValue(content.get(0).getCssValue("padding-left"))
-                        + getLongValue(
-                        content.get(0).getCssValue("padding-right"));
+        Long contentPadding = getLongValue(
+                content.get(0).getCssValue("padding-left"))
+                + getLongValue(content.get(0).getCssValue("padding-right"));
 
-        Long contentMargin =
-                getLongValue(content.get(0).getCssValue("margin-left"))
-                        + getLongValue(
-                        content.get(0).getCssValue("margin-right"));
+        Long contentMargin = getLongValue(
+                content.get(0).getCssValue("margin-left"))
+                + getLongValue(content.get(0).getCssValue("margin-right"));
 
         Long endpoint = contentPadding + contentMargin;
 
@@ -216,7 +196,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
      * Get the number for a css value with px suffix
      *
      * @param value
-     *         css value to get
+     *            css value to get
      * @return numeric value for given string with px suffix
      */
     private Long getLongValue(String value) {

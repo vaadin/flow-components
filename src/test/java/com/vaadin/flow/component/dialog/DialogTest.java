@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.server.VaadinSession;
@@ -258,6 +259,23 @@ public class DialogTest {
         dialog.open();
 
         assertInvocations();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addComponentAtIndex_negativeIndex() {
+        addDivAtIndex(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addComponentAtIndex_indexIsBiggerThanChildrenCount() {
+        addDivAtIndex(1);
+    }
+
+    private void addDivAtIndex(int index) {
+        Dialog dialog = new Dialog();
+
+        Div div = new Div();
+        dialog.addComponentAtIndex(index, div);
     }
 
     private List<JavaScriptInvocation> flushInvocations() {
