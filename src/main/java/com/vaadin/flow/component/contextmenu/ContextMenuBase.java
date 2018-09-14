@@ -36,7 +36,7 @@ import com.vaadin.flow.shared.Registration;
  * {@code <vaadin-context-menu>}. Classes extending this should provide API for
  * adding items and handling events related to them. For basic example, see
  * {@link ContextMenu}.
- * 
+ *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
@@ -44,8 +44,7 @@ import com.vaadin.flow.shared.Registration;
 @HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
 @JavaScript("frontend://contextMenuConnector.js")
 public class ContextMenuBase<C extends ContextMenuBase<C>>
-        extends GeneratedVaadinContextMenu<C>
-        implements HasComponents {
+        extends GeneratedVaadinContextMenu<C> implements HasComponents {
 
     private Component target;
 
@@ -91,7 +90,7 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
      * <p>
      * By default, the context menu can be opened with a right click or a long
      * touch on the target component.
-     * 
+     *
      * @param target
      *            the target component for this context menu, can be
      *            {@code null} to remove the target
@@ -164,7 +163,7 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
     /**
      * Gets the target component of this context menu, or {@code null} if it
      * doesn't have a target.
-     * 
+     *
      * @return the target component of this context menu
      * @see #setTarget(Component)
      */
@@ -177,7 +176,7 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
      * <p>
      * By default, the context menu can be opened with a right click or a long
      * touch on the target component.
-     * 
+     *
      * @param openOnClick
      *            if {@code true}, the context menu can be opened with left
      *            click only. Otherwise the context menu follows the default
@@ -193,7 +192,7 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
      * <p>
      * By default, this will return {@code false} and context menu can be opened
      * with a right click or a long touch on the target component.
-     * 
+     *
      * @return {@code true} if the context menu can be opened with left click
      *         only. Otherwise the context menu follows the default behavior.
      */
@@ -267,7 +266,7 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
      * The added elements in the DOM will not be children of the
      * {@code <vaadin-context-menu>} element, but will be inserted into an
      * overlay that is attached into the {@code <body>}.
-     * 
+     *
      * @param index
      *            the index, where the component will be added.
      * @param component
@@ -276,15 +275,13 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
     @Override
     public void addComponentAtIndex(int index, Component component) {
         Objects.requireNonNull(component, "Component should not be null");
-        int indexCheck;
         if (index < 0) {
-            indexCheck = 0;
-        } else if (index > container.getChildCount()) {
-            indexCheck = container.getChildCount();
-        } else {
-            indexCheck = index;
+            throw new IllegalArgumentException(
+                    "Cannot add a component with a negative index");
         }
-        container.insertChild(indexCheck, component.getElement());
+        // The case when the index is bigger than the children count is handled
+        // inside the method below
+        container.insertChild(index, component.getElement());
     }
 
     /**
@@ -305,7 +302,7 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
     /**
      * Gets the items added to this component (the children of this component
      * that are instances of {@link MenuItem}).
-     * 
+     *
      * @return the {@link MenuItem} components in this context menu
      * @see #addItem(String, ComponentEventListener)
      */
@@ -326,7 +323,7 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
     /**
      * Creates and adds a new item component to this context menu with the given
      * text content.
-     * 
+     *
      * @param text
      *            the text content for the created menu item
      * @return the created menu item
@@ -341,7 +338,7 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
     /**
      * Creates and adds a new item component to this context menu with the given
      * component inside.
-     * 
+     *
      * @param component
      *            the component to add to the created menu item
      * @return the created menu item

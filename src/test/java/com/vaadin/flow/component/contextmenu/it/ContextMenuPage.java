@@ -61,14 +61,7 @@ public class ContextMenuPage extends Div {
         NativeButton addAtSecond = createTestButton(contextMenu, addedButton,
                 "button-to-second", 1);
 
-        NativeButton addOverIndex = createTestButton(contextMenu, addedButton,
-                "button-over-index", 10);
-
-        NativeButton addNegativeIndex = createTestButton(contextMenu,
-                addedButton,
-                "button-negative-index", -10);
-
-        add(target, addFirst, addAtSecond, addOverIndex, addNegativeIndex);
+        add(target, addFirst, addAtSecond);
     }
 
     private NativeButton createTestButton(ContextMenu menu,

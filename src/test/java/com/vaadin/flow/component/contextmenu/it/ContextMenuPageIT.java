@@ -154,24 +154,6 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         assertButtonText(1);
     }
 
-    @Test
-    public void openMenuAddComponentOverIndex() {
-        verifyInitialMenu(3);
-        findElement(By.id("button-over-index")).click();
-        rightClickOn("context-menu-add-component-target");
-        assertButtonNumberInMenu(4);
-        assertButtonText(3);
-    }
-
-    @Test
-    public void openMenuAddComponentNegativeIndex() {
-        verifyInitialMenu(3);
-        findElement(By.id("button-negative-index")).click();
-        rightClickOn("context-menu-add-component-target");
-        assertButtonNumberInMenu(4);
-        assertButtonText(0);
-    }
-
     private void assertButtonText(int index) {
         Assert.assertEquals("Button Text is not correct", "Added Button",
                 findElements(By.tagName(CONTEXT_MENU_OVERLAY_TAG)).get(0)

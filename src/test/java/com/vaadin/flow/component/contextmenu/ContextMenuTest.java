@@ -159,6 +159,23 @@ public class ContextMenuTest {
         Assert.assertEquals(item2, items.get(1));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void addComponentAtIndex_negativeIndex() {
+        addDivAtIndex(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addComponentAtIndex_indexIsBiggerThanChildrenCount() {
+        addDivAtIndex(1);
+    }
+
+    private void addDivAtIndex(int index) {
+        ContextMenu contextMenu = new ContextMenu();
+
+        Div div = new Div();
+        contextMenu.addComponentAtIndex(index, div);
+    }
+
     private void assertComponentIsMenuItem(Component component,
             String expectedText) {
         Assert.assertTrue(
