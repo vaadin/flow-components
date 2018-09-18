@@ -21,7 +21,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -357,7 +356,7 @@ public class PasswordField
      * <p>
      * Note: {@link Binder} will take care of the {@code null} conversion when
      * integrates with password field, as long as no new converter is defined.
-     * 
+     *
      * @param value
      *            the new value, not {@code null}
      */
@@ -369,7 +368,7 @@ public class PasswordField
     /**
      * Returns the current value of the password field. By default, the empty
      * password field will return an empty string.
-     * 
+     *
      * @return the current value.
      */
     @Override
@@ -381,8 +380,7 @@ public class PasswordField
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
         if (!isConnectorAttached) {
-            UI.getCurrent().getPage()
-                    .addJavaScript("frontend://textConnector.js");
+            RequiredValidationUtil.attachConnector(this);
             isConnectorAttached = true;
         }
         RequiredValidationUtil.updateClientValidation(requiredIndicatorVisible,

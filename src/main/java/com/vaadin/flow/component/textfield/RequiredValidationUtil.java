@@ -31,6 +31,20 @@ final class RequiredValidationUtil {
         // utility class should not be instantiated
     }
 
+    static void attachConnector(Component component) {
+        execJS(component, "window.Vaadin.Flow.textConnector = {\n"
+                + "        disableClientValidation: function (textComponent){\n"
+                + "            if ( typeof textComponent.$validation == 'undefined'){\n"
+                + "                textComponent.$validation = textComponent.checkValidity;\n"
+                + "                textComponent.checkValidity = function() { return true; };\n"
+                + "            }\n  },\n"
+                + "        enableClientValidation: function (textComponent){\n"
+                + "            if ( textComponent.$validation ){\n"
+                + "                textComponent.checkValidity = textComponent.$validation;\n"
+                + "                delete textComponent.$validation;\n"
+                + "            }\n  }\n }");
+    }
+
     static void updateClientValidation(boolean requiredIndicatorVisible,
             Component component) {
         if (requiredIndicatorVisible) {
