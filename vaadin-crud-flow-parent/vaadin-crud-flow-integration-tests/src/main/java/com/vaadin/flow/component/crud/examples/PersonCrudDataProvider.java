@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -25,6 +26,8 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFil
             .rangeClosed(1, 10)
             .mapToObj(i -> new Person(i, randomName(), randomName()))
             .collect(toList());
+
+    private Consumer<Long> sizeChangeListener;
 
     private static String randomName() {
         Random random = new Random();
@@ -59,7 +62,17 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFil
     @Override
     protected int sizeInBackEnd(Query<Person, CrudFilter> query) {
         // For RDBMS just execute a SELECT COUNT(*) ... WHERE query
-        return (int) fetchFromBackEnd(query).count();
+        long count = fetchFromBackEnd(query).count();
+
+        if (sizeChangeListener != null) {
+            sizeChangeListener.accept(count);
+        }
+
+        return (int) count;
+    }
+
+    public void setSizeChangeListener(Consumer<Long> listener) {
+        sizeChangeListener = listener;
     }
 
     private Predicate<Person> predicate(CrudFilter filter) {

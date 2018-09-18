@@ -26,6 +26,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
@@ -40,6 +41,7 @@ public class Crud<E> extends Component {
     private final Class<E> beanType;
     private final Grid<E> grid;
     private final CrudEditor<E> editor;
+    private Component footer;
 
     private final Set<ComponentEventListener<NewEvent>> newListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
@@ -123,6 +125,25 @@ public class Crud<E> extends Component {
 
     public CrudEditor<E> getEditor() {
         return editor;
+    }
+
+    public Component getFooter() {
+        return footer;
+    }
+
+    public void setFooter(Component footer) {
+        footer.getElement().setAttribute("slot", "footer");
+        getElement().insertChild(0, footer.getElement());
+
+        if (this.footer != null) {
+            getElement().removeChild(this.footer.getElement());
+        }
+
+        this.footer = footer;
+    }
+
+    public void setFooter(String footer) {
+        setFooter(new Span(footer));
     }
 
     public Registration addNewListener(ComponentEventListener<NewEvent> listener) {
