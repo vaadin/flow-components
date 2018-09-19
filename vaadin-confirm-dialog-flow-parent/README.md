@@ -1,3 +1,6 @@
+[![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/vaadin-confirm-dialog)
+[![Stars on Vaadin Directory](https://img.shields.io/vaadin-directory/star/vaadin-confirm-dialog.svg)](https://vaadin.com/directory/component/vaadin-confirm-dialog)
+
 # Confirm Dialog Component for Vaadin Flow
 
 ### Overview
