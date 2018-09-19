@@ -16,11 +16,15 @@ public class PersonView extends VerticalLayout {
         final Crud<Person> crud = new Crud<>(Person.class, new PersonCrudEditor());
 
         final PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
+        dataProvider.setSizeChangeListener(count ->
+                crud.setFooter(String.format("%d item%s available", count, count == 1L ? "" : "s")));
+
         crud.setDataProvider(dataProvider);
 
         crud.addSaveListener(e -> dataProvider.persist(crud.getEditor().getItem()));
         crud.addDeleteListener(e -> dataProvider.delete(crud.getEditor().getItem()));
 
+        setHeight("100%");
         add(crud);
     }
 }
