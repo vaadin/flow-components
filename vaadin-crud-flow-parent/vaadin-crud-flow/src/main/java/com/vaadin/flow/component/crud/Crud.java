@@ -28,6 +28,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
@@ -36,6 +37,7 @@ import java.util.Set;
 
 @Tag("vaadin-crud")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
+@HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud-grid-edit-column.html")
 public class Crud<E> extends Component {
 
     private final Class<E> beanType;
@@ -90,14 +92,14 @@ public class Crud<E> extends Component {
         ComponentUtil.addListener(this, CancelEvent.class, (ComponentEventListener<CancelEvent>) e -> {
             cancelListeners.forEach(listener -> listener.onComponentEvent(e));
 
-            getEditor().setItem(null);
+            getEditor().clear();
             setOpened(false);
         });
 
         ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener<SaveEvent>) e -> {
             saveListeners.forEach(listener -> listener.onComponentEvent(e));
 
-            getEditor().setItem(null);
+            getEditor().clear();
             getGrid().getDataProvider().refreshAll();
             setOpened(false);
         });
@@ -105,7 +107,7 @@ public class Crud<E> extends Component {
         ComponentUtil.addListener(this, DeleteEvent.class, (ComponentEventListener<DeleteEvent>) e -> {
             deleteListeners.forEach(listener -> listener.onComponentEvent(e));
 
-            getEditor().setItem(null);
+            getEditor().clear();
             getGrid().getDataProvider().refreshAll();
             setOpened(false);
         });
@@ -179,6 +181,13 @@ public class Crud<E> extends Component {
         grid.setDataProvider(provider);
     }
 
+    public static void addEditColumn(Grid grid) {
+        grid.addColumn(
+                TemplateRenderer.of("<vaadin-crud-grid-edit></vaadin-crud-grid-edit>"))
+                .setWidth("40px")
+                .setFlexGrow(0);
+    }
+
     @DomEvent("cancel")
     public static class CancelEvent extends ComponentEvent<Crud<?>> {
 
@@ -227,12 +236,8 @@ public class Crud<E> extends Component {
                          @EventData("event.detail.item") JsonObject item,
                          @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
-            try {
-                this.item = source.getGrid().getDataCommunicator()
-                        .getKeyMapper().get(item.getString("key"));
-            } catch (NullPointerException ex) {
-                // TODO(oluwasayo): Remove when WC no longer fires edit event on grid active item change
-            }
+            this.item = source.getGrid().getDataCommunicator()
+                    .getKeyMapper().get(item.getString("key"));
         }
 
         public E getItem() {

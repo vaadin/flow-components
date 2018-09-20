@@ -22,6 +22,7 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 public class CrudGrid<E> extends Grid<E> {
@@ -40,16 +41,19 @@ public class CrudGrid<E> extends Grid<E> {
     }
 
     private void setup() {
-        this.setSelectionMode(SelectionMode.NONE);
-        setupSorting();
         if (enableDefaultFilters) {
             setupFiltering();
         }
+
+        setupSorting();
+
+        Crud.addEditColumn(this);
+        setSelectionMode(SelectionMode.NONE);
     }
 
     private void setupFiltering() {
         final HeaderRow filterRow = this.appendHeaderRow();
-        this.getColumns().forEach(column -> {
+        getColumns().forEach(column -> {
             final TextField field = new TextField();
 
             field.addValueChangeListener(event -> {
@@ -72,7 +76,7 @@ public class CrudGrid<E> extends Grid<E> {
 
     private void setupSorting() {
         setMultiSort(true);
-        this.addSortListener(event -> {
+        addSortListener(event -> {
             filter.getSortOrders().clear();
             event.getSortOrder().forEach(e ->
                     filter.getSortOrders().put(e.getSorted().getKey(), e.getDirection()));

@@ -30,12 +30,6 @@ public class PersonCrudEditor implements CrudEditor<Person> {
 
     @Override
     public void setItem(Person item) {
-        // TODO(oluwasayo): Remove when WC no longer fires edit event on grid active item change
-        if (item == null) {
-            clear();
-            return;
-        }
-
         binder = new Binder<>(Person.class);
         binder.bind(firstNameField, Person::getFirstName, Person::setFirstName);
         binder.bind(lastNameField, Person::getLastName, Person::setLastName);
