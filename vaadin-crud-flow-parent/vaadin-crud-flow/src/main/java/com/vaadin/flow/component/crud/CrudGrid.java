@@ -22,7 +22,6 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 public class CrudGrid<E> extends Grid<E> {
@@ -30,6 +29,7 @@ public class CrudGrid<E> extends Grid<E> {
     private final Class<E> beanType;
     private final boolean enableDefaultFilters;
     private final CrudFilter filter = new CrudFilter();
+    private DataProvider<E, ?> dataProvider;
 
     public CrudGrid(Class<E> beanType, boolean enableDefaultFilters) {
         super(beanType);
@@ -63,7 +63,7 @@ public class CrudGrid<E> extends Grid<E> {
                     filter.getConstraints().put(column.getKey(), event.getValue());
                 }
 
-                getConfigurableDataProvider().refreshAll();
+                getWrappedDataProvider().refreshAll();
             });
 
             field.setValueChangeMode(ValueChangeMode.EAGER);
@@ -80,12 +80,22 @@ public class CrudGrid<E> extends Grid<E> {
             filter.getSortOrders().clear();
             event.getSortOrder().forEach(e ->
                     filter.getSortOrders().put(e.getSorted().getKey(), e.getDirection()));
-            getConfigurableDataProvider().refreshAll();
+            getWrappedDataProvider().refreshAll();
         });
     }
 
-    private ConfigurableFilterDataProvider<E, Void, CrudFilter> getConfigurableDataProvider() {
+    private ConfigurableFilterDataProvider<E, Void, CrudFilter> getWrappedDataProvider() {
         return (ConfigurableFilterDataProvider<E, Void, CrudFilter>) getDataProvider();
+    }
+
+    /**
+     * Returns the data provider of this grid.
+     *
+     * @return the data provider of this grid, not {@code null}
+     */
+    @Override
+    public DataProvider<E, ?> getDataProvider() {
+        return dataProvider;
     }
 
     /**
@@ -105,6 +115,9 @@ public class CrudGrid<E> extends Grid<E> {
             provider.setFilter(filter);
 
             super.setDataProvider(provider);
+
+            // Keep a reference to the original data provider being wrapped
+            this.dataProvider = dataProvider;
         } catch (ClassCastException ex) {
             throw new IllegalArgumentException("DataProvider<" + beanType.getSimpleName()
                     + ", CrudFilter> expected", ex);
