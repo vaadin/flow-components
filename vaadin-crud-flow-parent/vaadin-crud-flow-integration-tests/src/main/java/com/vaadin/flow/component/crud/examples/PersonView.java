@@ -21,8 +21,8 @@ public class PersonView extends Div {
 
         crud.setDataProvider(dataProvider);
 
-        crud.addSaveListener(e -> dataProvider.persist(crud.getEditor().getItem()));
-        crud.addDeleteListener(e -> dataProvider.delete(crud.getEditor().getItem()));
+        crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
+        crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
 
         setHeight("100%");
         add(crud);

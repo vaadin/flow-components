@@ -47,9 +47,9 @@ public class Crud<E> extends Component {
 
     private final Set<ComponentEventListener<NewEvent>> newListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
-    private final Set<ComponentEventListener<SaveEvent>> saveListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<SaveEvent<E>>> saveListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<CancelEvent>> cancelListeners = new LinkedHashSet<>();
-    private final Set<ComponentEventListener<DeleteEvent>> deleteListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<DeleteEvent<E>>> deleteListeners = new LinkedHashSet<>();
 
     public Crud(Class<E> beanType, CrudEditor<E> editor) {
         this(beanType, new CrudGrid<>(beanType, true), editor);
@@ -89,28 +89,31 @@ public class Crud<E> extends Component {
                     editListeners.forEach(listener -> listener.onComponentEvent(e));
                 }));
 
-        ComponentUtil.addListener(this, CancelEvent.class, (ComponentEventListener<CancelEvent>) e -> {
-            cancelListeners.forEach(listener -> listener.onComponentEvent(e));
+        ComponentUtil.addListener(this, CancelEvent.class, (ComponentEventListener)
+                ((ComponentEventListener<CancelEvent>) e -> {
+                    cancelListeners.forEach(listener -> listener.onComponentEvent(e));
 
-            getEditor().clear();
-            setOpened(false);
-        });
+                    getEditor().clear();
+                    setOpened(false);
+                }));
 
-        ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener<SaveEvent>) e -> {
-            saveListeners.forEach(listener -> listener.onComponentEvent(e));
+        ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener)
+                ((ComponentEventListener<SaveEvent<E>>) e -> {
+                    saveListeners.forEach(listener -> listener.onComponentEvent(e));
 
-            getEditor().clear();
-            getGrid().getDataProvider().refreshAll();
-            setOpened(false);
-        });
+                    getEditor().clear();
+                    getGrid().getDataProvider().refreshAll();
+                    setOpened(false);
+                }));
 
-        ComponentUtil.addListener(this, DeleteEvent.class, (ComponentEventListener<DeleteEvent>) e -> {
-            deleteListeners.forEach(listener -> listener.onComponentEvent(e));
+        ComponentUtil.addListener(this, DeleteEvent.class, (ComponentEventListener)
+                ((ComponentEventListener<DeleteEvent<E>>) e -> {
+                    deleteListeners.forEach(listener -> listener.onComponentEvent(e));
 
-            getEditor().clear();
-            getGrid().getDataProvider().refreshAll();
-            setOpened(false);
-        });
+                    getEditor().clear();
+                    getGrid().getDataProvider().refreshAll();
+                    setOpened(false);
+                }));
     }
 
     public void setOpened(boolean opened) {
@@ -158,7 +161,7 @@ public class Crud<E> extends Component {
         return () -> editListeners.remove(listener);
     }
 
-    public Registration addSaveListener(ComponentEventListener<SaveEvent> listener) {
+    public Registration addSaveListener(ComponentEventListener<SaveEvent<E>> listener) {
         saveListeners.add(listener);
         return () -> saveListeners.remove(listener);
     }
@@ -168,7 +171,7 @@ public class Crud<E> extends Component {
         return () -> cancelListeners.remove(listener);
     }
 
-    public Registration addDeleteListener(ComponentEventListener<DeleteEvent> listener) {
+    public Registration addDeleteListener(ComponentEventListener<DeleteEvent<E>> listener) {
         deleteListeners.add(listener);
         return () -> deleteListeners.remove(listener);
     }
@@ -205,7 +208,7 @@ public class Crud<E> extends Component {
     }
 
     @DomEvent("delete")
-    public static class DeleteEvent extends ComponentEvent<Crud<?>> {
+    public static class DeleteEvent<E> extends ComponentEvent<Crud<E>> {
 
         /**
          * Creates a new event using the given source and indicator whether the
@@ -214,9 +217,13 @@ public class Crud<E> extends Component {
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
          */
-        public DeleteEvent(Crud<?> source, boolean fromClient,
+        public DeleteEvent(Crud<E> source, boolean fromClient,
                            @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
+        }
+
+        public E getItem() {
+            return getSource().getEditor().getItem();
         }
     }
 
@@ -262,7 +269,7 @@ public class Crud<E> extends Component {
     }
 
     @DomEvent("save")
-    public static class SaveEvent extends ComponentEvent<Crud<?>> {
+    public static class SaveEvent<E> extends ComponentEvent<Crud<E>> {
 
         /**
          * Creates a new event using the given source and indicator whether the
@@ -271,9 +278,13 @@ public class Crud<E> extends Component {
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
          */
-        public SaveEvent(Crud<?> source, boolean fromClient,
+        public SaveEvent(Crud<E> source, boolean fromClient,
                          @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
+        }
+
+        public E getItem() {
+            return getSource().getEditor().getItem();
         }
     }
 }
