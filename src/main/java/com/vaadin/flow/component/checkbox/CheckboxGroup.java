@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasSize;
@@ -56,7 +57,7 @@ public class CheckboxGroup<T>
 
     private static final String VALUE = "value";
 
-    private final KeyMapper<T> keyMapper = new KeyMapper<>();
+    private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
 
@@ -261,6 +262,23 @@ public class CheckboxGroup<T>
     }
 
     @Override
+    protected boolean valueEquals(Set<T> value1, Set<T> value2) {
+        assert value1 != null && value2 != null;
+        if (value1.size() != value2.size()) {
+            return false;
+        }
+
+        if (getDataProvider() == null) {
+            return super.valueEquals(value1, value2);
+        }
+        Set<Object> ids1 = value1.stream().map(getDataProvider()::getId)
+                .collect(Collectors.toSet());
+        Set<Object> ids2 = value2.stream().map(getDataProvider()::getId)
+                .collect(Collectors.toSet());
+        return ids1.equals(ids2);
+    }
+
+    @Override
     protected boolean hasValidValue() {
         Set<T> selectedItems = presentationToModel(this,
                 (JsonArray) getElement().getPropertyRaw(VALUE));
@@ -365,5 +383,12 @@ public class CheckboxGroup<T>
         model.stream().map(group.keyMapper::key)
                 .forEach(key -> array.set(array.length(), key));
         return array;
+    }
+
+    private Object getItemId(T item) {
+        if (getDataProvider() == null) {
+            return item;
+        }
+        return getDataProvider().getId(item);
     }
 }
