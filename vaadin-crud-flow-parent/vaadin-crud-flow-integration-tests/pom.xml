@@ -87,7 +87,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-ordered-layout-flow</artifactId>
+            <artifactId>vaadin-form-layout-flow</artifactId>
             <version>1.0.3</version>
         </dependency>
 
