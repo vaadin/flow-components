@@ -30,7 +30,7 @@ add the following dependency to your `pom.xml`:
 ```
 
 ## Flow documentation
-Documentation for Flow can be found on [vaadin.com website](https://vaadin.com/docs/v10/flow/Overview.html) or on [GitHub](https://github.com/vaadin/flow-and-components-documentation).
+Documentation for Flow can be found on [vaadin.com website](https://vaadin.com/docs/v10/flow/Overview.html) or on [GitHub](https://github.com/vaadin/flow-and-components-documentation/blob/master/documentation/Overview.asciidoc).
 
 ## Contributing
 - All contributions should be made for `master` branch, from where those will be picked into any platform LTS versions if necessary.
