@@ -3,9 +3,8 @@
 This project is the Component wrapper implementation of [`<vaadin-form-layout>`](https://github.com/vaadin/vaadin-form-layout) element
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
-This branch is Vaadin 11 compatible. See other branches for other framework versions:
-* master branch is Vaadin 11 (Flow version 1.1)
-* 1.0 branch is Vaadin 10 (Flow version 1.0)
+`master` branch is the latest version that will at some point be released in the [Vaadin platform](https://github.com/vaadin/platform). See other branches for other framework versions:
+ - `1.0` branch is Vaadin 10 LTS (Flow/Flow-component version 1.0)
 
 ## Running the component demo
 Run from the command line:
@@ -29,7 +28,7 @@ add the following dependency to your `pom.xml`:
 ```
 
 ## Flow documentation
-Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow-and-components-documentation/blob/master/Overview.asciidoc).
+Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow-and-components-documentation/blob/master/documentation/Overview.asciidoc).
 
 ## Contributing
 - Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/master/eclipse)
