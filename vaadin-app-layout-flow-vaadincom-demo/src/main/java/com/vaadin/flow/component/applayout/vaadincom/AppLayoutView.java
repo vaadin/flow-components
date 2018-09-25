@@ -26,7 +26,7 @@ public class AppLayoutView extends DemoView {
         // begin-source-example
         // source-example-heading: Basic App Layout with text branding
         AppLayout appLayout = new AppLayout();
-        appLayout.setBranding(new H3("App Company").getElement());
+        appLayout.setBranding(new H3("App Company"));
 
         // end-source-example
         // @formatter:on
@@ -41,7 +41,7 @@ public class AppLayoutView extends DemoView {
         AppLayout appLayout = new AppLayout();
         Image img = new Image("https://i.imgur.com/GPpnszs.png", "Vaadin Logo");
         img.setHeight("44px");
-        appLayout.setBranding(img.getElement());
+        appLayout.setBranding(img);
 
         appLayout.addMenuItem(new RoutingMenuItem("Page 1", "page1"));
         appLayout.addMenuItem(new RoutingMenuItem("Page 2", "page2"));
@@ -49,7 +49,7 @@ public class AppLayoutView extends DemoView {
         appLayout.addMenuItem(new RoutingMenuItem("Page 4", "page4"));
 
         Component content = new Span(new H3("Page title"), new Span("Page content"));
-        appLayout.setContent(content.getElement());
+        appLayout.setContent(content);
         // end-source-example
         // @formatter:on
 

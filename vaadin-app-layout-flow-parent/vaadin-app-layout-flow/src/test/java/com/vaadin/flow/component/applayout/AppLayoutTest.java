@@ -47,7 +47,7 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void setBranding() {
+    public void setBranding_Element() {
         Element branding = new H2("Vaadin").getElement();
         systemUnderTest.setBranding(branding);
 
@@ -56,6 +56,16 @@ public class AppLayoutTest {
                 .filter(e -> e.getAttribute("slot").equals("branding"))
                 .count();
         Assert.assertEquals(1, brandingCount);
+    }
+
+    @Test
+    public void setBranding_Component() {
+        Component branding = new Div();
+        Assert.assertNull(branding.getElement().getAttribute("slot"));
+        systemUnderTest.setBranding(branding);
+        Assert.assertEquals("branding",
+            branding.getElement().getAttribute("slot"));
+        assertContainsElement(branding.getElement());
     }
 
     @Test
@@ -186,13 +196,17 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void setContent() {
+    public void setContent_Element() {
         Element content = new Div().getElement();
         systemUnderTest.setContent(content);
+        assertContainsElement(content);
+    }
 
-        List<Element> children = systemUnderTest.getElement().getChildren()
-                .collect(Collectors.toList());
-        Assert.assertTrue(children.contains(content));
+    @Test
+    public void setContent_Component() {
+        Component content = new Div();
+        systemUnderTest.setContent(content);
+        assertContainsElement(content.getElement());
     }
 
     @Test
@@ -208,5 +222,10 @@ public class AppLayoutTest {
                 .collect(Collectors.toList());
         Assert.assertFalse(children.contains(content));
         Assert.assertNull(systemUnderTest.getContent());
+    }
+
+    private void assertContainsElement(Element element) {
+        Assert.assertTrue(systemUnderTest.getElement().getChildren()
+            .anyMatch(e -> e.equals(element)));
     }
 }

@@ -78,10 +78,20 @@ public class AppLayout extends Component {
     }
 
     /**
+     * Sets the component into branding area
+     *
+     * @param branding
+     *            Component to set into branding area
+     */
+    public void setBranding(Component branding) {
+        setBranding(branding != null ? branding.getElement() : null);
+    }
+
+    /**
      * Sets the element into branding area
      *
      * @param branding
-     *            the element to set into branding area
+     *            Element to set into branding area
      */
     public void setBranding(Element branding) {
         Objects.requireNonNull(branding, "Branding cannot be null");
@@ -164,6 +174,16 @@ public class AppLayout extends Component {
      */
     public Element getContent() {
         return content;
+    }
+
+    /**
+     * Sets the displayed content.
+     *
+     * @param content
+     *              Component to display in the content area
+     */
+    public void setContent(Component content) {
+        setContent(content != null ? content.getElement() : null);
     }
 
     /**
