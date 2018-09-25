@@ -63,7 +63,7 @@ public class CrudGrid<E> extends Grid<E> {
                     filter.getConstraints().put(column.getKey(), event.getValue());
                 }
 
-                getWrappedDataProvider().refreshAll();
+                super.getDataProvider().refreshAll();
             });
 
             field.setValueChangeMode(ValueChangeMode.EAGER);
@@ -80,12 +80,8 @@ public class CrudGrid<E> extends Grid<E> {
             filter.getSortOrders().clear();
             event.getSortOrder().forEach(e ->
                     filter.getSortOrders().put(e.getSorted().getKey(), e.getDirection()));
-            getWrappedDataProvider().refreshAll();
+            super.getDataProvider().refreshAll();
         });
-    }
-
-    private ConfigurableFilterDataProvider<E, Void, CrudFilter> getWrappedDataProvider() {
-        return (ConfigurableFilterDataProvider<E, Void, CrudFilter>) getDataProvider();
     }
 
     /**
