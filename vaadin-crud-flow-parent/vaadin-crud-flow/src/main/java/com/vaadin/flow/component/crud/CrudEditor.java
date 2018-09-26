@@ -31,7 +31,5 @@ public interface CrudEditor<E> extends Serializable {
 
     boolean isValid();
 
-    boolean isDirty();
-
     Element getView();
 }

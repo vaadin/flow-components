@@ -90,11 +90,6 @@ public class CrudTest {
         }
 
         @Override
-        public boolean isDirty() {
-            return false;
-        }
-
-        @Override
         public Element getView() {
             return new Div().getElement();
         }

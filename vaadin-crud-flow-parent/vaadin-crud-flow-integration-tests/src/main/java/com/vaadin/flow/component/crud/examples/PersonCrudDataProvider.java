@@ -19,6 +19,9 @@ import java.util.stream.Stream;
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * A dummy data provider. DO NOT DO THIS IN A PRODUCTION APP!
+ */
 class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFilter> {
 
     // A real app should hook up something like JPA

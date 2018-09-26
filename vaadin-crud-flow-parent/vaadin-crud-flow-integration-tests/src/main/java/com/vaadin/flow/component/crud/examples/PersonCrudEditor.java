@@ -11,14 +11,10 @@ public class PersonCrudEditor implements CrudEditor<Person> {
     private final TextField firstNameField = new TextField("First name");
     private final TextField lastNameField = new TextField("Last name");
 
-    private final FormLayout view = new FormLayout();
+    private final FormLayout view = new FormLayout(firstNameField, lastNameField);
 
     private Person editableItem;
     private Binder<Person> binder;
-
-    PersonCrudEditor() {
-        view.add(firstNameField, lastNameField);
-    }
 
     @Override
     public Person getItem() {
@@ -61,11 +57,6 @@ public class PersonCrudEditor implements CrudEditor<Person> {
     @Override
     public boolean isValid() {
         return binder != null && binder.isValid();
-    }
-
-    @Override
-    public boolean isDirty() {
-        return binder != null && binder.hasChanges();
     }
 
     @Override
