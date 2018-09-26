@@ -45,10 +45,10 @@ public class Crud<E> extends Component {
     private final CrudEditor<E> editor;
     private Component footer;
 
-    private final Set<ComponentEventListener<NewEvent>> newListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<NewEvent<E>>> newListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<SaveEvent<E>>> saveListeners = new LinkedHashSet<>();
-    private final Set<ComponentEventListener<CancelEvent>> cancelListeners = new LinkedHashSet<>();
+    private final Set<ComponentEventListener<CancelEvent<E>>> cancelListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<DeleteEvent<E>>> deleteListeners = new LinkedHashSet<>();
 
     public Crud(Class<E> beanType, CrudEditor<E> editor) {
@@ -72,15 +72,16 @@ public class Crud<E> extends Component {
     }
 
     private void registerHandlers() {
-        ComponentUtil.addListener(this, NewEvent.class, (ComponentEventListener<NewEvent>) e -> {
-            try {
-                editor.setItem(beanType.newInstance());
-            } catch (Exception ex) {
-                throw new RuntimeException("Unable to instantiate new bean", ex);
-            }
+        ComponentUtil.addListener(this, NewEvent.class, (ComponentEventListener)
+                ((ComponentEventListener<NewEvent<E>>) e -> {
+                    try {
+                        editor.setItem(beanType.newInstance());
+                    } catch (Exception ex) {
+                        throw new RuntimeException("Unable to instantiate new bean", ex);
+                    }
 
-            newListeners.forEach(listener -> listener.onComponentEvent(e));
-        });
+                    newListeners.forEach(listener -> listener.onComponentEvent(e));
+                }));
 
         ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<EditEvent<E>>) e -> {
@@ -90,7 +91,7 @@ public class Crud<E> extends Component {
                 }));
 
         ComponentUtil.addListener(this, CancelEvent.class, (ComponentEventListener)
-                ((ComponentEventListener<CancelEvent>) e -> {
+                ((ComponentEventListener<CancelEvent<E>>) e -> {
                     cancelListeners.forEach(listener -> listener.onComponentEvent(e));
 
                     getEditor().clear();
@@ -151,7 +152,7 @@ public class Crud<E> extends Component {
         setFooter(new Span(footer));
     }
 
-    public Registration addNewListener(ComponentEventListener<NewEvent> listener) {
+    public Registration addNewListener(ComponentEventListener<NewEvent<E>> listener) {
         newListeners.add(listener);
         return () -> newListeners.remove(listener);
     }
@@ -166,7 +167,7 @@ public class Crud<E> extends Component {
         return () -> saveListeners.remove(listener);
     }
 
-    public Registration addCancelListener(ComponentEventListener<CancelEvent> listener) {
+    public Registration addCancelListener(ComponentEventListener<CancelEvent<E>> listener) {
         cancelListeners.add(listener);
         return () -> cancelListeners.remove(listener);
     }
@@ -191,8 +192,7 @@ public class Crud<E> extends Component {
                 .setFlexGrow(0);
     }
 
-    @DomEvent("cancel")
-    public static class CancelEvent extends ComponentEvent<Crud<?>> {
+    static abstract class CrudEvent<E> extends ComponentEvent<Crud<E>> {
 
         /**
          * Creates a new event using the given source and indicator whether the
@@ -201,14 +201,33 @@ public class Crud<E> extends Component {
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
          */
-        public CancelEvent(Crud<?> source, boolean fromClient,
+        private CrudEvent(Crud<E> source, boolean fromClient) {
+            super(source, fromClient);
+        }
+
+        public E getItem() {
+            return getSource().getEditor().getItem();
+        }
+    }
+
+    @DomEvent("cancel")
+    public static class CancelEvent<E> extends CrudEvent<E> {
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the client
+         */
+        public CancelEvent(Crud<E> source, boolean fromClient,
                            @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
         }
     }
 
     @DomEvent("delete")
-    public static class DeleteEvent<E> extends ComponentEvent<Crud<E>> {
+    public static class DeleteEvent<E> extends CrudEvent<E> {
 
         /**
          * Creates a new event using the given source and indicator whether the
@@ -221,14 +240,10 @@ public class Crud<E> extends Component {
                            @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
         }
-
-        public E getItem() {
-            return getSource().getEditor().getItem();
-        }
     }
 
     @DomEvent("edit")
-    public static class EditEvent<E> extends ComponentEvent<Crud<E>> {
+    public static class EditEvent<E> extends CrudEvent<E> {
 
         private E item;
 
@@ -253,7 +268,7 @@ public class Crud<E> extends Component {
     }
 
     @DomEvent("new")
-    public static class NewEvent extends ComponentEvent<Crud<?>> {
+    public static class NewEvent<E> extends CrudEvent<E> {
 
         /**
          * Creates a new event using the given source and indicator whether the
@@ -262,14 +277,14 @@ public class Crud<E> extends Component {
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
          */
-        public NewEvent(Crud<?> source, boolean fromClient,
+        public NewEvent(Crud<E> source, boolean fromClient,
                         @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
         }
     }
 
     @DomEvent("save")
-    public static class SaveEvent<E> extends ComponentEvent<Crud<E>> {
+    public static class SaveEvent<E> extends CrudEvent<E> {
 
         /**
          * Creates a new event using the given source and indicator whether the
@@ -281,10 +296,6 @@ public class Crud<E> extends Component {
         public SaveEvent(Crud<E> source, boolean fromClient,
                          @EventData("event.stopPropagation()") Object ignored) {
             super(source, fromClient);
-        }
-
-        public E getItem() {
-            return getSource().getEditor().getItem();
         }
     }
 }
