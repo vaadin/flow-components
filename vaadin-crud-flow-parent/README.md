@@ -12,12 +12,12 @@ To purchase a license, visit http://vaadin.com/pricing
 
 ### Installing
 Add Crud to your project
-```
+```xml
 <dependencies>
   <dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-crud-flow</artifactId>
-    <version>1.0.0.alpha2</version>
+    <version>1.0.0.alpha3</version>
   </dependency>
 </dependencies>
 ```

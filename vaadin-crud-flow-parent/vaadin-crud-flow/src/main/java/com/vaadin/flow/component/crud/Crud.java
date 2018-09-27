@@ -37,19 +37,20 @@ import java.util.Set;
 
 /**
  * A component for performing <a href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a>
- * operations on a data backend (e.g entities from a database).
- *
- * Basic usage:
+ * operations on a data backend (e.g entities from a database).<br>
+ * <br>
+ * <u>Basic usage</u><br>
+ * <br>
  * <code>
- * Crud&lt;Person&gt; crud = new Crud&lt;&gt;(Person.class, personEditor);
- * crud.setDataProvider(personDataProvider);
- *  
- * // Handle save and delete events.
- * crud.addSaveListener(e -&gt; save(e.getItem()));
- * crud.addDeleteListener(e -&gt; delete(e.getItem()));
- *  
- * // Set a footer text or component if desired.
- * crud.setFooter("Flight manifest for XX210");
+ * Crud&lt;Person&gt; crud = new Crud&lt;&gt;(Person.class, personEditor);<br>
+ * crud.setDataProvider(personDataProvider);<br>
+ *  <br>
+ * // Handle save and delete events.<br>
+ * crud.addSaveListener(e -&gt; save(e.getItem()));<br>
+ * crud.addDeleteListener(e -&gt; delete(e.getItem()));<br>
+ *  <br>
+ * // Set a footer text or component if desired.<br>
+ * crud.setFooter("Flight manifest for XX210");<br>
  * </code>
  *
  * @author Vaadin Ltd
@@ -74,11 +75,11 @@ public class Crud<E> extends Component {
 
     /**
      * Instantiates a new Crud for the given bean type and uses the supplied editor.
-     * Furthermore, it displays the items using the built-in grid.
-     *
-     * Example:
+     * Furthermore, it displays the items using the built-in grid.<br>
+     * <br>
+     * Example:<br>
      * <code>
-     *     Crud&lt;Person&gt; crud = new Crud&lt;&gt;(Person.class, new PersonEditor());
+     *     Crud&lt;Person&gt; crud = new Crud&lt;&gt;(Person.class, new PersonEditor());<br>
      * </code>
      *
      * @param beanType the class of items

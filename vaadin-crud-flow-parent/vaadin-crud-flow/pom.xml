@@ -12,11 +12,10 @@
     <artifactId>vaadin-crud-flow</artifactId>
     <packaging>jar</packaging>
 
-    <name>Vaadin Crud for Vaadin 10</name>
+    <name>Vaadin Crud</name>
 
     <properties>
         <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
-        <powermock.version>1.7.1</powermock.version>
     </properties>
 
     <dependencies>
