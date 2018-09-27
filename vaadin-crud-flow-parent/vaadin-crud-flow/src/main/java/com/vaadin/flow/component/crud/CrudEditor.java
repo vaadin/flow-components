@@ -17,19 +17,48 @@ package com.vaadin.flow.component.crud;
  * #L%
  */
 
-import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.component.Component;
 
 import java.io.Serializable;
 
+/**
+ * Interface representing a crud editor.
+ *
+ * @param <E> the bean type
+ */
 public interface CrudEditor<E> extends Serializable {
 
+    /**
+     * Sets an item to be edited.
+     * This could be a newly instantiated item or an existing item from the grid.
+     *
+     * @param item the item to edit
+     */
     void setItem(E item);
 
+    /**
+     * Returns the item being edited.
+     *
+     * @return the item being edited
+     */
     E getItem();
 
+    /**
+     * Clears the editor.
+     */
     void clear();
 
+    /**
+     * Checks whether the data entered into an editor is valid.
+     *
+     * @return true if valid or false if otherwise
+     */
     boolean isValid();
 
-    Element getView();
+    /**
+     * Returns the user interface of an editor.
+     *
+     * @return the user interface
+     */
+    Component getView();
 }

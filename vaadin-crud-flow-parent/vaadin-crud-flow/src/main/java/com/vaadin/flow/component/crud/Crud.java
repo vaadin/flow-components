@@ -35,6 +35,27 @@ import elemental.json.JsonObject;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ * A component for performing <a href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a>
+ * operations on a data backend (e.g entities from a database).
+ *
+ * Basic usage:
+ * <code>
+ * Crud&lt;Person&gt; crud = new Crud&lt;&gt;(Person.class, personEditor);
+ * crud.setDataProvider(personDataProvider);
+ *  
+ * // Handle save and delete events.
+ * crud.addSaveListener(e -&gt; save(e.getItem()));
+ * crud.addDeleteListener(e -&gt; delete(e.getItem()));
+ *  
+ * // Set a footer text or component if desired.
+ * crud.setFooter("Flight manifest for XX210");
+ * </code>
+ *
+ * @author Vaadin Ltd
+ *
+ * @param <E> the bean type
+ */
 @Tag("vaadin-crud")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud-grid-edit-column.html")
@@ -51,10 +72,32 @@ public class Crud<E> extends Component {
     private final Set<ComponentEventListener<CancelEvent<E>>> cancelListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<DeleteEvent<E>>> deleteListeners = new LinkedHashSet<>();
 
+    /**
+     * Instantiates a new Crud for the given bean type and uses the supplied editor.
+     * Furthermore, it displays the items using the built-in grid.
+     *
+     * Example:
+     * <code>
+     *     Crud&lt;Person&gt; crud = new Crud&lt;&gt;(Person.class, new PersonEditor());
+     * </code>
+     *
+     * @param beanType the class of items
+     * @param editor the editor for manipulating individual items
+     * @see CrudGrid
+     * @see com.vaadin.flow.component.crud.Crud#Crud(Class, Grid, CrudEditor) Crud(Class, Grid, CrudEditor)
+     */
     public Crud(Class<E> beanType, CrudEditor<E> editor) {
         this(beanType, new CrudGrid<>(beanType, true), editor);
     }
 
+    /**
+     * Instantiates a new Crud using a custom grid.
+     *
+     * @param beanType the class of items
+     * @param grid the grid with which the items listing should be displayed
+     * @param editor the editor for manipulating individual items
+     * @see com.vaadin.flow.component.crud.Crud#Crud(Class, CrudEditor) Crud(Class, CrudEditor)
+     */
     public Crud(Class<E> beanType, Grid<E> grid, CrudEditor<E> editor) {
         this.beanType = beanType;
 
@@ -62,11 +105,11 @@ public class Crud<E> extends Component {
         this.grid.getElement().setAttribute("slot", "grid");
 
         this.editor = editor;
-        this.editor.getView().setAttribute("slot", "form");
+        this.editor.getView().getElement().setAttribute("slot", "form");
 
         registerHandlers();
 
-        getElement().appendChild(grid.getElement(), editor.getView());
+        getElement().appendChild(grid.getElement(), editor.getView().getElement());
     }
 
     private void registerHandlers() {
@@ -115,6 +158,12 @@ public class Crud<E> extends Component {
                 }));
     }
 
+    /**
+     * Opens or closes the editor. In most use cases opening or closing the editor
+     * is automatically done by the component and this method does not need to be called.
+     *
+     * @param opened true to open or false to close
+     */
     public void setOpened(boolean opened) {
         getElement().setProperty("opened", opened);
     }
@@ -123,14 +172,33 @@ public class Crud<E> extends Component {
         return grid;
     }
 
+    /**
+     * Gets the crud editor.
+     *
+     * @return the crud editor
+     */
     public CrudEditor<E> getEditor() {
         return editor;
     }
 
+    /**
+     * Gets the crud footer.
+     *
+     * @return the crud footer
+     * @see #setFooter(Component)
+     * @see #setFooter(String)
+     */
     public Component getFooter() {
         return footer;
     }
 
+    /**
+     * Sets a component to be displayed as the crud footer.
+     * This could, for example, be used to display a banner or anything else.
+     *
+     * @param footer the footer component
+     * @see #setFooter(String)
+     */
     public void setFooter(Component footer) {
         footer.getElement().setAttribute("slot", "footer");
         getElement().insertChild(0, footer.getElement());
@@ -142,43 +210,98 @@ public class Crud<E> extends Component {
         this.footer = footer;
     }
 
+    /**
+     * Sets a text to be displayed as the crud footer.
+     * This is a convenience version of {@link #setFooter(String)} when displaying simple texts.
+     *
+     * @param footer the footer text
+     * @see #setFooter(Component)
+     */
     public void setFooter(String footer) {
         setFooter(new Span(footer));
     }
 
+    /**
+     * Registers a listener to be notified when the user starts to create a new item.
+     *
+     * @param listener a listener to be notified
+     * @return a handle that can be used to unregister the listener
+     */
     public Registration addNewListener(ComponentEventListener<NewEvent<E>> listener) {
         newListeners.add(listener);
         return () -> newListeners.remove(listener);
     }
 
+    /**
+     * Registers a listener to be notified when the user starts to edit an existing item.
+     *
+     * @param listener a listener to be notified
+     * @return a handle that can be used to unregister the listener
+     */
     public Registration addEditListener(ComponentEventListener<EditEvent<E>> listener) {
         editListeners.add(listener);
         return () -> editListeners.remove(listener);
     }
 
+    /**
+     * Registers a listener to be notified when the user tries to save a new item
+     * or modifications to an existing item.
+     *
+     * @param listener a listener to be notified
+     * @return a handle that can be used to unregister the listener
+     */
     public Registration addSaveListener(ComponentEventListener<SaveEvent<E>> listener) {
         saveListeners.add(listener);
         return () -> saveListeners.remove(listener);
     }
 
+    /**
+     * Registers a listener to be notified when the user cancels a new item creation or existing item
+     * modification in progress.
+     *
+     * @param listener a listener to be notified
+     * @return a handle that can be used to unregister the listener
+     */
     public Registration addCancelListener(ComponentEventListener<CancelEvent<E>> listener) {
         cancelListeners.add(listener);
         return () -> cancelListeners.remove(listener);
     }
 
+    /**
+     * Registers a listener to be notified when the user tries to delete an existing item.
+     *
+     * @param listener a listener to be notified
+     * @return a handle that can be used to unregister the listener
+     */
     public Registration addDeleteListener(ComponentEventListener<DeleteEvent<E>> listener) {
         deleteListeners.add(listener);
         return () -> deleteListeners.remove(listener);
     }
 
+    /**
+     * Gets the data provider supplying the grid data.
+     *
+     * @return the data provider for the grid
+     */
     public DataProvider<E, ?> getDataProvider() {
         return grid.getDataProvider();
     }
 
+    /**
+     * Sets the data provider for the grid.
+     *
+     * @param provider the data provider for the grid
+     */
     public void setDataProvider(DataProvider<E, ?> provider) {
         grid.setDataProvider(provider);
     }
 
+    /**
+     * A helper method to add an edit column to a grid.
+     * Clicking on the edit cell for a row opens the item for editing in the editor.
+     *
+     * @param grid the grid in which to add the edit column
+     */
     public static void addEditColumn(Grid grid) {
         grid.addColumn(
                 TemplateRenderer.of("<vaadin-crud-grid-edit></vaadin-crud-grid-edit>"))
@@ -186,6 +309,12 @@ public class Crud<E> extends Component {
                 .setFlexGrow(0);
     }
 
+    /**
+     * The base class for all Crud events.
+     *
+     * @param <E> the bean type
+     * @see com.vaadin.flow.component.crud.Crud#Crud(Class, CrudEditor) Crud(Class, CrudEditor)
+     */
     static abstract class CrudEvent<E> extends ComponentEvent<Crud<E>> {
 
         /**
@@ -199,11 +328,22 @@ public class Crud<E> extends Component {
             super(source, fromClient);
         }
 
+        /**
+         * Gets the item being currently edited.
+         *
+         * @return the item being currently edited
+         */
         public E getItem() {
             return getSource().getEditor().getItem();
         }
     }
 
+    /**
+     * Event fired when the user cancels the creation of a new item
+     * or modifications to an existing item.
+     *
+     * @param <E> the bean type
+     */
     @DomEvent("cancel")
     public static class CancelEvent<E> extends CrudEvent<E> {
 
@@ -213,6 +353,7 @@ public class Crud<E> extends Component {
          *
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
+         * @param ignored an ignored parameter for a side effect
          */
         public CancelEvent(Crud<E> source, boolean fromClient,
                            @EventData("event.stopPropagation()") Object ignored) {
@@ -220,6 +361,11 @@ public class Crud<E> extends Component {
         }
     }
 
+    /**
+     * Event fired when the user tries to delete an existing item.
+     *
+     * @param <E> the bean type
+     */
     @DomEvent("delete")
     public static class DeleteEvent<E> extends CrudEvent<E> {
 
@@ -229,6 +375,7 @@ public class Crud<E> extends Component {
          *
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
+         * @param ignored an ignored parameter for a side effect
          */
         public DeleteEvent(Crud<E> source, boolean fromClient,
                            @EventData("event.stopPropagation()") Object ignored) {
@@ -236,6 +383,11 @@ public class Crud<E> extends Component {
         }
     }
 
+    /**
+     * Event fired when the user starts to edit an existing item.
+     *
+     * @param <E> the bean type
+     */
     @DomEvent("edit")
     public static class EditEvent<E> extends CrudEvent<E> {
 
@@ -247,6 +399,8 @@ public class Crud<E> extends Component {
          *
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
+         * @param item the item to be edited, provided in JSON as internally represented in Grid
+         * @param ignored an ignored parameter for a side effect
          */
         public EditEvent(Crud<E> source, boolean fromClient,
                          @EventData("event.detail.item") JsonObject item,
@@ -261,6 +415,11 @@ public class Crud<E> extends Component {
         }
     }
 
+    /**
+     * Event fired when the user starts to create a new item.
+     *
+     * @param <E> the bean type
+     */
     @DomEvent("new")
     public static class NewEvent<E> extends CrudEvent<E> {
 
@@ -270,6 +429,7 @@ public class Crud<E> extends Component {
          *
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
+         * @param ignored an ignored parameter for a side effect
          */
         public NewEvent(Crud<E> source, boolean fromClient,
                         @EventData("event.stopPropagation()") Object ignored) {
@@ -277,6 +437,11 @@ public class Crud<E> extends Component {
         }
     }
 
+    /**
+     * Event fired when the user tries to save a new item or modifications to an existing item.
+     *
+     * @param <E> the bean type
+     */
     @DomEvent("save")
     public static class SaveEvent<E> extends CrudEvent<E> {
 
@@ -286,6 +451,7 @@ public class Crud<E> extends Component {
          *
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
+         * @param ignored an ignored parameter for a side effect
          */
         public SaveEvent(Crud<E> source, boolean fromClient,
                          @EventData("event.stopPropagation()") Object ignored) {

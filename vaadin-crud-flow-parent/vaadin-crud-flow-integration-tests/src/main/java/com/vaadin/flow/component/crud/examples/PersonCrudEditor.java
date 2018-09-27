@@ -1,10 +1,10 @@
 package com.vaadin.flow.component.crud.examples;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.crud.CrudEditor;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.dom.Element;
 
 public class PersonCrudEditor implements CrudEditor<Person> {
 
@@ -60,7 +60,7 @@ public class PersonCrudEditor implements CrudEditor<Person> {
     }
 
     @Override
-    public Element getView() {
-        return view.getElement();
+    public Component getView() {
+        return view;
     }
 }

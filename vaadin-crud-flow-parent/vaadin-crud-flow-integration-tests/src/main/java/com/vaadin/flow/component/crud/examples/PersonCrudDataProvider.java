@@ -84,7 +84,8 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFil
                 .map(constraint -> (Predicate<Person>) person -> {
                     try {
                         Object value = valueOf(constraint.getKey(), person);
-                        return value != null && value.toString().startsWith(constraint.getValue());
+                        return value != null && value.toString().toLowerCase()
+                                .startsWith(constraint.getValue().toLowerCase());
                     } catch (Exception e) {
                         e.printStackTrace();
                         return false;

@@ -24,6 +24,11 @@ import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
+/**
+ * A simple grid implementation for Crud that allows searching and sorting backed by a data provider.
+ *
+ * @param <E> the bean type
+ */
 public class CrudGrid<E> extends Grid<E> {
 
     private final Class<E> beanType;
@@ -31,6 +36,12 @@ public class CrudGrid<E> extends Grid<E> {
     private final CrudFilter filter = new CrudFilter();
     private DataProvider<E, ?> dataProvider;
 
+    /**
+     * Instantiates a new CrudGrid for the supplied bean type.
+     *
+     * @param beanType the bean type
+     * @param enableDefaultFilters true to enable filtering or false to disable
+     */
     public CrudGrid(Class<E> beanType, boolean enableDefaultFilters) {
         super(beanType);
 
@@ -85,7 +96,7 @@ public class CrudGrid<E> extends Grid<E> {
     }
 
     /**
-     * Returns the data provider of this grid.
+     * Returns the data provider set to the grid.
      *
      * @return the data provider of this grid, not {@code null}
      */
@@ -99,9 +110,10 @@ public class CrudGrid<E> extends Grid<E> {
      *
      * @param dataProvider a {@link DataProvider}
      * @see CrudFilter
+     * @throws IllegalArgumentException if the supplied data provider is not a DataProvider&lt;E, CrudFilter&gt;
      */
     @Override
-    public void setDataProvider(DataProvider<E, ?> dataProvider) {
+    public void setDataProvider(DataProvider<E, ?> dataProvider) throws IllegalArgumentException {
         // Attempt a cast to ensure that the captured ? is actually a CrudFilter
         // Unfortunately this cannot be enforced by the compiler
         try {

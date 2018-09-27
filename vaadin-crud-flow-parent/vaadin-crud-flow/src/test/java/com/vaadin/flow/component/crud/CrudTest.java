@@ -1,13 +1,12 @@
 package com.vaadin.flow.component.crud;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.dom.Element;
 import elemental.json.JsonObject;
 import elemental.json.impl.JreJsonFactory;
 import org.junit.Assert;
@@ -15,7 +14,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
-
 
 public class CrudTest {
 
@@ -90,8 +88,8 @@ public class CrudTest {
         }
 
         @Override
-        public Element getView() {
-            return new Div().getElement();
+        public Component getView() {
+            return new Div();
         }
     }
 }
