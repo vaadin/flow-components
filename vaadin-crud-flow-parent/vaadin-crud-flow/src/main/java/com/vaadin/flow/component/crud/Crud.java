@@ -58,8 +58,6 @@ public class Crud<E> extends Component {
     public Crud(Class<E> beanType, Grid<E> grid, CrudEditor<E> editor) {
         this.beanType = beanType;
 
-        setEntityName(beanType.getSimpleName());
-
         this.grid = grid;
         this.grid.getElement().setAttribute("slot", "grid");
 
@@ -119,10 +117,6 @@ public class Crud<E> extends Component {
 
     public void setOpened(boolean opened) {
         getElement().setProperty("opened", opened);
-    }
-
-    public void setEntityName(String entityName) {
-        getElement().setProperty("entityName", entityName);
     }
 
     public Grid<E> getGrid() {
