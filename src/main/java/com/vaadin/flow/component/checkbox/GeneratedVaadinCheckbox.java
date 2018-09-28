@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2018 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -36,7 +36,7 @@ import com.vaadin.flow.shared.Registration;
  * Description copied from corresponding location in WebComponent:
  * </p>
  * <p>
- * {@code <vaadin-checkbox>} is a Polymer 2 element for customized checkboxes.
+ * {@code <vaadin-checkbox>} is a Web Component for customized checkboxes.
  * </p>
  * <p>
  * &lt;vaadin-checkbox&gt; Make my profile visible &lt;/vaadin-checkbox&gt;
@@ -70,32 +70,44 @@ import com.vaadin.flow.shared.Registration;
  * <tr>
  * <th>Attribute</th>
  * <th>Description</th>
+ * <th>Part name</th>
  * </tr>
  * </thead> <tbody>
  * <tr>
  * <td>{@code active}</td>
  * <td>Set when the checkbox is pressed down, either with mouse, touch or the
  * keyboard.</td>
+ * <td>{@code :host}</td>
  * </tr>
  * <tr>
  * <td>{@code disabled}</td>
  * <td>Set when the checkbox is disabled.</td>
+ * <td>{@code :host}</td>
  * </tr>
  * <tr>
  * <td>{@code focus-ring}</td>
  * <td>Set when the checkbox is focused using the keyboard.</td>
+ * <td>{@code :host}</td>
  * </tr>
  * <tr>
  * <td>{@code focused}</td>
  * <td>Set when the checkbox is focused.</td>
+ * <td>{@code :host}</td>
  * </tr>
  * <tr>
  * <td>{@code indeterminate}</td>
  * <td>Set when the checkbox is in indeterminate mode.</td>
+ * <td>{@code :host}</td>
  * </tr>
  * <tr>
  * <td>{@code checked}</td>
  * <td>Set when the checkbox is checked.</td>
+ * <td>{@code :host}</td>
+ * </tr>
+ * <tr>
+ * <td>{@code empty}</td>
+ * <td>Set when there is no label provided.</td>
+ * <td>{@code label}</td>
  * </tr>
  * </tbody>
  * </table>
@@ -106,8 +118,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.CheckboxElement#2.2.0-alpha3",
-        "Flow#1.1-SNAPSHOT" })
+        "WebComponent: Vaadin.CheckboxElement#2.2.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-checkbox")
 @HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
 public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<R, T>, T>
@@ -124,7 +135,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code autofocus} property from the webcomponent
      */
     protected boolean isAutofocusBoolean() {
@@ -138,7 +149,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * <p>
      * Specify that this control should have input focus when the page loads.
      * </p>
-     * 
+     *
      * @param autofocus
      *            the boolean value to set
      */
@@ -156,7 +167,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code disabled} property from the webcomponent
      */
     protected boolean isDisabledBoolean() {
@@ -170,7 +181,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * <p>
      * If true, the user cannot interact with this element.
      * </p>
-     * 
+     *
      * @param disabled
      *            the boolean value to set
      */
@@ -181,7 +192,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     /**
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return the {@code name} property from the webcomponent
      */
     protected String getNameString() {
@@ -209,7 +220,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * This property is synchronized automatically from client side when a
      * 'indeterminate-changed' event happens.
      * </p>
-     * 
+     *
      * @return the {@code indeterminate} property from the webcomponent
      */
     @Synchronize(property = "indeterminate", value = "indeterminate-changed")
@@ -227,16 +238,12 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * https://developer.mozilla.org/en-US/docs/Web/
      * HTML/Element/input/checkbox#Indeterminate_state_checkboxes
      * </p>
-     * 
+     *
      * @param indeterminate
      *            the boolean value to set
      */
     protected void setIndeterminate(boolean indeterminate) {
         getElement().setProperty("indeterminate", indeterminate);
-    }
-
-    protected void updateStyles() {
-        getElement().callFunction("updateStyles");
     }
 
     @DomEvent("change")
@@ -249,7 +256,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
 
     /**
      * Adds a listener for {@code change} events fired by the webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -271,7 +278,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     /**
      * Adds a listener for {@code checked-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -302,7 +309,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     /**
      * Adds a listener for {@code indeterminate-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -318,7 +325,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     /**
      * Constructs a new GeneratedVaadinCheckbox component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -347,7 +354,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     /**
      * Constructs a new GeneratedVaadinCheckbox component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -367,7 +374,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     /**
      * Constructs a new GeneratedVaadinCheckbox component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue

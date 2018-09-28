@@ -95,6 +95,11 @@ import com.vaadin.flow.shared.Registration;
  * <td>:host</td>
  * </tr>
  * <tr>
+ * <td>{@code has-value}</td>
+ * <td>Set when the element has a value</td>
+ * <td>:host</td>
+ * </tr>
+ * <tr>
  * <td>{@code required}</td>
  * <td>Set when the element is required</td>
  * <td>:host</td>
@@ -113,7 +118,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.CheckboxGroupElement#2.2.0-alpha3",
+        "WebComponent: Vaadin.CheckboxGroupElement#2.2.2",
         "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-checkbox-group")
 @HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox-group.html")
@@ -307,10 +312,6 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      */
     protected void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
-    }
-
-    protected void updateStyles() {
-        getElement().callFunction("updateStyles");
     }
 
     /**
