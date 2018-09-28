@@ -1,12 +1,12 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
- * 
+ * Copyright 2000-2018 Vaadin Ltd.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,16 +16,18 @@
 package com.vaadin.flow.component.upload;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.HasStyle;
-import elemental.json.JsonObject;
-import com.vaadin.flow.component.EventData;
-import com.vaadin.flow.component.DomEvent;
+
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.component.Component;
+
+import elemental.json.JsonObject;
 
 /**
  * <p>
@@ -114,22 +116,22 @@ import com.vaadin.flow.component.Component;
  * <tr>
  * <td>{@code error}</td>
  * <td>An error has happened during uploading</td>
- * <td>{@code progress}</td>
+ * <td>{@code :host}</td>
  * </tr>
  * <tr>
  * <td>{@code indeterminate}</td>
  * <td>Uploading is in progress, but the progress value is unknown</td>
- * <td>{@code progress}</td>
+ * <td>{@code :host}</td>
  * </tr>
  * <tr>
  * <td>{@code uploading}</td>
  * <td>Uploading is in progress</td>
- * <td>{@code progress}</td>
+ * <td>{@code :host}</td>
  * </tr>
  * <tr>
  * <td>{@code complete}</td>
  * <td>Uploading has finished successfully</td>
- * <td>{@code progress}</td>
+ * <td>{@code :host}</td>
  * </tr>
  * </tbody>
  * </table>
@@ -139,8 +141,8 @@ import com.vaadin.flow.component.Component;
  * how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.UploadFileElement#UNKNOWN", "Flow#1.0-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
+        "WebComponent: Vaadin.UploadFileElement#UNKNOWN", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-upload-file")
 @HtmlImport("frontend://bower_components/vaadin-upload/src/vaadin-upload-file.html")
 public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadFile<R>>
@@ -149,7 +151,7 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
     /**
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return the {@code file} property from the webcomponent
      */
     protected JsonObject getFileJsonObject() {
@@ -189,7 +191,7 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
 
     /**
      * Adds a listener for {@code file-abort} events fired by the webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -226,7 +228,7 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
 
     /**
      * Adds a listener for {@code file-remove} events fired by the webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -263,7 +265,7 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
 
     /**
      * Adds a listener for {@code file-retry} events fired by the webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -300,7 +302,7 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
 
     /**
      * Adds a listener for {@code file-start} events fired by the webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
