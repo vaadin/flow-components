@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2018 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -30,8 +30,8 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * Description copied from corresponding location in WebComponent:
  * </p>
  * <p>
- * {@code <vaadin-tabs>} is a Polymer 2 element for easy switching between
- * different view
+ * {@code <vaadin-tabs>} is a Web Component for easy switching between different
+ * views.
  * </p>
  * <p>
  * {@code
@@ -98,7 +98,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.TabsElement#2.1.0-alpha3", "Flow#1.1-SNAPSHOT" })
+        "WebComponent: Vaadin.TabsElement#2.1.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-tabs")
 @HtmlImport("frontend://bower_components/vaadin-tabs/src/vaadin-tabs.html")
 public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
@@ -106,7 +106,7 @@ public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
 
     /**
      * Adds theme variants to the component.
-     * 
+     *
      * @param variants
      *            theme variants to add
      */
@@ -117,7 +117,7 @@ public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
 
     /**
      * Removes theme variants from the component.
-     * 
+     *
      * @param variants
      *            theme variants to remove
      */
@@ -128,9 +128,5 @@ public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
 
     protected void focus() {
         getElement().callFunction("focus");
-    }
-
-    protected void updateStyles() {
-        getElement().callFunction("updateStyles");
     }
 }
