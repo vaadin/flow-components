@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2018 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -36,8 +36,8 @@ import com.vaadin.flow.shared.Registration;
  * Description copied from corresponding location in WebComponent:
  * </p>
  * <p>
- * {@code <vaadin-split-layout>} is a Polymer element implementing a split
- * layout for two content elements with a draggable splitter between them.
+ * {@code <vaadin-split-layout>} is a Web Component implementing a split layout
+ * for two content elements with a draggable splitter between them.
  * </p>
  * <p>
  * &lt;vaadin-split-layout&gt; &lt;div&gt;First content element&lt;/div&gt;
@@ -189,8 +189,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.SplitLayoutElement#4.1.0-alpha3",
-        "Flow#1.1-SNAPSHOT" })
+        "WebComponent: Vaadin.SplitLayoutElement#4.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-split-layout")
 @HtmlImport("frontend://bower_components/vaadin-split-layout/src/vaadin-split-layout.html")
 public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
@@ -198,7 +197,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
 
     /**
      * Adds theme variants to the component.
-     * 
+     *
      * @param variants
      *            theme variants to add
      */
@@ -210,7 +209,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
 
     /**
      * Removes theme variants from the component.
-     * 
+     *
      * @param variants
      *            theme variants to remove
      */
@@ -231,7 +230,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code orientation} property from the webcomponent
      */
     protected String getOrientationString() {
@@ -246,17 +245,13 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * The split layout's orientation. Possible values are:
      * {@code horizontal|vertical}.
      * </p>
-     * 
+     *
      * @param orientation
      *            the String value to set
      */
     protected void setOrientation(String orientation) {
         getElement().setProperty("orientation",
                 orientation == null ? "" : orientation);
-    }
-
-    protected void updateStyles() {
-        getElement().callFunction("updateStyles");
     }
 
     @DomEvent("iron-resize")
@@ -269,7 +264,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
 
     /**
      * Adds a listener for {@code iron-resize} events fired by the webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -292,7 +287,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
     /**
      * Adds a listener for {@code splitter-dragend} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -307,7 +302,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
     /**
      * Adds the given components as children of this component at the slot
      * 'primary'.
-     * 
+     *
      * @param components
      *            The components to add.
      * @see <a
@@ -327,7 +322,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
     /**
      * Adds the given components as children of this component at the slot
      * 'secondary'.
-     * 
+     *
      * @param components
      *            The components to add.
      * @see <a
@@ -346,7 +341,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
 
     /**
      * Removes the given child components from this component.
-     * 
+     *
      * @param components
      *            The components to remove.
      * @throws IllegalArgumentException
