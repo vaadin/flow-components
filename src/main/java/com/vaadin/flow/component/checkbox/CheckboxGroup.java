@@ -69,6 +69,7 @@ public class CheckboxGroup<T>
 
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
+    private Registration dataProviderListenerRegistration;
 
     private static class CheckBoxItem<T> extends Checkbox
             implements ItemComponent<T> {
@@ -98,6 +99,12 @@ public class CheckboxGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider = dataProvider;
         reset();
+
+        if (dataProviderListenerRegistration != null) {
+            dataProviderListenerRegistration.remove();
+        }
+        dataProviderListenerRegistration = dataProvider
+                .addDataProviderListener(event -> reset());
     }
 
     @Override
