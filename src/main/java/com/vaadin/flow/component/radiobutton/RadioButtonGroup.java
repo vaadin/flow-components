@@ -48,10 +48,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 public class RadioButtonGroup<T>
-        extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
-        implements HasItemsAndComponents<T>,
-        SingleSelect<RadioButtonGroup<T>, T>, HasDataProvider<T>,
-        HasValidation {
+        extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T> implements
+        HasItemsAndComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
+        HasDataProvider<T>, HasValidation {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
@@ -65,6 +64,7 @@ public class RadioButtonGroup<T>
 
     private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
     private Registration validationRegistration;
+    private Registration dataProviderListenerRegistration;
 
     private static <T> T presentationToModel(
             RadioButtonGroup<T> radioButtonGroup, String presentation) {
@@ -99,6 +99,12 @@ public class RadioButtonGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider = dataProvider;
         reset();
+
+        if (dataProviderListenerRegistration != null) {
+            dataProviderListenerRegistration.remove();
+        }
+        dataProviderListenerRegistration = dataProvider
+                .addDataProviderListener(event -> reset());
     }
 
     /**
@@ -188,7 +194,7 @@ public class RadioButtonGroup<T>
      * <p>
      * NOTE: The required indicator will not be visible, if there is no
      * {@code label} property set for the radiobutton group.
-     * 
+     *
      * @param required
      *            the boolean value to set
      */
@@ -202,7 +208,7 @@ public class RadioButtonGroup<T>
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return the {@code required} property from the webcomponent
      */
     public boolean isRequired() {
@@ -216,9 +222,10 @@ public class RadioButtonGroup<T>
 
     /**
      * Gets the current error message from the radio button group.
-     * 
+     *
      * @return the current error message
      */
+    @Override
     public String getErrorMessage() {
         return super.getErrorMessageString();
     }
@@ -230,7 +237,7 @@ public class RadioButtonGroup<T>
 
     /**
      * String used for the label element.
-     * 
+     *
      * @return the {@code label} property from the webcomponent
      */
     public String getLabel() {
