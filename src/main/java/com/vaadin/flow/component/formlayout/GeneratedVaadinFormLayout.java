@@ -1,12 +1,12 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
- * 
+ * Copyright 2000-2018 Vaadin Ltd.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,18 +16,20 @@
 package com.vaadin.flow.component.formlayout;
 
 import javax.annotation.Generated;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.HasStyle;
+
 import elemental.json.JsonObject;
-import com.vaadin.flow.component.Component;
 
 /**
  * <p>
  * Description copied from corresponding location in WebComponent:
  * </p>
  * <p>
- * {@code <vaadin-form-layout>} is a Polymer 2 element providing configurable
+ * {@code <vaadin-form-layout>} is a Web Component providing configurable
  * responsive layout for form elements.
  * </p>
  * <p>
@@ -133,8 +135,8 @@ import com.vaadin.flow.component.Component;
  * </tbody>
  * </table>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.0-SNAPSHOT",
-        "WebComponent: Vaadin.FormLayoutElement#2.0.1", "Flow#1.0-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
+        "WebComponent: Vaadin.FormLayoutElement#2.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-form-layout")
 @HtmlImport("frontend://bower_components/vaadin-form-layout/src/vaadin-form-layout.html")
 public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
@@ -162,7 +164,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * <p>
      * {@code javascript
     formLayout.responsiveSteps = [
-     * 
+     *
      * {minWidth: 0, columns: 1}, {minWidth: '40em', columns: 2} ]; // Sets two
      * responsive steps: // 1. When the layout width is &lt; 40em, one column,
      * labels aside. // 2. Width &gt;= 40em, two columns, labels aside.}
@@ -170,7 +172,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * <p>
      * {@code javascript
     formLayout.responsiveSteps = [
-     * 
+     *
      * {minWidth: 0, columns: 1, labelsPosition: 'top'}, {minWidth: '20em',
      * columns: 1}, {minWidth: '40em', columns: 2} ]; // Default value. Three
      * responsive steps: // 1. Width &lt; 20em, one column, labels on top. // 2.
@@ -180,7 +182,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code responsiveSteps} property from the webcomponent
      */
     protected JsonObject getResponsiveStepsJsonObject() {
@@ -209,7 +211,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * <p>
      * {@code javascript
     formLayout.responsiveSteps = [
-     * 
+     *
      * {minWidth: 0, columns: 1}, {minWidth: '40em', columns: 2} ]; // Sets two
      * responsive steps: // 1. When the layout width is &lt; 40em, one column,
      * labels aside. // 2. Width &gt;= 40em, two columns, labels aside.}
@@ -217,14 +219,14 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * <p>
      * {@code javascript
     formLayout.responsiveSteps = [
-     * 
+     *
      * {minWidth: 0, columns: 1, labelsPosition: 'top'}, {minWidth: '20em',
      * columns: 1}, {minWidth: '40em', columns: 2} ]; // Default value. Three
      * responsive steps: // 1. Width &lt; 20em, one column, labels on top. // 2.
      * 20em &lt;= width &lt; 40em, one column, labels aside. // 3. Width &gt;=
      * 40em, two columns, labels aside.}
      * </p>
-     * 
+     *
      * @param responsiveSteps
      *            the JsonObject value to set
      */
@@ -239,7 +241,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * <p>
      * Set custom CSS property values and update the layout.
      * </p>
-     * 
+     *
      * @param _Args
      *            Missing documentation!
      */
