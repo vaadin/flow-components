@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2018 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -33,7 +33,7 @@ import com.vaadin.flow.shared.Registration;
  * Description copied from corresponding location in WebComponent:
  * </p>
  * <p>
- * {@code <vaadin-radio-button>} is a Polymer element for radio buttons.
+ * {@code <vaadin-radio-button>} is a Web Component for radio buttons.
  * </p>
  * <p>
  * &lt;vaadin-radio-button
@@ -100,8 +100,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.RadioButtonElement#1.1.0-alpha3",
-        "Flow#1.1-SNAPSHOT" })
+        "WebComponent: Vaadin.RadioButtonElement#1.1.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-radio-button")
 @HtmlImport("frontend://bower_components/vaadin-radio-button/src/vaadin-radio-button.html")
 public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
@@ -117,7 +116,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code autofocus} property from the webcomponent
      */
     protected boolean isAutofocusBoolean() {
@@ -131,7 +130,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * <p>
      * Specify that this control should have input focus when the page loads.
      * </p>
-     * 
+     *
      * @param autofocus
      *            the boolean value to set
      */
@@ -149,7 +148,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code disabled} property from the webcomponent
      */
     protected boolean isDisabledBoolean() {
@@ -163,7 +162,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * <p>
      * If true, the user cannot interact with this element.
      * </p>
-     * 
+     *
      * @param disabled
      *            the boolean value to set
      */
@@ -174,7 +173,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
     /**
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return the {@code name} property from the webcomponent
      */
     protected String getNameString() {
@@ -199,7 +198,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * This property is synchronized automatically from client side when a
      * 'checked-changed' event happens.
      * </p>
-     * 
+     *
      * @return the {@code checked} property from the webcomponent
      */
     @Synchronize(property = "checked", value = "checked-changed")
@@ -214,7 +213,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * <p>
      * True if the radio button is checked.
      * </p>
-     * 
+     *
      * @param checked
      *            the boolean value to set
      */
@@ -232,7 +231,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code value} property from the webcomponent
      */
     protected String getValueString() {
@@ -246,16 +245,12 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * <p>
      * The value for this element.
      * </p>
-     * 
+     *
      * @param value
      *            the String value to set
      */
     protected void setValue(String value) {
         getElement().setProperty("value", value == null ? "" : value);
-    }
-
-    protected void updateStyles() {
-        getElement().callFunction("updateStyles");
     }
 
     public static class CheckedChangeEvent<R extends GeneratedVaadinRadioButton<R>>
@@ -275,7 +270,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
     /**
      * Adds a listener for {@code checked-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener

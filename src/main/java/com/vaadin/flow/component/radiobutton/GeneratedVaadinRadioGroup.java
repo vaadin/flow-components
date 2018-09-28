@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2018 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -37,7 +37,7 @@ import com.vaadin.flow.shared.Registration;
  * Description copied from corresponding location in WebComponent:
  * </p>
  * <p>
- * {@code <vaadin-radio-group>} is a Polymer element for grouping
+ * {@code <vaadin-radio-group>} is a Web Component for grouping
  * vaadin-radio-buttons.
  * </p>
  * <p>
@@ -101,6 +101,11 @@ import com.vaadin.flow.shared.Registration;
  * <td>Set when the element has a label</td>
  * <td>:host</td>
  * </tr>
+ * <tr>
+ * <td>{@code has-value}</td>
+ * <td>Set when the element has a value</td>
+ * <td>:host</td>
+ * </tr>
  * </tbody>
  * </table>
  * <p>
@@ -110,8 +115,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.RadioGroupElement#1.1.0-alpha3",
-        "Flow#1.1-SNAPSHOT" })
+        "WebComponent: Vaadin.RadioGroupElement#1.1.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-radio-group")
 @HtmlImport("frontend://bower_components/vaadin-radio-button/src/vaadin-radio-group.html")
 public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGroup<R, T>, T>
@@ -120,7 +124,7 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
 
     /**
      * Adds theme variants to the component.
-     * 
+     *
      * @param variants
      *            theme variants to add
      */
@@ -132,7 +136,7 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
 
     /**
      * Removes theme variants from the component.
-     * 
+     *
      * @param variants
      *            theme variants to remove
      */
@@ -153,7 +157,7 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code disabled} property from the webcomponent
      */
     protected boolean isDisabledBoolean() {
@@ -168,7 +172,7 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * The current disabled state of the radio group. True if group and all
      * internal radio buttons are disabled.
      * </p>
-     * 
+     *
      * @param disabled
      *            the boolean value to set
      */
@@ -340,10 +344,6 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
         getElement().setProperty("label", label == null ? "" : label);
     }
 
-    protected void updateStyles() {
-        getElement().callFunction("updateStyles");
-    }
-
     /**
      * <p>
      * Description copied from corresponding location in WebComponent:
@@ -412,7 +412,7 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
     /**
      * Constructs a new GeneratedVaadinRadioGroup component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -441,7 +441,7 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
     /**
      * Constructs a new GeneratedVaadinRadioGroup component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -461,7 +461,7 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
     /**
      * Constructs a new GeneratedVaadinRadioGroup component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
