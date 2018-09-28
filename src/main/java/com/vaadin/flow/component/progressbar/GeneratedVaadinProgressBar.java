@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2018 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -30,7 +30,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * Description copied from corresponding location in WebComponent:
  * </p>
  * <p>
- * {@code <vaadin-progress-bar>} is a Polymer 2 progress bar.
+ * {@code <vaadin-progress-bar>} is a Web Component for progress bars.
  * </p>
  * <p>
  * &lt;vaadin-progress-bar min=&quot;0&quot; max=&quot;1&quot;
@@ -100,8 +100,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * </table>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.ProgressBarElement#1.1.0-alpha3",
-        "Flow#1.1-SNAPSHOT" })
+        "WebComponent: Vaadin.ProgressBarElement#1.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-progress-bar")
 @HtmlImport("frontend://bower_components/vaadin-progress-bar/src/vaadin-progress-bar.html")
 public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
@@ -109,7 +108,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
 
     /**
      * Adds theme variants to the component.
-     * 
+     *
      * @param variants
      *            theme variants to add
      */
@@ -121,7 +120,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
 
     /**
      * Removes theme variants from the component.
-     * 
+     *
      * @param variants
      *            theme variants to remove
      */
@@ -141,7 +140,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code value} property from the webcomponent
      */
     protected double getValueDouble() {
@@ -155,7 +154,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * <p>
      * Current progress value.
      * </p>
-     * 
+     *
      * @param value
      *            the double value to set
      */
@@ -173,7 +172,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code min} property from the webcomponent
      */
     protected double getMinDouble() {
@@ -187,7 +186,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * <p>
      * Minimum bound of the progress bar.
      * </p>
-     * 
+     *
      * @param min
      *            the double value to set
      */
@@ -205,7 +204,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code max} property from the webcomponent
      */
     protected double getMaxDouble() {
@@ -219,7 +218,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * <p>
      * Maximum bound of the progress bar.
      * </p>
-     * 
+     *
      * @param max
      *            the double value to set
      */
@@ -238,7 +237,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code indeterminate} property from the webcomponent
      */
     protected boolean isIndeterminateBoolean() {
@@ -253,15 +252,11 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * Indeterminate state of the progress bar. This property takes precedence
      * over other state properties (min, max, value).
      * </p>
-     * 
+     *
      * @param indeterminate
      *            the boolean value to set
      */
     protected void setIndeterminate(boolean indeterminate) {
         getElement().setProperty("indeterminate", indeterminate);
-    }
-
-    protected void updateStyles() {
-        getElement().callFunction("updateStyles");
     }
 }
