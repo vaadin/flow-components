@@ -2,12 +2,14 @@ package com.vaadin.flow.component.applayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.dom.Element;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -24,37 +26,13 @@ public class AppLayoutTest {
     }
 
     @Test
-    public void onAttach_noMenuItem() {
-        systemUnderTest.onAttach(new AttachEvent(systemUnderTest, true));
-
-        long menuCount = systemUnderTest.getChildren()
-                .map(Component::getElement)
-                .filter(e -> e.getAttribute("slot").equals("menu"))
-                .count();
-
-        Assert.assertEquals(1, menuCount);
-        Assert.assertNull(systemUnderTest.getSelectedMenuItem());
-    }
-
-    @Test
-    public void onAttach_withMenuItems() {
-        systemUnderTest.addMenuItem(new ActionMenuItem("Go offline"));
-        systemUnderTest.addMenuItem(new RoutingMenuItem("Logout", "Logout"));
-        systemUnderTest.onAttach(new AttachEvent(systemUnderTest, true));
-
-        // A menu item is selected by default.
-        Assert.assertNotNull(systemUnderTest.getSelectedMenuItem());
-    }
-
-    @Test
     public void setBranding_Element() {
         Element branding = new H2("Vaadin").getElement();
         systemUnderTest.setBranding(branding);
 
         // Verify that branding goes to the branding slot.
         long brandingCount = systemUnderTest.getElement().getChildren()
-                .filter(e -> e.getAttribute("slot").equals("branding"))
-                .count();
+            .filter(e -> e.getAttribute("slot").equals("branding")).count();
         Assert.assertEquals(1, brandingCount);
     }
 
@@ -65,7 +43,8 @@ public class AppLayoutTest {
         systemUnderTest.setBranding(branding);
         Assert.assertEquals("branding",
             branding.getElement().getAttribute("slot"));
-        assertContainsElement(branding.getElement());
+        Assert.assertTrue(
+            systemUnderTest.getChildren().anyMatch(branding::equals));
     }
 
     @Test
@@ -76,19 +55,18 @@ public class AppLayoutTest {
         systemUnderTest.removeBranding();
 
         Assert.assertTrue(systemUnderTest.getElement().getChildren()
-                .noneMatch(e -> e.getAttribute("slot").equals("branding")));
+            .noneMatch(e -> e.getAttribute("slot").equals("branding")));
     }
 
     @Test
     public void setMenuItems() {
         Assert.assertEquals(0, getMenu().getChildCount());
 
-        systemUnderTest.addMenuItem(new RoutingMenuItem("Home", ""));
+        systemUnderTest.addMenuItem(new AppLayoutMenuItem("Home", ""));
 
-        MenuItem[] newMenuItems = Stream
-                .generate(() -> new RoutingMenuItem("Route", "route"))
-                .limit(3)
-                .toArray(MenuItem[]::new);
+        AppLayoutMenuItem[] newMenuItems = Stream
+            .generate(() -> new AppLayoutMenuItem("Route", "route")).limit(3)
+            .toArray(AppLayoutMenuItem[]::new);
 
         systemUnderTest.setMenuItems(newMenuItems);
 
@@ -99,21 +77,19 @@ public class AppLayoutTest {
     public void addMenuItem() {
         Assert.assertEquals(0, getMenu().getChildCount());
 
-        systemUnderTest.addMenuItem(new RoutingMenuItem("Home", ""));
+        systemUnderTest.addMenuItem(new AppLayoutMenuItem("Home", ""));
         Assert.assertEquals(1, getMenu().getChildCount());
     }
 
     private Element getMenu() {
-        return systemUnderTest.getChildren()
-                .map(Component::getElement)
-                .filter(e -> e.getAttribute("slot").equals("menu"))
-                .findFirst()
-                .get();
+        return systemUnderTest.getChildren().map(Component::getElement)
+            .filter(e -> e.getAttribute("slot").equals("menu")).findFirst()
+            .get();
     }
 
     @Test
     public void removeMenuItem() {
-        RoutingMenuItem home = new RoutingMenuItem("Home", "");
+        AppLayoutMenuItem home = new AppLayoutMenuItem("Home", "");
         systemUnderTest.addMenuItem(home);
 
         systemUnderTest.removeMenuItem(home);
@@ -122,11 +98,12 @@ public class AppLayoutTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void removeMenuItem_invalidItem() {
-        RoutingMenuItem home = new RoutingMenuItem("Home", "");
+        AppLayoutMenuItem home = new AppLayoutMenuItem("Home", "");
         systemUnderTest.addMenuItem(home);
 
         Tabs otherTabs = new Tabs();
-        RoutingMenuItem otherMenuItem = new RoutingMenuItem("Profile", "profile");
+        AppLayoutMenuItem otherMenuItem = new AppLayoutMenuItem("Profile",
+            "profile");
         otherTabs.add(otherMenuItem);
 
         systemUnderTest.removeMenuItem(otherMenuItem);
@@ -134,79 +111,74 @@ public class AppLayoutTest {
 
     @Test
     public void getMenuItemTargetingRoute() {
-        RoutingMenuItem home = new RoutingMenuItem("Home", "");
+        AppLayoutMenuItem home = new AppLayoutMenuItem("Home", "");
         systemUnderTest.addMenuItem(home);
 
-        RoutingMenuItem profile = new RoutingMenuItem("Profile", "profile");
+        AppLayoutMenuItem profile = new AppLayoutMenuItem("Profile", "profile");
         systemUnderTest.addMenuItem(profile);
 
-        RoutingMenuItem settings = new RoutingMenuItem("Settings", "settings");
+        AppLayoutMenuItem settings = new AppLayoutMenuItem("Settings",
+            "settings");
         systemUnderTest.addMenuItem(settings);
 
         Assert.assertEquals(profile,
-                systemUnderTest.getMenuItemTargetingRoute("profile").get());
+            systemUnderTest.getMenuItemTargetingRoute("profile").get());
     }
 
     @Test
     public void getMenuItemTargetingRoute_none() {
-        RoutingMenuItem home = new RoutingMenuItem("Home", "");
+        AppLayoutMenuItem home = new AppLayoutMenuItem("Home", "");
         systemUnderTest.addMenuItem(home);
 
-        RoutingMenuItem profile = new RoutingMenuItem("Profile", "profile");
+        AppLayoutMenuItem profile = new AppLayoutMenuItem("Profile", "profile");
         systemUnderTest.addMenuItem(profile);
 
         Assert.assertFalse(
-                systemUnderTest.getMenuItemTargetingRoute("dashboard").isPresent());
+            systemUnderTest.getMenuItemTargetingRoute("dashboard").isPresent());
     }
 
     @Test
     public void getMenuItemTargetingRoute_duplicate() {
-        RoutingMenuItem profile = new RoutingMenuItem("Profile", "profile");
+        AppLayoutMenuItem profile = new AppLayoutMenuItem("Profile", "profile");
         systemUnderTest.addMenuItem(profile);
 
-        RoutingMenuItem settings = new RoutingMenuItem("Settings", "profile");
+        AppLayoutMenuItem settings = new AppLayoutMenuItem("Settings",
+            "profile");
         systemUnderTest.addMenuItem(settings);
 
         Assert.assertEquals(profile,
-                systemUnderTest.getMenuItemTargetingRoute("profile").get());
+            systemUnderTest.getMenuItemTargetingRoute("profile").get());
     }
 
     @Test
     public void selectMenuItem() {
-        RoutingMenuItem home = new RoutingMenuItem("Home", "");
+        AppLayoutMenuItem home = new AppLayoutMenuItem("Home", "");
         systemUnderTest.addMenuItem(home);
 
-        RoutingMenuItem profile = new RoutingMenuItem("Profile", "profile");
+        AppLayoutMenuItem profile = new AppLayoutMenuItem("Profile", "profile");
         systemUnderTest.addMenuItem(profile);
 
-        ActionMenuItem logout = new ActionMenuItem("Logout");
+        AppLayoutMenuItem logout = new AppLayoutMenuItem("Logout");
         systemUnderTest.addMenuItem(logout);
 
-        systemUnderTest.onAttach(new AttachEvent(systemUnderTest, false));
-
-        Assert.assertFalse(
-                systemUnderTest.getMenu().getElement().hasProperty("selected"));
+        final Tabs tabs = (Tabs) systemUnderTest.getMenu().getElement()
+            .getComponent().get();
+        ComponentUtil.fireEvent(tabs, new AttachEvent(tabs, true));
+        Assert.assertNull(tabs.getSelectedTab());
 
         systemUnderTest.selectMenuItem(profile);
 
-        // Behavior of an ActionMenuItem selection cannot be unit-tested
-        // because Tabs for Flow doesn't trigger the selection server-side.
-        Assert.assertEquals("1",
-                systemUnderTest.getMenu().getElement().getProperty("selected"));
+        Assert.assertEquals(profile, tabs.getSelectedTab());
     }
 
     @Test
-    public void setContent_Element() {
+    public void setContent() {
         Element content = new Div().getElement();
         systemUnderTest.setContent(content);
-        assertContainsElement(content);
-    }
 
-    @Test
-    public void setContent_Component() {
-        Component content = new Div();
-        systemUnderTest.setContent(content);
-        assertContainsElement(content.getElement());
+        List<Element> children = systemUnderTest.getElement().getChildren()
+            .collect(Collectors.toList());
+        Assert.assertTrue(children.contains(content));
     }
 
     @Test
@@ -219,13 +191,37 @@ public class AppLayoutTest {
         systemUnderTest.removeContent();
 
         List<Element> children = systemUnderTest.getElement().getChildren()
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
         Assert.assertFalse(children.contains(content));
         Assert.assertNull(systemUnderTest.getContent());
     }
 
-    private void assertContainsElement(Element element) {
-        Assert.assertTrue(systemUnderTest.getElement().getChildren()
-            .anyMatch(e -> e.equals(element)));
+    @Test
+    public void setMenuItems_after_calling_addMenuItem() {
+        systemUnderTest.addMenuItem(new AppLayoutMenuItem("Action1"));
+        systemUnderTest.setMenuItems(new AppLayoutMenuItem("Action2"),
+            new AppLayoutMenuItem("Action3"));
+        Assert.assertArrayEquals(new Object[] { "Action2", "Action3" },
+            systemUnderTest.getMenu().getElement().getChildren()
+                .map(e -> (AppLayoutMenuItem) e.getComponent().get())
+                .map(AppLayoutMenuItem::getTitle).toArray());
     }
+
+    @Test
+    public void clearMenuItems() {
+        Assert.assertEquals(0,
+            systemUnderTest.getMenu().getElement().getChildCount());
+        //No exception on clearing already empty.
+        systemUnderTest.clearMenuItems();
+        systemUnderTest.setMenuItems(new AppLayoutMenuItem("Action1"),
+            new AppLayoutMenuItem("Action2"));
+        Assert.assertEquals(2,
+            systemUnderTest.getMenu().getElement().getChildCount());
+
+        systemUnderTest.clearMenuItems();
+        Assert.assertEquals(0,
+            systemUnderTest.getMenu().getElement().getChildCount());
+
+    }
+
 }

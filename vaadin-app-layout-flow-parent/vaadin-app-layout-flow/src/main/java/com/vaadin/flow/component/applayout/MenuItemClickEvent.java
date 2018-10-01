@@ -20,11 +20,11 @@ package com.vaadin.flow.component.applayout;
 import com.vaadin.flow.component.ComponentEvent;
 
 /**
- * Event fired after MenuItem is clicked
+ * Event fired after AppLayoutMenuItem is clicked
  */
-public class MenuItemClickEvent extends ComponentEvent<MenuItem> {
+public class MenuItemClickEvent extends ComponentEvent<AppLayoutMenuItem> {
 
-    public MenuItemClickEvent(MenuItem source, boolean fromClient) {
+    public MenuItemClickEvent(AppLayoutMenuItem source, boolean fromClient) {
         super(source, fromClient);
     }
 }

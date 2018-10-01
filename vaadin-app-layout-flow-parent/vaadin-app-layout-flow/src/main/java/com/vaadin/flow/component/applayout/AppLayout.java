@@ -18,11 +18,10 @@ package com.vaadin.flow.component.applayout;
  */
 
 import com.helger.commons.annotation.VisibleForTesting;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.dom.Element;
 
 import java.util.Objects;
@@ -39,49 +38,19 @@ public class AppLayout extends Component {
     private Element branding;
     private Element content;
 
-    private MenuItem selectedMenuItem;
-    private final Tabs menuTabs;
+    private final AppLayoutMenu menuTabs = new AppLayoutMenu();
 
     /**
      * Initializes a new app layout with a default menu.
      */
     public AppLayout() {
-        menuTabs = new Tabs();
-        menuTabs.getElement().setAttribute("slot", "menu");
-        menuTabs.getElement().setAttribute("theme", "minimal");
         getElement().appendChild(menuTabs.getElement());
-
-        menuTabs.addSelectedChangeListener(event -> {
-            final MenuItem selectedTab = (MenuItem) menuTabs.getSelectedTab();
-
-            if (selectedTab instanceof ActionMenuItem) {
-                // Do not set actions (such as logout) as selected.
-                menuTabs.getChildren()
-                        .map(MenuItem.class::cast)
-                        .filter(e -> e == selectedMenuItem)
-                        .findFirst()
-                        .ifPresent(this::selectMenuItem);
-            } else {
-                selectedMenuItem = selectedTab;
-            }
-
-            selectedTab.getListener().onComponentEvent(
-                    new MenuItemClickEvent(selectedTab, event.isFromClient()));
-        });
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        try {
-            selectedMenuItem = (MenuItem) menuTabs.getSelectedTab();
-        } catch (IllegalArgumentException noMenuItemPresent) { }
     }
 
     /**
      * Sets the component into branding area
      *
-     * @param branding
-     *            Component to set into branding area
+     * @param branding Component to set into branding area
      */
     public void setBranding(Component branding) {
         setBranding(branding != null ? branding.getElement() : null);
@@ -90,8 +59,7 @@ public class AppLayout extends Component {
     /**
      * Sets the element into branding area
      *
-     * @param branding
-     *            Element to set into branding area
+     * @param branding Element to set into branding area
      */
     public void setBranding(Element branding) {
         Objects.requireNonNull(branding, "Branding cannot be null");
@@ -108,65 +76,61 @@ public class AppLayout extends Component {
      * Clears the branding area
      */
     public void removeBranding() {
-        if (this.branding == null) {
-            return;
-        }
-
-        getElement().removeChild(this.branding);
-
+        remove(this.branding);
         this.branding = null;
-    }
-
-    /**
-     * Clears existing menu items and sets the new the arguments.
-     * @param menuItems
-     */
-    public void setMenuItems(MenuItem... menuItems) {
-        menuTabs.removeAll();
-        menuTabs.add(menuItems);
-    }
-
-    /**
-     * Adds menu item to the menu
-     *
-     * @param menuItem
-     *              Menu Item to add
-     */
-    public void addMenuItem(MenuItem menuItem) {
-        menuTabs.add(menuItem);
-    }
-
-    /**
-     * Removes menu item from the menu
-     */
-    public void removeMenuItem(MenuItem menuItem) {
-        menuTabs.remove(menuItem);
-    }
-
-    /**
-     * Gets the first {@link RoutingMenuItem} targeting a route.
-     */
-    Optional<MenuItem> getMenuItemTargetingRoute(String route) {
-        return menuTabs.getChildren()
-                .map(e -> (MenuItem) e)
-                .filter(e -> e instanceof RoutingMenuItem)
-                .filter(e -> ((RoutingMenuItem) e).getRoute().equals(route))
-                .findFirst();
-    }
-
-    /**
-     * Gets the currently selected menu item.
-     */
-    public MenuItem getSelectedMenuItem() {
-        return selectedMenuItem;
     }
 
     /**
      * Selects a menu item.
      */
-    public void selectMenuItem(MenuItem menuItem) {
-        menuTabs.setSelectedTab(menuItem);
-        selectedMenuItem = menuItem;
+    void selectMenuItem(AppLayoutMenuItem menuItem) {
+        menuTabs.selectMenuItem(menuItem);
+    }
+
+    /**
+     * Clears existing menu items and sets the new the arguments.
+     *
+     * @param menuItems menu items to set.
+     */
+    public void setMenuItems(AppLayoutMenuItem... menuItems) {
+        menuTabs.setMenuItems(menuItems);
+    }
+
+    /**
+     * Adds menu item to the menu
+     *
+     * @param menuItem Menu Item to add
+     */
+    public void addMenuItem(AppLayoutMenuItem menuItem) {
+        menuTabs.addMenuItem(menuItem);
+    }
+
+    /**
+     * Removes menu item from the menu
+     */
+    public void removeMenuItem(AppLayoutMenuItem menuItem) {
+        menuTabs.removeMenuItem(menuItem);
+    }
+
+    /**
+     * Removes all menu items.
+     */
+    public void clearMenuItems() {
+        menuTabs.clearMenuItems();
+    }
+
+    /**
+     * Gets the first {@link AppLayoutMenuItem} targeting a route.
+     */
+    Optional<AppLayoutMenuItem> getMenuItemTargetingRoute(String route) {
+        return menuTabs.getMenuItemTargetingRoute(route);
+    }
+
+    /**
+     * Gets the currently selected menu item.
+     */
+    public AppLayoutMenuItem getSelectedMenuItem() {
+        return menuTabs.getSelectedMenuItem();
     }
 
     /**
@@ -179,8 +143,7 @@ public class AppLayout extends Component {
     /**
      * Sets the displayed content.
      *
-     * @param content
-     *              Component to display in the content area
+     * @param content Component to display in the content area
      */
     public void setContent(Component content) {
         setContent(content != null ? content.getElement() : null);
@@ -189,8 +152,7 @@ public class AppLayout extends Component {
     /**
      * Sets the displayed content.
      *
-     * @param content
-     *              Element to display in the content area
+     * @param content Element to display in the content area
      */
     public void setContent(Element content) {
         Objects.requireNonNull(content, "Content cannot be null");
@@ -205,15 +167,18 @@ public class AppLayout extends Component {
      * Removes the displayed content.
      */
     public void removeContent() {
-        if (this.content != null) {
-            this.content.removeFromParent();
-        }
-
+        remove(this.content);
         this.content = null;
     }
 
+    private void remove(Element element) {
+        if (element != null) {
+            element.removeFromParent();
+        }
+    }
+
     @VisibleForTesting
-    Component getMenu() {
+    HasElement getMenu() {
         return menuTabs;
     }
 }

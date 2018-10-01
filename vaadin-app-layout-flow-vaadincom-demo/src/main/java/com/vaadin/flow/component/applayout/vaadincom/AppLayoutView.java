@@ -1,9 +1,8 @@
 package com.vaadin.flow.component.applayout.vaadincom;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.applayout.ActionMenuItem;
-import com.vaadin.flow.component.applayout.RoutingMenuItem;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.AppLayoutMenuItem;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
@@ -43,10 +42,10 @@ public class AppLayoutView extends DemoView {
         img.setHeight("44px");
         appLayout.setBranding(img);
 
-        appLayout.addMenuItem(new RoutingMenuItem("Page 1", "page1"));
-        appLayout.addMenuItem(new RoutingMenuItem("Page 2", "page2"));
-        appLayout.addMenuItem(new RoutingMenuItem("Page 3", "page3"));
-        appLayout.addMenuItem(new RoutingMenuItem("Page 4", "page4"));
+        appLayout.addMenuItem(new AppLayoutMenuItem("Page 1", "page1"));
+        appLayout.addMenuItem(new AppLayoutMenuItem("Page 2", "page2"));
+        appLayout.addMenuItem(new AppLayoutMenuItem("Page 3", "page3"));
+        appLayout.addMenuItem(new AppLayoutMenuItem("Page 4", "page4"));
 
         Component content = new Span(new H3("Page title"), new Span("Page content"));
         appLayout.setContent(content);
@@ -62,13 +61,13 @@ public class AppLayoutView extends DemoView {
         // source-example-heading: App Layout with Action Menu Item
         AppLayout appLayout = new AppLayout();
 
-        appLayout.addMenuItem(new RoutingMenuItem(
+        appLayout.addMenuItem(new AppLayoutMenuItem(
                 VaadinIcon.USER.create(), "My Profile", "profile"));
 
-        appLayout.addMenuItem(new RoutingMenuItem(
+        appLayout.addMenuItem(new AppLayoutMenuItem(
                 VaadinIcon.TRENDING_UP.create(), "Trending Topics", "trends"));
 
-        appLayout.addMenuItem(new ActionMenuItem(
+        appLayout.addMenuItem(new AppLayoutMenuItem(
                 VaadinIcon.SIGN_OUT.create(), "Sign Out", e -> logout()));
         // end-source-example
         // @formatter:on

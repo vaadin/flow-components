@@ -97,7 +97,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-tabs-flow</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.5</version>
         </dependency>
 
         <dependency>

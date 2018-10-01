@@ -63,10 +63,10 @@ public class AbstractAppRouterLayoutTest {
     public void showRouterLayoutContent() {
         setupFlowRouting();
 
-        RoutingMenuItem route1MenuItem = new RoutingMenuItem("Route 1", "route1");
+        AppLayoutMenuItem route1MenuItem = new AppLayoutMenuItem("Route 1", "route1");
         systemUnderTest.getAppLayout().addMenuItem(route1MenuItem);
         systemUnderTest.getAppLayout().addMenuItem(
-                new RoutingMenuItem("Dummy", "dummy"));
+                new AppLayoutMenuItem("Dummy", "dummy"));
 
         Route1 route1 = new Route1();
 
