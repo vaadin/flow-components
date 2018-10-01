@@ -44,6 +44,12 @@
 
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>flow-data</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-crud-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -57,6 +63,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons-flow</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-form-layout-flow</artifactId>
+            <version>1.0.3</version>
         </dependency>
     </dependencies>
 
