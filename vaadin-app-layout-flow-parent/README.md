@@ -28,7 +28,7 @@ public class AppLayoutView extends AbstractAppRouterLayout {
     @Override
     protected void configure(AppLayout appLayout) {
         appLayout.setBranding(new Span("App Name").getElement());
-        appLayout.addMenuItem(new RoutingMenuItem("About Company", "about"));
+        appLayout.addMenuItem(new AppLayoutMenuItem("About Company", "about"));
     }
 }
 /* Annotate AboutPage with @ParentLayout(AppLayoutView.class) */
