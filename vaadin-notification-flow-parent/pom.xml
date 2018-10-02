@@ -6,14 +6,14 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-notification-flow</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
 
     <properties>
-        <flow.version>1.1-SNAPSHOT</flow.version>
+        <flow.version>1.2-SNAPSHOT</flow.version>
     </properties>
 
     <repositories>
@@ -24,7 +24,7 @@
         <repository>
             <id>vaadin-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-        </repository>     
+        </repository>
     </repositories>
 
     <dependencies>
@@ -114,7 +114,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
