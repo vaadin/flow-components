@@ -26,7 +26,7 @@ import java.util.List;
 public class RichTextEditorElement extends TestBenchElement {
 
   public TestBenchElement getContent() {
-    return $(RichTextEditorElement.class).first().$("h1").first();
+    return $("h1").first();
   }
 
 }
