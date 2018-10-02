@@ -2,6 +2,7 @@ package com.vaadin.flow.component.applayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -9,8 +10,8 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.dom.Element;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -222,6 +223,84 @@ public class AppLayoutTest {
         Assert.assertEquals(0,
             systemUnderTest.getMenu().getElement().getChildCount());
 
+    }
+
+    @Test
+    public void addMenuItem_title() {
+        final String title = "Title";
+        AppLayoutMenuItem appLayoutMenuItem = systemUnderTest
+            .addMenuItem(title);
+        Assert.assertEquals(title, appLayoutMenuItem.getTitle());
+    }
+
+    @Test
+    public void addMenuItem_icon() {
+        final Component icon = new Div();
+        AppLayoutMenuItem appLayoutMenuItem = systemUnderTest.addMenuItem(icon);
+        Assert.assertEquals(icon, appLayoutMenuItem.getIcon());
+    }
+
+    @Test
+    public void addMenuItem_icon_and_title() {
+        final Component icon = new Div();
+        final String title = "Title";
+        AppLayoutMenuItem appLayoutMenuItem = systemUnderTest
+            .addMenuItem(icon, title);
+        Assert.assertEquals(icon, appLayoutMenuItem.getIcon());
+        Assert.assertEquals(title, appLayoutMenuItem.getTitle());
+    }
+
+    @Test
+    public void addMenuItem_icon_title_and_route() {
+        final Component icon = new Div();
+        final String title = "Title";
+        final String route = "route";
+        AppLayoutMenuItem appLayoutMenuItem = systemUnderTest
+            .addMenuItem(icon, title, route);
+        Assert.assertEquals(icon, appLayoutMenuItem.getIcon());
+        Assert.assertEquals(title, appLayoutMenuItem.getTitle());
+        Assert.assertEquals(route, appLayoutMenuItem.getRoute());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void addMenuItem_icon_listener() {
+        final Component icon = new Div();
+        final ComponentEventListener<MenuItemClickEvent> listener = (ComponentEventListener<MenuItemClickEvent>) Mockito
+            .mock(ComponentEventListener.class);
+        AppLayoutMenuItem appLayoutMenuItem = systemUnderTest
+            .addMenuItem(icon, listener);
+        Assert.assertEquals(icon, appLayoutMenuItem.getIcon());
+        appLayoutMenuItem.fireMenuItemClickEvent();
+        Mockito.verify(listener).onComponentEvent(Mockito.any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void addMenuItem_title_listener() {
+        final String title = "Title";
+        final ComponentEventListener<MenuItemClickEvent> listener = (ComponentEventListener<MenuItemClickEvent>) Mockito
+            .mock(ComponentEventListener.class);
+        AppLayoutMenuItem appLayoutMenuItem = systemUnderTest
+            .addMenuItem(title, listener);
+        Assert.assertEquals(title, appLayoutMenuItem.getTitle());
+        appLayoutMenuItem.fireMenuItemClickEvent();
+        Mockito.verify(listener).onComponentEvent(Mockito.any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void addMenuItem_icon_title_and_listener() {
+        final Component icon = new Div();
+        final String title = "Title";
+        final ComponentEventListener<MenuItemClickEvent> listener = (ComponentEventListener<MenuItemClickEvent>) Mockito
+            .mock(ComponentEventListener.class);
+        AppLayoutMenuItem appLayoutMenuItem = systemUnderTest
+            .addMenuItem(icon, title, listener);
+        Assert.assertEquals(icon, appLayoutMenuItem.getIcon());
+        Assert.assertEquals(title, appLayoutMenuItem.getTitle());
+        appLayoutMenuItem.fireMenuItemClickEvent();
+        Mockito.verify(listener).onComponentEvent(Mockito.any());
     }
 
 }

@@ -19,6 +19,7 @@ package com.vaadin.flow.component.applayout;
 
 import com.helger.commons.annotation.VisibleForTesting;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -103,6 +104,85 @@ public class AppLayout extends Component {
      */
     public void addMenuItem(AppLayoutMenuItem menuItem) {
         menuTabs.addMenuItem(menuItem);
+    }
+
+    /**
+     * Constructs a new object with the given title.
+     *
+     * @param title the title to display
+     */
+    public AppLayoutMenuItem addMenuItem(String title) {
+        return addAndReturn(new AppLayoutMenuItem(title));
+    }
+
+    /**
+     * Constructs a new object with the given icon.
+     *
+     * @param icon the icon to display
+     */
+    public AppLayoutMenuItem addMenuItem(Component icon) {
+        return addAndReturn(new AppLayoutMenuItem(icon));
+    }
+
+    /**
+     * Constructs a new object with the given icon and title.
+     *
+     * @param icon  the icon to display
+     * @param title the title to display
+     */
+    public AppLayoutMenuItem addMenuItem(Component icon, String title) {
+        return addAndReturn(new AppLayoutMenuItem(icon, title));
+    }
+
+    /**
+     * Constructs a new object with the given icon, title and route.
+     *
+     * @param icon  the icon to display
+     * @param title the title to display
+     * @param route the route to navigate on click
+     */
+    public AppLayoutMenuItem addMenuItem(Component icon, String title,
+        String route) {
+        return addAndReturn(new AppLayoutMenuItem(icon, title, route));
+    }
+
+    /**
+     * Constructs a new object with the given icon and click listener.
+     *
+     * @param icon     the icon to display
+     * @param listener the menu item click listener
+     */
+    public AppLayoutMenuItem addMenuItem(Component icon,
+        ComponentEventListener<MenuItemClickEvent> listener) {
+        return addAndReturn(new AppLayoutMenuItem(icon, listener));
+    }
+
+    /**
+     * Constructs a new object with the given title and click listener.
+     *
+     * @param title    the title to display
+     * @param listener the menu item click listener
+     */
+    public AppLayoutMenuItem addMenuItem(String title,
+        ComponentEventListener<MenuItemClickEvent> listener) {
+        return addAndReturn(new AppLayoutMenuItem(title, listener));
+    }
+
+    /**
+     * Constructs a new object with the given icon, title and click listener.
+     *
+     * @param icon     the icon to display
+     * @param title    the title to display
+     * @param listener the menu item click listener
+     */
+    public AppLayoutMenuItem addMenuItem(Component icon, String title,
+        ComponentEventListener<MenuItemClickEvent> listener) {
+        return addAndReturn(new AppLayoutMenuItem(icon, title, listener));
+    }
+
+    private AppLayoutMenuItem addAndReturn(AppLayoutMenuItem item) {
+        addMenuItem(item);
+        return item;
     }
 
     /**
