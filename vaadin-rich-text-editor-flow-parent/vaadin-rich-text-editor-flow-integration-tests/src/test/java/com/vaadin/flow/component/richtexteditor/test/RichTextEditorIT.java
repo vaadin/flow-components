@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.richtexteditor.test;
 
+import com.vaadin.flow.component.richtexteditor.testbench.RichTextEditorElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +13,8 @@ public class RichTextEditorIT extends AbstractParallelTest {
     }
 
     @Test
-    public void pass() {
-        Assert.assertEquals("Hello RichTextEditor!", $("h1").first().getText());
+    public void content() {
+        Assert.assertEquals("Foo bar",
+                $(RichTextEditorElement.class).waitForFirst().getContent().getText());
     }
 }

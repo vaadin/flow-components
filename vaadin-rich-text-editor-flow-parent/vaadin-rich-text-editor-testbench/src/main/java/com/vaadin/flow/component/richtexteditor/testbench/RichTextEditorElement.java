@@ -25,4 +25,8 @@ import java.util.List;
 @Element("vaadin-rich-text-editor")
 public class RichTextEditorElement extends TestBenchElement {
 
+  public TestBenchElement getContent() {
+    return $(RichTextEditorElement.class).first().$("h1").first();
+  }
+
 }
