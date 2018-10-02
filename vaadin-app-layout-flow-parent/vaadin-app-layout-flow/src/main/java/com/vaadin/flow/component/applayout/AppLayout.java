@@ -102,8 +102,8 @@ public class AppLayout extends Component {
      *
      * @param menuItem Menu Item to add
      */
-    public void addMenuItem(AppLayoutMenuItem menuItem) {
-        menuTabs.addMenuItem(menuItem);
+    public void addMenuItems(AppLayoutMenuItem... menuItem) {
+        menuTabs.addMenuItems(menuItem);
     }
 
     /**
@@ -181,7 +181,7 @@ public class AppLayout extends Component {
     }
 
     private AppLayoutMenuItem addAndReturn(AppLayoutMenuItem item) {
-        addMenuItem(item);
+        addMenuItems(item);
         return item;
     }
 

@@ -24,8 +24,8 @@ public class AppLayoutMenuTest {
 
     @Test
     public void onAttach_withMenuItems() {
-        systemUnderTest.addMenuItem(new AppLayoutMenuItem("Logout", "Logout"));
-        systemUnderTest.addMenuItem(new AppLayoutMenuItem("Go offline"));
+        systemUnderTest.addMenuItems(new AppLayoutMenuItem("Logout", "Logout"),
+            new AppLayoutMenuItem("Go offline"));
         final Tabs tabs = (Tabs) systemUnderTest.getElement().getComponent()
             .get();
         ComponentUtil.fireEvent(tabs, new AttachEvent(tabs, true));
@@ -37,8 +37,7 @@ public class AppLayoutMenuTest {
     @Test
     public void onAttach_withMenuItems_explicit_selection() {
         final AppLayoutMenuItem home = new AppLayoutMenuItem("Home", "Home");
-        systemUnderTest.addMenuItem(home);
-        systemUnderTest.addMenuItem(new AppLayoutMenuItem("Go offline"));
+        systemUnderTest.addMenuItems(home, new AppLayoutMenuItem("Go offline"));
         systemUnderTest.selectMenuItem(home);
         final Tabs tabs = (Tabs) systemUnderTest.getElement().getComponent()
             .get();

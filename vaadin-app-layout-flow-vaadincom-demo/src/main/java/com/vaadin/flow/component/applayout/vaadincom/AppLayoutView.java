@@ -42,12 +42,13 @@ public class AppLayoutView extends DemoView {
         img.setHeight("44px");
         appLayout.setBranding(img);
 
-        appLayout.addMenuItem(new AppLayoutMenuItem("Page 1", "page1"));
-        appLayout.addMenuItem(new AppLayoutMenuItem("Page 2", "page2"));
-        appLayout.addMenuItem(new AppLayoutMenuItem("Page 3", "page3"));
-        appLayout.addMenuItem(new AppLayoutMenuItem("Page 4", "page4"));
+        appLayout.addMenuItems(new AppLayoutMenuItem("Page 1", "page1"),
+            new AppLayoutMenuItem("Page 2", "page2"),
+            new AppLayoutMenuItem("Page 3", "page3"),
+            new AppLayoutMenuItem("Page 4", "page4"));
 
-        Component content = new Span(new H3("Page title"), new Span("Page content"));
+        Component content = new Span(new H3("Page title"),
+            new Span("Page content"));
         appLayout.setContent(content);
         // end-source-example
         // @formatter:on
@@ -61,14 +62,10 @@ public class AppLayoutView extends DemoView {
         // source-example-heading: App Layout with Action Menu Item
         AppLayout appLayout = new AppLayout();
 
-        appLayout.addMenuItem(new AppLayoutMenuItem(
-                VaadinIcon.USER.create(), "My Profile", "profile"));
-
-        appLayout.addMenuItem(new AppLayoutMenuItem(
-                VaadinIcon.TRENDING_UP.create(), "Trending Topics", "trends"));
-
-        appLayout.addMenuItem(new AppLayoutMenuItem(
-                VaadinIcon.SIGN_OUT.create(), "Sign Out", e -> logout()));
+        appLayout.addMenuItems(
+            new AppLayoutMenuItem(VaadinIcon.USER.create(),"My Profile","profile"),
+            new AppLayoutMenuItem(VaadinIcon.TRENDING_UP.create(),"Trending Topics","trends"),
+            new AppLayoutMenuItem(VaadinIcon.SIGN_OUT.create(),"Sign Out", e -> logout()));
         // end-source-example
         // @formatter:on
 

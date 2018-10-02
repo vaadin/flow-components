@@ -71,16 +71,16 @@ class AppLayoutMenu implements HasElement, AttachNotifier {
      */
     void setMenuItems(AppLayoutMenuItem... menuItems) {
         clearMenuItems();
-        tabs.add(menuItems);
+        addMenuItems(menuItems);
     }
 
     /**
-     * Adds menu item to the menu
+     * Adds menu items to the menu.
      *
-     * @param menuItem Menu Item to add
+     * @param menuItems items to add
      */
-    void addMenuItem(AppLayoutMenuItem menuItem) {
-        tabs.add(menuItem);
+    void addMenuItems(AppLayoutMenuItem... menuItems) {
+        tabs.add(menuItems);
     }
 
     /**

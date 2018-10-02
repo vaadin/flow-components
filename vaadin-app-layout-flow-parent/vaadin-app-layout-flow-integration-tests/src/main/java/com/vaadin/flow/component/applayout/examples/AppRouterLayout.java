@@ -11,6 +11,9 @@ import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
+import java.util.function.Function;
+import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
 @BodySize
@@ -21,20 +24,24 @@ public class AppRouterLayout extends AbstractAppRouterLayout {
     protected void configure(AppLayout appLayout) {
         appLayout.setBranding(new Span("Vaadin").getElement());
 
-        IntStream.range(1, 3).forEach(i ->
-                appLayout.addMenuItem(new AppLayoutMenuItem(
-                        VaadinIcon.SAFE_LOCK.create(), "Action " + i,
-                        e -> Notification.show(e.getSource().getTitle() + " executed!"))));
+        appLayout.addMenuItems(generateMenuItems(
+            i -> new AppLayoutMenuItem(VaadinIcon.SAFE_LOCK.create(),
+                "Action " + i, e -> Notification
+                .show(e.getSource().getTitle() + " executed!"))));
 
-        IntStream.range(1, 3).forEach(i ->
-                appLayout.addMenuItem(new AppLayoutMenuItem(
-                        VaadinIcon.LOCATION_ARROW.create(), "Page " + i, "Page" + i)));
+        appLayout.addMenuItems(generateMenuItems(
+            i -> (new AppLayoutMenuItem(VaadinIcon.LOCATION_ARROW.create(),
+                "Page " + i, "Page" + i))));
 
-        appLayout.addMenuItem(new AppLayoutMenuItem(
-                        VaadinIcon.HOME.create(), "Home", ""));
-
-        appLayout.addMenuItem(new AppLayoutMenuItem(
-                VaadinIcon.USER.create(), "Logout",
+        appLayout.addMenuItems(
+            new AppLayoutMenuItem(VaadinIcon.HOME.create(), "Home", ""),
+            new AppLayoutMenuItem(VaadinIcon.USER.create(), "Logout",
                 e -> UI.getCurrent().navigate("LoggedOut")));
+    }
+
+    private static AppLayoutMenuItem[] generateMenuItems(
+        IntFunction<AppLayoutMenuItem> f) {
+        return IntStream.range(1, 3).mapToObj(f)
+            .toArray(AppLayoutMenuItem[]::new);
     }
 }
