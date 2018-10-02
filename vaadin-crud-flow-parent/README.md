@@ -24,12 +24,14 @@ Add Crud to your project
 
 ### Using Vaadin Crud
 
+[<img src="https://raw.githubusercontent.com/vaadin/vaadin-crud/master/screenshot.gif" width="700" alt="Screenshot of vaadin-crud">](https://vaadin.com/components/vaadin-crud)
+
 #### Basic use
 In the most basic use case, Vaadin Crud requires the class of items to be processed
 and an editor for the class.
 
 ```java
-Crud<Person> crud = new Crud<>(Person.class, personEditor);
+Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
 crud.setDataProvider(personDataProvider);
 
 // Handle save and delete events.
@@ -40,62 +42,22 @@ crud.addDeleteListener(e -> delete(e.getItem()));
 crud.setFooter("Flight manifest for XX210");
 ```
 
-[<img src="https://raw.githubusercontent.com/vaadin/vaadin-crud/master/screenshot.gif" width="700" alt="Screenshot of vaadin-crud">](https://vaadin.com/components/vaadin-crud)
-
 #### Creating an editor
-An editor can be created by implementing the `CrudEditor` interface. The editor's purpose
-is to manage the currently edited item and present a UI (e.g a form) for manipulating it.
+The editor's purpose is to manage the currently edited item and present a UI (e.g a form) for manipulating it.
+You need to provide a class implementing the `CrudEditor` interface when creating a new Crud.
+Vaadin Crud however ships with the `BinderCrudEditor` helper which binds form fields to a provided bean.
 
 ```java
-public class PersonCrudEditor implements CrudEditor<Person> {
+private CrudEditor<Person> createPersonEditor() {
+    TextField firstName = new TextField("First name");
+    TextField lastName = new TextField("Last name");
+    FormLayout form = new FormLayout(firstName, lastName);
 
-    private TextField firstName = new TextField("First name");
-    private TextField lastName = new TextField("Last name");
+    Binder<Person> binder = new Binder<>(Person.class);
+    binder.bind(firstName, Person::getFirstName, Person::setFirstName);
+    binder.bind(lastName, Person::getLastName, Person::setLastName);
 
-    private FormLayout view = new FormLayout(firstName, lastName);
-
-    private Binder<Person> binder;
-
-    @Override
-    public Person getItem() {
-        return item;
-    }
-
-    @Override
-    public void setItem(Person item) {
-        // Setup bindings for the form fields. 
-        // The binder can also be used for implementing validation.
-
-        binder = new Binder<>(Person.class);
-        binder.bind(firstName, Person::getFirstName, Person::setFirstName);
-        binder.bind(lastName, Person::getLastName, Person::setLastName);
-
-        // Bind the form to the item.
-        binder.setBean(item);
-    }
-
-    @Override
-    public void clear() {
-        if (binder != null) {
-            binder.removeBinding("firstName");
-            binder.removeBinding("lastName");
-            binder.removeBean();
-            binder = null;
-        }
-
-        firstName.clear();
-        lastName.clear();
-    }
-
-    @Override
-    public boolean isValid() {
-        return binder != null && binder.isValid();
-    }
-
-    @Override
-    public Element getView() {
-        return view.getElement();
-    }
+    return new BinderCrudEditor<>(binder, form);
 }
 ```
 

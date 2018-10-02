@@ -1,6 +1,6 @@
 package com.vaadin.flow.component.crud.vaadincom;
 
-import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.crud.BinderCrudEditor;
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudEditor;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -15,7 +15,6 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-crud")
 public class CrudView extends DemoView {
 
-
     @Override
     protected void initView() {
         createListOfEntities();
@@ -25,11 +24,10 @@ public class CrudView extends DemoView {
                 new Label("These objects are used in the examples above"));
     }
 
-
     private void createListOfEntities() {
         // begin-source-example
         // source-example-heading: Basic CRUD
-        final Crud<Person> crud = new Crud<>(Person.class, new PersonEditor());
+        final Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
 
         final PersonDataProvider dataProvider = new PersonDataProvider();
         dataProvider.setSizeChangeListener(count -> crud.setFooter("Total: " + count));
@@ -44,11 +42,10 @@ public class CrudView extends DemoView {
     }
 
     private void createCustomGrid() {
-
         // begin-source-example
         // source-example-heading: CRUD with custom Grid
         final Grid<Person> grid = new Grid<>();
-        final Crud<Person> crud = new Crud<>(Person.class, grid, new PersonEditor());
+        final Crud<Person> crud = new Crud<>(Person.class, grid, createPersonEditor());
 
         final PersonDataProvider dataProvider = new PersonDataProvider();
         crud.setDataProvider(dataProvider);
@@ -114,59 +111,23 @@ public class CrudView extends DemoView {
     }
 
     /**
-     * Example editor for the Person entity
+     * Creates an editor for the Person entity
      */
-    public static class PersonEditor implements CrudEditor<Person> {
+    private CrudEditor<Person> createPersonEditor() {
+        TextField firstName = new TextField("First name");
+        TextField lastName = new TextField("Last name");
+        FormLayout form = new FormLayout(firstName, lastName);
 
-        private final TextField firstNameField = new TextField("First name");
-        private final TextField lastNameField = new TextField("Last name");
-        private final FormLayout view = new FormLayout(firstNameField, lastNameField);
+        Binder<Person> binder = new Binder<>(Person.class);
+        binder.bind(firstName, Person::getFirstName, Person::setFirstName);
+        binder
+                .forField(lastName)
+                .withValidator(
+                        value -> value != null && value.startsWith("O"),
+                        "Only last names starting with 'O' allowed")
+                .bind(Person::getLastName, Person::setLastName);
 
-        private Person editableItem;
-        private Binder<Person> binder;
-
-        @Override
-        public Person getItem() {
-            return editableItem;
-        }
-
-        @Override
-        public void setItem(Person item) {
-            binder = new Binder<>(Person.class);
-            binder.bind(firstNameField, Person::getFirstName, Person::setFirstName);
-            binder.bind(lastNameField, Person::getLastName, Person::setLastName);
-
-            editableItem = item.clone();
-            binder.setBean(editableItem);
-        }
-
-        @Override
-        public void clear() {
-            if (binder != null) {
-                binder.removeBinding("firstName");
-                binder.removeBinding("lastName");
-                binder.removeBean();
-                binder = null;
-            }
-
-            editableItem = null;
-
-            firstNameField.clear();
-            lastNameField.clear();
-        }
-
-        @Override
-        public boolean isValid() {
-            return binder != null && binder.isValid();
-        }
-
-        @Override
-        public Component getView() {
-            return view;
-        }
+        return new BinderCrudEditor<>(binder, form);
     }
     // end-source-example
-
-
-
 }

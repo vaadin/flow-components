@@ -136,26 +136,31 @@ public class Crud<E> extends Component {
                 ((ComponentEventListener<CancelEvent<E>>) e -> {
                     cancelListeners.forEach(listener -> listener.onComponentEvent(e));
 
-                    getEditor().clear();
                     setOpened(false);
+                    getEditor().clear();
                 }));
 
         ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<SaveEvent<E>>) e -> {
+                    if (!getEditor().isValid()) {
+                        return;
+                    }
+
+                    getEditor().writeItemChanges();
                     saveListeners.forEach(listener -> listener.onComponentEvent(e));
 
-                    getEditor().clear();
                     getGrid().getDataProvider().refreshAll();
                     setOpened(false);
+                    getEditor().clear();
                 }));
 
         ComponentUtil.addListener(this, DeleteEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<DeleteEvent<E>>) e -> {
                     deleteListeners.forEach(listener -> listener.onComponentEvent(e));
 
-                    getEditor().clear();
                     getGrid().getDataProvider().refreshAll();
                     setOpened(false);
+                    getEditor().clear();
                 }));
     }
 
@@ -166,7 +171,7 @@ public class Crud<E> extends Component {
      * @param opened true to open or false to close
      */
     public void setOpened(boolean opened) {
-        getElement().setProperty("opened", opened);
+        getElement().callFunction("set", "opened", opened);
     }
 
     public Grid<E> getGrid() {
@@ -357,7 +362,7 @@ public class Crud<E> extends Component {
          * @param ignored an ignored parameter for a side effect
          */
         public CancelEvent(Crud<E> source, boolean fromClient,
-                           @EventData("event.stopPropagation()") Object ignored) {
+                           @EventData("event.preventDefault()") Object ignored) {
             super(source, fromClient);
         }
     }
@@ -379,7 +384,7 @@ public class Crud<E> extends Component {
          * @param ignored an ignored parameter for a side effect
          */
         public DeleteEvent(Crud<E> source, boolean fromClient,
-                           @EventData("event.stopPropagation()") Object ignored) {
+                           @EventData("event.preventDefault()") Object ignored) {
             super(source, fromClient);
         }
     }
@@ -405,7 +410,7 @@ public class Crud<E> extends Component {
          */
         public EditEvent(Crud<E> source, boolean fromClient,
                          @EventData("event.detail.item") JsonObject item,
-                         @EventData("event.stopPropagation()") Object ignored) {
+                         @EventData("event.preventDefault()") Object ignored) {
             super(source, fromClient);
             this.item = source.getGrid().getDataCommunicator()
                     .getKeyMapper().get(item.getString("key"));
@@ -433,7 +438,7 @@ public class Crud<E> extends Component {
          * @param ignored an ignored parameter for a side effect
          */
         public NewEvent(Crud<E> source, boolean fromClient,
-                        @EventData("event.stopPropagation()") Object ignored) {
+                        @EventData("event.preventDefault()") Object ignored) {
             super(source, fromClient);
         }
     }
@@ -455,7 +460,7 @@ public class Crud<E> extends Component {
          * @param ignored an ignored parameter for a side effect
          */
         public SaveEvent(Crud<E> source, boolean fromClient,
-                         @EventData("event.stopPropagation()") Object ignored) {
+                         @EventData("event.preventDefault()") Object ignored) {
             super(source, fromClient);
         }
     }

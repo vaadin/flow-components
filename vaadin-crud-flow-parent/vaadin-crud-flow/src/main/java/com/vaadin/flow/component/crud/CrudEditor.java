@@ -56,6 +56,11 @@ public interface CrudEditor<E> extends Serializable {
     boolean isValid();
 
     /**
+     * Writes any pending input update (if any) to the item.
+     */
+    void writeItemChanges();
+
+    /**
      * Returns the user interface of an editor.
      *
      * @return the user interface

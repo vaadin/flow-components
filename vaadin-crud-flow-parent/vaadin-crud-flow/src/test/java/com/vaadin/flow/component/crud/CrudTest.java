@@ -88,6 +88,10 @@ public class CrudTest {
         }
 
         @Override
+        public void writeItemChanges() {
+        }
+
+        @Override
         public Component getView() {
             return new Div();
         }
