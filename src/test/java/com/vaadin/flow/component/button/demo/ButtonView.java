@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.button.demo;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -42,6 +44,7 @@ public class ButtonView extends DemoView {
         createImageButtonWithAccessibleLabel();
         createButtonsWithTabIndex();
         createDisabledButton();
+        createButtonWithDisableOnClick();
         addVariantsFeature();
 
         message = new Div();
@@ -180,5 +183,48 @@ public class ButtonView extends DemoView {
     private boolean containsChild(Component parent, String tagName) {
         return parent.getElement().getChildren()
                 .anyMatch(element -> element.getTag().equals(tagName));
+    }
+
+    private void createButtonWithDisableOnClick() {
+        // begin-source-example
+        // source-example-heading: Button disabled on click
+        Button button = new Button("Disabled on click", event -> {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        button.setDisableOnClick(true);
+        // end-source-example
+
+        final Div disabledMessage = new Div();
+        disabledMessage.setId("disabled-message");
+
+        AtomicInteger runCount = new AtomicInteger(0);
+        Button enable = new Button("Enable disabled button", click -> {
+            disabledMessage.setText("Re-enabled button from server.");
+            button.setEnabled(true);
+            runCount.set(0);
+        });
+
+        Button toggle = new Button("Disable on click true", event -> {
+            button.setDisableOnClick(!button.isDisableOnClick());
+            event.getSource()
+                    .setText("Disable on click " + button.isDisableOnClick());
+        });
+        toggle.setId("toggle-button");
+
+        addCard("Button disabled on click", button, enable, toggle,
+                disabledMessage);
+
+        button.addClickListener(evt -> disabledMessage.setText(
+                "Button " + evt.getSource().getText()
+                        + " was clicked and enabled state was changed to " + evt
+                        .getSource().isEnabled() + " receiving " + runCount
+                        .incrementAndGet() + " clicks"));
+
+        button.setId("disable-on-click-button");
+        enable.setId("enable-button");
     }
 }

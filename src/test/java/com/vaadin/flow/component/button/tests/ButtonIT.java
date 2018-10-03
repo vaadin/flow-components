@@ -130,6 +130,105 @@ public class ButtonIT extends ComponentDemoTest {
         Assert.assertEquals("", message.getText());
     }
 
+    @Test
+    public void clickDisableOnClickButton_newClickNotRegistered() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-button"));
+        Assert.assertTrue(
+                "The button should not contain the 'disabled' attribute",
+                button.getAttribute("disabled") == null);
+
+        scrollToElement(button);
+        executeScript("arguments[0].click();arguments[0].click();arguments[0].click();arguments[0].click();", button);
+
+        // Check that button is disabled
+        String disabled = button.getAttribute("disabled");
+        Assert.assertTrue(
+                "The button should contain the 'disabled' attribute after click",
+                disabled != null);
+
+        String singleClick = "Button Disabled on click was clicked and enabled state was changed to false receiving 1 clicks";
+        Assert.assertEquals(
+                "Too many click events received to disabled button.",
+                singleClick,
+                layout.findElement(By.id("disabled-message")).getText());
+
+        // Remove disabled Attribute and click again from client side, click
+        // message should not been shown in the dom
+        executeScript("arguments[0].removeAttribute(\"disabled\");"
+                        + "arguments[0].click();",
+                layout.findElement(By.id("disable-on-click-button")));
+
+        Assert.assertEquals("\"Hacking\" button disabled state went through.",
+                singleClick,
+                layout.findElement(By.id("disabled-message")).getText());
+
+        // Enable button from server side.
+        layout.findElement(By.id("enable-button")).click();
+
+        button = layout.findElement(By.id("disable-on-click-button"));
+
+        // Check that button is not disabled anymore
+        Assert.assertTrue(
+                "The button should not contain the 'disabled' attribute after server side clearing",
+                button.getAttribute("disabled") == null);
+
+        Assert.assertEquals(
+                "Button re-enabled message should be the latest message",
+                "Re-enabled button from server.",
+                layout.findElement(By.id("disabled-message")).getText());
+
+        button.click();
+
+        // Assert that button gets disabled again on click
+        disabled = button.getAttribute("disabled");
+        Assert.assertTrue(
+                "The button should contain the 'disabled' attribute after click",
+                disabled != null);
+
+        Assert.assertEquals("Button should have gotten 1 click and become disabled.",
+                singleClick,
+                layout.findElement(By.id("disabled-message")).getText());
+    }
+
+    @Test
+    public void removeDisabled_buttonWorksNormally() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-button"));
+        Assert.assertTrue(
+                "The button should not contain the 'disabled' attribute",
+                button.getAttribute("disabled") == null);
+
+        scrollIntoViewAndClick(button);
+
+        // Check that button is disabled
+        String disabled = button.getAttribute("disabled");
+        Assert.assertTrue(
+                "The button should contain the 'disabled' attribute after click",
+                disabled != null);
+
+
+        layout.findElement(By.id("enable-button")).click();
+        layout.findElement(By.id("toggle-button")).click();
+
+        button = layout
+                .findElement(By.id("disable-on-click-button"));
+
+        button.click();
+        button.click();
+
+        Assert.assertTrue(
+                "The button should not be disabled after click anymore.",
+                button.getAttribute("disabled") == null);
+
+        String singleClick = "Button Disabled on click was clicked and enabled state was changed to true receiving 2 clicks";
+        Assert.assertEquals(
+                "Button didn't get expected amount of clicks.",
+                singleClick,
+                layout.findElement(By.id("disabled-message")).getText());
+
+    }
+
     private void waitUntilMessageIsChangedForClickedButton(
             String messageString) {
         WebElement message = layout.findElement(By.id("buttonMessage"));

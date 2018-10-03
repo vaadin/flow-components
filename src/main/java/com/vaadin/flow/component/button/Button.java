@@ -28,6 +28,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the <code>vaadin-button</code> element.
@@ -42,6 +43,16 @@ public class Button extends GeneratedVaadinButton<Button>
     private Element span;
     private Component iconComponent;
     private boolean iconAfterText;
+    private boolean disableOnClick = false;
+    private boolean disableOnClickConfigured = false;
+
+    // Register immediately as first listener
+    private Registration disableListener = addClickListener(
+            buttonClickEvent -> {
+                if (disableOnClick) {
+                    setEnabled(false);
+                }
+            });
 
     /**
      * Default constructor. Creates an empty button.
@@ -205,7 +216,7 @@ public class Button extends GeneratedVaadinButton<Button>
      * Sets the given component as the icon of this button.
      * <p>
      * Even though you can use almost any component as an icon, some good
-     * options are {@link Icon} and {@link Image}.
+     * options are {@code Icon} and {@link Image}.
      * <p>
      * Use {@link #setIconAfterText(boolean)} to change the icon's position
      * relative to the button's text content.
@@ -355,6 +366,47 @@ public class Button extends GeneratedVaadinButton<Button>
      */
     public boolean isAutofocus() {
         return isAutofocusBoolean();
+    }
+
+    /**
+     * Set the button so that it is disabled on click.
+     * <p>
+     * Enabling the button needs to happen from the server.
+     *
+     * @param disableOnClick
+     *         true to disable button immediately when clicked
+     */
+    public void setDisableOnClick(boolean disableOnClick) {
+        this.disableOnClick = disableOnClick;
+        if (disableOnClick) {
+            initDisableOnClick();
+            getElement().setAttribute("disableOnClick", "true");
+        } else {
+            getElement().removeAttribute("disableOnClick");
+        }
+    }
+
+    /**
+     * Get if button is set to be disabled on click.
+     *
+     * @return {@code true} if button gets disabled on click, else {@code false}
+     */
+    public boolean isDisableOnClick() {
+        return disableOnClick;
+    }
+
+    /**
+     * Initialize client side disabling so disabled if immediate on click even
+     * if server-side handling takes some time.
+     */
+    private void initDisableOnClick() {
+        if (!disableOnClickConfigured) {
+            getElement().executeJavaScript("var disableEvent = function () {"
+                    + "if($0.getAttribute('disableOnClick')){"
+                    + " $0.setAttribute('disabled', 'true');" + "}" + "};"
+                    + "$0.addEventListener('click', disableEvent)");
+            disableOnClickConfigured = true;
+        }
     }
 
     /**
