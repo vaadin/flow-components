@@ -39,11 +39,12 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>com.vaadin.webjar</groupId>-->
-            <!--<artifactId>vaadin-rich-text-editor</artifactId>-->
-            <!--<version>1.0.0-beta2</version>-->
-        <!--</dependency>-->
+        <!--TODO: Use the new webjar groupId!!!-->
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-rich-text-editor</artifactId>
+            <version>0.1.0</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
