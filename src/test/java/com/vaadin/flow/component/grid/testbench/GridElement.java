@@ -15,13 +15,15 @@
  */
 package com.vaadin.flow.component.grid.testbench;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.openqa.selenium.NoSuchElementException;
-
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
+import org.junit.Assert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-grid&gt;</code> element.
@@ -260,6 +262,51 @@ public class GridElement extends TestBenchElement {
      */
     public GridTHTDElement getHeaderCell(int columnIndex) {
         return getVisibleColumns().get(columnIndex).getHeaderCell();
+    }
+
+    /**
+     * Finds the vaadin-grid-cell-content element for the given row and column
+     * in header.
+     * 
+     * @param rowIndex
+     *            the index of the row in the header
+     * @param columnIndex
+     *            the index of the column in the header
+     * @return the vaadin-grid-cell-content element for the given row and column
+     *         in header.
+     */
+    public TestBenchElement getHeaderCellContent(int rowIndex,
+            int columnIndex) {
+        WebElement thead = findInShadowRoot(By.id("header")).get(0);
+        List<WebElement> headerRows = thead.findElements(By.tagName("tr"));
+        List<WebElement> headerCells = headerRows.get(rowIndex)
+                .findElements(By.tagName("th"));
+        String slotName = headerCells.get(columnIndex)
+                .findElement(By.tagName("slot")).getAttribute("name");
+
+        return findElement(By.cssSelector(
+                "vaadin-grid-cell-content[slot='" + slotName + "']"));
+    }
+
+    /**
+     * Find all {@link WebElement}s using the given {@link By} selector.
+     *
+     * @param by
+     *            the selector used to find elements
+     * @return a list of found elements
+     */
+    public List<WebElement> findInShadowRoot(By by) {
+        return getShadowRoot().findElements(by);
+    }
+
+    private WebElement getShadowRoot() {
+        waitUntil(driver -> getCommandExecutor()
+                .executeScript("return arguments[0].shadowRoot", this) != null);
+        WebElement shadowRoot = (WebElement) getCommandExecutor()
+                .executeScript("return arguments[0].shadowRoot", this);
+        Assert.assertNotNull("Could not locate shadowRoot in the element",
+                shadowRoot);
+        return shadowRoot;
     }
 
     /**
