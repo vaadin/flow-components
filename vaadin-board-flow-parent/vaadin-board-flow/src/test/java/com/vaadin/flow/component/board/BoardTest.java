@@ -97,10 +97,11 @@ public class BoardTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void removeUnrelatedRow() throws Exception {
+    public void removeUnrelated() throws Exception {
         Board board = new Board();
-        board.addRow(new DummyComponent());
-        board.remove(new Row());
+        Component dummy = new DummyComponent();
+        board.addRow(dummy);
+        board.remove(dummy);
     }
 
     @Test

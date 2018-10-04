@@ -82,7 +82,7 @@ public class RowTest {
         Row row = new Row();
         row.add(c1);
 
-        row.remove(new DummyComponent());
+        new Row().remove(c1);
     }
 
     @Test
