@@ -2597,6 +2597,48 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
+     * Adds an item click listener to this component.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     *
+     * @see #addItemDoubleClickListener(ComponentEventListener)
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Registration addItemClickListener(
+            ComponentEventListener<ItemClickEvent<T>> listener) {
+        return addListener(ItemClickEvent.class,
+                (ComponentEventListener) Objects.requireNonNull(listener));
+    }
+
+    /**
+     * Adds an item double click listener to this component.
+     * <p>
+     * Note that double click event happens along with a click event. It means
+     * there is no way to get a double click event only (double click without a
+     * click): a click listener added using
+     * {@link #addItemClickListener(ComponentEventListener)} (if any) will also
+     * be notified about a click event once a double click event is fired.
+     * <p>
+     * Double click event type is not fully supported by the mobile browsers
+     * which means that double click event might not work (double click
+     * listeners won't be notified) for such browsers.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     *
+     * @see #addItemClickListener(ComponentEventListener)
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Registration addItemDoubleClickListener(
+            ComponentEventListener<ItemDoubleClickEvent<T>> listener) {
+        return addListener(ItemDoubleClickEvent.class,
+                (ComponentEventListener) Objects.requireNonNull(listener));
+    }
+
+    /**
      * Gets optional value provider for unique key in row's generated JSON.
      *
      * @return ValueProvider for unique key for row or null if not set

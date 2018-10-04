@@ -385,6 +385,8 @@ public class GridView extends DemoView {
         createLazyLoadingTreeGridUsage();
         createContextMenu();
         addVariantFeature();
+        createClickListener();
+        createDoubleClickListener();
 
         addCard("Grid example model",
                 new Label("These objects are used in the examples above"));
@@ -1291,6 +1293,50 @@ public class GridView extends DemoView {
         grid.setId("context-menu-grid");
         addCard("Context Menu", "Using ContextMenu With Grid", grid,
                 contextMenu);
+    }
+
+    private void createClickListener() {
+        Div message = new Div();
+        message.setId("clicked-item");
+
+        // begin-source-example
+        // source-example-heading: Item Click Listener
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(getItems());
+        grid.addColumn(Person::getName).setHeader("Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+
+        // Disable selection: will receive only click events instead
+        grid.setSelectionMode(SelectionMode.NONE);
+
+        grid.addItemClickListener(
+                event -> message.setText("Clicked Item: " + event.getItem()));
+
+        // end-source-example
+        grid.setId("item-click-listener");
+
+        message.addClickListener(event -> message.setText(""));
+        addCard("Click Listeners", "Item Click Listener", message, grid);
+    }
+
+    private void createDoubleClickListener() {
+        Div message = new Div();
+        message.setId("doubleclicked-item");
+
+        // begin-source-example
+        // source-example-heading: Item Double Click Listener
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(getItems());
+        grid.addColumn(Person::getName).setHeader("Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+
+        grid.addItemDoubleClickListener(event -> message
+                .setText("Double Clicked Item: " + event.getItem()));
+
+        // end-source-example
+        grid.setId("item-doubleclick-listener");
+        message.addClickListener(event -> message.setText(""));
+        addCard("Click Listeners", "Item Double Click Listener", message, grid);
     }
 
     private <T> Component[] withTreeGridToggleButtons(List<T> roots,

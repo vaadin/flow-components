@@ -29,8 +29,10 @@ import com.vaadin.flow.theme.NoTheme;
 @NoTheme
 public class DisabledGridPage extends Div {
 
+    private Div message;
+
     public DisabledGridPage() {
-        Div message = new Div();
+        message = new Div();
         message.setId("message");
 
         Grid<String> grid = new Grid<>();
@@ -38,13 +40,10 @@ public class DisabledGridPage extends Div {
         grid.setItems(Arrays.asList("Item 1", "Item 2", "Item 3"));
         grid.addColumn(ValueProvider.identity()).setHeader("Item");
         grid.addColumn(new NativeButtonRenderer<>("Native button",
-                item -> message.setText(
-                        "ERROR!!! This listener should not be triggered!!!")))
-                .setHeader("Button renderer");
+                item -> reportError())).setHeader("Button renderer");
 
         NativeButton headerButton = new NativeButton("Button in header",
-                event -> message.setText(
-                        "ERROR!!! This listener should not be triggered!!!"));
+                event -> reportError());
         headerButton.setId("header-button");
         grid.prependHeaderRow().getCells().get(0).setComponent(headerButton);
 
@@ -52,7 +51,14 @@ public class DisabledGridPage extends Div {
                 event -> grid.setEnabled(!grid.isEnabled()));
         toggleEnabled.setId("toggleEnabled");
 
+        grid.addItemClickListener(event -> reportError());
+        grid.addItemDoubleClickListener(event -> reportError());
+
         add(grid, message, toggleEnabled);
+    }
+
+    private void reportError() {
+        message.setText("ERROR!!! This listener should not be triggered!!!");
     }
 
 }

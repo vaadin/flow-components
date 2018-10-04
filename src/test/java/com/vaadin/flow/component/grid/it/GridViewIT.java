@@ -749,6 +749,61 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 "Person 5");
     }
 
+    @Test
+    public void itemClickListener_singleClick_doubleClickFireClick() {
+        openTabAndCheckForErrors("click-listeners");
+
+        GridElement grid = $(GridElement.class).id("item-click-listener");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridTRElement row = grid.getRow(0);
+        row.click(10, 10);
+
+        WebElement clickInfo = findElement(By.id("clicked-item"));
+
+        Assert.assertEquals("Clicked Item: Person 1", clickInfo.getText());
+
+        // Clear the message
+        clickInfo.click();
+        // self check
+        Assert.assertEquals("", clickInfo.getText());
+
+        GridTHTDElement headerCell = grid.getHeaderCell(0);
+        headerCell.click(10, 10);
+
+        // No event
+        Assert.assertEquals("", clickInfo.getText());
+    }
+
+    @Test
+    public void itemDoubleClickListener() {
+        openTabAndCheckForErrors("click-listeners");
+
+        GridElement grid = $(GridElement.class).id("item-doubleclick-listener");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridTRElement row = grid.getRow(0);
+        row.doubleClick();
+
+        WebElement clickInfo = findElement(By.id("doubleclicked-item"));
+
+        Assert.assertEquals("Double Clicked Item: Person 1",
+                clickInfo.getText());
+
+        // Clear the message
+        clickInfo.click();
+        // self check
+        Assert.assertEquals("", clickInfo.getText());
+
+        GridTHTDElement headerCell = grid.getHeaderCell(0);
+        headerCell.doubleClick();
+
+        // No event
+        Assert.assertEquals("", clickInfo.getText());
+    }
+
     private void assertFirstCells(GridElement grid, String... cellContents) {
         IntStream.range(0, cellContents.length).forEach(i -> {
             Assert.assertEquals(cellContents[i], grid.getCell(i, 0).getText());

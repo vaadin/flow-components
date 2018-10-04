@@ -57,8 +57,7 @@ public class DisabledGridIT extends AbstractComponentIT {
         executeScript("arguments[0].disabled = false", button);
         button.click();
 
-        Assert.assertTrue("The message should be empty",
-                message.getText().isEmpty());
+        assertEmptyMessage(message);
     }
 
     @Test
@@ -72,13 +71,12 @@ public class DisabledGridIT extends AbstractComponentIT {
         Assert.assertTrue("Button in the header should be enabled",
                 headerButton.isEnabled());
 
-        findElement(By.id("toggleEnabled")).click();
+        disableGrid();
 
         executeScript("arguments[0].disabled = false", headerButton);
         headerButton.click();
 
-        Assert.assertTrue("The message should be empty",
-                message.getText().isEmpty());
+        assertEmptyMessage(message);
     }
 
     @Ignore // https://github.com/vaadin/flow/issues/3998
@@ -92,11 +90,38 @@ public class DisabledGridIT extends AbstractComponentIT {
         Assert.assertTrue("Button in the header should be enabled",
                 headerButton.isEnabled());
 
-        findElement(By.id("toggleEnabled")).click();
+        disableGrid();
 
         Assert.assertFalse(
                 "Button in the header should have 'disabled' attribute",
                 headerButton.isEnabled());
+    }
+
+    @Test
+    public void gridIsDisabled_noItemClickEvents() {
+        open();
+        WebElement message = findElement(By.id("message"));
+        GridElement grid = $(GridElement.class).id("grid");
+
+        disableGrid();
+
+        GridTRElement row = grid.getRow(0);
+        row.click(10, 10);
+
+        assertEmptyMessage(message);
+
+        row.doubleClick();
+
+        assertEmptyMessage(message);
+    }
+
+    private void disableGrid() {
+        findElement(By.id("toggleEnabled")).click();
+    }
+
+    private void assertEmptyMessage(WebElement message) {
+        Assert.assertTrue("The message should be empty",
+                message.getText().isEmpty());
     }
 
 }
