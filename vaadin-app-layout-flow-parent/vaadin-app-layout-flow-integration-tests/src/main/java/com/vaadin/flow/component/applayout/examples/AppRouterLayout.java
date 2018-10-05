@@ -12,8 +12,6 @@ import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-import java.util.function.Function;
-import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 

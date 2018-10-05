@@ -50,13 +50,23 @@ public abstract class AbstractAppRouterLayout implements RouterLayout {
         AppLayoutMenu appLayoutMenu);
 
     /**
-     * This hook is called when a navigation is being made into a route
+     * This hook is called before a navigation is being made into a route
      * which has this router layout as its parent layout.
      *
-     * @param route   route that is being navigated to
-     * @param content {@link HasElement} the content component
+     * @param route route that is being navigated to
+     * @param content  {@link HasElement} the content component being added
      */
-    protected void onNavigate(String route, HasElement content) {
+    protected void beforeNavigate(String route, HasElement content) {
+    }
+
+    /**
+     * This hook is called after a navigation is made into a route
+     * which has this router layout as its parent layout.
+     *
+     * @param route route navigated to
+     * @param content  {@link HasElement} the content component added
+     */
+    protected void afterNavigate(String route, HasElement content) {
     }
 
     @Override
@@ -64,11 +74,13 @@ public abstract class AbstractAppRouterLayout implements RouterLayout {
         final String target = UI.getCurrent().getRouter()
             .getUrl(content.getElement().getComponent().get().getClass());
 
-        onNavigate(target, content);
+        beforeNavigate(target, content);
 
         getAppLayoutMenu().getMenuItemTargetingRoute(target)
             .ifPresent(getAppLayoutMenu()::selectMenuItem);
         getAppLayout().setContent(content.getElement());
+
+        afterNavigate(target, content);
     }
 
     @Override

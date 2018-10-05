@@ -32,8 +32,13 @@ public class AbstractAppRouterLayoutTest {
         }
 
         @Override
-        protected void onNavigate(String route, HasElement content) {
-            events.add("Navigated to " + route);
+        protected void beforeNavigate(String route, HasElement content) {
+            events.add("Before nav to " + route);
+        }
+
+        @Override
+        protected void afterNavigate(String route, HasElement content) {
+            events.add("After nav to " + route);
         }
     }
 
@@ -76,9 +81,11 @@ public class AbstractAppRouterLayoutTest {
         // Simulate navigation to Route1 (which has a matching menu item)
         systemUnderTest.showRouterLayoutContent(route1);
 
-        // Ensure onNavigate() hook gets called
-        Assert
-            .assertEquals("Navigated to route1", events.get(events.size() - 1));
+        // Ensure beforeNavigate() hook gets called
+        Assert.assertEquals("Before nav to route1", events.get(1));
+
+        // Ensure afterNavigate() hook gets called
+        Assert.assertEquals("After nav to route1", events.get(2));
 
         // Ensure the matching menu item is selected
         Assert.assertEquals(route1MenuItem,
