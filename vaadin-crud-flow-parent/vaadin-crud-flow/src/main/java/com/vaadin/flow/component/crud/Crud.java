@@ -23,12 +23,14 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
@@ -60,18 +62,18 @@ import java.util.Set;
 @Tag("vaadin-crud")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud-grid-edit-column.html")
-public class Crud<E> extends Component {
-
-    private final Class<E> beanType;
-    private final Grid<E> grid;
-    private final CrudEditor<E> editor;
-    private Component footer;
+public class Crud<E> extends Component implements HasSize {
 
     private final Set<ComponentEventListener<NewEvent<E>>> newListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<SaveEvent<E>>> saveListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<CancelEvent<E>>> cancelListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<DeleteEvent<E>>> deleteListeners = new LinkedHashSet<>();
+
+    private final Class<E> beanType;
+    private final Grid<E> grid;
+    private final CrudEditor<E> editor;
+    private Component footer;
 
     /**
      * Instantiates a new Crud for the given bean type and uses the supplied editor.
@@ -225,6 +227,16 @@ public class Crud<E> extends Component {
      */
     public void setFooter(String footer) {
         setFooter(new Span(footer));
+    }
+
+    /**
+     * Sets the internationalized messages to be used by this crud instance.
+     *
+     * @param i18n the internationalized messages
+     * @see CrudI18n#createDefault()
+     */
+    public void setI18n(CrudI18n i18n) {
+        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
     }
 
     /**

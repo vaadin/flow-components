@@ -1,0 +1,25 @@
+{
+  "newItem": "New item",
+  "editItem": "Edit item",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete...",
+  "confirm": {
+    "delete": {
+      "header": "Confirm delete",
+      "message": "Are you sure you want to delete the selected item? This action cannot be undone.",
+      "button": {
+        "ok": "Delete",
+        "cancel": "Cancel"
+      }
+    },
+    "cancel": {
+      "header": "Unsaved changes",
+      "message": "There are unsaved modifications to the item.",
+      "button": {
+        "ok": "Discard",
+        "cancel": "Continue editing"
+      }
+    }
+  }
+}
