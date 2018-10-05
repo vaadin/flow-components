@@ -43,6 +43,7 @@ public class BinderCrudEditor<E> implements CrudEditor<E> {
     public void setItem(E item) {
         this.item = item;
         binder.readBean(item);
+        binder.validate();
     }
 
     @Override
