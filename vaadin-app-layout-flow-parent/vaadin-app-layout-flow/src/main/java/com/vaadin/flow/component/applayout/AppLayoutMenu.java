@@ -33,6 +33,7 @@ import java.util.Optional;
 public class AppLayoutMenu implements HasElement, AttachNotifier {
 
     private final Tabs tabs = new Tabs();
+    private final SelectionChangeListener selectionChangeListener = new SelectionChangeListener();
     private AppLayoutMenuItem selectedMenuItem;
 
     /**
@@ -40,29 +41,7 @@ public class AppLayoutMenu implements HasElement, AttachNotifier {
      */
     public AppLayoutMenu() {
         tabs.getElement().setAttribute("theme", "minimal");
-
-        tabs.addAttachListener(attachEvent -> {
-            tabs.setSelectedTab(selectedMenuItem);
-            tabs.addSelectedChangeListener(event -> {
-                final AppLayoutMenuItem selectedTab = (AppLayoutMenuItem) tabs
-                    .getSelectedTab();
-
-                if (selectedTab != null) {
-                    if (selectedTab.getRoute() == null) {
-                        // If there is no route associated, set previous tab as selected
-                        if (selectedMenuItem != null) {
-                            tabs.setSelectedTab(selectedMenuItem);
-                        } else {
-                            tabs.setSelectedIndex(-1);
-                        }
-                    } else {
-                        // Update selected tab if it is associated with a route.
-                        selectedMenuItem = selectedTab;
-                    }
-                    selectedTab.fireMenuItemClickEvent();
-                }
-            });
-        });
+        tabs.addSelectedChangeListener(selectionChangeListener);
     }
 
     /**
@@ -81,7 +60,15 @@ public class AppLayoutMenu implements HasElement, AttachNotifier {
      * @param menuItems items of the type {@link AppLayoutMenuItem} to add
      */
     public void addMenuItems(AppLayoutMenuItem... menuItems) {
-        tabs.add(menuItems);
+        try {
+            selectionChangeListener.enabled = false;
+            tabs.add(menuItems);
+        } finally {
+            selectionChangeListener.enabled = true;
+        }
+        if (selectedMenuItem == null) {
+            tabs.setSelectedIndex(-1);
+        }
     }
 
     /**
@@ -218,5 +205,33 @@ public class AppLayoutMenu implements HasElement, AttachNotifier {
     @Override
     public Element getElement() {
         return tabs.getElement();
+    }
+
+    private class SelectionChangeListener
+        implements ComponentEventListener<Tabs.SelectedChangeEvent> {
+
+        private boolean enabled = true;
+
+        @Override
+        public void onComponentEvent(Tabs.SelectedChangeEvent event) {
+
+            final AppLayoutMenuItem selectedTab = (AppLayoutMenuItem) tabs
+                .getSelectedTab();
+
+            if (enabled && selectedTab != null) {
+                if (selectedTab.getRoute() == null) {
+                    // If there is no route associated, set previous tab as selected
+                    if (selectedMenuItem != null) {
+                        tabs.setSelectedTab(selectedMenuItem);
+                    } else {
+                        tabs.setSelectedIndex(-1);
+                    }
+                } else {
+                    // Update selected tab if it is associated with a route.
+                    selectedMenuItem = selectedTab;
+                }
+                selectedTab.fireMenuItemClickEvent();
+            }
+        }
     }
 }
