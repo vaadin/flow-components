@@ -26,9 +26,9 @@ Add App Layout to your project:
 ```java
 public class AppLayoutView extends AbstractAppRouterLayout {
     @Override
-    protected void configure(AppLayout appLayout) {
+    protected void configure(AppLayout appLayout, AppLayoutMenu appLayoutMenu) {
         appLayout.setBranding(new Span("App Name").getElement());
-        appLayout.addMenuItem(new AppLayoutMenuItem("About Company", "about"));
+        appLayoutMenu.addMenuItem(new AppLayoutMenuItem("About Company", "about"));
     }
 }
 /* Annotate AboutPage with @ParentLayout(AppLayoutView.class) */

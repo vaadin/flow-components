@@ -2,6 +2,7 @@ package com.vaadin.flow.component.applayout.vaadincom;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.AppLayoutMenu;
 import com.vaadin.flow.component.applayout.AppLayoutMenuItem;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
@@ -38,11 +39,12 @@ public class AppLayoutView extends DemoView {
         // begin-source-example
         // source-example-heading: Simple App Layout with brand logo
         AppLayout appLayout = new AppLayout();
+        AppLayoutMenu menu = appLayout.createMenu();
         Image img = new Image("https://i.imgur.com/GPpnszs.png", "Vaadin Logo");
         img.setHeight("44px");
         appLayout.setBranding(img);
 
-        appLayout.addMenuItems(new AppLayoutMenuItem("Page 1", "page1"),
+        menu.addMenuItems(new AppLayoutMenuItem("Page 1", "page1"),
             new AppLayoutMenuItem("Page 2", "page2"),
             new AppLayoutMenuItem("Page 3", "page3"),
             new AppLayoutMenuItem("Page 4", "page4"));
@@ -61,8 +63,9 @@ public class AppLayoutView extends DemoView {
         // begin-source-example
         // source-example-heading: App Layout with Action Menu Item
         AppLayout appLayout = new AppLayout();
+        AppLayoutMenu menu = appLayout.createMenu();
 
-        appLayout.addMenuItems(
+        menu.addMenuItems(
             new AppLayoutMenuItem(VaadinIcon.USER.create(),"My Profile","profile"),
             new AppLayoutMenuItem(VaadinIcon.TRENDING_UP.create(),"Trending Topics","trends"),
             new AppLayoutMenuItem(VaadinIcon.SIGN_OUT.create(),"Sign Out", e -> logout()));

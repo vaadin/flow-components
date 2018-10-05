@@ -176,7 +176,7 @@ public class AppLayoutMenuItem extends Tab {
     /**
      * Sets the route to be navigated to when this menu item is selected.
      *
-     * @param route
+     * @param route Route to be navigated to
      */
     public void setRoute(String route) {
         this.route = route;

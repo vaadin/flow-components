@@ -17,16 +17,13 @@ package com.vaadin.flow.component.applayout;
  * #L%
  */
 
-import com.helger.commons.annotation.VisibleForTesting;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Server-side component for the {@code <vaadin-app-layout>} element.
@@ -38,29 +35,21 @@ public class AppLayout extends Component {
 
     private Element branding;
     private Element content;
-
-    private final AppLayoutMenu menuTabs = new AppLayoutMenu();
-
-    /**
-     * Initializes a new app layout with a default menu.
-     */
-    public AppLayout() {
-        getElement().appendChild(menuTabs.getElement());
-    }
+    private Element menu;
 
     /**
      * Sets the component into branding area
      *
-     * @param branding Component to set into branding area
+     * @param branding {@link Component} to set into branding area
      */
     public void setBranding(Component branding) {
-        setBranding(branding != null ? branding.getElement() : null);
+        setBranding(toElement(branding));
     }
 
     /**
      * Sets the element into branding area
      *
-     * @param branding Element to set into branding area
+     * @param branding {@link Element} to set into branding area
      */
     public void setBranding(Element branding) {
         Objects.requireNonNull(branding, "Branding cannot be null");
@@ -82,139 +71,7 @@ public class AppLayout extends Component {
     }
 
     /**
-     * Selects a menu item.
-     */
-    void selectMenuItem(AppLayoutMenuItem menuItem) {
-        menuTabs.selectMenuItem(menuItem);
-    }
-
-    /**
-     * Clears existing menu items and sets the new the arguments.
-     *
-     * @param menuItems menu items to set.
-     */
-    public void setMenuItems(AppLayoutMenuItem... menuItems) {
-        menuTabs.setMenuItems(menuItems);
-    }
-
-    /**
-     * Adds menu item to the menu
-     *
-     * @param menuItem Menu Item to add
-     */
-    public void addMenuItems(AppLayoutMenuItem... menuItem) {
-        menuTabs.addMenuItems(menuItem);
-    }
-
-    /**
-     * Constructs a new object with the given title.
-     *
-     * @param title the title to display
-     */
-    public AppLayoutMenuItem addMenuItem(String title) {
-        return addAndReturn(new AppLayoutMenuItem(title));
-    }
-
-    /**
-     * Constructs a new object with the given icon.
-     *
-     * @param icon the icon to display
-     */
-    public AppLayoutMenuItem addMenuItem(Component icon) {
-        return addAndReturn(new AppLayoutMenuItem(icon));
-    }
-
-    /**
-     * Constructs a new object with the given icon and title.
-     *
-     * @param icon  the icon to display
-     * @param title the title to display
-     */
-    public AppLayoutMenuItem addMenuItem(Component icon, String title) {
-        return addAndReturn(new AppLayoutMenuItem(icon, title));
-    }
-
-    /**
-     * Constructs a new object with the given icon, title and route.
-     *
-     * @param icon  the icon to display
-     * @param title the title to display
-     * @param route the route to navigate on click
-     */
-    public AppLayoutMenuItem addMenuItem(Component icon, String title,
-        String route) {
-        return addAndReturn(new AppLayoutMenuItem(icon, title, route));
-    }
-
-    /**
-     * Constructs a new object with the given icon and click listener.
-     *
-     * @param icon     the icon to display
-     * @param listener the menu item click listener
-     */
-    public AppLayoutMenuItem addMenuItem(Component icon,
-        ComponentEventListener<MenuItemClickEvent> listener) {
-        return addAndReturn(new AppLayoutMenuItem(icon, listener));
-    }
-
-    /**
-     * Constructs a new object with the given title and click listener.
-     *
-     * @param title    the title to display
-     * @param listener the menu item click listener
-     */
-    public AppLayoutMenuItem addMenuItem(String title,
-        ComponentEventListener<MenuItemClickEvent> listener) {
-        return addAndReturn(new AppLayoutMenuItem(title, listener));
-    }
-
-    /**
-     * Constructs a new object with the given icon, title and click listener.
-     *
-     * @param icon     the icon to display
-     * @param title    the title to display
-     * @param listener the menu item click listener
-     */
-    public AppLayoutMenuItem addMenuItem(Component icon, String title,
-        ComponentEventListener<MenuItemClickEvent> listener) {
-        return addAndReturn(new AppLayoutMenuItem(icon, title, listener));
-    }
-
-    private AppLayoutMenuItem addAndReturn(AppLayoutMenuItem item) {
-        addMenuItems(item);
-        return item;
-    }
-
-    /**
-     * Removes menu item from the menu
-     */
-    public void removeMenuItem(AppLayoutMenuItem menuItem) {
-        menuTabs.removeMenuItem(menuItem);
-    }
-
-    /**
-     * Removes all menu items.
-     */
-    public void clearMenuItems() {
-        menuTabs.clearMenuItems();
-    }
-
-    /**
-     * Gets the first {@link AppLayoutMenuItem} targeting a route.
-     */
-    Optional<AppLayoutMenuItem> getMenuItemTargetingRoute(String route) {
-        return menuTabs.getMenuItemTargetingRoute(route);
-    }
-
-    /**
-     * Gets the currently selected menu item.
-     */
-    public AppLayoutMenuItem getSelectedMenuItem() {
-        return menuTabs.getSelectedMenuItem();
-    }
-
-    /**
-     * Returns a content
+     * Returns the {@link Element}
      */
     public Element getContent() {
         return content;
@@ -223,16 +80,16 @@ public class AppLayout extends Component {
     /**
      * Sets the displayed content.
      *
-     * @param content Component to display in the content area
+     * @param content {@link Component} to display in the content area
      */
     public void setContent(Component content) {
-        setContent(content != null ? content.getElement() : null);
+        setContent(toElement(content));
     }
 
     /**
      * Sets the displayed content.
      *
-     * @param content Element to display in the content area
+     * @param content {@link Element} to display in the content area
      */
     public void setContent(Element content) {
         Objects.requireNonNull(content, "Content cannot be null");
@@ -251,14 +108,62 @@ public class AppLayout extends Component {
         this.content = null;
     }
 
+    /**
+     * @return {@link Element} displayed at the content area.
+     */
+    public Element getMenu() {
+        return menu;
+    }
+
+    /**
+     * Sets the component to be placed in the menu slot.
+     *
+     * @param menu {@link HasElement} to placed in the menu slot.
+     */
+    public void setMenu(HasElement menu) {
+        setMenu(toElement(menu));
+    }
+
+    /**
+     * Sets the element to be placed in the menu slot.
+     *
+     * @param menu {@link Element} to placed in the menu slot.
+     */
+    public void setMenu(Element menu) {
+        Objects.requireNonNull(menu, "Menu cannot be null");
+
+        removeMenu();
+        this.menu = menu;
+        menu.setAttribute("slot", "menu");
+        getElement().appendChild(menu);
+    }
+
+    /**
+     * Creates a new empty AppLayoutMenu and sets it as the menu for this AppLayout instance.
+     *
+     * @return {@link AppLayoutMenu} created.
+     */
+    public AppLayoutMenu createMenu() {
+        final AppLayoutMenu menu = new AppLayoutMenu();
+        setMenu(menu);
+        return menu;
+    }
+
+    /**
+     * Remove the menu.
+     */
+    public void removeMenu() {
+        remove(this.menu);
+        this.menu = null;
+    }
+
     private void remove(Element element) {
         if (element != null) {
             element.removeFromParent();
         }
     }
 
-    @VisibleForTesting
-    HasElement getMenu() {
-        return menuTabs;
+    private static Element toElement(HasElement hasElement) {
+        return hasElement != null ? hasElement.getElement() : null;
     }
 }

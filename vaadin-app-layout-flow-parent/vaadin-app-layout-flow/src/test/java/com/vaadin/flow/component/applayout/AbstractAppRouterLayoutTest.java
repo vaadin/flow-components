@@ -26,7 +26,8 @@ public class AbstractAppRouterLayoutTest {
     public class TestAppRouterLayout extends AbstractAppRouterLayout {
 
         @Override
-        protected void configure(AppLayout appLayout) {
+        protected void configure(AppLayout appLayout,
+            AppLayoutMenu appLayoutMenu) {
             events.add("Configured");
         }
 
@@ -67,7 +68,7 @@ public class AbstractAppRouterLayoutTest {
 
         AppLayoutMenuItem route1MenuItem = new AppLayoutMenuItem("Route 1",
             "route1");
-        systemUnderTest.getAppLayout().addMenuItems(route1MenuItem,
+        systemUnderTest.getAppLayoutMenu().addMenuItems(route1MenuItem,
             new AppLayoutMenuItem("Dummy", "dummy"));
 
         Route1 route1 = new Route1();
@@ -81,7 +82,7 @@ public class AbstractAppRouterLayoutTest {
 
         // Ensure the matching menu item is selected
         Assert.assertEquals(route1MenuItem,
-            systemUnderTest.getAppLayout().getSelectedMenuItem());
+            systemUnderTest.getAppLayoutMenu().getSelectedMenuItem());
         Assert.assertEquals(route1.getElement(),
             systemUnderTest.getAppLayout().getContent());
 
@@ -90,7 +91,7 @@ public class AbstractAppRouterLayoutTest {
 
         // Ensure selected menu item remains unchanged
         Assert.assertEquals(route1MenuItem,
-            systemUnderTest.getAppLayout().getSelectedMenuItem());
+            systemUnderTest.getAppLayoutMenu().getSelectedMenuItem());
     }
 
     private void setupFlowRouting() {

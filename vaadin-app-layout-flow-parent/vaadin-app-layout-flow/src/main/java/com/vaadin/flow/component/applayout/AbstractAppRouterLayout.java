@@ -27,43 +27,47 @@ import com.vaadin.flow.router.RouterLayout;
  * Basic usage involves extending this class and implementing
  * the {@code configure} method.
  *
- * @see AbstractAppRouterLayout#configure(AppLayout)
+ * @see AbstractAppRouterLayout#configure(AppLayout, AppLayoutMenu)
  */
 public abstract class AbstractAppRouterLayout implements RouterLayout {
 
     private AppLayout appLayout = new AppLayout();
 
+    private AppLayoutMenu appLayoutMenu = appLayout.createMenu();
+
     protected AbstractAppRouterLayout() {
-        configure(getAppLayout());
+        configure(getAppLayout(), getAppLayoutMenu());
     }
 
     /**
      * This hook is called when this router layout is being constructed
      * and provides an opportunity to configure the AppLayout in use.
      *
-     * @param appLayout {@link AppLayout} to configure.
+     * @param appLayout {@link AppLayout} parent layout
+     * @param appLayoutMenu {@link AppLayoutMenu} to configure.
      */
-    protected abstract void configure(AppLayout appLayout);
+    protected abstract void configure(AppLayout appLayout,
+        AppLayoutMenu appLayoutMenu);
 
     /**
      * This hook is called when a navigation is being made into a route
      * which has this router layout as its parent layout.
      *
-     * @param route route that is being navigated to
-     * @param content the content component
+     * @param route   route that is being navigated to
+     * @param content {@link HasElement} the content component
      */
     protected void onNavigate(String route, HasElement content) {
     }
 
     @Override
     public void showRouterLayoutContent(HasElement content) {
-        final String target = UI.getCurrent().getRouter().getUrl(
-                content.getElement().getComponent().get().getClass());
+        final String target = UI.getCurrent().getRouter()
+            .getUrl(content.getElement().getComponent().get().getClass());
 
         onNavigate(target, content);
 
-        getAppLayout().getMenuItemTargetingRoute(target)
-                .ifPresent(getAppLayout()::selectMenuItem);
+        getAppLayoutMenu().getMenuItemTargetingRoute(target)
+            .ifPresent(getAppLayoutMenu()::selectMenuItem);
         getAppLayout().setContent(content.getElement());
     }
 
@@ -73,9 +77,17 @@ public abstract class AbstractAppRouterLayout implements RouterLayout {
     }
 
     /**
-     * Returns an application layout instance
+     * @return {@link AppLayout} parent layout
      */
     public AppLayout getAppLayout() {
         return appLayout;
+    }
+
+    /**
+     *
+     * @return {@link AppLayoutMenu} which will be updated on navigation.
+     */
+    public AppLayoutMenu getAppLayoutMenu() {
+        return appLayoutMenu;
     }
 }
