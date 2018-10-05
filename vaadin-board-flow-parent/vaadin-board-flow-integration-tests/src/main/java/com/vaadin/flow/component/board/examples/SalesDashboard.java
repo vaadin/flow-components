@@ -270,30 +270,30 @@ public class SalesDashboard extends Div {
 
         DataSeries dataSeries = new DataSeries("Unique users");
 
-        DataSeriesItem dataLead = new DataSeriesItem("Leads", 1);
+        DataSeriesItem dataLead = new DataSeriesItem("", 1);
         dataLead.setX(2543);
         dataSeries.add(dataLead);
 
         DataSeriesItem dataMarketing = new DataSeriesItem(
-                "Marketing qualified lead", 1);
+                "", 1);
         dataMarketing.setX(1264);
         dataSeries.add(dataMarketing);
 
-        DataSeriesItem dataSales = new DataSeriesItem("Sales qualified lead",
+        DataSeriesItem dataSales = new DataSeriesItem("",
                 1);
         dataSales.setX(305);
         dataSeries.add(dataSales);
 
-        DataSeriesItem dataCustomer = new DataSeriesItem("Customer engagement",
+        DataSeriesItem dataCustomer = new DataSeriesItem("",
                 1);
         dataCustomer.setX(141);
         dataSeries.add(dataCustomer);
 
-        DataSeriesItem dataOpportunity = new DataSeriesItem("Opportunity", 1);
+        DataSeriesItem dataOpportunity = new DataSeriesItem("", 1);
         dataOpportunity.setX(65);
         dataSeries.add(dataOpportunity);
 
-        DataSeriesItem dataClosed = new DataSeriesItem("Closed / Won", 1);
+        DataSeriesItem dataClosed = new DataSeriesItem("", 1);
         dataClosed.setX(34);
         dataSeries.add(dataClosed);
 
