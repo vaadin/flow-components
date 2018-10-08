@@ -49,7 +49,7 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-crud</artifactId>
-            <version>1.0.0-alpha3</version>
+            <version>1.0.0-alpha4</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.webjars.bowergithub.vaadin</groupId>

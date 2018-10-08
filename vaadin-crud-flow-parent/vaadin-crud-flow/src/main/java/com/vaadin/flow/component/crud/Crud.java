@@ -61,7 +61,7 @@ import java.util.Set;
  */
 @Tag("vaadin-crud")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
-@HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud-grid-edit-column.html")
+@HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud-edit-column.html")
 public class Crud<E> extends Component implements HasSize {
 
     private final Set<ComponentEventListener<NewEvent<E>>> newListeners = new LinkedHashSet<>();
@@ -173,7 +173,7 @@ public class Crud<E> extends Component implements HasSize {
      * @param opened true to open or false to close
      */
     public void setOpened(boolean opened) {
-        getElement().callFunction("set", "opened", opened);
+        getElement().callFunction("set", "editorOpened", opened);
     }
 
     public Grid<E> getGrid() {
@@ -322,7 +322,7 @@ public class Crud<E> extends Component implements HasSize {
      */
     public static void addEditColumn(Grid grid) {
         grid.addColumn(
-                TemplateRenderer.of("<vaadin-crud-grid-edit></vaadin-crud-grid-edit>"))
+                TemplateRenderer.of("<vaadin-crud-edit></vaadin-crud-edit>"))
                 .setWidth("40px")
                 .setFlexGrow(0);
     }
