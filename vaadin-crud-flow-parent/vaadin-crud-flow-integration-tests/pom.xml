@@ -90,6 +90,11 @@
             <artifactId>vaadin-form-layout-flow</artifactId>
             <version>1.0.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-ordered-layout-flow</artifactId>
+            <version>1.0.3</version>
+        </dependency>
 
         <!--Webjars-->
         <dependency>
@@ -131,7 +136,7 @@
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty.plugin.version}</version>
                 <configuration>
-                    <skip>${skipTests}</skip>
+                    <skip>${skipITs}</skip>
                     <scanIntervalSeconds>2</scanIntervalSeconds>
                     <stopKey>STOP</stopKey>
                     <stopPort>8005</stopPort>

@@ -1,6 +1,7 @@
-package com.vaadin.flow.component.crud.examples;
+package com.vaadin.flow.component.crud.examples.basic;
 
 import com.vaadin.flow.component.crud.CrudFilter;
+import com.vaadin.flow.component.crud.examples.Person;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -24,7 +25,7 @@ import static java.util.stream.Collectors.toList;
 class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFilter> {
 
     // A real app should hook up something like JPA
-    private static final List<Person> DATABASE = IntStream
+    private List<Person> database = IntStream
             .rangeClosed(1, 10)
             .mapToObj(i -> new Person(i, randomName(), randomName()))
             .collect(toList());
@@ -45,12 +46,16 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFil
                 result.substring(0, 1).toUpperCase()).toString();
     }
 
+    public void setDatabase(List<Person> database) {
+        this.database = database;
+    }
+
     @Override
     protected Stream<Person> fetchFromBackEnd(Query<Person, CrudFilter> query) {
         int offset = query.getOffset();
         int limit = query.getLimit();
 
-        Stream<Person> stream = DATABASE.stream();
+        Stream<Person> stream = database.stream();
 
         if (query.getFilter().isPresent()) {
             stream = stream
@@ -128,7 +133,7 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFil
 
     void persist(Person item) {
         if (item.getId() == null) {
-            item.setId(DATABASE
+            item.setId(database
                     .stream()
                     .map(Person::getId)
                     .max(naturalOrder())
@@ -137,22 +142,22 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFil
 
         final Optional<Person> existingItem = find(item.getId());
         if (existingItem.isPresent()) {
-            int position = DATABASE.indexOf(existingItem.get());
-            DATABASE.remove(existingItem.get());
-            DATABASE.add(position, item);
+            int position = database.indexOf(existingItem.get());
+            database.remove(existingItem.get());
+            database.add(position, item);
         } else {
-            DATABASE.add(item);
+            database.add(item);
         }
     }
 
     Optional<Person> find(Integer id) {
-        return DATABASE
+        return database
                 .stream()
                 .filter(entity -> entity.getId().equals(id))
                 .findFirst();
     }
 
     void delete(Person item) {
-        DATABASE.removeIf(entity -> entity.getId().equals(item.getId()));
+        database.removeIf(entity -> entity.getId().equals(item.getId()));
     }
 }

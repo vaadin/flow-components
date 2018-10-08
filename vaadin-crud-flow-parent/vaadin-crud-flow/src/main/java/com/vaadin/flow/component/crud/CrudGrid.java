@@ -66,6 +66,7 @@ public class CrudGrid<E> extends Grid<E> {
         final HeaderRow filterRow = this.appendHeaderRow();
         getColumns().forEach(column -> {
             final TextField field = new TextField();
+            field.getElement().setAttribute("crud-role", "Search");
 
             field.addValueChangeListener(event -> {
                 filter.getConstraints().remove(column.getKey());
@@ -96,7 +97,16 @@ public class CrudGrid<E> extends Grid<E> {
     }
 
     /**
-     * Returns the data provider set to the grid.
+     * Gets the filter applied to this grid
+     *
+     * @return the filter
+     */
+    public CrudFilter getFilter() {
+        return filter;
+    }
+
+    /**
+     * Gets the data provider set to the grid.
      *
      * @return the data provider of this grid, not {@code null}
      */
