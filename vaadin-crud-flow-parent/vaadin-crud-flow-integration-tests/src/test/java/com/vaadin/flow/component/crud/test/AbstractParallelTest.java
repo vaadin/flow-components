@@ -3,6 +3,8 @@ package com.vaadin.flow.component.crud.test;
 import java.util.Arrays;
 import java.util.List;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
 import org.junit.Assert;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Platform;
@@ -74,4 +76,19 @@ public abstract class AbstractParallelTest extends ParallelTest {
                 BrowserUtil.chrome(), BrowserUtil.edge(), BrowserUtil.safari());
     }
 
+    protected ButtonElement getButton(String id) {
+        return $(ButtonElement.class).onPage().all()
+                .stream()
+                .filter(e -> e.getAttribute("id").equals(id))
+                .findAny()
+                .get();
+    }
+
+    protected ButtonElement getNewButton() {
+        return $("vaadin-crud").first().$(ButtonElement.class).id("new");
+    }
+
+    protected String getLastEvent() {
+        return $(VerticalLayoutElement.class).last().$("span").last().getText();
+    }
 }

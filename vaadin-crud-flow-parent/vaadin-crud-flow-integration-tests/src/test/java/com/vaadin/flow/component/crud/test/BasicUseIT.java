@@ -27,7 +27,7 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Test
     public void dataPresentInGrid() {
-        Assert.assertEquals(10, $(GridElement.class).first().getRowCount());
+        Assert.assertEquals(3, $(GridElement.class).first().getRowCount());
     }
 
     @Test
@@ -55,8 +55,7 @@ public class BasicUseIT extends AbstractParallelTest {
         ButtonElement showFilterButton = getButton("showFilter");
         showFilterButton.click();
 
-        Assert.assertEquals("{firstName=Me, lastName=You}{}",
-                $(VerticalLayoutElement.class).last().$("span").last().getText());
+        Assert.assertEquals("{firstName=Me, lastName=You}{}", getLastEvent());
     }
 
     @Test
@@ -78,32 +77,19 @@ public class BasicUseIT extends AbstractParallelTest {
         ButtonElement showFilterButton = getButton("showFilter");
         showFilterButton.click();
 
-        Assert.assertEquals("{}{lastName=ASCENDING, firstName=ASCENDING}",
-                $(VerticalLayoutElement.class).last().$("span").last().getText());
+        Assert.assertEquals("{}{lastName=ASCENDING, firstName=ASCENDING}", getLastEvent());
     }
 
     @Test
     public void i18n() {
-        Assert.assertEquals("New item",
-                $("vaadin-crud").first().$(ButtonElement.class).id("new").getText());
-
+        Assert.assertEquals("New item", getNewButton().getText());
         getButton("updateI18n").click();
-
-        Assert.assertEquals("Eeyan titun",
-                $("vaadin-crud").first().$(ButtonElement.class).id("new").getText());
+        Assert.assertEquals("Eeyan titun", getNewButton().getText());
     }
 
     @Test
     public void footer() {
-        Assert.assertEquals("10 items available",
+        Assert.assertEquals("3 items available",
                 $("span").onPage().first().getText());
-    }
-
-    private ButtonElement getButton(String id) {
-        return $(ButtonElement.class).onPage().all()
-                .stream()
-                .filter(e -> e.getAttribute("id").equals(id))
-                .findAny()
-                .get();
     }
 }

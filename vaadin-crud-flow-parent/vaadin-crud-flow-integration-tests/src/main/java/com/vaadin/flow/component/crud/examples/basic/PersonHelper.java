@@ -11,7 +11,11 @@ class PersonHelper {
 
     static CrudEditor<Person> createPersonEditor() {
         TextField firstName = new TextField("First name");
+        firstName.getElement().setAttribute("editor-role", "first-name");
+
         TextField lastName = new TextField("Last name");
+        lastName.getElement().setAttribute("editor-role", "last-name");
+
         FormLayout form = new FormLayout(firstName, lastName);
 
         Binder<Person> binder = new Binder<>(Person.class);

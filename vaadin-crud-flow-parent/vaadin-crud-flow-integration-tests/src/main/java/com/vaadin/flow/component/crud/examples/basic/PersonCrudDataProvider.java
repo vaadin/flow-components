@@ -10,41 +10,26 @@ import java.lang.reflect.Field;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.naturalOrder;
-import static java.util.stream.Collectors.toList;
 
 /**
  * A dummy data provider. DO NOT DO THIS IN A PRODUCTION APP!
  */
-class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFilter> {
+public class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFilter> {
 
     // A real app should hook up something like JPA
-    private List<Person> database = IntStream
-            .rangeClosed(1, 10)
-            .mapToObj(i -> new Person(i, randomName(), randomName()))
-            .collect(toList());
+    private List<Person> database = Stream.of(
+            new Person(1, "Sayo", "Sayo"),
+            new Person(2, "Manolo", "Manolo"),
+            new Person(3, "Guille", "Guille")
+    ).collect(Collectors.toList());
 
     private Consumer<Long> sizeChangeListener;
-
-    private static String randomName() {
-        Random random = new Random();
-        StringBuilder result = new StringBuilder();
-
-        int length = 4 + random.nextInt(6);
-
-        for (int a = 0; a < length; a++) {
-            result.append((char) ('a' + random.nextInt(26)));
-        }
-
-        return result.replace(0, 1,
-                result.substring(0, 1).toUpperCase()).toString();
-    }
 
     public void setDatabase(List<Person> database) {
         this.database = database;

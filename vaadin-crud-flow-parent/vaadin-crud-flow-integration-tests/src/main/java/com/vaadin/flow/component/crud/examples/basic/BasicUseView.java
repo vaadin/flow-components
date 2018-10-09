@@ -20,7 +20,12 @@ import static com.vaadin.flow.component.crud.examples.basic.PersonHelper.createP
 @BodySize(height = "100vh", width = "100vw")
 public class BasicUseView extends VerticalLayout {
 
+    final VerticalLayout eventsPanel;
+
     public BasicUseView() {
+        eventsPanel = new VerticalLayout();
+        eventsPanel.setId("events");
+
         final Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
 
         final PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
@@ -29,26 +34,35 @@ public class BasicUseView extends VerticalLayout {
 
         crud.setDataProvider(dataProvider);
 
-        final VerticalLayout eventsPanel = new VerticalLayout();
-        eventsPanel.setId("events");
-
-        final Button showFiltersButton = new Button("Show filter", event -> {
+        final Button showFiltersButton = new Button("Show filter");
+        showFiltersButton.setId("showFilter");
+        showFiltersButton.addClickListener(event -> {
             CrudGrid<Person> grid = (CrudGrid<Person>) crud.getGrid();
             CrudFilter filter = grid.getFilter();
             String filterString = filter.getConstraints().toString()
                     + filter.getSortOrders().toString();
 
-            Span entry = new Span();
-            entry.setText(filterString);
-            eventsPanel.add(entry);
+            addEvent(filterString);
         });
-        showFiltersButton.setId("showFilter");
 
         final Button updateI18nButton = new Button("Switch to Yoruba",
                 event -> crud.setI18n(createYorubaI18n()));
         updateI18nButton.setId("updateI18n");
 
+        crud.addNewListener(e -> addEvent("New: " + e.getItem()));
+        crud.addEditListener(e -> addEvent("Edit: " + e.getItem()));
+        crud.addCancelListener(e -> addEvent("Cancel: " + e.getItem()));
+        crud.addDeleteListener(e -> addEvent("Delete: " + e.getItem()));
+        crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
+        crud.addSaveListener(e -> addEvent("Save: " + e.getItem()));
+        crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
+
+        setHeight("100%");
         add(crud, showFiltersButton, updateI18nButton, eventsPanel);
+    }
+
+    private void addEvent(String event) {
+        eventsPanel.add(new Span(event));
     }
 
     private CrudI18n createYorubaI18n() {
