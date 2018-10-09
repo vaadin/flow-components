@@ -17,10 +17,12 @@ package com.vaadin.flow.component.applayout;
  * #L%
  */
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLayout;
+import com.vaadin.flow.router.RouteNotFoundError;
 
 /**
  * Convenience class for using an AppLayout as a parent layout in a Flow application.
@@ -71,15 +73,19 @@ public abstract class AbstractAppRouterLayout implements RouterLayout {
 
     @Override
     public void showRouterLayoutContent(HasElement content) {
-        final String target = UI.getCurrent().getRouter()
-            .getUrl(content.getElement().getComponent().get().getClass());
+        Component component = content.getElement().getComponent().get();
+        String target = null;
+        if (component instanceof RouteNotFoundError) {
+            getAppLayoutMenu().selectMenuItem(null);
+        } else {
+            target = UI.getCurrent().getRouter()
+                    .getUrl(component.getClass());
 
+            getAppLayoutMenu().getMenuItemTargetingRoute(target)
+                    .ifPresent(getAppLayoutMenu()::selectMenuItem);
+        }
         beforeNavigate(target, content);
-
-        getAppLayoutMenu().getMenuItemTargetingRoute(target)
-            .ifPresent(getAppLayoutMenu()::selectMenuItem);
         getAppLayout().setContent(content.getElement());
-
         afterNavigate(target, content);
     }
 

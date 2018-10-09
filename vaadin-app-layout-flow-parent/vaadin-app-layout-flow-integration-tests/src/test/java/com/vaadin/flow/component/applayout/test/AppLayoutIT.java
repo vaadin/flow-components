@@ -105,4 +105,14 @@ public class AppLayoutIT extends AbstractParallelTest {
 
         Assert.assertNotEquals(initialSelectionTitle, selectionTitleAfterActionClick);
     }
+
+    @Test
+    public void navigateToNotFound() {
+        getDriver().get(getBaseURL() + "/nonexistingpage");
+        Assert.assertTrue($(AppLayoutElement.class).waitForFirst().getContent()
+                .getText().contains("Could not navigate to"));
+
+        Assert.assertFalse($(AppLayoutElement.class).first().getMenu().$(MenuItemElement.class)
+                .attribute("selected", "").exists());
+    }
 }
