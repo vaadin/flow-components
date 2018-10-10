@@ -2,7 +2,6 @@ package com.vaadin.flow.component.crud.test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
@@ -77,7 +76,7 @@ public class BasicUseIT extends AbstractParallelTest {
         ButtonElement showFilterButton = getButton("showFilter");
         showFilterButton.click();
 
-        Assert.assertEquals("{}{lastName=ASCENDING, firstName=ASCENDING}", getLastEvent());
+        Assert.assertEquals("{}{lastName=DESCENDING, firstName=ASCENDING}", getLastEvent());
     }
 
     @Test
@@ -91,5 +90,21 @@ public class BasicUseIT extends AbstractParallelTest {
     public void footer() {
         Assert.assertEquals("3 items available",
                 $("span").onPage().first().getText());
+    }
+
+    @Test
+    public void filterSearchBar() {
+        getDriver().get(getBaseURL() + "/SearchBar");
+
+        GridElement grid = $(GridElement.class).waitForFirst();
+        Assert.assertEquals(3, grid.getRowCount());
+        TextFieldElement searchBar = $(TextFieldElement.class).waitForFirst();
+
+        searchBar.setValue("ll");
+        waitUntil(c -> grid.getRowCount() == 1);
+        searchBar.setValue("");
+        waitUntil(c -> grid.getRowCount() == 3);
+        searchBar.setValue("o");
+        waitUntil(c -> grid.getRowCount() == 2);
     }
 }

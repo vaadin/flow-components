@@ -23,11 +23,15 @@ import static java.util.Comparator.naturalOrder;
 public class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFilter> {
 
     // A real app should hook up something like JPA
-    private List<Person> database = Stream.of(
+    private List<Person> database = generatePersonsList();
+
+    public static List<Person> generatePersonsList() {
+        return Stream.of(
             new Person(1, "Sayo", "Sayo"),
             new Person(2, "Manolo", "Manolo"),
             new Person(3, "Guille", "Guille")
-    ).collect(Collectors.toList());
+        ).collect(Collectors.toList());
+    }
 
     private Consumer<Long> sizeChangeListener;
 
@@ -74,7 +78,7 @@ public class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, 
                     try {
                         Object value = valueOf(constraint.getKey(), person);
                         return value != null && value.toString().toLowerCase()
-                                .startsWith(constraint.getValue().toLowerCase());
+                                .contains(constraint.getValue().toLowerCase());
                     } catch (Exception e) {
                         e.printStackTrace();
                         return false;
