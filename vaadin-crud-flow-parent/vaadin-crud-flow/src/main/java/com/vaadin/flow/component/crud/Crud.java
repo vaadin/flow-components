@@ -323,7 +323,7 @@ public class Crud<E> extends Component implements HasSize {
     public static void addEditColumn(Grid grid) {
         grid.addColumn(
                 TemplateRenderer.of("<vaadin-crud-edit></vaadin-crud-edit>"))
-                .setWidth("40px")
+                .setWidth("4em")
                 .setFlexGrow(0);
     }
 
