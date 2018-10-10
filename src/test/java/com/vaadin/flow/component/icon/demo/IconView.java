@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.icon.demo;
 
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -36,6 +37,7 @@ public class IconView extends DemoView {
     public void initView() {
         createBasicIconsView();
         createStyledIconView();
+        createClickableIconsView();
         createAllIconsView();
     }
 
@@ -65,6 +67,28 @@ public class IconView extends DemoView {
         addCard("Styling an icon", logo);
 
         logo.setId("logo-icon");
+    }
+
+    private void createClickableIconsView() {
+        // begin-source-example
+        // source-example-heading: Clickable icons
+        Div message = new Div();
+        Icon logoV = new Icon(VaadinIcon.VAADIN_V);
+        logoV.getStyle().set("cursor", "pointer");
+        logoV.addClickListener(
+                event -> message.setText("The VAADIN_V icon was clicked!"));
+
+        Icon logoH = new Icon(VaadinIcon.VAADIN_H);
+        logoH.getStyle().set("cursor", "pointer");
+        logoH.addClickListener(
+                event -> message.setText("The VAADIN_H icon was clicked!"));
+        // end-source-example
+
+        addCard("Clickable icons", new HorizontalLayout(logoV, logoH), message);
+
+        logoV.setId("clickable-v-icon");
+        logoH.setId("clickable-h-icon");
+        message.setId("clickable-message");
     }
 
     private void createAllIconsView() {

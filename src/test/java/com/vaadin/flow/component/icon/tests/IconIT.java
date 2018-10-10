@@ -50,6 +50,24 @@ public class IconIT extends ComponentDemoTest {
     }
 
     @Test
+    public void clickableIcon() {
+        WebElement message = layout.findElement(By.id("clickable-message"));
+        Assert.assertEquals("", message.getText());
+
+        WebElement icon = layout.findElement(By.id("clickable-v-icon"));
+        icon.click();
+
+        Assert.assertEquals("The VAADIN_V icon was clicked!",
+                message.getText());
+
+        icon = layout.findElement(By.id("clickable-h-icon"));
+        icon.click();
+
+        Assert.assertEquals("The VAADIN_H icon was clicked!",
+                message.getText());
+    }
+
+    @Test
     public void allAvailableIcons() {
         WebElement allIcons = layout.findElement(By.id("all-icons"));
         List<WebElement> children = allIcons
