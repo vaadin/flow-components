@@ -16,15 +16,11 @@ public class EventHandlingIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL()  + "/BasicUse");
+        getDriver().get(getBaseURL());
     }
 
     @After
     public void dismissDialog() {
-        dismissDialog(false);
-    }
-
-    private void dismissDialog(boolean forced) {
         if (isEditorOpen()) {
             getEditorCancelButton().click();
         }

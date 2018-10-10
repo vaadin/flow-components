@@ -95,6 +95,11 @@
             <artifactId>vaadin-ordered-layout-flow</artifactId>
             <version>1.0.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-icons-flow</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
         <!--Webjars-->
         <dependency>

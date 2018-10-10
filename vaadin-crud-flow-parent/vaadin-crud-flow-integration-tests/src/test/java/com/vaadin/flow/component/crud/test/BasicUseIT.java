@@ -15,7 +15,7 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL()  + "/BasicUse");
+        getDriver().get(getBaseURL());
     }
 
     @Test
@@ -26,7 +26,7 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Test
     public void dataPresentInGrid() {
-        Assert.assertEquals(3, $(GridElement.class).first().getRowCount());
+        Assert.assertEquals(3, $(GridElement.class).waitForFirst().getRowCount());
     }
 
     @Test
@@ -34,20 +34,18 @@ public class BasicUseIT extends AbstractParallelTest {
         $(TextFieldElement.class)
                 .attribute("crud-role", "Search").waitForFirst();
 
-        Assert.assertEquals(3, $(TextFieldElement.class)
-                .attribute("crud-role", "Search").all().size());
+        Assert.assertEquals(3, getFilterFields().size());
     }
 
     @Test
     public void filterCanBeDisabled() {
-        getDriver().get(getBaseURL() + "/NoFilter");
-        Assert.assertFalse($(TextFieldElement.class).attribute("crud-role", "Search").exists());
+        getDriver().get(getBaseURL() + "/nofilter");
+        Assert.assertTrue(getFilterFields().isEmpty());
     }
 
     @Test
     public void filterValueCorrect() {
-        List<TextFieldElement> fields = $(TextFieldElement.class)
-                .attribute("crud-role", "Search").all();
+        List<TextFieldElement> fields = getFilterFields();
         fields.get(0).setValue("Me");
         fields.get(2).setValue("You");
 
@@ -60,14 +58,14 @@ public class BasicUseIT extends AbstractParallelTest {
     @Test
     @Ignore("Unable to access the sorting controls in Grid")
     public void sortEnabledInGrid() {
-        GridElement grid = $(GridElement.class).first();
+        GridElement grid = $(GridElement.class).waitForFirst();
         Assert.assertTrue(grid.getHeaderCell(1).$("vaadin-grid-sorter").exists());
     }
 
     @Test
     @Ignore("Unable to access the sorting controls in Grid")
     public void sortOrdersCorrect() {
-        GridElement grid = $(GridElement.class).first();
+        GridElement grid = $(GridElement.class).waitForFirst();
         List<TestBenchElement> sorters = grid.getHeaderCell(1).$("vaadin-grid-sorter").all();
 
         sorters.get(0).click(); // First name ascending
@@ -92,19 +90,8 @@ public class BasicUseIT extends AbstractParallelTest {
                 $("span").onPage().first().getText());
     }
 
-    @Test
-    public void filterSearchBar() {
-        getDriver().get(getBaseURL() + "/SearchBar");
-
-        GridElement grid = $(GridElement.class).waitForFirst();
-        Assert.assertEquals(3, grid.getRowCount());
-        TextFieldElement searchBar = $(TextFieldElement.class).waitForFirst();
-
-        searchBar.setValue("ll");
-        waitUntil(c -> grid.getRowCount() == 1);
-        searchBar.setValue("");
-        waitUntil(c -> grid.getRowCount() == 3);
-        searchBar.setValue("o");
-        waitUntil(c -> grid.getRowCount() == 2);
+    private List<TextFieldElement> getFilterFields() {
+        return $(TextFieldElement.class)
+                .attribute("crud-role", "Search").all();
     }
 }

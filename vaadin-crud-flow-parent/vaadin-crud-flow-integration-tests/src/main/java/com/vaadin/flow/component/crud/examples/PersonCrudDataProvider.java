@@ -1,7 +1,6 @@
-package com.vaadin.flow.component.crud.examples.basic;
+package com.vaadin.flow.component.crud.examples;
 
 import com.vaadin.flow.component.crud.CrudFilter;
-import com.vaadin.flow.component.crud.examples.Person;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -20,7 +19,7 @@ import static java.util.Comparator.naturalOrder;
 /**
  * A dummy data provider. DO NOT DO THIS IN A PRODUCTION APP!
  */
-public class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFilter> {
+class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFilter> {
 
     // A real app should hook up something like JPA
     private List<Person> database = generatePersonsList();
@@ -35,7 +34,7 @@ public class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, 
 
     private Consumer<Long> sizeChangeListener;
 
-    public void setDatabase(List<Person> database) {
+    void setDatabase(List<Person> database) {
         this.database = database;
     }
 
@@ -67,7 +66,7 @@ public class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, 
         return (int) count;
     }
 
-    public void setSizeChangeListener(Consumer<Long> listener) {
+    void setSizeChangeListener(Consumer<Long> listener) {
         sizeChangeListener = listener;
     }
 

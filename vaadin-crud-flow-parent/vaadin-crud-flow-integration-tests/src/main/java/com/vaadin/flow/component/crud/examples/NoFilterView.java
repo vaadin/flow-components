@@ -1,22 +1,21 @@
-package com.vaadin.flow.component.crud.examples.basic;
+package com.vaadin.flow.component.crud.examples;
 
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudGrid;
-import com.vaadin.flow.component.crud.examples.Person;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-import static com.vaadin.flow.component.crud.examples.basic.PersonHelper.createPersonEditor;
+import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 
-@Route(value = "NoFilter")
+@Route
 @Theme(Lumo.class)
 @BodySize(height = "100vh", width = "100vw")
-public class PersonViewNoFilter extends VerticalLayout {
+public class NoFilterView extends VerticalLayout {
 
-    public PersonViewNoFilter() {
+    public NoFilterView() {
         final Crud<Person> crud = new Crud<>(Person.class,
                 new CrudGrid<>(Person.class, false), createPersonEditor());
 

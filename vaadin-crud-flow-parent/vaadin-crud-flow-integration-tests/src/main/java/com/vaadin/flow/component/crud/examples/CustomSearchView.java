@@ -1,6 +1,6 @@
-package com.vaadin.flow.component.crud.examples.basic;
+package com.vaadin.flow.component.crud.examples;
 
-import static com.vaadin.flow.component.crud.examples.basic.PersonHelper.createPersonEditor;
+import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,8 +11,8 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DebounceSettings;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.crud.Crud;
-import com.vaadin.flow.component.crud.examples.Person;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.component.textfield.TextField;
@@ -25,14 +25,14 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 
-@Route(value = "SearchBar")
+@Route
 @Theme(Lumo.class)
 @BodySize(height = "100vh", width = "100vw")
-public class PersonViewSearchBar extends VerticalLayout {
+public class CustomSearchView extends VerticalLayout {
 
     final private List<Person> data = PersonCrudDataProvider.generatePersonsList();
 
-    public PersonViewSearchBar() {
+    public CustomSearchView() {
         final Grid<Person> grid = new Grid<>(Person.class);
         final Crud<Person> crud = new Crud<>(Person.class, grid, createPersonEditor());
 
@@ -40,22 +40,29 @@ public class PersonViewSearchBar extends VerticalLayout {
             query -> findAnyMatching(query.getFilter()),
             query -> countAnyMatching(query.getFilter()));
 
-        ConfigurableFilterDataProvider<Person, Void, String> filterableDataProvider = dataProvider.withConfigurableFilter();
+        ConfigurableFilterDataProvider<Person, Void, String> filterableDataProvider
+                = dataProvider.withConfigurableFilter();
 
         grid.setDataProvider(filterableDataProvider);
         crud.addNewListener(e -> data.add(e.getItem()));
 
         final TextField searchBar = new TextField();
+        searchBar.setWidth("calc(100% - var(--lumo-space-s))");
         searchBar.setValueChangeMode(ValueChangeMode.EAGER);
-        searchBar.setPlaceholder("Type filter");
-        ComponentUtil.addListener(searchBar, FilterChanged.class, e -> filterableDataProvider.setFilter(searchBar.getValue()));
+        searchBar.setPrefixComponent(VaadinIcon.SEARCH.create());
+        searchBar.setPlaceholder("Search...");
+        ComponentUtil.addListener(searchBar, FilterChanged.class,
+                e -> filterableDataProvider.setFilter(searchBar.getValue()));
 
-        add(searchBar, crud);
+        crud.setFooter(searchBar);
+        crud.getElement().getStyle().set("flex-direction", "column-reverse");
+
+        add(crud);
     }
 
     @DomEvent(value = "value-changed", debounce = @DebounceSettings(timeout = 300, phases = DebouncePhase.TRAILING))
-    public static class FilterChanged extends ComponentEvent<TextField>
-    {
+    public static class FilterChanged extends ComponentEvent<TextField> {
+
         public FilterChanged(TextField source, boolean fromClient) {
             super(source, fromClient);
         }
