@@ -35,19 +35,19 @@ class Helper {
 
         yorubaI18n.setNewItem("Eeyan titun");
         yorubaI18n.setEditItem("S'atunko eeyan");
-        yorubaI18n.setSave("Fi pamo");
+        yorubaI18n.setSaveItem("Fi pamo");
         yorubaI18n.setCancel("Fa'gi lee");
-        yorubaI18n.setDelete("Paare");
+        yorubaI18n.setDeleteItem("Paare");
 
-        yorubaI18n.getConfirm().getCancel().setHeader("Akosile");
-        yorubaI18n.getConfirm().getCancel().setMessage("Akosile ti a o tii fi pamo nbe");
-        yorubaI18n.getConfirm().getCancel().getButton().setCancel("Se atunko sii");
-        yorubaI18n.getConfirm().getCancel().getButton().setOk("Fa'gi lee");
+        yorubaI18n.getConfirm().getCancel().setTitle("Akosile");
+        yorubaI18n.getConfirm().getCancel().setContent("Akosile ti a o tii fi pamo nbe");
+        yorubaI18n.getConfirm().getCancel().getButton().setDismiss("Se atunko sii");
+        yorubaI18n.getConfirm().getCancel().getButton().setConfirm("Fa'gi lee");
 
-        yorubaI18n.getConfirm().getDelete().setHeader("Amudaju ipare");
-        yorubaI18n.getConfirm().getDelete().setMessage("Se o da o l'oju pe o fe pa eeyan yi re? Igbese yi o l'ayipada o.");
-        yorubaI18n.getConfirm().getDelete().getButton().setCancel("Da'wo duro");
-        yorubaI18n.getConfirm().getDelete().getButton().setOk("Paare");
+        yorubaI18n.getConfirm().getDelete().setTitle("Amudaju ipare");
+        yorubaI18n.getConfirm().getDelete().setContent("Se o da o l'oju pe o fe pa eeyan yi re? Igbese yi o l'ayipada o.");
+        yorubaI18n.getConfirm().getDelete().getButton().setDismiss("Da'wo duro");
+        yorubaI18n.getConfirm().getDelete().getButton().setConfirm("Paare");
 
         return yorubaI18n;
     }

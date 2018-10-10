@@ -1,24 +1,25 @@
 {
   "newItem": "New item",
   "editItem": "Edit item",
-  "save": "Save",
+  "saveItem": "Save",
   "cancel": "Cancel",
-  "delete": "Delete...",
+  "deleteItem": "Delete...",
+  "editLabel": "Edit item",
   "confirm": {
     "delete": {
-      "header": "Confirm delete",
-      "message": "Are you sure you want to delete the selected item? This action cannot be undone.",
+      "title": "Confirm delete",
+      "content": "Are you sure you want to delete the selected item? This action cannot be undone.",
       "button": {
-        "ok": "Delete",
-        "cancel": "Cancel"
+        "confirm": "Delete",
+        "dismiss": "Cancel"
       }
     },
     "cancel": {
-      "header": "Unsaved changes",
-      "message": "There are unsaved modifications to the item.",
+      "title": "Unsaved changes",
+      "content": "There are unsaved modifications to the item.",
       "button": {
-        "ok": "Discard",
-        "cancel": "Continue editing"
+        "confirm": "Discard",
+        "dismiss": "Continue editing"
       }
     }
   }
