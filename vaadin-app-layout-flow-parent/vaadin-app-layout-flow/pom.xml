@@ -43,7 +43,7 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-app-layout</artifactId>
-            <version>1.0.0-alpha1</version>
+            <version>1.0.0-alpha2</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.polymer</groupId>
