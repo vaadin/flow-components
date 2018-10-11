@@ -42,16 +42,20 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Binder.Binding;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.binder.PropertySet;
+import com.vaadin.flow.data.binder.Setter;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.event.SortEvent.SortNotifier;
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -79,10 +83,13 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
@@ -260,6 +267,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         private boolean sortingEnabled;
 
+        private Binding<T, ?> editorBinding;
+
+        private boolean editorComponentSet;
+
         private SortOrderProvider sortOrderProvider = direction -> {
             String key = getKey();
             if (key == null) {
@@ -274,6 +285,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         private Renderer<T> renderer;
 
+        private Rendering<T> rendering;
+
         /**
          * Constructs a new Column for use inside a Grid.
          *
@@ -285,6 +298,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          *            the renderer to use in this column, must not be
          *            {@code null}
          */
+        @SuppressWarnings("unchecked")
         public Column(Grid<T> grid, String columnId, Renderer<T> renderer) {
             super(grid);
             Objects.requireNonNull(renderer);
@@ -293,9 +307,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
             comparator = (a, b) -> 0;
 
-            Rendering<T> rendering = renderer.render(getElement(),
-                    (KeyMapper<T>) getGrid().getDataCommunicator()
-                            .getKeyMapper());
+            rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
+                    .getDataCommunicator().getKeyMapper());
             Optional<DataGenerator<T>> dataGenerator = rendering
                     .getDataGenerator();
 
@@ -667,11 +680,136 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             return this;
         }
 
+        /**
+         * Sets an editor binding for this column. The {@link Binding} is used
+         * when a row is in editor mode to define how to populate an editor
+         * component based on the edited row and how to update an item based on
+         * the value in the editor component.
+         * <p>
+         * To create a binding to use with a column, define a binding for the
+         * editor binder (<code>grid.getEditor().getBinder()</code>) using e.g.
+         * {@link Binder#forField(HasValue)}.
+         * <p>
+         * The {@link HasValue} that the binding is defined to use must be a
+         * {@link Component}.
+         * <p>
+         * A binding for the column can be set only once. The second attempt
+         * will cause {@link IllegalStateException}.The same happens if the
+         * method {@link #setEditorComponent(Component)} is called after the
+         * {@link #setEditorBinding(Binding)} method.
+         *
+         * @param binding
+         *            the binding to use for this column, not {@code null}
+         * @return this column
+         *
+         * @see Binding
+         * @see #setEditorComponent(Component)
+         * @see Grid#getEditor()
+         * @see Editor#getBinder()
+         *
+         * @throws IllegalStateException
+         *             if binding is already set
+         */
+        public Column<T> setEditorBinding(Binding<T, ?> binding) {
+            Objects.requireNonNull(binding, "null is not a valid editor field");
+
+            if (editorBinding != null) {
+                throw new IllegalStateException("Cannot set a binding  to the "
+                        + "column which already has a binding");
+            }
+
+            HasValue<?, ?> field = binding.getField();
+
+            if (!(field instanceof Component)) {
+                throw new IllegalArgumentException(
+                        "Binding target must be a component.");
+            }
+
+            editorBinding = binding;
+            return setEditorComponent((Component) field);
+        }
+
+        /**
+         * Sets a component to use for editing values of this column in the
+         * editor row. This is a convenient way for use in simple cases where no
+         * need to read/write values (only UI components are shown in two modes:
+         * when editor is shown and closed). Use
+         * {@link #setEditorBinding(Binding)} to support more complex cases.
+         * <p>
+         * An editor component for the column can be set only once. The second
+         * attempt will cause {@link IllegalStateException}. The same happens if
+         * the method {@link #setEditorBinding(Binding)} is called after the
+         * {@link #setEditorComponent(Component)} method.
+         *
+         * @param editorComponent
+         *            the editor component, not {@code null}
+         * @return this column
+         *
+         * @see #setEditorBinding(Binding)
+         * @see Grid#getEditor()
+         * @see Binder#bind(HasValue, ValueProvider, Setter)
+         *
+         * @throws IllegalStateException
+         *             if components is already set
+         */
+        public Column<T> setEditorComponent(Component editorComponent) {
+            Objects.requireNonNull(editorComponent,
+                    "null is not a valid editor component");
+            if (editorComponentSet) {
+                throw new IllegalStateException(
+                        "Cannot set a binding or editor component to the "
+                                + "column which already has a binding/editor component");
+            }
+            editorComponentSet = true;
+
+            Element container = ElementFactory.createDiv();
+            getElement().appendVirtualChild(container);
+            container.appendChild(editorComponent.getElement());
+
+            runBeforeClientResponse(context -> setComponentTemplate(container));
+            return this;
+        }
+
+        /**
+         * Gets the binder binding that is currently used for this column.
+         *
+         * @return the used binder binding, or <code>null</code> if no binding
+         *         is configured
+         *
+         * @see #setEditorBinding(Binding)
+         */
+        public Binding<T, ?> getEditorBinding() {
+            return editorBinding;
+        }
+
         @Override
         protected Column<?> getBottomLevelColumn() {
             return this;
         }
 
+        private void setComponentTemplate(Element container) {
+            Element template = rendering.getTemplateElement();
+            String originalTemplate = template.getProperty("innerHTML");
+            String appId = UI.getCurrent().getInternals().getAppId();
+            int nodeId = container.getNode().getId();
+            String editorTemplate = String.format(
+                    "<flow-component-renderer appid='%s' nodeid='%s'></flow-component-renderer>",
+                    appId, nodeId);
+            template.setProperty("innerHTML", String.format(
+            //@formatter:off
+            "<template is='dom-if' if='[[item._editing]]' restamp>%s</template>" +
+            "<template is='dom-if' if='[[!item._editing]]' restamp>%s</template>",
+            //@formatter:on
+                    editorTemplate, originalTemplate));
+        }
+
+        private void runBeforeClientResponse(
+                SerializableConsumer<ExecutionContext> execution) {
+            getElement().getNode()
+                    .runWhenAttached(ui -> ui.getInternals().getStateTree()
+                            .beforeClientResponse(getElement().getNode(),
+                                    execution));
+        }
     }
 
     /**
@@ -904,6 +1042,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     private ValueProvider<T, String> uniqueKeyProvider;
 
     private String contextMenuTargetItemKey;
+
+    private Editor<T> editor;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -2636,6 +2776,33 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             ComponentEventListener<ItemDoubleClickEvent<T>> listener) {
         return addListener(ItemDoubleClickEvent.class,
                 (ComponentEventListener) Objects.requireNonNull(listener));
+    }
+
+    /**
+     * Gets the editor.
+     * <p>
+     * The editor is created using {@link #createEditor()}.
+     *
+     * @see #createEditor()
+     *
+     * @return the editor instance
+     */
+    public Editor<T> getEditor() {
+        if (editor == null) {
+            editor = createEditor();
+        }
+        return editor;
+    }
+
+    /**
+     * Creates a new Editor instance. Can be overridden to create a custom
+     * Editor. If the Editor is a {@link AbstractGridExtension}, it will be
+     * automatically added to {@link DataCommunicator}.
+     *
+     * @return editor
+     */
+    protected Editor<T> createEditor() {
+        return new EditorImpl<>(this, propertySet);
     }
 
     /**

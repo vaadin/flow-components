@@ -41,7 +41,9 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.Editor;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
@@ -61,6 +63,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
@@ -103,6 +106,7 @@ public class GridView extends DemoView {
         private int age;
         private String name;
         private Address address;
+        private boolean isMale;
 
         public int getId() {
             return id;
@@ -134,6 +138,14 @@ public class GridView extends DemoView {
 
         public void setAddress(Address address) {
             this.address = address;
+        }
+
+        public boolean isMale() {
+            return isMale;
+        }
+
+        public void setMale(boolean male) {
+            isMale = male;
         }
 
         @Override
@@ -387,6 +399,8 @@ public class GridView extends DemoView {
         addVariantFeature();
         createClickListener();
         createDoubleClickListener();
+        createBufferedEditor();
+        createNotBufferedEditor();
 
         addCard("Grid example model",
                 new Label("These objects are used in the examples above"));
@@ -1339,6 +1353,99 @@ public class GridView extends DemoView {
         addCard("Click Listeners", "Item Double Click Listener", message, grid);
     }
 
+    private void createBufferedEditor() {
+        Div message = new Div();
+        message.setId("buffered-editor-msg");
+
+        // begin-source-example
+        // source-example-heading: Editor in Buffered Mode
+        Grid<Person> grid = new Grid<>();
+        List<Person> persons = getItems();
+        grid.setItems(persons);
+        Column<Person> nameColumn = grid.addColumn(Person::getName)
+                .setHeader("Name");
+        Column<Person> genderColumn = grid
+                .addColumn(person -> person.isMale() ? "Male" : "Femail")
+                .setHeader("Gender");
+
+        Binder<Person> binder = new Binder<>(Person.class);
+        Editor<Person> editor = grid.getEditor();
+        editor.setBinder(binder);
+        editor.setBuffered(true);
+
+        Div validationStatus = new Div();
+        validationStatus.setId("validation");
+
+        TextField field = new TextField();
+        nameColumn.setEditorBinding(binder.forField(field)
+                .withValidator(name -> name.startsWith("Person"),
+                        "Name should start with Person")
+                .withStatusLabel(validationStatus).bind("name"));
+
+        Checkbox checkbox = new Checkbox();
+        genderColumn.setEditorBinding(binder.bind(checkbox, "male"));
+
+        Column<Person> editorColumn = grid.addComponentColumn(person -> {
+            Button edit = new Button("Edit");
+            edit.addClassName("edit");
+            edit.addClickListener(e -> editor.editItem(person));
+            return edit;
+        });
+
+        Button save = new Button("Save", e -> editor.save());
+        save.addClassName("save");
+
+        Button cancel = new Button("Cancel", e -> editor.cancel());
+        cancel.addClassName("cancel");
+
+        Div buttons = new Div(save, cancel);
+        editorColumn.setEditorComponent(buttons);
+
+        editor.addSaveListener(event -> message.setText(
+                event.getBean().getName() + ", " + event.getBean().isMale()));
+
+        // end-source-example
+        grid.setId("buffered-editor");
+        addCard("Grid Editor", "Editor in buffered mode", message,
+                validationStatus, grid);
+    }
+
+    private void createNotBufferedEditor() {
+        Div message = new Div();
+        message.setId("not-buffered-editor-msg");
+
+        // begin-source-example
+        // source-example-heading: Editor in Not Buffered Mode
+        Grid<Person> grid = new Grid<>();
+        List<Person> persons = getItems();
+        grid.setItems(persons);
+        Column<Person> nameColumn = grid.addColumn(Person::getName)
+                .setHeader("Name");
+        Column<Person> genderColumn = grid
+                .addColumn(person -> person.isMale() ? "Male" : "Femail")
+                .setHeader("Gender");
+
+        Binder<Person> binder = new Binder<>(Person.class);
+        grid.getEditor().setBinder(binder);
+
+        TextField field = new TextField();
+        nameColumn.setEditorBinding(binder.bind(field, "name"));
+
+        Checkbox checkbox = new Checkbox();
+        genderColumn.setEditorBinding(binder.bind(checkbox, "male"));
+
+        grid.addItemDoubleClickListener(
+                event -> grid.getEditor().editItem(persons.get(0)));
+
+        Person person = persons.get(0);
+        grid.addItemClickListener(event -> message
+                .setText(person.getName() + ", " + person.isMale()));
+
+        // end-source-example
+        grid.setId("not-buffered-editor");
+        addCard("Grid Editor", "Editor in not buffered mode", message, grid);
+    }
+
     private <T> Component[] withTreeGridToggleButtons(List<T> roots,
             TreeGrid<T> grid, Component... other) {
         NativeButton toggleFirstItem = new NativeButton("Toggle first item",
@@ -1450,6 +1557,7 @@ public class GridView extends DemoView {
         person.setId(id);
         person.setName("Person " + index);
         person.setAge(13 + random.nextInt(50));
+        person.setMale(random.nextBoolean());
 
         Address address = new Address();
         address.setStreet("Street " + ((char) ('A' + random.nextInt(26))));

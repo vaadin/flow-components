@@ -24,6 +24,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 
 public class BeanGridTest {
 
@@ -158,6 +160,17 @@ public class BeanGridTest {
     public void addColumnsForGridWithoutPropertySet_throws() {
         Grid<Person> nonBeanGrid = new Grid<>();
         nonBeanGrid.addColumns("name");
+    }
+
+    @Test
+    public void getEditor_editorHasBinder_binderIsAwareOfBeanProperties() {
+        Editor<Person> editor = grid.getEditor();
+        Binder<Person> binder = editor.getBinder();
+        Assert.assertNotNull(binder);
+
+        // Binder is aware about Person properties: otherwise it will throw
+        binder.bind(new TextField(), "name");
+        binder.bind(new TextField(), "born");
     }
 
 }
