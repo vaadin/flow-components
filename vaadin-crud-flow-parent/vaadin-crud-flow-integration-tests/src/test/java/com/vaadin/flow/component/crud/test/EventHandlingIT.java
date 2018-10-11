@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.crud.test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
@@ -9,8 +10,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.List;
 
 public class EventHandlingIT extends AbstractParallelTest {
 
@@ -21,53 +20,62 @@ public class EventHandlingIT extends AbstractParallelTest {
 
     @After
     public void dismissDialog() {
-        if (isEditorOpen()) {
-            getEditorCancelButton().click();
+        CrudElement crud = $(CrudElement.class).first();
+        if (crud.isEditorOpen()) {
+            crud.getEditorCancelButton().click();
         }
     }
 
     @Test
     public void newTest() {
-        Assert.assertFalse(isEditorOpen());
-        getNewButton().click();
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        Assert.assertFalse(crud.isEditorOpen());
+        crud.getNewItemButton().click();
         Assert.assertEquals("New: Person{id=null, firstName='null', lastName='null'}",
                 getLastEvent());
-        Assert.assertTrue(isEditorOpen());
+        Assert.assertTrue(crud.isEditorOpen());
     }
 
     @Test
     public void editTest() {
-        Assert.assertFalse(isEditorOpen());
-        openRowForEditing(0);
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        Assert.assertFalse(crud.isEditorOpen());
+        crud.openRowForEditing(0);
         Assert.assertEquals("Edit: Person{id=1, firstName='Sayo', lastName='Sayo'}",
                 getLastEvent());
-        Assert.assertTrue(isEditorOpen());
+        Assert.assertTrue(crud.isEditorOpen());
 
         dismissDialog();
 
-        openRowForEditing(2);
+        crud.openRowForEditing(2);
+
         Assert.assertEquals("Edit: Person{id=3, firstName='Guille', lastName='Guille'}",
                 getLastEvent());
-        Assert.assertEquals("Guille", $(TextFieldElement.class)
+
+        Assert.assertEquals("Guille", crud.getEditor().$(TextFieldElement.class)
                 .attribute("editor-role", "first-name").first().getValue());
-        Assert.assertEquals("Guille", $(TextFieldElement.class)
+
+        Assert.assertEquals("Guille", crud.getEditor().$(TextFieldElement.class)
                 .attribute("editor-role", "last-name").first().getValue());
     }
 
     @Test
     public void cancelTest() {
-        openRowForEditing(2);
-        getEditorCancelButton().click();
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        crud.openRowForEditing(2);
+        crud.getEditorCancelButton().click();
         Assert.assertEquals("Cancel: Person{id=3, firstName='Guille', lastName='Guille'}",
                 getLastEvent());
-        Assert.assertFalse(isEditorOpen());
+        Assert.assertFalse(crud.isEditorOpen());
     }
 
     @Test
     public void deleteTest() {
-        Assert.assertEquals("3 items available", getFooterText());
-        openRowForEditing(2);
-        getEditorDeleteButton().click();
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+
+        Assert.assertEquals("3 items available", getFooterText(crud));
+        crud.openRowForEditing(2);
+        crud.getEditorDeleteButton().click();
 
         // TODO(oluwasayo): Remove this workaround when vaadin-components-testbench includes Confirm Dialog
         TestBenchElement overlayContext = $("vaadin-dialog-overlay").onPage()
@@ -77,22 +85,23 @@ public class EventHandlingIT extends AbstractParallelTest {
 
         Assert.assertEquals("Delete: Person{id=3, firstName='Guille', lastName='Guille'}",
                 getLastEvent());
-        Assert.assertEquals("2 items available", getFooterText());
-        Assert.assertFalse(isEditorOpen());
+        Assert.assertEquals("2 items available", getFooterText(crud));
+        Assert.assertFalse(crud.isEditorOpen());
     }
 
     @Test
     public void saveTest() {
-        openRowForEditing(0);
-        TextFieldElement lastNameField = $(TextFieldElement.class)
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        crud.openRowForEditing(0);
+        TextFieldElement lastNameField = crud.getEditor().$(TextFieldElement.class)
                 .attribute("editor-role", "last-name").first();
         Assert.assertTrue(lastNameField.hasAttribute("invalid"));
 
         // Invalid input
         lastNameField.setValue("Manolo");
-        getEditorSaveButton().click();
+        crud.getEditorSaveButton().click();
         Assert.assertTrue(lastNameField.hasAttribute("invalid"));
-        Assert.assertTrue(isEditorOpen());
+        Assert.assertTrue(crud.isEditorOpen());
         Assert.assertEquals("Sayo",
                 $(GridElement.class).first().getCell(0, 2).getText());
 
@@ -100,7 +109,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         lastNameField.setValue("Oladeji");
         Assert.assertFalse(lastNameField.hasAttribute("invalid"));
 
-        getEditorSaveButton().click();
+        crud.getEditorSaveButton().click();
 
         if (BrowserUtil.isIE(getDesiredCapabilities())) {
             // TODO(oluwasayo): Investigate why editor sometimes doesn't disappear on first click in IE
@@ -108,49 +117,12 @@ public class EventHandlingIT extends AbstractParallelTest {
             return;
         }
 
-        Assert.assertFalse(isEditorOpen());
+        Assert.assertFalse(crud.isEditorOpen());
         Assert.assertEquals("Oladeji",
                 $(GridElement.class).first().getCell(0, 2).getText());
     }
 
-    private String getFooterText() {
-        return getFooterItems().stream()
-                .filter(e -> e.getTagName().equals("span"))
-                .findFirst()
-                .map(TestBenchElement::getText)
-                .orElse(null);
-    }
-
-    private List<TestBenchElement> getFooterItems() {
-        return $("*").attribute("slot", "footer").all();
-    }
-
-    private void openRowForEditing(int row) {
-        // The first real row is on index 2.
-        $("vaadin-crud-edit").all().get(row + 2).click();
-    }
-
-    private ButtonElement getEditorSaveButton() {
-        return getEditorButton(0);
-    }
-
-    private ButtonElement getEditorCancelButton() {
-        return getEditorButton(1);
-    }
-
-    private ButtonElement getEditorDeleteButton() {
-        return getEditorButton(2);
-    }
-
-    private ButtonElement getEditorButton(int index) {
-        return getEditor().$(ButtonElement.class).attribute("slot", "footer").get(index);
-    }
-
-    private boolean isEditorOpen() {
-        return $("vaadin-dialog-overlay").attribute("opened", "").exists();
-    }
-
-    private TestBenchElement getEditor() {
-        return $("vaadin-dialog-overlay").attribute("opened", "").first();
+    private static String getFooterText(CrudElement crud) {
+        return crud.$("span").attribute("slot", "footer").first().getText();
     }
 }

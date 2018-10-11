@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.crud.test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
@@ -20,36 +21,36 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Test
     public void crudIsPresent() {
-        Assert.assertTrue($("vaadin-crud").exists());
-        Assert.assertTrue($(GridElement.class).exists());
+        Assert.assertTrue($(CrudElement.class).exists());
+        Assert.assertNotNull($(CrudElement.class).first().getGrid());
     }
 
     @Test
     public void dataPresentInGrid() {
-        Assert.assertEquals(3, $(GridElement.class).waitForFirst().getRowCount());
+        Assert.assertEquals(3, $(CrudElement.class).waitForFirst().getGrid().getRowCount());
     }
 
     @Test
     public void filterEnabledInGrid() {
-        $(TextFieldElement.class)
-                .attribute("crud-role", "Search").waitForFirst();
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        waitUntil(e -> !crud.getFilterFields().isEmpty());
 
-        Assert.assertEquals(3, getFilterFields().size());
+        Assert.assertEquals(3, crud.getFilterFields().size());
     }
 
     @Test
     public void filterCanBeDisabled() {
         getDriver().get(getBaseURL() + "/nofilter");
-        Assert.assertTrue(getFilterFields().isEmpty());
+        Assert.assertTrue($(CrudElement.class).waitForFirst().getFilterFields().isEmpty());
     }
 
     @Test
     public void filterValueCorrect() {
-        List<TextFieldElement> fields = getFilterFields();
+        List<TextFieldElement> fields = $(CrudElement.class).waitForFirst().getFilterFields();
         fields.get(0).setValue("Me");
         fields.get(2).setValue("You");
 
-        ButtonElement showFilterButton = getButton("showFilter");
+        ButtonElement showFilterButton = getTestButton("showFilter");
         showFilterButton.click();
 
         Assert.assertEquals("{firstName=Me, lastName=You}{}", getLastEvent());
@@ -71,7 +72,7 @@ public class BasicUseIT extends AbstractParallelTest {
         sorters.get(0).click(); // First name ascending
         sorters.get(2).click(); sorters.get(2).click(); // Last name descending
 
-        ButtonElement showFilterButton = getButton("showFilter");
+        ButtonElement showFilterButton = getTestButton("showFilter");
         showFilterButton.click();
 
         Assert.assertEquals("{}{lastName=DESCENDING, firstName=ASCENDING}", getLastEvent());
@@ -79,9 +80,10 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Test
     public void i18n() {
-        Assert.assertEquals("New item", getNewButton().getText());
-        getButton("updateI18n").click();
-        Assert.assertEquals("Eeyan titun", getNewButton().getText());
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        Assert.assertEquals("New item", crud.getNewItemButton().getText());
+        getTestButton("updateI18n").click();
+        Assert.assertEquals("Eeyan titun", crud.getNewItemButton().getText());
     }
 
     @Test
@@ -90,8 +92,7 @@ public class BasicUseIT extends AbstractParallelTest {
                 $("span").onPage().first().getText());
     }
 
-    private List<TextFieldElement> getFilterFields() {
-        return $(TextFieldElement.class)
-                .attribute("crud-role", "Search").all();
+    private ButtonElement getTestButton(String id) {
+        return $(ButtonElement.class).onPage().id(id);
     }
 }

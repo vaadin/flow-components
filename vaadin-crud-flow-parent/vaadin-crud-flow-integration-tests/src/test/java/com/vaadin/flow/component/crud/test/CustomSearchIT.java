@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.crud.test;
 
+import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import org.junit.Assert;
@@ -17,14 +18,17 @@ public class CustomSearchIT extends AbstractParallelTest {
     public void filterSearchBar() {
         getDriver().get(getBaseURL() + "/customsearch");
 
-        GridElement grid = $(GridElement.class).waitForFirst();
+        GridElement grid = $(CrudElement.class).waitForFirst().getGrid();
         Assert.assertEquals(3, grid.getRowCount());
+
         TextFieldElement searchBar = $(TextFieldElement.class).waitForFirst();
 
         searchBar.setValue("ll");
         waitUntil(c -> grid.getRowCount() == 1);
+
         searchBar.setValue("");
         waitUntil(c -> grid.getRowCount() == 3);
+
         searchBar.setValue("o");
         waitUntil(c -> grid.getRowCount() == 2);
     }

@@ -70,6 +70,13 @@ public class CrudView extends DemoView {
         private String firstName;
         private String lastName;
 
+        /**
+         * No-arg constructor required by Crud to be able to instantiate a new bean
+         * when the new item button is clicked.
+         */
+        public Person() {
+        }
+
         public Person(Integer id, String firstName, String lastName) {
             this.id = id;
             this.firstName = firstName;
