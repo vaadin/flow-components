@@ -898,7 +898,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         // New data should be shown in the grid cell
         Assert.assertEquals(personName + "foo", nameCell.getText());
-        Assert.assertEquals(isMale ? "Femail" : "Male", genderCell.getText());
+        Assert.assertEquals(isMale ? "Female" : "Male", genderCell.getText());
 
         // There should be an event for the edited person
         WebElement msg = findElement(By.id("buffered-editor-msg"));
@@ -942,7 +942,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         // New data should be shown in the grid cell
         Assert.assertEquals(personName + "foo", nameCell.getText());
-        Assert.assertEquals(isMale ? "Femail" : "Male", genderCell.getText());
+        Assert.assertEquals(isMale ? "Female" : "Male", genderCell.getText());
 
         // The edited person should have new data
         WebElement msg = findElement(By.id("not-buffered-editor-msg"));

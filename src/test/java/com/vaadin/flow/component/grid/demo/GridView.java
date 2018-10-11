@@ -1365,7 +1365,7 @@ public class GridView extends DemoView {
         Column<Person> nameColumn = grid.addColumn(Person::getName)
                 .setHeader("Name");
         Column<Person> genderColumn = grid
-                .addColumn(person -> person.isMale() ? "Male" : "Femail")
+                .addColumn(person -> person.isMale() ? "Male" : "Female")
                 .setHeader("Gender");
 
         Binder<Person> binder = new Binder<>(Person.class);
@@ -1422,7 +1422,7 @@ public class GridView extends DemoView {
         Column<Person> nameColumn = grid.addColumn(Person::getName)
                 .setHeader("Name");
         Column<Person> genderColumn = grid
-                .addColumn(person -> person.isMale() ? "Male" : "Femail")
+                .addColumn(person -> person.isMale() ? "Male" : "Female")
                 .setHeader("Gender");
 
         Binder<Person> binder = new Binder<>(Person.class);
@@ -1435,11 +1435,14 @@ public class GridView extends DemoView {
         genderColumn.setEditorBinding(binder.bind(checkbox, "male"));
 
         grid.addItemDoubleClickListener(
-                event -> grid.getEditor().editItem(persons.get(0)));
+                event -> grid.getEditor().editItem(event.getItem()));
 
-        Person person = persons.get(0);
-        grid.addItemClickListener(event -> message
-                .setText(person.getName() + ", " + person.isMale()));
+        grid.addItemClickListener(event -> {
+            if (binder.getBean() != null) {
+                message.setText(binder.getBean().getName() + ", "
+                        + binder.getBean().isMale());
+            }
+        });
 
         // end-source-example
         grid.setId("not-buffered-editor");
