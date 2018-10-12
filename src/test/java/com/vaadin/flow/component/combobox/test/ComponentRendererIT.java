@@ -51,6 +51,25 @@ public class ComponentRendererIT extends AbstractComponentIT {
         testItems(comboBox);
     }
 
+    @Test
+    public void captionsForItemsExistWhenFirstSettingDataProvider() {
+        open();
+
+        ComboBoxElement comboBox = $(ComboBoxElement.class).id("dp-before-renderer");
+
+        testItems(comboBox);
+
+    }
+
+    @Test
+    public void captionsForItemsExistWhenFirstAddingRenderer_thenDataProvider() {
+        open();
+
+        ComboBoxElement comboBox = $(ComboBoxElement.class).id("dp-after-renderer");
+
+        testItems(comboBox);
+    }
+
     private void testItems(TestBenchElement comboBox) {
         executeScript("arguments[0].open(); return true;",comboBox);
         TestBenchElement overlay = $(TestBenchElement.class).id("overlay").$(TestBenchElement.class).id("content");

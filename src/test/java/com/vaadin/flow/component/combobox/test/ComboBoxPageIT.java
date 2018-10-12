@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.List;
 import java.util.Map;
 
@@ -24,11 +26,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.combobox.ComboBoxElementUpdated;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-
-import static org.junit.Assert.assertFalse;
 
 @TestPath("combo-box-test")
 public class ComboBoxPageIT extends AbstractComponentIT {
@@ -78,15 +79,19 @@ public class ComboBoxPageIT extends AbstractComponentIT {
 
     @Test
     public void selectedValue() {
-        WebElement combo = findElement(By.id("titles"));
+        ComboBoxElementUpdated combo = $(ComboBoxElementUpdated.class)
+                .id("titles");
+        combo.openPopup();
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[0]",
                 combo);
 
         WebElement selectionInfo = findElement(By.id("selected-titles"));
         Assert.assertEquals("MR", selectionInfo.getText());
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[1]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[1]",
                 combo);
         Assert.assertEquals("MRS", selectionInfo.getText());
     }
@@ -153,7 +158,9 @@ public class ComboBoxPageIT extends AbstractComponentIT {
 
     @Test
     public void changeValue_IsFromClientIsSetAccordingly() {
-        WebElement combo = findElement(By.id("updatable-combo"));
+        ComboBoxElementUpdated combo = $(ComboBoxElementUpdated.class)
+                .id("updatable-combo");
+        combo.openPopup();
         WebElement message = findElement(By.id("updatable-combo-message"));
         WebElement button = findElement(By.id("updatable-combo-button"));
 
@@ -164,7 +171,8 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         Assert.assertEquals("Value: Item 2 isFromClient: false",
                 message.getText());
 
-        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
+        executeScript(
+                "arguments[0].selectedItem = arguments[0].filteredItems[0]",
                 combo);
         Assert.assertEquals("Item 1", getSelectedItemLabel(combo));
         Assert.assertEquals("Value: Item 1 isFromClient: true",
@@ -176,50 +184,17 @@ public class ComboBoxPageIT extends AbstractComponentIT {
                 message.getText());
     }
 
-    @Test
-    public void openNullRepresentationBox() {
-        TestBenchElement comboBox = $(TestBenchElement.class)
-                .id("null-representation-box");
-        TestBenchElement message = $(TestBenchElement.class)
-                .id("null-representation-message");
-        comboBox.$(TestBenchElement.class).id("input").click();
-        waitForElementPresent(By.tagName("vaadin-combo-box-overlay"));
-
-        TestBenchElement item1 = getItemFromBox(1);
-        Assert.assertEquals(
-                "Displayed item should use the null representation.",
-                "Missing Value", item1.getText());
-
-        TestBenchElement item4 = getItemFromBox(4);
-        Assert.assertEquals(
-                "Displayed item should use the null representation.",
-                "Missing Value", item4.getText());
-
-        executeScript("arguments[0].selectedItem = arguments[0].items[1]",
-                comboBox);
-
-        waitUntil(driver -> message.getText().equals("Selected item is null"));
-        executeScript("arguments[0].selectedItem = arguments[0].items[0]",
-                comboBox);
-
-        waitUntil(driver -> message.getText()
-                .equals("Selected artist: Haircuts for Men"));
-        executeScript("arguments[0].selectedItem = arguments[0].items[4]",
-                comboBox);
-
-        waitUntil(driver -> message.getText().equals("Selected item is null"));
-    }
-
     private TestBenchElement getItemFromBox(int index) {
-        return $(TestBenchElement.class).id("overlay")
-                .$(TestBenchElement.class).id("content")
-                .$(TestBenchElement.class).id("selector")
+        return $(TestBenchElement.class).id("overlay").$(TestBenchElement.class)
+                .id("content").$(TestBenchElement.class).id("selector")
                 .$("vaadin-combo-box-item").get(index);
     }
 
     private List<?> getItems(WebElement combo) {
+        executeScript("arguments[0].opened=true", combo);
         List<?> items = (List<?>) getCommandExecutor()
-                .executeScript("return arguments[0].items;", combo);
+                .executeScript("return arguments[0].filteredItems;", combo);
+        executeScript("arguments[0].opened=false", combo);
         return items;
     }
 

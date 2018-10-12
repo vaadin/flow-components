@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.component.combobox.ComboBoxElementUpdated;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -67,10 +67,12 @@ public class ClearValueIT extends AbstractComponentIT {
 
     private void checkEmptyValue(String comboBoxId, String buttonId,
             boolean allowCustomValue) {
-        ComboBoxElement comboBox = $(ComboBoxElement.class).id(comboBoxId);
-        Assert.assertEquals(
-                "Unexpected 'value' property name for combo box with id '%s'",
-                ClearValuePage.INITIAL_VALUE, comboBox.getSelectedText());
+        ComboBoxElementUpdated comboBox = $(ComboBoxElementUpdated.class)
+                .id(comboBoxId);
+        Assert.assertEquals(String.format(
+                "Unexpected selected item label for combo box with id '%s'",
+                comboBoxId), ClearValuePage.INITIAL_VALUE,
+                comboBox.getSelectedText());
         Assert.assertEquals(String.format(
                 "Unexpected 'allowCustomValue' property name for combo box with id '%s'",
                 comboBoxId), Boolean.toString(allowCustomValue),

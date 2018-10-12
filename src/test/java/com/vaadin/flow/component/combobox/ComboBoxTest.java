@@ -15,26 +15,25 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.vaadin.flow.component.combobox.bean.TestItem;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
-import static org.junit.Assert.assertEquals;
+import elemental.json.Json;
 
 public class ComboBoxTest {
 
@@ -46,16 +45,11 @@ public class ComboBoxTest {
         private List<String> items;
 
         @Override
-        public void setDataProvider(DataProvider<String, ?> dataProvider) {
+        public void setDataProvider(ListDataProvider<String> dataProvider) {
             super.setDataProvider(dataProvider);
-            items = new ArrayList<>(
-                    ((ListDataProvider<String>) dataProvider).getItems());
+            items = new ArrayList<>(dataProvider.getItems());
         }
 
-        @Override
-        void runBeforeClientResponse(SerializableConsumer<UI> command) {
-            command.accept(new UI());
-        }
     }
 
     private enum Category {
@@ -84,15 +78,6 @@ public class ComboBoxTest {
     }
 
     @Test
-    public void setInvalidValue_throw() {
-        expectIllegalArgumentException(
-                "The provided value is not part of ComboBox: invalid");
-        TestComboBox comboBox = new TestComboBox();
-        comboBox.setItems(Arrays.asList("foo", "bar"));
-        comboBox.setValue("invalid");
-    }
-
-    @Test
     public void updateDataProvider_valueIsReset() {
         ComboBox<Object> comboBox = new ComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar"));
@@ -114,7 +99,8 @@ public class ComboBoxTest {
     public void setNull_thrownException() {
         expectNullPointerException("The data provider can not be null");
         ComboBox<Object> comboBox = new ComboBox<>();
-        comboBox.setDataProvider(null);
+        DataProvider<Object, String> dp = null;
+        comboBox.setDataProvider(dp);
     }
 
     @Test
@@ -129,8 +115,11 @@ public class ComboBoxTest {
         expectIllegalStateException(
                 "Got 'null' as a label value for the item 'foo'. 'ItemLabelGenerator' instance may not return 'null' values");
         TestComboBox comboBox = new TestComboBox();
+
         comboBox.setItemLabelGenerator(obj -> null);
         comboBox.setItems(Arrays.asList("foo", "bar"));
+
+        comboBox.getDataGenerator().generateData("foo", Json.createObject());
     }
 
     @Test
@@ -249,44 +238,22 @@ public class ComboBoxTest {
     }
 
     @Test
-    public void nullRepresentation() {
+    public void getPageSize_default50() {
         ComboBox<String> comboBox = new ComboBox<>();
-        Assert.assertEquals(
-                "By default, null representation string should be empty", "",
-                comboBox.getNullRepresentation());
-        comboBox.setNullRepresentation("Missing Value");
-        Assert.assertEquals(
-                "The null representation string should be \"Missing Value\"",
-                "Missing Value", comboBox.getNullRepresentation());
+        Assert.assertEquals(50, comboBox.getPageSize());
     }
 
     @Test
-    public void setValue_nonMatchingId_IllegalArgumentException() {
-        List<TestItem> list = Arrays.asList(new TestItem(1, "a", "First"),
-                new TestItem(2, "b", "Second"), new TestItem(3, "c", "Third"));
-
-        expectIllegalArgumentException(
-                "The provided value is not part of ComboBox:");
-        ComboBox comboBox = new ComboBox();
-        comboBox.setDataProvider(new ListDataProvider<TestItem>(list) {
-            @Override
-            public Object getId(TestItem item) {
-                return item.getId();
-            }
-        });
-        comboBox.setValue(new TestItem(0, "b", ""));
+    public void setPageSize_getPageSize() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setPageSize(111);
+        Assert.assertEquals(111, comboBox.getPageSize());
     }
 
-    @Test
-    public void setValue_nonExistingObject_IllegalArgumentException() {
-        List<TestItem> list = Arrays.asList(new TestItem(1, "a", "First"),
-                new TestItem(2, "b", "Second"), new TestItem(3, "c", "Third"));
-
-        expectIllegalArgumentException(
-                "The provided value is not part of ComboBox:");
-        ComboBox comboBox = new ComboBox();
-        comboBox.setItems(list);
-        comboBox.setValue(new TestItem(2, "bbb", ""));
+    @Test(expected = IllegalArgumentException.class)
+    public void setPageSizeZero_throws() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setPageSize(0);
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {

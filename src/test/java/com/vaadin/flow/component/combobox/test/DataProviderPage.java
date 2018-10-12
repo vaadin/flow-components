@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.bean.TestItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Route("data-provider")
 public class DataProviderPage extends Div {

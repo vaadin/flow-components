@@ -17,8 +17,12 @@ package com.vaadin.flow.component.combobox.demo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import com.github.javafaker.Faker;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -99,9 +103,10 @@ public class ComboBoxView extends DemoView {
         createDisabledComboBox();
         createObjectComboBox();
         createComboBoxWithObjectStringSimpleValue();
-        createComboBoxWithNullRepresentation();
         createComboBoxUsingTemplateRenderer();
         createComboBoxUsingComponentRenderer();
+        createComboBoxWithInMemoryLazyLoading();
+        createComboBoxWithCallbackLazyLoading();
     }
 
     private void createStringComboBox() {
@@ -137,7 +142,7 @@ public class ComboBoxView extends DemoView {
         comboBox.setItemLabelGenerator(Song::getName);
 
         List<Song> listOfSongs = createListOfSongs();
-        
+
         comboBox.setItems(listOfSongs);
         comboBox.addValueChangeListener(event -> {
             Song song = comboBox.getValue();
@@ -209,52 +214,32 @@ public class ComboBoxView extends DemoView {
         addCard("Disabled ComboBox", comboBox, message);
     }
 
-    private void createComboBoxWithNullRepresentation() {       
-        Div message = createMessageDiv("null-representation-message");
-        // begin-source-example
-        // source-example-heading: ComboBox with null representation
-        ComboBox<Song> comboBox = new ComboBox<>();
-        List<Song> listOfSongs = createListOfSongs();
-        listOfSongs.add(null);
-
-        comboBox.setItems(listOfSongs);
-        comboBox.setNullRepresentation("Missing Value");
-        comboBox.setItemLabelGenerator(item -> item.getName());
-        comboBox.setValue(listOfSongs.get(0));
-        comboBox.addValueChangeListener(event -> {
-            if (event.getSource().isEmpty()) {
-                message.setText("Selected item is null");
-            } else if (event.getOldValue() == null) {
-                message.setText(
-                        "Selected artist: " + event.getValue().getArtist());
-            } else {
-                message.setText(
-                        "Selected artist: " + event.getValue().getArtist()
-                                + "\nThe old selection was: "
-                                + event.getOldValue().getArtist());
-            }
-        });
-        // end-source-example
-        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
-        comboBox.setId("null-representation-box");
-        addCard("ComboBox with null representation", comboBox, message);
-    }
-
     private void createComboBoxUsingTemplateRenderer() {
         Div message = createMessageDiv("template-selection-message");
 
+        //@formatter:off
         // begin-source-example
         // source-example-heading: Rendering items using TemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
+
+        List<Song> listOfSongs = createListOfSongs();
+
+        /*
+         * Providing a custom item filter allows filtering based on all of
+         * the rendered properties:
+         */
+        ItemFilter<Song> filter = (song, filterString) -> 
+                song.getName().toLowerCase()
+                    .contains(filterString.toLowerCase())
+                || song.getArtist().toLowerCase()
+                    .contains(filterString.toLowerCase());
+
+        comboBox.setItems(filter, listOfSongs);
+        comboBox.setItemLabelGenerator(Song::getName);
         comboBox.setRenderer(TemplateRenderer.<Song> of(
                 "<div>[[item.song]]<br><small>[[item.artist]]</small></div>")
                 .withProperty("song", Song::getName)
                 .withProperty("artist", Song::getArtist));
-
-        List<Song> listOfSongs = createListOfSongs();
-
-        comboBox.setItems(listOfSongs);
-        comboBox.setItemLabelGenerator(Song::getName);
 
         comboBox.addValueChangeListener(event -> {
             if (event.getSource().isEmpty()) {
@@ -270,6 +255,7 @@ public class ComboBoxView extends DemoView {
             }
         });
         // end-source-example
+        //@formatter:on
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("template-selection-box");
@@ -284,6 +270,12 @@ public class ComboBoxView extends DemoView {
         // begin-source-example
         // source-example-heading: Rendering items using ComponentTemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
+
+        List<Song> listOfSongs = createListOfSongs();
+        comboBox.setItems(listOfSongs);
+
+        comboBox.setItemLabelGenerator(Song::getName);
+
         comboBox.setRenderer(new ComponentRenderer<>(item -> {
             VerticalLayout container = new VerticalLayout();
 
@@ -296,12 +288,6 @@ public class ComboBoxView extends DemoView {
 
             return container;
         }));
-
-
-        List<Song> listOfSongs = createListOfSongs();
-
-        comboBox.setItems(listOfSongs);
-        comboBox.setItemLabelGenerator(Song::getName);
 
         comboBox.addValueChangeListener(event -> {
             if (event.getSource().isEmpty()) {
@@ -324,6 +310,55 @@ public class ComboBoxView extends DemoView {
         addCard("Using components",
                 "Rendering items using ComponentTemplateRenderer", comboBox,
                 message);
+    }
+
+    private void createComboBoxWithInMemoryLazyLoading() {
+        // begin-source-example
+        // source-example-heading: Lazy loading between client and server
+        ComboBox<String> comboBox = new ComboBox<>();
+
+        /*
+         * Using a large data set makes the browser request items lazily as the
+         * user scrolls down the overlay. This will also trigger server-side
+         * filtering.
+         */
+        List<String> names = getNames(500);
+        comboBox.setItems(names);
+        // end-source-example
+
+        comboBox.setId("lazy-loading-box");
+        addCard("Lazy Loading", "Lazy loading between client and server",
+                comboBox);
+    }
+
+    private void createComboBoxWithCallbackLazyLoading() {
+        //@formatter:off
+        // begin-source-example
+        // source-example-heading: Lazy loading with callbacks
+        ComboBox<String> comboBox = new ComboBox<>();
+
+        /*
+         * This data provider doesn't load all the items to the server memory
+         * right away. The component calls the first provided callback to fetch
+         * items from the given range with the given filter. The second callback
+         * should provide the number of items that match the query.
+         */
+        comboBox.setDataProvider(
+                (filter, offset, limit) ->
+                    IntStream.range(offset, offset + limit)
+                        .mapToObj(i -> "Item " + i),
+                filter -> 500);
+
+        // end-source-example
+        //@formatter:on
+        comboBox.setId("callback-box");
+        addCard("Lazy Loading", "Lazy loading with callbacks", comboBox);
+    }
+
+    private List<String> getNames(int count) {
+        Faker faker = Faker.instance();
+        return IntStream.range(0, count).mapToObj(i -> faker.name().fullName())
+                .collect(Collectors.toList());
     }
 
     private List<Song> createListOfSongs() {

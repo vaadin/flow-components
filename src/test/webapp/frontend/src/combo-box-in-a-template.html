@@ -1,0 +1,16 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="combo-box-in-a-template">
+    <template>
+        <vaadin-combo-box id="comboBox"></vaadin-combo-box>
+    </template>
+
+    <script>
+        class ComboBoxInATemplate extends Polymer.Element {
+            static get is() {
+                return 'combo-box-in-a-template'
+            }
+        }
+        customElements.define(ComboBoxInATemplate.is, ComboBoxInATemplate);
+    </script>
+</dom-module>

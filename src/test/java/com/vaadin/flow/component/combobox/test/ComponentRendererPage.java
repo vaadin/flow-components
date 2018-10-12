@@ -23,6 +23,7 @@ import com.vaadin.flow.component.combobox.demo.ComboBoxView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.router.Route;
@@ -32,6 +33,8 @@ public class ComponentRendererPage extends Div {
     public ComponentRendererPage() {
         itemsBeforeRenderer();
         itemsAfterRenderer();
+        dataProviderBeforeRenderer();
+        dataProviderAfterRenderer();
     }
 
     private ComponentRenderer<VerticalLayout, ComboBoxView.Song> renderer = new ComponentRenderer<>(
@@ -74,12 +77,40 @@ public class ComponentRendererPage extends Div {
         add(comboBox);
     }
 
+    private void dataProviderBeforeRenderer() {
+        ComboBox<ComboBoxView.Song> comboBox = new ComboBox<>();
+        List<ComboBoxView.Song> listOfSongs = createListOfSongs();
+        comboBox.setDataProvider(
+                new ListDataProvider<ComboBoxView.Song>(listOfSongs));
+        comboBox.setItemLabelGenerator(ComboBoxView.Song::getName);
+
+        comboBox.setRenderer(renderer);
+
+        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");
+        comboBox.setId("dp-before-renderer");
+        add(comboBox);
+    }
+
+    private void dataProviderAfterRenderer() {
+        ComboBox<ComboBoxView.Song> comboBox = new ComboBox<>();
+        List<ComboBoxView.Song> listOfSongs = createListOfSongs();
+        comboBox.setRenderer(renderer);
+
+        comboBox.setDataProvider(
+                new ListDataProvider<ComboBoxView.Song>(listOfSongs));
+        comboBox.setItemLabelGenerator(ComboBoxView.Song::getName);
+
+        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");
+        comboBox.setId("dp-after-renderer");
+        add(comboBox);
+    }
+
     private List<ComboBoxView.Song> createListOfSongs() {
         List<ComboBoxView.Song> listOfSongs = new ArrayList<>();
         listOfSongs.add(new ComboBoxView.Song("A V Club Disagrees",
                 "Haircuts for Men", "Physical Fitness"));
-        listOfSongs.add(new ComboBoxView.Song("Sculpted", "Haywyre",
-                "Two Fold Pt.1"));
+        listOfSongs.add(
+                new ComboBoxView.Song("Sculpted", "Haywyre", "Two Fold Pt.1"));
         listOfSongs.add(new ComboBoxView.Song("Voices of a Distant Star",
                 "Killigrew", "Animus II"));
         return listOfSongs;
@@ -103,11 +134,11 @@ public class ComponentRendererPage extends Div {
          * Construct a song with the given name, artist and album.
          *
          * @param name
-         *         name of the song
+         *            name of the song
          * @param artist
-         *         name of the artist
+         *            name of the artist
          * @param album
-         *         name of the album
+         *            name of the album
          */
         public Song(String name, String artist, String album) {
             this.name = name;
