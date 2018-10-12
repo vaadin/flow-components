@@ -88,11 +88,11 @@
             <version>2.1.0-alpha2</version>
         </dependency>
         <dependency>
-            <groupId>com.vaadin.webjar</groupId>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-grid</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.vaadin.webjar</groupId>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-dialog</artifactId>
         </dependency>        
 
