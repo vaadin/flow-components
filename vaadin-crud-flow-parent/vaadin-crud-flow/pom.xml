@@ -18,6 +18,18 @@
         <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-component-base</artifactId>
+                <version>${flow.component.base.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!--Provided scoped-->
         <dependency>
@@ -60,6 +72,12 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-confirm-dialog</artifactId>
+            <version>1.1.0-alpha1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>license-checker</artifactId>
+            <version>2.1.0-alpha2</version>
         </dependency>
 
         <!--Vaadin components-->

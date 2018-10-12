@@ -60,27 +60,8 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-component-base</artifactId>
                 <version>${flow.component.base.version}</version>
+                <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin.webjar</groupId>
-                <artifactId>vaadin-confirm-dialog</artifactId>
-                <version>1.1.0-alpha1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bowergithub.vaadin</groupId>
-                <artifactId>vaadin-development-mode-detector</artifactId>
-                <version>2.0.0-alpha3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bowergithub.vaadin</groupId>
-                <artifactId>vaadin-element-mixin</artifactId>
-                <version>2.1.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bowergithub.vaadin</groupId>
-                <artifactId>vaadin-grid</artifactId>
-                <version>5.1.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
