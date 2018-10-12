@@ -106,7 +106,7 @@ public class GridView extends DemoView {
         private int age;
         private String name;
         private Address address;
-        private boolean isMale;
+        private boolean isSubscriber;
 
         public int getId() {
             return id;
@@ -140,12 +140,12 @@ public class GridView extends DemoView {
             this.address = address;
         }
 
-        public boolean isMale() {
-            return isMale;
+        public boolean isSubscriber() {
+            return isSubscriber;
         }
 
-        public void setMale(boolean male) {
-            isMale = male;
+        public void setSubscriber(boolean isSubscriber) {
+            this.isSubscriber = isSubscriber;
         }
 
         @Override
@@ -562,10 +562,17 @@ public class GridView extends DemoView {
     }
 
     private void createColumnTemplate() {
+        List<Person> items = new ArrayList<>();
+        items.add(createPerson(Person::new, "Person A", -1, 27, true,
+                "Street N", 31, "74253"));
+        items.add(createPerson(Person::new, "Person B", 0, 19, false,
+                "Street F", 73, "93493"));
+        items.addAll(createItems());
+
         // begin-source-example
         // source-example-heading: Grid with columns using template renderer
         Grid<Person> grid = new Grid<>();
-        grid.setItems(createItems());
+        grid.setItems(items);
 
         // You can use the [[index]] variable to print the row index (0 based)
         grid.addColumn(TemplateRenderer.of("[[index]]")).setHeader("#");
@@ -1364,9 +1371,8 @@ public class GridView extends DemoView {
         grid.setItems(persons);
         Column<Person> nameColumn = grid.addColumn(Person::getName)
                 .setHeader("Name");
-        Column<Person> genderColumn = grid
-                .addColumn(person -> person.isMale() ? "Male" : "Female")
-                .setHeader("Gender");
+        Column<Person> genderColumn = grid.addColumn(Person::isSubscriber)
+                .setHeader("Subscriber");
 
         Binder<Person> binder = new Binder<>(Person.class);
         Editor<Person> editor = grid.getEditor();
@@ -1383,7 +1389,7 @@ public class GridView extends DemoView {
                 .withStatusLabel(validationStatus).bind("name"));
 
         Checkbox checkbox = new Checkbox();
-        genderColumn.setEditorBinding(binder.bind(checkbox, "male"));
+        genderColumn.setEditorBinding(binder.bind(checkbox, "subscriber"));
 
         Column<Person> editorColumn = grid.addComponentColumn(person -> {
             Button edit = new Button("Edit");
@@ -1401,8 +1407,9 @@ public class GridView extends DemoView {
         Div buttons = new Div(save, cancel);
         editorColumn.setEditorComponent(buttons);
 
-        editor.addSaveListener(event -> message.setText(
-                event.getBean().getName() + ", " + event.getBean().isMale()));
+        editor.addSaveListener(
+                event -> message.setText(event.getBean().getName() + ", "
+                        + event.getBean().isSubscriber));
 
         // end-source-example
         grid.setId("buffered-editor");
@@ -1421,9 +1428,8 @@ public class GridView extends DemoView {
         grid.setItems(persons);
         Column<Person> nameColumn = grid.addColumn(Person::getName)
                 .setHeader("Name");
-        Column<Person> genderColumn = grid
-                .addColumn(person -> person.isMale() ? "Male" : "Female")
-                .setHeader("Gender");
+        Column<Person> genderColumn = grid.addColumn(Person::isSubscriber)
+                .setHeader("Subscriber");
 
         Binder<Person> binder = new Binder<>(Person.class);
         grid.getEditor().setBinder(binder);
@@ -1432,7 +1438,7 @@ public class GridView extends DemoView {
         nameColumn.setEditorBinding(binder.bind(field, "name"));
 
         Checkbox checkbox = new Checkbox();
-        genderColumn.setEditorBinding(binder.bind(checkbox, "male"));
+        genderColumn.setEditorBinding(binder.bind(checkbox, "subscriber"));
 
         grid.addItemDoubleClickListener(
                 event -> grid.getEditor().editItem(event.getItem()));
@@ -1440,7 +1446,7 @@ public class GridView extends DemoView {
         grid.addItemClickListener(event -> {
             if (binder.getBean() != null) {
                 message.setText(binder.getBean().getName() + ", "
-                        + binder.getBean().isMale());
+                        + binder.getBean().isSubscriber());
             }
         });
 
@@ -1556,16 +1562,26 @@ public class GridView extends DemoView {
 
     private static <T extends Person> T createPerson(Supplier<T> constructor,
             int index, int id, Random random) {
+        return createPerson(constructor, "Person " + index, id,
+                13 + random.nextInt(50), random.nextBoolean(),
+                "Street " + ((char) ('A' + random.nextInt(26))),
+                1 + random.nextInt(50),
+                String.valueOf(10000 + random.nextInt(8999)));
+    }
+
+    private static <T extends Person> T createPerson(Supplier<T> constructor,
+            String name, int id, int age, boolean subscriber, String street,
+            int addressNumber, String postalCode) {
         T person = constructor.get();
         person.setId(id);
-        person.setName("Person " + index);
-        person.setAge(13 + random.nextInt(50));
-        person.setMale(random.nextBoolean());
+        person.setName(name);
+        person.setAge(age);
+        person.setSubscriber(subscriber);
 
         Address address = new Address();
-        address.setStreet("Street " + ((char) ('A' + random.nextInt(26))));
-        address.setNumber(1 + random.nextInt(50));
-        address.setPostalCode(String.valueOf(10000 + random.nextInt(8999)));
+        address.setStreet(street);
+        address.setNumber(addressNumber);
+        address.setPostalCode(postalCode);
         person.setAddress(address);
 
         return person;
