@@ -17,6 +17,7 @@ package com.vaadin.flow.component.crud;
  * #L%
  */
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.textfield.TextField;
@@ -59,6 +60,14 @@ public class CrudGrid<E> extends Grid<E> {
         setupSorting();
 
         Crud.addEditColumn(this);
+
+        ComponentUtil.addListener(this, CrudI18nUpdatedEvent.class, event -> {
+           if (Crud.hasEditColumn(this)) {
+               Crud.removeEditColumn(this);
+               Crud.addEditColumn(this, event.getI18n());
+           }
+        });
+
         setSelectionMode(SelectionMode.NONE);
     }
 

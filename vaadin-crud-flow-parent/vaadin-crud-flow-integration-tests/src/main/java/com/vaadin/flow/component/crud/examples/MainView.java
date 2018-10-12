@@ -1,9 +1,11 @@
 package com.vaadin.flow.component.crud.examples;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudFilter;
 import com.vaadin.flow.component.crud.CrudGrid;
+import com.vaadin.flow.component.crud.CrudI18nUpdatedEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.BodySize;
@@ -47,6 +49,8 @@ public class MainView extends VerticalLayout {
         final Button updateI18nButton = new Button("Switch to Yoruba",
                 event -> crud.setI18n(createYorubaI18n()));
         updateI18nButton.setId("updateI18n");
+        ComponentUtil.addListener(crud.getGrid(), CrudI18nUpdatedEvent.class,
+                e -> addEvent("I18n updated"));
 
         crud.addNewListener(e -> addEvent("New: " + e.getItem()));
         crud.addEditListener(e -> addEvent("Edit: " + e.getItem()));

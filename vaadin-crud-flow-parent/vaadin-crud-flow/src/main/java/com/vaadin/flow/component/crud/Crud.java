@@ -64,6 +64,8 @@ import java.util.Set;
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud-edit-column.html")
 public class Crud<E> extends Component implements HasSize {
 
+    private static final String EDIT_COLUMN_KEY = "vaadin-crud-edit-column";
+
     private final Set<ComponentEventListener<NewEvent<E>>> newListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<SaveEvent<E>>> saveListeners = new LinkedHashSet<>();
@@ -109,6 +111,8 @@ public class Crud<E> extends Component implements HasSize {
 
         this.editor = editor;
         this.editor.getView().getElement().setAttribute("slot", "form");
+
+        this.setI18n(CrudI18n.createDefault(), false);
 
         registerHandlers();
 
@@ -236,7 +240,14 @@ public class Crud<E> extends Component implements HasSize {
      * @see CrudI18n#createDefault()
      */
     public void setI18n(CrudI18n i18n) {
+        setI18n(i18n, true);
+    }
+
+    private void setI18n(CrudI18n i18n, boolean fireEvent) {
         getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+        if (fireEvent) {
+            ComponentUtil.fireEvent(this.grid, new CrudI18nUpdatedEvent(this, false, i18n));
+        }
     }
 
     /**
@@ -319,12 +330,53 @@ public class Crud<E> extends Component implements HasSize {
      * Clicking on the edit cell for a row opens the item for editing in the editor.
      *
      * @param grid the grid in which to add the edit column
+     * @see #addEditColumn(Grid, CrudI18n)
+     * @see #removeEditColumn(Grid)
+     * @see #hasEditColumn(Grid)
      */
     public static void addEditColumn(Grid grid) {
-        grid.addColumn(
-                TemplateRenderer.of("<vaadin-crud-edit></vaadin-crud-edit>"))
+        addEditColumn(grid, CrudI18n.createDefault());
+    }
+
+    /**
+     * A helper method to add an edit column to a grid.
+     * Clicking on the edit cell for a row opens the item for editing in the editor.
+     * Additionally, the i18n object is used for setting the aria-label for the button, improving accessibility.
+     *
+     * @param grid the grid in which to add the edit column
+     * @param crudI18n the i18n object for localizing the accessibility of the edit column
+     */
+    public static void addEditColumn(Grid grid, CrudI18n crudI18n) {
+        grid.addColumn(TemplateRenderer.of(createEditColumnTemplate(crudI18n)))
+                .setKey(EDIT_COLUMN_KEY)
                 .setWidth("4em")
                 .setFlexGrow(0);
+    }
+
+    private static String createEditColumnTemplate(CrudI18n crudI18n) {
+        return "<vaadin-crud-edit aria-label=\"" + crudI18n.getEditLabel() + "\"></vaadin-crud-edit>";
+    }
+
+    /**
+     * Removes the crud edit column from a grid
+     *
+     * @param grid the grid from which to remove the edit column
+     * @see #addEditColumn(Grid)
+     * @see #hasEditColumn(Grid)
+     */
+    public static void removeEditColumn(Grid grid) {
+        grid.removeColumnByKey(EDIT_COLUMN_KEY);
+    }
+
+    /**
+     * Checks if an edit column has been added to the Grid using {@code Crud.addEditColumn(Grid)}
+     *
+     * @param grid the grid to check
+     * @return true if an edit column is present or false if otherwise
+     * @see Crud#addEditColumn(Grid)
+     */
+    public static boolean hasEditColumn(Grid grid) {
+        return grid.getColumnByKey(EDIT_COLUMN_KEY) != null;
     }
 
     /**

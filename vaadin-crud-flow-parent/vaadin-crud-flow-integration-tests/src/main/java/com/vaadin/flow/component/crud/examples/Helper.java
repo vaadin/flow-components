@@ -36,8 +36,9 @@ class Helper {
         yorubaI18n.setNewItem("Eeyan titun");
         yorubaI18n.setEditItem("S'atunko eeyan");
         yorubaI18n.setSaveItem("Fi pamo");
-        yorubaI18n.setCancel("Fa'gi lee");
         yorubaI18n.setDeleteItem("Paare");
+        yorubaI18n.setCancel("Fa'gi lee");
+        yorubaI18n.setEditLabel("S'atunko eeyan");
 
         yorubaI18n.getConfirm().getCancel().setTitle("Akosile");
         yorubaI18n.getConfirm().getCancel().setContent("Akosile ti a o tii fi pamo nbe");
