@@ -269,7 +269,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         private Binding<T, ?> editorBinding;
 
-        private boolean editorComponentSet;
+        private Component editorComponent;
 
         private SortOrderProvider sortOrderProvider = direction -> {
             String key = getKey();
@@ -712,12 +712,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          */
         public Column<T> setEditorBinding(Binding<T, ?> binding) {
             Objects.requireNonNull(binding, "null is not a valid editor field");
-
-            if (editorBinding != null) {
-                throw new IllegalStateException("Cannot set a binding  to the "
-                        + "column which already has a binding");
-            }
-
             HasValue<?, ?> field = binding.getField();
 
             if (!(field instanceof Component)) {
@@ -755,18 +749,20 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         public Column<T> setEditorComponent(Component editorComponent) {
             Objects.requireNonNull(editorComponent,
                     "null is not a valid editor component");
-            if (editorComponentSet) {
-                throw new IllegalStateException(
-                        "Cannot set a binding or editor component to the "
-                                + "column which already has a binding/editor component");
-            }
-            editorComponentSet = true;
+            boolean setComponentTemplate = this.editorComponent == null;
+            this.editorComponent = editorComponent;
 
             Element container = ElementFactory.createDiv();
             getElement().appendVirtualChild(container);
             container.appendChild(editorComponent.getElement());
 
-            runBeforeClientResponse(context -> setComponentTemplate(container));
+            if (setComponentTemplate) {
+
+                getGrid().addDataGenerator((item, jsonObject) -> jsonObject.put(
+                        "_" + columnInternalId,
+                        getEditorComponent().getElement().getNode().getId()));
+                runBeforeClientResponse(context -> setComponentTemplate());
+            }
             return this;
         }
 
@@ -777,9 +773,23 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
          *         is configured
          *
          * @see #setEditorBinding(Binding)
+         * @see #getEditorComponent()
          */
         public Binding<T, ?> getEditorBinding() {
             return editorBinding;
+        }
+
+        /**
+         * Gets the editor component that is currently used for this column.
+         *
+         * @return the editor component, or <code>null</code> if no component is
+         *         set
+         *
+         * @see #setEditorComponent(Component)
+         * @see #getEditorBinding()
+         */
+        public Component getEditorComponent() {
+            return editorComponent;
         }
 
         @Override
@@ -787,14 +797,13 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             return this;
         }
 
-        private void setComponentTemplate(Element container) {
+        private void setComponentTemplate() {
             Element template = rendering.getTemplateElement();
             String originalTemplate = template.getProperty("innerHTML");
             String appId = UI.getCurrent().getInternals().getAppId();
-            int nodeId = container.getNode().getId();
             String editorTemplate = String.format(
-                    "<flow-component-renderer appid='%s' nodeid='%s'></flow-component-renderer>",
-                    appId, nodeId);
+                    "<flow-component-renderer appid='%s' nodeid='[[item._%s]]'></flow-component-renderer>",
+                    appId, columnInternalId);
             template.setProperty("innerHTML", String.format(
             //@formatter:off
             "<template is='dom-if' if='[[item._editing]]' restamp>%s</template>" +

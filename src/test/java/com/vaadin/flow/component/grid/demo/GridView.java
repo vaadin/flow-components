@@ -1371,7 +1371,7 @@ public class GridView extends DemoView {
         grid.setItems(persons);
         Column<Person> nameColumn = grid.addColumn(Person::getName)
                 .setHeader("Name");
-        Column<Person> genderColumn = grid.addColumn(Person::isSubscriber)
+        Column<Person> subscriberColumn = grid.addColumn(Person::isSubscriber)
                 .setHeader("Subscriber");
 
         Binder<Person> binder = new Binder<>(Person.class);
@@ -1389,7 +1389,7 @@ public class GridView extends DemoView {
                 .withStatusLabel(validationStatus).bind("name"));
 
         Checkbox checkbox = new Checkbox();
-        genderColumn.setEditorBinding(binder.bind(checkbox, "subscriber"));
+        subscriberColumn.setEditorBinding(binder.bind(checkbox, "subscriber"));
 
         Column<Person> editorColumn = grid.addComponentColumn(person -> {
             Button edit = new Button("Edit");
@@ -1428,7 +1428,7 @@ public class GridView extends DemoView {
         grid.setItems(persons);
         Column<Person> nameColumn = grid.addColumn(Person::getName)
                 .setHeader("Name");
-        Column<Person> genderColumn = grid.addColumn(Person::isSubscriber)
+        Column<Person> subscriberColumn = grid.addColumn(Person::isSubscriber)
                 .setHeader("Subscriber");
 
         Binder<Person> binder = new Binder<>(Person.class);
@@ -1438,7 +1438,7 @@ public class GridView extends DemoView {
         nameColumn.setEditorBinding(binder.bind(field, "name"));
 
         Checkbox checkbox = new Checkbox();
-        genderColumn.setEditorBinding(binder.bind(checkbox, "subscriber"));
+        subscriberColumn.setEditorBinding(binder.bind(checkbox, "subscriber"));
 
         grid.addItemDoubleClickListener(
                 event -> grid.getEditor().editItem(event.getItem()));

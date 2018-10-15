@@ -23,13 +23,9 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.function.SerializableComparator;
-import com.vaadin.flow.function.ValueProvider;
 
 public class GridColumnTest {
 
@@ -179,43 +175,6 @@ public class GridColumnTest {
     public void testRenderer() {
         assert renderer != null;
         Assert.assertEquals(renderer, fourthColumn.getRenderer());
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void setBinding_coumnAlreadyHasBinding_throw() {
-        Binder<String> binder = new Binder<>();
-        firstColumn.setEditorBinding(binder.bind(new TextField(),
-                ValueProvider.identity(), (item, value) -> {
-                }));
-        firstColumn.setEditorBinding(binder.bind(new TextArea(),
-                ValueProvider.identity(), (item, value) -> {
-                }));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void setBinding_coumnAlreadyHasEditorComponent_throw() {
-        Binder<String> binder = new Binder<>();
-        firstColumn.setEditorBinding(binder.bind(new TextField(),
-                ValueProvider.identity(), (item, value) -> {
-                }));
-        firstColumn.setEditorComponent(new TextArea());
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void setEditorComponent_coumnAlreadyHasBinding_throw() {
-        firstColumn.setEditorComponent(new TextArea());
-
-        Binder<String> binder = new Binder<>();
-        firstColumn.setEditorBinding(binder.bind(new TextField(),
-                ValueProvider.identity(), (item, value) -> {
-                }));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void setEditorComponent_coumnAlreadyHasComponent_throw() {
-        firstColumn.setEditorComponent(new TextArea());
-
-        firstColumn.setEditorComponent(new TextField());
     }
 
     private void expectNullPointerException(String message) {
