@@ -256,6 +256,17 @@ public class ComboBoxTest {
         comboBox.setPageSize(0);
     }
 
+    @Test
+    public void setValueNull_selectedItemNull() {
+        ComboBox<String> comboBox = new ComboBox<>("1", "2");
+        comboBox.setValue("1");
+        comboBox.setValue(null);
+        Assert.assertNull(
+                "The selectedItem property must be null when there's no value. "
+                        + "Otherwise the 'clear value'-button will be shown.",
+                comboBox.getSelectedItemJsonObject());
+    }
+
     private void assertItem(TestComboBox comboBox, int index, String caption) {
         String value1 = comboBox.items.get(index);
         Assert.assertEquals(caption, value1);
