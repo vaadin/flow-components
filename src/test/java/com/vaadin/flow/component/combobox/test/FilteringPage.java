@@ -16,11 +16,13 @@
 package com.vaadin.flow.component.combobox.test;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
@@ -72,6 +74,29 @@ public class FilteringPage extends Div {
         pageSizeBox.setLabel("Page size 60");
         pageSizeBox.setId("page-size-60");
         add(new Div(), pageSizeBox);
+
+        ComboBox<String> comboBoxWithFilterableDataProvider = new ComboBox<>();
+        comboBoxWithFilterableDataProvider.setId("filterable-data-provider");
+        comboBoxWithFilterableDataProvider
+                .setLabel("Filter configured in the data provider");
+        CallbackDataProvider<String, String> dataProviderWithFiltering = DataProvider
+                .fromFilteringCallbacks(query -> {
+                    return IntStream
+                            .range(query.getOffset(),
+                                    query.getOffset() + query.getLimit())
+                            .mapToObj(i -> {
+                                if (query.getFilter().isPresent()) {
+                                    return "filtered";
+                                } else {
+                                    return "foo";
+                                }
+                            });
+                }, query -> {
+                    return 1;
+                });
+        comboBoxWithFilterableDataProvider
+                .setDataProvider(dataProviderWithFiltering);
+        add(new Div(), comboBoxWithFilterableDataProvider);
     }
 
 }

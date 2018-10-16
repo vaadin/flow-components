@@ -402,9 +402,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @Override
     public void setDataProvider(DataProvider<T, String> dataProvider) {
-        if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
-            userProvidedFilter = UserProvidedFilter.NO;
-        }
         setDataProvider(dataProvider, SerializableFunction.identity());
     }
 
@@ -533,8 +530,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         Objects.requireNonNull(listDataProvider,
                 "List data provider cannot be null");
 
-        // Must do getItemLabelGenerator() for each operation since it might
-        // not be the same as when this method was invoked
         setDataProvider(listDataProvider,
                 filterText -> item -> itemFilter.test(item, filterText));
     }

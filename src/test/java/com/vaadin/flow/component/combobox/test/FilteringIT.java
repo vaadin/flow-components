@@ -136,6 +136,20 @@ public class FilteringIT extends AbstractComboBoxIT {
         assertRendered("Item 0");
     }
 
+    @Test
+    public void configureFilterInDataProvider_setDataProvider_serverSideFiltering() {
+        box = $(ComboBoxElement.class).id("filterable-data-provider");
+        box.openPopup();
+        assertRendered("foo");
+        List<String> filteredItems = setFilterAndGetImmediateResults("f");
+        Assert.assertEquals("Expected server-side filtering, so there "
+                + "should be no filtered items until server has responded.", 0,
+                filteredItems.size());
+
+        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
+        assertRendered("filtered");
+    }
+
     private void assertClientSideFilter(boolean clientSide) {
         assertClientSideFilter(clientSide, "3", 13);
     }
