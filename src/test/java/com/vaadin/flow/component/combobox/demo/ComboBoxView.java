@@ -228,7 +228,7 @@ public class ComboBoxView extends DemoView {
          * Providing a custom item filter allows filtering based on all of
          * the rendered properties:
          */
-        ItemFilter<Song> filter = (song, filterString) -> 
+        ItemFilter<Song> filter = (song, filterString) ->
                 song.getName().toLowerCase()
                     .contains(filterString.toLowerCase())
                 || song.getArtist().toLowerCase()
@@ -272,7 +272,18 @@ public class ComboBoxView extends DemoView {
         ComboBox<Song> comboBox = new ComboBox<>();
 
         List<Song> listOfSongs = createListOfSongs();
-        comboBox.setItems(listOfSongs);
+
+        /*
+         * Providing a custom item filter allows filtering based on all of
+         * the rendered properties:
+         */
+        ItemFilter<Song> filter = (song, filterString) ->
+                song.getName().toLowerCase()
+                    .contains(filterString.toLowerCase())
+                || song.getArtist().toLowerCase()
+                    .contains(filterString.toLowerCase());
+
+        comboBox.setItems(filter, listOfSongs);
 
         comboBox.setItemLabelGenerator(Song::getName);
 

@@ -169,6 +169,24 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    public void componentBoxCustomFiltering_filterableByArtist() {
+        openTabAndCheckForErrors("using-components");
+        ComboBoxElementUpdated comboBox = $(ComboBoxElementUpdated.class)
+                .id("component-selection-box");
+        comboBox.openPopup();
+        comboBox.setFilter("ha");
+
+        waitUntil(driver -> ((List<Map<String, ?>>) executeScript(
+                "return arguments[0].filteredItems", comboBox)).size() == 2);
+
+        List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
+                "return arguments[0].filteredItems", comboBox);
+
+        Assert.assertEquals("A V Club Disagrees", items.get(0).get("label"));
+        Assert.assertEquals("Sculpted", items.get(1).get("label"));
+    }
+
+    @Test
     public void openComponentBox() {
         openTabAndCheckForErrors("using-components");
 

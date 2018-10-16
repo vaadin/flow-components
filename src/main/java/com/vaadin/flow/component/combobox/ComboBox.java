@@ -353,6 +353,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * filter text is a substring of the label displayed for that item, which
      * you can configure with
      * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     * <p>
+     * Filtering will be handled in the client-side if the size of the data set
+     * is less than the page size. To force client-side filtering with a larger
+     * data set (at the cost of increased network traffic), you can increase the
+     * page size with {@link #setPageSize(int)}.
      */
     @Override
     public void setItems(Collection<T> items) {
@@ -467,6 +472,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * filter text is a substring of the label displayed for that item, which
      * you can configure with
      * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     * <p>
+     * Filtering will be handled in the client-side if the size of the data set
+     * is less than the page size. To force client-side filtering with a larger
+     * data set (at the cost of increased network traffic), you can increase the
+     * page size with {@link #setPageSize(int)}.
      *
      * @param listDataProvider
      *            the list data provider to use, not <code>null</code>
