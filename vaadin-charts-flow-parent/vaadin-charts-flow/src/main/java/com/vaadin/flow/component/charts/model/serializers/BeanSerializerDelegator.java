@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
 
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * Delegates serialization calls to the given instance of
@@ -69,12 +70,12 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
     }
 
     @Override
-    protected BeanSerializerBase withIgnorals(String[] toIgnore) {
+    protected BeanSerializerBase withIgnorals(Set<String> toIgnore) {
         return new BeanSerializerDelegator(this, toIgnore);
     }
 
     @Override
-    protected BeanSerializerBase withFilterId(Object filterId) {
+    public BeanSerializerBase withFilterId(Object filterId) {
         return new BeanSerializerDelegator(this, filterId);
     }
 

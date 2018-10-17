@@ -16,14 +16,14 @@
     <name>Vaadin Charts for Flow</name>
 
     <properties>
-        <jackson.version>2.5.2</jackson.version>
+        <jackson.version>2.9.7</jackson.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-charts</artifactId>
-            <version>6.2.0-alpha1</version>
+            <version>6.2.0-alpha2</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.polymer</groupId>

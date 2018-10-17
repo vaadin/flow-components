@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -90,7 +91,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         legendItem.click();
 
-        assertLastEventIsType(SeriesHideEvent.class);
+        assertHasEventOfType(SeriesHideEvent.class);
         assertFirstHistoryEventIsType(SeriesLegendItemClickEvent.class);
     }
 
@@ -129,7 +130,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         legendItem.click();
 
-        assertLastEventIsType(SeriesHideEvent.class);
+        assertHasEventOfType(SeriesHideEvent.class);
     }
 
     @Test
@@ -138,7 +139,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         hideSeries.click();
 
-        assertLastEventIsType(SeriesHideEvent.class);
+        assertHasEventOfType(SeriesHideEvent.class);
     }
 
     @Test
@@ -148,7 +149,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         legendItem.click();
 
-        assertLastEventIsType(SeriesShowEvent.class);
+        assertHasEventOfType(SeriesShowEvent.class);
     }
 
     @Test
@@ -158,7 +159,7 @@ public class ServerSideEventsIT extends AbstractTBTest {
 
         hideSeriesToggle.click();
 
-        assertLastEventIsType(SeriesShowEvent.class);
+        assertHasEventOfType(SeriesShowEvent.class);
     }
 
     @Test
@@ -201,6 +202,17 @@ public class ServerSideEventsIT extends AbstractTBTest {
         assertNotNull(eventHistory);
         String eventType = eventHistory.split(":")[0];
         Assert.assertEquals(expectedEvent.getSimpleName(), eventType);
+    }
+
+    private void assertHasEventOfType(Class<? extends ComponentEvent<Chart>> expectedEvent) {
+        List<LabelElement> labels = $(LabelElement.class).all();
+        String expected = expectedEvent.getSimpleName();
+        Optional<String> actual = labels.stream().map(label -> {
+            String eventHistory = label.getText();
+            assertNotNull(eventHistory);
+            return eventHistory.split(":")[0];
+        }).filter(text -> text.equals(expected)).findFirst();
+        Assert.assertTrue("Expect to find " + expected, actual.isPresent());
     }
 
     private void assertNthHistoryEventIsType(
