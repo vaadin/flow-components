@@ -39,9 +39,8 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--TODO: Use the new webjar groupId!!!-->
         <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-rich-text-editor</artifactId>
             <version>1.0.0-alpha2</version>
         </dependency>
