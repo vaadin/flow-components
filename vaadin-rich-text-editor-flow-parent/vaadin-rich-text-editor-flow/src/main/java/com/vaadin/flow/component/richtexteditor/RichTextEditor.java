@@ -17,11 +17,15 @@ package com.vaadin.flow.component.richtexteditor;
  * #L%
  */
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.InputNotifier;
+import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
  * Server-side component for the {@code <vaadin-rich-text-editor>} component.
@@ -31,20 +35,116 @@ import com.vaadin.flow.component.html.H1;
  */
 @Tag("vaadin-rich-text-editor")
 @HtmlImport("frontend://bower_components/vaadin-rich-text-editor/src/vaadin-rich-text-editor.html")
-public class RichTextEditor extends Component {
+public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
+    implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier, CompositionNotifier {
+
+    private ValueChangeMode currentMode;
 
     /**
-     * Initializes a new Rich Text Editor.
+     * Constructs an empty {@code RichTextEditor}.
      */
     public RichTextEditor() {
-        this("Foo bar");
+        super("", "", false);
+        setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 
     /**
-     * Initializes a new Rich Text Editor with the string content.
-     * @param content the string content.
+     * Constructs a {@code RichTextEditor} with the initial value
+     *
+     * @param initialValue
+     *            the initial value
+     *
+     * @see #setValue(Object)
      */
-    public RichTextEditor(String content) {
-        getElement().appendChild(new H1(content).getElement());
+    public RichTextEditor(String initialValue) {
+        this();
+        setValue(initialValue);
+    }
+
+    /**
+     * Constructs an empty {@code TextField} with a value change listener.
+     *
+     * @param listener
+     *            the value change listener
+     *
+     * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
+     */
+    public RichTextEditor(
+            ValueChangeListener<? super ComponentValueChangeEvent<RichTextEditor, String>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs an empty {@code RichTextEditor} with a value change
+     * listener and an initial value.
+     *
+     * @param initialValue
+     *            the initial value
+     * @param listener
+     *            the value change listener
+     *
+     * @see #setValue(Object)
+     * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
+     */
+    public RichTextEditor(String initialValue,
+            ValueChangeListener<? super ComponentValueChangeEvent<RichTextEditor, String>> listener) {
+        this();
+        setValue(initialValue);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The default value is {@link ValueChangeMode#ON_CHANGE}.
+     */
+    @Override
+    public ValueChangeMode getValueChangeMode() {
+        return currentMode;
+    }
+
+    @Override
+    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+        currentMode = valueChangeMode;
+        setSynchronizedEvent(
+                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
+    }
+
+    /**
+     * Sets the value of this editor. If the new value is not equal to
+     * {@code getValue()}, fires a value change event. Throws
+     * {@code NullPointerException}, if the value is null.
+     * <p>
+     * Note: {@link Binder} will take care of the {@code null} conversion when
+     * integrates with the editor, as long as no new converter is defined.
+     *
+     * @param value
+     *            the new value, not {@code null}
+     */
+    @Override
+    public void setValue(String value) {
+        super.setValue(value);
+    }
+
+    /**
+     * Returns the current value of the text editor. By default, the empty
+     * editor will return an empty string.
+     *
+     * @return the current value.
+     */
+    @Override
+    public String getValue() {
+        return super.getValue();
+    }
+
+
+    /**
+     * Value of the editor presented as HTML string.
+     *
+     * @return the {@code htmlValue} property from the webcomponent
+     */
+    public String getHtmlValue() {
+        return getHtmlValueString();
     }
 }

@@ -43,7 +43,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-rich-text-editor</artifactId>
-            <version>0.1.0</version>
+            <version>1.0.0-alpha2</version>
         </dependency>
 
         <dependency>
@@ -69,6 +69,13 @@
             <artifactId>powermock-api-mockito</artifactId>
             <version>${powermock.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-data</artifactId>
+            <version>${flow.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

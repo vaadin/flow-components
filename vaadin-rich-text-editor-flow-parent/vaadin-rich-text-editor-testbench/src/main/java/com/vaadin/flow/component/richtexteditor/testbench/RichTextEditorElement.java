@@ -20,13 +20,11 @@ package com.vaadin.flow.component.richtexteditor.testbench;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
-import java.util.List;
-
 @Element("vaadin-rich-text-editor")
 public class RichTextEditorElement extends TestBenchElement {
 
-  public TestBenchElement getContent() {
-    return $("h1").first();
+  public TestBenchElement getEditor() {
+    return $("div").attributeContains("class", "ql-editor").first();
   }
 
 }

@@ -74,4 +74,11 @@ public abstract class AbstractParallelTest extends ParallelTest {
                 BrowserUtil.chrome(), BrowserUtil.edge(), BrowserUtil.safari());
     }
 
+    protected String getLastValue() {
+        return $("div").id("valuePanel").getText();
+    }
+
+    protected String getLastHtmlValue() {
+        return $("div").id("htmlValuePanel").getText();
+    }
 }

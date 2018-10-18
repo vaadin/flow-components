@@ -27,6 +27,11 @@
 
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>flow-data</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
             <version>${flow.version}</version>
         </dependency>
