@@ -13,36 +13,40 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.grid;
+package com.vaadin.flow.component.grid.editor;
 
 import java.util.EventObject;
 
+import com.vaadin.flow.component.grid.Grid;
+
 /**
- * An event that is fired when a Grid editor is cancelled.
+ * Base class for events fired in {@link Editor}.
  *
  * @author Vaadin Ltd
  *
+ * @see EditorOpenListener
  * @see EditorCancelListener
- * @see Editor#addCancelListener(EditorCancelListener)
+ * @see EditorCloseListener
+ * @see EditorSaveListener
  *
  * @param <T>
- *            the bean type
+ *            the item type
  */
-public class EditorCancelEvent<T> extends EventObject {
+public abstract class EditorEvent<T> extends EventObject {
 
-    private T bean;
+    private T item;
 
     /**
-     * Constructor for a editor cancel event.
+     * Constructor for the editor event.
      *
      * @param editor
      *            the source of the event
-     * @param bean
-     *            the bean being edited
+     * @param item
+     *            the item being edited
      */
-    public EditorCancelEvent(Editor<T> editor, T bean) {
+    public EditorEvent(Editor<T> editor, T item) {
         super(editor);
-        this.bean = bean;
+        this.item = item;
     }
 
     @SuppressWarnings("unchecked")
@@ -61,11 +65,11 @@ public class EditorCancelEvent<T> extends EventObject {
     }
 
     /**
-     * Gets the bean being edited.
+     * Gets the item being edited.
      *
-     * @return the bean being edited
+     * @return the item being edited
      */
-    public T getBean() {
-        return bean;
+    public T getItem() {
+        return item;
     }
 }

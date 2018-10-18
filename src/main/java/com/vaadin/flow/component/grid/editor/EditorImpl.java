@@ -13,16 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.grid;
+package com.vaadin.flow.component.grid.editor;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
+import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -45,33 +49,11 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
      */
     private static final String EDITING = "_editing";
 
+    private final Map<Class<?>, List<?>> listeners = new HashMap<>();
+
     private Binder<T> binder;
     private T edited;
     private boolean isBuffered;
-
-    private static class SaveEvent<T> extends ComponentEvent<Grid<T>> {
-
-        public SaveEvent(Grid<T> source) {
-            super(source, false);
-        }
-
-    }
-
-    private static class CancelEvent<T> extends ComponentEvent<Grid<T>> {
-
-        public CancelEvent(Grid<T> source) {
-            super(source, false);
-        }
-
-    }
-
-    private static class EditEvent<T> extends ComponentEvent<Grid<T>> {
-
-        public EditEvent(Grid<T> source) {
-            super(source, false);
-        }
-
-    }
 
     public EditorImpl(Grid<T> grid, PropertySet<T> propertySet) {
         super(grid);
@@ -120,7 +102,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
         if (isOpen() && isBuffered()) {
             getBinder().validate();
             if (getBinder().writeBeanIfValid(edited)) {
-                ComponentUtil.fireEvent(getGrid(), new SaveEvent<T>(getGrid()));
+                fireSaveEvent(new EditorSaveEvent<>(this, edited));
                 close();
                 return true;
             }
@@ -130,7 +112,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
 
     @Override
     public void cancel() {
-        ComponentUtil.fireEvent(getGrid(), new CancelEvent<T>(getGrid()));
+        fireCancelEvent(new EditorCancelEvent<>(this, edited));
         close();
     }
 
@@ -151,7 +133,12 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
             binder.setBean(item);
         }
 
-        ComponentUtil.fireEvent(getGrid(), new EditEvent<T>(getGrid()));
+        fireOpenEvent(new EditorOpenEvent<>(this, edited));
+    }
+
+    @Override
+    public T getItem() {
+        return edited;
     }
 
     @Override
@@ -170,8 +157,10 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
 
     private void close() {
         if (edited != null) {
-            refresh(edited);
+            T oldEdited = edited;
             edited = null;
+            refresh(oldEdited);
+            fireCloseEvent(new EditorCloseEvent<>(this, oldEdited));
         }
     }
 
@@ -200,31 +189,73 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public Registration addSaveListener(EditorSaveListener<T> listener) {
-        ComponentEventListener componentListener = event -> listener
-                .onEditorSave(new EditorSaveEvent<T>(this, edited));
-        return ComponentUtil.addListener(getGrid(), SaveEvent.class,
-                componentListener);
+        return addListener(EditorSaveListener.class, listener);
     }
 
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addCancelListener(EditorCancelListener<T> listener) {
-        ComponentEventListener componentListener = event -> listener
-                .onEditorCancel(new EditorCancelEvent<T>(this, edited));
-        return ComponentUtil.addListener(getGrid(), CancelEvent.class,
-                componentListener);
+        return addListener(EditorCancelListener.class, listener);
     }
 
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addOpenListener(EditorOpenListener<T> listener) {
-        ComponentEventListener componentListener = event -> listener
-                .onEditorOpen(new EditorOpenEvent<T>(this, edited));
-        return ComponentUtil.addListener(getGrid(), EditEvent.class,
-                componentListener);
+        return addListener(EditorOpenListener.class, listener);
+    }
+
+    @Override
+    public Registration addCloseListener(EditorCloseListener<T> listener) {
+        return addListener(EditorCloseListener.class, listener);
+    }
+
+    private <L> Registration addListener(Class<L> listenerType, L listener) {
+        List<L> list = (List<L>) listeners.computeIfAbsent(listenerType,
+                key -> Collections.synchronizedList(new ArrayList<>(1)));
+        list.add(listener);
+        return () -> list.remove(listener);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void fireOpenEvent(EditorOpenEvent<T> event) {
+        List<EditorOpenListener<T>> list = (List<EditorOpenListener<T>>) listeners
+                .get(EditorOpenListener.class);
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        new ArrayList<>(list).forEach(listener -> listener.onEditorOpen(event));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void fireCancelEvent(EditorCancelEvent<T> event) {
+        List<EditorCancelListener<T>> list = (List<EditorCancelListener<T>>) listeners
+                .get(EditorCancelListener.class);
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        new ArrayList<>(list)
+                .forEach(listener -> listener.onEditorCancel(event));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void fireSaveEvent(EditorSaveEvent<T> event) {
+        List<EditorSaveListener<T>> list = (List<EditorSaveListener<T>>) listeners
+                .get(EditorSaveListener.class);
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        new ArrayList<>(list).forEach(listener -> listener.onEditorSave(event));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void fireCloseEvent(EditorCloseEvent<T> event) {
+        List<EditorCloseListener<T>> list = (List<EditorCloseListener<T>>) listeners
+                .get(EditorCloseListener.class);
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        new ArrayList<>(list)
+                .forEach(listener -> listener.onEditorClose(event));
     }
 
 }

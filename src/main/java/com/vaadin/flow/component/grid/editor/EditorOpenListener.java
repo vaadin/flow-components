@@ -13,29 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.grid;
+package com.vaadin.flow.component.grid.editor;
 
 import java.io.Serializable;
 
+import com.vaadin.flow.component.grid.Grid;
+
 /**
- * An event listener for a {@link Grid} editor cancel events.
+ * An event listener for a {@link Grid} editor open events.
  *
  * @author Vaadin Ltd
  *
- * @see EditorCancelEvent
- * @see Editor#addCancelListener(EditorCancelListener)
- *
  * @param <T>
  *            the bean type
+ *
+ * @see EditorOpenEvent
+ * @see Editor#addOpenListener(EditorOpenListener)
  */
 @FunctionalInterface
-public interface EditorCancelListener<T> extends Serializable {
+public interface EditorOpenListener<T> extends Serializable {
 
     /**
-     * Called when the editor is cancelled.
+     * Called when the editor is opened.
      *
      * @param event
-     *            cancel event
+     *            open event
      */
-    public void onEditorCancel(EditorCancelEvent<T> event);
+    public void onEditorOpen(EditorOpenEvent<T> event);
 }

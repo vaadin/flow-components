@@ -43,7 +43,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.grid.Editor;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
@@ -54,6 +53,7 @@ import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
+import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.HierarchicalTestBean;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -1408,8 +1408,8 @@ public class GridView extends DemoView {
         editorColumn.setEditorComponent(buttons);
 
         editor.addSaveListener(
-                event -> message.setText(event.getBean().getName() + ", "
-                        + event.getBean().isSubscriber));
+                event -> message.setText(event.getItem().getName() + ", "
+                        + event.getItem().isSubscriber));
 
         // end-source-example
         grid.setId("buffered-editor");
