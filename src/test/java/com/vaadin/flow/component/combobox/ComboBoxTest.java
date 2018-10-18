@@ -267,6 +267,14 @@ public class ComboBoxTest {
                 comboBox.getSelectedItemJsonObject());
     }
 
+    @Test
+    public void setValueWithoutItems_throw() {
+        expectIllegalStateException(
+                "Cannot set a value for a ComboBox without items.");
+        ComboBox<String> combo = new ComboBox<>();
+        combo.setValue("foo");
+    }
+
     private void assertItem(TestComboBox comboBox, int index, String caption) {
         String value1 = comboBox.items.get(index);
         Assert.assertEquals(caption, value1);
