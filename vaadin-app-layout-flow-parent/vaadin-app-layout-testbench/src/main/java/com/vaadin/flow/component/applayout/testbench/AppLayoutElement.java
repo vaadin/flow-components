@@ -36,27 +36,12 @@ public class AppLayoutElement extends TestBenchElement {
                 contentPlaceholder);
     }
 
-    public TestBenchElement getMenu() {
-        return $(TestBenchElement.class).attribute("slot", "menu").first();
+    public <T extends TestBenchElement> T getMenu(Class<T> clazz) {
+        return $(clazz).attribute("slot", "menu").waitForFirst();
     }
 
-    public List<MenuItemElement> getMenuItems() {
-        return getMenu().$(MenuItemElement.class).all();
+    public AppLayoutMenuElement getAppLayoutMenuElement() {
+        return getMenu(AppLayoutMenuElement.class);
     }
 
-    public MenuItemElement getMenuItemAt(int index) {
-        return getMenu().$(MenuItemElement.class).get(index);
-    }
-
-    public MenuItemElement getMenuItemWithTitle(String title) {
-        return getMenu().$(MenuItemElement.class).attribute("title", title).first();
-    }
-
-    public MenuItemElement getSelectedMenuItem() {
-        return getMenu().$(MenuItemElement.class).attribute("selected", "").first();
-    }
-
-    public int countMenuItems() {
-        return getMenuItems().size();
-    }
 }
