@@ -36,7 +36,7 @@ public class GridWithTemplatePage extends Div {
         createGridInATemplateWithTemplatesInTheHeader();
         createGridInTemplateWithColumnProperties();
 
-        getElement().appendChild(new Element("hr", false));
+        getElement().appendChild(new Element("hr"));
         add(new H2("Standalone Grid"));
         createStandaloneGridWithTemplatesInTheCells();
         createStandaloneGridWithTemplatesInTheDetails();

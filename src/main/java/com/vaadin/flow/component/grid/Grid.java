@@ -923,6 +923,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
             if (itemDetailsDataGenerator != null && refresh) {
                 refresh(item);
+                if (!detailsVisible.contains(item)) {
+                    itemDetailsDataGenerator.destroyData(item);
+                }
             }
         }
 
@@ -966,8 +969,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         @Override
         public void refreshData(T item) {
-            if (itemDetailsDataGenerator != null && isDetailsVisible(item)) {
-                itemDetailsDataGenerator.refreshData(item);
+            if (itemDetailsDataGenerator != null) {
+                if (isDetailsVisible(item)) {
+                    itemDetailsDataGenerator.refreshData(item);
+                } else {
+                    itemDetailsDataGenerator.destroyData(item);
+                }
             }
         }
 
