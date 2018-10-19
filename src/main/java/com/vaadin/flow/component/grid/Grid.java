@@ -1056,6 +1056,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private Editor<T> editor;
 
+    private boolean verticalScrollingEnabled = true;
+
     /**
      * Creates a new instance, with page size of 50.
      */
@@ -2787,6 +2789,33 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             ComponentEventListener<ItemDoubleClickEvent<T>> listener) {
         return addListener(ItemDoubleClickEvent.class,
                 (ComponentEventListener) Objects.requireNonNull(listener));
+    }
+
+    /**
+     * Enables or disables the vertical scrolling on the Grid web component. By
+     * default, the scrolling is enabled.
+     * 
+     * @param enabled
+     *            <code>true</code> to enable vertical scrolling,
+     *            <code>false</code> to disabled it
+     */
+    public void setVerticalScrollingEnabled(boolean enabled) {
+        if (isVerticalScrollingEnabled() == enabled) {
+            return;
+        }
+        verticalScrollingEnabled = enabled;
+        getElement().callFunction("$connector.setVerticalScrollingEnabled",
+                enabled);
+    }
+
+    /**
+     * Gets whether the vertical scrolling on the Grid web component is enabled.
+     * 
+     * @return <code>true</code> if the vertical scrolling is enabled,
+     *         <code>false</code> otherwise
+     */
+    public boolean isVerticalScrollingEnabled() {
+        return verticalScrollingEnabled;
     }
 
     /**

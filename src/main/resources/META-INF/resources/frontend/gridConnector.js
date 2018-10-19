@@ -757,6 +757,36 @@ window.Vaadin.Flow.gridConnector = {
       }
     }
 
+    // TODO: should be removed once https://github.com/vaadin/vaadin-grid/issues/1471 gets implemented
+    grid.$connector.setVerticalScrollingEnabled = function(enabled) {
+      // There are two scollable containers in grid so apply the changes for both
+      setVerticalScrollingEnabled(grid.$.table, enabled);
+      setVerticalScrollingEnabled(grid.$.outerscroller, enabled);
+
+      // Since the scrollbars were toggled, there might have been some changes to layout
+      // size. Notify grid of the resize to ensure everything is in place.
+      grid.notifyResize();
+    }
+
+    const setVerticalScrollingEnabled = function(scrollable, enabled) {
+      // Prevent Y axis scrolling with CSS. This will hide the vertical scrollbar.
+      scrollable.style.overflowY = enabled ? '' : 'hidden';
+      // Clean up an existing listener
+      scrollable.removeEventListener('wheel', scrollable.__wheelListener);
+      // Add a wheel event listener with the horizontal scrolling prevention logic
+      !enabled && scrollable.addEventListener('wheel', scrollable.__wheelListener = e => {
+        if (e.deltaX) {
+          // If there was some horizontal delta related to the wheel event, force the vertical
+          // delta to 0 and let grid process the wheel event normally
+          Object.defineProperty(e, 'deltaY', { value: 0 });
+        } else {
+          // If there was verical delta only, skip the grid's wheel event processing to
+          // enable scrolling the page even if grid isn't scrolled to end
+          e.stopImmediatePropagation();
+        }
+      });
+    }
+
     const contextMenuListener = function(e) {
       // https://github.com/vaadin/vaadin-grid/issues/1318
       const path = e.composedPath();
