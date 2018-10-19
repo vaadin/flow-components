@@ -19,6 +19,8 @@ import java.util.stream.IntStream;
 @Theme(Lumo.class)
 public class AppRouterLayout extends AbstractAppRouterLayout {
 
+    private static final int NOTIFICATION_DURATION = 10000;
+
     @Override
     protected void configure(AppLayout appLayout, AppLayoutMenu appLayoutMenu) {
         appLayout.setBranding(new Span("Vaadin").getElement());
@@ -26,7 +28,8 @@ public class AppRouterLayout extends AbstractAppRouterLayout {
         appLayoutMenu.addMenuItems(generateMenuItems(
             i -> new AppLayoutMenuItem(VaadinIcon.SAFE_LOCK.create(),
                 "Action " + i, e -> Notification
-                .show(e.getSource().getTitle() + " executed!"))));
+                .show(e.getSource().getTitle() + " executed!",
+                        NOTIFICATION_DURATION, Notification.Position.BOTTOM_START))));
 
         appLayoutMenu.addMenuItems(generateMenuItems(
             i -> (new AppLayoutMenuItem(VaadinIcon.LOCATION_ARROW.create(),

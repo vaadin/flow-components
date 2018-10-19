@@ -2,7 +2,7 @@ package com.vaadin.flow.component.applayout;
 
 /*
  * #%L
- * Vaadin App Layout for Vaadin 10
+ * Vaadin App Layout
  * %%
  * Copyright (C) 2017 - 2018 Vaadin Ltd
  * %%
