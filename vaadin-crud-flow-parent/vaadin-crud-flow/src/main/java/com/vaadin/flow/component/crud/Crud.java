@@ -35,25 +35,28 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * A component for performing <a href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a>
- * operations on a data backend (e.g entities from a database).<br>
- * <br>
- * <u>Basic usage</u><br>
- * <br>
- * <code>
- * Crud&lt;Person&gt; crud = new Crud&lt;&gt;(Person.class, personEditor);<br>
- * crud.setDataProvider(personDataProvider);<br>
- *  <br>
- * // Handle save and delete events.<br>
- * crud.addSaveListener(e -&gt; save(e.getItem()));<br>
- * crud.addDeleteListener(e -&gt; delete(e.getItem()));<br>
- *  <br>
- * // Set a footer text or component if desired.<br>
- * crud.setFooter("Flight manifest for XX210");<br>
- * </code>
+ * operations on a data backend (e.g entities from a database).
+ *
+ * <pre>
+ * <u>Basic usage</u>
+ *
+ * {@code
+ *   Crud<Person> crud = new Crud<>(Person.class, personEditor);
+ *   crud.setDataProvider(personDataProvider);
+ *
+ *   // Handle save and delete events.
+ *   crud.addSaveListener(e -> save(e.getItem()));
+ *   crud.addDeleteListener(e -> delete(e.getItem()));
+ *
+ *   // Set a footer text or component if desired.
+ *   crud.setFooter("Flight manifest for XX210");
+ * }
+ * </pre>
  *
  * @author Vaadin Ltd
  *
@@ -72,28 +75,10 @@ public class Crud<E> extends Component implements HasSize {
     private final Set<ComponentEventListener<CancelEvent<E>>> cancelListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<DeleteEvent<E>>> deleteListeners = new LinkedHashSet<>();
 
-    private final Class<E> beanType;
-    private final Grid<E> grid;
-    private final CrudEditor<E> editor;
+    private Class<E> beanType;
+    private Grid<E> grid;
+    private CrudEditor<E> editor;
     private Component footer;
-
-    /**
-     * Instantiates a new Crud for the given bean type and uses the supplied editor.
-     * Furthermore, it displays the items using the built-in grid.<br>
-     * <br>
-     * Example:<br>
-     * <code>
-     *     Crud&lt;Person&gt; crud = new Crud&lt;&gt;(Person.class, new PersonEditor());<br>
-     * </code>
-     *
-     * @param beanType the class of items
-     * @param editor the editor for manipulating individual items
-     * @see CrudGrid
-     * @see com.vaadin.flow.component.crud.Crud#Crud(Class, Grid, CrudEditor) Crud(Class, Grid, CrudEditor)
-     */
-    public Crud(Class<E> beanType, CrudEditor<E> editor) {
-        this(beanType, new CrudGrid<>(beanType, true), editor);
-    }
 
     /**
      * Instantiates a new Crud using a custom grid.
@@ -104,26 +89,76 @@ public class Crud<E> extends Component implements HasSize {
      * @see com.vaadin.flow.component.crud.Crud#Crud(Class, CrudEditor) Crud(Class, CrudEditor)
      */
     public Crud(Class<E> beanType, Grid<E> grid, CrudEditor<E> editor) {
-        this.beanType = beanType;
+        this();
 
-        this.grid = grid;
-        this.grid.getElement().setAttribute("slot", "grid");
+        setGrid(grid);
+        setEditor(editor);
+        setBeanType(beanType);
+    }
 
-        this.editor = editor;
-        this.editor.getView().getElement().setAttribute("slot", "form");
+    /**
+     * Instantiates a new Crud for the given bean type and uses the supplied editor.
+     * Furthermore, it displays the items using the built-in grid.
+     *
+     * @param beanType the class of items
+     * @param editor the editor for manipulating individual items
+     * @see CrudGrid
+     * @see com.vaadin.flow.component.crud.Crud#Crud(Class, Grid, CrudEditor) Crud(Class, Grid, CrudEditor)
+     */
+    public Crud(Class<E> beanType, CrudEditor<E> editor) {
+        this();
 
-        this.setI18n(CrudI18n.createDefault(), false);
+        setEditor(editor);
+        setBeanType(beanType);
+    }
 
+    /**
+     * Instantiates a new Crud with no grid, editor and runtime bean type information.
+     * The editor and bean type must be initialized before a Crud is put into full use
+     * therefore this constructor only exists for partial initialization in order to support
+     * template binding.
+     *
+     * <pre>
+     * Example:
+     * <code>
+     *    &#064;Id
+     *    Crud&lt;Person&gt; crud;
+     *
+     *    &#064;Id
+     *    private TextField firstName;
+     *
+     *    &#064;Id
+     *    private TextField lastName;
+     *
+     *    &#064;Override
+     *    protected void onAttach(AttachEvent attachEvent) {
+     *        super.onAttach(attachEvent);
+     *
+     *        Binder&lt;Person&gt; binder = new Binder&lt;&gt;(Person.class);
+     *        binder.bind(firstName, Person::getFirstName, Person::setFirstName);
+     *        binder.bind(lastName, Person::getLastName, Person::setLastName);
+     *
+     *        crud.setEditor(new BinderCrudEditor&lt;&gt;(binder));
+     *        crud.setBeanType(Person.class);
+     *
+     *        crud.setDataProvider(new PersonCrudDataProvider());
+     *    }
+     * </code>
+     * </pre>
+     *
+     * @see #setEditor(CrudEditor)
+     * @see #setBeanType(Class)
+     */
+    public Crud() {
+        setI18n(CrudI18n.createDefault(), false);
         registerHandlers();
-
-        getElement().appendChild(grid.getElement(), editor.getView().getElement());
     }
 
     private void registerHandlers() {
         ComponentUtil.addListener(this, NewEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<NewEvent<E>>) e -> {
                     try {
-                        editor.setItem(beanType.newInstance());
+                        getEditor().setItem(getBeanType().newInstance());
                     } catch (Exception ex) {
                         throw new RuntimeException("Unable to instantiate new bean", ex);
                     }
@@ -133,7 +168,7 @@ public class Crud<E> extends Component implements HasSize {
 
         ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<EditEvent<E>>) e -> {
-                    editor.setItem(e.getItem());
+                    getEditor().setItem(e.getItem());
 
                     editListeners.forEach(listener -> listener.onComponentEvent(e));
                 }));
@@ -180,8 +215,69 @@ public class Crud<E> extends Component implements HasSize {
         getElement().callFunction("set", "editorOpened", opened);
     }
 
+    /**
+     * Gets the runtime bean type information
+     *
+     * @return the bean type
+     */
+    public Class<E> getBeanType() {
+        if (beanType == null) {
+            throw new IllegalStateException("The bean type must be initialized before event processing");
+        }
+
+        return beanType;
+    }
+
+    /**
+     * Sets the runtime bean type information.
+     * If no grid exists a built-in grid is created since the bean type information is now known.
+     * When injecting a {@link Crud} with {@literal @}Id this method must be called
+     * before the crud is put into use.
+     *
+     * @param beanType the bean type
+     */
+    public void setBeanType(Class<E> beanType) {
+        Objects.requireNonNull(beanType, "Bean type cannot be null");
+
+        this.beanType = beanType;
+
+        if (this.grid == null) {
+            setGrid(new CrudGrid<>(beanType, true));
+        }
+    }
+
+    /**
+     * Gets the grid
+     *
+     * @return the grid
+     */
     public Grid<E> getGrid() {
+        if (grid == null) {
+            throw new IllegalStateException("The grid must be initialized before event processing");
+        }
+
         return grid;
+    }
+
+    /**
+     * Sets the grid
+     *
+     * @param grid the grid
+     */
+    public void setGrid(Grid<E> grid) {
+        Objects.requireNonNull(grid, "Grid cannot be null");
+
+        if (this.grid != null && this.getChildren().anyMatch(c -> c == this.grid)) {
+            this.grid.getElement().removeFromParent();
+        }
+
+        this.grid = grid;
+        grid.getElement().setAttribute("slot", "grid");
+
+        // It might already have a parent e.g when injected from a template
+        if (grid.getElement().getParent() == null) {
+            getElement().appendChild(grid.getElement());
+        }
     }
 
     /**
@@ -190,7 +286,35 @@ public class Crud<E> extends Component implements HasSize {
      * @return the crud editor
      */
     public CrudEditor<E> getEditor() {
+        if (editor == null) {
+            throw new IllegalStateException("The editor must be initialized before event processing");
+        }
+
         return editor;
+    }
+
+    /**
+     * Sets the editor.
+     * When injecting a {@link Crud} with {@literal @}Id this method must be called
+     * before the crud is put into use.
+     *
+     * @param editor the editor
+     */
+    public void setEditor(CrudEditor<E> editor) {
+        Objects.requireNonNull(editor, "Editor cannot be null");
+
+        if (this.editor != null && this.editor.getView() != null
+                && this.getChildren().anyMatch(c -> c == this.editor.getView())) {
+            this.editor.getView().getElement().removeFromParent();
+        }
+
+        this.editor = editor;
+
+        // It might already have a parent e.g when injected from a template
+        if (editor.getView() != null && editor.getView().getElement().getParent() == null) {
+            editor.getView().getElement().setAttribute("slot", "form");
+            getElement().appendChild(editor.getView().getElement());
+        }
     }
 
     /**

@@ -34,6 +34,21 @@ public class BinderCrudEditor<E> implements CrudEditor<E> {
     private final Component view;
     private E item;
 
+    /**
+     * Initializes a BinderCrudEditor with the given binder and no form view
+     *
+     * @param binder the editor binder
+     */
+    public BinderCrudEditor(Binder<E> binder) {
+        this(binder, null);
+    }
+
+    /**
+     * Initializes a BinderCrudEditor with the given binder and form view
+     *
+     * @param binder the editor binder
+     * @param view the form view
+     */
     public BinderCrudEditor(Binder<E> binder, Component view) {
         this.binder = binder;
         this.view = view;
