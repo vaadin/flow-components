@@ -6,6 +6,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,10 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFil
     }
 
     private Consumer<Long> sizeChangeListener;
+
+    public List<Person> getDatabase() {
+        return Collections.unmodifiableList(database);
+    }
 
     void setDatabase(List<Person> database) {
         this.database = database;
