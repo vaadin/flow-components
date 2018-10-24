@@ -53,6 +53,17 @@ public class BasicUseIT extends AbstractParallelTest {
         Assert.assertEquals("<p>Foo</p>", getLastHtmlValue());
     }
 
+    @Test
+    public void setAndGetI18nCorrect() {
+        ButtonElement setI18n = getTestButton("setI18n");
+        ButtonElement getI18n = getTestButton("getI18n");
+        setI18n.click();
+        getI18n.click();
+
+        Assert.assertEquals(getLastI18nValue(),
+                $(RichTextEditorElement.class).waitForFirst().getTitles().toString());
+    }
+
     private ButtonElement getTestButton(String id) {
         return $(ButtonElement.class).onPage().id(id);
     }
