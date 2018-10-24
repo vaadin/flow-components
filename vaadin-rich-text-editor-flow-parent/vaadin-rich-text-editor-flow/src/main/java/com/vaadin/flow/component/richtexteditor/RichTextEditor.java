@@ -189,10 +189,19 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     /**
      * Value of the editor presented as HTML string.
      *
-     * @return the {@code htmlValue} property from the webcomponent
+     * @return the sanitized {@code htmlValue} property from the webcomponent.
      */
     public String getHtmlValue() {
-        return getHtmlValueString();
+        // Using basic whitelist and adding img tag with data protocol enabled.
+        return sanitize(getHtmlValueString());
+    }
+
+    String sanitize(String html) {
+        return org.jsoup.Jsoup.clean(html,
+                        org.jsoup.safety.Whitelist.basic()
+                        .addTags("img")
+                        .addAttributes("img", "align", "alt", "height", "src", "title", "width")
+                        .addProtocols("img", "src", "data"));
     }
 
     /**
