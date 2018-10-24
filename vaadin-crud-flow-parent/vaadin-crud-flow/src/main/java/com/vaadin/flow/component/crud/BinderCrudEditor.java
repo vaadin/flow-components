@@ -55,10 +55,12 @@ public class BinderCrudEditor<E> implements CrudEditor<E> {
     }
 
     @Override
-    public void setItem(E item) {
+    public void setItem(E item, boolean validate) {
         this.item = item;
         binder.readBean(item);
-        binder.validate();
+        if (validate) {
+            binder.validate();
+        }
     }
 
     @Override

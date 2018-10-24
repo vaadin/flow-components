@@ -31,10 +31,23 @@ public interface CrudEditor<E> extends Serializable {
     /**
      * Sets an item to be edited.
      * This could be a newly instantiated item or an existing item from the grid.
+     * Initial validation will be skipped.
      *
      * @param item the item to edit
+     * @see #setItem(Object, boolean)
      */
-    void setItem(E item);
+    default void setItem(E item) {
+        setItem(item, false);
+    }
+
+    /**
+     * Sets an item to be edited.
+     * This could be a newly instantiated item or an existing item from the grid.
+     *
+     * @param item the item to edit
+     * @param validate if true the item will be validated immediately
+     */
+    void setItem(E item, boolean validate);
 
     /**
      * Returns the item being edited.

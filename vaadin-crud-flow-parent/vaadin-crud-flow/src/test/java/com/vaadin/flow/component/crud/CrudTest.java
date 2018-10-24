@@ -69,7 +69,7 @@ public class CrudTest {
         private Thing item;
 
         @Override
-        public void setItem(Thing item) {
+        public void setItem(Thing item, boolean validate) {
             this.item = item;
         }
 

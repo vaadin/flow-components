@@ -168,7 +168,7 @@ public class Crud<E> extends Component implements HasSize {
 
         ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<EditEvent<E>>) e -> {
-                    getEditor().setItem(e.getItem());
+                    getEditor().setItem(e.getItem(), true);
 
                     editListeners.forEach(listener -> listener.onComponentEvent(e));
                 }));
