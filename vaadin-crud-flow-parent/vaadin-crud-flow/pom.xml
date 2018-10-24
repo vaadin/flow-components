@@ -61,12 +61,8 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-crud</artifactId>
-            <version>1.0.0-alpha5</version>
+            <version>1.0.0-alpha7</version>
             <exclusions>
-                <exclusion>
-                    <groupId>org.webjars.bowergithub.vaadin</groupId>
-                    <artifactId>vaadin-confirm-dialog</artifactId>
-                </exclusion>
                  <exclusion>
                     <groupId>org.webjars.bowergithub.vaadin</groupId>
                     <artifactId>vaadin-grid</artifactId>
@@ -76,11 +72,6 @@
                     <artifactId>vaadin-dialog</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin.webjar</groupId>
-            <artifactId>vaadin-confirm-dialog</artifactId>
-            <version>1.1.0-alpha1</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
@@ -105,7 +96,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>1.0.4</version>
+            <version>1.1.0</version>
         </dependency>
 
         <!--Test scoped-->
@@ -125,7 +116,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-lumo-theme</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

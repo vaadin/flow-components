@@ -267,7 +267,7 @@ public class Crud<E> extends Component implements HasSize {
     public void setGrid(Grid<E> grid) {
         Objects.requireNonNull(grid, "Grid cannot be null");
 
-        if (this.grid != null && this.getChildren().anyMatch(c -> c == this.grid)) {
+        if (this.grid != null && this.grid.getElement().getParent() == getElement()) {
             this.grid.getElement().removeFromParent();
         }
 
@@ -303,8 +303,9 @@ public class Crud<E> extends Component implements HasSize {
     public void setEditor(CrudEditor<E> editor) {
         Objects.requireNonNull(editor, "Editor cannot be null");
 
-        if (this.editor != null && this.editor.getView() != null
-                && this.getChildren().anyMatch(c -> c == this.editor.getView())) {
+        if (this.editor != null
+                && this.editor.getView() != null
+                && this.editor.getView().getElement().getParent() == getElement()) {
             this.editor.getView().getElement().removeFromParent();
         }
 
