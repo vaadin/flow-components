@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.grid.testbench;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-grid&gt;</code> element.
@@ -175,7 +176,7 @@ public class GridElement extends TestBenchElement {
         String script = "var grid = arguments[0];"
                 + "var rowIndex = arguments[1];"
                 + "var rowsInDom = grid.$.items.children;"
-                + "var rowInDom = Array.from(rowsInDom).filter(function(row) { return row.index == rowIndex;})[0];"
+                + "var rowInDom = Array.from(rowsInDom).filter(function(row) { return !row.hidden && row.index == rowIndex;})[0];"
                 + "return rowInDom;";
         return ((TestBenchElement) executeScript(script, this, rowIndex))
                 .wrap(GridTRElement.class);

@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -45,8 +46,8 @@ public class GridLoadsItemsIT extends AbstractComponentIT {
         List<String> messages = getMessages();
 
         Assert.assertEquals(
-                "There should be two queries, one for eagerly fetched data and one to fill the buffer based on the size of the Grid",
-                Arrays.asList("Fetch 0 - 50", "Fetch 50 - 150"), messages);
+                "There should be just one query, that fills up the pageSize of the Grid",
+                Arrays.asList("Fetch 0 - 50"), messages);
     }
 
     @Test
@@ -55,14 +56,14 @@ public class GridLoadsItemsIT extends AbstractComponentIT {
 
         findElement(By.id("clear-messages")).click();
 
-        WebElement grid = findElement(By.id("data-grid"));
-        executeScript("return arguments[0].scrollToIndex(500)", grid);
+        GridElement grid = $(GridElement.class).id("data-grid");
+        grid.scrollToRow(500);
 
         List<String> messages = getMessages();
 
         Assert.assertEquals(
-                "There should be one query fetching two previous pages, the current page, and two upcoming pages",
-                Arrays.asList("Fetch 400 - 650"), messages);
+                "There should be one query fetching two previous pages (400-450 + 450-500), the current page (500-550), and one upcoming page (550-600)",
+                Arrays.asList("Fetch 400 - 600"), messages);
     }
 
     private List<String> getMessages() {

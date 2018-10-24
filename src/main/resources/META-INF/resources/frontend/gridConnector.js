@@ -346,7 +346,7 @@ window.Vaadin.Flow.gridConnector = {
         }
 
         let parentCache = grid.$connector.getCacheByKey(parentUniqueKey);
-        let itemCache = (parentCache) ? parentCache.itemkeyCaches[parentUniqueKey] : undefined;
+        let itemCache = (parentCache && parentCache.itemkeyCaches) ? parentCache.itemkeyCaches[parentUniqueKey] : undefined;
         if(cache[parentUniqueKey] && cache[parentUniqueKey][page] && itemCache) {
           // workaround: sometimes grid-element gives page index that overflows
           page = Math.min(page, Math.floor(itemCache.size / grid.pageSize));
@@ -420,7 +420,8 @@ window.Vaadin.Flow.gridConnector = {
     }
 
     grid._expandedInstanceChangedCallback = function(inst, value) {
-      if (inst.item == undefined) {
+      // method available only for the TreeGrid server-side component
+      if (inst.item == undefined || grid.$server.updateExpandedState == undefined) {
         return;
       }
       let parentKey = grid.getItemId(inst.item);
@@ -430,7 +431,7 @@ window.Vaadin.Flow.gridConnector = {
       } else {
         delete cache[parentKey];
         let parentCache = grid.$connector.getCacheByKey(parentKey);
-        if(parentCache && parentCache.itemkeyCaches[parentKey]) {
+        if(parentCache && parentCache.itemkeyCaches && parentCache.itemkeyCaches[parentKey]) {
           parentCache.itemkeyCaches[parentKey].items = [];
         }
         delete lastRequestedRanges[parentKey];
@@ -476,7 +477,7 @@ window.Vaadin.Flow.gridConnector = {
       if((parentKey || root) !== root) {
         const items = cache[parentKey][page];
         let parentCache = grid.$connector.getCacheByKey(parentKey);
-        if(parentCache) {
+        if(parentCache && parentCache.itemkeyCaches) {
           let _cache = parentCache.itemkeyCaches[parentKey];
           _updateGridCache(page, items,
             treePageCallbacks[parentKey][page],

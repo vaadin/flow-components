@@ -236,10 +236,10 @@ public class TreeGridElement extends GridElement {
      * @throws NoSuchElementException
      *             if there is no expand element for this row
      */
-    public WebElement getExpandToggleElement(int rowIndex, int hierarchyColumnIndex) {
-        return getCell(rowIndex, hierarchyColumnIndex)
-                .$("vaadin-grid-tree-toggle").first();
-
+    public WebElement getExpandToggleElement(int rowIndex,
+            int hierarchyColumnIndex) {
+        GridTHTDElement cell = getCell(rowIndex, hierarchyColumnIndex);
+        return cell == null ? null : cell.$("vaadin-grid-tree-toggle").first();
     }
 
     /**
@@ -269,8 +269,7 @@ public class TreeGridElement extends GridElement {
      */
     public long getNumberOfExpandedRows() {
         long value = (long) executeScript(
-                "return arguments[0].expandedItems.length;",
-                this);
+                "return arguments[0].expandedItems.length;", this);
         return value;
     }
 

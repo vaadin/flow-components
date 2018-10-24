@@ -36,7 +36,7 @@ public class GridTRElement extends TestBenchElement {
                         + "return Array.from(grid.children)."
                         + "filter(function(cell) { return cell._column && cell._column.__generatedTbId == columnId;})[0]",
                 this, column.get__generatedId());
-        return e.wrap(GridTHTDElement.class);
+        return e == null ? null : e.wrap(GridTHTDElement.class);
     }
 
     /**
@@ -50,7 +50,7 @@ public class GridTRElement extends TestBenchElement {
                         + "return Array.from(grid.children)."
                         + "filter(function(cell) { return cell.getAttribute('part') && cell.getAttribute('part').includes('cell details-cell');})[0]",
                 this);
-        return e.wrap(GridTHTDElement.class);
+        return e == null ? null : e.wrap(GridTHTDElement.class);
     }
 
     /**
