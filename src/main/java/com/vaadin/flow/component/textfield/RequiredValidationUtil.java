@@ -34,14 +34,22 @@ final class RequiredValidationUtil {
     static void attachConnector(Component component) {
         execJS(component, "window.Vaadin.Flow.textConnector = {\n"
                 + "        disableClientValidation: function (textComponent){\n"
-                + "            if ( typeof textComponent.$validation == 'undefined'){\n"
-                + "                textComponent.$validation = textComponent.checkValidity;\n"
+                + "            if ( typeof textComponent.$checkValidity == 'undefined'){\n"
+                + "                textComponent.$checkValidity = textComponent.checkValidity;\n"
                 + "                textComponent.checkValidity = function() { return true; };\n"
+                + "            }\n  "
+                + "            if ( typeof textComponent.$validate == 'undefined'){\n"
+                + "                textComponent.$validate = textComponent.validate;\n"
+                + "                textComponent.validate = function() { return true; };\n"
                 + "            }\n  },\n"
                 + "        enableClientValidation: function (textComponent){\n"
-                + "            if ( textComponent.$validation ){\n"
-                + "                textComponent.checkValidity = textComponent.$validation;\n"
-                + "                delete textComponent.$validation;\n"
+                + "            if ( textComponent.$checkValidity ){\n"
+                + "                textComponent.checkValidity = textComponent.$checkValidity;\n"
+                + "                delete textComponent.$checkValidity;\n"
+                + "            }\n  "
+                + "            if ( textComponent.$validate ){\n"
+                + "                textComponent.validate = textComponent.$validate;\n"
+                + "                delete textComponent.$validate;\n"
                 + "            }\n  }\n }");
     }
 
