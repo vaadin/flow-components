@@ -10,11 +10,8 @@
     </parent>
     <artifactId>vaadin-confirm-dialog-flow</artifactId>
     <packaging>jar</packaging>
-    <name>Vaadin Confirm Dialog for Vaadin 10</name>
+    <name>Vaadin Confirm Dialog</name>
 
-    <properties>
-        <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -30,7 +27,7 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-confirm-dialog</artifactId>
-            <version>1.1.0-alpha1</version>
+            <version>1.1.0-beta1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.webjars.bowergithub.vaadin</groupId>
@@ -125,7 +122,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>license-checker</artifactId>
-            <version>2.1.0-alpha2</version>
+            <version>2.1.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
