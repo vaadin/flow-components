@@ -415,11 +415,37 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItems(itemFilter, Arrays.asList(items));
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The filter-type of the given data provider must be String so that it can
+     * handle the filters typed into the ComboBox by users. If your data
+     * provider uses some other type of filter, you can provide a function which
+     * converts the ComboBox's filter-string into that type via
+     * {@link #setDataProvider(DataProvider, SerializableFunction)}. Another way
+     * to do the same thing is to use this method with your data provider
+     * converted with
+     * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
+     */
     @Override
     public void setDataProvider(DataProvider<T, String> dataProvider) {
         setDataProvider(dataProvider, SerializableFunction.identity());
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * ComboBox triggers filtering queries based on the strings users type into
+     * the field. For this reason you need to provide the second parameter, a
+     * function which converts the filter-string typed by the user into
+     * filter-type used by your data provider. If your data provider already
+     * supports String as the filter-type, it can be used without a converter
+     * function via {@link #setDataProvider(DataProvider)}.
+     * <p>
+     * Using this method provides the same result as using a data provider
+     * wrapped with
+     * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
+     */
     @Override
     public <C> void setDataProvider(DataProvider<T, C> dataProvider,
             SerializableFunction<String, C> filterConverter) {
