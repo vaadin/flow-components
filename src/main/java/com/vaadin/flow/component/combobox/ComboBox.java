@@ -440,7 +440,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setValue(null);
 
         SerializableFunction<String, C> convertOrNull = filterText -> {
-            if (filterText == null || filterText.isEmpty()) {
+            if (filterText == null) {
                 return null;
             }
 

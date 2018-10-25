@@ -85,7 +85,8 @@ public class FilteringPage extends Div {
                             .range(query.getOffset(),
                                     query.getOffset() + query.getLimit())
                             .mapToObj(i -> {
-                                if (query.getFilter().isPresent()) {
+                                if (query.getFilter().isPresent() && query
+                                        .getFilter().get().length() > 0) {
                                     return "filtered";
                                 } else {
                                     return "foo";
@@ -97,6 +98,15 @@ public class FilteringPage extends Div {
         comboBoxWithFilterableDataProvider
                 .setDataProvider(dataProviderWithFiltering);
         add(new Div(), comboBoxWithFilterableDataProvider);
+
+        ComboBox<String> comboBoxWithEmptyFilterReturnsNone = new ComboBox<>();
+        comboBoxWithEmptyFilterReturnsNone.setDataProvider(
+                (filter, offset, limit) -> IntStream
+                        .range(offset, offset + limit)
+                        .mapToObj(i -> "Item " + i),
+                filter -> filter.isEmpty() ? 0 : 1);
+        comboBoxWithEmptyFilterReturnsNone.setId("empty-filter-returns-none");
+        add(new Div(), comboBoxWithEmptyFilterReturnsNone);
     }
 
 }

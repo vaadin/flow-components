@@ -150,6 +150,35 @@ public class FilteringIT extends AbstractComboBoxIT {
         assertRendered("filtered");
     }
 
+    @Test
+    public void configureEmptyFilterToReturnNoItems_useCaseWorks() {
+        box = $(ComboBoxElement.class).id("empty-filter-returns-none");
+        box.openPopup();
+
+        assertItemsNotLoaded();
+
+        box.setFilter("foo");
+        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
+        assertRendered("Item 0");
+
+        box.setFilter("");
+        assertItemsNotLoaded();
+    }
+
+    private void assertItemsNotLoaded() {
+        try {
+            waitUntil(driver -> {
+                if (getLoadedItems(box).size() > 0) {
+                    Assert.fail("Expected no items to be loaded when " +
+                            "opening the ComboBox with empty filter.");
+                }
+                return false;
+            }, 1);
+        } catch (Exception e) {
+            // Success
+        }
+    }
+
     private void assertClientSideFilter(boolean clientSide) {
         assertClientSideFilter(clientSide, "3", 13);
     }
