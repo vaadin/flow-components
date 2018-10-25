@@ -89,6 +89,7 @@ import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.ExecutionContext;
@@ -123,7 +124,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         HasTheme, HasDataGenerators<T> {
 
     protected static class UpdateQueue implements Update {
-        private final ArrayList<Runnable> queue = new ArrayList<>();
+        private final ArrayList<SerializableRunnable> queue = new ArrayList<>();
         private final UpdateQueueData data;
 
         protected UpdateQueue(UpdateQueueData data, int size) {
@@ -158,7 +159,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
 
         public void commit() {
-            queue.forEach(Runnable::run);
+            queue.forEach(SerializableRunnable::run);
             queue.clear();
         }
 
