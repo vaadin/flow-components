@@ -31,6 +31,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.demo.GridView;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
@@ -266,6 +267,19 @@ public class GridViewIT extends TabbedComponentDemoTest {
         assertFrozenColumn(grid, frozenStatusScript,
                 "toggle-selection-column-frozen",
                 "vaadin-grid-flow-selection-column");
+
+        WebElement alignments = findElement(By.id("toggle-text-align"));
+
+        List<WebElement> radioGroups = alignments
+                .findElements(By.tagName("vaadin-radio-button"));
+        radioGroups.get(2).click();
+        assertTextAlignment(grid, 2, ColumnTextAlign.END);
+
+        radioGroups.get(1).click();
+        assertTextAlignment(grid, 2, ColumnTextAlign.CENTER);
+
+        radioGroups.get(0).click();
+        assertTextAlignment(grid, 2, ColumnTextAlign.START);
     }
 
     @Test
@@ -1144,6 +1158,15 @@ public class GridViewIT extends TabbedComponentDemoTest {
         clickElementWithJs(toggleIdColumnFrozen);
         Assert.assertEquals(false, getCommandExecutor()
                 .executeScript(frozenStatusScript, idColumn));
+    }
+
+    private void assertTextAlignment(WebElement grid, int column,
+            ColumnTextAlign align) {
+        Assert.assertEquals(align.getPropertyValue(),
+                getCommandExecutor().executeScript(
+                        "return arguments[0].querySelectorAll('vaadin-grid-column')["
+                                + column + "].textAlign;",
+                        grid));
     }
 
     @Override

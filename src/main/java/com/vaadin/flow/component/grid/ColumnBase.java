@@ -78,6 +78,32 @@ interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
     }
 
     /**
+     * Sets the column text align.
+     * 
+     * @param textAlign
+     *            the text alignment of the column. Setting it to
+     *            <code>null</code> resets the alignment to the default value
+     *            {@link ColumnTextAlign#START}.
+     * @return this column, for method chaining
+     */
+    default T setTextAlign(ColumnTextAlign textAlign) {
+        getElement().setProperty("textAlign",
+                textAlign == null ? null : textAlign.getPropertyValue());
+        return (T) this;
+    }
+
+    /**
+     * Gets the column text align. The default is {@link ColumnTextAlign#START}.
+     * 
+     * @return the column text align, not <code>null</code>
+     */
+    @Synchronize("text-align-changed")
+    default ColumnTextAlign getTextAlign() {
+        return ColumnTextAlign
+                .fromPropertyValue(getElement().getProperty("textAlign"));
+    }
+
+    /**
      * Gets the underlying column element.
      * <p>
      * <strong>It is highly discouraged to directly use the API exposed by the

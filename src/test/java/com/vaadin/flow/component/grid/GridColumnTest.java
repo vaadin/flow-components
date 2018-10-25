@@ -177,6 +177,29 @@ public class GridColumnTest {
         Assert.assertEquals(renderer, fourthColumn.getRenderer());
     }
 
+    @Test
+    public void addColumn_defaultTextAlign() {
+        Grid<Person> grid = new Grid<>();
+
+        Column<Person> nameColumn = grid.addColumn(Person::getName);
+        Assert.assertEquals(ColumnTextAlign.START, nameColumn.getTextAlign());
+    }
+
+    @Test
+    public void setTextAlignToNull_defaultTextAlign() {
+        Grid<Person> grid = new Grid<>();
+
+        Column<Person> nameColumn = grid.addColumn(Person::getName)
+                .setTextAlign(null);
+        Assert.assertEquals(ColumnTextAlign.START, nameColumn.getTextAlign());
+
+        nameColumn.setTextAlign(ColumnTextAlign.CENTER);
+        Assert.assertEquals(ColumnTextAlign.CENTER, nameColumn.getTextAlign());
+
+        nameColumn.setTextAlign(null);
+        Assert.assertEquals(ColumnTextAlign.START, nameColumn.getTextAlign());
+    }
+
     private void expectNullPointerException(String message) {
         thrown.expect(NullPointerException.class);
         thrown.expectMessage(message);

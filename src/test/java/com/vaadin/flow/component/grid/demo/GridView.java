@@ -43,6 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
@@ -53,13 +54,14 @@ import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
-import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.HierarchicalTestBean;
+import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
@@ -819,6 +821,13 @@ public class GridView extends DemoView {
         freezeSelectionColumn.addClickListener(
                 event -> multiSlection.setSelectionColumnFrozen(
                         !multiSlection.isSelectionColumnFrozen()));
+
+        RadioButtonGroup<ColumnTextAlign> alignments = new RadioButtonGroup<>();
+        alignments.setItems(ColumnTextAlign.values());
+        alignments.setLabel("Text alignment for the Age column");
+        alignments.setValue(ColumnTextAlign.START);
+        alignments.addValueChangeListener(event -> grid.getColumnByKey("age")
+                .setTextAlign(event.getValue()));
         // end-source-example
 
         grid.setId("column-api-example");
@@ -826,9 +835,10 @@ public class GridView extends DemoView {
         userReordering.setId("toggle-user-reordering");
         freezeIdColumn.setId("toggle-id-column-frozen");
         freezeSelectionColumn.setId("toggle-selection-column-frozen");
+        alignments.setId("toggle-text-align");
         addCard("Configuring columns", "Column API example", grid,
                 new VerticalLayout(idColumnVisibility, userReordering,
-                        freezeIdColumn, freezeSelectionColumn));
+                        freezeIdColumn, freezeSelectionColumn, alignments));
     }
 
     private Grid<Person> createGridWithDetails() {
@@ -1084,7 +1094,7 @@ public class GridView extends DemoView {
                                     budgetHistory -> budgetHistory
                                             .getFirstHalfOfYear(year),
                                     dollarFormat))
-                    .setHeader("H1")
+                    .setHeader("H1").setTextAlign(ColumnTextAlign.END)
                     .setFooter(dollarFormat.format(firstHalfSum))
                     .setComparator((p1, p2) -> p1.getFirstHalfOfYear(year)
                             .compareTo(p2.getFirstHalfOfYear(year)));
@@ -1095,7 +1105,7 @@ public class GridView extends DemoView {
                                     budgetHistory -> budgetHistory
                                             .getSecondHalfOfYear(year),
                                     dollarFormat))
-                    .setHeader("H2")
+                    .setHeader("H2").setTextAlign(ColumnTextAlign.END)
                     .setFooter(dollarFormat.format(secondHalfSum))
                     .setComparator((p1, p2) -> p1.getSecondHalfOfYear(year)
                             .compareTo(p2.getSecondHalfOfYear(year)));
@@ -1413,7 +1423,7 @@ public class GridView extends DemoView {
 
         // end-source-example
         grid.setId("buffered-editor");
-        addCard("Grid Editor", "Editor in buffered mode", message,
+        addCard("Grid Editor", "Editor in Buffered Mode", message,
                 validationStatus, grid);
     }
 
@@ -1452,7 +1462,7 @@ public class GridView extends DemoView {
 
         // end-source-example
         grid.setId("not-buffered-editor");
-        addCard("Grid Editor", "Editor in not buffered mode", message, grid);
+        addCard("Grid Editor", "Editor in Not Buffered Mode", message, grid);
     }
 
     private <T> Component[] withTreeGridToggleButtons(List<T> roots,
