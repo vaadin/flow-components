@@ -12,6 +12,14 @@
     <packaging>jar</packaging>
     <name>Vaadin App Layout</name>
 
+    <licenses>
+        <license>
+            <name>Apache License Version 2.0</name>
+            <distribution>repo</distribution>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
     <properties>
         <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
         <powermock.version>1.7.1</powermock.version>
@@ -148,8 +156,7 @@
                 <version>1.8</version>
                 <!--  Use `mvn license:update-file-header` to fix header problems -->
                 <configuration>
-                    <licenseName>cval3</licenseName>
-                    <licenseResolver>${project.baseUri}src/license</licenseResolver>
+                    <licenseName>apache_v2</licenseName>
                     <includes>
                         <include>**/main/**/*.java</include>
                     </includes>
@@ -174,22 +181,10 @@
                         <index>true</index>
                         <manifest>
                             <addClasspath>false</addClasspath>
-                            <!-- Implementation-Title and Implementation-Version 
+                            <!-- Implementation-Title and Implementation-Version
                                 come from the POM by default -->
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
-                        <manifestEntries>
-                            <!-- Package format version - do not change -->
-                            <Vaadin-Package-Version>1</Vaadin-Package-Version>
-
-                            <!-- Add-on specific fields to update -->
-                            <AdVaaLicen>cval</AdVaaLicen>
-                            <AdVaaName>vaadin-app-layout</AdVaaName>
-                            <AdVaaPkg>com.vaadin.applayout</AdVaaPkg>
-                            <!-- Implementation-Title and Implementation-Version 
-                                come from the POM by default -->
-                            <Implementation-Title>Vaadin App Layout</Implementation-Title>
-                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>

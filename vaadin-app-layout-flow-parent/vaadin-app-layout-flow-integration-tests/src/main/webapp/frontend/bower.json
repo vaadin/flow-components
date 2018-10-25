@@ -4,7 +4,7 @@
   "authors": [],
   "description": "",
   "main": "",
-  "license": "CVAL3",
+  "license": "Apache-2.0",
   "private": true,
   "ignore": [
     "**/.*",

@@ -10,6 +10,14 @@
     </parent>
     <artifactId>vaadin-app-layout-testbench</artifactId>
 
+   <licenses>
+        <license>
+            <name>Apache License Version 2.0</name>
+            <distribution>repo</distribution>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
     <packaging>jar</packaging>
     <name>Vaadin App Layout Testbench API</name>
     <dependencies>
@@ -33,7 +41,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>1.8</version>
                 <configuration>
-                    <licenseName>cval3</licenseName>
+                    <licenseName>apache_v2</licenseName>
                     <licenseResolver>file://${basedir}/src/license</licenseResolver>
                     <includes>
                         <include>**/main/**/*.java</include>

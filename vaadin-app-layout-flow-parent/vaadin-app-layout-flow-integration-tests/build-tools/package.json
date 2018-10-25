@@ -3,7 +3,7 @@
   "description": "Frontend dependencies for vaadin-app-layout-flow demo",
   "version": "1.0.0",
   "author": "Vaadin Ltd",
-  "license": "SEE LICENSE IN https://vaadin.com/license/cval-3.0",
+  "license": "Apache-2.0",
   "devDependencies": {
     "bower": "1.8.2"
   },
