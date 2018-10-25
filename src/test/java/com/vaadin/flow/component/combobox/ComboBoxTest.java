@@ -275,6 +275,12 @@ public class ComboBoxTest {
         combo.setValue("foo");
     }
 
+    @Test
+    public void clearWithoutItems_doesNotThrow() {
+        ComboBox<String> combo = new ComboBox<>();
+        combo.clear();
+    }
+
     private void assertItem(TestComboBox comboBox, int index, String caption) {
         String value1 = comboBox.items.get(index);
         Assert.assertEquals(caption, value1);

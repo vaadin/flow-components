@@ -306,10 +306,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @Override
     public void setValue(T value) {
         if (dataCommunicator == null) {
-            throw new IllegalStateException(
-                    "Cannot set a value for a ComboBox without items. "
-                            + "Use setItems or setDataProvider to populate "
-                            + "items into the ComboBox before setting a value.");
+            if (value == null) {
+                return;
+            } else {
+                throw new IllegalStateException(
+                        "Cannot set a value for a ComboBox without items. "
+                                + "Use setItems or setDataProvider to populate "
+                                + "items into the ComboBox before setting a value.");
+            }
         }
         super.setValue(value);
 
