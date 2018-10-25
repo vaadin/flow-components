@@ -25,9 +25,16 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>flow-server</artifactId>
+			<version>${flow.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>com.vaadin.webjar</groupId>
 			<artifactId>vaadin-cookie-consent</artifactId>
-			<version>1.1.0-alpha2</version>
+			<version>1.1.0-beta1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars.bowergithub.polymer</groupId>
@@ -68,7 +75,7 @@
 		<dependency>
 			<groupId>org.webjars.bowergithub.vaadin</groupId>
 			<artifactId>license-checker</artifactId>
-			<version>2.1.0-alpha2</version>
+			<version>2.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars.bowergithub.insites</groupId>
@@ -76,11 +83,6 @@
 			<version>3.0.6</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>flow-server</artifactId>
-			<version>${flow.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

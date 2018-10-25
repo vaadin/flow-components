@@ -15,7 +15,7 @@
 	<name>vaadin-cookie-consent-flow-integration-tests</name>
 
 	<properties>
-		<jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
+		<jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
 		<failOnMissingWebXml>false</failOnMissingWebXml>
 		<sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
 		<ci-sauce.version>1.138</ci-sauce.version>

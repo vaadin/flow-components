@@ -26,8 +26,8 @@
 		</license>
 	</licenses>
 	<properties>
-		<flow.component.base.version>1.1.0</flow.component.base.version>
-		<flow.version>1.1.0</flow.version>
+		<flow.component.base.version>1.2.0.alpha2</flow.component.base.version>
+		<flow.version>1.2.0.alpha1</flow.version>
 		<testbench.version>6.0.1</testbench.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -76,31 +76,6 @@
 				<groupId>com.vaadin</groupId>
 				<artifactId>flow-server-production-mode</artifactId>
 				<version>${flow.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.webjars.bowergithub.vaadin</groupId>
-				<artifactId>vaadin-element-mixin</artifactId>
-				<version>2.1.2</version>
-			</dependency>
-			<dependency>
-				<groupId>org.webjars.bowergithub.vaadin</groupId>
-				<artifactId>vaadin-lumo-styles</artifactId>
-				<version>1.1.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.webjars.bowergithub.vaadin</groupId>
-				<artifactId>vaadin-material-styles</artifactId>
-				<version>1.1.2</version>
-			</dependency>
-			<dependency>
-				<groupId>org.webjars.bowergithub.vaadin</groupId>
-				<artifactId>vaadin-usage-statistics</artifactId>
-				<version>2.0.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.webjars.bowergithub.vaadin</groupId>
-				<artifactId>vaadin-development-mode-detector</artifactId>
-				<version>2.0.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
