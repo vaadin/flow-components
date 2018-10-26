@@ -2802,7 +2802,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Enables or disables the vertical scrolling on the Grid web component. By
      * default, the scrolling is enabled.
-     * 
+     *
      * @param enabled
      *            <code>true</code> to enable vertical scrolling,
      *            <code>false</code> to disabled it
@@ -2818,7 +2818,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets whether the vertical scrolling on the Grid web component is enabled.
-     * 
+     *
      * @return <code>true</code> if the vertical scrolling is enabled,
      *         <code>false</code> otherwise
      */
