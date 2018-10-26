@@ -42,8 +42,8 @@
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
 
-        <flow.component.base.version>1.2.0.alpha1</flow.component.base.version>
-        <flow.version>1.2.0.alpha1</flow.version>
+        <flow.component.base.version>1.2.0.alpha2</flow.component.base.version>
+        <flow.version>1.2.0.beta1</flow.version>
         <jetty.version>9.4.11.v20180605</jetty.version>
         <testbench.version>6.0.1</testbench.version>
     </properties>
@@ -70,21 +70,6 @@
                 <version>${flow.component.base.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bowergithub.vaadin</groupId>
-                <artifactId>vaadin-element-mixin</artifactId>
-                <version>2.1.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bowergithub.vaadin</groupId>
-                <artifactId>vaadin-usage-statistics</artifactId>
-                <version>2.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.bowergithub.vaadin</groupId>
-                <artifactId>vaadin-development-mode-detector</artifactId>
-                <version>2.0.0</version>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
