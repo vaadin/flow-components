@@ -331,6 +331,19 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     }
 
     @Test
+    public void filterMatchesNoItems_loadingStateResolved() {
+        // Otherwise the spinner is not cleared and it looks like the web
+        // component is still waiting for more data.
+        stringBox.openPopup();
+        stringBox.setFilter("foo");
+        waitUntil(driver -> !stringBox.getPropertyBoolean("loading"));
+        assertLoadedItemsCount(
+                "Expected no items to be loaded after setting "
+                        + "a filter which doesn't match any item",
+                0, stringBox);
+    }
+
+    @Test
     public void callbackDataprovider_pagesLoadedLazily() {
         callbackBox.openPopup();
         assertLoadedItemsCount(
