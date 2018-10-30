@@ -14,10 +14,6 @@
 
     <name>Vaadin Crud</name>
 
-    <properties>
-        <jetty.plugin.version>9.3.9.v20160517</jetty.plugin.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -38,6 +34,7 @@
             <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
@@ -57,12 +54,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--Webjar-->
-        <dependency>
-            <groupId>com.vaadin.webjar</groupId>
-            <artifactId>vaadin-crud</artifactId>
-            <version>1.0.0-alpha7</version>
-        </dependency>
 
         <!--Vaadin components-->
         <dependency>
@@ -73,14 +64,109 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0.beta1</version>
         </dependency>
+
+
+        <!--Webjar-->
+        <dependency>
+            <groupId>com.vaadin.webjar</groupId>
+            <artifactId>vaadin-crud</artifactId>
+            <version>1.0.0-alpha7</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.vaadin</groupId>
+                    <artifactId>vaadin-grid</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.vaadin</groupId>
+                    <artifactId>vaadin-text-field</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.vaadin.webjar</groupId>
+                    <artifactId>vaadin-confirm-dialog</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+
+        <!--Pinned transitive webjars-->
+        <dependency>
+            <groupId>com.vaadin.webjar</groupId>
+            <artifactId>vaadin-confirm-dialog</artifactId>
+            <version>1.1.0-beta1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>license-checker</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymer</groupId>
+            <artifactId>polymer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.webcomponents</groupId>
+            <artifactId>webcomponentsjs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.webcomponents</groupId>
+            <artifactId>shadycss</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-material-styles</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-usage-statistics</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-development-mode-detector</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-element-mixin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-dialog</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-overlay</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-lumo-styles</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-themable-mixin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-button</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-form-layout</artifactId>
+        </dependency>
+
 
         <!--Test scoped-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
 
@@ -94,12 +180,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-lumo-theme</artifactId>
             <version>1.1.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
