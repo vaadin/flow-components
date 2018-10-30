@@ -17,7 +17,7 @@ Add Crud to your project
   <dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-crud-flow</artifactId>
-    <version>1.0.0.alpha3</version>
+    <version>${vaadin.crud.version}</version>
   </dependency>
 </dependencies>
 ```
