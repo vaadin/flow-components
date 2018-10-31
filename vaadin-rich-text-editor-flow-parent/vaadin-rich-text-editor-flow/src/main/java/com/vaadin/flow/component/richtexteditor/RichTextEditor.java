@@ -199,8 +199,9 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     String sanitize(String html) {
         return org.jsoup.Jsoup.clean(html,
                         org.jsoup.safety.Whitelist.basic()
-                        .addTags("img")
+                        .addTags("img", "h1", "h2", "h3", "s")
                         .addAttributes("img", "align", "alt", "height", "src", "title", "width")
+                        .addAttributes(":all", "style")
                         .addProtocols("img", "src", "data"));
     }
 
