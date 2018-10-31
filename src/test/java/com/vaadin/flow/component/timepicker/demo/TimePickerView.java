@@ -15,14 +15,21 @@
  */
 package com.vaadin.flow.component.timepicker.demo;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.stream.Stream;
 
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 
 /**
  * View for {@link TimePicker} demo.
@@ -34,8 +41,45 @@ public class TimePickerView extends DemoView {
     @Override
     public void initView() {
         createDefaultTimePicker();
+        createLocalizedTimePicker();
         createDisabledTimePicker();
         createTimePickerWithStepSetting();
+    }
+
+    private void createLocalizedTimePicker() {
+        // begin-source-example
+        // source-example-heading: Localization for Time Picker
+        Stream<Locale> availableLocales = TimePicker
+                .getSupportedAvailableLocales()
+                .sorted((locale, locale2) -> locale.getDisplayName()
+                        .compareTo(locale2.getDisplayName()));
+        ComboBox<Locale> localesCB = new ComboBox<>("Localization");
+        localesCB.setItemLabelGenerator(locale -> locale.getDisplayName());
+        localesCB.setWidth("300px");
+        localesCB.setItems(availableLocales);
+
+        TimePicker timePicker = new TimePicker();
+
+        LocalTimeTextBlock localTimeTextBlock = new LocalTimeTextBlock();
+
+        localesCB.addValueChangeListener(event -> {
+            timePicker.setLocale(event.getValue());
+            localTimeTextBlock.setLocale(event.getValue());
+        });
+
+        timePicker.addValueChangeListener(event -> {
+            localTimeTextBlock.setLocalTime(event.getValue());
+        });
+
+        localesCB.setValue(UI.getCurrent().getLocale());
+
+        // end-source-example
+        Span localizedTimeLabel = new Span("The formatted value:");
+
+        Div container = new Div(localesCB, timePicker, localizedTimeLabel,
+                localTimeTextBlock);
+        container.getStyle().set("display", "inline-grid");
+        addCard("Localized Time Picker", container);
     }
 
     private void createDefaultTimePicker() {
@@ -60,8 +104,8 @@ public class TimePickerView extends DemoView {
         // source-example-heading: Time Picker With Step Setting
         TimePicker timePicker = new TimePicker();
 
-        NativeButton button1 = new NativeButton("Time Pattern: hh:mm:ss.fff", 
-                event-> { 
+        NativeButton button1 = new NativeButton("Time Pattern: hh:mm:ss.fff",
+                event -> {
                     timePicker.setStep(0.5);
                     message.setText("Current Step:" + timePicker.getStep());
                 });
@@ -115,6 +159,41 @@ public class TimePickerView extends DemoView {
                     + selectedTime.getMinute());
         } else {
             message.setText("No time is selected");
+        }
+    }
+
+    /**
+     * Component for showing browser formatted time string in the given locale.
+     */
+    public static class LocalTimeTextBlock extends Composite<Div> {
+
+        private Locale locale;
+        private LocalTime localTime;
+
+        public void setLocale(Locale locale) {
+            this.locale = locale;
+            updateValue();
+        }
+
+        public void setLocalTime(LocalTime localTime) {
+            this.localTime = localTime;
+            updateValue();
+        }
+
+        private void updateValue() {
+            if (locale == null || localTime == null) {
+                return;
+            }
+            String format = LocalDateTime.of(LocalDate.now(), localTime)
+                    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            StringBuilder tag = new StringBuilder(locale.getLanguage());
+            if (!locale.getCountry().isEmpty()) {
+                tag.append("-").append(locale.getCountry());
+            }
+            String expression = "$0['innerText'] = new Date('" + format
+                    + "').toLocaleTimeString('" + tag.toString()
+                    + "', {hour: 'numeric', minute: 'numeric'});";
+            getElement().executeJavaScript(expression, getElement());
         }
     }
 }

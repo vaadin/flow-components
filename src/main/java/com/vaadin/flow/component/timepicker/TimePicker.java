@@ -16,22 +16,24 @@
 package com.vaadin.flow.component.timepicker;
 
 import java.time.LocalTime;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasEnabled;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Server-side component for the <code>vaadin-time-picker</code> element.
+ * An input component for selecting time of day, based on
+ * {@code vaadin-time-picker} web component.
  *
  * @author Vaadin Ltd
  */
-public class TimePicker
-        extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
+@JavaScript("frontend://timepickerConnector.js")
+public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled {
 
     private static final SerializableFunction<String, LocalTime> PARSER = s -> {
@@ -42,6 +44,8 @@ public class TimePicker
         return d == null ? "" : d.toString();
     };
 
+    private Locale locale;
+
     /**
      * Default constructor.
      */
@@ -51,7 +55,7 @@ public class TimePicker
 
     /**
      * Convenience constructor to create a time picker with a pre-selected time.
-     * 
+     *
      * @param time
      *            the pre-selected time in the picker
      */
@@ -61,7 +65,7 @@ public class TimePicker
 
     /**
      * Convenience constructor to create a time picker with a label.
-     * 
+     *
      * @param label
      *            the label describing the time picker
      * @see #setLabel(String)
@@ -74,7 +78,7 @@ public class TimePicker
     /**
      * Convenience constructor to create a time picker with a pre-selected time
      * and a label.
-     * 
+     *
      * @param label
      *            the label describing the time picker
      * @param time
@@ -197,7 +201,7 @@ public class TimePicker
      * <p>
      * If the step is less than 900 seconds, the dropdown is hidden.
      * </p>
-     * 
+     *
      * @param step
      *            the step to set, unit seconds
      */
@@ -208,11 +212,11 @@ public class TimePicker
 
     /**
      * Gets the step of the time picker.
-     * 
+     *
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return the {@code step} property from the picker, unit seconds
      */
     public double getStep() {
@@ -223,5 +227,103 @@ public class TimePicker
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent<TimePicker>> listener) {
         return super.addInvalidChangeListener(listener);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (getLocale() == null) {
+            setLocale(attachEvent.getUI().getLocale());
+        }
+        initConnector();
+    }
+
+    private void initConnector() {
+        // can't run this with getElement().executeJavaScript(...) since then
+        // setLocale might be called before this causing client side error
+        runBeforeClientResponse(ui -> ui.getPage().executeJavaScript(
+                "window.Vaadin.Flow.timepickerConnector.initLazy($0)",
+                getElement()));
+    }
+
+    /**
+     * Set the Locale for the Time Picker. The displayed time will be formatted
+     * by the browser using the given locale.
+     * <p>
+     * By default, the locale is {@code null} until the component is attached to
+     * an UI, and then locale is set to {@link UI#getLocale()}, unless a locale
+     * has been explicitly set before that.
+     * <p>
+     * The time formatting is done in the browser using the <a href=
+     * "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleTimeString">Date.toLocaleTimeString()</a>
+     * function.
+     * <p>
+     * If for some reason the browser doesn't support the given locale, the
+     * en-US locale is used.
+     * <p>
+     * <em>NOTE: only the language + country/region codes are used</em>. This
+     * means that the script and variant information is not used and supported.
+     * <em>NOTE: timezone related data is not supported.</em>
+     *
+     * @param locale
+     *            the locale set to the time picker, cannot be [@code null}
+     */
+    public void setLocale(Locale locale) {
+        Objects.requireNonNull(locale, "Locale must not be null.");
+        if (locale.getLanguage().isEmpty()) {
+            throw new UnsupportedOperationException("Given Locale "
+                    + locale.getDisplayName()
+                    + " is not supported by time picker because it is missing the language information.");
+        }
+
+        this.locale = locale;
+        // we could support script & variant, but that requires more work on
+        // client side to detect the different
+        // number characters for other scripts (current only Arabic there)
+        StringBuilder bcp47LanguageTag = new StringBuilder(
+                locale.getLanguage());
+        if (!locale.getCountry().isEmpty()) {
+            bcp47LanguageTag.append("-").append(locale.getCountry());
+        }
+        runBeforeClientResponse(ui -> getElement().callFunction(
+                "$connector.setLocale", bcp47LanguageTag.toString()));
+    }
+
+    /**
+     * Gets the Locale for this date picker.
+     * <p>
+     * By default, the locale is {@code null} until the component is attached to
+     * an UI, and then locale is set to {@link UI#getLocale()}, unless
+     * {@link #setLocale(Locale)} has been explicitly called before that.
+     *
+     * @return the locale used for this picker
+     */
+    @Override
+    public Locale getLocale() {
+        return locale;
+    }
+
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    /**
+     * Returns a stream of all the available locales that are supported by the
+     * time picker component.
+     * <p>
+     * This is a shorthand for {@link Locale#getAvailableLocales()} where all
+     * locales without the {@link Locale#getLanguage()} have been filtered out,
+     * as the browser cannot localize the time for those.
+     *
+     * @return a stream of the available locales that are supported by the time
+     *         picker component
+     * @see #setLocale(Locale)
+     * @see Locale#getAvailableLocales()
+     * @see Locale#getLanguage()
+     */
+    public static Stream<Locale> getSupportedAvailableLocales() {
+        return Stream.of(Locale.getAvailableLocales())
+                .filter(locale -> !locale.getLanguage().isEmpty());
     }
 }

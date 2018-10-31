@@ -44,8 +44,7 @@ public class TimePickerIT extends ComponentDemoTest {
 
         executeScript("arguments[0].value = '10:08'", picker);
 
-        waitUntil(driver -> message.getText()
-                .contains("Hour: 10\nMinute: 8"));
+        waitUntil(driver -> message.getText().contains("Hour: 10\nMinute: 8"));
 
         executeScript("arguments[0].value = ''", picker);
 
@@ -70,7 +69,7 @@ public class TimePickerIT extends ComponentDemoTest {
                 .id("step-setting-picker");
         openPickerDropDown(picker);
         waitForElementPresent(By.tagName("vaadin-combo-box-overlay"));
-        Assert.assertEquals("Item in the dropdown is not correct", "01:00",
+        Assert.assertEquals("Item in the dropdown is not correct", "1:00 AM",
                 findItemText(1));
         closePickerDropDown(picker);
         executeScript("arguments[0].value = '12:31'", picker);
@@ -86,17 +85,16 @@ public class TimePickerIT extends ComponentDemoTest {
         clickButtonAndAssertText(900.0, "12:31", picker);
         openPickerDropDown(picker);
         waitForElementPresent(By.tagName("vaadin-combo-box-overlay"));
-        Assert.assertEquals("Item in the dropdown is not correct", "00:15",
+        Assert.assertEquals("Item in the dropdown is not correct", "12:15 AM",
                 findItemText(1));
         closePickerDropDown(picker);
     }
 
     private String findItemText(int index) {
-        return $("vaadin-combo-box-overlay").first()
-                .$(TestBenchElement.class).id("content")
-                .$(TestBenchElement.class).id("selector")
-                .$("vaadin-combo-box-item").get(index)
-                .$(TestBenchElement.class).id("content").getText();
+        return $("vaadin-combo-box-overlay").first().$(TestBenchElement.class)
+                .id("content").$(TestBenchElement.class).id("selector")
+                .$("vaadin-combo-box-item").get(index).$(TestBenchElement.class)
+                .id("content").getText();
     }
 
     private void openPickerDropDown(TestBenchElement picker) {
