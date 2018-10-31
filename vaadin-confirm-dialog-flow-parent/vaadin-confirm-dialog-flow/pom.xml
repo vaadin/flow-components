@@ -147,6 +147,42 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Bundle-SymbolicName>${project.groupId}.flow.component.confirmdialog</Bundle-SymbolicName>
+                        <Import-Package>*</Import-Package>
+                        <Export-Package>com.vaadin.flow.component.*;-noimport:=true</Export-Package>
+                        <Private-Package></Private-Package>
+                        <Bundle-Activator></Bundle-Activator>
+                        <Bundle-Version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</Bundle-Version>
+                        <Bundle-License>https://vaadin.com/license/cval-3.0</Bundle-License>
+                        <Bundle-Description></Bundle-Description>
+                        <!-- Package format version - do not change -->
+                        <Vaadin-Package-Version>1</Vaadin-Package-Version>
+                        <!-- Add-on specific fields to update -->
+                        <AdVaaLicen>cval</AdVaaLicen>
+                        <AdVaaName>vaadin-confirm-dialog</AdVaaName>
+                        <AdVaaPkg>com.vaadin.confirmdialog</AdVaaPkg>
+                        <!-- Implementation-Title and Implementation-Version
+                            come from the POM by default -->
+                        <Implementation-Title>Vaadin Confirm Dialog</Implementation-Title>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>1.8</version>
@@ -172,30 +208,28 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
+                <version>3.0.2</version>
                 <configuration>
+                    <finalName>${project.artifactId}</finalName>
                     <archive>
-                        <index>true</index>
-                        <manifest>
-                            <addClasspath>false</addClasspath>
-                            <!-- Implementation-Title and Implementation-Version 
-                                come from the POM by default -->
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                        <manifestEntries>
-                            <!-- Package format version - do not change -->
-                            <Vaadin-Package-Version>1</Vaadin-Package-Version>
-
-                            <!-- Add-on specific fields to update -->
-                            <AdVaaLicen>cval</AdVaaLicen>
-                            <AdVaaName>vaadin-confirm-dialog</AdVaaName>
-                            <AdVaaPkg>com.vaadin.confirmdialog</AdVaaPkg>
-                            <!-- Implementation-Title and Implementation-Version 
-                                come from the POM by default -->
-                            <Implementation-Title>Vaadin Confirm Dialog</Implementation-Title>
-                        </manifestEntries>
+                        <manifestFile>
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+                        </manifestFile>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>parse-version</id>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
