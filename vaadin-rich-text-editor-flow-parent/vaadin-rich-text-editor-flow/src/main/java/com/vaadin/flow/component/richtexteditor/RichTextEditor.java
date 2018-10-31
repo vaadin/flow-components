@@ -158,7 +158,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     }
 
     /**
-     * Sets the value of this editor. Should be in Delta format. 
+     * Sets the value of this editor. Should be in <a href="https://github.com/quilljs/delta">Delta</a> format.
      * If the new value is not equal to
      * {@code getValue()}, fires a value change event. Throws
      * {@code NullPointerException}, if the value is null.
@@ -175,7 +175,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     }
 
     /**
-     * Returns the current value of the text editor in Delta format. By default, the empty
+     * Returns the current value of the text editor in <a href="https://github.com/quilljs/delta">Delta</a> format. By default, the empty
      * editor will return an empty string.
      *
      * @return the current value.
