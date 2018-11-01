@@ -123,6 +123,6 @@ public class EventHandlingIT extends AbstractParallelTest {
     }
 
     private static String getFooterText(CrudElement crud) {
-        return crud.$("span").attribute("slot", "toolbar").first().getText();
+        return crud.getToolbar().get(0).getText();
     }
 }
