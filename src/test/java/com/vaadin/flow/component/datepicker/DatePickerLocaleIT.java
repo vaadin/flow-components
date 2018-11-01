@@ -48,7 +48,9 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                 "Expected only [Deprecation] warning should be in the logs", 1,
                 logs.size());
         Assert.assertThat(logs.get(0).getMessage(), CoreMatchers.containsString(
-                "deprecation - Styling master document from stylesheets defined in HTML Imports is deprecated"));
+                "HTML Imports"));
+        Assert.assertThat(logs.get(0).getMessage(), CoreMatchers.containsString(
+                "deprecated"));
 
         localePicker = $(DatePickerElement.class)
                 .id("german-locale-date-picker");
