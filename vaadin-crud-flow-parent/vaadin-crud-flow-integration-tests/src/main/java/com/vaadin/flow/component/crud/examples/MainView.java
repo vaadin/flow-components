@@ -6,6 +6,7 @@ import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudFilter;
 import com.vaadin.flow.component.crud.CrudGrid;
 import com.vaadin.flow.component.crud.CrudI18nUpdatedEvent;
+import com.vaadin.flow.component.crud.CrudVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.BodySize;
@@ -22,6 +23,7 @@ import static com.vaadin.flow.component.crud.examples.Helper.createYorubaI18n;
 public class MainView extends VerticalLayout {
 
     final VerticalLayout eventsPanel;
+    boolean hasBorder = true;
 
     public MainView() {
         eventsPanel = new VerticalLayout();
@@ -52,6 +54,17 @@ public class MainView extends VerticalLayout {
         ComponentUtil.addListener(crud.getGrid(), CrudI18nUpdatedEvent.class,
                 e -> addEvent("I18n updated"));
 
+        // no-border should be reflected to the generated grid too
+        final Button toggleBordersButton = new Button("Toggle borders", event -> {
+            if (hasBorder) {
+                crud.addThemeVariants(CrudVariant.NO_BORDER);
+            } else {
+                crud.removeThemeVariants(CrudVariant.NO_BORDER);
+            }
+            hasBorder = !hasBorder;
+        });
+        toggleBordersButton.setId("toggleBorders");
+
         crud.addNewListener(e -> addEvent("New: " + e.getItem()));
         crud.addEditListener(e -> addEvent("Edit: " + e.getItem()));
         crud.addCancelListener(e -> addEvent("Cancel: " + e.getItem()));
@@ -63,7 +76,7 @@ public class MainView extends VerticalLayout {
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
 
         setHeight("100%");
-        add(crud, showFiltersButton, updateI18nButton, eventsPanel);
+        add(crud, showFiltersButton, updateI18nButton, toggleBordersButton, eventsPanel);
     }
 
     private void addEvent(String event) {

@@ -13,6 +13,7 @@ import com.vaadin.flow.component.crud.CrudEditor;
 import com.vaadin.flow.component.crud.CrudFilter;
 import com.vaadin.flow.component.crud.CrudGrid;
 import com.vaadin.flow.component.crud.CrudI18n;
+import com.vaadin.flow.component.crud.CrudVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
@@ -73,6 +74,8 @@ public class CrudView extends DemoView {
         crud.setDataProvider(dataProvider);
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
+
+        crud.addThemeVariants(CrudVariant.NO_BORDER);
         // end-source-example
 
         addCard("Basic CRUD", crud);

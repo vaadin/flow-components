@@ -93,6 +93,23 @@ public class BasicUseIT extends AbstractParallelTest {
                 $("span").onPage().first().getText());
     }
 
+    @Test
+    public void crudAndGeneratedGridReactToThemeVariantChanges() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        GridElement grid = $(GridElement.class).first();
+
+        Assert.assertNotEquals("no-border", crud.getAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+
+        getTestButton("toggleBorders").click();
+        Assert.assertEquals("no-border", crud.getAttribute("theme"));
+        Assert.assertEquals("no-border", grid.getAttribute("theme"));
+
+        getTestButton("toggleBorders").click();
+        Assert.assertNotEquals("no-border", crud.getAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+    }
+
     private ButtonElement getTestButton(String id) {
         return $(ButtonElement.class).onPage().id(id);
     }

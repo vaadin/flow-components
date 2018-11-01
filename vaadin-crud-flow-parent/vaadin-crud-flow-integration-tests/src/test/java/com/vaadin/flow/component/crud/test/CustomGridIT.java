@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.crud.test;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
@@ -9,11 +10,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CustomEditGridIT extends AbstractParallelTest {
+public class CustomGridIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/customeditgrid");
+        getDriver().get(getBaseURL() + "/customgrid");
     }
 
     @Test
@@ -29,6 +30,7 @@ public class CustomEditGridIT extends AbstractParallelTest {
 
         // TODO(alexberazouski): Check why setValue doesn't fire the valueChange event
         lastNameField.setValue("Otto");
+
         // TODO(alexberazouski): Check why is it possible to click on disabled save button
         crud.getEditorSaveButton().click();
 
@@ -39,5 +41,22 @@ public class CustomEditGridIT extends AbstractParallelTest {
         Assert.assertFalse(crud.isEditorOpen());
         Assert.assertEquals("Otto",
                 $(GridElement.class).first().getCell(0, 2).getText());
+    }
+
+    @Test
+    public void customGridDoesNotReactToThemeVariantChanges() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        GridElement grid = $(GridElement.class).first();
+
+        Assert.assertNotEquals("no-border", crud.getAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+
+        toggleBordersButton().click();
+        Assert.assertEquals("no-border", crud.getAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+    }
+
+    private ButtonElement toggleBordersButton() {
+        return $(ButtonElement.class).onPage().id("toggleBorders");
     }
 }

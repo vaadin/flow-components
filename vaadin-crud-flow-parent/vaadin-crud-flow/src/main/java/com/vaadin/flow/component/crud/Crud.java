@@ -24,6 +24,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.grid.Grid;
@@ -34,9 +35,12 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A component for performing <a href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a>
@@ -65,7 +69,7 @@ import java.util.Set;
 @Tag("vaadin-crud")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud-edit-column.html")
-public class Crud<E> extends Component implements HasSize {
+public class Crud<E> extends Component implements HasSize, HasTheme {
 
     private static final String EDIT_COLUMN_KEY = "vaadin-crud-edit-column";
 
@@ -242,7 +246,7 @@ public class Crud<E> extends Component implements HasSize {
         this.beanType = beanType;
 
         if (this.grid == null) {
-            setGrid(new CrudGrid<>(beanType, true));
+            setGrid(new CrudGrid<>(beanType, true, true));
         }
     }
 
@@ -373,6 +377,42 @@ public class Crud<E> extends Component implements HasSize {
         if (fireEvent) {
             ComponentUtil.fireEvent(this.grid, new CrudI18nUpdatedEvent(this, false, i18n));
         }
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(CrudVariant... variants) {
+        List<String> variantNames = variantNames(variants);
+        getThemeNames().addAll(variantNames);
+
+        if (grid instanceof CrudGrid) {
+            ((CrudGrid) grid).addCrudThemeVariants(variantNames);
+        }
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(CrudVariant... variants) {
+        List<String> variantNames = variantNames(variants);
+        getThemeNames().removeAll(variantNames);
+
+        if (grid instanceof CrudGrid) {
+            ((CrudGrid) grid).removeCrudThemeVariants(variantNames);
+        }
+    }
+
+    private static List<String> variantNames(CrudVariant... variants) {
+        return Arrays.stream(variants)
+                .map(CrudVariant::getVariantName)
+                .collect(Collectors.toList());
     }
 
     /**
