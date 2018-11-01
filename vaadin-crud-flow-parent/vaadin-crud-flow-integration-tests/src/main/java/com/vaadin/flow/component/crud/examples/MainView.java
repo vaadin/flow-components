@@ -2,9 +2,11 @@ package com.vaadin.flow.component.crud.examples;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudFilter;
 import com.vaadin.flow.component.crud.CrudGrid;
+import com.vaadin.flow.component.crud.CrudI18n;
 import com.vaadin.flow.component.crud.CrudI18nUpdatedEvent;
 import com.vaadin.flow.component.crud.CrudVariant;
 import com.vaadin.flow.component.html.Span;
@@ -31,9 +33,16 @@ public class MainView extends VerticalLayout {
 
         final Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
 
+        final Button newButton = new Button(CrudI18n.createDefault().getNewItem());
+        newButton.setThemeName(ButtonVariant.LUMO_PRIMARY.getVariantName());
+        newButton.getElement().setAttribute("new-button", "");
+
+        final Span footer = new Span();
+        crud.setToolbar(footer, newButton);
+
         final PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
         dataProvider.setSizeChangeListener(count ->
-                crud.setFooter(String.format("%d items available", count)));
+                footer.setText(String.format("%d items available", count)));
 
         crud.setDataProvider(dataProvider);
 
@@ -48,8 +57,11 @@ public class MainView extends VerticalLayout {
             addEvent(filterString);
         });
 
-        final Button updateI18nButton = new Button("Switch to Yoruba",
-                event -> crud.setI18n(createYorubaI18n()));
+        final Button updateI18nButton = new Button("Switch to Yoruba", event -> {
+            CrudI18n yorubaI18n = createYorubaI18n();
+            crud.setI18n(yorubaI18n);
+            newButton.setText(yorubaI18n.getNewItem());
+        });
         updateI18nButton.setId("updateI18n");
         ComponentUtil.addListener(crud.getGrid(), CrudI18nUpdatedEvent.class,
                 e -> addEvent("I18n updated"));

@@ -20,10 +20,12 @@ package com.vaadin.flow.component.crud.testbench;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * TestBench element for the vaadin-crud element
@@ -45,8 +47,10 @@ public class CrudElement extends TestBenchElement {
      *
      * @return the new item button
      */
-    public ButtonElement getNewItemButton() {
-        return this.$(ButtonElement.class).id("new");
+    public Optional<TestBenchElement> getNewItemButton() {
+        ElementQuery<TestBenchElement> newButtonQuery
+                = this.$(TestBenchElement.class).attribute("new-button", "");
+        return newButtonQuery.exists() ? Optional.of(newButtonQuery.last()) : Optional.empty();
     }
 
     /**
@@ -60,13 +64,12 @@ public class CrudElement extends TestBenchElement {
     }
 
     /**
-     * Gets the footer content. This would typically be a <code>span</code> element containing a text if
-     * the footer was set with {@code crud.setFooter(String)}
+     * Gets the toolbar content.
      *
-     * @return the footer content
+     * @return the toolbar content
      */
-    public List<TestBenchElement> getFooterItems() {
-        return this.$(TestBenchElement.class).attribute("slot", "footer").all();
+    public List<TestBenchElement> getToolbar() {
+        return this.$(TestBenchElement.class).attribute("slot", "toolbar").all();
     }
 
     /**

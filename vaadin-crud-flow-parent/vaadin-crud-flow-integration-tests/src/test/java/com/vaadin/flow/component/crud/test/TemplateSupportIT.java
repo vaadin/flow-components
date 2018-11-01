@@ -35,7 +35,7 @@ public class TemplateSupportIT extends AbstractParallelTest {
     public void newTest() {
         CrudElement crud = getCrud().waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());
-        crud.getNewItemButton().click();
+        crud.getNewItemButton().get().click();
         Assert.assertEquals("New: Person{id=null, firstName='null', lastName='null'}",
                 getLastEvent());
         Assert.assertTrue(crud.isEditorOpen());

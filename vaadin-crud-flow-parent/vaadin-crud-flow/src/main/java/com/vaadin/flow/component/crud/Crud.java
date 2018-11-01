@@ -31,6 +31,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
@@ -56,9 +57,6 @@ import java.util.stream.Collectors;
  *   // Handle save and delete events.
  *   crud.addSaveListener(e -> save(e.getItem()));
  *   crud.addDeleteListener(e -> delete(e.getItem()));
- *
- *   // Set a footer text or component if desired.
- *   crud.setFooter("Flight manifest for XX210");
  * }
  * </pre>
  *
@@ -72,6 +70,11 @@ import java.util.stream.Collectors;
 public class Crud<E> extends Component implements HasSize, HasTheme {
 
     private static final String EDIT_COLUMN_KEY = "vaadin-crud-edit-column";
+    private static final String EVENT_PREVENT_DEFAULT_JS = "event.preventDefault()";
+    private static final String SLOT_KEY = "slot";
+    private static final String TOOLBAR_SLOT_NAME = "toolbar";
+    private static final String GRID_SLOT_NAME = "grid";
+    private static final String FORM_SLOT_NAME = "form";
 
     private final Set<ComponentEventListener<NewEvent<E>>> newListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
@@ -82,7 +85,6 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     private Class<E> beanType;
     private Grid<E> grid;
     private CrudEditor<E> editor;
-    private Component footer;
 
     /**
      * Instantiates a new Crud using a custom grid.
@@ -276,7 +278,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
         }
 
         this.grid = grid;
-        grid.getElement().setAttribute("slot", "grid");
+        grid.getElement().setAttribute(SLOT_KEY, GRID_SLOT_NAME);
 
         // It might already have a parent e.g when injected from a template
         if (grid.getElement().getParent() == null) {
@@ -317,49 +319,28 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
 
         // It might already have a parent e.g when injected from a template
         if (editor.getView() != null && editor.getView().getElement().getParent() == null) {
-            editor.getView().getElement().setAttribute("slot", "form");
+            editor.getView().getElement().setAttribute(SLOT_KEY, FORM_SLOT_NAME);
             getElement().appendChild(editor.getView().getElement());
         }
     }
 
     /**
-     * Gets the crud footer.
+     * Sets the content of the toolbar.
+     * Any content with the attribute `new-button` triggers a new item creation.
      *
-     * @return the crud footer
-     * @see #setFooter(Component)
-     * @see #setFooter(String)
+     * @param components the content to be set
      */
-    public Component getFooter() {
-        return footer;
-    }
+    public void setToolbar(Component... components) {
+        final Element[] existingToolbarElements = getElement().getChildren()
+                .filter(e -> TOOLBAR_SLOT_NAME.equals(e.getAttribute(SLOT_KEY)))
+                .toArray(Element[]::new);
+        getElement().removeChild(existingToolbarElements);
 
-    /**
-     * Sets a component to be displayed as the crud footer.
-     * This could, for example, be used to display a banner or anything else.
-     *
-     * @param footer the footer component
-     * @see #setFooter(String)
-     */
-    public void setFooter(Component footer) {
-        footer.getElement().setAttribute("slot", "footer");
-        getElement().insertChild(0, footer.getElement());
-
-        if (this.footer != null) {
-            getElement().removeChild(this.footer.getElement());
-        }
-
-        this.footer = footer;
-    }
-
-    /**
-     * Sets a text to be displayed as the crud footer.
-     * This is a convenience version of {@link #setFooter(String)} when displaying simple texts.
-     *
-     * @param footer the footer text
-     * @see #setFooter(Component)
-     */
-    public void setFooter(String footer) {
-        setFooter(new Span(footer));
+        final Element[] newToolbarElements = Arrays.stream(components)
+                .map(Component::getElement)
+                .map(e -> e.setAttribute(SLOT_KEY, TOOLBAR_SLOT_NAME))
+                .toArray(Element[]::new);
+        getElement().appendChild(newToolbarElements);
     }
 
     /**
@@ -591,7 +572,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
          * @param ignored an ignored parameter for a side effect
          */
         public CancelEvent(Crud<E> source, boolean fromClient,
-                           @EventData("event.preventDefault()") Object ignored) {
+                           @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
         }
     }
@@ -613,7 +594,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
          * @param ignored an ignored parameter for a side effect
          */
         public DeleteEvent(Crud<E> source, boolean fromClient,
-                           @EventData("event.preventDefault()") Object ignored) {
+                           @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
         }
     }
@@ -639,7 +620,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
          */
         public EditEvent(Crud<E> source, boolean fromClient,
                          @EventData("event.detail.item") JsonObject item,
-                         @EventData("event.preventDefault()") Object ignored) {
+                         @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
             this.item = source.getGrid().getDataCommunicator()
                     .getKeyMapper().get(item.getString("key"));
@@ -667,7 +648,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
          * @param ignored an ignored parameter for a side effect
          */
         public NewEvent(Crud<E> source, boolean fromClient,
-                        @EventData("event.preventDefault()") Object ignored) {
+                        @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
         }
     }
@@ -689,7 +670,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
          * @param ignored an ignored parameter for a side effect
          */
         public SaveEvent(Crud<E> source, boolean fromClient,
-                         @EventData("event.preventDefault()") Object ignored) {
+                         @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
         }
     }

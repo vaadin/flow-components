@@ -81,9 +81,9 @@ public class BasicUseIT extends AbstractParallelTest {
     @Test
     public void i18n() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
-        Assert.assertEquals("New item", crud.getNewItemButton().getText());
+        Assert.assertEquals("New item", crud.getNewItemButton().get().getText().trim());
         getTestButton("updateI18n").click();
-        Assert.assertEquals("Eeyan titun", crud.getNewItemButton().getText());
+        Assert.assertEquals("Eeyan titun", crud.getNewItemButton().get().getText().trim());
         Assert.assertEquals("I18n updated", getLastEvent());
     }
 

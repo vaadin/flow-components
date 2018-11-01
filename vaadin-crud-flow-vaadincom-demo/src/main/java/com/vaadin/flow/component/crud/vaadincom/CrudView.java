@@ -17,6 +17,7 @@ import com.vaadin.flow.component.crud.CrudVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
@@ -68,7 +69,6 @@ public class CrudView extends DemoView {
         Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
 
         PersonDataProvider dataProvider = new PersonDataProvider();
-        dataProvider.setSizeChangeListener(count -> crud.setFooter("Total: " + count));
 
         crud.getGrid().removeColumnByKey("id");
         crud.setDataProvider(dataProvider);
@@ -87,8 +87,16 @@ public class CrudView extends DemoView {
         CrudGrid<Person> crudGrid = new CrudGrid<>(Person.class, false);
         Crud<Person> crud = new Crud<>(Person.class, crudGrid, createPersonEditor());
 
+        Span footer = new Span();
+        Button newItemButton = new Button();
+        newItemButton.getElement().setAttribute("new-button", true);
+
+        // An element with attribute new-button is required when setting toolbar content
+        // if new item creation is desired.
+        crud.setToolbar(footer, newItemButton);
+
         PersonDataProvider dataProvider = new PersonDataProvider();
-        dataProvider.setSizeChangeListener(count -> crud.setFooter("Total: " + count));
+        dataProvider.setSizeChangeListener(count -> footer.setText("Total: " + count));
 
         crud.getGrid().removeColumnByKey("id");
         crud.getGrid().setSortableColumns();
@@ -172,7 +180,7 @@ public class CrudView extends DemoView {
             filterableDataProvider.setFilter(searchBar.getValue());
         });
 
-        crud.setFooter(searchBar);
+        crud.setToolbar(searchBar);
         crud.getElement().getStyle().set("flex-direction", "column-reverse");
         // end-source-example
 
@@ -189,10 +197,9 @@ public class CrudView extends DemoView {
 
         Button updateI18nButton = new Button("Switch to Yorùbá",
                 event -> crud.setI18n(createYorubaI18n()));
-        crud.setFooter(updateI18nButton);
         // end-source-example
 
-        addCard("CRUD with internationalization", crud);
+        addCard("CRUD with internationalization", crud, updateI18nButton);
     }
 
     // Dummy database
