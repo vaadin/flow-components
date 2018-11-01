@@ -196,10 +196,10 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         Assert.assertEquals("0", grid.getCell(0, 0).getText());
         Assert.assertEquals(
-                "<div title=\"Person A\">Person A<br><small>27 years old</small></div>",
+                "<div title=\"Person 1\">Person 1<br><small>23 years old</small></div>",
                 grid.getCell(0, 1).getInnerHTML());
         Assert.assertEquals(
-                "<div>Street N, number 31<br><small>74253</small></div>",
+                "<div>Street S, number 49<br><small>10795</small></div>",
                 grid.getCell(0, 2).getInnerHTML());
         Assert.assertEquals("<button>Update</button><button>Remove</button>",
                 grid.getCell(0, 3).getInnerHTML());
@@ -209,16 +209,16 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         buttons.get(0).click();
         Assert.assertEquals(
-                "<div title=\"Person A Updated\">Person A Updated<br><small>27 years old</small></div>",
+                "<div title=\"Person 1 Updated\">Person 1 Updated<br><small>23 years old</small></div>",
                 grid.getCell(0, 1).getInnerHTML());
         buttons.get(0).click();
         Assert.assertEquals(
-                "<div title=\"Person A Updated Updated\">Person A Updated Updated<br><small>27 years old</small></div>",
+                "<div title=\"Person 1 Updated Updated\">Person 1 Updated Updated<br><small>23 years old</small></div>",
                 grid.getCell(0, 1).getInnerHTML());
 
         buttons.get(1).click();
         Assert.assertEquals(
-                "<div title=\"Person B\">Person B<br><small>19 years old</small></div>",
+                "<div title=\"Person 2\">Person 2<br><small>61 years old</small></div>",
                 grid.getCell(0, 1).getInnerHTML());
     }
 
@@ -549,7 +549,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         Assert.assertThat("There should be a cell with the renderered footer",
                 columns.get(0).getAttribute("innerHTML"),
-                CoreMatchers.containsString("Total: 499 people"));
+                CoreMatchers.containsString("Total: 500 people"));
     }
 
     @Test
@@ -583,7 +583,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         Assert.assertTrue("There should be a cell with the renderered footer",
                 hasComponentRendereredHeaderCell(grid,
-                        "<label>Total: 499 people</label>"));
+                        "<label>Total: 500 people</label>"));
     }
 
     @Test
@@ -678,16 +678,16 @@ public class GridViewIT extends TabbedComponentDemoTest {
         int offset = getCellsOffsetFromTheHeaders(grid, cells);
 
         assertCellContent("Item 1", cells.get(offset));
-        assertCellContent("$ 72.76", cells.get(offset + 1));
-        assertCellContent("1/10/18 11:19:11 AM", cells.get(offset + 2));
-        assertCellContent("Jan 25, 2018", cells.get(offset + 3));
+        assertCellContent("$ 73.10", cells.get(offset + 1));
+        assertCellContent("1/10/18 11:43:59 AM", cells.get(offset + 2));
+        assertCellContent("Jan 11, 2018", cells.get(offset + 3));
         assertRendereredContent("$$$", cells.get(offset + 4));
         assertCellContent("<button>Remove</button>", cells.get(offset + 5));
 
         assertCellContent("Item 2", cells.get(offset + 6));
-        assertCellContent("$ 30.87", cells.get(offset + 7));
-        assertCellContent("1/10/18 11:14:54 AM", cells.get(offset + 8));
-        assertCellContent("Jan 19, 2018", cells.get(offset + 9));
+        assertCellContent("$ 24.05", cells.get(offset + 7));
+        assertCellContent("1/10/18 11:07:31 AM", cells.get(offset + 8));
+        assertCellContent("Jan 24, 2018", cells.get(offset + 9));
         assertRendereredContent("$", cells.get(offset + 10));
         assertCellContent("<button>Remove</button>", cells.get(offset + 11));
     }
@@ -697,7 +697,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         openTabAndCheckForErrors("height-by-rows");
         GridElement grid = $(GridElement.class).id("grid-height-by-rows");
         scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() == 49);
+        waitUntil(driver -> grid.getRowCount() == 50);
 
         Assert.assertEquals("Grid should have heightByRows set to true", "true",
                 grid.getAttribute("heightByRows"));
@@ -736,10 +736,10 @@ public class GridViewIT extends TabbedComponentDemoTest {
         Assert.assertFalse("The rendered button should be disabled",
                 button.isEnabled());
 
-        grid.scrollToRow(498);
-        waitUntil(driver -> grid.getRowCount() == 499);
+        grid.scrollToRow(499);
+        waitUntil(driver -> grid.getRowCount() == 500);
 
-        row = grid.getRow(498);
+        row = grid.getRow(499);
         cell = row.getCell(grid.getColumn("Action"));
         button = cell.getContext().findElement(By.tagName("button"));
 
@@ -1206,12 +1206,12 @@ public class GridViewIT extends TabbedComponentDemoTest {
         // New data should be shown in the grid cell
         Assert.assertEquals(personName + "foo", nameCell.getText());
         Assert.assertEquals(Boolean.TRUE.toString(), subscriberCell.getText());
-        Assert.assertEquals("mailvn@example.org",
+        Assert.assertEquals("mailss@example.org",
                 row.getCell(grid.getAllColumns().get(2)).getText());
 
         // The edited person should have new data
         WebElement msg = findElement(By.id("not-buffered-dynamic-editor-msg"));
-        Assert.assertEquals(personName + "foo, true, mailvn@example.org",
+        Assert.assertEquals(personName + "foo, true, mailss@example.org",
                 msg.getText());
     }
 
@@ -1446,7 +1446,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         waitUntil(driver -> !updatedItemMsg.getText().isEmpty());
 
-        Assert.assertEquals("Person 1foo, true, mailvn@example.org",
+        Assert.assertEquals("Person 1foo, true, mailss@example.org",
                 updatedItemMsg.getText());
     }
 

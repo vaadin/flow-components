@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,8 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -66,7 +63,6 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.bean.Country;
-import com.vaadin.flow.data.bean.UsaState;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Binder.Binding;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -96,7 +92,6 @@ public class GridView extends DemoView {
 
     public static List<Person> items = new ArrayList<>();
     public static List<PersonWithLevel> rootItems = new ArrayList<>();
-    public static AtomicInteger treeIds = new AtomicInteger(0);
     static {
         items = createItems();
         rootItems = createRootItems();
@@ -114,8 +109,6 @@ public class GridView extends DemoView {
         private Address address;
         private boolean isSubscriber;
         private String email;
-        private Country country;
-        private String state;
 
         public int getId() {
             return id;
@@ -163,22 +156,6 @@ public class GridView extends DemoView {
 
         public void setEmail(String email) {
             this.email = email;
-        }
-
-        public Country getCountry() {
-            return country;
-        }
-
-        public void setCountry(Country country) {
-            this.country = country;
-        }
-
-        public String getState() {
-            return state;
-        }
-
-        public void setState(String state) {
-            this.state = state;
         }
 
         @Override
@@ -236,6 +213,24 @@ public class GridView extends DemoView {
         private String street;
         private int number;
         private String postalCode;
+        private Country country;
+        private String state;
+
+        public Country getCountry() {
+            return country;
+        }
+
+        public void setCountry(Country country) {
+            this.country = country;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
 
         public String getStreet() {
             return street;
@@ -268,7 +263,7 @@ public class GridView extends DemoView {
     }
     // end-source-example
 
-    private static class Item {
+    public static class Item {
         private String name;
         private double price;
         private LocalDateTime purchaseDate;
@@ -485,12 +480,12 @@ public class GridView extends DemoView {
          * view "window". The Data Provider will use callbacks to load only a
          * portion of the data.
          */
-        Random random = new Random(0);
+        PeopleGenerator generator = new PeopleGenerator();
         grid.setDataProvider(DataProvider.fromCallbacks(
                 query -> IntStream
                         .range(query.getOffset(),
                                 query.getOffset() + query.getLimit())
-                        .mapToObj(index -> createPerson(index + 1, random)),
+                        .mapToObj(index -> generator.createPerson(index + 1)),
                 query -> 100 * 1000 * 1000));
 
         grid.addColumn(Person::getName).setHeader("Name");
@@ -598,10 +593,6 @@ public class GridView extends DemoView {
 
     private void createColumnTemplate() {
         List<Person> items = new ArrayList<>();
-        items.add(createPerson(Person::new, "Person A", -1, 27, true,
-                "foo@gmail.com", "Street N", 31, "74253", Country.FINLAND, ""));
-        items.add(createPerson(Person::new, "Person B", 0, 19, false, "",
-                "Street F", 73, "93493", Country.USA, ""));
         items.addAll(createItems());
 
         // begin-source-example
@@ -997,8 +988,6 @@ public class GridView extends DemoView {
         // Property-names are automatically set as keys
         // You can remove undesired columns by using the key
         grid.removeColumnByKey("id");
-        grid.removeColumnByKey("country");
-        grid.removeColumnByKey("state");
 
         // Columns for sub-properties can be added easily
         grid.addColumn("address.postalCode");
@@ -1767,103 +1756,15 @@ public class GridView extends DemoView {
     }
 
     private static List<Person> createItems(int number) {
-        Random random = new Random(0);
-        return IntStream.range(1, number)
-                .mapToObj(index -> createPerson(index, random))
-                .collect(Collectors.toList());
+        return new PeopleGenerator().generatePeople(number);
     }
 
     private static List<PersonWithLevel> createSubItems(int number, int level) {
-        Random random = new Random(0);
-        return IntStream.range(1, number)
-                .mapToObj(index -> createPersonWithLevel(index, random, level))
-                .collect(Collectors.toList());
-    }
-
-    private static Person createPerson(int index, Random random) {
-        return createPerson(Person::new, index, index, random);
-    }
-
-    private static <T extends Person> T createPerson(Supplier<T> constructor,
-            int index, int id, Random random) {
-        boolean isSubscriber = random.nextBoolean();
-        Country country = Country.values()[random
-                .nextInt(Country.values().length)];
-        String state;
-        if (country == Country.USA) {
-            state = UsaState.values()[random.nextInt(UsaState.values().length)]
-                    .toString();
-        } else {
-            state = "A state in " + country.toString();
-        }
-        return createPerson(constructor, "Person " + index, id,
-                13 + random.nextInt(50), isSubscriber,
-                isSubscriber ? generateEmail(random) : "",
-                "Street " + generateChar(random, false), 1 + random.nextInt(50),
-                String.valueOf(10000 + random.nextInt(8999)), country, state);
-    }
-
-    private static String generateEmail(Random random) {
-        StringBuilder builder = new StringBuilder("mail");
-        builder.append(generateChar(random, true));
-        builder.append(generateChar(random, true));
-        builder.append("@example.com");
-        return builder.toString();
-    }
-
-    private static char generateChar(Random random, boolean lowerCase) {
-        return ((char) ((lowerCase ? 'a' : 'A') + random.nextInt(26)));
-    }
-
-    private static <T extends Person> T createPerson(Supplier<T> constructor,
-            String name, int id, int age, boolean subscriber, String email,
-            String street, int addressNumber, String postalCode,
-            Country country, String state) {
-        T person = constructor.get();
-        person.setId(id);
-        person.setName(name);
-        person.setAge(age);
-        person.setSubscriber(subscriber);
-        person.setEmail(email);
-
-        Address address = new Address();
-        address.setStreet(street);
-        address.setNumber(addressNumber);
-        address.setPostalCode(postalCode);
-        person.setAddress(address);
-        person.setCountry(null);
-        person.setState(null);
-
-        return person;
-    }
-
-    private static PersonWithLevel createPersonWithLevel(int index,
-            Random random, int level) {
-        PersonWithLevel person = createPerson(PersonWithLevel::new, index,
-                treeIds.getAndIncrement(), random);
-        person.setLevel(level);
-        return person;
+        return new PeopleGenerator().generatePeopleWithLevels(number, level);
     }
 
     private static List<Item> getShoppingCart() {
-        Random random = new Random(42);
-        LocalDate baseDate = LocalDate.of(2018, 1, 10);
-        return IntStream.range(1, 101)
-                .mapToObj(index -> createItem(index, random, baseDate))
-                .collect(Collectors.toList());
-
-    }
-
-    private static Item createItem(int index, Random random,
-            LocalDate baseDate) {
-        Item item = new Item();
-        item.setName("Item " + index);
-        item.setPrice(100 * random.nextDouble());
-        item.setPurchaseDate(baseDate.atTime(12, 0)
-                .minus(1 + random.nextInt(3600), ChronoUnit.SECONDS));
-        item.setEstimatedDeliveryDate(
-                baseDate.plus(1 + random.nextInt(15), ChronoUnit.DAYS));
-        return item;
+        return new ItemGenerator().generateItems(100);
     }
 
     private static final String[] companies = new String[] { "Deomic",
