@@ -10,9 +10,13 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 
+import java.time.Duration;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 @Route("time-picker-localization")
@@ -32,11 +36,15 @@ public class TimePickerLocalizationView extends Div
         localesCB.setItems(supportedAvailableLocales);
         localesCB.setId("locale-picker");
 
-        ComboBox<Double> stepSelector = new ComboBox<>();
-        stepSelector.setItems(0.5, 10.0, 60.0, 900.0, 1800.0, 3600.0);
+        ComboBox<Duration> stepSelector = new ComboBox<>();
+        stepSelector.setItems(Duration.ofMillis(500), Duration.ofSeconds(10),
+                Duration.ofMinutes(1), Duration.ofMinutes(15),
+                Duration.ofMinutes(30), Duration.ofHours(1));
+        stepSelector.setItemLabelGenerator(duration -> {
+            return duration.toString().replace("PT","").toLowerCase();
+        });
         stepSelector.setId("step-picker");
-        stepSelector.setValue(3600.0); // default is null but it is really an
-                                       // hour
+        stepSelector.setValue(Duration.ofHours(1));
 
         timePicker = new TimePicker();
 
@@ -53,7 +61,7 @@ public class TimePickerLocalizationView extends Div
 
         stepSelector.addValueChangeListener(event -> {
             if (event.getValue() != null)
-                timePicker.setStep(event.getValue().doubleValue());
+                timePicker.setStep(event.getValue());
         });
 
         timePicker.addValueChangeListener(

@@ -87,7 +87,6 @@ window.Vaadin.Flow.timepickerConnector = {
             //console.info(locale.toUpperCase() + " AM/PM: " + amString + "/" + pmString + ", separator " + separator);
 
             // 3. regexp that allows to find the numberd and continuing searching after it
-            // TODO milliseconds have their own separator, and could be handled separately
             const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + separator + ')?', 'g');
 
             const includeSeconds = function () {
@@ -95,34 +94,53 @@ window.Vaadin.Flow.timepickerConnector = {
             };
 
             const includeMilliSeconds = function () {
-                return timepicker.step && timepicker.step < 1;
+                // TODO not allowing milliseconds for other than 24-hour clock
+                return timepicker.step && timepicker.step < 1 && !amString && !pmString;
             };
 
             // the web component expects the correct granularity used for the time string,
             // thus need to format the time object in correct granularity by passing the format options
-            let cachedStep = timepicker.step;
+            let cachedStep;
             let cachedOptions;
             const getTimeFormatOptions = function () {
-                if (!cachedOptions || cachedStep && timepicker.step && cachedStep !== timepicker.step) {
+                // calculate the format options if none done cached or step has changed
+                if (!cachedOptions || cachedStep !== timepicker.step) {
                     cachedOptions = {
                         hour: "numeric",
                         minute: "numeric",
                         second: includeSeconds() ? "numeric" : undefined,
-                        milliseconds: includeMilliSeconds() ? "numeric" : undefined
                     };
+                    cachedStep = timepicker.step;
                 }
                 return cachedOptions;
             };
 
+            const formatMilliseconds = function (localeTimeString, milliseconds) {
+                if (includeMilliSeconds()) {
+                    // TODO to be fixed so that it includes milliseconds correctly to all locales
+                    if (milliseconds) {
+                        let milliseconds = milliseconds < 10 ? "0" : "";
+                        milliseconds += milliseconds < 100 ? "0" : "";
+                        milliseconds += milliseconds;
+                        localeTimeString += "." + milliseconds;
+                    } else {
+                        localeTimeString += ".000";
+                    }
+                }
+                return localeTimeString;
+            }
+
             timepicker.i18n = {
                 formatTime: function (timeObject) {
                     if (timeObject) {
-                        let time = new Date();
-                        time.setHours(timeObject.hours);
-                        time.setMinutes(timeObject.minutes);
-                        time.setSeconds(timeObject.seconds !== undefined ? timeObject.seconds : 0);
-                        time.setMilliseconds(timeObject.milliseconds !== undefined ? timeObject.milliseconds : 0);
-                        return time.toLocaleTimeString(locale, getTimeFormatOptions());
+                        let timeToBeFormatted = new Date();
+                        timeToBeFormatted.setHours(timeObject.hours);
+                        timeToBeFormatted.setMinutes(timeObject.minutes);
+                        timeToBeFormatted.setSeconds(timeObject.seconds !== undefined ? timeObject.seconds : 0);
+                        let localeTimeString = timeToBeFormatted.toLocaleTimeString(locale, getTimeFormatOptions());
+                        // milliseconds not part of the time format API
+                        localeTimeString = formatMilliseconds(localeTimeString, timeObject.milliseconds);
+                        return localeTimeString;
                     }
                 },
                 parseTime: function (timeString) {
