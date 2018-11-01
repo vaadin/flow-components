@@ -65,7 +65,10 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.bean.Country;
+import com.vaadin.flow.data.bean.UsaState;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Binder.Binding;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
@@ -78,6 +81,7 @@ import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -109,6 +113,9 @@ public class GridView extends DemoView {
         private String name;
         private Address address;
         private boolean isSubscriber;
+        private String email;
+        private Country country;
+        private String state;
 
         public int getId() {
             return id;
@@ -148,6 +155,30 @@ public class GridView extends DemoView {
 
         public void setSubscriber(boolean isSubscriber) {
             this.isSubscriber = isSubscriber;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public Country getCountry() {
+            return country;
+        }
+
+        public void setCountry(Country country) {
+            this.country = country;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
         }
 
         @Override
@@ -403,6 +434,8 @@ public class GridView extends DemoView {
         createDoubleClickListener();
         createBufferedEditor();
         createNotBufferedEditor();
+        createBufferedDynamicEditor();
+        createNotBufferedDynamicEditor();
 
         addCard("Grid example model",
                 new Label("These objects are used in the examples above"));
@@ -566,9 +599,9 @@ public class GridView extends DemoView {
     private void createColumnTemplate() {
         List<Person> items = new ArrayList<>();
         items.add(createPerson(Person::new, "Person A", -1, 27, true,
-                "Street N", 31, "74253"));
-        items.add(createPerson(Person::new, "Person B", 0, 19, false,
-                "Street F", 73, "93493"));
+                "foo@gmail.com", "Street N", 31, "74253", Country.FINLAND, ""));
+        items.add(createPerson(Person::new, "Person B", 0, 19, false, "",
+                "Street F", 73, "93493", Country.USA, ""));
         items.addAll(createItems());
 
         // begin-source-example
@@ -964,6 +997,8 @@ public class GridView extends DemoView {
         // Property-names are automatically set as keys
         // You can remove undesired columns by using the key
         grid.removeColumnByKey("id");
+        grid.removeColumnByKey("country");
+        grid.removeColumnByKey("state");
 
         // Columns for sub-properties can be added easily
         grid.addColumn("address.postalCode");
@@ -1393,13 +1428,15 @@ public class GridView extends DemoView {
         validationStatus.setId("validation");
 
         TextField field = new TextField();
-        nameColumn.setEditorBinding(binder.forField(field)
+        binder.forField(field)
                 .withValidator(name -> name.startsWith("Person"),
                         "Name should start with Person")
-                .withStatusLabel(validationStatus).bind("name"));
+                .withStatusLabel(validationStatus).bind("name");
+        nameColumn.setEditorComponent(field);
 
         Checkbox checkbox = new Checkbox();
-        subscriberColumn.setEditorBinding(binder.bind(checkbox, "subscriber"));
+        binder.bind(checkbox, "subscriber");
+        subscriberColumn.setEditorComponent(checkbox);
 
         Column<Person> editorColumn = grid.addComponentColumn(person -> {
             Button edit = new Button("Edit");
@@ -1445,10 +1482,12 @@ public class GridView extends DemoView {
         grid.getEditor().setBinder(binder);
 
         TextField field = new TextField();
-        nameColumn.setEditorBinding(binder.bind(field, "name"));
+        binder.bind(field, "name");
+        nameColumn.setEditorComponent(field);
 
         Checkbox checkbox = new Checkbox();
-        subscriberColumn.setEditorBinding(binder.bind(checkbox, "subscriber"));
+        binder.bind(checkbox, "subscriber");
+        subscriberColumn.setEditorComponent(checkbox);
 
         grid.addItemDoubleClickListener(
                 event -> grid.getEditor().editItem(event.getItem()));
@@ -1463,6 +1502,181 @@ public class GridView extends DemoView {
         // end-source-example
         grid.setId("not-buffered-editor");
         addCard("Grid Editor", "Editor in Not Buffered Mode", message, grid);
+    }
+
+    private void createBufferedDynamicEditor() {
+        Div message = new Div();
+        message.setId("buffered-dynamic-editor-msg");
+
+        // begin-source-example
+        // source-example-heading: Dynamic Editor in Buffered Mode
+        Grid<Person> grid = new Grid<>();
+        List<Person> persons = new ArrayList<>();
+        persons.addAll(createItems());
+        grid.setItems(persons);
+
+        Column<Person> nameColumn = grid.addColumn(Person::getName)
+                .setHeader("Name");
+        Column<Person> subscriberColumn = grid.addColumn(Person::isSubscriber)
+                .setHeader("Subscriber");
+        Column<Person> emailColumn = grid.addColumn(Person::getEmail)
+                .setHeader("E-mail");
+
+        Binder<Person> binder = new Binder<>(Person.class);
+        Editor<Person> editor = grid.getEditor();
+        editor.setBinder(binder);
+        editor.setBuffered(true);
+
+        TextField field = new TextField();
+        binder.bind(field, "name");
+        nameColumn.setEditorComponent(field);
+
+        Div validationStatus = new Div();
+        validationStatus.getStyle().set("color", "red");
+        validationStatus.setId("email-validation");
+
+        Checkbox checkbox = new Checkbox();
+        binder.bind(checkbox, "subscriber");
+        subscriberColumn.setEditorComponent(checkbox);
+
+        TextField emailField = new TextField();
+
+        // When not a subscriber, we want to show a read-only text-field that
+        // ignores whatever is set to it
+        TextField readOnlyEmail = new TextField();
+        readOnlyEmail.setValue("Not a subscriber");
+        readOnlyEmail.setReadOnly(true);
+
+        Supplier<Binding<Person, String>> bindEmail = () -> binder
+                .forField(emailField)
+                .withValidator(new EmailValidator("Invalid email"))
+                .withStatusLabel(validationStatus).bind("email");
+
+        Runnable setEmail = () -> emailColumn.setEditorComponent(item -> {
+            if (item.isSubscriber()) {
+                bindEmail.get();
+                return emailField;
+            } else {
+                return readOnlyEmail;
+            }
+        });
+
+        // Sets the binding based on the Person bean state
+        setEmail.run();
+
+        // Refresh subscriber editor component when checkbox value is changed
+        checkbox.addValueChangeListener(event -> {
+            // Only updates from the client-side should be taken into account
+            if (event.isFromClient()) {
+
+                // When using buffered mode, the partial updates shouldn't be
+                // propagated to the bean before the Save button is clicked, so
+                // here we need to override the binding function to take the
+                // checkbox state into consideration instead
+                emailColumn.setEditorComponent(item -> {
+                    if (checkbox.getValue()) {
+                        bindEmail.get();
+                        return emailField;
+                    } else {
+                        return readOnlyEmail;
+                    }
+                });
+                grid.getEditor().refresh();
+            }
+        });
+
+        // Resets the binding function to use the bean state whenever the editor
+        // is closed
+        editor.addCloseListener(event -> setEmail.run());
+
+        Column<Person> editorColumn = grid.addComponentColumn(person -> {
+            Button edit = new Button("Edit");
+            edit.addClassName("edit");
+            edit.addClickListener(e -> editor.editItem(person));
+            return edit;
+        });
+
+        Button save = new Button("Save", e -> editor.save());
+        save.addClassName("save");
+
+        Button cancel = new Button("Cancel", e -> editor.cancel());
+        cancel.addClassName("cancel");
+
+        Div buttons = new Div(save, cancel);
+        editorColumn.setEditorComponent(buttons);
+
+        editor.addSaveListener(event -> message.setText(
+                event.getItem().getName() + ", " + event.getItem().isSubscriber
+                        + ", " + event.getItem().getEmail()));
+
+        // end-source-example
+        grid.setId("buffered-dynamic-editor");
+        addCard("Grid Editor", "Dynamic Editor in Buffered Mode", message,
+                validationStatus, grid);
+    }
+
+    private void createNotBufferedDynamicEditor() {
+        Div message = new Div();
+        message.setId("not-buffered-dynamic-editor-msg");
+
+        // begin-source-example
+        // source-example-heading: Dynamic Editor in Not Buffered Mode
+        Grid<Person> grid = new Grid<>();
+        List<Person> persons = new ArrayList<>();
+        persons.addAll(createItems());
+        grid.setItems(persons);
+
+        Column<Person> nameColumn = grid.addColumn(Person::getName)
+                .setHeader("Name");
+        Column<Person> subscriberColumn = grid.addColumn(Person::isSubscriber)
+                .setHeader("Subscriber");
+        Column<Person> emailColumn = grid.addColumn(Person::getEmail)
+                .setHeader("E-mail");
+
+        Binder<Person> binder = new Binder<>(Person.class);
+        Editor<Person> editor = grid.getEditor();
+        editor.setBinder(binder);
+
+        TextField field = new TextField();
+        binder.bind(field, "name");
+        nameColumn.setEditorComponent(field);
+
+        Checkbox checkbox = new Checkbox();
+        binder.bind(checkbox, "subscriber");
+        subscriberColumn.setEditorComponent(checkbox);
+
+        TextField emailField = new TextField();
+        emailColumn.setEditorComponent(item -> {
+            if (item.isSubscriber()) {
+                binder.bind(emailField, "email");
+                return emailField;
+            } else {
+                return null;
+            }
+        });
+
+        grid.addItemDoubleClickListener(
+                event -> grid.getEditor().editItem(event.getItem()));
+
+        // Revalidates the editors every time something changes on the Binder.
+        // This is needed for the email column to turn into nothing when the
+        // checkbox is desselected, for example.
+        binder.addValueChangeListener(event -> {
+            grid.getEditor().refresh();
+        });
+
+        grid.addItemClickListener(event -> {
+            if (binder.getBean() != null) {
+                message.setText(binder.getBean().getName() + ", "
+                        + binder.getBean().isSubscriber() + ", "
+                        + binder.getBean().getEmail());
+            }
+        });
+
+        // end-source-example
+        grid.setId("not-buffered-dynamic-editor");
+        addCard("Grid Editor", "Dynamic Editor in Not Buffered Mode", message,
+                grid);
     }
 
     private <T> Component[] withTreeGridToggleButtons(List<T> roots,
@@ -1572,27 +1786,53 @@ public class GridView extends DemoView {
 
     private static <T extends Person> T createPerson(Supplier<T> constructor,
             int index, int id, Random random) {
+        boolean isSubscriber = random.nextBoolean();
+        Country country = Country.values()[random
+                .nextInt(Country.values().length)];
+        String state;
+        if (country == Country.USA) {
+            state = UsaState.values()[random.nextInt(UsaState.values().length)]
+                    .toString();
+        } else {
+            state = "A state in " + country.toString();
+        }
         return createPerson(constructor, "Person " + index, id,
-                13 + random.nextInt(50), random.nextBoolean(),
-                "Street " + ((char) ('A' + random.nextInt(26))),
-                1 + random.nextInt(50),
-                String.valueOf(10000 + random.nextInt(8999)));
+                13 + random.nextInt(50), isSubscriber,
+                isSubscriber ? generateEmail(random) : "",
+                "Street " + generateChar(random, false), 1 + random.nextInt(50),
+                String.valueOf(10000 + random.nextInt(8999)), country, state);
+    }
+
+    private static String generateEmail(Random random) {
+        StringBuilder builder = new StringBuilder("mail");
+        builder.append(generateChar(random, true));
+        builder.append(generateChar(random, true));
+        builder.append("@example.com");
+        return builder.toString();
+    }
+
+    private static char generateChar(Random random, boolean lowerCase) {
+        return ((char) ((lowerCase ? 'a' : 'A') + random.nextInt(26)));
     }
 
     private static <T extends Person> T createPerson(Supplier<T> constructor,
-            String name, int id, int age, boolean subscriber, String street,
-            int addressNumber, String postalCode) {
+            String name, int id, int age, boolean subscriber, String email,
+            String street, int addressNumber, String postalCode,
+            Country country, String state) {
         T person = constructor.get();
         person.setId(id);
         person.setName(name);
         person.setAge(age);
         person.setSubscriber(subscriber);
+        person.setEmail(email);
 
         Address address = new Address();
         address.setStreet(street);
         address.setNumber(addressNumber);
         address.setPostalCode(postalCode);
         person.setAddress(address);
+        person.setCountry(null);
+        person.setState(null);
 
         return person;
     }

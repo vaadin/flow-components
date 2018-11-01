@@ -137,6 +137,14 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     }
 
     @Override
+    public void refresh() {
+        if (!isOpen()) {
+            return;
+        }
+        refresh(edited);
+    }
+
+    @Override
     public T getItem() {
         return edited;
     }

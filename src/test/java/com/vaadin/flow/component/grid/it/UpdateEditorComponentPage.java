@@ -37,18 +37,22 @@ public class UpdateEditorComponentPage extends Div {
         Binder<String> binder = new Binder<>();
         grid.getEditor().setBinder(binder);
 
-        column.setEditorBinding(binder.bind(new TextField(),
-                ValueProvider.identity(), (item, value) -> {
-                }));
+        TextField filed = new TextField();
+        binder.bind(filed, ValueProvider.identity(), (item, value) -> {
+        });
+        column.setEditorComponent(filed);
 
         grid.addItemDoubleClickListener(
                 event -> grid.getEditor().editItem(event.getItem()));
 
         NativeButton updateEditorComponent = new NativeButton(
-                "Update editor component",
-                event -> column.setEditorBinding(binder.bind(new TextArea(),
-                        ValueProvider.identity(), (item, value) -> {
-                        })));
+                "Update editor component", event -> {
+                    TextArea area = new TextArea();
+                    binder.bind(area, ValueProvider.identity(),
+                            (item, value) -> {
+                            });
+                    column.setEditorComponent(area);
+                });
         updateEditorComponent.setId("update-editor");
         add(grid, updateEditorComponent);
     }

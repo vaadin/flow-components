@@ -28,8 +28,9 @@ public class EditorVerticalScrollingPage extends Div {
         Binder<Person> binder = new Binder<>(Person.class);
         TextField editorComponent = new TextField();
         editorComponent.setId("editor");
-        grid.addColumn(Person::getFirstName).setHeader("Name").setEditorBinding(
-                binder.forField(editorComponent).bind("firstName"));
+        binder.forField(editorComponent).bind("firstName");
+        grid.addColumn(Person::getFirstName).setHeader("Name")
+                .setEditorComponent(editorComponent);
         grid.addColumn(new ComponentRenderer<>(this::createComponent,
                 this::editComponent));
         grid.getEditor().setBuffered(true).setBinder(binder);

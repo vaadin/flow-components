@@ -45,15 +45,14 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
+import com.vaadin.flow.component.grid.editor.EditorRenderer;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.Binder.Binding;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.binder.PropertySet;
@@ -85,14 +84,12 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
-import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
@@ -270,9 +267,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         private boolean sortingEnabled;
 
-        private Binding<T, ?> editorBinding;
-
         private Component editorComponent;
+        private EditorRenderer<T> editorRenderer;
 
         private SortOrderProvider sortOrderProvider = direction -> {
             String key = getKey();
@@ -285,9 +281,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         private SerializableComparator<T> comparator;
 
         private Registration columnDataGeneratorRegistration;
+        private Registration editorDataGeneratorRegistration;
 
         private Renderer<T> renderer;
-
         private Rendering<T> rendering;
 
         /**
@@ -312,6 +308,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
             rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
                     .getDataCommunicator().getKeyMapper());
+
             Optional<DataGenerator<T>> dataGenerator = rendering
                     .getDataGenerator();
 
@@ -325,6 +322,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             if (columnDataGeneratorRegistration != null) {
                 columnDataGeneratorRegistration.remove();
                 columnDataGeneratorRegistration = null;
+            }
+            if (editorDataGeneratorRegistration != null) {
+                editorDataGeneratorRegistration.remove();
+                editorDataGeneratorRegistration = null;
             }
         }
 
@@ -684,112 +685,66 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
 
         /**
-         * Sets an editor binding for this column. The {@link Binding} is used
-         * when a row is in editor mode to define how to populate an editor
-         * component based on the edited row and how to update an item based on
-         * the value in the editor component.
-         * <p>
-         * To create a binding to use with a column, define a binding for the
-         * editor binder (<code>grid.getEditor().getBinder()</code>) using e.g.
-         * {@link Binder#forField(HasValue)}.
-         * <p>
-         * The {@link HasValue} that the binding is defined to use must be a
-         * {@link Component}.
-         * <p>
-         * A binding for the column can be set only once. The second attempt
-         * will cause {@link IllegalStateException}.The same happens if the
-         * method {@link #setEditorComponent(Component)} is called after the
-         * {@link #setEditorBinding(Binding)} method.
-         *
-         * @param binding
-         *            the binding to use for this column, not {@code null}
-         * @return this column
-         *
-         * @see Binding
-         * @see #setEditorComponent(Component)
-         * @see Grid#getEditor()
-         * @see Editor#getBinder()
-         *
-         * @throws IllegalStateException
-         *             if binding is already set
-         */
-        public Column<T> setEditorBinding(Binding<T, ?> binding) {
-            Objects.requireNonNull(binding, "null is not a valid editor field");
-            HasValue<?, ?> field = binding.getField();
-
-            if (!(field instanceof Component)) {
-                throw new IllegalArgumentException(
-                        "Binding target must be a component.");
-            }
-
-            editorBinding = binding;
-            return setEditorComponent((Component) field);
-        }
-
-        /**
          * Sets a component to use for editing values of this column in the
-         * editor row. This is a convenient way for use in simple cases where no
-         * need to read/write values (only UI components are shown in two modes:
-         * when editor is shown and closed). Use
-         * {@link #setEditorBinding(Binding)} to support more complex cases.
-         * <p>
-         * An editor component for the column can be set only once. The second
-         * attempt will cause {@link IllegalStateException}. The same happens if
-         * the method {@link #setEditorBinding(Binding)} is called after the
-         * {@link #setEditorComponent(Component)} method.
+         * editor row. This is a convenient way for use in simple cases where
+         * the same component can be used to edit all the items. Use
+         * {@link #setEditorComponent(SerializableFunction)} to support more
+         * complex cases.
          *
          * @param editorComponent
-         *            the editor component, not {@code null}
+         *            the editor component, or <code>null</code> to remove the
+         *            editor component for this column
          * @return this column
          *
-         * @see #setEditorBinding(Binding)
          * @see Grid#getEditor()
          * @see Binder#bind(HasValue, ValueProvider, Setter)
-         *
-         * @throws IllegalStateException
-         *             if components is already set
          */
         public Column<T> setEditorComponent(Component editorComponent) {
-            Objects.requireNonNull(editorComponent,
-                    "null is not a valid editor component");
-            boolean setComponentTemplate = this.editorComponent == null;
-            this.editorComponent = editorComponent;
-
-            Element container = ElementFactory.createDiv();
-            getElement().appendVirtualChild(container);
-            container.appendChild(editorComponent.getElement());
-
-            if (setComponentTemplate) {
-
-                getGrid().addDataGenerator((item, jsonObject) -> jsonObject.put(
-                        "_" + columnInternalId + "_editor",
-                        getEditorComponent().getElement().getNode().getId()));
-                runBeforeClientResponse(context -> setComponentTemplate());
+            if (editorComponent == null) {
+                setEditorComponent(
+                        (SerializableFunction<T, ? extends Component>) null);
+            } else {
+                setEditorComponent(item -> editorComponent);
             }
+            this.editorComponent = editorComponent;
             return this;
         }
 
         /**
-         * Gets the binder binding that is currently used for this column.
+         * Sets a function that returns the editor component to be used for an
+         * specific item in the editor row.
          *
-         * @return the used binder binding, or <code>null</code> if no binding
-         *         is configured
+         * @param componentCallback
+         *            the editor component function, or <code>null</code> to
+         *            remove the editor component for this column
          *
-         * @see #setEditorBinding(Binding)
-         * @see #getEditorComponent()
+         * @return this column
+         *
+         * @see Grid#getEditor()
+         * @see #setEditorComponent(Component)
          */
-        public Binding<T, ?> getEditorBinding() {
-            return editorBinding;
+        public Column<T> setEditorComponent(
+                SerializableFunction<T, ? extends Component> componentCallback) {
+
+            editorComponent = null;
+            if (editorRenderer == null && componentCallback != null) {
+                setupColumnEditor();
+            }
+            if (editorRenderer != null) {
+                editorRenderer.setComponentFunction(componentCallback);
+            }
+
+            return this;
         }
 
         /**
-         * Gets the editor component that is currently used for this column.
+         * Gets the editor component that is used for this column.
          *
          * @return the editor component, or <code>null</code> if no component is
-         *         set
+         *         set, or if it was set by using
+         *         {@link #setEditorComponent(SerializableFunction)}.
          *
          * @see #setEditorComponent(Component)
-         * @see #getEditorBinding()
          */
         public Component getEditorComponent() {
             return editorComponent;
@@ -800,27 +755,19 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             return this;
         }
 
-        private void setComponentTemplate() {
-            Element template = rendering.getTemplateElement();
-            String originalTemplate = template.getProperty("innerHTML");
-            String appId = UI.getCurrent().getInternals().getAppId();
-            String editorTemplate = String.format(
-                    "<flow-component-renderer appid='%s' nodeid='[[item._%s_editor]]'></flow-component-renderer>",
-                    appId, columnInternalId);
-            template.setProperty("innerHTML", String.format(
-            //@formatter:off
-            "<template is='dom-if' if='[[item._editing]]' restamp>%s</template>" +
-            "<template is='dom-if' if='[[!item._editing]]' restamp>%s</template>",
-            //@formatter:on
-                    editorTemplate, originalTemplate));
-        }
+        private void setupColumnEditor() {
+            editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
+                    columnInternalId);
 
-        private void runBeforeClientResponse(
-                SerializableConsumer<ExecutionContext> execution) {
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.getInternals().getStateTree()
-                            .beforeClientResponse(getElement().getNode(),
-                                    execution));
+            Rendering<T> editorRendering = editorRenderer.render(getElement(),
+                    null, rendering.getTemplateElement());
+
+            Optional<DataGenerator<T>> dataGenerator = editorRendering
+                    .getDataGenerator();
+            if (dataGenerator.isPresent()) {
+                editorDataGeneratorRegistration = grid
+                        .addDataGenerator((DataGenerator) dataGenerator.get());
+            }
         }
     }
 
@@ -1417,8 +1364,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * <p/>
      * This method must not return <code>null</code>.
      *
-     * @param renderer the renderer used to create the grid cell structure
-     * @param columnId internal column id
+     * @param renderer
+     *            the renderer used to create the grid cell structure
+     * @param columnId
+     *            internal column id
      * @return column instance
      * @see #createColumnId(boolean)
      * @see Renderer

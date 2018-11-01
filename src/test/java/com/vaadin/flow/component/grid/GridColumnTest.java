@@ -29,8 +29,6 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.function.SerializableComparator;
 
-import javax.annotation.Nonnull;
-
 public class GridColumnTest {
 
     Grid<String> grid;
