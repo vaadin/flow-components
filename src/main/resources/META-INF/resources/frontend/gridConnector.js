@@ -129,7 +129,7 @@ window.Vaadin.Flow.gridConnector = {
       if (selectionMode === 'NONE') {
         return;
       }
-      if (userOriginated && (grid.getAttribute('disabled') || grid.getAttribute('disabled') === '')) {
+      if (userOriginated && grid.hasAttribute('disabled')) {
           return;
       }
       if (selectionMode === 'SINGLE') {
@@ -153,6 +153,10 @@ window.Vaadin.Flow.gridConnector = {
     };
 
     grid.$connector.doDeselection = function(item, userOriginated) {
+      if (userOriginated && grid.hasAttribute('disabled')) {
+        return;
+      }
+
       if (selectionMode === 'SINGLE' || selectionMode === 'MULTI') {
         grid.deselectItem(item);
         delete selectedKeys[item.key];

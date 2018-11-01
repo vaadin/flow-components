@@ -113,6 +113,10 @@
 
       _onSelectAllClick(e) {
         e.preventDefault();
+        if (this._grid.hasAttribute('disabled')) {
+          e.target.checked = !e.target.checked;
+          return;
+        }
         this.selectAll ? this.$server.deselectAll() : this.$server.selectAll();
       }
 
