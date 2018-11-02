@@ -5,6 +5,8 @@ import com.vaadin.flow.component.richtexteditor.testbench.RichTextEditorElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 public class BasicUseIT extends AbstractParallelTest {
 
@@ -62,6 +64,53 @@ public class BasicUseIT extends AbstractParallelTest {
 
         Assert.assertEquals(getLastI18nValue(),
                 $(RichTextEditorElement.class).waitForFirst().getTitles().toString());
+    }
+
+    // Binder
+
+    @Test
+    public void useBinderWithRichTextEditor() {
+        WebElement info = findElement(By.id("binder-info"));
+        ButtonElement save = getTestButton("binder-save");
+        ButtonElement reset = getTestButton("binder-reset");
+        ButtonElement getValue = getTestButton("get-binder-rte-value");
+        save.click();
+        
+        // Empty rte validation: there is an error
+        waitUntil(
+                driver -> "There are errors: Delta value should contain something"
+                        .equals(getLastBinderInfoValue()));
+
+        $(RichTextEditorElement.class).get(1).getEditor().setProperty("innerHTML", "<p>Foo</p>");
+
+        // Rte validation
+        waitUntil(driver -> {
+            save.click();
+            return info.getText().startsWith("Saved bean values");
+        });
+
+        Assert.assertTrue(getLastBinderInfoValue().contains("Foo"));
+
+        reset.click();
+
+        // Wait for everything to update.
+        waitUntil(driver -> info.getText().isEmpty());
+
+        getValue.click();
+        Assert.assertEquals("", getLastRteBinderValue());
+    }
+
+    @Test
+    public void richTextEditorInATemplate_settingAndGettingValueCorrectly() {
+        RichTextEditorElement templateRte = $("rte-in-a-template").id("template")
+                .$(RichTextEditorElement.class).first();
+        templateRte.getEditor().setProperty("innerHTML", "<p>Bar</p>");
+        ButtonElement getValue = getTestButton("get-template-rte-value");
+
+        waitUntil(driver -> {
+            getValue.click();
+            return getLastRteTemplateValue().equals("[{\"insert\":\"Bar\\n\"}]");
+        });
     }
 
     private ButtonElement getTestButton(String id) {
