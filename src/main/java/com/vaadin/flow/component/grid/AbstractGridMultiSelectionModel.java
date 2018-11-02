@@ -96,6 +96,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (added) {
             fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                     getGrid().asMultiSelect(), oldSelection, true));
+
+            selectionColumn.setSelectAllCheckboxState(getGrid().getDataCommunicator().getDataProvider()
+                    .size(new Query<>()) == selected.size());
         }
     }
 

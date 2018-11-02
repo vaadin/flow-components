@@ -176,6 +176,16 @@ public class GridViewIT extends TabbedComponentDemoTest {
         clickElementWithJs(selectBtn);
         assertRowsSelected(grid, 0, 6);
         Assert.assertFalse(isRowSelected(grid, 6));
+
+        // test the select all button
+        grid.findElement(By.id("selectAllCheckbox")).click();
+        // deselect 1
+        getCellContent(grid.getCell(0, 0)).click();
+        Assert.assertEquals("Select all should have been deselected","false", grid.findElement(By.id("selectAllCheckbox")).getAttribute("aria-checked"));
+
+        getCellContent(grid.getCell(0, 0)).click();
+        Assert.assertEquals("Select all should have been reselected", "true", grid.findElement(By.id("selectAllCheckbox")).getAttribute("aria-checked"));
+
     }
 
     @Test
