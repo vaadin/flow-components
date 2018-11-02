@@ -59,12 +59,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-grid-flow</artifactId>
-            <version>2.1.0.alpha2</version>
+            <version>2.1.0.beta1</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>1.2.0.beta1</version>
+            <version>1.2.0</version>
         </dependency>
 
 
@@ -72,7 +72,7 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-crud</artifactId>
-            <version>1.0.0-alpha9</version>
+            <version>1.0.0-beta1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.webjars.bowergithub.vaadin</groupId>
@@ -94,7 +94,7 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-confirm-dialog</artifactId>
-            <version>1.1.0-beta1</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
