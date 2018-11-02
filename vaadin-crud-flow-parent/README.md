@@ -114,3 +114,10 @@ To build and install the project into the local repository run
 in the root directory. `-DskipITs` will skip the integration tests, which require a TestBench license. If you want to run all tests as part of the build, run
 
 ```mvn install```
+
+To compile and run demos locally execute
+
+```
+mvn compile
+mvn -pl vaadin-crud-flow-vaadincom-demo -Pwar jetty:run
+```

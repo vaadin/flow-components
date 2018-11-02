@@ -88,7 +88,8 @@ public class CrudView extends DemoView {
         Crud<Person> crud = new Crud<>(Person.class, crudGrid, createPersonEditor());
 
         Span footer = new Span();
-        Button newItemButton = new Button();
+        footer.getElement().getStyle().set("flex", "1");
+        Button newItemButton = new Button("Add person ...");
         newItemButton.getElement().setAttribute("new-button", true);
 
         // An element with attribute new-button is required when setting toolbar content
