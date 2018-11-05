@@ -202,7 +202,7 @@ public class CrudView extends DemoView {
         Crud.addEditColumn(grid);
         grid.addColumn(TemplateRenderer.<Person>
                 of("<img src=[[item.photoSource]] style=\"height: 40px; border-radius: 50%;\">")
-                .withProperty("photoSource", this::randomProfilePictureUrl))
+                .withProperty("photoSource", CrudView::randomProfilePictureUrl))
                 .setWidth("60px")
                 .setFlexGrow(0);
         grid.addColumn(Person::getFirstName).setHeader("First name");
@@ -245,7 +245,7 @@ public class CrudView extends DemoView {
 
         TextField searchBar = new TextField();
         searchBar.setPlaceholder("Search...");
-        searchBar.setWidth("calc(100% - var(--lumo-space-s))");
+        searchBar.setWidth("100%");
         searchBar.setValueChangeMode(ValueChangeMode.EAGER);
         searchBar.setPrefixComponent(VaadinIcon.SEARCH.create());
 
@@ -255,10 +255,10 @@ public class CrudView extends DemoView {
                 (ComponentEventListener) e -> searchBar.clear());
         searchBar.setSuffixComponent(closeIcon);
 
-        ComponentUtil.addListener(searchBar, FilterChanged.class, e -> {
+        searchBar.getElement().addEventListener("value-changed", event -> {
             closeIcon.setVisible(!searchBar.getValue().isEmpty());
             filterableDataProvider.setFilter(searchBar.getValue());
-        });
+        }).debounce(300, DebouncePhase.TRAILING);
 
         crud.setToolbar(searchBar);
         crud.getElement().getStyle().set("flex-direction", "column-reverse");
@@ -266,19 +266,6 @@ public class CrudView extends DemoView {
 
         addCard("CRUD with custom search", crud);
     }
-
-    // NOTE: heading has three unicode spaces
-    // begin-source-example
-    // source-example-heading:    
-    @DomEvent(value = "value-changed",
-              debounce = @DebounceSettings(timeout = 300,
-              phases = DebouncePhase.TRAILING))
-    public static class FilterChanged extends ComponentEvent<TextField> {
-        public FilterChanged(TextField source, boolean fromClient) {
-            super(source, fromClient);
-        }
-    }
-    // end-source-example
 
     // Dummy database
     private static final String[] FIRSTS = {"James", "Mary", "John", "Patricia", "Robert", "Jennifer"};
@@ -291,10 +278,10 @@ public class CrudView extends DemoView {
                 .collect(toList());
     }
 
-    private String randomProfilePictureUrl(Object context) {
+    private static String randomProfilePictureUrl(Object context) {
         return "https://randomuser.me/api/portraits/thumb/"
                 + (Math.random() > 0.5 ? "men" : "women")
-                + "/"
+                + '/'
                 + (1 + (int) (Math.random() * 100))
                 + ".jpg";
     }
@@ -394,7 +381,7 @@ public class CrudView extends DemoView {
             sizeChangeListener = listener;
         }
 
-        private Predicate<Person> predicate(CrudFilter filter) {
+        private static Predicate<Person> predicate(CrudFilter filter) {
             // For RDBMS just generate a WHERE clause
             return filter.getConstraints().entrySet().stream()
                     .map(constraint -> (Predicate<Person>) person -> {
@@ -411,7 +398,7 @@ public class CrudView extends DemoView {
                     .orElse(e -> true);
         }
 
-        private Comparator<Person> comparator(CrudFilter filter) {
+        private static Comparator<Person> comparator(CrudFilter filter) {
             // For RDBMS just generate an ORDER BY clause
             return filter.getSortOrders().entrySet().stream()
                     .map(sortClause -> {
@@ -433,7 +420,7 @@ public class CrudView extends DemoView {
                     .orElse((o1, o2) -> 0);
         }
 
-        private Object valueOf(String fieldName, Person person) {
+        private static Object valueOf(String fieldName, Person person) {
             try {
                 Field field = Person.class.getDeclaredField(fieldName);
                 field.setAccessible(true);
