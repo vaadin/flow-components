@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2018 Vaadin Ltd.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -36,6 +36,9 @@ import javax.annotation.Generated;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import com.vaadin.flow.component.Synchronize;
 import elemental.json.JsonArray;
 import com.vaadin.flow.component.DomEvent;
@@ -107,6 +110,10 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
  * <td>The content wrapper</td>
  * </tr>
  * <tr>
+ * <td>{@code group}</td>
+ * <td>The group for toolbar controls</td>
+ * </tr>
+ * <tr>
  * <td>{@code undo-button}</td>
  * <td>The &quot;undo&quot; button</td>
  * </tr>
@@ -143,12 +150,12 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
  * <td>The &quot;header 3&quot; button</td>
  * </tr>
  * <tr>
- * <td>{@code sub-script-button}</td>
- * <td>The &quot;sub-script&quot; button</td>
+ * <td>{@code subscript-button}</td>
+ * <td>The &quot;subscript&quot; button</td>
  * </tr>
  * <tr>
- * <td>{@code super-script-button}</td>
- * <td>The &quot;super-script&quot; button</td>
+ * <td>{@code superscript-button}</td>
+ * <td>The &quot;superscript&quot; button</td>
  * </tr>
  * <tr>
  * <td>{@code list-ordered-button}</td>
@@ -196,12 +203,37 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.2-SNAPSHOT",
-        "WebComponent: Vaadin.RichTextEditorElement#1.0.0-alpha2",
+        "WebComponent: Vaadin.RichTextEditorElement#1.0.0-alpha3",
         "Flow#1.2-SNAPSHOT" })
 @Tag("vaadin-rich-text-editor")
 @HtmlImport("frontend://bower_components/vaadin-rich-text-editor/src/vaadin-rich-text-editor.html")
 public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRichTextEditor<R, T>, T>
-        extends AbstractSinglePropertyField<R, T> implements HasStyle {
+        extends AbstractSinglePropertyField<R, T>
+        implements HasStyle, HasTheme {
+
+    /**
+     * Adds theme variants to the component.
+     * 
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(RichTextEditorVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(RichTextEditorVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     * 
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(RichTextEditorVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(RichTextEditorVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
 
     /**
      * <p>
@@ -213,7 +245,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * This property is synchronized automatically from client side when a
      * 'html-value-changed' event happens.
      * </p>
-     *
+     * 
      * @return the {@code htmlValue} property from the webcomponent
      */
     @Synchronize(property = "htmlValue", value = "html-value-changed")
@@ -231,7 +263,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code disabled} property from the webcomponent
      */
     protected boolean isDisabledBoolean() {
@@ -245,7 +277,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * <p>
      * When true, the user can not modify, nor copy the editor content.
      * </p>
-     *
+     * 
      * @param disabled
      *            the boolean value to set
      */
@@ -263,7 +295,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code readonly} property from the webcomponent
      */
     protected boolean isReadonlyBoolean() {
@@ -277,7 +309,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * <p>
      * When true, the user can not modify the editor content, but can copy it.
      * </p>
-     *
+     * 
      * @param readonly
      *            the boolean value to set
      */
@@ -296,7 +328,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code i18n} property from the webcomponent
      */
     protected JsonArray getI18nJsonArray() {
@@ -311,7 +343,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * An object used to localize this component. The properties are used e.g.
      * as the tooltips for the editor toolbar buttons.
      * </p>
-     *
+     * 
      * @param i18n
      *            the JsonArray value to set
      */
@@ -329,7 +361,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
 
     /**
      * Adds a listener for {@code change} events fired by the webcomponent.
-     *
+     * 
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -341,41 +373,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
                 (ComponentEventListener) listener);
     }
 
-    public static class HtmlValueChangeEvent<R extends GeneratedVaadinRichTextEditor<R, ?>>
-            extends ComponentEvent<R> {
-        private final String htmlValue;
-
-        public HtmlValueChangeEvent(R source, boolean fromClient) {
-            super(source, fromClient);
-            this.htmlValue = source.getHtmlValueString();
-        }
-
-        public String getHtmlValue() {
-            return htmlValue;
-        }
-    }
-
-    /**
-     * Adds a listener for {@code html-value-changed} events fired by the
-     * webcomponent.
-     *
-     * @param listener
-     *            the listener
-     * @return a {@link Registration} for removing the event listener
-     */
-    protected Registration addHtmlValueChangeListener(
-            ComponentEventListener<HtmlValueChangeEvent<R>> listener) {
-        return getElement()
-                .addPropertyChangeListener("htmlValue",
-                        event -> listener.onComponentEvent(
-                                new HtmlValueChangeEvent<R>((R) this,
-                                        event.isUserOriginated())));
-    }
-
     /**
      * Constructs a new GeneratedVaadinRichTextEditor component with the given
      * arguments.
-     *
+     * 
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -390,9 +391,9 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *            the property type
      */
     public <P> GeneratedVaadinRichTextEditor(T initialValue, T defaultValue,
-                                             Class<P> elementPropertyType,
-                                             SerializableFunction<P, T> presentationToModel,
-                                             SerializableFunction<T, P> modelToPresentation) {
+            Class<P> elementPropertyType,
+            SerializableFunction<P, T> presentationToModel,
+            SerializableFunction<T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
@@ -404,7 +405,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
     /**
      * Constructs a new GeneratedVaadinRichTextEditor component with the given
      * arguments.
-     *
+     * 
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -413,7 +414,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *            whether <code>null</code> is accepted as a model value
      */
     public GeneratedVaadinRichTextEditor(T initialValue, T defaultValue,
-                                         boolean acceptNullValues) {
+            boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
             setModelValue(initialValue, false);
@@ -424,7 +425,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
     /**
      * Constructs a new GeneratedVaadinRichTextEditor component with the given
      * arguments.
-     *
+     * 
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -441,9 +442,9 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *            the property type
      */
     public <P> GeneratedVaadinRichTextEditor(T initialValue, T defaultValue,
-                                             Class<P> elementPropertyType,
-                                             SerializableBiFunction<R, P, T> presentationToModel,
-                                             SerializableBiFunction<R, T, P> modelToPresentation) {
+            Class<P> elementPropertyType,
+            SerializableBiFunction<R, P, T> presentationToModel,
+            SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
