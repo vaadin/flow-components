@@ -54,12 +54,17 @@ public class CrudView extends DemoView {
     @Override
     protected void initView() {
         basicCrud();
-        basicCrudWithoutFilteringAndSorting();
+        // Using unicode spaces so as card does not show any header
+        addCard(" ");
+        internationalization();
+        addCard("  ");
+        crudWithoutFilteringAndSorting();
+        customToolbar();
         customGrid();
         customSearch();
-        internationalization();
+        addCard("   ");
 
-        addCard("Crud examples objects",
+        addCard("Example Classes",
                 new Label("These objects are used in the examples above"));
     }
 
@@ -81,23 +86,29 @@ public class CrudView extends DemoView {
         addCard("Basic CRUD", crud);
     }
 
-    private void basicCrudWithoutFilteringAndSorting() {
+     // NOTE: heading is an unicode space
+     // begin-source-example
+     // source-example-heading:  
+    private CrudEditor<Person> createPersonEditor() {
+        TextField firstName = new TextField("First name");
+        TextField lastName = new TextField("Last name");
+        FormLayout form = new FormLayout(firstName, lastName);
+
+        Binder<Person> binder = new Binder<>(Person.class);
+        binder.bind(firstName, Person::getFirstName, Person::setFirstName);
+        binder.bind(lastName, Person::getLastName, Person::setLastName);
+
+        return new BinderCrudEditor<>(binder, form);
+    }
+    // end-source-example
+
+    private void crudWithoutFilteringAndSorting() {
         // begin-source-example
-        // source-example-heading: Basic CRUD without filtering and sorting
+        // source-example-heading: CRUD without filtering and sorting
         CrudGrid<Person> crudGrid = new CrudGrid<>(Person.class, false);
         Crud<Person> crud = new Crud<>(Person.class, crudGrid, createPersonEditor());
 
-        Span footer = new Span();
-        footer.getElement().getStyle().set("flex", "1");
-        Button newItemButton = new Button("Add person ...");
-        newItemButton.getElement().setAttribute("new-button", true);
-
-        // An element with attribute new-button is required when setting toolbar content
-        // if new item creation is desired.
-        crud.setToolbar(footer, newItemButton);
-
         PersonDataProvider dataProvider = new PersonDataProvider();
-        dataProvider.setSizeChangeListener(count -> footer.setText("Total: " + count));
 
         crud.getGrid().removeColumnByKey("id");
         crud.getGrid().setSortableColumns();
@@ -106,7 +117,75 @@ public class CrudView extends DemoView {
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
         // end-source-example
 
-        addCard("Basic CRUD without filtering and sorting", crud);
+        addCard("CRUD without filtering and sorting", crud);
+    }
+
+    private void internationalization() {
+        // begin-source-example
+        // source-example-heading: CRUD with internationalization
+        Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
+
+        crud.getGrid().removeColumnByKey("id");
+        crud.setDataProvider(new PersonDataProvider());
+
+        Button updateI18nButton = new Button("Switch to Yorùbá",
+                event -> crud.setI18n(createYorubaI18n()));
+        // end-source-example
+
+        addCard("CRUD with internationalization", crud, updateI18nButton);
+    }
+
+    // NOTE: heading is two unicode spaces
+    // begin-source-example
+    // source-example-heading:   
+    private CrudI18n createYorubaI18n() {
+        CrudI18n yorubaI18n = CrudI18n.createDefault();
+
+        yorubaI18n.setNewItem("Eeyan titun");
+        yorubaI18n.setEditItem("S'atunko eeyan");
+        yorubaI18n.setSaveItem("Fi pamo");
+        yorubaI18n.setDeleteItem("Paare");
+        yorubaI18n.setCancel("Fa'gi lee");
+        yorubaI18n.setEditLabel("S'atunko eeyan");
+
+        yorubaI18n.getConfirm().getCancel().setTitle("Akosile");
+        yorubaI18n.getConfirm().getCancel().setContent("Akosile ti a o tii fi pamo nbe");
+        yorubaI18n.getConfirm().getCancel().getButton().setDismiss("Se atunko sii");
+        yorubaI18n.getConfirm().getCancel().getButton().setConfirm("Fa'gi lee");
+
+        yorubaI18n.getConfirm().getDelete().setTitle("Amudaju ipare");
+        yorubaI18n.getConfirm().getDelete().setContent("Se o da o l'oju pe o fe pa eeyan yi re? Igbese yi o l'ayipada o.");
+        yorubaI18n.getConfirm().getDelete().getButton().setDismiss("Da'wo duro");
+        yorubaI18n.getConfirm().getDelete().getButton().setConfirm("Paare");
+
+        return yorubaI18n;
+    }
+    // end-source-example
+
+    private void customToolbar() {
+        // begin-source-example
+        // source-example-heading: CRUD with custom toolbar
+        Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
+
+        Span footer = new Span();
+        footer.getElement().getStyle().set("flex", "1");
+
+        Button newItemButton = new Button("Add person ...");
+        // Required attribute to handle the new item action
+        newItemButton.getElement().setAttribute("new-button", true);
+
+        crud.setToolbar(footer, newItemButton);
+
+        PersonDataProvider dataProvider = new PersonDataProvider();
+        dataProvider.setSizeChangeListener(count -> footer.setText("Total: " + count));
+
+        crud.getGrid().removeColumnByKey("id");
+        crud.setDataProvider(dataProvider);
+        crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
+        crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
+        // end-source-example
+
+        addCard("CRUD with custom toolbar", crud);
     }
 
     private void customGrid() {
@@ -188,20 +267,18 @@ public class CrudView extends DemoView {
         addCard("CRUD with custom search", crud);
     }
 
-    private void internationalization() {
-        // begin-source-example
-        // source-example-heading: CRUD with internationalization
-        Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
-
-        crud.getGrid().removeColumnByKey("id");
-        crud.setDataProvider(new PersonDataProvider());
-
-        Button updateI18nButton = new Button("Switch to Yorùbá",
-                event -> crud.setI18n(createYorubaI18n()));
-        // end-source-example
-
-        addCard("CRUD with internationalization", crud, updateI18nButton);
+    // NOTE: heading has three unicode spaces
+    // begin-source-example
+    // source-example-heading:    
+    @DomEvent(value = "value-changed",
+              debounce = @DebounceSettings(timeout = 300,
+              phases = DebouncePhase.TRAILING))
+    public static class FilterChanged extends ComponentEvent<TextField> {
+        public FilterChanged(TextField source, boolean fromClient) {
+            super(source, fromClient);
+        }
     }
+    // end-source-example
 
     // Dummy database
     private static final String[] FIRSTS = {"James", "Mary", "John", "Patricia", "Robert", "Jennifer"};
@@ -223,11 +300,8 @@ public class CrudView extends DemoView {
     }
 
     // begin-source-example
-    // source-example-heading: Crud examples objects
-    // Basic CRUD entity and helper
-    /**
-     * The Person entity object.
-     */
+    // source-example-heading: Example Classes
+    // Person Bean
     public static class Person implements Cloneable {
         private Integer id;
         private String firstName;
@@ -277,30 +351,6 @@ public class CrudView extends DemoView {
             } catch (CloneNotSupportedException e) {
                 return null;
             }
-        }
-    }
-
-    /**
-     * Creates an editor for the Person entity
-     */
-    private CrudEditor<Person> createPersonEditor() {
-        TextField firstName = new TextField("First name");
-        TextField lastName = new TextField("Last name");
-        FormLayout form = new FormLayout(firstName, lastName);
-
-        Binder<Person> binder = new Binder<>(Person.class);
-        binder.bind(firstName, Person::getFirstName, Person::setFirstName);
-        binder.bind(lastName, Person::getLastName, Person::setLastName);
-
-        return new BinderCrudEditor<>(binder, form);
-    }
-
-    // Custom search helpers
-    @DomEvent(value = "value-changed", debounce = @DebounceSettings(timeout = 300, phases = DebouncePhase.TRAILING))
-    public static class FilterChanged extends ComponentEvent<TextField> {
-
-        public FilterChanged(TextField source, boolean fromClient) {
-            super(source, fromClient);
         }
     }
 
@@ -424,28 +474,5 @@ public class CrudView extends DemoView {
         }
     }
 
-    // Internationalization helper
-    private CrudI18n createYorubaI18n() {
-        CrudI18n yorubaI18n = CrudI18n.createDefault();
-
-        yorubaI18n.setNewItem("Eeyan titun");
-        yorubaI18n.setEditItem("S'atunko eeyan");
-        yorubaI18n.setSaveItem("Fi pamo");
-        yorubaI18n.setDeleteItem("Paare");
-        yorubaI18n.setCancel("Fa'gi lee");
-        yorubaI18n.setEditLabel("S'atunko eeyan");
-
-        yorubaI18n.getConfirm().getCancel().setTitle("Akosile");
-        yorubaI18n.getConfirm().getCancel().setContent("Akosile ti a o tii fi pamo nbe");
-        yorubaI18n.getConfirm().getCancel().getButton().setDismiss("Se atunko sii");
-        yorubaI18n.getConfirm().getCancel().getButton().setConfirm("Fa'gi lee");
-
-        yorubaI18n.getConfirm().getDelete().setTitle("Amudaju ipare");
-        yorubaI18n.getConfirm().getDelete().setContent("Se o da o l'oju pe o fe pa eeyan yi re? Igbese yi o l'ayipada o.");
-        yorubaI18n.getConfirm().getDelete().getButton().setDismiss("Da'wo duro");
-        yorubaI18n.getConfirm().getDelete().getButton().setConfirm("Paare");
-
-        return yorubaI18n;
-    }
     // end-source-example
 }
