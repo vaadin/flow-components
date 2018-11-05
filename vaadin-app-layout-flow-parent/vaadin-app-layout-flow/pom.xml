@@ -100,7 +100,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-tabs-flow</artifactId>
-            <version>1.0.5</version>
+            <version>1.2.0</version>
         </dependency>
 
         <dependency>
@@ -137,13 +137,13 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-lumo-theme</artifactId>
-            <version>1.0.0</version>
+            <version>1.2.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons-flow</artifactId>
-            <version>1.0.0</version>
+            <version>1.2.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
