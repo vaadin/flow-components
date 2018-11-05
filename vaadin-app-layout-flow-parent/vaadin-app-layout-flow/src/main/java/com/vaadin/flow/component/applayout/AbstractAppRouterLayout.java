@@ -85,7 +85,7 @@ public abstract class AbstractAppRouterLayout implements RouterLayout {
                     .getUrl(component.getClass());
 
             getAppLayoutMenu().getMenuItemTargetingRoute(target)
-                    .ifPresent(getAppLayoutMenu()::selectMenuItem);
+                    .ifPresent(item -> getAppLayoutMenu().selectMenuItem(item, false));
         }
         beforeNavigate(target, content);
         getAppLayout().setContent(content.getElement());

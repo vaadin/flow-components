@@ -185,8 +185,27 @@ public class AppLayoutMenu implements HasElement, AttachNotifier {
      * @param menuItem {@link AppLayoutMenuItem} to select
      */
     public void selectMenuItem(AppLayoutMenuItem menuItem) {
-        selectedMenuItem = menuItem;
-        tabs.setSelectedTab(menuItem);
+        selectMenuItem(menuItem, true);
+    }
+
+    /**
+     * Selects a menu item.
+     *
+     * @param menuItem {@link AppLayoutMenuItem} to select
+     * @param fireSelectionChange whether or not to trigger SelectionChange event
+     */
+    void selectMenuItem(AppLayoutMenuItem menuItem, boolean fireSelectionChange) {
+        try {
+            if (!fireSelectionChange) {
+                selectionChangeListener.enabled = false;
+            }
+            selectedMenuItem = menuItem;
+            tabs.setSelectedTab(menuItem);
+        } finally {
+            if (!fireSelectionChange) {
+                selectionChangeListener.enabled = true;
+            }
+        }
     }
 
     /**
