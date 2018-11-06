@@ -1440,6 +1440,11 @@ public class GridView extends DemoView {
         Button cancel = new Button("Cancel", e -> editor.cancel());
         cancel.addClassName("cancel");
 
+        // Add a keypress listener that listens for an escape key up event.
+        // Note! some browsers return key as Escape and some as Esc
+        grid.getElement().addEventListener("keyup", event -> editor.cancel())
+                .setFilter("event.key === 'Escape' || even.key === 'Esc'");
+
         Div buttons = new Div(save, cancel);
         editorColumn.setEditorComponent(buttons);
 
@@ -1590,6 +1595,11 @@ public class GridView extends DemoView {
 
         Button cancel = new Button("Cancel", e -> editor.cancel());
         cancel.addClassName("cancel");
+
+        // Add a keypress listener that listens for an escape key up event.
+        // Note! some browsers return key as Escape and some as Esc
+        grid.getElement().addEventListener("keyup", event -> editor.cancel())
+                .setFilter("event.key === 'Escape' || even.key === 'Esc'");
 
         Div buttons = new Div(save, cancel);
         editorColumn.setEditorComponent(buttons);

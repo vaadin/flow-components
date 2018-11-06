@@ -879,6 +879,39 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
+    public void bufferedEditor_cancelWithEscape() {
+        openTabAndCheckForErrors("grid-editor");
+
+        GridElement grid = $(GridElement.class).id("buffered-editor");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridTRElement row = grid.getRow(0);
+
+        GridColumnElement nameColumn = grid.getColumn("Name");
+        GridTHTDElement nameCell = row.getCell(nameColumn);
+        String personName = nameCell.getText();
+
+        WebElement edit = findElement(By.className("edit"));
+        edit.click();
+
+        // Test cancel by ESC
+        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
+
+        TestBenchElement nameInput = nameField.$("input").first();
+        nameInput.clear();
+        nameInput.sendKeys("foo");
+        nameInput.sendKeys(Keys.ESCAPE);
+
+        Assert.assertFalse("Edit button should be visible", nameCell.$("vaadin-text-field").exists());
+
+        nameColumn = grid.getColumn("Name");
+        nameCell = row.getCell(nameColumn);
+        Assert.assertEquals("Field name should not have changed.", personName, nameCell.getText());
+
+    }
+
+    @Test
     public void bufferedEditor_validName() throws InterruptedException {
         openTabAndCheckForErrors("grid-editor");
 
