@@ -37,6 +37,10 @@
                     <groupId>org.webjars.bowergithub.vaadin</groupId>
                     <artifactId>vaadin-dialog</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-flex-layout</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -118,6 +122,10 @@
         <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-resizable-behavior</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-flex-layout</artifactId>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
