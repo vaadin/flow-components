@@ -181,10 +181,14 @@ public class GridViewIT extends TabbedComponentDemoTest {
         grid.findElement(By.id("selectAllCheckbox")).click();
         // deselect 1
         getCellContent(grid.getCell(0, 0)).click();
-        Assert.assertEquals("Select all should have been deselected","false", grid.findElement(By.id("selectAllCheckbox")).getAttribute("aria-checked"));
+        Assert.assertEquals("Select all should have been deselected", "false",
+                grid.findElement(By.id("selectAllCheckbox"))
+                        .getAttribute("aria-checked"));
 
         getCellContent(grid.getCell(0, 0)).click();
-        Assert.assertEquals("Select all should have been reselected", "true", grid.findElement(By.id("selectAllCheckbox")).getAttribute("aria-checked"));
+        Assert.assertEquals("Select all should have been reselected", "true",
+                grid.findElement(By.id("selectAllCheckbox"))
+                        .getAttribute("aria-checked"));
 
     }
 
@@ -903,16 +907,18 @@ public class GridViewIT extends TabbedComponentDemoTest {
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ESCAPE);
 
-        Assert.assertFalse("Edit button should be visible", nameCell.$("vaadin-text-field").exists());
+        Assert.assertFalse("Edit button should be visible",
+                nameCell.$("vaadin-text-field").exists());
 
         nameColumn = grid.getColumn("Name");
         nameCell = row.getCell(nameColumn);
-        Assert.assertEquals("Field name should not have changed.", personName, nameCell.getText());
+        Assert.assertEquals("Field name should not have changed.", personName,
+                nameCell.getText());
 
     }
 
     @Test
-    public void bufferedEditor_validName() throws InterruptedException {
+    public void bufferedEditor_validName() {
         openTabAndCheckForErrors("grid-editor");
 
         GridElement grid = $(GridElement.class).id("buffered-editor");
@@ -968,7 +974,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
     }
 
     @Test
-    public void notBufferedEditor() throws InterruptedException {
+    public void notBufferedEditor() {
         openTabAndCheckForErrors("grid-editor");
 
         GridElement grid = $(GridElement.class).id("not-buffered-editor");
@@ -1012,6 +1018,11 @@ public class GridViewIT extends TabbedComponentDemoTest {
         WebElement msg = findElement(By.id("not-buffered-editor-msg"));
         Assert.assertEquals(personName + "foo, " + !isSubscriber,
                 msg.getText());
+    }
+
+    @Test
+    public void notBufferedEditor_closeEditorUsingKeyboard() {
+        assertCloseEditorUsingKeyBoard("not-buffered-editor");
     }
 
     @Test
@@ -1258,6 +1269,84 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 msg.getText());
     }
 
+    @Test
+    public void dynamicNotBufferedEditor_closeEditorUsingKeyboard()
+            throws InterruptedException {
+        GridElement grid = assertCloseEditorUsingKeyBoard(
+                "not-buffered-dynamic-editor");
+
+        GridTRElement row = grid.getRow(0);
+
+        GridColumnElement emailColumn = grid.getColumn("E-mail");
+        GridTHTDElement emailCell = row.getCell(emailColumn);
+
+        row.doubleClick();
+
+        TestBenchElement emailField = emailCell.$("vaadin-text-field").first();
+
+        TestBenchElement emailInput = emailField.$("input").first();
+        emailInput.click();
+        emailInput.sendKeys(Keys.TAB);
+        assertNotBufferedEditorClosed(grid);
+
+    }
+
+    private GridElement assertCloseEditorUsingKeyBoard(String gridId) {
+        openTabAndCheckForErrors("grid-editor");
+
+        GridElement grid = $(GridElement.class).id(gridId);
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridTRElement row = grid.getRow(0);
+
+        GridColumnElement nameColumn = grid.getColumn("Name");
+        GridTHTDElement nameCell = row.getCell(nameColumn);
+
+        row.doubleClick();
+
+        TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
+
+        TestBenchElement nameInput = nameField.$("input").first();
+        nameInput.click();
+
+        nameInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.TAB));
+
+        assertNotBufferedEditorClosed(grid);
+
+        GridColumnElement subscriberColumn = grid.getColumn("Subscriber");
+        GridTHTDElement subscriberCell = row.getCell(subscriberColumn);
+
+        row.doubleClick();
+
+        TestBenchElement checkbox = subscriberCell.$("vaadin-checkbox").first();
+        checkbox.click();
+
+        checkbox.sendKeys(Keys.TAB);
+
+        assertNotBufferedEditorClosed(grid);
+
+        // restore the previous state
+        row.doubleClick();
+
+        checkbox = subscriberCell.$("vaadin-checkbox").first();
+        checkbox.click();
+
+        // close the editor
+        grid.getRow(1).click(5, 5);
+
+        return grid;
+    }
+
+    private void assertNotBufferedEditorClosed(GridElement grid) {
+        GridColumnElement nameColumn = grid.getColumn("Name");
+        GridTRElement row = grid.getRow(0);
+        GridTHTDElement nameCell = row.getCell(nameColumn);
+        Assert.assertEquals(
+                "Unexpected shown text field in the name cell when the editor should be closed",
+                0, nameCell.$("vaadin-text-field").all().size());
+    }
+
     private void assertFirstCells(GridElement grid, String... cellContents) {
         IntStream.range(0, cellContents.length).forEach(i -> {
             Assert.assertEquals(cellContents[i], grid.getCell(i, 0).getText());
@@ -1386,30 +1475,11 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
     private void assertComponentRendereredDetails(WebElement grid, int rowIndex,
             String personName) {
-        try {
-            /*
-             * Wait a bit for the changes to propagate from the server to the
-             * client. Without this wait, some elements can be stale when this
-             * method is executed, causing instability on the tests.
-             */
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        waitUntil(driver -> isElementPresent(
+                By.id("person-card-" + (rowIndex + 1))), 20);
 
-        waitUntil(driver -> {
-            List<WebElement> elements = grid
-                    .findElements(By.className("custom-details"));
-            return elements.stream()
-                    .filter(el -> el.getAttribute("id")
-                            .equals("person-card-" + (rowIndex + 1)))
-                    .findAny().isPresent();
-        }, 20);
-        WebElement element = grid.findElements(By.className("custom-details"))
-                .stream()
-                .filter(el -> el.getAttribute("id")
-                        .equals("person-card-" + (rowIndex + 1)))
-                .findFirst().get();
+        WebElement element = findElement(
+                By.id("person-card-" + (rowIndex + 1)));
 
         element = element.findElement(By.tagName("vaadin-horizontal-layout"));
         Assert.assertNotNull(element);

@@ -1476,12 +1476,22 @@ public class GridView extends DemoView {
         grid.getEditor().setBinder(binder);
 
         TextField field = new TextField();
+        // Close the editor in case of backward between components
+        field.getElement()
+                .addEventListener("keydown", event -> grid.getEditor().cancel())
+                .setFilter("event.key === 'Tab' && event.shiftKey");
+
         binder.bind(field, "name");
         nameColumn.setEditorComponent(field);
 
         Checkbox checkbox = new Checkbox();
         binder.bind(checkbox, "subscriber");
         subscriberColumn.setEditorComponent(checkbox);
+
+        // Close the editor in case of forward navigation between
+        checkbox.getElement()
+                .addEventListener("keydown", event -> grid.getEditor().cancel())
+                .setFilter("event.key === 'Tab' && !event.shiftKey");
 
         grid.addItemDoubleClickListener(
                 event -> grid.getEditor().editItem(event.getItem()));
@@ -1637,12 +1647,22 @@ public class GridView extends DemoView {
         editor.setBinder(binder);
 
         TextField field = new TextField();
+        // Close the editor in case of backward navigation between components
+        field.getElement()
+                .addEventListener("keydown", event -> grid.getEditor().cancel())
+                .setFilter("event.key === 'Tab' && event.shiftKey");
         binder.bind(field, "name");
         nameColumn.setEditorComponent(field);
 
         Checkbox checkbox = new Checkbox();
         binder.bind(checkbox, "subscriber");
         subscriberColumn.setEditorComponent(checkbox);
+        // Close the editor in case of forward navigation between components
+        checkbox.getElement().addEventListener("keydown", event -> {
+            if (!checkbox.getValue()) {
+                grid.getEditor().cancel();
+            }
+        }).setFilter("event.key === 'Tab' && !event.shiftKey");
 
         TextField emailField = new TextField();
         emailColumn.setEditorComponent(item -> {
@@ -1653,6 +1673,10 @@ public class GridView extends DemoView {
                 return null;
             }
         });
+        // Close the editor in case of forward navigation between components
+        emailField.getElement()
+                .addEventListener("keydown", event -> grid.getEditor().cancel())
+                .setFilter("event.key === 'Tab' && !event.shiftKey");
 
         grid.addItemDoubleClickListener(
                 event -> grid.getEditor().editItem(event.getItem()));
