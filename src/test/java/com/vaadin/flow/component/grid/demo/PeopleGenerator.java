@@ -25,8 +25,6 @@ import java.util.stream.IntStream;
 import com.vaadin.flow.component.grid.demo.GridView.Address;
 import com.vaadin.flow.component.grid.demo.GridView.Person;
 import com.vaadin.flow.component.grid.demo.GridView.PersonWithLevel;
-import com.vaadin.flow.data.bean.Country;
-import com.vaadin.flow.data.bean.UsaState;
 
 /**
  * Helper class used for generating stable random data for demo purposes.
@@ -65,28 +63,18 @@ class PeopleGenerator extends BeanGenerator {
     private <T extends Person> T createPerson(Supplier<T> constructor,
             int index, int id) {
         boolean isSubscriber = getRandom("subscriber").nextBoolean();
-        Country country = Country.values()[getRandom("country")
-                .nextInt(Country.values().length)];
-        String state;
-        if (country == Country.USA) {
-            state = UsaState.values()[getRandom("state")
-                    .nextInt(UsaState.values().length)].toString();
-        } else {
-            state = "A state in " + country.toString();
-        }
+
         return createPerson(constructor, "Person " + index, id,
                 13 + getRandom("age").nextInt(50), isSubscriber,
                 isSubscriber ? generateEmail() : "",
                 "Street " + generateChar(getRandom("street"), false),
                 1 + getRandom("street").nextInt(50),
-                String.valueOf(10000 + getRandom("postalCode").nextInt(8999)),
-                country, state);
+                String.valueOf(10000 + getRandom("postalCode").nextInt(8999)));
     }
 
     private <T extends Person> T createPerson(Supplier<T> constructor,
             String name, int id, int age, boolean subscriber, String email,
-            String street, int addressNumber, String postalCode,
-            Country country, String state) {
+            String street, int addressNumber, String postalCode) {
         T person = constructor.get();
         person.setId(id);
         person.setName(name);
@@ -98,8 +86,6 @@ class PeopleGenerator extends BeanGenerator {
         address.setStreet(street);
         address.setNumber(addressNumber);
         address.setPostalCode(postalCode);
-        address.setCountry(country);
-        address.setState(state);
 
         person.setAddress(address);
 

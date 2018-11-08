@@ -62,7 +62,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.bean.Country;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Binder.Binding;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -213,24 +212,6 @@ public class GridView extends DemoView {
         private String street;
         private int number;
         private String postalCode;
-        private Country country;
-        private String state;
-
-        public Country getCountry() {
-            return country;
-        }
-
-        public void setCountry(Country country) {
-            this.country = country;
-        }
-
-        public String getState() {
-            return state;
-        }
-
-        public void setState(String state) {
-            this.state = state;
-        }
 
         public String getStreet() {
             return street;
