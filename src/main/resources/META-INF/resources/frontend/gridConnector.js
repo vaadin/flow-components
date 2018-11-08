@@ -795,10 +795,10 @@ window.Vaadin.Flow.gridConnector = {
     const contextMenuListener = function(e) {
       // https://github.com/vaadin/vaadin-grid/issues/1318
       const path = e.composedPath();
-      const cell = path[path.indexOf(grid.$.table) - 3]; // <td> element in shadow dom
-      var key;
-      if (cell && cell._instance.item) {
-        key = cell._instance.item.key;
+      const row = path[path.indexOf(grid.$.table) - 2]; // <tr> element in shadow dom
+      let key;
+      if (row && row._item) {
+        key = row._item.key;
       }
       grid.$server.updateContextMenuTargetItem(key);
     }

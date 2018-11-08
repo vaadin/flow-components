@@ -150,25 +150,46 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
         container.appendVirtualChild(editorContainer);
 
         /*
-         * This is needed because ComponentRenderers don't set the innerHTML of
-         * the <template> elements in advance, only before the client response.
+         * The runBeforeClientResponse is needed because ComponentRenderers
+         * don't set the innerHTML of the <template> elements in advance, only
+         * before the client response.
          */
-        runBeforeClientResponse(container, context -> {
-            String originalTemplate = contentTemplate.getProperty("innerHTML");
-            String appId = context.getUI().getInternals().getAppId();
-            String editorTemplate = String.format(
-                    "<flow-component-renderer appid='%s' nodeid='[[item._%s_editor]]'></flow-component-renderer>",
-                    appId, columnInternalId);
-
-            contentTemplate.setProperty("innerHTML", String.format(
-            //@formatter:off
-            "<template is='dom-if' if='[[item._editing]]' restamp>%s</template>" +
-            "<template is='dom-if' if='[[!item._editing]]' restamp>%s</template>",
-            //@formatter:on
-                    editorTemplate, originalTemplate));
-        });
+        runBeforeClientResponse(container,
+                context -> setupEditorTemplate(container, contentTemplate,
+                        context));
 
         return new EditorRendering(contentTemplate);
+    }
+
+    private void setupEditorTemplate(Element container, Element contentTemplate,
+            ExecutionContext context) {
+        final String originalTemplate;
+        final Element attachedTemplate;
+
+        // the template can be null if the original renderer didn't use any
+        // template, such as the ColumnPathRenderer
+        if (contentTemplate == null) {
+            originalTemplate = "[[item." + columnInternalId + "]]";
+            attachedTemplate = new Element("template");
+            container.appendChild(attachedTemplate);
+        } else {
+            attachedTemplate = contentTemplate;
+            originalTemplate = contentTemplate.getProperty("innerHTML");
+        }
+        String appId = context.getUI().getInternals().getAppId();
+        String editorTemplate = String.format(
+                "<flow-component-renderer appid='%s' nodeid='[[item._%s_editor]]'></flow-component-renderer>",
+                appId, columnInternalId);
+
+        attachedTemplate.setProperty("innerHTML", String.format(
+        //@formatter:off
+        "<template is='dom-if' if='[[item._editing]]' restamp>%s</template>" +
+        "<template is='dom-if' if='[[!item._editing]]' restamp>%s</template>",
+        //@formatter:on
+                editorTemplate, originalTemplate));
+
+        // clear the path property, since we are using a explicit template
+        container.removeProperty("path");
     }
 
     private void runBeforeClientResponse(Element container,
