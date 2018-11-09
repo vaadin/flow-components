@@ -1411,7 +1411,10 @@ public class GridView extends DemoView {
         Column<Person> editorColumn = grid.addComponentColumn(person -> {
             Button edit = new Button("Edit");
             edit.addClassName("edit");
-            edit.addClickListener(e -> editor.editItem(person));
+            edit.addClickListener(e -> {
+                editor.editItem(person);
+                field.focus();
+            });
             return edit;
         });
 
@@ -1474,8 +1477,10 @@ public class GridView extends DemoView {
                 .addEventListener("keydown", event -> grid.getEditor().closeEditor())
                 .setFilter("event.key === 'Tab' && !event.shiftKey");
 
-        grid.addItemDoubleClickListener(
-                event -> grid.getEditor().editItem(event.getItem()));
+        grid.addItemDoubleClickListener(event -> {
+            grid.getEditor().editItem(event.getItem());
+            field.focus();
+        });
 
         grid.addItemClickListener(event -> {
             if (binder.getBean() != null) {
@@ -1577,7 +1582,10 @@ public class GridView extends DemoView {
         Column<Person> editorColumn = grid.addComponentColumn(person -> {
             Button edit = new Button("Edit");
             edit.addClassName("edit");
-            edit.addClickListener(e -> editor.editItem(person));
+            edit.addClickListener(e -> {
+                editor.editItem(person);
+                field.focus();
+            });
             return edit;
         });
 
@@ -1659,8 +1667,10 @@ public class GridView extends DemoView {
                 .addEventListener("keydown", event -> grid.getEditor().closeEditor())
                 .setFilter("event.key === 'Tab' && !event.shiftKey");
 
-        grid.addItemDoubleClickListener(
-                event -> grid.getEditor().editItem(event.getItem()));
+        grid.addItemDoubleClickListener(event -> {
+            grid.getEditor().editItem(event.getItem());
+            field.focus();
+        });
 
         // Re-validates the editors every time something changes on the Binder.
         // This is needed for the email column to turn into nothing when the

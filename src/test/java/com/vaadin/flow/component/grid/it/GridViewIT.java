@@ -858,6 +858,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
+        assertElementHasFocus(nameField);
+
         nameInput.clear();
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
@@ -903,6 +905,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
+        assertElementHasFocus(nameField);
+
         nameInput.clear();
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ESCAPE);
@@ -947,6 +951,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
+        assertElementHasFocus(nameField);
+
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
 
@@ -1001,6 +1007,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
+        assertElementHasFocus(nameField);
+
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
 
@@ -1045,6 +1053,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
+        assertElementHasFocus(nameField);
+
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
 
@@ -1140,6 +1150,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
+        assertElementHasFocus(nameField);
         nameInput.sendKeys(Keys.TAB);
 
         // skip checkbox and focus the email field
@@ -1180,6 +1191,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
+        assertElementHasFocus(nameField);
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
 
@@ -1243,6 +1255,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
         TestBenchElement nameInput = nameField.$("input").first();
+        assertElementHasFocus(nameField);
+
         nameInput.sendKeys("foo");
         nameInput.sendKeys(Keys.ENTER);
         nameInput.click();
@@ -1288,7 +1302,13 @@ public class GridViewIT extends TabbedComponentDemoTest {
         emailInput.click();
         emailInput.sendKeys(Keys.TAB);
         assertNotBufferedEditorClosed(grid);
+    }
 
+    private void assertElementHasFocus(WebElement element) {
+        Assert.assertTrue("Element should have focus",
+                (Boolean) executeScript(
+                        "return document.activeElement === arguments[0]",
+                        element));
     }
 
     private GridElement assertCloseEditorUsingKeyBoard(String gridId) {
