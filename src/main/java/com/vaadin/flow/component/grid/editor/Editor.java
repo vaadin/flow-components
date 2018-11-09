@@ -78,19 +78,39 @@ public interface Editor<T> extends Serializable {
     boolean isOpen();
 
     /**
-     * Saves any changes from the Editor fields to the edited bean.
+     * In buffered mode calling save will validate bean and will save any
+     * changes made to the Editor fields to the edited bean if all validators
+     * pass.
+     * <p>
+     * A successful write will fire an {@link EditorSaveEvent} and close the
+     * editor that will fire an {@link EditorCloseEvent}.
+     * <p>
+     * If the write fails then there will be no events and the editor will stay
+     * open.
+     * <p>
+     * Note! For an unbuffered editor calling save will have no effect and
+     * always return <code>false</code>.
      *
      * @return {@code true} if save succeeded; {@code false} if not
      */
     boolean save();
 
     /**
-     * Close the editor discarding any unsaved changes.
+     * Cancel will discard any changes made in editor fields for a buffered
+     * editor.
+     * <p>
+     * Calling cancel will fire an {@link EditorCancelEvent} and close the
+     * editor that will fire an {@link EditorCloseEvent} if the edited item is
+     * not <code>null</code>.
      */
     void cancel();
 
     /**
-     * Opens the editor interface for the provided item.
+     * Opens the editor component for the provided item and fires an {@link
+     * EditorOpenEvent}.
+     * <p>
+     * In case there is an open editor an {@link EditorCloseEvent} will also be
+     * fired.
      *
      * @param item
      *            the edited item
@@ -134,7 +154,8 @@ public interface Editor<T> extends Serializable {
     Grid<T> getGrid();
 
     /**
-     * Adds an editor save {@code listener}.
+     * Adds an editor save {@code listener}. {@link EditorSaveEvent} is called
+     * when {@link #save()} is called.
      *
      * @param listener
      *            save listener
@@ -143,7 +164,8 @@ public interface Editor<T> extends Serializable {
     Registration addSaveListener(EditorSaveListener<T> listener);
 
     /**
-     * Adds an editor cancel {@code listener}.
+     * Adds an editor cancel {@code listener}. {@link EditorCancelEvent} is
+     * fired when {@link #cancel()} is called.
      *
      * @param listener
      *            cancel listener
@@ -152,7 +174,8 @@ public interface Editor<T> extends Serializable {
     Registration addCancelListener(EditorCancelListener<T> listener);
 
     /**
-     * Adds an editor open {@code listener}.
+     * Adds an editor open {@code listener}. {@link EditorOpenEvent} is
+     * fired when the editor is opened through {@link #editItem(T)}
      *
      * @param listener
      *            open listener
@@ -163,8 +186,8 @@ public interface Editor<T> extends Serializable {
 
     /**
      * Adds an editor close {@code listener}. Close events are sent every time
-     * the editor is closed, no matter if it is due to a save or to a cancel
-     * operation.
+     * the editor is closed, no matter if it is due to a close, save or to a
+     * cancel operation.
      * <p>
      * When a successful {@link #save()} operation is performed, two listeners
      * are triggered: save and close listeners. Likewise, when a
