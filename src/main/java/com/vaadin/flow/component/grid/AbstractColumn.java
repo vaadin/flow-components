@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -71,27 +70,18 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     /**
-     * Hides or shows the column. By default columns are visible before
-     * explicitly hiding them.
+     * {@inheritDoc}
+     * <p>
+     * Note that column related data is sent to the client side even if the
+     * column is invisible. Use {@link Grid#removeColumn(Column)} to remove
+     * column (or don't add the column all) and avoid sending extra data.
+     * </p>
      *
-     * @param visible
-     *            {@code false} to hide the column, {@code true} to show
+     * @see Grid#removeColumn(Column)
      */
     @Override
     public void setVisible(boolean visible) {
-        getElement().setProperty("hidden", !visible);
-    }
-
-    /**
-     * Returns whether this column is visible. Default is {@code true}.
-     *
-     * @return {@code false} if the column is currently hidden, {@code true}
-     *         otherwise
-     */
-    @Override
-    @Synchronize("hidden-changed")
-    public boolean isVisible() {
-        return !getElement().getProperty("hidden", false);
+        super.setVisible(visible);
     }
 
     protected void setHeaderRenderer(Renderer<?> renderer) {
@@ -200,7 +190,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
      * Updates this component to either have sorting indicators according to the
      * sortable state of the underlying column, or removes the sorting
      * indicators.
-     * 
+     *
      * @param sortable
      *            {@code true} to have sorting indicators if the column is
      *            sortable, {@code false} to not have sorting indicators
@@ -215,7 +205,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
 
     /**
      * Sets this component to show sorting indicators or not.
-     * 
+     *
      * @param sortingIndicators
      *            {@code true} to show sorting indicators, {@code false} to
      *            remove them
@@ -257,7 +247,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
      * {@code <vaadin-grid-column>} component. This method should be called only
      * on components which have only one such bottom-level column (not on
      * ColumnGroups with multiple children).
-     * 
+     *
      * @return the bottom column component
      */
     protected abstract Column<?> getBottomLevelColumn();
@@ -265,7 +255,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     /**
      * Gets recursively the child components of this component that are
      * instances of Column.
-     * 
+     *
      * @return the Column children of this component
      */
     protected List<Column<?>> getBottomChildColumns() {
