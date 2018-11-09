@@ -1459,7 +1459,7 @@ public class GridView extends DemoView {
         TextField field = new TextField();
         // Close the editor in case of backward between components
         field.getElement()
-                .addEventListener("keydown", event -> grid.getEditor().cancel())
+                .addEventListener("keydown", event -> grid.getEditor().closeEditor())
                 .setFilter("event.key === 'Tab' && event.shiftKey");
 
         binder.bind(field, "name");
@@ -1471,7 +1471,7 @@ public class GridView extends DemoView {
 
         // Close the editor in case of forward navigation between
         checkbox.getElement()
-                .addEventListener("keydown", event -> grid.getEditor().cancel())
+                .addEventListener("keydown", event -> grid.getEditor().closeEditor())
                 .setFilter("event.key === 'Tab' && !event.shiftKey");
 
         grid.addItemDoubleClickListener(
@@ -1630,7 +1630,7 @@ public class GridView extends DemoView {
         TextField field = new TextField();
         // Close the editor in case of backward navigation between components
         field.getElement()
-                .addEventListener("keydown", event -> grid.getEditor().cancel())
+                .addEventListener("keydown", event -> grid.getEditor().closeEditor())
                 .setFilter("event.key === 'Tab' && event.shiftKey");
         binder.bind(field, "name");
         nameColumn.setEditorComponent(field);
@@ -1641,7 +1641,7 @@ public class GridView extends DemoView {
         // Close the editor in case of forward navigation between components
         checkbox.getElement().addEventListener("keydown", event -> {
             if (!checkbox.getValue()) {
-                grid.getEditor().cancel();
+                grid.getEditor().closeEditor();
             }
         }).setFilter("event.key === 'Tab' && !event.shiftKey");
 
@@ -1656,15 +1656,15 @@ public class GridView extends DemoView {
         });
         // Close the editor in case of forward navigation between components
         emailField.getElement()
-                .addEventListener("keydown", event -> grid.getEditor().cancel())
+                .addEventListener("keydown", event -> grid.getEditor().closeEditor())
                 .setFilter("event.key === 'Tab' && !event.shiftKey");
 
         grid.addItemDoubleClickListener(
                 event -> grid.getEditor().editItem(event.getItem()));
 
-        // Revalidates the editors every time something changes on the Binder.
+        // Re-validates the editors every time something changes on the Binder.
         // This is needed for the email column to turn into nothing when the
-        // checkbox is desselected, for example.
+        // checkbox is deselected, for example.
         binder.addValueChangeListener(event -> {
             grid.getEditor().refresh();
         });

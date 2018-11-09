@@ -21,7 +21,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.editor.EditorEvent;
@@ -32,6 +34,9 @@ import com.vaadin.flow.data.binder.StatusChangeEvent;
 import com.vaadin.flow.function.ValueProvider;
 
 public class EditorImplTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     private Grid<String> grid;
     private TestEditor editor;
@@ -212,6 +217,41 @@ public class EditorImplTest {
 
         Assert.assertTrue(statusEventCapture.get().hasValidationErrors());
     }
+
+    @Test
+    public void editorIsInBufferedMode_closeEditorThrows() {
+        thrown.expect(UnsupportedOperationException.class);
+        thrown.reportMissingExceptionWithMessage("Buffered editor should be closed using save() or cancel()");
+
+        editor.editItem("bar");
+        editor.refreshedItems.clear();
+        editor.setBuffered(true);
+
+        AtomicReference<EditorEvent<String>> closeEventCapture = new AtomicReference<>();
+
+        editor.addCloseListener(
+                event -> closeEventCapture.compareAndSet(null, event));
+
+        editor.closeEditor();
+
+        Assert.assertNull("Received close event even though method should have thrown.", closeEventCapture.get());
+    }
+
+    @Test
+    public void editorInUnBufferedMode_closeEditorSendsCloseEvent() {
+        editor.editItem("bar");
+        editor.refreshedItems.clear();
+
+        AtomicReference<EditorEvent<String>> closeEventCapture = new AtomicReference<>();
+
+        editor.addCloseListener(
+                event -> closeEventCapture.compareAndSet(null, event));
+
+        editor.closeEditor();
+
+        Assert.assertNotNull("No close event was fired.", closeEventCapture.get());
+    }
+
 
     private void assertNegativeSave(
             AtomicReference<StatusChangeEvent> statusEventCapture,

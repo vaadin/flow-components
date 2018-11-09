@@ -117,6 +117,14 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     }
 
     @Override
+    public void closeEditor() {
+        if(isOpen() && isBuffered()) {
+            throw new UnsupportedOperationException("Buffered editor should be closed using save() or cancel()");
+        }
+        close();
+    }
+
+    @Override
     public void editItem(T item) {
         Objects.requireNonNull(item, "Editor can't edit null");
 

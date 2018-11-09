@@ -106,6 +106,20 @@ public interface Editor<T> extends Serializable {
     void cancel();
 
     /**
+     * Closes the editor when in unbuffered mode and fires an {@link
+     * EditorCloseEvent} if the edited item is
+     * not <code>null</code>.
+     * <p>
+     * For buffered mode calling close editor will throw an {@link
+     * UnsupportedOperationException} as either {@link #save()} or {@link
+     * #cancel()} should be used.
+     *
+     * @throws UnsupportedOperationException
+     *         thrown if trying to close editor in buffered mode
+     */
+    void closeEditor();
+
+    /**
      * Opens the editor component for the provided item and fires an {@link
      * EditorOpenEvent}.
      * <p>
