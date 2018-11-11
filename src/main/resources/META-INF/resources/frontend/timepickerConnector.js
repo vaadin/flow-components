@@ -35,7 +35,7 @@ window.Vaadin.Flow.timepickerConnector = {
             return getAmPmString(locale, testAmTime);
         };
 
-        // map from unicode arabic characters to numbers
+        // map from unicode eastern arabic number characters to arabic numbers
         const arabicDigitMap = {
             '\\u0660': '0',
             '\\u0661': '1',
@@ -50,12 +50,30 @@ window.Vaadin.Flow.timepickerConnector = {
         };
 
         // parses eastern arabic number characters to arabic numbers (0-9)
-        const parseAnyCharsToInt = function (arabicDigit) {
-            return parseInt(arabicDigit.replace(/[\u0660-\u0669]/g, function (char) {
+        const anyNumberCharToArabicNumberReplacer = function (charsToReplace) {
+            return charsToReplace.replace(/[\u0660-\u0669]/g, function (char) {
                 const unicode = '\\u0' + char.charCodeAt(0).toString(16);
                 return arabicDigitMap[unicode];
-            }));
+            });
         };
+
+        const parseAnyCharsToInt = function (anyNumberChars) {
+            return parseInt(anyNumberCharToArabicNumberReplacer(anyNumberChars));
+        };
+
+        const parseMillisecondCharsToInt = function (millisecondChars) {
+            millisecondChars = anyNumberCharToArabicNumberReplacer(millisecondChars);
+            // digits are either .1 .01 or .001 so need to "shift"
+            if (millisecondChars.length === 1) {
+                millisecondChars += "00";
+            } else if (millisecondChars.length === 2) {
+                millisecondChars += "0";
+            }
+            return parseInt(millisecondChars);
+        };
+
+        // detecting milliseconds from input, expects am/pm removed from end, eg. .0 or .00 or .000
+        const millisecondRegExp = /[[\.][\d\u0660-\u0669]{1,3}$/;
 
         timepicker.$connector.setLocale = function (locale) {
             // capture previous value if any
@@ -66,7 +84,7 @@ window.Vaadin.Flow.timepickerConnector = {
 
             try {
                 // Check whether the locale is supported by the browser or not
-                console.log(locale.toUpperCase() + ": " + testPmTime.toLocaleTimeString(locale));
+                testPmTime.toLocaleTimeString(locale);
             } catch (e) {
                 locale = "en-US";
                 // FIXME should do a callback for server to throw an exception ?
@@ -86,7 +104,7 @@ window.Vaadin.Flow.timepickerConnector = {
             const separator = localeTimeString.match(/[^\u0660-\u0669\s\d]/);
             //console.info(locale.toUpperCase() + " AM/PM: " + amString + "/" + pmString + ", separator " + separator);
 
-            // 3. regexp that allows to find the numberd and continuing searching after it
+            // 3. regexp that allows to find the numbers with optional separator and continuing searching after it
             const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + separator + ')?', 'g');
 
             const includeSeconds = function () {
@@ -94,8 +112,7 @@ window.Vaadin.Flow.timepickerConnector = {
             };
 
             const includeMilliSeconds = function () {
-                // TODO not allowing milliseconds for other than 24-hour clock
-                return timepicker.step && timepicker.step < 1 && !amString && !pmString;
+                return timepicker.step && timepicker.step < 1;
             };
 
             // the web component expects the correct granularity used for the time string,
@@ -117,18 +134,33 @@ window.Vaadin.Flow.timepickerConnector = {
 
             const formatMilliseconds = function (localeTimeString, milliseconds) {
                 if (includeMilliSeconds()) {
-                    // TODO to be fixed so that it includes milliseconds correctly to all locales
-                    if (milliseconds) {
-                        let milliseconds = milliseconds < 10 ? "0" : "";
-                        milliseconds += milliseconds < 100 ? "0" : "";
-                        milliseconds += milliseconds;
-                        localeTimeString += "." + milliseconds;
-                    } else {
-                        localeTimeString += ".000";
+                    // might need to inject milliseconds between seconds and AM/PM
+                    let cleanedTimeString = localeTimeString;
+                    if (localeTimeString.endsWith(amString)) {
+                        cleanedTimeString = localeTimeString.replace(" " + amString, '');
+                    } else if (localeTimeString.endsWith(pmString)) {
+                        cleanedTimeString = localeTimeString.replace(" " + pmString, '');
                     }
+                    if (milliseconds) {
+                        let millisecondsString = milliseconds < 10 ? "0" : "";
+                        millisecondsString += milliseconds < 100 ? "0" : "";
+                        millisecondsString += milliseconds;
+                        cleanedTimeString += "." + millisecondsString;
+                    } else {
+                        cleanedTimeString += ".000";
+                    }
+                    if (localeTimeString.endsWith(amString)) {
+                        cleanedTimeString = cleanedTimeString + " " + amString;
+                    } else if (localeTimeString.endsWith(pmString)) {
+                        cleanedTimeString = cleanedTimeString + " " + pmString;
+                    }
+                    return cleanedTimeString;
                 }
                 return localeTimeString;
-            }
+            };
+
+            let cachedTimeString;
+            let cachedTimeObject;
 
             timepicker.i18n = {
                 formatTime: function (timeObject) {
@@ -144,16 +176,21 @@ window.Vaadin.Flow.timepickerConnector = {
                     }
                 },
                 parseTime: function (timeString) {
+                    if (timeString && timeString === cachedTimeString && cachedTimeObject) {
+                        return cachedTimeObject;
+                    }
                     if (timeString) {
                         const pm = timeString.search(pmString);
                         const am = timeString.search(amString);
-                        const numbersOnlyTimeString = timeString.replace(amString, '').replace(pmString, '').trim();
+                        let numbersOnlyTimeString = timeString.replace(amString, '').replace(pmString, '').trim();
+                        // reset regex to beginning or things can explode when the length of the input changes
+                        numbersRegExp.lastIndex = 0;
                         let hours = numbersRegExp.exec(numbersOnlyTimeString);
                         if (hours) {
                             hours = parseAnyCharsToInt(hours[0].replace(separator, ''));
                             // handle 12 am -> 0
                             // do not do anything if am & pm are not used or if those are the same,
-                            // as with locale bg-BG there is always  ч. at the end of the time
+                            // as with locale bg-BG there is always ч. at the end of the time
                             if (pm !== am) {
                                 if (hours === 12 && am !== -1) {
                                     hours = 0;
@@ -163,16 +200,22 @@ window.Vaadin.Flow.timepickerConnector = {
                             }
                             const minutes = numbersRegExp.exec(numbersOnlyTimeString);
                             const seconds = minutes && numbersRegExp.exec(numbersOnlyTimeString);
-                            // TODO milliseconds has its own separator
-                            const milliseconds = seconds && numbersRegExp.exec(numbersOnlyTimeString);
+                            // reset to end or things can explode
+                            let milliseconds = seconds && includeMilliSeconds() && millisecondRegExp.exec(numbersOnlyTimeString);
+                            // handle case where last numbers are seconds and . is the separator (invalid regexp match)
+                            if (milliseconds && milliseconds['index'] <= seconds['index']) {
+                                milliseconds = undefined;
+                            }
                             // hours is a number at this point, others are either arrays or null
                             // the string in [0] from the arrays includes the separator too
-                            return hours !== undefined && {
+                            cachedTimeObject = hours !== undefined && {
                                 hours: hours,
                                 minutes: minutes ? parseAnyCharsToInt(minutes[0].replace(separator, '')) : 0,
                                 seconds: seconds ? parseAnyCharsToInt(seconds[0].replace(separator, '')) : 0,
-                                milliseconds: milliseconds ? parseAnyCharsToInt(milliseconds[0].replace(separator, '')) : 0
+                                milliseconds: minutes && seconds && milliseconds ? parseMillisecondCharsToInt(milliseconds[0].replace('.', '')) : 0
                             };
+                            cachedTimeString = timeString;
+                            return cachedTimeObject;
                         }
                         // when nothing is returned, the component shows the invalid state for the input
                     }

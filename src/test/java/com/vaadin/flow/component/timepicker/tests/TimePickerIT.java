@@ -68,6 +68,7 @@ public class TimePickerIT extends ComponentDemoTest {
     public void TimePickerWithDifferentStep() {
         TestBenchElement picker = $(TestBenchElement.class)
                 .id("step-setting-picker");
+        picker.scrollIntoView();
         openPickerDropDown(picker);
         waitForElementPresent(By.tagName("vaadin-combo-box-overlay"));
         Assert.assertEquals("Item in the dropdown is not correct", "1:00 AM",
@@ -97,12 +98,6 @@ public class TimePickerIT extends ComponentDemoTest {
         closePickerDropDown(picker);
     }
 
-    @Test
-    public void testServerSideValue_stepChanges_valueDoesntContainExtraInformation() {
-        // TODO
-        // TODO milliseconds is broken ATM
-    }
-
     private String findItemText(int index) {
         return $("vaadin-combo-box-overlay").first().$(TestBenchElement.class)
                 .id("content").$(TestBenchElement.class).id("selector")
@@ -128,6 +123,9 @@ public class TimePickerIT extends ComponentDemoTest {
 
         Assert.assertEquals("The current step is incorrect", step,
                 comboBox.$("vaadin-text-field").first().getProperty("value"));
+
+        executeScript("arguments[0].close()", comboBox);
+        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
     }
 
     private void validatePickerValue(TestBenchElement picker, String value) {

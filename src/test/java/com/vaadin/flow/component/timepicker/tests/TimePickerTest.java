@@ -15,8 +15,10 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
+import java.time.Duration;
 import java.time.LocalTime;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.timepicker.TimePicker;
@@ -46,7 +48,7 @@ public class TimePickerTest {
         assertEquals(LocalTime.of(9, 32), picker.getValue());
         assertEquals("09:32", picker.getElement().getProperty("value"));
     }
-    
+
     @Test
     public void timePickerWithLabel() {
         String label = new String("Time Picker Label");
@@ -62,6 +64,84 @@ public class TimePickerTest {
 
         assertEquals(placeholder,
                 picker.getElement().getProperty("placeholder"));
+    }
+
+    @Test
+    public void testSetStep_dividesEvenly_matchesGetter() {
+        TimePicker timePicker = new TimePicker();
+
+        Assert.assertEquals("Invalid default step", Duration.ofHours(1),
+                timePicker.getStep());
+
+        timePicker.setStep(Duration.ofSeconds(1));
+        Assert.assertEquals("Invalid step returned", Duration.ofSeconds(1),
+                timePicker.getStep());
+
+        timePicker.setStep(Duration.ofMillis(1));
+        Assert.assertEquals("Invalid step returned", Duration.ofMillis(1),
+                timePicker.getStep());
+
+        timePicker.setStep(Duration.ofMillis(10));
+        Assert.assertEquals("Invalid step returned", Duration.ofMillis(10),
+                timePicker.getStep());
+
+        timePicker.setStep(Duration.ofMillis(100));
+        Assert.assertEquals("Invalid step returned", Duration.ofMillis(100),
+                timePicker.getStep());
+
+        timePicker.setStep(Duration.ofMillis(1000));
+        Assert.assertEquals("Invalid step returned", Duration.ofSeconds(1),
+                timePicker.getStep());
+
+        // the next 3 would be broken in the web component
+        // https://github.com/vaadin/vaadin-time-picker/issues/79
+        timePicker.setStep(Duration.ofMinutes(40));
+        Assert.assertEquals("Invalid step returned", Duration.ofMinutes(40),
+                timePicker.getStep());
+
+        timePicker.setStep(Duration.ofMinutes(45));
+        Assert.assertEquals("Invalid step returned", Duration.ofMinutes(45),
+                timePicker.getStep());
+
+        timePicker.setStep(Duration.ofMinutes(90));
+        Assert.assertEquals("Invalid step returned", Duration.ofMinutes(90),
+                timePicker.getStep());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetStep_secondsNotDivideEvenly_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofSeconds(11));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetStep_minutesNotDivideEvenly_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofMinutes(35));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetStep_millisecondsNotDivideEvenly_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofMillis(333));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetStep_hoursNotDivideEvenly_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofHours(5));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetStep_negativeStep_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofMinutes(-15));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetStep_lessThan0Ms_throwsException() {
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofNanos(500_000));
     }
 
 }

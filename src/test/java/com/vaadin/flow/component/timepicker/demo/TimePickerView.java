@@ -22,6 +22,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalField;
 import java.util.Locale;
 import java.util.stream.Stream;
 
@@ -80,6 +81,7 @@ public class TimePickerView extends DemoView {
 
         // end-source-example
         Span localizedTimeLabel = new Span("The formatted value:");
+        localTimeTextBlock.setStep(timePicker.getStep());
 
         Div container = new Div(localesCB, timePicker, localizedTimeLabel,
                 localTimeTextBlock);
@@ -121,11 +123,12 @@ public class TimePickerView extends DemoView {
             Duration newStep = event.getValue();
             if (newStep != null) {
                 timePicker.setStep(newStep);
+
             }
         });
+        String localTimeValueFormat = "LocalTime value on server side: %sh %smin %sseconds %smilliseconds";
 
         // end-source-example
-        String localTimeValueFormat = "LocalTime value on server side: %sh %smin %sseconds %smilliseconds";
         Div localTimeValue = new Div();
         localTimeValue.setText(
                 String.format(localTimeValueFormat, "0", "0", "0", "0"));
@@ -185,8 +188,11 @@ public class TimePickerView extends DemoView {
      */
     public static class LocalTimeTextBlock extends Composite<Div> {
 
+        public static String MILLISECONDS_SPLIT = "MS:";
+
         private Locale locale;
         private LocalTime localTime;
+        private Duration step;
 
         public void setLocale(Locale locale) {
             this.locale = locale;
@@ -196,6 +202,10 @@ public class TimePickerView extends DemoView {
         public void setLocalTime(LocalTime localTime) {
             this.localTime = localTime;
             updateValue();
+        }
+
+        public void setStep(Duration step) {
+            this.step = step;
         }
 
         private void updateValue() {
@@ -210,8 +220,19 @@ public class TimePickerView extends DemoView {
             }
             String expression = "$0['innerText'] = new Date('" + format
                     + "').toLocaleTimeString('" + tag.toString()
-                    + "', {hour: 'numeric', minute: 'numeric'});";
-            getElement().executeJavaScript(expression, getElement());
+                    + "', {hour: 'numeric', minute: 'numeric'"
+                    + (step.getSeconds() < 60 ? ", second: 'numeric'" : "")
+                    + "})";
+            // no support for milliseconds in the toLocaleTimeString method
+            if (step.getSeconds() < 1) {
+                expression += "+' " + MILLISECONDS_SPLIT + "'+ $1;";
+                int milliSeconds = localTime.get(ChronoField.MILLI_OF_SECOND);
+                getElement().executeJavaScript(expression, getElement(),
+                        milliSeconds);
+            } else {
+                expression += ";";
+                getElement().executeJavaScript(expression, getElement());
+            }
         }
     }
 }
