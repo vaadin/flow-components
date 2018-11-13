@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import com.vaadin.flow.component.grid.HierarchicalTestBean;
+import com.vaadin.flow.component.grid.demo.HierarchicalTestBean;
 import com.vaadin.flow.component.grid.LazyHierarchicalDataProvider;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.treegrid.TreeGrid;

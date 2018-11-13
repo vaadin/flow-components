@@ -25,7 +25,7 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel.SelectAllCheckboxVisibility;
 import com.vaadin.flow.component.grid.GridSelectionModel;
-import com.vaadin.flow.component.grid.HierarchicalTestBean;
+import com.vaadin.flow.component.grid.demo.HierarchicalTestBean;
 import com.vaadin.flow.component.grid.LazyHierarchicalDataProvider;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
