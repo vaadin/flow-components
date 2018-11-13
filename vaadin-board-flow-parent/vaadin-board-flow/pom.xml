@@ -114,15 +114,9 @@
                         <Bundle-Version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</Bundle-Version>
                         <Bundle-License>https://vaadin.com/license/cval-3.0</Bundle-License>
                         <Bundle-Description>${project.name}</Bundle-Description>
-                       <!-- Package format version - do not change -->
+                        <!-- Package format version - do not change -->
                         <Vaadin-Package-Version>1</Vaadin-Package-Version>
-                        <!-- Add-on specific fields to update -->
-                       <!-- Add-on specific fields to update -->
-                       <AdVaaLicen>cval</AdVaaLicen>
-                       <AdVaaName>vaadin-board</AdVaaName>
-                       <AdVaaPkg>com.vaadin.board</AdVaaPkg>
-                       <!-- Implementation-Title and Implementation-Version
-                            come from the POM by default -->
+                        <!-- Implementation-Title and Implementation-Version come from the POM by default -->
                         <Implementation-Title>Vaadin Board</Implementation-Title>
                     </instructions>
                 </configuration>
