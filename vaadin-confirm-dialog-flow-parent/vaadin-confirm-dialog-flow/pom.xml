@@ -180,10 +180,6 @@
                         <Bundle-Description></Bundle-Description>
                         <!-- Package format version - do not change -->
                         <Vaadin-Package-Version>1</Vaadin-Package-Version>
-                        <!-- Add-on specific fields to update -->
-                        <AdVaaLicen>cval</AdVaaLicen>
-                        <AdVaaName>vaadin-confirm-dialog</AdVaaName>
-                        <AdVaaPkg>com.vaadin.confirmdialog</AdVaaPkg>
                         <!-- Implementation-Title and Implementation-Version
                             come from the POM by default -->
                         <Implementation-Title>Vaadin Confirm Dialog</Implementation-Title>
