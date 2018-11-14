@@ -15,12 +15,19 @@
  */
 package com.vaadin.flow.component.timepicker;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -36,13 +43,17 @@ import com.vaadin.flow.shared.Registration;
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled {
 
-    private static final SerializableFunction<String, LocalTime> PARSER = s -> {
-        return s == null || s.isEmpty() ? null : LocalTime.parse(s);
+    private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
+        return valueFromClient == null || valueFromClient.isEmpty() ? null
+                : LocalTime.parse(valueFromClient);
     };
 
-    private static final SerializableFunction<LocalTime, String> FORMATTER = d -> {
-        return d == null ? "" : d.toString();
+    private static final SerializableFunction<LocalTime, String> FORMATTER = valueFromModel -> {
+        return valueFromModel == null ? "" : valueFromModel.toString();
     };
+
+    private static final long MILLISECONDS_IN_A_DAY = 86400000L;
+    private static final long MILLISECONDS_IN_AN_HOUR = 3600000L;
 
     private Locale locale;
 
@@ -185,29 +196,45 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
-     * Sets the {@code step} property of the time picker. It specifies the
-     * intervals for the displayed items in the time picker dropdown.
+     * Sets the {@code step} property of the time picker using duration. It
+     * specifies the intervals for the displayed items in the time picker
+     * dropdown and also the displayed time format.
      * <p>
-     * Note: the displayed time format can be affected by changing the
-     * {@code step} property. By default, the format is {@code hh:mm}, but if
-     * the step is less than 60 seconds, the format will be changed to
+     * The set step needs to evenly divide a day or an hour and has to be larger
+     * than 0 milliseconds. By default, the format is {@code hh:mm} (same as *
+     * {@code Duration.ofHours(1)}
+     * <p>
+     * If the step is less than 60 seconds, the format will be changed to
      * {@code hh:mm:ss} and it can be in {@code hh:mm:ss.fff} format, when the
      * step is less than 1 second.
-     * </p>
      * <p>
-     * Unit must be set in seconds, and for correctly configuring intervals in
-     * the dropdown, it need to evenly divide a day or an hour.
-     * </p>
+     * <em>NOTE:</em> If the step is less than 900 seconds, the dropdown is
+     * hidden.
      * <p>
-     * If the step is less than 900 seconds, the dropdown is hidden.
-     * </p>
+     * <em>NOTE: changing the step to a larger duration can cause a new
+     * {@link com.vaadin.flow.component.HasValue.ValueChangeEvent} to be fired
+     * if some parts (eg. seconds) is discarded from the value.</em>
      *
      * @param step
-     *            the step to set, unit seconds
+     *            the step to set, not {@code null} and should divide a day or
+     *            an hour evenly
      */
-    @Override
-    public void setStep(double step) {
-        super.setStep(step);
+    public void setStep(Duration step) {
+        Objects.requireNonNull(step, "Step cannot be null");
+        long stepAsMilliseconds = step.getSeconds() * 1000
+                + (long) (step.getNano() / 1E6);
+        if (step.isNegative() || stepAsMilliseconds == 0) {
+            throw new IllegalArgumentException(
+                    "Step cannot be negative and must be larger than 0 milliseconds");
+        }
+
+        if (MILLISECONDS_IN_A_DAY % stepAsMilliseconds != 0
+                && MILLISECONDS_IN_AN_HOUR % stepAsMilliseconds != 0) {
+            throw new IllegalArgumentException("Given step " + step.toString()
+                    + " does not divide evenly a day or an hour.");
+        }
+
+        super.setStep(step.getSeconds() + (step.getNano() / 1E9));
     }
 
     /**
@@ -219,8 +246,13 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *
      * @return the {@code step} property from the picker, unit seconds
      */
-    public double getStep() {
-        return super.getStepDouble();
+    public Duration getStep() {
+        // the web component doesn't have a default value defined, but it is an
+        // hour, not 0.0 like in the generated class
+        if (!getElement().hasProperty("step")) {
+            return Duration.ofHours(1);
+        }
+        return Duration.ofNanos((long) (getStepDouble() * 1E9));
     }
 
     @Override
@@ -263,7 +295,10 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * <p>
      * <em>NOTE: only the language + country/region codes are used</em>. This
      * means that the script and variant information is not used and supported.
-     * <em>NOTE: timezone related data is not supported.</em>
+     * <em>NOTE: timezone related data is not supported.</em> <em>NOTE: changing
+     * the locale does not cause a new
+     * {@link com.vaadin.flow.component.HasValue.ValueChangeEvent} to be
+     * fired.</em>
      *
      * @param locale
      *            the locale set to the time picker, cannot be [@code null}
@@ -290,13 +325,13 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
-     * Gets the Locale for this date picker.
+     * Gets the Locale for this time picker.
      * <p>
      * By default, the locale is {@code null} until the component is attached to
      * an UI, and then locale is set to {@link UI#getLocale()}, unless
      * {@link #setLocale(Locale)} has been explicitly called before that.
      *
-     * @return the locale used for this picker
+     * @return the locale used for this time picker
      */
     @Override
     public Locale getLocale() {

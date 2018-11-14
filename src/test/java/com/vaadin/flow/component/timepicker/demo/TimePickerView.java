@@ -15,14 +15,20 @@
  */
 package com.vaadin.flow.component.timepicker.demo;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalField;
 import java.util.Locale;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.HtmlContainer;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.*;
@@ -75,6 +81,7 @@ public class TimePickerView extends DemoView {
 
         // end-source-example
         Span localizedTimeLabel = new Span("The formatted value:");
+        localTimeTextBlock.setStep(timePicker.getStep());
 
         Div container = new Div(localesCB, timePicker, localizedTimeLabel,
                 localTimeTextBlock);
@@ -97,35 +104,49 @@ public class TimePickerView extends DemoView {
     }
 
     private void createTimePickerWithStepSetting() {
-        Div message = createMessageDiv("step-setting-picker-message");
         Label label = new Label(
-                "The first two steps will not show the dropdown.\n Different step setting will affect the displayed time pattern.");
+                "Changing the step changes the time format and the drop down "
+                        + "is not shown when step is less than 900 seconds. "
+                        + "NOTE: the LocalTime value is not updated when the step changes -"
+                        + "new granularity is applied after next time selection.");
         // begin-source-example
         // source-example-heading: Time Picker With Step Setting
         TimePicker timePicker = new TimePicker();
 
-        NativeButton button1 = new NativeButton("Time Pattern: hh:mm:ss.fff",
-                event -> {
-                    timePicker.setStep(0.5);
-                    message.setText("Current Step:" + timePicker.getStep());
-                });
-        NativeButton button2 = new NativeButton("Time Pattern: hh:mm:ss",
-                event -> {
-                    timePicker.setStep(6.0);
-                    message.setText("Current Step:" + timePicker.getStep());
-                });
-        NativeButton button3 = new NativeButton("Time Pattern: hh:mm",
-                event -> {
-                    timePicker.setStep(900.0);
-                    message.setText("Current Step:" + timePicker.getStep());
-                });
+        ComboBox<Duration> stepSelector = new ComboBox<>();
+        stepSelector.setLabel("TimePicker Step");
+        stepSelector.setItems(Duration.ofMillis(500), Duration.ofSeconds(10),
+                Duration.ofMinutes(1), Duration.ofMinutes(15),
+                Duration.ofMinutes(30), Duration.ofHours(1));
+        stepSelector.setValue(timePicker.getStep());
+        stepSelector.addValueChangeListener(event -> {
+            Duration newStep = event.getValue();
+            if (newStep != null) {
+                timePicker.setStep(newStep);
+
+            }
+        });
+        String localTimeValueFormat = "LocalTime value on server side: %sh %smin %sseconds %smilliseconds";
+
         // end-source-example
+        Div localTimeValue = new Div();
+        localTimeValue.setText(
+                String.format(localTimeValueFormat, "0", "0", "0", "0"));
+
+        stepSelector.setId("step-picker");
+        stepSelector.setItemLabelGenerator(duration -> {
+            return duration.toString().replace("PT", "").toLowerCase();
+        });
+        timePicker.addValueChangeListener(event -> {
+            LocalTime value = event.getValue();
+            localTimeValue.setText(String.format(localTimeValueFormat,
+                    value.getHour(), value.getMinute(), value.getSecond(),
+                    value.get(ChronoField.MILLI_OF_SECOND)));
+        });
         timePicker.setId("step-setting-picker");
-        button1.setId("step-0.5");
-        button2.setId("step-6.0");
-        button3.setId("step-900.0");
-        addCard("Time Picker With Step Setting", label, timePicker, button1,
-                button2, button3, message);
+        label.setFor(timePicker);
+        addCard("Time Picker With Step Setting", label, stepSelector,
+                timePicker, localTimeValue);
     }
 
     private void createDisabledTimePicker() {
@@ -167,8 +188,11 @@ public class TimePickerView extends DemoView {
      */
     public static class LocalTimeTextBlock extends Composite<Div> {
 
+        public static String MILLISECONDS_SPLIT = "MS:";
+
         private Locale locale;
         private LocalTime localTime;
+        private Duration step;
 
         public void setLocale(Locale locale) {
             this.locale = locale;
@@ -178,6 +202,10 @@ public class TimePickerView extends DemoView {
         public void setLocalTime(LocalTime localTime) {
             this.localTime = localTime;
             updateValue();
+        }
+
+        public void setStep(Duration step) {
+            this.step = step;
         }
 
         private void updateValue() {
@@ -192,8 +220,19 @@ public class TimePickerView extends DemoView {
             }
             String expression = "$0['innerText'] = new Date('" + format
                     + "').toLocaleTimeString('" + tag.toString()
-                    + "', {hour: 'numeric', minute: 'numeric'});";
-            getElement().executeJavaScript(expression, getElement());
+                    + "', {hour: 'numeric', minute: 'numeric'"
+                    + (step.getSeconds() < 60 ? ", second: 'numeric'" : "")
+                    + "})";
+            // no support for milliseconds in the toLocaleTimeString method
+            if (step.getSeconds() < 1) {
+                expression += "+' " + MILLISECONDS_SPLIT + "'+ $1;";
+                int milliSeconds = localTime.get(ChronoField.MILLI_OF_SECOND);
+                getElement().executeJavaScript(expression, getElement(),
+                        milliSeconds);
+            } else {
+                expression += ";";
+                getElement().executeJavaScript(expression, getElement());
+            }
         }
     }
 }

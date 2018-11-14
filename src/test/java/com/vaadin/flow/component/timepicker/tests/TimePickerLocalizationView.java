@@ -10,9 +10,14 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 
+import java.time.Duration;
 import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 @Route("time-picker-localization")
@@ -32,16 +37,25 @@ public class TimePickerLocalizationView extends Div
         localesCB.setItems(supportedAvailableLocales);
         localesCB.setId("locale-picker");
 
-        ComboBox<Double> stepSelector = new ComboBox<>();
-        stepSelector.setItems(0.5, 10.0, 60.0, 900.0, 1800.0, 3600.0);
-        stepSelector.setId("step-picker");
-        stepSelector.setValue(3600.0); // default is null but it is really an
-                                       // hour
-
         timePicker = new TimePicker();
+
+        ComboBox<Duration> stepSelector = new ComboBox<>();
+        stepSelector.setItems(Duration.ofMillis(1), Duration.ofMillis(500),
+                Duration.ofSeconds(1), Duration.ofSeconds(10),
+                Duration.ofMinutes(1), Duration.ofMinutes(15),
+                Duration.ofMinutes(30), Duration.ofHours(1));
+        stepSelector.setItemLabelGenerator(duration -> {
+            return duration.toString().replace("PT", "").toLowerCase();
+        });
+        stepSelector.setId("step-picker");
+        stepSelector.setValue(timePicker.getStep());
 
         browserFormattedTime = new TimePickerView.LocalTimeTextBlock();
         browserFormattedTime.setId("formatted-time");
+        browserFormattedTime.setStep(timePicker.getStep());
+
+        Div valueLabel = new Div();
+        valueLabel.setId("value-label");
 
         localesCB.addValueChangeListener(event -> {
             if (event.getValue() == null) {
@@ -52,14 +66,22 @@ public class TimePickerLocalizationView extends Div
         });
 
         stepSelector.addValueChangeListener(event -> {
-            if (event.getValue() != null)
-                timePicker.setStep(event.getValue().doubleValue());
+            if (event.getValue() != null) {
+                timePicker.setStep(event.getValue());
+                browserFormattedTime.setStep(event.getValue());
+            }
         });
 
-        timePicker.addValueChangeListener(
-                event -> browserFormattedTime.setLocalTime(event.getValue()));
+        timePicker.addValueChangeListener(event -> {
+            LocalTime value = event.getValue();
+            browserFormattedTime.setLocalTime(value);
+            valueLabel.setText(String.format("%s:%s:%s.%s",
+                    value.getHour(), value.getMinute(), value.getSecond(),
+                    value.get(ChronoField.MILLI_OF_SECOND)));
+        });
 
-        add(localesCB, stepSelector, timePicker, browserFormattedTime);
+        add(localesCB, stepSelector, timePicker, browserFormattedTime,
+                valueLabel);
         localesCB.setValue(UI.getCurrent().getLocale());
     }
 
