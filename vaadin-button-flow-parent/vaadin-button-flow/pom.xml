@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-button-flow-parent</artifactId>
+        <version>1.2-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>vaadin-button-flow</artifactId>
+ 	<packaging>jar</packaging>
+
+	<name>Vaadin Button</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-button</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-lumo-styles</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-icon</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-meta</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-iconset-svg</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-element-mixin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-usage-statistics</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-development-mode-detector</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-control-state-mixin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-themable-mixin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-material-styles</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-flex-layout</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow</artifactId>
+            <version>${flow.version}</version>
+            <type>pom</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-icons-flow</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-generic</artifactId>
+            <version>${flow.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+ 	<build>
+ 		<plugins>
+ 			<plugin>
+	                <groupId>org.codehaus.mojo</groupId>
+	                <artifactId>build-helper-maven-plugin</artifactId>
+	         </plugin>
+ 		</plugins>
+ 	</build>
+</project>
