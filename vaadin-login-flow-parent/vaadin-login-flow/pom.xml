@@ -54,27 +54,12 @@
             <scope>provided</scope>
         </dependency>
 
-
-        <!--Vaadin components-->
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-grid-flow</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-text-field-flow</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-
-
         <!--Webjar-->
-        <!--<dependency>-->
-            <!--<groupId>com.vaadin.webjar</groupId>-->
-            <!--<artifactId>vaadin-login</artifactId>-->
-            <!--<version>1.0.0</version>-->
-        <!--</dependency>-->
-
+        <dependency>
+            <groupId>com.vaadin.webjar</groupId>
+            <artifactId>vaadin-login</artifactId>
+            <version>1.0.0-alpha1</version>
+        </dependency>
 
         <!--Pinned transitive webjars-->
         <dependency>

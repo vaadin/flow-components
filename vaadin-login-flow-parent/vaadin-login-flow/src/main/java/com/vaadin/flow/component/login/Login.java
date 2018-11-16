@@ -18,19 +18,39 @@ package com.vaadin.flow.component.login;
  */
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.shared.Registration;
 
-@Tag("div")
-//@Tag("vaadin-login")
-//@HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login.html")
+/**
+ * Server-side component for the {@code <vaadin-login>} component.
+ *
+ * @author Vaadin Ltd
+ *
+ */
+@Tag("vaadin-login")
+@HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login.html")
 public class Login extends Component {
 
     /**
-     * Initializes a new Login.
+     * Adds `forgotPassword` event listener
      */
-    public Login() {
-        getElement().appendChild(new H1("Hello World!").getElement());
+    public Registration addForgotPasswordListener(ComponentEventListener<ForgotPasswordEvent> listener) {
+        return ComponentUtil.addListener(this, ForgotPasswordEvent.class, listener);
     }
+
+    /**
+     * `forgot-password` is fired when the user clicks Forgot password button
+     */
+    @DomEvent("forgot-password")
+    public static class ForgotPasswordEvent extends ComponentEvent<Login> {
+        public ForgotPasswordEvent(Login source, boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
 }

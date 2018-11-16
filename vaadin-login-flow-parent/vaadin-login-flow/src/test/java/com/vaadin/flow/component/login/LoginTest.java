@@ -1,23 +1,22 @@
 package com.vaadin.flow.component.login;
 
-import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ComponentUtil;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LoginTest {
 
-    private Login systemUnderTest;
-
-    @Before
-    public void setUp() {
-        systemUnderTest = new Login();
-    }
-
     @Test
-    public void onAttach_init() {
-        systemUnderTest.addAttachListener(e -> new AttachEvent(systemUnderTest, true));
+    public void onForgotPasswordEvent() {
+        Login systemUnderTest = new Login();
 
-        Assert.assertTrue(true);
+        AtomicInteger count = new AtomicInteger(0);
+        systemUnderTest.addForgotPasswordListener(e -> count.incrementAndGet());
+
+        ComponentUtil.fireEvent(systemUnderTest, new Login.ForgotPasswordEvent(systemUnderTest, false));
+
+        Assert.assertEquals(1, count.get());
     }
 }
