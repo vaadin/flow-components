@@ -16,10 +16,6 @@
 
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>
-        <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
-        <ci-sauce.version>1.138</ci-sauce.version>
-
-        <frontend.working.directory>${project.basedir}/src/main/webapp/frontend</frontend.working.directory>
     </properties>
 
     <dependencies>
@@ -113,6 +109,12 @@
         	<groupId>com.vaadin</groupId>
         	<artifactId>vaadin-button-flow-demo</artifactId>
         	<version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-util</artifactId>
+            <version>${flow.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
