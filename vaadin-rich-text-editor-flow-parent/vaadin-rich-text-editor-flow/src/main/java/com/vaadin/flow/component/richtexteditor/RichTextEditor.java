@@ -226,6 +226,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
         private String alignCenter;
         private String alignRight;
         private String image;
+        private String link;
         private String blockquote;
         private String codeBlock;
         private String clean;
@@ -588,6 +589,27 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
         }
 
         /**
+         * Gets the translated word for {@code link}
+         *
+         * @return the translated word for link
+         */
+        public String getLink() {
+            return link;
+        }
+
+        /**
+         * Sets the translated word for {@code link}.
+         *
+         * @param link
+         *            the translated word for link
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setLink(String link) {
+            this.link = link;
+            return this;
+        }
+
+        /**
          * Gets the translated word for {@code blockquote}
          *
          * @return the translated word for blockquote
@@ -675,6 +697,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
                     alignCenter + ", " +
                     alignRight + ", " +
                     image + ", " +
+                    link + ", " +
                     blockquote + ", " +
                     codeBlock + ", " +
                     clean + "]";

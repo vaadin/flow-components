@@ -85,8 +85,8 @@ public class MainView extends VerticalLayout {
                 .setH1("7").setH2("8").setH3("9")
                 .setSubscript("10").setSuperscript("11").setListOrdered("12")
                 .setListBullet("13").setAlignLeft("14").setAlignCenter("15")
-                .setAlignRight("16").setImage("17").setBlockquote("18")
-                .setCodeBlock("19").setClean("20");
+                .setAlignRight("16").setImage("17").setLink("18").setBlockquote("19")
+                .setCodeBlock("20").setClean("21");
         return i18n;
     }
 
