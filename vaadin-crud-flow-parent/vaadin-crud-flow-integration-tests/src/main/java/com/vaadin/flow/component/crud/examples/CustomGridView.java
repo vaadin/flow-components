@@ -40,6 +40,7 @@ public class CustomGridView extends VerticalLayout {
         });
         toggleBordersButton.setId("toggleBorders");
 
+        setHeight("100%");
         add(crud, toggleBordersButton);
     }
 }

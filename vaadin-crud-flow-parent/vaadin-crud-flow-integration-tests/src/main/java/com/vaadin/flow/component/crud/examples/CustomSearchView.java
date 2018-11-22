@@ -61,6 +61,7 @@ public class CustomSearchView extends VerticalLayout {
 
         crud.getElement().getStyle().set("flex-direction", "column-reverse");
 
+        setHeight("100%");
         add(crud);
     }
 

@@ -22,6 +22,7 @@ public class NoFilterView extends VerticalLayout {
         final PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
         crud.setDataProvider(dataProvider);
 
+        setHeight("100%");
         add(crud);
     }
 }

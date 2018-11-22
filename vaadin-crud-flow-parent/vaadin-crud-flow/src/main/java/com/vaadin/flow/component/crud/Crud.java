@@ -194,20 +194,24 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                     }
 
                     getEditor().writeItemChanges();
-                    saveListeners.forEach(listener -> listener.onComponentEvent(e));
-
-                    getGrid().getDataProvider().refreshAll();
-                    setOpened(false);
-                    getEditor().clear();
+                    try {
+                        saveListeners.forEach(listener -> listener.onComponentEvent(e));
+                        setOpened(false);
+                        getEditor().clear();
+                    } finally {
+                        getGrid().getDataProvider().refreshAll();
+                    }
                 }));
 
         ComponentUtil.addListener(this, DeleteEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<DeleteEvent<E>>) e -> {
-                    deleteListeners.forEach(listener -> listener.onComponentEvent(e));
-
-                    getGrid().getDataProvider().refreshAll();
-                    setOpened(false);
-                    getEditor().clear();
+                    try {
+                        deleteListeners.forEach(listener -> listener.onComponentEvent(e));
+                        setOpened(false);
+                        getEditor().clear();
+                    } finally {
+                        getGrid().getDataProvider().refreshAll();
+                    }
                 }));
     }
 

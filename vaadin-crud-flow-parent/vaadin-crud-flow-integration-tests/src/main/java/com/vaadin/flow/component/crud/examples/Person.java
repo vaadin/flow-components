@@ -1,6 +1,6 @@
 package com.vaadin.flow.component.crud.examples;
 
-public class Person {
+public class Person implements Cloneable {
 
     private Integer id;
     private String firstName;
@@ -46,5 +46,10 @@ public class Person {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 '}';
+    }
+
+    @Override
+    public Person clone() {
+        return new Person(id, firstName, lastName);
     }
 }
