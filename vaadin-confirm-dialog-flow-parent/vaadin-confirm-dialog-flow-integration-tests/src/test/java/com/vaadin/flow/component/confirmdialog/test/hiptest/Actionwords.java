@@ -15,20 +15,19 @@ import com.vaadin.testbench.TestBenchElement;
 public class Actionwords {
 
     private final AbstractParallelTest test;
-    private final Class testView;
+    private final Class<?> testView;
 
     public Actionwords(AbstractParallelTest test) {
-        this.test = test;
-        testView = Features.class;
+        this(test, Features.class);
     }
 
-    public Actionwords(AbstractParallelTest test, Class testView) {
+    public Actionwords(AbstractParallelTest test, Class<?> testView) {
         this.test = test;
         this.testView = testView;
     }
 
     Optional<ConfirmDialogElement> getConfirmDialog() {
-        ElementQuery<ConfirmDialogElement> query =  test.$(ConfirmDialogElement.class).onPage();
+        ElementQuery<ConfirmDialogElement> query = test.$(ConfirmDialogElement.class).onPage();
         return query.exists() ? Optional.of(query.first()) : Optional.empty();
     }
 
@@ -76,7 +75,7 @@ public class Actionwords {
         checkFiredEventName(ConfirmDialog.RejectEvent.class);
     }
 
-    private void checkFiredEventName(Class eventClass) {
+    private void checkFiredEventName(Class<?> eventClass) {
         Assert.assertEquals(eventClass.getSimpleName(), getEventName());
     }
 }
