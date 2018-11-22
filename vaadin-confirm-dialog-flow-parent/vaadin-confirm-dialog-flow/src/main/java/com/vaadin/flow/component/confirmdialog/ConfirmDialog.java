@@ -227,6 +227,16 @@ public class ConfirmDialog extends Component
     /**
      * Sets custom Reject button
      * 
+     * @param component
+     *            the component to display instead of default Reject button
+     */
+    public void setRejectButton(Component component) {
+        setRejectButton(component.getElement());
+    }
+
+    /**
+     * Sets custom Reject button
+     * 
      * @param element
      *            the element to display instead of default Reject button
      */
@@ -266,6 +276,16 @@ public class ConfirmDialog extends Component
             String theme) {
         setCancelButton(buttonText, cancelListener);
         setCancelButtonTheme(theme);
+    }
+
+    /**
+     * Sets custom cancel button
+     * 
+     * @param component
+     *            the component to display instead of default Cancel button
+     */
+    public void setCancelButton(Component component) {
+        setCancelButton(component.getElement());
     }
 
     /**
@@ -313,6 +333,16 @@ public class ConfirmDialog extends Component
     /**
      * Sets custom confirm button
      * 
+     * @param component
+     *            the element to display instead of default Confirm button
+     */
+    public void setConfirmButton(Component component) {
+        setConfirmButton(component.getElement());
+    }
+
+    /**
+     * Sets custom confirm button
+     * 
      * @param element
      *            the element to display instead of default Confirm button
      */
@@ -335,6 +365,17 @@ public class ConfirmDialog extends Component
     /**
      * Sets custom confirmation message element
      * 
+     * @param component
+     *            the component to display instead of default 
+     *            confirmation text node
+     */
+    public void setText(Component component) {
+        setText(component.getElement());
+    }
+
+    /**
+     * Sets custom confirmation message element
+     * 
      * @param element
      *            the element to display instead of default 
      *            confirmation text node
@@ -348,7 +389,6 @@ public class ConfirmDialog extends Component
      */
     public void setConfirmText(String confirmText) {
         getElement().setProperty("confirmText", confirmText);
-
     }
 
     /**
@@ -417,6 +457,16 @@ public class ConfirmDialog extends Component
      */
     public void setHeader(String header) {
         getElement().setProperty("header", header);
+    }
+
+    /**
+     * Sets confirmation dialog custom header element
+     * 
+     * @param component
+     *            the component to display instead of default header text
+     */
+    public void setHeader(Component component) {
+        setHeader(component.getElement());
     }
 
     /**
