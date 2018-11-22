@@ -24,23 +24,51 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-login>} component.
  *
  * @author Vaadin Ltd
- *
  */
 @Tag("vaadin-login")
 @HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login.html")
 public class Login extends Component {
 
     /**
+     * Initializes a new Login.
+     */
+    public Login() {
+        this(LoginI18n.createDefault());
+    }
+
+    /**
+     * Initializes a new Login.
+     *
+     * @param i18n internationalized messages to be used by this instance.
+     */
+    public Login(LoginI18n i18n) {
+        setI18n(i18n);
+    }
+
+    /**
+     * Sets the internationalized messages to be used by this instance.
+     *
+     * @param i18n the internationalized messages
+     * @see LoginI18n#createDefault()
+     */
+    public void setI18n(LoginI18n i18n) {
+        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+    }
+
+    /**
      * Adds `forgotPassword` event listener
      */
-    public Registration addForgotPasswordListener(ComponentEventListener<ForgotPasswordEvent> listener) {
-        return ComponentUtil.addListener(this, ForgotPasswordEvent.class, listener);
+    public Registration addForgotPasswordListener(
+        ComponentEventListener<ForgotPasswordEvent> listener) {
+        return ComponentUtil
+            .addListener(this, ForgotPasswordEvent.class, listener);
     }
 
     /**
