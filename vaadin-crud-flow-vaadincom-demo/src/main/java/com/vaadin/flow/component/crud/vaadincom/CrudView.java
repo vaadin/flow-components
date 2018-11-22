@@ -62,8 +62,6 @@ public class CrudView extends DemoView {
         customToolbar();
         customGrid();
         customSearch();
-        addCard("   ");
-
         addCard("Example Classes",
                 new Label("These objects are used in the examples above"));
     }
