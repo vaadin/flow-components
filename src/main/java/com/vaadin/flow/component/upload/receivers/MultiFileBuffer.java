@@ -61,7 +61,7 @@ public class MultiFileBuffer extends AbstractFileBuffer
     }
 
     /**
-     * Get file data for upload with file name
+     * Get file data for upload with file name.
      *
      * @param fileName
      *         file name to get upload data for

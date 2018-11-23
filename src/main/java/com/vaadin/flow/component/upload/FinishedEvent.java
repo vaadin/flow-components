@@ -18,7 +18,7 @@ package com.vaadin.flow.component.upload;
 import com.vaadin.flow.component.ComponentEvent;
 
 /**
- * Upload.FinishedEvent is sent when the upload receives a file, regardless of
+ * FinishedEvent is sent when the upload receives a file, regardless of
  * whether the reception was successful or failed. If you wish to distinguish
  * between the two cases, use either SucceededEvent or FailedEvent, which are
  * both subclasses of the FinishedEvent.
@@ -43,54 +43,56 @@ public class FinishedEvent extends ComponentEvent<Upload> {
     private final String fileName;
 
     /**
+     * Create an instance of the event.
+     *
      * @param source
-     *            the source of the file.
+     *            the source of the file
      * @param fileName
-     *            the received file name.
-     * @param MIMEType
-     *            the MIME type of the received file.
+     *            the received file name
+     * @param mimeType
+     *            the MIME type of the received file
      * @param length
-     *            the length of the received file.
+     *            the length of the received file
      */
-    public FinishedEvent(Upload source, String fileName, String MIMEType,
+    public FinishedEvent(Upload source, String fileName, String mimeType,
             long length) {
         super(source, false);
-        type = MIMEType;
+        type = mimeType;
         this.fileName = fileName;
         this.length = length;
     }
 
     /**
-     * Uploads where the event occurred.
+     * Upload where the event occurred.
      *
-     * @return the Source of the event.
+     * @return the Source of the event
      */
     public Upload getUpload() {
         return getSource();
     }
 
     /**
-     * Gets the file name.
+     * Get the file name.
      *
-     * @return the fileName.
+     * @return the file name
      */
     public String getFileName() {
         return fileName;
     }
 
     /**
-     * Gets the MIME Type of the file.
+     * Get the MIME Type of the file.
      *
-     * @return the MIME type.
+     * @return the MIME type
      */
     public String getMIMEType() {
         return type;
     }
 
     /**
-     * Gets the length of the file.
+     * Get the length of the file.
      *
-     * @return the length.
+     * @return the length
      */
     public long getContentLength() {
         return length;

@@ -46,7 +46,7 @@ public abstract class AbstractFileBuffer implements Serializable {
     /**
      * Constructor taking in the file factory used to create upload
      * {@link File}.
-     * 
+     *
      * @param factory
      *            file factory for file buffer
      */
@@ -55,10 +55,10 @@ public abstract class AbstractFileBuffer implements Serializable {
     }
 
     /**
-     * Create a file output stream for filename
-     * 
-     * @param fileName
-     * @return
+     * Create a file output stream for the file.
+     *
+     * @param fileName the name of the file
+     * @return the file output stream
      */
     protected FileOutputStream createFileOutputStream(String fileName) {
         try {

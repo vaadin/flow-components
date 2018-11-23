@@ -16,26 +16,27 @@
 package com.vaadin.flow.component.upload;
 
 /**
- * Upload.SucceededEvent event is sent when the upload is received successfully.
+ * SucceededEvent event is sent when the upload is received successfully.
  *
  * @author Vaadin Ltd.
  */
 public class SucceededEvent extends FinishedEvent {
 
     /**
+     * Create an instance of the event.
      *
      * @param source
-     *            the source of the file.
-     * @param filename
-     *            the received file name.
-     * @param MIMEType
-     *            the MIME type of the received file.
+     *            the source of the file
+     * @param fileName
+     *            the received file name
+     * @param mimeType
+     *            the MIME type of the received file
      * @param length
-     *            the length of the received file.
+     *            the length of the received file
      */
-    public SucceededEvent(Upload source, String filename, String MIMEType,
+    public SucceededEvent(Upload source, String fileName, String mimeType,
             long length) {
-        super(source, filename, MIMEType, length);
+        super(source, fileName, mimeType, length);
     }
 
 }

@@ -42,7 +42,7 @@ public class MultiFileMemoryBuffer implements MultiFileReceiver {
 
     /**
      * Get the files in memory for this buffer.
-     * 
+     *
      * @return files in memory
      */
     public Set<String> getFiles() {
@@ -50,8 +50,8 @@ public class MultiFileMemoryBuffer implements MultiFileReceiver {
     }
 
     /**
-     * Get file data for upload with file name
-     * 
+     * Get file data for upload with file name.
+     *
      * @param fileName
      *            file name to get upload data for
      * @return file data for filename or null if not found
@@ -62,7 +62,7 @@ public class MultiFileMemoryBuffer implements MultiFileReceiver {
 
     /**
      * Get the output stream for file.
-     * 
+     *
      * @param fileName
      *            name of file to get stream for
      * @return file output stream or empty stream if no file found
@@ -77,7 +77,7 @@ public class MultiFileMemoryBuffer implements MultiFileReceiver {
 
     /**
      * Get the input stream for file with filename.
-     * 
+     *
      * @param filename
      *            name of file to get input stream for
      * @return input stream for file or empty stream if file not found

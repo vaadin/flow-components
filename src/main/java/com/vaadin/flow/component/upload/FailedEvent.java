@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.upload;
 
 /**
- * Upload.FailedEvent event is sent when the upload is received, but the
+ * FailedEvent event is sent when the upload is received, but the
  * reception is interrupted for some reason.
  *
  * @author Vaadin Ltd.
@@ -26,32 +26,34 @@ public class FailedEvent extends FinishedEvent {
     private Exception reason = null;
 
     /**
+     * Create an instance of the event.
      *
      * @param source
-     *            the source of the file.
+     *            the source of the file
      * @param filename
-     *            the received file name.
-     * @param MIMEType
-     *            the MIME type of the received file.
+     *            the received file name
+     * @param mimeType
+     *            the MIME type of the received file
      * @param length
      *            the number of uploaded bytes
      * @param reason
      *            exception that failed the upload
      */
-    public FailedEvent(Upload source, String filename, String MIMEType,
+    public FailedEvent(Upload source, String filename, String mimeType,
             long length, Exception reason) {
-        this(source, filename, MIMEType, length);
+        this(source, filename, mimeType, length);
         this.reason = reason;
     }
 
     /**
+     * Create an instance of the event.
      *
      * @param source
-     *            the source of the file.
+     *            the source of the file
      * @param filename
-     *            the received file name.
+     *            the received file name
      * @param MIMEType
-     *            the MIME type of the received file.
+     *            the MIME type of the received file
      * @param length
      *            the number of uploaded bytes
      */
@@ -61,7 +63,7 @@ public class FailedEvent extends FinishedEvent {
     }
 
     /**
-     * Gets the exception that caused the failure.
+     * Get the exception that caused the failure.
      *
      * @return the exception that caused the failure, null if n/a
      */
@@ -70,7 +72,7 @@ public class FailedEvent extends FinishedEvent {
     }
 
     /**
-     * Gets the number of uploaded bytes.
+     * Get the number of uploaded bytes.
      *
      * @return the number of uploaded bytes
      */

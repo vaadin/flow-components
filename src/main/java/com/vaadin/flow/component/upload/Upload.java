@@ -42,7 +42,7 @@ import elemental.json.JsonObject;
 /**
  * Server-side component for the {@code vaadin-upload} element.
  *
- * @author Vaadin Ltd
+ * @author Vaadin Ltd.
  */
 public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
 
@@ -60,7 +60,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     private Receiver receiver;
 
     /**
-     * Creates a new instance of Upload.
+     * Create a new instance of Upload.
      * <p>
      * The receiver must be set before performing an upload.
      */
@@ -100,7 +100,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     /**
      * Limit of files to upload, by default it is unlimited. If the value is set
      * to one, the native file browser will prevent selecting multiple files.
-     * 
+     *
      * @param maxFiles
      *            the maximum number of files allowed for the user to select
      */
@@ -109,9 +109,9 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Gets the maximum number of files allowed for the user to select to
+     * Get the maximum number of files allowed for the user to select to
      * upload.
-     * 
+     *
      * @return the maximum number of files
      */
     public int getMaxFiles() {
@@ -119,10 +119,10 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Specifies the maximum file size in bytes allowed to upload. Notice that
+     * Specify the maximum file size in bytes allowed to upload. Notice that
      * it is a client-side constraint, which will be checked before sending the
      * request.
-     * 
+     *
      * @param maxFileSize
      *            the maximum file size in bytes
      */
@@ -131,8 +131,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Gets the maximum allowed file size in the client-side, in bytes.
-     * 
+     * Get the maximum allowed file size in the client-side, in bytes.
+     *
      * @return the maximum file size in bytes
      */
     public int getMaxFileSize() {
@@ -142,7 +142,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     /**
      * When <code>false</code>, it prevents uploads from triggering immediately
      * upon adding file(s). The default is <code>true</code>.
-     * 
+     *
      * @param autoUpload
      *            <code>true</code> to allow uploads to start immediately after
      *            selecting files, <code>false</code> otherwise.
@@ -152,8 +152,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Gets the auto upload status.
-     * 
+     * Get the auto upload status.
+     *
      * @return <code>true</code> if the upload of files should start immediately
      *         after they are selected, <code>false</code> otherwise.
      */
@@ -167,7 +167,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * mobile devices do not support drag events in general. Setting it
      * <code>true</code> means that drop is enabled even in touch-devices, and
      * <code>false</code> disables drop in all devices.
-     * 
+     *
      * @param dropAllowed
      *            <code>true</code> to allow file dropping, <code>false</code>
      *            otherwise
@@ -177,10 +177,10 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Gets whether file dropping is allowed or not. By default it's enabled in
+     * Get whether file dropping is allowed or not. By default it's enabled in
      * desktop and disabled in touch devices because mobile devices do not
      * support drag events in general.
-     * 
+     *
      * @return <code>true</code> if file dropping is allowed, <code>false</code>
      *         otherwise.
      */
@@ -189,14 +189,14 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Specifies the types of files that the server accepts. Syntax: a MIME type
+     * Specify the types of files that the server accepts. Syntax: a MIME type
      * pattern (wildcards are allowed) or file extensions. Notice that MIME
      * types are widely supported, while file extensions are only implemented in
      * certain browsers, so it should be avoided.
      * <p>
      * Example: <code>"video/*","image/tiff"</code> or
      * <code>".pdf","audio/mp3"</code>
-     * 
+     *
      * @param acceptedFileTypes
      *            the allowed file types to be uploaded, or <code>null</code> to
      *            clear any restrictions
@@ -210,8 +210,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Gets the list of accepted file types for upload.
-     * 
+     * Get the list of accepted file types for upload.
+     *
      * @return a list of allowed file types, never <code>null</code>.
      */
     public List<String> getAcceptedFileTypes() {
@@ -223,9 +223,9 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Sets the component as the actionable button inside the upload component,
+     * Set the component as the actionable button inside the upload component,
      * that starts the upload of the selected files.
-     * 
+     *
      * @param uploadButton
      *            the component to be clicked by the user to start the upload,
      *            or <code>null</code> to clear it
@@ -238,8 +238,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Gets the component set as the upload button for the upload, if any.
-     * 
+     * Get the component set as the upload button for the upload, if any.
+     *
      * @return the actionable button, or <code>null</code> if none was set
      */
     public Component getUploadButton() {
@@ -247,9 +247,9 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Sets the component to show as a message to the user to drop files in the
+     * Set the component to show as a message to the user to drop files in the
      * upload component. Despite of the name, the label can be any component.
-     * 
+     *
      * @param dropLabel
      *            the label to show for the users when it's possible drop files,
      *            or <code>null</code> to clear it
@@ -262,8 +262,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Gets the component set as the drop label, if any.
-     * 
+     * Get the component set as the drop label, if any.
+     *
      * @return the drop label component, or <code>null</code> if none was set
      */
     public Component getDropLabel() {
@@ -271,10 +271,10 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Sets the component to show as the drop label icon. The icon is visible
+     * Set the component to show as the drop label icon. The icon is visible
      * when the user can drop files to this upload component. Despite of the
      * name, the drop label icon can be any component.
-     * 
+     *
      * @param dropLabelIcon
      *            the label icon to show for the users when it's possible to
      *            drop files, or <code>null</code> to cleat it
@@ -287,8 +287,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Gets the component set as the drop label icon, if any.
-     * 
+     * Get the component set as the drop label icon, if any.
+     *
      * @return the drop label icon component, or <code>null</code> if none was
      *         set
      */
@@ -323,11 +323,12 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Interrupts the upload currently being received. The interruption will be
-     * done by the receiving thread so this method will return immediately and
-     * the actual interrupt will happen a bit later.
+     * Interrupt the upload currently being received.
      * <p>
-     * Note! this will interrupt all uploads in multi upload mode.
+     * The interruption will be done by the receiving thread so this method
+     * will return immediately and the actual interrupt will happen a bit later.
+     * <p>
+     * Note! this will interrupt all uploads in multi-upload mode.
      */
     public void interruptUpload() {
         if (isUploading()) {
@@ -380,7 +381,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Emits the progress event.
+     * Emit the progress event.
      *
      * @param totalBytes
      *            bytes received so far
@@ -452,7 +453,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Returns the current receiver.
+     * Return the current receiver.
      *
      * @return the StreamVariable.
      */
@@ -480,7 +481,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Set the internationalization properties for this component.
      *
      * @param i18n
      *            the internationalized properties, not <code>null</code>
@@ -509,7 +510,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Gets the internationalization object previously set for this component.
+     * Get the internationalization object previously set for this component.
      * <p>
      * Note: updating the object content that is gotten from this method will
      * not update the language on the component if not set back using

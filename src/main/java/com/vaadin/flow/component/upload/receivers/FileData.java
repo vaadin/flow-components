@@ -25,6 +25,13 @@ public class FileData implements Serializable {
     private final String fileName, mimeType;
     private final OutputStream outputBuffer;
 
+    /**
+     * Create a FileData instance for a file.
+     *
+     * @param fileName the file name
+     * @param mimeType the file MIME type
+     * @param outputBuffer the output buffer where to write the file
+     */
     public FileData(String fileName, String mimeType,
             OutputStream outputBuffer) {
         this.fileName = fileName;
@@ -33,7 +40,7 @@ public class FileData implements Serializable {
     }
 
     /**
-     * Returns the mimeType of this file.
+     * Return the mimeType of this file.
      *
      * @return mime types of the files
      */
@@ -43,7 +50,7 @@ public class FileData implements Serializable {
 
     /**
      * Return the name of this file.
-     * 
+     *
      * @return file name
      */
     public String getFileName() {
@@ -52,7 +59,7 @@ public class FileData implements Serializable {
 
     /**
      * Return the output buffer for this file data.
-     * 
+     *
      * @return output buffer
      */
     public OutputStream getOutputBuffer() {

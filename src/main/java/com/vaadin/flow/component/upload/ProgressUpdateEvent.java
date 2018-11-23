@@ -38,7 +38,7 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
      * Event constructor method to construct a new progress event.
      *
      * @param source
-     *            the source of the file.
+     *            the source of the file
      * @param readBytes
      *            bytes transferred
      * @param contentLength
@@ -52,9 +52,9 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
     }
 
     /**
-     * Uploads where the event occurred.
+     * Upload where the event occurred.
      *
-     * @return the Source of the event.
+     * @return the Source of the event
      */
     public Upload getUpload() {
         return getSource();

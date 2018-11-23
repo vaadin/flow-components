@@ -18,7 +18,7 @@ package com.vaadin.flow.component.upload;
 import com.vaadin.flow.component.ComponentEvent;
 
 /**
- * Upload.StartedEvent event is sent when the upload is started to received.
+ * StartedEvent event is sent when the upload is started to received.
  *
  * @author Vaadin Ltd.
  */
@@ -32,52 +32,55 @@ public class StartedEvent extends ComponentEvent<Upload> {
     private final long length;
 
     /**
+     * Create an instance of the event.
      *
      * @param source
-     *            the source of the file.
-     * @param filename
-     *            the received file name.
-     * @param MIMEType
-     *            the MIME type of the received file.
+     *            the source of the file
+     * @param fileName
+     *            the received file name
+     * @param mimeType
+     *            the MIME type of the received file
      * @param contentLength
-     *            the length of the received file.
+     *            the length of the received file
      */
-    public StartedEvent(Upload source, String filename, String MIMEType,
+    public StartedEvent(Upload source, String fileName, String mimeType,
             long contentLength) {
         super(source, false);
-        this.filename = filename;
-        type = MIMEType;
+        this.filename = fileName;
+        type = mimeType;
         length = contentLength;
     }
 
     /**
-     * Uploads where the event occurred.
+     * Upload where the event occurred.
      *
-     * @return the Source of the event.
+     * @return the source of the event
      */
     public Upload getUpload() {
         return getSource();
     }
 
     /**
-     * Gets the file name.
+     * Get the file name.
      *
-     * @return the filename.
+     * @return the file name
      */
     public String getFileName() {
         return filename;
     }
 
     /**
-     * Gets the MIME Type of the file.
+     * Get the MIME type of the file.
      *
-     * @return the MIME type.
+     * @return the MIME type
      */
     public String getMIMEType() {
         return type;
     }
 
     /**
+     * Get the length of the file.
+     *
      * @return the length of the file that is being uploaded
      */
     public long getContentLength() {

@@ -22,6 +22,7 @@ import java.io.Serializable;
  */
 @FunctionalInterface
 public interface ProgressListener extends Serializable {
+
     /**
      * Updates progress to listener.
      *

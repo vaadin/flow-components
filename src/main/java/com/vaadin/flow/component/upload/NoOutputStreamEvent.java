@@ -21,18 +21,19 @@ package com.vaadin.flow.component.upload;
 public class NoOutputStreamEvent extends FailedEvent {
 
     /**
+     * Create an instance of the event.
      *
      * @param source
      *            the source of the file.
-     * @param filename
+     * @param fileName
      *            the received file name.
-     * @param MIMEType
+     * @param mimeType
      *            the MIME type of the received file.
      * @param length
      *            the length of the received file.
      */
-    public NoOutputStreamEvent(Upload source, String filename, String MIMEType,
+    public NoOutputStreamEvent(Upload source, String fileName, String mimeType,
             long length) {
-        super(source, filename, MIMEType, length);
+        super(source, fileName, mimeType, length);
     }
 }
