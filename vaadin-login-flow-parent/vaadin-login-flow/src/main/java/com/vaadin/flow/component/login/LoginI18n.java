@@ -25,7 +25,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Internationalization object for customizing the component UI texts.
@@ -41,8 +41,8 @@ public class LoginI18n implements Serializable {
         try {
             final JsonFactory JSON_FACTORY = new JreJsonFactory();
             DEFAULT_I18N = JSON_FACTORY.parse(IOUtils
-                .toString(LoginI18n.class.getResource("/i18n.json"),
-                    Charset.defaultCharset()));
+                .toString(LoginI18n.class.getResource("i18n.json"),
+                        StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new IllegalStateException(
                 "Cannot find the default i18n configuration");
