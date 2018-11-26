@@ -42,4 +42,26 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertEquals("Forgot password button pressed",
                 notification);
     }
+
+    @Test
+    public void login() {
+        LoginElement login = $(LoginElement.class).waitForFirst();
+
+        login.getUsernameField().setValue("username");
+        login.getPasswordField().setValue("password");
+        login.submit();
+        String notification = $(NotificationElement.class).waitForFirst().getText();
+        Assert.assertEquals("Successful login", notification);
+    }
+
+    @Test
+    public void failedLogin() {
+        LoginElement login = $(LoginElement.class).waitForFirst();
+
+        login.getUsernameField().setValue("username");
+        login.getPasswordField().setValue("wrongPassword");
+        login.submit();
+        String notification = $(NotificationElement.class).waitForFirst().getText();
+        Assert.assertEquals("Login failed", notification);
+    }
 }

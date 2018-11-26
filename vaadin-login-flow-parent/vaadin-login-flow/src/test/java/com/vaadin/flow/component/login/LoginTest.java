@@ -19,4 +19,21 @@ public class LoginTest {
 
         Assert.assertEquals(1, count.get());
     }
+
+    @Test
+    public void onLoginEvent() {
+        Login systemUnderTest = new Login();
+
+        AtomicInteger count = new AtomicInteger(0);
+        systemUnderTest.addLoginListener(e -> {
+            Assert.assertEquals("username", e.getUsername());
+            Assert.assertEquals("password", e.getPassword());
+            count.incrementAndGet();
+        });
+
+        ComponentUtil.fireEvent(systemUnderTest, new Login.LoginEvent(systemUnderTest, false,
+                "username", "password"));
+
+        Assert.assertEquals(1, count.get());
+    }
 }

@@ -12,10 +12,24 @@ public class Home extends Div {
         this.setSizeFull();
         Login login = new Login();
 
-        Notification notification = new Notification("Forgot password button pressed",
-                15000, Notification.Position.MIDDLE);
+        Notification notification = new Notification("", 15000, Notification.Position.MIDDLE);
 
-        login.addForgotPasswordListener(e -> notification.open());
+        login.addForgotPasswordListener(e -> {
+            notification.setText("Forgot password button pressed");
+            notification.open();
+        });
+
+        login.addLoginListener(e -> {
+            if ("username".equals(e.getUsername()) && "password".equals(e.getPassword())) {
+                notification.setText("Successful login");
+                notification.open();
+                return;
+            }
+
+            // TODO: Set error property when implemented: https://github.com/vaadin/vaadin-login-flow/issues/9
+            notification.setText("Login failed");
+            notification.open();
+        });
 
         add(login, notification);
     }

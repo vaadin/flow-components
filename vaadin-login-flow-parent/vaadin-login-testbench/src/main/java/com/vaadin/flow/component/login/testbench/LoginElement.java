@@ -33,14 +33,14 @@ public class LoginElement extends TestBenchElement {
      * Returns the username field
      */
     public TextFieldElement getUsernameField() {
-        return $(TextFieldElement.class).first();
+        return $(TextFieldElement.class).id("username");
     }
 
     /**
      * Returns the password field
      */
     public PasswordFieldElement getPasswordField() {
-        return $(PasswordFieldElement.class).first();
+        return $(PasswordFieldElement.class).id("password");
     }
 
     /**
