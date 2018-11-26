@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.demo;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.GeneratedVaadinTextField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -34,6 +35,7 @@ public class TextFieldView extends DemoView {
     @Override
     public void initView() {
         addBasicFeatures();
+        addClearButtonFeature();
         addNumberFields();
         addDisabledField();
         addVariantsFeature();
@@ -72,6 +74,21 @@ public class TextFieldView extends DemoView {
                 new ValueChangeModeButtonProvider(textField)
                         .getToggleValueSyncButton(),
                 message);
+    }
+
+    private void addClearButtonFeature() {
+        // begin-source-example
+        // source-example-heading: Text field with clear button
+        TextField textField = new TextField();
+        textField.setLabel("Text field label");
+        textField.setPlaceholder("placeholder text");
+        NativeButton clearButton = new NativeButton("Toggle clear button", event -> {
+            textField.setClearButtonVisible(
+                    !textField.isClearButtonVisible());
+        });
+        // end-source-example
+
+        addCard("Text field with clear button", textField, clearButton);
     }
 
     private void addNumberFields() {

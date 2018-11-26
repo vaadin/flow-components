@@ -50,4 +50,19 @@ public class PasswordFieldTest {
         Assert.assertEquals(passwordField.getEmptyValue(),
                 passwordField.getElement().getProperty("value"));
     }
+
+    @Test
+    public void clearButtonVisiblePropertyValue() {
+        PasswordField passwordField = new PasswordField();
+
+        assertClearButtonPropertyValueEquals(passwordField, true);
+        assertClearButtonPropertyValueEquals(passwordField, false);
+    }
+
+    public void assertClearButtonPropertyValueEquals(PasswordField passwordField, Boolean value) {
+        passwordField.setClearButtonVisible(value);
+        Assert.assertEquals(value, passwordField.isClearButtonVisible());
+        Assert.assertEquals(passwordField.isClearButtonVisible(),
+                passwordField.getElement().getProperty("clearButtonVisible", value));
+    }
 }

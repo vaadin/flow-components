@@ -72,7 +72,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertValueWithoutListener() throws InterruptedException {
+    public void assertValueWithoutListener() {
         WebElement field = findElement(By.id("value-change"));
 
         WebElement input = getInShadowRoot(field, By.cssSelector("input"));
@@ -87,5 +87,20 @@ public class TextFieldPageIT extends AbstractComponentIT {
 
         String value = findElement(By.className("text-field-value")).getText();
         Assert.assertEquals("foo", value);
+    }
+
+    @Test
+    public void assertClearValue() {
+       WebElement field = findElement(By.id("clear-text-field"));
+
+       WebElement input = getInShadowRoot(field, By.cssSelector("input"));
+       input.sendKeys("foo");
+       blur();
+
+       WebElement clearButton = getInShadowRoot(field, By.cssSelector("[part~='clear-button']"));
+       clearButton.click();
+
+       String value = findElement(By.id("clear-message")).getText();
+       Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
     }
 }

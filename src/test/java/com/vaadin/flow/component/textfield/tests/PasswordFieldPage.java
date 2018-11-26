@@ -51,5 +51,16 @@ public class PasswordFieldPage extends Div {
                 event -> passwordField.setRequiredIndicatorVisible(
                         !passwordField.isRequiredIndicatorVisible()));
         add(required);
+
+        PasswordField passwordFieldClear = new PasswordField();
+        passwordFieldClear.setId("clear-password-field");
+        passwordFieldClear.getStyle().set("display", "block");
+        passwordFieldClear.setClearButtonVisible(true);
+        Div clearValueMessage = new Div();
+        clearValueMessage.setId("clear-message");
+        passwordFieldClear.addValueChangeListener(event -> clearValueMessage
+                .setText(String.format("Old value: '%s'. New value: '%s'.",
+                        event.getOldValue(), event.getValue())));
+        add(passwordFieldClear, clearValueMessage);
     }
 }

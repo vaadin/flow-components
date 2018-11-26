@@ -35,6 +35,7 @@ public class PasswordFieldView extends DemoView {
     @Override
     public void initView() {
         addBasicField();
+        addClearButtonFeature();
         addDisabledField();
         addVariantsFeature();
     }
@@ -77,6 +78,21 @@ public class PasswordFieldView extends DemoView {
                 new ValueChangeModeButtonProvider(passwordField)
                         .getToggleValueSyncButton(),
                 message);
+    }
+
+    private void addClearButtonFeature() {
+        // begin-source-example
+        // source-example-heading: Password field with clear button
+        PasswordField passwordField = new PasswordField();
+        passwordField.setLabel("Password field label");
+        passwordField.setPlaceholder("placeholder text");
+        NativeButton clearButton = new NativeButton("Toggle clear button", event -> {
+            passwordField.setClearButtonVisible(
+                    !passwordField.isClearButtonVisible());
+        });
+        // end-source-example
+
+        addCard("Password field with clear button", passwordField, clearButton);
     }
 
     private void addDisabledField() {

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.demo;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.GeneratedVaadinTextArea;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
@@ -33,6 +34,7 @@ public class TextAreaView extends DemoView {
     @Override
     public void initView() {
         addBasicFeatures();
+        addClearButtonFeature();
         addMaxHeightFeature();
         addMinHeightFeature();
         addDisabledField();
@@ -104,6 +106,21 @@ public class TextAreaView extends DemoView {
                 new ValueChangeModeButtonProvider(textArea)
                         .getToggleValueSyncButton(),
                 message);
+    }
+
+    private void addClearButtonFeature() {
+        // begin-source-example
+        // source-example-heading: Text area with clear button
+        TextArea textArea = new TextArea();
+        textArea.setLabel("Text area label");
+        textArea.setPlaceholder("placeholder text");
+        NativeButton clearButton = new NativeButton("Toggle clear button", event -> {
+            textArea.setClearButtonVisible(
+                    !textArea.isClearButtonVisible());
+        });
+        // end-source-example
+
+        addCard("Text area with clear button", textArea, clearButton);
     }
 
     private void addDisabledField() {

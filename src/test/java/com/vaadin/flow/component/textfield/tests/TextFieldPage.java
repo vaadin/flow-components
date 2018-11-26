@@ -64,6 +64,17 @@ public class TextFieldPage extends Div {
                 event -> handleTextFieldValue(valueChangeSource));
         valueChange.setId("get-value");
         add(valueChangeSource, valueChange);
+
+       TextField textFieldClear = new TextField();
+       textFieldClear.setId("clear-text-field");
+       textFieldClear.getStyle().set("display", "block");
+       textFieldClear.setClearButtonVisible(true);
+       Div clearValueMessage = new Div();
+       clearValueMessage.setId("clear-message");
+       textFieldClear.addValueChangeListener(event -> clearValueMessage
+               .setText(String.format("Old value: '%s'. New value: '%s'.",
+                       event.getOldValue(), event.getValue())));
+       add(textFieldClear, clearValueMessage);
     }
 
     private void handleTextFieldValue(TextField field) {

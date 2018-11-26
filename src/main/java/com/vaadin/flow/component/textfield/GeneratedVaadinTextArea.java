@@ -16,25 +16,24 @@
 package com.vaadin.flow.component.textfield;
 
 import javax.annotation.Generated;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
-import com.vaadin.flow.component.NotSupported;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasTheme;
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.NotSupported;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 
 /**
  * <p>
@@ -142,8 +141,9 @@ import com.vaadin.flow.shared.Registration;
  * how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.TextAreaElement#2.1.2", "Flow#1.1-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
+        "WebComponent: Vaadin.TextAreaElement#2.3.0-alpha1",
+        "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-area")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-text-area.html")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
@@ -355,6 +355,38 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
     protected void setAutocapitalize(String autocapitalize) {
         getElement().setProperty("autocapitalize",
                 autocapitalize == null ? "" : autocapitalize);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Set to true to display the clear icon which clears the input.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     *
+     * @return the {@code clearButtonVisible} property from the webcomponent
+     */
+    protected boolean isClearButtonVisibleBoolean() {
+        return getElement().getProperty("clearButtonVisible", false);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Set to true to display the clear icon which clears the input.
+     * </p>
+     *
+     * @param clearButtonVisible
+     *            the boolean value to set
+     */
+    protected void setClearButtonVisible(boolean clearButtonVisible) {
+        getElement().setProperty("clearButtonVisible", clearButtonVisible);
     }
 
     /**
@@ -864,9 +896,9 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            the property type
      */
     public <P> GeneratedVaadinTextArea(T initialValue, T defaultValue,
-            Class<P> elementPropertyType,
-            SerializableFunction<P, T> presentationToModel,
-            SerializableFunction<T, P> modelToPresentation) {
+                                       Class<P> elementPropertyType,
+                                       SerializableFunction<P, T> presentationToModel,
+                                       SerializableFunction<T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
@@ -887,7 +919,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            whether <code>null</code> is accepted as a model value
      */
     public GeneratedVaadinTextArea(T initialValue, T defaultValue,
-            boolean acceptNullValues) {
+                                   boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
             setModelValue(initialValue, false);
@@ -915,9 +947,9 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            the property type
      */
     public <P> GeneratedVaadinTextArea(T initialValue, T defaultValue,
-            Class<P> elementPropertyType,
-            SerializableBiFunction<R, P, T> presentationToModel,
-            SerializableBiFunction<R, T, P> modelToPresentation) {
+                                       Class<P> elementPropertyType,
+                                       SerializableBiFunction<R, P, T> presentationToModel,
+                                       SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
