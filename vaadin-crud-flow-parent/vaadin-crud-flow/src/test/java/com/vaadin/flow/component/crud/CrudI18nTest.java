@@ -1,25 +1,21 @@
 package com.vaadin.flow.component.crud;
 
-import com.vaadin.flow.internal.JsonSerializer;
-import elemental.json.JsonValue;
-import elemental.json.impl.JreJsonFactory;
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.io.IOException;
-
-import static com.vaadin.flow.internal.JsonUtils.jsonEquals;
 
 public class CrudI18nTest {
 
     @Test
-    public void createDefaultAndRender() throws IOException {
-        JsonValue reference = new JreJsonFactory()
-                .parse(IOUtils.toString(getClass().getResource("/i18n.json"), "UTF-8"));
+    public void createDefault() {
+        CrudI18n i18n = CrudI18n.createDefault();
 
-        JsonValue generated = JsonSerializer.toJson(CrudI18n.createDefault());
-
-        Assert.assertTrue(jsonEquals(reference, generated));
+        Assert.assertEquals("Cancel", i18n.getCancel());
+        Assert.assertEquals("Delete...", i18n.getDeleteItem());
+        Assert.assertEquals("Edit item", i18n.getEditItem());
+        Assert.assertEquals("Edit item", i18n.getEditLabel());
+        Assert.assertEquals("New item", i18n.getNewItem());
+        Assert.assertEquals("Save", i18n.getSaveItem());
+        Assert.assertEquals("Discard", i18n.getConfirm().getCancel().getButton().getConfirm());
+        Assert.assertEquals("Delete", i18n.getConfirm().getDelete().getButton().getConfirm());
     }
 }
