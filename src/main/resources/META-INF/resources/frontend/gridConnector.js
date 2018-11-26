@@ -435,8 +435,11 @@ window.Vaadin.Flow.gridConnector = {
       } else {
         delete cache[parentKey];
         let parentCache = grid.$connector.getCacheByKey(parentKey);
-        if(parentCache && parentCache.itemkeyCaches && parentCache.itemkeyCaches[parentKey]) {
-          parentCache.itemkeyCaches[parentKey].items = [];
+        if (parentCache && parentCache.itemkeyCaches && parentCache.itemkeyCaches[parentKey]) {
+          delete parentCache.itemkeyCaches[parentKey];
+        }
+        if (parentCache && parentCache.itemCaches && parentCache.itemCaches[parentKey]) {
+          delete parentCache.itemCaches[parentKey];
         }
         delete lastRequestedRanges[parentKey];
 

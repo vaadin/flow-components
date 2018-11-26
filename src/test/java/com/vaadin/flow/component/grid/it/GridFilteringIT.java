@@ -38,7 +38,6 @@ public class GridFilteringIT extends AbstractComponentIT {
         // Blur input to get value change
         executeScript("arguments[0].blur();", input);
 
-
         WebElement grid = findElement(By.id("data-grid"));
         // empty Grid content
         Object size = executeScript("return arguments[0].size", grid);
@@ -52,6 +51,6 @@ public class GridFilteringIT extends AbstractComponentIT {
         waitUntil(driver -> executeScript("return arguments[0].size", grid)
                 .toString().equals("3"));
 
-        waitUntil(driver -> grid.getAttribute("loading") == null);
+        waitUntil(driver -> "false".equals(grid.getAttribute("loading")));
     }
 }
