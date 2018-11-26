@@ -9,6 +9,7 @@ public class GridSerializableTest extends ClassesSerializableTest {
     protected Stream<String> getExcludedPatterns() {
         return Stream.concat(super.getExcludedPatterns(),Stream.of(
                 "com\\.vaadin\\.flow\\.component\\.grid\\.it\\..*",
+                "com\\.vaadin\\.flow\\.component\\.contextmenu\\.osgi\\..*",
                 "com\\.vaadin\\.flow\\.component\\.treegrid\\.it\\..*"
         ));
     }
