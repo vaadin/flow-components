@@ -14,7 +14,7 @@ Add App Layout to your project:
   <dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-app-layout-flow</artifactId>
-    <version>1.0.0.alpha1</version>
+    <version>1.0.3</version>
   </dependency>
 </dependencies>
 ```
