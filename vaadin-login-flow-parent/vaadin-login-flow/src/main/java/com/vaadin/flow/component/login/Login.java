@@ -24,6 +24,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
@@ -54,6 +55,26 @@ public class Login extends Component {
     }
 
     /**
+     * Sets the path where to send the form-data when a form is submitted.
+     * Once action is defined a {@link Login.LoginEvent} is not fired anymore.
+     *
+     * @see #getAction()
+     */
+    public void setAction(String action) {
+        getElement().setProperty("action", action);
+    }
+
+    /**
+     * Returns the action defined for a login form.
+     *
+     * @return the value of action property
+     */
+    @Synchronize("action-changed")
+    public String getAction() {
+        return getElement().getProperty("action");
+    }
+
+    /**
      * Sets the internationalized messages to be used by this instance.
      *
      * @param i18n the internationalized messages
@@ -65,6 +86,7 @@ public class Login extends Component {
 
     /**
      * Adds `login` event listener
+     * Event is fired only if no action is defined
      */
     public Registration addLoginListener(ComponentEventListener<LoginEvent> listener) {
         return ComponentUtil.addListener(this, LoginEvent.class, listener);

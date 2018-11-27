@@ -64,4 +64,16 @@ public class BasicIT extends AbstractParallelTest {
         String notification = $(NotificationElement.class).waitForFirst().getText();
         Assert.assertEquals("Login failed", notification);
     }
+
+    @Test
+    public void actionLogin() {
+        getDriver().get(getBaseURL() + "/action");
+        LoginElement login = $(LoginElement.class).waitForFirst();
+
+        login.getUsernameField().setValue("username");
+        login.getPasswordField().setValue("wrongPassword");
+        login.submit();
+        Assert.assertTrue("Redirect didn't happened on login",
+                getDriver().getCurrentUrl().endsWith("process-login-here"));
+    }
 }
