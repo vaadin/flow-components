@@ -4,8 +4,10 @@ import com.vaadin.flow.component.login.testbench.LoginElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.testbench.parallel.BrowserUtil;
 import org.junit.Assert;
+import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
 public class BasicIT extends AbstractParallelTest {
 
@@ -44,12 +46,43 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    public void login() {
+    public void disabledLogin() {
+        getDriver().get(getBaseURL() + "/disabledlogin");
         LoginElement login = $(LoginElement.class).waitForFirst();
-
         login.getUsernameField().setValue("username");
         login.getPasswordField().setValue("password");
         login.submit();
+
+        Assert.assertTrue("Form submit redirect happened, but it should not",
+                getDriver().getCurrentUrl().endsWith("disabledlogin"));
+
+        if (BrowserUtil.isEdge(getDesiredCapabilities())) {
+            throw new AssumptionViolatedException("Skip for Edge due to the sendKeys usage");
+        }
+        login.sendKeys(Keys.ENTER);
+        Assert.assertTrue("Form submit redirect happened, but it should not",
+                getDriver().getCurrentUrl().endsWith("disabledlogin"));
+    }
+
+    @Test
+    public void enterKeyLogin() {
+        if (BrowserUtil.isEdge(getDesiredCapabilities())) {
+            throw new AssumptionViolatedException("Skip for Edge due to the sendKeys usage");
+        }
+        LoginElement login = $(LoginElement.class).waitForFirst();
+        checkSuccessfulLogin(login, () -> login.sendKeys(Keys.ENTER));
+    }
+
+    @Test
+    public void login() {
+        LoginElement login = $(LoginElement.class).waitForFirst();
+        checkSuccessfulLogin(login, () -> login.submit());
+    }
+
+    private void checkSuccessfulLogin(LoginElement login, Runnable submit) {
+        login.getUsernameField().setValue("username");
+        login.getPasswordField().setValue("password");
+        submit.run();
         String notification = $(NotificationElement.class).waitForFirst().getText();
         Assert.assertEquals("Successful login", notification);
     }
