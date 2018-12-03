@@ -4,7 +4,6 @@ import com.vaadin.flow.component.login.testbench.LoginElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.testbench.parallel.BrowserUtil;
 import org.junit.Assert;
-import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
@@ -38,7 +37,10 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void forgotPassword() {
-        LoginElement login = $(LoginElement.class).waitForFirst();
+        checkForgotPassword($(LoginElement.class).waitForFirst());
+    }
+
+    private void checkForgotPassword(LoginElement login) {
         login.forgotPassword();
         String notification = $(NotificationElement.class).waitForFirst().getText();
         Assert.assertEquals("Forgot password button pressed",
@@ -47,30 +49,65 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void disabledLogin() {
-        getDriver().get(getBaseURL() + "/disabledlogin");
+        getDriver().get(getBaseURL() + "/disable-login");
         LoginElement login = $(LoginElement.class).waitForFirst();
         login.getUsernameField().setValue("username");
         login.getPasswordField().setValue("password");
         login.submit();
 
-        Assert.assertTrue("Form submit redirect happened, but it should not",
-                getDriver().getCurrentUrl().endsWith("disabledlogin"));
+        Assert.assertFalse("Login notification was shown",
+                $(NotificationElement.class).waitForFirst().isOpen());
 
         if (BrowserUtil.isEdge(getDesiredCapabilities())) {
-            throw new AssumptionViolatedException("Skip for Edge due to the sendKeys usage");
+            skipTest("Skip for Edge due to the sendKeys usage");
         }
+        login.getPasswordField().focus();
         login.sendKeys(Keys.ENTER);
-        Assert.assertTrue("Form submit redirect happened, but it should not",
-                getDriver().getCurrentUrl().endsWith("disabledlogin"));
+        Assert.assertFalse("Login notification was shown",
+                $(NotificationElement.class).waitForFirst().isOpen());
+
+        if (BrowserUtil.isIE(getDesiredCapabilities())) {
+            skipTest("Temporary Skip IE until disabled property won't reflectToAttribute");
+            Assert.assertFalse("Disabled property should not reflect to attribute", login.hasAttribute("disabled"));
+        }
+        // Forgot password event should be processed anyway
+        checkForgotPassword(login);
     }
 
     @Test
     public void enterKeyLogin() {
         if (BrowserUtil.isEdge(getDesiredCapabilities())) {
-            throw new AssumptionViolatedException("Skip for Edge due to the sendKeys usage");
+            skipTest("Skip for Edge due to the sendKeys usage");
         }
         LoginElement login = $(LoginElement.class).waitForFirst();
-        checkSuccessfulLogin(login, () -> login.sendKeys(Keys.ENTER));
+        checkSuccessfulLogin(login, () -> {
+            login.focus();
+            login.sendKeys(Keys.ENTER);
+        });
+    }
+
+    @Test
+    public void passwordEnterKeyLogin() {
+        if (BrowserUtil.isEdge(getDesiredCapabilities())) {
+            skipTest("Skip for Edge due to the sendKeys usage");
+        }
+        LoginElement login = $(LoginElement.class).waitForFirst();
+        checkSuccessfulLogin(login, () -> {
+            login.getPasswordField().focus();
+            login.sendKeys(Keys.ENTER);
+        });
+    }
+
+    @Test
+    public void usernameEnterKeyLogin() {
+        if (BrowserUtil.isEdge(getDesiredCapabilities())) {
+            skipTest("Skip for Edge due to the sendKeys usage");
+        }
+        LoginElement login = $(LoginElement.class).waitForFirst();
+        checkSuccessfulLogin(login, () -> {
+            login.getUsernameField().focus();
+            login.sendKeys(Keys.ENTER);
+        });
     }
 
     @Test

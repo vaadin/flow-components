@@ -10,30 +10,32 @@ public class LoginTest {
 
     @Test
     public void onForgotPasswordEvent() {
-        Login systemUnderTest = new Login();
+        Login loginComponent = new Login();
 
         AtomicInteger count = new AtomicInteger(0);
-        systemUnderTest.addForgotPasswordListener(e -> count.incrementAndGet());
+        loginComponent.addForgotPasswordListener(e -> count.incrementAndGet());
 
-        ComponentUtil.fireEvent(systemUnderTest, new Login.ForgotPasswordEvent(systemUnderTest, false));
+        ComponentUtil.fireEvent(loginComponent, new Login.ForgotPasswordEvent(loginComponent, false));
 
         Assert.assertEquals(1, count.get());
     }
 
     @Test
     public void onLoginEvent() {
-        Login systemUnderTest = new Login();
+        Login loginComponent = new Login();
 
         AtomicInteger count = new AtomicInteger(0);
-        systemUnderTest.addLoginListener(e -> {
+        loginComponent.addLoginListener(e -> {
             Assert.assertEquals("username", e.getUsername());
             Assert.assertEquals("password", e.getPassword());
             count.incrementAndGet();
         });
 
-        ComponentUtil.fireEvent(systemUnderTest, new Login.LoginEvent(systemUnderTest, false,
+        Assert.assertTrue(loginComponent.isEnabled());
+        ComponentUtil.fireEvent(loginComponent, new Login.LoginEvent(loginComponent, false,
                 "username", "password"));
 
         Assert.assertEquals(1, count.get());
+        Assert.assertFalse(loginComponent.isEnabled());
     }
 }

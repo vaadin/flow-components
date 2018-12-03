@@ -10,7 +10,7 @@ public class ActionView extends Div {
     public ActionView() {
         this.setSizeFull();
         Login login = new Login();
-        login.setAction("process-login-here");
+        login.setAction("action/process-login-here");
         add(login);
     }
 }

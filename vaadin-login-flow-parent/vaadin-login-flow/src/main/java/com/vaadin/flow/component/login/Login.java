@@ -26,13 +26,17 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-login>} component.
+ * On {@link Login.LoginEvent} component becomes disabled.
+ * Disabled component stops to process login events, however
+ * the {@link Login.ForgotPasswordEvent} event is processed anyway.
+ * To enable use the {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)} method.
  *
  * @author Vaadin Ltd
  */
@@ -40,11 +44,15 @@ import com.vaadin.flow.shared.Registration;
 @HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login.html")
 public class Login extends Component implements HasEnabled {
 
+    private static final String LOGIN_EVENT = "login";
+
     /**
-     * Initializes a new Login.
+     * Initializes a new Login with default localization.
      */
     public Login() {
         this(LoginI18n.createDefault());
+        getElement().synchronizeProperty("disabled", LOGIN_EVENT);
+        addLoginListener(e -> setEnabled(false));
     }
 
     /**
@@ -76,28 +84,6 @@ public class Login extends Component implements HasEnabled {
         return getElement().getProperty("action");
     }
 
-
-    /**
-     * Enables or disables submit action or login event as well as a submit button
-     *
-     * @see #isEnabled()
-     */
-    @Override
-    public void setEnabled(boolean enabled) {
-        getElement().setProperty("disabled", !enabled);
-    }
-
-    /**
-     * Returns whether the submit action and login event are prevented or not
-     *
-     * @return the value of disabled property
-     */
-    @Override
-    @Synchronize("disabled-changed")
-    public boolean isEnabled() {
-        return !getElement().getProperty("disabled", false);
-    }
-
     /**
      * Sets the internationalized messages to be used by this instance.
      *
@@ -117,19 +103,21 @@ public class Login extends Component implements HasEnabled {
     }
 
     /**
-     * Adds `forgotPassword` event listener
+     * Adds `forgotPassword` event listener. Event continues being process even if
+     * the component is not {@link #isEnabled()}.
      */
     public Registration addForgotPasswordListener(
         ComponentEventListener<ForgotPasswordEvent> listener) {
         return ComponentUtil
-            .addListener(this, ForgotPasswordEvent.class, listener);
+            .addListener(this, ForgotPasswordEvent.class, listener,
+                    domReg -> domReg.setDisabledUpdateMode(DisabledUpdateMode.ALWAYS));
     }
 
     /**
      * `login` is fired when the user either clicks Submit button or presses an Enter key.
      * Event is fired only if no action is set for login form and client-side validation passed.
      */
-    @DomEvent("login")
+    @DomEvent(LOGIN_EVENT)
     public static class LoginEvent extends ComponentEvent<Login> {
 
         private String username;
@@ -160,6 +148,11 @@ public class Login extends Component implements HasEnabled {
         public ForgotPasswordEvent(Login source, boolean fromClient) {
             super(source, fromClient);
         }
+    }
+
+    @Override
+    public void onEnabledStateChanged(boolean enabled) {
+        getElement().setProperty("disabled", !enabled);
     }
 
 }

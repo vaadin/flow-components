@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.AssumptionViolatedException;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -72,6 +73,10 @@ public abstract class AbstractParallelTest extends ParallelTest {
         ie11Windows8_1.setPlatform(Platform.WIN8_1);
         return Arrays.asList(ie11Windows8_1, BrowserUtil.firefox(),
                 BrowserUtil.chrome(), BrowserUtil.edge(), BrowserUtil.safari());
+    }
+
+    public void skipTest(String message) {
+        throw new AssumptionViolatedException(message);
     }
 
 }
