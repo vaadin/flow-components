@@ -17,6 +17,8 @@ package com.vaadin.flow.component.contextmenu.osgi;
 
 import java.io.Serializable;
 
+import org.osgi.service.component.annotations.Component;
+
 import com.vaadin.flow.osgi.support.OsgiVaadinStaticResource;
 
 /**
@@ -26,6 +28,7 @@ import com.vaadin.flow.osgi.support.OsgiVaadinStaticResource;
  * @author Vaadin Ltd
  *
  */
+@Component(immediate = true, service = OsgiVaadinStaticResource.class)
 public class ContextMenuConectorResource
         implements OsgiVaadinStaticResource, Serializable {
 
