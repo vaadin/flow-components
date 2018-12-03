@@ -55,14 +55,14 @@ public class PasswordFieldIT extends ComponentDemoTest {
             blur();
         }
         waitUntilTextsEqual("Password field value changed from '' to 'a'",
-                passwordFieldValueDiv.getText());
+                passwordFieldValueDiv);
 
         passwordField.sendKeys(Keys.BACK_SPACE);
         if (toggleBlur) {
             blur();
         }
         waitUntilTextsEqual("Password field value changed from 'a' to ''",
-                passwordFieldValueDiv.getText());
+                passwordFieldValueDiv);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class PasswordFieldIT extends ComponentDemoTest {
         verifyThemeVariantsBeingToggled();
     }
 
-    private void waitUntilTextsEqual(String expected, String actual) {
-        waitUntil(driver -> expected.equals(actual));
+    private void waitUntilTextsEqual(String expected, WebElement valueDiv) {
+        waitUntil(driver -> expected.equals(valueDiv.getText()));
     }
 }

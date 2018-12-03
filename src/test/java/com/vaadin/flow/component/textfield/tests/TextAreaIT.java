@@ -57,14 +57,14 @@ public class TextAreaIT extends ComponentDemoTest {
             blur();
         }
         waitUntilTextsEqual("Text area value changed from '' to 'a'",
-                textFieldValueDiv.getText());
+                textFieldValueDiv);
 
         textArea.sendKeys(Keys.BACK_SPACE);
         if (toggleBlur) {
             blur();
         }
         waitUntilTextsEqual("Text area value changed from 'a' to ''",
-                textFieldValueDiv.getText());
+                textFieldValueDiv);
     }
 
     @Test
@@ -115,8 +115,8 @@ public class TextAreaIT extends ComponentDemoTest {
         Assert.assertEquals("", message.getText());
     }
 
-    private void waitUntilTextsEqual(String expected, String actual) {
-        waitUntil(driver -> expected.equals(actual));
+    private void waitUntilTextsEqual(String expected, WebElement valueDiv) {
+        waitUntil(driver -> expected.equals(valueDiv.getText()));
     }
 
     @Test

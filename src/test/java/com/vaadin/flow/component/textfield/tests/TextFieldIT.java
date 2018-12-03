@@ -55,14 +55,14 @@ public class TextFieldIT extends ComponentDemoTest {
             blur();
         }
         waitUntilTextsEqual("Text field value changed from '' to 'a'",
-                textFieldValueDiv.getText());
+                textFieldValueDiv);
 
         textField.sendKeys(Keys.BACK_SPACE);
         if (toggleBlur) {
             blur();
         }
         waitUntilTextsEqual("Text field value changed from 'a' to ''",
-                textFieldValueDiv.getText());
+                textFieldValueDiv);
     }
 
     @Test
@@ -73,8 +73,8 @@ public class TextFieldIT extends ComponentDemoTest {
                 "placeholder text");
     }
 
-    private void waitUntilTextsEqual(String expected, String actual) {
-        waitUntil(driver -> expected.equals(actual));
+    private void waitUntilTextsEqual(String expected, WebElement valueDiv) {
+        waitUntil(driver -> expected.equals(valueDiv.getText()));
     }
 
     @Test
