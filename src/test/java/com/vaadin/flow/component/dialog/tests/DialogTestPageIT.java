@@ -140,6 +140,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         assertButtonNumberInDialog(initialNumber);
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).perform();
         waitForElementNotPresent(By.id("dialog-add-component-at-index"));
+        waitForElementNotPresent(By.cssSelector(DIALOG_OVERLAY_TAG));
     }
 
     private void assertButtonNumberInDialog(int expectedButtonNumber) {
