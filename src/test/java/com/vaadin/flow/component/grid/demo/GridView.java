@@ -38,8 +38,10 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -86,6 +88,7 @@ import com.vaadin.flow.router.Route;
  * View for {@link Grid} demo.
  */
 @Route("vaadin-grid")
+@HtmlImport("grid-demo-styles.html")
 public class GridView extends DemoView {
 
     public static List<Person> items = new ArrayList<>();
@@ -397,6 +400,7 @@ public class GridView extends DemoView {
         createGridWithHeaderAndFooterRows();
         createHeaderAndFooterUsingComponents();
         createGridWithFilters();
+        createStyling();
         createBeanGrid();
         createHeightByRows();
         createBasicFeatures();
@@ -1690,6 +1694,60 @@ public class GridView extends DemoView {
         grid.setId("not-buffered-dynamic-editor");
         addCard("Grid Editor", "Dynamic Editor in Not Buffered Mode", message,
                 grid);
+    }
+
+    private void createStyling() {
+        //@formatter:off
+        /*
+        // begin-source-example
+        // source-example-heading: Styling Grid Cells
+        // source-example-type: HTML
+        <dom-module id="my-grid-theme" theme-for="vaadin-grid">
+          <template>
+            <style>
+              [part~="cell"].subscriber {
+                 background: rgb(245, 245, 255);
+              }
+              [part~="cell"].minor {
+                color: red;
+                font-weight: bold;
+              }
+            </style>
+          </template>
+        </dom-module>
+        // end-source-example
+        */
+        //@formatter:on
+        String instructions = "<p>In order to inject styles into Grid cells, "
+                + "create a style-module like in the snippet below, "
+                + "put it into an html-file in your resources folder, "
+                + "and import it with <code>@HtmlImport</code>. "
+                + "After this you can apply the CSS classes "
+                + "(<code>subscriber</code> and <code>minor</code> in this case) "
+                + "into grid rows and cells as shown in the next example.</p>";
+        addCard("Styling", "Styling Grid Cells", new Html(instructions));
+
+        // begin-source-example
+        // source-example-heading: Generating CSS Class Names for Cells
+        Grid<Person> grid = new Grid<>();
+        grid.setItems(getItems());
+        grid.setSelectionMode(SelectionMode.NONE);
+
+        grid.addColumn(Person::getName).setHeader("Name");
+        Column<Person> ageColumn = grid.addColumn(Person::getAge)
+                .setHeader("Age");
+        grid.addColumn(person -> person.isSubscriber ? "Yes" : "")
+                .setHeader("Subscriber");
+
+        grid.setClassNameGenerator(
+                person -> person.isSubscriber() ? "subscriber" : "");
+
+        ageColumn.setClassNameGenerator(
+                person -> person.getAge() < 18 ? "minor" : "");
+
+        // end-source-example
+        grid.setId("class-name-generator");
+        addCard("Styling", "Generating CSS Class Names for Cells", grid);
     }
 
     private <T> Component[] withTreeGridToggleButtons(List<T> roots,

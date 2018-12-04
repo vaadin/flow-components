@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -29,8 +30,10 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * 
@@ -195,6 +198,25 @@ public class GridTestPageIT extends AbstractComponentIT {
             Assert.assertEquals(String.valueOf(row),
                     String.valueOf(map.get("col2")));
         });
+    }
+
+    @Test
+    public void removeColumn_removedFromClientDataStructure() {
+        GridElement grid = $(GridElement.class)
+                .id("grid-with-removable-columns");
+        assertClientColumnIds(new String[] { "col1", "col2" }, grid);
+
+        $(TestBenchElement.class).id("remove-name-column-button").click();
+        assertClientColumnIds(new String[] { "col2" }, grid);
+    }
+
+    private void assertClientColumnIds(String[] expectedIds, GridElement grid) {
+        List<String> columnIds = (List<String>) executeScript(
+                "return Array.from(arguments[0].$connector.columnToIdMap.values())",
+                grid);
+        Assert.assertArrayEquals(
+                "The client connector contains unexpected column ids",
+                expectedIds, columnIds.toArray(new String[columnIds.size()]));
     }
 
     @Test

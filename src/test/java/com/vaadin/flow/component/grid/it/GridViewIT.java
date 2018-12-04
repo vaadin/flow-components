@@ -1304,6 +1304,24 @@ public class GridViewIT extends TabbedComponentDemoTest {
         assertNotBufferedEditorClosed(grid);
     }
 
+    @Test
+    public void stylingDemo_classNamesGenerated() {
+        openTabAndCheckForErrors("styling");
+        GridElement grid = $(GridElement.class).id("class-name-generator");
+
+        GridStylingIT.assertCellClassNames(grid, 0, 0, "subscriber");
+        GridStylingIT.assertCellClassNames(grid, 0, 1, "subscriber");
+        GridStylingIT.assertCellClassNames(grid, 0, 2, "subscriber");
+
+        GridStylingIT.assertCellClassNames(grid, 5, 0, "");
+        GridStylingIT.assertCellClassNames(grid, 5, 1, "minor");
+        GridStylingIT.assertCellClassNames(grid, 5, 2, "");
+
+        GridStylingIT.assertCellClassNames(grid, 9, 0, "subscriber");
+        GridStylingIT.assertCellClassNames(grid, 9, 1, "subscriber minor");
+        GridStylingIT.assertCellClassNames(grid, 9, 2, "subscriber");
+    }
+
     private void assertElementHasFocus(WebElement element) {
         Assert.assertTrue("Element should have focus",
                 (Boolean) executeScript(
