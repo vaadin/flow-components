@@ -58,7 +58,7 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-login</artifactId>
-            <version>1.0.0-alpha2</version>
+            <version>1.0.0-alpha3</version>
         </dependency>
 
         <!--Pinned transitive webjars-->

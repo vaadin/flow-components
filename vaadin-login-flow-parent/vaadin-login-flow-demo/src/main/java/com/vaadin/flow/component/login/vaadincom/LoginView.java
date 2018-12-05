@@ -3,6 +3,7 @@ package com.vaadin.flow.component.login.vaadincom;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.login.Login;
 import com.vaadin.flow.component.login.LoginI18n;
+import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -13,6 +14,7 @@ public class LoginView extends DemoView {
     protected void initView() {
         basicDemo();
         internationalization();
+        overlay();
     }
 
     private void basicDemo() {
@@ -33,6 +35,18 @@ public class LoginView extends DemoView {
         // end-source-example
 
         addCard("Login with internationalization", component, updateI18nButton);
+    }
+
+    private void overlay() {
+        // begin-source-example
+        // source-example-heading: Login in an overlay
+        LoginOverlay component = new LoginOverlay();
+        component.addLoginListener(e -> component.close());
+        Button open = new Button("Open login overlay",
+                e -> component.setOpened(true));
+        // end-source-example
+
+        addCard("Login in an overlay", component, open);
     }
 
     private LoginI18n createPortugueseI18n() {
