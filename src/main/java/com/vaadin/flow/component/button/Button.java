@@ -374,7 +374,7 @@ public class Button extends GeneratedVaadinButton<Button>
      * Enabling the button needs to happen from the server.
      *
      * @param disableOnClick
-     *         true to disable button immediately when clicked
+     *            true to disable button immediately when clicked
      */
     public void setDisableOnClick(boolean disableOnClick) {
         this.disableOnClick = disableOnClick;
@@ -453,16 +453,14 @@ public class Button extends GeneratedVaadinButton<Button>
     }
 
     private void updateThemeAttribute() {
-        // Set attribute theme="icon" when the button contains only an icon to
+        // Add theme attribute "icon" when the button contains only an icon to
         // fully support themes like Valo. This doesn't override explicitly set
         // theme attribute.
-        String theme = getElement().getAttribute(THEME_ATTRIBUTE);
 
-        if (theme == null && getElement().getChildCount() == 1
-                && iconComponent != null) {
-            getElement().setAttribute(THEME_ATTRIBUTE, "icon");
-        } else if ("icon".equals(theme)) {
-            getElement().removeAttribute(THEME_ATTRIBUTE);
+        if (getElement().getChildCount() == 1 && iconComponent != null) {
+            getThemeNames().add("icon");
+        } else {
+            getThemeNames().remove("icon");
         }
     }
 }

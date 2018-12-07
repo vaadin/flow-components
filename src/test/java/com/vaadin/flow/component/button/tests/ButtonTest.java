@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.button.tests;
 
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.junit.Assert;
@@ -22,6 +23,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.dom.Element;
@@ -139,19 +141,19 @@ public class ButtonTest {
     @Test
     public void updatingThemeAttribute() {
         button = new Button();
-        assertButtonHasThemeAttribute(null);
+        assertButtonHasNoThemeAttribute();
 
         button.setIcon(new Icon());
         assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
 
         button.setText("foo");
-        assertButtonHasThemeAttribute(null);
+        assertButtonHasNoThemeAttribute();
 
         button.setIcon(null);
-        assertButtonHasThemeAttribute(null);
+        assertButtonHasNoThemeAttribute();
 
         button = new Button("foo", new Icon());
-        assertButtonHasThemeAttribute(null);
+        assertButtonHasNoThemeAttribute();
 
         button.setText("");
         assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
@@ -223,6 +225,42 @@ public class ButtonTest {
         Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
     }
 
+    @Test
+    public void addThemeVariant_setIcon_themeAttributeContiansThemeVariantAndIcon() {
+        button = new Button();
+        button.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        button.setIcon(new Icon(VaadinIcon.ARROW_RIGHT));
+
+        Set<String> themeNames = button.getThemeNames();
+        Assert.assertTrue(themeNames.contains("icon"));
+        Assert.assertTrue(themeNames
+                .contains(ButtonVariant.LUMO_SUCCESS.getVariantName()));
+    }
+
+    @Test
+    public void setIcon_addThemeVariant_themeAttributeContiansThemeVariantAndIcon() {
+        button = new Button();
+        button.setIcon(new Icon(VaadinIcon.ARROW_RIGHT));
+        button.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+
+        Set<String> themeNames = button.getThemeNames();
+        Assert.assertTrue(themeNames.contains("icon"));
+        Assert.assertTrue(themeNames
+                .contains(ButtonVariant.LUMO_SUCCESS.getVariantName()));
+    }
+
+    @Test
+    public void changeIcon_iconThemeIsPreserved() {
+        button = new Button();
+        button.setIcon(new Icon(VaadinIcon.ARROW_RIGHT));
+
+        Assert.assertEquals("icon", button.getThemeName());
+
+        button.setIcon(new Icon(VaadinIcon.ALARM));
+
+        Assert.assertEquals("icon", button.getThemeName());
+    }
+
     private void assertOnlyChildIsText() {
         Assert.assertEquals(1, button.getElement().getChildCount());
         Element child = getButtonChild(0);
@@ -248,13 +286,12 @@ public class ButtonTest {
     }
 
     private void assertButtonHasThemeAttribute(String theme) {
-        if (theme == null) {
-            Assert.assertFalse(
-                    button.getElement().hasAttribute(THEME_ATTRIBUTE));
-        } else {
-            Assert.assertEquals(theme,
-                    button.getElement().getAttribute(THEME_ATTRIBUTE));
-        }
+        Assert.assertTrue("Expected " + theme + " to be in the theme attribute",
+                button.getThemeNames().contains(theme));
+    }
+
+    private void assertButtonHasNoThemeAttribute() {
+        Assert.assertNull(button.getElement().getAttribute("theme"));
     }
 
     private void assertIconBeforeText() {
