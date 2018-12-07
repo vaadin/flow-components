@@ -940,6 +940,13 @@ public class GridViewIT extends TabbedComponentDemoTest {
         WebElement edit = findElement(By.className("edit"));
         edit.click();
 
+        // check that shown Edit buttons are disabled
+        WebElement nextEditButton = grid.getRow(1)
+                .getCell(grid.getAllColumns().get(2)).$("vaadin-button")
+                .first();
+        Assert.assertEquals(Boolean.TRUE.toString(),
+                nextEditButton.getAttribute("disabled"));
+
         GridTHTDElement subscriberCell = row.getCell(subscriberColumn);
 
         TestBenchElement subscriberCheckbox = subscriberCell
@@ -1048,7 +1055,15 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         GridColumnElement editColumn = grid.getAllColumns().get(3);
 
-        row.getCell(editColumn).$("vaadin-button").first().click();
+        WebElement editButon = row.getCell(editColumn).$("vaadin-button")
+                .first();
+        editButon.click();
+
+        // check that shown Edit buttons are disabled
+        WebElement nextEditButton = grid.getRow(1).getCell(editColumn)
+                .$("vaadin-button").first();
+        Assert.assertEquals(Boolean.TRUE.toString(),
+                nextEditButton.getAttribute("disabled"));
 
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
