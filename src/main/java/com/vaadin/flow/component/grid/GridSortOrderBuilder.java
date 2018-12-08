@@ -25,8 +25,8 @@ import com.vaadin.flow.data.provider.SortOrderBuilder;
  * create the list of sort orders.
  *
  * @see GridSortOrder
- * @see #thenAsc(Column)
- * @see #thenDesc(Column)
+ * @see GridSortOrderBuilder#thenAsc(com.vaadin.flow.component.grid.Grid.Column) 
+ * @see GridSortOrderBuilder#thenDesc(com.vaadin.flow.component.grid.Grid.Column)
  * @see #build()
  *
  * @author Vaadin Ltd.

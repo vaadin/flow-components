@@ -29,7 +29,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  *
- * @param <T>
+ * @param <T> the type of the row/item being edited
  */
 public interface Editor<T> extends Serializable {
 
@@ -189,7 +189,7 @@ public interface Editor<T> extends Serializable {
 
     /**
      * Adds an editor open {@code listener}. {@link EditorOpenEvent} is
-     * fired when the editor is opened through {@link #editItem(T)}
+     * fired when the editor is opened through {@link #editItem(java.lang.Object) }
      *
      * @param listener
      *            open listener

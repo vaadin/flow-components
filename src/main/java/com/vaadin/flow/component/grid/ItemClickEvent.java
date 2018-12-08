@@ -44,6 +44,7 @@ public class ItemClickEvent<T> extends ClickEvent<Grid<T>> {
      *            <code>true</code> if the event was originally fired on the
      *            client, <code>false</code> if the event originates from
      *            server-side logic
+     * @param itemKey the item mapper key
      * @param screenX
      *            the x coordinate of the click event, relative to the upper
      *            left corner of the screen, -1 if unknown

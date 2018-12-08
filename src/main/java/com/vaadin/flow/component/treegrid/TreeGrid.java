@@ -306,8 +306,8 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * <strong>Note:</strong> This method can only be used for a Grid created
-     * from a bean type with {@link #Grid(Class)}.
+     * <strong>Note:</strong> This method can only be used for a TreeGrid created
+     * from a bean type with {@link #TreeGrid(Class)}.
      * <p>
      * Resets columns and their order based on bean properties.
      * <p>
@@ -332,8 +332,8 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * <strong>Note:</strong> This method can only be used for a Grid created
-     * from a bean type with {@link #Grid(Class)}.
+     * <strong>Note:</strong> This method can only be used for a TreeGrid created
+     * from a bean type with {@link #TreeGrid(Class)}.
      * <p>
      * Resets columns and their order based on bean properties.
      * <p>
@@ -365,8 +365,8 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * <strong>Note:</strong> This method can only be used for a Grid created
-     * from a bean type with {@link #Grid(Class)}.
+     * <strong>Note:</strong> This method can only be used for a TreeGrid created
+     * from a bean type with {@link #TreeGrid(Class)}.
      * <p>
      * Sets the columns and their order based on the given properties.
      * <p>
@@ -387,6 +387,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param propertyNames
      *            set of properties to create columns for. Including given
      *            hierarchyPropertyName
+     * @return the hierarchy column 
      */
     public Column<T> setColumns(String hierarchyPropertyName,
             ValueProvider<T, ?> valueProvider,

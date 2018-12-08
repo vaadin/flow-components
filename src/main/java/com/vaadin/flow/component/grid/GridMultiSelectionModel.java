@@ -64,7 +64,7 @@ public interface GridMultiSelectionModel<T>
          * <li>Hidden, if the data provider is NOT in-memory (lazy)</li>
          * </ul>
          *
-         * @see DataProvider#isInMemory()}.
+         * @see DataProvider#isInMemory()
          */
         DEFAULT;
     }
