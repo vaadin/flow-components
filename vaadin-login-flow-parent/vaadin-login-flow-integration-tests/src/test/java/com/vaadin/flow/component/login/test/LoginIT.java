@@ -2,6 +2,7 @@ package com.vaadin.flow.component.login.test;
 
 import com.vaadin.flow.component.login.testbench.LoginElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.parallel.BrowserUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -96,11 +97,18 @@ public class LoginIT extends BasicIT {
     public void failedLogin() {
         LoginElement login = getLogin();
 
+        TestBenchElement errorMessage = login.$(TestBenchElement.class)
+                .attribute("part", "error-message").first();
+        Assert.assertFalse(errorMessage.isDisplayed());
+
         login.getUsernameField().setValue("username");
         login.getPasswordField().setValue("wrongPassword");
         login.submit();
-        String notification = $(NotificationElement.class).waitForFirst().getText();
-        Assert.assertEquals("Login failed", notification);
+
+        Assert.assertTrue(errorMessage.isDisplayed());
+        Assert.assertEquals("Incorrect username or password", login.getErrorMessageTitle());
+        Assert.assertEquals("Check that you have entered the correct username and password and try again.",
+                login.getErrorMessage());
     }
 
     @Test

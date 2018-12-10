@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.login.vaadincom;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.login.AbstractLogin;
 import com.vaadin.flow.component.login.Login;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
@@ -21,9 +22,26 @@ public class LoginView extends DemoView {
         // begin-source-example
         // source-example-heading: Basic Demo
         Login component = new Login();
+        component.addLoginListener(e -> {
+            boolean isAuthenticated = authenticate(e);
+            if (isAuthenticated) {
+                navigateToMainPage();
+            } else {
+                component.setError(true);
+            }
+        });
         // end-source-example
 
         addCard("Basic Demo", component);
+    }
+
+    @SuppressWarnings("unused")
+    private boolean authenticate(AbstractLogin.LoginEvent e) {
+        return false;
+    }
+
+    private void navigateToMainPage() {
+
     }
 
     private void internationalization() {
@@ -43,7 +61,7 @@ public class LoginView extends DemoView {
         LoginOverlay component = new LoginOverlay();
         component.addLoginListener(e -> component.close());
         Button open = new Button("Open login overlay",
-                e -> component.setOpened(true));
+            e -> component.setOpened(true));
         // end-source-example
 
         addCard("Login in an overlay", component, open);

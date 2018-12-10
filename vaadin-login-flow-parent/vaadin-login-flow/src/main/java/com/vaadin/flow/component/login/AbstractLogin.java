@@ -48,7 +48,10 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     public AbstractLogin() {
         this(LoginI18n.createDefault());
         getElement().synchronizeProperty("disabled", LOGIN_EVENT);
-        addLoginListener(e -> setEnabled(false));
+        addLoginListener(e -> {
+            setEnabled(false);
+            setError(false);
+        });
     }
 
     /**
@@ -70,15 +73,36 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
         getElement().setProperty("action", action);
     }
 
-     /**
+    /**
      * Returns the action defined for a login form.
      *
      * @return the value of action property
      */
-    @Synchronize("action-changed")
+    @Synchronize(property = "action", value = "action-changed")
     public String getAction() {
         return getElement().getProperty("action");
     }
+
+    /**
+     * Sets whether to show or hide the error message.
+     * The message can be set via {@link #setI18n(LoginI18n)}
+     *
+     * @see #isError()
+     */
+    public void setError(boolean error) {
+        getElement().setProperty("error", error);
+    }
+
+    /**
+     * Returns whether the error message is displayed or not
+     *
+     * @return the value of error property
+     */
+    @Synchronize(property = "error", value = "error-changed")
+    public boolean isError() {
+        return getElement().getProperty("error", false);
+    }
+
 
     /**
      * Sets the internationalized messages to be used by this instance.

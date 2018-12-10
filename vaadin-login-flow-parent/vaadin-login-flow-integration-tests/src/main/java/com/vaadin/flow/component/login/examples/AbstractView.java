@@ -31,9 +31,8 @@ public abstract class AbstractView extends Div implements HasUrlParameter<String
                 return;
             }
 
-            // TODO: Set error property when implemented: https://github.com/vaadin/vaadin-login-flow/issues/9
-            notification.setText("Login failed");
-            notification.open();
+            login.setError(true);
+            login.setEnabled(true);
         });
 
         add(login, notification);
