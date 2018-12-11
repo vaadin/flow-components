@@ -62,9 +62,11 @@ import com.vaadin.flow.data.event.SortEvent.SortNotifier;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.HasDataGenerators;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
@@ -479,12 +481,14 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         /**
          * Sets a comparator to use with in-memory sorting with this column
          * based on the return type of the given {@link ValueProvider}.Sorting
- with a back-end is done using
-        {@link Column#setSortProperty(String[])}.<p>
+         * with a back-end is done using
+         * {@link Column#setSortProperty(String[])}.
+         * <p>
          * <strong>Note:</strong> calling this method automatically sets the
          * column as sortable with {@link #setSortable(boolean)}.
          *
-         * @param <V> the value of the column
+         * @param <V>
+         *            the value of the column
          * @param keyExtractor
          *            the value provider used to extract the {@link Comparable}
          *            sort key
@@ -1056,9 +1060,13 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private Editor<T> editor;
 
+    private SerializableSupplier<Editor<T>> editorFactory = () -> createEditor();
+
     private boolean verticalScrollingEnabled = true;
 
     private SerializableFunction<T, String> classNameGenerator = item -> null;
+
+    private Registration dataProviderChangeRegistration;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -1358,10 +1366,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Adds a new text column to this {@link Grid} with a value provider and
      * sorting properties.The value is converted to a JSON value by using
-    {@link JsonSerializer#toJson(Object)}. The sorting properties are used to
- configure backend sorting for this column. In-memory sorting is
- automatically configured using the return type of the given
- {@link ValueProvider}.
+     * {@link JsonSerializer#toJson(Object)}. The sorting properties are used to
+     * configure backend sorting for this column. In-memory sorting is
+     * automatically configured using the return type of the given
+     * {@link ValueProvider}.
      *
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1377,7 +1385,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            the value provider
      * @param sortingProperties
      *            the sorting properties to use with this column
-     * @param <V> the type of the column
+     * @param <V>
+     *            the type of the column
      * @return the created column
      */
     public <V extends Comparable<? super V>> Column<T> addColumn(
@@ -1963,6 +1972,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
+        handleDataProviderChange(dataProvider);
+
         deselectAll();
         getDataCommunicator().setDataProvider(dataProvider, null);
 
@@ -2904,7 +2915,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public Editor<T> getEditor() {
         if (editor == null) {
-            editor = createEditor();
+            editor = editorFactory.get();
         }
         return editor;
     }
@@ -3023,6 +3034,31 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         return arrayUpdater;
     }
 
+    /**
+     * Callback which is called if a new data provider is set or any change
+     * happen in the current data provider (an {@link DataChangeEvent} event is
+     * fired).
+     *
+     * Default implementation closes the editor if it's opened.
+     *
+     * @see #setDataProvider(DataProvider)
+     * @see DataChangeEvent
+     * @see DataProviderListener
+     *
+     */
+    protected void onDataProviderChange() {
+        SerializableSupplier<Editor<T>> factory = editorFactory;
+        editorFactory = () -> null;
+        try {
+            Editor<T> editor = getEditor();
+            if (editor != null) {
+                getEditor().closeEditor();
+            }
+        } finally {
+            editorFactory = factory;
+        }
+    }
+
     private static boolean hasCommonComparableBaseType(Object a, Object b) {
         if (a instanceof Comparable<?> && b instanceof Comparable<?>) {
             Class<?> aClass = a.getClass();
@@ -3049,5 +3085,16 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     private static int compareComparables(Object a, Object b) {
         return ((Comparator) Comparator.nullsLast(Comparator.naturalOrder()))
                 .compare(a, b);
+    }
+
+    private void handleDataProviderChange(DataProvider<T, ?> dataProvider) {
+        onDataProviderChange();
+
+        if (dataProviderChangeRegistration != null) {
+            dataProviderChangeRegistration.remove();
+        }
+
+        dataProviderChangeRegistration = dataProvider
+                .addDataProviderListener(event -> onDataProviderChange());
     }
 }
