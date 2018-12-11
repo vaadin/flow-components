@@ -1,0 +1,19 @@
+{
+  "name": "vaadin-pro-grid",
+  "homepage": "https://github.com/vaadin/vaadin-grid-pro",
+  "authors": [],
+  "description": "",
+  "main": "",
+  "license": "CVAL3",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vaadin-grid-pro": "vaadin/vaadin-grid-pro#master"
+  }
+}
