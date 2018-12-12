@@ -30,7 +30,7 @@ public class DatePickerLocalePage extends Div {
         frenchLocale.setValue(may3rd);
 
         DatePicker german = new DatePicker();
-        german.setLocale(Locale.GERMANY);
+        german.setLocale(Locale.GERMAN);
         german.setId("german-locale-date-picker");
 
         add(datePicker, locale, frenchLocale, german);

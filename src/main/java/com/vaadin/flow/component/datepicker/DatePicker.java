@@ -254,7 +254,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public void setLocale(Locale locale) {
         Objects.requireNonNull(locale, "Locale must not be null.");
         this.locale = locale;
-        String languageTag = locale.getLanguage() + "-" + locale.getCountry();
+        String languageTag = locale.toLanguageTag();
         runBeforeClientResponse(ui -> getElement()
                 .callFunction("$connector.setLocale", languageTag));
     }
