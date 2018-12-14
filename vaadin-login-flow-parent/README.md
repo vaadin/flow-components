@@ -4,7 +4,7 @@ Vaadin Login for Flow is a UI component add-on for Vaadin.
 
 ## License & Author
 
-This Add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3). For license terms, see LICENSE.txt.
+Apache License 2.0
 
 Vaadin Login is written by Vaadin Ltd.
 

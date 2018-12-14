@@ -14,6 +14,14 @@
 
     <name>Vaadin Login Testbench API</name>
 
+    <licenses>
+        <license>
+            <name>Apache License Version 2.0</name>
+            <distribution>repo</distribution>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -35,8 +43,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>1.8</version>
                 <configuration>
-                    <licenseName>cval3</licenseName>
-                    <licenseResolver>file://${basedir}/src/license</licenseResolver>
+                    <licenseName>apache_v2</licenseName>
                     <includes>
                         <include>**/main/**/*.java</include>
                     </includes>
