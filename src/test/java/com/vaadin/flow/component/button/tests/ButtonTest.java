@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.button.tests;
 
+
+import com.helger.commons.mutable.MutableBoolean;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -225,6 +227,19 @@ public class ButtonTest {
         Assert.assertEquals("prefix", icon.getElement().getAttribute("slot"));
     }
 
+    @Test
+    public void testFireClick() {
+        button = new Button();
+        MutableBoolean clicked = new MutableBoolean(false);
+        button.addClickListener(e-> {
+            clicked.set(true);
+        });
+        
+        Assert.assertFalse(clicked.booleanValue());
+        button.click();
+        Assert.assertTrue(clicked.booleanValue());
+    }
+    
     @Test
     public void addThemeVariant_setIcon_themeAttributeContiansThemeVariantAndIcon() {
         button = new Button();

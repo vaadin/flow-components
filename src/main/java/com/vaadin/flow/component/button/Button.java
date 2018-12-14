@@ -319,10 +319,21 @@ public class Button extends GeneratedVaadinButton<Button>
     }
 
     /**
-     * Executes a click on this button at the client-side. Calling this method
-     * behaves exactly the same as if the user would have clicked on the button.
+     * Simulates a click on this button on the server side. Calling this method
+     * executes all registered click listeners on the server side, but does not 
+     * execute possible client side registered listeners.
+     * 
+     * @see #clickInClient() 
      */
     public void click() {
+        fireEvent(new ClickEvent<>(this, false, 0,0,0,0,0,0,false,false,false,false));
+    }
+    
+    /**
+     * Executes a click on this button at the client-side. Calling this method
+     * behaves the same as if the user would have clicked on the button.
+     */
+    public void clickInClient() {
         getElement().callFunction("click");
     }
 
