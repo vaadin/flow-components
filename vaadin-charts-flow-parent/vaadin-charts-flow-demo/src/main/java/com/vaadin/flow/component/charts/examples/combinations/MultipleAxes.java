@@ -34,6 +34,7 @@ public class MultipleAxes extends AbstractChartExample {
         conf.addxAxis(x);
 
         YAxis y1 = new YAxis();
+        y1.setShowEmpty(false);
         y1.setTitle(new AxisTitle("Temperature"));
         Labels labels = new Labels();
         labels.setFormatter("return this.value +'°C'");
@@ -43,6 +44,7 @@ public class MultipleAxes extends AbstractChartExample {
         conf.addyAxis(y1);
 
         YAxis y2 = new YAxis();
+        y2.setShowEmpty(false);
         y2.setTitle(new AxisTitle("Rainfall"));
         labels = new Labels();
         labels.setFormatter("return this.value +' mm'");
@@ -51,6 +53,7 @@ public class MultipleAxes extends AbstractChartExample {
         conf.addyAxis(y2);
 
         YAxis y3 = new YAxis();
+        y3.setShowEmpty(false);
         y3.setTitle(new AxisTitle("Sea-Level Pressure"));
         labels = new Labels();
         labels.setFormatter("return this.value +' mb'");
