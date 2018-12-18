@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -48,7 +49,7 @@ import com.vaadin.flow.function.SerializablePredicate;
 @HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
 public class ListBox<T> extends AbstractSinglePropertyField<ListBox<T>, T>
         implements HasItemsAndComponents<T>, SingleSelect<ListBox<T>, T>,
-        HasDataProvider<T>, HasComponents {
+        HasDataProvider<T>, HasComponents, HasSize {
 
     private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
     private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>();
