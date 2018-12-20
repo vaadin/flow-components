@@ -99,13 +99,15 @@ public class LoginIT extends BasicIT {
 
         TestBenchElement errorMessage = login.$(TestBenchElement.class)
                 .attribute("part", "error-message").first();
-        Assert.assertFalse(errorMessage.isDisplayed());
+        // TODO #isDisplayed() should be used when safari 12 is in use
+        Assert.assertTrue(errorMessage.hasAttribute("hidden"));
 
         login.getUsernameField().setValue("username");
         login.getPasswordField().setValue("wrongPassword");
         login.submit();
 
-        Assert.assertTrue(errorMessage.isDisplayed());
+        // TODO #isDisplayed() should be used when safari 12 is in use
+        Assert.assertFalse(errorMessage.hasAttribute("hidden"));
         Assert.assertEquals("Incorrect username or password", login.getErrorMessageTitle());
         Assert.assertEquals("Check that you have entered the correct username and password and try again.",
                 login.getErrorMessage());
