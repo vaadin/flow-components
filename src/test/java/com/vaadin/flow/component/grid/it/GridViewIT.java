@@ -1618,6 +1618,6 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return "/vaadin-grid";
+        return "/vaadin-grid-it-demo";
     }
 }
