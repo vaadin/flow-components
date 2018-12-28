@@ -58,16 +58,6 @@ interface Login {
     void forgotPassword();
 
     /**
-     * Return the title of the login element
-     */
-    String getTitle();
-
-    /**
-     * Return the message under the title of the login element
-     */
-    String getMessage();
-
-    /**
      * Return the form title of the login element
      */
     String getFormTitle();

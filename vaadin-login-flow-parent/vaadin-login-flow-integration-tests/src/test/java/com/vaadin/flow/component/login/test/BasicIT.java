@@ -20,8 +20,6 @@ public abstract class BasicIT extends AbstractParallelTest {
     public void testDefaultStrings() {
         LoginElement login = getLogin();
 
-        Assert.assertEquals("App name", login.getTitle());
-        Assert.assertEquals("Inspiring application description", login.getMessage());
         Assert.assertEquals("Log in", login.getFormTitle());
         if (!BrowserUtil.isEdge(getDesiredCapabilities()) && !BrowserUtil.isSafari(getDesiredCapabilities())) {
             // Error message should be hidden by default, however Safari and Edge drivers return the innerHTML content

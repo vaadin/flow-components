@@ -63,18 +63,6 @@ public class LoginElement extends TestBenchElement implements Login {
     }
 
     @Override
-    public String getTitle() {
-        return $(TestBenchElement.class)
-                .attribute("part", "brand").first().$("h1").first().getText();
-    }
-
-    @Override
-    public String getMessage() {
-        return $(TestBenchElement.class)
-                .attribute("part", "brand").first().$("p").first().getText();
-    }
-
-    @Override
     public String getFormTitle() {
         return $(TestBenchElement.class)
                 .attribute("part", "form").first().$("h2").first().getText();

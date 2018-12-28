@@ -64,9 +64,9 @@
 
         <!--Webjar-->
         <dependency>
-            <groupId>com.vaadin.webjar</groupId>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-login</artifactId>
-            <version>1.0.0-alpha3</version>
+            <version>1.0.0-alpha4</version>
         </dependency>
 
         <!--Test scoped-->

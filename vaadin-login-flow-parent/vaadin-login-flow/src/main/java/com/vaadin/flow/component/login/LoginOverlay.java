@@ -20,6 +20,7 @@ package com.vaadin.flow.component.login;
  * #L%
  */
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -32,7 +33,11 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  */
 @Tag("vaadin-login-overlay")
 @HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login-overlay.html")
+@HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login-overlay-element.html")
+@HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login.html")
 public class LoginOverlay extends AbstractLogin {
+
+    private Component title;
 
     private boolean autoAddedToTheUi;
 
@@ -108,4 +113,78 @@ public class LoginOverlay extends AbstractLogin {
             });
         }
     }
+
+    /**
+     * Sets the application title
+     *
+     * @see #getTitleAsText()
+     */
+    public void setTitle(String title) {
+        getElement().setProperty("title", title);
+    }
+
+    /**
+     * Returns the value of the title property or a text content
+     * of the title if it was set via {@link #setTitle(Component)}
+     *
+     * @return the string value of title
+     */
+    @Synchronize(property = "title", value = "title-changed")
+    public String getTitleAsText() {
+        if (title != null) {
+            return title.getElement().getText();
+        }
+        return getElement().getProperty("title");
+    }
+
+    /**
+     * Sets the application title, <code>null</code> to remove any previously
+     *
+     * @see #getTitle()
+     * @param title
+     *            the title component to set, or <code>null</code> to remove
+     *            any previously set title
+     */
+    public void setTitle(Component title) {
+        if (this.title != null) {
+            this.title.getElement().removeFromParent();
+        }
+
+        this.title = title;
+        if (title == null) {
+            return;
+        }
+
+        title.getElement().setAttribute("slot", "title");
+        getElement().appendChild(title.getElement());
+    }
+
+    /**
+     * Returns custom title component which was set via {@link #setTitle(Component)}
+     *
+     * @return the title component, <code>null</code> if nothing was set
+     */
+    public Component getTitle() {
+        return title;
+    }
+
+    /**
+     * Sets the application description
+     *
+     * @see #getDescription()
+     * @param description
+     *            the description string
+     */
+    public void setDescription(String description) {
+        getElement().setProperty("description", description);
+    }
+
+    /**
+     * @return the value of description property
+     */
+    @Synchronize(property = "description", value = "description-changed")
+    public String getDescription() {
+        return getElement().getProperty("description");
+    }
+
 }

@@ -50,25 +50,12 @@ public class LoginIT extends BasicIT {
         login.sendKeys(Keys.ENTER);
         Assert.assertFalse("Login notification was shown",
                 $(NotificationElement.class).waitForFirst().isOpen());
-        if (BrowserUtil.isIE(getDesiredCapabilities())) {
-            skipTest("Temporary Skip IE until disabled property won't reflectToAttribute");
-            Assert.assertFalse("Disabled property should not reflect to attribute", login.hasAttribute("disabled"));
-        }
+
+        Assert.assertFalse("Disabled property should not reflect to attribute", login.hasAttribute("disabled"));
         // Forgot password event should be processed anyway
         checkForgotPassword(login);
     }
 
-    @Test
-    public void enterKeyLogin() {
-        if (BrowserUtil.isEdge(getDesiredCapabilities())) {
-            skipTest("Skip for Edge due to the sendKeys usage");
-        }
-        LoginElement login = getLogin();
-        checkSuccessfulLogin(login, () -> {
-            login.focus();
-            login.sendKeys(Keys.ENTER);
-        });
-    }
     @Test
     public void passwordEnterKeyLogin() {
         if (BrowserUtil.isEdge(getDesiredCapabilities())) {
@@ -86,7 +73,7 @@ public class LoginIT extends BasicIT {
         if (BrowserUtil.isEdge(getDesiredCapabilities())) {
             skipTest("Skip for Edge due to the sendKeys usage");
         }
-        LoginElement login = $(LoginElement.class).waitForFirst();
+        LoginElement login = getLogin();
         checkSuccessfulLogin(login, () -> {
             login.getUsernameField().focus();
             login.sendKeys(Keys.ENTER);

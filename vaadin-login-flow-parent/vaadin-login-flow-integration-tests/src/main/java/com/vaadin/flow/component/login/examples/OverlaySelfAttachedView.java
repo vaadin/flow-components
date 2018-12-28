@@ -13,8 +13,7 @@ public class OverlaySelfAttachedView extends Div {
         login.addLoginListener(e -> login.close());
         NativeButton button = new NativeButton("open");
         button.setId("open");
-        button.addClickListener(e ->
-                ((LoginOverlay) login).setOpened(true));
+        button.addClickListener(e -> login.setOpened(true));
         add(button);
     }
 }

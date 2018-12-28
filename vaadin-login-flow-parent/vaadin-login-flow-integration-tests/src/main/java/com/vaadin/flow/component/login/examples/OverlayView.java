@@ -1,7 +1,13 @@
 package com.vaadin.flow.component.login.examples;
 
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 
 @Route
@@ -14,8 +20,43 @@ public class OverlayView extends AbstractView {
         login.addLoginListener(e -> login.close());
         NativeButton button = new NativeButton("open");
         button.setId("open");
-        button.addClickListener(e ->
-            ((LoginOverlay) login).setOpened(true));
+        button.addClickListener(e -> login.setOpened(true));
         add(button);
+    }
+
+    @Override
+    public void setParameter(BeforeEvent beforeEvent,  @OptionalParameter String s) {
+        super.setParameter(beforeEvent, s);
+        if ("component-title".equals(s)) {
+            Div div = new Div(VaadinIcon.VAADIN_H.create(), new H3("Component title"));
+            div.setId("componentTitle");
+            login.setTitle(div);
+        }
+        if ("property-title-description".equals(s)) {
+            login.setTitle("Property title");
+            login.setDescription("Property description");
+        }
+        if ("ptbr".equals(s)) {
+            login.setI18n(getPtBrI18n());
+        }
+    }
+
+    private LoginI18n getPtBrI18n() {
+        LoginI18n i18n = LoginI18n.createDefault();
+        i18n.setHeader(new LoginI18n.Header());
+        i18n.getHeader().setTitle("Nome do aplicativo");
+        i18n.getHeader().setDescription("Descrição do aplicativo");
+        i18n.getForm().setUsername("Usuário");
+        i18n.getForm().setTitle("Acesse a sua conta");
+        i18n.getForm().setSubmit("Entrar");
+        i18n.getForm().setPassword("Senha");
+        i18n.getForm().setForgotPassword("Esqueci minha senha");
+        i18n.getErrorMessage().setTitle("Usuário/senha inválidos");
+        i18n.getErrorMessage()
+                .setMessage("Confira seu usuário e senha e tente novamente.");
+        i18n.setAdditionalInformation(
+                "Caso necessite apresentar alguma informação extra para o usuário (como credenciais padrão), este é o lugar.");
+
+        return i18n;
     }
 }

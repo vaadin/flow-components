@@ -1,6 +1,6 @@
 package com.vaadin.flow.component.login.test;
 
-import com.vaadin.flow.component.login.testbench.LoginElement;
+import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,14 +9,15 @@ public class I18nIT extends AbstractParallelTest {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/ptbr");
+        getDriver().get(getBaseURL() + "/overlay/ptbr");
     }
 
     @Test
     public void testI18n() {
-        LoginElement login = $(LoginElement.class).waitForFirst();
+        $("button").waitForFirst().click();
+        LoginOverlayElement login = $(LoginOverlayElement.class).waitForFirst();
         Assert.assertEquals("Nome do aplicativo", login.getTitle());
-        Assert.assertEquals("Descrição do aplicativo", login.getMessage());
+        Assert.assertEquals("Descrição do aplicativo", login.getDescription());
         Assert.assertEquals("Acesse a sua conta", login.getFormTitle());
         Assert.assertEquals("Usuário", login.getUsernameField().getLabel());
         Assert.assertEquals("Senha", login.getPasswordField().getLabel());
