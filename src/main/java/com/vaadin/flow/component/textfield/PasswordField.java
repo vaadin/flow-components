@@ -345,6 +345,30 @@ public class PasswordField
     }
 
     /**
+     * Specifies if the field value gets automatically selected when
+     * the field gains focus.
+     *
+     * @return <code>true</code> if autoselect is active, <code>false</code>
+     *         otherwise
+     */
+    public boolean isAutoselect() {
+        return super.isAutoselectBoolean();
+    }
+
+    /**
+     * Set to <code>true</code> to always have the field value automatically
+     * selected when the field gains focus, <code>false</code> otherwise.
+     *
+     * @param autoselect
+     *            <code>true</code> to set auto select on,
+     *            <code>false</code> otherwise
+     */
+    @Override
+    public void setAutoselect(boolean autoselect) {
+        super.setAutoselect(autoselect);
+    }
+
+    /**
      * Gets the visibility   state of the button which clears the password
      * field.
      *

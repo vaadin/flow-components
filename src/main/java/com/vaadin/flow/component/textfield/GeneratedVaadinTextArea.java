@@ -142,7 +142,7 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
-        "WebComponent: Vaadin.TextAreaElement#2.3.0-alpha1",
+        "WebComponent: Vaadin.TextAreaElement#2.3.0-alpha4",
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-area")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-text-area.html")
@@ -355,6 +355,40 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
     protected void setAutocapitalize(String autocapitalize) {
         getElement().setProperty("autocapitalize",
                 autocapitalize == null ? "" : autocapitalize);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Specify that the value should be automatically selected when the field
+     * gains focus.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     *
+     * @return the {@code autoselect} property from the webcomponent
+     */
+    protected boolean isAutoselectBoolean() {
+        return getElement().getProperty("autoselect", false);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Specify that the value should be automatically selected when the field
+     * gains focus.
+     * </p>
+     *
+     * @param autoselect
+     *            the boolean value to set
+     */
+    protected void setAutoselect(boolean autoselect) {
+        getElement().setProperty("autoselect", autoselect);
     }
 
     /**
@@ -896,9 +930,9 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            the property type
      */
     public <P> GeneratedVaadinTextArea(T initialValue, T defaultValue,
-                                       Class<P> elementPropertyType,
-                                       SerializableFunction<P, T> presentationToModel,
-                                       SerializableFunction<T, P> modelToPresentation) {
+            Class<P> elementPropertyType,
+            SerializableFunction<P, T> presentationToModel,
+            SerializableFunction<T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
@@ -919,7 +953,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            whether <code>null</code> is accepted as a model value
      */
     public GeneratedVaadinTextArea(T initialValue, T defaultValue,
-                                   boolean acceptNullValues) {
+            boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
             setModelValue(initialValue, false);
@@ -947,9 +981,9 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            the property type
      */
     public <P> GeneratedVaadinTextArea(T initialValue, T defaultValue,
-                                       Class<P> elementPropertyType,
-                                       SerializableBiFunction<R, P, T> presentationToModel,
-                                       SerializableBiFunction<R, T, P> modelToPresentation) {
+            Class<P> elementPropertyType,
+            SerializableBiFunction<R, P, T> presentationToModel,
+            SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {

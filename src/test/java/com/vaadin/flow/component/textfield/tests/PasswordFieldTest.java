@@ -65,4 +65,19 @@ public class PasswordFieldTest {
         Assert.assertEquals(passwordField.isClearButtonVisible(),
                 passwordField.getElement().getProperty("clearButtonVisible", value));
     }
+
+    @Test
+    public void autoselectPropertyValue() {
+        PasswordField passwordField = new PasswordField();
+
+        assertAutoselectPropertyValueEquals(passwordField, true);
+        assertAutoselectPropertyValueEquals(passwordField, false);
+    }
+
+    public void assertAutoselectPropertyValueEquals(PasswordField passwordField, Boolean value) {
+        passwordField.setAutoselect(value);
+        Assert.assertEquals(value, passwordField.isAutoselect());
+        Assert.assertEquals(passwordField.isAutoselect(),
+                passwordField.getElement().getProperty("autoselect", value));
+    }
 }

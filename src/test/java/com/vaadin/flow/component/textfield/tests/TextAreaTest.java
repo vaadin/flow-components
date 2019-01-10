@@ -65,4 +65,19 @@ public class TextAreaTest {
         Assert.assertEquals(textArea.isClearButtonVisible(),
                 textArea.getElement().getProperty("clearButtonVisible", value));
     }
+
+    @Test
+    public void autoselectPropertyValue() {
+        TextArea textArea = new TextArea();
+
+        assertAutoselectPropertyValueEquals(textArea, true);
+        assertAutoselectPropertyValueEquals(textArea, false);
+    }
+
+    public void assertAutoselectPropertyValueEquals(TextArea textArea, Boolean value) {
+        textArea.setAutoselect(value);
+        Assert.assertEquals(value, textArea.isAutoselect());
+        Assert.assertEquals(textArea.isAutoselect(),
+                textArea.getElement().getProperty("autoselect", value));
+    }
 }

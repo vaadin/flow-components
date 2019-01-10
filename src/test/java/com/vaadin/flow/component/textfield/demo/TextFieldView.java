@@ -36,6 +36,7 @@ public class TextFieldView extends DemoView {
     public void initView() {
         addBasicFeatures();
         addClearButtonFeature();
+        addAutoselectFeature();
         addNumberFields();
         addDisabledField();
         addVariantsFeature();
@@ -89,6 +90,19 @@ public class TextFieldView extends DemoView {
         // end-source-example
 
         addCard("Text field with clear button", textField, clearButton);
+    }
+
+    private void addAutoselectFeature() {
+        // begin-source-example
+        // source-example-heading: Text field with autoselect
+        TextField textField = new TextField();
+        textField.setLabel("Text field label");
+        textField.setValue("Text field value");
+        textField.setAutoselect(true);
+
+        // end-source-example
+
+        addCard("Text field with autoselect", textField);
     }
 
     private void addNumberFields() {

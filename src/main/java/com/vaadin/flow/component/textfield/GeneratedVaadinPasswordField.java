@@ -81,7 +81,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
-        "WebComponent: Vaadin.PasswordFieldElement#2.3.0-alpha1",
+        "WebComponent: Vaadin.PasswordFieldElement#2.3.0-alpha4",
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-password-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-password-field.html")
@@ -155,9 +155,9 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
      *            the property type
      */
     public <P> GeneratedVaadinPasswordField(T initialValue, T defaultValue,
-                                            Class<P> elementPropertyType,
-                                            SerializableFunction<P, T> presentationToModel,
-                                            SerializableFunction<T, P> modelToPresentation) {
+            Class<P> elementPropertyType,
+            SerializableFunction<P, T> presentationToModel,
+            SerializableFunction<T, P> modelToPresentation) {
         super(initialValue, defaultValue, elementPropertyType,
                 presentationToModel, modelToPresentation);
     }
@@ -174,7 +174,7 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
      *            whether <code>null</code> is accepted as a model value
      */
     public GeneratedVaadinPasswordField(T initialValue, T defaultValue,
-                                        boolean acceptNullValues) {
+            boolean acceptNullValues) {
         super(initialValue, defaultValue, acceptNullValues);
     }
 
@@ -198,9 +198,9 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
      *            the property type
      */
     public <P> GeneratedVaadinPasswordField(T initialValue, T defaultValue,
-                                            Class<P> elementPropertyType,
-                                            SerializableBiFunction<R, P, T> presentationToModel,
-                                            SerializableBiFunction<R, T, P> modelToPresentation) {
+            Class<P> elementPropertyType,
+            SerializableBiFunction<R, P, T> presentationToModel,
+            SerializableBiFunction<R, T, P> modelToPresentation) {
         super(initialValue, defaultValue, elementPropertyType,
                 presentationToModel, modelToPresentation);
     }
