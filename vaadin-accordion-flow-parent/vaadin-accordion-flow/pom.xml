@@ -14,6 +14,14 @@
 
     <name>Vaadin Accordion</name>
 
+    <licenses>
+        <license>
+            <name>Apache License Version 2.0</name>
+            <distribution>repo</distribution>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -60,14 +68,6 @@
             <!--<artifactId>vaadin-accordion</artifactId>-->
             <!--<version>1.0.0</version>-->
         <!--</dependency>-->
-
-
-        <!--Pinned transitive webjars-->
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>license-checker</artifactId>
-            <version>2.1.0</version>
-        </dependency>
 
         <!--Test scoped-->
         <dependency>
@@ -121,7 +121,7 @@
                         <Private-Package></Private-Package>
                         <Bundle-Activator></Bundle-Activator>
                         <Bundle-Version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</Bundle-Version>
-                        <Bundle-License>https://vaadin.com/license/cval-3.0</Bundle-License>
+                        <Bundle-License>http://www.apache.org/licenses/LICENSE-2.0</Bundle-License>
                         <Bundle-Description></Bundle-Description>
                         <!-- Package format version - do not change -->
                         <Vaadin-Package-Version>1</Vaadin-Package-Version>
@@ -138,8 +138,7 @@
                 <version>1.8</version>
                 <!--  Use `mvn license:update-file-header` to fix header problems -->
                 <configuration>
-                    <licenseName>cval3</licenseName>
-                    <licenseResolver>${project.baseUri}src/license</licenseResolver>
+                    <licenseName>apache_v2</licenseName>
                     <includes>
                         <include>**/main/**/*.java</include>
                     </includes>
