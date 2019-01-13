@@ -1,0 +1,19 @@
+{
+  "name": "vaadin-accordion",
+  "homepage": "https://github.com/vaadin/vaadin-accordion",
+  "authors": [],
+  "description": "",
+  "main": "",
+  "license": "CVAL3",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vaadin-accordion": "vaadin/vaadin-accordion#master"
+  }
+}
