@@ -7,16 +7,22 @@ import org.junit.Test;
 
 public class CustomFieldTest {
 
-    private CustomField systemUnderTest;
+    private CustomField<Object> systemUnderTest;
 
     @Before
     public void setUp() {
-        systemUnderTest = new CustomField();
+        systemUnderTest = new CustomField<Object>(null) {
+            @Override
+            protected void setPresentationValue(Object newPresentationValue) {
+
+            }
+        };
     }
 
     @Test
     public void onAttach_init() {
-        systemUnderTest.addAttachListener(e -> new AttachEvent(systemUnderTest, true));
+        systemUnderTest
+            .addAttachListener(e -> new AttachEvent(systemUnderTest, true));
 
         Assert.assertTrue(true);
     }

@@ -8,6 +8,7 @@ import com.vaadin.flow.router.Route;
 public class Home extends Div {
 
     public Home() {
-        add(new CustomField());
+        // TODO
+        // add(new CustomField());
     }
 }

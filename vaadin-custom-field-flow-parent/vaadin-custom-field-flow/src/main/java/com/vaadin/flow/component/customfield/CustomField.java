@@ -20,20 +20,89 @@ package com.vaadin.flow.component.customfield;
  * #L%
  */
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.html.H1;
 
-@Tag("div")
-//@Tag("vaadin-custom-field")
-//@HtmlImport("frontend://bower_components/vaadin-custom-field/src/vaadin-custom-field.html")
-public class CustomField extends Component {
+@Tag("vaadin-custom-field")
+@HtmlImport("frontend://bower_components/vaadin-custom-field/src/vaadin-custom-field.html")
+public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
+    implements HasComponents, HasSize, HasValidation, Focusable<CustomField> {
 
     /**
-     * Initializes a new CustomField.
+     * Constructs a new custom field.
+     *
+     * @see AbstractField#AbstractField(Object)
      */
-    public CustomField() {
-        getElement().appendChild(new H1("Hello World!").getElement());
+    public CustomField(T defaultValue) {
+        super(defaultValue);
     }
+
+    /**
+     * Specifies that the user must fill in a value.
+     *
+     * @return the {@code required} property from the webcomponent
+     */
+    public boolean isRequired() {
+        return getElement().getProperty("required", false);
+    }
+
+    public void setRequired(boolean required) {
+        getElement().setProperty("required", required);
+    }
+
+    /**
+     * <p>
+     * This property is set to true when the control value is invalid.
+     * <p>
+     * This property is synchronized automatically from client side when a
+     * 'invalid-changed' event happens.
+     * </p>
+     *
+     * @return the {@code invalid} property from the webcomponent
+     */
+    @Synchronize(property = "invalid", value = "invalid-changed")
+    public boolean isInvalid() {
+        return getElement().getProperty("invalid", false);
+    }
+
+    /**
+     * <p>
+     * This property is set to true when the control value is invalid.
+     * </p>
+     *
+     * @param invalid the boolean value to set
+     */
+    public void setInvalid(boolean invalid) {
+        getElement().setProperty("invalid", invalid);
+    }
+
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        getElement().setProperty("errorMessage", errorMessage);
+    }
+
+    @Override
+    public String getErrorMessage() {
+        return getElement().getProperty("errorMessage");
+    }
+
+    /**
+     * Gets the label for the field.
+     *
+     * @return the {@code label} property from the webcomponent
+     */
+    public String getLabel() {
+        return getElement().getProperty("label", null);
+    }
+
+    /**
+     * Sets the label for the field.
+     *
+     * @param label value for the {@code label} property in the webcomponent
+     */
+    public void setLabel(String label) {
+        getElement().setProperty("label", label);
+    }
+
 }
+
