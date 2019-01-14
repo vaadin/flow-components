@@ -14,18 +14,19 @@
   ~ the License.
   -->
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
-
-<dom-module id="combo-box-in-a-template">
+<dom-module id="wrapper-template">
     <template>
-        <vaadin-combo-box id="comboBox"></vaadin-combo-box>
+        <combo-box-in-a-template
+                id="comboBoxInATemplate"></combo-box-in-a-template>
+        <combo-box-in-a-template2
+                id="comboBoxInATemplate2"></combo-box-in-a-template2>
     </template>
-
     <script>
-        class ComboBoxInATemplate extends Polymer.Element {
+        class WrapperTemplate extends Polymer.Element {
             static get is() {
-                return 'combo-box-in-a-template'
+                return 'wrapper-template'
             }
         }
-        customElements.define(ComboBoxInATemplate.is, ComboBoxInATemplate);
+        customElements.define(WrapperTemplate.is, WrapperTemplate);
     </script>
 </dom-module>
