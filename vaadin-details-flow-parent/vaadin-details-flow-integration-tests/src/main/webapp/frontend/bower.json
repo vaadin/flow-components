@@ -1,0 +1,19 @@
+{
+  "name": "vaadin-details",
+  "homepage": "https://github.com/vaadin/vaadin-details",
+  "authors": [],
+  "description": "",
+  "main": "",
+  "license": "CVAL3",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vaadin-details": "vaadin/vaadin-details#master"
+  }
+}
