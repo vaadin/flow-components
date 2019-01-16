@@ -10,10 +10,10 @@
 		<relativePath />
 	</parent>
 
-	<artifactId>vaadin-pro-grid-flow-parent</artifactId>
+	<artifactId>vaadin-grid-pro-flow-parent</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Vaadin ProGrid Parent</name>
+	<name>Vaadin GridPro Parent</name>
 	<inceptionYear>2018</inceptionYear>
 
 	<organization>
@@ -33,10 +33,10 @@
 	</properties>
 
 	<modules>
-		<module>vaadin-pro-grid-flow</module>
-		<module>vaadin-pro-grid-flow-testbench</module>
-		<module>vaadin-pro-grid-flow-integration-tests</module>
-		<module>vaadin-pro-grid-flow-demo</module>
+		<module>vaadin-grid-pro-flow</module>
+		<module>vaadin-grid-pro-testbench</module>
+		<module>vaadin-grid-pro-flow-integration-tests</module>
+		<module>vaadin-grid-pro-flow-demo</module>
 	</modules>
 
 	<repositories>

@@ -1,30 +1,30 @@
-# Vaadin ProGrid for Flow
+# Vaadin GridPro for Flow
 
-Vaadin ProGrid for Flow is a UI component add-on for Vaadin.
+Vaadin GridPro for Flow is a UI component add-on for Vaadin.
 
 ## License & Author
 
 This Add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3). For license terms, see LICENSE.txt.
 
-Vaadin ProGrid is written by Vaadin Ltd.
+Vaadin GridPro is written by Vaadin Ltd.
 
 To purchase a license, visit http://vaadin.com/pricing
 
 ### Installing
-Add ProGrid to your project
+Add GridPro to your project
 ```xml
 <dependencies>
   <dependency>
     <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-pro-grid-flow</artifactId>
-    <version>${vaadin.progrid.version}</version>
+    <artifactId>vaadin-grid-pro-flow</artifactId>
+    <version>${vaadin.gridpro.version}</version>
   </dependency>
 </dependencies>
 ```
 
-### Using Vaadin ProGrid
+### Using Vaadin GridPro
 
-[<img src="https://raw.githubusercontent.com/vaadin/vaadin-pro-grid/master/screenshot.gif" width="700" alt="Screenshot of vaadin-pro-grid">](https://vaadin.com/components/vaadin-pro-grid)
+[<img src="https://raw.githubusercontent.com/vaadin/vaadin-grid-pro/master/screenshot.gif" width="700" alt="Screenshot of vaadin-grid-pro">](https://vaadin.com/components/vaadin-grid-pro)
 
 #### Basic use
 ```java
@@ -36,7 +36,7 @@ Component component = new Component();
 Clone the project in GitHub (or fork it if you plan on contributing)
 
 ```
-git clone git@github.com:vaadin/vaadin-pro-grid-flow.git
+git clone git@github.com:vaadin/vaadin-grid-pro-flow.git
 ```
 
 To build and install the project into the local repository run
@@ -51,5 +51,5 @@ To compile and run demos locally execute
 
 ```
 mvn compile
-mvn -pl vaadin-pro-grid-flow-demo -Pwar jetty:run
+mvn -pl vaadin-grid-pro-flow-demo -Pwar jetty:run
 ```
