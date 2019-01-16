@@ -51,6 +51,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons-flow</artifactId>
             <version>${flow.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
+                    <artifactId>iron-flex-layout</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -58,23 +64,11 @@
             <version>${flow.version}</version>
         </dependency>
 
-        <!-- Dependencies for the demo -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.25</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-icons-flow</artifactId>
-            <version>1.2-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                    <artifactId>iron-flex-layout</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
     </dependencies>
