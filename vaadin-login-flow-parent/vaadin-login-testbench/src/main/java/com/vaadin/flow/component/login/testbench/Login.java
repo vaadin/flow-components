@@ -24,6 +24,7 @@ package com.vaadin.flow.component.login.testbench;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.TestBenchElement;
 
 interface Login {
 
@@ -79,4 +80,16 @@ interface Login {
      * of the login element
      */
     String getAdditionalInformation();
+
+    /**
+     * Return the custom footer component.
+     *
+     */
+    TestBenchElement getFooter();
+
+    /**
+     * Whether the custom footer component was set or not.
+     *
+     */
+    boolean hasFooter();
 }

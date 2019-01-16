@@ -21,6 +21,19 @@ public class LoginIT extends BasicIT {
     }
 
     @Test
+    public void login() {
+        LoginElement login = getLogin();
+        checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(), () -> login.submit());
+    }
+
+    @Override
+    public void testDefaultStrings() {
+        super.testDefaultStrings();
+        LoginElement login = getLogin();
+        checkLoginForm(login.getUsernameField(), login.getPasswordField(), login.getSubmitButton());
+    }
+
+    @Test
     public void forgotPassword() {
         checkForgotPassword(getLogin());
     }
@@ -62,7 +75,7 @@ public class LoginIT extends BasicIT {
             skipTest("Skip for Edge due to the sendKeys usage");
         }
         LoginElement login = getLogin();
-        checkSuccessfulLogin(login, () -> {
+        checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(), () -> {
             login.getPasswordField().focus();
             login.sendKeys(Keys.ENTER);
         });
@@ -74,7 +87,7 @@ public class LoginIT extends BasicIT {
             skipTest("Skip for Edge due to the sendKeys usage");
         }
         LoginElement login = getLogin();
-        checkSuccessfulLogin(login, () -> {
+        checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(), () -> {
             login.getUsernameField().focus();
             login.sendKeys(Keys.ENTER);
         });
@@ -111,4 +124,5 @@ public class LoginIT extends BasicIT {
         Assert.assertTrue("Redirect didn't happened on login",
                 getDriver().getCurrentUrl().endsWith("process-login-here"));
     }
+
 }

@@ -1,7 +1,10 @@
 package com.vaadin.flow.component.login.test;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
+import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.parallel.BrowserUtil;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,25 +29,24 @@ public abstract class BasicIT extends AbstractParallelTest {
             Assert.assertEquals("", login.getErrorMessageTitle());
             Assert.assertEquals("", login.getErrorMessage());
         }
-        Assert.assertEquals("Username", login.getUsernameField().getLabel());
-        Assert.assertEquals("Password", login.getPasswordField().getLabel());
-        Assert.assertEquals("Log in", login.getSubmitButton().getText());
         Assert.assertEquals("Forgot password", login.getForgotPasswordButton().getText());
         Assert.assertEquals("In case you need to provide some additional info for the user.",
                 login.getAdditionalInformation());
     }
 
-    @Test
-    public void login() {
-        LoginElement login = getLogin();
-        checkSuccessfulLogin(login, () -> login.submit());
+    protected void checkLoginForm(TextFieldElement username, PasswordFieldElement password, ButtonElement submit) {
+        Assert.assertEquals("Username", username.getLabel());
+        Assert.assertEquals("Password", password.getLabel());
+        Assert.assertEquals("Log in", submit.getText());
     }
 
-    protected void checkSuccessfulLogin(LoginElement login, Runnable submit) {
-        login.getUsernameField().setValue("username");
-        login.getPasswordField().setValue("password");
+    protected void checkSuccessfulLogin(TextFieldElement usernameField, PasswordFieldElement passwordField,
+                                        Runnable submit) {
+        usernameField.setValue("username");
+        passwordField.setValue("password");
         submit.run();
         String notification = $(NotificationElement.class).waitForFirst().getText();
         Assert.assertEquals("Successful login", notification);
     }
+
 }

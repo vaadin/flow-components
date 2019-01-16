@@ -33,12 +33,12 @@ import org.openqa.selenium.StaleElementReferenceException;
 @Element("vaadin-login-overlay")
 public class LoginOverlayElement extends TestBenchElement implements Login {
 
-    public TestBenchElement getLoginOverlayElement() {
-        return $("vaadin-login-overlay-element").onPage().waitForFirst();
+    public TestBenchElement getLoginOverlayWrapper() {
+        return $("vaadin-login-overlay-wrapper").onPage().waitForFirst();
     }
 
     public LoginElement getLogin() {
-        return getLoginOverlayElement().$(LoginElement.class).first();
+        return getLoginOverlayWrapper().$(LoginElement.class).first();
     }
 
     public boolean isOpened() {
@@ -51,17 +51,17 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
 
     @Override
     public TextFieldElement getUsernameField() {
-        return getLogin().getUsernameField();
+        return getLoginOverlayWrapper().$(TextFieldElement.class).id("username");
     }
 
     @Override
     public PasswordFieldElement getPasswordField() {
-        return getLogin().getPasswordField();
+        return getLoginOverlayWrapper().$(PasswordFieldElement.class).id("password");
     }
 
     @Override
     public ButtonElement getSubmitButton() {
-        return getLogin().getSubmitButton();
+        return getLoginOverlayWrapper().$(ButtonElement.class).id("submit");
     }
 
     @Override
@@ -71,12 +71,12 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
 
     @Override
     public void submit() {
-        getLogin().getSubmitButton().click();
+        getSubmitButton().click();
     }
 
     @Override
     public void forgotPassword() {
-        getLogin().getForgotPasswordButton().click();
+        getForgotPasswordButton().click();
     }
 
     /**
@@ -86,7 +86,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
         if (hasTitleComponent()) {
             return getTitleComponent().getText();
         }
-        return getLoginOverlayElement().$(TestBenchElement.class)
+        return getLoginOverlayWrapper().$(TestBenchElement.class)
                 .attribute("part", "brand").first().$("h1").first()
                 // Using textContent, since getText() works unpredictable in Edge
                 .getPropertyString("textContent");
@@ -96,7 +96,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
      * Returns the description displayed in the login element
      */
     public String getDescription() {
-        return getLoginOverlayElement().$(TestBenchElement.class)
+        return getLoginOverlayWrapper().$(TestBenchElement.class)
                 .attribute("part", "brand").first().$("p").first().getText();
     }
 
@@ -104,7 +104,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
      * Checks if anything was set into the title slot
      */
     public boolean hasTitleComponent() {
-        return getLoginOverlayElement().$(TestBenchElement.class).attribute("slot", "title").exists();
+        return getLoginOverlayWrapper().$(TestBenchElement.class).attribute("slot", "title").exists();
     }
 
     /**
@@ -115,7 +115,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
         if (!hasTitleComponent()) {
             return null;
         }
-        return getLoginOverlayElement().$(TestBenchElement.class).attribute("slot", "title").first();
+        return getLoginOverlayWrapper().$(TestBenchElement.class).attribute("slot", "title").first();
     }
 
     @Override
@@ -136,5 +136,15 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
     @Override
     public String getAdditionalInformation() {
         return getLogin().getAdditionalInformation();
+    }
+
+    @Override
+    public TestBenchElement getFooter() {
+        return getLogin().getFooter();
+    }
+
+    @Override
+    public boolean hasFooter() {
+        return getLogin().hasFooter();
     }
 }

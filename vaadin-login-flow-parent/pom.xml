@@ -62,6 +62,11 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.webjars.bowergithub.vaadin</groupId>
+				<artifactId>vaadin-text-field</artifactId>
+				<version>2.3.0-alpha6</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>

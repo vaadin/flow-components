@@ -82,7 +82,18 @@ public class LoginElement extends TestBenchElement implements Login {
 
     @Override
     public String getAdditionalInformation() {
-        return $(TestBenchElement.class)
-                .attribute("part", "footer").first().$("p").first().getText();
+        return $("span").first()
+                // Using textContent, since getText() works unpredictable in Edge
+                .getPropertyString("textContent");
+    }
+
+    @Override
+    public boolean hasFooter() {
+        return $(TestBenchElement.class).attribute("slot", "footer").exists();
+    }
+
+    @Override
+    public TestBenchElement getFooter() {
+        return $(TestBenchElement.class).attribute("slot", "footer").first();
     }
 }

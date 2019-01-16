@@ -3,16 +3,14 @@ package com.vaadin.flow.component.login.test;
 import com.vaadin.flow.component.login.testbench.LoginElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.parallel.BrowserUtil;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 public class OverlayIT extends BasicIT {
 
-    @Before
-    public void init() {
-        getDriver().get(getBaseURL() + "/overlay");
+    @Override
+    protected String getBaseURL() {
+        return super.getBaseURL() + "/overlay";
     }
 
     @Override
@@ -25,17 +23,25 @@ public class OverlayIT extends BasicIT {
         $("button").waitForFirst().click();
     }
 
+    @Test
+    public void login() {
+        openOverlay();
+        LoginOverlayElement overlay = $(LoginOverlayElement.class).waitForFirst();
+        checkSuccessfulLogin(overlay.getUsernameField(), overlay.getPasswordField(), () -> overlay.submit());
+    }
+
     @Override
     public void testDefaultStrings() {
         super.testDefaultStrings();
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
         Assert.assertEquals("App name", loginOverlay.getTitle());
         Assert.assertEquals("Application description", loginOverlay.getDescription());
+        checkLoginForm(loginOverlay.getUsernameField(), loginOverlay.getPasswordField(), loginOverlay.getSubmitButton());
     }
 
     @Test
     public void testOverlaySelfAttached() {
-        getDriver().get(getBaseURL() + "/overlayselfattached");
+        getDriver().get(super.getBaseURL() + "/overlayselfattached");
 
         Assert.assertFalse($(LoginOverlayElement.class).exists());
         openOverlay();
@@ -47,27 +53,21 @@ public class OverlayIT extends BasicIT {
         loginOverlay.getPasswordField().setValue("value");
         loginOverlay.submit();
 
-        if (BrowserUtil.isIE(getDesiredCapabilities())) {
-            // https://github.com/vaadin/vaadin-login-flow/issues/27
-            skipTest("Skip IE since the overlay is not self detached from the page");
-        }
         Assert.assertFalse($(LoginOverlayElement.class).exists());
     }
 
     @Test
     public void testTitleComponent() {
-        getDriver().get(getBaseURL() + "/overlay/component-title");
+        getDriver().get(getBaseURL() + "/component-title");
         openOverlay();
 
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
         TestBenchElement title = loginOverlay.getTitleComponent();
-        if (BrowserUtil.isIE(getDesiredCapabilities())) {
-            // https://github.com/vaadin/vaadin-login-flow/issues/27
-            skipTest("Skip IE since the teleport doesn't work there");
-        }
+
         Assert.assertEquals("Component title", title.getText());
 
-        checkSuccessfulLogin(loginOverlay.getLogin(), () -> loginOverlay.submit());
+        checkSuccessfulLogin(loginOverlay.getUsernameField(), loginOverlay.getPasswordField(),
+                () -> loginOverlay.submit());
 
         Assert.assertFalse(loginOverlay.isOpened());
         openOverlay();
@@ -83,7 +83,7 @@ public class OverlayIT extends BasicIT {
 
     @Test
     public void testTitleAndDescriptionStrings() {
-        getDriver().get(getBaseURL() + "/overlay/property-title-description");
+        getDriver().get(getBaseURL() + "/property-title-description");
         openOverlay();
 
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
