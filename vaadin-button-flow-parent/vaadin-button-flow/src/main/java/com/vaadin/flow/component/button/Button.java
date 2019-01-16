@@ -15,23 +15,6 @@
  */
 package com.vaadin.flow.component.button;
 
-/*
- * #%L
- * Vaadin Button
- * %%
- * Copyright (C) 2018 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Add-On License 3.0
- * (CVALv3).
- * 
- * See the file license.html distributed with this software for more
- * information about licensing.
- * 
- * You should have received a copy of the CVALv3 along with this program.
- * If not, see <http://vaadin.com/license/cval-3>.
- * #L%
- */
-
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -54,8 +37,6 @@ import com.vaadin.flow.shared.Registration;
  */
 public class Button extends GeneratedVaadinButton<Button>
         implements HasSize, HasEnabled {
-
-    private static final String THEME_ATTRIBUTE = "theme";
 
     private Element span;
     private Component iconComponent;
@@ -337,15 +318,16 @@ public class Button extends GeneratedVaadinButton<Button>
 
     /**
      * Simulates a click on this button on the server side. Calling this method
-     * executes all registered click listeners on the server side, but does not 
+     * executes all registered click listeners on the server side, but does not
      * execute possible client side registered listeners.
-     * 
-     * @see #clickInClient() 
+     *
+     * @see #clickInClient()
      */
     public void click() {
-        fireEvent(new ClickEvent<>(this, false, 0,0,0,0,0,0,false,false,false,false));
+        fireEvent(new ClickEvent<>(this, false, 0, 0, 0, 0, 0, 0, false, false,
+                false, false));
     }
-    
+
     /**
      * Executes a click on this button at the client-side. Calling this method
      * behaves the same as if the user would have clicked on the button.

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -56,7 +57,7 @@
             <artifactId>vaadin-form-layout-flow</artifactId>
             <version>${flow.version}</version>
         </dependency>
-        
+
         <!-- Dependencies for the demo -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -75,7 +76,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        
+
     </dependencies>
 
     <build>
@@ -98,7 +99,9 @@
                     <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
@@ -113,7 +116,7 @@
             </properties>
         </profile>
         <profile>
-            <!--Only used for local testing-->
+            <!--Only used for local testing -->
             <id>war</id>
             <properties>
                 <packaging.type>war</packaging.type>
@@ -121,9 +124,16 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>3.2.2</version>
+                        <configuration>
+                            <warSourceDirectory>${basedir}/src/main/resources/META-INF/resources</warSourceDirectory>
+                        </configuration>
+                    </plugin>
+                    <plugin>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
-                        <version>${jetty.plugin.version}</version>
                         <configuration>
                             <scanIntervalSeconds>5</scanIntervalSeconds>
                         </configuration>
