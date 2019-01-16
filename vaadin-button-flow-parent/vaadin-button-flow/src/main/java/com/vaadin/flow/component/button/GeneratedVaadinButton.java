@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2018 Vaadin Ltd.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,19 +15,17 @@
  */
 package com.vaadin.flow.component.button;
 
-
 import javax.annotation.Generated;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.vaadin.flow.component.ClickNotifier;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasText;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ClickNotifier;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasTheme;
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -104,8 +102,8 @@ import com.vaadin.flow.dom.Element;
  * how to apply styles for shadow parts</a>
  * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.ButtonElement#2.1.0", "Flow#1.1-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.2-SNAPSHOT",
+        "WebComponent: Vaadin.ButtonElement#2.1.0", "Flow#1.2-SNAPSHOT" })
 @Tag("vaadin-button")
 @HtmlImport("frontend://bower_components/vaadin-button/src/vaadin-button.html")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
@@ -114,7 +112,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
 
     /**
      * Adds theme variants to the component.
-     *
+     * 
      * @param variants
      *            theme variants to add
      */
@@ -126,7 +124,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
 
     /**
      * Removes theme variants from the component.
-     *
+     * 
      * @param variants
      *            theme variants to remove
      */
@@ -146,7 +144,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code autofocus} property from the webcomponent
      */
     protected boolean isAutofocusBoolean() {
@@ -160,7 +158,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * <p>
      * Specify that this control should have input focus when the page loads.
      * </p>
-     *
+     * 
      * @param autofocus
      *            the boolean value to set
      */
@@ -178,7 +176,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code disabled} property from the webcomponent
      */
     protected boolean isDisabledBoolean() {
@@ -192,7 +190,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * <p>
      * If true, the user cannot interact with this element.
      * </p>
-     *
+     * 
      * @param disabled
      *            the boolean value to set
      */
@@ -203,7 +201,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
     /**
      * Adds the given components as children of this component at the slot
      * 'prefix'.
-     *
+     * 
      * @param components
      *            The components to add.
      * @see <a
@@ -223,7 +221,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
     /**
      * Adds the given components as children of this component at the slot
      * 'suffix'.
-     *
+     * 
      * @param components
      *            The components to add.
      * @see <a
@@ -242,7 +240,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
 
     /**
      * Removes the given child components from this component.
-     *
+     * 
      * @param components
      *            The components to remove.
      * @throws IllegalArgumentException
@@ -273,7 +271,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
 
     /**
      * Sets the given string as the content of this component.
-     *
+     * 
      * @param text
      *            the text content to set
      * @see HasText#setText(String)
