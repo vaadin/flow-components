@@ -26,4 +26,34 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-details")
 public class DetailsElement extends TestBenchElement {
 
+	/**
+	 * Returns summary element
+	 */
+	public TestBenchElement getSummary() {
+		return $(TestBenchElement.class).attribute("slot", "summary").first();
+	}
+
+	/**
+	 * Returns summary element as string
+	 */
+	public String getSummaryText() {
+		return getSummary().getText();
+	}
+
+	/**
+	 * Returns content element
+	 */
+	public TestBenchElement getContent() {
+		TestBenchElement contentPlaceholder = $(TestBenchElement.class).attribute("part", "content").first();
+
+		return (TestBenchElement) executeScript("return arguments[0].firstElementChild.assignedNodes()[0];",
+				contentPlaceholder);
+	}
+
+	/**
+	 * Returns content element as string
+	 */
+	public String getContentText() {
+		return getContent().getText();
+	}
 }

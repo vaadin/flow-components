@@ -63,11 +63,11 @@
         </dependency>
 
         <!--Webjar-->
-        <!--<dependency>-->
-            <!--<groupId>com.vaadin.webjar</groupId>-->
-            <!--<artifactId>vaadin-details</artifactId>-->
-            <!--<version>1.0.0</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-details</artifactId>
+            <version>1.0.0-alpha2</version>
+        </dependency>
 
         <!--Test scoped-->
         <dependency>
