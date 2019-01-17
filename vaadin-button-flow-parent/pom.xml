@@ -34,7 +34,6 @@
     <modules>
         <module>vaadin-button-flow</module>
         <module>vaadin-button-testbench</module>
-        <module>vaadin-button-flow-integration-tests</module>
         <module>vaadin-button-flow-demo</module>
     </modules>
 
@@ -44,8 +43,8 @@
             <url>http://maven.vaadin.com/vaadin-prereleases</url>
         </pluginRepository>
     </pluginRepositories>
-    
-     <repositories>
+
+    <repositories>
         <repository>
             <id>vaadin-prereleases</id>
             <url>https://maven.vaadin.com/vaadin-prereleases</url>
@@ -55,5 +54,19 @@
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
         </repository>
     </repositories>
+
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <property>
+                    <name>!release</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-button-flow-integration-tests</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
