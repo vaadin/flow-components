@@ -70,11 +70,6 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-button-flow</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-form-layout-flow</artifactId>
             <version>${flow.version}</version>
         </dependency>
