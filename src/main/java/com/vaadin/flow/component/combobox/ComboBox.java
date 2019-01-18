@@ -324,6 +324,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         if (value == null) {
             getElement().setProperty("selectedItem", null);
+            getElement().setProperty("value", "");
+            getElement().setProperty("_inputElementValue", "");
             return;
         }
 
