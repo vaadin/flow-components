@@ -56,4 +56,8 @@ public class DetailsElement extends TestBenchElement {
 	public String getContentText() {
 		return getContent().getText();
 	}
+
+	public boolean isOpened() {
+		return getPropertyBoolean("opened");
+	}
 }

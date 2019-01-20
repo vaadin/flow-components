@@ -14,6 +14,7 @@ public class Home extends Div {
         details.setContent(new Span("Some content"));
 
         Details detailsText = new Details();
+        detailsText.setOpened(true);
         detailsText.setSummaryText("Summary Text");
         detailsText.setContentText("Content Text");
 

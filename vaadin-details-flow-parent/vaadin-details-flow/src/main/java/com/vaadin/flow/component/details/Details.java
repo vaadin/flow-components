@@ -21,6 +21,7 @@ package com.vaadin.flow.component.details;
  */
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Span;
@@ -162,4 +163,27 @@ public class Details extends Component {
     public String getContentText() {
         return content.getElement().getText();
     }
+
+    /**
+     * See {@link #setOpened(boolean)}
+     *
+     * @return whether details are expanded or collapsed
+     */
+    @Synchronize(property = "opened", value = "opened-changed")
+    public boolean isOpened() {
+        return getElement().getProperty("opened", false);
+    }
+
+    /**
+     * <p>
+     * True if the details are opened and the content is displayed
+     * </p>
+     *
+     * @param opened
+     *            the boolean value to set
+     */
+    public void setOpened(boolean opened) {
+        getElement().setProperty("opened", opened);
+    }
+
 }

@@ -34,11 +34,15 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertEquals(2, detailsElements.size());
 
         DetailsElement detail1 = detailsElements.get(0);
+        Assert.assertFalse(detail1.isOpened());
         detail1.getSummary().click();
+        Assert.assertTrue(detail1.isOpened());
         Assert.assertEquals("Some content", detail1.getContentText());
 
         DetailsElement detail2 = detailsElements.get(1);
-        detail2.getSummary().click();
+        Assert.assertTrue(detail2.isOpened());
         Assert.assertEquals("Content Text", detail2.getContentText());
+        detail2.getSummary().click();
+        Assert.assertFalse(detail2.isOpened());
     }
 }
