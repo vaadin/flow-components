@@ -99,7 +99,7 @@ public class Details extends Component {
     }
 
     /**
-     * Creates a text wrapper and sets a summry via {@link #setSummary(Component)}
+     * Creates a text wrapper and sets a summary via {@link #setSummary(Component)}
      */
     public void setSummaryText(String summary) {
         if (summary == null) {
