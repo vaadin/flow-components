@@ -80,16 +80,4 @@ interface Login {
      * of the login element
      */
     String getAdditionalInformation();
-
-    /**
-     * Return the custom footer component.
-     *
-     */
-    TestBenchElement getFooter();
-
-    /**
-     * Whether the custom footer component was set or not.
-     *
-     */
-    boolean hasFooter();
 }

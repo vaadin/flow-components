@@ -137,14 +137,4 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
     public String getAdditionalInformation() {
         return getLogin().getAdditionalInformation();
     }
-
-    @Override
-    public TestBenchElement getFooter() {
-        return getLogin().getFooter();
-    }
-
-    @Override
-    public boolean hasFooter() {
-        return getLogin().hasFooter();
-    }
 }
