@@ -1,8 +1,11 @@
 package com.vaadin.flow.component.gridpro.examples;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.gridpro.EditColumnConfigurator;
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
 import java.util.ArrayList;
@@ -12,37 +15,42 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Route
-public class MainView extends Div {
+public class MainView extends VerticalLayout {
 
     public MainView() {
+        createEditorColumns();
+    }
+
+    protected void createEditorColumns() {
+        Div itemDisplayPanel = new Div();
+        Div subPropertyDisplayPanel = new Div();
+
         GridPro<Person> grid = new GridPro<>();
         grid.setItems(createItems());
 
         grid.addColumn(Person::getName).setHeader("NAME");
 
         grid.addEditColumn(Person::getAge, EditColumnConfigurator.text((obj, string) -> {
-            System.out.println(obj);
-            System.out.println(string);
+            itemDisplayPanel.setText(obj.toString());
+            subPropertyDisplayPanel.setText(string.toString());
         })).setHeader("Age").setWidth("300px");
 
-        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.checkbox((obj, string) -> {
-            System.out.println(obj);
-            System.out.println(string);
-        })).setHeader("Email").setWidth("300px");
+        grid.addEditColumn(Person::isSubscriber, EditColumnConfigurator.checkbox((obj, string) -> {
+            itemDisplayPanel.setText(obj.toString());
+            subPropertyDisplayPanel.setText(string.toString());
+        })).setHeader("Subscriber").setWidth("300px");
 
-        List<String> listOptions = new ArrayList<String>();
-        listOptions.add("Sergey");
-        listOptions.add("Tomi");
-        listOptions.add("Manolo");
-        listOptions.add("Yuriy");
-        grid.addEditColumn(Person::getName, EditColumnConfigurator.select((obj, string) -> {
-            System.out.println(obj);
-            System.out.println(string);
-        }, listOptions).setAllowEnterRowChange(true).setPreserveEditMode(true)).setHeader("Name Options").setWidth("300px");
+        List<String> listOptions = new ArrayList<>();
+        listOptions.add("Male");
+        listOptions.add("Female");
+        listOptions.add("Unknown");
+        grid.addEditColumn(Person::getGender, EditColumnConfigurator.select((obj, string) -> {
+            itemDisplayPanel.setText(obj.toString());
+            subPropertyDisplayPanel.setText(string.toString());
+        }, listOptions).setAllowEnterRowChange(true).setPreserveEditMode(true)).setHeader("Gender").setWidth("300px");
 
-        add(grid);
+        add(grid, itemDisplayPanel, subPropertyDisplayPanel);
     }
-
 
     private static List<Person> createItems() {
         Random random = new Random(0);
@@ -54,9 +62,10 @@ public class MainView extends Div {
     private static Person createPerson(int index, Random random) {
         Person person = new Person();
         person.setId(index);
-        person.setEmail("bla-bla@" + index);
+        person.setEmail("person" + index + "@vaadin.com");
         person.setName("Person " + index);
         person.setAge(13 + random.nextInt(50));
+        person.setGender(Gender.getRandomCGender());
 
         return person;
     }

@@ -4,8 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Platform;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.testbench.annotations.BrowserConfiguration;
@@ -74,4 +77,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
                 BrowserUtil.chrome(), BrowserUtil.edge(), BrowserUtil.safari());
     }
 
+    protected void doubleClickOn(WebElement element) {
+        Actions action = new Actions(getDriver());
+        action.doubleClick(element).perform();
+    }
 }

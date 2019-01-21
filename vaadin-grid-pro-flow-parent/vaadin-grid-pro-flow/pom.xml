@@ -61,11 +61,11 @@
         </dependency>
 
         <!--Webjar-->
-        <!--<dependency>-->
-            <!--<groupId>com.vaadin.webjar</groupId>-->
-            <!--<artifactId>vaadin-grid-pro</artifactId>-->
-            <!--<version>1.0.0</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.vaadin.webjar</groupId>
+            <artifactId>vaadin-grid-pro</artifactId>
+            <version>1.0.0-alpha3</version>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-grid-flow</artifactId>

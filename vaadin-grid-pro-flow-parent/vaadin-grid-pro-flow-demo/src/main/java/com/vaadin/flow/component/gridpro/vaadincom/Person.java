@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.gridpro.examples;
+package com.vaadin.flow.component.gridpro.vaadincom;
 
 import java.io.Serializable;
 
@@ -8,20 +8,6 @@ public class Person implements Serializable {
     private String name;
     private boolean isSubscriber;
     private String email;
-    private Gender gender;
-
-    public Person() {
-        super();
-    }
-
-    public Person(String name, boolean isSubscriber, String email, int age, Gender gender) {
-        super();
-        this.name = name;
-        this.isSubscriber = isSubscriber;
-        this.email = email;
-        this.age = age;
-        this.gender = gender;
-    }
 
     public int getId() {
         return id;
@@ -61,14 +47,6 @@ public class Person implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public Gender getGender() {
-        return gender;
-    }
-
-    public void setGender(Gender gender) {
-        this.gender = gender;
     }
 
     @Override
