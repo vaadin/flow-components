@@ -19,7 +19,7 @@ public class LoginI18nTest {
         Assert.assertEquals("Check that you have entered the correct username and password and try again.",
                 i18n.getErrorMessage().getMessage());
 
-        Assert.assertEquals("In case you need to provide some additional info for the user.",
+        Assert.assertEquals(null,
                 i18n.getAdditionalInformation());
     }
 }
