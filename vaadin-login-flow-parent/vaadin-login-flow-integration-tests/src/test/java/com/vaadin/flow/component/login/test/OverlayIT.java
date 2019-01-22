@@ -31,8 +31,8 @@ public class OverlayIT extends BasicIT {
     }
 
     @Override
-    public void testDefaultStrings() {
-        super.testDefaultStrings();
+    public void testDefaults() {
+        super.testDefaults();
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
         Assert.assertEquals("App name", loginOverlay.getTitle());
         Assert.assertEquals("Application description", loginOverlay.getDescription());

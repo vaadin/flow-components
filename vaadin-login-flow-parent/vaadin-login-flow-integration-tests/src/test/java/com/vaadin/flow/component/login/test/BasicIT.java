@@ -20,7 +20,7 @@ public abstract class BasicIT extends AbstractParallelTest {
     public abstract LoginElement getLogin();
 
     @Test
-    public void testDefaultStrings() {
+    public void testDefaults() {
         LoginElement login = getLogin();
 
         Assert.assertEquals("Log in", login.getFormTitle());
@@ -30,6 +30,7 @@ public abstract class BasicIT extends AbstractParallelTest {
             Assert.assertEquals("", login.getErrorMessage());
         }
         Assert.assertEquals("Forgot password", login.getForgotPasswordButton().getText());
+        Assert.assertFalse(getLogin().getForgotPasswordButton().hasAttribute("hidden"));
         Assert.assertEquals("", login.getAdditionalInformation());
     }
 
@@ -46,6 +47,13 @@ public abstract class BasicIT extends AbstractParallelTest {
         submit.run();
         String notification = $(NotificationElement.class).waitForFirst().getText();
         Assert.assertEquals("Successful login", notification);
+    }
+
+    @Test
+    public void testNoForgotPasswordButton() {
+        getDriver().get(getBaseURL() + "/no-forgot-password");
+
+        Assert.assertTrue(getLogin().getForgotPasswordButton().hasAttribute("hidden"));
     }
 
 }

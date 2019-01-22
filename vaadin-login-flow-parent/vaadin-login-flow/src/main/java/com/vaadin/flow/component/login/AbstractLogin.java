@@ -45,12 +45,17 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
 
     private static final String LOGIN_EVENT = "login";
 
+    private static final String PROP_ACTION = "action";
+    private static final String PROP_DISABLED = "disabled";
+    private static final String PROP_ERROR = "error";
+    private static final String PROP_NO_FORGOT_PASSWORD = "noForgotPassword";
+
     /**
      * Initializes a new AbstractLogin with a default localization.
      */
     public AbstractLogin() {
         this(LoginI18n.createDefault());
-        getElement().synchronizeProperty("disabled", LOGIN_EVENT);
+        getElement().synchronizeProperty(PROP_DISABLED, LOGIN_EVENT);
         addLoginListener(e -> {
             setEnabled(false);
             setError(false);
@@ -73,7 +78,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @see #getAction()
      */
     public void setAction(String action) {
-        getElement().setProperty("action", action);
+        getElement().setProperty(PROP_ACTION, action);
     }
 
     /**
@@ -81,9 +86,9 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *
      * @return the value of action property
      */
-    @Synchronize(property = "action", value = "action-changed")
+    @Synchronize(property = PROP_ACTION, value = "action-changed")
     public String getAction() {
-        return getElement().getProperty("action");
+        return getElement().getProperty(PROP_ACTION);
     }
 
     /**
@@ -93,7 +98,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @see #isError()
      */
     public void setError(boolean error) {
-        getElement().setProperty("error", error);
+        getElement().setProperty(PROP_ERROR, error);
     }
 
     /**
@@ -101,11 +106,32 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *
      * @return the value of error property
      */
-    @Synchronize(property = "error", value = "error-changed")
+    @Synchronize(property = PROP_ERROR, value = "error-changed")
     public boolean isError() {
-        return getElement().getProperty("error", false);
+        return getElement().getProperty(PROP_ERROR, false);
     }
 
+    /**
+     * Sets whether to show or hide the forgot password button.
+     * The button is visible by default
+     *
+     * @see #isForgotPasswordButtonVisible()
+     *
+     * @param forgotPasswordButtonVisible whether to display or hide the button
+     */
+    public void setForgotPasswordButtonVisible(boolean forgotPasswordButtonVisible) {
+        getElement().setProperty(PROP_NO_FORGOT_PASSWORD, !forgotPasswordButtonVisible);
+    }
+
+    /**
+     * Returns whether the forgot password button is visible or not
+     *
+     * @return {@code true} if the forgot password button is visible
+     *         {@code false} otherwise
+     */
+    public boolean isForgotPasswordButtonVisible() {
+        return !getElement().getProperty(PROP_NO_FORGOT_PASSWORD, false);
+    }
 
     /**
      * Sets the internationalized messages to be used by this instance.
@@ -174,6 +200,6 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
 
     @Override
     public void onEnabledStateChanged(boolean enabled) {
-        getElement().setProperty("disabled", !enabled);
+        getElement().setProperty(PROP_DISABLED, !enabled);
     }
 }

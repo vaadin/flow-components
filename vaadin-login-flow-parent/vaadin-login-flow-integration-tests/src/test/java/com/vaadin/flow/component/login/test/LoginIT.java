@@ -27,8 +27,8 @@ public class LoginIT extends BasicIT {
     }
 
     @Override
-    public void testDefaultStrings() {
-        super.testDefaultStrings();
+    public void testDefaults() {
+        super.testDefaults();
         LoginElement login = getLogin();
         checkLoginForm(login.getUsernameField(), login.getPasswordField(), login.getSubmitButton());
     }
@@ -124,5 +124,4 @@ public class LoginIT extends BasicIT {
         Assert.assertTrue("Redirect didn't happened on login",
                 getDriver().getCurrentUrl().endsWith("process-login-here"));
     }
-
 }
