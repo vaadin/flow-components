@@ -57,7 +57,31 @@ public class DetailsElement extends TestBenchElement {
 		return getContent().getText();
 	}
 
+	/**
+	 * Whether the details are opened or not
+	 */
 	public boolean isOpened() {
 		return getPropertyBoolean("opened");
+	}
+
+	/**
+	 * Whether the component is enabled or not
+	 */
+	public boolean isEnabled() {
+		return !getPropertyBoolean("disabled");
+	}
+
+	/**
+	 * Returns a wrapper of the summary component
+	 */
+	public TestBenchElement getSummaryWrapper() {
+		return $(TestBenchElement.class).attribute("part", "summary").first();
+	}
+
+	/**
+	 * Expands or collapses the details
+	 */
+	public void toggle() {
+		getSummaryWrapper().click();
 	}
 }

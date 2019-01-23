@@ -21,6 +21,7 @@ package com.vaadin.flow.component.details;
  */
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -28,7 +29,7 @@ import com.vaadin.flow.component.html.Span;
 
 @Tag("vaadin-details")
 @HtmlImport("frontend://bower_components/vaadin-details/src/vaadin-details.html")
-public class Details extends Component {
+public class Details extends Component implements HasEnabled {
 
     private Component summary;
     private Component content;

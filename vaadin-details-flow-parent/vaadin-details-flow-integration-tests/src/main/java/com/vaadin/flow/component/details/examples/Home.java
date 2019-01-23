@@ -18,6 +18,12 @@ public class Home extends Div {
         detailsText.setSummaryText("Summary Text");
         detailsText.setContentText("Content Text");
 
-        add(details, detailsText);
+        Details detailsDisabled = new Details();
+        detailsDisabled.setOpened(true);
+        detailsDisabled.setEnabled(false);
+        detailsDisabled.setSummaryText("Disabled heading");
+        detailsDisabled.setContentText("Always visible content");
+
+        add(details, detailsText, detailsDisabled);
     }
 }
