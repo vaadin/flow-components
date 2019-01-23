@@ -465,9 +465,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
             userProvidedFilter = UserProvidedFilter.YES;
         }
-        
+
         runBeforeClientResponse(ui -> ui.getPage().executeJavaScript("window.Vaadin.Flow.comboBoxConnector.initLazy($0);", getElement()));
-        
+
         if (dataCommunicator == null) {
             dataCommunicator = new DataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> getElement()
