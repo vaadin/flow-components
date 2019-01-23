@@ -38,6 +38,8 @@ import com.vaadin.flow.shared.Registration;
  * Disabled component stops to process login events, however
  * the {@link Login.ForgotPasswordEvent} event is processed anyway.
  * To enable use the {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)} method.
+ * Setting error {@link #setError(boolean)} true makes component automatically enabled for
+ * the next login attempt.
  *
  * @author Vaadin Ltd
  */
@@ -96,9 +98,16 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * The message can be set via {@link #setI18n(LoginI18n)}
      *
      * @see #isError()
+     *
+     * @param error
+     *            {@code true} to show the error message and enable component for next login attempt,
+     *            {@code false} to hide an error
      */
     public void setError(boolean error) {
         getElement().setProperty(PROP_ERROR, error);
+        if (error) {
+            setEnabled(true);
+        }
     }
 
     /**

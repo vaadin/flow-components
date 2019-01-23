@@ -111,6 +111,15 @@ public class LoginIT extends BasicIT {
         Assert.assertEquals("Incorrect username or password", login.getErrorMessageTitle());
         Assert.assertEquals("Check that you have entered the correct username and password and try again.",
                 login.getErrorMessage());
+
+        Assert.assertTrue(login.isEnabled());
+        login.submit();
+        Assert.assertTrue(login.isEnabled());
+        login.submit();
+
+        // Should be disabled after 3 attempts
+        // TODO Uncomment when client part wil be able to set Error without autoEnable
+        // Assert.assertFalse(login.isEnabled());
     }
 
     @Test

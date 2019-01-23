@@ -7,6 +7,8 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public abstract class AbstractView extends Div implements HasUrlParameter<String> {
 
     private AbstractLogin login;
@@ -24,15 +26,19 @@ public abstract class AbstractView extends Div implements HasUrlParameter<String
             notification.open();
         });
 
+        AtomicInteger failCounter = new AtomicInteger(0);
         login.addLoginListener(e -> {
             if ("username".equals(e.getUsername()) && "password".equals(e.getPassword())) {
+                failCounter.set(0);
                 notification.setText("Successful login");
                 notification.open();
                 return;
             }
 
             login.setError(true);
-            login.setEnabled(true);
+            if (failCounter.incrementAndGet() > 2) {
+                login.setEnabled(false);
+            }
         });
 
         add(login, notification);
