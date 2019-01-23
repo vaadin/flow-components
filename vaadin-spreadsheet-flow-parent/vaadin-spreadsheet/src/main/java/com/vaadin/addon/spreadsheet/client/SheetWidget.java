@@ -4638,9 +4638,15 @@ public class SheetWidget extends Panel {
             cc.hide();
         }
         alwaysVisibleCellComments.clear();
-        cellCommentsMap.clear();
-        cellCommentAuthorsMap.clear();
-        invalidFormulaCells.clear();
+        if (cellCommentsMap != null) {
+            cellCommentsMap.clear();
+        }
+        if (cellCommentAuthorsMap != null) {
+            cellCommentAuthorsMap.clear();
+        }
+        if (invalidFormulaCells != null) {
+            invalidFormulaCells.clear();
+        }
     }
 
     /**
