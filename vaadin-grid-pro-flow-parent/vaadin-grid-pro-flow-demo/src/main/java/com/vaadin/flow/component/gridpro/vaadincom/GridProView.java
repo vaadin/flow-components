@@ -76,9 +76,10 @@ public class GridProView extends DemoView {
         grid.setItems(createItems());
 
         /*
-         * Using EditColumnConfigurator it is possible to allow enter pressing change the row.
+         * It is possible to allow enter pressing change the row by using grid pro method setAllowEnterRowChange.
          */
-        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((modifiedItem, columnPath) -> {}).setAllowEnterRowChange(true)).setHeader("Name (editable)");
+        grid.setAllowEnterRowChange(true);
+        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((modifiedItem, columnPath) -> {})).setHeader("Name (editable)");
         // end-source-example
 
         addCard("Allow Enter Row Change", grid);
@@ -91,9 +92,10 @@ public class GridProView extends DemoView {
         grid.setItems(createItems());
 
         /*
-         * Using EditColumnConfigurator it is possible to preserve edit mode when moving to the next cell.
+         * It is possible to preserve edit mode when moving to the next cell by using grid pro method setPreserveEditMode.
          */
-        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((modifiedItem, columnPath) -> {}).setPreserveEditMode(true)).setHeader("Email (editable)");
+        grid.setPreserveEditMode(true);
+        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((modifiedItem, columnPath) -> {})).setHeader("Email (editable)");
         // end-source-example
 
         addCard("Preserve Edit Mode", grid);

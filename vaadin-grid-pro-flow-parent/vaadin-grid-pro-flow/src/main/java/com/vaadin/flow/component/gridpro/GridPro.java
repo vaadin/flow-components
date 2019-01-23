@@ -149,26 +149,6 @@ public class GridPro<E> extends Grid<E> {
         protected List<String> getOptions() {
             return JsonSerializer.toObjects(String.class,  (JsonArray) getElement().getPropertyRaw("editorOptions"));
         }
-
-        protected EditColumn<T> setAllowEnterRowChange(Boolean allowEnterRowChange) {
-            getElement().setProperty("allowEnterRowChange", allowEnterRowChange);
-            return this;
-        }
-
-        @Synchronize("allow-enter-row-change-changed")
-        protected Boolean getAllowEnterRowChange() {
-            return getElement().getProperty("allowEnterRowChange", false);
-        }
-
-        protected EditColumn<T> setPreserveEditMode(Boolean preserveEditMode) {
-            getElement().setProperty("preserveEditMode", preserveEditMode);
-            return this;
-        }
-
-        @Synchronize("preserve-edit-mode-changed")
-        protected Boolean getPreserveEditMode() {
-            return getElement().getProperty("preserveEditMode", false);
-        }
     }
 
     /**
@@ -192,6 +172,38 @@ public class GridPro<E> extends Grid<E> {
         EditColumn<E> column = this.addColumn(valueProvider, this::createEditColumn);
 
         return configureEditColumn(column, columnConfigurator);
+    }
+
+    /**
+     * Sets allowEnterRowChange value for this grid.
+     *
+     * @param allowEnterRowChange
+     *            when <code>true</code>, after moving to next editable cell using
+     *            Tab / Enter, it will be focused in edit mode
+     */
+    public void setAllowEnterRowChange(Boolean allowEnterRowChange) {
+        getElement().setProperty("allowEnterRowChange", allowEnterRowChange);
+    }
+
+    @Synchronize("allow-enter-row-change-changed")
+    public Boolean getAllowEnterRowChange() {
+        return getElement().getProperty("allowEnterRowChange", false);
+    }
+
+    /**
+     * Sets preserveEditMode value for this grid.
+     *
+     * @param preserveEditMode
+     *            when <code>true</code>, pressing Enter while in cell edit mode
+     *            will move focus to the editable cell in the next row
+     */
+    public void setPreserveEditMode(Boolean preserveEditMode) {
+        getElement().setProperty("preserveEditMode", preserveEditMode);
+    }
+
+    @Synchronize("preserve-edit-mode-changed")
+    public Boolean getPreserveEditMode() {
+        return getElement().getProperty("preserveEditMode", false);
     }
 
     /**
@@ -256,14 +268,6 @@ public class GridPro<E> extends Grid<E> {
         column.setEditorType(columnConfigurator.getType());
         column.setHandler(columnConfigurator.getHandler());
         column.setOptions(columnConfigurator.getOptions());
-
-        if(columnConfigurator.getAllowEnterRowChange() != null) {
-            column.setAllowEnterRowChange(columnConfigurator.getAllowEnterRowChange());
-        }
-
-        if(columnConfigurator.getPreserveEditMode() != null) {
-            column.setPreserveEditMode(columnConfigurator.getPreserveEditMode());
-        }
 
         return column;
     }

@@ -84,18 +84,6 @@ public class GridProEditColumnTest {
     }
 
     @Test
-    public void setAllowEnterRowChange_getAllowEnterRowChange() {
-        textColumn.setAllowEnterRowChange(true);
-        Assert.assertEquals(selectColumn.getAllowEnterRowChange(), true);
-    }
-
-    @Test
-    public void setPreserveEditMode_getPreserveEditMode() {
-        textColumn.setPreserveEditMode(true);
-        Assert.assertEquals(selectColumn.getPreserveEditMode(), true);
-    }
-
-    @Test
     public void addColumn_changeEditorType() {
         GridPro<Person> grid = new GridPro<>();
 

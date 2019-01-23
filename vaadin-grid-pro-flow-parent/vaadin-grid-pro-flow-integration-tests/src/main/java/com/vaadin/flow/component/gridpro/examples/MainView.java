@@ -45,7 +45,7 @@ public class MainView extends VerticalLayout {
         grid.addEditColumn(Person::getGender, EditColumnConfigurator.select((modifiedItem, columnPath) -> {
             itemDisplayPanel.setText(modifiedItem.toString());
             subPropertyDisplayPanel.setText(columnPath.toString());
-        }, listOptions).setAllowEnterRowChange(true).setPreserveEditMode(true)).setHeader("Gender").setWidth("300px");
+        }, listOptions)).setHeader("Gender").setWidth("300px");
 
         add(grid, itemDisplayPanel, subPropertyDisplayPanel);
     }

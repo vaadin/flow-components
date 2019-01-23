@@ -35,9 +35,6 @@ public class EditColumnConfigurator {
     private EditorType type;
     private List<String> options;
 
-    private Boolean preserveEditMode;
-    private Boolean allowEnterRowChange;
-
     private EditColumnConfigurator(SerializableBiConsumer<Object, String> handler, EditorType type, List<String> options) {
         this.handler = handler;
         this.type = type;
@@ -54,38 +51,6 @@ public class EditColumnConfigurator {
 
     protected List<String> getOptions() {
         return this.options;
-    }
-
-    /**
-     * Sets preserveEditMode value for this column configurator.
-     *
-     * @param preserveEditMode
-     *            when <code>true</code>, pressing Enter while in cell edit mode
-     *            will move focus to the editable cell in the next row
-     */
-    public EditColumnConfigurator setPreserveEditMode(Boolean preserveEditMode) {
-        this.preserveEditMode = preserveEditMode;
-        return this;
-    }
-
-    protected Boolean getPreserveEditMode() {
-        return this.preserveEditMode;
-    }
-
-    /**
-     * Sets allowEnterRowChange value for this column configurator.
-     *
-     * @param allowEnterRowChange
-     *            when <code>true</code>, after moving to next editable cell using
-     *            Tab / Enter, it will be focused in edit mode
-     */
-    public EditColumnConfigurator setAllowEnterRowChange(Boolean allowEnterRowChange) {
-        this.allowEnterRowChange = allowEnterRowChange;
-        return this;
-    }
-
-    protected Boolean getAllowEnterRowChange() {
-        return this.allowEnterRowChange;
     }
 
     /**

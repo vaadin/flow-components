@@ -27,23 +27,7 @@ public class GridProEditColumnConfiguratorTest {
         listOptions.add("bar");
         listOptions.add("baz");
     }
-
-    @Test
-    public void setConfiguratorPreserveEditMode_getConfiguratorPreserveEditMode() {
-        configurator = EditColumnConfigurator.text(testConsumer);
-
-        configurator.setPreserveEditMode(true);
-        Assert.assertEquals(configurator.getPreserveEditMode(), true);
-    }
-
-    @Test
-    public void setConfiguratorAllowEnterRowChange_getConfiguratorAllowEnterRowChange() {
-        configurator = EditColumnConfigurator.text(testConsumer);
-
-        configurator.setAllowEnterRowChange(true);
-        Assert.assertEquals(configurator.getAllowEnterRowChange(), true);
-    }
-
+    
     @Test
     public void shouldConfigureTextEditColumnPreset() {
         configurator = EditColumnConfigurator.text(testConsumer);
