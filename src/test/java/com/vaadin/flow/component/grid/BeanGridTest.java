@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid;
 
 import java.util.Collections;
 
+import com.vaadin.flow.data.renderer.Renderer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,10 +35,12 @@ public class BeanGridTest {
     public ExpectedException thrown = ExpectedException.none();
 
     Grid<Person> grid;
+    ExtendedGrid<Person> extendedGrid;
 
     @Before
     public void init() {
         grid = new Grid<>(Person.class);
+        extendedGrid = new ExtendedGrid<>(Person.class);
     }
 
     @Test
@@ -62,6 +65,36 @@ public class BeanGridTest {
         grid.addColumn(property);
         Assert.assertNotNull("Column for sub-property not found by key",
                 grid.getColumnByKey(property));
+    }
+
+    private static class ExtendedColumn<T> extends Column<T> {
+        ExtendedColumn(Grid<T> grid, String columnId, Renderer<T> renderer) {
+            super(grid, columnId, renderer);
+        }
+    }
+
+    private static class ExtendedGrid<T> extends Grid<T> {
+        public ExtendedGrid(Class<T> beanType) {
+            super(beanType, false);
+        }
+
+        public ExtendedColumn<T> createCustomColumn(Renderer<T> renderer, String columnId) {
+            return new ExtendedColumn<>(this, columnId, renderer);
+        }
+    }
+
+    private void assertEqualColumnClasses(Class columnClass, Class compareTo) {
+        Assert.assertNotNull(columnClass);
+        Assert.assertEquals(compareTo, columnClass);
+    }
+
+    @Test
+    public void addRegularColumnAndExtendedColumn() {
+        Column<Person> regularColumn = extendedGrid.addColumn("name");
+        ExtendedColumn<Person> extendedColumn = extendedGrid.addColumn("born", extendedGrid::createCustomColumn);
+
+        assertEqualColumnClasses(regularColumn.getClass(), Column.class);
+        assertEqualColumnClasses(extendedColumn.getClass(), ExtendedColumn.class);
     }
 
     @Test

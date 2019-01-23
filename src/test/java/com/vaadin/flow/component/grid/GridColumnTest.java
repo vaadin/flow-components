@@ -29,6 +29,10 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.function.SerializableComparator;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+
 public class GridColumnTest {
 
     Grid<String> grid;
@@ -234,9 +238,66 @@ public class GridColumnTest {
         Assert.assertEquals(ExtendedColumn.class, column.getClass());
     }
 
+    @Test
+    public void addColumn_extendedColumnTypeByOverridingDefaultColumnFactoryGetter() {
+        Grid<Person> extendedGrid = new Grid<Person>() {
+            public ExtendedColumn<Person> createCustomColumn(Renderer<Person> renderer, String columnId) {
+                return new ExtendedColumn<>(this, columnId, renderer);
+            }
+
+            @Override
+            protected BiFunction<Renderer<Person>, String, Column<Person>> getDefaultColumnFactory() {
+                return this::createCustomColumn;
+            }
+        };
+
+        Column<Person> column = extendedGrid.addColumn(Person::toString);
+
+        Assert.assertNotNull(column);
+        Assert.assertEquals(ExtendedColumn.class, column.getClass());
+    }
+
+    @Test
+    public void addColumn_extendedColumnTypeByUsingAddColumnOverload() {
+        ExtendedGrid<Person> extendedGrid = new ExtendedGrid<>();
+
+        List<ExtendedColumn<Person>> columnsList = new ArrayList<>();
+
+        columnsList.add(extendedGrid.addColumn(Person::toString, extendedGrid::createCustomColumn));
+        columnsList.add(extendedGrid.addColumn(TemplateRenderer.of(""), extendedGrid::createCustomColumn));
+        columnsList.add(extendedGrid.addColumn(TemplateRenderer.of(""), extendedGrid::createCustomColumn, ""));
+
+        columnsList.forEach(column -> {
+            Assert.assertNotNull(column);
+            Assert.assertEquals(ExtendedColumn.class, column.getClass());
+        });
+    }
+
+    @Test
+    public void addRegularColumnAndExtendedColumn() {
+        ExtendedGrid<Person> extendedGrid = new ExtendedGrid<>();
+
+        Column regularColumn = extendedGrid.addColumn(Person::toString);
+        ExtendedColumn extendedColumn = extendedGrid.addColumn(TemplateRenderer.of(""), extendedGrid::createCustomColumn);
+
+        assertEqualColumnClasses(regularColumn.getClass(), Column.class);
+        assertEqualColumnClasses(extendedColumn.getClass(), ExtendedColumn.class);
+    }
+
+    private void assertEqualColumnClasses(Class columnClass, Class compareTo) {
+        Assert.assertNotNull(columnClass);
+        Assert.assertEquals(compareTo, columnClass);
+    }
+
     private static class ExtendedColumn<T> extends Column<T> {
         ExtendedColumn(Grid<T> grid, String columnId, Renderer<T> renderer) {
             super(grid, columnId, renderer);
+        }
+    }
+
+    private static class ExtendedGrid<T> extends Grid<T> {
+        public ExtendedColumn<T> createCustomColumn(Renderer<T> renderer, String columnId) {
+            return new ExtendedColumn<>(this, columnId, renderer);
         }
     }
 }

@@ -28,6 +28,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -1295,9 +1296,41 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
-     * Adds a new text column to this {@link Grid} with a value provider. The
-     * value is converted to String when sent to the client by using
-     * {@link String#valueOf(Object)}.
+     * Adds a new text column to this {@link Grid} with a value provider and
+     * default column factory. The value is converted to String when sent to
+     * the client by using {@link String#valueOf(Object)}.
+     * <p>
+     * <em>NOTE:</em> For displaying components, see
+     * {@link #addComponentColumn(ValueProvider)}. For using build-in renderers,
+     * see {@link #addColumn(Renderer)}.
+     * </p>
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     * <p>
+     * <em>NOTE:</em> This method is a shorthand for {@link #addColumn(ValueProvider, BiFunction)}
+     * </p>
+     *
+     * @param valueProvider
+     *            the value provider
+     * @return the created column
+     * @see #addComponentColumn(ValueProvider)
+     * @see #addColumn(Renderer)
+     * @see #removeColumn(Column)
+     * @see #getDefaultColumnFactory()
+     * @see #addColumn(ValueProvider, BiFunction)
+     */
+    public Column<T> addColumn(ValueProvider<T, ?> valueProvider) {
+        BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
+        return addColumn(valueProvider, defaultFactory);
+    }
+
+    /**
+     * Adds a new text column to this {@link Grid} with a value provider and
+     * column factory provided. The value is converted to String when sent to
+     * the client by using {@link String#valueOf(Object)}.
      * <p>
      * <em>NOTE:</em> For displaying components, see
      * {@link #addComponentColumn(ValueProvider)}. For using build-in renderers,
@@ -1311,18 +1344,21 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *
      * @param valueProvider
      *            the value provider
+     * @param columnFactory
+     *            the method that creates a new column instance for this {@link Grid} instance.
      * @return the created column
+     * @see #addColumn(ValueProvider)
      * @see #addComponentColumn(ValueProvider)
      * @see #addColumn(Renderer)
      * @see #removeColumn(Column)
      */
-    public Column<T> addColumn(ValueProvider<T, ?> valueProvider) {
+    protected <C extends Column<T>> C addColumn(ValueProvider<T, ?> valueProvider, BiFunction<Renderer<T>, String, C> columnFactory) {
         String columnId = createColumnId(false);
 
-        Column<T> column = addColumn(new ColumnPathRenderer<T>(columnId,
+        C column = addColumn(new ColumnPathRenderer<T>(columnId,
                 value -> formatValueToSendToTheClient(
-                        valueProvider.apply(value))));
-        column.comparator = ((a, b) -> compareMaybeComparables(
+                        valueProvider.apply(value))), columnFactory);
+        ((Column<T>)column).comparator = ((a, b) -> compareMaybeComparables(
                 valueProvider.apply(a), valueProvider.apply(b)));
         return column;
     }
@@ -1398,7 +1434,45 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
-     * Adds a new text column to this {@link Grid} with a renderer.
+     * Adds a new text column to this {@link Grid} with a renderer and default
+     * column factory.
+     * <p>
+     * See implementations of the {@link Renderer} interface for built-in
+     * renderer options with type safe APIs. For a renderer using template
+     * binding, use {@link TemplateRenderer#of(String)}.
+     * <p>
+     * <em>NOTE:</em> You can add component columns easily using the
+     * {@link #addComponentColumn(ValueProvider)}, but using
+     * {@link ComponentRenderer} is not as efficient as the built in renderers
+     * or using {@link TemplateRenderer}.
+     * </p>
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     * <p>
+     * <em>NOTE:</em> This method is a shorthand for {@link #addColumn(Renderer, BiFunction)}
+     * </p>
+     *
+     * @param renderer
+     *            the renderer used to create the grid cell structure
+     * @return the created column
+     *
+     * @see #getDefaultColumnFactory()
+     * @see TemplateRenderer#of(String)
+     * @see #addComponentColumn(ValueProvider)
+     * @see #removeColumn(Column)
+     * @see #addColumn(Renderer, BiFunction)
+     */
+    public Column<T> addColumn(Renderer<T> renderer) {
+        BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
+        return addColumn(renderer, defaultFactory);
+    }
+
+    /**
+     * Adds a new text column to this {@link Grid} with a renderer and column
+     * factory provided.
      * <p>
      * See implementations of the {@link Renderer} interface for built-in
      * renderer options with type safe APIs. For a renderer using template
@@ -1417,18 +1491,21 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *
      * @param renderer
      *            the renderer used to create the grid cell structure
+     * @param columnFactory
+     *            the method that creates a new column instance for this {@link Grid} instance.
      * @return the created column
      *
+     * @see #addColumn(Renderer)
      * @see TemplateRenderer#of(String)
      * @see #addComponentColumn(ValueProvider)
      * @see #removeColumn(Column)
      */
-    public Column<T> addColumn(Renderer<T> renderer) {
+    protected <C extends Column<T>> C addColumn(Renderer<T> renderer, BiFunction<Renderer<T>, String, C> columnFactory) {
         String columnId = createColumnId(true);
 
         getDataCommunicator().reset();
 
-        Column<T> column = createColumn(renderer, columnId);
+        C column = columnFactory.apply(renderer, columnId);
         idToColumnMap.put(columnId, column);
         getElement().callFunction("$connector.setColumnId", column.getElement(),
                 columnId);
@@ -1456,16 +1533,30 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @param columnId
      *            internal column id
      * @return column instance
+     * @deprecated This method should not be used outside. {@link #getDefaultColumnFactory} should
+     * be used instead.
      * @see #createColumnId(boolean)
      * @see Renderer
      */
+    @Deprecated
     protected Column<T> createColumn(Renderer<T> renderer, String columnId) {
         return new Column<>(this, columnId, renderer);
     }
 
     /**
-     * Adds a new text column to this {@link Grid} with a template renderer and
-     * sorting properties. The values inside the renderer are converted to JSON
+     * Gives a reference to the column factory.
+     * <p>
+     * This method must not return <code>null</code>.
+     *
+     * @return method for column creation
+     */
+    protected BiFunction<Renderer<T>, String, Column<T>> getDefaultColumnFactory() {
+        return this::createColumn;
+    }
+
+    /**
+     * Adds a new text column to this {@link Grid} with a template renderer, sorting properties
+     * and default column factory. The values inside the renderer are converted to JSON
      * values by using {@link JsonSerializer#toJson(Object)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
@@ -1487,6 +1578,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * {@link Grid#removeColumn(Column)} to avoid sending extra data.
      * </p>
      *
+     * <p>
+     * <strong>Note:</strong> This method is a shorthand for {@link ##addColumn(Renderer, BiFunction, String...)}
+     * </p>
+     *
+     * @see #getDefaultColumnFactory()
+     * @see #addColumn(Renderer, BiFunction, String...)
      * @see #removeColumn(Column)
      *
      * @param renderer
@@ -1497,7 +1594,49 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public Column<T> addColumn(Renderer<T> renderer,
             String... sortingProperties) {
-        Column<T> column = addColumn(renderer);
+        BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
+        return addColumn(renderer, defaultFactory, sortingProperties);
+    }
+
+
+    /**
+     * Adds a new text column to this {@link Grid} with a template renderer, sorting properties
+     * and column factory provided. The values inside the renderer are converted to JSON
+     * values by using {@link JsonSerializer#toJson(Object)}.
+     * <p>
+     * <em>NOTE:</em> You can add component columns easily using the
+     * {@link #addComponentColumn(ValueProvider)}, but using
+     * {@link ComponentRenderer} is not as efficient as the built in renderers
+     * or using {@link TemplateRenderer}.
+     * <p>
+     * This constructor attempts to automatically configure both in-memory and
+     * backend sorting using the given sorting properties and matching those
+     * with the property names used in the given renderer.
+     * <p>
+     * <strong>Note:</strong> if a property of the renderer that is used as a
+     * sorting property does not extend Comparable, no in-memory sorting is
+     * configured for it.
+     *
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     *
+     * @see #addColumn(Renderer, String...)
+     * @see #removeColumn(Column)
+     *
+     * @param renderer
+     *            the renderer used to create the grid cell structure
+     * @param columnFactory
+     *            the method that creates a new column instance for this {@link Grid} instance.
+     * @param sortingProperties
+     *            the sorting properties to use for this column
+     * @return the created column
+     */
+    protected <C extends Column<T>> C addColumn(Renderer<T> renderer, BiFunction<Renderer<T>, String, C> columnFactory,
+            String... sortingProperties) {
+        C column = addColumn(renderer, columnFactory);
 
         Map<String, ValueProvider<T, ?>> valueProviders = renderer
                 .getValueProviders();
@@ -1523,14 +1662,14 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 return nullsLastComparator.compare(aa, bb);
             });
         }
-        column.setComparator(combinedComparator);
+
         return column;
     }
 
     /**
-     * Adds a new column for the given property name. The property values are
-     * converted to Strings in the grid cells. The property's full name will be
-     * used as the {@link Column#setKey(String) column key} and the property
+     * Adds a new column for the given property name with the default column factory.
+     * The property values are converted to Strings in the grid cells. The property's
+     * full name will be used as the {@link Column#setKey(String) column key} and the property
      * caption will be used as the {@link Column#setHeader(String) column
      * header}.
      * <p>
@@ -1550,6 +1689,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * {@link Grid#removeColumn(Column)} to avoid sending extra data.
      * </p>
      *
+     * <p>
+     * <strong>Note:</strong> This method is a shorthand for {@link #addColumn(String, BiFunction)}
+     * </p>
+     *
+     * @see #getDefaultColumnFactory()
+     * @see #addColumn(String, BiFunction)
      * @see #removeColumn(Column)
      *
      * @param propertyName
@@ -1557,6 +1702,43 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @return the created column
      */
     public Column<T> addColumn(String propertyName) {
+        BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
+        return addColumn(propertyName, defaultFactory);
+    }
+
+    /**
+     * Adds a new column for the given property name with the column factory provided.
+     * The property values are converted to Strings in the grid cells. The property's
+     * full name will be used as the {@link Column#setKey(String) column key} and the property
+     * caption will be used as the {@link Column#setHeader(String) column
+     * header}.
+     * <p>
+     * You can add columns for nested properties with dot notation, eg.
+     * <code>"property.nestedProperty"</code>
+     * <p>
+     * If the property is {@link Comparable}, the created column is sortable by
+     * default. This can be changed with the {@link Column#setSortable(boolean)}
+     * method.
+     * <p>
+     * <strong>Note:</strong> This method can only be used for a Grid created
+     * from a bean type with {@link #Grid(Class)}.
+     *
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     *
+     * @see #addColumn(String)
+     * @see #removeColumn(Column)
+     *
+     * @param propertyName
+     *            the property name of the new column, not <code>null</code>
+     * @param columnFactory
+     *            the method that creates a new column instance for this {@link Grid} instance.
+     * @return the created column
+     */
+    protected <C extends Column<T>> C addColumn(String propertyName, BiFunction<Renderer<T>, String, C> columnFactory) {
         checkForBeanGrid();
         Objects.requireNonNull(propertyName, "Property name can't be null");
 
@@ -1567,13 +1749,18 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             throw new IllegalArgumentException("Can't resolve property name '"
                     + propertyName + "' from '" + propertySet + "'");
         }
-        return addColumn(property);
+        return addColumn(property, columnFactory);
     }
 
     private Column<T> addColumn(PropertyDefinition<T, ?> property) {
-        Column<T> column = addColumn(
-                item -> runPropertyValueGetter(property, item))
-                        .setHeader(property.getCaption());
+        BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
+        return addColumn(property, defaultFactory);
+    }
+
+    private <C extends Column<T>> C addColumn(PropertyDefinition<T, ?> property, BiFunction<Renderer<T>, String, C> columnFactory) {
+        C column = (C) addColumn(
+                item -> runPropertyValueGetter(property, item), columnFactory)
+                .setHeader(property.getCaption());
         try {
             column.setKey(property.getName());
         } catch (IllegalArgumentException exception) {
