@@ -35,7 +35,11 @@ public class GridProView extends DemoView {
          */
         grid.addColumn(Person::getName).setHeader("NAME");
 
-        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((obj, str) -> {})).setHeader("Email (editable)");
+        /*
+         * Lambda provided as a parameter for .text() method is a callback function that will
+         * be called when item is changed.
+         */
+        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((modifiedItem, columnPath) -> {})).setHeader("Email (editable)");
         // end-source-example
 
         addCard("Basic Grid Pro", grid);
@@ -51,15 +55,15 @@ public class GridProView extends DemoView {
          * Using EditColumnConfigurator it is possible to define the type of the editor:
          * "text", "checkbox" or "select" and provide needed parameters.
          */
-        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((obj, str) -> {})).setHeader("Name (editable)");
+        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((modifiedItem, columnPath) -> {})).setHeader("Name (editable)");
 
-        grid.addEditColumn(Person::isSubscriber, EditColumnConfigurator.checkbox((obj, str) -> {})).setHeader("Subscriber (editable)");
+        grid.addEditColumn(Person::isSubscriber, EditColumnConfigurator.checkbox((modifiedItem, columnPath) -> {})).setHeader("Subscriber (editable)");
 
         List<String> optionsList = new ArrayList<>();
         optionsList.add("bla-bla@vaadin.com");
         optionsList.add("bla-bla@gmail.com");
         optionsList.add("super-mail@gmail.com");
-        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.select((obj, str) -> {}, optionsList)).setHeader("Email (editable)");
+        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.select((modifiedItem, columnPath) -> {}, optionsList)).setHeader("Email (editable)");
         // end-source-example
 
         addCard("Editor Types", grid);
@@ -74,7 +78,7 @@ public class GridProView extends DemoView {
         /*
          * Using EditColumnConfigurator it is possible to allow enter pressing change the row.
          */
-        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((obj, str) -> {}).setAllowEnterRowChange(true)).setHeader("Name (editable)");
+        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((modifiedItem, columnPath) -> {}).setAllowEnterRowChange(true)).setHeader("Name (editable)");
         // end-source-example
 
         addCard("Allow Enter Row Change", grid);
@@ -89,7 +93,7 @@ public class GridProView extends DemoView {
         /*
          * Using EditColumnConfigurator it is possible to preserve edit mode when moving to the next cell.
          */
-        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((obj, str) -> {}).setPreserveEditMode(true)).setHeader("Email (editable)");
+        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((modifiedItem, columnPath) -> {}).setPreserveEditMode(true)).setHeader("Email (editable)");
         // end-source-example
 
         addCard("Preserve Edit Mode", grid);
