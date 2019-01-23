@@ -105,7 +105,7 @@ public class EditColumnConfigurator {
      *            the callback function allowing to operate with the data
      */
     public static EditColumnConfigurator checkbox(SerializableBiConsumer handler) {
-        return new EditColumnConfigurator(handler, EditorType.BOOLEAN, Collections.emptyList());
+        return new EditColumnConfigurator(handler, EditorType.CHECKBOX, Collections.emptyList());
     }
 
     /**

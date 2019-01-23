@@ -24,9 +24,9 @@ public class GridProEditColumnTest {
 
     @Before
     public void init() {
-        testConsumer = (obj, str) -> {
-            Assert.assertNotNull(obj);
-            Assert.assertNotNull(str);
+        testConsumer = (modifiedItem, columnPath) -> {
+            Assert.assertNotNull(modifiedItem);
+            Assert.assertNotNull(columnPath);
         };
 
         grid = new GridPro<>();
@@ -65,14 +65,14 @@ public class GridProEditColumnTest {
 
     @Test
     public void setHandler_getHandler() {
-        SerializableBiConsumer testConsumer = (obj, str) -> {};
+        SerializableBiConsumer testConsumer = (modifiedItem, columnPath) -> {};
         checkboxColumn.setHandler(testConsumer);
         Assert.assertEquals(checkboxColumn.getHandler(), testConsumer);
     }
 
     @Test
     public void setEditorType_getEditorType() {
-        EditorType editorType = EditorType.BOOLEAN;
+        EditorType editorType = EditorType.CHECKBOX;
         textColumn.setEditorType(editorType);
         Assert.assertEquals(textColumn.getEditorType(), editorType.getTypeName());
     }
@@ -99,10 +99,9 @@ public class GridProEditColumnTest {
     public void addColumn_changeEditorType() {
         GridPro<Person> grid = new GridPro<>();
 
-        GridPro.EditColumn<Person> nameColumn = grid.addEditColumn(Person::getName, EditColumnConfigurator.text((obj, str) -> {
-        }));
-        nameColumn.setEditorType(EditorType.BOOLEAN);
-        Assert.assertEquals(nameColumn.getEditorType(), EditorType.BOOLEAN.getTypeName());
+        GridPro.EditColumn<Person> nameColumn = grid.addEditColumn(Person::getName, EditColumnConfigurator.text((modifiedItem, columnPath) -> {}));
+        nameColumn.setEditorType(EditorType.CHECKBOX);
+        Assert.assertEquals(nameColumn.getEditorType(), EditorType.CHECKBOX.getTypeName());
 
         nameColumn.setEditorType(EditorType.SELECT);
         Assert.assertEquals(nameColumn.getEditorType(), EditorType.SELECT.getTypeName());
@@ -113,8 +112,7 @@ public class GridProEditColumnTest {
 
     @Test
     public void addEditColumn_returnsNonNullAndEditColumnType() {
-        GridPro.EditColumn column = new GridPro<Person>().addEditColumn(str -> str, EditColumnConfigurator.text((obj, str) -> {
-        }));
+        GridPro.EditColumn column = new GridPro<Person>().addEditColumn(str -> str, EditColumnConfigurator.text((modifiedItem, columnPath) -> {}));
         Assert.assertNotNull(column);
         Assert.assertEquals(GridPro.EditColumn.class, column.getClass());
     }

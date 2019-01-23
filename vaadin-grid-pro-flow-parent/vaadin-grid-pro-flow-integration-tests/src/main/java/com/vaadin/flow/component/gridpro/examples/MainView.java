@@ -1,11 +1,9 @@
 package com.vaadin.flow.component.gridpro.examples;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.gridpro.EditColumnConfigurator;
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
 import java.util.ArrayList;
@@ -30,23 +28,23 @@ public class MainView extends VerticalLayout {
 
         grid.addColumn(Person::getName).setHeader("NAME");
 
-        grid.addEditColumn(Person::getAge, EditColumnConfigurator.text((obj, string) -> {
-            itemDisplayPanel.setText(obj.toString());
-            subPropertyDisplayPanel.setText(string.toString());
+        grid.addEditColumn(Person::getAge, EditColumnConfigurator.text((modifiedItem, columnPath) -> {
+            itemDisplayPanel.setText(modifiedItem.toString());
+            subPropertyDisplayPanel.setText(columnPath.toString());
         })).setHeader("Age").setWidth("300px");
 
-        grid.addEditColumn(Person::isSubscriber, EditColumnConfigurator.checkbox((obj, string) -> {
-            itemDisplayPanel.setText(obj.toString());
-            subPropertyDisplayPanel.setText(string.toString());
+        grid.addEditColumn(Person::isSubscriber, EditColumnConfigurator.checkbox((modifiedItem, columnPath) -> {
+            itemDisplayPanel.setText(modifiedItem.toString());
+            subPropertyDisplayPanel.setText(columnPath.toString());
         })).setHeader("Subscriber").setWidth("300px");
 
         List<String> listOptions = new ArrayList<>();
         listOptions.add("Male");
         listOptions.add("Female");
         listOptions.add("Unknown");
-        grid.addEditColumn(Person::getGender, EditColumnConfigurator.select((obj, string) -> {
-            itemDisplayPanel.setText(obj.toString());
-            subPropertyDisplayPanel.setText(string.toString());
+        grid.addEditColumn(Person::getGender, EditColumnConfigurator.select((modifiedItem, columnPath) -> {
+            itemDisplayPanel.setText(modifiedItem.toString());
+            subPropertyDisplayPanel.setText(columnPath.toString());
         }, listOptions).setAllowEnterRowChange(true).setPreserveEditMode(true)).setHeader("Gender").setWidth("300px");
 
         add(grid, itemDisplayPanel, subPropertyDisplayPanel);

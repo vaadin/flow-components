@@ -21,7 +21,7 @@ package com.vaadin.flow.component.gridpro;
  * Set of editor types applicable for editor of the {@code vaadin-grid-edit-column} component.
  */
 public enum EditorType {
-    TEXT("text"), BOOLEAN("boolean"), SELECT("select");
+    TEXT("text"), CHECKBOX("checkbox"), SELECT("select");
 
     private final String type;
 

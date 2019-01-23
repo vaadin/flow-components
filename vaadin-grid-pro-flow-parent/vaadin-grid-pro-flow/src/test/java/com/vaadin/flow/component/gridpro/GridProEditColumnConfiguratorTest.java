@@ -21,7 +21,7 @@ public class GridProEditColumnConfiguratorTest {
 
     @Before
     public void init() {
-        testConsumer = (obj, str) -> {};
+        testConsumer = (modifiedItem, columnPath) -> {};
         listOptions = new ArrayList<String>();
         listOptions.add("foo");
         listOptions.add("bar");
@@ -56,7 +56,7 @@ public class GridProEditColumnConfiguratorTest {
     public void shouldConfigureCheckboxEditColumnPreset() {
         configurator = EditColumnConfigurator.checkbox(testConsumer);
 
-        Assert.assertEquals(configurator.getType(), EditorType.BOOLEAN);
+        Assert.assertEquals(configurator.getType(), EditorType.CHECKBOX);
         Assert.assertEquals(configurator.getHandler(), testConsumer);
     }
 
