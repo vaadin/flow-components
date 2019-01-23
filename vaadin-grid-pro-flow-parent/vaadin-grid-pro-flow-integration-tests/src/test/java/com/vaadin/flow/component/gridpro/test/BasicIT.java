@@ -29,17 +29,17 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void textEditorIsUsedForTextColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-grid-pro-edit-column-text-field");
+        AssertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-grid-pro-edit-text-field");
     }
 
     @Test
-    public void checkboxEditorIsUsedForTextColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-grid-pro-edit-column-checkbox");
+    public void checkboxEditorIsUsedForCheckboxColumn() {
+        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-grid-pro-edit-checkbox");
     }
 
     @Test
-    public void selectEditorIsUsedForTextColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 3, "vaadin-grid-pro-edit-column-select-wrapper");
+    public void selectEditorIsUsedForSelectColumn() {
+        AssertCellEnterEditModeOnDoubleClick(0, 3, "vaadin-grid-pro-edit-select-wrapper");
     }
 
     @Test
@@ -58,7 +58,7 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertFalse(cell.innerHTMLContains(editorTag));
 
         // Entering edit mode with double click
-        doubleClickOn(cell);
+        cell.doubleClick();
         WebElement editor = cell.getFirstSlottedElement();
 
         Assert.assertEquals(editor.getTagName(), editorTag);

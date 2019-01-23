@@ -79,9 +79,4 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return Arrays.asList(ie11Windows8_1, BrowserUtil.firefox(),
                 BrowserUtil.chrome(), BrowserUtil.edge(), safari);
     }
-
-    protected void doubleClickOn(WebElement element) {
-        Actions action = new Actions(getDriver());
-        action.doubleClick(element).perform();
-    }
 }
