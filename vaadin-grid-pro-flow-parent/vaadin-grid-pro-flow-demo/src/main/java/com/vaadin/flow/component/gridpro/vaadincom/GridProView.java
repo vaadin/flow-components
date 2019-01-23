@@ -35,10 +35,7 @@ public class GridProView extends DemoView {
          */
         grid.addColumn(Person::getName).setHeader("NAME");
 
-        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((obj, str) -> {
-            System.out.println(obj);
-            System.out.println(str);
-        })).setHeader("Email (editable)");
+        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((obj, str) -> {})).setHeader("Email (editable)");
         // end-source-example
 
         addCard("Basic Grid Pro", grid);
@@ -54,24 +51,15 @@ public class GridProView extends DemoView {
          * Using EditColumnConfigurator it is possible to define the type of the editor:
          * "text", "checkbox" or "select" and provide needed parameters.
          */
-        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((obj, str) -> {
-            System.out.println(obj);
-            System.out.println(str);
-        })).setHeader("Name (editable)");
+        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((obj, str) -> {})).setHeader("Name (editable)");
 
-        grid.addEditColumn(Person::getAge, EditColumnConfigurator.checkbox((obj, str) -> {
-            System.out.println(obj);
-            System.out.println(str);
-        })).setHeader("Age (editable)");
+        grid.addEditColumn(Person::isSubscriber, EditColumnConfigurator.checkbox((obj, str) -> {})).setHeader("Subscriber (editable)");
 
         List<String> optionsList = new ArrayList<>();
         optionsList.add("bla-bla@vaadin.com");
         optionsList.add("bla-bla@gmail.com");
         optionsList.add("super-mail@gmail.com");
-        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.select((obj, str) -> {
-            System.out.println(obj);
-            System.out.println(str);
-        }, optionsList)).setHeader("Email (editable)");
+        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.select((obj, str) -> {}, optionsList)).setHeader("Email (editable)");
         // end-source-example
 
         addCard("Editor Types", grid);
@@ -86,10 +74,7 @@ public class GridProView extends DemoView {
         /*
          * Using EditColumnConfigurator it is possible to allow enter pressing change the row.
          */
-        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((obj, str) -> {
-            System.out.println(obj);
-            System.out.println(str);
-        }).setAllowEnterRowChange(true)).setHeader("Email (editable)");
+        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((obj, str) -> {}).setAllowEnterRowChange(true)).setHeader("Name (editable)");
         // end-source-example
 
         addCard("Allow Enter Row Change", grid);
@@ -104,10 +89,7 @@ public class GridProView extends DemoView {
         /*
          * Using EditColumnConfigurator it is possible to preserve edit mode when moving to the next cell.
          */
-        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((obj, str) -> {
-            System.out.println(obj);
-            System.out.println(str);
-        }).setPreserveEditMode(true)).setHeader("Email (editable)");
+        grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((obj, str) -> {}).setPreserveEditMode(true)).setHeader("Email (editable)");
         // end-source-example
 
         addCard("Preserve Edit Mode", grid);
@@ -123,9 +105,10 @@ public class GridProView extends DemoView {
     private static Person createPerson(int index, Random random) {
         Person person = new Person();
         person.setId(index);
-        person.setEmail("bla-bla@" + index);
+        person.setEmail("person" + index + "@vaadin.com");
         person.setName("Person " + index);
         person.setAge(13 + random.nextInt(50));
+        person.setGender(Gender.getRandomCGender());
 
         return person;
     }

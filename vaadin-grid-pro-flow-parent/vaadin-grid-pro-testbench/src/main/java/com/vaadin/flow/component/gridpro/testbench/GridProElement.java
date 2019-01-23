@@ -22,11 +22,6 @@ import com.vaadin.testbench.elementsbase.Element;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
-
 /**
  * A TestBench element representing a <code>&lt;vaadin-grid-pro&gt;</code> element.
  */
@@ -43,15 +38,6 @@ public class GridProElement extends TestBenchElement {
     }
 
     /**
-     * Gets the page size used when fetching data.
-     *
-     * @return the page size
-     */
-    public int getPageSize() {
-        return getPropertyInteger("pageSize");
-    }
-
-    /**
      * Gets the index of the first row which is at least partially visible.
      *
      * @return the index of the first visible row
@@ -60,15 +46,6 @@ public class GridProElement extends TestBenchElement {
         return ((Long) executeScript(
                 "return arguments[0]._firstVisibleIndex+arguments[0]._vidxOffset",
                 this)).intValue();
-    }
-
-    /**
-     * Gets the total number of rows.
-     *
-     * @return the number of rows
-     */
-    public int getRowCount() {
-        return getPropertyDouble("_effectiveSize").intValue();
     }
 
     /**
@@ -107,36 +84,6 @@ public class GridProElement extends TestBenchElement {
 
         GridTRElement row = getRow(rowIndex);
         return row.getCell(column);
-    }
-
-    /**
-     * Finds the first cell inside the rendered range with a text content
-     * matching the given string.
-     *
-     * @param contents
-     *            the string to look for
-     * @return a grid cell containing the given string
-     * @throws NoSuchElementException
-     *             if no cell with the given string was found
-     */
-    public GridTHTDElement getCell(String contents)
-            throws NoSuchElementException {
-
-        String script = "const grid = arguments[0];"
-                + "const contents = arguments[1];"
-                + "const rowsInDom = Array.from(arguments[0].$.items.children);"
-                + "var tds = [];"
-                + "rowsInDom.forEach(function(tr) { Array.from(tr.children).forEach(function(td) { tds.push(td);})});"
-                + "const matches = tds.filter(function(td) { return td._content.textContent == contents});"
-                + "return matches.length ? matches[0] : null;";
-        TestBenchElement td = (TestBenchElement) executeScript(script, this,
-                contents);
-        if (td == null) {
-            throw new NoSuchElementException(
-                    "No cell with text content '" + contents + "' found");
-        }
-
-        return td.wrap(GridTHTDElement.class);
     }
 
     /**
@@ -182,23 +129,6 @@ public class GridProElement extends TestBenchElement {
                 .wrap(GridTRElement.class);
     }
 
-    /**
-     * Gets all columns defined for the grid, including any selection checkbox
-     * column.
-     *
-     * @return a list of grid column elements which can be used to refer to the
-     *         given column
-     */
-    public List<GridProColumnElement> getAllColumns() {
-        generatedColumnIdsIfNeeded();
-        String getVisibleColumnsJS = "return arguments[0]._getColumns().sort(function(a,b) { return a._order - b._order;}).map(function(column) { return column.__generatedTbId;});";
-        @SuppressWarnings("unchecked")
-        List<Long> elements = (List<Long>) executeScript(getVisibleColumnsJS,
-                this);
-        return elements.stream()
-                .map(generatedId -> new GridProColumnElement(generatedId, this))
-                .collect(Collectors.toList());
-    }
 
     protected void generatedColumnIdsIfNeeded() {
         String generateIds = "const grid = arguments[0];"
@@ -212,7 +142,6 @@ public class GridProElement extends TestBenchElement {
                 + "});";
 
         executeScript(generateIds, this);
-        //
     }
 
     /**
@@ -231,134 +160,4 @@ public class GridProElement extends TestBenchElement {
                 .collect(Collectors.toList());
 
     }
-
-    /**
-     * Gets the column with the given header text.
-     * <p>
-     * If multiple columns are found with the same header text, returns the
-     * first column.
-     *
-     * @param headerText
-     *            the text in the header
-     * @return the grid column element for the given column
-     * @throws NoSuchElementException
-     *             if no column was found
-     */
-    public GridProColumnElement getColumn(String headerText)
-            throws NoSuchElementException {
-        return getVisibleColumns().stream().filter(
-                column -> headerText.equals(column.getHeaderCell().getText()))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException(
-                        "No column with header '" + headerText
-                                + "' was found"));
-    }
-
-    /**
-     * Gets the header cell for the given visible column index.
-     *
-     * @param columnIndex
-     *            the index of the column
-     * @return a cell element for the header cell
-     */
-    public GridTHTDElement getHeaderCell(int columnIndex) {
-        return getVisibleColumns().get(columnIndex).getHeaderCell();
-    }
-
-    /**
-     * Finds the vaadin-grid-cell-content element for the given row and column
-     * in header.
-     *
-     * @param rowIndex
-     *            the index of the row in the header
-     * @param columnIndex
-     *            the index of the column in the header
-     * @return the vaadin-grid-cell-content element for the given row and column
-     *         in header.
-     */
-    public TestBenchElement getHeaderCellContent(int rowIndex,
-                                                 int columnIndex) {
-        WebElement thead = findInShadowRoot(By.id("header")).get(0);
-        List<WebElement> headerRows = thead.findElements(By.tagName("tr"));
-        List<WebElement> headerCells = headerRows.get(rowIndex)
-                .findElements(By.tagName("th"));
-        String slotName = headerCells.get(columnIndex)
-                .findElement(By.tagName("slot")).getAttribute("name");
-
-        return findElement(By.cssSelector(
-                "vaadin-grid-cell-content[slot='" + slotName + "']"));
-    }
-
-    /**
-     * Find all {@link WebElement}s using the given {@link By} selector.
-     *
-     * @param by
-     *            the selector used to find elements
-     * @return a list of found elements
-     */
-    public List<WebElement> findInShadowRoot(By by) {
-        return getShadowRoot().findElements(by);
-    }
-
-    private WebElement getShadowRoot() {
-        waitUntil(driver -> getCommandExecutor()
-                .executeScript("return arguments[0].shadowRoot", this) != null);
-        WebElement shadowRoot = (WebElement) getCommandExecutor()
-                .executeScript("return arguments[0].shadowRoot", this);
-        Assert.assertNotNull("Could not locate shadowRoot in the element",
-                shadowRoot);
-        return shadowRoot;
-    }
-
-    /**
-     * Gets the footer cell for the given visible column index.
-     *
-     * @param columnIndex
-     *            the index of the column
-     * @return a cell element for the footer cell
-     */
-    public GridTHTDElement getFooterCell(int columnIndex) {
-        return getVisibleColumns().get(columnIndex).getFooterCell();
-    }
-
-    /**
-     * Selects the row with the given index.
-     *
-     * @param rowIndex
-     *            the row to select
-     */
-    public void select(int rowIndex) {
-        if (isMultiselect()) {
-            getRow(rowIndex).select();
-        } else {
-            setActiveItem(getRow(rowIndex));
-        }
-    }
-
-    /**
-     * Deselects the row with the given index.
-     *
-     * @param rowIndex
-     *            the row to deselect
-     */
-    public void deselect(int rowIndex) {
-        getRow(rowIndex).deselect();
-    }
-
-    private void setActiveItem(GridTRElement row) {
-        executeScript("arguments[0].activeItem=arguments[1]._item", this, row);
-    }
-
-    /**
-     * Checks if the grid is in multi select mode.
-     *
-     * @return <code>true</code> if the grid is in multi select mode as defined
-     *         by the Flow grid, <code>false</code> otherwise
-     */
-    private boolean isMultiselect() {
-        return (boolean) executeScript(
-                "return arguments[0]._getColumns().filter(function(col) { return typeof col.selectAll != 'undefined';}).length > 0",
-                this);
-    }
-
 }

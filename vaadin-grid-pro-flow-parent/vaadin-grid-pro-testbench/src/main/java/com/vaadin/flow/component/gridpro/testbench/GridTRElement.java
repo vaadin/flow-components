@@ -39,44 +39,4 @@ public class GridTRElement extends TestBenchElement {
         return e == null ? null : e.wrap(GridTHTDElement.class);
     }
 
-    /**
-     * Gets the row details for this row.
-     *
-     * @return the details cell
-     */
-    public GridTHTDElement getDetails() {
-        TestBenchElement e = (TestBenchElement) executeScript(
-                "const grid = arguments[0];" //
-                        + "return Array.from(grid.children)."
-                        + "filter(function(cell) { return cell.getAttribute('part') && cell.getAttribute('part').includes('cell details-cell');})[0]",
-                this);
-        return e == null ? null : e.wrap(GridTHTDElement.class);
-    }
-
-    /**
-     * Checks if the row is selected
-     *
-     * @return <code>true</code> if the row is selected, <code>false</code>
-     *         otherwise
-     */
-    @Override
-    public boolean isSelected() {
-        return hasAttribute("selected");
-    }
-
-    /**
-     * Selects the row if it is not already selected.
-     */
-    public void select() {
-        executeScript("var grid = arguments[0].getRootNode().host;"
-                + "grid.selectItem(arguments[0]._item);", this);
-    }
-
-    /**
-     * Deselects the row if it is selected.
-     */
-    public void deselect() {
-        executeScript("var grid = arguments[0].getRootNode().host;"
-                + "grid.deselectItem(arguments[0]._item);", this);
-    }
 }

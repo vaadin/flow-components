@@ -85,7 +85,7 @@ public class GridPro<E> extends Grid<E> {
     private void setup() {
         addItemPropertyChangedListener(e -> {
             EditColumn<E> column = (EditColumn<E>) this.idToColumnMap.get(e.getPath());
-            column.getHandler().accept(e.getItem(), e.getPath());
+            column.getHandler().accept(e.getSourceItem(), e.getPath());
         });
     }
 
@@ -282,6 +282,7 @@ public class GridPro<E> extends Grid<E> {
     public static class ItemPropertyChangedEvent<E> extends ComponentEvent<GridPro<E>> {
 
         private E item;
+        private JsonObject sourceItem;
         private String path;
 
         /**
@@ -297,6 +298,7 @@ public class GridPro<E> extends Grid<E> {
                                         @EventData("event.detail.item") JsonObject item,
                                         @EventData("event.detail.path") String path) {
             super(source, fromClient);
+            this.sourceItem = item;
             this.item = source.getDataCommunicator()
                     .getKeyMapper().get(item.getString("key"));
             this.path = path;
@@ -304,6 +306,10 @@ public class GridPro<E> extends Grid<E> {
 
         public E getItem() {
             return item;
+        }
+
+        public JsonObject getSourceItem() {
+            return sourceItem;
         }
 
         public String getPath() {

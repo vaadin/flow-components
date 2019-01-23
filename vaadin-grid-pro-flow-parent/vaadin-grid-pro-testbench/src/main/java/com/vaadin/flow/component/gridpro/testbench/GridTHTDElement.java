@@ -17,6 +17,7 @@ package com.vaadin.flow.component.gridpro.testbench;
 
 import java.util.List;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 
@@ -57,30 +58,14 @@ public class GridTHTDElement extends TestBenchElement {
         }
     }
 
-    /**
-     * Gets the text content of the elements assigned to the given slot
-     *
-     * @param slot
-     *            a <code>&lt;slot&gt;</code> element
-     * @return the combined text content of all elements assigned to the given
-     *         slot
-     */
-    protected static String getSlotText(TestBenchElement slot) {
-        List<TestBenchElement> content = (List<TestBenchElement>) slot
-                .callFunction("assignedNodes");
-        StringBuilder text = new StringBuilder();
-        content.forEach(element -> text.append(element.getText()));
-
-        return text.toString();
+    public Boolean innerHTMLContains(String key) {
+        return this.getInnerHTML().contains(key);
     }
 
-    /**
-     * Gets the row index for this grid cell.
-     *
-     * @return the row index
-     */
-    public int getRow() {
-        return getPropertyInteger("parentElement", "index");
+
+    public TestBenchElement getFirstSlottedElement() {
+        List<TestBenchElement> content = (List<TestBenchElement>) this.findElement(By.tagName("slot")).callFunction("assignedNodes");
+        return content.get(0).findElement(By.cssSelector(":first-child"));
     }
 
     /**

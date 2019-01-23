@@ -1,6 +1,6 @@
 package com.vaadin.flow.component.gridpro.testbench;
 
-import com.vaadin.testbench.TestBenchElement;
+import java.util.ArrayList;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-grid-column&gt;</code>
@@ -27,15 +27,13 @@ public class GridProColumnElement {
     }
 
     /**
-     * Gets the header cell for this column.
-     * <p>
-     * A column always has a header cell, even if the header is not shown.
+     * Gets the options List for this column.
      *
-     * @return the header cell for the column
+     * @return the options list
      */
-    public GridTHTDElement getHeaderCell() {
-        return ((TestBenchElement) execJs("return column._headerCell"))
-                .wrap(GridTHTDElement.class);
+    public ArrayList<String> getOptionsList() {
+        ArrayList<String> editorOptions = (ArrayList<String>) execJs("return column.editorOptions");
+        return editorOptions;
     }
 
     private Object execJs(String js) {
@@ -44,18 +42,6 @@ public class GridProColumnElement {
                         + "var generatedId = arguments[1];"
                         + "var column = grid._getColumns().filter(function(column) {return column.__generatedTbId == generatedId;})[0];"
                         + js, grid, __generatedId);
-    }
-
-    /**
-     * Gets the footer cell for this column.
-     * <p>
-     * A column always has a footer cell, even if the footer is not shown.
-     *
-     * @return the footer cell for the column
-     */
-    public GridTHTDElement getFooterCell() {
-        return ((TestBenchElement) execJs("return column._footerCell"))
-                .wrap(GridTHTDElement.class);
     }
 
     @Override
