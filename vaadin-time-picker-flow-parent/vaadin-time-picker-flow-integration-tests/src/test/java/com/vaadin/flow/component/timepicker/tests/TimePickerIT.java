@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
+import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,11 +32,9 @@ import com.vaadin.testbench.TestBenchElement;
  */
 public class TimePickerIT extends ComponentDemoTest {
 
-    private static final String TIMEPICKER_OVERLAY = "vaadin-combo-box-overlay";
-
     @Before
     public void init() {
-        waitForElementPresent(By.tagName("vaadin-time-picker"));
+        $(TimePickerElement.class).waitForFirst();
     }
 
     @Test
@@ -66,14 +65,13 @@ public class TimePickerIT extends ComponentDemoTest {
 
     @Test
     public void TimePickerWithDifferentStep() {
-        TestBenchElement picker = $(TestBenchElement.class)
+        TimePickerElement picker = $(TimePickerElement.class)
                 .id("step-setting-picker");
         picker.scrollIntoView();
-        openPickerDropDown(picker);
-        waitForElementPresent(By.tagName("vaadin-combo-box-overlay"));
+        picker.openDropDown();
         Assert.assertEquals("Item in the dropdown is not correct", "1:00 AM",
-                findItemText(1));
-        closePickerDropDown(picker);
+                picker.getItemText(1));
+        picker.closeDropDown();
         executeScript("arguments[0].value = '12:31'", picker);
 
         selectStep("0.5s");
@@ -86,37 +84,20 @@ public class TimePickerIT extends ComponentDemoTest {
         // new step
         executeScript("arguments[0].value = '12:30:00'", picker);
         selectStep("30m"); // using smaller step will cause the drop down to be
-                          // big and then drop down iron list does magic that
-                          // messes the item indexes
+                           // big and then drop down iron list does magic that
+                           // messes the item indexes
         validatePickerValue(picker, "12:30");
 
-        openPickerDropDown(picker);
-        waitForElementPresent(By.tagName("vaadin-combo-box-overlay"));
+        picker.openDropDown();
 
         Assert.assertEquals("Item in the dropdown is not correct", "12:30 AM",
-                findItemText(1));
-        closePickerDropDown(picker);
-    }
-
-    private String findItemText(int index) {
-        return $("vaadin-combo-box-overlay").first().$(TestBenchElement.class)
-                .id("content").$(TestBenchElement.class).id("selector")
-                .$("vaadin-combo-box-item").get(index).$(TestBenchElement.class)
-                .id("content").getText();
-    }
-
-    private void openPickerDropDown(TestBenchElement picker) {
-        TestBenchElement comboLight = picker.$("vaadin-combo-box-light").get(0);
-        executeScript("arguments[0].open()", comboLight);
-    }
-
-    private void closePickerDropDown(TestBenchElement picker) {
-        TestBenchElement comboLight = picker.$("vaadin-combo-box-light").get(0);
-        executeScript("arguments[0].close()", comboLight);
-        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
+                picker.getItemText(1));
+        picker.closeDropDown();
     }
 
     private void selectStep(String step) {
+        // TODO should be replaced with ComboBoxElement once it is available as
+        // an artifact
         TestBenchElement comboBox = $("vaadin-combo-box").id("step-picker");
         executeScript("arguments[0]['$'].clearButton.click()", comboBox);
         comboBox.sendKeys(step + Keys.RETURN);
@@ -128,9 +109,9 @@ public class TimePickerIT extends ComponentDemoTest {
         waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
     }
 
-    private void validatePickerValue(TestBenchElement picker, String value) {
+    private void validatePickerValue(TimePickerElement picker, String value) {
         Assert.assertEquals("Invalid time picker value", value,
-                picker.getPropertyString("value"));
+                picker.getValue());
     }
 
     @Override

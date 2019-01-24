@@ -18,6 +18,7 @@ package com.vaadin.flow.component.timepicker.tests;
 
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.timepicker.demo.TimePickerView;
+import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
@@ -39,7 +40,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        waitForElementPresent(By.tagName("vaadin-time-picker"));
+        $(TimePickerElement.class).waitForFirst();
     }
 
     @Override
@@ -126,7 +127,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         ArrayList<String> errors = new ArrayList<>(0);
 
         selectLocale(locale);
-        enterTime(initialValue4PM);
+        getTimePickerElement().selectByText(initialValue4PM);
 
         errors.add(verifyFormat());
         errors.add(verifyValueProperty("16:00"));
@@ -138,7 +139,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         // value on the server side stays the same when scale gets smaller
         errors.add(verifyServerValue("16:0:0.0"));
 
-        enterTime("17:22:33.123");
+        getTimePickerElement().selectByText("17:22:33.123");
 
         errors.add(verifyFormatIncludingMilliseconds("PM"));
         errors.add(verifyValueProperty("17:22:33.123"));
@@ -220,7 +221,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
                 }
             }
             for (Integer value : valueIndices) {
-                selectItem(value);
+                getTimePickerElement().selectItemByIndex(value);
                 error = verifyValueProperty(
                         values[valueIndices.indexOf(value)]);
                 if (error != null) {
@@ -263,7 +264,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
 
         selectLocale(locale);
         selectStep("1h");
-        selectItem(1); // 1:00 AM
+        getTimePickerElement().selectItemByIndex(1); // 1:00 AM
         errors.add(verifyFormat());
         errors.add(verifyValueProperty("01:00"));
 
@@ -273,67 +274,67 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         errors.add(verifyValueProperty("01:00:00.000"));
         errors.add(verifyServerValue("1:0:0.0"));
 
-        enterTime("2:03:04.555");
+        getTimePickerElement().selectByText("2:03:04.555");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("02:03:04.555"));
         errors.add(verifyServerValue("2:3:4.555"));
 
-        enterTime("6:3");
+        getTimePickerElement().selectByText("6:3");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("06:03:00.000"));
         errors.add(verifyServerValue("6:3:0.0"));
 
-        enterTime("1:2:3");
+        getTimePickerElement().selectByText("1:2:3");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("01:02:03.000"));
         errors.add(verifyServerValue("1:2:3.0"));
 
-        enterTime("2:3:4.5");
+        getTimePickerElement().selectByText("2:3:4.5");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("02:03:04.500"));
         errors.add(verifyServerValue("2:3:4.500"));
 
-        enterTime("6:7:8.90");
+        getTimePickerElement().selectByText("6:7:8.90");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("06:07:08.900"));
         errors.add(verifyServerValue("6:7:8.900"));
 
-        enterTime("2:3:4.05");
+        getTimePickerElement().selectByText("2:3:4.05");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("02:03:04.050"));
         errors.add(verifyServerValue("2:3:4.50"));
 
-        enterTime("6:7:8.009");
+        getTimePickerElement().selectByText("6:7:8.009");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("06:07:08.009"));
         errors.add(verifyServerValue("6:7:8.9"));
 
-        enterTime("10:11:12.100");
+        getTimePickerElement().selectByText("10:11:12.100");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("10:11:12.100"));
         errors.add(verifyServerValue("10:11:12.100"));
 
-        enterTime("1 2 3.111");
+        getTimePickerElement().selectByText("1 2 3.111");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("01:02:03.111"));
         errors.add(verifyServerValue("1:2:3.111"));
 
-        enterTime("3 0 0.222");
+        getTimePickerElement().selectByText("3 0 0.222");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("03:00:00.222"));
         errors.add(verifyServerValue("3:0:0.222"));
 
-        enterTime("4 5 6 123");
+        getTimePickerElement().selectByText("4 5 6 123");
 
         errors.add(verifyFormatIncludingMilliseconds(amString));
         errors.add(verifyValueProperty("04:05:06.000"));
@@ -348,7 +349,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private String verifyValueProperty(String value) {
-        String timePickerValue = getTimePickerValue();
+        String timePickerValue = getTimePickerElement().getValue();
         if (value.equals(timePickerValue)) {
             return null;
         } else {
@@ -367,7 +368,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private String verifyFormat() {
-        String timePickerInputValue = getTimePickerInputValue();
+        String timePickerInputValue = getTimePickerElement().getTimePickerTextFieldValue();
         String formattedTextValue = getLabelValue();
         if (formattedTextValue.equals(timePickerInputValue)) {
             return null;
@@ -378,7 +379,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private String verifyFormatIncludingMilliseconds(String amPmString) {
-        String timePickerInputValue = getTimePickerInputValue();
+        String timePickerInputValue = getTimePickerElement().getTimePickerTextFieldValue();
         String[] splitInputValue = timePickerInputValue.split("\\.");
         String millisecondsInputValue = amPmString != null
                 ? splitInputValue[splitInputValue.length - 1]
@@ -411,10 +412,6 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         return errors.length() > 0 ? errors.toString() : null;
     }
 
-    private void selectItem(Integer index) {
-        selectComboBoxItemByIndex(getTimePickerComboBox(), index);
-    }
-
     private void selectLocale(Locale locale) {
         TestBenchElement comboBox = $("vaadin-combo-box").id("locale-picker");
         executeScript("arguments[0]['$'].clearButton.click()", comboBox);
@@ -428,54 +425,12 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         comboBox.sendKeys(step + Keys.RETURN);
     }
 
-    private void enterTime(String timeInputString) {
-        TestBenchElement timePickerInput = getTimePickerInputElement();
-        executeScript("arguments[0].value = ''", timePickerInput);
-        timePickerInput.sendKeys(timeInputString + Keys.RETURN);
-    }
-
-    private void selectComboBoxItemByIndex(TestBenchElement comboBox,
-            int index) {
-        executeScript("arguments[0].open()", comboBox);
-
-        scrollToItem(comboBox, index);
-
-        TestBenchElement item = $("vaadin-combo-box-overlay").first()
-                .$(TestBenchElement.class).id("content")
-                .$(TestBenchElement.class).id("selector")
-                .$("vaadin-combo-box-item").get(index);
-        item.click();
-    }
-
-    private void scrollToItem(TestBenchElement comboBox, int index) {
-        executeScript("arguments[0].$.overlay._scrollIntoView(arguments[1])",
-                comboBox, index);
-    }
-
-    private TestBenchElement getTimePickerComboBox() {
-        TestBenchElement picker = getTimePickerElement();
-        return picker.$("vaadin-combo-box-light").get(0);
-    }
-
     private String getLabelValue() {
         return $("div").id("formatted-time").getText();
     }
 
-    private String getTimePickerValue() {
-        return getTimePickerElement().getPropertyString("value");
-    }
-
-    private TestBenchElement getTimePickerInputElement() {
-        return getTimePickerElement().$("vaadin-combo-box-light").first()
-                .$("vaadin-time-picker-text-field").first();
-    }
-
-    private String getTimePickerInputValue() {
-        return getTimePickerInputElement().getPropertyString("value");
-    }
-
-    private TestBenchElement getTimePickerElement() {
-        return $("vaadin-time-picker").first();
+    private TimePickerElement getTimePickerElement() {
+        return $(TimePickerElement.class).first();
     }
 
     private static String prettyPrint(Locale locale) {

@@ -32,8 +32,8 @@
 
     <modules>
         <module>vaadin-time-picker-flow</module>
+        <module>vaadin-time-picker-testbench</module>
         <module>vaadin-time-picker-flow-demo</module>
-        <module>vaadin-time-picker-flow-integration-tests</module>
     </modules>
 
     <repositories>
