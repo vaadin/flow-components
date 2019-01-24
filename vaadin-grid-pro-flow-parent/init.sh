@@ -1,7 +1,7 @@
 #!/bin/bash
-defaultName="ProGrid"
+defaultName="GridPro"
 defaultNameDashed="pro-grid"
-defaultPackage="progrid"
+defaultPackage="gridpro"
 
 print_usage_and_exit() {
    echo $1
