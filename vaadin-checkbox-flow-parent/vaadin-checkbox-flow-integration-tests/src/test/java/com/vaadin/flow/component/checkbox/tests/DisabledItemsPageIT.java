@@ -22,25 +22,23 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 
-public class DisabledItemsPageIT extends ComponentDemoTest {
-
-    @Override
-    protected String getTestPath() {
-        return "/disabled-items";
-    }
+@TestPath("disabled-items")
+public class DisabledItemsPageIT extends AbstractComponentIT {
 
     @Test
     public void set_items_to_disabled_group_should_be_disabled() {
-        WebElement group = layout.findElement(By.id("checkbox-group"));
+        open();
+        WebElement group = findElement(By.id("checkbox-group"));
 
         List<WebElement> checkboxes = group
                 .findElements(By.tagName("vaadin-checkbox"));
         Assert.assertTrue("No buttons should be present", checkboxes.isEmpty());
 
         // Click button to add items
-        layout.findElement(By.id("add-button")).click();
+        findElement(By.id("add-button")).click();
 
         waitForElementPresent(By.tagName("vaadin-checkbox"));
         checkboxes = group.findElements(By.tagName("vaadin-checkbox"));

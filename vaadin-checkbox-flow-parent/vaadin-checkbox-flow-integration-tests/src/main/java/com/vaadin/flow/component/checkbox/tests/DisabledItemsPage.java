@@ -16,15 +16,14 @@
 package com.vaadin.flow.component.checkbox.tests;
 
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
 @Route("disabled-items")
-public class DisabledItemsPage extends DemoView {
+public class DisabledItemsPage extends Div {
 
-    @Override
-    protected void initView() {
+    public DisabledItemsPage() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setId("checkbox-group");
         checkboxGroup.setEnabled(false);
