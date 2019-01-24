@@ -32,10 +32,18 @@
             <version>${flow.version}</version>
         </dependency>
 
+        <!-- Component -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <!-- demo specific -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-component-demo-helpers</artifactId>
+            <version>${flow.version}</version>
         </dependency>
 
         <dependency>

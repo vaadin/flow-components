@@ -26,13 +26,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
             <version>${testbench.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-testbench</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!--System under test -->
@@ -59,34 +57,22 @@
             <version>${flow.version}</version>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>com.vaadin</groupId>-->
-            <!--<artifactId>flow-server-production-mode</artifactId>-->
-            <!--<version>${flow.version}</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>com.vaadin</groupId>-->
-            <!--<artifactId>vaadin-lumo-theme</artifactId>-->
-            <!--<version>${flow.version}</version>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>com.vaadin</groupId>-->
-            <!--<artifactId>flow-component-demo-helpers</artifactId>-->
-            <!--<version>${flow.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-server-production-mode</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow-demo</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.vaadin</groupId>-->
-            <!--<artifactId>flow-test-util</artifactId>-->
-            <!--<version>${flow.version}</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-util</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

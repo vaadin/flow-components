@@ -69,15 +69,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-usage-statistics</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-development-mode-detector</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow</artifactId>
             <version>${flow.version}</version>
@@ -87,15 +78,9 @@
 
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-test-generic</artifactId>
+            <artifactId>flow-data</artifactId>
             <version>${flow.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-test-util</artifactId>
-            <version>${flow.version}</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
