@@ -2,11 +2,10 @@ package com.vaadin.flow.component.gridpro.test;
 
 import com.vaadin.flow.component.gridpro.testbench.GridProElement;
 import com.vaadin.flow.component.gridpro.testbench.GridTHTDElement;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +22,7 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void editColumnsAdded() {
-        List<WebElement> columns = grid
-                .findElements(By.tagName("vaadin-grid-pro-edit-column"));
+        List<TestBenchElement> columns = grid.$("vaadin-grid-pro-edit-column").all();
         Assert.assertEquals(columns.size(), 3);
     }
 
@@ -59,7 +57,9 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertFalse(cell.innerHTMLContains(editorTag));
 
         // Entering edit mode with double click
-        cell.doubleClick();
+        // Workaround(yuriy-fix): doubleClick is not working on IE11
+        cell.click();
+        cell.click();
         cell.innerHTMLContains(editorTag);
     }
 }
