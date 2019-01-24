@@ -55,8 +55,7 @@ window.Vaadin.Flow.comboBoxConnector = {
                 comboBox.$server.resetDataCommunicator();
               }
             });
-        }
-        else {
+        } else {
           comboBox.$server.setRequestedRange(0, upperLimit, params.filter);
         }
 
@@ -69,7 +68,11 @@ window.Vaadin.Flow.comboBoxConnector = {
       return comboBox._getItemLabel(item).toString().toLowerCase().indexOf(filter) > -1;
     }
 
-    comboBox.$connector.set = function (index, items) {
+    comboBox.$connector.set = function (index, items, filter) {
+      if (filter != lastFilter) {
+        return;
+      }
+
       if (index % comboBox.pageSize != 0) {
         throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + comboBox.pageSize;
       }
@@ -117,7 +120,12 @@ window.Vaadin.Flow.comboBoxConnector = {
       comboBox.clearCache();
     };
 
-    comboBox.$connector.confirm = function (id) {
+    comboBox.$connector.confirm = function (id, filter) {
+
+      if (filter != lastFilter) {
+        return;
+      }
+
       // We're done applying changes from this batch, resolve outstanding
       // callbacks
       let outstandingRequests = Object.getOwnPropertyNames(pageCallbacks);

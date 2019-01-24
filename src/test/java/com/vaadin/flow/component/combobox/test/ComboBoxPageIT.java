@@ -15,24 +15,20 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import static org.junit.Assert.assertFalse;
-
 import java.util.List;
-import java.util.Map;
 
+import com.vaadin.flow.component.combobox.ComboBoxElementUpdated;
+import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.combobox.ComboBoxElementUpdated;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
+import static org.junit.Assert.assertFalse;
 
 @TestPath("combo-box-test")
-public class ComboBoxPageIT extends AbstractComponentIT {
+public class ComboBoxPageIT extends AbstractComboBoxIT {
 
     @Before
     public void init() {
@@ -53,13 +49,13 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         // update data provider
         findElement(By.id("update-provider")).click();
 
-        waitUntil(driver -> "baz".equals(getItem(getItems(combo), 0)));
+        waitUntil(driver -> "baz".equals(getItemLabel(getItems(combo), 0)));
         assertItem(getItems(combo), 1, "foobar");
 
         // update item caption generator
         findElement(By.id("update-caption-gen")).click();
 
-        waitUntil(driver -> "3".equals(getItem(getItems(combo), 0)));
+        waitUntil(driver -> "3".equals(getItemLabel(getItems(combo), 0)));
         assertItem(getItems(combo), 1, "6");
     }
 
@@ -133,7 +129,7 @@ public class ComboBoxPageIT extends AbstractComponentIT {
         WebElement combo = findElement(By.id("combo"));
 
         findElement(By.id("update-provider")).click();
-        waitUntil(driver -> "baz".equals(getItem(getItems(combo), 0)));
+        waitUntil(driver -> "baz".equals(getItemLabel(getItems(combo), 0)));
 
         findElement(By.id("update-value")).click();
         String value = getSelectedItemLabel(combo);
@@ -184,33 +180,4 @@ public class ComboBoxPageIT extends AbstractComponentIT {
                 message.getText());
     }
 
-    private TestBenchElement getItemFromBox(int index) {
-        return $(TestBenchElement.class).id("overlay").$(TestBenchElement.class)
-                .id("content").$(TestBenchElement.class).id("selector")
-                .$("vaadin-combo-box-item").get(index);
-    }
-
-    private List<?> getItems(WebElement combo) {
-        executeScript("arguments[0].opened=true", combo);
-        List<?> items = (List<?>) getCommandExecutor()
-                .executeScript("return arguments[0].filteredItems;", combo);
-        executeScript("arguments[0].opened=false", combo);
-        return items;
-    }
-
-    private void assertItem(List<?> items, int index, String caption) {
-        Map<?, ?> map = (Map<?, ?>) items.get(index);
-        Assert.assertEquals(caption, map.get("label"));
-    }
-
-    private Object getItem(List<?> items, int index) {
-        Map<?, ?> map = (Map<?, ?>) items.get(index);
-        return map.get("label");
-    }
-
-    private String getSelectedItemLabel(WebElement combo) {
-        return String.valueOf(executeScript(
-                "return arguments[0].selectedItem ? arguments[0].selectedItem.label : \"\"",
-                combo));
-    }
 }
