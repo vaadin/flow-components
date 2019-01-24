@@ -18,9 +18,6 @@ package com.vaadin.flow.component.gridpro.testbench;
  */
 
 
-import java.util.List;
-
-import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 
@@ -63,12 +60,6 @@ public class GridTHTDElement extends TestBenchElement {
 
     public Boolean innerHTMLContains(String key) {
         return this.getInnerHTML().contains(key);
-    }
-
-
-    public TestBenchElement getFirstSlottedElement() {
-        List<TestBenchElement> content = (List<TestBenchElement>) this.findElement(By.tagName("slot")).callFunction("assignedNodes");
-        return content.get(0).findElement(By.cssSelector(":first-child"));
     }
 
     /**

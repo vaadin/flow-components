@@ -23,7 +23,8 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void editColumnsAdded() {
-        List<WebElement> columns = grid.findElements(By.tagName("vaadin-grid-pro-edit-column"));
+        List<WebElement> columns = grid
+                .findElements(By.tagName("vaadin-grid-pro-edit-column"));
         Assert.assertEquals(columns.size(), 3);
     }
 
@@ -59,8 +60,6 @@ public class BasicIT extends AbstractParallelTest {
 
         // Entering edit mode with double click
         cell.doubleClick();
-        WebElement editor = cell.getFirstSlottedElement();
-
-        Assert.assertEquals(editor.getTagName(), editorTag);
+        cell.innerHTMLContains(editorTag);
     }
 }
