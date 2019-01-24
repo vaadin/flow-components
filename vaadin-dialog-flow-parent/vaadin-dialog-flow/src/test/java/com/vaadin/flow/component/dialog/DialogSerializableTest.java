@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.dialog.tests;
+package com.vaadin.flow.component.dialog;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
