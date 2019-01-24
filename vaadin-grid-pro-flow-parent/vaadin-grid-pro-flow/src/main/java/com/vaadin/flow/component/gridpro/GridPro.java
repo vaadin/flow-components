@@ -121,30 +121,58 @@ public class GridPro<E> extends Grid<E> {
             super(grid, columnId, renderer);
         }
 
+        /**
+         * Sets the callback function that will be called on item changed.
+         *
+         * @param handler
+         *            the callback function
+         */
         protected <C extends Column<T>> C setHandler(SerializableBiConsumer<Object, String> handler) {
             this.handler = handler;
             return (C) this;
         }
 
+        /**
+         * Gets the callback function that will be called on item changed.
+         */
         protected SerializableBiConsumer<Object, String> getHandler() {
             return handler;
         }
 
+        /**
+         * Sets the type of the editor that is used for modifying cell value.
+         *
+         * @param type
+         *            the type of the editor
+         * @see EditorType
+         */
         protected EditColumn<T> setEditorType(EditorType type) {
             getElement().setProperty("editorType", type == null ? "text" : type.getTypeName());
             return this;
         }
 
+        /**
+         * Gets the type of the editor that is used for modifying cell value.
+         */
         @Synchronize("editor-type-changed")
         protected String getEditorType() {
             return getElement().getProperty("editorType", "text");
         }
 
+        /**
+         * Sets the list of options that is used for select type of the editor.
+         *
+         * @param options
+         *            the list of options
+         */
         protected EditColumn<T> setOptions(List<String> options) {
             getElement().setPropertyJson("editorOptions", JsonSerializer.toJson(options));
             return this;
         }
 
+        /**
+         * Gets the list of options that is used for select type of the editor.
+         */
         @Synchronize("editor-options-changed")
         protected List<String> getOptions() {
             return JsonSerializer.toObjects(String.class,  (JsonArray) getElement().getPropertyRaw("editorOptions"));
@@ -185,6 +213,9 @@ public class GridPro<E> extends Grid<E> {
         getElement().setProperty("allowEnterRowChange", allowEnterRowChange);
     }
 
+    /**
+     * Gets the allowEnterRowChange value for this grid.
+     */
     @Synchronize("allow-enter-row-change-changed")
     public Boolean getAllowEnterRowChange() {
         return getElement().getProperty("allowEnterRowChange", false);
@@ -201,6 +232,9 @@ public class GridPro<E> extends Grid<E> {
         getElement().setProperty("preserveEditMode", preserveEditMode);
     }
 
+    /**
+     * Gets the preserveEditMode value for this grid.
+     */
     @Synchronize("preserve-edit-mode-changed")
     public Boolean getPreserveEditMode() {
         return getElement().getProperty("preserveEditMode", false);
@@ -272,6 +306,18 @@ public class GridPro<E> extends Grid<E> {
         return column;
     }
 
+    /**
+     * Creates a new edit column instance for this {@link GridPro} instance.
+     * <p>
+     * This method must not return <code>null</code>.
+     *
+     * @param renderer
+     *            the renderer used to create the grid cell structure
+     * @param columnId
+     *            internal column id
+     * @return edit column instance
+     * @see Renderer
+     */
     protected EditColumn<E> createEditColumn(Renderer<E> renderer, String columnId) {
         EditColumn<E> column = new EditColumn<>(this, columnId, renderer);
         idToColumnMap.put(columnId, column);
@@ -308,14 +354,29 @@ public class GridPro<E> extends Grid<E> {
             this.path = path;
         }
 
+        /**
+         * Gets an instance of edited item.
+         *
+         * @return the instance of edited item
+         */
         public E getItem() {
             return item;
         }
 
+        /**
+         * Gets an instance of edited item with the relations to the columns.
+         *
+         * @return the instance of edited item
+         */
         public JsonObject getSourceItem() {
             return sourceItem;
         }
 
+        /**
+         * Gets the key of the column where item was edited.
+         *
+         * @return the key of the column
+         */
         public String getPath() {
             return path;
         }
