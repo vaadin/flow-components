@@ -14,7 +14,7 @@
     <packaging>war</packaging>
 
 
-    <name>Vaadin Button Integration Tests</name>
+    <name>Vaadin Text Field Integration Tests</name>
 
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>
