@@ -201,7 +201,7 @@ public class TreeGrid<T> extends Grid<T>
 
             return new HierarchicalDataCommunicator<>(dataGenerator,
                     arrayUpdater,
-                    data -> element.callFunction("$connector.updateData", data),
+                    data -> element.callFunction("$connector.updateHierarchicalData", data),
                     element.getNode(), uniqueKeyProviderSupplier);
         }
     }

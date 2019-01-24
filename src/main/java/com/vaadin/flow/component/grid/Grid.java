@@ -1285,7 +1285,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 CompositeDataGenerator<T> dataGenerator, U arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
             return new DataCommunicator<>(dataGenerator, arrayUpdater,
-                    data -> element.callFunction("$connector.updateData", data),
+                    data -> element.callFunction("$connector.updateFlatData", data),
                     element.getNode());
         }
     }
