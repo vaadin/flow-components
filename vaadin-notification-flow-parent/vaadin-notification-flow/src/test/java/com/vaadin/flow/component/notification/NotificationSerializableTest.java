@@ -1,5 +1,5 @@
 
-package com.vaadin.flow.component.notification.tests;
+package com.vaadin.flow.component.notification;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
