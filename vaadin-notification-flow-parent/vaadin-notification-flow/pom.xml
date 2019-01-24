@@ -38,10 +38,10 @@
             <version>2.1.0</version>
         </dependency>
         <dependency>
-                <groupId>org.webjars.bowergithub.polymerelements</groupId>
-                <artifactId>iron-iconset-svg</artifactId>
-                <version>2.2.1</version>
-            </dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-iconset-svg</artifactId>
+            <version>2.2.1</version>
+        </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-themable-mixin</artifactId>
