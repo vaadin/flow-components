@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-text-field-testbench</artifactId>
+            <artifactId>vaadin-text-field-flow-testbench</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
