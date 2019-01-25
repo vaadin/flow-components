@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>vaadin-dialog-flow-parent</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Dialog Flow Parent</name>
 
