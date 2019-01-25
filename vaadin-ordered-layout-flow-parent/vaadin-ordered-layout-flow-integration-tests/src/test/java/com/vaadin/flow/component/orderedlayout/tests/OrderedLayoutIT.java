@@ -4,22 +4,22 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 
-public class OrderedLayoutIT extends ComponentDemoTest {
-    @Override
-    protected String getTestPath() {
-        return "/ordered-layout-tests";
-    }
+@TestPath("ordered-layout-tests")
+public class OrderedLayoutIT extends AbstractComponentIT {
 
     @Test
     public void testHorizontalLayout_spacingTheme() {
+        open();
         WebElement hLayout = findElement(By.id("hl-spacing"));
         testSpacing(hLayout);
     }
 
     @Test
     public void testVerticalLayout_spacingTheme() {
+        open();
         WebElement vLayout = findElement(By.id("vl-spacing"));
         testSpacing(vLayout);
     }
