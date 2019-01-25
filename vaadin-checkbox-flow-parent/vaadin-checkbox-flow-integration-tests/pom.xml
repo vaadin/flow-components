@@ -77,13 +77,6 @@
             <artifactId>flow-test-util</artifactId>
             <version>${flow.version}</version>
         </dependency>
-
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-component-demo-helpers</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
