@@ -102,21 +102,6 @@
             <version>2.1.0</version>
         </dependency>
         <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-element-mixin</artifactId>
-            <version>2.1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-usage-statistics</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-development-mode-detector</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-media-query</artifactId>
             <version>2.1.0</version>
@@ -162,7 +147,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-components-testbench</artifactId>
             <version>1.0.0</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
