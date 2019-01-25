@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import org.junit.Assert;
 import org.junit.Before;
@@ -96,16 +97,8 @@ public class TimePickerIT extends ComponentDemoTest {
     }
 
     private void selectStep(String step) {
-        // TODO should be replaced with ComboBoxElement once it is available as
-        // an artifact
-        TestBenchElement comboBox = $("vaadin-combo-box").id("step-picker");
-        executeScript("arguments[0]['$'].clearButton.click()", comboBox);
-        comboBox.sendKeys(step + Keys.RETURN);
-
-        Assert.assertEquals("The current step is incorrect", step,
-                comboBox.$("vaadin-text-field").first().getProperty("value"));
-
-        executeScript("arguments[0].close()", comboBox);
+        ComboBoxElement comboBox = $(ComboBoxElement.class).id("step-picker");
+        selectFromComboBox(comboBox, step);
         waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
     }
 
@@ -117,5 +110,24 @@ public class TimePickerIT extends ComponentDemoTest {
     @Override
     protected String getTestPath() {
         return ("/vaadin-time-picker");
+    }
+
+    public static void selectFromComboBox(ComboBoxElement comboBox,
+            String text) {
+        try {
+            comboBox.selectByText(text);
+        } catch (IllegalArgumentException iae) {
+            // ignore due to issues in the TB element for CB
+            // the element selects the correct item, but then throws IAE
+            // because it tries to validate the selection. Probably regression
+            // with CB 2.0 ?
+        }
+
+        Assert.assertEquals("The current value is not incorrect",
+                text.toLowerCase(), comboBox.$("vaadin-text-field").first()
+                        .getPropertyString("value").toLowerCase());
+
+        comboBox.getCommandExecutor().executeScript("arguments[0].close()",
+                comboBox);
     }
 }

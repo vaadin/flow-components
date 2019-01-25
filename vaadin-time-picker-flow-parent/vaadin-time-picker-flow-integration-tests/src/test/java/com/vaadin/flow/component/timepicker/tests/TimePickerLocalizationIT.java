@@ -16,6 +16,7 @@
 
 package com.vaadin.flow.component.timepicker.tests;
 
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.timepicker.demo.TimePickerView;
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
@@ -90,10 +91,10 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         runMillisecondLocalizationTest(Locale.US, ":", "AM");
 
         // 24 h : separator
-        runMillisecondLocalizationTest(Locale.FRANCE, ":", null);
+        runMillisecondLocalizationTest(Locale.FRANCE, ":", "");
 
         // 24h . separator
-        runMillisecondLocalizationTest(new Locale("fi", "FI"), ".", null);
+        runMillisecondLocalizationTest(new Locale("fi", "FI"), ".", "");
 
         // 12h : separator, AM/PM before entry
         runMillisecondLocalizationTest(new Locale("zh", "SG"), ":", "上午");
@@ -114,16 +115,17 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
 
     @Test
     public void testChangingStep_reduceStepToHigherScale_valueIsNotTooDetailed() {
-        runReduceStepTest(new Locale("en-US"), "4:00 PM");
-        runReduceStepTest(new Locale("en-CA"), "16:00");
-        runReduceStepTest(new Locale("fi-FI"), "16:00");
-        runReduceStepTest(new Locale("no-NO"), "16:00");
-        runReduceStepTest(new Locale("zh-TW"), "16:00");
-        runReduceStepTest(new Locale("ko-KR"), "16:00");
-        runReduceStepTest(new Locale("es-PA"), "16:00");
+        runReduceStepTest(new Locale("en-US"), "4:00 PM", "PM");
+        runReduceStepTest(new Locale("en-CA"), "16:00", "p.m.");
+        runReduceStepTest(new Locale("fi-FI"), "16:00", "");
+        runReduceStepTest(new Locale("no-NO"), "16:00", "PM");
+        runReduceStepTest(new Locale("zh-TW"), "16:00", "");
+        runReduceStepTest(new Locale("ko-KR"), "16:00", "");
+        runReduceStepTest(new Locale("es-PA"), "16:00", "p. m.");
     }
 
-    private void runReduceStepTest(Locale locale, String initialValue4PM) {
+    private void runReduceStepTest(Locale locale, String initialValue4PM,
+            String pmString) {
         ArrayList<String> errors = new ArrayList<>(0);
 
         selectLocale(locale);
@@ -141,7 +143,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
 
         getTimePickerElement().selectByText("17:22:33.123");
 
-        errors.add(verifyFormatIncludingMilliseconds("PM"));
+        errors.add(verifyFormatIncludingMilliseconds(pmString));
         errors.add(verifyValueProperty("17:22:33.123"));
         errors.add(verifyServerValue("17:22:33.123"));
 
@@ -167,13 +169,8 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
 
         errors.removeIf(item -> item == null);
 
-        if (!errors.isEmpty()) {
-            // log errors early so test run can be interrupted early
-            Logger.getLogger(getClass().getName())
-                    .severe(errors.stream().collect(Collectors.joining("\n")));
-        }
-        Assert.assertTrue("Errors with Locale " + locale.getDisplayName(),
-                errors.isEmpty());
+        Assert.assertTrue("Errors with Locale " + locale.getDisplayName()
+                + String.join("\n", errors), errors.isEmpty());
     }
 
     private void runInitialLoadValueTestPattern(String locale, String time) {
@@ -256,7 +253,8 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
 
     private void runMillisecondLocalizationTest(Locale locale, String separator,
             String amString) {
-        // there is some timing weirdness in team city with the last locale (zh-SG),
+        // there is some timing weirdness in team city with the last locale
+        // (zh-SG),
         // unable to reproduce it locally -> reload UI
         open();
 
@@ -368,7 +366,8 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private String verifyFormat() {
-        String timePickerInputValue = getTimePickerElement().getTimePickerTextFieldValue();
+        String timePickerInputValue = getTimePickerElement()
+                .getTimePickerTextFieldValue();
         String formattedTextValue = getLabelValue();
         if (formattedTextValue.equals(timePickerInputValue)) {
             return null;
@@ -379,12 +378,15 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private String verifyFormatIncludingMilliseconds(String amPmString) {
-        String timePickerInputValue = getTimePickerElement().getTimePickerTextFieldValue();
-        String[] splitInputValue = timePickerInputValue.split("\\.");
+        String timePickerInputValue = getTimePickerElement()
+                .getTimePickerTextFieldValue();
+        String[] splitInputValue = timePickerInputValue.replace(amPmString, "")
+                .split("\\.");
         String millisecondsInputValue = amPmString != null
-                ? splitInputValue[splitInputValue.length - 1]
-                        .replace(amPmString, "").trim()
-                : splitInputValue[splitInputValue.length - 1];
+                && !amPmString.isEmpty()
+                        ? splitInputValue[splitInputValue.length - 1]
+                                .replace(amPmString, "").trim()
+                        : splitInputValue[splitInputValue.length - 1];
 
         timePickerInputValue = timePickerInputValue
                 .replace("." + millisecondsInputValue, "");
@@ -413,16 +415,17 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private void selectLocale(Locale locale) {
-        TestBenchElement comboBox = $("vaadin-combo-box").id("locale-picker");
-        executeScript("arguments[0]['$'].clearButton.click()", comboBox);
-        comboBox.sendKeys(TimePickerLocalizationView.getLocaleString(locale)
-                + Keys.RETURN);
+        ComboBoxElement comboBox = $(ComboBoxElement.class).id("locale-picker");
+        String localeString = TimePickerLocalizationView
+                .getLocaleString(locale);
+        TimePickerIT.selectFromComboBox(comboBox, localeString);
+        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
     }
 
     private void selectStep(String step) {
-        TestBenchElement comboBox = $("vaadin-combo-box").id("step-picker");
-        executeScript("arguments[0]['$'].clearButton.click()", comboBox);
-        comboBox.sendKeys(step + Keys.RETURN);
+        ComboBoxElement comboBox = $(ComboBoxElement.class).id("step-picker");
+        TimePickerIT.selectFromComboBox(comboBox, step);
+        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
     }
 
     private String getLabelValue() {

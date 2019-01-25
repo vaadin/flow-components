@@ -91,8 +91,8 @@ public class TimePickerLocalizationView extends Div
         timePicker.addValueChangeListener(event -> {
             LocalTime value = event.getValue();
             browserFormattedTime.setLocalTime(value);
-            valueLabel.setText(String.format("%s:%s:%s.%s",
-                    value.getHour(), value.getMinute(), value.getSecond(),
+            valueLabel.setText(String.format("%s:%s:%s.%s", value.getHour(),
+                    value.getMinute(), value.getSecond(),
                     value.get(ChronoField.MILLI_OF_SECOND)));
         });
 
@@ -117,6 +117,7 @@ public class TimePickerLocalizationView extends Div
     }
 
     static String getLocaleString(Locale locale) {
-        return locale.getLanguage() + "-" + locale.getCountry();
+        String country = locale.getCountry();
+        return locale.getLanguage() + (country.isEmpty() ? "" : "-" + country);
     }
 }
