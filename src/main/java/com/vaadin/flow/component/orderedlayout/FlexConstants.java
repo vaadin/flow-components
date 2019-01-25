@@ -18,6 +18,7 @@ package com.vaadin.flow.component.orderedlayout;
 class FlexConstants {
 
     static final String JUSTIFY_CONTENT_CSS_PROPERTY = "justifyContent";
+    static final String FLEX_WRAP_CSS_PROPERTY = "flexWrap";
     static final String FLEX_GROW_CSS_PROPERTY = "flexGrow";
     static final String ALIGN_SELF_CSS_PROPERTY = "alignSelf";
     static final String ALIGN_ITEMS_CSS_PROPERTY = "alignItems";
