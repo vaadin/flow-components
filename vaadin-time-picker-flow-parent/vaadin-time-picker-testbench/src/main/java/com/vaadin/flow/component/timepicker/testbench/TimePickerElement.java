@@ -23,7 +23,6 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-time-picker&gt;</code>
@@ -119,7 +118,8 @@ public class TimePickerElement extends TestBenchElement
      * @return the text content for the item
      */
     public String getItemText(int index) {
-        return $(ComboBoxOverlayElement.class).onPage().first().getItem(index).getText();
+        return $(ComboBoxOverlayElement.class).onPage().first().getItem(index)
+                .getText();
     }
 
     /**

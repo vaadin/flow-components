@@ -21,28 +21,25 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalField;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.Html;
-import com.vaadin.flow.component.HtmlContainer;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 
 /**
  * View for {@link TimePicker} demo.
  */
 @Route("vaadin-time-picker")
 public class TimePickerView extends DemoView {
-    private Div message;
 
     @Override
     public void initView() {
@@ -57,10 +54,9 @@ public class TimePickerView extends DemoView {
         // source-example-heading: Localization for Time Picker
         Stream<Locale> availableLocales = TimePicker
                 .getSupportedAvailableLocales()
-                .sorted((locale, locale2) -> locale.getDisplayName()
-                        .compareTo(locale2.getDisplayName()));
+                .sorted(Comparator.comparing(Locale::getDisplayName));
         ComboBox<Locale> localesCB = new ComboBox<>("Localization");
-        localesCB.setItemLabelGenerator(locale -> locale.getDisplayName());
+        localesCB.setItemLabelGenerator(Locale::getDisplayName);
         localesCB.setWidth("300px");
         localesCB.setItems(availableLocales);
 
@@ -73,9 +69,8 @@ public class TimePickerView extends DemoView {
             localTimeTextBlock.setLocale(event.getValue());
         });
 
-        timePicker.addValueChangeListener(event -> {
-            localTimeTextBlock.setLocalTime(event.getValue());
-        });
+        timePicker.addValueChangeListener(
+                event -> localTimeTextBlock.setLocalTime(event.getValue()));
 
         localesCB.setValue(UI.getCurrent().getLocale());
 
@@ -96,7 +91,7 @@ public class TimePickerView extends DemoView {
         TimePicker timePicker = new TimePicker();
 
         timePicker.addValueChangeListener(
-                event -> UpdateMessage(message, timePicker));
+                event -> updateMessage(message, timePicker));
         // end-source-example
 
         timePicker.setId("simple-picker");
@@ -134,9 +129,9 @@ public class TimePickerView extends DemoView {
                 String.format(localTimeValueFormat, "0", "0", "0", "0"));
 
         stepSelector.setId("step-picker");
-        stepSelector.setItemLabelGenerator(duration -> {
-            return duration.toString().replace("PT", "").toLowerCase();
-        });
+        stepSelector.setItemLabelGenerator(duration ->
+                duration.toString().replace("PT", "").toLowerCase());
+
         timePicker.addValueChangeListener(event -> {
             LocalTime value = event.getValue();
             localTimeValue.setText(String.format(localTimeValueFormat,
@@ -158,9 +153,8 @@ public class TimePickerView extends DemoView {
         timePicker.setEnabled(false);
         // end-source-example
 
-        timePicker.addValueChangeListener(event -> {
-            message.setText("This event should not have happened");
-        });
+        timePicker.addValueChangeListener(event ->
+                message.setText("This event should not have happened"));
 
         timePicker.setId("disabled-picker");
         addCard("Disabled Time Picker", timePicker, message);
@@ -173,7 +167,7 @@ public class TimePickerView extends DemoView {
         return message;
     }
 
-    private void UpdateMessage(Div message, TimePicker timePicker) {
+    private void updateMessage(Div message, TimePicker timePicker) {
         LocalTime selectedTime = timePicker.getValue();
         if (selectedTime != null) {
             message.setText("Hour: " + selectedTime.getHour() + "\nMinute: "
@@ -188,7 +182,7 @@ public class TimePickerView extends DemoView {
      */
     public static class LocalTimeTextBlock extends Composite<Div> {
 
-        public static String MILLISECONDS_SPLIT = "MS:";
+        public final static String MILLISECONDS_SPLIT = "MS:";
 
         private Locale locale;
         private LocalTime localTime;
