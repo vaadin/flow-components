@@ -130,5 +130,19 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         getElement().setProperty("label", label);
     }
 
+    @DomEvent("change")
+    public static class CustomFieldChangeEvent extends ComponentEvent<CustomField<?>> {
+
+        private final String value;
+
+        public CustomFieldChangeEvent(CustomField<?> source, boolean fromClient,@EventData("event.detail.value") String value) {
+            super(source, fromClient);
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
 }
 
