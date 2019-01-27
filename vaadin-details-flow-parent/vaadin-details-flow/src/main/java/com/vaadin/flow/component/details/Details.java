@@ -22,14 +22,18 @@ package com.vaadin.flow.component.details;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Span;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Tag("vaadin-details")
 @HtmlImport("frontend://bower_components/vaadin-details/src/vaadin-details.html")
-public class Details extends Component implements HasEnabled {
+public class Details extends Component implements HasEnabled, HasTheme {
 
     private Component summary;
     private Component content;
@@ -185,6 +189,28 @@ public class Details extends Component implements HasEnabled {
      */
     public void setOpened(boolean opened) {
         getElement().setProperty("opened", opened);
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(DetailsVariant... variants) {
+        getThemeNames().addAll(Stream.of(variants)
+                .map(DetailsVariant::getVariantName).collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(DetailsVariant... variants) {
+        getThemeNames().removeAll(Stream.of(variants)
+                .map(DetailsVariant::getVariantName).collect(Collectors.toList()));
     }
 
 }

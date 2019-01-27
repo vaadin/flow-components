@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.details.examples;
 
 import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
@@ -24,6 +25,10 @@ public class Home extends Div {
         detailsDisabled.setSummaryText("Disabled heading");
         detailsDisabled.setContentText("Always visible content");
 
-        add(details, detailsText, detailsDisabled);
+
+        Details detailsThemed = new Details("Small Reversed Filled Summary", new Span("Themed Content"));
+        detailsThemed.addThemeVariants(DetailsVariant.values());
+
+        add(details, detailsText, detailsDisabled, detailsThemed);
     }
 }
