@@ -76,6 +76,32 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         getElement().setProperty("invalid", invalid);
     }
 
+    /**
+     * <p>
+     * This property is set in the frontend when the inputs change value
+     * <p>
+     * This property is synchronized automatically from client side when a
+     * 'value-changed' event happens.
+     * </p>
+     *
+     * @return the {@code invalid} property from the webcomponent
+     */
+    @Synchronize(property = "value", value = "value-changed")
+    public String getFrontendValue() {
+        return getElement().getProperty("value");
+    }
+
+    /**
+     * <p>
+     * This property is set to true when the control value is invalid.
+     * </p>
+     *
+     * @param value the value to set
+     */
+    public void setFrontendValue(String value) {
+        getElement().setProperty("value", value != null ? value : "");
+    }
+
     @Override
     public void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage", errorMessage);
