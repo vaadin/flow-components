@@ -11,7 +11,12 @@ public class CustomFieldTest {
 
     @Before
     public void setUp() {
-        systemUnderTest = new CustomField<Object>(null) {
+        systemUnderTest = new CustomField<Object>() {
+            @Override
+            protected Object generateModelValue(CustomFieldChangeEvent event) {
+                return null;
+            }
+
             @Override
             protected void setPresentationValue(Object newPresentationValue) {
 
