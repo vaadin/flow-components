@@ -35,7 +35,17 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      */
     public CustomField(T defaultValue) {
         super(defaultValue);
+        ComponentUtil.addListener(this, CustomFieldChangeEvent.class,
+            this::generateModelValue);
     }
+
+    /**
+     * This method should return the value of the field, based on value of the internal fields.
+     *
+     * @param event {@link CustomFieldChangeEvent}
+     * @return new value of the field.
+     */
+    protected abstract T generateModelValue(CustomFieldChangeEvent event);
 
     /**
      * Specifies that the user must fill in a value.
