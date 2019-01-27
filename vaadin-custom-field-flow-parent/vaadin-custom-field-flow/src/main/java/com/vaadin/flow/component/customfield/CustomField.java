@@ -40,6 +40,13 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     }
 
     /**
+     * Default constructor using null as default value.
+     */
+    public CustomField() {
+        this(null);
+    }
+
+    /**
      * This method should return the value of the field, based on value of the internal fields.
      *
      * @param event {@link CustomFieldChangeEvent}
