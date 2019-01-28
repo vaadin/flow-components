@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.contextmenu.it;
 
 import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -38,6 +39,8 @@ public class ContextMenuPage extends Div {
         addContextMenuWithControls();
         addSeparator();
         createContextMenuAndAddComponentAtIndex();
+        addSeparator();
+        addContextMenuWithCheckableItem();
     }
 
     private void createContextMenuAndAddComponentAtIndex() {
@@ -138,6 +141,31 @@ public class ContextMenuPage extends Div {
 
         add(contextMenu, target, altTarget, message, on, off, changeTarget,
                 removeTarget);
+    }
+
+    private void addContextMenuWithCheckableItem() {
+        Paragraph target = new Paragraph(
+                "Target for context menu with checkable item");
+        target.setId("context-menu-checkable-item-target");
+
+        Paragraph message = new Paragraph();
+        message.setId("checked-message");
+
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.setTarget(target);
+
+        MenuItem item = contextMenu.addItem("checkable",
+                event -> message.setText("" + event.getSource().isChecked()));
+
+        NativeButton toggleCheckable = new NativeButton("Toggle checkable",
+                event -> item.setCheckable(!item.isCheckable()));
+        toggleCheckable.setId("toggle-checkable");
+
+        MenuItem initiallyChecked = contextMenu.addItem("initially checked");
+        initiallyChecked.setCheckable(true);
+        initiallyChecked.setChecked(true);
+
+        add(target, message, toggleCheckable);
     }
 
 }

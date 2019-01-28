@@ -16,38 +16,33 @@
 package com.vaadin.flow.component.contextmenu;
 
 import com.vaadin.flow.component.ClickNotifier;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasEnabled;
-import com.vaadin.flow.component.HasText;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.function.SerializableRunnable;
 
 /**
- * Item component used inside {@link ContextMenu}
- * 
+ * Item component used inside {@link ContextMenu} and {@link SubMenu}. This
+ * component can be created and added to a menu overlay with
+ * {@link HasMenuItems#addItem(String, ComponentEventListener)} and similar
+ * methods.
+ *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
-@Tag("vaadin-item")
-@HtmlImport("frontend://bower_components/vaadin-item/src/vaadin-item.html")
-public class MenuItem extends Component
-        implements HasText, HasComponents, ClickNotifier<MenuItem>, HasEnabled {
+public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
+        implements ClickNotifier<MenuItem> {
 
-    private ContextMenuBase<?> contextMenu;
+    private final SerializableRunnable contentReset;
 
-    MenuItem(ContextMenuBase<?> contextMenu) {
+    public MenuItem(ContextMenu contextMenu,
+            SerializableRunnable contentReset) {
+        super(contextMenu);
         assert contextMenu != null;
-        this.contextMenu = contextMenu;
+        this.contentReset = contentReset;
     }
 
-    /**
-     * Gets the context-menu component that this item belongs to.
-     * 
-     * @return the context-menu component
-     */
-    public ContextMenuBase<?> getContextMenu() {
-        return contextMenu;
+    @Override
+    protected SubMenu createSubMenu() {
+        return new SubMenu(this, contentReset);
     }
 
 }

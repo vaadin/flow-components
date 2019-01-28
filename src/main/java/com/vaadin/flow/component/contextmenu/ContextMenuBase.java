@@ -16,19 +16,17 @@
 package com.vaadin.flow.component.contextmenu;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
-import java.util.stream.Stream.Builder;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -37,19 +35,27 @@ import com.vaadin.flow.shared.Registration;
  * adding items and handling events related to them. For basic example, see
  * {@link ContextMenu}.
  *
+ * @param <C>
+ *            the context-menu type
+ * @param <I>
+ *            the menu-item type
+ * @param <S>
+ *            the sub menu type
+ *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
 @HtmlImport("flow-component-renderer.html")
 @HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
 @JavaScript("frontend://contextMenuConnector.js")
-public class ContextMenuBase<C extends ContextMenuBase<C>>
+public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends GeneratedVaadinContextMenu<C> implements HasComponents {
 
     private Component target;
+    private MenuManager<C, I, S> menuManager;
 
-    private Element template;
-    private Element container;
+    private boolean updateScheduled = false;
+    private final Element container;
 
     private String openOnEventName = "vaadin-contextmenu";
     private Registration targetBeforeOpenRegistration;
@@ -60,15 +66,8 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
      * Creates an empty context menu.
      */
     public ContextMenuBase() {
-        template = new Element("template");
-        getElement().appendChild(template);
-
-        container = new Element("vaadin-list-box");
+        container = new Element("div");
         getElement().appendVirtualChild(container);
-
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        context -> attachComponentRenderer()));
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
@@ -83,6 +82,8 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
                 autoAddedToTheUi = false;
             }
         });
+
+        addAttachListener(event -> resetContent());
     }
 
     /**
@@ -129,35 +130,6 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
                     target.getElement().callFunction(
                             "$contextMenuConnector.openMenu", getElement());
                 });
-    }
-
-    private void updateOpenOn() {
-        if (target != null) {
-            target.getElement().callFunction(
-                    "$contextMenuConnector.updateOpenOn", openOnEventName);
-        }
-    }
-
-    private void beforeOpen() {
-        if (getElement().getNode().getParent() == null) {
-            UI ui = getCurrentUI();
-            ui.beforeClientResponse(ui, context -> {
-                ui.add(this);
-                autoAddedToTheUi = true;
-            });
-        }
-    }
-
-    private UI getCurrentUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
     }
 
     /**
@@ -209,11 +181,48 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
     }
 
     /**
+     * Adds a new item component with the given text content to the context menu
+     * overlay.
+     * <p>
+     * This is a convenience method for the use case where you have a list of
+     * highlightable {@link MenuItem}s inside the overlay. If you want to
+     * configure the contents of the overlay without wrapping them inside
+     * {@link MenuItem}s, or if you just want to add some non-highlightable
+     * components between the items, use the {@link #add(Component...)} method.
+     *
+     * @param text
+     *            the text content for the created menu item
+     * @return the created menu item
+     * @see #add(Component...)
+     */
+    public I addItem(String text) {
+        return getMenuManager().addItem(text);
+    }
+
+    /**
+     * Adds a new item component with the given component to the context menu
+     * overlay.
+     * <p>
+     * This is a convenience method for the use case where you have a list of
+     * highlightable {@link MenuItem}s inside the overlay. If you want to
+     * configure the contents of the overlay without wrapping them inside
+     * {@link MenuItem}s, or if you just want to add some non-highlightable
+     * components between the items, use the {@link #add(Component...)} method.
+     *
+     * @param component
+     *            the component to add to the created menu item
+     * @return the created menu item
+     * @see #add(Component...)
+     */
+    public I addItem(Component component) {
+        return getMenuManager().addItem(component);
+    }
+
+    /**
      * Adds the given components into the context menu overlay.
      * <p>
      * For the common use case of having a list of high-lightable items inside
-     * the overlay, you can use the
-     * {@link #addItem(Component, ComponentEventListener)} convenience methods
+     * the overlay, you can use the {@link #addItem(String)} convenience methods
      * instead.
      * <p>
      * The added elements in the DOM will not be children of the
@@ -222,42 +231,26 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
      *
      * @param components
      *            the components to add
-     * @see #addItem(String, ComponentEventListener)
-     * @see #addItem(Component, ComponentEventListener)
+     * @see HasMenuItems#addItem(String, ComponentEventListener)
+     * @see HasMenuItems#addItem(Component, ComponentEventListener)
      */
     @Override
     public void add(Component... components) {
-        Objects.requireNonNull(components, "Components to add cannot be null");
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to add cannot be null");
-            container.appendChild(component.getElement());
-        }
+        getMenuManager().add(components);
     }
 
     @Override
     public void remove(Component... components) {
-        Objects.requireNonNull(components,
-                "Components to remove cannot be null");
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to remove cannot be null");
-            if (container.equals(component.getElement().getParent())) {
-                container.removeChild(component.getElement());
-            } else {
-                throw new IllegalArgumentException("The given component ("
-                        + component + ") is not a child of this component");
-            }
-        }
+        getMenuManager().remove(components);
     }
 
     /**
-     * {@inheritDoc} This also removes all the items added with
-     * {@link #addItem(String)} and its overload methods.
+     * Removes all of the child components. This also removes all the items
+     * added with {@link #addItem(String)} and its overload methods.
      */
     @Override
     public void removeAll() {
-        container.removeAllChildren();
+        getMenuManager().removeAll();
     }
 
     /**
@@ -268,47 +261,40 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
      * overlay that is attached into the {@code <body>}.
      *
      * @param index
-     *            the index, where the component will be added.
+     *            the index, where the component will be added
      * @param component
      *            the component to add
+     * @see #add(Component...)
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Objects.requireNonNull(component, "Component should not be null");
-        if (index < 0) {
-            throw new IllegalArgumentException(
-                    "Cannot add a component with a negative index");
-        }
-        // The case when the index is bigger than the children count is handled
-        // inside the method below
-        container.insertChild(index, component.getElement());
+        getMenuManager().addComponentAtIndex(index, component);
     }
 
     /**
      * Gets the child components of this component. This includes components
      * added with {@link #add(Component...)} and the {@link MenuItem} components
-     * created with {@link #addItem(String)} and its overload methods.
+     * created with {@link #addItem(String)} and its overload methods. This
+     * doesn't include the components added to the sub menus of this context
+     * menu.
      *
      * @return the child components of this component
      */
     @Override
     public Stream<Component> getChildren() {
-        Builder<Component> childComponents = Stream.builder();
-        container.getChildren().forEach(childElement -> ComponentUtil
-                .findComponents(childElement, childComponents::add));
-        return childComponents.build();
+        return getMenuManager().getChildren();
     }
 
     /**
      * Gets the items added to this component (the children of this component
-     * that are instances of {@link MenuItem}).
+     * that are instances of {@link MenuItem}). This doesn't include the
+     * components added to the sub menus of this context menu.
      *
      * @return the {@link MenuItem} components in this context menu
-     * @see #addItem(String, ComponentEventListener)
+     * @see #addItem(String)
      */
-    public List<MenuItem> getItems() {
-        return getChildren().filter(MenuItem.class::isInstance)
-                .map(child -> (MenuItem) child).collect(Collectors.toList());
+    public List<I> getItems() {
+        return getMenuManager().getItems();
     }
 
     /**
@@ -318,36 +304,6 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
      */
     public boolean isOpened() {
         return super.isOpenedBoolean();
-    }
-
-    /**
-     * Creates and adds a new item component to this context menu with the given
-     * text content.
-     *
-     * @param text
-     *            the text content for the created menu item
-     * @return the created menu item
-     */
-    protected MenuItem addItem(String text) {
-        MenuItem menuItem = new MenuItem(this);
-        add(menuItem);
-        menuItem.setText(text);
-        return menuItem;
-    }
-
-    /**
-     * Creates and adds a new item component to this context menu with the given
-     * component inside.
-     *
-     * @param component
-     *            the component to add to the created menu item
-     * @return the created menu item
-     */
-    protected MenuItem addItem(Component component) {
-        MenuItem menuItem = new MenuItem(this);
-        add(menuItem);
-        menuItem.add(component);
-        return menuItem;
     }
 
     /**
@@ -364,13 +320,102 @@ public class ContextMenuBase<C extends ContextMenuBase<C>>
         return super.addOpenedChangeListener(listener);
     }
 
-    private void attachComponentRenderer() {
-        String appId = UI.getCurrent().getInternals().getAppId();
-        int nodeId = container.getNode().getId();
-        String renderer = String.format(
-                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
-                appId, nodeId);
-        template.setProperty("innerHTML", renderer);
+    /**
+     * Gets the menu manager.
+     *
+     * @return the menu manager
+     */
+    protected MenuManager<C, I, S> getMenuManager() {
+        if (menuManager == null) {
+            menuManager = createMenuManager(this::resetContent);
+        }
+        return menuManager;
     }
 
+    /**
+     * Creates a menu manager instance which contains logic to control the menu
+     * content.
+     *
+     * @param a
+     *            callback to reset the menu content
+     * @return a new menu manager instance
+     */
+    protected abstract MenuManager<C, I, S> createMenuManager(
+            SerializableRunnable contentReset);
+
+    private void resetContent() {
+        if (updateScheduled) {
+            return;
+        }
+        updateScheduled = true;
+        runBeforeClientResponse(ui -> {
+            container.removeAllChildren();
+            getItems().forEach(this::resetContainers);
+
+            int containerNodeId = createNewContainer(getChildren());
+            String appId = ui.getInternals().getAppId();
+
+            ui.getPage().executeJavaScript(
+                    "window.Vaadin.Flow.contextMenuConnector.generateItems($0, $1, $2)",
+                    getElement(), appId, containerNodeId);
+
+            updateScheduled = false;
+        });
+    }
+
+    private void resetContainers(I menuItem) {
+        if (!menuItem.isParentItem()) {
+            menuItem.getElement().removeProperty("_containerNodeId");
+            return;
+        }
+        SubMenuBase<C, I, S> subMenu = menuItem.getSubMenu();
+
+        int containerNodeId = createNewContainer(subMenu.getChildren());
+        menuItem.getElement().setProperty("_containerNodeId", containerNodeId);
+
+        subMenu.getItems().forEach(this::resetContainers);
+    }
+
+    private int createNewContainer(Stream<Component> components) {
+        Element subContainer = new Element("div");
+        container.appendChild(subContainer);
+
+        components
+                .forEach(child -> subContainer.appendChild(child.getElement()));
+        return subContainer.getNode().getId();
+    }
+
+    private void runBeforeClientResponse(Consumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void updateOpenOn() {
+        if (target != null) {
+            target.getElement().callFunction(
+                    "$contextMenuConnector.updateOpenOn", openOnEventName);
+        }
+    }
+
+    private void beforeOpen() {
+        if (getElement().getNode().getParent() == null) {
+            UI ui = getCurrentUI();
+            ui.beforeClientResponse(ui, context -> {
+                ui.add(this);
+                autoAddedToTheUi = true;
+            });
+        }
+    }
+
+    private UI getCurrentUI() {
+        UI ui = UI.getCurrent();
+        if (ui == null) {
+            throw new IllegalStateException("UI instance is not available. "
+                    + "It means that you are calling this method "
+                    + "out of a normal workflow where it's always implicitly set. "
+                    + "That may happen if you call the method from the custom thread without "
+                    + "'UI::access' or from tests without proper initialization.");
+        }
+        return ui;
+    }
 }

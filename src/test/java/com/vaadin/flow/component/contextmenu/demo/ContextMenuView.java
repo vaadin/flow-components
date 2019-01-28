@@ -19,14 +19,14 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H5;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -40,7 +40,10 @@ public class ContextMenuView extends DemoView {
     @Override
     public void initView() {
         addBasicContextMenu();
+        addContextMenuWithSubMenus();
+        addCheckableMenuItems();
         addContextMenuWithComponents();
+        addContextMenuWithComponentsInSubMenu();
         addCard("Target component used in the demo");
     }
 
@@ -72,6 +75,72 @@ public class ContextMenuView extends DemoView {
         contextMenu.setId("basic-context-menu");
     }
 
+    private void addContextMenuWithSubMenus() {
+        // begin-source-example
+        // source-example-heading: Hierarchical Menu
+        ContextMenu contextMenu = new ContextMenu();
+
+        Component target = createTargetComponent();
+        contextMenu.setTarget(target);
+
+        Label message = new Label("-");
+
+        contextMenu.addItem("First menu item",
+                event -> message.setText("Clicked on the first item"));
+
+        MenuItem parent = contextMenu.addItem("Parent item");
+        SubMenu subMenu = parent.getSubMenu();
+
+        subMenu.addItem("Second menu item",
+                event -> message.setText("Clicked on the second item"));
+
+        subMenu = subMenu.addItem("Parent item").getSubMenu();
+        subMenu.addItem("Third menu item",
+                event -> message.setText("Clicked on the third item"));
+
+        // end-source-example
+
+        addCard("Hierarchical Menu", target, message);
+        target.setId("hierarchical-menu-target");
+        message.setId("hierarchical-menu-message");
+    }
+
+    private void addCheckableMenuItems() {
+        // begin-source-example
+        // source-example-heading: Checkable Menu Items
+        ContextMenu contextMenu = new ContextMenu();
+
+        Component target = createTargetComponent();
+        contextMenu.setTarget(target);
+
+        Label message = new Label("-");
+
+        MenuItem item1 = contextMenu.addItem("Option 1", event -> {
+            if (event.getSource().isChecked()) {
+                message.setText("Selected option 1");
+            } else {
+                message.setText("Unselected option 1");
+            }
+        });
+        item1.setCheckable(true);
+
+        MenuItem item2 = contextMenu.addItem("Option 2", event -> {
+            if (event.getSource().isChecked()) {
+                message.setText("Selected option 2");
+            } else {
+                message.setText("Unselected option 2");
+            }
+        });
+        item2.setCheckable(true);
+        item2.setChecked(true);
+
+        // end-source-example
+
+        addCard("Checkable Menu Items", target, message);
+        target.setId("checkable-menu-items-target");
+        message.setId("checkable-menu-items-message");
+    }
+
     private void addContextMenuWithComponents() {
         // begin-source-example
         // source-example-heading: ContextMenu With Components
@@ -90,8 +159,8 @@ public class ContextMenuView extends DemoView {
 
         // Components can also be added to the overlay
         // without creating menu items with add()
-        Component horizontalLine = createHorizontalLine();
-        contextMenu.add(horizontalLine, new Label("This is not a menu item"));
+        Component separator = new Hr();
+        contextMenu.add(separator, new Label("This is not a menu item"));
 
         // end-source-example
 
@@ -99,6 +168,40 @@ public class ContextMenuView extends DemoView {
         target.setId("context-menu-with-components-target");
         contextMenu.setId("context-menu-with-components");
         message.setId("context-menu-with-components-message");
+    }
+
+    private void addContextMenuWithComponentsInSubMenu() {
+        // begin-source-example
+        // source-example-heading: ContextMenu With Components in Sub Menu
+        Component target = createTargetComponent();
+        ContextMenu contextMenu = new ContextMenu(target);
+
+        Label message = new Label("-");
+
+        contextMenu.addItem(new H5("First menu item"),
+                event -> message.setText("Clicked on the first item"));
+
+        MenuItem subMenuItem = contextMenu.addItem("SubMenu Item");
+        SubMenu subMenu = subMenuItem.getSubMenu();
+
+        Checkbox checkbox = new Checkbox("Checkbox");
+        subMenu.addItem(checkbox, event -> message.setText(
+                "Clicked on checkbox with value: " + checkbox.getValue()));
+
+        subMenu.addItem("TextItem",
+                event -> message.setText("Clicked on text item"));
+
+        // Components can also be added to the submenu overlay
+        // without creating menu items with add()
+        subMenu.addComponentAtIndex(1, new Hr());
+        subMenu.add(new Label("This is not a menu item"));
+
+        // end-source-example
+
+        addCard("ContextMenu With Components in Sub Menu", target, message);
+        target.setId("context-menu-with-submenu-components-target");
+        contextMenu.setId("context-menu-with-submenu-components");
+        message.setId("context-menu-with-submenu-components-message");
     }
 
     // begin-source-example
@@ -113,9 +216,4 @@ public class ContextMenuView extends DemoView {
     }
     // end-source-example
 
-    private Component createHorizontalLine() {
-        Element hr = ElementFactory.createHr();
-        return new Component(hr) {
-        };
-    }
 }

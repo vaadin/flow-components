@@ -58,7 +58,7 @@ public class ContextMenuTest {
         Assert.assertEquals(2, children.size());
         Assert.assertThat(children, CoreMatchers.hasItems(label1, label3));
 
-        label1.getElement().removeFromParent();
+        contextMenu.remove(label1);
         children = contextMenu.getChildren().collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
         Assert.assertThat(children, CoreMatchers.hasItems(label3));
@@ -164,9 +164,20 @@ public class ContextMenuTest {
         addDivAtIndex(-1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IndexOutOfBoundsException.class)
     public void addComponentAtIndex_indexIsBiggerThanChildrenCount() {
         addDivAtIndex(1);
+    }
+
+    @Test
+    public void addItemsWithNullClickListeners_doesNotThrow() {
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem foo = contextMenu.addItem("foo", null);
+        contextMenu.addItem(new Div(), null);
+
+        foo.getSubMenu().addItem("bar", null);
+        foo.getSubMenu().addItem(new Div(), null);
     }
 
     private void addDivAtIndex(int index) {

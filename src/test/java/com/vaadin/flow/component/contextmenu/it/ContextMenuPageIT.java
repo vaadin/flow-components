@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * @author Vaadin Ltd
@@ -49,7 +50,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         Assert.assertEquals("Context menu test.", getOverlay().getText());
         assertMessage(string, true, messageId);
 
-        getOverlay().click();
+        clickBody();
         verifyClosed();
         assertMessage(string, false, messageId);
     }
@@ -63,7 +64,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
 
         rightClickOn("context-menu-with-controls");
         verifyOpened();
-        getOverlay().click();
+        clickBody();
         verifyClosed();
         leftClickOn("context-menu-with-controls");
         verifyClosed();
@@ -72,7 +73,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         assertMessage(string, true, messageId);
         leftClickOn("context-menu-with-controls");
         verifyOpened();
-        getOverlay().click();
+        clickBody();
         verifyClosed();
         rightClickOn("context-menu-with-controls");
         verifyClosed();
@@ -81,7 +82,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         assertMessage(string, false, messageId);
         rightClickOn("context-menu-with-controls");
         verifyOpened();
-        getOverlay().click();
+        clickBody();
         verifyClosed();
         leftClickOn("context-menu-with-controls");
         verifyClosed();
@@ -152,6 +153,75 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         rightClickOn("context-menu-add-component-target");
         assertButtonNumberInMenu(4);
         assertButtonText(1);
+    }
+
+    @Test
+    public void clickOnNonItemContent_overlayNotClosed() {
+        verifyClosed();
+        rightClickOn("context-menu-test");
+        verifyOpened();
+
+        getOverlay().$("p").first().click();
+        verifyOpened();
+    }
+
+    @Test
+    public void clickNonCheckableItem_checkedStateNotUpdated() {
+        rightClickOn("context-menu-checkable-item-target");
+        TestBenchElement item = getMenuItems().get(0);
+        item.click();
+        Assert.assertEquals("false",
+                findElement(By.id("checked-message")).getText());
+
+        rightClickOn("context-menu-checkable-item-target");
+        item = getMenuItems().get(0);
+        Assert.assertFalse(item.hasAttribute("menu-item-checked"));
+    }
+
+    @Test
+    public void clickCheckableItem_checkedStateUpdated() {
+        clickElementWithJs("toggle-checkable");
+
+        rightClickOn("context-menu-checkable-item-target");
+        TestBenchElement item = getMenuItems().get(0);
+        assertCheckedInClientSide(item, false);
+
+        item.click();
+        Assert.assertEquals("true",
+                findElement(By.id("checked-message")).getText());
+
+        rightClickOn("context-menu-checkable-item-target");
+        item = getMenuItems().get(0);
+        assertCheckedInClientSide(item, true);
+
+        item.click();
+        Assert.assertEquals("false",
+                findElement(By.id("checked-message")).getText());
+
+        rightClickOn("context-menu-checkable-item-target");
+        item = getMenuItems().get(0);
+        assertCheckedInClientSide(item, false);
+    }
+
+    @Test
+    public void initiallyCheckedItem_hasCheckmark() {
+        rightClickOn("context-menu-checkable-item-target");
+        TestBenchElement item = getMenuItems().get(1);
+        assertCheckedInClientSide(item, true);
+    }
+
+    public static void assertCheckedInClientSide(TestBenchElement item,
+            boolean shouldBeChecked) {
+        boolean isChecked = item.hasAttribute("menu-item-checked");
+        if (shouldBeChecked) {
+            Assert.assertTrue(
+                    "Expected menu item to be marked as checked in client-side",
+                    isChecked);
+        } else {
+            Assert.assertFalse(
+                    "Expected menu item to not be marked as checked in client-side",
+                    isChecked);
+        }
     }
 
     private void assertButtonText(int index) {

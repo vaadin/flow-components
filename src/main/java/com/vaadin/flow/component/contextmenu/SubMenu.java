@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2018 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,30 +21,21 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
- * Server-side component for {@code <vaadin-context-menu>}.
+ * API that allows adding content into the sub menus of a {@link ContextMenu} to
+ * create hierarchical menus. Get it by calling {@link MenuItem#getSubMenu()} on
+ * the item component that should open the sub menu. Sub menu will be rendered
+ * only if content has been added inside it.
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
-public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
+public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
         implements HasMenuItems {
 
-    /**
-     * Creates an empty context menu.
-     */
-    public ContextMenu() {
-    }
+    private final SerializableRunnable contentReset;
 
-    /**
-     * Creates an empty context menu with the given target component.
-     *
-     * @param target
-     *            the target component for this context menu
-     * @see #setTarget(Component)
-     */
-    public ContextMenu(Component target) {
-        this();
-        setTarget(target);
+    public SubMenu(MenuItem parentMenuItem, SerializableRunnable contentReset) {
+        super(parentMenuItem);
+        this.contentReset = contentReset;
     }
 
     @Override
@@ -60,10 +51,9 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
     }
 
     @Override
-    protected MenuManager<ContextMenu, MenuItem, SubMenu> createMenuManager(
-            SerializableRunnable contentReset) {
-        return new MenuManager<>(this, contentReset, MenuItem::new,
-                MenuItem.class, null);
+    protected MenuManager<ContextMenu, MenuItem, SubMenu> createMenuManager() {
+        return new MenuManager<>(getParentMenuItem().getContextMenu(),
+                contentReset, MenuItem::new, MenuItem.class,
+                getParentMenuItem());
     }
-
 }

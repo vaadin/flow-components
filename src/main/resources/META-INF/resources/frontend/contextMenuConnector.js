@@ -45,5 +45,39 @@ window.Vaadin.Flow.contextMenuConnector = {
       }
 
     };
+  },
+
+  generateItems: function(menu, appId, nodeId) {
+    menu._containerNodeId = nodeId;
+
+    const getContainer = function(nodeId) {
+      try {
+        return window.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
+      } catch (error) {
+        console.error("Could not get node %s from app %s", nodeId, appId);
+        console.error(error);
+      }
+    };
+
+    const getChildItems = function(parent) {
+      const container = getContainer(parent._containerNodeId);
+      const items = Array.from(container.children).map(child => {
+        const item = {component: child, checked: child._checked};
+        if (Vaadin.ItemElement && (child instanceof Vaadin.ItemElement) && child._containerNodeId) {
+          item.children = getChildItems(child);
+        }
+        return item;
+      });
+      return items;
+    };
+
+    const items = getChildItems(menu);
+    menu.items = items;
+  },
+
+  setChecked: function(component, checked) {
+    if (component._item) {
+      component._item.checked = checked;
+    }
   }
 }

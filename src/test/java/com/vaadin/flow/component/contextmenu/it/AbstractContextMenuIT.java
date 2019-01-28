@@ -22,6 +22,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.testbench.TestBenchElement;
 
 public abstract class AbstractContextMenuIT extends AbstractComponentIT {
 
@@ -37,8 +38,20 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
         findElement(By.id(id)).click();
     }
 
-    protected WebElement getOverlay() {
-        return findElement(By.tagName(OVERLAY_TAG));
+    protected void clickBody() {
+        $("body").first().click();
+    }
+
+    protected TestBenchElement getOverlay() {
+        return $(OVERLAY_TAG).first();
+    }
+
+    protected List<TestBenchElement> getAllOverlays() {
+        return $(OVERLAY_TAG).all();
+    }
+
+    protected void verifyNumOfOverlays(int expected) {
+        waitUntil(driver -> getAllOverlays().size() == expected);
     }
 
     protected void verifyClosed() {
@@ -50,11 +63,25 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
     }
 
     protected String[] getMenuItemCaptions() {
-        return getMenuItems().stream().map(WebElement::getText)
+        return getMenuItemCaptions(getMenuItems());
+    }
+
+    protected String[] getMenuItemCaptions(List<TestBenchElement> menuItems) {
+        return menuItems.stream().map(WebElement::getText)
                 .toArray(String[]::new);
     }
 
-    protected List<WebElement> getMenuItems() {
-        return getOverlay().findElements(By.tagName("vaadin-item"));
+    protected List<TestBenchElement> getMenuItems() {
+        return getMenuItems(getOverlay());
+    }
+
+    protected List<TestBenchElement> getMenuItems(TestBenchElement overlay) {
+        return overlay.$("vaadin-item").all();
+    }
+
+    protected void openSubMenu(TestBenchElement parentItem) {
+        executeScript(
+                "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
+                parentItem);
     }
 }

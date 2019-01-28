@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.contextmenu.it;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.contextmenu.demo.ContextMenuView;
 import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Integration tests for the {@link ContextMenuView}.
@@ -47,7 +49,7 @@ public class ContextMenuDemoIT extends ComponentDemoTest {
         Assert.assertEquals("The last item is supposed to be disabled", "true",
                 getMenuItems().get(2).getAttribute("disabled"));
 
-        getOverlay().click();
+        $("body").first().click();
         verifyClosed();
     }
 
@@ -75,14 +77,103 @@ public class ContextMenuDemoIT extends ComponentDemoTest {
                 message.getText());
     }
 
+    @Test
+    public void hierarchicalContextMenu_openSubMenus() {
+        verifyClosed();
+
+        rightClickOn(By.id("hierarchical-menu-target"));
+        verifyOpened();
+
+        openSubMenu(getMenuItems().get(1));
+
+        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 2);
+        List<TestBenchElement> overlays = $(OVERLAY_TAG).all();
+
+        openSubMenu(getMenuItems(overlays.get(1)).get(1));
+
+        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 3);
+        overlays = $(OVERLAY_TAG).all();
+
+        getMenuItems(overlays.get(2)).get(0).click();
+
+        Assert.assertEquals("Clicked on the third item",
+                $("label").id("hierarchical-menu-message").getText());
+
+        verifyClosed();
+    }
+
+    @Test
+    public void checkableMenuItems() {
+        verifyClosed();
+
+        rightClickOn(By.id("checkable-menu-items-target"));
+        verifyOpened();
+
+        List<TestBenchElement> items = getMenuItems();
+        ContextMenuPageIT.assertCheckedInClientSide(items.get(0), false);
+        ContextMenuPageIT.assertCheckedInClientSide(items.get(1), true);
+
+        items.get(1).click();
+
+        Assert.assertEquals("Unselected option 2",
+                $("label").id("checkable-menu-items-message").getText());
+        verifyClosed();
+
+        rightClickOn(By.id("checkable-menu-items-target"));
+        verifyOpened();
+
+        items = getMenuItems();
+        ContextMenuPageIT.assertCheckedInClientSide(items.get(0), false);
+        ContextMenuPageIT.assertCheckedInClientSide(items.get(1), false);
+
+        items.get(0).click();
+
+        Assert.assertEquals("Selected option 1",
+                $("label").id("checkable-menu-items-message").getText());
+        verifyClosed();
+
+        rightClickOn(By.id("checkable-menu-items-target"));
+        verifyOpened();
+
+        items = getMenuItems();
+        ContextMenuPageIT.assertCheckedInClientSide(items.get(0), true);
+        ContextMenuPageIT.assertCheckedInClientSide(items.get(1), false);
+    }
+
+    @Test
+    public void subMenuHasComponents_componentsAreNotItems() {
+        verifyClosed();
+
+        rightClickOn(By.id("context-menu-with-submenu-components-target"));
+        verifyOpened();
+
+        openSubMenu(getMenuItems().get(1));
+        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 2);
+
+        TestBenchElement subMenuOverlay = $(OVERLAY_TAG).all().get(1);
+
+        TestBenchElement overlayContainer = subMenuOverlay.$("vaadin-list-box")
+                .first();
+        List<WebElement> items = overlayContainer.findElements(By.xpath("./*"));
+        Assert.assertEquals(4, items.size());
+        Assert.assertEquals("vaadin-item",
+                items.get(0).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("hr",
+                items.get(1).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("vaadin-item",
+                items.get(2).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("label",
+                items.get(3).getTagName().toLowerCase(Locale.ENGLISH));
+    }
+
     private void rightClickOn(By by) {
         Actions action = new Actions(getDriver());
         WebElement element = findElement(by);
         action.contextClick(element).perform();
     }
 
-    private WebElement getOverlay() {
-        return findElement(By.tagName(OVERLAY_TAG));
+    private TestBenchElement getOverlay() {
+        return $(OVERLAY_TAG).first();
     }
 
     private void verifyClosed() {
@@ -98,8 +189,18 @@ public class ContextMenuDemoIT extends ComponentDemoTest {
                 .toArray(String[]::new);
     }
 
-    private List<WebElement> getMenuItems() {
-        return getOverlay().findElements(By.tagName("vaadin-item"));
+    private List<TestBenchElement> getMenuItems() {
+        return getOverlay().$("vaadin-item").all();
+    }
+
+    private List<TestBenchElement> getMenuItems(TestBenchElement overlay) {
+        return overlay.$("vaadin-item").all();
+    }
+
+    private void openSubMenu(WebElement parentItem) {
+        executeScript(
+                "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
+                parentItem);
     }
 
     @Override
