@@ -2,6 +2,7 @@ package com.vaadin.flow.component.customfield.test;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BasicIT extends AbstractParallelTest {
@@ -12,6 +13,7 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
+    @Ignore
     public void pass() {
         Assert.assertEquals("Hello World!", $("h1").first().getText());
     }
