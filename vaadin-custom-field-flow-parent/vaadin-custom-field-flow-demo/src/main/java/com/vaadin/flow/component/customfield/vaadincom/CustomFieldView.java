@@ -32,14 +32,13 @@ public class CustomFieldView extends DemoView {
         private final TimePicker timePicker = new TimePicker();
 
         DateTimeField() {
-            super(null);
-            datePicker.addValueChangeListener(e -> setModelValue(
-                LocalDateTime.of(e.getValue(), timePicker.getValue()),
-                e.isFromClient()));
-            timePicker.addValueChangeListener(e -> setModelValue(
-                LocalDateTime.of(datePicker.getValue(), e.getValue()),
-                e.isFromClient()));
             add(datePicker, timePicker);
+        }
+
+        @Override
+        protected LocalDateTime generateModelValue(
+            CustomFieldChangeEvent event) {
+            return LocalDateTime.of(datePicker.getValue(),timePicker.getValue());
         }
 
         @Override
