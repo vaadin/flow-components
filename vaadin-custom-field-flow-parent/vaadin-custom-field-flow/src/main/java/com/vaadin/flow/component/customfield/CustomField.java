@@ -55,7 +55,8 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     protected abstract T generateModelValue(CustomFieldChangeEvent event);
 
     protected void updateModelValue(CustomFieldChangeEvent event) {
-        setModelValue(generateModelValue(event),event.isFromClient());
+        setModelValue(generateModelValue(event), false);
+        setPresentationValue(getValue());
     }
 
     /**
