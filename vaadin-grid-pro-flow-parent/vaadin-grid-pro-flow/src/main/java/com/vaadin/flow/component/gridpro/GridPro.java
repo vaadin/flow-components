@@ -315,7 +315,7 @@ public class GridPro<E> extends Grid<E> {
      *            when <code>true</code>, after moving to next editable cell using
      *            Tab / Enter, it will be focused in edit mode
      */
-    public void setAllowEnterRowChange(Boolean allowEnterRowChange) {
+    public void setAllowEnterRowChange(boolean allowEnterRowChange) {
         getElement().setProperty("allowEnterRowChange", allowEnterRowChange);
     }
 
@@ -323,7 +323,7 @@ public class GridPro<E> extends Grid<E> {
      * Gets the allowEnterRowChange value for this grid.
      */
     @Synchronize("allow-enter-row-change-changed")
-    public Boolean getAllowEnterRowChange() {
+    public boolean getAllowEnterRowChange() {
         return getElement().getProperty("allowEnterRowChange", false);
     }
 
@@ -334,7 +334,7 @@ public class GridPro<E> extends Grid<E> {
      *            when <code>true</code>, pressing Enter while in cell edit mode
      *            will move focus to the editable cell in the next row
      */
-    public void setPreserveEditMode(Boolean preserveEditMode) {
+    public void setPreserveEditMode(boolean preserveEditMode) {
         getElement().setProperty("preserveEditMode", preserveEditMode);
     }
 
@@ -342,7 +342,7 @@ public class GridPro<E> extends Grid<E> {
      * Gets the preserveEditMode value for this grid.
      */
     @Synchronize("preserve-edit-mode-changed")
-    public Boolean getPreserveEditMode() {
+    public boolean getPreserveEditMode() {
         return getElement().getProperty("preserveEditMode", false);
     }
 

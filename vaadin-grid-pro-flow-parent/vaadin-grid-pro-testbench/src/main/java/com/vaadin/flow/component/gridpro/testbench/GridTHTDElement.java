@@ -58,7 +58,7 @@ public class GridTHTDElement extends TestBenchElement {
         }
     }
 
-    public Boolean innerHTMLContains(String key) {
+    public boolean innerHTMLContains(String key) {
         return this.getInnerHTML().contains(key);
     }
 
