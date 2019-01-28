@@ -28,6 +28,8 @@ import org.junit.Test;
 
 public class RadioButtonGroupTest {
 
+    private static final String OUTER_HTML = "<vaadin-radio-button>\n <span>%s</span>\n</vaadin-radio-button>";
+
     @Test
     public void setReadOnlyRadioGroup_groupIsReadOnlyAndDisabled() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
@@ -146,5 +148,47 @@ public class RadioButtonGroupTest {
 
         Assert.assertEquals(null, radioButtonGroup.getValue());
         Assert.assertEquals(null, capture.get());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testResetAllItems() {
+        RadioButtonGroup<ItemHelper> group = new RadioButtonGroup<ItemHelper>();
+        ItemHelper item1 = new ItemHelper("foo", "01");
+        ItemHelper item2 = new ItemHelper("baz", "02");
+
+        group.setItems(item1, item2);
+
+        item1.setName("zoo");
+        item2.setName("bar");
+        group.getDataProvider().refreshAll();
+
+        List<Component> components = group.getChildren().collect(Collectors.toList());
+        RadioButton<ItemHelper> radioZoo = (RadioButton<ItemHelper>) components.get(0);
+        RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components.get(1);
+
+        Assert.assertEquals(String.format(OUTER_HTML, "zoo"), radioZoo.getElement().getOuterHTML());
+        Assert.assertEquals(String.format(OUTER_HTML, "bar"), radioBar.getElement().getOuterHTML());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testResetSingleItem() {
+        RadioButtonGroup<ItemHelper> group = new RadioButtonGroup<ItemHelper>();
+        ItemHelper item1 = new ItemHelper("foo", "01");
+        ItemHelper item2 = new ItemHelper("baz", "02");
+
+        group.setItems(item1, item2);
+
+        item1.setName("zoo");
+        item2.setName("bar");
+        group.getDataProvider().refreshItem(item2);
+
+        List<Component> components = group.getChildren().collect(Collectors.toList());
+        RadioButton<ItemHelper> radioFoo = (RadioButton<ItemHelper>) components.get(0);
+        RadioButton<ItemHelper> radioBar = (RadioButton<ItemHelper>) components.get(1);
+
+        Assert.assertEquals(String.format(OUTER_HTML, "foo"), radioFoo.getElement().getOuterHTML());
+        Assert.assertEquals(String.format(OUTER_HTML, "bar"), radioBar.getElement().getOuterHTML());
     }
 }

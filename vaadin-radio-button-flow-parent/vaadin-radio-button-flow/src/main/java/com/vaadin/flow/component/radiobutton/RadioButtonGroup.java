@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
@@ -103,8 +104,16 @@ public class RadioButtonGroup<T>
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
+
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(event -> reset());
+                .addDataProviderListener(event -> {
+                    if (event instanceof DataChangeEvent.DataRefreshEvent) {
+                        resetRadioButton(
+                            ((DataChangeEvent.DataRefreshEvent<T>) event).getItem());
+                    } else {
+                        reset();
+                    }
+                });
     }
 
     /**
@@ -260,6 +269,13 @@ public class RadioButtonGroup<T>
         clear();
         getDataProvider().fetch(new Query<>()).map(this::createRadioButton)
                 .forEach(this::add);
+    }
+
+    private void resetRadioButton(T item) {
+        getRadioButtons().filter(radioButton ->
+            getDataProvider().getId(radioButton.getItem()).equals(getDataProvider().getId(item)))
+        .findFirst()
+        .ifPresent(this::updateButton);
     }
 
     private Component createRadioButton(T item) {
