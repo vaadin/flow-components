@@ -10,7 +10,7 @@
         <version>1.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>vaadin-list-box-integration-tests</artifactId>
+    <artifactId>vaadin-list-box-flow-integration-tests</artifactId>
     <packaging>war</packaging>
 
     <name>Vaadin List Box Integration Tests</name>
@@ -25,13 +25,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
             <version>${testbench.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-list-box-testbench</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!--System under test -->
@@ -89,7 +87,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
             <version>${flow.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
