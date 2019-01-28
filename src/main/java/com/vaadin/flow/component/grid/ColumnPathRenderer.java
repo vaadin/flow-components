@@ -27,6 +27,8 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 
+import elemental.json.Json;
+
 /**
  * Renderer for columns that doesn't use any template for rendering its contents
  * (only the value from the object model). In such cases, a {@code template}
@@ -73,7 +75,7 @@ public class ColumnPathRenderer<SOURCE> extends Renderer<SOURCE> {
         container.setProperty("path", property);
 
         // disables the automatic creation of headers when the path is used
-        container.setProperty("header", "");
+        container.setPropertyJson("header", Json.createNull());
 
         return new SingleValueProviderRendering();
     }

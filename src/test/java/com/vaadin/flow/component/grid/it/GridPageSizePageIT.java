@@ -15,14 +15,13 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -40,7 +39,7 @@ public class GridPageSizePageIT extends AbstractComponentIT {
 
     @Test
     public void gridWithPageSize10_changeTo80_revertBackTo10() {
-        WebElement grid = findElement(By.tagName("vaadin-grid"));
+        GridElement grid = $(GridElement.class).first();
 
         assertPageSize(grid, 10);
         assertCellContents(grid);
@@ -64,38 +63,16 @@ public class GridPageSizePageIT extends AbstractComponentIT {
         assertCellContents(grid);
     }
 
-    private void assertCellContents(WebElement grid) {
+    private void assertCellContents(GridElement grid) {
         /*
          * Smoke test for the cell contents. The actual contents depends on the
          * size of the Grid, the window size, and the scroll position. The
          * headers and footers are also part of the Grid contents.
          */
-        List<WebElement> cells = grid
-                .findElements(By.tagName("vaadin-grid-cell-content"));
-
-        int offset = getCellsOffsetFromTheHeaders(grid, cells);
-
-        assertCellContent("0", cells.get(offset));
-        assertCellContent("24", cells.get(offset + 48));
-    }
-
-    private int getCellsOffsetFromTheHeaders(WebElement grid,
-            List<WebElement> cells) {
-        int numberOfColumns = grid
-                .findElements(By.tagName("vaadin-grid-column")).size();
-        for (int i = numberOfColumns; i < cells.size(); i++) {
-            WebElement cell = cells.get(i);
-            String content = cell.getAttribute("innerHTML");
-            if (!content.trim().isEmpty()) {
-                return i;
-            }
-        }
-        return 0;
-    }
-
-    private void assertCellContent(String expected, WebElement cell) {
-        Assert.assertEquals("Wrong content of the rendered cell", expected,
-                cell.getAttribute("innerHTML"));
+        Assert.assertEquals("Wrong content for first content cell", "0",
+                grid.getCell(0, 0).getText());
+        Assert.assertEquals("Wrong content for 24th content cell", "24",
+                grid.getCell(24, 0).getText());
     }
 
     private void assertPageSize(WebElement grid, int pageSize) {
