@@ -2,9 +2,8 @@
   "name": "vaadin-accordion-flow-demo",
   "description": "Frontend dependencies for vaadin-accordion-flow demo",
   "version": "1.0.0",
-  "private": true,
   "author": "Vaadin Ltd",
-  "license": "Apache-2.0",
+  "license": "SEE LICENSE IN https://vaadin.com/license/cval-3.0",
   "devDependencies": {
     "bower": "1.8.2"
   },
@@ -13,6 +12,7 @@
     "build": "cd ../src/main/webapp/frontend && bower install && polymer build"
   },
   "dependencies": {
-    "polymer-cli": "^1.5.7"
+    "polymer-cli": "^1.5.7",
+    "rimraf": "^2.6.2"
   }
 }

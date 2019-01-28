@@ -2,38 +2,69 @@ package com.vaadin.flow.component.accordion;
 
 /*
  * #%L
- * Vaadin Accordion for Vaadin 13
+ * Vaadin Accordion
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright (C) 2018 - 2019 Vaadin Ltd
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This program is available under Commercial Vaadin Add-On License 3.0
+ * (CVALv3).
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * See the file license.html distributed with this software for more
+ * information about licensing.
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the CVALv3 along with this program.
+ * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
  */
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.shared.Registration;
 
-@Tag("div")
-//@Tag("vaadin-accordion")
-//@HtmlImport("frontend://bower_components/vaadin-accordion/src/vaadin-accordion.html")
-public class Accordion extends Component {
+@Tag("vaadin-accordion")
+@HtmlImport("frontend://bower_components/vaadin-accordion/src/vaadin-accordion.html")
+public class Accordion extends Component implements HasSize, HasTheme {
 
-    /**
-     * Initializes a new Accordion.
-     */
-    public Accordion() {
-        getElement().appendChild(new H1("Hello World!").getElement());
+    private static final String OPENED_PROPERTY = "opened";
+
+    public AccordionPanel add(String summary, Component detail) {
+        final AccordionPanel panel = new AccordionPanel(summary, detail);
+        return add(panel);
+    }
+
+    public AccordionPanel add(AccordionPanel panel) {
+        getElement().appendChild(panel.getElement());
+        return panel;
+    }
+
+    public void remove(AccordionPanel panel) {
+        getElement().removeChild(panel.getElement());
+    }
+
+    public void collapse() {
+        getElement().setProperty(OPENED_PROPERTY, null);
+    }
+
+    public void expand(int index) {
+        getElement().setProperty(OPENED_PROPERTY, index);
+    }
+
+    public void expand(AccordionPanel panel) {
+        expand(getElement().indexOfChild(panel.getElement()));
+    }
+
+    public Integer getExpandedIndex() {
+        final String opened = getElement().getProperty(OPENED_PROPERTY);
+        return opened == null ? null : Integer.valueOf(opened);
+    }
+
+    public Registration addOpenedChangedListener(ComponentEventListener<AccordionOpenedChanged> listener) {
+        return ComponentUtil.addListener(this, AccordionOpenedChanged.class, listener);
     }
 }
