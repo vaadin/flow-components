@@ -66,8 +66,8 @@ public class GridProEditColumnTest {
     @Test
     public void setHandler_getHandler() {
         SerializableBiConsumer testConsumer = (modifiedItem, columnPath) -> {};
-        checkboxColumn.setHandler(testConsumer);
-        Assert.assertEquals(checkboxColumn.getHandler(), testConsumer);
+        checkboxColumn.setCallback(testConsumer);
+        Assert.assertEquals(checkboxColumn.getCallback(), testConsumer);
     }
 
     @Test
