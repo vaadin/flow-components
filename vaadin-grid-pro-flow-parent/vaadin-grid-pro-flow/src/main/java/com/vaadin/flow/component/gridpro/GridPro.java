@@ -56,6 +56,7 @@ public class GridPro<E> extends Grid<E> {
      */
     public GridPro(Class<E> beanType) {
         super(beanType);
+        setup();
     }
 
     /**
@@ -85,7 +86,7 @@ public class GridPro<E> extends Grid<E> {
     private void setup() {
         addItemPropertyChangedListener(e -> {
             EditColumn<E> column = (EditColumn<E>) this.idToColumnMap.get(e.getPath());
-            column.getHandler().accept(e.getSourceItem(), e.getPath());
+            column.getCallback().accept(e.getSourceItem(), e.getPath());
         });
     }
 
@@ -104,7 +105,7 @@ public class GridPro<E> extends Grid<E> {
     @Tag("vaadin-grid-pro-edit-column")
     public static class EditColumn<T> extends Column<T> {
 
-        private SerializableBiConsumer<Object, String> handler;
+        private SerializableBiConsumer<Object, String> callback;
 
         /**
          * Constructs a new Column for use inside a Grid.
@@ -124,19 +125,20 @@ public class GridPro<E> extends Grid<E> {
         /**
          * Sets the callback function that will be called on item changed.
          *
-         * @param handler
-         *            the callback function
+         * @param callback
+         *            the callback function that is called when item is changed.
+         *            It receives two arguments: modifiedItem and columnPath
          */
-        protected <C extends Column<T>> C setHandler(SerializableBiConsumer<Object, String> handler) {
-            this.handler = handler;
+        protected <C extends Column<T>> C setCallback(SerializableBiConsumer<Object, String> callback) {
+            this.callback = callback;
             return (C) this;
         }
 
         /**
          * Gets the callback function that will be called on item changed.
          */
-        protected SerializableBiConsumer<Object, String> getHandler() {
-            return handler;
+        protected SerializableBiConsumer<Object, String> getCallback() {
+            return callback;
         }
 
         /**
@@ -188,16 +190,120 @@ public class GridPro<E> extends Grid<E> {
      * visibility state. Don't add a new column at all or use
      * {@link GridPro#removeColumn(Column)} to avoid sending extra data.
      * </p>
+     * <p>
+     * This method is based on {@link Grid#addColumn(ValueProvider)}.
+     * </p>
+     * <p>
+     * The instance of {@link EditColumnConfigurator} should be provided as
+     * second parameter in order to configure the needed type of the editor for the
+     * column.
+     * </p>
      *
      * @param valueProvider
      *            the value provider
+     * @param columnConfigurator
+     *            the instance of {@link EditColumnConfigurator} class which configures
+     *            the column to operate with specific type of the editor
      * @return the created column
+     * @see EditColumnConfigurator#text(SerializableBiConsumer)
+     * @see EditColumnConfigurator#checkbox(SerializableBiConsumer)
+     * @see EditColumnConfigurator#select(SerializableBiConsumer, List)
+     * @see Grid#addColumn(ValueProvider)
      * @see #removeColumn(Column)
      */
     public EditColumn<E> addEditColumn(ValueProvider<E, ?> valueProvider, EditColumnConfigurator columnConfigurator) {
         Objects.requireNonNull(columnConfigurator);
 
         EditColumn<E> column = this.addColumn(valueProvider, this::createEditColumn);
+
+        return configureEditColumn(column, columnConfigurator);
+    }
+
+    /**
+     * Adds a new edit column to this {@link GridPro} with a renderer.
+     * <p>
+     * See implementations of the {@link Renderer} interface for built-in
+     * renderer options with type safe APIs. For a renderer using template
+     * binding, use {@link TemplateRenderer#of(String)}.
+     * </p>
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link GridPro#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     * <p>
+     * This method is based on {@link Grid#addColumn(Renderer)}.
+     * </p>
+     * <p>
+     * The instance of {@link EditColumnConfigurator} should be provided as
+     * second parameter in order to configure the needed type of the editor for the
+     * column.
+     * </p>
+     *
+     * @param renderer
+     *            the renderer used to create the grid cell structure
+     * @param columnConfigurator
+     *            the instance of {@link EditColumnConfigurator} class which configures
+     *            the column to operate with specific type of the editor
+     * @return the created column
+     *
+     * @see EditColumnConfigurator#text(SerializableBiConsumer)
+     * @see EditColumnConfigurator#checkbox(SerializableBiConsumer)
+     * @see EditColumnConfigurator#select(SerializableBiConsumer, List)
+     * @see Grid#addColumn(Renderer)
+     * @see TemplateRenderer#of(String)
+     * @see #removeColumn(Column)
+     */
+    public EditColumn<E> addEditColumn(Renderer<E> renderer, EditColumnConfigurator columnConfigurator) {
+        Objects.requireNonNull(columnConfigurator);
+
+        EditColumn<E> column = this.addColumn(renderer, this::createEditColumn);
+
+        return configureEditColumn(column, columnConfigurator);
+    }
+
+    /**
+     * Adds a new edit column for the given property name. The property values are
+     * converted to Strings in the grid cells. The property's full name will be
+     * used as the {@link Column#setKey(String) column key} and the property
+     * caption will be used as the {@link Column#setHeader(String) column
+     * header}.
+     * <p>
+     * <strong>Note:</strong> This method can only be used for a Grid created
+     * from a bean type with {@link #GridPro(Class)}.
+     * </p>
+     * <p>
+     * Every added column sends data to the client side regardless of its
+     * visibility state. Don't add a new column at all or use
+     * {@link GridPro#removeColumn(Column)} to avoid sending extra data.
+     * </p>
+     * <p>
+     * This method is based on {@link Grid#addColumn(String)}.
+     * </p>
+     * <p>
+     * The instance of {@link EditColumnConfigurator} should be provided as
+     * second parameter in order to configure the needed type of the editor for the
+     * column.
+     * </p>
+     *
+     * @see #removeColumn(Column)
+     *
+     * @param propertyName
+     *            the property name of the new column, not <code>null</code>
+     * @param columnConfigurator
+     *            the instance of {@link EditColumnConfigurator} class which configures
+     *            the column to operate with specific type of the editor
+     * @return the created column
+     *
+     * @see EditColumnConfigurator#text(SerializableBiConsumer)
+     * @see EditColumnConfigurator#checkbox(SerializableBiConsumer)
+     * @see EditColumnConfigurator#select(SerializableBiConsumer, List)
+     * @see Grid#addColumn(String)
+     */
+    public EditColumn<E> addEditColumn(String propertyName, EditColumnConfigurator columnConfigurator) {
+        Objects.requireNonNull(columnConfigurator);
+
+        EditColumn<E> column = this.addColumn(propertyName, this::createEditColumn);
 
         return configureEditColumn(column, columnConfigurator);
     }
@@ -240,67 +346,9 @@ public class GridPro<E> extends Grid<E> {
         return getElement().getProperty("preserveEditMode", false);
     }
 
-    /**
-     * Adds a new edit column to this {@link GridPro} with a renderer.
-     * <p>
-     * See implementations of the {@link Renderer} interface for built-in
-     * renderer options with type safe APIs. For a renderer using template
-     * binding, use {@link TemplateRenderer#of(String)}.
-     * </p>
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link GridPro#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
-     * @param renderer
-     *            the renderer used to create the grid cell structure
-     * @return the created column
-     *
-     * @see TemplateRenderer#of(String)
-     * @see #removeColumn(Column)
-     */
-    public EditColumn<E> addEditColumn(Renderer<E> renderer, EditColumnConfigurator columnConfigurator) {
-        Objects.requireNonNull(columnConfigurator);
-
-        EditColumn<E> column = this.addColumn(renderer, this::createEditColumn);
-
-        return configureEditColumn(column, columnConfigurator);
-    }
-
-    /**
-     * Adds a new edit column for the given property name. The property values are
-     * converted to Strings in the grid cells. The property's full name will be
-     * used as the {@link Column#setKey(String) column key} and the property
-     * caption will be used as the {@link Column#setHeader(String) column
-     * header}.
-     * <p>
-     * <strong>Note:</strong> This method can only be used for a Grid created
-     * from a bean type with {@link #GridPro(Class)}.
-     *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link GridPro#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
-     * @see #removeColumn(Column)
-     *
-     * @param propertyName
-     *            the property name of the new column, not <code>null</code>
-     * @return the created column
-     */
-    public EditColumn<E> addEditColumn(String propertyName, EditColumnConfigurator columnConfigurator) {
-        Objects.requireNonNull(columnConfigurator);
-
-        EditColumn<E> column = this.addColumn(propertyName, this::createEditColumn);
-
-        return configureEditColumn(column, columnConfigurator);
-    }
-
     private EditColumn<E> configureEditColumn(EditColumn<E> column, EditColumnConfigurator columnConfigurator) {
         column.setEditorType(columnConfigurator.getType());
-        column.setHandler(columnConfigurator.getHandler());
+        column.setCallback(columnConfigurator.getCallback());
         column.setOptions(columnConfigurator.getOptions());
 
         return column;
@@ -323,6 +371,7 @@ public class GridPro<E> extends Grid<E> {
         idToColumnMap.put(columnId, column);
         return column;
     }
+
     /**
      * Event fired when the user starts to edit an existing item.
      *

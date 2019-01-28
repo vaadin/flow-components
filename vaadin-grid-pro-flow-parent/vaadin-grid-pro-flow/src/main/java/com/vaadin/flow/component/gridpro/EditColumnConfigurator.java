@@ -31,12 +31,12 @@ import java.util.Objects;
  */
 public class EditColumnConfigurator {
 
-    private SerializableBiConsumer<Object, String> handler;
+    private SerializableBiConsumer<Object, String> callback;
     private EditorType type;
     private List<String> options;
 
-    private EditColumnConfigurator(SerializableBiConsumer<Object, String> handler, EditorType type, List<String> options) {
-        this.handler = handler;
+    private EditColumnConfigurator(SerializableBiConsumer<Object, String> callback, EditorType type, List<String> options) {
+        this.callback = callback;
         this.type = type;
         this.options = options;
     }
@@ -45,8 +45,8 @@ public class EditColumnConfigurator {
         return this.type;
     }
 
-    protected SerializableBiConsumer<Object, String> getHandler() {
-        return this.handler;
+    protected SerializableBiConsumer<Object, String> getCallback() {
+        return this.callback;
     }
 
     protected List<String> getOptions() {
@@ -56,37 +56,39 @@ public class EditColumnConfigurator {
     /**
      * Constructs a new Column Configurator with text editor preset for column creation.
      *
-     * @param handler
-     *            the callback function allowing to operate with the data
+     * @param callback
+     *            the callback function that is called when item is changed.
+     *            It receives two arguments: modifiedItem and columnPath
      */
-    public static EditColumnConfigurator text(SerializableBiConsumer handler) {
-        return new EditColumnConfigurator(handler, EditorType.TEXT, Collections.emptyList());
+    public static EditColumnConfigurator text(SerializableBiConsumer callback) {
+        return new EditColumnConfigurator(callback, EditorType.TEXT, Collections.emptyList());
     }
 
     /**
      * Constructs a new Column Configurator with checkbox editor preset for column creation.
      *
-     * @param handler
-     *            the callback function allowing to operate with the data
+     * @param callback
+     *            the callback function that is called when item is changed.
+     *            It receives two arguments: modifiedItem and columnPath
      */
-    public static EditColumnConfigurator checkbox(SerializableBiConsumer handler) {
-        return new EditColumnConfigurator(handler, EditorType.CHECKBOX, Collections.emptyList());
+    public static EditColumnConfigurator checkbox(SerializableBiConsumer callback) {
+        return new EditColumnConfigurator(callback, EditorType.CHECKBOX, Collections.emptyList());
     }
 
     /**
      * Constructs a new Column Configurator with select editor preset for column creation.
      *
-     * @param handler
-     *            the callback function allowing to operate with the data
-     *
+     * @param callback
+     *            the callback function that is called when item is changed.
+     *            It receives two arguments: modifiedItem and columnPath
      * @param options
      *            the callback function allowing to operate with the data
      *
      */
-    public static EditColumnConfigurator select(SerializableBiConsumer handler, List<String> options) {
+    public static EditColumnConfigurator select(SerializableBiConsumer callback, List<String> options) {
         Objects.requireNonNull(options);
 
-        return new EditColumnConfigurator(handler, EditorType.SELECT, options);
+        return new EditColumnConfigurator(callback, EditorType.SELECT, options);
     }
 }
 
