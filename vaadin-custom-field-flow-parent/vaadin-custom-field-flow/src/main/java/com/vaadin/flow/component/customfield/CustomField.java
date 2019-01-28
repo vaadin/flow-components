@@ -9,9 +9,9 @@ package com.vaadin.flow.component.customfield;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,6 +35,35 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      */
     public CustomField(T defaultValue) {
         super(defaultValue);
+        ComponentUtil.addListener(this, CustomFieldChangeEvent.class,
+            this::updateModelValue);
+    }
+
+    /**
+     * Default constructor using null as default value.
+     */
+    public CustomField() {
+        this(null);
+    }
+
+    /**
+     * This method should return the value of the field, based on value of the internal fields.
+     *
+     * @param event {@link CustomFieldChangeEvent}
+     * @return new value of the field.
+     */
+    protected abstract T generateModelValue(CustomFieldChangeEvent event);
+
+    protected void updateModelValue(CustomFieldChangeEvent event) {
+        setModelValue(generateModelValue(event), false);
+        setPresentationValue(getValue());
+    }
+
+    /**
+     * Forces a value update.
+     */
+    public void updateModelValue() {
+        fireEvent(new CustomFieldChangeEvent(this, false, getFrontendValue()));
     }
 
     /**
@@ -76,6 +105,32 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         getElement().setProperty("invalid", invalid);
     }
 
+    /**
+     * <p>
+     * This property is set in the frontend when the inputs change value
+     * <p>
+     * This property is synchronized automatically from client side when a
+     * 'value-changed' event happens.
+     * </p>
+     *
+     * @return the {@code invalid} property from the webcomponent
+     */
+    @Synchronize(property = "value", value = "value-changed")
+    public String getFrontendValue() {
+        return getElement().getProperty("value");
+    }
+
+    /**
+     * <p>
+     * This property is set to true when the control value is invalid.
+     * </p>
+     *
+     * @param value the value to set
+     */
+    public void setFrontendValue(String value) {
+        getElement().setProperty("value", value != null ? value : "");
+    }
+
     @Override
     public void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage", errorMessage);
@@ -104,5 +159,19 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         getElement().setProperty("label", label);
     }
 
+    @DomEvent("change")
+    public static class CustomFieldChangeEvent extends ComponentEvent<CustomField<?>> {
+
+        private final String value;
+
+        public CustomFieldChangeEvent(CustomField<?> source, boolean fromClient,@EventData("event.detail.value") String value) {
+            super(source, fromClient);
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
 }
 
