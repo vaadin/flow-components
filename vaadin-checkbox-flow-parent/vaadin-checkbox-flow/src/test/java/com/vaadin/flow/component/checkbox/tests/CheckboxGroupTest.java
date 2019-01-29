@@ -16,12 +16,14 @@
 package com.vaadin.flow.component.checkbox.tests;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.data.provider.ListDataProvider;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Assert;
 import org.junit.Test;
@@ -162,5 +164,153 @@ public class CheckboxGroupTest {
 
         Assert.assertThat(checkboxGroup.getValue(), IsEmptyCollection.empty());
         Assert.assertThat(capture.get(), IsEmptyCollection.empty());
+    }
+
+    @Test
+    public void singleDataRefreshEvent() {
+        Wrapper item1 = new Wrapper(1, "foo");
+        Wrapper item2 = new Wrapper(2, "bar");
+
+        List<Wrapper> items = new ArrayList<>();
+        items.add(item1);
+        items.add(item2);
+
+        CheckboxGroup<Wrapper> checkboxGroup = getRefreshEventCheckboxGroup(items);
+
+        assertCheckboxLabels(checkboxGroup, "foo", "bar");
+
+        item1.setLabel("etc");
+        item2.setLabel("opt");
+        checkboxGroup.getDataProvider().refreshItem(item1);
+        assertCheckboxLabels(checkboxGroup, "etc", "bar");
+
+    }
+
+    @Test
+    public void singleDataRefreshEvent_overrideDataProviderGetId() {
+        Wrapper item1 = new Wrapper(1, "foo");
+        Wrapper item2 = new Wrapper(2, "bar");
+
+        List<Wrapper> items = new ArrayList<>();
+        items.add(item1);
+        items.add(item2);
+
+        CheckboxGroup<Wrapper> checkboxGroup =
+                getRefreshEventCheckboxGroupWithCustomDataProvider(items);
+
+        assertCheckboxLabels(checkboxGroup, "foo", "bar");
+
+        item1.setLabel("etc");
+        item2.setLabel("opt");
+        checkboxGroup.getDataProvider().refreshItem(new Wrapper(1));
+        assertCheckboxLabels(checkboxGroup, "etc", "bar");
+
+
+    }
+
+    @Test
+    public void allDataRefreshEvent() {
+        Wrapper item1 = new Wrapper(1, "foo");
+        Wrapper item2 = new Wrapper(2, "bar");
+
+        List<Wrapper> items = new ArrayList<>();
+        items.add(item1);
+        items.add(item2);
+
+        CheckboxGroup<Wrapper> checkboxGroup = getRefreshEventCheckboxGroup(items);
+
+        assertCheckboxLabels(checkboxGroup, "foo", "bar");
+
+        item1.setLabel("etc");
+        item2.setLabel("opt");
+        checkboxGroup.getDataProvider().refreshAll();
+        assertCheckboxLabels(checkboxGroup, "etc", "opt");
+
+    }
+
+
+    private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(List<Wrapper> items) {
+        CheckboxGroup<Wrapper> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItemLabelGenerator(Wrapper::getLabel);
+        ListDataProvider<Wrapper> dataProvider = new ListDataProvider<>(items);
+        checkboxGroup.setDataProvider(dataProvider);
+        return checkboxGroup;
+    }
+
+    private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroupWithCustomDataProvider(List<Wrapper> items) {
+        CheckboxGroup<Wrapper> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItemLabelGenerator(Wrapper::getLabel);
+        ListDataProvider<Wrapper> dataProvider = new CustomDataProvider(items);
+        checkboxGroup.setDataProvider(dataProvider);
+        return checkboxGroup;
+    }
+
+    private void assertCheckboxLabels(CheckboxGroup<Wrapper> checkboxGroup, String firstLabel, String secondLabel) {
+        List<Component> components = checkboxGroup.getChildren().collect(Collectors.toList());
+        Assert.assertEquals(2, components.size());
+        Assert.assertEquals(firstLabel, components.get(0).getElement().getText());
+        Assert.assertEquals(secondLabel, components.get(1).getElement().getText());
+    }
+
+    /**
+     * Used in the tests {@link #singleDataRefreshEvent()} and {@link #allDataRefreshEvent()}
+     */
+    private class Wrapper {
+
+        private int id;
+        private String label;
+
+        public Wrapper(int id) {
+            this.id = id;
+        }
+
+        Wrapper(int id, String label) {
+            this.id = id;
+            this.label = label;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        String getLabel() {
+            return label;
+        }
+
+        void setLabel(String label) {
+            this.label = label;
+        }
+    }
+
+    private class CustomDataProvider extends ListDataProvider<Wrapper> {
+
+        /**
+         * Constructs a new ListDataProvider.
+         * <p>
+         * No protective copy is made of the list, and changes in the provided
+         * backing Collection will be visible via this data provider. The caller
+         * should copy the list if necessary.
+         *
+         * @param items the initial data, not null
+         */
+        public CustomDataProvider(Collection<Wrapper> items) {
+            super(items);
+        }
+
+        /**
+         * Gets an identifier for the given Wrapper. This identifier is used by the
+         * framework to determine equality between two Wrappers.
+         *
+         * @param wrapper the Wrapper to get identifier for; not {@code null}
+         * @return the identifier for given wrapper; not {@code null}
+         */
+        @Override
+        public Object getId(Wrapper wrapper) {
+            return wrapper.getId();
+        }
     }
 }
