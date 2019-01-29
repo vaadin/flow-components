@@ -33,7 +33,7 @@ public class GridProEditColumnConfiguratorTest {
         configurator = EditColumnConfigurator.text(testConsumer);
 
         Assert.assertEquals(configurator.getType(), EditorType.TEXT);
-        Assert.assertEquals(configurator.getHandler(), testConsumer);
+        Assert.assertEquals(configurator.getCallback(), testConsumer);
     }
 
     @Test
@@ -41,7 +41,7 @@ public class GridProEditColumnConfiguratorTest {
         configurator = EditColumnConfigurator.checkbox(testConsumer);
 
         Assert.assertEquals(configurator.getType(), EditorType.CHECKBOX);
-        Assert.assertEquals(configurator.getHandler(), testConsumer);
+        Assert.assertEquals(configurator.getCallback(), testConsumer);
     }
 
     @Test
@@ -49,7 +49,7 @@ public class GridProEditColumnConfiguratorTest {
         configurator = EditColumnConfigurator.select(testConsumer, listOptions);
 
         Assert.assertEquals(configurator.getType(), EditorType.SELECT);
-        Assert.assertEquals(configurator.getHandler(), testConsumer);
+        Assert.assertEquals(configurator.getCallback(), testConsumer);
         Assert.assertEquals(configurator.getOptions(), listOptions);
     }
 }
