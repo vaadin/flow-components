@@ -2596,6 +2596,13 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         getElement().callFunction("$connector.columnRemoved",
                 column.getInternalId());
     }
+    
+    /**
+     * Removes all columns from this Grid.
+     */
+    public void removeAllColumns() {
+        getColumns().forEach(c -> removeColumn(c));
+    }
 
     private void removeColumnAndColumnGroupsIfNeeded(Column<?> column) {
         Component parent = column.getParent().get();

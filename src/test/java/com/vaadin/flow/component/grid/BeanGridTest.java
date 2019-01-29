@@ -206,5 +206,15 @@ public class BeanGridTest {
         binder.bind(new TextField(), "name");
         binder.bind(new TextField(), "born");
     }
+    
+    @Test
+    public void removeAllColumns() {
+        int initialColumnCount = grid.getColumns().size();
+        Assert.assertTrue(initialColumnCount > 0);
+        grid.removeAllColumns();
+        int columnCount = grid.getColumns().size();
+        Assert.assertEquals(0, columnCount);
+    }
+
 
 }
