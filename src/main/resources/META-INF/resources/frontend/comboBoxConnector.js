@@ -9,7 +9,6 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     let pageCallbacks = {};
     let cache = {};
-    let firstPage;
     let lastFilter = '';
 
     comboBox.size = 0; // To avoid NaN here and there before we get proper data
@@ -20,19 +19,30 @@ window.Vaadin.Flow.comboBoxConnector = {
         throw 'Invalid pageSize';
       }
 
-      const filterChanged = params.filter !== lastFilter;
-      if (filterChanged) {
-        cache = {};
-        lastFilter = params.filter;
+      if (comboBox._clientSideFilter) {
+        // For clientside filter we first make sure we have all data which we also
+        // filter based on comboBox.filter. While later we only filter clientside data.
+
+        if (cache[0]) {
+          performClientSideFilter(cache[0], callback)
+          return;
+
+        } else {
+          // If client side filter is enabled then we need to first ask all data
+          // and filter it on client side, otherwise next time when user will
+          // input another filter, eg. continue to type, the local cache will be only
+          // what was received for the first filter, which may not be the whole
+          // data from server (keep in mind that client side filter is enabled only
+          // when the items count does not exceed one page).
+          params.filter = "";
+        }
       }
 
-      if (comboBox._clientSideFilter && firstPage) {
-        // Data size is less than page size and client has all the data,
-        // so client-side filtering is used
-        const filteredItems = firstPage.filter(item =>
-          comboBox.$connector.filter(item, comboBox.filter));
-        callback(filteredItems, filteredItems.size);
-        return;
+      const filterChanged = params.filter !== lastFilter;
+      if (filterChanged) {
+        pageCallbacks = {};
+        cache = {};
+        lastFilter = params.filter;
       }
 
       if (cache[params.page]) {
@@ -110,15 +120,24 @@ window.Vaadin.Flow.comboBoxConnector = {
     }
 
     comboBox.$connector.updateSize = function (newSize) {
-      comboBox.size = newSize;
-    };
+      if (!comboBox._clientSideFilter) {
+        // FIXME: It may be that this size set is unnecessary, since when
+        // providing data to combobox via callback we may use data's size.
+        // However, if this size reflect the whole data size, including
+        // data not fetched yet into client side, and combobox expect it
+        // to be set as such, the at least, we don't need it in case the
+        // filter is clientSide only, since it'll increase the height of
+        // the popup at only at first user filter to this size, while the
+        // filtered items count are less.
+        comboBox.size = newSize;
+      }
+    }
 
     comboBox.$connector.reset = function () {
       pageCallbacks = {};
       cache = {};
-      firstPage = undefined;
       comboBox.clearCache();
-    };
+    }
 
     comboBox.$connector.confirm = function (id, filter) {
 
@@ -146,13 +165,35 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     const commitPage = function (page, callback) {
       let data = cache[page];
-      delete cache[page];
 
-      if (page == 0) {
-        // Keep the data for client-side filtering
-        firstPage = data;
+      if (comboBox._clientSideFilter) {
+        performClientSideFilter(data, callback)
+
+      } else {
+        // Remove the data if server-side filtering, but keep it for client-side
+        // filtering
+        delete cache[page];
+
+        // FIXME: It may be that we ought to provide data.length instead of
+        // comboBox.size and remove updateSize function.
+        callback(data, comboBox.size);
       }
-      callback(data, comboBox.size);
+    }
+
+    // Perform filter on client side (here) using the items from specified page
+    // and submitting the filtered items to specified callback.
+    // The filter used is the one from combobox, not the lastFilter stored since
+    // that may not reflect user's input.
+    const performClientSideFilter = function (page, callback) {
+
+      let filteredItems = page;
+
+      if (comboBox.filter) {
+        filteredItems = page.filter(item =>
+          comboBox.$connector.filter(item, comboBox.filter));
+      }
+
+      callback(filteredItems, filteredItems.length);
     }
   }
 }

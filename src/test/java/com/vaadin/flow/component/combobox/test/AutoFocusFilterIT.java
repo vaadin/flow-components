@@ -24,6 +24,7 @@ import org.openqa.selenium.By;
 
 @TestPath("auto-focus-filter")
 public class AutoFocusFilterIT extends AbstractComboBoxIT {
+
     @Before
     public void init() {
         open();

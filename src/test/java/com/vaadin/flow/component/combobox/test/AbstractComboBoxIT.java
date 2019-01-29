@@ -158,7 +158,7 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     /**
      * Wait for the items of the specified combobox to fulfill the specified
      * condition.
-     * 
+     *
      * @param combo
      *            The combobox element.
      * @param condition

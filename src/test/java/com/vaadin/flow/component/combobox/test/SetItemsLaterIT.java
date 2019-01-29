@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @TestPath("set-items-later")
-public class SetItemsLaterIT extends AbstractComponentIT {
+public class SetItemsLaterIT extends AbstractComboBoxIT {
     @Before
     public void init() {
         open();
@@ -42,21 +42,17 @@ public class SetItemsLaterIT extends AbstractComponentIT {
         open();
         ComboBoxElement comboBox = $(ComboBoxElementUpdated.class).first();
 
-        List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
-                "return arguments[0].filteredItems", comboBox);
-
-        Assert.assertNull("Items must be null.", items);
+        waitForItems(comboBox, items -> items == null);
 
         WebElement button = findElement(By.tagName("button"));
         button.click();
 
-        items = (List<Map<String, ?>>) executeScript(
-                "return arguments[0].filteredItems", comboBox);
+        comboBox.openPopup();
 
-        Assert.assertNotNull("Items must not be null.", items);
-
-        Assert.assertEquals("ComboBox must contain 2 items.",
-                2, items.size());
+        waitForItems(comboBox, items -> items != null && items.size() == 2
+                && "foo".equals(getItemLabel(items, 0))
+                && "bar".equals(getItemLabel(items, 1))
+        );
 
     }
 
