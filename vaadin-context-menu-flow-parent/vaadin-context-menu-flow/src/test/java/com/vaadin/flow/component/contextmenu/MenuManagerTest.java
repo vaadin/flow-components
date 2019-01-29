@@ -67,7 +67,7 @@ public class MenuManagerTest {
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent) {
             @Override
-            void add(Component... components) {
+            public void add(Component... components) {
                 Stream.of(components).forEach(addedComponents::add);
             }
         };
