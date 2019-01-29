@@ -17,7 +17,7 @@ public class GridProTest {
     @Before
     public void init() {
         grid = new GridPro<>();
-        textColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.text((modifiedItem, columnPath) -> {}));
+        textColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.text((item, newValue) -> {}));
     }
 
     @Test

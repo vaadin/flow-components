@@ -28,23 +28,23 @@ public class MainView extends VerticalLayout {
 
         grid.addColumn(Person::getName).setHeader("NAME");
 
-        grid.addEditColumn(Person::getAge, EditColumnConfigurator.text((modifiedItem, columnPath) -> {
-            itemDisplayPanel.setText(modifiedItem.toString());
-            subPropertyDisplayPanel.setText(columnPath.toString());
+        grid.addEditColumn(Person::getAge, EditColumnConfigurator.text((item, newValue) -> {
+            itemDisplayPanel.setText(item.toString());
+            subPropertyDisplayPanel.setText(newValue.toString());
         })).setHeader("Age").setWidth("300px");
 
-        grid.addEditColumn(Person::isSubscriber, EditColumnConfigurator.checkbox((modifiedItem, columnPath) -> {
-            itemDisplayPanel.setText(modifiedItem.toString());
-            subPropertyDisplayPanel.setText(columnPath.toString());
+        grid.addEditColumn(Person::isSubscriber, EditColumnConfigurator.checkbox((item, newValue) -> {
+            itemDisplayPanel.setText(item.toString());
+            subPropertyDisplayPanel.setText(newValue.toString());
         })).setHeader("Subscriber").setWidth("300px");
 
         List<String> listOptions = new ArrayList<>();
         listOptions.add("Male");
         listOptions.add("Female");
         listOptions.add("Unknown");
-        grid.addEditColumn(Person::getGender, EditColumnConfigurator.select((modifiedItem, columnPath) -> {
-            itemDisplayPanel.setText(modifiedItem.toString());
-            subPropertyDisplayPanel.setText(columnPath.toString());
+        grid.addEditColumn(Person::getGender, EditColumnConfigurator.select((item, newValue) -> {
+            itemDisplayPanel.setText(item.toString());
+            subPropertyDisplayPanel.setText(newValue.toString());
         }, listOptions)).setHeader("Gender").setWidth("300px");
 
         add(grid, itemDisplayPanel, subPropertyDisplayPanel);

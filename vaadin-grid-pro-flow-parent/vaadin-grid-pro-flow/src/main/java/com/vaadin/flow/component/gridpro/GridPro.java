@@ -86,7 +86,7 @@ public class GridPro<E> extends Grid<E> {
     private void setup() {
         addItemPropertyChangedListener(e -> {
             EditColumn<E> column = (EditColumn<E>) this.idToColumnMap.get(e.getPath());
-            column.getCallback().accept(e.getSourceItem(), e.getPath());
+            column.getCallback().accept(e.getItem(), e.getSourceItem().get(e.getPath()).asString());
         });
     }
 
@@ -127,7 +127,8 @@ public class GridPro<E> extends Grid<E> {
          *
          * @param callback
          *            the callback function that is called when item is changed.
-         *            It receives two arguments: modifiedItem and columnPath
+         *            It receives two arguments: item and newValue
+         *            Can be provided as lambda
          */
         protected <C extends Column<T>> C setCallback(SerializableBiConsumer<Object, String> callback) {
             this.callback = callback;
