@@ -42,7 +42,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd.
  */
-class MenuManager<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
+public class MenuManager<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         implements Serializable {
 
     private final C menu;
@@ -53,7 +53,21 @@ class MenuManager<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, 
 
     private final List<Component> children = new ArrayList<>();
 
-    MenuManager(C menu, SerializableRunnable contentReset,
+    /**
+     * Creates a new manager instance.
+     *
+     * @param menu
+     *            the context menu
+     * @param contentReset
+     *            callback to reset the context menu
+     * @param itemGenerator
+     *            the item generator/factory
+     * @param itemType
+     *            the item type
+     * @param parentMenuItem
+     *            the parent menu item of the subemnu
+     */
+    public MenuManager(C menu, SerializableRunnable contentReset,
             SerializableBiFunction<C, SerializableRunnable, I> itemGenerator,
             Class<I> itemType, I parentMenuItem) {
         this.menu = menu;
@@ -63,22 +77,45 @@ class MenuManager<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, 
         this.parentMenuItem = parentMenuItem;
     }
 
-    I addItem(String text) {
+    /**
+     * Adds a text as a menu item.
+     *
+     * @param text
+     *            the text for the menu item
+     * @return a new menu item
+     */
+    public I addItem(String text) {
         I menuItem = itemGenerator.apply(menu, contentReset);
         menuItem.setText(text);
         add(menuItem);
         return menuItem;
     }
 
-    I addItem(Component component) {
+    /**
+     * Adds a component as a menu item.
+     *
+     * @param component
+     *            the component for the menu item
+     * @return a new menu item
+     */
+    public I addItem(Component component) {
         I menuItem = itemGenerator.apply(menu, contentReset);
         add(menuItem);
         menuItem.add(component);
         return menuItem;
     }
 
+    /**
+     * Adds a text as a menu item with a click listener.
+     *
+     * @param text
+     *            the text for the menu item
+     * @param clickListener
+     *            a click listener
+     * @return a new menu item
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    I addItem(String text,
+    public I addItem(String text,
             ComponentEventListener<ClickEvent<I>> clickListener) {
         I menuItem = addItem(text);
         if (clickListener != null) {
@@ -88,8 +125,17 @@ class MenuManager<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, 
         return menuItem;
     }
 
+    /**
+     * Adds a component as a menu item with a click listener.
+     *
+     * @param component
+     *            the component for the menu item
+     * @param clickListener
+     *            a click listener
+     * @return a new menu item
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    I addItem(Component component,
+    public I addItem(Component component,
             ComponentEventListener<ClickEvent<I>> clickListener) {
         I menuItem = addItem(component);
         if (clickListener != null) {
@@ -99,7 +145,18 @@ class MenuManager<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, 
         return menuItem;
     }
 
-    void add(Component... components) {
+    /**
+     * Adds components to the (sub)menu.
+     * <p>
+     * The components are added into the content as is, they are not wrapped as
+     * menu items.
+     *
+     * @param components
+     *            components to add
+     * @see #remove(Component...)
+     * @see #addComponentAtIndex(int, Component)
+     */
+    public void add(Component... components) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
             throw new IllegalStateException(
                     "A checkable item cannot have a sub menu");
@@ -115,7 +172,14 @@ class MenuManager<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, 
         }
     }
 
-    void remove(Component... components) {
+    /**
+     * Removes components to the (sub)menu.
+     *
+     * @param components
+     *            components to remove
+     * @see #add(Component...)
+     */
+    public void remove(Component... components) {
         Objects.requireNonNull(components,
                 "Components to remove cannot be null");
         boolean needUpdate = false;
@@ -134,12 +198,31 @@ class MenuManager<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, 
         }
     }
 
-    void removeAll() {
+    /**
+     * Remove all components and items from (sub)menu.
+     *
+     * @see #remove(Component...)
+     */
+    public void removeAll() {
         children.clear();
         updateChildren();
     }
 
-    void addComponentAtIndex(int index, Component component) {
+    /**
+     * Inserts component to the (sub)menu using the {@code index}.
+     * <p>
+     * The component is inserted into the content as is, it is not wrapped as a
+     * menu item.
+     *
+     * @param index
+     *            index to insert, not negative
+     * @param component
+     *            component to insert
+     *
+     * @see #add(Component...)
+     * @see #remove(Component...)
+     */
+    public void addComponentAtIndex(int index, Component component) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
             throw new IllegalStateException(
                     "A checkable item cannot have a sub menu");
@@ -153,11 +236,32 @@ class MenuManager<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, 
         updateChildren();
     }
 
-    Stream<Component> getChildren() {
+    /**
+     * Gets all (sub)menu children.
+     * <p>
+     * Children consist of components and items.
+     *
+     * @see #add(Component...)
+     * @see #addItem(Component)
+     *
+     * @see #getItems()
+     *
+     * @return the children components
+     */
+    public Stream<Component> getChildren() {
         return children.stream();
     }
 
-    List<I> getItems() {
+    /**
+     * Gets all children items.
+     * <p>
+     * The items are filtered using the provided item type in the constructor.
+     *
+     * @see #getChildren()
+     *
+     * @return all children items
+     */
+    public List<I> getItems() {
         return getChildren().filter(itemType::isInstance).map(itemType::cast)
                 .collect(Collectors.toList());
     }
