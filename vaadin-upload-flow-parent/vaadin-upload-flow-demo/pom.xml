@@ -17,7 +17,6 @@
 
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>
-        <flow.version>1.3-SNAPSHOT</flow.version>
     </properties>
 
     <dependencies>
@@ -59,7 +58,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.25</version>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -113,9 +111,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-war-plugin</artifactId>
                         <version>3.2.2</version>
-                        <configuration>
-                            <warSourceDirectory>${basedir}/src/main/resources/META-INF/resources</warSourceDirectory>
-                        </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>
