@@ -21,7 +21,7 @@ import javax.annotation.Generated;
  * Set of theme variants applicable for {@code vaadin-text-area} component.
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
-        "WebComponent: Vaadin.TextAreaElement#2.3.0-alpha1",
+        "WebComponent: Vaadin.TextAreaElement#2.3.0-alpha8",
         "Flow#1.3-SNAPSHOT" })
 public enum TextAreaVariant {
     LUMO_SMALL("small"), LUMO_ALIGN_CENTER("align-center"), LUMO_ALIGN_RIGHT(

@@ -26,12 +26,12 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
- * Server-side component for the {@code vaadin-password-field} element.
+ * Server-side component for the {@code vaadin-email-field} element.
  *
  * @author Vaadin Ltd.
  */
-public class PasswordField
-        extends GeneratedVaadinPasswordField<PasswordField, String>
+public class EmailField
+        extends GeneratedVaadinEmailField<EmailField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect {
@@ -40,26 +40,26 @@ public class PasswordField
     private boolean isConnectorAttached;
 
     /**
-     * Constructs an empty {@code PasswordField}.
+     * Constructs an empty {@code EmailField}.
      */
-    public PasswordField() {
+    public EmailField() {
         super("", "", false);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 
     /**
-     * Constructs an empty {@code PasswordField} with the given label.
+     * Constructs an empty {@code EmailField} with the given label.
      *
      * @param label
      *            the text to set as the label
      */
-    public PasswordField(String label) {
+    public EmailField(String label) {
         this();
         setLabel(label);
     }
 
     /**
-     * Constructs an empty {@code PasswordField} with the given label and
+     * Constructs an empty {@code EmailField} with the given label and
      * placeholder text.
      *
      * @param label
@@ -67,27 +67,27 @@ public class PasswordField
      * @param placeholder
      *            the placeholder text to set
      */
-    public PasswordField(String label, String placeholder) {
+    public EmailField(String label, String placeholder) {
         this(label);
         setPlaceholder(placeholder);
     }
 
     /**
-     * Constructs an empty {@code PasswordField} with a value change listener.
+     * Constructs an empty {@code EmailField} with a value change listener.
      *
      * @param listener
      *            the value change listener
      *
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public PasswordField(
-            ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
+    public EmailField(
+            ValueChangeListener<? super ComponentValueChangeEvent<EmailField, String>> listener) {
         this();
         addValueChangeListener(listener);
     }
 
     /**
-     * Constructs an empty {@code PasswordField} with a value change listener
+     * Constructs an empty {@code EmailField} with a value change listener
      * and a label.
      *
      * @param label
@@ -98,14 +98,14 @@ public class PasswordField
      * @see #setLabel(String)
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public PasswordField(String label,
-            ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
+    public EmailField(String label,
+            ValueChangeListener<? super ComponentValueChangeEvent<EmailField, String>> listener) {
         this(label);
         addValueChangeListener(listener);
     }
 
     /**
-     * Constructs a {@code PasswordField} with a value change listener, a label
+     * Constructs a {@code EmailField} with a value change listener, a label
      * and an initial value.
      *
      * @param label
@@ -119,8 +119,8 @@ public class PasswordField
      * @see #setValue(Object)
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public PasswordField(String label, String initialValue,
-            ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
+    public EmailField(String label, String initialValue,
+            ValueChangeListener<? super ComponentValueChangeEvent<EmailField, String>> listener) {
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
@@ -248,20 +248,6 @@ public class PasswordField
     }
 
     /**
-     * Specifies that the user must fill in a value.
-     *
-     * @return the {@code required} property from the webcomponent
-     */
-    public boolean isRequired() {
-        return isRequiredBoolean();
-    }
-
-    @Override
-    public void setRequired(boolean required) {
-        super.setRequired(required);
-    }
-
-    /**
      * When set to <code>true</code>, user is prevented from typing a value that
      * conflicts with the given {@code pattern}.
      *
@@ -306,29 +292,6 @@ public class PasswordField
     }
 
     /**
-     * Set to <code>false</code> to hide the eye icon which toggles the password
-     * visibility.
-     *
-     * @return <code>true</code> if the button is visible, <code>false</code>
-     *         otherwise
-     */
-    public boolean isRevealButtonVisible() {
-        return !isRevealButtonHiddenBoolean();
-    }
-
-    /**
-     * Set to <code>false</code> to hide the eye icon which toggles the password
-     * visibility.
-     *
-     * @param revealButtonVisible
-     *            <code>true</code> to set the button visible,
-     *            <code>false</code> otherwise
-     */
-    public void setRevealButtonVisible(boolean revealButtonVisible) {
-        setRevealButtonHidden(!revealButtonVisible);
-    }
-
-    /**
      * Specifies if the field value gets automatically selected when
      * the field gains focus.
      *
@@ -353,8 +316,7 @@ public class PasswordField
     }
 
     /**
-     * Gets the visibility   state of the button which clears the password
-     * field.
+     * Gets the visibility state of the button which clears the email field.
      *
      * @return <code>true</code> if the button is visible, <code>false</code>
      *         otherwise
@@ -364,7 +326,7 @@ public class PasswordField
     }
 
     /**
-     * Set to <code>false</code> to hide the clear button which clears the password
+     * Set to <code>false</code> to hide the clear button which clears the email
      * field.
      *
      * @param clearButtonVisible
@@ -382,12 +344,12 @@ public class PasswordField
     }
 
     /**
-     * Sets the value of this password field. If the new value is not equal to
+     * Sets the value of this email field. If the new value is not equal to
      * {@code getValue()}, fires a value change event. Throws
      * {@code NullPointerException}, if the value is null.
      * <p>
      * Note: {@link Binder} will take care of the {@code null} conversion when
-     * integrates with password field, as long as no new converter is defined.
+     * integrates with email field, as long as no new converter is defined.
      *
      * @param value
      *            the new value, not {@code null}
@@ -398,8 +360,8 @@ public class PasswordField
     }
 
     /**
-     * Returns the current value of the password field. By default, the empty
-     * password field will return an empty string.
+     * Returns the current value of the email field. By default, the empty email
+     * field will return an empty string.
      *
      * @return the current value.
      */

@@ -21,45 +21,54 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
- * Server-side component for the {@code vaadin-password-field} element.
+ * Server-side component for the {@code vaadin-number-field} element.
  *
  * @author Vaadin Ltd.
  */
-public class PasswordField
-        extends GeneratedVaadinPasswordField<PasswordField, String>
+public class NumberField
+        extends GeneratedVaadinNumberField<NumberField, Double>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect {
+    
+    private static final SerializableFunction<String, Double> PARSER = valueFromClient -> valueFromClient == null
+            || valueFromClient.isEmpty() ? null
+                    : Double.parseDouble(valueFromClient);
+
+    private static final SerializableFunction<Double, String> FORMATTER = valueFromModel -> valueFromModel == null
+            ? ""
+            : valueFromModel.toString();
+
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
 
     /**
-     * Constructs an empty {@code PasswordField}.
+     * Constructs an empty {@code NumberField}.
      */
-    public PasswordField() {
-        super("", "", false);
+    public NumberField() {
+        super(null, null, String.class, PARSER, FORMATTER);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 
     /**
-     * Constructs an empty {@code PasswordField} with the given label.
+     * Constructs an empty {@code NumberField} with the given label.
      *
      * @param label
      *            the text to set as the label
      */
-    public PasswordField(String label) {
+    public NumberField(String label) {
         this();
         setLabel(label);
     }
 
     /**
-     * Constructs an empty {@code PasswordField} with the given label and
+     * Constructs an empty {@code NumberField} with the given label and
      * placeholder text.
      *
      * @param label
@@ -67,27 +76,27 @@ public class PasswordField
      * @param placeholder
      *            the placeholder text to set
      */
-    public PasswordField(String label, String placeholder) {
+    public NumberField(String label, String placeholder) {
         this(label);
         setPlaceholder(placeholder);
     }
 
     /**
-     * Constructs an empty {@code PasswordField} with a value change listener.
+     * Constructs an empty {@code NumberField} with a value change listener.
      *
      * @param listener
      *            the value change listener
      *
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public PasswordField(
-            ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
+    public NumberField(
+            ValueChangeListener<? super ComponentValueChangeEvent<NumberField, Double>> listener) {
         this();
         addValueChangeListener(listener);
     }
 
     /**
-     * Constructs an empty {@code PasswordField} with a value change listener
+     * Constructs an empty {@code NumberField} with a value change listener
      * and a label.
      *
      * @param label
@@ -98,14 +107,14 @@ public class PasswordField
      * @see #setLabel(String)
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public PasswordField(String label,
-            ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
+    public NumberField(String label,
+            ValueChangeListener<? super ComponentValueChangeEvent<NumberField, Double>> listener) {
         this(label);
         addValueChangeListener(listener);
     }
 
     /**
-     * Constructs a {@code PasswordField} with a value change listener, a label
+     * Constructs a {@code NumberField} with a value change listener, a label
      * and an initial value.
      *
      * @param label
@@ -119,8 +128,8 @@ public class PasswordField
      * @see #setValue(Object)
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      */
-    public PasswordField(String label, String initialValue,
-            ValueChangeListener<? super ComponentValueChangeEvent<PasswordField, String>> listener) {
+    public NumberField(String label, Double initialValue,
+            ValueChangeListener<? super ComponentValueChangeEvent<NumberField, Double>> listener) {
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
@@ -178,8 +187,64 @@ public class PasswordField
     }
 
     @Override
+    public void setMax(double max) {
+        super.setMax(max);
+    }
+
+    /**
+     * The maximum value of the field.
+     * 
+     * @return the {@code max} property from the webcomponent
+     */
+    public double getMax() {
+        return super.getMaxDouble();
+    }
+
+    @Override
+    public void setMin(double min) {
+        super.setMin(min);
+    }
+
+    /**
+     * The minimum value of the field.
+     * 
+     * @return the {@code min} property from the webcomponent
+     */
+    public double getMin() {
+        return super.getMinDouble();
+    }
+
+    @Override
+    public void setStep(double step) {
+        super.setStep(step);
+    }
+
+    /**
+     * Specifies the allowed number intervals of the field.
+     * 
+     * @return the {@code step} property from the webcomponent
+     */
+    public double getStep() {
+        return super.getStepDouble();
+    }
+
+    @Override
     public void setPlaceholder(String placeholder) {
         super.setPlaceholder(placeholder);
+    }
+
+    @Override
+    public void setHasControls(boolean hasControls) {
+        super.setHasControls(hasControls);
+    }
+
+    /**
+     * Set to true to display value increase/decrease controls.
+     *
+     * @return the {@code hasControls} property from the webcomponent
+     */
+    public boolean hasControls() {
+        return super.hasControlsBoolean();
     }
 
     /**
@@ -248,20 +313,6 @@ public class PasswordField
     }
 
     /**
-     * Specifies that the user must fill in a value.
-     *
-     * @return the {@code required} property from the webcomponent
-     */
-    public boolean isRequired() {
-        return isRequiredBoolean();
-    }
-
-    @Override
-    public void setRequired(boolean required) {
-        super.setRequired(required);
-    }
-
-    /**
      * When set to <code>true</code>, user is prevented from typing a value that
      * conflicts with the given {@code pattern}.
      *
@@ -306,29 +357,6 @@ public class PasswordField
     }
 
     /**
-     * Set to <code>false</code> to hide the eye icon which toggles the password
-     * visibility.
-     *
-     * @return <code>true</code> if the button is visible, <code>false</code>
-     *         otherwise
-     */
-    public boolean isRevealButtonVisible() {
-        return !isRevealButtonHiddenBoolean();
-    }
-
-    /**
-     * Set to <code>false</code> to hide the eye icon which toggles the password
-     * visibility.
-     *
-     * @param revealButtonVisible
-     *            <code>true</code> to set the button visible,
-     *            <code>false</code> otherwise
-     */
-    public void setRevealButtonVisible(boolean revealButtonVisible) {
-        setRevealButtonHidden(!revealButtonVisible);
-    }
-
-    /**
      * Specifies if the field value gets automatically selected when
      * the field gains focus.
      *
@@ -353,8 +381,7 @@ public class PasswordField
     }
 
     /**
-     * Gets the visibility   state of the button which clears the password
-     * field.
+     * Gets the visibility state of the button which clears the number field.
      *
      * @return <code>true</code> if the button is visible, <code>false</code>
      *         otherwise
@@ -364,7 +391,7 @@ public class PasswordField
     }
 
     /**
-     * Set to <code>false</code> to hide the clear button which clears the password
+     * Set to <code>false</code> to hide the clear button which clears the number
      * field.
      *
      * @param clearButtonVisible
@@ -376,35 +403,34 @@ public class PasswordField
         super.setClearButtonVisible(clearButtonVisible);
     }
 
+    /**
+     * Returns the value that represents an empty value.
+     */
     @Override
-    public String getEmptyValue() {
-        return "";
+    public Double getEmptyValue() {
+        return null;
     }
 
     /**
-     * Sets the value of this password field. If the new value is not equal to
-     * {@code getValue()}, fires a value change event. Throws
-     * {@code NullPointerException}, if the value is null.
-     * <p>
-     * Note: {@link Binder} will take care of the {@code null} conversion when
-     * integrates with password field, as long as no new converter is defined.
+     * Sets the value of this number field. If the new value is not equal to
+     * {@code getValue()}, fires a value change event. 
      *
      * @param value
-     *            the new value, not {@code null}
+     *            the new value
      */
     @Override
-    public void setValue(String value) {
+    public void setValue(Double value) {
         super.setValue(value);
     }
 
     /**
-     * Returns the current value of the password field. By default, the empty
-     * password field will return an empty string.
+     * Returns the current value of the number field. By default, the empty
+     * number field will return {@code null} .
      *
      * @return the current value.
      */
     @Override
-    public String getValue() {
+    public Double getValue() {
         return super.getValue();
     }
 

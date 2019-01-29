@@ -18,7 +18,11 @@ package com.vaadin.flow.component.textfield.demo;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.GeneratedVaadinEmailField;
+import com.vaadin.flow.component.textfield.GeneratedVaadinNumberField;
 import com.vaadin.flow.component.textfield.GeneratedVaadinTextField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.demo.DemoView;
@@ -39,6 +43,7 @@ public class TextFieldView extends DemoView {
         addAutoselectFeature();
         addNumberFields();
         addDisabledField();
+        addEmailFieldFields();
         addVariantsFeature();
     }
 
@@ -47,11 +52,27 @@ public class TextFieldView extends DemoView {
         // source-example-heading: Theme variants usage
         TextField textField = new TextField();
         textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        
+        NumberField numberField = new NumberField();
+        numberField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        EmailField emailField = new EmailField();
+        emailField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
         // end-source-example
 
         addVariantsDemo(TextField::new,
                 GeneratedVaadinTextField::addThemeVariants,
                 GeneratedVaadinTextField::removeThemeVariants,
+                TextFieldVariant::getVariantName, TextFieldVariant.LUMO_SMALL);
+        
+        addVariantsDemo(NumberField::new,
+                GeneratedVaadinNumberField::addThemeVariants,
+                GeneratedVaadinNumberField::removeThemeVariants,
+                TextFieldVariant::getVariantName, TextFieldVariant.LUMO_SMALL);
+        
+        addVariantsDemo(EmailField::new,
+                GeneratedVaadinEmailField::addThemeVariants,
+                GeneratedVaadinEmailField::removeThemeVariants,
                 TextFieldVariant::getVariantName, TextFieldVariant.LUMO_SMALL);
     }
 
@@ -108,21 +129,43 @@ public class TextFieldView extends DemoView {
     private void addNumberFields() {
         // begin-source-example
         // source-example-heading: Number fields
-        TextField dollarField = new TextField("Dollars");
-        dollarField.setPattern("[0-9]*");
-        dollarField.setPreventInvalidInput(true);
+        NumberField dollarField = new NumberField("Dollars");
         dollarField.setPrefixComponent(new Span("$"));
 
-        TextField euroField = new TextField("Euros");
-        euroField.setPattern("[0-9]*");
-        euroField.setPreventInvalidInput(true);
+        NumberField euroField = new NumberField("Euros");
+        euroField.setSuffixComponent(new Span("€"));
+
+        NumberField stepperField = new NumberField("Stepper");
+        stepperField.setValue(1d);
+        stepperField.setMin(0);
+        stepperField.setMax(10);
+        stepperField.setHasControls(true);
+
         euroField.setSuffixComponent(new Span("€"));
         // end-source-example
 
         dollarField.setId("dollar-field");
         euroField.setId("euro-field");
+        stepperField.setId("step-number-field");
 
-        addCard("Number fields", dollarField, euroField);
+        addCard("Number fields", dollarField, euroField, stepperField);
+    }
+
+    private void addEmailFieldFields() {
+        Div message = new Div();
+
+        // begin-source-example
+        // source-example-heading: Email field
+        EmailField emailField = new EmailField("Email");
+        emailField.addValueChangeListener(event -> message.setText(
+                String.format("Email field value changed from '%s' to '%s'",
+                        event.getOldValue(), event.getValue())));
+        // end-source-example
+
+        emailField.setId("email-field");
+        message.setId("email-field-value");
+
+        addCard("Email field", emailField, message);
     }
 
     private void addDisabledField() {
