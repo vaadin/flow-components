@@ -66,7 +66,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code autofocus} property from the webcomponent
      */
     protected boolean isAutofocusBoolean() {
@@ -80,7 +80,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * Specify that this control should have input focus when the page loads.
      * </p>
-     * 
+     *
      * @param autofocus
      *            the boolean value to set
      */
@@ -582,6 +582,46 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      */
     protected void checkValidity() {
         getElement().callFunction("checkValidity");
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Minimum time allowed.
+     *
+     * Supported time formats are in ISO 8601:
+     * - `hh:mm`
+     * - `hh:mm:ss`
+     * - `hh:mm:ss.fff`
+     * </p>
+     *
+     * @param min
+     *            the String value to set
+     */
+    protected void setMin(String min) {
+        getElement().setProperty("min", min);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Maximum time allowed.
+     *
+     * Supported time formats are in ISO 8601:
+     * - `hh:mm`
+     * - `hh:mm:ss`
+     * - `hh:mm:ss.fff`
+     * </p>
+     *
+     * @param max
+     *            the String value to set
+     */
+    protected void setMax(String max) {
+        getElement().setProperty("max", max);
     }
 
     public static class InvalidChangeEvent<R extends GeneratedVaadinTimePicker<R, ?>>

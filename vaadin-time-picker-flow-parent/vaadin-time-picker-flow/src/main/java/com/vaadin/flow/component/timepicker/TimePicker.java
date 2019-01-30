@@ -338,6 +338,28 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return locale;
     }
 
+    /**
+     * Set the minimum values for the date picker.
+     *
+     * @param min
+     *            the String value to set
+     */
+    @Override
+    public void setMin(String min) {
+        super.setMin(min);
+    }
+
+    /**
+     * Set the minimum values for the date picker.
+     *
+     * @param max
+     *            the String value to set
+     */
+    @Override
+    public void setMax(String max) {
+        super.setMax(max);
+    }
+
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));

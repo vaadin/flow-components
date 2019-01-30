@@ -47,6 +47,7 @@ public class TimePickerView extends DemoView {
         createLocalizedTimePicker();
         createDisabledTimePicker();
         createTimePickerWithStepSetting();
+        createTimePickerWithMinAndMaxSetting();
     }
 
     private void createLocalizedTimePicker() {
@@ -158,6 +159,24 @@ public class TimePickerView extends DemoView {
 
         timePicker.setId("disabled-picker");
         addCard("Disabled Time Picker", timePicker, message);
+    }
+
+    private void createTimePickerWithMinAndMaxSetting() {
+        Div message = createMessageDiv("time-picker-min-max-message");
+        // begin-source-example
+        // source-example-heading: Time Picker With Min And Max Setting
+        TimePicker timePicker = new TimePicker();
+        timePicker.setLabel("TimePicker Min & Max");
+
+        timePicker.setMin("05:00");
+        timePicker.setMax("18:00");
+
+        // end-source-example
+        timePicker.addValueChangeListener(
+                event -> updateMessage(message, timePicker));
+
+        timePicker.setId("time-picker-min-max");
+        addCard("Time Picker With Min And Max Setting", timePicker, message);
     }
 
     private Div createMessageDiv(String id) {
