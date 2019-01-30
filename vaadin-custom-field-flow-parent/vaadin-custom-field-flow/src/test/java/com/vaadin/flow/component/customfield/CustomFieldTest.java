@@ -13,7 +13,7 @@ public class CustomFieldTest {
     public void setUp() {
         systemUnderTest = new CustomField<Object>() {
             @Override
-            protected Object generateModelValue(CustomFieldChangeEvent event) {
+            protected Object generateModelValue() {
                 return null;
             }
 

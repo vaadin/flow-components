@@ -36,22 +36,13 @@ public class CustomFieldView extends DemoView {
         }
 
         @Override
-        protected LocalDateTime generateModelValue(
-            CustomFieldChangeEvent event) {
+        protected LocalDateTime generateModelValue() {
             return LocalDateTime.of(datePicker.getValue(),timePicker.getValue());
         }
 
         @Override
         protected void setPresentationValue(
             LocalDateTime newPresentationValue) {
-            LocalDate date = null;
-            LocalTime time = null;
-            if (newPresentationValue != null) {
-                date = newPresentationValue.toLocalDate();
-                time = newPresentationValue.toLocalTime();
-            }
-            datePicker.setValue(date);
-            timePicker.setValue(time);
         }
 
     }
