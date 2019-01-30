@@ -21,7 +21,7 @@ public class GridProEditColumnConfiguratorTest {
 
     @Before
     public void init() {
-        testConsumer = (modifiedItem, columnPath) -> {};
+        testConsumer = (item, newValue) -> {};
         listOptions = new ArrayList<String>();
         listOptions.add("foo");
         listOptions.add("bar");

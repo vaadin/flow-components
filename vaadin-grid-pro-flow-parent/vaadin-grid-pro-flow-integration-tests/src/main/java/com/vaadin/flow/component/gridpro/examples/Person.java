@@ -89,7 +89,14 @@ public class Person implements Serializable {
 
     @Override
     public String toString() {
-        return name;
+        return "Person{" +
+                "id=" + id +
+                ", age=" + age +
+                ", name='" + name + '\'' +
+                ", isSubscriber=" + isSubscriber +
+                ", email='" + email + '\'' +
+                ", gender=" + gender +
+                '}';
     }
 
     @Override

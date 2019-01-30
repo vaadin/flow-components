@@ -58,7 +58,8 @@ public class EditColumnConfigurator {
      *
      * @param callback
      *            the callback function that is called when item is changed.
-     *            It receives two arguments: modifiedItem and columnPath
+     *            It receives two arguments: item, newValue
+     *            Can be provided as lambda
      */
     public static EditColumnConfigurator text(SerializableBiConsumer callback) {
         return new EditColumnConfigurator(callback, EditorType.TEXT, Collections.emptyList());
@@ -69,7 +70,8 @@ public class EditColumnConfigurator {
      *
      * @param callback
      *            the callback function that is called when item is changed.
-     *            It receives two arguments: modifiedItem and columnPath
+     *            It receives two arguments: item and newValue
+     *            Can be provided as lambda
      */
     public static EditColumnConfigurator checkbox(SerializableBiConsumer callback) {
         return new EditColumnConfigurator(callback, EditorType.CHECKBOX, Collections.emptyList());
@@ -80,7 +82,8 @@ public class EditColumnConfigurator {
      *
      * @param callback
      *            the callback function that is called when item is changed.
-     *            It receives two arguments: modifiedItem and columnPath
+     *            It receives two arguments: item and newValue
+     *            Can be provided as lambda
      * @param options
      *            the callback function allowing to operate with the data
      *

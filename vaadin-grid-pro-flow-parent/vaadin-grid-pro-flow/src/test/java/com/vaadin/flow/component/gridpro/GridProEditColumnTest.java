@@ -24,9 +24,9 @@ public class GridProEditColumnTest {
 
     @Before
     public void init() {
-        testConsumer = (modifiedItem, columnPath) -> {
-            Assert.assertNotNull(modifiedItem);
-            Assert.assertNotNull(columnPath);
+        testConsumer = (item, newValue) -> {
+            Assert.assertNotNull(item);
+            Assert.assertNotNull(newValue);
         };
 
         grid = new GridPro<>();
@@ -65,7 +65,7 @@ public class GridProEditColumnTest {
 
     @Test
     public void setHandler_getHandler() {
-        SerializableBiConsumer testConsumer = (modifiedItem, columnPath) -> {};
+        SerializableBiConsumer testConsumer = (item, newValue) -> {};
         checkboxColumn.setCallback(testConsumer);
         Assert.assertEquals(checkboxColumn.getCallback(), testConsumer);
     }
@@ -87,7 +87,7 @@ public class GridProEditColumnTest {
     public void addColumn_changeEditorType() {
         GridPro<Person> grid = new GridPro<>();
 
-        GridPro.EditColumn<Person> nameColumn = grid.addEditColumn(Person::getName, EditColumnConfigurator.text((modifiedItem, columnPath) -> {}));
+        GridPro.EditColumn<Person> nameColumn = grid.addEditColumn(Person::getName, EditColumnConfigurator.text((item, newValue) -> {}));
         nameColumn.setEditorType(EditorType.CHECKBOX);
         Assert.assertEquals(nameColumn.getEditorType(), EditorType.CHECKBOX.getTypeName());
 
@@ -100,7 +100,7 @@ public class GridProEditColumnTest {
 
     @Test
     public void addEditColumn_returnsNonNullAndEditColumnType() {
-        GridPro.EditColumn column = new GridPro<Person>().addEditColumn(str -> str, EditColumnConfigurator.text((modifiedItem, columnPath) -> {}));
+        GridPro.EditColumn column = new GridPro<Person>().addEditColumn(str -> str, EditColumnConfigurator.text((item, newValue) -> {}));
         Assert.assertNotNull(column);
         Assert.assertEquals(GridPro.EditColumn.class, column.getClass());
     }
