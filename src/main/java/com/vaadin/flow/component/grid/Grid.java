@@ -46,6 +46,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
@@ -2714,15 +2715,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     @ClientCallable
     private void updateContextMenuTargetItem(String key) {
-        contextMenuTargetItemKey = key;
-    }
-
-    protected T getContextMenuTargetItem() {
-        if (contextMenuTargetItemKey == null) {
-            return null;
-        } else {
-            return findByKey(contextMenuTargetItemKey);
-        }
+        getElement().setProperty("_contextMenuTargetItemKey", key);
     }
 
     /**

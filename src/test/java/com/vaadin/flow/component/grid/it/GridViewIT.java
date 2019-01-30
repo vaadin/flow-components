@@ -47,6 +47,8 @@ import com.vaadin.testbench.TestBenchElement;
  */
 public class GridViewIT extends TabbedComponentDemoTest {
 
+    private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
+
     @Test
     public void dataIsShown() throws InterruptedException {
         openTabAndCheckForErrors("");
@@ -1342,6 +1344,41 @@ public class GridViewIT extends TabbedComponentDemoTest {
         GridStylingIT.assertCellClassNames(grid, 9, 2, "subscriber");
     }
 
+    @Test
+    public void openSubMenu_insertRowBefore_rowIsInserted() {
+        clickSubmenu(0, 0);
+
+        assertFirstCells($(GridElement.class).id("context-submenu-grid"),
+                "Person 501", "Person 1", "Person 2", "Person 3", "Person 4");
+    }
+
+    @Test
+    public void openSubMenu_insertRowAfter_rowIsInserted() {
+        clickSubmenu(0, 1);
+
+        assertFirstCells($(GridElement.class).id("context-submenu-grid"),
+                "Person 1", "Person 501", "Person 2", "Person 3", "Person 4");
+    }
+
+    private void clickSubmenu(int menuIndex, int subMenuIndex) {
+        openTabAndCheckForErrors("context-menu");
+        GridElement grid = $(GridElement.class).id("context-submenu-grid");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        assertFirstCells(grid, "Person 1", "Person 2", "Person 3", "Person 4");
+
+        grid.getCell(0, 0).contextClick();
+
+        verifyOpened(1);
+
+        openSubMenu($(OVERLAY_TAG).first().$("vaadin-item").get(menuIndex));
+
+        verifyOpened(2);
+
+        $(OVERLAY_TAG).all().get(1).$("vaadin-item").get(subMenuIndex).click();
+    }
+
     private void assertElementHasFocus(WebElement element) {
         Assert.assertTrue("Element should have focus",
                 (Boolean) executeScript(
@@ -1598,6 +1635,16 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         Assert.assertEquals("Person 1foo, true, mailss@example.org",
                 updatedItemMsg.getText());
+    }
+
+    private void verifyOpened(int overlayNumber) {
+        waitUntil(driver -> $(OVERLAY_TAG).all().size() == overlayNumber);
+    }
+
+    private void openSubMenu(WebElement parentItem) {
+        executeScript(
+                "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
+                parentItem);
     }
 
     @Override

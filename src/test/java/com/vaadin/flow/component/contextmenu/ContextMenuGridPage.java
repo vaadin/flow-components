@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2017 Vaadin Ltd.
+ * Copyright 2000-2018 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,14 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.grid.it;
+package com.vaadin.flow.component.contextmenu;
 
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridContextMenu;
 import com.vaadin.flow.component.grid.Person;
+import com.vaadin.flow.component.grid.it.GridInATemplate;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
@@ -48,22 +51,23 @@ public class ContextMenuGridPage extends Div {
                 .mapToObj(i -> new Person("Person " + i, 1900 + i)));
 
         GridContextMenu<Person> contextMenu = grid.addContextMenu();
-        contextMenu.addItem("Show name of context menu target item", e -> {
-            String name = e.getItem().map(Person::getName)
-                    .orElse("no target item");
-            message.setText(name);
-        });
-        contextMenu.addItem("Show connected grid id", e -> {
-            String id = e.getGrid().getId().get();
-            message.setText("Grid id: " + id);
-        });
+        addItems(contextMenu);
+        contextMenu.addComponentAtIndex(1, new Hr());
 
         NativeButton toggleOpenOnClick = new NativeButton(
                 "Toggle open on click",
                 e -> contextMenu.setOpenOnClick(!contextMenu.isOpenOnClick()));
         toggleOpenOnClick.setId("toggle-open-on-click");
 
-        add(grid, toggleOpenOnClick);
+        NativeButton addSubMenu = new NativeButton("Add sub-menu", e -> {
+            GridMenuItem<Person> parent = contextMenu.addItem("parent");
+            GridSubMenu<Person> subMenu = parent.getSubMenu();
+            addItems(subMenu);
+            subMenu.addComponentAtIndex(1, new H1("bar"));
+        });
+        addSubMenu.setId("add-sub-menu");
+
+        add(grid, toggleOpenOnClick, addSubMenu);
         grid.setId("grid-with-context-menu");
     }
 
@@ -79,5 +83,22 @@ public class ContextMenuGridPage extends Div {
                 e -> message.setText(e.getItem().orElse("no target item")));
 
         add(template);
+    }
+
+    private void addItems(HasGridMenuItems<Person> menu) {
+        menu.addItem("Show name of context menu target item", event -> {
+            String name = event.getItem().map(Person::getName)
+                    .orElse("no target item");
+            message.setText(name);
+        });
+        menu.addItem("Show connected grid id", e -> {
+            String id = e.getGrid().getId().get();
+            message.setText("Grid id: " + id);
+        });
+
+        Anchor link = new Anchor("foo", "Link");
+        menu.addItem(link, event -> {
+            message.setText("Link is clicked");
+        });
     }
 }

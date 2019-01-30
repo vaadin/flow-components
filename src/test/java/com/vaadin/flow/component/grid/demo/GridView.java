@@ -41,12 +41,13 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.component.grid.GridContextMenu;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridSortOrder;
@@ -55,6 +56,7 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -408,6 +410,7 @@ public class GridView extends DemoView {
         createBasicTreeGridUsage();
         createLazyLoadingTreeGridUsage();
         createContextMenu();
+        createContextSubMenu();
         addVariantFeature();
         createClickListener();
         createDoubleClickListener();
@@ -1346,6 +1349,52 @@ public class GridView extends DemoView {
         // end-source-example
         grid.setId("context-menu-grid");
         addCard("Context Menu", "Using ContextMenu With Grid", grid,
+                contextMenu);
+    }
+
+    // Context sub Menu begin
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void createContextSubMenu() {
+        // begin-source-example
+        // source-example-heading: Using Context Sub Menu With Grid
+        Grid<Person> grid = new Grid<>();
+
+        ListDataProvider<Person> dataProvider = DataProvider
+                .ofCollection(getItems());
+
+        grid.setDataProvider(dataProvider);
+
+        grid.addColumn(Person::getName).setHeader("Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+        GridContextMenu<Person> contextMenu = new GridContextMenu<>(grid);
+        GridMenuItem<Person> insert = contextMenu.addItem("Insert");
+
+        insert.getSubMenu().addItem("Insert a row above", event -> {
+            Optional<Person> item = event.getItem();
+            if (!item.isPresent()) {
+                // no selected row
+                return;
+            }
+            List<Person> items = (List) dataProvider.getItems();
+            items.add(items.indexOf(item.get()),
+                    new PeopleGenerator().createPerson(items.size() + 1));
+            dataProvider.refreshAll();
+        });
+        insert.getSubMenu().add(new Hr());
+        insert.getSubMenu().addItem("Insert a row below", event -> {
+            Optional<Person> item = event.getItem();
+            if (!item.isPresent()) {
+                // no selected row
+                return;
+            }
+            List<Person> items = (List) dataProvider.getItems();
+            items.add(items.indexOf(item.get()) + 1,
+                    new PeopleGenerator().createPerson(items.size() + 1));
+            dataProvider.refreshAll();
+        });
+        // end-source-example
+        grid.setId("context-submenu-grid");
+        addCard("Context Menu", "Using Context Sub Menu With Grid", grid,
                 contextMenu);
     }
 

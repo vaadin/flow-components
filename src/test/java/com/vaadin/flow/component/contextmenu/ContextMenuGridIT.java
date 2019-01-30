@@ -1,0 +1,197 @@
+/*
+ * Copyright 2000-2018 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.contextmenu;
+
+import java.util.List;
+import java.util.Locale;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+
+@TestPath("context-menu-grid")
+public class ContextMenuGridIT extends AbstractComponentIT {
+
+    private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
+
+    private GridElement grid;
+
+    @Before
+    public void init() {
+        open();
+        grid = $(GridElement.class).first();
+        verifyClosed();
+    }
+
+    @Test
+    public void contextClickOnRow_itemClickGetsTargetItem() {
+        grid.getCell(56, 1).contextClick();
+        $("vaadin-item").first().click();
+        assertMessage("Person 56");
+        verifyClosed();
+    }
+
+    @Test
+    public void contextClickOnRow_itemClickGetsGrid() {
+        grid.getCell(56, 1).contextClick();
+        $("vaadin-item").get(1).click();
+        assertMessage("Grid id: grid-with-context-menu");
+        verifyClosed();
+    }
+
+    @Test
+    public void contextClickOnHeader_targetItemReturnsNull() {
+        grid.getHeaderCell(0).contextClick();
+        $("vaadin-item").first().click();
+        assertMessage("no target item");
+        verifyClosed();
+    }
+
+    @Test
+    public void setOpenOnClick_clickOnRow_itemClickGetsTargetItem() {
+        $("button").id("toggle-open-on-click").click();
+        grid.getCell(14, 0).click();
+        $("vaadin-item").first().click();
+        assertMessage("Person 14");
+        verifyClosed();
+    }
+
+    @Test
+    public void setOpenOnClick_contextClickOnRow_noContextMenuOpen() {
+        $("button").id("toggle-open-on-click").click();
+        grid.getCell(22, 0).contextClick();
+        verifyClosed();
+    }
+
+    @Test
+    public void addSubMenu_itemClickGetsTargetItemAndGrid() {
+        $("button").id("add-sub-menu").click();
+        grid.getCell(45, 1).contextClick();
+        openSubMenu($("vaadin-item").get(3));
+        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 2);
+        getSubMenuItems().get(0).click();
+        assertMessage("Person 45");
+        verifyClosed();
+
+        grid.getCell(29, 0).contextClick();
+        openSubMenu($("vaadin-item").get(3));
+        waitUntil(driver -> $("vaadin-context-menu-overlay").all().size() == 2);
+        getSubMenuItems().get(1).click();
+        assertMessage("Grid id: grid-with-context-menu");
+        verifyClosed();
+    }
+
+    @Test
+    public void gridInATemplateWithContextMenu_itemClickGetsTargetItem() {
+        GridElement gridInATemplate = $("grid-in-a-template").first()
+                .$(GridElement.class).first();
+        gridInATemplate.getCell(18, 0).contextClick();
+        $("vaadin-item").first().click();
+        assertMessage("Item 18");
+    }
+
+    @Test
+    public void menuHasComponents_componentsAreNotItems() {
+        GridElement grid = $(GridElement.class).id("grid-with-context-menu");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        grid.getCell(0, 0).contextClick();
+
+        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 1);
+
+        TestBenchElement menuOverlay = $(OVERLAY_TAG).first();
+
+        TestBenchElement overlayContainer = menuOverlay.$("vaadin-list-box")
+                .first();
+        List<WebElement> items = overlayContainer.findElements(By.xpath("./*"));
+        Assert.assertEquals(4, items.size());
+        Assert.assertEquals("vaadin-item",
+                items.get(0).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("hr",
+                items.get(1).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("vaadin-item",
+                items.get(2).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("vaadin-item",
+                items.get(3).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("Link", items.get(3).getText());
+    }
+
+    @Test
+    public void subMenuHasComponents_componentsAreNotItems() {
+        GridElement grid = $(GridElement.class).id("grid-with-context-menu");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        $(TestBenchElement.class).id("add-sub-menu").click();
+
+        grid.getCell(0, 0).contextClick();
+
+        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 1);
+        TestBenchElement menuOverlay = $(OVERLAY_TAG).first();
+
+        TestBenchElement overlayContainer = menuOverlay.$("vaadin-list-box")
+                .first();
+        openSubMenu(overlayContainer.$("vaadin-item").get(3));
+
+        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 2);
+        TestBenchElement subMenuOverlay = $(OVERLAY_TAG).get(1);
+
+        List<WebElement> items = subMenuOverlay.$("vaadin-list-box").first()
+                .findElements(By.xpath("./*"));
+        Assert.assertEquals(4, items.size());
+        Assert.assertEquals("vaadin-item",
+                items.get(0).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("h1",
+                items.get(1).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("bar", items.get(1).getText());
+        Assert.assertEquals("vaadin-item",
+                items.get(2).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("vaadin-item",
+                items.get(3).getTagName().toLowerCase(Locale.ENGLISH));
+        Assert.assertEquals("Link", items.get(3).getText());
+
+        subMenuOverlay.$("vaadin-item").get(0).click();
+
+        assertMessage("Person 0");
+    }
+
+    private void assertMessage(String expected) {
+        Assert.assertEquals(expected, $("label").id("message").getText());
+    }
+
+    private void openSubMenu(TestBenchElement parentItem) {
+        executeScript(
+                "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
+                parentItem);
+    }
+
+    private List<TestBenchElement> getSubMenuItems() {
+        return $(OVERLAY_TAG).get(1).$("vaadin-item").all();
+    }
+
+    private void verifyClosed() {
+        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
+    }
+
+}
