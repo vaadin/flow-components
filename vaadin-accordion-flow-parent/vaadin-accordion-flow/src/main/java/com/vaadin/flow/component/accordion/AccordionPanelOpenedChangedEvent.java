@@ -19,9 +19,12 @@ package com.vaadin.flow.component.accordion;
 
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 
-@DomEvent("items-changed")
-public class AccordionItemsChanged extends ComponentEvent<Accordion> {
+@DomEvent("opened-changed")
+public class AccordionPanelOpenedChangedEvent extends ComponentEvent<AccordionPanel> {
+
+    private final boolean opened;
 
     /**
      * Creates a new event using the given source and indicator whether the
@@ -30,7 +33,13 @@ public class AccordionItemsChanged extends ComponentEvent<Accordion> {
      * @param source     the source component
      * @param fromClient <code>true</code> if the event originated from the client
      */
-    public AccordionItemsChanged(Accordion source, boolean fromClient) {
+    public AccordionPanelOpenedChangedEvent(AccordionPanel source, boolean fromClient,
+                                            @EventData("event.detail.value") boolean opened) {
         super(source, fromClient);
+        this.opened = opened;
+    }
+
+    public boolean isOpened() {
+        return opened;
     }
 }

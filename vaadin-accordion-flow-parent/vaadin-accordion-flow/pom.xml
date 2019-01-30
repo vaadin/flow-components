@@ -64,11 +64,11 @@
 
 
         <!--Webjar-->
-        <!--<dependency>-->
-            <!--<groupId>com.vaadin.webjar</groupId>-->
-            <!--<artifactId>vaadin-accordion</artifactId>-->
-            <!--<version>1.0.0.alpha2</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-accordion</artifactId>
+            <version>1.0.0-beta1</version>
+        </dependency>
 
 
         <!--Pinned transitive webjars-->

@@ -39,7 +39,9 @@ public class AccordionPanel extends Details implements HasEnabled {
         super(summary, content);
     }
 
-    public Registration addOpenedChangedListener(ComponentEventListener<AccordionPanelOpenedChanged> listener) {
-        return ComponentUtil.addListener(this, AccordionPanelOpenedChanged.class, listener);
+    public Registration addOpenedChangedListener(
+            ComponentEventListener<AccordionPanelOpenedChangedEvent> listener) {
+
+        return ComponentUtil.addListener(this, AccordionPanelOpenedChangedEvent.class, listener);
     }
 }

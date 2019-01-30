@@ -4,7 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
-import com.vaadin.flow.component.accordion.AccordionPanelOpenedChanged;
+import com.vaadin.flow.component.accordion.AccordionPanelOpenedChangedEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toMap;
@@ -74,8 +73,10 @@ public class MainView extends HorizontalLayout {
             accordionEvents.add(new Span(text));
         });
 
-        accordion.getChildren().forEach(e -> ComponentUtil.addListener(e, AccordionPanelOpenedChanged.class, event -> {
-            final String text = "Panel " + ((AccordionPanel) e).getSummaryText() + " " + (event.isOpened() ? "opened" : "closed");
+        accordion.getChildren().forEach(e ->
+                ComponentUtil.addListener(e, AccordionPanelOpenedChangedEvent.class, event -> {
+            final String text = "Panel " + ((AccordionPanel) e).getSummaryText()
+                    + " " + (event.isOpened() ? "opened" : "closed");
             panelEvents.add(new Span(text));
         }));
 

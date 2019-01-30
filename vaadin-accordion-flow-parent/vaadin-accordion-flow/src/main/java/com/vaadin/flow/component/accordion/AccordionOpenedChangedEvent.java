@@ -24,7 +24,7 @@ import com.vaadin.flow.component.EventData;
 import java.util.Optional;
 
 @DomEvent("opened-changed")
-public class AccordionOpenedChanged extends ComponentEvent<Accordion> {
+public class AccordionOpenedChangedEvent extends ComponentEvent<Accordion> {
 
     private final Integer index;
 
@@ -35,8 +35,8 @@ public class AccordionOpenedChanged extends ComponentEvent<Accordion> {
      * @param source     the source component
      * @param fromClient <code>true</code> if the event originated from the client
      */
-    public AccordionOpenedChanged(Accordion source, boolean fromClient,
-                                  @EventData("event.detail.value") Integer index) {
+    public AccordionOpenedChangedEvent(Accordion source, boolean fromClient,
+                                       @EventData("event.detail.value") Integer index) {
         super(source, fromClient);
         this.index = index;
     }

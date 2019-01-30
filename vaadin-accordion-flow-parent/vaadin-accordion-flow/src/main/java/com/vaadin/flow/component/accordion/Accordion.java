@@ -21,15 +21,13 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-accordion")
 @HtmlImport("frontend://bower_components/vaadin-accordion/src/vaadin-accordion.html")
-public class Accordion extends Component implements HasSize, HasTheme {
+public class Accordion extends Component implements HasSize {
 
     private static final String OPENED_PROPERTY = "opened";
 
@@ -64,7 +62,9 @@ public class Accordion extends Component implements HasSize, HasTheme {
         return opened == null ? null : Integer.valueOf(opened);
     }
 
-    public Registration addOpenedChangedListener(ComponentEventListener<AccordionOpenedChanged> listener) {
-        return ComponentUtil.addListener(this, AccordionOpenedChanged.class, listener);
+    public Registration addOpenedChangedListener(
+            ComponentEventListener<AccordionOpenedChangedEvent> listener) {
+
+        return ComponentUtil.addListener(this, AccordionOpenedChangedEvent.class, listener);
     }
 }
