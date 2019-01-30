@@ -3,7 +3,7 @@ package com.vaadin.flow.component.login;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class LoginI18nTest {
+public class LoginFormI18nTest {
 
     @Test
     public void createDefault() {

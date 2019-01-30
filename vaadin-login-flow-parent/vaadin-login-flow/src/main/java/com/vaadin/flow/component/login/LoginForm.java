@@ -2,7 +2,7 @@ package com.vaadin.flow.component.login;
 
 /*
  * #%L
- * Vaadin Login for Vaadin
+ * Login for Vaadin Flow
  * %%
  * Copyright (C) 2017 - 2018 Vaadin Ltd
  * %%
@@ -24,18 +24,18 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 
 /**
- * Server-side abstract component for the {@code <vaadin-login>} component.
+ * Server-side component for the {@code <vaadin-login-form>} component.
  *
  * @author Vaadin Ltd
  */
-@Tag("vaadin-login")
-@HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login.html")
-public class Login extends AbstractLogin {
+@Tag("vaadin-login-form")
+@HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login-form.html")
+public class LoginForm extends AbstractLogin {
 
-    public Login() {
+    public LoginForm() {
     }
 
-    public Login(LoginI18n i18n) {
+    public LoginForm(LoginI18n i18n) {
         super(i18n);
     }
 

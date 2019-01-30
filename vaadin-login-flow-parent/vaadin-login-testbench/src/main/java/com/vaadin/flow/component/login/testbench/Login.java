@@ -64,6 +64,11 @@ interface Login {
     String getFormTitle();
 
     /**
+     * Return the error component
+     */
+    TestBenchElement getErrorComponent();
+
+    /**
      * Return the error message title. Returns empty string
      * if the error message is not displayed
      */

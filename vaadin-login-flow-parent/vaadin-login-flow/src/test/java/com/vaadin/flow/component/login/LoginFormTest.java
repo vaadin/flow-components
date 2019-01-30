@@ -6,36 +6,36 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LoginTest {
+public class LoginFormTest {
 
     @Test
     public void onForgotPasswordEvent() {
-        Login loginComponent = new Login();
+        LoginForm loginFormComponent = new LoginForm();
 
         AtomicInteger count = new AtomicInteger(0);
-        loginComponent.addForgotPasswordListener(e -> count.incrementAndGet());
+        loginFormComponent.addForgotPasswordListener(e -> count.incrementAndGet());
 
-        ComponentUtil.fireEvent(loginComponent, new Login.ForgotPasswordEvent(loginComponent, false));
+        ComponentUtil.fireEvent(loginFormComponent, new LoginForm.ForgotPasswordEvent(loginFormComponent, false));
 
         Assert.assertEquals(1, count.get());
     }
 
     @Test
     public void onLoginEvent() {
-        Login loginComponent = new Login();
+        LoginForm loginFormComponent = new LoginForm();
 
         AtomicInteger count = new AtomicInteger(0);
-        loginComponent.addLoginListener(e -> {
+        loginFormComponent.addLoginListener(e -> {
             Assert.assertEquals("username", e.getUsername());
             Assert.assertEquals("password", e.getPassword());
             count.incrementAndGet();
         });
 
-        Assert.assertTrue(loginComponent.isEnabled());
-        ComponentUtil.fireEvent(loginComponent, new Login.LoginEvent(loginComponent, false,
+        Assert.assertTrue(loginFormComponent.isEnabled());
+        ComponentUtil.fireEvent(loginFormComponent, new LoginForm.LoginEvent(loginFormComponent, false,
                 "username", "password"));
 
         Assert.assertEquals(1, count.get());
-        Assert.assertFalse(loginComponent.isEnabled());
+        Assert.assertFalse(loginFormComponent.isEnabled());
     }
 }

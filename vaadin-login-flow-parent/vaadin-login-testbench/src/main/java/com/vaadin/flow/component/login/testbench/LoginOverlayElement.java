@@ -33,12 +33,18 @@ import org.openqa.selenium.StaleElementReferenceException;
 @Element("vaadin-login-overlay")
 public class LoginOverlayElement extends TestBenchElement implements Login {
 
+    /**
+     * Returns the container of the branding and form area
+     */
     public TestBenchElement getLoginOverlayWrapper() {
         return $("vaadin-login-overlay-wrapper").onPage().waitForFirst();
     }
 
-    public LoginElement getLogin() {
-        return getLoginOverlayWrapper().$(LoginElement.class).first();
+    /**
+     * Returns the login form, the actual container of native html form
+     */
+    public LoginFormElement getLoginForm() {
+        return getLoginOverlayWrapper().$(LoginFormElement.class).first();
     }
 
     public boolean isOpened() {
@@ -51,22 +57,27 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
 
     @Override
     public TextFieldElement getUsernameField() {
-        return getLoginOverlayWrapper().$(TextFieldElement.class).id("username");
+        return getLoginForm().getUsernameField();
     }
 
     @Override
     public PasswordFieldElement getPasswordField() {
-        return getLoginOverlayWrapper().$(PasswordFieldElement.class).id("password");
+        return getLoginForm().getPasswordField();
     }
 
     @Override
     public ButtonElement getSubmitButton() {
-        return getLoginOverlayWrapper().$(ButtonElement.class).id("submit");
+        return getLoginForm().getSubmitButton();
     }
 
     @Override
     public ButtonElement getForgotPasswordButton() {
-        return getLogin().getForgotPasswordButton();
+        return getLoginForm().getForgotPasswordButton();
+    }
+
+    @Override
+    public TestBenchElement getErrorComponent() {
+        return getLoginForm().getErrorComponent();
     }
 
     @Override
@@ -80,7 +91,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
     }
 
     /**
-     * Returns the title displayed in the login element
+     * Returns the title displayed in the login overlay element
      */
     public String getTitle() {
         if (hasTitleComponent()) {
@@ -120,21 +131,21 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
 
     @Override
     public String getFormTitle() {
-        return getLogin().getFormTitle();
+        return getLoginForm().getFormTitle();
     }
 
     @Override
     public String getErrorMessageTitle() {
-        return getLogin().getErrorMessageTitle();
+        return getLoginForm().getErrorMessageTitle();
     }
 
     @Override
     public String getErrorMessage() {
-        return getLogin().getErrorMessage();
+        return getLoginForm().getErrorMessage();
     }
 
     @Override
     public String getAdditionalInformation() {
-        return getLogin().getAdditionalInformation();
+        return getLoginForm().getAdditionalInformation();
     }
 }

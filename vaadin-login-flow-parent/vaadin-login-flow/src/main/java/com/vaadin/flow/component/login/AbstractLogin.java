@@ -2,7 +2,7 @@ package com.vaadin.flow.component.login;
 
 /*
  * #%L
- * Vaadin AbstractLogin for Vaadin
+ * Login for Vaadin Flow
  * %%
  * Copyright (C) 2017 - 2018 Vaadin Ltd
  * %%
@@ -33,10 +33,11 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Abstract component for the {@code <vaadin-login>} component.
- * On {@link Login.LoginEvent} component becomes disabled.
+ * Abstract component for the {@code <vaadin-login-overlay>} and
+ * {@code <vaadin-login-form>} components.
+ * On {@link LoginForm.LoginEvent} component becomes disabled.
  * Disabled component stops to process login events, however
- * the {@link Login.ForgotPasswordEvent} event is processed anyway.
+ * the {@link LoginForm.ForgotPasswordEvent} event is processed anyway.
  * To enable use the {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)} method.
  * Setting error {@link #setError(boolean)} true makes component automatically enabled for
  * the next login attempt.
@@ -154,7 +155,6 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
 
     /**
      * Adds `login` event listener
-     * Event is fired only if no action is defined
      */
     public Registration addLoginListener(ComponentEventListener<LoginEvent> listener) {
         return ComponentUtil.addListener(this, LoginEvent.class, listener);
@@ -172,7 +172,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
 
     /**
      * `login` is fired when the user either clicks Submit button or presses an Enter key.
-     * Event is fired only if no action is set for login form and client-side validation passed.
+     * Event is fired only if client-side validation passed.
      */
     @DomEvent(LOGIN_EVENT)
     public static class LoginEvent extends ComponentEvent<AbstractLogin> {

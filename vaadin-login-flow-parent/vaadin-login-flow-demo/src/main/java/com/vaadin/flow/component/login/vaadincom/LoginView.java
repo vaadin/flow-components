@@ -7,7 +7,7 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.login.AbstractLogin;
-import com.vaadin.flow.component.login.Login;
+import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -20,8 +20,8 @@ public class LoginView extends DemoView {
 
     @Override
     protected void initView() {
-        basicDemo();
         overlay();
+        basicDemo();
         internationalization();
         addCard(" ");
         customTitle();
@@ -29,8 +29,8 @@ public class LoginView extends DemoView {
 
     private void basicDemo() {
         // begin-source-example
-        // source-example-heading: Basic Login
-        Login component = new Login();
+        // source-example-heading: Login Form
+        LoginForm component = new LoginForm();
         component.addLoginListener(e -> {
             boolean isAuthenticated = authenticate(e);
             if (isAuthenticated) {
@@ -41,7 +41,7 @@ public class LoginView extends DemoView {
         });
         // end-source-example
 
-        addCard("Basic Login", createLayout(component));
+        addCard("Login Form", createLayout(component));
     }
 
     @SuppressWarnings("unused")
@@ -55,18 +55,18 @@ public class LoginView extends DemoView {
 
     private void internationalization() {
         // begin-source-example
-        // source-example-heading: Login with internationalization
-        Login component = new Login();
+        // source-example-heading: Login Form with internationalization
+        LoginForm component = new LoginForm();
         Button updateI18nButton = new Button("Switch to Brazilian Portuguese",
             event -> component.setI18n(createPortugueseI18n()));
         // end-source-example
 
-        addCard("Login with internationalization", createLayout(component), updateI18nButton);
+        addCard("Login Form with internationalization", createLayout(component), updateI18nButton);
     }
 
     private void overlay() {
         // begin-source-example
-        // source-example-heading: Login in an overlay
+        // source-example-heading: Login Overlay
         LoginOverlay component = new LoginOverlay();
         component.addLoginListener(e -> component.close());
         Button open = new Button("Open login overlay",
@@ -77,7 +77,7 @@ public class LoginView extends DemoView {
         component.setI18n(i18n);
         // end-source-example
 
-        addCard("Login in an overlay", component, open);
+        addCard("Login Overlay", component, open);
     }
 
     private void customTitle() {
@@ -105,9 +105,9 @@ public class LoginView extends DemoView {
         addCard("Title with custom HTML", component, open);
     }
 
-    private Component createLayout(Login login) {
+    private Component createLayout(LoginForm loginForm) {
         VerticalLayout layout = new VerticalLayout();
-        layout.add(login);
+        layout.add(loginForm);
 
         layout.setSizeFull();
         layout.setPadding(true);

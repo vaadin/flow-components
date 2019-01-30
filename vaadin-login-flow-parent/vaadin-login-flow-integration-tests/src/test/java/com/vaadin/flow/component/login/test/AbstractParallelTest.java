@@ -78,8 +78,4 @@ public abstract class AbstractParallelTest extends ParallelTest {
                 BrowserUtil.chrome(), BrowserUtil.edge(), safari);
     }
 
-    public void skipTest(String message) {
-        throw new AssumptionViolatedException(message);
-    }
-
 }

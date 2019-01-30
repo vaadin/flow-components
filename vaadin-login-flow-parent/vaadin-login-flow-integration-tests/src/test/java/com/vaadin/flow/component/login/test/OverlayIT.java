@@ -1,6 +1,6 @@
 package com.vaadin.flow.component.login.test;
 
-import com.vaadin.flow.component.login.testbench.LoginElement;
+import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
@@ -14,9 +14,9 @@ public class OverlayIT extends BasicIT {
     }
 
     @Override
-    public LoginElement getLogin() {
+    public LoginFormElement getLoginForm() {
         openOverlay();
-        return $(LoginOverlayElement.class).waitForFirst().getLogin();
+        return $(LoginOverlayElement.class).waitForFirst().getLoginForm();
     }
 
     private void openOverlay() {

@@ -2,7 +2,7 @@ package com.vaadin.flow.component.login;
 
 /*
  * #%L
- * Vaadin Login for Vaadin
+ * Login for Vaadin Flow
  * %%
  * Copyright (C) 2018 Vaadin Ltd
  * %%
@@ -34,7 +34,7 @@ import java.nio.charset.StandardCharsets;
  * Internationalization object for customizing the component UI texts.
  * An instance with the default messages can be obtained using {@link LoginI18n#createDefault()}
  *
- * @see Login#setI18n(LoginI18n)
+ * @see LoginForm#setI18n(LoginI18n)
  */
 public class LoginI18n implements Serializable {
 

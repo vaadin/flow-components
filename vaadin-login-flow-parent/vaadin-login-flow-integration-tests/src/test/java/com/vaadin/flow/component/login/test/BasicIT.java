@@ -1,7 +1,7 @@
 package com.vaadin.flow.component.login.test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.login.testbench.LoginElement;
+import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
@@ -17,11 +17,11 @@ public abstract class BasicIT extends AbstractParallelTest {
         getDriver().get(getBaseURL());
     }
 
-    public abstract LoginElement getLogin();
+    public abstract LoginFormElement getLoginForm();
 
     @Test
     public void testDefaults() {
-        LoginElement login = getLogin();
+        LoginFormElement login = getLoginForm();
 
         Assert.assertEquals("Log in", login.getFormTitle());
         if (!BrowserUtil.isEdge(getDesiredCapabilities()) && !BrowserUtil.isSafari(getDesiredCapabilities())) {
@@ -30,7 +30,7 @@ public abstract class BasicIT extends AbstractParallelTest {
             Assert.assertEquals("", login.getErrorMessage());
         }
         Assert.assertEquals("Forgot password", login.getForgotPasswordButton().getText());
-        Assert.assertFalse(getLogin().getForgotPasswordButton().hasAttribute("hidden"));
+        Assert.assertFalse(getLoginForm().getForgotPasswordButton().hasAttribute("hidden"));
         Assert.assertEquals("", login.getAdditionalInformation());
     }
 
@@ -45,7 +45,7 @@ public abstract class BasicIT extends AbstractParallelTest {
         usernameField.setValue("username");
         passwordField.setValue("password");
         submit.run();
-        String notification = $(NotificationElement.class).waitForFirst().getText();
+        String notification = $(NotificationElement.class).waitForFirst().getText().trim();
         Assert.assertEquals("Successful login", notification);
     }
 
@@ -53,7 +53,7 @@ public abstract class BasicIT extends AbstractParallelTest {
     public void testNoForgotPasswordButton() {
         getDriver().get(getBaseURL() + "/no-forgot-password");
 
-        Assert.assertTrue(getLogin().getForgotPasswordButton().hasAttribute("hidden"));
+        Assert.assertTrue(getLoginForm().getForgotPasswordButton().hasAttribute("hidden"));
     }
 
 }
