@@ -104,18 +104,6 @@ public class GridView extends DemoView {
     }
 
     // begin-source-example
-    // source-example-heading: Grid example model
-    /**
-     * Example object.
-     */
-
-    /**
-     * Example object.
-     */
-
-    // end-source-example
-
-    // begin-source-example
     // source-example-heading: Grid with columns using component renderer
     /**
      * Component used for the cell rendering.
@@ -250,6 +238,10 @@ public class GridView extends DemoView {
 
         addCard("Grid example model",
                 new Label("These objects are used in the examples above"));
+    }
+
+    @Override
+    public void populateSources() {
     }
 
     private void addVariantFeature() {
@@ -438,7 +430,7 @@ public class GridView extends DemoView {
         // properties not present on the original bean.
         grid.addColumn(TemplateRenderer.<Person> of(
                 "<div title='[[item.name]]'>[[item.name]]<br><small>[[item.yearsOld]]</small></div>")
-                .withProperty("name", Person::getFirstName)
+                .withProperty("firstName", Person::getFirstName)
                 .withProperty("yearsOld",
                         person -> person.getAge() > 1
                                 ? person.getAge() + " years old"
@@ -717,7 +709,7 @@ public class GridView extends DemoView {
                         + "<div>Hi! My name is <b>[[item.name]]!</b></div>"
                         + "<div><button on-click='handleClick'>Update Person</button></div>"
                         + "</div>")
-                .withProperty("name", Person::getFirstName)
+                .withProperty("firstName", Person::getFirstName)
                 .withEventHandler("handleClick", person -> {
                     person.setFirstName(person.getFirstName() + " Updated");
                     grid.getDataProvider().refreshItem(person);
@@ -757,7 +749,7 @@ public class GridView extends DemoView {
         grid.setItems(getItems());
         grid.setSelectionMode(SelectionMode.NONE);
 
-        grid.addColumn(Person::getFirstName, "name").setHeader("Name");
+        grid.addColumn(Person::getFirstName, "firstName").setHeader("Name");
         grid.addColumn(Person::getAge, "age").setHeader("Age");
 
         grid.addColumn(TemplateRenderer.<Person> of(
@@ -829,7 +821,7 @@ public class GridView extends DemoView {
         // a single method call
         NativeButton showBasicInformation = new NativeButton(
                 "Show basic information",
-                event -> grid.setColumns("name", "age", "address"));
+                event -> grid.setColumns("firstName", "age", "address"));
         NativeButton showAddressInformation = new NativeButton(
                 "Show address information",
                 event -> grid.setColumns("address.street", "address.number",
@@ -1299,7 +1291,7 @@ public class GridView extends DemoView {
         binder.forField(field)
                 .withValidator(name -> name.startsWith("Person"),
                         "Name should start with Person")
-                .withStatusLabel(validationStatus).bind("name");
+                .withStatusLabel(validationStatus).bind("firstName");
         nameColumn.setEditorComponent(field);
 
         Checkbox checkbox = new Checkbox();
@@ -1374,7 +1366,7 @@ public class GridView extends DemoView {
                         event -> grid.getEditor().closeEditor())
                 .setFilter("event.key === 'Tab' && event.shiftKey");
 
-        binder.bind(field, "name");
+        binder.bind(field, "firstName");
         nameColumn.setEditorComponent(field);
 
         Checkbox checkbox = new Checkbox();
@@ -1428,7 +1420,7 @@ public class GridView extends DemoView {
         editor.setBuffered(true);
 
         TextField field = new TextField();
-        binder.bind(field, "name");
+        binder.bind(field, "firstName");
         nameColumn.setEditorComponent(field);
 
         Div validationStatus = new Div();
@@ -1564,7 +1556,7 @@ public class GridView extends DemoView {
                 .addEventListener("keydown",
                         event -> grid.getEditor().closeEditor())
                 .setFilter("event.key === 'Tab' && event.shiftKey");
-        binder.bind(field, "name");
+        binder.bind(field, "firstName");
         nameColumn.setEditorComponent(field);
 
         Checkbox checkbox = new Checkbox();

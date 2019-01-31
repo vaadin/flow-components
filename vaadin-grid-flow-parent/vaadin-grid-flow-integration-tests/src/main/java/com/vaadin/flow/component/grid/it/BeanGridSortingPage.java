@@ -29,7 +29,7 @@ public class BeanGridSortingPage extends Div {
         Grid<Person> grid = new Grid<>(Person.class);
         grid.setItems(new Person("Person 1", 99), new Person("Person 2", 1111),
                 new Person("Person 3", 1));
-        grid.setColumns("name", "born");
+        grid.setColumns("firstName", "born");
         add(grid);
     }
 
