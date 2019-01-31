@@ -23,11 +23,9 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertEquals("",
             customField.findElements(By.tagName("div")).get(0).getText());
         getById(customField, "field1").sendKeys("1\t");
-        //getById(customField, "field2").click();
         Assert.assertEquals("0",
             customField.findElements(By.tagName("div")).get(0).getText());
         getById(customField, "field2").sendKeys("2\t");
-        //getById(customField, "field1").click();
         Assert.assertEquals("3",
             customField.findElements(By.tagName("div")).get(0).getText());
     }
