@@ -60,7 +60,6 @@ public class AppLayoutIT extends AbstractParallelTest {
     }
 
     @Test
-    @Ignore
     public void actionMenuItems_executeAction() {
         MenuItemElement action1 =
                 $(AppLayoutElement.class).waitForFirst().getAppLayoutMenuElement().getMenuItemWithTitle("Action 1");

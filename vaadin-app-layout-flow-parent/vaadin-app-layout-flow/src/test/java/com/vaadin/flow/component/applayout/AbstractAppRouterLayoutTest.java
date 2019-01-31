@@ -5,7 +5,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.Router;
-import com.vaadin.flow.server.startup.RouteRegistry;
+import com.vaadin.flow.server.RouteRegistry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
