@@ -4,7 +4,7 @@ package com.vaadin.flow.component.accordion.testbench;
  * #%L
  * Vaadin Accordion Testbench API
  * %%
- * Copyright (C) 2018 Vaadin Ltd
+ * Copyright (C) 2019 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).

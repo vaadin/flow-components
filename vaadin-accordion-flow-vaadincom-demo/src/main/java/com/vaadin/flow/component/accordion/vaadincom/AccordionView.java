@@ -32,6 +32,9 @@ public class AccordionView extends DemoView {
     @Override
     protected void initView() {
         basicAccordion();
+        themeVariants();
+        eventHandling();
+        complexForm();
     }
 
     private void basicAccordion() {
@@ -54,6 +57,7 @@ public class AccordionView extends DemoView {
     private Component createBox(String color) {
         final Div box = new Div();
         box.getStyle().set("background-color", color);
+        box.getStyle().set("border-radius", "10px");
         box.setHeight("150px");
         box.setWidth("400px");
         return box;
@@ -87,7 +91,6 @@ public class AccordionView extends DemoView {
     }
 
     private void eventHandling() {
-        Checkbox activateDemo = new Checkbox("Activate demo");
         // begin-source-example
         // source-example-heading: Event handling
         Accordion accordion = new Accordion();
@@ -97,10 +100,12 @@ public class AccordionView extends DemoView {
         accordion.add("Bottom start", createBox("yellow"));
         accordion.add("Bottom end", createBox("yellow"));
 
+        Checkbox activateNotifications = new Checkbox("Activate notifications");
+
         accordion.getChildren()
                 .map(AccordionPanel.class::cast)
                 .forEach(panel -> panel.addOpenedChangedListener(event -> {
-                    if (event.isOpened() && activateDemo.getValue()) {
+                    if (event.isOpened() && activateNotifications.getValue()) {
                         final String title = event.getSource().getSummaryText();
                         Notification.show(title + " opened", 2000,
                                 Notification.Position.valueOf(title
@@ -110,7 +115,7 @@ public class AccordionView extends DemoView {
                 }));
 
         accordion.addOpenedChangedListener(event -> {
-            if (!event.getOpenedPanel().isPresent() && activateDemo.getValue()) {
+            if (!event.getOpenedPanel().isPresent() && activateNotifications.getValue()) {
                 Notification.show("Accordion collapsed", 2000,
                         Notification.Position.BOTTOM_CENTER);
             }
@@ -118,7 +123,7 @@ public class AccordionView extends DemoView {
 
         // end-source-example
 
-        addCard("Event handling", accordion, activateDemo);
+        addCard("Event handling", accordion, activateNotifications);
     }
 
     private void complexForm() {

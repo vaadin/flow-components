@@ -139,23 +139,11 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-generic</artifactId>
             <version>${flow.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-lumo-theme</artifactId>
-            <version>1.1.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -184,7 +172,7 @@
                         <Private-Package></Private-Package>
                         <Bundle-Activator></Bundle-Activator>
                         <Bundle-Version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</Bundle-Version>
-                        <Bundle-License>https://vaadin.com/license/cval-3.0</Bundle-License>
+                        <Bundle-License>https://raw.githubusercontent.com/vaadin/vaadin-button-flow/master/LICENSE</Bundle-License>
                         <Bundle-Description></Bundle-Description>
                         <!-- Package format version - do not change -->
                         <Vaadin-Package-Version>1</Vaadin-Package-Version>
@@ -199,29 +187,6 @@
                         <_removeheaders>Built-By</_removeheaders>
                     </instructions>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>1.8</version>
-                <!--  Use `mvn license:update-file-header` to fix header problems -->
-                <configuration>
-                    <licenseName>cval3</licenseName>
-                    <licenseResolver>${project.baseUri}src/license</licenseResolver>
-                    <includes>
-                        <include>**/main/**/*.java</include>
-                    </includes>
-                    <failOnMissingHeader>true</failOnMissingHeader>
-                    <failOnNotUptodateHeader>true</failOnNotUptodateHeader>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>update-file-header</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
