@@ -65,7 +65,7 @@ public class TimePickerIT extends ComponentDemoTest {
     }
 
     @Test
-    public void TimePickerWithDifferentStep() {
+    public void timePickerWithDifferentStep() {
         TimePickerElement picker = $(TimePickerElement.class)
                 .id("step-setting-picker");
         picker.scrollIntoView();
@@ -94,6 +94,18 @@ public class TimePickerIT extends ComponentDemoTest {
         Assert.assertEquals("Item in the dropdown is not correct", "12:30 AM",
                 picker.getItemText(1));
         picker.closeDropDown();
+    }
+
+    @Test
+    public void timePickerWithMinAndMaxSetting() {
+        TimePickerElement picker = $(TimePickerElement.class)
+                .id("time-picker-min-max");
+        picker.scrollIntoView();
+        picker.openDropDown();
+        Assert.assertEquals("The first item in the dropdown should be the min value",
+                "5:00 AM", picker.getItemText(0));
+        Assert.assertEquals("The last item in the dropdown should be the max value",
+                "6:00 PM", picker.getLastItemText());
     }
 
     private void selectStep(String step) {

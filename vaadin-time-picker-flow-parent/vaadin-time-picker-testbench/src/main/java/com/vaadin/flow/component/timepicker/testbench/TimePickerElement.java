@@ -66,7 +66,7 @@ public class TimePickerElement extends TestBenchElement
         /**
          * Gets the item at the given index from the opened drop down for the
          * <code>&lt;vaadin-time-picker&gt;</code> element.
-         * 
+         *
          * @param index
          *            the index of the item
          * @return the item element
@@ -75,6 +75,18 @@ public class TimePickerElement extends TestBenchElement
             return $(TestBenchElement.class).id("content")
                     .$(TestBenchElement.class).id("selector")
                     .$("vaadin-combo-box-item").get(index);
+        }
+
+        /**
+         * Gets the last item from the opened drop down for the
+         * <code>&lt;vaadin-time-picker&gt;</code> element.
+         *
+         * @return the last item element
+         */
+        public TestBenchElement getLastItem() {
+            return $(TestBenchElement.class).id("content")
+                    .$(TestBenchElement.class).id("selector")
+                    .$("vaadin-combo-box-item").last();
         }
     }
 
@@ -119,6 +131,19 @@ public class TimePickerElement extends TestBenchElement
      */
     public String getItemText(int index) {
         return $(ComboBoxOverlayElement.class).onPage().first().getItem(index)
+                .getText();
+    }
+
+    /**
+     * Gets the text content for the last item inside the drop down.
+     * <p>
+     * <em>NOTE:</em> the time picker drop down should be opened with
+     * {@link #openDropDown()} first.
+     *
+     * @return the text content for the last item
+     */
+    public String getLastItemText() {
+        return $(ComboBoxOverlayElement.class).onPage().first().getLastItem()
                 .getText();
     }
 
