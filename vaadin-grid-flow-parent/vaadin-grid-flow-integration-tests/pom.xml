@@ -66,37 +66,37 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         
          <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-radio-button-flow</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-checkbox-flow</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
