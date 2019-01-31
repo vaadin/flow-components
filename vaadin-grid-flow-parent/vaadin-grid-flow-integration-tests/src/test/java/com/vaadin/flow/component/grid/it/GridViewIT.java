@@ -455,7 +455,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         scrollToElement(grid);
 
         getCellContent(grid.getHeaderCell(0)).click();
-        assertSortMessageEquals(QuerySortOrder.asc("name").build(), true);
+        assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
         getCellContent(grid.getHeaderCell(2)).click();
         assertSortMessageEquals(
                 QuerySortOrder.asc("street").thenAsc("number").build(), true);
@@ -470,7 +470,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
         getCellContent(grid.getHeaderCell(0)).click();
         getCellContent(grid.getHeaderCell(1)).click();
         assertSortMessageEquals(
-                QuerySortOrder.asc("age").thenAsc("name").build(), true);
+                QuerySortOrder.asc("age").thenAsc("firstName").build(), true);
     }
 
     @Test
@@ -500,13 +500,14 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 By.id("grid-sortable-columns-reset-sortings"));
 
         getCellContent(grid.getHeaderCell(0)).click();
-        assertSortMessageEquals(QuerySortOrder.asc("name").build(), true);
+        assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
 
         clickElementWithJs(invertButton);
-        assertSortMessageEquals(QuerySortOrder.desc("name").build(), false);
+        assertSortMessageEquals(QuerySortOrder.desc("firstName").build(),
+                false);
 
         clickElementWithJs(invertButton);
-        assertSortMessageEquals(QuerySortOrder.asc("name").build(), false);
+        assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), false);
 
         clickElementWithJs(resetButton);
         assertSortMessageEquals(Collections.emptyList(), false);
@@ -516,10 +517,11 @@ public class GridViewIT extends TabbedComponentDemoTest {
         getCellContent(grid.getHeaderCell(0)).click();
         getCellContent(grid.getHeaderCell(1)).click();
         assertSortMessageEquals(
-                QuerySortOrder.asc("age").thenAsc("name").build(), true);
+                QuerySortOrder.asc("age").thenAsc("firstName").build(), true);
         clickElementWithJs(invertButton);
         assertSortMessageEquals(
-                QuerySortOrder.desc("age").thenDesc("name").build(), false);
+                QuerySortOrder.desc("age").thenDesc("firstName").build(),
+                false);
 
         clickElementWithJs(resetButton);
         assertSortMessageEquals(Collections.emptyList(), false);
@@ -633,15 +635,22 @@ public class GridViewIT extends TabbedComponentDemoTest {
         GridElement grid = $(GridElement.class).id("bean-grid");
         scrollToElement(grid);
 
-        Assert.assertEquals("Unexpected amount of columns", 6,
+        Assert.assertEquals("Unexpected amount of columns", 13,
                 grid.findElements(By.tagName("vaadin-grid-column")).size());
 
         Assert.assertEquals("Address", grid.getHeaderCell(0).getText());
         Assert.assertEquals("Age", grid.getHeaderCell(1).getText());
-        Assert.assertEquals("Email", grid.getHeaderCell(2).getText());
-        Assert.assertEquals("Name", grid.getHeaderCell(3).getText());
-        Assert.assertEquals("Subscriber", grid.getHeaderCell(4).getText());
-        Assert.assertEquals("Postal Code", grid.getHeaderCell(5).getText());
+        Assert.assertEquals("Birth Date", grid.getHeaderCell(2).getText());
+        Assert.assertEquals("Deceased", grid.getHeaderCell(3).getText());
+        Assert.assertEquals("Email", grid.getHeaderCell(4).getText());
+        Assert.assertEquals("First Name", grid.getHeaderCell(5).getText());
+        Assert.assertEquals("Gender", grid.getHeaderCell(6).getText());
+        Assert.assertEquals("Last Name", grid.getHeaderCell(7).getText());
+        Assert.assertEquals("Rent", grid.getHeaderCell(8).getText());
+        Assert.assertEquals("Salary", grid.getHeaderCell(9).getText());
+        Assert.assertEquals("Salary Double", grid.getHeaderCell(10).getText());
+        Assert.assertEquals("Subscriber", grid.getHeaderCell(11).getText());
+        Assert.assertEquals("Postal Code", grid.getHeaderCell(12).getText());
     }
 
     @Test
@@ -649,6 +658,8 @@ public class GridViewIT extends TabbedComponentDemoTest {
         openTabAndCheckForErrors("configuring-columns");
         WebElement grid = findElement(By.id("bean-grid"));
         scrollToElement(grid);
+
+        findElement(By.id("show-address-information")).click();
 
         Assert.assertTrue(
                 "Address should be displayed as a String starting with the street name",
@@ -681,7 +692,7 @@ public class GridViewIT extends TabbedComponentDemoTest {
                 "Grid should have three columnsa after calling "
                         + "setColumns() with three properties",
                 3, grid.getAllColumns().size());
-        Assert.assertEquals("Name", grid.getHeaderCell(0).getText());
+        Assert.assertEquals("First Name", grid.getHeaderCell(0).getText());
         Assert.assertEquals("Age", grid.getHeaderCell(1).getText());
         Assert.assertEquals("Address", grid.getHeaderCell(2).getText());
         Assert.assertTrue(

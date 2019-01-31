@@ -47,7 +47,7 @@ public class HiddenColumnPage extends Div {
         editor.setBinder(binder);
 
         TextField field = new TextField();
-        binder.bind(field, "name");
+        binder.bind(field, "firstName");
         nameColumn.setEditorComponent(field);
 
         grid.addItemDoubleClickListener(
