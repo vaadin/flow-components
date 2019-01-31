@@ -14,7 +14,7 @@ public class ErrorIT extends AbstractParallelTest {
     @Test
     public void checkProperties() {
         final CustomFieldElement customField = $(CustomFieldElement.class)
-            .first();
+            .waitForFirst();
         Assert.assertEquals("My custom field", customField.getLabel());
         Assert.assertEquals("My error message", customField.getErrorMessage());
 
