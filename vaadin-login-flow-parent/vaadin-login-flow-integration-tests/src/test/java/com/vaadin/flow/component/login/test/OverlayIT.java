@@ -79,9 +79,31 @@ public class OverlayIT extends BasicIT {
 
         Assert.assertEquals("Component title",
                 title.$("h3").first().getText());
+
+        checkSuccessfulLogin(loginOverlay.getUsernameField(), loginOverlay.getPasswordField(),
+                () -> loginOverlay.submit());
+        Assert.assertFalse(loginOverlay.isOpened());
+
+        checkTitleComponentWasReset();
     }
 
     @Test
+    public void testResetTitleComponent() {
+        getDriver().get(getBaseURL() + "/component-title");
+        checkTitleComponentWasReset();
+    }
+
+    private void checkTitleComponentWasReset() {
+        // Setting title as String should detach the title component
+        $("button").id("removeCustomTitle").click();
+        openOverlay();
+
+        LoginOverlayElement loginOverlay = $(LoginOverlayElement.class).waitForFirst();
+
+        Assert.assertFalse(loginOverlay.hasTitleComponent());
+        Assert.assertEquals("Make title string again", loginOverlay.getTitle());
+    }
+
     public void testTitleAndDescriptionStrings() {
         getDriver().get(getBaseURL() + "/property-title-description");
         openOverlay();

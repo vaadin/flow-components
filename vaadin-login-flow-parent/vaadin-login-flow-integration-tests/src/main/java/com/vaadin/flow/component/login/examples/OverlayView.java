@@ -31,6 +31,12 @@ public class OverlayView extends AbstractView {
             Div div = new Div(VaadinIcon.VAADIN_H.create(), new H3("Component title"));
             div.setId("componentTitle");
             login.setTitle(div);
+
+            NativeButton removeCustomTitle = new NativeButton("Remove title");
+            removeCustomTitle.setId("removeCustomTitle");
+            removeCustomTitle.addClickListener(e -> login.setTitle("Make title string again"));
+            add(removeCustomTitle);
+
         }
         if ("property-title-description".equals(s)) {
             login.setTitle("Property title");

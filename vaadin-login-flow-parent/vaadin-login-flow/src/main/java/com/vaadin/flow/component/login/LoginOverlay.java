@@ -114,11 +114,18 @@ public class LoginOverlay extends AbstractLogin {
     }
 
     /**
-     * Sets the application title
+     * Sets the application title. Detaches the component title
+     * if it was set earlier.
+     * Note: the method calls {@link #setTitle(Component)}, which
+     * will reset the custom title, if it was set. Custom title can be
+     * reset only when the overlay is closed.
+     *
+     * Title is a part of the I18n object. See {@link #setI18n(LoginI18n)}.
      *
      * @see #getTitleAsText()
      */
     public void setTitle(String title) {
+        setTitle((Component) null);
         getElement().setProperty("title", title);
     }
 
@@ -137,7 +144,9 @@ public class LoginOverlay extends AbstractLogin {
     }
 
     /**
-     * Sets the application title, <code>null</code> to remove any previously
+     * Sets the application title, <code>null</code> to remove any previous title
+     * and to display title set via {@link #setTitle(String)}.
+     * Note: the title component has to be set when the overlay is closed.
      *
      * @see #getTitle()
      * @param title
@@ -145,6 +154,9 @@ public class LoginOverlay extends AbstractLogin {
      *            any previously set title
      */
     public void setTitle(Component title) {
+        if (isOpened()) {
+            return;
+        }
         if (this.title != null) {
             this.title.getElement().removeFromParent();
         }
@@ -168,7 +180,9 @@ public class LoginOverlay extends AbstractLogin {
     }
 
     /**
-     * Sets the application description
+     * Sets the application description.
+     *
+     * Description is a part of I18n object. See {@link #setI18n(LoginI18n)}.
      *
      * @see #getDescription()
      * @param description
