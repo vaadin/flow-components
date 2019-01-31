@@ -34,27 +34,53 @@ public class AccordionPanelElement extends TestBenchElement {
     private static final String SLOT_TAG = "slot";
     private static final String SUMMARY_SLOT = "summary";
 
+    /**
+     * Checks if the panel is expanded.
+     *
+     * @return true if expanded of false if otherwise
+     */
     public boolean isExpanded() {
         return hasAttribute(OPENED_PROPERTY);
     }
 
+    /**
+     * Expands the panel.
+     */
     public void expand() {
         setProperty(OPENED_PROPERTY, true);
     }
 
+    /**
+     * Collapses the panel.
+     */
     public void collapse() {
         setProperty(OPENED_PROPERTY, (Boolean) null);
     }
 
+    /**
+     * Gets the summary text if set as text on the component.
+     *
+     * @return the summary text
+     */
     public String getSummaryText() {
         return $("span").attribute(SLOT_TAG, SUMMARY_SLOT).first().getText();
     }
 
+    /**
+     * Gets the summary element.
+     *
+     * @return the summary element
+     */
     public TestBenchElement getSummary() {
         return $(TestBenchElement.class).attribute(SLOT_TAG, SUMMARY_SLOT).first();
     }
 
-    public List<TestBenchElement> getDetails() {
+    /**
+     * Gets the content of the panel.
+     *
+     * @return the content
+     */
+    public List<TestBenchElement> getContent() {
         return $(TestBenchElement.class).all().stream()
                 .filter(e -> !e.hasAttribute(SLOT_TAG))
                 .collect(Collectors.toList());

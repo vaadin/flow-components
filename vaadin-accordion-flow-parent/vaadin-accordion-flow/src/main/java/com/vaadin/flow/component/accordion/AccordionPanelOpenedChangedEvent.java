@@ -21,6 +21,9 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 
+/**
+ * An event fired when an AccordionPanel is expanded or collapsed.
+ */
 @DomEvent("opened-changed")
 public class AccordionPanelOpenedChangedEvent extends ComponentEvent<AccordionPanel> {
 
@@ -32,6 +35,7 @@ public class AccordionPanelOpenedChangedEvent extends ComponentEvent<AccordionPa
      *
      * @param source     the source component
      * @param fromClient <code>true</code> if the event originated from the client
+     * @param opened true if the panel was opened, otherwise false
      */
     public AccordionPanelOpenedChangedEvent(AccordionPanel source, boolean fromClient,
                                             @EventData("event.detail.value") boolean opened) {
@@ -39,6 +43,11 @@ public class AccordionPanelOpenedChangedEvent extends ComponentEvent<AccordionPa
         this.opened = opened;
     }
 
+    /**
+     * Gets whether the panel was expanded or collapsed.
+     *
+     * @return true if the panel was expanded, otherwise false
+     */
     public boolean isOpened() {
         return opened;
     }

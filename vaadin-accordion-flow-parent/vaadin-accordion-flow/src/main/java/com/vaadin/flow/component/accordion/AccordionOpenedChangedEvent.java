@@ -21,8 +21,12 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * An event fired when an Accordion is expanded or collapsed.
+ */
 @DomEvent("opened-changed")
 public class AccordionOpenedChangedEvent extends ComponentEvent<Accordion> {
 
@@ -34,6 +38,7 @@ public class AccordionOpenedChangedEvent extends ComponentEvent<Accordion> {
      *
      * @param source     the source component
      * @param fromClient <code>true</code> if the event originated from the client
+     * @param index the index of the expanded panel or null if the accordion is collapsed
      */
     public AccordionOpenedChangedEvent(Accordion source, boolean fromClient,
                                        @EventData("event.detail.value") Integer index) {
@@ -41,15 +46,24 @@ public class AccordionOpenedChangedEvent extends ComponentEvent<Accordion> {
         this.index = index;
     }
 
+    /**
+     * Gets the index of the expanded panel or null if the accordion is collapsed.
+     *
+     * @return the index of the expanded panel or null if collapsed
+     */
+    @Nullable
     public Integer getIndex() {
         return index;
     }
 
     /**
-     * Caution should be exercised when using this method with an accordion which along with its panels
-     * are created in a template. Such template children would by default not be children of the
-     * Accordion Flow component thus making it possible for this method to return the wrong panel in such cases.
-     * @return
+     * Gets the expanded panel.
+     *
+     * Caution should be exercised when using this method with an Accordion which along with its panels
+     * were created in a template. Such template children would by default not be children of the
+     * Accordion Flow component, thus making it possible for this method to return the wrong panel in such cases.
+     *
+     * @return the expanded panel.
      */
     public Optional<AccordionPanel> getOpenedPanel() {
         return index == null || index >= getSource().getChildren().count() ? Optional.empty() :

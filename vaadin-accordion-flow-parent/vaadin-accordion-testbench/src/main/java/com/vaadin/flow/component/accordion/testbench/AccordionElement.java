@@ -20,6 +20,8 @@ package com.vaadin.flow.component.accordion.testbench;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
+import javax.annotation.Nullable;
+
 /**
  * TestBench element for the vaadin-accordion element
  */
@@ -28,19 +30,39 @@ public class AccordionElement extends TestBenchElement {
 
     static final String OPENED_PROPERTY = "opened";
 
+    /**
+     * Collapses the accordion.
+     */
     public void collapse() {
         setProperty(OPENED_PROPERTY, (Boolean) null);
     }
 
+    /**
+     * Expands the panel at the specified index. The first panel is at index zero.
+     *
+     * @param index the index of the panel to be expanded
+     */
     public void expand(int index) {
         setProperty(OPENED_PROPERTY, index);
     }
 
+    /**
+     * Gets the index of the expanded panel or null if the accordion is collapsed.
+     *
+     * @return the index of the expanded panel or null if collapsed.
+     */
+    @Nullable
     public Integer getExpandedIndex() {
         final String openedAttribute = getAttribute(OPENED_PROPERTY);
         return openedAttribute == null ? null : Integer.valueOf(openedAttribute);
     }
 
+    /**
+     * Gets the the expanded panel or null if the accordion is collapsed.
+     *
+     * @return the expanded panel or null if collapsed.
+     */
+    @Nullable
     public AccordionPanelElement getExpandedPanel() {
         return !$(AccordionPanelElement.class).attribute(OPENED_PROPERTY, "").exists() ? null
                 : $(AccordionPanelElement.class).attribute(OPENED_PROPERTY, "").first();

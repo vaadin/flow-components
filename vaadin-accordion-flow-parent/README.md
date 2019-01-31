@@ -1,14 +1,12 @@
-# Vaadin Accordion for Flow
+# Accordion for Vaadin Flow
 
-Vaadin Accordion for Flow is a UI component add-on for Vaadin which provides an accordion component.
+Accordion for Vaadin Flow is a UI component add-on for Vaadin which provides an accordion component.
 
-## License & Author
+### License & Author
 
-This Add-on is distributed under [Commercial Vaadin Add-on License version 3](http://vaadin.com/license/cval-3) (CVALv3). For license terms, see LICENSE.txt.
+Apache License 2.0
 
 Vaadin Accordion is written by Vaadin Ltd.
-
-To purchase a license, visit http://vaadin.com/pricing
 
 ### Installing
 Add Accordion to your project
@@ -22,19 +20,18 @@ Add Accordion to your project
 </dependencies>
 ```
 
-### Using Vaadin Accordion
-
-[<img src="https://raw.githubusercontent.com/vaadin/vaadin-accordion/master/screenshot.gif" width="700" alt="Screenshot of vaadin-accordion">](https://vaadin.com/components/vaadin-accordion)
-
 #### Basic use
-In the most basic use case, Vaadin Accordion requires...
 
-#### Reacting to events
-The events are...
+````java
+Accordion accordion = new Accordion();
+accordion.add("Red", redContent);
+accordion.add("Orange", orangeContent);
+accordion.add("Yellow", yellowContent);
 
+accordion.addOpenedChangedListener(event ->
+        Notification.show(event.getOpenedPanel().get().getSummaryText() + " opened"));
+````
 
-#### Disabling a panel
-Accordion panels can be...
 
 ## Setting up for development
 
