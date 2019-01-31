@@ -81,7 +81,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-date-picker-flow</artifactId>
-            <version>1.3.0-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         
         <dependency>
