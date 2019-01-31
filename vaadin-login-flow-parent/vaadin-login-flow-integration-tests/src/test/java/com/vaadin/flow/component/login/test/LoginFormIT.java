@@ -112,9 +112,9 @@ public class LoginFormIT extends BasicIT {
         Assert.assertTrue(login.isEnabled());
         login.submit();
 
-        // Should be disabled after 3 attempts
-        // TODO Uncomment when client part wil be able to set Error without autoEnable
-        // Assert.assertFalse(login.isEnabled());
+        // Should be disabled after 3rd attempt and change the error message
+        Assert.assertFalse(login.isEnabled());
+        Assert.assertEquals("You made too many attempts", login.getErrorMessageTitle());
     }
 
     @Test

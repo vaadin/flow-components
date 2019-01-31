@@ -148,4 +148,9 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
     public String getAdditionalInformation() {
         return getLoginForm().getAdditionalInformation();
     }
+
+    @Override
+    public boolean isEnabled() {
+        return getLoginForm().isEnabled();
+    }
 }

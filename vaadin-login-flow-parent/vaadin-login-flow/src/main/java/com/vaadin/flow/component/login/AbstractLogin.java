@@ -59,6 +59,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     public AbstractLogin() {
         this(LoginI18n.createDefault());
         getElement().synchronizeProperty(PROP_DISABLED, LOGIN_EVENT);
+        getElement().setProperty("_preventAutoEnable", true);
         addLoginListener(e -> {
             setEnabled(false);
             setError(false);
@@ -105,10 +106,10 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *            {@code false} to hide an error
      */
     public void setError(boolean error) {
-        getElement().setProperty(PROP_ERROR, error);
         if (error) {
             setEnabled(true);
         }
+        getElement().setProperty(PROP_ERROR, error);
     }
 
     /**

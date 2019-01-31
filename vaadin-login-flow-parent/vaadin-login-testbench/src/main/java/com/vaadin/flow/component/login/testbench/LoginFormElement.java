@@ -92,4 +92,9 @@ public class LoginFormElement extends TestBenchElement implements Login {
         return getFormWrapper().$(TestBenchElement.class)
                 .attribute("part", "footer").first().$("p").first().getText();
     }
+
+    @Override
+    public boolean isEnabled() {
+        return !Boolean.TRUE.equals(getPropertyBoolean("disabled")) && super.isEnabled();
+    }
 }
