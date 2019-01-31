@@ -71,6 +71,11 @@
             <artifactId>vaadin-lumo-theme</artifactId>
             <version>${flow.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-notification-flow</artifactId>
+            <version>1.1.0</version>
+        </dependency>
 
         <!--Webjars-->
         <dependency>

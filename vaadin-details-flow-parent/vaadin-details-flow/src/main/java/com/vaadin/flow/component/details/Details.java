@@ -21,12 +21,17 @@ package com.vaadin.flow.component.details;
  */
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.shared.Registration;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -205,12 +210,37 @@ public class Details extends Component implements HasEnabled, HasTheme {
     /**
      * Removes theme variants from the component.
      *
-     * @param variants
-     *            theme variants to remove
+     * @param variants theme variants to remove
      */
     public void removeThemeVariants(DetailsVariant... variants) {
         getThemeNames().removeAll(Stream.of(variants)
                 .map(DetailsVariant::getVariantName).collect(Collectors.toList()));
     }
 
+    @DomEvent("opened-changed")
+    public static class OpenedChangeEvent<R extends Details> extends ComponentEvent<R> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(R source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code opened-changed} events fired by the
+     * webcomponent.
+     *
+     * @param listener the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent<? super Details>> listener) {
+        return ComponentUtil.addListener(this, OpenedChangeEvent.class,
+                (ComponentEventListener) listener);
+    }
 }

@@ -2,6 +2,7 @@ package com.vaadin.flow.component.details.test;
 
 import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.details.testbench.DetailsElement;
+import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +21,7 @@ public class BasicIT extends AbstractParallelTest {
         getDriver().get(getBaseURL());
         detailsElements = $(DetailsElement.class).all();
 
-        Assert.assertEquals(4, detailsElements.size());
+        Assert.assertEquals(5, detailsElements.size());
     }
 
     @Test
@@ -37,6 +38,14 @@ public class BasicIT extends AbstractParallelTest {
                 Stream.of(DetailsVariant.values())
                         .map(DetailsVariant::getVariantName).collect(Collectors.toList())));
         Assert.assertEquals("Small Reversed Filled Summary", detail4.getSummaryText());
+    }
+
+    @Test
+    public void testOpenedChange() {
+        DetailsElement detail = detailsElements.get(4);
+        detail.toggle();
+        Assert.assertEquals("opened-change",
+                $(NotificationElement.class).first().getText());
     }
 
     @Test

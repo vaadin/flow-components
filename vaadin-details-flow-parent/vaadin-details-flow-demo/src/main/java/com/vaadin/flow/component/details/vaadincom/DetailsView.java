@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -23,6 +24,8 @@ public class DetailsView extends DemoView {
         // source-example-heading: Details
         Details component = new Details("Expandable Details",
                 new Text("Toggle using mouse, Enter and Space keys."));
+        component.addOpenedChangeListener(e ->
+                Notification.show(e.isOpened() ? "Opened" : "Closed"));
         // end-source-example
 
         addCard("Details", component);
