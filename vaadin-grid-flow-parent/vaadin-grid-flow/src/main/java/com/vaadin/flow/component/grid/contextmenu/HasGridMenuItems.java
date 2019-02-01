@@ -14,13 +14,13 @@
  * the License.
  */
 
-package com.vaadin.flow.component.contextmenu;
+package com.vaadin.flow.component.grid.contextmenu;
 
 import java.io.Serializable;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.contextmenu.GridContextMenu.GridContextMenuItemClickEvent;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu.GridContextMenuItemClickEvent;
 
 /**
  * A common interface for components that can have {@link GridMenuItem}s with

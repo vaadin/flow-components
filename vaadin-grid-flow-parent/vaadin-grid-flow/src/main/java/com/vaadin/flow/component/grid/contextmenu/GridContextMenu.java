@@ -13,13 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.contextmenu;
+package com.vaadin.flow.component.grid.contextmenu;
 
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.contextmenu.ContextMenuBase;
+import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableRunnable;

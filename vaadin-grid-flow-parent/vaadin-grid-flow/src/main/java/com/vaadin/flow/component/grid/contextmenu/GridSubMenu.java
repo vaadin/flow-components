@@ -14,12 +14,14 @@
  * the License.
  */
 
-package com.vaadin.flow.component.contextmenu;
+package com.vaadin.flow.component.grid.contextmenu;
 
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.contextmenu.MenuManager;
+import com.vaadin.flow.component.contextmenu.SubMenuBase;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableRunnable;
 
