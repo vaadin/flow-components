@@ -29,44 +29,7 @@ public class CustomFieldView extends DemoView {
     }
 
     // begin-source-example
-    // source-example-heading: Custom DateTime Picker
-    public static class CustomDateTimePicker
-        extends CustomField<LocalDateTime> {
-
-        private final DatePicker datePicker = new DatePicker();
-        private final TimePicker timePicker = new TimePicker();
-
-        CustomDateTimePicker() {
-            setLabel("Start datetime");
-            add(datePicker, timePicker);
-        }
-
-        @Override
-        protected LocalDateTime generateModelValue() {
-            final LocalDate date = datePicker.getValue();
-            final LocalTime time = timePicker.getValue();
-            return date != null && time != null ?
-                LocalDateTime.of(date, time) :
-                null;
-        }
-
-        @Override
-        protected void setPresentationValue(
-            LocalDateTime newPresentationValue) {
-            datePicker.setValue(newPresentationValue != null ?
-                newPresentationValue.toLocalDate() :
-                null);
-            timePicker.setValue(newPresentationValue != null ?
-                newPresentationValue.toLocalTime() :
-                null);
-
-        }
-
-    }
-    // end-source-example
-
-    // begin-source-example
-    // source-example-heading: Displaying the field value.
+    // source-example-heading: Displaying the field value
     public static class SumField extends CustomField<Integer> {
 
         private final TextField firstNumber = new TextField("First number");
@@ -100,12 +63,13 @@ public class CustomFieldView extends DemoView {
     // end-source-example
 
     // begin-source-example
-    // source-example-heading: Single element wrapping.
+    // source-example-heading: Single element wrapping
     public static class SingleElementWrapping extends CustomField<String> {
         private final TextField wrappedField = new TextField();
 
         SingleElementWrapping() {
             setLabel("Name");
+            add(wrappedField);
         }
 
         @Override
@@ -120,14 +84,16 @@ public class CustomFieldView extends DemoView {
     }
 
     // end-source-example
+
     // begin-source-example
-    // source-example-heading: Native input.
+    // source-example-heading: Native input
     public static class NativeInput extends CustomField<String> {
         private final Input wrappedField = new Input();
 
         NativeInput() {
             setLabel("Price");
             wrappedField.setType("number");
+            add(wrappedField);
         }
 
         @Override
@@ -139,6 +105,43 @@ public class CustomFieldView extends DemoView {
         protected void setPresentationValue(String newPresentationValue) {
             wrappedField.setValue(newPresentationValue);
         }
+    }
+    // end-source-example
+
+    // begin-source-example
+    // source-example-heading: Custom DateTime Picker
+    public static class CustomDateTimePicker
+        extends CustomField<LocalDateTime> {
+
+        private final DatePicker datePicker = new DatePicker();
+        private final TimePicker timePicker = new TimePicker();
+
+        CustomDateTimePicker() {
+            setLabel("Start datetime");
+            add(datePicker, timePicker);
+        }
+
+        @Override
+        protected LocalDateTime generateModelValue() {
+            final LocalDate date = datePicker.getValue();
+            final LocalTime time = timePicker.getValue();
+            return date != null && time != null ?
+                LocalDateTime.of(date, time) :
+                null;
+        }
+
+        @Override
+        protected void setPresentationValue(
+            LocalDateTime newPresentationValue) {
+            datePicker.setValue(newPresentationValue != null ?
+                newPresentationValue.toLocalDate() :
+                null);
+            timePicker.setValue(newPresentationValue != null ?
+                newPresentationValue.toLocalTime() :
+                null);
+
+        }
+
     }
     // end-source-example
 

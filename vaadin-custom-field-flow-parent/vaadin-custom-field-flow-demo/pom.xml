@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>vaadin-custom-field-flow-demo</artifactId>
-    <packaging>jar</packaging>
+    <packaging>${packaging.type}</packaging>
 
     <name>Vaadin CustomField Flow Demo</name>
 
