@@ -43,7 +43,6 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * Subclasses must implement {@link #generateModelValue()} and AbstractField{@link #setPresentationValue(Object)}.
  *
  * @param <T> field value type
- * @since 8.0
  */
 @Tag("vaadin-custom-field")
 @HtmlImport("frontend://bower_components/vaadin-custom-field/src/vaadin-custom-field.html")
