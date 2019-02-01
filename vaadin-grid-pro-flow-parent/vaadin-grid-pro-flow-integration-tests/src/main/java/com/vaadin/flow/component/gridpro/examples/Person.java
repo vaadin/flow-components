@@ -8,19 +8,19 @@ public class Person implements Serializable {
     private String name;
     private boolean isSubscriber;
     private String email;
-    private Gender gender;
+    private Department department;
 
     public Person() {
         super();
     }
 
-    public Person(String name, boolean isSubscriber, String email, int age, Gender gender) {
+    public Person(String name, boolean isSubscriber, String email, int age, Department department) {
         super();
         this.name = name;
         this.isSubscriber = isSubscriber;
         this.email = email;
         this.age = age;
-        this.gender = gender;
+        this.department = department;
     }
 
     public int getId() {
@@ -63,12 +63,12 @@ public class Person implements Serializable {
         this.email = email;
     }
 
-    public Gender getGender() {
-        return gender;
+    public Department getDepartment() {
+        return department;
     }
 
-    public void setGender(Gender gender) {
-        this.gender = gender;
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 
     @Override
@@ -95,7 +95,7 @@ public class Person implements Serializable {
                 ", name='" + name + '\'' +
                 ", isSubscriber=" + isSubscriber +
                 ", email='" + email + '\'' +
-                ", gender=" + gender +
+                ", department=" + department +
                 '}';
     }
 

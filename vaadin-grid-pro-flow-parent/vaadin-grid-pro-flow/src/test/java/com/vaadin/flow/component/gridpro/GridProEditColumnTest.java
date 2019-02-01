@@ -17,27 +17,27 @@ public class GridProEditColumnTest {
     GridPro.EditColumn<String> checkboxColumn;
     GridPro.EditColumn<String> selectColumn;
     List<String> listOptions;
-    SerializableBiConsumer testConsumer;
+    ItemUpdater itemUpdater;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void init() {
-        testConsumer = (item, newValue) -> {
+        itemUpdater = (item, newValue) -> {
             Assert.assertNotNull(item);
             Assert.assertNotNull(newValue);
         };
 
         grid = new GridPro<>();
-        textColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.text(testConsumer));
-        checkboxColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.checkbox(testConsumer));
+        textColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.text(itemUpdater));
+        checkboxColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.checkbox(itemUpdater));
 
-        listOptions = new ArrayList<String>();
+        listOptions = new ArrayList<>();
         listOptions.add("foo");
         listOptions.add("bar");
         listOptions.add("baz");
-        selectColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.select(testConsumer, listOptions));
+        selectColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.select(itemUpdater, listOptions));
     }
 
     @Test
@@ -64,10 +64,10 @@ public class GridProEditColumnTest {
     }
 
     @Test
-    public void setHandler_getHandler() {
-        SerializableBiConsumer testConsumer = (item, newValue) -> {};
-        checkboxColumn.setCallback(testConsumer);
-        Assert.assertEquals(checkboxColumn.getCallback(), testConsumer);
+    public void setItemUpdater_getItemUpdater() {
+        ItemUpdater itemUpdater = (Object item, Object newValue) -> {};
+        checkboxColumn.setItemUpdater(itemUpdater);
+        Assert.assertEquals(checkboxColumn.getItemUpdater(), itemUpdater);
     }
 
     @Test

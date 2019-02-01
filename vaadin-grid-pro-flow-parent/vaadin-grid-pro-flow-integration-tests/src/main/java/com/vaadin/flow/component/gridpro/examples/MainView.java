@@ -26,26 +26,29 @@ public class MainView extends VerticalLayout {
         GridPro<Person> grid = new GridPro<>();
         grid.setItems(createItems());
 
-        grid.addColumn(Person::getName).setHeader("NAME");
+        grid.addColumn(Person::getAge).setHeader("Age");
 
-        grid.addEditColumn(Person::getAge, EditColumnConfigurator.text((item, newValue) -> {
+        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((item, newValue) -> {
+            item.setName(newValue);
             itemDisplayPanel.setText(item.toString());
-            subPropertyDisplayPanel.setText(newValue.toString());
-        })).setHeader("Age").setWidth("300px");
+            subPropertyDisplayPanel.setText(newValue);
+        })).setHeader("Name").setWidth("300px");
 
         grid.addEditColumn(Person::isSubscriber, EditColumnConfigurator.checkbox((item, newValue) -> {
+            item.setSubscriber(newValue);
             itemDisplayPanel.setText(item.toString());
             subPropertyDisplayPanel.setText(newValue.toString());
         })).setHeader("Subscriber").setWidth("300px");
 
         List<String> listOptions = new ArrayList<>();
-        listOptions.add("Male");
-        listOptions.add("Female");
-        listOptions.add("Unknown");
-        grid.addEditColumn(Person::getGender, EditColumnConfigurator.select((item, newValue) -> {
+        listOptions.add("Services");
+        listOptions.add("Marketing");
+        listOptions.add("Sales");
+        grid.addEditColumn(Person::getDepartment, EditColumnConfigurator.select((item, newValue) -> {
+            item.setDepartment(Department.valueOf(newValue));
             itemDisplayPanel.setText(item.toString());
-            subPropertyDisplayPanel.setText(newValue.toString());
-        }, listOptions)).setHeader("Gender").setWidth("300px");
+            subPropertyDisplayPanel.setText(newValue);
+        }, listOptions)).setHeader("Department").setWidth("300px");
 
         add(grid, itemDisplayPanel, subPropertyDisplayPanel);
     }
@@ -63,7 +66,7 @@ public class MainView extends VerticalLayout {
         person.setEmail("person" + index + "@vaadin.com");
         person.setName("Person " + index);
         person.setAge(13 + random.nextInt(50));
-        person.setGender(Gender.getRandomCGender());
+        person.setDepartment(Department.getRandomDepartment());
 
         return person;
     }

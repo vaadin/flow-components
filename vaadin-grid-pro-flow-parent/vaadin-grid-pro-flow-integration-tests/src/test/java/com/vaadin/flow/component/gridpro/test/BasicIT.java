@@ -45,9 +45,9 @@ public class BasicIT extends AbstractParallelTest {
     public void selectEditorOptionsAreSet() {
         GridTHTDElement cell = grid.getCell(0, 3);
         ArrayList optionsList = cell.getColumn().getOptionsList();
-        Assert.assertTrue(optionsList.contains("Male"));
-        Assert.assertTrue(optionsList.contains("Female"));
-        Assert.assertTrue(optionsList.contains("Unknown"));
+        Assert.assertTrue(optionsList.contains("Services"));
+        Assert.assertTrue(optionsList.contains("Marketing"));
+        Assert.assertTrue(optionsList.contains("Sales"));
     }
 
     private void AssertCellEnterEditModeOnDoubleClick(Integer rowIndex, Integer colIndex, String editorTag) {

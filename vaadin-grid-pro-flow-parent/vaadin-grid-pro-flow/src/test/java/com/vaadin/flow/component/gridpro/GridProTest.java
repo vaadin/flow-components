@@ -21,14 +21,14 @@ public class GridProTest {
     }
 
     @Test
-    public void setAllowEnterRowChange_getAllowEnterRowChange() {
-        grid.setAllowEnterRowChange(true);
-        Assert.assertEquals(grid.getAllowEnterRowChange(), true);
+    public void setEnterNextRow_getEnterNextRow() {
+        grid.setEnterNextRow(true);
+        Assert.assertEquals(grid.getEnterNextRow(), true);
     }
 
     @Test
-    public void setPreserveEditMode_getPreserveEditMode() {
-        grid.setPreserveEditMode(true);
-        Assert.assertEquals(grid.getPreserveEditMode(), true);
+    public void setKeepEditorOpen_getKeepEditorOpen() {
+        grid.setKeepEditorOpen(true);
+        Assert.assertEquals(grid.getKeepEditorOpen(), true);
     }
 }

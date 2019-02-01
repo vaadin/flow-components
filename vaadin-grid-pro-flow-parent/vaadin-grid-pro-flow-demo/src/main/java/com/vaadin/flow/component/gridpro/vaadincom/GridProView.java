@@ -18,8 +18,8 @@ public class GridProView extends DemoView {
     protected void initView() {
         basicGridPro();
         editorTypes();
-        allowEnterRowChange();
-        preserveEditMode();
+        enterNextRow();
+        keepEditorOpen();
     }
 
     private void basicGridPro() {
@@ -69,36 +69,36 @@ public class GridProView extends DemoView {
         addCard("Editor Types", grid);
     }
 
-    private void allowEnterRowChange() {
+    private void enterNextRow() {
         // begin-source-example
-        // source-example-heading: Allow Enter Row Change
+        // source-example-heading: Enter Next Row
         GridPro<Person> grid = new GridPro<>();
         grid.setItems(createItems());
 
         /*
-         * It is possible to allow enter pressing change the row by using grid pro method setAllowEnterRowChange.
+         * It is possible to allow enter pressing change the row by using grid pro method setEnterNextRow.
          */
-        grid.setAllowEnterRowChange(true);
+        grid.setEnterNextRow(true);
         grid.addEditColumn(Person::getName, EditColumnConfigurator.text((item, newValue) -> {})).setHeader("Name (editable)");
         // end-source-example
 
-        addCard("Allow Enter Row Change", grid);
+        addCard("Enter Next Row", grid);
     }
 
-    private void preserveEditMode() {
+    private void keepEditorOpen() {
         // begin-source-example
-        // source-example-heading: Preserve Edit Mode
+        // source-example-heading: Keep Editor Open
         GridPro<Person> grid = new GridPro<>();
         grid.setItems(createItems());
 
         /*
-         * It is possible to preserve edit mode when moving to the next cell by using grid pro method setPreserveEditMode.
+         * It is possible to preserve edit mode when moving to the next cell by using grid pro method setKeepEditorOpen.
          */
-        grid.setPreserveEditMode(true);
+        grid.setKeepEditorOpen(true);
         grid.addEditColumn(Person::getEmail, EditColumnConfigurator.text((item, newValue) -> {})).setHeader("Email (editable)");
         // end-source-example
 
-        addCard("Preserve Edit Mode", grid);
+        addCard("Keep Editor Open", grid);
     }
 
     private static List<Person> createItems() {
@@ -114,7 +114,7 @@ public class GridProView extends DemoView {
         person.setEmail("person" + index + "@vaadin.com");
         person.setName("Person " + index);
         person.setAge(13 + random.nextInt(50));
-        person.setGender(Gender.getRandomCGender());
+        person.setDepartment(Department.getRandomDepartment());
 
         return person;
     }
