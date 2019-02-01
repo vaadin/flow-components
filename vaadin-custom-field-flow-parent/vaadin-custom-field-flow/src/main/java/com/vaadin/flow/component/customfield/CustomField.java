@@ -88,11 +88,10 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     protected abstract void setPresentationValue(T newPresentationValue);
 
     /**
-     * Updates both the model and the presentation values.
+     * Regenerates the value and updates the model. It is called when a change is detected from the contained fields.
      */
     protected void updateValue() {
         setModelValue(generateModelValue(), false);
-        setPresentationValue(getValue());
     }
 
     /**
