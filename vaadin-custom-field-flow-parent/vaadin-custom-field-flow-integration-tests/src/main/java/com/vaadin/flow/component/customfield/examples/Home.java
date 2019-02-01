@@ -2,6 +2,7 @@ package com.vaadin.flow.component.customfield.examples;
 
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
@@ -31,8 +32,10 @@ public class Home extends Div {
                 result.setText("" + integer);
             }
         };
+        NativeButton button = new NativeButton("Useless button");
+        button.setId("button1");
         customField.add(field1, field2, result);
 
-        add(customField);
+        add(customField,button);
     }
 }

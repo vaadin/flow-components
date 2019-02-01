@@ -33,4 +33,5 @@ public class CustomFieldElement extends TestBenchElement {
     public String getErrorMessage() {
         return getPropertyString("errorMessage");
     }
+
 }
