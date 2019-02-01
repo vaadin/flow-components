@@ -29,13 +29,14 @@ public class Home extends Div {
 
             @Override
             protected void setPresentationValue(Integer integer) {
-                result.setText("" + integer);
+
             }
         };
         NativeButton button = new NativeButton("Useless button");
         button.setId("button1");
         customField.add(field1, field2, result);
-
-        add(customField,button);
+        customField
+            .addValueChangeListener(e -> result.setText("" + e.getValue()));
+        add(customField, button);
     }
 }
