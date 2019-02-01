@@ -78,7 +78,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     /**
      * Updates both the model and the presentation values.
      */
-    public void updateValue() {
+    protected void updateValue() {
         setModelValue(generateModelValue(), false);
         setPresentationValue(getValue());
     }
