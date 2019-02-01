@@ -2,9 +2,9 @@ package com.vaadin.flow.component.details;
 
 /*
  * #%L
- * Vaadin Accordion for Vaadin 13
+ * Details for Vaadin Flow
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright (C) 2017 - 2019 Vaadin Ltd
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
