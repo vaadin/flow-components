@@ -15,15 +15,17 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    public void valueIsUpdated() {
+    public void valueIsUpdated() throws InterruptedException {
         final CustomFieldElement customField = $(CustomFieldElement.class)
             .waitForFirst();
         Assert.assertEquals("",
             customField.findElements(By.tagName("div")).get(0).getText());
         getById(customField, "field1").sendKeys("1\t");
+        Thread.sleep(1000);
         Assert.assertEquals("0",
             customField.findElements(By.tagName("div")).get(0).getText());
         getById(customField, "field2").sendKeys("2\t");
+        Thread.sleep(1000);
         Assert.assertEquals("3",
             customField.findElements(By.tagName("div")).get(0).getText());
     }
