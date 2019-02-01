@@ -135,6 +135,8 @@
                         <!-- Implementation-Title and Implementation-Version
                             come from the POM by default -->
                         <Implementation-Title>Vaadin Accordion</Implementation-Title>
+                        <Implementation-Version>${project.version}</Implementation-Version>
+                        <Implementation-Vendor>${organization.name}</Implementation-Vendor>
                         <_removeheaders>Built-By</_removeheaders>
                     </instructions>
                 </configuration>
