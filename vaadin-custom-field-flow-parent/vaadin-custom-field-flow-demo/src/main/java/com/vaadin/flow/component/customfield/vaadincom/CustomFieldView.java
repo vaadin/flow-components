@@ -53,6 +53,13 @@ public class CustomFieldView extends DemoView {
         @Override
         protected void setPresentationValue(
             LocalDateTime newPresentationValue) {
+            datePicker.setValue(newPresentationValue != null ?
+                newPresentationValue.toLocalDate() :
+                null);
+            timePicker.setValue(newPresentationValue != null ?
+                newPresentationValue.toLocalTime() :
+                null);
+
         }
 
     }
@@ -69,6 +76,7 @@ public class CustomFieldView extends DemoView {
         SumField() {
             super(0);
             setLabel("Sum");
+            addValueChangeListener(e -> display.setText(""+e.getValue()));
             add(firstNumber, secondNumber, display);
         }
 
@@ -84,7 +92,7 @@ public class CustomFieldView extends DemoView {
 
         @Override
         protected void setPresentationValue(Integer newPresentationValue) {
-            display.setText("" + newPresentationValue);
+            // It is not possible to know the values of each field by their sum.
         }
 
     }
@@ -106,7 +114,7 @@ public class CustomFieldView extends DemoView {
 
         @Override
         protected void setPresentationValue(String newPresentationValue) {
-
+            wrappedField.setValue(newPresentationValue);
         }
     }
 
@@ -128,7 +136,7 @@ public class CustomFieldView extends DemoView {
 
         @Override
         protected void setPresentationValue(String newPresentationValue) {
-
+            wrappedField.setValue(newPresentationValue);
         }
     }
     // end-source-example
