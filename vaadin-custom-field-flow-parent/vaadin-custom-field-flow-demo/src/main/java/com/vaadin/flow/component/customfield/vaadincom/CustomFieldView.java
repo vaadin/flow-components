@@ -2,6 +2,9 @@ package com.vaadin.flow.component.customfield.vaadincom;
 
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Input;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
@@ -19,41 +22,115 @@ public class CustomFieldView extends DemoView {
     }
 
     private void basicDemo() {
-        DateTimeField component = new DateTimeField();
-
-        addCard("Basic Demo", component);
+        addCard("Single element wrapping", new SingleElementWrapping());
+        addCard("Native input", new NativeInput());
+        addCard("Displaying the field value", new SumField());
+        addCard("Custom DateTime Picker", new CustomDateTimePicker());
     }
 
     // begin-source-example
-    // source-example-heading: Basic Demo
-    public static class DateTimeField extends CustomField<LocalDateTime> {
+    // source-example-heading: Custom DateTime Picker
+    public static class CustomDateTimePicker
+        extends CustomField<LocalDateTime> {
 
         private final DatePicker datePicker = new DatePicker();
         private final TimePicker timePicker = new TimePicker();
 
-        DateTimeField() {
+        CustomDateTimePicker() {
+            setLabel("Start datetime");
             add(datePicker, timePicker);
         }
 
         @Override
-        protected LocalDateTime generateModelValue(
-            CustomFieldChangeEvent event) {
-            return LocalDateTime.of(datePicker.getValue(),timePicker.getValue());
+        protected LocalDateTime generateModelValue() {
+            final LocalDate date = datePicker.getValue();
+            final LocalTime time = timePicker.getValue();
+            return date != null && time != null ?
+                LocalDateTime.of(date, time) :
+                null;
         }
 
         @Override
         protected void setPresentationValue(
             LocalDateTime newPresentationValue) {
-            LocalDate date = null;
-            LocalTime time = null;
-            if (newPresentationValue != null) {
-                date = newPresentationValue.toLocalDate();
-                time = newPresentationValue.toLocalTime();
-            }
-            datePicker.setValue(date);
-            timePicker.setValue(time);
         }
 
     }
     // end-source-example
+
+    // begin-source-example
+    // source-example-heading: Displaying the field value.
+    public static class SumField extends CustomField<Integer> {
+
+        private final TextField firstNumber = new TextField("First number");
+        private final TextField secondNumber = new TextField("Second number");
+        private final Div display = new Div();
+
+        SumField() {
+            super(0);
+            setLabel("Sum");
+            add(firstNumber, secondNumber, display);
+        }
+
+        @Override
+        protected Integer generateModelValue() {
+            try {
+                return Integer.valueOf(firstNumber.getValue()) + Integer
+                    .valueOf(secondNumber.getValue());
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+
+        @Override
+        protected void setPresentationValue(Integer newPresentationValue) {
+            display.setText("" + newPresentationValue);
+        }
+
+    }
+    // end-source-example
+
+    // begin-source-example
+    // source-example-heading: Single element wrapping.
+    public static class SingleElementWrapping extends CustomField<String> {
+        private final TextField wrappedField = new TextField();
+
+        SingleElementWrapping() {
+            setLabel("Name");
+        }
+
+        @Override
+        protected String generateModelValue() {
+            return wrappedField.getValue();
+        }
+
+        @Override
+        protected void setPresentationValue(String newPresentationValue) {
+
+        }
+    }
+
+    // end-source-example
+    // begin-source-example
+    // source-example-heading: Native input.
+    public static class NativeInput extends CustomField<String> {
+        private final Input wrappedField = new Input();
+
+        NativeInput() {
+            setLabel("Price");
+            wrappedField.setType("number");
+        }
+
+        @Override
+        protected String generateModelValue() {
+            return wrappedField.getValue();
+        }
+
+        @Override
+        protected void setPresentationValue(String newPresentationValue) {
+
+        }
+    }
+    // end-source-example
+
 }

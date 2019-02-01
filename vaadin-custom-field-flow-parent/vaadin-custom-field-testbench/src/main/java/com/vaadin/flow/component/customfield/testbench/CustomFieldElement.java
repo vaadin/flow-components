@@ -26,4 +26,12 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-custom-field")
 public class CustomFieldElement extends TestBenchElement {
 
+    public String getLabel() {
+        return getPropertyString("label");
+    }
+
+    public String getErrorMessage() {
+        return getPropertyString("errorMessage");
+    }
+
 }

@@ -22,18 +22,6 @@
         </license>
     </licenses>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-component-base</artifactId>
-                <version>${flow.component.base.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <!--Provided scoped-->
         <dependency>
@@ -66,7 +54,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-custom-field</artifactId>
-            <version>1.0.0-alpha1</version>
+            <version>1.0.0-beta1</version>
         </dependency>
 
         <!--Test scoped-->

@@ -20,50 +20,69 @@ package com.vaadin.flow.component.customfield;
  * #L%
  */
 
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 
+/**
+ * A {@link HasValue} whose UI content can be constructed by the user, enabling
+ * the creation of e.g. form fields by composing Vaadin components.
+ * Customization of both the visual presentation and the logic of the field is
+ * possible.
+ * <p>
+ * Subclasses must implement {@link #generateModelValue()} and AbstractField{@link #setPresentationValue(Object)}.
+ *
+ * @param <T> field value type
+ * @since 8.0
+ */
 @Tag("vaadin-custom-field")
 @HtmlImport("frontend://bower_components/vaadin-custom-field/src/vaadin-custom-field.html")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     implements HasComponents, HasSize, HasValidation, Focusable<CustomField> {
 
     /**
-     * Constructs a new custom field.
-     *
-     * @see AbstractField#AbstractField(Object)
-     */
-    public CustomField(T defaultValue) {
-        super(defaultValue);
-        ComponentUtil.addListener(this, CustomFieldChangeEvent.class,
-            this::updateModelValue);
-    }
-
-    /**
-     * Default constructor using null as default value.
+     * Default constructor.
      */
     public CustomField() {
         this(null);
     }
 
     /**
-     * This method should return the value of the field, based on value of the internal fields.
+     * Constructs a new custom field.
      *
-     * @param event {@link CustomFieldChangeEvent}
-     * @return new value of the field.
+     * @param defaultValue The initial value for the field. Will also be used by {@link #getEmptyValue()}.
+     * @see AbstractField#AbstractField(Object)
      */
-    protected abstract T generateModelValue(CustomFieldChangeEvent event);
-
-    protected void updateModelValue(CustomFieldChangeEvent event) {
-        setModelValue(generateModelValue(event), false);
-        setPresentationValue(getValue());
+    public CustomField(T defaultValue) {
+        super(defaultValue);
+        // Force a value update when the change event generated
+        ComponentUtil.addListener(this, CustomFieldChangeEvent.class,
+            e -> this.updateValue());
     }
 
     /**
-     * Forces a value update.
+     * This method should return the value of the field, based on value of the internal fields.
+     *
+     * @return new value of the field.
      */
-    public void updateModelValue() {
-        fireEvent(new CustomFieldChangeEvent(this, false, getFrontendValue()));
+    protected abstract T generateModelValue();
+
+    /**
+     * Updates both the model and the presentation values.
+     */
+    public void updateValue() {
+        setModelValue(generateModelValue(), false);
+        setPresentationValue(getValue());
     }
 
     /**
@@ -75,6 +94,11 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         return getElement().getProperty("required", false);
     }
 
+    /**
+     * Specifies that the user must fill in a value.
+     *
+     * @param required if the field is required
+     */
     public void setRequired(boolean required) {
         getElement().setProperty("required", required);
     }
@@ -105,32 +129,6 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         getElement().setProperty("invalid", invalid);
     }
 
-    /**
-     * <p>
-     * This property is set in the frontend when the inputs change value
-     * <p>
-     * This property is synchronized automatically from client side when a
-     * 'value-changed' event happens.
-     * </p>
-     *
-     * @return the {@code invalid} property from the webcomponent
-     */
-    @Synchronize(property = "value", value = "value-changed")
-    public String getFrontendValue() {
-        return getElement().getProperty("value");
-    }
-
-    /**
-     * <p>
-     * This property is set to true when the control value is invalid.
-     * </p>
-     *
-     * @param value the value to set
-     */
-    public void setFrontendValue(String value) {
-        getElement().setProperty("value", value != null ? value : "");
-    }
-
     @Override
     public void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage", errorMessage);
@@ -159,12 +157,22 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         getElement().setProperty("label", label);
     }
 
+    /**
+     * Event generated by the webcomponent when one of the fields changes.
+     */
     @DomEvent("change")
-    public static class CustomFieldChangeEvent extends ComponentEvent<CustomField<?>> {
+    protected static class CustomFieldChangeEvent
+        extends ComponentEvent<CustomField<?>> {
 
         private final String value;
 
-        public CustomFieldChangeEvent(CustomField<?> source, boolean fromClient,@EventData("event.detail.value") String value) {
+        /**
+         * @param source     the {@link CustomField} that generated the event.
+         * @param fromClient If it is from the client.
+         * @param value      value generated by the webcomponent. By default it is the value of all fields separated by a single space.
+         */
+        public CustomFieldChangeEvent(CustomField<?> source, boolean fromClient,
+            @EventData("event.detail.value") String value) {
             super(source, fromClient);
             this.value = value;
         }
