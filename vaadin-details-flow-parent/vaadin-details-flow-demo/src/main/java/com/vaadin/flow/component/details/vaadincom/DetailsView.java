@@ -3,6 +3,7 @@ package com.vaadin.flow.component.details.vaadincom;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.details.DetailsVariant;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.demo.DemoView;
@@ -48,7 +49,7 @@ public class DetailsView extends DemoView {
         // source-example-heading: Small Size Details
         Details component = new Details();
         component.setSummaryText("Small");
-        component.setContentText("Panel content");
+        component.addContent(new H3("Panel content heading"), new Text("Panel content text"));
         component.addThemeVariants(DetailsVariant.SMALL);
         // end-source-example
 

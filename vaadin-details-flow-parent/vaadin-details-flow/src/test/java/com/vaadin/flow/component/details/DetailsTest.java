@@ -1,23 +1,26 @@
 package com.vaadin.flow.component.details;
 
-import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.html.Span;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class DetailsTest {
 
-    private Details systemUnderTest;
+    private Details details;
 
     @Before
     public void setUp() {
-        systemUnderTest = new Details();
+        details = new Details();
     }
 
     @Test
-    public void onAttach_init() {
-        systemUnderTest.addAttachListener(e -> new AttachEvent(systemUnderTest, true));
+    public void initContent() {
+        details.setContent(new Span());
+        details.addContent(new Span());
+        Assert.assertEquals(2, details.getContent().count());
 
-        Assert.assertTrue(true);
+        details.setContent(new Span());
+        Assert.assertEquals(1, details.getContent().count());
     }
 }

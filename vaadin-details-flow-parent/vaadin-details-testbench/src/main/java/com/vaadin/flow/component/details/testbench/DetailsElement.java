@@ -51,13 +51,6 @@ public class DetailsElement extends TestBenchElement {
 	}
 
 	/**
-	 * Returns content element as string
-	 */
-	public String getContentText() {
-		return getContent().getText();
-	}
-
-	/**
 	 * Whether the details are opened or not
 	 */
 	public boolean isOpened() {

@@ -21,7 +21,7 @@ public class BasicIT extends AbstractParallelTest {
         getDriver().get(getBaseURL());
         detailsElements = $(DetailsElement.class).all();
 
-        Assert.assertEquals(5, detailsElements.size());
+        Assert.assertEquals(4, detailsElements.size());
     }
 
     @Test
@@ -29,20 +29,17 @@ public class BasicIT extends AbstractParallelTest {
         DetailsElement detail1 = detailsElements.get(0);
         Assert.assertEquals("Some summary", detail1.getSummaryText());
 
-        DetailsElement detail2 = detailsElements.get(1);
-        Assert.assertEquals("Summary Text", detail2.getSummaryText());
-
-        DetailsElement detail4   = detailsElements.get(3);
-        List<String> themes = Arrays.asList( detail4.getAttribute("theme").split(" "));
+        DetailsElement detailsThemed   = detailsElements.get(2);
+        List<String> themes = Arrays.asList( detailsThemed.getAttribute("theme").split(" "));
         Assert.assertTrue(themes.containsAll(
                 Stream.of(DetailsVariant.values())
                         .map(DetailsVariant::getVariantName).collect(Collectors.toList())));
-        Assert.assertEquals("Small Reversed Filled Summary", detail4.getSummaryText());
+        Assert.assertEquals("Small Reversed Filled Summary", detailsThemed.getSummaryText());
     }
 
     @Test
     public void testOpenedChange() {
-        DetailsElement detail = detailsElements.get(4);
+        DetailsElement detail = detailsElements.get(3);
         detail.toggle();
         Assert.assertEquals("opened-change",
                 $(NotificationElement.class).first().getText());
@@ -54,20 +51,18 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertFalse(detail1.isOpened());
         detail1.toggle();
         Assert.assertTrue(detail1.isOpened());
-        Assert.assertEquals("Some content", detail1.getContentText());
+        Assert.assertEquals("Some content", detail1.getContent().getText());
 
-        DetailsElement detail2 = detailsElements.get(1);
-        Assert.assertTrue(detail2.isOpened());
-        Assert.assertEquals("Content Text", detail2.getContentText());
-        detail2.toggle();
-        Assert.assertFalse(detail2.isOpened());
+        DetailsElement detailsDisabled = detailsElements.get(1);
+        Assert.assertTrue(detailsDisabled.isOpened());
+        Assert.assertFalse(detailsDisabled.isEnabled());
+        Assert.assertEquals("Disabled content",
+                detailsDisabled.getContent().$("h3").first().getText());
+        Assert.assertEquals("Always visible content",
+                detailsDisabled.getContent().$("span").first().getText());
 
-        DetailsElement detail3 = detailsElements.get(2);
-        Assert.assertTrue(detail3.isOpened());
-        Assert.assertFalse(detail3.isEnabled());
-        Assert.assertEquals("Always visible content", detail3.getContentText());
         // TODO: uncomment when https://github.com/vaadin/vaadin-details/issues/4 is fixed
-//        detail3.toggle();
-//        Assert.assertTrue(detail3.isOpened());
+        //  detail3.toggle();
+        //  Assert.assertTrue(detail3.isOpened());
     }
 }

@@ -30,6 +30,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.shared.Registration;
 
@@ -41,12 +42,14 @@ import java.util.stream.Stream;
 public class Details extends Component implements HasEnabled, HasTheme {
 
     private Component summary;
-    private Component content;
+    private final Div contentContainer;
 
     /**
-     * Initializes a new Details.
+     * Initializes a new Details component.
      */
     public Details() {
+        contentContainer = new Div();
+        getElement().appendChild(contentContainer.getElement());
     }
 
     /**
@@ -59,6 +62,7 @@ public class Details extends Component implements HasEnabled, HasTheme {
      * @see #setContent(Component)
      */
     public Details(String summary, Component content) {
+        this();
         setSummaryText(summary);
         setContent(content);
     }
@@ -73,6 +77,7 @@ public class Details extends Component implements HasEnabled, HasTheme {
      * @see #setContent(Component)
      */
     public Details(Component summary, Component content) {
+        this();
         setSummary(summary);
         setContent(content);
     }
@@ -120,7 +125,7 @@ public class Details extends Component implements HasEnabled, HasTheme {
     }
 
     /**
-     * @return summary as string
+     * @return summary section content as string
      */
     public String getSummaryText() {
         return summary.getElement().getText();
@@ -135,43 +140,33 @@ public class Details extends Component implements HasEnabled, HasTheme {
      *            any previously set content
      */
     public void setContent(Component content) {
-        if (this.content != null) {
-            this.content.getElement().removeFromParent();
-        }
-
-        this.content = content;
+        contentContainer.getElement().removeAllChildren();
         if (content == null) {
             return;
         }
 
-        getElement().appendChild(content.getElement());
+        contentContainer.add(content);
     }
 
     /**
-     * Returns the content of component which was set via {@link #setContent(Component)}
-     * or {@link #setContentText(String)}
+     * Adds components to the content section
      *
-     * @return the content component, <code>null</code> if nothing was set
+     * @see #getContent()
+     * @param components
+     *            the components to add
      */
-    public Component getContent() {
-        return content;
+    public void addContent(Component... components) {
+        contentContainer.add(components);
     }
 
     /**
-     * Creates a text wrapper and sets the content via {@link #setContent(Component)}
+     * Returns the content components which were added via {@link #setContent(Component)}
+     * or via {@link #addContent(Component...)}
+     *
+     * @return the child components of the content section
      */
-    public void setContentText(String content) {
-        if (content == null) {
-            content = "";
-        }
-        setContent(new Span(content));
-    }
-
-    /**
-     * @return content as string
-     */
-    public String getContentText() {
-        return content.getElement().getText();
+    public Stream<Component> getContent() {
+        return contentContainer.getChildren();
     }
 
     /**
