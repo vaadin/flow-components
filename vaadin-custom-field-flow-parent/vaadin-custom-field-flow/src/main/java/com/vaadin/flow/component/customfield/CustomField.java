@@ -86,24 +86,6 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     }
 
     /**
-     * Specifies that the user must fill in a value.
-     *
-     * @return the {@code required} property from the webcomponent
-     */
-    public boolean isRequired() {
-        return getElement().getProperty("required", false);
-    }
-
-    /**
-     * Specifies that the user must fill in a value.
-     *
-     * @param required if the field is required
-     */
-    public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
-    }
-
-    /**
      * <p>
      * This property is set to true when the control value is invalid.
      * <p>
