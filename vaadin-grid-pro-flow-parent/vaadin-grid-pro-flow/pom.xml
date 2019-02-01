@@ -14,18 +14,6 @@
 
     <name>Vaadin GridPro</name>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-component-base</artifactId>
-                <version>${flow.component.base.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <!--Provided scoped-->
         <dependency>
@@ -69,7 +57,52 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-grid-flow</artifactId>
-            <version>2.1-SNAPSHOT</version>
+            <version>3.0.0.beta1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-list-box</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-text-field</artifactId>
+            <version>2.3.0-beta1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-select</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-item</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-list-mixin</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-overlay</artifactId>
+            <version>3.2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-overlay</artifactId>
+            <version>3.2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.polymerelements</groupId>
+            <artifactId>iron-media-query</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-lumo-styles</artifactId>
+            <version>1.4.1</version>
         </dependency>
 
 
