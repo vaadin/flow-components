@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 public class BasicIT extends AbstractParallelTest {
 
@@ -15,17 +16,19 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    public void valueIsUpdated() throws InterruptedException {
+    public void valueIsUpdated() {
         final CustomFieldElement customField = $(CustomFieldElement.class)
             .waitForFirst();
         Assert.assertEquals("",
             customField.findElements(By.tagName("div")).get(0).getText());
-        getById(customField, "field1").sendKeys("1\t");
-        Thread.sleep(1000);
+        TextFieldElement field1 = getById(customField, "field1");
+        field1.sendKeys("1");
+        field1.sendKeys(Keys.TAB);
         Assert.assertEquals("0",
             customField.findElements(By.tagName("div")).get(0).getText());
-        getById(customField, "field2").sendKeys("2\t");
-        Thread.sleep(1000);
+        TextFieldElement field2 = getById(customField, "field2");
+        field2.sendKeys("2");
+        field2.sendKeys(Keys.TAB);
         Assert.assertEquals("3",
             customField.findElements(By.tagName("div")).get(0).getText());
     }
