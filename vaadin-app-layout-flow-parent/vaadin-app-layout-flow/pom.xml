@@ -123,12 +123,6 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-lumo-theme</artifactId>
-            <version>1.3.0.beta1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons-flow</artifactId>
             <version>1.3.0.beta1</version>
             <scope>test</scope>
