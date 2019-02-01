@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-cookie-consent-flow-root</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.2-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-cookie-consent-flow-vaadincom-demo</artifactId>
 
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>1.2.0</version>
+            <version>1.3.0.beta1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

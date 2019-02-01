@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.vaadin</groupId>
 		<artifactId>vaadin-cookie-consent-flow-root</artifactId>
-		<version>1.1-SNAPSHOT</version>
+		<version>1.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>vaadin-cookie-consent-flow-integration-tests</artifactId>
 
@@ -68,33 +68,11 @@
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>${jetty.plugin.version}</version>
-				<configuration>
+				<configuration combine.self="override">
 					<scanIntervalSeconds>2</scanIntervalSeconds>
 					<stopKey>STOP</stopKey>
 					<stopPort>8005</stopPort>
 				</configuration>
-				<executions>
-					<!-- start and stop jetty (running our app) when running integration 
-						tests -->
-					<execution>
-						<id>start-jetty</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>deploy-war</goal>
-						</goals>
-						<configuration>
-							<daemon>true</daemon>
-							<scanIntervalSeconds>0</scanIntervalSeconds>
-						</configuration>
-					</execution>
-					<execution>
-						<id>stop-jetty</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 
 			<!-- plugins for tests -->
@@ -274,7 +252,12 @@
 					<plugin>
 						<groupId>com.saucelabs.maven.plugin</groupId>
 						<artifactId>sauce-connect-plugin</artifactId>
-						<version>2.1.23</version>
+						<version>2.1.25</version>
+						<configuration>
+							<sauceUsername>${sauce.user}</sauceUsername>
+							<sauceAccessKey>${sauce.sauceAccessKey}</sauceAccessKey>
+							<options>${sauce.options}</options>
+						</configuration>
 						<dependencies>
 							<dependency>
 								<groupId>com.saucelabs</groupId>
