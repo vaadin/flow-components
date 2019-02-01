@@ -76,6 +76,7 @@ public class CustomFieldView extends DemoView {
         SumField() {
             super(0);
             setLabel("Sum");
+            // Add a value change listener to display the field value.
             addValueChangeListener(e -> display.setText(""+e.getValue()));
             add(firstNumber, secondNumber, display);
         }

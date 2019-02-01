@@ -21,10 +21,6 @@ package com.vaadin.flow.component.customfield;
  */
 
 import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
@@ -79,7 +75,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * This method should be implemented to set the value of the fields contained
      * in this custom field according to the value of the parameter.
      * It can also be use to show the value to the user in some way, like placing it in an element contained on the field.
-     *
+     * <p>
      * {@inheritDoc}
      *
      * @param newPresentationValue The new presentation value.
@@ -88,7 +84,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     protected abstract void setPresentationValue(T newPresentationValue);
 
     /**
-     * Regenerates the value and updates the model. It is called when a change is detected from the contained fields.
+     * Regenerates the value and updates the model. Subclasses of CustomField can call it when the model value needs to be regenerated and updated.
      */
     protected void updateValue() {
         setModelValue(generateModelValue(), false);
