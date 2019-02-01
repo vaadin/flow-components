@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-board-flow-root</artifactId>
-        <version>2.1-SNAPSHOT</version>
+        <version>2.2-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-board-flow</artifactId>
     <packaging>jar</packaging>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -39,36 +39,9 @@
             <version>2.1.0</version>
         </dependency>
         <dependency>
-            <groupId>org.webjars.bowergithub.polymer</groupId>
-            <artifactId>polymer</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.webcomponents</groupId>
-            <artifactId>webcomponentsjs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.webcomponents</groupId>
-            <artifactId>shadycss</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-resizable-behavior</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-element-mixin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-usage-statistics</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-development-mode-detector</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-themable-mixin</artifactId>
+            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
