@@ -14,6 +14,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -24,6 +25,7 @@ import com.vaadin.flow.router.Route;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 @SuppressWarnings("serial")
 @Route("vaadin-accordion")
@@ -52,15 +54,6 @@ public class AccordionView extends DemoView {
         // end-source-example
 
         addCard("Basic Accordion", accordion);
-    }
-
-    private Component createBox(String color) {
-        final Div box = new Div();
-        box.getStyle().set("background-color", color);
-        box.getStyle().set("border-radius", "10px");
-        box.setHeight("150px");
-        box.setWidth("400px");
-        return box;
     }
 
     private void themeVariants() {
@@ -100,30 +93,40 @@ public class AccordionView extends DemoView {
         accordion.add("Bottom start", createBox("yellow"));
         accordion.add("Bottom end", createBox("yellow"));
 
-        Checkbox activateNotifications = new Checkbox("Activate notifications");
+        Checkbox isActive = new Checkbox("Activate notifications");
 
-        accordion.getChildren()
-                .map(AccordionPanel.class::cast)
-                .forEach(panel -> panel.addOpenedChangedListener(event -> {
-                    if (event.isOpened() && activateNotifications.getValue()) {
-                        final String title = event.getSource().getSummaryText();
-                        Notification.show(title + " opened", 2000,
-                                Notification.Position.valueOf(title
-                                        .replace(' ', '_')
-                                        .toUpperCase()));
-                    }
-                }));
+        Stream<AccordionPanel> panels = accordion.getChildren()
+                .map(AccordionPanel.class::cast);
+
+        panels.forEach(panel -> panel.addOpenedChangedListener(event -> {
+            if (event.isOpened() && isActive.getValue()) {
+                String title = event.getSource().getSummaryText();
+                String position = title.replace(' ', '_').toUpperCase();
+
+                Notification.show(title + " opened", 2000,
+                        Position.valueOf(position));
+            }
+        }));
 
         accordion.addOpenedChangedListener(event -> {
-            if (!event.getOpenedPanel().isPresent() && activateNotifications.getValue()) {
+            if (!event.getOpenedPanel().isPresent() && isActive.getValue()) {
                 Notification.show("Accordion collapsed", 2000,
-                        Notification.Position.BOTTOM_CENTER);
+                        Position.BOTTOM_CENTER);
             }
         });
 
         // end-source-example
 
-        addCard("Event handling", accordion, activateNotifications);
+        addCard("Event handling", accordion, isActive);
+    }
+
+    private Component createBox(String color) {
+        final Div box = new Div();
+        box.getStyle().set("background-color", color);
+        box.getStyle().set("border-radius", "10px");
+        box.setHeight("150px");
+        box.setWidth("400px");
+        return box;
     }
 
     private void complexForm() {
@@ -208,22 +211,22 @@ public class AccordionView extends DemoView {
         accordion.add(accountInfo);
 
 
-        // BIO DATA
-        AccordionPanel bioData = new AccordionPanel();
-        bioData.setSummary(summaryFactory.apply(2, "Bio data"));
-        bioData.addOpenedChangedListener(
+        // PROFILE INFORMATION
+        AccordionPanel profileInfo = new AccordionPanel();
+        profileInfo.setSummary(summaryFactory.apply(2, "Profile information"));
+        profileInfo.addOpenedChangedListener(
                 event -> activateProgress.accept(event, 50));
 
-        FormLayout bioForm = new FormLayout();
-        bioForm.addFormItem(new TextField(), "First name");
-        bioForm.addFormItem(new TextField(), "Last name");
-        RadioButtonGroup<String> gender = new RadioButtonGroup<>();
-        gender.setItems("male", "female");
-        bioForm.addFormItem(gender, "Gender");
-        bioForm.addFormItem(new DatePicker(), "Date of birth");
+        FormLayout profileInfoForm = new FormLayout();
+        profileInfoForm.addFormItem(new TextField(), "First name");
+        profileInfoForm.addFormItem(new TextField(), "Last name");
+        RadioButtonGroup<String> languageGroup = new RadioButtonGroup<>();
+        languageGroup.setItems("English", "Finnish");
+        profileInfoForm.addFormItem(languageGroup, "Language");
+        profileInfoForm.addFormItem(new DatePicker(), "Date of birth");
 
-        bioData.setContent(bioForm);
-        accordion.add(bioData);
+        profileInfo.setContent(profileInfoForm);
+        accordion.add(profileInfo);
 
 
         // TOPICS OF INTEREST
@@ -254,14 +257,14 @@ public class AccordionView extends DemoView {
 
         Paragraph paragraph = new Paragraph();
         paragraph.setText("After all has been said and done, I agree that " +
-                "my data will be safely stored for the sole purpose of " +
+                "my data shall be safely stored for the sole purpose of " +
                 "my ultimate enjoyment.");
 
         Button submit = new Button("Sign up");
         submit.setEnabled(false);
         submit.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         submit.addClickListener(e -> Notification.show("Complete! \uD83D\uDC4D",
-                4000, Notification.Position.BOTTOM_END));
+                4000, Position.BOTTOM_END));
 
         Checkbox consent = new Checkbox("I agree");
         consent.addValueChangeListener(e -> submit.setEnabled(e.getValue()));
