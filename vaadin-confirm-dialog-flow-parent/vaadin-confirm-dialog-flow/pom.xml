@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-confirm-dialog-flow-root</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.2-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-confirm-dialog-flow</artifactId>
     <packaging>jar</packaging>
