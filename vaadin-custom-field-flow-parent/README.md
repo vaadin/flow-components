@@ -1,7 +1,10 @@
 # Vaadin CustomField for Flow
 
-Vaadin CustomField for Flow is a UI component add-on for Vaadin.
-
+Vaadin CustomField for Flow is a UI component add-on for Vaadin. 
+It is a field whose UI content can be constructed by the user, enabling 
+the creation of e.g. form fields by composing Vaadin components.
+Customization of both the visual presentation and the logic of the field is
+possible.
 ## License & Author
 
 Apache License 2.0
@@ -26,7 +29,24 @@ Add CustomField to your project
 
 #### Basic use
 ```java
-CustomField component = new CustomField();
+    public class SingleElementWrapping extends CustomField<String> {
+        private final TextField wrappedField = new TextField();
+
+        SingleElementWrapping() {
+            setLabel("Name");
+            add(wrappedField);
+        }
+
+        @Override
+        protected String generateModelValue() {
+            return wrappedField.getValue();
+        }
+
+        @Override
+        protected void setPresentationValue(String newPresentationValue) {
+            wrappedField.setValue(newPresentationValue);
+        }
+    }
 ```
 
 ## Setting up for development
