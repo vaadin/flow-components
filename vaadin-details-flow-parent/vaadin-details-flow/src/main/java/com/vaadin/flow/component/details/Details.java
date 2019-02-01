@@ -213,10 +213,10 @@ public class Details extends Component implements HasEnabled, HasTheme {
     }
 
     @DomEvent("opened-changed")
-    public static class OpenedChangeEvent<R extends Details> extends ComponentEvent<R> {
+    public static class OpenedChangeEvent extends ComponentEvent<Details> {
         private final boolean opened;
 
-        public OpenedChangeEvent(R source, boolean fromClient) {
+        public OpenedChangeEvent(Details source, boolean fromClient) {
             super(source, fromClient);
             this.opened = source.isOpened();
         }
@@ -234,8 +234,7 @@ public class Details extends Component implements HasEnabled, HasTheme {
      * @return a {@link Registration} for removing the event listener
      */
     public Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<? super Details>> listener) {
-        return ComponentUtil.addListener(this, OpenedChangeEvent.class,
-                (ComponentEventListener) listener);
+            ComponentEventListener<OpenedChangeEvent> listener) {
+        return ComponentUtil.addListener(this, OpenedChangeEvent.class, listener);
     }
 }
