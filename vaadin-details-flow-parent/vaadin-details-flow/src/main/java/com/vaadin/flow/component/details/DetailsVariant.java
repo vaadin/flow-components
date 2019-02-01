@@ -1,6 +1,9 @@
 package com.vaadin.flow.component.details;
 
 /*
+ * #%L
+ * Details for Vaadin Flow
+ * %%
  * Copyright (C) 2017 - 2019 Vaadin Ltd
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
