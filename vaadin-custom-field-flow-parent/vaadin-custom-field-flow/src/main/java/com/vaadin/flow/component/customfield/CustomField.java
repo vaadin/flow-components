@@ -84,6 +84,34 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         setPresentationValue(getValue());
     }
 
+    /**
+     * <p>
+     * This property is set to true when the control value is invalid.
+     * <p>
+     * This property is synchronized automatically from client side when a
+     * 'invalid-changed' event happens.
+     * </p>
+     *
+     * @return the {@code invalid} property from the webcomponent
+     */
+    @Synchronize(property = "invalid", value = "invalid-changed")
+    @Override
+    public boolean isInvalid() {
+        return getElement().getProperty("invalid", false);
+    }
+
+    /**
+     * <p>
+     * This property is set to true when the control value is invalid.
+     * </p>
+     *
+     * @param invalid the boolean value to set
+     */
+    @Override
+    public void setInvalid(boolean invalid) {
+        getElement().setProperty("invalid", invalid);
+    }
+
     @Override
     public void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage", errorMessage);
