@@ -78,8 +78,7 @@ public class CrudElement extends TestBenchElement {
      * @param row the row to open for editing
      */
     public void openRowForEditing(int row) {
-        // The first real row is on index 2.
-        this.$("vaadin-crud-edit").all().get(row + 2).click();
+        this.$("vaadin-crud-edit").all().get(row).click();
     }
 
     /**
