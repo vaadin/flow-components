@@ -10,33 +10,48 @@ import com.vaadin.flow.router.Route;
 public class Home extends Div {
 
     public Home() {
-        final TextField field1 = new TextField();
-        field1.setId("field1");
-        final TextField field2 = new TextField();
-        field2.setId("field2");
         final Div result = new Div();
-        CustomField<Integer> customField = new CustomField<Integer>() {
-            @Override
-            protected Integer generateModelValue() {
-                try {
-                    int i1 = Integer.valueOf(field1.getValue());
-                    int i2 = Integer.valueOf(field2.getValue());
-                    return i1 + i2;
-                } catch (NumberFormatException e) {
-                    return 0;
-                }
-            }
-
-            @Override
-            protected void setPresentationValue(Integer integer) {
-
-            }
-        };
-        NativeButton button = new NativeButton("Useless button");
+        result.setId("result");
+        MyField customField = new MyField();
+        NativeButton button = new NativeButton("Update");
         button.setId("button1");
-        customField.add(field1, field2, result);
+        button.addClickListener(e -> customField.updateValue());
         customField
             .addValueChangeListener(e -> result.setText("" + e.getValue()));
-        add(customField, button);
+        add(customField, result,button);
+    }
+
+    private class MyField extends CustomField<Integer> {
+        final TextField field1 = new TextField();
+        final TextField field2 = new TextField();
+
+        MyField() {
+            field1.setId("field1");
+            field2.setId("field2");
+            add(field1, field2);
+
+        }
+
+
+        @Override
+        protected Integer generateModelValue() {
+            try {
+                int i1 = Integer.valueOf(field1.getValue());
+                int i2 = Integer.valueOf(field2.getValue());
+                return i1 + i2;
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+
+        @Override
+        protected void updateValue() {
+            super.updateValue();
+        }
+
+        @Override
+        protected void setPresentationValue(Integer integer) {
+
+        }
     }
 }
