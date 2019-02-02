@@ -92,6 +92,7 @@ public class Details extends Component implements HasEnabled, HasTheme {
      */
     public void setSummary(Component summary) {
         if (this.summary != null) {
+            this.summary.getElement().removeAttribute("slot");
             this.summary.getElement().removeFromParent();
         }
 
