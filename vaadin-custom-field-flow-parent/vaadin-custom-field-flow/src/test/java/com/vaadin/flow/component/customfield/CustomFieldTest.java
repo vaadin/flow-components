@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 
 import java.util.function.Consumer;
 
+@SuppressWarnings("unchecked")
 public class CustomFieldTest {
 
     private final Object value = new Object();
@@ -16,7 +17,6 @@ public class CustomFieldTest {
     private Consumer<Object> consumer;
 
     @Before
-    @SuppressWarnings("unchecked")
     public void setUp() {
         consumer = Mockito.mock(Consumer.class);
         systemUnderTest = new CustomField<Object>() {
@@ -35,8 +35,11 @@ public class CustomFieldTest {
     @Test
     public void valuesAreUpdated() {
         Assert.assertNull(systemUnderTest.getValue());
-        systemUnderTest.updateValue();
+        systemUnderTest.setValue(value);
         Assert.assertSame(value,systemUnderTest.getValue());
         Mockito.verify(consumer).accept(value);
+        Consumer<Object> listener = Mockito.mock(Consumer.class);
+        systemUnderTest.addValueChangeListener(e -> listener.accept(e.getValue()));
     }
+
 }
