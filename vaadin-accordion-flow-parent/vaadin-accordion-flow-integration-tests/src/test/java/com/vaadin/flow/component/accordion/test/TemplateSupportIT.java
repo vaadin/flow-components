@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.accordion.test;
 
-import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.accordion.testbench.AccordionElement;
 import com.vaadin.flow.component.accordion.testbench.AccordionPanelElement;
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
@@ -25,11 +24,11 @@ public class TemplateSupportIT extends AbstractParallelTest {
 
     @Test
     public void interactions() {
-        getPanels().get(1).expand();
+        getPanels().get(1).open();
         Assert.assertEquals("Billing Address opened", getLastEvent());
 
-        getAccordion().first().collapse();
-        Assert.assertEquals("Accordion collapsed", getLastEvent());
+        getAccordion().first().close();
+        Assert.assertEquals("Accordion closed", getLastEvent());
     }
 
     private ElementQuery<AccordionElement> getAccordion() {

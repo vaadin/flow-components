@@ -17,10 +17,12 @@ package com.vaadin.flow.component.accordion.testbench;
  * #L%
  */
 
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * TestBench element for the vaadin-accordion element
@@ -31,40 +33,42 @@ public class AccordionElement extends TestBenchElement {
     static final String OPENED_PROPERTY = "opened";
 
     /**
-     * Collapses the accordion.
+     * Closes the opened panel (if any) in the accordion.
      */
-    public void collapse() {
+    public void close() {
         setProperty(OPENED_PROPERTY, (Boolean) null);
     }
 
     /**
-     * Expands the panel at the specified index. The first panel is at index zero.
+     * Opens the panel at the specified index. The first panel is at index zero.
      *
-     * @param index the index of the panel to be expanded
+     * @param index the index of the panel to be opened
      */
-    public void expand(int index) {
+    public void open(int index) {
         setProperty(OPENED_PROPERTY, index);
     }
 
     /**
-     * Gets the index of the expanded panel or null if the accordion is collapsed.
+     * Gets the index of the opened panel or null if the accordion is closed.
      *
-     * @return the index of the expanded panel or null if collapsed.
+     * @return the index of the opened panel or null if closed.
      */
-    @Nullable
-    public Integer getExpandedIndex() {
+    public OptionalInt getOpenedIndex() {
         final String openedAttribute = getAttribute(OPENED_PROPERTY);
-        return openedAttribute == null ? null : Integer.valueOf(openedAttribute);
+        return openedAttribute == null ?
+                OptionalInt.empty() :
+                OptionalInt.of(Integer.valueOf(openedAttribute));
     }
 
     /**
-     * Gets the the expanded panel or null if the accordion is collapsed.
+     * Gets the the opened panel or null if the accordion is closed.
      *
-     * @return the expanded panel or null if collapsed.
+     * @return the opened panel or null if closed.
      */
-    @Nullable
-    public AccordionPanelElement getExpandedPanel() {
-        return !$(AccordionPanelElement.class).attribute(OPENED_PROPERTY, "").exists() ? null
-                : $(AccordionPanelElement.class).attribute(OPENED_PROPERTY, "").first();
+    public Optional<AccordionPanelElement> getOpenedPanel() {
+        final ElementQuery<AccordionPanelElement> openedPanels
+                = $(AccordionPanelElement.class).attribute(OPENED_PROPERTY, "");
+
+        return !openedPanels.exists() ? Optional.empty() : Optional.of(openedPanels.first());
     }
 }

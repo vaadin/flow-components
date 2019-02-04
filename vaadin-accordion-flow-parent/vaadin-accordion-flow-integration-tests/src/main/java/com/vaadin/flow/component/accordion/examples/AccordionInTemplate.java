@@ -25,12 +25,12 @@ public class AccordionInTemplate extends PolymerTemplate<TemplateModel> {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        accordion.addOpenedChangedListener(e -> e.getSource().getElement().executeJavaScript(
-                "const summary = $0 != null ? " +
+        accordion.addOpenedChangeListener(e -> e.getSource().getElement().executeJavaScript(
+                "const summary = $0 >= 0 ? " +
                     "this.querySelectorAll('span[slot=\"summary\"]')[$0].textContent + ' opened' : " +
-                    "'Accordion collapsed';" +
+                    "'Accordion closed';" +
                 "const newEvent = document.createElement('span');" +
                 "newEvent.textContent = summary;" +
-                "$1.appendChild(newEvent);", e.getIndex(), events.getElement()));
+                "$1.appendChild(newEvent);", e.getOpenedIndex().orElse(-1), events.getElement()));
     }
 }

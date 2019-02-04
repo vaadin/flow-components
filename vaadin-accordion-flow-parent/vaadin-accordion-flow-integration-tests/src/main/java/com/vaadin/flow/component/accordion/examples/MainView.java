@@ -1,10 +1,8 @@
 package com.vaadin.flow.component.accordion.examples;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
-import com.vaadin.flow.component.accordion.AccordionPanelOpenedChangedEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -65,50 +63,69 @@ public class MainView extends HorizontalLayout {
         final VerticalLayout panelEvents = new VerticalLayout();
         panelEvents.setId(PANEL_EVENTS);
 
-        accordion.addOpenedChangedListener(e -> {
+        accordion.addOpenedChangeListener(e -> {
             final Optional<AccordionPanel> openedPanel = e.getOpenedPanel();
+            if (!openedPanel.equals(accordion.getOpenedPanel())) {
+                throw new IllegalStateException("Event opened panel (" + openedPanel +
+                        ") and component opened panel (" + accordion.getOpenedPanel() +
+                        ") inconsistent");
+            }
+
             final String text = openedPanel
                     .map(accordionPanel -> accordionPanel.getSummaryText() + " opened")
-                    .orElse("Accordion collapsed");
+                    .orElse("Accordion closed");
             accordionEvents.add(new Span(text));
         });
 
-        accordion.getChildren().forEach(e ->
-                ComponentUtil.addListener(e, AccordionPanelOpenedChangedEvent.class, event -> {
-            final String text = "Panel " + ((AccordionPanel) e).getSummaryText()
-                    + " " + (event.isOpened() ? "opened" : "closed");
-            panelEvents.add(new Span(text));
-        }));
+        accordion.getChildren()
+                .map(AccordionPanel.class::cast)
+                .forEach(panel -> panel.addOpenedChangeListener(event -> {
+                    final String text = "Panel " + panel.getSummaryText()
+                            + " " + (event.isOpened() ? "opened" : "closed");
+                    panelEvents.add(new Span(text));
+                }));
 
         final Div controls = new Div();
 
-        final Button collapse = new Button("Collapse", e -> accordion.collapse());
-        collapse.setId("collapse");
+        final Button close = new Button("Close", e -> accordion.close());
+        close.setId("close");
 
-        final Button red = new Button("Red", e -> accordion.expand(redPanel));
+        final Button red = new Button("Red", e -> accordion.open(redPanel));
         red.setId("red");
 
-        final Button green = new Button("Green", e -> accordion.expand(greenPanel));
+        final Button green = new Button("Green", e -> accordion.open(greenPanel));
         green.setId("green");
 
-        final Button disabled = new Button("Disabled", e -> accordion.expand(disabledPanel));
+        final Button disabled = new Button("Disabled", e -> accordion.open(disabledPanel));
         disabled.setId("disabled");
 
-        final Button blue = new Button("Blue", e -> accordion.expand(bluePanel));
+        final Button blue = new Button("Blue", e -> accordion.open(bluePanel));
         blue.setId("blue");
 
-        final Button toggleDisabled = new Button("Toggle disabled", e -> disabledPanel.setEnabled(!disabledPanel.isEnabled()));
+        final Button toggleDisabled = new Button("Toggle disabled",
+                e -> disabledPanel.setEnabled(!disabledPanel.isEnabled()));
         toggleDisabled.setId("toggle-disabled");
 
-        final Map<Button, Integer> indexButtons = IntStream.rangeClosed(0, 3).boxed().collect(toMap(e -> {
-            final Button btn = new Button(e.toString());
-            btn.setId(e.toString());
-            btn.addClickListener(clickEvent -> accordion.expand(e));
-            return btn;
-        }, Function.identity(), Integer::compareTo, LinkedHashMap::new));
+        final Map<Button, Integer> indexButtons = IntStream.rangeClosed(0, 3)
+                .boxed()
+                .collect(toMap(e -> {
+                    final Button btn = new Button(e.toString());
+                    btn.setId(e.toString());
+                    btn.addClickListener(clickEvent -> accordion.open(e));
+                    return btn;
+                }, Function.identity(), Integer::compareTo, LinkedHashMap::new));
 
-        controls.add(red, green, disabled, blue, new Hr(), collapse, toggleDisabled, new Hr());
+        controls.add(red, green, disabled, blue, new Hr(), close, toggleDisabled, new Hr());
         controls.add(indexButtons.keySet().toArray(new Component[0]));
+
+        final Button removeRed = new Button("Remove red", e -> accordion.remove(redPanel));
+        removeRed.setId("removeRed");
+
+        final Button removeBlueByContent = new Button("Remove blue by content",
+                e -> accordion.remove(blueDiv));
+        removeBlueByContent.setId("removeBlueByContent");
+
+        controls.add(new Hr(), removeRed, removeBlueByContent);
 
         add(accordion, accordionEvents, panelEvents, controls);
     }

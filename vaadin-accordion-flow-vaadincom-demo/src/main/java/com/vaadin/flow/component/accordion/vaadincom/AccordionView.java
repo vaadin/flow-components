@@ -3,11 +3,11 @@ package com.vaadin.flow.component.accordion.vaadincom;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
-import com.vaadin.flow.component.accordion.AccordionPanelOpenedChangedEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.details.Details.OpenedChangeEvent;
 import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -98,7 +98,7 @@ public class AccordionView extends DemoView {
         Stream<AccordionPanel> panels = accordion.getChildren()
                 .map(AccordionPanel.class::cast);
 
-        panels.forEach(panel -> panel.addOpenedChangedListener(event -> {
+        panels.forEach(panel -> panel.addOpenedChangeListener(event -> {
             if (event.isOpened() && isActive.getValue()) {
                 String title = event.getSource().getSummaryText();
                 String position = title.replace(' ', '_').toUpperCase();
@@ -108,9 +108,9 @@ public class AccordionView extends DemoView {
             }
         }));
 
-        accordion.addOpenedChangedListener(event -> {
+        accordion.addOpenedChangeListener(event -> {
             if (!event.getOpenedPanel().isPresent() && isActive.getValue()) {
-                Notification.show("Accordion collapsed", 2000,
+                Notification.show("Accordion closed", 2000,
                         Position.BOTTOM_CENTER);
             }
         });
@@ -139,7 +139,7 @@ public class AccordionView extends DemoView {
         progressBar.setMin(0);
         progressBar.setValue(25);
 
-        BiConsumer<AccordionPanelOpenedChangedEvent, Integer> activateProgress
+        BiConsumer<OpenedChangeEvent, Integer> activateProgress
                 = (event, progress) -> {
 
             Style style = event.getSource().getSummary().getElement().getStyle();
@@ -184,7 +184,7 @@ public class AccordionView extends DemoView {
         // ACCOUNT INFORMATION
         AccordionPanel accountInfo = new AccordionPanel();
         accountInfo.setSummary(summaryFactory.apply(1, "Account information"));
-        accountInfo.addOpenedChangedListener(
+        accountInfo.addOpenedChangeListener(
                 event -> activateProgress.accept(event, 25));
 
         FormLayout accountForm = new FormLayout();
@@ -214,7 +214,7 @@ public class AccordionView extends DemoView {
         // PROFILE INFORMATION
         AccordionPanel profileInfo = new AccordionPanel();
         profileInfo.setSummary(summaryFactory.apply(2, "Profile information"));
-        profileInfo.addOpenedChangedListener(
+        profileInfo.addOpenedChangeListener(
                 event -> activateProgress.accept(event, 50));
 
         FormLayout profileInfoForm = new FormLayout();
@@ -232,7 +232,7 @@ public class AccordionView extends DemoView {
         // TOPICS OF INTEREST
         AccordionPanel topicsOfInterest = new AccordionPanel();
         topicsOfInterest.setSummary(summaryFactory.apply(3, "Topics of interest"));
-        topicsOfInterest.addOpenedChangedListener(
+        topicsOfInterest.addOpenedChangeListener(
                 event -> activateProgress.accept(event, 75));
 
         FormLayout topicsForm = new FormLayout();
@@ -252,7 +252,7 @@ public class AccordionView extends DemoView {
         // TERMS AND CONDITIONS
         AccordionPanel conditions = new AccordionPanel();
         conditions.setSummary(summaryFactory.apply(4, "Terms and conditions"));
-        conditions.addOpenedChangedListener(
+        conditions.addOpenedChangeListener(
                 event -> activateProgress.accept(event, 100));
 
         Paragraph paragraph = new Paragraph();

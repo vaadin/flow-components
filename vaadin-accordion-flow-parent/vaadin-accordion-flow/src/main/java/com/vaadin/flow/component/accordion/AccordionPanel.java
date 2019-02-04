@@ -17,18 +17,14 @@ package com.vaadin.flow.component.accordion;
  */
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.shared.Registration;
 
 /**
- * An accordion panel which could be expanded or collapsed.
+ * An accordion panel which could be opened or closed.
  */
 @Tag("vaadin-accordion-panel")
-public class AccordionPanel extends Details implements HasEnabled {
+public class AccordionPanel extends Details {
 
     /**
      * Creates an empty panel.
@@ -39,8 +35,8 @@ public class AccordionPanel extends Details implements HasEnabled {
     /**
      * Creates a panel with the provided summary text and content.
      *
-     * @param summary the summary
-     * @param content the content
+     * @param summary the summary. Null is treated like an empty string.
+     * @param content the content. If null no content is added.
      */
     public AccordionPanel(String summary, Component content) {
         super(summary, content);
@@ -49,22 +45,10 @@ public class AccordionPanel extends Details implements HasEnabled {
     /**
      * Creates a panel with the provided summary component and content.
      *
-     * @param summary the summary
-     * @param content the content
+     * @param summary the summary. Null clears any existing summary.
+     * @param content the content. If null no content is added.
      */
     public AccordionPanel(Component summary, Component content) {
         super(summary, content);
-    }
-
-    /**
-     * Registers a listener to be notified when the panel is expanded or collapsed.
-     *
-     * @param listener the listener to be notified
-     * @return a handle to the registered listener which could also be used to unregister it
-     */
-    public Registration addOpenedChangedListener(
-            ComponentEventListener<AccordionPanelOpenedChangedEvent> listener) {
-
-        return ComponentUtil.addListener(this, AccordionPanelOpenedChangedEvent.class, listener);
     }
 }

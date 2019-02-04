@@ -17,11 +17,8 @@ package com.vaadin.flow.component.accordion.testbench;
  * #L%
  */
 
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import com.vaadin.flow.component.details.testbench.DetailsElement;
 
 import static com.vaadin.flow.component.accordion.testbench.AccordionElement.OPENED_PROPERTY;
 
@@ -29,60 +26,19 @@ import static com.vaadin.flow.component.accordion.testbench.AccordionElement.OPE
  * TestBench element for the vaadin-accordion-panel element
  */
 @Element("vaadin-accordion-panel")
-public class AccordionPanelElement extends TestBenchElement {
-
-    private static final String SLOT_TAG = "slot";
-    private static final String SUMMARY_SLOT = "summary";
+public class AccordionPanelElement extends DetailsElement {
 
     /**
-     * Checks if the panel is expanded.
-     *
-     * @return true if expanded of false if otherwise
+     * Opens the panel.
      */
-    public boolean isExpanded() {
-        return hasAttribute(OPENED_PROPERTY);
-    }
-
-    /**
-     * Expands the panel.
-     */
-    public void expand() {
+    public void open() {
         setProperty(OPENED_PROPERTY, true);
     }
 
     /**
-     * Collapses the panel.
+     * Closes the panel.
      */
-    public void collapse() {
+    public void close() {
         setProperty(OPENED_PROPERTY, (Boolean) null);
-    }
-
-    /**
-     * Gets the summary text if set as text on the component.
-     *
-     * @return the summary text
-     */
-    public String getSummaryText() {
-        return $("span").attribute(SLOT_TAG, SUMMARY_SLOT).first().getText();
-    }
-
-    /**
-     * Gets the summary element.
-     *
-     * @return the summary element
-     */
-    public TestBenchElement getSummary() {
-        return $(TestBenchElement.class).attribute(SLOT_TAG, SUMMARY_SLOT).first();
-    }
-
-    /**
-     * Gets the content of the panel.
-     *
-     * @return the content
-     */
-    public List<TestBenchElement> getContent() {
-        return $(TestBenchElement.class).all().stream()
-                .filter(e -> !e.hasAttribute(SLOT_TAG))
-                .collect(Collectors.toList());
     }
 }

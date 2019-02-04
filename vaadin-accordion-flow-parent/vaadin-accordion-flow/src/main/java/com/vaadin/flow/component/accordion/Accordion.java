@@ -17,24 +17,32 @@ package com.vaadin.flow.component.accordion;
  */
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.shared.Registration;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * Accordion is a a vertically stacked set of expandable panels.
- * Only one panel can be expanded at a time.
+ * Only one panel can be opened at a time.
  */
 @Tag("vaadin-accordion")
 @HtmlImport("frontend://bower_components/vaadin-accordion/src/vaadin-accordion.html")
 public class Accordion extends Component implements HasSize {
 
     private static final String OPENED_PROPERTY = "opened";
+    private static final String OPENED_CHANGED_DOM_EVENT = "opened-changed";
 
     /**
      * Adds a panel created from the given title and content.
@@ -51,10 +59,11 @@ public class Accordion extends Component implements HasSize {
     /**
      * Adds a panel.
      *
-     * @param panel the panel to be added
+     * @param panel the non-null panel to be added
      * @return the added panel
      */
-    public AccordionPanel add(AccordionPanel panel) {
+    public AccordionPanel add(@Nonnull AccordionPanel panel) {
+        Objects.requireNonNull(panel, "The panel to be added cannot be null");
         getElement().appendChild(panel.getElement());
         return panel;
     }
@@ -62,58 +71,160 @@ public class Accordion extends Component implements HasSize {
     /**
      * Removes a panel.
      *
-     * @param panel the panel to be removed
+     * @param panel the non-null panel to be removed
      */
-    public void remove(AccordionPanel panel) {
+    public void remove(@Nonnull AccordionPanel panel) {
+        Objects.requireNonNull(panel, "The panel to be removed cannot be null");
         getElement().removeChild(panel.getElement());
     }
 
     /**
-     * Collapses all the panels in this accordion.
+     * Removes a panel based on the content
+     *
+     * @param content the non-null content of the panel to be removed
      */
-    public void collapse() {
+    public void remove(@Nonnull Component content) {
+        Objects.requireNonNull(content, "The content of the panel to be removed cannot be null");
+
+        if (content instanceof AccordionPanel) {
+            remove((AccordionPanel) content);
+            return;
+        }
+
+
+        if (content.getParent().isPresent()) {
+            final Optional<Component> grandParent = content.getParent().get().getParent();
+            if (grandParent.isPresent() && grandParent.get() instanceof  AccordionPanel) {
+                remove((AccordionPanel) grandParent.get());
+                return;
+            }
+        }
+
+        throw new IllegalArgumentException("The supplied content is not a descendant of this Accordion");
+    }
+
+    /**
+     * Closes the opened panel (if any) in this accordion.
+     */
+    public void close() {
         getElement().setProperty(OPENED_PROPERTY, null);
     }
 
     /**
-     * Expands the panel at the specified index.
+     * Opens the panel at the specified index.
      *
-     * @param index the position of the panel to be expanded.
+     * @param index the (positive) index of the panel to be open.
      *              The first panel is at index zero.
      */
-    public void expand(int index) {
+    public void open(int index) {
+        if (index < 0) {
+            throw new IllegalArgumentException("The index to open cannot be negative");
+        }
+
         getElement().setProperty(OPENED_PROPERTY, index);
     }
 
     /**
-     * Expands the specified panel.
+     * Opens the specified panel.
      *
-     * @param panel the panel to be expanded
+     * @param panel the non-null panel to be opened
      */
-    public void expand(AccordionPanel panel) {
-        expand(getElement().indexOfChild(panel.getElement()));
+    public void open(@Nonnull AccordionPanel panel) {
+        Objects.requireNonNull(panel, "The panel to be opened cannot be null");
+        open(getElement().indexOfChild(panel.getElement()));
     }
 
     /**
-     * Gets the index of the currently expanded index.
+     * Gets the index of the currently opened index.
      *
-     * @return the index of the expanded panel or null if the accordion is collapsed.
+     * @return the index of the opened panel or null if the accordion is closed.
      */
-    @Nullable
-    public Integer getExpandedIndex() {
+    @Synchronize(property = OPENED_PROPERTY, value = OPENED_CHANGED_DOM_EVENT)
+    public OptionalInt getOpenedIndex() {
         final String opened = getElement().getProperty(OPENED_PROPERTY);
-        return opened == null ? null : Integer.valueOf(opened);
+        return opened == null ? OptionalInt.empty() : OptionalInt.of(Integer.valueOf(opened));
     }
 
     /**
-     * Registers a listener to be notified whenever a panel is expanded or collapsed.
+     * Gets the opened panel.
+     *
+     * Caution should be exercised when using this method with an Accordion which along with its panels
+     * were created in a template. Such template children would by default not be children of the
+     * Accordion Flow component, thus making it possible for this method to return the wrong panel in such cases.
+     *
+     * @return the opened panel.
+     */
+    @Synchronize(property = OPENED_PROPERTY, value = OPENED_CHANGED_DOM_EVENT)
+    public Optional<AccordionPanel> getOpenedPanel() {
+        final OptionalInt optionalOpenedIndex = getOpenedIndex();
+
+        if (!optionalOpenedIndex.isPresent()) {
+            return Optional.empty();
+        }
+
+        int index = optionalOpenedIndex.getAsInt();
+        return Accordion.getOpenedPanel(this, index);
+    }
+
+    private static Optional<AccordionPanel> getOpenedPanel(Accordion accordion, Integer index) {
+        return index == null || index >= accordion.getChildren().count() ? Optional.empty() :
+                accordion.getElement().getChild(index).getComponent().map(AccordionPanel.class::cast);
+    }
+
+    /**
+     * Registers a listener to be notified whenever a panel is opened or closed.
      *
      * @param listener the listener to be notified
      * @return a handle to the registered listener which could also be used to unregister it.
      */
-    public Registration addOpenedChangedListener(
-            ComponentEventListener<AccordionOpenedChangedEvent> listener) {
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent> listener) {
 
-        return ComponentUtil.addListener(this, AccordionOpenedChangedEvent.class, listener);
+        return ComponentUtil.addListener(this, OpenedChangeEvent.class, listener);
+    }
+
+    /**
+     * An event fired when an Accordion is opened or closed.
+     */
+    @DomEvent(OPENED_CHANGED_DOM_EVENT)
+    public static class OpenedChangeEvent extends ComponentEvent<Accordion> {
+
+        private final Integer index;
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the client
+         * @param index the index of the opened panel or null if the accordion is closed
+         */
+        public OpenedChangeEvent(Accordion source, boolean fromClient,
+                                 @EventData("event.detail.value") Integer index) {
+            super(source, fromClient);
+            this.index = index;
+        }
+
+        /**
+         * Gets the index of the opened panel or null if the accordion is closed.
+         *
+         * @return the index of the opened panel or null if closed
+         */
+        public OptionalInt getOpenedIndex() {
+            return index == null ? OptionalInt.empty() : OptionalInt.of(index);
+        }
+
+        /**
+         * Gets the opened panel.
+         *
+         * Caution should be exercised when using this method with an Accordion which along with its panels
+         * were created in a template. Such template children would by default not be children of the
+         * Accordion Flow component, thus making it possible for this method to return the wrong panel in such cases.
+         *
+         * @return the opened panel.
+         */
+        public Optional<AccordionPanel> getOpenedPanel() {
+            return Accordion.getOpenedPanel(getSource(), index);
+        }
     }
 }
