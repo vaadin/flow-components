@@ -9,9 +9,11 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.function.Function;
 
 @Route("vaadin-custom-field")
 public class CustomFieldView extends DemoView {
@@ -24,39 +26,51 @@ public class CustomFieldView extends DemoView {
     private void basicDemo() {
         addCard("Single element wrapping", new SingleElementWrapping());
         addCard("Native input", new NativeInput());
-        addCard("Displaying the field value", new SumField());
+        addCard("Displaying the field value", new DecimalNumberField());
         addCard("Custom DateTime Picker", new CustomDateTimePicker());
     }
 
     // begin-source-example
     // source-example-heading: Displaying the field value
-    public static class SumField extends CustomField<Integer> {
+    public static class DecimalNumberField extends CustomField<BigDecimal> {
 
-        private final TextField firstNumber = new TextField("First number");
-        private final TextField secondNumber = new TextField("Second number");
+        private final TextField integerPart = new TextField("Integer part");
+        private final TextField fractionalPart = new TextField(
+            "Fractional part");
         private final Div display = new Div();
 
-        SumField() {
-            super(0);
-            setLabel("Sum");
+        DecimalNumberField() {
+            super(BigDecimal.ZERO);
+            setLabel("Decimal field");
             // Add a value change listener to display the field value.
-            addValueChangeListener(e -> display.setText(""+e.getValue()));
-            add(firstNumber, secondNumber, display);
+            addValueChangeListener(e -> display.setText("" + e.getValue()));
+            add(integerPart, fractionalPart, display);
         }
 
         @Override
-        protected Integer generateModelValue() {
+        protected BigDecimal generateModelValue() {
             try {
-                return Integer.valueOf(firstNumber.getValue()) + Integer
-                    .valueOf(secondNumber.getValue());
+                Function<TextField, Integer> toNumber = t ->
+                   !t.isEmpty() ? Integer.valueOf(t.getValue()) : 0;
+                int i = toNumber.apply(integerPart);
+                int f = toNumber.apply(fractionalPart);
+                return new BigDecimal(i + "." + f);
             } catch (NumberFormatException e) {
-                return 0;
+                return BigDecimal.ZERO;
             }
         }
 
         @Override
-        protected void setPresentationValue(Integer newPresentationValue) {
-            // It is not possible to know the values of each field by their sum.
+        protected void setPresentationValue(BigDecimal newPresentationValue) {
+            if (newPresentationValue == null) {
+                integerPart.setValue(null);
+                fractionalPart.setValue(null);
+            } else {
+                String[] parts = newPresentationValue.toPlainString()
+                    .split("\\.");
+                integerPart.setValue(parts[0]);
+                fractionalPart.setValue(parts.length > 1 ? parts[1] : null);
+            }
         }
 
     }
