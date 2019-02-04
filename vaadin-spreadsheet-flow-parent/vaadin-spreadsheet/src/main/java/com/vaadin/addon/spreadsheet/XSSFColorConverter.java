@@ -75,17 +75,6 @@ public class XSSFColorConverter implements ColorConverter {
         } else if (fillBackgroundXSSFColor != null
                 && !fillBackgroundXSSFColor.isAuto()) {
             backgroundColor = styleColor(fillBackgroundXSSFColor);
-        } else {
-            // bypass POI API and try to get the fill ourself, because of bug:
-            // https://issues.apache.org/bugzilla/show_bug.cgi?id=53262
-            try {
-                XSSFColor themeColor = getFillColor(cs);
-                if (themeColor != null && !themeColor.isAuto()) {
-                    backgroundColor = styleColor(themeColor);
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.FINEST, e.getMessage(), e);
-            }
         }
 
         if (backgroundColor != null
@@ -124,11 +113,6 @@ public class XSSFColorConverter implements ColorConverter {
         sb.append(":");
         if (color == null || color.isAuto()) {
             sb.append("#000;");
-            return sb.toString();
-        }
-        if (color.isIndexed() && ColorConverterUtil
-            .hasCustomIndexedColors(workbook)) {
-            sb.append(ColorConverterUtil.getIndexedARGB(workbook,color));
             return sb.toString();
         }
 
@@ -297,17 +281,6 @@ public class XSSFColorConverter implements ColorConverter {
         } else if (fillBackgroundXSSFColor != null
                 && !fillBackgroundXSSFColor.isAuto()) {
             return true;
-        } else {
-            // bypass POI API and try to get the fill ourself, because of bug:
-            // https://issues.apache.org/bugzilla/show_bug.cgi?id=53262
-            try {
-                XSSFColor themeColor = getFillColor(cs);
-                if (themeColor != null && !themeColor.isAuto()) {
-                    return true;
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.FINEST, e.getMessage(), e);
-            }
         }
         return false;
     }
@@ -399,13 +372,8 @@ public class XSSFColorConverter implements ColorConverter {
         if (color == null || color.isAuto()) {
             return null;
         }
-        //the XSSFColor#getARGB() method returns wrong colors for custom indexed colors
-        // to be removed when bug # 60898 is resolved (https://bz.apache.org/bugzilla/show_bug.cgi?id=60898)
-        if (color.isIndexed() && ColorConverterUtil
-            .hasCustomIndexedColors(workbook)) {
-            return ColorConverterUtil.getIndexedARGB(workbook, color);
-        }
 
+        // pulls color directly, or from an indexed color (custom, default, or theme) if set
         byte[] argb = color.getARGB();
         if (argb == null) {
             return null;

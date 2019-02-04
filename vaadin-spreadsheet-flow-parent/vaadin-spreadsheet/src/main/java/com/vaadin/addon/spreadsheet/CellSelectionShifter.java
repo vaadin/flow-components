@@ -177,15 +177,15 @@ public class CellSelectionShifter implements Serializable {
             boolean removeShifted, Double sequenceIncrement) {
         // clear the new cell first because it might have errors which prevent
         // it from being set to a new type
-        if (newCell.getCellTypeEnum() != CellType.BLANK
-                || shiftedCell.getCellTypeEnum() == CellType.BLANK) {
+        if (newCell.getCellType() != CellType.BLANK
+                || shiftedCell.getCellType() == CellType.BLANK) {
             newCell.setCellType(CellType.BLANK);
         }
-        newCell.setCellType(shiftedCell.getCellTypeEnum());
+        newCell.setCellType(shiftedCell.getCellType());
         newCell.setCellStyle(shiftedCell.getCellStyle());
         spreadsheet.getSpreadsheetStyleFactory()
                 .cellStyleUpdated(newCell, true);
-        switch (shiftedCell.getCellTypeEnum()) {
+        switch (shiftedCell.getCellType()) {
         case FORMULA:
             shiftFormula(shiftedCell, newCell);
             break;
@@ -633,9 +633,9 @@ public class CellSelectionShifter implements Serializable {
         if (row != null) {
             Cell firstCell = row.getCell(c1 - 1);
             if (firstCell != null) {
-                if (firstCell.getCellTypeEnum() == CellType.STRING) {
+                if (firstCell.getCellType() == CellType.STRING) {
                     return getSequenceIncrement(getRowStringValues(row, c1, c2));
-                } else if (firstCell.getCellTypeEnum() == CellType.NUMERIC) {
+                } else if (firstCell.getCellType() == CellType.NUMERIC) {
                     return getSequenceIncrement(getRowNumericValues(row, c1, c2));
                 }
             }
@@ -668,7 +668,7 @@ public class CellSelectionShifter implements Serializable {
             row = activeSheet.getRow(i - 1);
             if (row != null) {
                 cell = row.getCell(columnIndex - 1);
-                if (cell != null && cell.getCellTypeEnum() == CellType.STRING) {
+                if (cell != null && cell.getCellType() == CellType.STRING) {
                     result[i - r1] = cell.getStringCellValue();
                 } else {
                     break;
@@ -705,7 +705,7 @@ public class CellSelectionShifter implements Serializable {
             row = activeSheet.getRow(i - 1);
             if (row != null) {
                 cell = row.getCell(columnIndex - 1);
-                if (cell != null && cell.getCellTypeEnum() == CellType.NUMERIC) {
+                if (cell != null && cell.getCellType() == CellType.NUMERIC) {
                     result[i - r1] = cell.getNumericCellValue();
                 } else {
                     break;
@@ -735,7 +735,7 @@ public class CellSelectionShifter implements Serializable {
         Cell cell;
         for (int i = c1; i <= c2; i++) {
             cell = row.getCell(i - 1);
-            if (cell != null && cell.getCellTypeEnum() == CellType.STRING) {
+            if (cell != null && cell.getCellType() == CellType.STRING) {
                 result[i - c1] = cell.getStringCellValue();
             } else {
                 break;
@@ -763,7 +763,7 @@ public class CellSelectionShifter implements Serializable {
         for (int i = c1; i <= c2; i++) {
             shiftedCell = row.getCell(i - 1);
             if (shiftedCell != null
-                    && shiftedCell.getCellTypeEnum() == CellType.NUMERIC) {
+                    && shiftedCell.getCellType() == CellType.NUMERIC) {
                 result[i - c1] = shiftedCell.getNumericCellValue();
             } else {
                 break;
@@ -873,10 +873,10 @@ public class CellSelectionShifter implements Serializable {
         if (row != null) {
             Cell firstCell = row.getCell(cIndex - 1);
             if (firstCell != null) {
-                if (firstCell.getCellTypeEnum() == CellType.STRING) {
+                if (firstCell.getCellType() == CellType.STRING) {
                     return getSequenceIncrement(getColumnStringValues(
                             activeSheet, cIndex, r1, r2));
-                } else if (firstCell.getCellTypeEnum() == CellType.NUMERIC) {
+                } else if (firstCell.getCellType() == CellType.NUMERIC) {
                     return getSequenceIncrement(getColumnNumericValues(
                             activeSheet, cIndex, r1, r2));
                 }

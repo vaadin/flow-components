@@ -299,7 +299,7 @@ public class CellValueCommand extends SpreadsheetCommand implements
         if (cell == null) {
             return null;
         } else {
-            switch (cell.getCellTypeEnum()) {
+            switch (cell.getCellType()) {
             case BOOLEAN:
                 return cell.getBooleanCellValue();
             case ERROR:

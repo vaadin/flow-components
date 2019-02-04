@@ -43,7 +43,7 @@ class ColorUtils {
 
     private static final float PERCENTAGE_FACTOR = 100000f;
 
-    private static class ColorParameters {
+    static class ColorParameters {
         public byte[] rgb;
         public float lumMod;
         public float lumOff;
@@ -262,10 +262,12 @@ class ColorUtils {
         return new float[] { h, s * 100, l * 100 };
     }
 
-    private static byte[] toRGB(float h, float s, float l) {
-        h = h % 360.0f;
+    private static byte[] toRGB(float hue, float sat, float lum) {
+        float h = hue % 360.0f;
         h /= 360f;
+        float s = sat;
         s /= 100f;
+        float l = lum;
         l /= 100f;
 
         float q = 0;
@@ -292,7 +294,8 @@ class ColorUtils {
         return new byte[] { r_byte, g_byte, b_byte };
     }
 
-    private static float HueToRGB(float p, float q, float h) {
+    private static float HueToRGB(float p, float q, float hue) {
+        float h = hue;
         if (h < 0)
             h += 1;
 

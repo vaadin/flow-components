@@ -58,7 +58,7 @@ public class DefaultHyperlinkCellClickHandler implements
     public void onHyperLinkCellClick(Cell cell, Hyperlink hyperlink,
             Spreadsheet spreadsheet) {
         if (hyperlink != null && hyperlink.getAddress() != null) {
-            if (hyperlink.getTypeEnum() == HyperlinkType.DOCUMENT) { // internal
+            if (hyperlink.getType() == HyperlinkType.DOCUMENT) { // internal
                 navigateTo(cell, spreadsheet, hyperlink.getAddress());
             } else {
                 spreadsheet.getUI().getPage()
@@ -164,7 +164,7 @@ public class DefaultHyperlinkCellClickHandler implements
      * @return True if hyperlink is found
      */
     public final static boolean isHyperlinkFormulaCell(Cell cell) {
-        return cell != null && cell.getCellTypeEnum() == CellType.FORMULA
+        return cell != null && cell.getCellType() == CellType.FORMULA
                 && cell.getCellFormula().startsWith("HYPERLINK(");
     }
 

@@ -43,7 +43,7 @@ public class AddOrRemoveCommentFixture implements SpreadsheetFixture {
     }
 
     private Comment createCommentTo(int row, int col) {
-        Drawing drawing = spreadsheet.getActiveSheet().createDrawingPatriarch();
+        Drawing<?> drawing = spreadsheet.getActiveSheet().createDrawingPatriarch();
         CreationHelper factory = spreadsheet.getActiveSheet().getWorkbook()
                 .getCreationHelper();
 

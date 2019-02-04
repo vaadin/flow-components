@@ -7,18 +7,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFTable;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Before;
 import org.junit.Test;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
 
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.SpreadsheetTable;
@@ -71,9 +72,7 @@ public class ColumnFiltersTest {
 
     @Test
     public void sheetWithTables_loadWorkbook_tablesPreserved() {
-        XSSFTable table = workbook.getSheetAt(0).createTable();
-        CTTable ctTable = table.getCTTable();
-        ctTable.setRef(TABLE2_RANGE);
+        XSSFTable table = workbook.getSheetAt(0).createTable(new AreaReference(TABLE2_RANGE, null));
 
         spreadsheet.setWorkbook(workbook);
 

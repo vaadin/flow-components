@@ -739,19 +739,19 @@ public class ConditionalFormatter implements Serializable {
      */
     protected boolean matchesValue(Cell cell, ConditionalFormattingRule rule, int deltaColumn, int deltaRow) {
 
-        boolean isFormulaType = cell.getCellTypeEnum() == CellType.FORMULA;
+        boolean isFormulaType = cell.getCellType() == CellType.FORMULA;
 
         if (isFormulaType) {
             // make sure we have the latest value for formula cells
-            getFormulaEvaluator().evaluateFormulaCellEnum(cell);
+            getFormulaEvaluator().evaluateFormulaCell(cell);
         }
         
         boolean isFormulaStringType = isFormulaType
-                && cell.getCachedFormulaResultTypeEnum() == CellType.STRING;
+                && cell.getCachedFormulaResultType() == CellType.STRING;
         boolean isFormulaBooleanType = isFormulaType
-                && cell.getCachedFormulaResultTypeEnum() == CellType.BOOLEAN;
+                && cell.getCachedFormulaResultType() == CellType.BOOLEAN;
         boolean isFormulaNumericType = isFormulaType
-                && cell.getCachedFormulaResultTypeEnum() == CellType.NUMERIC;
+                && cell.getCachedFormulaResultType() == CellType.NUMERIC;
 
         String formula = rule.getFormula1();
         byte comparisonOperation = rule.getComparisonOperation();
@@ -762,14 +762,14 @@ public class ConditionalFormatter implements Serializable {
             return false;
         }
         
-        if (!hasCoherentType(eval, cell.getCellTypeEnum(), isFormulaStringType,
+        if (!hasCoherentType(eval, cell.getCellType(), isFormulaStringType,
             isFormulaBooleanType, isFormulaNumericType)) {
             // Comparison between different types (e.g. Bool vs String)
             return (comparisonOperation == ComparisonOperator.NOT_EQUAL);
         }
 
         // other than numerical types
-        if (cell.getCellTypeEnum() == CellType.STRING || isFormulaStringType) {
+        if (cell.getCellType() == CellType.STRING || isFormulaStringType) {
 
             String formulaValue = ((StringEval)eval).getStringValue();
             String stringValue = cell.getStringCellValue();
@@ -782,7 +782,7 @@ public class ConditionalFormatter implements Serializable {
                 return !stringValue.equalsIgnoreCase(formulaValue);
             }
         }
-        if (cell.getCellTypeEnum() == CellType.BOOLEAN
+        if (cell.getCellType() == CellType.BOOLEAN
                 || isFormulaBooleanType) {
             // not sure if this is used, since no boolean option exists in
             // Excel..
@@ -798,7 +798,7 @@ public class ConditionalFormatter implements Serializable {
         }
 
         // numerical types
-        if (cell.getCellTypeEnum() == CellType.NUMERIC
+        if (cell.getCellType() == CellType.NUMERIC
                 || isFormulaNumericType) {
 
             double formula1Val = ((NumericValueEval)eval).getNumberValue();
@@ -861,9 +861,9 @@ public class ConditionalFormatter implements Serializable {
             return eval instanceof NumericValueEval || isFormulaNumericType;
         case FORMULA:
             return isCoherentTypeFormula(eval, isFormulaStringType,
-                isFormulaBooleanType, isFormulaNumericType);
+                    isFormulaBooleanType, isFormulaNumericType);
         default:
-        	return false;
+            return false;
         }
     }
 

@@ -24,27 +24,6 @@ public class ColorConverterUtil implements Serializable {
         return buildRgba(rgba, x);
     }
 
-    public static String getIndexedARGB(XSSFWorkbook workbook,
-        XSSFColor color) {
-        if (color.isIndexed() && hasCustomIndexedColors(workbook)) {
-            try {
-                StylesTable styleSource = workbook.getStylesSource();
-
-                CTRgbColor ctRgbColor = styleSource.getCTStylesheet().getColors()
-                    .getIndexedColors().getRgbColorList().get(color.getIndex());
-
-                String rgb = ctRgbColor.getDomNode().getAttributes()
-                    .getNamedItem("rgb").getNodeValue();
-                return toRGBA(rgb);
-            } catch (IndexOutOfBoundsException e) {
-                return color.getARGBHex();
-            }
-        }
-
-        return color.getARGBHex();
-
-    }
-
     public static String toRGBA(String hexARGB) {
         int rgba[] = new int[3];
 
@@ -53,18 +32,6 @@ public class ColorConverterUtil implements Serializable {
         rgba[2] = Integer.parseInt(hexARGB.substring(6), 16);
         float alpha = Integer.parseInt(hexARGB.substring(0, 2), 16);
         return buildRgba(rgba, alpha);
-    }
-
-    public static boolean hasCustomIndexedColors(XSSFWorkbook workbook) {
-        StylesTable stylesSource = workbook.getStylesSource();
-        CTColors ctColors = stylesSource.getCTStylesheet().getColors();
-        if (ctColors == null) {
-            return false;
-        }
-        if (ctColors.getIndexedColors() == null) {
-            return false;
-        }
-        return true;
     }
 
     public static String buildRgba(int[] rgb, float alpha) {

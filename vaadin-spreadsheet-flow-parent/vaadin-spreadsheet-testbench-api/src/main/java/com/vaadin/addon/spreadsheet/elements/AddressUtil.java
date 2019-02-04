@@ -49,7 +49,7 @@ public class AddressUtil implements Serializable {
         m.find();
 
         int col = charAddressToInt(m.group(1));
-        int row = Integer.valueOf(m.group(2));
+        int row = Integer.parseInt(m.group(2));
 
         return new Point(col, row);
     }
@@ -67,10 +67,10 @@ public class AddressUtil implements Serializable {
         m.find();
 
         int left = charAddressToInt(m.group(1));
-        int top = Integer.valueOf(m.group(2));
+        int top = Integer.parseInt(m.group(2));
 
         int right = charAddressToInt(m.group(3));
-        int bottom = Integer.valueOf(m.group(4));
+        int bottom = Integer.parseInt(m.group(4));
 
         HashSet<Point> points = new HashSet<Point>();
         for (int col = left; col <= right; col++) {
@@ -89,9 +89,8 @@ public class AddressUtil implements Serializable {
      * @return The numeric value of the address
      */
     private static int charAddressToInt(String address) {
-        address = address.toUpperCase();
         int result = 0;
-        String reversed = new StringBuffer(address).reverse().toString();
+        String reversed = new StringBuffer(address.toUpperCase()).reverse().toString();
         for (int i = 0; i < reversed.length(); i++) {
             result += ((reversed.charAt(i) - 'A') + 1) * Math.pow(26, i);
         }

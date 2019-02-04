@@ -797,7 +797,7 @@ public class SpreadsheetDemoUI extends UI implements Receiver {
             }
 
             if (cell != null) {
-                if (cell.getCellTypeEnum() == CellType.BOOLEAN) {
+                if (cell.getCellType() == CellType.BOOLEAN) {
                     ((CheckBox) customEditor).setValue(cell
                             .getBooleanCellValue());
                 } else if (customEditor instanceof DateField) {

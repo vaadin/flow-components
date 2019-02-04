@@ -310,7 +310,7 @@ public class CellSelectionManager implements Serializable {
                 final Cell cell = row.getCell(colIndex - 1);
                 if (cell != null) {
                     String value = "";
-                    boolean formula = cell.getCellTypeEnum() == CellType.FORMULA;
+                    boolean formula = cell.getCellType() == CellType.FORMULA;
                     if (!spreadsheet.isCellHidden(cell)) {
                         if (formula) {
                             value = cell.getCellFormula();

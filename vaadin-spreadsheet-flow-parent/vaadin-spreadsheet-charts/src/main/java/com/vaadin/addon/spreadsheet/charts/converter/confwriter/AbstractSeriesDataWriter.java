@@ -47,12 +47,8 @@ public abstract class AbstractSeriesDataWriter {
          * intermediate classes, TODO think about a better way of doing this
          */
         final DataSeries dataSeries = new SelectListeningDataSeries(
-                series.name, new SelectListener() {
-                    @Override
-                    public void selected() {
-                        series.dataSelectListener.dataSelected();
-                    }
-                });
+                getSeriesData().name,
+                () -> getSeriesData().dataSelectListener.dataSelected());
 
         configureDataSeries(dataSeries);
 

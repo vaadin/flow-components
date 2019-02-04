@@ -40,7 +40,6 @@ import org.openxmlformats.schemas.drawingml.x2006.main.CTTextCharacterProperties
 import org.openxmlformats.schemas.drawingml.x2006.main.CTTextParagraph;
 import org.openxmlformats.schemas.drawingml.x2006.main.ThemeDocument;
 
-import com.vaadin.addon.charts.model.YAxis;
 import com.vaadin.addon.spreadsheet.Spreadsheet;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ChartData.AxisProperties;
 import com.vaadin.addon.spreadsheet.charts.converter.chartdata.ChartData.BackgroundProperties;

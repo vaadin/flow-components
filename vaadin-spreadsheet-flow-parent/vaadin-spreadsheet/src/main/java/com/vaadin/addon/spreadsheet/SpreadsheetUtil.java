@@ -91,7 +91,7 @@ public class SpreadsheetUtil implements Serializable {
      * @return true if the cell contains a date
      */
     public static boolean cellContainsDate(Cell cell) {
-        return cell.getCellTypeEnum() == CellType.NUMERIC
+        return cell.getCellType() == CellType.NUMERIC
                 && DateUtil.isCellDateFormatted(cell);
     }
 
@@ -414,7 +414,7 @@ public class SpreadsheetUtil implements Serializable {
      *         every string.
      */
     public static boolean needsLeadingQuote(Cell cell) {
-        if (cell.getCellTypeEnum() != CellType.STRING) {
+        if (cell.getCellType() != CellType.STRING) {
             return false;
         }
 

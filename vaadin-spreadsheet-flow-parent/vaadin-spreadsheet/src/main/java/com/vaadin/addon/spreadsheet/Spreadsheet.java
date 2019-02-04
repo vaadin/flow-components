@@ -55,6 +55,7 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -949,7 +950,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * See {@link Workbook#setSheetHidden(int, int)}.
+     * See {@link Workbook#setSheetHidden(int, boolean)}.
      * <p>
      * Gets the Workbook with {@link #getWorkbook()} and uses its API to access
      * status on currently visible/hidden/very hidden sheets.
@@ -977,7 +978,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         boolean isHidden = workbook.isSheetHidden(sheetPOIIndex);
         boolean isVeryHidden = workbook.isSheetVeryHidden(sheetPOIIndex);
         int activeSheetIndex = workbook.getActiveSheetIndex();
-        workbook.setSheetHidden(sheetPOIIndex, hidden);
+        SheetVisibility visibility = isVeryHidden ? SheetVisibility.VERY_HIDDEN
+                : (isHidden ? SheetVisibility.HIDDEN : SheetVisibility.VISIBLE);
+
+        workbook.setSheetVisibility(sheetPOIIndex, visibility);
 
         // skip component reload if "nothing changed"
         if (hidden == 0 && (isHidden || isVeryHidden) || hidden != 0
@@ -2162,7 +2166,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                 for (short c = row.getFirstCellNum(); c < row.getLastCellNum(); c++) {
                     Cell cell = row.getCell(c);
                     if (cell != null
-                            && cell.getCellTypeEnum() != CellType.BLANK) {
+                            && cell.getCellType() != CellType.BLANK) {
                         return r;
                     }
                 }
@@ -4569,7 +4573,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * 
      * @see com.vaadin.ui.HasComponents#iterator()
      */
-    @SuppressWarnings("unchecked")
     @Override
     public Iterator<Component> iterator() {
         return new IteratorChain<Component>(Arrays.asList(

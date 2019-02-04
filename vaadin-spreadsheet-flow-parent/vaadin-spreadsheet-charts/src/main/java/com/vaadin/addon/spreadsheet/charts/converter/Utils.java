@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -62,7 +63,7 @@ public class Utils {
             Spreadsheet spreadsheet) {
         List<String> strings = new ArrayList<String>();
 
-        for (CellReference ref : getAllReferencedCells(formula)) {
+        for (CellReference ref : getAllReferencedCells(spreadsheet.getWorkbook().getSpreadsheetVersion(), formula)) {
             strings.add(getStringValue(ref, spreadsheet));
         }
 
@@ -80,9 +81,14 @@ public class Utils {
         return buf.toString();
     }
 
-    public static List<CellReference> getAllReferencedCells(String formula) {
+    /**
+     * @param version for inferring ranges for column-only references
+     * @param formula
+     * @return all cells in the referenced areas
+     */
+    public static List<CellReference> getAllReferencedCells(SpreadsheetVersion version, String formula) {
         ArrayList<CellReference> cellRefs = new ArrayList<CellReference>();
-        for (AreaReference area : getAreaReferences(formula)) {
+        for (AreaReference area : getAreaReferences(version, formula)) {
             cellRefs.addAll(Arrays.asList(area.getAllReferencedCells()));
         }
         return cellRefs;
@@ -91,14 +97,18 @@ public class Utils {
     /**
      * Returns an array of contiguous area references addressed by the given
      * formula.
+     * @param version to infer max # of rows for column-only formula references
+     * @param formula containing possibly non-contiguous area refrences
+     * @return array of references
      */
-    public static AreaReference[] getAreaReferences(String formula) {
+    public static AreaReference[] getAreaReferences(SpreadsheetVersion version, String formula) {
+        String formulaIn = formula;
         // generateContiguous cannot parse a formula in parentheses
-        if (formula.startsWith("(") && formula.endsWith(")")) {
-            formula = formula.substring(1, formula.length() - 1);
+        if (formulaIn.startsWith("(") && formulaIn.endsWith(")")) {
+            formulaIn = formulaIn.substring(1, formulaIn.length() - 1);
         }
-        
-        return AreaReference.generateContiguous(formula);
+
+        return AreaReference.generateContiguous(version, formulaIn);
     }
 
     /**
@@ -127,7 +137,7 @@ public class Utils {
      */
     public static List<CellReference> getAllReferencedCells(String formula,
             Spreadsheet spreadsheet, boolean includeHiddenCells) {
-        final List<CellReference> cellRefs = getAllReferencedCells(formula);
+        final List<CellReference> cellRefs = getAllReferencedCells(spreadsheet.getWorkbook().getSpreadsheetVersion(), formula);
 
         if (includeHiddenCells) {
             return cellRefs;
@@ -156,10 +166,10 @@ public class Utils {
             Sheet sheet = spreadsheet.getWorkbook()
                     .getSheet(ref.getSheetName());
             Cell cell = spreadsheet.getCell(ref, sheet);
-            spreadsheet.getFormulaEvaluator().evaluateFormulaCellEnum(cell);
+            spreadsheet.getFormulaEvaluator().evaluateFormulaCell(cell);
 
-            if (cell.getCellTypeEnum() == CellType.NUMERIC
-                    || cell.getCellTypeEnum() == CellType.FORMULA) {
+            if (cell.getCellType() == CellType.NUMERIC
+                    || cell.getCellType() == CellType.FORMULA) {
                 return cell.getNumericCellValue();
             }
         } catch (NullPointerException e) {

@@ -108,13 +108,15 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     }
 
-    private static final Map<HorizontalAlignment, String> ALIGN = mapFor(HorizontalAlignment.LEFT, "left",
-    		HorizontalAlignment.CENTER, "center", HorizontalAlignment.RIGHT, "right", HorizontalAlignment.FILL, "left",
-    		HorizontalAlignment.JUSTIFY, "left", HorizontalAlignment.CENTER_SELECTION, "center");
+    private static final Map<HorizontalAlignment, String> ALIGN = mapFor(
+            HorizontalAlignment.LEFT, "left", HorizontalAlignment.CENTER,
+            "center", HorizontalAlignment.RIGHT, "right",
+            HorizontalAlignment.FILL, "left", HorizontalAlignment.JUSTIFY,
+            "left", HorizontalAlignment.CENTER_SELECTION, "center");
 
     private static final Map<VerticalAlignment, String> VERTICAL_ALIGN = mapFor(
-    		VerticalAlignment.BOTTOM, "flex-end", VerticalAlignment.CENTER, "center",
-    		VerticalAlignment.TOP, "flex-start");
+            VerticalAlignment.BOTTOM, "flex-end", VerticalAlignment.CENTER,
+            "center", VerticalAlignment.TOP, "flex-start");
 
     static final Map<org.apache.poi.ss.usermodel.BorderStyle, BorderStyle> BORDER = mapFor(
             org.apache.poi.ss.usermodel.BorderStyle.DASH_DOT, BorderStyle.DASHED_THIN,
@@ -192,7 +194,7 @@ public class SpreadsheetStyleFactory implements Serializable {
 
         // get default text alignments
         CellStyle cellStyle = workbook.getCellStyleAt((short) 0);
-        defaultTextAlign = cellStyle.getAlignmentEnum();
+        defaultTextAlign = cellStyle.getAlignment();
         // defaultVerticalAlign = cellStyle.getVerticalAlignment();
 
         // create default style (cell style 0)
@@ -576,8 +578,8 @@ public class SpreadsheetStyleFactory implements Serializable {
         fontStyle(sb, cellStyle);
         colorConverter.colorStyles(cellStyle, sb);
         borderStyles(sb, cellStyle);
-        if (cellStyle.getAlignmentEnum() != defaultTextAlign) {
-            styleOut(sb, "text-align", cellStyle.getAlignmentEnum(), ALIGN);
+        if (cellStyle.getAlignment() != defaultTextAlign) {
+            styleOut(sb, "text-align", cellStyle.getAlignment(), ALIGN);
             // TODO For correct overflow, rtl should be used for right align
             // if (cellStyle.getAlignment() == ALIGN_RIGHT) {
             // sb.append("direction:rtl;");
@@ -587,7 +589,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         // excel default is bottom, so that is what we have in the CSS base
         // files.
         // TODO This only works on modern (10+) IE.
-        styleOut(sb, "justify-content", cellStyle.getVerticalAlignmentEnum(),
+        styleOut(sb, "justify-content", cellStyle.getVerticalAlignment(),
                 VERTICAL_ALIGN);
 
         if (cellStyle.getWrapText()) { // default is to overflow
@@ -789,7 +791,7 @@ public class SpreadsheetStyleFactory implements Serializable {
     private void defaultFontStyle(CellStyle cellStyle, StringBuilder sb) {
         if (cellStyle.getIndex() == 0) {
             defaultFont = spreadsheet.getWorkbook().getFontAt(
-                    cellStyle.getFontIndex());
+                    cellStyle.getFontIndexAsInt());
             defaultFontFamily = styleFontFamily(defaultFont);
             sb.append(defaultFontFamily);
             if (defaultFont.getBold()) {
@@ -813,8 +815,8 @@ public class SpreadsheetStyleFactory implements Serializable {
     private void fontStyle(StringBuilder sb, CellStyle cellStyle) {
         try {
             Font font = spreadsheet.getWorkbook().getFontAt(
-                    cellStyle.getFontIndex());
-            if (font.getIndex() == defaultFont.getIndex()) {
+                    cellStyle.getFontIndexAsInt());
+            if (font.getIndexAsInt() == defaultFont.getIndexAsInt()) {
                 // uses default font, no need to add styles
                 return;
             }
@@ -842,7 +844,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         } catch (IndexOutOfBoundsException ioobe) {
             // somehow workbook doesn't have all the fonts the cells have???
             LOGGER.log(Level.WARNING,
-                    "Font missing, " + cellStyle.getFontIndex() + " / "
+                    "Font missing, " + cellStyle.getFontIndexAsInt() + " / "
                             + cellStyle.getClass() + ", " + ioobe.getMessage(),
                     ioobe);
         }
@@ -891,7 +893,7 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private String getBorderRightStyle(CellStyle cellStyle) {
         StringBuilder sb = new StringBuilder();
-        BorderStyle borderRight = BORDER.get(cellStyle.getBorderRightEnum());
+        BorderStyle borderRight = BORDER.get(cellStyle.getBorderRight());
         if (cellStyle instanceof XSSFCellStyle
                 && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {
             // borders from theme are not working in POI 3.9
@@ -919,7 +921,7 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private String getBorderBottomStyle(CellStyle cellStyle) {
         StringBuilder sb = new StringBuilder();
-        BorderStyle borderBottom = BORDER.get(cellStyle.getBorderBottomEnum());
+        BorderStyle borderBottom = BORDER.get(cellStyle.getBorderBottom());
         if (cellStyle instanceof XSSFCellStyle
                 && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {
             // borders from theme are not working in POI 3.9
@@ -947,10 +949,10 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private void borderStyles(StringBuilder sb, CellStyle cellStyle) {
 
-        BorderStyle borderLeft = BORDER.get(cellStyle.getBorderLeftEnum());
-        BorderStyle borderRight = BORDER.get(cellStyle.getBorderRightEnum());
-        BorderStyle borderTop = BORDER.get(cellStyle.getBorderTopEnum());
-        BorderStyle borderBottom = BORDER.get(cellStyle.getBorderBottomEnum());
+        BorderStyle borderLeft = BORDER.get(cellStyle.getBorderLeft());
+        BorderStyle borderRight = BORDER.get(cellStyle.getBorderRight());
+        BorderStyle borderTop = BORDER.get(cellStyle.getBorderTop());
+        BorderStyle borderBottom = BORDER.get(cellStyle.getBorderBottom());
 
         if (cellStyle instanceof XSSFCellStyle
                 && !((XSSFCellStyle) cellStyle).getCoreXf().getApplyBorder()) {

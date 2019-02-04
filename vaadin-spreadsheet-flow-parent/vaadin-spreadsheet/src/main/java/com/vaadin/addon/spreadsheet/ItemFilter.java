@@ -130,7 +130,6 @@ public class ItemFilter extends Panel implements SpreadsheetFilter {
                 // than what is displayed, like in case when allItems and all
                 // options were left unchecked.
                 if (!allItems.getValue()) {
-                    @SuppressWarnings("unchecked")
                     Collection<String> currentValue = filterCheckbox
                             .getValue();
                     cancelValueChangeUpdate = true;

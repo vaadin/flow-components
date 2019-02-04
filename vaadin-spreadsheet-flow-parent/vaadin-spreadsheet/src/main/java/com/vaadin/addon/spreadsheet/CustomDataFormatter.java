@@ -98,9 +98,9 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
 
     private CellType getCellType(Cell cell, FormulaEvaluator evaluator) {
 
-        CellType cellType = cell.getCellTypeEnum();
+        CellType cellType = cell.getCellType();
         if (cellType == CellType.FORMULA) {
-            cellType = evaluator.evaluateFormulaCellEnum(cell);
+            cellType = evaluator.evaluateFormulaCell(cell);
         }
         return cellType;
     }

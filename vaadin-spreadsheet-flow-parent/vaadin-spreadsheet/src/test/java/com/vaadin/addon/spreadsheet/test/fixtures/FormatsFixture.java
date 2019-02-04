@@ -67,32 +67,32 @@ public class FormatsFixture implements SpreadsheetFixture {
             c = spreadsheet.createCell(1, column, "example");
             c.setCellStyle(style);
             spreadsheet.createCell(1, column + formats.length + 1,
-                    "" + c.getCellTypeEnum().ordinal());
+                    "" + c.getCellType().ordinal());
 
             c = spreadsheet.createCell(2, column, new Date(1095379000000l));
             c.setCellStyle(style);
             spreadsheet.createCell(2, column + formats.length + 1,
-                    "" + c.getCellTypeEnum().ordinal());
+                    "" + c.getCellType().ordinal());
 
             c = spreadsheet.createCell(3, column, Boolean.TRUE);
             c.setCellStyle(style);
             spreadsheet.createCell(3, column + formats.length + 1,
-                    "" + c.getCellTypeEnum().ordinal());
+                    "" + c.getCellType().ordinal());
 
             c = spreadsheet.createCell(4, column, Calendar.getInstance());
             c.setCellStyle(style);
             spreadsheet.createCell(4, column + formats.length + 1,
-                    "" + c.getCellTypeEnum().ordinal());
+                    "" + c.getCellType().ordinal());
 
             c = spreadsheet.createCell(5, column, Double.parseDouble("3.1415"));
             c.setCellStyle(style);
             spreadsheet.createCell(5, column + formats.length + 1,
-                    "" + c.getCellTypeEnum().ordinal());
+                    "" + c.getCellType().ordinal());
 
             c = spreadsheet.createCell(6, column, "3.1415");
             c.setCellStyle(style);
             spreadsheet.createCell(6, column + formats.length + 1,
-                    "" + c.getCellTypeEnum().ordinal());
+                    "" + c.getCellType().ordinal());
         }
 
         int formulaBaseColumn = 0;
@@ -116,7 +116,7 @@ public class FormatsFixture implements SpreadsheetFixture {
             // sheetController.setCellType(Cell.CELL_TYPE_FORMULA);
             c.setCellFormula(formula);
             c = spreadsheet.createCell(row, formulaBaseColumn + 2,
-                    c.getCellTypeEnum().ordinal());
+                    c.getCellType().ordinal());
         }
 
         spreadsheet.refreshAllCellValues();

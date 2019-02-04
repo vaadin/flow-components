@@ -15,7 +15,6 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.NativeSelect;
 
-@SuppressWarnings("serial")
 public class PopupButtonFixture implements SpreadsheetFixture {
 
     private static final List<String> VALUES = Arrays.asList(new String[] {

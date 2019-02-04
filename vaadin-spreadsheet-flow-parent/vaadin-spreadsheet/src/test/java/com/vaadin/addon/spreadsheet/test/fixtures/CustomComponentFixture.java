@@ -130,24 +130,21 @@ class ComponentEditorFactory extends AbstractComponentFactory {
         if (curCell != null) {
             switch (CustomComponentFixture.getCompByCell(rowIndex, columnIndex)) {
                 case "textfield": {
-                    @SuppressWarnings("unchecked")
                     final TextField field = (TextField) customEditor;
                     String value = spreadsheet.getCellValue(curCell);
                     field.setValue(value);
                     break;
                 }
                 case "textarea": {
-                    @SuppressWarnings("unchecked")
                     final TextArea ta = (TextArea) customEditor;
                     String value = spreadsheet.getCellValue(curCell);
                     ta.setValue(value);
                     break;
                 }
                 case "checkbox": {
-                    @SuppressWarnings("unchecked")
                     final CheckBox cb = (CheckBox) customEditor;
                     String value = spreadsheet.getCellValue(curCell);
-                    cb.setValue(Boolean.parseBoolean(value));
+                    cb.setValue(Boolean.valueOf(value));
                     break;
                 }
                 case "datefield": {
@@ -165,12 +162,12 @@ class ComponentEditorFactory extends AbstractComponentFactory {
                     final Slider slider = (Slider) customEditor;
                     String value = spreadsheet.getCellValue(curCell);
 
-                    slider.setValue(Double.parseDouble(value));
+                    slider.setValue(Double.valueOf(value));
                     break;
                 }
                 case "combobox": {
                     @SuppressWarnings("unchecked")
-                    final NativeSelect<String> select = (NativeSelect) customEditor;
+                    final NativeSelect<String> select = (NativeSelect<String>) customEditor;
                     String value = spreadsheet.getCellValue(curCell);
                     select.setValue(value);
                     break;

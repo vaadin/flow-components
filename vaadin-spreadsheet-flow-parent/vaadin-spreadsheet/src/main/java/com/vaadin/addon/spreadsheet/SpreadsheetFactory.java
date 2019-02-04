@@ -33,7 +33,6 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.poi.POIXMLException;
 import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
@@ -42,7 +41,7 @@ import org.apache.poi.hssf.usermodel.HSSFPictureData;
 import org.apache.poi.hssf.usermodel.HSSFShape;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ooxml.POIXMLException;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
@@ -232,8 +231,6 @@ public class SpreadsheetFactory implements Serializable {
             reloadSpreadsheetComponent(spreadsheet, workbook);
         } catch (POIXMLException e) {
             throw new IOException(e);
-        } catch (InvalidFormatException e) {
-            throw new IOException("Invalid file format.", e);
         }
     }
 
@@ -249,12 +246,8 @@ public class SpreadsheetFactory implements Serializable {
      */
     static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
             final InputStream inputStream) throws IOException {
-        try {
             reloadSpreadsheetComponent(spreadsheet,
                     WorkbookFactory.create(inputStream));
-        } catch (InvalidFormatException e) {
-            throw new IOException("Invalid file format.", e);
-        }
     }
 
     /**
@@ -322,12 +315,8 @@ public class SpreadsheetFactory implements Serializable {
                 fos.close();
             }
         }
-        try {
-            Workbook wb = WorkbookFactory.create(file);
-            spreadsheet.setInternalWorkbook(wb);
-        } catch (InvalidFormatException e) {
-            LOGGER.log(Level.WARNING, e.getMessage(), e);
-        }
+        Workbook wb = WorkbookFactory.create(file);
+        spreadsheet.setInternalWorkbook(wb);
         return file;
     }
 
@@ -852,7 +841,7 @@ public class SpreadsheetFactory implements Serializable {
      */
     static void loadSheetOverlays(Spreadsheet spreadsheet) {
         final Sheet sheet = spreadsheet.getActiveSheet();
-        Drawing drawing = getDrawingPatriarch(sheet);
+        Drawing<?> drawing = getDrawingPatriarch(sheet);
 
         if (drawing instanceof XSSFDrawing) {
             for (XSSFShape shape : ((XSSFDrawing) drawing).getShapes()) {
@@ -928,7 +917,7 @@ public class SpreadsheetFactory implements Serializable {
      * Returns a chart wrapper if this drawing has a chart, otherwise null.
      */
     private static SheetChartWrapper tryLoadChart(
-            final Spreadsheet spreadsheet, final Drawing drawing,
+            final Spreadsheet spreadsheet, final Drawing<?> drawing,
             final XSSFGraphicFrame frame) {
         try {
             XSSFChart chartXml = getChartForFrame((XSSFDrawing) drawing, frame);
@@ -998,7 +987,7 @@ public class SpreadsheetFactory implements Serializable {
      * The getDrawingPatriarch() method is missing from the interface, so we
      * have to check each implementation. SXSSFSheet is unsupported.
      */
-    private static Drawing getDrawingPatriarch(Sheet sheet) {
+    private static Drawing<?> getDrawingPatriarch(Sheet sheet) {
         if (sheet instanceof XSSFSheet) {
             return ((XSSFSheet) sheet).getDrawingPatriarch();
         } else if (sheet instanceof HSSFSheet) {

@@ -117,7 +117,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
                     @Override
                     public String get(int index) {
                         return Utils.getStringValue(cellReferences.get(index),
-                                spreadsheet);
+                                getSpreadsheet());
                     }
 
                     @Override
@@ -243,9 +243,9 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             @Override
             public void dataSelected() {
                 AreaReference[] areaReferences = Utils
-                        .getAreaReferences(formula);
+                        .getAreaReferences(getSpreadsheet().getWorkbook().getSpreadsheetVersion(), formula);
 
-                spreadsheet.setSelectionRange(
+                getSpreadsheet().setSelectionRange(
                         areaReferences[0].getFirstCell().getRow(),
                         areaReferences[0].getFirstCell().getCol(),
                         areaReferences[areaReferences.length - 1].getLastCell()
@@ -293,7 +293,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         return decimalCount;
     }
 
-    private void onValueChange(final List<CellReference> referencedCells,
+    void onValueChange(final List<CellReference> referencedCells,
                                final SERIES_DATA_TYPE seriesData,
                                final ValueUpdateMode updateMode,
                                Spreadsheet.ValueChangeEvent event) {

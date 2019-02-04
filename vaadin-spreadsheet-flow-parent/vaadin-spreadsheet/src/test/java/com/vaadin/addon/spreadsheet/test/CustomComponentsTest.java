@@ -3,7 +3,6 @@ package com.vaadin.addon.spreadsheet.test;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
