@@ -46,7 +46,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     @Test
     public void contextClickOnRow_itemClickGetsTargetItem() {
         grid.getCell(56, 1).contextClick();
-        $("vaadin-item").first().click();
+        $("vaadin-context-menu-item").first().click();
         assertMessage("Person 56");
         verifyClosed();
     }
@@ -54,7 +54,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     @Test
     public void contextClickOnRow_itemClickGetsGrid() {
         grid.getCell(56, 1).contextClick();
-        $("vaadin-item").get(1).click();
+        $("vaadin-context-menu-item").get(1).click();
         assertMessage("Grid id: grid-with-context-menu");
         verifyClosed();
     }
@@ -62,7 +62,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     @Test
     public void contextClickOnHeader_targetItemReturnsNull() {
         grid.getHeaderCell(0).contextClick();
-        $("vaadin-item").first().click();
+        $("vaadin-context-menu-item").first().click();
         assertMessage("no target item");
         verifyClosed();
     }
@@ -71,7 +71,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     public void setOpenOnClick_clickOnRow_itemClickGetsTargetItem() {
         $("button").id("toggle-open-on-click").click();
         grid.getCell(14, 0).click();
-        $("vaadin-item").first().click();
+        $("vaadin-context-menu-item").first().click();
         assertMessage("Person 14");
         verifyClosed();
     }
@@ -87,14 +87,14 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     public void addSubMenu_itemClickGetsTargetItemAndGrid() {
         $("button").id("add-sub-menu").click();
         grid.getCell(45, 1).contextClick();
-        openSubMenu($("vaadin-item").get(3));
+        openSubMenu($("vaadin-context-menu-item").get(3));
         waitUntil(driver -> $(OVERLAY_TAG).all().size() == 2);
         getSubMenuItems().get(0).click();
         assertMessage("Person 45");
         verifyClosed();
 
         grid.getCell(29, 0).contextClick();
-        openSubMenu($("vaadin-item").get(3));
+        openSubMenu($("vaadin-context-menu-item").get(3));
         waitUntil(driver -> $("vaadin-context-menu-overlay").all().size() == 2);
         getSubMenuItems().get(1).click();
         assertMessage("Grid id: grid-with-context-menu");
@@ -106,7 +106,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         GridElement gridInATemplate = $("grid-in-a-template").first()
                 .$(GridElement.class).first();
         gridInATemplate.getCell(18, 0).contextClick();
-        $("vaadin-item").first().click();
+        $("vaadin-context-menu-item").first().click();
         assertMessage("Item 18");
     }
 
@@ -122,17 +122,17 @@ public class ContextMenuGridIT extends AbstractComponentIT {
 
         TestBenchElement menuOverlay = $(OVERLAY_TAG).first();
 
-        TestBenchElement overlayContainer = menuOverlay.$("vaadin-list-box")
+        TestBenchElement overlayContainer = menuOverlay.$("vaadin-context-menu-list-box")
                 .first();
         List<WebElement> items = overlayContainer.findElements(By.xpath("./*"));
         Assert.assertEquals(4, items.size());
-        Assert.assertEquals("vaadin-item",
+        Assert.assertEquals("vaadin-context-menu-item",
                 items.get(0).getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("hr",
                 items.get(1).getTagName().toLowerCase(Locale.ENGLISH));
-        Assert.assertEquals("vaadin-item",
+        Assert.assertEquals("vaadin-context-menu-item",
                 items.get(2).getTagName().toLowerCase(Locale.ENGLISH));
-        Assert.assertEquals("vaadin-item",
+        Assert.assertEquals("vaadin-context-menu-item",
                 items.get(3).getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("Link", items.get(3).getText());
     }
@@ -150,28 +150,28 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         waitUntil(driver -> $(OVERLAY_TAG).all().size() == 1);
         TestBenchElement menuOverlay = $(OVERLAY_TAG).first();
 
-        TestBenchElement overlayContainer = menuOverlay.$("vaadin-list-box")
+        TestBenchElement overlayContainer = menuOverlay.$("vaadin-context-menu-list-box")
                 .first();
-        openSubMenu(overlayContainer.$("vaadin-item").get(3));
+        openSubMenu(overlayContainer.$("vaadin-context-menu-item").get(3));
 
         waitUntil(driver -> $(OVERLAY_TAG).all().size() == 2);
         TestBenchElement subMenuOverlay = $(OVERLAY_TAG).get(1);
 
-        List<WebElement> items = subMenuOverlay.$("vaadin-list-box").first()
+        List<WebElement> items = subMenuOverlay.$("vaadin-context-menu-list-box").first()
                 .findElements(By.xpath("./*"));
         Assert.assertEquals(4, items.size());
-        Assert.assertEquals("vaadin-item",
+        Assert.assertEquals("vaadin-context-menu-item",
                 items.get(0).getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("h1",
                 items.get(1).getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("bar", items.get(1).getText());
-        Assert.assertEquals("vaadin-item",
+        Assert.assertEquals("vaadin-context-menu-item",
                 items.get(2).getTagName().toLowerCase(Locale.ENGLISH));
-        Assert.assertEquals("vaadin-item",
+        Assert.assertEquals("vaadin-context-menu-item",
                 items.get(3).getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("Link", items.get(3).getText());
 
-        subMenuOverlay.$("vaadin-item").get(0).click();
+        subMenuOverlay.$("vaadin-context-menu-item").get(0).click();
 
         assertMessage("Person 0");
     }
@@ -187,7 +187,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     }
 
     private List<TestBenchElement> getSubMenuItems() {
-        return $(OVERLAY_TAG).get(1).$("vaadin-item").all();
+        return $(OVERLAY_TAG).get(1).$("vaadin-context-menu-item").all();
     }
 
     private void verifyClosed() {
