@@ -22,8 +22,6 @@ Add Details to your project
 
 ### Using Vaadin Details
 
-[<img src="https://raw.githubusercontent.com/vaadin/vaadin-details/master/screenshot.gif" width="700" alt="Screenshot of vaadin-details">](https://vaadin.com/components/vaadin-details)
-
 #### Basic use
 ```java
 Component component = new Component();
