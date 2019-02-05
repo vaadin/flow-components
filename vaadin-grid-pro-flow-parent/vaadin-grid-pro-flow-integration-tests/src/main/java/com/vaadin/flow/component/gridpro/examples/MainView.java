@@ -44,7 +44,7 @@ public class MainView extends VerticalLayout {
         listOptions.add("Marketing");
         listOptions.add("Sales");
         grid.addEditColumn(Person::getDepartment).select((item, newValue) -> {
-            item.setDepartment(Department.valueOf(newValue));
+            item.setDepartment(fromStringRepresentation((newValue)));
             itemDisplayPanel.setText(item.toString());
             subPropertyDisplayPanel.setText(newValue);
         }, listOptions).setHeader("Department").setWidth("300px");
@@ -68,5 +68,16 @@ public class MainView extends VerticalLayout {
         person.setDepartment(Department.getRandomDepartment());
 
         return person;
+    }
+
+    public static Department fromStringRepresentation(String stringRepresentation)
+    {
+        for(Department type : Department.values()) {
+            if(type.getStringRepresentation().equals(stringRepresentation.toLowerCase())) {
+               return type;
+            }
+        }
+
+        return null;
     }
 }
