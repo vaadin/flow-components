@@ -12,7 +12,7 @@
 	<artifactId>vaadin-cookie-consent-flow</artifactId>
 
 	<packaging>jar</packaging>
-	<name>Vaadin Cookie Consent for Vaadin 10</name>
+	<name>Cookie Consent for Vaadin Flow</name>
 
 	<properties>
 		<jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>

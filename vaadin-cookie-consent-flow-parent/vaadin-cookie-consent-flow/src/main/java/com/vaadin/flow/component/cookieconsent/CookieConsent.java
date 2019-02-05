@@ -2,9 +2,9 @@ package com.vaadin.flow.component.cookieconsent;
 
 /*
  * #%L
- * Vaadin Cookie Consent for Vaadin 10
+ * Cookie Consent for Vaadin Flow
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright (C) 2017 - 2019 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
