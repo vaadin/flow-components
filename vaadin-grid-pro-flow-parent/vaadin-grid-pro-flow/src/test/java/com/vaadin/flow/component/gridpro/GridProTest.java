@@ -6,10 +6,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.grid.Grid;
+
 public class GridProTest {
 
     GridPro<String> grid;
-    GridPro.EditColumn<String> textColumn;
+    Grid.Column<String> textColumn;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -17,7 +19,7 @@ public class GridProTest {
     @Before
     public void init() {
         grid = new GridPro<>();
-        textColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.text((item, newValue) -> {}));
+        textColumn = grid.addEditColumn(str -> str).text((item, newValue) -> {});
     }
 
     @Test

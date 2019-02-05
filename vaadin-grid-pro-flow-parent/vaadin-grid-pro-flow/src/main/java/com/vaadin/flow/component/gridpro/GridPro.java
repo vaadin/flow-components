@@ -17,24 +17,27 @@ package com.vaadin.flow.component.gridpro;
  * #L%
  */
 
-import com.vaadin.flow.component.*;
-import com.vaadin.flow.component.grid.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.data.provider.Query;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
-
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Objects;
-
 
 @Tag("vaadin-grid-pro")
 @HtmlImport("frontend://bower_components/vaadin-grid-pro/src/vaadin-grid-pro.html")
@@ -198,62 +201,40 @@ public class GridPro<E> extends Grid<E> {
 
     /**
      * Adds a new edit column to this {@link GridPro} with a value provider.
-     * <p>
-     * The instance of {@link EditColumnConfigurator} should be provided as
-     * second parameter in order to configure the needed type of the editor for the
-     * column. Available static methods to configure the needed editor type are:
-     * {@link EditColumnConfigurator#text(ItemUpdater)}
-     * {@link EditColumnConfigurator#checkbox(ItemUpdater)}
-     * {@link EditColumnConfigurator#select(ItemUpdater, List)}
      *
      * @param valueProvider
      *            the value provider
-     * @param columnConfigurator
-     *            the instance of {@link EditColumnConfigurator} class which configures
-     *            the column to operate with specific type of the editor
-     * @return the created column
+     * @return an edit column configurer for configuring the column editor
+     *
      * @see Grid#addColumn(ValueProvider)
      * @see EditColumnConfigurator#text(ItemUpdater)
      * @see EditColumnConfigurator#checkbox(ItemUpdater)
      * @see EditColumnConfigurator#select(ItemUpdater, List)
      * @see #removeColumn(Column)
      */
-    public EditColumn<E> addEditColumn(ValueProvider<E, ?> valueProvider, EditColumnConfigurator<E> columnConfigurator) {
-        Objects.requireNonNull(columnConfigurator);
-
+    public EditColumnConfigurator<E> addEditColumn(ValueProvider<E, ?> valueProvider) {
         EditColumn<E> column = this.addColumn(valueProvider, this::createEditColumn);
 
-        return configureEditColumn(column, columnConfigurator);
+        return new EditColumnConfigurator<>(column);
     }
 
     /**
      * Adds a new edit column to this {@link GridPro} with a renderer.
-     * <p>
-     * The instance of {@link EditColumnConfigurator} should be provided as
-     * second parameter in order to configure the needed type of the editor for the
-     * column. Available static methods to configure the needed editor type are:
-     * {@link EditColumnConfigurator#text(ItemUpdater)}
-     * {@link EditColumnConfigurator#checkbox(ItemUpdater)}
-     * {@link EditColumnConfigurator#select(ItemUpdater, List)}
      *
      * @param renderer
      *            the renderer used to create the grid cell structure
-     * @param columnConfigurator
-     *            the instance of {@link EditColumnConfigurator} class which configures
-     *            the column to operate with specific type of the editor
-     * @return the created column
+     * @return an edit column configurer for configuring the column editor
+     *
      * @see Grid#addColumn(Renderer)
      * @see EditColumnConfigurator#text(ItemUpdater)
      * @see EditColumnConfigurator#checkbox(ItemUpdater)
      * @see EditColumnConfigurator#select(ItemUpdater, List)
      * @see #removeColumn(Column)
      */
-    public EditColumn<E> addEditColumn(Renderer<E> renderer, EditColumnConfigurator<E> columnConfigurator) {
-        Objects.requireNonNull(columnConfigurator);
-
+    public EditColumnConfigurator<E> addEditColumn(Renderer<E> renderer) {
         EditColumn<E> column = this.addColumn(renderer, this::createEditColumn);
 
-        return configureEditColumn(column, columnConfigurator);
+        return new EditColumnConfigurator<>(column);
     }
 
     /**
@@ -261,34 +242,21 @@ public class GridPro<E> extends Grid<E> {
      * <p>
      * <strong>Note:</strong> This method can only be used for a Grid created
      * from a bean type with {@link #GridPro(Class)}.
-     * <p>
-     * The instance of {@link EditColumnConfigurator} should be provided as
-     * second parameter in order to configure the needed type of the editor for the
-     * column. Available static methods to configure the needed editor type are:
-     * {@link EditColumnConfigurator#text(ItemUpdater)}
-     * {@link EditColumnConfigurator#checkbox(ItemUpdater)}
-     * {@link EditColumnConfigurator#select(ItemUpdater, List)}
-     *
-     * @see #removeColumn(Column)
      *
      * @param propertyName
      *            the property name of the new column, not <code>null</code>
-     * @param columnConfigurator
-     *            the instance of {@link EditColumnConfigurator} class which configures
-     *            the column to operate with specific type of the editor
-     * @return the created column
+     * @return and edit column configurer for configuring the column editor
      *
      * @see Grid#addColumn(String)
      * @see EditColumnConfigurator#text(ItemUpdater)
      * @see EditColumnConfigurator#checkbox(ItemUpdater)
      * @see EditColumnConfigurator#select(ItemUpdater, List)
+     * @see #removeColumn(Column)
      */
-    public EditColumn<E> addEditColumn(String propertyName, EditColumnConfigurator<E> columnConfigurator) {
-        Objects.requireNonNull(columnConfigurator);
-
+    public EditColumnConfigurator<E> addEditColumn(String propertyName) {
         EditColumn<E> column = this.addColumn(propertyName, this::createEditColumn);
 
-        return configureEditColumn(column, columnConfigurator);
+        return new EditColumnConfigurator<>(column);
     }
 
     /**
@@ -339,14 +307,6 @@ public class GridPro<E> extends Grid<E> {
     @Synchronize("keep-editor-open-changed")
     public boolean getKeepEditorOpen() {
         return getElement().getProperty("keepEditorOpen", false);
-    }
-
-    private EditColumn<E> configureEditColumn(EditColumn<E> column, EditColumnConfigurator<E> columnConfigurator) {
-        column.setEditorType(columnConfigurator.getType());
-        column.setItemUpdater(columnConfigurator.getItemUpdater());
-        column.setOptions(columnConfigurator.getOptions());
-
-        return column;
     }
 
     /**

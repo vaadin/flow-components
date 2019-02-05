@@ -6,20 +6,27 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class GridProEditColumnConfiguratorTest {
 
-    EditColumnConfigurator configurator;
+    EditColumnConfigurator<Person> configurator;
     ItemUpdater testItemUpdater;
     List<String> listOptions;
+    EditColumn<Person> column;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void init() {
+        GridPro<Person> grid = new GridPro<>();
+        configurator = grid.addEditColumn(value -> value);
+        column = (EditColumn<Person>) configurator.getColumn();
+
         testItemUpdater = (item, newValue) -> {};
         listOptions = new ArrayList<>();
         listOptions.add("foo");
@@ -29,15 +36,15 @@ public class GridProEditColumnConfiguratorTest {
 
     @Test
     public void shouldConfigureTextEditColumnPreset() {
-        configurator = EditColumnConfigurator.text(testItemUpdater);
+        configurator.text(testItemUpdater);
 
-        Assert.assertEquals(configurator.getType(), EditorType.TEXT);
-        Assert.assertEquals(configurator.getItemUpdater(), testItemUpdater);
+        Assert.assertEquals(column.getEditorType(), EditorType.TEXT.getTypeName());
+        Assert.assertEquals(column.getItemUpdater(), testItemUpdater);
     }
 
     @Test
     public void shouldConfigureCheckboxEditColumnPreset() {
-        Object initialItem = new Object();
+        Person initialItem = new Person(null, 0);
         String initialValue = "true";
 
         testItemUpdater = (item, newValue) -> {
@@ -45,67 +52,67 @@ public class GridProEditColumnConfiguratorTest {
             Assert.assertTrue(Boolean.parseBoolean(initialValue));
         };
 
-        configurator = EditColumnConfigurator.checkbox(testItemUpdater);
-        Assert.assertEquals(configurator.getType(), EditorType.CHECKBOX);
-        configurator.getItemUpdater().accept(initialItem, initialValue);
+        configurator.checkbox(testItemUpdater);
+        Assert.assertEquals(column.getEditorType(), EditorType.CHECKBOX.getTypeName());
+        column.getItemUpdater().accept(initialItem, initialValue);
     }
 
     @Test
     public void shouldConfigureSelectEditColumnPreset() {
-        configurator = EditColumnConfigurator.select(testItemUpdater, listOptions);
+        configurator.select(testItemUpdater, listOptions);
 
-        Assert.assertEquals(configurator.getType(), EditorType.SELECT);
-        Assert.assertEquals(configurator.getItemUpdater(), testItemUpdater);
-        Assert.assertEquals(configurator.getOptions(), listOptions);
+        Assert.assertEquals(column.getEditorType(), EditorType.SELECT.getTypeName());
+        Assert.assertEquals(column.getItemUpdater(), testItemUpdater);
+        Assert.assertEquals(column.getOptions(), listOptions);
     }
 
     @Test
     public void shouldConfigureSelectEditColumnEnumPreset() {
-        configurator = EditColumnConfigurator.select(testItemUpdater, "foo", "bar", "baz");
+        configurator.select(testItemUpdater, "foo", "bar", "baz");
 
-        Assert.assertEquals(configurator.getType(), EditorType.SELECT);
-        Assert.assertEquals(configurator.getItemUpdater(), testItemUpdater);
-        Assert.assertEquals(configurator.getOptions(), listOptions);
+        Assert.assertEquals(column.getEditorType(), EditorType.SELECT.getTypeName());
+        Assert.assertEquals(column.getItemUpdater(), testItemUpdater);
+        Assert.assertEquals(column.getOptions(), listOptions);
     }
 
     @Test
     public void shouldConfigureSelectEditColumnEnumToStringPreset() {
-        Object initialItem = new Object();
+        Person initialItem = new Person(null, 0);
         String initialValue = "bar";
 
         testItemUpdater = (item, newValue) -> {
             Assert.assertEquals(initialItem, item);
-            Assert.assertEquals(initialValue, ((testEnum) newValue).getStringRepresentation());
+            Assert.assertEquals(initialValue, ((TestEnum) newValue).getStringRepresentation());
         };
-        configurator = EditColumnConfigurator.select(testItemUpdater, testEnum.class, testEnum::getStringRepresentation);
+        configurator.select(testItemUpdater, TestEnum.class, TestEnum::getStringRepresentation);
 
-        Assert.assertEquals(configurator.getType(), EditorType.SELECT);
-        Assert.assertEquals(configurator.getOptions(), listOptions);
-        configurator.getItemUpdater().accept(initialItem, initialValue);
+        Assert.assertEquals(column.getEditorType(), EditorType.SELECT.getTypeName());
+        Assert.assertEquals(column.getOptions(), listOptions);
+        column.getItemUpdater().accept(initialItem, initialValue);
     }
 
     @Test
     public void shouldConfigureSelectEditColumnEnumDefaultPreset() {
-        Object initialItem = new Object();
+        Person initialItem = new Person(null, 0);
         String initialValue = "bar";
 
         testItemUpdater = (item, newValue) -> {
             Assert.assertEquals(initialItem, item);
-            Assert.assertEquals(initialValue, ((testEnum) newValue).getStringRepresentation());
+            Assert.assertEquals(initialValue, ((TestEnum) newValue).getStringRepresentation());
         };
-        configurator = EditColumnConfigurator.select(testItemUpdater, testEnum.class);
+        configurator.select(testItemUpdater, TestEnum.class);
 
-        Assert.assertEquals(configurator.getType(), EditorType.SELECT);
-        Assert.assertEquals(configurator.getOptions(), listOptions);
-        configurator.getItemUpdater().accept(initialItem, initialValue);
+        Assert.assertEquals(column.getEditorType(), EditorType.SELECT.getTypeName());
+        Assert.assertEquals(column.getOptions(), listOptions);
+        column.getItemUpdater().accept(initialItem, initialValue);
     }
 
-    private enum testEnum {
+    private enum TestEnum {
         FOO("foo"), BAR("bar"), BAZ("baz");
 
         private String stringRepresentation;
 
-        testEnum(String stringRepresentation) {
+        TestEnum(String stringRepresentation) {
             this.stringRepresentation = stringRepresentation;
         }
 

@@ -1,14 +1,16 @@
 package com.vaadin.flow.component.gridpro;
 
-import com.vaadin.flow.function.SerializableBiConsumer;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
 
 public class GridProEditColumnTest {
 
@@ -30,14 +32,14 @@ public class GridProEditColumnTest {
         };
 
         grid = new GridPro<>();
-        textColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.text(itemUpdater));
-        checkboxColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.checkbox(itemUpdater));
+        textColumn = (EditColumn<String>) grid.addEditColumn(str -> str).text(itemUpdater);
+        checkboxColumn = (EditColumn<String>) grid.addEditColumn(str -> str).checkbox(itemUpdater);
 
         listOptions = new ArrayList<>();
         listOptions.add("foo");
         listOptions.add("bar");
         listOptions.add("baz");
-        selectColumn = grid.addEditColumn(str -> str, EditColumnConfigurator.select(itemUpdater, listOptions));
+        selectColumn = (EditColumn<String>) grid.addEditColumn(str -> str).select(itemUpdater, listOptions);
     }
 
     @Test
@@ -87,7 +89,7 @@ public class GridProEditColumnTest {
     public void addColumn_changeEditorType() {
         GridPro<Person> grid = new GridPro<>();
 
-        GridPro.EditColumn<Person> nameColumn = grid.addEditColumn(Person::getName, EditColumnConfigurator.text((item, newValue) -> {}));
+        GridPro.EditColumn<Person> nameColumn = (EditColumn<Person>) grid.addEditColumn(Person::getName).text((item, newValue) -> {});
         nameColumn.setEditorType(EditorType.CHECKBOX);
         Assert.assertEquals(nameColumn.getEditorType(), EditorType.CHECKBOX.getTypeName());
 
@@ -100,7 +102,7 @@ public class GridProEditColumnTest {
 
     @Test
     public void addEditColumn_returnsNonNullAndEditColumnType() {
-        GridPro.EditColumn column = new GridPro<Person>().addEditColumn(str -> str, EditColumnConfigurator.text((item, newValue) -> {}));
+        Grid.Column<Person> column = new GridPro<Person>().addEditColumn(str -> str).text((item, newValue) -> {});
         Assert.assertNotNull(column);
         Assert.assertEquals(GridPro.EditColumn.class, column.getClass());
     }

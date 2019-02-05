@@ -1,16 +1,15 @@
 package com.vaadin.flow.component.gridpro.examples;
 
-import com.vaadin.flow.component.gridpro.EditColumnConfigurator;
-import com.vaadin.flow.component.gridpro.GridPro;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Route;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.vaadin.flow.component.gridpro.GridPro;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 
 @Route
 public class MainView extends VerticalLayout {
@@ -28,27 +27,27 @@ public class MainView extends VerticalLayout {
 
         grid.addColumn(Person::getAge).setHeader("Age");
 
-        grid.addEditColumn(Person::getName, EditColumnConfigurator.text((item, newValue) -> {
+        grid.addEditColumn(Person::getName).text((item, newValue) -> {
             item.setName(newValue);
             itemDisplayPanel.setText(item.toString());
             subPropertyDisplayPanel.setText(newValue);
-        })).setHeader("Name").setWidth("300px");
+        }).setHeader("Name").setWidth("300px");
 
-        grid.addEditColumn(Person::isSubscriber, EditColumnConfigurator.checkbox((item, newValue) -> {
+        grid.addEditColumn(Person::isSubscriber).checkbox((item, newValue) -> {
             item.setSubscriber(newValue);
             itemDisplayPanel.setText(item.toString());
             subPropertyDisplayPanel.setText(newValue.toString());
-        })).setHeader("Subscriber").setWidth("300px");
+        }).setHeader("Subscriber").setWidth("300px");
 
         List<String> listOptions = new ArrayList<>();
         listOptions.add("Services");
         listOptions.add("Marketing");
         listOptions.add("Sales");
-        grid.addEditColumn(Person::getDepartment, EditColumnConfigurator.select((item, newValue) -> {
+        grid.addEditColumn(Person::getDepartment).select((item, newValue) -> {
             item.setDepartment(Department.valueOf(newValue));
             itemDisplayPanel.setText(item.toString());
             subPropertyDisplayPanel.setText(newValue);
-        }, listOptions)).setHeader("Department").setWidth("300px");
+        }, listOptions).setHeader("Department").setWidth("300px");
 
         add(grid, itemDisplayPanel, subPropertyDisplayPanel);
     }
