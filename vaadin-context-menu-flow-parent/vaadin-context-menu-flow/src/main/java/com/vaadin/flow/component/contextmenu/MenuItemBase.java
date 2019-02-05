@@ -37,7 +37,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
-@Tag("vaadin-item")
+@Tag("vaadin-context-menu-item")
 @HtmlImport("frontend://bower_components/vaadin-item/src/vaadin-item.html")
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component implements HasText, HasComponents, HasEnabled {

@@ -152,15 +152,16 @@ public class ContextMenuDemoIT extends ComponentDemoTest {
 
         TestBenchElement subMenuOverlay = $(OVERLAY_TAG).all().get(1);
 
-        TestBenchElement overlayContainer = subMenuOverlay.$("vaadin-list-box")
+        TestBenchElement overlayContainer = subMenuOverlay.$("vaadin" +
+                "-context-menu-list-box")
                 .first();
         List<WebElement> items = overlayContainer.findElements(By.xpath("./*"));
         Assert.assertEquals(4, items.size());
-        Assert.assertEquals("vaadin-item",
+        Assert.assertEquals("vaadin-context-menu-item",
                 items.get(0).getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("hr",
                 items.get(1).getTagName().toLowerCase(Locale.ENGLISH));
-        Assert.assertEquals("vaadin-item",
+        Assert.assertEquals("vaadin-context-menu-item",
                 items.get(2).getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("label",
                 items.get(3).getTagName().toLowerCase(Locale.ENGLISH));
@@ -190,11 +191,11 @@ public class ContextMenuDemoIT extends ComponentDemoTest {
     }
 
     private List<TestBenchElement> getMenuItems() {
-        return getOverlay().$("vaadin-item").all();
+        return getOverlay().$("vaadin-context-menu-item").all();
     }
 
     private List<TestBenchElement> getMenuItems(TestBenchElement overlay) {
-        return overlay.$("vaadin-item").all();
+        return overlay.$("vaadin-context-menu-item").all();
     }
 
     private void openSubMenu(WebElement parentItem) {
