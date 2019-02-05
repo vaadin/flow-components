@@ -193,14 +193,14 @@
             <dependencies>
                 <!--VAADIN COMPONENTS-->
                 <dependency>
-                    <groupId>com.vaadin</groupId>
-                    <artifactId>vaadin-icons-flow</artifactId>
-                    <version>1.3.0.beta1</version>
+                    <groupId>org.webjars.bowergithub.vaadin</groupId>
+                    <artifactId>vaadin-icons</artifactId>
+                    <version>4.2.1</version>
                 </dependency>
                 <dependency>
-                    <groupId>com.vaadin</groupId>
-                    <artifactId>vaadin-split-layout-flow</artifactId>
-                    <version>1.3.0.beta1</version>
+                    <groupId>org.webjars.bowergithub.vaadin</groupId>
+                    <artifactId>vaadin-split-layout</artifactId>
+                    <version>4.1.0</version>
                 </dependency>
 
                 <!--PAPER ELEMENTS-->
