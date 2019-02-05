@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-details-testbench</artifactId>
-            <version>${vaadin.details.version}</version>
+            <version>${vaadin.details.flow.version}</version>
         </dependency>
     </dependencies>
 
