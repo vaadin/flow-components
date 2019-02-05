@@ -24,7 +24,7 @@ Add Details to your project
 
 #### Basic use
 ```java
-Component component = new Component();
+Details component = new Details("Heading", new Span("Details"));
 ```
 
 ## Setting up for development
