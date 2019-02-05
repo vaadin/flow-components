@@ -1,6 +1,6 @@
 # Vaadin GridPro for Flow
 
-Vaadin GridPro for Flow is a UI component add-on for Vaadin.
+Vaadin GridPro for Flow is a high quality data grid / data table UI component add-on for Vaadin.
 
 ## License & Author
 
@@ -24,11 +24,11 @@ Add GridPro to your project
 
 ### Using Vaadin GridPro
 
-[<img src="https://raw.githubusercontent.com/vaadin/vaadin-grid-pro/master/screenshot.gif" width="700" alt="Screenshot of vaadin-grid-pro">](https://vaadin.com/components/vaadin-grid-pro)
+[<img src="https://raw.githubusercontent.com/vaadin/vaadin-grid-pro/master/screenshot.png" width="700" alt="Screenshot of vaadin-grid-pro">](https://vaadin.com/components/vaadin-grid-pro)
 
 #### Basic use
 ```java
-Component component = new Component();
+GridPro<> grid = new GridPro<>();
 ```
 
 ## Setting up for development
