@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>vaadin-rich-text-editor-flow-vaadincom-demo</artifactId>
-    <packaging>jar</packaging>
+    <packaging>${packaging.type}</packaging>
 
     <name>Vaadin Rich Text Editor Flow VaadinCom Demo</name>
 
@@ -56,12 +56,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>1.0.0</version>
+            <version>1.3.0</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons-flow</artifactId>
-            <version>1.0.0</version>
+            <version>1.3.0</version>
         </dependency>
     </dependencies>
 
@@ -87,5 +87,36 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <packaging.type>jar</packaging.type>
+            </properties>
+        </profile>
+        <profile>
+            <!--Only used for local testing-->
+            <id>war</id>
+            <properties>
+                <packaging.type>war</packaging.type>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${jetty.plugin.version}</version>
+                        <configuration combine.self="override">
+                            <scanIntervalSeconds>5</scanIntervalSeconds>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
