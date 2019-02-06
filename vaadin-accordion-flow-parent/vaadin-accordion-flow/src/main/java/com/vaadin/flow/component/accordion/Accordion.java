@@ -28,7 +28,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.shared.Registration;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -62,7 +61,7 @@ public class Accordion extends Component implements HasSize {
      * @param panel the non-null panel to be added
      * @return the added panel
      */
-    public AccordionPanel add(@Nonnull AccordionPanel panel) {
+    public AccordionPanel add(AccordionPanel panel) {
         Objects.requireNonNull(panel, "The panel to be added cannot be null");
         getElement().appendChild(panel.getElement());
         return panel;
@@ -73,7 +72,7 @@ public class Accordion extends Component implements HasSize {
      *
      * @param panel the non-null panel to be removed
      */
-    public void remove(@Nonnull AccordionPanel panel) {
+    public void remove(AccordionPanel panel) {
         Objects.requireNonNull(panel, "The panel to be removed cannot be null");
         getElement().removeChild(panel.getElement());
     }
@@ -83,7 +82,7 @@ public class Accordion extends Component implements HasSize {
      *
      * @param content the non-null content of the panel to be removed
      */
-    public void remove(@Nonnull Component content) {
+    public void remove(Component content) {
         Objects.requireNonNull(content, "The content of the panel to be removed cannot be null");
 
         if (content instanceof AccordionPanel) {
@@ -129,7 +128,7 @@ public class Accordion extends Component implements HasSize {
      *
      * @param panel the non-null panel to be opened
      */
-    public void open(@Nonnull AccordionPanel panel) {
+    public void open(AccordionPanel panel) {
         Objects.requireNonNull(panel, "The panel to be opened cannot be null");
         open(getElement().indexOfChild(panel.getElement()));
     }
