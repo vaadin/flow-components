@@ -65,11 +65,6 @@ public class MainView extends HorizontalLayout {
 
         accordion.addOpenedChangeListener(e -> {
             final Optional<AccordionPanel> openedPanel = e.getOpenedPanel();
-            if (!openedPanel.equals(accordion.getOpenedPanel())) {
-                throw new IllegalStateException("Event opened panel (" + openedPanel +
-                        ") and component opened panel (" + accordion.getOpenedPanel() +
-                        ") inconsistent");
-            }
 
             final String text = openedPanel
                     .map(accordionPanel -> accordionPanel.getSummaryText() + " opened")
