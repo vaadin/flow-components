@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.confirmdialog.vaadincom;
+package com.vaadin.flow.component.confirmdialog;
 
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;

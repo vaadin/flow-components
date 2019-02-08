@@ -8,10 +8,10 @@
         <artifactId>vaadin-confirm-dialog-flow-root</artifactId>
         <version>1.2-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-confirm-dialog-flow-vaadincom-demo</artifactId>
+    <artifactId>vaadin-confirm-dialog-flow-demo</artifactId>
 
     <packaging>jar</packaging>
-    <name>vaadin-confirm-dialog-flow-vaadincom-demo</name>
+    <name>Vaadin Confirm Dialog Flow Demo</name>
 
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>

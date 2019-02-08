@@ -33,7 +33,7 @@
 		<module>vaadin-confirm-dialog-flow</module>
 		<module>vaadin-confirm-dialog-testbench</module>
 		<module>vaadin-confirm-dialog-flow-integration-tests</module>
-		<module>vaadin-confirm-dialog-flow-vaadincom-demo</module>
+		<module>vaadin-confirm-dialog-flow-demo</module>
 	</modules>
 
 	<repositories>
