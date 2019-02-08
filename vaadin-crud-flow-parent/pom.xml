@@ -37,7 +37,7 @@
         <module>vaadin-crud-flow</module>
         <module>vaadin-crud-testbench</module>
         <module>vaadin-crud-flow-integration-tests</module>
-        <module>vaadin-crud-flow-vaadincom-demo</module>
+        <module>vaadin-crud-flow-demo</module>
     </modules>
 
     <repositories>

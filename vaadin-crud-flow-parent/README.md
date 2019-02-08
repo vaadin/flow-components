@@ -119,5 +119,5 @@ To compile and run demos locally execute
 
 ```
 mvn compile
-mvn -pl vaadin-crud-flow-vaadincom-demo -Pwar jetty:run
+mvn -pl vaadin-crud-flow-demo -Pwar jetty:run
 ```

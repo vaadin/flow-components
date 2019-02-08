@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.crud.vaadincom;
+package com.vaadin.flow.component.crud;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEvent;

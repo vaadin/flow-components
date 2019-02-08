@@ -9,10 +9,10 @@
         <version>1.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>vaadin-crud-flow-vaadincom-demo</artifactId>
+    <artifactId>vaadin-crud-flow-demo</artifactId>
     <packaging>${packaging.type}</packaging>
 
-    <name>Vaadin Crud Flow VaadinCom Demo</name>
+    <name>Vaadin Crud Flow Demo</name>
 
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>
