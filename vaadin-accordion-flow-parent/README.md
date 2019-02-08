@@ -53,5 +53,5 @@ To compile and run demos locally execute
 
 ```
 mvn compile
-mvn -pl vaadin-accordion-flow-vaadincom-demo -Pwar jetty:run
+mvn -pl vaadin-accordion-flow-demo -Pwar jetty:run
 ```

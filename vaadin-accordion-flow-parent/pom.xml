@@ -39,7 +39,7 @@
         <module>vaadin-accordion-flow</module>
         <module>vaadin-accordion-testbench</module>
         <module>vaadin-accordion-flow-integration-tests</module>
-        <module>vaadin-accordion-flow-vaadincom-demo</module>
+        <module>vaadin-accordion-flow-demo</module>
     </modules>
 
     <repositories>

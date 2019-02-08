@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.accordion.vaadincom;
+package com.vaadin.flow.component.accordion;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
