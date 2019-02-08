@@ -52,12 +52,10 @@ public class ConfirmDialogElement extends TestBenchElement {
     }
 
     public String getMessageText() {
-        return getOverlayContext().$(TestBenchElement.class)
-                .attribute("part", "message").first().getText();
+        return getPropertyString("message");
     }
 
     public String getHeaderText() {
-        return getOverlayContext().$(TestBenchElement.class)
-                .attribute("part", "header").first().getText();
+        return getPropertyString("header");
     }
 }
