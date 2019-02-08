@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.board.vaadincom;
+package com.vaadin.flow.component.board;
 
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Text;
@@ -11,7 +11,7 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-board")
-@StyleSheet("context://vaadin-board-flow-vaadincom-demo/vaadin-board-demo.css")
+@StyleSheet("context://vaadin-board-flow-demo/vaadin-board-demo.css")
 public class Demos extends DemoView {
 
     private static final String CATEGORY_STYLING = "Styling";

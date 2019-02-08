@@ -8,10 +8,10 @@
         <artifactId>vaadin-board-flow-root</artifactId>
         <version>2.2-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-board-flow-vaadincom-demo</artifactId>
+    <artifactId>vaadin-board-flow-demo</artifactId>
 
     <packaging>jar</packaging>
-    <name>vaadin-board-flow-vaadincom-demo</name>
+    <name>Vaadin Board Flow Demo</name>
 
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>

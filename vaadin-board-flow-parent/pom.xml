@@ -37,7 +37,7 @@
 		<module>vaadin-board-flow</module>
 		<module>vaadin-board-testbench</module>
 		<module>vaadin-board-flow-integration-tests</module>
-		<module>vaadin-board-flow-vaadincom-demo</module>
+		<module>vaadin-board-flow-demo</module>
 	</modules>
 
 	<repositories>
