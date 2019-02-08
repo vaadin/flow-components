@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.cookieconsent.vaadincom;
+package com.vaadin.flow.component.cookieconsent;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.cookieconsent.CookieConsent;

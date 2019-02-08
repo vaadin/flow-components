@@ -8,10 +8,10 @@
         <artifactId>vaadin-cookie-consent-flow-root</artifactId>
         <version>1.2-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-cookie-consent-flow-vaadincom-demo</artifactId>
+    <artifactId>vaadin-cookie-consent-flow-demo</artifactId>
 
     <packaging>jar</packaging>
-    <name>vaadin-cookie-consent-flow-vaadincom-demo</name>
+    <name>Vaadin Cookie Consent Flow Demo</name>
 
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>

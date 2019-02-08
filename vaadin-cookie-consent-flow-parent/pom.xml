@@ -36,7 +36,7 @@
 	<modules>
 		<module>vaadin-cookie-consent-flow</module>
 		<module>vaadin-cookie-consent-flow-integration-tests</module>
-		<module>vaadin-cookie-consent-flow-vaadincom-demo</module>
+		<module>vaadin-cookie-consent-flow-demo</module>
 		<module>vaadin-cookie-consent-testbench</module>
 	</modules>
 
