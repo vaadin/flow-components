@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.applayout.vaadincom;
+package com.vaadin.flow.component.applayout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;

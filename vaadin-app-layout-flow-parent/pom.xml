@@ -33,7 +33,7 @@
 		<module>vaadin-app-layout-flow</module>
 		<module>vaadin-app-layout-testbench</module>
 		<module>vaadin-app-layout-flow-integration-tests</module>
-		<module>vaadin-app-layout-flow-vaadincom-demo</module>
+		<module>vaadin-app-layout-flow-demo</module>
 	</modules>
 	<repositories>
 		<repository>

@@ -8,10 +8,10 @@
         <artifactId>vaadin-app-layout-flow-root</artifactId>
         <version>1.1-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-app-layout-flow-vaadincom-demo</artifactId>
+    <artifactId>vaadin-app-layout-flow-demo</artifactId>
 
     <packaging>${packaging.type}</packaging>
-    <name>Vaadin App Layout Flow VaadinCom Demo</name>
+    <name>Vaadin App Layout Flow Demo</name>
 
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>
