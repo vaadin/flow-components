@@ -49,6 +49,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
+
 import elemental.json.Json;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
@@ -196,7 +197,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private boolean renderScheduled;
 
     // Filter set by the client when requesting data. It's sent back to client
-    // together with the response so client may know for what filter data is provided.
+    // together with the response so client may know for what filter data is
+    // provided.
     private String lastFilter;
 
     private DataCommunicator<T> dataCommunicator;
@@ -876,6 +878,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         customValueListenersCount++;
         Registration registration = super.addCustomValueSetListener(listener);
         return new CustomValueRegistration(registration);
+    }
+
+    @Override
+    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
+        getElement().callFunction("$connector.enableClientValidation",
+                !requiredIndicatorVisible);
     }
 
     CompositeDataGenerator<T> getDataGenerator() {

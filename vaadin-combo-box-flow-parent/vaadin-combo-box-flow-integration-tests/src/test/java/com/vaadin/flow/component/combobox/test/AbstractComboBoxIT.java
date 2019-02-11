@@ -21,13 +21,15 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.testbench.TestBenchElement;
-import elemental.json.JsonObject;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.testbench.TestBenchElement;
+
+import elemental.json.JsonObject;
 
 @Ignore
 public class AbstractComboBoxIT extends AbstractComponentIT {

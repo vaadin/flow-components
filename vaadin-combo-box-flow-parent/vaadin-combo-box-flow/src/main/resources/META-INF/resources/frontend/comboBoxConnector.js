@@ -162,6 +162,61 @@ window.Vaadin.Flow.comboBoxConnector = {
       // Let server know we're done
       comboBox.$server.confirmUpdate(id);
     }
+    
+    comboBox.$connector.enableClientValidation = function( enable ){
+        let input = comboBox.$["input"];
+        if (input){
+            if ( enable){
+                enableClientValidation(comboBox);
+                enableTextFieldClientValidation(input);
+            }
+            else {
+                disableClientValidation(comboBox);
+                disableTextFieldClientValidation(input,comboBox );
+            }
+        }
+        else {
+            setTimeout( function(){ 
+                comboBox.$connector.enableClientValidation(enable); 
+                }, 10);
+        }
+    }
+    
+    const disableClientValidation =  function (combo){
+        if ( typeof combo.$checkValidity == 'undefined'){
+            combo.$checkValidity = combo.checkValidity;
+            combo.checkValidity = function() { return true; };
+        }
+        if ( typeof combo.$validate == 'undefined'){
+            combo.$validate = combo.validate;
+            combo.validate = function() { return true; };
+        }
+    }
+    
+    const disableTextFieldClientValidation =  function (field, comboBox){
+        if ( typeof field.$checkValidity == 'undefined'){
+            field.$checkValidity = field.checkValidity;
+            field.checkValidity = function() { return !comboBox.invalid; };
+        }
+    }
+    
+    const enableTextFieldClientValidation = function (field){
+        if ( field.$checkValidity ){
+            field.checkValidity = field.$checkValidity;
+            delete field.$checkValidity;
+        }
+     }
+    
+    const enableClientValidation = function (combo){
+        if ( combo.$checkValidity ){
+            combo.checkValidity = combo.$checkValidity;
+            delete combo.$checkValidity;
+        }
+          if ( combo.$validate ){
+            combo.validate = combo.$validate;
+            delete combo.$validate;
+        }
+     }
 
     const commitPage = function (page, callback) {
       let data = cache[page];
