@@ -99,6 +99,8 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * Sets whether to show or hide the error message.
      * The message can be set via {@link #setI18n(LoginI18n)}
      *
+     * Calling this method with {@code true} will also enable the component.
+     *
      * @see #isError()
      *
      * @param error
