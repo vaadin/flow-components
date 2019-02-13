@@ -28,7 +28,7 @@ Add Login to your project
 
 #### Basic use
 ```java
-Component component = new Component();
+LoginOverlay component = new LoginOverlay();
 ```
 
 ## Setting up for development
