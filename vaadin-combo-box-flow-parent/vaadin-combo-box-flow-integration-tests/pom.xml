@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -91,7 +91,7 @@
             <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
@@ -102,6 +102,19 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/main/webapp/frontend</directory>
+                            <includes>
+                                <include>bower_components/</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
@@ -140,6 +153,66 @@
                     <plugin>
                         <groupId>com.lazerycode.selenium</groupId>
                         <artifactId>driver-binary-downloader-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!--This profile is only present for quick testing againt the element from GitHub-->
+        <!--Do not use with production mode-->
+        <profile>
+            <id>bower</id>
+            <activation>
+                <property>
+                    <name>useBower</name>
+                </property>
+            </activation>
+
+            <properties>
+                <buildtools.directory>build-tools</buildtools.directory>
+
+                <!-- Not the newest version because of https://www.polymer-project.org/2.0/docs/tools/node-support -->
+                <frontend.maven.plugin.version>1.6</frontend.maven.plugin.version>
+                <node.version>v8.9.0</node.version>
+                <yarn.version>v1.3.2</yarn.version>
+            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${frontend.maven.plugin.version}</version>
+
+                        <configuration>
+                            <nodeVersion>${node.version}</nodeVersion>
+                            <yarnVersion>${yarn.version}</yarnVersion>
+                            <workingDirectory>${buildtools.directory}</workingDirectory>
+                        </configuration>
+
+                        <executions>
+                            <execution>
+                                <id>install-tools-then-build</id>
+                                <goals>
+                                    <goal>install-node-and-yarn</goal>
+                                    <goal>yarn</goal>
+                                </goals>
+                                <configuration>
+                                    <workingDirectory>${buildtools.directory}</workingDirectory>
+                                    <arguments>install-bower-and-dependencies</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <configuration>
+                            <webAppConfig>
+                                <resourceBases combine.children="append">
+                                    <resourceBase>${project.basedir}/src/main/webapp</resourceBase>
+                                </resourceBases>
+                            </webAppConfig>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
