@@ -11,8 +11,6 @@ window.Vaadin.Flow.comboBoxConnector = {
     let cache = {};
     let lastFilter = '';
 
-    comboBox.size = 0; // To avoid NaN here and there before we get proper data
-
     comboBox.dataProvider = function (params, callback) {
 
       if (params.pageSize != comboBox.pageSize) {
