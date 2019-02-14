@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.bean.SimpleBean;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -34,6 +36,12 @@ public class RefreshDataProviderPage extends Div {
             .ofCollection(nameList);
 
     public RefreshDataProviderPage() {
+        createRefreshAll();
+        add(new Hr());
+        createRefreshItem();
+    }
+
+    private void createRefreshAll() {
         NativeButton update = new NativeButton("Update");
         update.addClickListener(event -> addNames());
         update.setId("update");
@@ -48,5 +56,25 @@ public class RefreshDataProviderPage extends Div {
         nameList.add("foo");
         nameList.add("bar");
         provider.refreshAll();
+    }
+
+    private void createRefreshItem() {
+        SimpleBean item1 = new SimpleBean("foo");
+        SimpleBean item2 = new SimpleBean("bar");
+
+        ComboBox<SimpleBean> comboBox = new ComboBox<>();
+        comboBox.setItemLabelGenerator(SimpleBean::getName);
+        comboBox.setId("refresh-item-combo-box");
+        comboBox.setItems(item1, item2);
+
+        NativeButton button = new NativeButton(
+                "Change both items, refresh only the second one", e -> {
+                    item1.setName("foo updated");
+                    item2.setName("bar updated");
+                    comboBox.getDataProvider().refreshItem(item2);
+                });
+        button.setId("refresh-item");
+
+        add(comboBox, button);
     }
 }

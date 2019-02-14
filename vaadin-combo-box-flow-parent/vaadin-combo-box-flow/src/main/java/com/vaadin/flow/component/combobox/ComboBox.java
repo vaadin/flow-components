@@ -36,6 +36,7 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -505,14 +506,19 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
 
-        dataProvider.addDataProviderListener(
-                e -> dataProviderUpdated(shouldForceServerSideFiltering));
-        dataProviderUpdated(shouldForceServerSideFiltering);
+        dataProvider.addDataProviderListener(e -> {
+            if (e instanceof DataRefreshEvent) {
+                dataCommunicator.refresh(((DataRefreshEvent<T>) e).getItem());
+            } else {
+                refreshAllData(shouldForceServerSideFiltering);
+            }
+        });
+        refreshAllData(shouldForceServerSideFiltering);
 
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
     }
 
-    private void dataProviderUpdated(boolean forceServerSideFiltering) {
+    private void refreshAllData(boolean forceServerSideFiltering) {
         int size = getDataProvider().size(new Query<>());
         setClientSideFilter(
                 !forceServerSideFiltering && size <= getPageSizeDouble());

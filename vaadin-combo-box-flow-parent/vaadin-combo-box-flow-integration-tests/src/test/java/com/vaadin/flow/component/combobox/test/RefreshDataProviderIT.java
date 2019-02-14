@@ -15,61 +15,58 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("refresh-data-provider")
 public class RefreshDataProviderIT extends AbstractComponentIT {
 
-    @Test
-    public void refreshDataProvider() throws InterruptedException {
+    @Before
+    public void init() {
         open();
+    }
 
-        List<String> items = getItems();
-        Assert.assertEquals(
+    @Test
+    public void emptyComboBox_addItemsAndRefreshAll_addedItemsIncluded() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class).first();
+        testItems(
                 "Unexpected items in the combobox, there shouldn't be any item",
-                0, items.size());
+                comboBox);
 
         findElement(By.id("update")).click();
 
-        items = getItems();
-        Assert.assertEquals(
-                "Unexpected items size. The rendered items size must be 2", 2,
-                items.size());
-        Assert.assertEquals("Unexpected rendered the first item text", "foo",
-                items.get(0));
-        Assert.assertEquals("Unexpected rendered the second item text", "bar",
-                items.get(1));
-
+        testItems(
+                "Expected to contain added items after refreshing data provider",
+                comboBox, "foo", "bar");
     }
 
-    private List<String> getItems() {
-        findElement(By.tagName("vaadin-combo-box")).sendKeys(Keys.ARROW_DOWN);
+    @Test
+    public void refreshItem_onlyOneItemUpdated() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id("refresh-item-combo-box");
+        testItems("Unexpected initial items", comboBox, "foo", "bar");
 
-        if (!isElementPresent(By.tagName("vaadin-combo-box-overlay"))) {
-            return new ArrayList<String>();
-        }
+        findElement(By.id("refresh-item")).click();
 
-        WebElement overlay = findElement(
-                By.tagName("vaadin-combo-box-overlay"));
-        WebElement content = getInShadowRoot(overlay, By.id("content"));
-        WebElement selector = getInShadowRoot(content, By.id("selector"));
-        List<String> items = selector
-                .findElements(By.tagName("vaadin-combo-box-item")).stream()
-                .map(item -> getInShadowRoot(item,
-                        By.cssSelector("flow-component-renderer")))
-                .map(WebElement::getText).collect(Collectors.toList());
-        return items;
+        testItems("Expected only the second item to be updated", comboBox,
+                "foo", "bar updated");
+    }
+
+    private void testItems(String message, ComboBoxElement comboBox,
+            String... expectedItems) {
+        comboBox.openPopup();
+        List<String> items = comboBox.getOptions();
+        Assert.assertArrayEquals(message, expectedItems,
+                items.toArray(new String[items.size()]));
+        comboBox.closePopup();
     }
 
 }
