@@ -26,6 +26,13 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 /**
  * Server-side component for the {@code <vaadin-login-form>} component.
  *
+ * On {@link LoginForm.LoginEvent} component becomes disabled.
+ * Disabled component stops to process login events, however
+ * the {@link LoginForm.ForgotPasswordEvent} event is processed anyway.
+ * To enable use the {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)} method.
+ * Setting error {@link #setError(boolean)} true makes component automatically enabled for
+ * the next login attempt.
+ *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-form")
