@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +37,6 @@ public class DataProviderIT extends AbstractComponentIT {
 
     @Test
     public void setValue_ProviderHasGetIdAndValueIdExists_selectionTextShouldBeSet() {
-        open();
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id(DataProviderPage.COMBO_BOX_WITH_GET_ID_ID);
 
@@ -53,7 +54,6 @@ public class DataProviderIT extends AbstractComponentIT {
 
     @Test
     public void setValue_ValueReferenceExists_selectionTextShouldBeSet() {
-        open();
         findElement(By.id(DataProviderPage.SET_VALUE_USING_REFERENCE_BUTTON_ID))
                 .click();
         ComboBoxElement comboBox = $(ComboBoxElement.class)
@@ -65,7 +65,6 @@ public class DataProviderIT extends AbstractComponentIT {
 
     @Test
     public void setValue_ValueEqualToAnExistingItem_selectionTextShouldBeSet() {
-        open();
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id(DataProviderPage.COMBO_BOX_WITHOUT_GET_ID_ID);
 
@@ -78,5 +77,25 @@ public class DataProviderIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "ComboBox::setValue must use Object::equals to find the item.",
                 "c, Third", comboBox.getSelectedText());
+    }
+
+    @Test
+    public void loadData_refreshAllWithSmallerDataSet_correctItemsDisplayed() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id("combo-box-with-reduce-data-set");
+        comboBox.openPopup();
+        comboBox.closePopup();
+
+        findElement(By.id("refresh-all-with-smaller-data-set")).click();
+        comboBox.openPopup();
+
+        List<String> items = comboBox.getOptions();
+        Assert.assertEquals(
+                "Expected one item to be visible after refreshing "
+                        + "the data provider with a smaller data set.",
+                1, items.size());
+        Assert.assertEquals(
+                "Item is not the same as in the refreshed data provider.",
+                "bar", items.get(0));
     }
 }
