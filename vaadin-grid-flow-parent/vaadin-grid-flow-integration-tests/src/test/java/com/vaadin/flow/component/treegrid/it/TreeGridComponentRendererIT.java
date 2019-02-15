@@ -53,8 +53,10 @@ public class TreeGridComponentRendererIT extends AbstractTreeGridIT {
 
     private void assertAllRowsHasTextField(int expectedRowCount) {
         Assert.assertEquals(expectedRowCount, getTreeGrid().getRowCount());
-        IntStream.range(0, getTreeGrid().getRowCount()).forEach(
-                i -> Assert.assertTrue(getTreeGrid().hasComponentRenderer(i, 1,
-                        By.tagName("vaadin-text-field"))));
+        IntStream.range(0, getTreeGrid().getRowCount())
+                .forEach(i -> Assert.assertTrue(
+                        "Row with index " + i + " has no component renderer",
+                        getTreeGrid().hasComponentRenderer(i, 1,
+                                By.tagName("vaadin-text-field"))));
     }
 }

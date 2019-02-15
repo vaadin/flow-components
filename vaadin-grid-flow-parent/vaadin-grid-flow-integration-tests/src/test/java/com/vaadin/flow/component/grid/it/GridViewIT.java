@@ -662,28 +662,15 @@ public class GridViewIT extends TabbedComponentDemoTest {
 
         findElement(By.id("show-address-information")).click();
 
-        waitUntil(webDriver -> {
-            List<WebElement> cells = getCells(grid);
-            try {
-                /*
-                    Since the button click changes the cells on the grid,
-                    fetching the cells right away will yield the previous
-                    cells which in turn will cause `getText` to throw
-                    StaleElementReferenceException
-                  */
-                cells.get(0).getText();
-                return true;
-            }
-            catch (StaleElementReferenceException e) {
-                // we don't care
-            }
-            return false;
-        }, 4000);
+        List<?> cellTexts = (List<?>) getCommandExecutor().executeScript(
+                "var result = [];  var cells = arguments[0].querySelectorAll('vaadin-grid-cell-content');"
+                        + "for (i=0; i<cells.length; i++) { result.push(cells[i].innerText); } return result;",
+                grid);
 
         Assert.assertTrue(
                 "Address should be displayed as a String starting with the street name",
-                getCells(grid).stream()
-                        .anyMatch(cell -> cell.getText().startsWith("Street")));
+                cellTexts.stream().anyMatch(
+                        cell -> cell.toString().startsWith("Street")));
     }
 
     @Test

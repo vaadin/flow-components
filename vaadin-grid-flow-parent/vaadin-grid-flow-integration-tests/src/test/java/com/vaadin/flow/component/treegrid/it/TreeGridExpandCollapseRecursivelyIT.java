@@ -4,14 +4,14 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
- * the License. 
+ * the License.
  */
 package com.vaadin.flow.component.treegrid.it;
 
@@ -22,7 +22,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 
 import com.vaadin.flow.testutil.TestPath;
 
@@ -134,7 +136,18 @@ public class TreeGridExpandCollapseRecursivelyIT extends AbstractTreeGridIT {
         selectDepth(0);
         expandButton.click();
 
-        waitUntil(input -> getTreeGrid().getRowCount() == rowCount1, 20);
+        waitUntil(new ExpectedCondition<Boolean>() {
+            @Override
+            public Boolean apply(WebDriver input) {
+                return getTreeGrid().getRowCount() == rowCount1;
+            }
+
+            @Override
+            public String toString() {
+                return "Tree Grid has " + getTreeGrid().getRowCount()
+                        + " rows intead of exected " + rowCount1;
+            }
+        }, 20);
         Assert.assertEquals(expandedRows.addAndGet(rowCount0),
                 getTreeGrid().getNumberOfExpandedRows());
 
