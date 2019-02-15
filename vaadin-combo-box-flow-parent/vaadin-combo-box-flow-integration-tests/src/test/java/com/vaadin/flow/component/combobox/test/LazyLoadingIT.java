@@ -38,6 +38,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     private ComboBoxElement filterBox;
     private ComboBoxElement callbackBox;
     private ComboBoxElement templateBox;
+    private ComboBoxElement emptyCallbackBox;
 
     @Before
     public void init() {
@@ -51,6 +52,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         callbackBox = $(ComboBoxElement.class).id("callback-dataprovider");
         templateBox = $("combo-box-in-a-template").id("template")
                 .$(ComboBoxElement.class).first();
+        emptyCallbackBox = $(ComboBoxElement.class).id("empty-callback");
     }
 
     @Test
@@ -341,6 +343,18 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "Expected no items to be loaded after setting "
                         + "a filter which doesn't match any item",
                 0, stringBox);
+    }
+
+    @Test
+    public void callbackDataProviderReturnsNoItems_openMultipleTimes_loadingStateResolved() {
+        for (int i = 0; i < 3; i++) {
+            emptyCallbackBox.openPopup();
+            waitUntil(
+                    driver -> !emptyCallbackBox.getPropertyBoolean("loading"));
+            assertLoadedItemsCount("Expected no items to be loaded", 0,
+                    emptyCallbackBox);
+            emptyCallbackBox.closePopup();
+        }
     }
 
     @Test

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox.test;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -55,6 +56,8 @@ public class LazyLoadingPage extends Div {
         createCallbackDataProvider();
         addSeparator();
         createComboBoxInATemplate();
+        addSeparator();
+        createCallbackDataProviderWhichReturnsZeroItems();
     }
 
     private void createListDataProviderWithStrings() {
@@ -200,6 +203,21 @@ public class LazyLoadingPage extends Div {
         comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
 
         add(comboBoxInATemplate);
+    }
+
+    private void createCallbackDataProviderWhichReturnsZeroItems() {
+        addTitle("Callback data provider returns zero items");
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setId("empty-callback");
+
+        List<String> items = Collections.emptyList();
+        CallbackDataProvider.FetchCallback<String, String> fetch = query -> items
+                .stream().limit(query.getLimit()).skip(query.getOffset());
+        CallbackDataProvider.CountCallback<String, String> count = query -> 0;
+        comboBox.setDataProvider(
+                DataProvider.fromFilteringCallbacks(fetch, count));
+
+        add(comboBox);
     }
 
     public static List<String> generateStrings(int count) {
