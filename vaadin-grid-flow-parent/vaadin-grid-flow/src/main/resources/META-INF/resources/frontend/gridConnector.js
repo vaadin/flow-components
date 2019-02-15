@@ -811,6 +811,10 @@ window.Vaadin.Flow.gridConnector = {
           let callback = rootPageCallbacks[page];
           delete rootPageCallbacks[page];
           callback(cache[root][page] || new Array(grid.pageSize));
+          // Makes sure to push all new rows before this stack execution is done so any timeout expiration called after will be applied on a fully updated grid
+          //Resolves https://github.com/vaadin/vaadin-grid-flow/issues/511
+          if(grid._debounceIncreasePool)
+            grid._debounceIncreasePool.flush();
         }
       }
 
