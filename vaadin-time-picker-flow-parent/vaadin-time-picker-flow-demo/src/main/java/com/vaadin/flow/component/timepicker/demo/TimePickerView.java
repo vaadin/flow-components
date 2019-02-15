@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
@@ -39,6 +40,7 @@ import com.vaadin.flow.router.Route;
  * View for {@link TimePicker} demo.
  */
 @Route("vaadin-time-picker")
+@HtmlImport("frontend://hide-clear-button-theme.html")
 public class TimePickerView extends DemoView {
 
     @Override
@@ -57,6 +59,7 @@ public class TimePickerView extends DemoView {
                 .getSupportedAvailableLocales()
                 .sorted(Comparator.comparing(Locale::getDisplayName));
         ComboBox<Locale> localesCB = new ComboBox<>("Localization");
+        localesCB.addClassName("no-clear-button");
         localesCB.setItemLabelGenerator(Locale::getDisplayName);
         localesCB.setWidth("300px");
         localesCB.setItems(availableLocales);
@@ -66,8 +69,13 @@ public class TimePickerView extends DemoView {
         LocalTimeTextBlock localTimeTextBlock = new LocalTimeTextBlock();
 
         localesCB.addValueChangeListener(event -> {
-            timePicker.setLocale(event.getValue());
-            localTimeTextBlock.setLocale(event.getValue());
+            Locale value = event.getValue();
+            if (value == null) {
+                localesCB.setValue(UI.getCurrent().getLocale());
+            } else {
+                timePicker.setLocale(event.getValue());
+                localTimeTextBlock.setLocale(event.getValue());
+            }
         });
 
         timePicker.addValueChangeListener(
@@ -130,8 +138,8 @@ public class TimePickerView extends DemoView {
                 String.format(localTimeValueFormat, "0", "0", "0", "0"));
 
         stepSelector.setId("step-picker");
-        stepSelector.setItemLabelGenerator(duration ->
-                duration.toString().replace("PT", "").toLowerCase());
+        stepSelector.setItemLabelGenerator(duration -> duration.toString()
+                .replace("PT", "").toLowerCase());
 
         timePicker.addValueChangeListener(event -> {
             LocalTime value = event.getValue();
@@ -154,8 +162,8 @@ public class TimePickerView extends DemoView {
         timePicker.setEnabled(false);
         // end-source-example
 
-        timePicker.addValueChangeListener(event ->
-                message.setText("This event should not have happened"));
+        timePicker.addValueChangeListener(event -> message
+                .setText("This event should not have happened"));
 
         timePicker.setId("disabled-picker");
         addCard("Disabled Time Picker", timePicker, message);
