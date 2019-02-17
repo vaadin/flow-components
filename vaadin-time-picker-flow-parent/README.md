@@ -5,7 +5,7 @@ for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Running the component demo
 Run from the command line:
-- `mvn jetty:run -Pruntests`
+- `mvn -Pwar install jetty:run`
 
 Then navigate to `http://localhost:9998/vaadin-time-picker` to view the demo.
 
