@@ -15,9 +15,11 @@
  */
 package com.vaadin.flow.component.listbox.test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.listbox.testbench.ListBoxElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -34,7 +36,7 @@ public class ListBoxIT extends ComponentDemoTest {
     private static final String MILK = "Milk";
 
     private WebElement card;
-    private WebElement listBox;
+    private ListBoxElement listBox;
     private List<WebElement> items;
 
     private WebElement messageLabel;
@@ -46,7 +48,7 @@ public class ListBoxIT extends ComponentDemoTest {
 
     private void init(String cardId) {
         card = layout.findElement(By.id(cardId));
-        listBox = card.findElement(By.tagName("vaadin-list-box"));
+        listBox = $(ListBoxElement.class).context(card).first();
         items = listBox.findElements(By.tagName("vaadin-item"));
     }
 
@@ -55,19 +57,20 @@ public class ListBoxIT extends ComponentDemoTest {
         init("list-box-with-selection");
         messageLabel = layout.findElement(By.tagName("label"));
 
-        Object[] texts = items.stream().map(WebElement::getText).toArray();
-        Assert.assertArrayEquals(new Object[] { BREAD, BUTTER, MILK }, texts);
+        final List<String> texts = listBox.getOptions();
+        Assert.assertEquals(Arrays.asList(BREAD, BUTTER, MILK ),texts);
 
-        items.get(1).click();
+        listBox.selectByText(texts.get(1));
+
         assertMessage(null, BUTTER, true);
 
         card.findElement(By.tagName("button")).click();
         assertMessage(BUTTER, MILK, false);
 
-        items.get(0).click();
+        listBox.selectByText(texts.get(0));
         assertMessage(MILK, BREAD, true);
 
-        items.get(2).click();
+        listBox.selectByText(texts.get(2));
         assertMessage(BREAD, MILK, true);
 
     }
