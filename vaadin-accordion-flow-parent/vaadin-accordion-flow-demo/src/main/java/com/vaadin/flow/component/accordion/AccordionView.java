@@ -11,6 +11,7 @@ import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -27,97 +28,107 @@ public class AccordionView extends DemoView {
 
     @Override
     protected void initView() {
-        basicAccordion();
-        themeVariants();
-        eventHandling();
+        basicUsage();
+        filledPannels();
+        smallPannels();
+        reversePannels();
         complexForm();
     }
 
-    private void basicAccordion() {
+    private void basicUsage() {
+
         // begin-source-example
-        // source-example-heading: Basic Accordion
+        // source-example-heading: Basics
         Accordion accordion = new Accordion();
-        accordion.add("Red", createBox("red"));
-        accordion.add("Orange", createBox("orange"));
-        accordion.add("Yellow", createBox("yellow"));
-        accordion.add("Green", createBox("green"));
-        accordion.add("Blue", createBox("blue"));
-        accordion.add("Indigo", createBox("indigo"));
-        accordion.add("Violet", createBox("violet"));
+
+        VerticalLayout personalInformationLayout = new VerticalLayout();
+        personalInformationLayout.add(
+            new TextField("Name"),
+            new TextField("Phone"),
+            new TextField("Email")
+        );
+        accordion.add("Personal Information", personalInformationLayout);
+
+        VerticalLayout billingAddressLayout = new VerticalLayout();
+        billingAddressLayout.add(
+            new TextField("Address"),
+            new TextField("City"),
+            new TextField("State"),
+            new TextField("Zip Code")
+        );
+        accordion.add("Billing Address", billingAddressLayout);
+
+        VerticalLayout paymenLayout = new VerticalLayout();
+        paymenLayout.add(
+            new Span("Not yet implemented")
+        );
+        AccordionPanel billingAddressPanel = accordion.add("Payment", paymenLayout);
+        billingAddressPanel.setEnabled(false);
 
         // end-source-example
 
-        addCard("Basic Accordion", accordion);
+        addCard("Basics", accordion);
     }
 
-    private void themeVariants() {
+    private void filledPannels() {
+
         // begin-source-example
-        // source-example-heading: Theme variants
+        // source-example-heading: Theme variants - Filled Pannels
         Accordion accordion = new Accordion();
 
-        accordion.add("Red", createBox("red"))
-                .addThemeVariants(DetailsVariant.FILLED);
+        accordion.add("Panel 1", new Span("Panel content"))
+            .addThemeVariants(DetailsVariant.FILLED);
 
-        accordion.add("Orange", createBox("orange"))
-                .addThemeVariants(DetailsVariant.REVERSE);
+        accordion.add("Panel 2", new Span("Panel content"))
+            .addThemeVariants(DetailsVariant.FILLED);
 
-        accordion.add("Yellow", createBox("yellow"))
-                .addThemeVariants(DetailsVariant.SMALL);
-
-        // Multiple theme variants can be combined.
-        accordion.add("Green", createBox("green")).addThemeVariants(
-                DetailsVariant.FILLED, DetailsVariant.REVERSE,
-                DetailsVariant.SMALL);
+        AccordionPanel disabledPannel = accordion.add("Panel 3", new Span("Panel content"));
+        disabledPannel.addThemeVariants(DetailsVariant.FILLED);
+        disabledPannel.setEnabled(false);
 
         // end-source-example
 
-        addCard("Theme variants", accordion);
+        addCard("Theme variants - Filled Pannels", accordion);
     }
 
-    private void eventHandling() {
+    private void smallPannels() {
+
         // begin-source-example
-        // source-example-heading: Event handling
+        // source-example-heading: Theme variants - Small Pannels
         Accordion accordion = new Accordion();
 
-        accordion.add("Top start", createBox("red"));
-        accordion.add("Top end", createBox("orange"));
-        accordion.add("Bottom start", createBox("yellow"));
-        accordion.add("Bottom end", createBox("yellow"));
+        accordion.add("Panel 1", new Span("Panel content"))
+            .addThemeVariants(DetailsVariant.SMALL);
 
-        Checkbox isActive = new Checkbox("Activate notifications");
+        accordion.add("Panel 2", new Span("Panel content"))
+            .addThemeVariants(DetailsVariant.SMALL);
 
-        Stream<AccordionPanel> panels = accordion.getChildren()
-                .map(AccordionPanel.class::cast);
-
-        panels.forEach(panel -> panel.addOpenedChangeListener(event -> {
-            if (event.isOpened() && isActive.getValue()) {
-                String title = event.getSource().getSummaryText();
-                String position = title.replace(' ', '_').toUpperCase();
-
-                Notification.show(title + " opened", 2000,
-                        Position.valueOf(position));
-            }
-        }));
-
-        accordion.addOpenedChangeListener(event -> {
-            if (!event.getOpenedPanel().isPresent() && isActive.getValue()) {
-                Notification.show("Accordion closed", 2000,
-                        Position.BOTTOM_CENTER);
-            }
-        });
+        accordion.add("Panel 3", new Span("Panel content"))
+            .addThemeVariants(DetailsVariant.SMALL);
 
         // end-source-example
 
-        addCard("Event handling", accordion, isActive);
+        addCard("Theme variants - Small Pannels", accordion);
     }
 
-    private Component createBox(String color) {
-        final Div box = new Div();
-        box.getStyle().set("background-color", color);
-        box.getStyle().set("border-radius", "10px");
-        box.setHeight("150px");
-        box.setWidth("400px");
-        return box;
+    private void reversePannels() {
+
+        // begin-source-example
+        // source-example-heading: Theme variants - Reverse Pannels
+        Accordion accordion = new Accordion();
+
+        accordion.add("Panel 1", new Span("Panel content"))
+            .addThemeVariants(DetailsVariant.REVERSE);
+
+        accordion.add("Panel 2", new Span("Panel content"))
+            .addThemeVariants(DetailsVariant.REVERSE);
+
+        accordion.add("Panel 3", new Span("Panel content"))
+            .addThemeVariants(DetailsVariant.REVERSE);
+
+        // end-source-example
+
+        addCard("Theme variants - Reverse Pannels", accordion);
     }
 
     private void complexForm() {
