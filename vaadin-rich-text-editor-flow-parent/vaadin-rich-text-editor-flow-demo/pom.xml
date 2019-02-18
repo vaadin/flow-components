@@ -9,10 +9,10 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>vaadin-rich-text-editor-flow-vaadincom-demo</artifactId>
+    <artifactId>vaadin-rich-text-editor-flow-demo</artifactId>
     <packaging>${packaging.type}</packaging>
 
-    <name>Vaadin Rich Text Editor Flow VaadinCom Demo</name>
+    <name>Vaadin Rich Text Editor Flow Demo</name>
 
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>

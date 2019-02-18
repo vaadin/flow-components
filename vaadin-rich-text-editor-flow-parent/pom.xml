@@ -33,7 +33,7 @@
 		<module>vaadin-rich-text-editor-flow</module>
 		<module>vaadin-rich-text-editor-testbench</module>
 		<module>vaadin-rich-text-editor-flow-integration-tests</module>
-		<module>vaadin-rich-text-editor-flow-vaadincom-demo</module>
+		<module>vaadin-rich-text-editor-flow-demo</module>
 	</modules>
 	<repositories>
 		<repository>

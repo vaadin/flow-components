@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.richtexteditor.vaadincom;
+package com.vaadin.flow.component.richtexteditor;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
