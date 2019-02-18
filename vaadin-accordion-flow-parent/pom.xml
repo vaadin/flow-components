@@ -31,8 +31,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <vaadin.details.flow.version>1.0.0</vaadin.details.flow.version>
-        <vaadin.details.wc.version>1.0.0</vaadin.details.wc.version>
+        <vaadin.details.flow.version>1.0.1</vaadin.details.flow.version>
+        <vaadin.details.wc.version>1.0.1</vaadin.details.wc.version>
     </properties>
 
     <modules>
