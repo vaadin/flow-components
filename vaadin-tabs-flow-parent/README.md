@@ -8,7 +8,7 @@ element for use from the server side with [Vaadin Flow](https://github.com/vaadi
  
 ## Running the component demo
 Run from the command line:
-- `mvn jetty:run -PrunTests`
+- `mvn -pl vaadin-tabs-flow-demo -Pwar install jetty:run`
 
 Then navigate to `http://localhost:9998/vaadin-tabs` to view the demo.
 
