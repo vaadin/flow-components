@@ -69,8 +69,13 @@ public class TimePickerView extends DemoView {
         LocalTimeTextBlock localTimeTextBlock = new LocalTimeTextBlock();
 
         localesCB.addValueChangeListener(event -> {
-            timePicker.setLocale(event.getValue());
-            localTimeTextBlock.setLocale(event.getValue());
+            Locale value = event.getValue();
+            if (value == null) {
+                localesCB.setValue(UI.getCurrent().getLocale());
+            } else {
+                timePicker.setLocale(event.getValue());
+                localTimeTextBlock.setLocale(event.getValue());
+            }
         });
 
         timePicker.addValueChangeListener(
