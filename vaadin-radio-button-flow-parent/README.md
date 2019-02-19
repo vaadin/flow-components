@@ -10,7 +10,7 @@ The repository contains implementations for `RadionButtonGroup`.
 
 ## Running the component demo
 Run from the command line:
-- `mvn jetty:run -PrunTests`
+- `mvn -pl vaadin-radio-button-flow-demo -Pwar install jetty:run`
 
 Then navigate to `http://localhost:9998/vaadin-radio-button` for the demo.
 
