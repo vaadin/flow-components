@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid.editor;
 
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.server.VaadinSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,6 +35,8 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.StatusChangeEvent;
 import com.vaadin.flow.function.ValueProvider;
 
+import static org.mockito.Mockito.mock;
+
 public class EditorImplTest {
 
     @Rule
@@ -40,6 +44,7 @@ public class EditorImplTest {
 
     private Grid<String> grid;
     private TestEditor editor;
+    private MockUI ui;
 
     private static class TestEditor extends EditorImpl<String> {
 
@@ -55,9 +60,18 @@ public class EditorImplTest {
         }
     }
 
+
+    private void fakeClientResponse() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
+    }
+
     @Before
     public void setUp() {
         grid = new Grid<>();
+        ui = new MockUI();
+        ui.getElement().appendChild(grid.getElement());
         editor = new TestEditor(grid);
 
         editor.setBinder(new Binder<>());
@@ -67,12 +81,15 @@ public class EditorImplTest {
     @Test(expected = IllegalStateException.class)
     public void editItem_itemIsNotKnown_throw() {
         editor.editItem("foo");
+        fakeClientResponse();
     }
 
     @Test(expected = IllegalStateException.class)
     public void editItem_noBinder_throw() {
         editor = new TestEditor(grid);
         editor.editItem("bar");
+
+        fakeClientResponse();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -81,8 +98,10 @@ public class EditorImplTest {
 
         editor.setBuffered(true);
         editor.editItem("bar");
+        fakeClientResponse();
 
         editor.editItem("foo");
+        fakeClientResponse();
     }
 
     @Test
@@ -112,8 +131,11 @@ public class EditorImplTest {
         grid.getDataCommunicator().getKeyMapper().key("foo");
 
         editor.editItem("bar");
+        fakeClientResponse();
+
         editor.refreshedItems.clear();
         editor.editItem("foo");
+        fakeClientResponse();
 
         Assert.assertEquals(2, editor.refreshedItems.size());
         Assert.assertEquals("bar", editor.refreshedItems.get(0));
@@ -123,6 +145,8 @@ public class EditorImplTest {
     @Test
     public void cancel_eventIsFiredAndItemIsRefreshed() {
         editor.editItem("bar");
+        fakeClientResponse();
+
         editor.refreshedItems.clear();
 
         AtomicReference<EditorEvent<String>> cancelEventCapture = new AtomicReference<>();
@@ -158,6 +182,8 @@ public class EditorImplTest {
     @Test
     public void save_editorIsOpened_editorIsInNotBufferedMode_noEvents() {
         editor.editItem("bar");
+        fakeClientResponse();
+
         editor.refreshedItems.clear();
 
         AtomicReference<StatusChangeEvent> statusEventCapture = new AtomicReference<>();
@@ -176,6 +202,8 @@ public class EditorImplTest {
     @Test
     public void save_editorIsOpened_editorIsInBufferedMode_eventsAreFired() {
         editor.editItem("bar");
+        fakeClientResponse();
+
         editor.refreshedItems.clear();
         editor.setBuffered(true);
 
@@ -200,6 +228,8 @@ public class EditorImplTest {
                 .bind(ValueProvider.identity(), (item, value) -> {
                 });
         editor.editItem("bar");
+        fakeClientResponse();
+
         editor.refreshedItems.clear();
         editor.setBuffered(true);
 
@@ -224,6 +254,8 @@ public class EditorImplTest {
         thrown.reportMissingExceptionWithMessage("Buffered editor should be closed using save() or cancel()");
 
         editor.editItem("bar");
+        fakeClientResponse();
+
         editor.refreshedItems.clear();
         editor.setBuffered(true);
 
@@ -240,6 +272,8 @@ public class EditorImplTest {
     @Test
     public void editorInUnBufferedMode_closeEditorSendsCloseEvent() {
         editor.editItem("bar");
+        fakeClientResponse();
+
         editor.refreshedItems.clear();
 
         AtomicReference<EditorEvent<String>> closeEventCapture = new AtomicReference<>();
@@ -284,10 +318,19 @@ public class EditorImplTest {
         editor.addOpenListener(
                 event -> openEventCapure.compareAndSet(null, event));
         editor.editItem("bar");
+        fakeClientResponse();
 
         Assert.assertNotNull(statusEventCapture.get());
         Assert.assertNotNull(openEventCapure.get());
 
         Assert.assertEquals("bar", openEventCapure.get().getItem());
+    }
+
+    public static class MockUI extends UI {
+
+        public MockUI() {
+            getInternals().setSession(mock(VaadinSession.class));
+        }
+
     }
 }

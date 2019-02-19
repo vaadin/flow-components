@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid.editor;
 
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.ExecutionContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,7 +52,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     private static final String EDITING = "_editing";
 
     private final Map<Class<?>, List<?>> listeners = new HashMap<>();
-
+    private SerializableConsumer<ExecutionContext> editItemRequest;
     private Binder<T> binder;
     private T edited;
     private boolean isBuffered;
@@ -128,6 +130,18 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     public void editItem(T item) {
         Objects.requireNonNull(item, "Editor can't edit null");
 
+        final T it = item;
+        if (editItemRequest == null) {
+            editItemRequest = context -> {
+                requestEditItem(it);
+                editItemRequest = null;
+            };
+            getGrid().getElement().getNode().runWhenAttached(ui -> ui.getInternals().getStateTree()
+                    .beforeClientResponse(getGrid().getElement().getNode(), editItemRequest));
+        }
+    }
+
+    private void requestEditItem(T item) {
         validate(item);
 
         close();
