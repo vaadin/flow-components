@@ -328,10 +328,21 @@ public class GridElement extends TestBenchElement {
      *            the row to select
      */
     public void select(int rowIndex) {
+        select(getRow(rowIndex));
+    }
+
+    /**
+     * Selects the row.
+     *
+     * @param row
+     *            the row to select
+     */
+    void select(GridTRElement row) {
         if (isMultiselect()) {
-            getRow(rowIndex).select();
+            executeScript("arguments[0].selectItem(arguments[1]._item);", this,
+                    row);
         } else {
-            setActiveItem(getRow(rowIndex));
+            setActiveItem(row);
         }
     }
 
@@ -342,11 +353,30 @@ public class GridElement extends TestBenchElement {
      *            the row to deselect
      */
     public void deselect(int rowIndex) {
-        getRow(rowIndex).deselect();
+        deselect(getRow(rowIndex));
+    }
+
+    /**
+     * Deselects the row with the given index.
+     *
+     * @param rowIndex
+     *            the row to deselect
+     */
+    void deselect(GridTRElement row) {
+        if (isMultiselect()) {
+            executeScript("arguments[0].deselectItem(arguments[1]._item);",
+                    this, row);
+        } else {
+            removeActiveItem(row);
+        }
     }
 
     private void setActiveItem(GridTRElement row) {
         executeScript("arguments[0].activeItem=arguments[1]._item", this, row);
+    }
+
+    private void removeActiveItem(GridTRElement row) {
+        executeScript("if(arguments[0].activeItem == arguments[1]._item) { arguments[0].activeItem=null;}", this, row);
     }
 
     /**

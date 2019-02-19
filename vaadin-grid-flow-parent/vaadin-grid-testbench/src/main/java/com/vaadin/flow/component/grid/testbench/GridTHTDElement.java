@@ -113,6 +113,15 @@ public class GridTHTDElement extends TestBenchElement {
                         .wrap(GridElement.class);
     }
 
+    /**
+     * Gets the TR parent of this element.
+     *
+     * @return the parent TR element
+     */
+    public GridTRElement getRowElement() {
+        return getPropertyElement("parentElement").wrap(GridTRElement.class);
+    }
+
     @Override
     public SearchContext getContext() {
         return (SearchContext) executeScript(
