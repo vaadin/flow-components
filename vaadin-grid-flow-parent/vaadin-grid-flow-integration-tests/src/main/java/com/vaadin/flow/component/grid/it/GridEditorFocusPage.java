@@ -39,7 +39,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Route("editor-focus")
@@ -67,9 +66,7 @@ public class GridEditorFocusPage extends Div {
         TextField field = new TextField();
         binder.bind(field, "firstName");
         nameColumn.setEditorComponent(field);
-        editor.addOpenListener(event -> {
-            field.focus();
-        });
+        editor.addOpenListener(event ->field.focus());
         grid.addItemDoubleClickListener(
                 event -> grid.getEditor().editItem(event.getItem()));
 
@@ -83,9 +80,7 @@ public class GridEditorFocusPage extends Div {
 
         addItem.setId("add-item");
 
-        NativeButton editFirstRow = new NativeButton("Edit first item", event -> {
-            editor.editItem(items.get(0));
-        });
+        NativeButton editFirstRow = new NativeButton("Edit first item", event -> editor.editItem(items.get(0)));
 
         editFirstRow.setId("edit-first-item");
 
