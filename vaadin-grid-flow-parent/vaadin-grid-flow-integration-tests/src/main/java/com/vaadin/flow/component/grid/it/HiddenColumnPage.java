@@ -55,7 +55,7 @@ public class HiddenColumnPage extends Div {
 
         grid.getElement()
                 .addEventListener("keyup", event -> grid.getEditor().cancel())
-                .setFilter("event.key === 'Escape' || even.key === 'Esc'");
+                .setFilter("event.key === 'Escape' || event.key === 'Esc'");
 
         NativeButton hideUnhide = new NativeButton("Hide/unhide Name column",
                 event -> nameColumn.setVisible(!nameColumn.isVisible()));
