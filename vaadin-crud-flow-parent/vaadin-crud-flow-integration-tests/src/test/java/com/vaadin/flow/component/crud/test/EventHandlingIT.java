@@ -26,11 +26,29 @@ public class EventHandlingIT extends AbstractParallelTest {
         }
     }
 
+    private void dismissConfirmDialog() {
+        // TODO(oluwasayo): Remove this workaround when vaadin-components-testbench includes Confirm Dialog
+        TestBenchElement overlayContext = $("vaadin-dialog-overlay").onPage()
+                .last().$(TestBenchElement.class).id("content");
+        TestBenchElement confirmButton = overlayContext.$(ButtonElement.class).id("confirm");
+        confirmButton.click();
+    }
+
     @Test
     public void newTest() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertFalse(crud.isEditorOpen());
         crud.getNewItemButton().get().click();
+        Assert.assertEquals("New: Person{id=null, firstName='null', lastName='null'}",
+                getLastEvent());
+        Assert.assertTrue(crud.isEditorOpen());
+    }
+
+    @Test
+    public void newTest_serverSide() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        Assert.assertFalse(crud.isEditorOpen());
+        getTestButton("newServerItem").click();
         Assert.assertEquals("New: Person{id=null, firstName='null', lastName='null'}",
                 getLastEvent());
         Assert.assertTrue(crud.isEditorOpen());
@@ -60,6 +78,37 @@ public class EventHandlingIT extends AbstractParallelTest {
     }
 
     @Test
+    public void editTest_serverSide() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        Assert.assertFalse(crud.isEditorOpen());
+        getTestButton("editServerItem").click();
+        Assert.assertEquals("Edit: Person{id=1, firstName='Sayo', lastName='Oladeji'}",
+                getLastEvent());
+        Assert.assertTrue(crud.isEditorOpen());
+
+        dismissDialog();
+        Assert.assertFalse(crud.isEditorOpen());
+        try {
+            dismissConfirmDialog();
+            Assert.fail("There should be no confirm dialog open");
+        } catch (Exception ignored) { }
+
+        // Ensure editor is marked dirty on edit
+        getTestButton("editServerItem").click();
+        crud.getEditor().$(TextFieldElement.class)
+                .attribute("editor-role", "first-name")
+                .first()
+                .sendKeys("Vaadin");
+
+        dismissDialog();
+
+        // Send keys not working as expected in Firefox
+        if (!BrowserUtil.isFirefox(getDesiredCapabilities())) {
+            dismissConfirmDialog();
+        }
+    }
+
+    @Test
     public void cancelTest() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(2);
@@ -76,12 +125,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         Assert.assertEquals("3 items available", getFooterText(crud));
         crud.openRowForEditing(2);
         crud.getEditorDeleteButton().click();
-
-        // TODO(oluwasayo): Remove this workaround when vaadin-components-testbench includes Confirm Dialog
-        TestBenchElement overlayContext = $("vaadin-dialog-overlay").onPage()
-                .last().$(TestBenchElement.class).id("content");
-        TestBenchElement confirmButton = overlayContext.$(ButtonElement.class).id("confirm");
-        confirmButton.click();
+        dismissConfirmDialog();
 
         Assert.assertEquals("Delete: Person{id=3, firstName='Guille', lastName='Guille'}",
                 getLastEvent());
@@ -124,5 +168,9 @@ public class EventHandlingIT extends AbstractParallelTest {
 
     private static String getFooterText(CrudElement crud) {
         return crud.getToolbar().get(0).getText();
+    }
+
+    private ButtonElement getTestButton(String id) {
+        return $(ButtonElement.class).onPage().id(id);
     }
 }

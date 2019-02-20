@@ -37,6 +37,15 @@ public class MainView extends VerticalLayout {
         newButton.setThemeName(ButtonVariant.LUMO_PRIMARY.getVariantName());
         newButton.getElement().setAttribute("new-button", "");
 
+        final Button serverSideNewButton = new Button(CrudI18n.createDefault().getNewItem());
+        serverSideNewButton.setId("newServerItem");
+        serverSideNewButton.addClickListener(e -> crud.edit(new Person(), Crud.EditMode.NEW_ITEM));
+
+        final Button serverSideEditButton = new Button(CrudI18n.createDefault().getEditItem());
+        serverSideEditButton.setId("editServerItem");
+        serverSideEditButton.addClickListener(e ->
+                crud.edit(new Person(1, "Sayo", "Oladeji"), Crud.EditMode.EXISTING_ITEM));
+
         final Span footer = new Span();
         crud.setToolbar(footer, newButton);
 
@@ -88,7 +97,8 @@ public class MainView extends VerticalLayout {
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
 
         setHeight("100%");
-        add(crud, showFiltersButton, updateI18nButton, toggleBordersButton, eventsPanel);
+        add(crud, serverSideNewButton, serverSideEditButton, showFiltersButton,
+                updateI18nButton, toggleBordersButton, eventsPanel);
     }
 
     private void addEvent(String event) {

@@ -28,7 +28,6 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.Element;
@@ -71,10 +70,10 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
 
     private static final String EDIT_COLUMN_KEY = "vaadin-crud-edit-column";
     private static final String EVENT_PREVENT_DEFAULT_JS = "event.preventDefault()";
+    private static final String FORM_SLOT_NAME = "form";
+    private static final String GRID_SLOT_NAME = "grid";
     private static final String SLOT_KEY = "slot";
     private static final String TOOLBAR_SLOT_NAME = "toolbar";
-    private static final String GRID_SLOT_NAME = "grid";
-    private static final String FORM_SLOT_NAME = "form";
 
     private final Set<ComponentEventListener<NewEvent<E>>> newListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
@@ -164,7 +163,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
         ComponentUtil.addListener(this, NewEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<NewEvent<E>>) e -> {
                     try {
-                        getEditor().setItem(getBeanType().newInstance());
+                        getEditor().setItem(e.getItem() != null ? e.getItem() : getBeanType().newInstance());
                     } catch (Exception ex) {
                         throw new RuntimeException("Unable to instantiate new bean", ex);
                     }
@@ -213,6 +212,27 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                         getGrid().getDataProvider().refreshAll();
                     }
                 }));
+    }
+
+    /**
+     * Initiates an item edit from the server-side.
+     * This sets the supplied item as the working bean and opens the edit dialog.
+     *
+     * @param item the item to be edited
+     * @param editMode the edit mode
+     */
+    public void edit(E item, EditMode editMode) {
+        final CrudEvent<E> event;
+        if (editMode == EditMode.NEW_ITEM) {
+            getElement().setProperty("__isNew", true);
+            event = new NewEvent<>(this, false, item, null);
+        } else {
+            getElement().setProperty("__isDirty", false);
+            event = new EditEvent<E>(this, false, item);
+        }
+
+        setOpened(true);
+        ComponentUtil.fireEvent(this, event);
     }
 
     /**
@@ -630,6 +650,12 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                     .getKeyMapper().get(item.getString("key"));
         }
 
+        private EditEvent(Crud<E> source, boolean fromClient, E item) {
+            super(source, fromClient);
+            this.item = item;
+        }
+
+        @Override
         public E getItem() {
             return item;
         }
@@ -643,17 +669,38 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     @DomEvent("new")
     public static class NewEvent<E> extends CrudEvent<E> {
 
+        private E item;
+
         /**
          * Creates a new event using the given source and indicator whether the
          * event originated from the client side or the server side.
          *
          * @param source     the source component
          * @param fromClient <code>true</code> if the event originated from the client
-         * @param ignored an ignored parameter for a side effect
+         * @param ignored    an ignored parameter for a side effect
          */
         public NewEvent(Crud<E> source, boolean fromClient,
                         @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
+        }
+
+        /**
+         * Private constructor for server-initiated edits
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the client
+         * @param item       the item to be edited
+         * @param ignored    only present to workaround Java generics erasure
+         *                (since E also erases to Object and clashes with the other constructor)
+         */
+        private NewEvent(Crud<E> source, boolean fromClient, E item, Object ignored) {
+            super(source, fromClient);
+            this.item = item;
+        }
+
+        @Override
+        public E getItem() {
+            return item != null ? item : super.getItem();
         }
     }
 
@@ -677,5 +724,23 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                          @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
         }
+    }
+
+    /**
+     * Determines whether an item presented for editing is to be treated
+     * as a new item or an existing item.
+     *
+     * @see Crud#edit(Object, EditMode)
+     */
+    public enum EditMode {
+        /**
+         * The item presented for editing should be treated as a new item.
+         */
+        NEW_ITEM,
+
+        /**
+         * The item presented for editing should be treated as an existing item.
+         */
+        EXISTING_ITEM
     }
 }

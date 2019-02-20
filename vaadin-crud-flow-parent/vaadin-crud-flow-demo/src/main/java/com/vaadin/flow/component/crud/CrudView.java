@@ -1,19 +1,9 @@
 package com.vaadin.flow.component.crud;
 
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.DebounceSettings;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.crud.BinderCrudEditor;
-import com.vaadin.flow.component.crud.Crud;
-import com.vaadin.flow.component.crud.CrudEditor;
-import com.vaadin.flow.component.crud.CrudFilter;
-import com.vaadin.flow.component.crud.CrudGrid;
-import com.vaadin.flow.component.crud.CrudI18n;
-import com.vaadin.flow.component.crud.CrudVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
@@ -56,9 +46,10 @@ public class CrudView extends DemoView {
         basicCrud();
         // Using unicode spaces so as card does not show any header
         addCard(" ");
+        editOnDoubleClick();
         internationalization();
         addCard("  ");
-        crudWithoutFilteringAndSorting();
+        noFilteringAndSorting();
         customToolbar();
         customGrid();
         customSearch();
@@ -73,11 +64,11 @@ public class CrudView extends DemoView {
 
         PersonDataProvider dataProvider = new PersonDataProvider();
 
-        crud.getGrid().removeColumnByKey("id");
         crud.setDataProvider(dataProvider);
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
 
+        crud.getGrid().removeColumnByKey("id");
         crud.addThemeVariants(CrudVariant.NO_BORDER);
         // end-source-example
 
@@ -100,9 +91,30 @@ public class CrudView extends DemoView {
     }
     // end-source-example
 
-    private void crudWithoutFilteringAndSorting() {
+    private void editOnDoubleClick() {
         // begin-source-example
-        // source-example-heading: CRUD without filtering and sorting
+        // source-example-heading: Edit on double-click
+        Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
+        Crud.removeEditColumn(crud.getGrid());
+
+        crud.getGrid().addItemDoubleClickListener(
+                e -> crud.edit(e.getItem(), Crud.EditMode.EXISTING_ITEM));
+
+        PersonDataProvider dataProvider = new PersonDataProvider();
+        crud.setDataProvider(dataProvider);
+        crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
+        crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
+
+        crud.getGrid().removeColumnByKey("id");
+        crud.addThemeVariants(CrudVariant.NO_BORDER);
+        // end-source-example
+
+        addCard("Edit on double-click", crud);
+    }
+
+    private void noFilteringAndSorting() {
+        // begin-source-example
+        // source-example-heading: No filtering and sorting
         CrudGrid<Person> crudGrid = new CrudGrid<>(Person.class, false);
         Crud<Person> crud = new Crud<>(Person.class, crudGrid, createPersonEditor());
 
@@ -115,12 +127,12 @@ public class CrudView extends DemoView {
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
         // end-source-example
 
-        addCard("CRUD without filtering and sorting", crud);
+        addCard("No filtering and sorting", crud);
     }
 
     private void internationalization() {
         // begin-source-example
-        // source-example-heading: CRUD with internationalization
+        // source-example-heading: Internationalization
         Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
 
         crud.getGrid().removeColumnByKey("id");
@@ -130,7 +142,7 @@ public class CrudView extends DemoView {
                 event -> crud.setI18n(createYorubaI18n()));
         // end-source-example
 
-        addCard("CRUD with internationalization", crud, updateI18nButton);
+        addCard("Internationalization", crud, updateI18nButton);
     }
 
     // NOTE: heading is two unicode spaces
@@ -162,15 +174,14 @@ public class CrudView extends DemoView {
 
     private void customToolbar() {
         // begin-source-example
-        // source-example-heading: CRUD with custom toolbar
+        // source-example-heading: Custom toolbar
         Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
 
         Span footer = new Span();
         footer.getElement().getStyle().set("flex", "1");
 
         Button newItemButton = new Button("Add person ...");
-        // Required attribute to handle the new item action
-        newItemButton.getElement().setAttribute("new-button", true);
+        newItemButton.addClickListener(e -> crud.edit(new Person(), Crud.EditMode.NEW_ITEM));
 
         crud.setToolbar(footer, newItemButton);
 
@@ -183,12 +194,12 @@ public class CrudView extends DemoView {
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
         // end-source-example
 
-        addCard("CRUD with custom toolbar", crud);
+        addCard("Custom toolbar", crud);
     }
 
     private void customGrid() {
         // begin-source-example
-        // source-example-heading: CRUD with custom Grid
+        // source-example-heading: Custom Grid
         Grid<Person> grid = new Grid<>();
         Crud<Person> crud = new Crud<>(Person.class, grid, createPersonEditor());
 
@@ -207,12 +218,12 @@ public class CrudView extends DemoView {
         grid.addColumn(Person::getLastName).setHeader("Last name");
         // end-source-example
 
-        addCard("CRUD with custom Grid", crud);
+        addCard("Custom Grid", crud);
     }
 
     private void customSearch() {
         // begin-source-example
-        // source-example-heading: CRUD with custom search
+        // source-example-heading: Custom search
         Grid<Person> grid = new Grid<>(Person.class);
         Crud<Person> crud = new Crud<>(Person.class, grid, createPersonEditor());
 
@@ -262,7 +273,7 @@ public class CrudView extends DemoView {
         crud.getElement().getStyle().set("flex-direction", "column-reverse");
         // end-source-example
 
-        addCard("CRUD with custom search", crud);
+        addCard("Custom search", crud);
     }
 
     // Dummy database
