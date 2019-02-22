@@ -8,7 +8,7 @@ for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Running the component demo
 Run from the command line:
-- `mvn -pl vaadin-button-flow-demo -Pwar install jetty:run`
+- `mvn -pl vaadin-button-flow-demo -Pwar install jetty:run-war`
 
 Then navigate to `http://localhost:9998/vaadin-button` to view the demo.
 

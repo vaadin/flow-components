@@ -19,13 +19,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.button.GeneratedVaadinButton;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -46,6 +52,7 @@ public class ButtonView extends DemoView {
         createDisabledButton();
         createButtonWithDisableOnClick();
         addVariantsFeature();
+        createButtonsWithShortcuts();
 
         message = new Div();
         message.setId("buttonMessage");
@@ -161,6 +168,35 @@ public class ButtonView extends DemoView {
                 GeneratedVaadinButton::removeThemeVariants,
                 ButtonVariant::getVariantName, ButtonVariant.LUMO_SMALL,
                 ButtonVariant.LUMO_PRIMARY);
+    }
+
+    private void createButtonsWithShortcuts() {
+        // begin-source-example
+        // source-example-heading: Button shortcuts
+        Button button = new Button("Has global Enter-shortcut",
+                this::showButtonClickedMessage);
+        button.addClickShortcut(Key.ENTER);
+
+        TextField firstName = new TextField("First name");
+        firstName.setValueChangeMode(ValueChangeMode.EAGER);
+        TextField lastName = new TextField("Last name");
+        lastName.setValueChangeMode(ValueChangeMode.EAGER);
+        Button clearButton = new Button("Clear fields", event -> {
+            firstName.clear();
+            lastName.clear();
+        });
+        VerticalLayout container = new VerticalLayout(firstName, lastName, clearButton);
+        clearButton.addClickShortcut(Key.KEY_L, KeyModifier.ALT)
+                .listenOn(container);
+        // end-source-example
+        Paragraph paragraph = new Paragraph("Button \"Clean fields\"'s " +
+                "shortcut ALT+L works only within the text fields.");
+        container.add(paragraph);
+        addCard("Button shortcuts", button, container);
+        button.setId("shortcuts-enter-button");
+        clearButton.setId("shortcuts-clear-button");
+        firstName.setId("shortcuts-firstname");
+        lastName.setId("shortcuts-lastname");
     }
 
     private void showButtonClickedMessage(ClickEvent<Button> evt) {
