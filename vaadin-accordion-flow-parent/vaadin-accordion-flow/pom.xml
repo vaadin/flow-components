@@ -67,12 +67,6 @@
         <!--Pinned transitive webjars-->
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>license-checker</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-material-styles</artifactId>
             <version>1.2.0</version>
         </dependency>
@@ -133,10 +127,6 @@
                         <!-- Package format version - do not change -->
                         <Vaadin-Package-Version>1</Vaadin-Package-Version>
 
-                        <!-- Add-on specific fields to update -->
-                        <AdVaaLicen>cval</AdVaaLicen>
-                        <AdVaaName>vaadin-accordion</AdVaaName>
-                        <AdVaaPkg>com.vaadin.accordion</AdVaaPkg>
                         <!-- Implementation-Title and Implementation-Version
                             come from the POM by default -->
                         <Implementation-Title>Vaadin Accordion</Implementation-Title>
