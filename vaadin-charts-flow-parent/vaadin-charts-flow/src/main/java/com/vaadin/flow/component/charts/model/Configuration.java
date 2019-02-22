@@ -43,6 +43,7 @@ import java.util.Map;
 public class Configuration extends AbstractConfigurationObject
         implements ChartConfiguration {
 
+    private Accessibility accessibility;
     private ChartModel chart;
     private Title title;
     private Subtitle subtitle;
@@ -70,6 +71,25 @@ public class Configuration extends AbstractConfigurationObject
 
     @JsonIgnore
     private final List<ConfigurationChangeListener> changeListeners = new ArrayList<>();
+
+    /**
+     * @see #setAccessibility(Accessibility)
+     */
+    public Accessibility getAccessibility() {
+        if (accessibility == null) {
+            setAccessibility(new Accessibility());
+        }
+        return accessibility;
+    }
+
+    /**
+     * Sets options for configuring accessibility for the chart.
+     * 
+     * @param accessibility
+     */
+    public void setAccessibility(Accessibility accessibility) {
+        this.accessibility = accessibility;
+    }
 
     /**
      * @see #setChart(ChartModel)
