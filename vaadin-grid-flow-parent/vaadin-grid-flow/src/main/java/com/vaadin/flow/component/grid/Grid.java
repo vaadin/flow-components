@@ -1058,11 +1058,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private ValueProvider<T, String> uniqueKeyProvider;
 
-    private String contextMenuTargetItemKey;
-
     private Editor<T> editor;
 
-    private SerializableSupplier<Editor<T>> editorFactory = () -> createEditor();
+    private SerializableSupplier<Editor<T>> editorFactory = this::createEditor;
 
     private boolean verticalScrollingEnabled = true;
 
@@ -2714,8 +2712,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     @ClientCallable
-    private void updateContextMenuTargetItem(String key) {
+    private void updateContextMenuTargetItem(String key, String colId) {
         getElement().setProperty("_contextMenuTargetItemKey", key);
+        getElement().setProperty("_contextMenuTargetColumnId",colId);
     }
 
     /**

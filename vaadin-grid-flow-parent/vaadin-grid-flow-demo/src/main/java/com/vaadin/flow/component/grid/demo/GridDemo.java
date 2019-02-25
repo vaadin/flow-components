@@ -1860,33 +1860,37 @@ public class GridDemo extends DemoView {
 
     // Context Menu begin
     private void createContextMenu() {
+        TextArea message = new TextArea("");
+        message.setHeight("100px");
+        message.setReadOnly(true);
         // begin-source-example
         // source-example-heading: Using ContextMenu With Grid
         Grid<Person> grid = new Grid<>();
         grid.setItems(getItems());
-        grid.addColumn(Person::getfirstName).setHeader("First name");
-        grid.addColumn(Person::getAge).setHeader("Age");
+        grid.addColumn(Person::getfirstName).setHeader("First name").setId("First name");
+        grid.addColumn(Person::getAge).setHeader("Age").setId("Age");
+        grid.setSelectionMode(SelectionMode.MULTI);
         GridContextMenu<Person> contextMenu = new GridContextMenu<>(grid);
-        contextMenu.addItem("Update", event -> {
-            event.getItem().ifPresent(person -> {
-                person.setfirstName(person.getfirstName() + " Updated");
-                ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) event
-                        .getGrid().getDataProvider();
-                dataProvider.refreshItem(person);
-            });
-        });
-        contextMenu.addItem("Remove", event -> {
-            event.getItem().ifPresent(person -> {
-                ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) grid
-                        .getDataProvider();
-                dataProvider.getItems().remove(person);
-                dataProvider.refreshAll();
-            });
-        });
+        contextMenu.addItem("Update", event -> event.getItem().ifPresent(person -> {
+            person.setfirstName(person.getfirstName() + " Updated");
+            ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) event
+                    .getGrid().getDataProvider();
+            dataProvider.refreshItem(person);
+        }));
+        contextMenu.addItem("Remove", event -> event.getItem().ifPresent(person -> {
+            ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) grid
+                    .getDataProvider();
+            dataProvider.getItems().remove(person);
+            dataProvider.refreshAll();
+        }));
+        contextMenu.addGridContextMenuOpenedListener(event ->
+                message.setValue(String.format("Menu opened on\n Row: '%s'\n Column: '%s'",
+                    event.getItem().map(Person::toString).orElse("-no item-"),
+                    event.getColumnId().orElse("-no column-"))));
         // end-source-example
         grid.setId("context-menu-grid");
         addCard("Context Menu", "Using ContextMenu With Grid", grid,
-                contextMenu);
+                contextMenu, message);
     }
 
     // Context sub Menu begin

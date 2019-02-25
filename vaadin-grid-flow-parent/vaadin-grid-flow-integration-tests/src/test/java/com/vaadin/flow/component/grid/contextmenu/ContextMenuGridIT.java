@@ -198,6 +198,26 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         Assert.assertFalse(isElementPresent(By.tagName(OVERLAY_TAG)));
     }
 
+    @Test
+    public void contextClickOnRow_preOpenGetsTargetItemCol0() {
+        grid.getCell(23, 0).contextClick();
+        assertMessage("pre-open: name=Person 23, colId=Name-Id");
+
+        // ensure closing
+        grid.getCell(29, 1).contextClick();
+        verifyClosed();
+    }
+
+    @Test
+    public void contextClickOnRow_preOpenGetsTargetItemCol1() {
+        grid.getCell(6, 1).contextClick();
+        assertMessage("pre-open: name=Person 6, colId=Born-Id");
+
+        // ensure closing
+        grid.getCell(19, 1).contextClick();
+        verifyClosed();
+    }
+
     private void assertMessage(String expected) {
         Assert.assertEquals(expected, $("label").id("message").getText());
     }

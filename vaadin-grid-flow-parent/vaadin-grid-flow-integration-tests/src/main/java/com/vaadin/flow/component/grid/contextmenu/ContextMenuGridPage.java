@@ -31,8 +31,9 @@ import com.vaadin.flow.router.Route;
 @Route("context-menu-grid")
 public class ContextMenuGridPage extends Div {
 
+    private static final String NO_TARGET_ITEM = "no target item";
+
     private Label message;
-    private Grid<Person> grid;
 
     public ContextMenuGridPage() {
         message = new Label("-");
@@ -44,15 +45,22 @@ public class ContextMenuGridPage extends Div {
     }
 
     private void gridWithContextMenu() {
-        grid = new Grid<>();
-        grid.addColumn(Person::getFirstName).setHeader("Name");
-        grid.addColumn(Person::getAge).setHeader("Born");
+        final Grid<Person> grid = new Grid<>();
+        grid.addColumn(Person::getFirstName).setHeader("Name").setId("Name-Id");
+        grid.addColumn(Person::getAge).setHeader("Born").setId("Born-Id");
         grid.setItems(IntStream.range(0, 77)
                 .mapToObj(i -> new Person("Person " + i, 1900 + i)));
 
         GridContextMenu<Person> contextMenu = grid.addContextMenu();
         addItems(contextMenu);
         contextMenu.addComponentAtIndex(1, new Hr());
+
+        contextMenu.addGridContextMenuOpenedListener(event -> {
+            String name = event.getItem().map(Person::getFirstName)
+                    .orElse(NO_TARGET_ITEM);
+            String columnId = event.getColumnId().orElse("No column");
+            message.setText("pre-open: name="+name+", colId="+columnId);
+        });
 
         NativeButton toggleOpenOnClick = new NativeButton(
                 "Toggle open on click",
@@ -84,7 +92,7 @@ public class ContextMenuGridPage extends Div {
 
         GridContextMenu<String> contextMenu = gridInATemplate.addContextMenu();
         contextMenu.addItem("Show name of context menu target item",
-                e -> message.setText(e.getItem().orElse("no target item")));
+                e -> message.setText(e.getItem().orElse(NO_TARGET_ITEM)));
 
         add(template);
     }
@@ -92,7 +100,7 @@ public class ContextMenuGridPage extends Div {
     private void addItems(HasGridMenuItems<Person> menu) {
         menu.addItem("Show name of context menu target item", event -> {
             String name = event.getItem().map(Person::getFirstName)
-                    .orElse("no target item");
+                    .orElse(NO_TARGET_ITEM);
             message.setText(name);
         });
         menu.addItem("Show connected grid id", e -> {

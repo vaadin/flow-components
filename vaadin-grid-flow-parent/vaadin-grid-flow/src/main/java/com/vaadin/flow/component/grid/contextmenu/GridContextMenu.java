@@ -25,6 +25,7 @@ import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for {@code <vaadin-context-menu>} to be used with
@@ -47,7 +48,7 @@ public class GridContextMenu<T> extends
             extends ComponentEvent<GridMenuItem<T>> {
 
         private Grid<T> grid;
-        private Optional<T> item;
+        private transient Optional<T> item;
 
         @SuppressWarnings("unchecked")
         GridContextMenuItemClickEvent(GridMenuItem<T> source,
@@ -78,6 +79,47 @@ public class GridContextMenu<T> extends
         public Optional<T> getItem() {
             return item;
         }
+    }
+
+    public static class GridContextMenuOpenedEvent<T>
+            extends OpenedChangeEvent<GridContextMenu<T>> {
+
+        private final Grid<T> grid;
+        private final transient Optional<T> item;
+        private final transient Optional<String> columnId;
+
+        public GridContextMenuOpenedEvent(GridContextMenu<T> source, boolean fromClient) {
+            super(source, fromClient);
+            grid = (Grid<T>) getSource().getTarget();
+            item = Optional.ofNullable(grid.getDataCommunicator().getKeyMapper()
+                    .get(grid.getElement()
+                            .getProperty("_contextMenuTargetItemKey")));
+            columnId = Optional.ofNullable(grid.getElement()
+                            .getProperty("_contextMenuTargetColumnId"));
+        }
+
+        /**
+         * Gets the item in the Grid that was the target of the context-click,
+         * or an empty {@code Optional} if the context-click didn't target any
+         * item in the Grid (eg. if targeting a header).
+         *
+         * @return the target item of the context-click
+         */
+        public Optional<T> getItem() {
+            return item;
+        }
+
+        /**
+         * Gets the column ID in the Grid that was the target of the context-click,
+         * or an empty {@code Optional} if the context-click didn't target any
+         * application column in the Grid (eg. selection column).
+         *
+         * @return the target item of the context-click
+         */
+        public Optional<String> getColumnId() {
+            return columnId;
+        }
+
     }
 
     /**
@@ -144,6 +186,19 @@ public class GridContextMenu<T> extends
                         (SerializableRunnable) reset);
         return new MenuManager(this, contentReset, itemFactory,
                 GridMenuItem.class, null);
+    }
+
+    /**
+     * Adds a listener for the {@code opened-changed} events fired by the web
+     * component.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
+     */
+    public Registration addGridContextMenuOpenedListener(
+            ComponentEventListener<GridContextMenuOpenedEvent<T>> listener) {
+        return super.addOpenedChangeListener(ev -> listener.onComponentEvent(new GridContextMenuOpenedEvent<>(ev.getSource(), ev.isFromClient())));
     }
 
 }
