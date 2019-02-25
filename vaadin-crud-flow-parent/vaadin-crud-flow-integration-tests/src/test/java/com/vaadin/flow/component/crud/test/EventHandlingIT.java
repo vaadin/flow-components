@@ -1,15 +1,17 @@
 package com.vaadin.flow.component.crud.test;
 
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.parallel.BrowserUtil;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class EventHandlingIT extends AbstractParallelTest {
 
@@ -26,11 +28,8 @@ public class EventHandlingIT extends AbstractParallelTest {
         }
     }
 
-    private void dismissConfirmDialog() {
-        // TODO(oluwasayo): Remove this workaround when vaadin-components-testbench includes Confirm Dialog
-        TestBenchElement overlayContext = $("vaadin-dialog-overlay").onPage()
-                .last().$(TestBenchElement.class).id("content");
-        TestBenchElement confirmButton = overlayContext.$(ButtonElement.class).id("confirm");
+    private void dismissConfirmDialog(CrudElement crud) {
+        final TestBenchElement confirmButton = crud.$(ConfirmDialogElement.class).first().getConfirmButton();
         confirmButton.click();
     }
 
@@ -89,7 +88,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         dismissDialog();
         Assert.assertFalse(crud.isEditorOpen());
         try {
-            dismissConfirmDialog();
+            dismissConfirmDialog(crud);
             Assert.fail("There should be no confirm dialog open");
         } catch (Exception ignored) { }
 
@@ -104,7 +103,7 @@ public class EventHandlingIT extends AbstractParallelTest {
 
         // Send keys not working as expected in Firefox
         if (!BrowserUtil.isFirefox(getDesiredCapabilities())) {
-            dismissConfirmDialog();
+            dismissConfirmDialog(crud);
         }
     }
 
@@ -125,7 +124,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         Assert.assertEquals("3 items available", getFooterText(crud));
         crud.openRowForEditing(2);
         crud.getEditorDeleteButton().click();
-        dismissConfirmDialog();
+        dismissConfirmDialog(crud);
 
         Assert.assertEquals("Delete: Person{id=3, firstName='Guille', lastName='Guille'}",
                 getLastEvent());
