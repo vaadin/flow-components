@@ -238,6 +238,27 @@ public class GridPro<E> extends Grid<E> {
     }
 
     /**
+     * Adds a new edit column to this {@link GridPro} with a renderer and sorting properties.
+     *
+     * @param renderer
+     *            the renderer used to create the grid cell structure
+     * @param sortingProperties
+     *            the sorting properties to use for this column
+     * @return an edit column configurer for configuring the column editor
+     *
+     * @see Grid#addColumn(Renderer, String[])
+     * @see EditColumnConfigurator#text(ItemUpdater)
+     * @see EditColumnConfigurator#checkbox(ItemUpdater)
+     * @see EditColumnConfigurator#select(ItemUpdater, List)
+     * @see #removeColumn(Column)
+     */
+    public EditColumnConfigurator<E> addEditColumn(Renderer<E> renderer, String... sortingProperties) {
+        EditColumn<E> column = this.addColumn(renderer, this::createEditColumn, sortingProperties);
+
+        return new EditColumnConfigurator<>(column);
+    }
+
+    /**
      * Adds a new edit column for the given property name.
      * <p>
      * <strong>Note:</strong> This method can only be used for a Grid created
