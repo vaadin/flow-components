@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>vaadin-radio-button-flow-parent</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Radio Button Flow Parent</name>
 
