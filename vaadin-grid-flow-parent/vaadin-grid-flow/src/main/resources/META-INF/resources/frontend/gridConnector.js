@@ -542,7 +542,7 @@ window.Vaadin.Flow.gridConnector = {
      * @param array items the items to update in DOM
      */
     const updateGridItemsInDomBasedOnCache = function(items) {
-      if (!items) {
+      if (!items || !grid._physicalItems) {
         return;
       }
       /**
