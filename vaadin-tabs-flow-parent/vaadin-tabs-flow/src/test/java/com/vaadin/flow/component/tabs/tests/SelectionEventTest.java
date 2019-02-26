@@ -16,12 +16,13 @@
 
 package com.vaadin.flow.component.tabs.tests;
 
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.component.tabs.Tabs;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Vaadin Ltd.
@@ -263,6 +264,37 @@ public class SelectionEventTest {
         Assert.assertEquals(
                 "Selection was not changed, no event should've been fired", 1,
                 eventCount);
+    }
+
+    @Test
+    public void tabsAutoselectFalse_previousAndCurrentTab() {
+        AtomicReference<Tab> currentTab = new AtomicReference<>();
+        AtomicReference<Tab> previousTab = new AtomicReference<>();
+        tabs = new Tabs();
+        tabs.setAutoselect(false);
+        tabs.add(tab1, tab2);
+        tabs.addSelectedChangeListener(e -> {
+            currentTab.set(e.getSelectedTab());
+            previousTab.set(e.getPreviousTab());
+        });
+
+        tabs.setSelectedTab(tab1);
+        Assert.assertEquals("Current tab should be tab 1", currentTab.get(), tab1);
+        Assert.assertNull("Previous tab should be empty", previousTab.get());
+
+        tabs.setSelectedTab(tab2);
+        Assert.assertEquals("Current tab should be tab 2", currentTab.get(), tab2);
+        Assert.assertEquals("Previous tab should be tab 1", previousTab.get(), tab1);
+    }
+
+    @Test
+    public void removeCurrent_withoutAutomaticSelectionResetsSelection() {
+        tabs.setAutoselect(false);
+        tabs.setSelectedIndex(1);
+        Assert.assertEquals(tab2, tabs.getSelectedTab());
+
+        tabs.remove(tab2);
+        Assert.assertEquals(tabs.getSelectedIndex(), -1);
     }
 
 }

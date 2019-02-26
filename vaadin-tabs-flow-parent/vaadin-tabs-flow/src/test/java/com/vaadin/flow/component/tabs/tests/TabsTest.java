@@ -154,4 +154,32 @@ public class TabsTest {
         Assert.assertFalse(tab1.isSelected());
         Assert.assertTrue(tab2.isSelected());
     }
+
+    @Test
+    public void tabsWithoutAutomaticSelection() {
+        Tab tab1 = new Tab("Tab one");
+        Tab tab2 = new Tab("Tab two");
+        Tabs tabs = new Tabs(false, tab1, tab2);
+
+        Assert.assertNull(tabs.getSelectedTab());
+        Assert.assertEquals(tabs.getSelectedIndex(), -1);
+    }
+
+    @Test
+    public void removeTabInTabsWithoutAutomaticSelection() {
+        Tab tab1 = new Tab("Tab one");
+        Tab tab2 = new Tab("Tab two");
+        Tab tab3 = new Tab("Tab three");
+        Tabs tabs = new Tabs(false, tab1, tab2, tab3);
+
+        tabs.setSelectedTab(tab2);
+        tabs.remove(tab1);
+
+        Assert.assertEquals("should not change selected tab",
+                tabs.getSelectedTab(), tab2);
+
+        tabs.remove(tab2);
+        Assert.assertNull("should not select other tab if current tab removed",
+                tabs.getSelectedTab());
+    }
 }
