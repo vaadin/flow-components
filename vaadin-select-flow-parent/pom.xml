@@ -11,7 +11,7 @@
 	</parent>
 
 	<artifactId>vaadin-select-flow-parent</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Vaadin Select Flow Parent</name>
 	<inceptionYear>2019</inceptionYear>
@@ -22,7 +22,7 @@
 	</organization>
 
 	<properties>
-		<flow.version>1.2.3</flow.version>
+		<flow.version>1.5-SNAPSHOT</flow.version>
 		<testbench.version>6.0.1</testbench.version>
 		<jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
