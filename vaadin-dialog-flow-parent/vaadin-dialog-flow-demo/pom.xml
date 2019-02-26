@@ -6,7 +6,7 @@
     <parent>
         <artifactId>vaadin-dialog-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>1.3-SNAPSHOT</version>
+        <version>1.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-dialog-flow-demo</artifactId>
