@@ -113,11 +113,11 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
 
     @Override
     public void add(Component... components) {
+        boolean wasEmpty = getComponentCount() == 0;
+        HasOrderedComponents.super.add(components);
         if (components.length == 0) {
             return;
         }
-        boolean wasEmpty = getComponentCount() == 0;
-        HasOrderedComponents.super.add(components);
         if (wasEmpty && autoselect) {
             assert getSelectedIndex() == -1;
             setSelectedIndex(0);
