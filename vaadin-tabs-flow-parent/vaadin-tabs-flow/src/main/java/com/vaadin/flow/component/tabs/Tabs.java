@@ -91,7 +91,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * {@link Orientation#HORIZONTAL HORIZONTAL} orientation.
      *
      * @param autoselect
-     *            @{code true} to autoselect tab, {@code false} to not
+     *            {@code true} to autoselect tab, {@code false} to not
      * @param tabs
      *            the tabs to enclose
      */
@@ -113,6 +113,9 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
 
     @Override
     public void add(Component... components) {
+        if (components.length == 0) {
+            return;
+        }
         boolean wasEmpty = getComponentCount() == 0;
         HasOrderedComponents.super.add(components);
         if (wasEmpty && autoselect) {
@@ -422,7 +425,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * The default value is true.
      *
      * @param autoselect
-     *            @{code true} to autoselect tab, {@code false} to not.
+     *            {@code true} to autoselect tab, {@code false} to not.
      */
     public void setAutoselect(boolean autoselect) {
         this.autoselect = autoselect;

@@ -16,9 +16,6 @@
 
 package com.vaadin.flow.component.tabs.tests;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -27,6 +24,9 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Vaadin Ltd.
@@ -156,13 +156,24 @@ public class TabsTest {
     }
 
     @Test
+    public void tabsAutoselectConstructor() {
+        Tabs tabs1 = new Tabs(true);
+        tabs1.add(new Tab("Tab"));
+        Assert.assertEquals(tabs1.getSelectedIndex(), 0);
+
+        Tabs tabs2 = new Tabs(false);
+        tabs2.add(new Tab("Tab"));
+        Assert.assertEquals(tabs2.getSelectedIndex(), -1);
+    }
+
+    @Test
     public void tabsWithoutAutomaticSelection() {
         Tab tab1 = new Tab("Tab one");
         Tab tab2 = new Tab("Tab two");
-        Tabs tabs = new Tabs(false, tab1, tab2);
+        Tabs tabs2 = new Tabs(false, tab1, tab2);
 
-        Assert.assertNull(tabs.getSelectedTab());
-        Assert.assertEquals(tabs.getSelectedIndex(), -1);
+        Assert.assertNull(tabs2.getSelectedTab());
+        Assert.assertEquals(tabs2.getSelectedIndex(), -1);
     }
 
     @Test
