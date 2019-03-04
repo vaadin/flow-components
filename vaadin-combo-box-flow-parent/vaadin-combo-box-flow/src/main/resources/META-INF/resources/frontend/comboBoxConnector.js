@@ -162,7 +162,10 @@ window.Vaadin.Flow.comboBoxConnector = {
     }
     
     comboBox.$connector.enableClientValidation = function( enable ){
-        let input = comboBox.$["input"];
+        let input = null;
+        if ( comboBox.$ ){
+            input = comboBox.$["input"]; 
+        }
         if (input){
             if ( enable){
                 enableClientValidation(comboBox);
