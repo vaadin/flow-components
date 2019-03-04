@@ -297,8 +297,7 @@ public class CellValueManager implements Serializable {
                                                     .get((int) cell
                                                             .getCellStyle()
                                                             .getIndex()),
-                                            spreadsheet.getState(false).colW[cell
-                                                    .getColumnIndex()] - 10);
+                                            getCellWidth(cell) - 10);
                         } else if (cell.getCellType() != CellType.STRING
                                 && (cell.getCellType() == CellType.FORMULA
                                         && cell.getCachedFormulaResultType() != CellType.STRING)) {
@@ -436,8 +435,28 @@ public class CellValueManager implements Serializable {
         // FIXME We should probably measure this from the actual value since it
         // might be changed in the style
         BigDecimal columnWidth = new BigDecimal(
-                spreadsheet.getState(false).colW[cell.getColumnIndex()] - 4);
+                getCellWidth(cell) - 4);
         return stringPixels.compareTo(columnWidth) <= 0;
+    }
+
+    /**
+     * Calculate cell width, accounting for merged cells (see #655)
+     * @param cell
+     * @return cell width, including widths of any merged columns
+     */
+    protected int getCellWidth(Cell cell) {
+        for (CellRangeAddress range : cell.getSheet().getMergedRegions()) {
+            if (range.isInRange(cell)) {
+                int w = 0;
+                for (int c = range.getFirstColumn(); c <= range
+                        .getLastColumn(); c++) {
+                    w += spreadsheet.getState(false).colW[c];
+                }
+                return w;
+            }
+        }
+        // if we get here, cell is not in a merged region
+        return spreadsheet.getState(false).colW[cell.getColumnIndex()];
     }
 
     /**
