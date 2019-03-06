@@ -97,8 +97,16 @@ public abstract class AbstractGridMultiSelectionModel<T>
             fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                     getGrid().asMultiSelect(), oldSelection, true));
 
-            selectionColumn.setSelectAllCheckboxState(getGrid().getDataCommunicator().getDataProvider()
-                    .size(new Query<>()) == selected.size());
+            long size = 0;
+
+            final DataProvider<T, ?> dataProvider = getGrid().getDataCommunicator().getDataProvider();
+
+            // Avoid throwing an IllegalArgumentException in case of HierarchicalDataProvider
+            if (!(dataProvider instanceof HierarchicalDataProvider)) {
+                size = dataProvider.size(new Query<>());
+            }
+
+            selectionColumn.setSelectAllCheckboxState(size == selected.size());
         }
     }
 

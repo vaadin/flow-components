@@ -15,13 +15,11 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.vaadin.flow.component.grid.Grid.SelectionMode;
 
 public class AbstractGridMultiSelectionModelTest {
 
@@ -89,5 +87,19 @@ public class AbstractGridMultiSelectionModelTest {
 
         grid.getSelectionModel().deselectFromClient("foo");
         Assert.assertEquals(0, deselected.size());
+    }
+
+    @Test
+    public void treegrid_select_singleItemSignature_selectFromClient() {
+        TreeGrid<String> grid = new TreeGrid<>();
+
+        grid.setSelectionMode(SelectionMode.MULTI);
+        List<String> roots = Arrays.asList("foo", "bar");
+        grid.setItems(roots, root -> roots.contains(root)? Arrays.asList(root + 1, root + 2) :
+        Collections.emptyList());
+        // Asserting that selectFromClient does not throw any exception
+        grid.getSelectionModel().selectFromClient("foo");
+
+        Assert.assertEquals(1, grid.getSelectedItems().size());
     }
 }
