@@ -216,5 +216,9 @@ public class BeanGridTest {
         Assert.assertEquals(0, columnCount);
     }
 
+    @Test
+    public void beanType_isSet() {
+        Assert.assertEquals(Person.class, grid.getBeanType());
+    }
 
 }
