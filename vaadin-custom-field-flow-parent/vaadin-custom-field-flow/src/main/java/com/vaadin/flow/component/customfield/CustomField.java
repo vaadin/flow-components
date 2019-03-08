@@ -89,10 +89,17 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     protected abstract void setPresentationValue(T newPresentationValue);
 
     /**
-     * Regenerates the value and updates the model. Subclasses of CustomField can call it when the model value needs to be regenerated and updated.
+     * Regenerates the value by calling {@link #generateModelValue()} and updates the model.
+     * If the value is different than the current one, a {@link ValueChangeEvent} will be generated with {@link ValueChangeEvent#isFromClient()} set to <code>true</code>
+     *
+     * <p>This method is called when the webcomponent generates a <b>changed</b> event, typically in response to a change made by the user in one of the contained fields.
+     *
+     * <p>Custom implementations of this method <b>must</b> call {@link #setModelValue(Object, boolean)} with the updated model value.
+     * Subclasses can call this method when the model value needs to be regenerated and updated.
      */
     protected void updateValue() {
-        setModelValue(generateModelValue(), false);
+        // The second parameter is true since this method is called in response to a change event from the client.
+        setModelValue(generateModelValue(), true);
     }
 
     /**
