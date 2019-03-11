@@ -210,6 +210,23 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         assertCheckedInClientSide(item, true);
     }
 
+    @Test
+    public void detachTarget_attachTarget_rightClickTarget_menuOpens() {
+        clickElementWithJs("detach-target");
+        clickElementWithJs("attach-target");
+        rightClickOn("context-menu-with-controls");
+        verifyOpened();
+    }
+
+    @Test
+    public void detachTarget_changeTarget_attachOldTarget_rightClickOldTarget_menuNotOpened() {
+        clickElementWithJs("detach-target");
+        clickElementWithJs("change-target");
+        clickElementWithJs("attach-target");
+        rightClickOn("context-menu-with-controls");
+        verifyClosed();
+    }
+
     public static void assertCheckedInClientSide(TestBenchElement item,
             boolean shouldBeChecked) {
         boolean isChecked = item.hasAttribute("menu-item-checked");

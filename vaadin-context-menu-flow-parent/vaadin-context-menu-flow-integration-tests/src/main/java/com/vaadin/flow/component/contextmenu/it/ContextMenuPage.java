@@ -139,8 +139,16 @@ public class ContextMenuPage extends Div {
                 event -> contextMenu.setTarget(null));
         removeTarget.setId("remove-target");
 
+        NativeButton detachTarget = new NativeButton("Detach target",
+                event -> remove(target));
+        detachTarget.setId("detach-target");
+
+        NativeButton attachTarget = new NativeButton("Attach target",
+                event -> add(target));
+        attachTarget.setId("attach-target");
+
         add(contextMenu, target, altTarget, message, on, off, changeTarget,
-                removeTarget);
+                removeTarget, detachTarget, attachTarget);
     }
 
     private void addContextMenuWithCheckableItem() {

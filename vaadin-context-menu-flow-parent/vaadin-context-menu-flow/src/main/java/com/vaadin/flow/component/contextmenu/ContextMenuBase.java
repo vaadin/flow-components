@@ -59,6 +59,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     private String openOnEventName = "vaadin-contextmenu";
     private Registration targetBeforeOpenRegistration;
+    private Registration targetAttachRegistration;
 
     private boolean autoAddedToTheUi;
 
@@ -99,6 +100,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     public void setTarget(Component target) {
         if (getTarget() != null) {
             targetBeforeOpenRegistration.remove();
+            targetAttachRegistration.remove();
             getTarget().getElement()
                     .callFunction("$contextMenuConnector.removeConnector");
         }
@@ -116,12 +118,13 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
                 ui -> ui.beforeClientResponse(target, context -> {
                     ui.getInternals()
                             .addComponentDependencies(ContextMenuBase.class);
-                    ui.getPage().executeJavaScript(
-                            "window.Vaadin.Flow.contextMenuConnector.init($0)",
-                            target.getElement());
                 }));
 
-        updateOpenOn();
+        // Target's JavaScript needs to be executed on each attach,
+        // because Flow creates a new client-side element
+        target.getUI().ifPresent(this::onTargetAttach);
+        targetAttachRegistration = target
+                .addAttachListener(e -> onTargetAttach(e.getUI()));
 
         // Server round-trip before opening the overlay
         targetBeforeOpenRegistration = target.getElement()
@@ -388,6 +391,12 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private void runBeforeClientResponse(Consumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void onTargetAttach(UI ui) {
+        ui.getPage().executeJavaScript(
+                "window.Vaadin.Flow.contextMenuConnector.init($0)", target);
+        updateOpenOn();
     }
 
     private void updateOpenOn() {
