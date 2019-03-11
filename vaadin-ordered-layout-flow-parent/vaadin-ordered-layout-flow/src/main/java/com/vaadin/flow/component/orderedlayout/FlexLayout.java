@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
+import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 
@@ -31,7 +32,8 @@ import java.util.Arrays;
  *      CSS Flexible boxes on MDN</a>
  */
 @Tag(Tag.DIV)
-public class FlexLayout extends Component implements FlexComponent<FlexLayout> {
+public class FlexLayout extends Component
+        implements FlexComponent<FlexLayout>, ClickNotifier<FlexLayout> {
 
     /**
      * Possible values for the {@code flex-wrap} CSS property, which determines how the elements inside the layout
