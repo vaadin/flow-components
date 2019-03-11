@@ -520,9 +520,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void refreshAllData(boolean forceServerSideFiltering) {
-        int size = getDataProvider().size(new Query<>());
-        setClientSideFilter(
-                !forceServerSideFiltering && size <= getPageSizeDouble());
+        setClientSideFilter(!forceServerSideFiltering && getDataProvider()
+                .size(new Query<>()) <= getPageSizeDouble());
 
         reset();
     }
