@@ -394,6 +394,21 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertRendered("Item 52");
     }
 
+    @Test // https://github.com/vaadin/vaadin-combo-box-flow/issues/216
+    public void filterAndSelectItemNotOnFirstPage_setCurrentValue_valueCorrect() {
+        String item = "Item 151";
+
+        stringBox.openPopup();
+        stringBox.setFilter(item);
+        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
+        stringBox.selectByText(item);
+
+        clickButton("set-current-value");
+
+        assertMessage(item);
+        Assert.assertEquals(item, getSelectedItemLabel(stringBox));
+    }
+
     private void assertMessage(String expectedMessage) {
         Assert.assertEquals(expectedMessage, $("div").id("message").getText());
     }

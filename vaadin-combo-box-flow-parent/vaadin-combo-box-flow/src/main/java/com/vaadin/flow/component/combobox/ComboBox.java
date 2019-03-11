@@ -343,6 +343,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         json.put("key", keyMapper.key(value));
         dataGenerator.generateData(value, json);
         setSelectedItem(json);
+        getElement().setProperty("value", keyMapper.key(value));
 
         // Workaround for property not updating in certain scenario
         // https://github.com/vaadin/flow/issues/4862

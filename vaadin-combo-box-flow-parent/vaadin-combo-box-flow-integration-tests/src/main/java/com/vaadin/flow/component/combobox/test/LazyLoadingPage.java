@@ -81,7 +81,13 @@ public class LazyLoadingPage extends Div {
         });
         disableButton.setId("disable");
 
-        add(comboBox, setButton, disableButton);
+        NativeButton setCurrentValueButton = new NativeButton(
+                "set current value", e -> {
+                    comboBox.setValue(comboBox.getValue());
+                });
+        setCurrentValueButton.setId("set-current-value");
+
+        add(comboBox, setButton, disableButton, setCurrentValueButton);
     }
 
     private void createComboBoxWithCustomPageSize() {
