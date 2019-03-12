@@ -240,7 +240,7 @@ public class SheetTabSheet extends Widget {
                             Element element = (Element) tabs.get(
                                     selectedTabIndex).cast();
                             element.getStyle().clearWidth();
-                            element.setInnerText(cachedSheetName);
+                            setTabName(element, cachedSheetName);
                             handler.onSheetRenameCancel();
                             break;
                         default:
@@ -354,16 +354,16 @@ public class SheetTabSheet extends Widget {
             for (int i = 0; i < tabs.length(); i++) {
                 // value cannot be the same as with another sheet
                 if (value.equals(((Element) tabs.get(i).cast()).getInnerText())) {
-                    selectedTab.setInnerText(cachedSheetName);
+                    setTabName(selectedTab, cachedSheetName);
                     return;
                 }
             }
             handler.onSheetRename(selectedTabIndex, value);
-            selectedTab.setInnerText(value);
+            setTabName(selectedTab, value);
             showHideScrollIcons();
         } else {
             // TODO show error ?
-            selectedTab.setInnerText(cachedSheetName);
+            setTabName(selectedTab, cachedSheetName);
         }
     }
 
@@ -400,7 +400,7 @@ public class SheetTabSheet extends Widget {
 
     private Element createTabElement(String tabName) {
         final Element e = Document.get().createDivElement();
-        e.setInnerText(tabName);
+        setTabName(e, tabName);
         e.setClassName("sheet-tabsheet-tab");
         return e;
     }
@@ -428,7 +428,8 @@ public class SheetTabSheet extends Widget {
         for (int i = 0; i < tabNames.length; i++) {
             JavaScriptObject jso = tabs.get(i);
             if (jso != null) {
-                ((Element) jso.cast()).setInnerText(tabNames[i]);
+                Element tabElement = (Element) jso.cast();
+                setTabName(tabElement, tabNames[i]);
             } else {
                 Element newTab = createTabElement(tabNames[i]);
                 container.appendChild(newTab);
@@ -514,6 +515,17 @@ public class SheetTabSheet extends Widget {
             scrollRight.addClassName(HIDDEN);
             scrollEnd.addClassName(HIDDEN);
         }
+    }
+    
+    /**
+     * Set the tab inner text and title to the given name value
+     * @param tab
+     * @param name to use
+     */
+    private void setTabName(Element tab, String name) {
+        if (tab == null) return;
+        tab.setInnerText(name);
+        tab.setTitle(name);
     }
 
     public void onWidgetResize() {
