@@ -923,10 +923,9 @@ public class SpreadsheetFactory implements Serializable {
             XSSFChart chartXml = getChartForFrame((XSSFDrawing) drawing, frame);
 
             if (chartXml != null) {
-                XSSFClientAnchor anchor = getAnchorFromParent(frame
-                        .getCTGraphicalObjectFrame());
-
-                return new SheetChartWrapper(anchor, chartXml, spreadsheet);
+                // removed old anchor lookup, as it was wrong for some Excel files.
+                // anchor can be referenced directly from XSSFChart.
+                return new SheetChartWrapper(chartXml, spreadsheet);
             }
         } catch (NullPointerException e) {
             // means we did not find any chart for this drawing (not an error,

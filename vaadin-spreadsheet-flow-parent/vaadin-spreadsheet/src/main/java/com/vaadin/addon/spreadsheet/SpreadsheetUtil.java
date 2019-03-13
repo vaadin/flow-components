@@ -24,11 +24,19 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.Format;
 import java.text.ParsePosition;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.converter.ExcelToHtmlUtils;
+import org.apache.poi.ss.formula.WorkbookEvaluatorProvider;
+import org.apache.poi.ss.formula.eval.AreaEval;
+import org.apache.poi.ss.formula.eval.ExternalNameEval;
+import org.apache.poi.ss.formula.eval.RefEval;
+import org.apache.poi.ss.formula.eval.RefListEval;
+import org.apache.poi.ss.formula.eval.ValueEval;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -438,5 +446,106 @@ public class SpreadsheetUtil implements Serializable {
         }
 
         return cellStyle.getCoreXf().getQuotePrefix();
+    }
+
+    /**
+     * evaluate the formula (which may just be a single cell or range string)
+     * and find the bounding rectangle for the referenced cells.
+     * 
+     * @param formula
+     * @param spreadsheet
+     * @param includeHiddenCells
+     * @return CellRangeAddress bounding the evaluated result
+     */
+    public static CellRangeAddress getRangeForReference(String formula,
+            Spreadsheet spreadsheet, boolean includeHiddenCells) {
+        int minRow = Integer.MAX_VALUE;
+        int minCol = Integer.MAX_VALUE;
+        int maxRow = 0;
+        int maxCol = 0;
+        for (CellReference ref : getAllReferencedCells(formula, spreadsheet,
+                includeHiddenCells)) {
+            minRow = Math.min(minRow, ref.getRow());
+            maxRow = Math.max(maxRow, ref.getRow());
+            minCol = Math.min(minCol, ref.getCol());
+            maxCol = Math.max(maxCol, ref.getCol());
+        }
+        return new CellRangeAddress(minRow, maxRow, minCol, maxCol);
+    }
+
+    /**
+     * This function returns all the cells that the given formula references.
+     * You can optionally filter out all the hidden rows from the list honoring
+     * filtering of charts based on SpreadsheetTable filter settings.
+     * 
+     * @param formula
+     *            The formula to find referenced cells for
+     * @param spreadsheet
+     *            Spreadsheet to operate on
+     * @param includeHiddenCells
+     *            <code>true</code> to include cells residing in hidden rows or
+     *            columns, <code>false</code> to omit them
+     * 
+     */
+    public static List<CellReference> getAllReferencedCells(String formula,
+            Spreadsheet spreadsheet, boolean includeHiddenCells) {
+        final List<CellReference> cellRefs = new ArrayList<>();
+        getAllReferencedCells(
+                ((WorkbookEvaluatorProvider) spreadsheet.getFormulaEvaluator())
+                        ._getWorkbookEvaluator().evaluate(formula,
+                                new CellReference(
+                                        spreadsheet.getActiveSheet()
+                                                .getSheetName(),
+                                        0, 0, false, false)),
+                spreadsheet, cellRefs);
+
+        if (includeHiddenCells) {
+            return cellRefs;
+        } else {
+            // Filter out hidden cells of rows that are hidden (Excel spec)
+            ArrayList<CellReference> visibleCells = new ArrayList<CellReference>();
+            for (CellReference cr : cellRefs) {
+                if (!spreadsheet.isRowHidden(cr.getRow())
+                        && !spreadsheet.isColumnHidden(cr.getCol())) {
+                    visibleCells.add(cr);
+                }
+            }
+            return visibleCells;
+        }
+    }
+
+    private static void getAllReferencedCells(ValueEval rawEval,
+            Spreadsheet spreadsheet, List<CellReference> cells) {
+        if (rawEval instanceof AreaEval) {
+            // includes 2D and 3D contiguous ranges (1+ sheets, start/end
+            // row/column)
+            final AreaEval areaEval = (AreaEval) rawEval;
+            for (int s = areaEval.getFirstSheetIndex(); s <= areaEval
+                    .getLastSheetIndex(); s++) {
+                for (int r = areaEval.getFirstRow(); r <= areaEval
+                        .getLastRow(); r++) {
+                    for (int c = areaEval.getFirstColumn(); c <= areaEval
+                            .getLastColumn(); c++) {
+                        cells.add(new CellReference(
+                                spreadsheet.getWorkbook().getSheetName(s), r, c,
+                                false, false));
+                    }
+                }
+            }
+        } else if (rawEval instanceof RefEval) {
+            // same cell on 1+ sheets, by row/column index
+            final RefEval refEval = (RefEval) rawEval;
+            for (int s = refEval.getFirstSheetIndex(); s <= refEval
+                    .getLastSheetIndex(); s++) {
+                cells.add(new CellReference(
+                        spreadsheet.getWorkbook().getSheetName(s),
+                        refEval.getRow(), refEval.getColumn(), false, false));
+            }
+        } else if (rawEval instanceof RefListEval) {
+            // list of evals, call this with each one
+            final RefListEval list = (RefListEval) rawEval;
+            for (ValueEval eval : list.getList())
+                getAllReferencedCells(eval, spreadsheet, cells);
+        } // ignore others, static values, not cell references
     }
 }

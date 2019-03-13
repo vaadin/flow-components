@@ -86,9 +86,9 @@ public class SheetChartWrapper extends SheetOverlayWrapper implements
         }
     }
 
-    public SheetChartWrapper(XSSFClientAnchor anchor, XSSFChart chartXml,
+    public SheetChartWrapper(XSSFChart chartXml,
             Spreadsheet spreadsheet) {
-        super(anchor);
+        super(chartXml.getGraphicFrame().getAnchor());
 
         this.chartXml = chartXml;
         this.spreadsheet = spreadsheet;

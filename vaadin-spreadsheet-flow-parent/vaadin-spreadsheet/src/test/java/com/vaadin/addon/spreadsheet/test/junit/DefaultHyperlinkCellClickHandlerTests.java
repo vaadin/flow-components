@@ -1,44 +1,53 @@
 package com.vaadin.addon.spreadsheet.test.junit;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import static org.junit.Assert.*;
 
-import org.junit.Assert;
+import java.io.File;
+import java.net.URL;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.Test;
 
 import com.vaadin.addon.spreadsheet.DefaultHyperlinkCellClickHandler;
+import com.vaadin.addon.spreadsheet.Spreadsheet;
 
 /**
  * Created by mtzukanov on 24.4.2017.
  */
 public class DefaultHyperlinkCellClickHandlerTests {
 
-    private Map<String, String> testStrings = new HashMap<String, String>() {
-        {
-            put("=HYPERLINK(\"[spreadsheet_hyperlinks.xlsx]Sheet1!B6\", \"explicit link to next cell\")",
-                "\"[spreadsheet_hyperlinks.xlsx]Sheet1!B6\"");
-            put("G( A2 , A3)", "A2");
-            put("G( \"hello\" ,A3)", "\"hello\"");
-            put("G(\"comma,comma\",A3)", "\"comma,comma\"");
-        }
-    };
-
     @Test
-    public void hyperlinkParser_validStrings_correctParsed()
-        throws NoSuchMethodException, InvocationTargetException,
-        IllegalAccessException {
-        final Method getFirstArgumentFromFormula = DefaultHyperlinkCellClickHandler.class
-            .getDeclaredMethod("getFirstArgumentFromFormula", String.class);
+    public void hyperlinkParser_validStrings_correctParsed()throws Exception {
+        URL testSheetResource = this.getClass().getClassLoader()
+                .getResource("test_sheets/hyper_links.xlsx");
+        File testSheetFile = new File(testSheetResource.toURI());
 
-        getFirstArgumentFromFormula.setAccessible(true);
+        Workbook workbook = WorkbookFactory.create(testSheetFile);
 
-        for (String testString : testStrings.keySet()) {
-            final Object result = getFirstArgumentFromFormula
-                .invoke(null, testString);
-            
-            Assert.assertEquals(testStrings.get(testString), result);
+        final Spreadsheet ss = new Spreadsheet(workbook);
+        ss.setActiveSheetIndex(0);
+
+        TestHyperlinkCellClickHandler handler = new TestHyperlinkCellClickHandler(ss);
+
+        // this tests the condition from #537, formula first argument is a cell
+        // ref whose value is the link target
+        assertEquals("#A3", handler.getFirstArgumentFromFormula(ss.getCell(0, 1)));
+        assertEquals("https://www.google.com", handler.getFirstArgumentFromFormula(ss.getCell(1, 1)));
+    }
+
+    public static class TestHyperlinkCellClickHandler extends DefaultHyperlinkCellClickHandler {
+        public TestHyperlinkCellClickHandler(Spreadsheet spreadsheet) {
+            super(spreadsheet);
+        }
+
+        /**
+         * @see com.vaadin.addon.spreadsheet.DefaultHyperlinkCellClickHandler#getFirstArgumentFromFormula(org.apache.poi.ss.usermodel.Cell)
+         */
+        @Override
+        public String getFirstArgumentFromFormula(Cell cell) {
+            return super.getFirstArgumentFromFormula(cell);
         }
     }
 }

@@ -47,6 +47,8 @@ import java.util.logging.Logger;
 import org.apache.poi.hssf.converter.AbstractExcelUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.formula.BaseFormulaEvaluator;
+import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Comment;
@@ -126,6 +128,12 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private FormulaEvaluator formulaEvaluator;
 
     /**
+     * A common conditional formatting formula evaluator for this Spreadsheet
+     * needed for proper value string conversions
+     */
+    private ConditionalFormattingEvaluator conditionalFormattingEvaluator;
+
+    /**
      * Pixel width of the filter popup button
      */
     private static final int FILTER_BUTTON_PIXEL_WIDTH = 14;
@@ -167,12 +175,16 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          *            The {@link FormulaEvaluator} for this sheet
          * @param formatter
          *            The {@link DataFormatter} for this workbook
+         * @param conditionalFormattingEvaluator
+         *            The {@link ConditionalFormattingEvaluator} for this
+         *            workbook
          * @return <code>true</code> if component default parsing should still
          *         be done, <code>false</code> if not
          */
         public boolean cellValueUpdated(Cell cell, Sheet sheet, int colIndex,
                 int rowIndex, String newValue,
-                FormulaEvaluator formulaEvaluator, DataFormatter formatter);
+                FormulaEvaluator formulaEvaluator, DataFormatter formatter,
+                ConditionalFormattingEvaluator conditionalFormattingEvaluator);
     }
 
     /**
@@ -197,12 +209,16 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          *            The {@link FormulaEvaluator} for this sheet
          * @param formatter
          *            The {@link DataFormatter} for this workbook
+         * @param conditionalFormattingEvaluator
+         *            The {@link ConditionalFormattingEvaluator} for this
+         *            workbook
          * @return <code>true</code> if component default deletion should still
          *         be done, <code>false</code> if not
          */
         public boolean cellDeleted(Cell cell, Sheet sheet, int colIndex,
                 int rowIndex, FormulaEvaluator formulaEvaluator,
-                DataFormatter formatter);
+                DataFormatter formatter,
+                ConditionalFormattingEvaluator conditionalFormattingEvaluator);
 
         /**
          * Called if individually selected cell values have been deleted by the
@@ -218,12 +234,16 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          *            The {@link FormulaEvaluator} for this sheet
          * @param formatter
          *            The {@link DataFormatter} for this workbook
+         * @param conditionalFormattingEvaluator
+         *            The {@link ConditionalFormattingEvaluator} for this
+         *            workbook
          * @return <code>true</code> if component default deletion should still
          *         be done, <code>false</code> if not
          */
         public boolean individualSelectedCellsDeleted(
                 List<CellReference> individualSelectedCells, Sheet sheet,
-                FormulaEvaluator formulaEvaluator, DataFormatter formatter);
+                FormulaEvaluator formulaEvaluator, DataFormatter formatter,
+                ConditionalFormattingEvaluator conditionalFormattingEvaluator);
 
         /**
          * Called if a cell range has been deleted by the user. Use
@@ -238,35 +258,44 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
          *            The {@link FormulaEvaluator} for this sheet
          * @param formatter
          *            The {@link DataFormatter} for this workbook
+         * @param conditionalFormattingEvaluator
+         *            The {@link ConditionalFormattingEvaluator} for this
+         *            workbook
          * @return <code>true</code> if component default deletion should still
          *         be done, <code>false</code> if not
          */
         public boolean cellRangeDeleted(
                 List<CellRangeAddress> cellRangeAddresses, Sheet sheet,
-                FormulaEvaluator formulaEvaluator, DataFormatter formatter);
+                FormulaEvaluator formulaEvaluator, DataFormatter formatter,
+                ConditionalFormattingEvaluator conditionalFormattingEvaluator);
     }
 
     /**
      * An interface for handling clicks on cells that contain a hyperlink.
      * <p>
-     * Implement this interface and use
+     * Implement this interface and set it with
      * {@link Spreadsheet#setHyperlinkCellClickHandler(HyperlinkCellClickHandler)}
-     * to enable it for the spreadsheet.
+     * to customize the default behavior.
      */
     public interface HyperlinkCellClickHandler extends Serializable {
 
         /**
          * Called when a hyperlink cell has been clicked.
          * 
+         * Assumes the implementation knows which spreadsheet is in use if
+         * needed, and how to navigate or perform some other action.
+         * 
          * @param cell
          *            The cell that contains the hyperlink
          * @param hyperlink
          *            The actual hyperlink
-         * @param spreadsheet
-         *            The Spreadsheet the cell is in
          */
-        public void onHyperLinkCellClick(Cell cell, Hyperlink hyperlink,
-                Spreadsheet spreadsheet);
+        public void onHyperLinkCellClick(Cell cell, Hyperlink hyperlink);
+
+        /**
+         * @return link target for use as a tooltip
+         */
+        public String getHyperlinkFunctionTarget(Cell cell);
     }
 
     private SpreadsheetStyleFactory styler;
@@ -275,7 +304,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     private final CellSelectionManager selectionManager = new CellSelectionManager(
             this);
-    private final CellValueManager valueManager = new CellValueManager(this);
     private final CellSelectionShifter cellShifter = new CellSelectionShifter(
             this);
     private final ContextMenuManager contextMenuManager = new ContextMenuManager(
@@ -283,6 +311,11 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private final SpreadsheetHistoryManager historyManager = new SpreadsheetHistoryManager(
             this);
     private ConditionalFormatter conditionalFormatter;
+
+    /**
+     * caches data, so it needs to be stable for the life of a given workbook
+     */
+    private CellValueManager valueManager;
 
     /** The first visible row in the scroll area **/
     private int firstRow;
@@ -305,7 +338,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     private int defaultNewSheetColumns = SpreadsheetFactory.DEFAULT_COLUMNS;
 
     private boolean topLeftCellCommentsLoaded;
-    private boolean topLeftCellHyperlinksLoaded;
 
     private SpreadsheetDefaultActionHandler defaultActionHandler;
 
@@ -473,12 +505,33 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     private void init() {
+        valueManager = createCellValueManager();
         sheetOverlays = new HashSet<SheetOverlayWrapper>();
         tables = new HashSet<SpreadsheetTable>();
         registerRpc(new SpreadsheetHandlerImpl(this));
         setSizeFull(); // Default to full size
         defaultActionHandler = new SpreadsheetDefaultActionHandler();
+        hyperlinkCellClickHandler = new DefaultHyperlinkCellClickHandler(this);
         addActionHandler(defaultActionHandler);
+        customInit();
+    }
+
+    /**
+     * Override if there are desired changes or temporary bug fixes, but be
+     * careful - this class should cache values for performance.
+     * 
+     * @return CellValueManager
+     */
+    protected CellValueManager createCellValueManager() {
+        return new CellValueManager(this);
+    }
+
+    /**
+     * Implement this to perform custom initialization in subclasses. Called
+     * before loading any workbook, at the end of the required init() actions.
+     */
+    protected void customInit() {
+        // do nothing by default
     }
 
     /**
@@ -581,15 +634,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
 
     /**
      * Sets the {@link HyperlinkCellClickHandler} for this component (not
-     * workbook/sheet specific). It's called when the user click a cell that is
-     * a hyperlink.
-     * 
-     * @param hyperLinkCellClickHandler
-     *            New handler or <code>null</code> if none should be used
+     * workbook/sheet specific). Called when the user clicks a cell that is
+     * a hyperlink or uses the hyperlink function.
+     * @param handler new handler or <code>null</code> if none should be used
+     * @see HyperlinkCellClickHandler
+     * @see DefaultHyperlinkCellClickHandler
      */
-    public void setHyperlinkCellClickHandler(
-            HyperlinkCellClickHandler hyperLinkCellClickHandler) {
-        hyperlinkCellClickHandler = hyperLinkCellClickHandler;
+    public void setHyperlinkCellClickHandler(HyperlinkCellClickHandler handler) {
+        hyperlinkCellClickHandler = handler;
     }
 
     /**
@@ -958,40 +1010,40 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * If the currently active sheet is set hidden, another sheet is set as
      * active sheet automatically. At least one sheet should be always visible.
      * 
-     * @param hidden
-     *            Visibility state to set: 0-visible, 1-hidden, 2-very hidden.
      * @param sheetPOIIndex
      *            Index of the target sheet within the POI model, 0-based
+     * @param visibility
+     *            Visibility state to set: visible, hidden, very hidden.
      * @throws IllegalArgumentException
      *             If the index or state is invalid, or if trying to hide the
      *             only visible sheet.
      */
-    public void setSheetHidden(int sheetPOIIndex, int hidden)
+    public void setSheetHidden(int sheetPOIIndex, SheetVisibility visibility) 
             throws IllegalArgumentException {
         // POI allows user to hide all sheets ...
-        if (hidden != 0
+        if (visibility != SheetVisibility.VISIBLE
                 && SpreadsheetUtil.getNumberOfVisibleSheets(workbook) == 1
-                && !workbook.isSheetHidden(sheetPOIIndex)) {
+                && ! (workbook.isSheetHidden(sheetPOIIndex)
+                        || workbook.isSheetVeryHidden(sheetPOIIndex))) {
             throw new IllegalArgumentException(
                     "At least one sheet should be always visible.");
         }
         boolean isHidden = workbook.isSheetHidden(sheetPOIIndex);
         boolean isVeryHidden = workbook.isSheetVeryHidden(sheetPOIIndex);
         int activeSheetIndex = workbook.getActiveSheetIndex();
-        SheetVisibility visibility = isVeryHidden ? SheetVisibility.VERY_HIDDEN
-                : (isHidden ? SheetVisibility.HIDDEN : SheetVisibility.VISIBLE);
 
         workbook.setSheetVisibility(sheetPOIIndex, visibility);
 
         // skip component reload if "nothing changed"
-        if (hidden == 0 && (isHidden || isVeryHidden) || hidden != 0
-                && !(isHidden && isVeryHidden)) {
+        if ( (visibility == SheetVisibility.VISIBLE && (isHidden || isVeryHidden))
+                || (visibility != SheetVisibility.VISIBLE
+                    && !(isHidden || isVeryHidden)) ) {
             if (sheetPOIIndex != activeSheetIndex) {
                 reloadSheetNames();
                 getState().sheetIndex = getSpreadsheetSheetIndex(activeSheetIndex) + 1;
             } else { // the active sheet can be only set as hidden
                 int oldVisibleSheetIndex = getState().sheetIndex - 1;
-                if (hidden != 0
+                if (visibility != SheetVisibility.VISIBLE
                         && activeSheetIndex == (workbook.getNumberOfSheets() - 1)) {
                     // hiding the active sheet, and it was the last sheet
                     oldVisibleSheetIndex--;
@@ -1003,6 +1055,30 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                         .reloadSpreadsheetData(this, getActiveSheet());
             }
         }
+    }
+
+    /**
+     * See {@link Workbook#setSheetHidden(int, boolean)}.
+     * <p>
+     * Gets the Workbook with {@link #getWorkbook()} and uses its API to access
+     * status on currently visible/hidden/very hidden sheets.
+     * 
+     * If the currently active sheet is set hidden, another sheet is set as
+     * active sheet automatically. At least one sheet should be always visible.
+     * 
+     * @param hidden
+     *            Visibility state to set: 0-visible, 1-hidden, 2-very hidden.
+     * @param sheetPOIIndex
+     *            Index of the target sheet within the POI model, 0-based
+     * @throws IllegalArgumentException
+     *             If the index or state is invalid, or if trying to hide the
+     *             only visible sheet.
+     * @deprecated use {@link #setSheetHidden(int, SheetVisibility)}
+     */
+    @Deprecated
+    public void setSheetHidden(int sheetPOIIndex, int hidden)
+            throws IllegalArgumentException {
+        setSheetHidden(sheetPOIIndex, SheetVisibility.values()[hidden]);
     }
 
     /**
@@ -1296,6 +1372,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                             + sheetIndex);
         }
         workbook.setActiveSheet(sheetIndex);
+        // assume since the UI doesn't allow multiple sheet selections 
+        // active sheet == selected tab
+        workbook.setSelectedTab(sheetIndex);
+
+        // formulas defined relative to the sheet may need recalculation
+        getFormulaEvaluator().clearAllCachedResultValues();
+        getConditionalFormattingEvaluator().clearAllCachedValues();
+
         reloadActiveSheetData();
         SpreadsheetFactory.reloadSpreadsheetData(this,
                 workbook.getSheetAt(sheetIndex));
@@ -1454,8 +1538,28 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      *         defined
      */
     public Cell getCell(CellReference cellReference) {
-        return cellReference == null ? null : getCell(cellReference.getRow(),
-                cellReference.getCol());
+        return cellReference == null ? null
+                : getCell(cellReference.getSheetName(), cellReference.getRow(),
+                        cellReference.getCol());
+    }
+
+    /**
+     * Returns the Cell at the given coordinates. If the cell is updated in
+     * outside code, call {@link #refreshCells(Cell...)} AFTER ALL UPDATES
+     * (value, type, formatting or style) to mark the cell as "dirty".
+     * 
+     * @param sheetName
+     *            Name of the sheet the cell is on, or current sheet if null
+     * @param row
+     *            Row index of the cell to return, 0-based
+     * @param column
+     *            Column index of the cell to return, 0-based
+     * @return The cell at the given coordinates, or null if not defined
+     */
+    public Cell getCell(String sheetName, int row, int column) {
+        if (sheetName == null)
+            return getCell(row, column);
+        return getCell(row, column, workbook.getSheet(sheetName));
     }
 
     /**
@@ -1685,6 +1789,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             cell.setCellValue(value.toString());
         }
         valueManager.cellUpdated(cell);
+        // if programmatically adding cells, need to make sure they display
+        if (row > getRows()) {
+            setMaxRows(row);
+        }
         return cell;
     }
 
@@ -1698,6 +1806,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     public void refreshAllCellValues() {
 
         getFormulaEvaluator().clearAllCachedResultValues();
+        getConditionalFormattingEvaluator().clearAllCachedValues();
         valueManager.clearCachedContent();
 
         // only reload if the cells have been loaded once previously
@@ -1946,6 +2055,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         // need to re-send the cell values to client
         // remove all cached cell data that is now empty
         getFormulaEvaluator().clearAllCachedResultValues();
+        getConditionalFormattingEvaluator().clearAllCachedValues();
         int start = n < 0 ? Math.max(lastNonBlankRow, startRow) : startRow;
         int end = n < 0 ? endRow : startRow + n - 1;
         valueManager.updateDeletedRowsInClientCache(start + 1, end + 1);
@@ -2153,10 +2263,20 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     }
 
     /**
-     * Get the common {@link FormulaEvaluator} instance.
+     * @return the common {@link FormulaEvaluator} instance.
      */
     public FormulaEvaluator getFormulaEvaluator() {
         return formulaEvaluator;
+    }
+
+    /**
+     * POI, as of 4.0.0, now accepts this as an argument to formula evaluation.
+     * Some conditional formats can modify the display text of a cell.
+     * 
+     * @return the common {@link ConditionalFormattingEvaluator} instance.
+     */
+    public ConditionalFormattingEvaluator getConditionalFormattingEvaluator() {
+        return conditionalFormattingEvaluator;
     }
 
     private int getLastNonBlankRow(Sheet sheet) {
@@ -2453,7 +2573,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             reloadImageSizesFromPOI = true;
             loadOrUpdateOverlays();
         }
-        
+
         getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
@@ -2484,21 +2604,17 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
             row = activeSheet.createRow(rowIndex);
         }
         row.setZeroHeight(hidden);
-        if (hidden && !getState().hiddenRowIndexes.contains(rowIndex + 1)) {
-            getState().hiddenRowIndexes.add(rowIndex + 1);
-            getState().rowH[rowIndex] = 0.0F;
-        } else if (!hidden
-                && getState().hiddenRowIndexes.contains(rowIndex + 1)) {
-            getState().hiddenRowIndexes.remove(getState().hiddenRowIndexes
-                    .indexOf(rowIndex + 1));
-            getState().rowH[rowIndex] = row.getHeightInPoints();
-        }
+
+        // can't assume the state already had room for the row in its 
+        // arrays, it may have been created above.  This avoids 
+        // ArrayIndexOutOfBoundsException
+        SpreadsheetFactory.calculateSheetSizes(this,  getActiveSheet());
 
         if (hasSheetOverlays()) {
             reloadImageSizesFromPOI = true;
             loadOrUpdateOverlays();
         }
-        
+
         getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
@@ -2720,6 +2836,10 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         this.workbook = workbook;
         formulaEvaluator = workbook.getCreationHelper()
                 .createFormulaEvaluator();
+        // currently all formula implementations extend BaseFormulaEvaluator
+        conditionalFormattingEvaluator = new ConditionalFormattingEvaluator(
+                workbook, (BaseFormulaEvaluator) formulaEvaluator);
+
         styler = createSpreadsheetStyleFactory();
 
         reloadActiveSheetData();
@@ -2772,7 +2892,6 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         firstColumn = lastColumn = firstRow = lastRow = -1;
         clearSheetOverlays();
         topLeftCellCommentsLoaded = false;
-        topLeftCellHyperlinksLoaded = false;
 
         reload = true;
         getState().sheetIndex = getSpreadsheetSheetIndex(workbook
@@ -3085,10 +3204,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         Cell cell = getActiveSheet().getRow(row - 1).getCell(column - 1);
         if (hyperlinkCellClickHandler != null) {
             hyperlinkCellClickHandler.onHyperLinkCellClick(cell,
-                    cell.getHyperlink(), Spreadsheet.this);
-        } else {
-            DefaultHyperlinkCellClickHandler.get().onHyperLinkCellClick(cell,
-                    cell.getHyperlink(), Spreadsheet.this);
+                    cell.getHyperlink());
         }
     }
 
@@ -3131,11 +3247,14 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                     row.setZeroHeight(false);
                 }
             }
-            getState().rowH[index] = height;
             if (row == null) {
                 row = getActiveSheet().createRow(index);
             }
             row.setHeightInPoints(height);
+            // can't assume the state already had room for the row in its 
+            // arrays, it may have been created above.  This avoids 
+            // ArrayIndexOutOfBoundsException
+            SpreadsheetFactory.calculateSheetSizes(this,  getActiveSheet());
         }
     }
 
@@ -3198,8 +3317,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
         } else {
             getState().hyperlinksTooltips.clear();
         }
-        if (getLastFrozenRow() > 0 && getLastFrozenColumn() > 0
-                && !topLeftCellHyperlinksLoaded) {
+        // removed && !topLeftCellHyperlinksLoaded as it was always false
+        if (getLastFrozenRow() > 0 && getLastFrozenColumn() > 0) {
             loadHyperLinks(1, 1, getLastFrozenRow(), getLastFrozenColumn());
         }
         if (getLastFrozenRow() > 0) {
@@ -3241,12 +3360,13 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
                             } else {
                                 // Check if the cell has HYPERLINK function
                                 if (DefaultHyperlinkCellClickHandler
-                                        .isHyperlinkFormulaCell(cell)) {
+                                        .isHyperlinkFormulaCell(cell)
+                                        && hyperlinkCellClickHandler != null) {
                                     getState().hyperlinksTooltips
                                             .put(SpreadsheetUtil.toKey(c + 1,
                                                     r + 1),
-                                                    DefaultHyperlinkCellClickHandler
-                                                            .getHyperlinkFunctionCellAddress(cell, this));
+                                                    hyperlinkCellClickHandler
+                                                            .getHyperlinkFunctionTarget(cell));
                                 }
                             }
                         } catch (XmlValueDisconnectedException exc) {
@@ -3999,7 +4119,7 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      * Returns the formatted value for the given cell, using the
      * {@link DataFormatter} with the current locale.
      * 
-     * See {@link DataFormatter#formatCellValue(Cell, FormulaEvaluator)}.
+     * See {@link DataFormatter#formatCellValue(Cell, FormulaEvaluator, ConditionalFormattingEvaluator)}.
      * 
      * @param cell
      *            Cell to get the value from
@@ -4007,7 +4127,8 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
      */
     public final String getCellValue(Cell cell) {
         return valueManager.getDataFormatter().formatCellValue(cell,
-                valueManager.getFormulaEvaluator());
+                valueManager.getFormulaEvaluator(),
+                getConditionalFormattingEvaluator());
     }
 
     /**
@@ -4650,12 +4771,16 @@ public class Spreadsheet extends AbstractComponent implements HasComponents,
     /**
      * Selects the cell(s) at the given coordinates
      * 
+     * Coordinates can be simple "A1" style addresses or ranges,
+     * named ranges, or a formula.  Note that scatter charts, if present,
+     * use formulas that may contain named ranges.
+     * 
      * @param selectionRange
      *            The wanted range, e.g. "A3" or "B3:C5"
      */
     public void setSelection(String selectionRange) {
-        CellRangeAddress cra = CellRangeAddress.valueOf(selectionRange);
-        selectionManager.handleCellRangeSelection(cra);
+        selectionManager.handleCellRangeSelection(SpreadsheetUtil
+                .getRangeForReference(selectionRange, this, true));
     }
 
     /**

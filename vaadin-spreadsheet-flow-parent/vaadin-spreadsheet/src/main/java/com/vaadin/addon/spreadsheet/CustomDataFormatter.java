@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.apache.poi.ss.format.CellFormat;
+import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -66,17 +67,17 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
      * Otherwise use <code>DataFormatter#formatCellValue</code>
      **/
     @Override
-    public String formatCellValue(Cell cell, FormulaEvaluator evaluator) {
+    public String formatCellValue(Cell cell, FormulaEvaluator evaluator, ConditionalFormattingEvaluator cfEvaluator) {
 
         if (cell == null || cell.getCellStyle() == null) {
-            return super.formatCellValue(cell, evaluator);
+            return super.formatCellValue(cell, evaluator, cfEvaluator);
         }
 
         final String dataFormatString = cell.getCellStyle()
             .getDataFormatString();
 
         if (isGeneralFormat(dataFormatString)) {
-            return super.formatCellValue(cell, evaluator);
+            return super.formatCellValue(cell, evaluator, cfEvaluator);
         }
 
         final String[] parts = dataFormatString.split(";", -1);
@@ -92,7 +93,7 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
             return formatStringCellValue(cell, dataFormatString, parts);
         } else {
 
-            return super.formatCellValue(cell, evaluator);
+            return super.formatCellValue(cell, evaluator, cfEvaluator);
         }
     }
 

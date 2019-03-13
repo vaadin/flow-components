@@ -19,7 +19,7 @@ public class HyperLinkFixture implements SpreadsheetFixture {
 
                     @Override
                     public void onHyperLinkCellClick(Cell cell,
-                            Hyperlink hyperlink, Spreadsheet spreadsheet) {
+                            Hyperlink hyperlink) {
                         if (hyperlink.getAddress() != null) {
                             spreadsheet.getUI().getPage()
                                     .open(hyperlink.getAddress(), "_new", true);
@@ -30,6 +30,11 @@ public class HyperLinkFixture implements SpreadsheetFixture {
                             cell.setCellValue("new value");
                             spreadsheet.refreshAllCellValues();
                         }
+                    }
+
+                    @Override
+                    public String getHyperlinkFunctionTarget(Cell cell) {
+                        return "new value function";
                     }
                 });
 

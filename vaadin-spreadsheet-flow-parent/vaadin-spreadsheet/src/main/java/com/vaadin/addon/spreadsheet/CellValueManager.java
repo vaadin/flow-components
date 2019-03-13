@@ -45,6 +45,7 @@ import org.apache.poi.hssf.record.RecordBase;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFHyperlink;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.formula.eval.ErrorEval;
 import org.apache.poi.ss.usermodel.Cell;
@@ -186,6 +187,14 @@ public class CellValueManager implements Serializable {
         return spreadsheet.getFormulaEvaluator();
     }
 
+    /**
+     * @return the common {@link ConditionalFormattingEvaluator} instance from
+     *         {@link Spreadsheet}
+     */
+    protected ConditionalFormattingEvaluator getConditionalFormattingEvaluator() {
+        return spreadsheet.getConditionalFormattingEvaluator();
+    }
+
     private String getCachedFormulaCellValue(Cell formulaCell) {
         String result = null;
         switch (formulaCell.getCachedFormulaResultType()) {
@@ -230,7 +239,8 @@ public class CellValueManager implements Serializable {
                     try {
                         String oldValue = getCachedFormulaCellValue(cell);
                         String newValue = formatter.formatCellValue(cell,
-                                getFormulaEvaluator());
+                                getFormulaEvaluator(),
+                                getConditionalFormattingEvaluator());
                         if (!newValue.equals(oldValue)) {
                             changedFormulaCells.add(new CellReference(cell));
                         }
@@ -253,7 +263,7 @@ public class CellValueManager implements Serializable {
             }
 
             String formattedCellValue = formatter.formatCellValue(cell,
-                    getFormulaEvaluator());
+                    getFormulaEvaluator(), getConditionalFormattingEvaluator());
 
             if (!spreadsheet.isCellHidden(cell)) {
                 if (cell.getCellType() == CellType.FORMULA
@@ -612,7 +622,8 @@ public class CellValueManager implements Serializable {
         if (getCustomCellValueHandler() == null
                 || getCustomCellValueHandler().cellValueUpdated(cell,
                         activeSheet, col - 1, row - 1, value,
-                        getFormulaEvaluator(), formatter)) {
+                        getFormulaEvaluator(), formatter,
+                        getConditionalFormattingEvaluator())) {
             Exception exception = null;
             try {
                 // handle new cell creation
@@ -776,7 +787,8 @@ public class CellValueManager implements Serializable {
      */
     private String getFormattedCellValue(Cell cell) {
         try {
-            return formatter.formatCellValue(cell, getFormulaEvaluator());
+            return formatter.formatCellValue(cell, getFormulaEvaluator(),
+                    getConditionalFormattingEvaluator());
         } catch (RuntimeException rte) {
             return null;
         }
@@ -936,7 +948,8 @@ public class CellValueManager implements Serializable {
             final Cell cell = row.getCell(colIndex);
             if (cell != null) {
                 return customCellDeletionHandler.cellDeleted(cell, activeSheet,
-                        colIndex, rowIndex, getFormulaEvaluator(), formatter);
+                        colIndex, rowIndex, getFormulaEvaluator(), formatter,
+                        getConditionalFormattingEvaluator());
             }
         }
         return true;
@@ -962,7 +975,7 @@ public class CellValueManager implements Serializable {
                 .getActiveSheetIndex());
         return customCellDeletionHandler.individualSelectedCellsDeleted(
                 individualSelectedCells, activeSheet, getFormulaEvaluator(),
-                formatter);
+                formatter, getConditionalFormattingEvaluator());
     }
 
     /**
@@ -982,7 +995,8 @@ public class CellValueManager implements Serializable {
         final Sheet activeSheet = workbook.getSheetAt(workbook
                 .getActiveSheetIndex());
         return customCellDeletionHandler.cellRangeDeleted(cellRangeAddresses,
-                activeSheet, getFormulaEvaluator(), formatter);
+                activeSheet, getFormulaEvaluator(), formatter,
+                getConditionalFormattingEvaluator());
     }
 
     /**

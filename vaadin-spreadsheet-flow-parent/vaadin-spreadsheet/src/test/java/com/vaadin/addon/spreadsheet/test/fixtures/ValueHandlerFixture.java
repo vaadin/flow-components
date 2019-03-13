@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -30,7 +31,8 @@ public class ValueHandlerFixture implements SpreadsheetFixture {
             @Override
             public boolean cellValueUpdated(Cell cell, Sheet sheet,
                     int colIndex, int rowIndex, String newValue,
-                    FormulaEvaluator formulaEvaluator, DataFormatter formatter) {
+                    FormulaEvaluator formulaEvaluator, DataFormatter formatter,
+                    ConditionalFormattingEvaluator conditionalFormattingEvaluator) {
                 if (cell == null) {
                     cell = spreadsheet.createCell(rowIndex, colIndex, "");
                 }
@@ -59,7 +61,8 @@ public class ValueHandlerFixture implements SpreadsheetFixture {
             @Override
             public boolean cellValueUpdated(Cell cell, Sheet sheet,
                     int colIndex, int rowIndex, String newValue,
-                    FormulaEvaluator formulaEvaluator, DataFormatter formatter) {
+                    FormulaEvaluator formulaEvaluator, DataFormatter formatter,
+                    ConditionalFormattingEvaluator conditionalFormattingEvaluator) {
 
                 if (cell == null) {
                     cell = spreadsheet.createCell(rowIndex, colIndex, "");
@@ -91,7 +94,8 @@ public class ValueHandlerFixture implements SpreadsheetFixture {
         @Override
         public boolean cellValueUpdated(Cell cell, Sheet sheet, int colIndex,
                 int rowIndex, String newValue,
-                FormulaEvaluator formulaEvaluator, DataFormatter formatter) {
+                FormulaEvaluator formulaEvaluator, DataFormatter formatter,
+                ConditionalFormattingEvaluator conditionalFormattingEvaluator) {
 
             cell.setCellValue(Double.parseDouble(newValue) * 2);
             return false;
@@ -111,14 +115,15 @@ class MultiplexerCellValueHandler implements Spreadsheet.CellValueHandler {
     @Override
     public boolean cellValueUpdated(Cell cell, Sheet sheet, int colIndex,
             int rowIndex, String newValue, FormulaEvaluator formulaEvaluator,
-            DataFormatter formatter) {
+            DataFormatter formatter,
+            ConditionalFormattingEvaluator conditionalFormattingEvaluator) {
         if (!handlerFactories.containsKey(rowIndex + ":" + colIndex)) {
             return true;
         }
 
         return handlerFactories.get(rowIndex + ":" + colIndex)
                 .cellValueUpdated(cell, sheet, colIndex, rowIndex, newValue,
-                        formulaEvaluator, formatter);
+                        formulaEvaluator, formatter, conditionalFormattingEvaluator);
     }
 
 }
@@ -134,11 +139,13 @@ class StackedCellValueHandler implements Spreadsheet.CellValueHandler {
     @Override
     public boolean cellValueUpdated(Cell cell, Sheet sheet, int colIndex,
             int rowIndex, String newValue, FormulaEvaluator formulaEvaluator,
-            DataFormatter formatter) {
+            DataFormatter formatter,
+            ConditionalFormattingEvaluator conditionalFormattingEvaluator) {
 
         for (Spreadsheet.CellValueHandler handler : handlers) {
             if (!handler.cellValueUpdated(cell, sheet, colIndex, rowIndex,
-                    newValue, formulaEvaluator, formatter)) {
+                    newValue, formulaEvaluator, formatter,
+                    conditionalFormattingEvaluator)) {
                 return false;
             }
         }
