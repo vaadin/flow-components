@@ -22,12 +22,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jsoup.helper.StringUtil;
-
+import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.JsonSerializable;
+import org.jsoup.helper.StringUtil;
+
 import com.vaadin.flow.component.html.Label;
 
 import elemental.json.Json;
@@ -41,7 +42,7 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
-        implements HasSize, HasComponents {
+        implements HasSize, HasComponents, ClickNotifier<FormLayout> {
 
     /**
      * A class used in describing the responsive layouting behavior of a
