@@ -107,10 +107,13 @@ public class CheckboxGroup<T>
         dataProviderListenerRegistration = dataProvider
                 .addDataProviderListener(event -> {
                     if (event instanceof DataChangeEvent.DataRefreshEvent) {
-                        T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) event).getItem();
-                        this.getCheckboxItems().filter(item -> Objects.equals(getItemId(item.item), getItemId(otherItem)))
-                                .findFirst()
-                                .ifPresent(this::updateCheckbox);
+                        T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) event)
+                                .getItem();
+                        this.getCheckboxItems()
+                                .filter(item -> Objects.equals(
+                                        getItemId(item.item),
+                                        getItemId(otherItem)))
+                                .findFirst().ifPresent(this::updateCheckbox);
                     } else {
                         reset();
                     }
@@ -133,8 +136,9 @@ public class CheckboxGroup<T>
     @Override
     public Registration addSelectionListener(
             MultiSelectionListener<CheckboxGroup<T>, T> listener) {
-        return addValueChangeListener(event -> new MultiSelectionEvent<>(this,
-                this, event.getOldValue(), event.isFromClient()));
+        return addValueChangeListener(event -> listener
+                .selectionChange(new MultiSelectionEvent<>(this, this,
+                        event.getOldValue(), event.isFromClient())));
     }
 
     /**
@@ -381,7 +385,7 @@ public class CheckboxGroup<T>
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
-                                                  JsonArray presentation) {
+            JsonArray presentation) {
         JsonArray array = presentation;
         Set<T> set = new HashSet<>();
         for (int i = 0; i < array.length(); i++) {
@@ -391,7 +395,7 @@ public class CheckboxGroup<T>
     }
 
     private static <T> JsonArray modelToPresentation(CheckboxGroup<T> group,
-                                                     Set<T> model) {
+            Set<T> model) {
         JsonArray array = Json.createArray();
         if (model.isEmpty()) {
             return array;

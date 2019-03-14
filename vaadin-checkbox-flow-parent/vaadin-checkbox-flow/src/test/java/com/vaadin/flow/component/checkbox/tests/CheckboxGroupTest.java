@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.data.provider.ListDataProvider;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,6 +31,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.selection.MultiSelectionEvent;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -175,7 +176,8 @@ public class CheckboxGroupTest {
         items.add(item1);
         items.add(item2);
 
-        CheckboxGroup<Wrapper> checkboxGroup = getRefreshEventCheckboxGroup(items);
+        CheckboxGroup<Wrapper> checkboxGroup = getRefreshEventCheckboxGroup(
+                items);
 
         assertCheckboxLabels(checkboxGroup, "foo", "bar");
 
@@ -195,8 +197,8 @@ public class CheckboxGroupTest {
         items.add(item1);
         items.add(item2);
 
-        CheckboxGroup<Wrapper> checkboxGroup =
-                getRefreshEventCheckboxGroupWithCustomDataProvider(items);
+        CheckboxGroup<Wrapper> checkboxGroup = getRefreshEventCheckboxGroupWithCustomDataProvider(
+                items);
 
         assertCheckboxLabels(checkboxGroup, "foo", "bar");
 
@@ -204,7 +206,6 @@ public class CheckboxGroupTest {
         item2.setLabel("opt");
         checkboxGroup.getDataProvider().refreshItem(new Wrapper(1));
         assertCheckboxLabels(checkboxGroup, "etc", "bar");
-
 
     }
 
@@ -217,7 +218,8 @@ public class CheckboxGroupTest {
         items.add(item1);
         items.add(item2);
 
-        CheckboxGroup<Wrapper> checkboxGroup = getRefreshEventCheckboxGroup(items);
+        CheckboxGroup<Wrapper> checkboxGroup = getRefreshEventCheckboxGroup(
+                items);
 
         assertCheckboxLabels(checkboxGroup, "foo", "bar");
 
@@ -228,8 +230,40 @@ public class CheckboxGroupTest {
 
     }
 
+    @Test
+    public void addSelectionListener_selectionEventIsFired() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
 
-    private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(List<Wrapper> items) {
+        AtomicReference<MultiSelectionEvent<CheckboxGroup<String>, String>> eventCapture = new AtomicReference<>();
+        checkboxGroup.addSelectionListener(event -> {
+            Assert.assertNull(eventCapture.get());
+            eventCapture.set(event);
+        });
+
+        checkboxGroup.setValue(Collections.singleton("bar"));
+
+        Assert.assertNotNull(eventCapture.get());
+        Assert.assertEquals(Collections.emptySet(),
+                eventCapture.get().getOldValue());
+        Assert.assertEquals(Collections.singleton("bar"),
+                eventCapture.get().getNewSelection());
+
+        eventCapture.set(null);
+
+        checkboxGroup.select("foo", "bar");
+        Assert.assertNotNull(eventCapture.get());
+        Assert.assertEquals(Collections.singleton("bar"),
+                eventCapture.get().getOldSelection());
+        Assert.assertEquals(2, eventCapture.get().getNewSelection().size());
+
+        Set<String> newSelection = eventCapture.get().getNewSelection();
+        Assert.assertTrue(newSelection.contains("foo"));
+        Assert.assertTrue(newSelection.contains("bar"));
+    }
+
+    private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(
+            List<Wrapper> items) {
         CheckboxGroup<Wrapper> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItemLabelGenerator(Wrapper::getLabel);
         ListDataProvider<Wrapper> dataProvider = new ListDataProvider<>(items);
@@ -237,7 +271,8 @@ public class CheckboxGroupTest {
         return checkboxGroup;
     }
 
-    private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroupWithCustomDataProvider(List<Wrapper> items) {
+    private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroupWithCustomDataProvider(
+            List<Wrapper> items) {
         CheckboxGroup<Wrapper> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItemLabelGenerator(Wrapper::getLabel);
         ListDataProvider<Wrapper> dataProvider = new CustomDataProvider(items);
@@ -245,15 +280,20 @@ public class CheckboxGroupTest {
         return checkboxGroup;
     }
 
-    private void assertCheckboxLabels(CheckboxGroup<Wrapper> checkboxGroup, String firstLabel, String secondLabel) {
-        List<Component> components = checkboxGroup.getChildren().collect(Collectors.toList());
+    private void assertCheckboxLabels(CheckboxGroup<Wrapper> checkboxGroup,
+            String firstLabel, String secondLabel) {
+        List<Component> components = checkboxGroup.getChildren()
+                .collect(Collectors.toList());
         Assert.assertEquals(2, components.size());
-        Assert.assertEquals(firstLabel, components.get(0).getElement().getText());
-        Assert.assertEquals(secondLabel, components.get(1).getElement().getText());
+        Assert.assertEquals(firstLabel,
+                components.get(0).getElement().getText());
+        Assert.assertEquals(secondLabel,
+                components.get(1).getElement().getText());
     }
 
     /**
-     * Used in the tests {@link #singleDataRefreshEvent()} and {@link #allDataRefreshEvent()}
+     * Used in the tests {@link #singleDataRefreshEvent()} and
+     * {@link #allDataRefreshEvent()}
      */
     private class Wrapper {
 
@@ -295,17 +335,19 @@ public class CheckboxGroupTest {
          * backing Collection will be visible via this data provider. The caller
          * should copy the list if necessary.
          *
-         * @param items the initial data, not null
+         * @param items
+         *            the initial data, not null
          */
         public CustomDataProvider(Collection<Wrapper> items) {
             super(items);
         }
 
         /**
-         * Gets an identifier for the given Wrapper. This identifier is used by the
-         * framework to determine equality between two Wrappers.
+         * Gets an identifier for the given Wrapper. This identifier is used by
+         * the framework to determine equality between two Wrappers.
          *
-         * @param wrapper the Wrapper to get identifier for; not {@code null}
+         * @param wrapper
+         *            the Wrapper to get identifier for; not {@code null}
          * @return the identifier for given wrapper; not {@code null}
          */
         @Override
