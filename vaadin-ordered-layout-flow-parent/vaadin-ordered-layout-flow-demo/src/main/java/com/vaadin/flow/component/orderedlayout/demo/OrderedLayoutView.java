@@ -44,6 +44,7 @@ public class OrderedLayoutView extends AbstractLayout {
         createHorizontalLayoutWithExpandRatios();
         createHorizontalLayoutWithCenterComponent();
         createHorizontalLayoutWithBoxSizing();
+        createHorizontalLayoutWithExpandingContent();
 
         createDefaultVerticalLayout();
         createVerticalLayoutWithJustifyContent();
@@ -52,6 +53,7 @@ public class OrderedLayoutView extends AbstractLayout {
         createVerticalLayoutWithExpandRatios();
         createVerticalLayoutWithCenterComponent();
         createVerticalLayoutWithBoxSizing();
+        createVerticalLayoutWithExpandingContent();
     }
 
     /* HorizontalLayout demos */
@@ -280,6 +282,24 @@ public class OrderedLayoutView extends AbstractLayout {
                 layout, createBoxSizingButtons(layout, layout.getId().get()));
     }
 
+    private void createHorizontalLayoutWithExpandingContent() {
+        // begin-source-example
+        // source-example-heading: Horizontal layout with expanding content
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.getStyle().set("border", "1px solid #9E9E9E");
+
+        Div component1 = createLoremIpsum();
+        Div component2 = createLoremIpsum();
+        Div component3 = createLoremIpsum();
+
+        layout.addAndExpand(component1, component2, component3);
+        // end-source-example
+
+        layout.setId("horizontal-layout-with-expanding-content");
+
+        addCard("HorizontalLayout", "Horizontal layout with expanding content", layout);
+    }
+
     /* VerticalLayout demos */
 
     private void createDefaultVerticalLayout() {
@@ -502,6 +522,24 @@ public class OrderedLayoutView extends AbstractLayout {
 
         addCard("VerticalLayout", "VerticalLayout with box-sizing settings",
                 layout, createBoxSizingButtons(layout, layout.getId().get()));
+    }
+
+    private void createVerticalLayoutWithExpandingContent() {
+        // begin-source-example
+        // source-example-heading: Vertical layout with expanding content
+        VerticalLayout layout = new VerticalLayout();
+        layout.getStyle().set("border", "1px solid #9E9E9E");
+
+        Div component1 = createLoremIpsum();
+        Div component2 = createLoremIpsum();
+        Div component3 = createLoremIpsum();
+
+        layout.addAndExpand(component1, component2, component3);
+        // end-source-example
+
+        layout.setId("vertical-layout-with-expanding-content");
+
+        addCard("VerticalLayout", "Vertical layout with expanding content", layout);
     }
 
     /* Override setParameter to redirect to horizontal tab */

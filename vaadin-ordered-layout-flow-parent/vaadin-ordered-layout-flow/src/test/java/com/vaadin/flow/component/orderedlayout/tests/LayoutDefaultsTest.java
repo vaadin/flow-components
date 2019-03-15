@@ -1,11 +1,14 @@
 package com.vaadin.flow.component.orderedlayout.tests;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import java.util.stream.Stream;
 
 public class LayoutDefaultsTest {
 
@@ -42,5 +45,24 @@ public class LayoutDefaultsTest {
 
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.addClickListener(event -> {});
+    }
+
+    @Test
+    public void expandable_Layout() {
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.addAndExpand(new Label("Foo"), new Label("bar"));
+        testExpandableComponent(horizontalLayout.getWidth(), horizontalLayout.getChildren());
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.addAndExpand(new Label("Foo"), new Label("bar"));
+        testExpandableComponent(verticalLayout.getHeight(), verticalLayout.getChildren());
+    }
+
+    private void testExpandableComponent(String size, Stream<Component> components) {
+        Assert.assertEquals(size, "100%");
+
+        components.forEach(component ->
+                Assert.assertEquals(component.getElement().getStyle().get("flex-grow"), "1.0")
+        );
     }
 }

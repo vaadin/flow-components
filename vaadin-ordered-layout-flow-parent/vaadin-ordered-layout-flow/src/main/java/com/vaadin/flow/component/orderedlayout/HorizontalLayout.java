@@ -208,4 +208,19 @@ public class HorizontalLayout extends Component
         // that should be used and has better javadocs.
         return FlexComponent.super.getAlignSelf(container);
     }
+
+    /**
+     * Adds the given components to this layout and sets them as expanded. The
+     * flex-grow of all added child components are set to 1 so that the
+     * expansion will be effective. The width of this layout is also set to
+     * 100%.
+     *
+     * @param components
+     *            the components to set, not <code>null</code>
+     */
+    public void addAndExpand(Component... components) {
+        add(components);
+        setWidthFull();
+        expand(components);
+    }
 }
