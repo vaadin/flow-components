@@ -28,8 +28,8 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  */
 @Tag("vaadin-horizontal-layout")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-horizontal-layout.html")
-public class HorizontalLayout extends Component
-        implements ThemableLayout, FlexComponent<HorizontalLayout>, ClickNotifier<HorizontalLayout> {
+public class HorizontalLayout extends Component implements ThemableLayout,
+        FlexComponent<HorizontalLayout>, ClickNotifier<HorizontalLayout> {
 
     /**
      * Constructs an empty layout with spacing on by default.
@@ -56,7 +56,9 @@ public class HorizontalLayout extends Component
      * <p>
      * Spacing is enabled by default for horizontal layout.
      *
-     * @param spacing adds {@code spacing} theme setting if {@code true} or removes it if {@code false}
+     * @param spacing
+     *            adds {@code spacing} theme setting if {@code true} or removes
+     *            it if {@code false}
      */
     @Override
     public void setSpacing(boolean spacing) {
@@ -115,7 +117,7 @@ public class HorizontalLayout extends Component
      * <p>
      * It effectively sets the {@code "alignItems"} style value.
      * <p>
-     * The default alignment is {@link Alignment#START}.
+     * The default alignment is {@link Alignment#STRETCH}.
      * <p>
      * It's the same as the {@link #setAlignItems(Alignment)} method.
      *
@@ -187,7 +189,7 @@ public class HorizontalLayout extends Component
      */
     @Override
     public void setAlignSelf(Alignment alignment,
-                             HasElement... elementContainers) {
+            HasElement... elementContainers) {
         // this method is overridden to have javadocs that point to the method
         // that should be used and has better javadocs.
         FlexComponent.super.setAlignSelf(alignment, elementContainers);

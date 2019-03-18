@@ -1,14 +1,16 @@
 package com.vaadin.flow.component.orderedlayout.tests;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import java.util.stream.Stream;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.stream.Stream;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class LayoutDefaultsTest {
 
@@ -38,31 +40,48 @@ public class LayoutDefaultsTest {
         // throw. Test is on purpose, so that the implementation not
         // accidentally removed.
         HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.addClickListener(event -> {});
+        horizontalLayout.addClickListener(event -> {
+        });
 
         FlexLayout flexLayout = new FlexLayout();
-        flexLayout.addClickListener(event -> {});
+        flexLayout.addClickListener(event -> {
+        });
 
         VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.addClickListener(event -> {});
+        verticalLayout.addClickListener(event -> {
+        });
+    }
+
+    @Test
+    public void defaultAlignmentValues() {
+        VerticalLayout verticalLayout = new VerticalLayout();
+        Assert.assertEquals(Alignment.STRETCH,
+                verticalLayout.getDefaultHorizontalComponentAlignment());
+
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        Assert.assertEquals(Alignment.STRETCH,
+                horizontalLayout.getDefaultVerticalComponentAlignment());
+
     }
 
     @Test
     public void expandable_Layout() {
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.addAndExpand(new Label("Foo"), new Label("bar"));
-        testExpandableComponent(horizontalLayout.getWidth(), horizontalLayout.getChildren());
+        testExpandableComponent(horizontalLayout.getWidth(),
+                horizontalLayout.getChildren());
 
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.addAndExpand(new Label("Foo"), new Label("bar"));
-        testExpandableComponent(verticalLayout.getHeight(), verticalLayout.getChildren());
+        testExpandableComponent(verticalLayout.getHeight(),
+                verticalLayout.getChildren());
     }
 
-    private void testExpandableComponent(String size, Stream<Component> components) {
+    private void testExpandableComponent(String size,
+            Stream<Component> components) {
         Assert.assertEquals(size, "100%");
 
-        components.forEach(component ->
-                Assert.assertEquals(component.getElement().getStyle().get("flex-grow"), "1.0")
-        );
+        components.forEach(component -> Assert.assertEquals(
+                component.getElement().getStyle().get("flex-grow"), "1.0"));
     }
 }

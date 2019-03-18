@@ -28,8 +28,8 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  */
 @Tag("vaadin-vertical-layout")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-vertical-layout.html")
-public class VerticalLayout extends Component
-        implements ThemableLayout, FlexComponent<VerticalLayout>, ClickNotifier<VerticalLayout> {
+public class VerticalLayout extends Component implements ThemableLayout,
+        FlexComponent<VerticalLayout>, ClickNotifier<VerticalLayout> {
 
     /**
      * Constructs an empty layout with spacing and padding on by default.
@@ -127,7 +127,7 @@ public class VerticalLayout extends Component
      * can be aligned by using the
      * {@link #setHorizontalComponentAlignment(Alignment, Component...)} method.
      * <p>
-     * The default alignment is {@link Alignment#START}.
+     * The default alignment is {@link Alignment#STRETCH}.
      * <p>
      * It's the same as the {@link #setAlignItems(Alignment)} method.
      *
@@ -143,7 +143,7 @@ public class VerticalLayout extends Component
      * Gets the default horizontal alignment used by all components without
      * individual alignments inside the layout.
      * <p>
-     * The default alignment is {@link Alignment#START}.
+     * The default alignment is {@link Alignment#STRETCH}.
      * <p>
      * It's the same as the {@link #getAlignItems()} method.
      *
