@@ -159,8 +159,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             enqueue("$connector.confirm", updateId, ComboBox.this.lastFilter);
             queue.forEach(Runnable::run);
             queue.clear();
-
-            ComboBox.this.lastFilter = null;
         }
 
         private void enqueue(String name, Serializable... arguments) {
@@ -502,8 +500,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 .setDataProvider(dataProvider,
                         convertOrNull.apply(getFilterString()));
 
-        filterSlot = filter -> providerFilterSlot
-                .accept(convertOrNull.apply(filter));
+        filterSlot = filter -> {
+            if (!Objects.equals(filter, lastFilter)) {
+                providerFilterSlot.accept(convertOrNull.apply(filter));
+                lastFilter = filter;
+            }
+        };
 
         boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
 
@@ -938,8 +940,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @ClientCallable
     private void setRequestedRange(int start, int length, String filter) {
-        this.lastFilter = filter;
-
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
     }

@@ -234,8 +234,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
         clickButton("component-renderer");
         beanBox.openPopup();
-        assertRendered("<flow-component-renderer appid=\"ROOT\">"
-                + "<h4>Person 4</h4></flow-component-renderer>");
+        assertComponentRendered("<h4>Person 4</h4>");
         assertLoadedItemsCount("Only the first page should be loaded.", 50,
                 beanBox);
     }
@@ -256,8 +255,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         clickButton("item-label-generator");
         clickButton("component-renderer");
         beanBox.openPopup();
-        assertRendered("<flow-component-renderer appid=\"ROOT\">"
-                + "<h4>Person 4</h4></flow-component-renderer>");
+        assertComponentRendered("<h4>Person 4</h4>");
         getItemElements().get(7).click();
         Assert.assertEquals("Born 7", getTextFieldValue(beanBox));
 
@@ -407,6 +405,18 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         assertMessage(item);
         Assert.assertEquals(item, getSelectedItemLabel(stringBox));
+    }
+
+    @Test // https://github.com/vaadin/vaadin-combo-box-flow/issues/227
+    public void setComponentRenderer_scrollDown_scrollUp_itemsRendered() {
+        clickButton("component-renderer");
+        beanBox.openPopup();
+        scrollToItem(beanBox, 300);
+        scrollToItem(beanBox, 0);
+
+        assertComponentRendered("<h4>Person 0</h4>");
+        assertComponentRendered("<h4>Person 4</h4>");
+        assertComponentRendered("<h4>Person 9</h4>");
     }
 
     private void assertMessage(String expectedMessage) {

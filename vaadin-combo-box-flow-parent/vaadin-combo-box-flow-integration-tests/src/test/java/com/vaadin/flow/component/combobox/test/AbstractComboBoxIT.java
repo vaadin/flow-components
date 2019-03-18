@@ -95,6 +95,11 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
                 matchingItem.isPresent());
     }
 
+    protected void assertComponentRendered(String componentHtml) {
+        assertRendered("<flow-component-renderer appid=\"ROOT\">"
+                + componentHtml + "</flow-component-renderer>");
+    }
+
     // Gets the innerHTML of all the actually rendered item elements.
     // There's more items loaded though.
     protected List<String> getOverlayContents() {
