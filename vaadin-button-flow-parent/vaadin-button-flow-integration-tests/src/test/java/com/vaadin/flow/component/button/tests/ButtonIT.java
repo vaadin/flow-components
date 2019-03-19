@@ -15,17 +15,19 @@
  */
 package com.vaadin.flow.component.button.tests;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.flow.demo.ComponentDemoTest;
 
 /**
- * Integration tests for the {@link ButtonView}.
+ * Integration tests for the ButtonView.
  */
 public class ButtonIT extends ComponentDemoTest {
     @Test
@@ -114,7 +116,7 @@ public class ButtonIT extends ComponentDemoTest {
         WebElement button = layout.findElement(By.id("disabled-button"));
         Assert.assertTrue("The button should contain the 'disabled' attribute",
                 button.getAttribute("disabled").equals("")
-                || button.getAttribute("disabled").equals("true"));
+                        || button.getAttribute("disabled").equals("true"));
 
         // valo theme adds the pointer-events: none CSS property, which makes
         // the button unclickable by selenium.
@@ -140,7 +142,9 @@ public class ButtonIT extends ComponentDemoTest {
                 button.getAttribute("disabled") == null);
 
         scrollToElement(button);
-        executeScript("arguments[0].click();arguments[0].click();arguments[0].click();arguments[0].click();", button);
+        executeScript(
+                "arguments[0].click();arguments[0].click();arguments[0].click();arguments[0].click();",
+                button);
 
         // Check that button is disabled
         String disabled = button.getAttribute("disabled");
@@ -156,40 +160,69 @@ public class ButtonIT extends ComponentDemoTest {
 
         // Remove disabled Attribute and click again from client side, click
         // message should not been shown in the dom
-        executeScript("arguments[0].removeAttribute(\"disabled\");"
-                + "arguments[0].click();",
+        executeScript(
+                "arguments[0].removeAttribute(\"disabled\");"
+                        + "arguments[0].click();",
                 layout.findElement(By.id("disable-on-click-button")));
 
         Assert.assertEquals("\"Hacking\" button disabled state went through.",
                 singleClick,
                 layout.findElement(By.id("disabled-message")).getText());
 
-        // Enable button from server side.
-        layout.findElement(By.id("enable-button")).click();
+        // test that enabling after disable on click works more than once ...
+        for (int i = 0; i < 3; i++) {
+            // Enable button from server side.
+            layout.findElement(By.id("enable-button")).click();
 
-        button = layout.findElement(By.id("disable-on-click-button"));
+            button = layout.findElement(By.id("disable-on-click-button"));
 
-        // Check that button is not disabled anymore
-        Assert.assertTrue(
-                "The button should not contain the 'disabled' attribute after server side clearing",
-                button.getAttribute("disabled") == null);
+            // Check that button is not disabled anymore
+            Assert.assertTrue(
+                    "The button should not contain the 'disabled' attribute after server side clearing (iteration: "
+                            + i + ")",
+                    button.getAttribute("disabled") == null);
 
-        Assert.assertEquals(
-                "Button re-enabled message should be the latest message",
-                "Re-enabled button from server.",
-                layout.findElement(By.id("disabled-message")).getText());
+            Assert.assertEquals(
+                    "Button re-enabled message should be the latest message (iteration: "
+                            + i + ")",
+                    "Re-enabled button from server.",
+                    layout.findElement(By.id("disabled-message")).getText());
 
-        button.click();
+            button.click();
 
-        // Assert that button gets disabled again on click
-        disabled = button.getAttribute("disabled");
-        Assert.assertTrue(
-                "The button should contain the 'disabled' attribute after click",
-                disabled != null);
+            // Assert that button gets disabled again on click
+            disabled = button.getAttribute("disabled");
+            Assert.assertTrue(
+                    "The button should contain the 'disabled' attribute after click (iteration: "
+                            + i + ")",
+                    disabled != null);
 
-        Assert.assertEquals("Button should have gotten 1 click and become disabled.",
-                singleClick,
-                layout.findElement(By.id("disabled-message")).getText());
+            Assert.assertEquals(
+                    "Button should have gotten 1 click and become disabled.",
+                    singleClick,
+                    layout.findElement(By.id("disabled-message")).getText());
+        }
+    }
+
+    @Test // https://github.com/vaadin/vaadin-button-flow/issues/115
+    public void disableButtonOnClick_canBeEnabled() {
+        getCommandExecutor().disableWaitForVaadin();
+        ButtonElement button = $(ButtonElement.class)
+                .id("temporarily-disabled-button");
+
+        for (int i = 0; i < 3; i++) {
+            button.click();
+
+            Assert.assertFalse("button should be disabled", button.isEnabled());
+            waitUntil(ExpectedConditions.elementToBeClickable(
+                    $(ButtonElement.class).id("temporarily-disabled-button")),
+                    2000);
+
+            Assert.assertTrue("button should be enabled again",
+                    button.isEnabled());
+        }
+
+        getCommandExecutor().enableWaitForVaadin();
     }
 
     @Test
@@ -208,22 +241,20 @@ public class ButtonIT extends ComponentDemoTest {
                 "The button should contain the 'disabled' attribute after click",
                 disabled != null);
 
-
         layout.findElement(By.id("enable-button")).click();
         layout.findElement(By.id("toggle-button")).click();
 
-        button = layout
-                .findElement(By.id("disable-on-click-button"));
+        button = layout.findElement(By.id("disable-on-click-button"));
 
         button.click();
         button.click();
 
-        Assert.assertNull("The button should not be disabled after " +
-                "click anymore.", button.getAttribute("disabled"));
+        Assert.assertNull(
+                "The button should not be disabled after " + "click anymore.",
+                button.getAttribute("disabled"));
 
         String singleClick = "Button Disabled on click was clicked and enabled state was changed to true receiving 2 clicks";
-        Assert.assertEquals(
-                "Button didn't get expected amount of clicks.",
+        Assert.assertEquals("Button didn't get expected amount of clicks.",
                 singleClick,
                 layout.findElement(By.id("disabled-message")).getText());
 
@@ -241,9 +272,10 @@ public class ButtonIT extends ComponentDemoTest {
 
         waitUntilMessageIsChangedForClickedButton("Has global Enter-shortcut");
 
-        WebElement firstNameField = layout.findElement(By.id("shortcuts-firstname"));
-        WebElement lastNamefield = layout.findElement(By.id("shortcuts" +
-                "-lastname"));
+        WebElement firstNameField = layout
+                .findElement(By.id("shortcuts-firstname"));
+        WebElement lastNamefield = layout
+                .findElement(By.id("shortcuts" + "-lastname"));
 
         firstNameField.sendKeys("text 1");
         lastNamefield.sendKeys("text 2");
@@ -259,14 +291,14 @@ public class ButtonIT extends ComponentDemoTest {
 
     private void waitUntilMessageIsChangedForClickedButton(
             String messageString) {
-        final String expected ="Button " + messageString + " was clicked.";
+        final String expected = "Button " + messageString + " was clicked.";
         WebElement message = layout.findElement(By.id("buttonMessage"));
 
         WebDriverWait wait = new WebDriverWait(getDriver(), 5);
-        wait.until(driver ->  {
+        wait.until(driver -> {
             String msg = message.getText();
-            wait.withMessage("Expected '" + expected + "' but found '" +
-                    (msg != null ? msg : "") + "'!");
+            wait.withMessage("Expected '" + expected + "' but found '"
+                    + (msg != null ? msg : "") + "'!");
             return expected.equals(msg);
         });
     }

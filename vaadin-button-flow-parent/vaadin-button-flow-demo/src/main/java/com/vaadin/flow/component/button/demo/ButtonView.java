@@ -160,11 +160,11 @@ public class ButtonView extends DemoView {
         // begin-source-example
         // source-example-heading: Theme variants usage
         Button button = new Button();
-        button.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_PRIMARY);
+        button.addThemeVariants(ButtonVariant.LUMO_SMALL,
+                ButtonVariant.LUMO_PRIMARY);
         // end-source-example
 
-        addVariantsDemo(Button::new,
-                GeneratedVaadinButton::addThemeVariants,
+        addVariantsDemo(Button::new, GeneratedVaadinButton::addThemeVariants,
                 GeneratedVaadinButton::removeThemeVariants,
                 ButtonVariant::getVariantName, ButtonVariant.LUMO_SMALL,
                 ButtonVariant.LUMO_PRIMARY);
@@ -185,12 +185,13 @@ public class ButtonView extends DemoView {
             firstName.clear();
             lastName.clear();
         });
-        VerticalLayout container = new VerticalLayout(firstName, lastName, clearButton);
+        VerticalLayout container = new VerticalLayout(firstName, lastName,
+                clearButton);
         clearButton.addClickShortcut(Key.KEY_L, KeyModifier.ALT)
                 .listenOn(container);
         // end-source-example
-        Paragraph paragraph = new Paragraph("Button \"Clean fields\"'s " +
-                "shortcut ALT+L works only within the text fields.");
+        Paragraph paragraph = new Paragraph("Button \"Clean fields\"'s "
+                + "shortcut ALT+L works only within the text fields.");
         container.add(paragraph);
         addCard("Button shortcuts", button, container);
         button.setId("shortcuts-enter-button");
@@ -224,14 +225,23 @@ public class ButtonView extends DemoView {
     private void createButtonWithDisableOnClick() {
         // begin-source-example
         // source-example-heading: Button disabled on click
-        Button button = new Button("Disabled on click", event -> {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        Button disableOnClickButton = new Button("Disabled on click", event -> {
+            // Triggering an action that can be started only once
         });
-        button.setDisableOnClick(true);
+        disableOnClickButton.setDisableOnClick(true);
+
+        Button temporarilyDisabledButton = new Button(
+                "Temporarily disabled button", event -> {
+                    try {
+                        // Blocking the user from clicking the button
+                        // multiple times, due to a long running request that
+                        // is not running asynchronously.
+                        Thread.sleep(1500);
+                        event.getSource().setEnabled(true);
+                    } catch (InterruptedException e) {
+                    }
+                });
+        temporarilyDisabledButton.setDisableOnClick(true);
         // end-source-example
 
         final Div disabledMessage = new Div();
@@ -240,27 +250,29 @@ public class ButtonView extends DemoView {
         AtomicInteger runCount = new AtomicInteger(0);
         Button enable = new Button("Enable disabled button", click -> {
             disabledMessage.setText("Re-enabled button from server.");
-            button.setEnabled(true);
+            disableOnClickButton.setEnabled(true);
             runCount.set(0);
         });
 
         Button toggle = new Button("Disable on click true", event -> {
-            button.setDisableOnClick(!button.isDisableOnClick());
-            event.getSource()
-                    .setText("Disable on click " + button.isDisableOnClick());
+            disableOnClickButton.setDisableOnClick(
+                    !disableOnClickButton.isDisableOnClick());
+            event.getSource().setText("Disable on click "
+                    + disableOnClickButton.isDisableOnClick());
         });
         toggle.setId("toggle-button");
 
-        addCard("Button disabled on click", button, enable, toggle,
-                disabledMessage);
+        addCard("Button disabled on click", disableOnClickButton, enable,
+                toggle, disabledMessage, new Div(temporarilyDisabledButton));
 
-        button.addClickListener(evt -> disabledMessage.setText(
-                "Button " + evt.getSource().getText()
-                        + " was clicked and enabled state was changed to " + evt
-                        .getSource().isEnabled() + " receiving " + runCount
-                        .incrementAndGet() + " clicks"));
+        disableOnClickButton.addClickListener(evt -> disabledMessage
+                .setText("Button " + evt.getSource().getText()
+                        + " was clicked and enabled state was changed to "
+                        + evt.getSource().isEnabled() + " receiving "
+                        + runCount.incrementAndGet() + " clicks"));
 
-        button.setId("disable-on-click-button");
+        disableOnClickButton.setId("disable-on-click-button");
+        temporarilyDisabledButton.setId("temporarily-disabled-button");
         enable.setId("enable-button");
     }
 }

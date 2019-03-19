@@ -15,11 +15,16 @@
  */
 package com.vaadin.flow.component.button.tests;
 
-
 import com.helger.commons.mutable.MutableBoolean;
+
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import com.vaadin.flow.internal.StateNode;
+import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
+import org.easymock.Capture;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -231,15 +236,15 @@ public class ButtonTest {
     public void testFireClick() {
         button = new Button();
         MutableBoolean clicked = new MutableBoolean(false);
-        button.addClickListener(e-> {
+        button.addClickListener(e -> {
             clicked.set(true);
         });
-        
+
         Assert.assertFalse(clicked.booleanValue());
         button.click();
         Assert.assertTrue(clicked.booleanValue());
     }
-    
+
     @Test
     public void addThemeVariant_setIcon_themeAttributeContiansThemeVariantAndIcon() {
         button = new Button();
@@ -274,6 +279,44 @@ public class ButtonTest {
         button.setIcon(new Icon(VaadinIcon.ALARM));
 
         Assert.assertEquals("icon", button.getThemeName());
+    }
+
+    @Test
+    public void disableOnClick_click_disablesComponent() {
+        Capture<Boolean> disabledCapture = new Capture<>();
+        button = new Button("foo", event -> disabledCapture
+                .setValue(event.getSource().isEnabled()));
+        button.setDisableOnClick(true);
+
+        button.click();
+
+        Assert.assertFalse(
+                "Button should have been disabled when event has been fired",
+                disabledCapture.getValue());
+    }
+
+    @Test
+    public void disableOnClick_serverRevertsDisabled_stateChangesAdded() {
+        button = new Button();
+        button.setDisableOnClick(true);
+
+        button.click();
+
+        StateNode node = button.getElement().getNode();
+        HashMap<String, Serializable> changeTracker = node.getChangeTracker(
+                node.getFeature(ElementAttributeMap.class), () -> null);
+        Assert.assertEquals(
+                "Change should have been set for disabled attribute", "true",
+                changeTracker.get("disabled"));
+        Assert.assertFalse("Button should be disabled", button.isEnabled());
+
+        changeTracker.clear();
+
+        button.addClickListener(event -> event.getSource().setEnabled(true));
+
+        button.click();
+
+        Assert.assertTrue("Button should be enabled", button.isEnabled());
     }
 
     private void assertOnlyChildIsText() {
@@ -349,7 +392,6 @@ public class ButtonTest {
      *
      * @param elementPredicate
      *            condition for the element to look for
-     *
      * @return the index of the first child of the button that matches the
      *         elementPredicate
      */
