@@ -407,7 +407,9 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         Assert.assertEquals(item, getSelectedItemLabel(stringBox));
     }
 
-    @Test // https://github.com/vaadin/vaadin-combo-box-flow/issues/227
+    @Test
+    // https://github.com/vaadin/vaadin-combo-box-flow/issues/227
+    // https://github.com/vaadin/vaadin-combo-box-flow/issues/232
     public void setComponentRenderer_scrollDown_scrollUp_itemsRendered() {
         clickButton("component-renderer");
         beanBox.openPopup();

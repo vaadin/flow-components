@@ -251,5 +251,9 @@ window.Vaadin.Flow.comboBoxConnector = {
 
       callback(filteredItems, filteredItems.length);
     }
+
+    // https://github.com/vaadin/vaadin-combo-box-flow/issues/232
+    comboBox.addEventListener('opened-changed', e =>
+      e.detail.value && (comboBox.$.overlay._selector._manageFocus = () => {}));
   }
 }
