@@ -1,14 +1,15 @@
 package com.vaadin.flow.component.crud.test;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.crud.testbench.CrudElement;
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-
-import com.vaadin.testbench.parallel.BrowserUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
+import com.vaadin.flow.component.crud.testbench.CrudElement;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.parallel.BrowserUtil;
 
 public class CustomGridIT extends AbstractParallelTest {
 
@@ -28,10 +29,7 @@ public class CustomGridIT extends AbstractParallelTest {
 
         Assert.assertEquals("Sayo", lastNameField.getValue());
 
-        // TODO(alexberazouski): Check why setValue doesn't fire the valueChange event
         lastNameField.setValue("Otto");
-
-        // TODO(alexberazouski): Check why is it possible to click on disabled save button
         crud.getEditorSaveButton().click();
 
         if (BrowserUtil.isIE(getDesiredCapabilities())) {
@@ -40,6 +38,32 @@ public class CustomGridIT extends AbstractParallelTest {
 
         Assert.assertFalse(crud.isEditorOpen());
         Assert.assertEquals("Otto",
+                $(GridElement.class).first().getCell(0, 2).getText());
+    }
+
+    @Test
+    public void cancelChangesTest() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        Assert.assertFalse(crud.isEditorOpen());
+        crud.openRowForEditing(0);
+        Assert.assertTrue(crud.isEditorOpen());
+        TextFieldElement lastNameField = crud.getEditor()
+                .$(TextFieldElement.class).attribute("editor-role", "last-name")
+                .first();
+
+        Assert.assertEquals("Sayo", lastNameField.getValue());
+        lastNameField.setValue("Otto");
+        crud.getEditorCancelButton().click();
+
+        if (BrowserUtil.isIE(getDesiredCapabilities())) {
+            return;
+        }
+
+        ConfirmDialogElement confirmCancel = crud.$(ConfirmDialogElement.class)
+                .id("confirmCancel");
+        Assert.assertEquals("Discard changes", confirmCancel.getHeaderText());
+        confirmCancel.getConfirmButton().click();
+        Assert.assertEquals("Sayo",
                 $(GridElement.class).first().getCell(0, 2).getText());
     }
 
