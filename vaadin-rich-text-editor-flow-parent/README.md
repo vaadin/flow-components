@@ -17,7 +17,7 @@ Add Rich Text Editor to your project
   <dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-rich-text-editor-flow</artifactId>
-    <version>1.0.0.alpha3</version>
+    <version>1.0.1</version>
   </dependency>
 </dependencies>
 ```
