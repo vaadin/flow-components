@@ -37,6 +37,8 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
 
     private boolean isConnectorAttached;
 
+    private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
+
     /**
      * Constructs an empty {@code TextArea}.
      */
@@ -158,6 +160,23 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         currentMode = valueChangeMode;
         setSynchronizedEvent(
                 ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
+        applyChangeTimeout();
+    }
+
+    @Override
+    public void setValueChangeTimeout(int valueChangeTimeout) {
+        this.valueChangeTimeout = valueChangeTimeout;
+        applyChangeTimeout();
+    }
+
+    @Override
+    public int getValueChangeTimeout() {
+        return valueChangeTimeout;
+    }
+
+    private void applyChangeTimeout() {
+        ValueChangeMode.applyChangeTimeout(getValueChangeMode(), getValueChangeTimeout(),
+                getSynchronizationRegistration());
     }
 
     @Override

@@ -24,6 +24,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Integration tests for changing the ValueChangeMode of TextField, TextArea and
@@ -50,21 +51,21 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     }
 
     @Test
-    public void testValueChangeModesForTextField() {
+    public void testValueChangeModesForTextField() throws InterruptedException {
         testValueChangeModes(textField, "textfield");
     }
 
     @Test
-    public void testValueChangeModesForTextArea() {
+    public void testValueChangeModesForTextArea() throws InterruptedException {
         testValueChangeModes(textArea, "textarea");
     }
 
     @Test
-    public void testValueChangeModesForPasswordField() {
+    public void testValueChangeModesForPasswordField() throws InterruptedException {
         testValueChangeModes(passwordField, "passwordfield");
     }
 
-    private void testValueChangeModes(WebElement field, String componentName) {
+    private void testValueChangeModes(WebElement field, String componentName) throws InterruptedException {
         field.sendKeys("a");
         assertMessageNotUpdated(
                 "By default the value change events should not be sent on every key stroke (ValueChangeMode should be ON_CHANGE)");
@@ -106,6 +107,40 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         assertMessageNotUpdated(
                 "The value change event should not be sent again on blur, because it was already sent eagerly when typing");
 
+        WebElement changeTimeoutField = findElement(By.id(componentName + "-set-change-timeout"));
+        changeTimeoutField.sendKeys("1000");
+        blur();
+        testValueChangeTimeout(field, componentName);
+    }
+
+    private void testValueChangeTimeout(WebElement field, String componentName) throws InterruptedException {
+        clickButton(componentName + "-lazy");
+        field.sendKeys("a");
+        assertMessageNotUpdated(
+                "The value change event should not be sent on first key stroke when using ValueChangeMode.LAZY");
+
+        for (int i = 0; i < 2; i++) {
+            field.sendKeys("a");
+            Thread.sleep(800);
+            assertMessageNotUpdated(
+                    "The value change event should not be sent until timeout elapsed since last keystroke when using ValueChangeMode.LAZY");
+        }
+
+        waitUntilMessageUpdated(200,
+                "The value change event should be sent when timeout elapsed since last keystroke when using ValueChangeMode.LAZY");
+
+        clickButton(componentName + "-timeout");
+        field.sendKeys("a");
+        assertMessageUpdated(
+                "The value change event should be sent on first key stroke when using ValueChangeMode.TIMEOUT");
+
+        field.sendKeys("a");
+        Thread.sleep(800);
+        assertMessageNotUpdated(
+                "The value change event should not be sent until timeout elapsed since last event when using ValueChangeMode.TIMEOUT");
+
+        waitUntilMessageUpdated(200,
+                "The value change event should be sent when timeout elapsed since last event when using ValueChangeMode.TIMEOUT");
     }
 
     private void clickButton(String buttonId) {
@@ -125,5 +160,11 @@ public class ValueChangeModeIT extends AbstractComponentIT {
         boolean isUpdated = !message.getText().equals(lastMessageText);
         lastMessageText = messageText;
         return isUpdated;
+    }
+
+    private void waitUntilMessageUpdated(long timeout, String failMessage) {
+        new WebDriverWait(getDriver(), timeout)
+                .withMessage(failMessage)
+                .until(webDriver -> isMessageUpdated());
     }
 }

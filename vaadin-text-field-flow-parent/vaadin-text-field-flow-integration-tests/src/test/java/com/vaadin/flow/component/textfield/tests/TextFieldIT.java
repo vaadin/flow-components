@@ -21,9 +21,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.textfield.demo.ValueChangeModeButtonProvider;
 import com.vaadin.flow.demo.ComponentDemoTest;
+
+import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
 
 /**
  * Integration tests for the {@link TextField}.
@@ -43,8 +45,8 @@ public class TextFieldIT extends ComponentDemoTest {
                 .findElement(By.id("text-field-with-value-change-listener"));
 
         updateValues(textFieldValueDiv, textField, true);
-        layout.findElement(
-                By.id(ValueChangeModeButtonProvider.TOGGLE_BUTTON_ID)).click();
+        $(RadioButtonGroupElement.class).context(layout).first()
+                .selectByText(EAGER.toString());
         updateValues(textFieldValueDiv, textField, false);
     }
 

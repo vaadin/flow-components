@@ -80,5 +80,11 @@ public class ValueChangeModePage extends Div {
                     .replace('_', '-'));
             add(button);
         });
+        TextField timeoutField = new TextField();
+        timeoutField.addValueChangeListener(event ->
+                component.setValueChangeTimeout(new Integer(event.getValue())));
+        timeoutField.setId(name.toLowerCase() + "-set-change-timeout");
+        add(timeoutField);
     }
+
 }
