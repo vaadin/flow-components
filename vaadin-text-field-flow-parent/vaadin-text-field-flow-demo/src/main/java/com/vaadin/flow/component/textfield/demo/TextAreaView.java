@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.demo;
 
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.GeneratedVaadinTextArea;
@@ -39,6 +41,18 @@ public class TextAreaView extends DemoView {
         addMinHeightFeature();
         addDisabledField();
         addVariantsFeature();
+        addFocusShortcut();
+    }
+
+    private void addFocusShortcut() {
+        // begin-source-example
+        // source-example-heading: Focus shortcut usage
+        TextArea textArea = new TextArea();
+        textArea.setLabel("Press ALT + 1 to focus");
+        textArea.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
+        // end-source-example
+
+        this.addCard("Focus shortcut usage", textArea);
     }
 
     private void addVariantsFeature() {

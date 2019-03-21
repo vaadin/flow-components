@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.demo;
 
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.GeneratedVaadinPasswordField;
@@ -38,6 +40,18 @@ public class PasswordFieldView extends DemoView {
         addClearButtonFeature();
         addDisabledField();
         addVariantsFeature();
+        addFocusShortcut();
+    }
+
+    private void addFocusShortcut() {
+        // begin-source-example
+        // source-example-heading: Focus shortcut usage
+        PasswordField passwordField = new PasswordField();
+        passwordField.setLabel("Press ALT + 1 to focus");
+        passwordField.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
+        // end-source-example
+
+        this.addCard("Focus shortcut usage", passwordField);
     }
 
     private void addVariantsFeature() {

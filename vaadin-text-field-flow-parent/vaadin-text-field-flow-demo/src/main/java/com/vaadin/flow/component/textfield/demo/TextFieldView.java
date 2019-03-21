@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.demo;
 
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
@@ -45,6 +47,18 @@ public class TextFieldView extends DemoView {
         addDisabledField();
         addEmailFieldFields();
         addVariantsFeature();
+        addFocusShortcut();
+    }
+
+    private void addFocusShortcut() {
+        // begin-source-example
+        // source-example-heading: Focus shortcut usage
+        TextField textField = new TextField();
+        textField.setLabel("Press ALT + 1 to focus");
+        textField.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
+        // end-source-example
+
+        this.addCard("Focus shortcut usage", textField);
     }
 
     private void addVariantsFeature() {
@@ -52,7 +66,7 @@ public class TextFieldView extends DemoView {
         // source-example-heading: Theme variants usage
         TextField textField = new TextField();
         textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-        
+
         NumberField numberField = new NumberField();
         numberField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
 
@@ -64,12 +78,12 @@ public class TextFieldView extends DemoView {
                 GeneratedVaadinTextField::addThemeVariants,
                 GeneratedVaadinTextField::removeThemeVariants,
                 TextFieldVariant::getVariantName, TextFieldVariant.LUMO_SMALL);
-        
+
         addVariantsDemo(NumberField::new,
                 GeneratedVaadinNumberField::addThemeVariants,
                 GeneratedVaadinNumberField::removeThemeVariants,
                 TextFieldVariant::getVariantName, TextFieldVariant.LUMO_SMALL);
-        
+
         addVariantsDemo(EmailField::new,
                 GeneratedVaadinEmailField::addThemeVariants,
                 GeneratedVaadinEmailField::removeThemeVariants,

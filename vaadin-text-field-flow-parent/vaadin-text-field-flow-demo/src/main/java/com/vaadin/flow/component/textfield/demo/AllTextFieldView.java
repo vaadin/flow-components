@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.demo;
 
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
@@ -53,6 +55,8 @@ public class AllTextFieldView extends DemoView {
         addTextAreaMinHeightFeature();
         addTextAreaDisabledField();
         addTextAreaVariantsFeature();
+
+        addFocusShortcut();
     }
 
     private void addVariantsFeature() {
@@ -304,5 +308,28 @@ public class AllTextFieldView extends DemoView {
                 change -> message.setText("Value changed"));
 
         addCard("Disabled text area", textArea, message);
+    }
+
+    private void addFocusShortcut() {
+        // begin-source-example
+        // source-example-heading: Focus shortcut usage
+        TextField textField = new TextField();
+        textField.setLabel("Press ALT + 1 to focus");
+        textField.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setLabel("Press ALT + 2 to focus");
+        passwordField.addFocusShortcut(Key.DIGIT_2, KeyModifier.ALT);
+
+        TextArea textArea = new TextArea();
+        textArea.setLabel("Press ALT + 3 to focus");
+        textArea.addFocusShortcut(Key.DIGIT_3, KeyModifier.ALT);
+        // end-source-example
+
+        Div container = new Div(textField, passwordField, textArea);
+        container.getChildren().forEach(child -> child.getElement().getStyle()
+                .set("margin", "var(--lumo-space-s,8)"));
+
+        this.addCard("Focus shortcut usage", container);
     }
 }
