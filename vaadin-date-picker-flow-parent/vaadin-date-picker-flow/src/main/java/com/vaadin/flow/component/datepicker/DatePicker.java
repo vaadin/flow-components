@@ -254,7 +254,19 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public void setLocale(Locale locale) {
         Objects.requireNonNull(locale, "Locale must not be null.");
         this.locale = locale;
-        String languageTag = locale.toLanguageTag();
+        String languageTag;
+        // For ill-formed locales, Locale.toLanguageTag() will append subtag
+        // "lvariant" to it, which will cause the client side Date().toLocaleDateString()
+        // fallback to the system default locale silently.
+        // This has been caught by DatePickerValidationPage::invalidLocale test when running on
+        // Chrome(73+)/FireFox(66)/Edge(42.17134).
+        if(!locale.toLanguageTag().contains("lvariant")){
+            languageTag = locale.toLanguageTag();
+        } else if (locale.getCountry().isEmpty()){
+            languageTag = locale.getLanguage();
+        } else {
+            languageTag = locale.getLanguage() + "-" + locale.getCountry();
+        }
         runBeforeClientResponse(ui -> getElement()
                 .callFunction("$connector.setLocale", languageTag));
     }
