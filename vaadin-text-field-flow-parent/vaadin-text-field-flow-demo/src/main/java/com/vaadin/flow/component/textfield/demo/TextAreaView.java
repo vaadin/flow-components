@@ -52,6 +52,7 @@ public class TextAreaView extends DemoView {
         textArea.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
         // end-source-example
 
+        textArea.setId("shortcut-field");
         this.addCard("Focus shortcut usage", textArea);
     }
 

@@ -51,6 +51,7 @@ public class PasswordFieldView extends DemoView {
         passwordField.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
         // end-source-example
 
+        passwordField.setId("shortcut-field");
         this.addCard("Focus shortcut usage", passwordField);
     }
 

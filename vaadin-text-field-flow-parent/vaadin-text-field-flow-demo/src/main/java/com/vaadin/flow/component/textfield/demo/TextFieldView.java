@@ -58,6 +58,8 @@ public class TextFieldView extends DemoView {
         textField.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
         // end-source-example
 
+        textField.setId("shortcut-field");
+
         this.addCard("Focus shortcut usage", textField);
     }
 

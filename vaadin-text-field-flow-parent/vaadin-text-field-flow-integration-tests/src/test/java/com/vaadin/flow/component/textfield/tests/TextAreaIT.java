@@ -22,9 +22,11 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.demo.ComponentDemoTest;
 
 import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
@@ -124,5 +126,27 @@ public class TextAreaIT extends ComponentDemoTest {
     @Test
     public void assertVariants() {
         verifyThemeVariantsBeingToggled();
+    }
+
+    @Test
+    public void assertFocusShortcut(){
+        TextAreaElement shortcutField = $(TextAreaElement.class).id("shortcut-field");
+        Assert.assertNull("TextArea should not be focused before the shortcut event is triggered.",
+                shortcutField.getAttribute("focused"));
+
+        sendKeys(Keys.ALT, "1");
+        Assert.assertTrue("TextArea should be focused after the shortcut event is triggered.",
+                shortcutField.getAttribute("focused").equals("true")
+                        || shortcutField.getAttribute("focused").equals(""));
+    }
+
+    private void sendKeys(CharSequence... keys) {
+        new Actions(driver).sendKeys(keys).build().perform();
+        /* if keys are not reset, alt will remain down and start flip-flopping */
+        resetKeys();
+    }
+
+    private void resetKeys() {
+        new Actions(driver).sendKeys(Keys.NULL).build().perform();
     }
 }
