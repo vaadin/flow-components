@@ -42,7 +42,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd.
  */
-public class MenuManager<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
+public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S extends SubMenuBase<?, I, S>>
         implements Serializable {
 
     private final C menu;
