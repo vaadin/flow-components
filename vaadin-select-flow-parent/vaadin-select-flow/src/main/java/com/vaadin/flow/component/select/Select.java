@@ -674,6 +674,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         if (vaadinItem == emptySelectionItem) {
             vaadinItem.setText(emptySelectionCaption);
+        } else if (getItemLabelGenerator() != null) {
+            vaadinItem.setText(getItemLabelGenerator().apply(item));
         } else if (getItemRenderer() == null) {
             vaadinItem.setText(item.toString());
         } else {

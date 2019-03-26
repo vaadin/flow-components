@@ -18,7 +18,7 @@ public class ItemLabelGeneratorIT extends AbstractSelectIT {
     private void verifyItems(String labelPostfix) {
         for (int i = 0; i < getInitialNumberOfItems(); i++) {
             selectElement.selectItemByIndex(i);
-            verify.selectedItem("Item-" + i, "Item-" + i + labelPostfix);
+            verify.selectedItem("Item-" + i  + labelPostfix, "Item-" + i + labelPostfix);
         }
     }
 

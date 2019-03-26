@@ -168,19 +168,19 @@ public class SelectTest {
         select.setItems("1", "2", "3");
         select.setItemLabelGenerator(item -> item + " LABEL");
 
-        validateItem(0, "1", "1 LABEL", true);
-        validateItem(1, "2", "2 LABEL", true);
-        validateItem(2, "3", "3 LABEL", true);
+        validateItem(0, "1 LABEL", "1 LABEL", true);
+        validateItem(1, "2 LABEL", "2 LABEL", true);
+        validateItem(2, "3 LABEL", "3 LABEL", true);
 
         select.setItems("one", "two");
 
-        validateItem(0, "one", "one LABEL", true);
-        validateItem(1, "two", "two LABEL", true);
+        validateItem(0, "one LABEL", "one LABEL", true);
+        validateItem(1, "two LABEL", "two LABEL", true);
 
         select.setItemLabelGenerator(item -> "LABEL " + item);
 
-        validateItem(0, "one", "LABEL one", true);
-        validateItem(1, "two", "LABEL two", true);
+        validateItem(0, "LABEL one", "LABEL one", true);
+        validateItem(1, "LABEL two", "LABEL two", true);
     }
 
     @Test
@@ -276,8 +276,8 @@ public class SelectTest {
         select.setItemLabelGenerator(string -> string == null ? "FOOBAR" : string + "!");
 
         validateItem(0, "", "FOOBAR", true);
-        validateItem(1, "foo", "foo!", true);
-        validateItem(2, "bar", "bar!", true);
+        validateItem(1, "foo!", "foo!", true);
+        validateItem(2, "bar!", "bar!", true);
     }
 
     @Test
