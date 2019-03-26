@@ -27,6 +27,26 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
+    public void customRepresentationIsRendered() {
+        GridTHTDElement cell = grid.getCell(0, 2);
+        Assert.assertEquals("No", cell.$("span").first().getText());
+    }
+
+    @Test
+    public void customRepresentationIsEdited() {
+        GridTHTDElement cell = grid.getCell(0, 2);
+        Assert.assertEquals("No", cell.$("span").first().getText());
+
+        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-grid-pro-edit-checkbox");
+        TestBenchElement checkbox = cell.$("vaadin-grid-pro-edit-checkbox").first();
+        checkbox.click();
+        checkbox.dispatchEvent("focusout");
+
+        waitUntil(driver -> cell.$("span").exists());
+        Assert.assertEquals("Yes", cell.$("span").first().getText());
+    }
+
+    @Test
     public void textEditorIsUsedForTextColumn() {
         AssertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-grid-pro-edit-text-field");
     }
@@ -58,8 +78,8 @@ public class BasicIT extends AbstractParallelTest {
 
         // Entering edit mode with double click
         // Workaround(yuriy-fix): doubleClick is not working on IE11
-        cell.click();
-        cell.click();
-        cell.innerHTMLContains(editorTag);
+        executeScript("var cellContent = arguments[0].firstElementChild.assignedNodes()[0];" +
+            "cellContent.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));", cell);
+        Assert.assertTrue(cell.innerHTMLContains(editorTag));
     }
 }

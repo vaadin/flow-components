@@ -20,6 +20,7 @@ package com.vaadin.flow.component.gridpro;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -29,9 +30,15 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.grid.ColumnPathRenderer;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataGenerator;
+import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.Rendering;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
@@ -96,6 +103,8 @@ public class GridPro<E> extends Grid<E> {
             EditColumn<E> column = (EditColumn<E>) this.idToColumnMap.get(e.getPath());
 
             column.getItemUpdater().accept(e.getItem(), e.getSourceItem().get(e.getPath()).asString());
+
+            getDataProvider().refreshItem(e.getItem());
         });
     }
 
@@ -214,6 +223,32 @@ public class GridPro<E> extends Grid<E> {
      */
     public EditColumnConfigurator<E> addEditColumn(ValueProvider<E, ?> valueProvider) {
         EditColumn<E> column = this.addColumn(valueProvider, this::createEditColumn);
+
+        return new EditColumnConfigurator<>(column);
+    }
+
+    /**
+     * Adds a new edit column to this {@link GridPro} with a value provider 
+     * and renderer for custom representation of the value in the column.
+     *
+     * @param valueProvider
+     *            the value provider
+     * @param renderer
+     *            the renderer
+     * @return an edit column configurer for configuring the column editor
+     *
+     * @see Grid#addColumn(Renderer)
+     * @see EditColumnConfigurator#text(ItemUpdater)
+     * @see EditColumnConfigurator#checkbox(ItemUpdater)
+     * @see EditColumnConfigurator#select(ItemUpdater, List)
+     * @see #removeColumn(Column)
+     */
+    public EditColumnConfigurator<E> addComponentEditColumn(ValueProvider<E, ?> valueProvider, Renderer<E> renderer) {
+        String columnId = createColumnId(false);
+
+        EditColumn<E> column = this.addColumn((new ColumnComponentPathRenderer<>(columnId,
+                value -> valueProvider.apply(value), renderer)), this::createEditColumn);
+        idToColumnMap.put(columnId, column);
 
         return new EditColumnConfigurator<>(column);
     }
@@ -416,5 +451,58 @@ public class GridPro<E> extends Grid<E> {
     public Registration addItemPropertyChangedListener(ComponentEventListener<ItemPropertyChangedEvent<E>> listener) {
         return ComponentUtil.addListener(this, ItemPropertyChangedEvent.class,
                 (ComponentEventListener) listener);
+    }
+
+    /**
+     * Renderer for edit columns that use custom template for rendering its value
+     * (only the value from the object model).
+     *
+     * @param <SOURCE>
+     *            the object model type
+     * @see GridPro#addComponentEditColumn(ValueProvider, Renderer)
+     */
+    class ColumnComponentPathRenderer<SOURCE> extends ColumnPathRenderer<SOURCE> {
+        private Renderer<SOURCE> representationRenderer;
+
+        /**
+         * Creates a new renderer based on the property, value provider for
+         * that property, and renderer for its visual representation in column
+         *
+         * @param property
+         *            the property name
+         * @param provider
+         *            the value provider for the property
+         * @param renderer
+         *            the renderer for the visual representation
+         */
+        public ColumnComponentPathRenderer(String property, ValueProvider<SOURCE, ?> provider, Renderer<SOURCE> renderer) {
+            super(property, provider);
+            representationRenderer = renderer;
+        }
+
+        @Override
+        public Rendering<SOURCE> render(Element container,
+                                        DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
+
+            Rendering<SOURCE> columnPathRendering = super.render(container, keyMapper, contentTemplate);
+            Rendering<SOURCE> representationRendering = representationRenderer.render(container, keyMapper);
+
+            return new Rendering<SOURCE>() {
+                @Override
+                public Optional<DataGenerator<SOURCE>> getDataGenerator() {
+                    CompositeDataGenerator<SOURCE> compositeDataGenerator = new CompositeDataGenerator<>();
+                    compositeDataGenerator.addDataGenerator(representationRendering.getDataGenerator().get());
+                    compositeDataGenerator.addDataGenerator(columnPathRendering.getDataGenerator().get());
+                    return Optional.of(compositeDataGenerator);
+                }
+
+                @Override
+                public Element getTemplateElement() {
+                    return representationRendering.getTemplateElement();
+                }
+            };
+        }
+
+
     }
 }

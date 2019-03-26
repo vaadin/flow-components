@@ -8,7 +8,9 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route
@@ -33,7 +35,10 @@ public class MainView extends VerticalLayout {
             subPropertyDisplayPanel.setText(newValue);
         }).setHeader("Name").setWidth("300px");
 
-        grid.addEditColumn(Person::isSubscriber).checkbox((item, newValue) -> {
+        ComponentRenderer<Span, Person> booleanRenderer = new ComponentRenderer<>(person ->
+            new Span(person.isSubscriber() ? "Yes" : "No")
+        );
+        grid.addComponentEditColumn(Person::isSubscriber, booleanRenderer).checkbox((item, newValue) -> {
             item.setSubscriber(newValue);
             itemDisplayPanel.setText(item.toString());
             subPropertyDisplayPanel.setText(newValue.toString());
