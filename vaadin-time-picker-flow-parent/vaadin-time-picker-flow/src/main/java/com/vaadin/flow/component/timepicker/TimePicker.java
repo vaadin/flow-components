@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.timepicker;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.time.LocalTime;
 import java.util.Locale;
 import java.util.Objects;
@@ -119,6 +120,17 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         super.setLabel(label);
     }
 
+    /**
+     * This is needed because the LocalTime format is not the same depending on the platform.
+     * 
+     */
+    
+    @Override
+    public void setValue(LocalTime value) {
+    	LocalTime truncated_value = value.truncatedTo(ChronoUnit.MILLIS);
+    	super.setValue(truncated_value);
+    }
+    
     /**
      * Gets the label of the time picker.
      *
