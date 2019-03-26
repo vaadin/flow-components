@@ -15,7 +15,11 @@
  */
 package com.vaadin.flow.component.menubar.tests;
 
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.router.Route;
 
@@ -25,5 +29,38 @@ public class MenuBarTestPage extends Div {
     public MenuBarTestPage() {
         MenuBar menuBar = new MenuBar();
         add(menuBar);
+
+        Paragraph message = new Paragraph("no message yet");
+        message.setId("message");
+        add(message);
+
+        MenuItem item1 = menuBar.addItem("item 1");
+
+        MenuItem item2 = menuBar.addItem(new Paragraph("item 2"),
+                e -> message.setText("clicked item 2"));
+
+        MenuItem subItem1 = item1.getSubMenu().addItem("sub item 1");
+        MenuItem subItem2 = item1.getSubMenu()
+                .addItem(new Paragraph("sub item 2"));
+
+        subItem2.getSubMenu().addItem(new Paragraph("sub sub item 1"));
+        MenuItem checkable = subItem2.getSubMenu().addItem("checkable");
+        checkable.setCheckable(true);
+        checkable.addClickListener(
+                e -> message.setText(String.valueOf(checkable.isChecked())));
+
+        NativeButton addRootItemButton = new NativeButton("add root item",
+                e -> menuBar.addItem("added item"));
+        addRootItemButton.setId("add-root-item");
+
+        NativeButton addSubItemButton = new NativeButton("add sub item",
+                e -> item2.getSubMenu().addItem("added sub item"));
+        addSubItemButton.setId("add-sub-item");
+
+        NativeButton removeItemButton = new NativeButton("Remove item 2",
+                e -> menuBar.remove(item2));
+        removeItemButton.setId("remove-item");
+
+        add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton);
     }
 }
