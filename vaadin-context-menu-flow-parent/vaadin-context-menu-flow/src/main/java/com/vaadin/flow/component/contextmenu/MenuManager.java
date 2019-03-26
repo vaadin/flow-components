@@ -37,7 +37,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *            the context menu type
  * @param <I>
  *            the menu item type
- * @param S
+ * @param <S>
  *            the sub menu type
  *
  * @author Vaadin Ltd.

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.contextmenu;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
@@ -25,7 +24,6 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
 
@@ -53,9 +51,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     private Component target;
     private MenuManager<C, I, S> menuManager;
-
-    private boolean updateScheduled = false;
-    private final Element container;
+    private MenuItemsArrayGenerator<I> menuItemsArrayGenerator;
 
     private String openOnEventName = "vaadin-contextmenu";
     private Registration targetBeforeOpenRegistration;
@@ -67,9 +63,6 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * Creates an empty context menu.
      */
     public ContextMenuBase() {
-        container = new Element("div");
-        getElement().appendVirtualChild(container);
-
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
 
@@ -84,6 +77,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             }
         });
 
+        menuItemsArrayGenerator = new MenuItemsArrayGenerator<>(this);
         addAttachListener(event -> resetContent());
     }
 
@@ -347,50 +341,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             SerializableRunnable contentReset);
 
     private void resetContent() {
-        if (updateScheduled) {
-            return;
-        }
-        updateScheduled = true;
-        runBeforeClientResponse(ui -> {
-            container.removeAllChildren();
-            getItems().forEach(this::resetContainers);
-
-            int containerNodeId = createNewContainer(getChildren());
-            String appId = ui.getInternals().getAppId();
-
-            ui.getPage().executeJavaScript(
-                    "window.Vaadin.Flow.contextMenuConnector.generateItems($0, $1, $2)",
-                    getElement(), appId, containerNodeId);
-
-            updateScheduled = false;
-        });
-    }
-
-    private void resetContainers(I menuItem) {
-        if (!menuItem.isParentItem()) {
-            menuItem.getElement().removeProperty("_containerNodeId");
-            return;
-        }
-        SubMenuBase<C, I, S> subMenu = menuItem.getSubMenu();
-
-        int containerNodeId = createNewContainer(subMenu.getChildren());
-        menuItem.getElement().setProperty("_containerNodeId", containerNodeId);
-
-        subMenu.getItems().forEach(this::resetContainers);
-    }
-
-    private int createNewContainer(Stream<Component> components) {
-        Element subContainer = new Element("div");
-        container.appendChild(subContainer);
-
-        components
-                .forEach(child -> subContainer.appendChild(child.getElement()));
-        return subContainer.getNode().getId();
-    }
-
-    private void runBeforeClientResponse(Consumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
+        menuItemsArrayGenerator.generate();
     }
 
     private void onTargetAttach(UI ui) {
