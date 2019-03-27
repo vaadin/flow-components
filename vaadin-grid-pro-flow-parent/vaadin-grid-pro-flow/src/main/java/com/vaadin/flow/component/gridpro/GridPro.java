@@ -294,6 +294,32 @@ public class GridPro<E> extends Grid<E> {
     }
 
     /**
+     * Adds a new edit column to this {@link GridPro} with a value provider and
+     * sorting properties.
+     *
+     * @param valueProvider
+     *            the value provider
+     * @param sortingProperties
+     *            the sorting properties to use for this column
+     * @return an edit column configurer for configuring the column editor
+     *
+     * @see Grid#addColumn(ValueProvider, String[])
+     * @see Column#setComparator(ValueProvider)
+     * @see Column#setSortProperty(String...)
+     * @see EditColumnConfigurator#text(ItemUpdater)
+     * @see EditColumnConfigurator#checkbox(ItemUpdater)
+     * @see EditColumnConfigurator#select(ItemUpdater, List)
+     * @see #removeColumn(Column)
+     */
+    public <V extends Comparable<? super V>> EditColumnConfigurator<E> addEditColumn(
+            ValueProvider<E, V> valueProvider, String... sortingProperties) {
+        EditColumn<E> column = addColumn(valueProvider, this::createEditColumn);
+        column.setComparator(valueProvider);
+        column.setSortProperty(sortingProperties);
+        return new EditColumnConfigurator<>(column);
+    }
+
+    /**
      * Adds a new edit column for the given property name.
      * <p>
      * <strong>Note:</strong> This method can only be used for a Grid created

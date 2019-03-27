@@ -18,6 +18,8 @@ package com.vaadin.flow.component.gridpro.testbench;
  */
 
 
+import com.vaadin.testbench.TestBenchElement;
+
 import java.util.ArrayList;
 
 /**
@@ -52,6 +54,18 @@ public class GridProColumnElement {
     public ArrayList<String> getOptionsList() {
         ArrayList<String> editorOptions = (ArrayList<String>) execJs("return column.editorOptions");
         return editorOptions;
+    }
+
+    /**
+     * Gets the header cell for this column.
+     * <p>
+     * A column always has a header cell, even if the header is not shown.
+     *
+     * @return the header cell for the column
+     */
+    public GridTHTDElement getHeaderCell() {
+        return ((TestBenchElement) execJs("return column._headerCell"))
+                .wrap(GridTHTDElement.class);
     }
 
     private Object execJs(String js) {

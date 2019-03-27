@@ -29,7 +29,7 @@ public class MainView extends VerticalLayout {
 
         grid.addColumn(Person::getAge).setHeader("Age");
 
-        grid.addEditColumn(Person::getName).text((item, newValue) -> {
+        grid.addEditColumn(Person::getName, "name").text((item, newValue) -> {
             item.setName(newValue);
             itemDisplayPanel.setText(item.toString());
             subPropertyDisplayPanel.setText(newValue);

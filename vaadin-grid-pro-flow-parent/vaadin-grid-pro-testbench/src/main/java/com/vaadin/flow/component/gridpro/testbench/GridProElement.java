@@ -19,6 +19,10 @@ package com.vaadin.flow.component.gridpro.testbench;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
+import org.junit.Assert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,6 +100,41 @@ public class GridProElement extends TestBenchElement {
         return ((Long) executeScript(
                 "return arguments[0]._lastVisibleIndex+arguments[0]._vidxOffset",
                 this)).intValue();
+    }
+
+    /**
+     * Gets the header cell for the given visible column index.
+     *
+     * @param columnIndex
+     *            the index of the column
+     * @return a cell element for the header cell
+     */
+    public GridTHTDElement getHeaderCell(int columnIndex) {
+        return getVisibleColumns().get(columnIndex).getHeaderCell();
+    }
+
+    /**
+     * Finds the vaadin-grid-cell-content element for the given row and column
+     * in header.
+     *
+     * @param rowIndex
+     *            the index of the row in the header
+     * @param columnIndex
+     *            the index of the column in the header
+     * @return the vaadin-grid-cell-content element for the given row and column
+     *         in header.
+     */
+    public TestBenchElement getHeaderCellContent(int rowIndex,
+                                                 int columnIndex) {
+        WebElement thead = $("thead").id("header");
+        List<WebElement> headerRows = thead.findElements(By.tagName("tr"));
+        List<WebElement> headerCells = headerRows.get(rowIndex)
+                .findElements(By.tagName("th"));
+        String slotName = headerCells.get(columnIndex)
+                .findElement(By.tagName("slot")).getAttribute("name");
+
+        return findElement(By.cssSelector(
+                "vaadin-grid-cell-content[slot='" + slotName + "']"));
     }
 
     /**

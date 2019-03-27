@@ -18,6 +18,7 @@ public class GridProView extends DemoView {
     @Override
     protected void initView() {
         basicGridPro();
+        sortingEditColumn();
         editorTypes();
         customRepresentation();
         enterNextRow();
@@ -47,6 +48,24 @@ public class GridProView extends DemoView {
         // end-source-example
 
         addCard("Basic Grid Pro", grid);
+    }
+
+    private void sortingEditColumn() {
+        // begin-source-example
+        // source-example-heading: Sorting
+        GridPro<Person> grid = new GridPro<>();
+        grid.setItems(createItems());
+
+        grid.addEditColumn(Person::getName, "name")
+                .text((item, newValue) -> item.setName(newValue))
+                .setHeader("Name (editable)");
+
+        grid.addEditColumn(Person::isSubscriber)
+                .checkbox((item, newValue) -> {})
+                .setHeader("Subscriber (editable)");
+        // end-source-example
+
+        addCard("Sorting", grid);
     }
 
     private void editorTypes() {
