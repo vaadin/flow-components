@@ -18,6 +18,7 @@ public class MainView extends VerticalLayout {
 
     public MainView() {
         createEditorColumns();
+        createBeanGridWithEditColumns();
     }
 
     protected void createEditorColumns() {
@@ -55,6 +56,16 @@ public class MainView extends VerticalLayout {
         }, listOptions).setHeader("Department").setWidth("300px");
 
         add(grid, itemDisplayPanel, subPropertyDisplayPanel);
+    }
+
+    protected void createBeanGridWithEditColumns() {
+        GridPro<Person> beanGrid = new GridPro<>(Person.class);
+        beanGrid.setColumns();
+        beanGrid.setItems(createItems());
+
+        beanGrid.addEditColumn("name").text((item, newValue) -> item.setName(newValue));
+
+        add(beanGrid);
     }
 
     private static List<Person> createItems() {
