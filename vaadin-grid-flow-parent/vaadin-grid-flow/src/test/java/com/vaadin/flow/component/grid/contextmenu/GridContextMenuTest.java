@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
+import java.util.Optional;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -30,6 +32,7 @@ import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.StateNode;
+import com.vaadin.flow.shared.Registration;
 
 public class GridContextMenuTest {
 
@@ -97,10 +100,15 @@ public class GridContextMenuTest {
 
         DomListenerRegistration registration = Mockito
                 .mock(DomListenerRegistration.class);
-
         Mockito.when(
                 element.addEventListener(Mockito.anyString(), Mockito.any()))
                 .thenReturn(registration);
+
+        Mockito.when(grid.getUI()).thenReturn(Optional.empty());
+
+        Registration attachRegistration = Mockito.mock(Registration.class);
+        Mockito.when(grid.addAttachListener(Mockito.any()))
+                .thenReturn(attachRegistration);
 
         GridContextMenu gridContextMenu = new GridContextMenu<>();
         gridContextMenu.setTarget(grid);
