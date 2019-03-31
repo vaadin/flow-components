@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,18 +15,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -39,7 +32,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
-import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -58,13 +50,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.hierarchy.AbstractBackEndHierarchicalDataProvider;
-import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
@@ -73,20 +62,14 @@ import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid")
 @HtmlImport("grid-demo-styles.html")
 public class GridDemo extends DemoView {
 
-    public static List<Person> items = new ArrayList<>();
-    public static List<PersonWithLevel> rootItems = new ArrayList<>();
+    public static final List<Person> items = createItems();
 
-    static {
-        items = createItems();
-        rootItems = createRootItems();
-    }
     // begin-source-example
     // source-example-heading: Grid example model
 
@@ -261,6 +244,11 @@ public class GridDemo extends DemoView {
 
         }
 
+        public Address(String postalCode, String city) {
+            this.postalCode = postalCode;
+            this.city = city;
+        }
+
         public String getStreet() {
             return street;
         }
@@ -298,19 +286,6 @@ public class GridDemo extends DemoView {
             return String.format("%s %s", postalCode, city);
         }
 
-        public Address(String street, int number, String postalCode) {
-            super();
-            this.street = street;
-            this.number = number;
-            this.postalCode = postalCode;
-        }
-
-        public Address(String postalCode, String city) {
-            super();
-            this.postalCode = postalCode;
-            this.city = city;
-        }
-
     }
 
     public enum MaritalStatus {
@@ -332,22 +307,6 @@ public class GridDemo extends DemoView {
 
         public List<Person> fetchAll() {
             return personData.getPersons();
-        }
-    }
-
-    /**
-     * Example object.
-     */
-    public static class PersonWithLevel extends Person {
-
-        private int level;
-
-        public int getLevel() {
-            return level;
-        }
-
-        public void setLevel(int level) {
-            this.level = level;
         }
     }
 
@@ -429,7 +388,14 @@ public class GridDemo extends DemoView {
         private LocalDate EstimatedDeliveryDate;
 
         public Item() {
+        }
 
+        public Item(String name, double price, LocalDateTime purchaseDate,
+                LocalDate estimatedDeliveryDate) {
+            this.name = name;
+            this.price = price;
+            this.purchaseDate = purchaseDate;
+            EstimatedDeliveryDate = estimatedDeliveryDate;
         }
 
         public String getName() {
@@ -464,15 +430,6 @@ public class GridDemo extends DemoView {
             EstimatedDeliveryDate = estimatedDeliveryDate;
         }
 
-        public Item(String name, double price, LocalDateTime purchaseDate,
-                LocalDate estimatedDeliveryDate) {
-            super();
-            this.name = name;
-            this.price = price;
-            this.purchaseDate = purchaseDate;
-            EstimatedDeliveryDate = estimatedDeliveryDate;
-        }
-
         @Override
         public String toString() {
             return getName();
@@ -486,9 +443,21 @@ public class GridDemo extends DemoView {
         private int numberOfOrder;
         private float price;
         private LocalDateTime purchaseDate;
-        private LocalDate EstimatedDeliveryDate;
+        private LocalDate estimatedDeliveryDate;
         private String personName;
         private Address address;
+
+        public Order(String name, int numberOfOrder, float price,
+                LocalDateTime purchaseDate, LocalDate estimatedDeliveryDate,
+                String personName, Address address) {
+            this.name = name;
+            this.numberOfOrder = numberOfOrder;
+            this.price = price;
+            this.purchaseDate = purchaseDate;
+            this.estimatedDeliveryDate = estimatedDeliveryDate;
+            this.personName = personName;
+            this.address = address;
+        }
 
         public String getName() {
             return name;
@@ -515,11 +484,11 @@ public class GridDemo extends DemoView {
         }
 
         public LocalDate getEstimatedDeliveryDate() {
-            return EstimatedDeliveryDate;
+            return estimatedDeliveryDate;
         }
 
         public void setEstimatedDeliveryDate(LocalDate estimatedDeliveryDate) {
-            EstimatedDeliveryDate = estimatedDeliveryDate;
+            this.estimatedDeliveryDate = estimatedDeliveryDate;
         }
 
         public String getPersonName() {
@@ -546,18 +515,6 @@ public class GridDemo extends DemoView {
             this.address = address;
         }
 
-        public Order(String name, int numberOfOrder, float price,
-                LocalDateTime purchaseDate, LocalDate estimatedDeliveryDate,
-                String personName, Address address) {
-            super();
-            this.name = name;
-            this.numberOfOrder = numberOfOrder;
-            this.price = price;
-            this.purchaseDate = purchaseDate;
-            EstimatedDeliveryDate = estimatedDeliveryDate;
-            this.personName = personName;
-            this.address = address;
-        }
     }
 
     public static class Benefit {
@@ -567,6 +524,16 @@ public class GridDemo extends DemoView {
         private int quarter2;
         private int quarter3;
         private int quarter4;
+
+        public Benefit(int year, int quarter1, int quarter2, int quarter3,
+                int quarter4) {
+
+            this.year = year;
+            this.quarter1 = quarter1;
+            this.quarter2 = quarter2;
+            this.quarter3 = quarter3;
+            this.quarter4 = quarter4;
+        }
 
         public int getYear() {
             return year;
@@ -608,16 +575,6 @@ public class GridDemo extends DemoView {
             this.quarter4 = quarter4;
         }
 
-        public Benefit(int year, int quarter1, int quarter2, int quarter3,
-                int quarter4) {
-
-            this.year = year;
-            this.quarter1 = quarter1;
-            this.quarter2 = quarter2;
-            this.quarter3 = quarter3;
-            this.quarter4 = quarter4;
-        }
-
     }
 
     @Override
@@ -647,8 +604,6 @@ public class GridDemo extends DemoView {
         createGridUsingComponentFilters();
         createGridWithItemDetails();
         createItemDetailsOpenedProgrammatically();
-        createBasicTreeGridUsage();// TreeGrid
-        createLazyLoadingTreeGridUsage();
         createContextMenu();// Context Menu
         createContextSubMenu();// Context Sub Menu
         createClickListener();// Click Listener
@@ -671,7 +626,6 @@ public class GridDemo extends DemoView {
         // source-example-heading: Grid Basics
         List<Person> personList = new ArrayList<>();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         personList.add(new Person(100, "Lucas", "Kane", 68,
                 new Address("12080", "Washington"), "127-942-237"));
         personList.add(new Person(101, "Peter", "Buchanan", 38,
@@ -765,10 +719,7 @@ public class GridDemo extends DemoView {
                 .addColumn(Person::getfirstName).setHeader("First name");
         Grid.Column<Person> lastNameColumn = grid.addColumn(Person::getLastName)
                 .setHeader("Last name");
-        Grid.Column<Person> ageColumn = grid.addColumn(Person::getAge)
-                .setHeader("Age");
-
-        List<Person> personListForAdding = new ArrayList<>();
+        grid.addColumn(Person::getAge).setHeader("Age");
 
         Button addButton = new Button("Add Item", event -> {
 
@@ -967,21 +918,6 @@ public class GridDemo extends DemoView {
                 deselectBtn);
     }
 
-    private void createGridWithNoSelect() {
-        // begin-source-example
-        // source-example-heading: Grid with No Selection Enabled
-        Grid<Person> grid = new Grid<>();
-        grid.setItems(getItems());
-
-        grid.addColumn(Person::getfirstName).setHeader("First name");
-        grid.addColumn(Person::getAge).setHeader("Age");
-
-        grid.setSelectionMode(Grid.SelectionMode.NONE);
-        // end-source-example
-        grid.setId("none-selection");
-        addCard("Selection", "Grid with No Selection Enabled", grid);
-    }
-
     // Sorting Begin
     private void createGridWithSortableColumns() {
         Div messageDiv = new Div();
@@ -1125,15 +1061,10 @@ public class GridDemo extends DemoView {
                 personList);
         grid.setDataProvider(dataProvider);
 
-        Grid.Column<Person> firstNameColumn = grid
-                .addColumn(Person::getfirstName).setHeader("Name");
-        Grid.Column<Person> ageColumn = grid.addColumn(Person::getAge)
-                .setHeader("Age");
-        Grid.Column<Person> birthDateColumn = grid
-                .addColumn(person -> person.getBirthdate())
-                .setHeader("Birth date");
-        Grid.Column<Person> postalCodeColumn = grid
-                .addColumn(person -> person.getAddress().getPostalCode())
+        grid.addColumn(Person::getfirstName).setHeader("Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+        grid.addColumn(person -> person.getBirthdate()).setHeader("Birth date");
+        grid.addColumn(person -> person.getAddress().getPostalCode())
                 .setHeader("Postal Code");
 
         maritalStatus = new ComboBox<>("Filter by marital status: ");
@@ -1204,15 +1135,14 @@ public class GridDemo extends DemoView {
 
         List<Person> personList = getItems();
         Grid<Person> grid = new Grid<>();
-        GridSelectionModel<Person> selectionMode = grid
-                .setSelectionMode(Grid.SelectionMode.MULTI);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.setItems(personList);
 
         Grid.Column<Person> idColumn = grid.addColumn(Person::getId)
                 .setHeader("ID").setFlexGrow(0).setWidth("75px");
 
         // Combination of properties
-        Grid.Column<Person> nameColumn = grid.addColumn(
+        grid.addColumn(
                 Person -> Person.getfirstName() + " " + Person.getLastName())
                 .setHeader("Full name").setResizable(true);
 
@@ -1361,8 +1291,7 @@ public class GridDemo extends DemoView {
         Grid<Benefit> grid = new Grid<>();
         grid.setItems(benefitList);
 
-        Grid.Column<Benefit> year = grid.addColumn(Benefit::getYear)
-                .setHeader("Year");
+        grid.addColumn(Benefit::getYear).setHeader("Year");
         // Setting the alignment of columns
         Grid.Column<Benefit> quarter1 = grid.addColumn(Benefit::getQuarter1, "")
                 .setHeader("Quarter 1").setTextAlign(ColumnTextAlign.END);
@@ -1656,208 +1585,6 @@ public class GridDemo extends DemoView {
         addCard("Item details", "Open details programmatically", header, grid);
     }
 
-    // TreeGrid Begin
-    private Map<PersonWithLevel, List<PersonWithLevel>> childMap;
-
-    private void createBasicTreeGridUsage() {
-        childMap = new HashMap<>();
-        TextArea message = new TextArea("");
-        message.setHeight("100px");
-        message.setReadOnly(true);
-
-        // begin-source-example
-        // source-example-heading: TreeGrid Basics
-        TreeGrid<PersonWithLevel> grid = new TreeGrid<>();
-        grid.setItems(getRootItems(), item -> {
-            if ((item.getLevel() == 0 && item.getId() > 10)
-                    || item.getLevel() > 1) {
-                return Collections.emptyList();
-            }
-            if (!childMap.containsKey(item)) {
-                childMap.put(item, createSubItems(81, item.getLevel() + 1));
-            }
-            return childMap.get(item);
-        });
-        grid.addHierarchyColumn(Person::getfirstName).setHeader("Hierarchy");
-        grid.addColumn(Person::getAge).setHeader("Age");
-
-        grid.addExpandListener(event -> message.setValue(
-                String.format("Expanded %s item(s)", event.getItems().size())
-                        + "\n" + message.getValue()));
-        grid.addCollapseListener(event -> message.setValue(
-                String.format("Collapsed %s item(s)", event.getItems().size())
-                        + "\n" + message.getValue()));
-
-        // end-source-example
-        grid.setId("treegridbasic");
-
-        TextField name = new TextField("Name of selected person");
-        grid.addSelectionListener(event -> name.setValue(event
-                .getFirstSelectedItem().map(Person::getfirstName).orElse("")));
-        NativeButton save = new NativeButton("Save", event -> {
-            grid.getSelectionModel().getFirstSelectedItem()
-                    .ifPresent(person -> person.setfirstName(name.getValue()));
-            grid.getSelectionModel().getFirstSelectedItem().ifPresent(
-                    person -> grid.getDataProvider().refreshItem(person));
-        });
-        HorizontalLayout nameEditor = new HorizontalLayout(name, save);
-
-        addCard("TreeGrid", "TreeGrid Basics", withTreeGridToggleButtons(
-                getRootItems(), grid, nameEditor, message));
-    }
-
-    private <T> Component[] withTreeGridToggleButtons(List<T> roots,
-            TreeGrid<T> grid, Component... other) {
-        NativeButton toggleFirstItem = new NativeButton("Toggle first item",
-                evt -> {
-                    if (grid.isExpanded(roots.get(0))) {
-                        grid.collapse(roots.get(0));
-                    } else {
-                        grid.expand(roots.get(0));
-                    }
-                });
-        toggleFirstItem.setId("treegrid-toggle-first-item");
-        Div div1 = new Div(toggleFirstItem);
-
-        NativeButton toggleSeveralItems = new NativeButton(
-                "Toggle first three items", evt -> {
-                    List<T> collapse = new ArrayList<>();
-                    List<T> expand = new ArrayList<>();
-                    roots.stream().limit(3).collect(Collectors.toList())
-                            .forEach(p -> {
-                                if (grid.isExpanded(p)) {
-                                    collapse.add(p);
-                                } else {
-                                    expand.add(p);
-                                }
-                            });
-                    if (!expand.isEmpty()) {
-                        grid.expand(expand);
-                    }
-                    if (!collapse.isEmpty()) {
-                        grid.collapse(collapse);
-                    }
-                });
-        toggleSeveralItems.setId("treegrid-toggle-first-five-item");
-        Div div2 = new Div(toggleSeveralItems);
-
-        NativeButton toggleRecursivelyFirstItem = new NativeButton(
-                "Toggle first item recursively", evt -> {
-                    if (grid.isExpanded(roots.get(0))) {
-                        grid.collapseRecursively(roots.stream().limit(1), 2);
-                    } else {
-                        grid.expandRecursively(roots.stream().limit(1), 2);
-                    }
-                });
-        toggleFirstItem.setId("treegrid-toggle-first-item-recur");
-        Div div3 = new Div(toggleRecursivelyFirstItem);
-
-        NativeButton toggleAllRecursively = new NativeButton(
-                "Toggle all recursively", evt -> {
-                    List<T> collapse = new ArrayList<>();
-                    List<T> expand = new ArrayList<>();
-                    roots.forEach(p -> {
-                        if (grid.isExpanded(p)) {
-                            collapse.add(p);
-                        } else {
-                            expand.add(p);
-                        }
-                    });
-                    if (!expand.isEmpty()) {
-                        grid.expandRecursively(expand, 2);
-                    }
-                    if (!collapse.isEmpty()) {
-                        grid.collapseRecursively(collapse, 2);
-                    }
-                });
-        toggleAllRecursively.setId("treegrid-toggle-all-recur");
-        Div div4 = new Div(toggleAllRecursively);
-
-        return Stream.concat(Stream.of(grid, div1, div2, div3, div4),
-                Stream.of(other)).toArray(Component[]::new);
-    }
-
-    // TreeGrid with lazy loading
-    private void createLazyLoadingTreeGridUsage() {
-        TextArea message = new TextArea("");
-        message.setHeight("100px");
-        message.setReadOnly(true);
-
-        // begin-source-example
-        // source-example-heading: TreeGrid with lazy loading
-        TreeGrid<HierarchicalTestBean> grid = new TreeGrid<>();
-        grid.addHierarchyColumn(HierarchicalTestBean::toString)
-                .setHeader("Hierarchy");
-        grid.addColumn(HierarchicalTestBean::getDepth).setHeader("Depth");
-        grid.addColumn(HierarchicalTestBean::getIndex)
-                .setHeader("Index on this depth");
-        grid.setDataProvider(
-                new AbstractBackEndHierarchicalDataProvider<HierarchicalTestBean, Void>() {
-
-                    private final int nodesPerLevel = 3;
-                    private final int depth = 2;
-
-                    @Override
-                    public int getChildCount(
-                            HierarchicalQuery<HierarchicalTestBean, Void> query) {
-
-                        Optional<Integer> count = query.getParentOptional()
-                                .flatMap(parent -> Optional.of(Integer
-                                        .valueOf((internalHasChildren(parent)
-                                                ? nodesPerLevel
-                                                : 0))));
-
-                        return count.orElse(nodesPerLevel);
-                    }
-
-                    @Override
-                    public boolean hasChildren(HierarchicalTestBean item) {
-                        return internalHasChildren(item);
-                    }
-
-                    private boolean internalHasChildren(
-                            HierarchicalTestBean node) {
-                        return node.getDepth() < depth;
-                    }
-
-                    @Override
-                    protected Stream<HierarchicalTestBean> fetchChildrenFromBackEnd(
-                            HierarchicalQuery<HierarchicalTestBean, Void> query) {
-                        final int depth = query.getParentOptional().isPresent()
-                                ? query.getParent().getDepth() + 1
-                                : 0;
-                        final Optional<String> parentKey = query
-                                .getParentOptional()
-                                .flatMap(parent -> Optional.of(parent.getId()));
-
-                        List<HierarchicalTestBean> list = new ArrayList<>();
-                        int limit = Math.min(query.getLimit(), nodesPerLevel);
-                        for (int i = 0; i < limit; i++) {
-                            list.add(new HierarchicalTestBean(
-                                    parentKey.orElse(null), depth,
-                                    i + query.getOffset()));
-                        }
-                        return list.stream();
-                    }
-                });
-
-        // end-source-example
-        grid.setId("treegridlazy");
-
-        grid.addExpandListener(event -> message.setValue(
-                String.format("Expanded %s item(s)", event.getItems().size())
-                        + "\n" + message.getValue()));
-        grid.addCollapseListener(event -> message.setValue(
-                String.format("Collapsed %s item(s)", event.getItems().size())
-                        + "\n" + message.getValue()));
-
-        addCard("TreeGrid", "TreeGrid with lazy loading",
-                withTreeGridToggleButtons(grid.getDataProvider().fetch(
-                        new HierarchicalQuery<HierarchicalTestBean, SerializablePredicate<HierarchicalTestBean>>(
-                                null, null))
-                        .collect(Collectors.toList()), grid, message));
-    }
-
     // Context Menu begin
     private void createContextMenu() {
         TextArea message = new TextArea("");
@@ -1875,8 +1602,8 @@ public class GridDemo extends DemoView {
         contextMenu.addItem("Update",
                 event -> event.getItem().ifPresent(person -> {
                     person.setfirstName(person.getfirstName() + " Updated");
-                    ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) event
-                            .getGrid().getDataProvider();
+                    DataProvider<Person, ?> dataProvider = grid
+                            .getDataProvider();
                     dataProvider.refreshItem(person);
                 }));
         contextMenu.addItem("Remove",
@@ -2340,28 +2067,12 @@ public class GridDemo extends DemoView {
         return personList;
     }
 
-    private List<PersonWithLevel> getRootItems() {
-        return rootItems;
-    }
-
     private static List<Person> createItems() {
         return createItems(500);
     }
 
-    private static List<PersonWithLevel> createRootItems() {
-        return createSubItems(500, 0);
-    }
-
     private static List<Person> createItems(int number) {
         return new PeopleGenerator().generatePeople(number);
-    }
-
-    private static List<PersonWithLevel> createSubItems(int number, int level) {
-        return new PeopleGenerator().generatePeopleWithLevels(number, level);
-    }
-
-    private static List<Item> getShoppingCart() {
-        return new ItemGenerator().generateItems(100);
     }
 
     private static final String[] companies = new String[] { "Deomic",
@@ -2489,107 +2200,4 @@ public class GridDemo extends DemoView {
         }
     }
     // end-source-example
-
-    /**
-     * Helper class used for generating stable random data for demo purposes.
-     *
-     * @author Vaadin Ltd.
-     */
-    static class PeopleGenerator extends BeanGenerator {
-
-        private static final AtomicInteger treeIds = new AtomicInteger(0);
-
-        public List<Person> generatePeople(int amount) {
-            return IntStream.range(0, amount)
-                    .mapToObj(index -> createPerson(index + 1))
-                    .collect(Collectors.toList());
-        }
-
-        public List<PersonWithLevel> generatePeopleWithLevels(int amount,
-                int level) {
-            return IntStream.range(0, amount)
-                    .mapToObj(index -> createPersonWithLevel(index + 1, level))
-                    .collect(Collectors.toList());
-        }
-
-        private PersonWithLevel createPersonWithLevel(int index, int level) {
-            PersonWithLevel person = createPerson(PersonWithLevel::new, index,
-                    treeIds.getAndIncrement());
-            person.setLevel(level);
-            return person;
-        }
-
-        public Person createPerson(int index) {
-            return createPerson(Person::new, index, index);
-        }
-
-        private <T extends Person> T createPerson(Supplier<T> constructor,
-                int index, int id) {
-            boolean isSubscriber = getRandom("subscriber").nextBoolean();
-
-            return createPerson(constructor, "Person " + index, id,
-                    13 + getRandom("age").nextInt(50), isSubscriber,
-                    isSubscriber ? generateEmail() : "",
-                    "Street " + generateChar(getRandom("street"), false),
-                    1 + getRandom("street").nextInt(50), String.valueOf(
-                            10000 + getRandom("postalCode").nextInt(8999)));
-        }
-
-        private <T extends Person> T createPerson(Supplier<T> constructor,
-                String name, int id, int age, boolean subscriber, String email,
-                String street, int addressNumber, String postalCode) {
-            T person = constructor.get();
-            person.setId(id);
-            person.setfirstName(name);
-            person.setAge(age);
-            person.setSubscriber(subscriber);
-            person.setEmail(email);
-
-            Address address = new Address();
-            address.setStreet(street);
-            address.setNumber(addressNumber);
-            address.setPostalCode(postalCode);
-
-            person.setAddress(address);
-
-            return person;
-        }
-
-        private String generateEmail() {
-            StringBuilder builder = new StringBuilder("mail");
-            builder.append(generateChar(getRandom("email"), true));
-            builder.append(generateChar(getRandom("email"), true));
-            builder.append("@example.com");
-            return builder.toString();
-        }
-
-        private char generateChar(Random random, boolean lowerCase) {
-            return ((char) ((lowerCase ? 'a' : 'A') + random.nextInt(26)));
-        }
-
-    }
-
-    static class ItemGenerator extends BeanGenerator {
-
-        public List<Item> generateItems(int amount) {
-            LocalDate baseDate = LocalDate.of(2018, 1, 10);
-            return IntStream.range(0, amount)
-                    .mapToObj(index -> createItem(index + 1, baseDate))
-                    .collect(Collectors.toList());
-        }
-
-        private Item createItem(int index, LocalDate baseDate) {
-            Item item = new Item();
-            item.setName("Item " + index);
-            item.setPrice(100 * getRandom("price").nextDouble());
-            item.setPurchaseDate(baseDate.atTime(12, 0).minus(
-                    1 + getRandom("purchaseDate").nextInt(3600),
-                    ChronoUnit.SECONDS));
-            item.setEstimatedDeliveryDate(baseDate.plus(
-                    1 + getRandom("estimatedDeliveryDate").nextInt(15),
-                    ChronoUnit.DAYS));
-            return item;
-        }
-
-    }
 }
