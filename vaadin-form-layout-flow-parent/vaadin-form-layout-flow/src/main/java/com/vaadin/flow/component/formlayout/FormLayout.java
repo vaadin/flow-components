@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.ClickNotifier;
@@ -211,6 +212,68 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
      */
     public FormLayout(Component... components) {
         add(components);
+    }
+    
+    /**
+     * Sets the colspan of the given component's element.
+     * Will default to 1 if an integer lower than 1 is supplied.
+     * You can directly add components with the wanted colspan with
+     * {@link #add(Component, int)}.
+     *
+     * @param component
+     *            the component to set the colspan for, not {@code null}
+     *
+     * @param colspan
+     *            the desired colspan for the component
+     *
+     */
+    public void setColspan(Component component, int colspan) {
+        Objects.requireNonNull(component, "component cannot be null");
+    	String strColspan = "";
+    	if (colspan < 1) {
+    		strColspan = "1";
+    	} else {
+    		strColspan=String.valueOf(colspan);
+    	}
+    	component.getElement().setAttribute("colspan", strColspan );
+    }
+    
+    /**
+     * Adds a component with the desired colspan.
+     * This method is a shorthand for calling {@link #add(Component)} 
+     * and {@link #setColspan(Component, int)}
+     *
+     * @param component
+     *            the component to add
+     *
+     * @param colspan
+     *            the desired colspan for the component
+     *
+     */
+    public void add(Component component, int colspan) {
+    	add(component);
+    	setColspan(component, colspan);
+    	
+    }
+    
+    /**
+     * Gets the colspan of the given component. If none is set, returns 1.
+     *
+     * @param component
+     *            the component whose colspan is retrieved
+     *
+     *
+     */
+    public int getColspan(Component component) {
+    	String strColspan = component.getElement().getAttribute("colspan");
+    	if (strColspan == null) {
+    		return 1;
+		//need this in case the colspan is modified outside the API to an incorrect format somehow.
+    	} else if (strColspan.matches("\\d+")) {
+    		return Integer.parseInt(strColspan);
+    	} else {
+    		return 1;
+    	}
     }
 
     /**

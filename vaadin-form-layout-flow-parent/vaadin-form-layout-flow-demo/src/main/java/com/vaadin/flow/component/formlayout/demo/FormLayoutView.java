@@ -55,6 +55,7 @@ public class FormLayoutView extends DemoView {
     public void initView() {
         createResponsiveLayout();
         createFormLayoutWithItems();
+        createLayoutHandleColspans();
         createFormLayoutWithBinder();
         createCompositeLayout();
     }
@@ -202,6 +203,44 @@ public class FormLayoutView extends DemoView {
                 layoutWithFormItems);
     }
 
+    private void createLayoutHandleColspans() {
+        // begin-source-example
+        // source-example-heading: Handling columns and colspans in a layout
+    	FormLayout columnLayout = new FormLayout();
+    	// Setting the desired responsive steps for the columns in the layout
+    	columnLayout.setResponsiveSteps(
+                new ResponsiveStep("0", 1),
+                new ResponsiveStep("21em", 2),
+                new ResponsiveStep("22em", 3));
+        TextField firstName = new TextField();
+        firstName.setPlaceholder("First Name");
+        TextField lastName = new TextField();
+        lastName.setPlaceholder("Last Name");
+        TextField email = new TextField();
+        email.setPlaceholder("Email");
+        TextField nickname = new TextField();
+        nickname.setPlaceholder("Username");
+        TextField website = new TextField();
+        website.setPlaceholder("Link to personal website");
+        TextField description = new TextField();
+        description.setPlaceholder("Enter a short description about yourself");
+        columnLayout.add(firstName, lastName,  nickname, email, website); 
+        // You can set the desired column span for the components individually.
+        columnLayout.setColspan(website, 2);
+        // Or just set it as you add them.
+        columnLayout.add(description, 3);
+        // end-source-example
+        
+        firstName.setId("colspan-first-name");
+        lastName.setId("colspan-last-name");
+        nickname.setId("colspan-nickname");
+        email.setId("colspan-email");
+        website.setId("colspan-website");
+        description.setId("colspan-description");
+
+        addCard("Handling columns and colspans in a layout", columnLayout);
+    }
+
     private void createFormLayoutWithBinder() {
         // begin-source-example
         // source-example-heading: A form layout with fields using Binder
@@ -329,4 +368,6 @@ public class FormLayoutView extends DemoView {
 
         addCard("Using form layout inside a composite", layout);
     }
+    
+
 }

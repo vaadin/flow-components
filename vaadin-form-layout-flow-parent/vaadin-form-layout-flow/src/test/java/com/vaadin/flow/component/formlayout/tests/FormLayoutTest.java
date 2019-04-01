@@ -36,4 +36,48 @@ public class FormLayoutTest {
         FormLayout formLayout = new FormLayout();
         formLayout.addClickListener(event -> {});
     }
+
+
+    @Test 
+    public void verifyColspanElement(){
+        FormLayout layout = new FormLayout();
+        // using layouts as components to avoid importing dependencies.
+        
+        // verifying the colspan is correctly set in the element itself
+        FormLayout comp1 = new FormLayout();
+        layout.add(comp1, 2);
+        String strColspan = comp1.getElement().getAttribute("colspan");
+        Assert.assertEquals(Integer.parseInt(strColspan),2);
+    }
+    
+    @Test
+    public void verifyColspanCodeBehaviour() {
+        FormLayout layout = new FormLayout();
+        // using layouts as components to avoid importing dependencies.
+        
+        // verifying normal use cases
+        FormLayout comp1 = new FormLayout();
+        layout.add(comp1, 2);
+        Assert.assertEquals(layout.getColspan(comp1),2);
+        layout.setColspan(comp1, 1);
+        Assert.assertEquals(layout.getColspan(comp1),1);
+        
+        // verifying it correctly sets it to 1 if an number lower than 1 is supplied
+        FormLayout comp2 = new FormLayout();
+        layout.add(comp2, -1);
+        Assert.assertEquals(layout.getColspan(comp2),1);
+        
+        // verifying it correctly gets  1 if invalid colspans are supplied outside the API
+        FormLayout compInvalid = new FormLayout();
+        layout.add(compInvalid);
+        compInvalid.getElement().setAttribute("colspan", "qsd4hdsj%f");
+        Assert.assertEquals(layout.getColspan(compInvalid),1);
+
+        // verifying it correctly gets 1 if no colspan was set.
+        FormLayout compUnset = new FormLayout();
+        layout.add(compUnset);
+        Assert.assertEquals(layout.getColspan(compUnset),1);
+        
+    }
+    
 }
