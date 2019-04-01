@@ -40,7 +40,7 @@ public abstract class PowerMockTest {
 
         final Answer<?> routeResolver = invocationOnMock -> {
             Class<?> routeClass = (Class<?>) invocationOnMock.getArguments()[0];
-            Route route = (Route) routeClass.getDeclaredAnnotation(Route.class);
+            Route route = routeClass.getDeclaredAnnotation(Route.class);
             return route.value();
         };
         

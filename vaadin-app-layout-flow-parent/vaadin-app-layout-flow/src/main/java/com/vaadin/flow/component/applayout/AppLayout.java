@@ -20,13 +20,12 @@ package com.vaadin.flow.component.applayout;
  * #L%
  */
 
-import java.util.Objects;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.PropertyDescriptor;
+import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLayout;
 
 /**
@@ -36,11 +35,37 @@ import com.vaadin.flow.router.RouterLayout;
 @Tag("vaadin-app-layout")
 @HtmlImport("frontend://bower_components/vaadin-app-layout/src/vaadin-app-layout.html")
 public class AppLayout extends Component implements RouterLayout {
+    private static final PropertyDescriptor<Boolean, Boolean> drawerFirstProperty = PropertyDescriptors
+        .propertyWithDefault("drawerFirst", false);
+    private static final PropertyDescriptor<Boolean, Boolean> drawerOpenedProperty = PropertyDescriptors
+        .propertyWithDefault("drawerOpened", true);
+    private static final PropertyDescriptor<Boolean, Boolean> overlayProperty = PropertyDescriptors
+        .propertyWithDefault("overlay", false);
 
     private Component content;
 
+    public boolean isDrawerFirst() {
+        return drawerFirstProperty.get(this);
+    }
+
+    public void setDrawerFirst(boolean drawerFirst) {
+        drawerFirstProperty.set(this, drawerFirst);
+    }
+
+    public boolean isDrawerOpened() {
+        return drawerOpenedProperty.get(this);
+    }
+
+    public void setDrawerOpened(boolean drawerOpened) {
+        drawerOpenedProperty.set(this, drawerOpened);
+    }
+
+    public boolean isOverlay() {
+        return overlayProperty.get(this);
+    }
+
     /**
-     * Returns the {@link Element}
+     * Returns the displayed content
      */
     public Component getContent() {
         return content;
@@ -52,19 +77,49 @@ public class AppLayout extends Component implements RouterLayout {
      * @param content {@link Component} to display in the content area
      */
     public void setContent(Component content) {
-        Objects.requireNonNull(content, "Content cannot be null");
 
         removeContent();
 
-        this.content = content;
-        content.getElement().removeAttribute("slot");
-        getElement().appendChild(content.getElement());
+        if (content != null) {
+            this.content = content;
+            content.getElement().removeAttribute("slot");
+            add(content);
+        }
+    }
+
+    public void addToDrawer(Component... components) {
+        addToSlot("drawer", components);
+    }
+
+    public void addToNavbar(Component... components) {
+        addToSlot("navbar", components);
+    }
+
+    public void remove(Component... components) {
+        for (Component component : components) {
+            remove(component);
+        }
+    }
+
+    private void addToSlot(String slot, Component... components) {
+        for (Component component : components) {
+            setSlot(component, slot);
+            add(component);
+        }
+    }
+
+    private void add(Component component) {
+        getElement().appendChild(component.getElement());
+    }
+
+    private static void setSlot(Component component, String slot) {
+        component.getElement().setAttribute("slot", slot);
     }
 
     /**
      * Removes the displayed content.
      */
-    public void removeContent() {
+    private void removeContent() {
         remove(this.content);
         this.content = null;
     }
@@ -81,27 +136,6 @@ public class AppLayout extends Component implements RouterLayout {
             .orElseThrow(() -> new IllegalArgumentException(
                 "AppLayout content must be a Component"));
 
-        beforeNavigate(target);
         setContent(target);
-        afterNavigate(target);
     }
-
-    /**
-     * This hook is called before a navigation is being made into a route
-     * which has this router layout as its parent layout.
-     *
-     * @param content  {@link HasElement} the content component being added
-     */
-    protected void beforeNavigate(Component content) {
-    }
-
-    /**
-     * This hook is called after a navigation is made into a route
-     * which has this router layout as its parent layout.
-     *
-     * @param content  {@link HasElement} the content component added
-     */
-    protected void afterNavigate(Component content) {
-    }
-
 }

@@ -15,23 +15,38 @@ public class AppLayoutIT extends AbstractParallelTest {
 
     @Test
     public void content() {
-        Assert.assertEquals("Welcome home",
-                $(AppLayoutElement.class).waitForFirst().getContent().getText());
+        final AppLayoutElement layout = $(AppLayoutElement.class)
+            .waitForFirst();
+        Assert
+            .assertEquals("Welcome home", layout.getContent().getText());
 
-        getDriver().get(getBaseURL() + "/Page1");
+        Assert.assertNotNull(layout.getDrawerToggle());
+
+        layout.$("a").attribute("href", "Page1").first().click();
         Assert.assertEquals("This is Page 1",
-            $(AppLayoutElement.class).waitForFirst().getContent().getText());
+            $(AppLayoutElement.class).waitForFirst().getContent()
+                .getText());
 
-        getDriver().get(getBaseURL() + "/Page2");
+        layout.$("a").attribute("href", "Page2").first().click();
         Assert.assertEquals("This is Page 2",
-            $(AppLayoutElement.class).waitForFirst().getContent().getText());
+            $(AppLayoutElement.class).waitForFirst().getContent()
+                .getText());
+    }
 
+    @Test
+    public void properties() {
+        final AppLayoutElement layout = $(AppLayoutElement.class)
+            .waitForFirst();
+        Assert.assertEquals(true, layout.isDrawerOpened());
+        Assert.assertEquals(false, layout.isDrawerFirst());
+        Assert.assertEquals(false, layout.isOverlay());
     }
 
     @Test
     public void navigateToNotFound() {
         getDriver().get(getBaseURL() + "/nonexistingpage");
-        Assert.assertTrue($(AppLayoutElement.class).waitForFirst().getContent()
+        Assert.assertTrue(
+            $(AppLayoutElement.class).waitForFirst().getContent()
                 .getText().contains("Could not navigate to"));
 
     }
