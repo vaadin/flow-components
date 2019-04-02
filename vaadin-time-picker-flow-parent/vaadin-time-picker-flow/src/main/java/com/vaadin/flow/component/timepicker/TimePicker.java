@@ -127,8 +127,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     
     @Override
     public void setValue(LocalTime value) {
-    	LocalTime truncated_value = value.truncatedTo(ChronoUnit.MILLIS);
-    	super.setValue(truncated_value);
+        if (value == null) {
+            super.setValue(null)    
+        } else {
+            LocalTime truncated_value = value.truncatedTo(ChronoUnit.MILLIS);
+            super.setValue(truncated_value);
+        }
     }
     
     /**
