@@ -1,12 +1,10 @@
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
-
-/*
+/*-
  * #%L
- * Vaadin Charts
+ * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 Vaadin Ltd
+ * Copyright (C) 2014 - 2019 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -18,6 +16,9 @@ import java.io.IOException;
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
+
+import java.io.IOException;
+
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;

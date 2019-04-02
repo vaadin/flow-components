@@ -1,12 +1,10 @@
 package com.vaadin.flow.component.charts.model;
 
-import com.vaadin.flow.component.charts.model.style.ButtonTheme;
-
-/*
+/*-
  * #%L
- * Vaadin Charts
+ * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2012 - 2015 Vaadin Ltd
+ * Copyright (C) 2014 - 2019 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -18,6 +16,9 @@ import com.vaadin.flow.component.charts.model.style.ButtonTheme;
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
+
+import com.vaadin.flow.component.charts.model.style.ButtonTheme;
+
 
 /**
  * Options for the drill up button that appears when drilling down on a series.

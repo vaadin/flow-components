@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.events.internal;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2018 Vaadin Ltd
+ * Copyright (C) 2014 - 2019 Vaadin Ltd
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
@@ -16,6 +16,7 @@ package com.vaadin.flow.component.charts.events.internal;
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
  */
+
 
 import com.vaadin.flow.component.charts.model.Series;
 
