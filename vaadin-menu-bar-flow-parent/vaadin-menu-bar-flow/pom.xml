@@ -16,11 +16,11 @@
     <name>Vaadin MenuBar</name>
 
     <dependencies>
-        <!--<dependency>-->
-        <!--<groupId>org.webjars.bowergithub.vaadin</groupId>-->
-        <!--<artifactId>vaadin-menu-bar</artifactId>-->
-        <!--<version>1.0.0</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-menu-bar</artifactId>
+            <version>1.0.0-alpha1</version>
+        </dependency>
 
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
