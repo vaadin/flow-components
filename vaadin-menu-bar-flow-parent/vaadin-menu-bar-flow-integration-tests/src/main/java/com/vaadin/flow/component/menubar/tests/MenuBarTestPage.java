@@ -30,14 +30,14 @@ public class MenuBarTestPage extends Div {
         MenuBar menuBar = new MenuBar();
         add(menuBar);
 
-        Paragraph message = new Paragraph("no message yet");
+        Paragraph message = new Paragraph("");
         message.setId("message");
         add(message);
 
         MenuItem item1 = menuBar.addItem("item 1");
 
         MenuItem item2 = menuBar.addItem(new Paragraph("item 2"),
-                e -> message.setText("clicked item 2"));
+                e -> message.setText(message.getText() + "clicked item 2"));
 
         MenuItem subItem1 = item1.getSubMenu().addItem("sub item 1");
         MenuItem subItem2 = item1.getSubMenu()

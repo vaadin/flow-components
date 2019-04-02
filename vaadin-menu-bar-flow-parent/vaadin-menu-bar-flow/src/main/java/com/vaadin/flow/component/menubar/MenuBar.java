@@ -44,6 +44,8 @@ public class MenuBar extends Component
     private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
     private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
 
+    private boolean updateScheduled = false;
+
     /**
      * Creates an empty menu bar component.
      * <p>
@@ -214,5 +216,26 @@ public class MenuBar extends Component
 
     private void resetContent() {
         menuItemsArrayGenerator.generate();
+
+        if (updateScheduled) {
+            return;
+        }
+
+        // Propagate click events from the menu buttons to the item components
+        String script = //@formatter:off
+            "$0._buttons.forEach(function(b){" +
+              "if(b.item && b.item.component){" +
+                "b.addEventListener('click', function(e){" +
+                   "b.item.component.dispatchEvent(new Event('click'));" +
+                "});" +
+              "}" +
+            "});";
+        //@formatter:on
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> {
+                    ui.getPage().executeJavaScript(script, getElement());
+                    updateScheduled = false;
+                }));
+        updateScheduled = true;
     }
 }

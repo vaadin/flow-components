@@ -62,12 +62,6 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void clickRootButtonWithClickListener_listenerCalled() {
-        menuBar.getButtons().get(1).click();
-        assertMessage("clicked item 2");
-    }
-
-    @Test
     public void clickRootButton_hoverOnParentItem_subSubMenuRenders() {
         openSubSubMenu();
 
@@ -151,6 +145,28 @@ public class MenuBarPageIT extends AbstractComponentIT {
         verifyOpened();
         Assert.assertArrayEquals(new String[] { "<p>item 2</p>", "added item" },
                 getOverlayMenuItemContents());
+    }
+
+    @Test
+    public void clickRootButtonWithClickListener_listenerCalled() {
+        menuBar.getButtons().get(1).click();
+        assertMessage("clicked item 2");
+    }
+
+    @Test
+    public void changeItems_clickRootButtonWithClickListener_clickListenerCalled() {
+        click("add-root-item");
+        menuBar.getButtons().get(1).click();
+        assertMessage("clicked item 2");
+    }
+
+    @Test
+    public void buttonWithClickListenerOverflows_clickListenerWorksInSubMenu() {
+        click("set-width");
+        click("add-root-item");
+        menuBar.getEllipsisButton().click();
+        getOverlayMenuItems().get(0).click();
+        assertMessage("clicked item 2");
     }
 
     @After
