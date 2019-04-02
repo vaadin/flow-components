@@ -74,6 +74,17 @@ public class MenuBarTest {
         menuBar.remove(item);
     }
 
+    @Test
+    public void openOnHover_falseByDefault() {
+        Assert.assertFalse(menuBar.isOpenOnHover());
+    }
+
+    @Test
+    public void setOpenOnHover_isOpenOnHover() {
+        menuBar.setOpenOnHover(true);
+        Assert.assertTrue(menuBar.isOpenOnHover());
+    }
+
     private void assertChildrenAndItems(MenuItem... expected) {
         Object[] menuItems = menuBar.getChildren().toArray();
         Assert.assertArrayEquals(expected, menuItems);

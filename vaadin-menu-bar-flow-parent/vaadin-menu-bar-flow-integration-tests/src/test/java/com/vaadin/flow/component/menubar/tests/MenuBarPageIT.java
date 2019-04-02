@@ -126,6 +126,19 @@ public class MenuBarPageIT extends AbstractComponentIT {
                 getOverlayMenuItemContents());
     }
 
+    @Test
+    public void hoverOnRootItem_subMenuNotOpened() {
+        hoverOn(menuBar.getButtons().get(0));
+        verifyClosed();
+    }
+
+    @Test
+    public void setOpenOnHover_hoverOnRootItem_subMenuOpens() {
+        click("toggle-open-on-hover");
+        hoverOn(menuBar.getButtons().get(0));
+        verifyOpened();
+    }
+
     @After
     public void afterTest() {
         checkLogsForErrors();

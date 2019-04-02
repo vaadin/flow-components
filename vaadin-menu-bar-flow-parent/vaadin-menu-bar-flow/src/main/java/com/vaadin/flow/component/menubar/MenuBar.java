@@ -190,6 +190,28 @@ public class MenuBar extends Component
         return menuManager.getChildren();
     }
 
+    /**
+     * Sets the event which opens the sub menus of the root level buttons.
+     * 
+     * @param openOnHover
+     *            {@code true} to make the sub menus open on hover (mouseover),
+     *            {@code false} to make them openable by clicking
+     */
+    public void setOpenOnHover(boolean openOnHover) {
+        getElement().setProperty("openOnHover", openOnHover);
+    }
+
+    /**
+     * Gets whether the sub menus open by clicking or hovering on the root level
+     * buttons.
+     * 
+     * @return {@code true} if the sub menus open by hovering on the root level
+     *         buttons, {@code false} if they open by clicking
+     */
+    public boolean isOpenOnHover() {
+        return getElement().getProperty("openOnHover", false);
+    }
+
     private void resetContent() {
         menuItemsArrayGenerator.generate();
     }

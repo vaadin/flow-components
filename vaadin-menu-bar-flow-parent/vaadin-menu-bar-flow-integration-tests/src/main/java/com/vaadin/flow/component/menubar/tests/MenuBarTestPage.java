@@ -57,10 +57,15 @@ public class MenuBarTestPage extends Div {
                 e -> item2.getSubMenu().addItem("added sub item"));
         addSubItemButton.setId("add-sub-item");
 
-        NativeButton removeItemButton = new NativeButton("Remove item 2",
+        NativeButton removeItemButton = new NativeButton("remove item 2",
                 e -> menuBar.remove(item2));
         removeItemButton.setId("remove-item");
 
-        add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton);
+        NativeButton openOnHoverButton = new NativeButton("toggle openOnHover",
+                e -> menuBar.setOpenOnHover(!menuBar.isOpenOnHover()));
+        openOnHoverButton.setId("toggle-open-on-hover");
+
+        add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
+                openOnHoverButton);
     }
 }
