@@ -37,8 +37,7 @@ public class MenuBarElement extends TestBenchElement {
      */
     public List<TestBenchElement> getButtons() {
         return $("vaadin-menu-bar-button").all().stream()
-                .filter(element -> !element.getAttribute("part")
-                        .contains("ellipsis-button"))
+                .filter(element -> !isEllipsis(element) && isVisible(element))
                 .collect(Collectors.toList());
     }
 
@@ -56,18 +55,13 @@ public class MenuBarElement extends TestBenchElement {
         return ellipsisButton;
     }
 
-    // public void openSubMenu(TestBenchElement parentItem) {
-    //
-    // }
-    //
-    // private boolean isRootLevelItem(TestBenchElement item) {
-    //
-    // }
-    //
-    // private void hoverOn(TestBenchElement hoverTarget) {
-    // executeScript(
-    // "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
-    // hoverTarget);
-    // }
+    private boolean isEllipsis(TestBenchElement element) {
+        return element.getAttribute("part").contains("ellipsis-button");
+    }
+
+    private boolean isVisible(TestBenchElement element) {
+        return (boolean) executeScript(
+                "return arguments[0].style.visibility !== 'hidden'", element);
+    }
 
 }

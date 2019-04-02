@@ -65,7 +65,12 @@ public class MenuBarTestPage extends Div {
                 e -> menuBar.setOpenOnHover(!menuBar.isOpenOnHover()));
         openOnHoverButton.setId("toggle-open-on-hover");
 
+        NativeButton setWidthButton = new NativeButton("set width 150px", e -> {
+            setWidth("150px");
+        });
+        setWidthButton.setId("set-width");
+
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
-                openOnHoverButton);
+                openOnHoverButton, setWidthButton);
     }
 }

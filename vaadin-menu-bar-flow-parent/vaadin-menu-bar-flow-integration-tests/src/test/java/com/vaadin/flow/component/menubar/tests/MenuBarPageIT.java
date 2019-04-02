@@ -43,10 +43,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     @Test
     public void rootLevelItemsRendered() {
-        Assert.assertEquals("Expected 2 buttons to be rendered", 2,
-                menuBar.getButtons().size());
-        assertItemContent(0, "item 1");
-        assertItemContent(1, "<p>item 2</p>");
+        assertButtonContents("item 1", "<p>item 2</p>");
     }
 
     @Test
@@ -110,11 +107,13 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void addRootItem_newRootItemRendered() {
         click("add-root-item");
+        assertButtonContents("item 1", "<p>item 2</p>", "added item");
     }
 
     @Test
     public void removeRootItem_itemNotRendered() {
         click("remove-item");
+        assertButtonContents("item 1");
     }
 
     @Test
@@ -139,22 +138,36 @@ public class MenuBarPageIT extends AbstractComponentIT {
         verifyOpened();
     }
 
+    @Test
+    public void buttonsOverflow_itemsMovedToEllipsisSubMenu() {
+        click("set-width");
+        click("add-root-item");
+        TestBenchElement ellipsisButton = menuBar.getEllipsisButton();
+        Assert.assertNotNull("Expected the ellipsis button to be rendered",
+                ellipsisButton);
+        assertButtonContents("item 1");
+
+        ellipsisButton.click();
+        verifyOpened();
+        Assert.assertArrayEquals(new String[] { "<p>item 2</p>", "added item" },
+                getOverlayMenuItemContents());
+    }
+
     @After
     public void afterTest() {
         checkLogsForErrors();
     }
 
-    private void assertItemContent(int index, String expectedInnerHTML) {
-        String itemContent = menuBar.getButtons().get(index)
-                .$("vaadin-context-menu-item").first()
-                .getAttribute("innerHTML");
-        Assert.assertEquals(
-                "Unexpected content in the button at index " + index,
-                expectedInnerHTML, itemContent);
+    private void assertButtonContents(String... expectedInnerHTML) {
+        String[] contents = menuBar.getButtons().stream()
+                .map(button -> button.$("vaadin-context-menu-item").first()
+                        .getAttribute("innerHTML"))
+                .toArray(String[]::new);
+        Assert.assertArrayEquals(expectedInnerHTML, contents);
     }
 
     private void openSubSubMenu() {
-        menuBar.$("vaadin-menu-bar-button").first().click();
+        menuBar.getButtons().get(0).click();
         verifyOpened();
         hoverOn(getOverlayMenuItems().get(1));
         verifyNumOfOverlays(2);
