@@ -41,7 +41,13 @@ public class TimePickerTest {
         picker.getElement().setProperty("value", "07:40");
         assertEquals(LocalTime.of(7, 40), picker.getValue());
     }
-
+    
+    @Test
+    public void timePicker_nullValue() {
+    	TimePicker timePicker = new TimePicker();
+    	timePicker.setValue(null);
+    	assertEquals(null, timePicker.getValue());
+    }
     @Test
     public void setInitialValue() {
         TimePicker picker = new TimePicker(LocalTime.of(9, 32));
@@ -144,4 +150,5 @@ public class TimePickerTest {
         timePicker.setStep(Duration.ofNanos(500_000));
     }
 
+    
 }
