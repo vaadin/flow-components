@@ -48,6 +48,7 @@ public class TimePickerTest {
     	timePicker.setValue(null);
     	assertEquals(null, timePicker.getValue());
     }
+    
     @Test
     public void setInitialValue() {
         TimePicker picker = new TimePicker(LocalTime.of(9, 32));
