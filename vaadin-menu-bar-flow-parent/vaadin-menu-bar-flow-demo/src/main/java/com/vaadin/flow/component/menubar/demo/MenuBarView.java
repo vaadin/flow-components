@@ -18,6 +18,8 @@ package com.vaadin.flow.component.menubar.demo;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
@@ -31,7 +33,6 @@ public class MenuBarView extends DemoView {
     @Override
     public void initView() {
         createBasicDemo();
-        createComponentDemo();
     }
 
     private void createBasicDemo() {
@@ -41,7 +42,8 @@ public class MenuBarView extends DemoView {
 
         MenuItem project = menuBar.addItem("Project");
         MenuItem account = menuBar.addItem("Account");
-        MenuItem signOut = menuBar.addItem("Sign Out");
+        MenuItem signOut = menuBar.addItem("Sign Out ");
+        signOut.add(new Icon(VaadinIcon.SIGN_OUT));
 
         SubMenu projectSubMenu = project.getSubMenu();
         projectSubMenu.addItem("Dashboard");
@@ -66,16 +68,6 @@ public class MenuBarView extends DemoView {
         // end-source-example
 
         addCard("Basic MenuBar", menuBar);
-    }
-
-    private void createComponentDemo() {
-        // begin-source-example
-        // source-example-heading: MenuBar With Components
-        MenuBar menuBar = new MenuBar();
-
-        // end-source-example
-
-        addCard("MenuBar With Components", menuBar);
     }
 
 }
