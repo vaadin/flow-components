@@ -151,5 +151,4 @@ public class TimePickerTest {
         timePicker.setStep(Duration.ofNanos(500_000));
     }
 
-    
 }
