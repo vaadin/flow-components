@@ -126,8 +126,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         if (value == null) {
             super.setValue(null);
         } else {
-            LocalTime truncated_value = value.truncatedTo(ChronoUnit.MILLIS);
-            super.setValue(truncated_value);
+            LocalTime truncatedValue = value.truncatedTo(ChronoUnit.MILLIS);
+            super.setValue(truncatedValue);
         }
     }
     
