@@ -60,12 +60,13 @@ public class MenuBar extends Component
     }
 
     /**
-     * Adds a new item component with the given text content to the root level
-     * of this menu bar.
+     * Creates a new {@link MenuItem} component with the provided text content
+     * and adds it to the root level of this menu bar.
      * <p>
-     * The root level items are normally placed inside buttons. When the buttons
-     * overflow the menu bar horizontally, the overflowing items are placed into
-     * a context menu openable via ellipsis button.
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via ellipsis button.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
      * use {@link MenuItem#getSubMenu()}.
@@ -79,12 +80,14 @@ public class MenuBar extends Component
     }
 
     /**
-     * Adds a new item component with the given component as its content to the
-     * root level of this menu bar.
+     * Creates a new {@link MenuItem} component and adds it to the root level of
+     * this menu bar. The provided component is added into the created
+     * {@link MenuItem}.
      * <p>
-     * The root level items are normally placed inside buttons. When the buttons
-     * overflow the menu bar horizontally, the overflowing items are placed into
-     * a context menu openable via ellipsis button.
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via ellipsis button.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
      * use {@link MenuItem#getSubMenu()}.
@@ -98,12 +101,13 @@ public class MenuBar extends Component
     }
 
     /**
-     * Adds a new item component with the given text content and click listener
-     * to the root level of this menu bar.
+     * Creates a new {@link MenuItem} component with the provided text content
+     * and click listener and adds it to the root level of this menu bar.
      * <p>
-     * The root level items are normally placed inside buttons. When the buttons
-     * overflow the menu bar horizontally, the overflowing items are placed into
-     * a context menu openable via ellipsis button.
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via ellipsis button.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
      * use {@link MenuItem#getSubMenu()}.
@@ -122,12 +126,14 @@ public class MenuBar extends Component
     }
 
     /**
-     * Adds a new item component with the given component content and click
-     * listener to the root level of this menu bar.
+     * Creates a new {@link MenuItem} component with the provided click listener
+     * and adds it to the root level of this menu bar. The provided component is
+     * added into the created {@link MenuItem}.
      * <p>
-     * The root level items are normally placed inside buttons. When the buttons
-     * overflow the menu bar horizontally, the overflowing items are placed into
-     * a context menu openable via ellipsis button.
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via ellipsis button.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
      * use {@link MenuItem#getSubMenu()}.
