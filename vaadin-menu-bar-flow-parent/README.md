@@ -3,15 +3,18 @@
 This project is the Component wrapper implementation of [`<vaadin-menu-bar>`](https://github.com/vaadin/vaadin-menu-bar) element
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
-## Running the component demo
-Run from the command line:
-- `mvn -pl vaadin-menu-bar-flow-demo -Pwar install jetty:run-war`
-
-Then navigate to `http://localhost:9998/vaadin-menu-bar` to view the demo.
+Then navigate to `http://localhost:8080/vaadin-menu-bar` to view the demo.
 
 ## Installing the component
 Run from the command line:
-- `mvn clean install -DskipTests`
+
+`mvn clean install -DskipTests`
+
+## Running the component demo
+Install the component and run:
+
+`mvn -pl vaadin-menu-bar-flow-demo -Pwar jetty:run`
+
 
 ## Using the component in a Flow application
 To use the component in an application using maven,

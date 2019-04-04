@@ -119,7 +119,8 @@
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
-                        <configuration>
+                        <version>${jetty.plugin.version}</version>
+                        <configuration combine.self="override">
                             <scanIntervalSeconds>5</scanIntervalSeconds>
                         </configuration>
                     </plugin>
