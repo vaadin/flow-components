@@ -39,7 +39,8 @@ public class MenuBarTestPage extends Div {
         MenuItem item2 = menuBar.addItem(new Paragraph("item 2"),
                 e -> message.setText(message.getText() + "clicked item 2"));
 
-        MenuItem subItem1 = item1.getSubMenu().addItem("sub item 1");
+        item1.getSubMenu().addItem("sub item 1",
+                e -> message.setText("clicked sub item 1"));
         MenuItem subItem2 = item1.getSubMenu()
                 .addItem(new Paragraph("sub item 2"));
 
@@ -65,9 +66,8 @@ public class MenuBarTestPage extends Div {
                 e -> menuBar.setOpenOnHover(!menuBar.isOpenOnHover()));
         openOnHoverButton.setId("toggle-open-on-hover");
 
-        NativeButton setWidthButton = new NativeButton("set width 150px", e -> {
-            setWidth("150px");
-        });
+        NativeButton setWidthButton = new NativeButton("set width 150px",
+                e -> setWidth("150px"));
         setWidthButton.setId("set-width");
 
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,

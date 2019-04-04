@@ -73,6 +73,13 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void openSubMenu_clickItem_listenerCalled() {
+        menuBar.getButtons().get(0).click();
+        getOverlayMenuItems().get(0).click();
+        assertMessage("clicked sub item 1");
+    }
+
+    @Test
     public void openSubSubMenu_clickCheckableItem_checkableStateChanges() {
         openSubSubMenu();
 
