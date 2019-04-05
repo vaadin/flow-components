@@ -112,7 +112,7 @@ public class GridProView extends DemoView {
         ComponentRenderer<Span, Person> booleanRenderer = new ComponentRenderer<>(person ->
             new Span(person.isSubscriber() ? "Yes" : "No")
         );
-        grid.addComponentEditColumn(Person::isSubscriber, booleanRenderer)
+        grid.addEditColumn(Person::isSubscriber, booleanRenderer)
                 .checkbox((item, newValue) -> {})
                 .setHeader("Subscriber (editable)");
         // end-source-example
