@@ -20,8 +20,11 @@ import com.vaadin.flow.function.SerializableRunnable;
 
 class MenuBarRootItem extends MenuItem {
 
-    MenuBarRootItem(SerializableRunnable contentReset) {
+    private MenuBar menuBar;
+
+    MenuBarRootItem(MenuBar menuBar, SerializableRunnable contentReset) {
         super(null, contentReset);
+        this.menuBar = menuBar;
     }
 
     @Override
@@ -30,5 +33,14 @@ class MenuBarRootItem extends MenuItem {
             throw new UnsupportedOperationException(
                     "A root level item in a MenuBar can not be checkable");
         }
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (enabled == isEnabled()) {
+            return;
+        }
+        super.setEnabled(enabled);
+        menuBar.updateButtons();
     }
 }

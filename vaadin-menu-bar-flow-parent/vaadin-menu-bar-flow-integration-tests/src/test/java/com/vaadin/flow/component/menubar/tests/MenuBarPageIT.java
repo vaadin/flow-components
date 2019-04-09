@@ -20,6 +20,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -170,15 +171,99 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void buttonWithClickListenerOverflows_clickListenerWorksInSubMenu() {
         click("set-width");
-        click("add-root-item");
         menuBar.getEllipsisButton().click();
         getOverlayMenuItems().get(0).click();
         assertMessage("clicked item 2");
     }
 
+    @Test
+    public void overflow_openAndClose_unOverflow_clickButton_listenerCalled() {
+        click("set-width");
+        menuBar.getEllipsisButton().click();
+        verifyOpened();
+        clickBody();
+        click("reset-width");
+        menuBar.getButtons().get(1).click();
+        assertMessage("clicked item 2");
+    }
+
+    @Test
+    public void buttonsReflectDisabledStateOfMenuItems() {
+        assertButtonDisabled(0, false);
+        click("toggle-disable");
+        assertButtonDisabled(0, true);
+        click("toggle-disable");
+        assertButtonDisabled(0, false);
+    }
+
+    @Test
+    public void disableButton_removeDisabledAttribute_click_listenerNotCalled() {
+        click("toggle-disable");
+        TestBenchElement button2 = menuBar.getButtons().get(1);
+        executeScript("arguments[0].disabled=false;"
+                + "arguments[0].querySelector('vaadin-context-menu-item').disabled=false;",
+                button2);
+        button2.click();
+        assertMessage("");
+    }
+
+    @Test
+    public void disableItems_addItem_oldItemStillDisabled() {
+        click("toggle-disable");
+        click("add-root-item");
+        assertButtonDisabled(0, true);
+        assertButtonDisabled(1, true);
+        assertButtonDisabled(2, false);
+    }
+
+    @Test
+    public void disableItem_overflow_itemDisabled() {
+        click("toggle-disable");
+        click("set-width");
+        menuBar.getEllipsisButton().click();
+        verifyOpened();
+        assertDisabled(getOverlayMenuItems().get(0), true);
+    }
+
+    @Test
+    public void overflow_disableItem_itemDisabled() {
+        click("set-width");
+        click("toggle-disable");
+        menuBar.getEllipsisButton().click();
+        verifyOpened();
+        assertDisabled(getOverlayMenuItems().get(0), true);
+        // repeat
+        clickBody();
+        menuBar.getEllipsisButton().click();
+        verifyOpened();
+        assertDisabled(getOverlayMenuItems().get(0), true);
+    }
+
+    @Test
+    @Ignore // https://github.com/vaadin/vaadin-menu-bar/issues/41
+    public void disable_overflow_openAndClose_unOverflow_buttonDisabled() {
+        click("toggle-disable");
+        click("set-width");
+        menuBar.getEllipsisButton().click();
+        verifyOpened();
+        clickBody();
+        click("reset-width");
+        assertButtonDisabled(1, true);
+    }
+
     @After
     public void afterTest() {
         checkLogsForErrors();
+    }
+
+    private void assertButtonDisabled(int index, boolean expectDisabled) {
+        assertDisabled(menuBar.getButtons().get(index), expectDisabled);
+    }
+
+    private void assertDisabled(TestBenchElement element,
+            boolean expectDisabled) {
+        Assert.assertEquals("Unexpected disabled state on element",
+                expectDisabled, element.hasAttribute("disabled"));
     }
 
     private void assertButtonContents(String... expectedInnerHTML) {

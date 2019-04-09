@@ -66,11 +66,25 @@ public class MenuBarTestPage extends Div {
                 e -> menuBar.setOpenOnHover(!menuBar.isOpenOnHover()));
         openOnHoverButton.setId("toggle-open-on-hover");
 
-        NativeButton setWidthButton = new NativeButton("set width 150px",
-                e -> setWidth("150px"));
+        NativeButton setWidthButton = new NativeButton("set width 140px", e -> {
+            setWidth("140px");
+            menuBar.getElement().callFunction("notifyResize");
+        });
         setWidthButton.setId("set-width");
 
+        NativeButton resetWidthButton = new NativeButton("reset width", e -> {
+            setWidth("auto");
+            menuBar.getElement().callFunction("notifyResize");
+        });
+        resetWidthButton.setId("reset-width");
+
+        NativeButton disableButton = new NativeButton("toggle disable items",
+                e -> menuBar.getItems()
+                        .forEach(item -> item.setEnabled(!item.isEnabled())));
+        disableButton.setId("toggle-disable");
+
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
-                openOnHoverButton, setWidthButton);
+                openOnHoverButton, setWidthButton, resetWidthButton,
+                disableButton);
     }
 }

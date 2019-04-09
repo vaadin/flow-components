@@ -54,7 +54,7 @@ public class MenuBar extends Component
     public MenuBar() {
         menuItemsArrayGenerator = new MenuItemsArrayGenerator<>(this);
         menuManager = new MenuManager<>(this, this::resetContent,
-                (menu, contentReset) -> new MenuBarRootItem(contentReset),
+                (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
                 MenuItem.class, null);
         addAttachListener(event -> resetContent());
     }
@@ -222,19 +222,28 @@ public class MenuBar extends Component
 
     private void resetContent() {
         menuItemsArrayGenerator.generate();
+        updateButtons();
+    }
 
+    void updateButtons() {
         if (updateScheduled) {
             return;
         }
-
-        // Propagate click events from the menu buttons to the item components
         String script = //@formatter:off
+
+            // 1. Propagate disabled state from items to parent buttons
+            "$0.items.forEach(function(i){" +
+                "i.disabled = i.component.disabled;" +
+            "});" +
+            "$0.render();"+
+
+            // 2. Propagate click events from the menu buttons to the item components
             "$0._buttons.forEach(function(b){" +
-              "if(b.item && b.item.component){" +
-                "b.addEventListener('click', function(e){" +
-                   "b.item.component.dispatchEvent(new Event('click'));" +
-                "});" +
-              "}" +
+                "if(b.item && b.item.component){" +
+                    "b.addEventListener('click',function(e){" +
+                        "b.item.component.dispatchEvent(new Event('click'));" +
+                    "});" +
+                "}" +
             "});";
         //@formatter:on
         getElement().getNode().runWhenAttached(
