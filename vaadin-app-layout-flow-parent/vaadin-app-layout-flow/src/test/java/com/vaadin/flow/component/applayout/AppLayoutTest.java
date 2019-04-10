@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.applayout;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.Element;
 import org.junit.Before;
@@ -68,6 +69,7 @@ public class AppLayoutTest {
     @Test
     public void removeContent() {
         testRemoval(systemUnderTest::setContent);
+        assertNull(systemUnderTest.getContent());
     }
 
     @Test
@@ -89,6 +91,36 @@ public class AppLayoutTest {
 
         systemUnderTest.remove(component);
         assertNull(getParent(component));
+    }
+
+    @Test
+    public void testShowRouterLayoutContentWithNullValue() {
+        testShowRouterLayoutContent(null);
+    }
+
+    @Test
+    public void testShowRouterLayoutContentWithValidValue() {
+        testShowRouterLayoutContent(new Div());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testShowRouterLayoutContentThrowsExceptionForNonComponent() {
+        final Element element = new Element("div");
+        systemUnderTest.showRouterLayoutContent(() -> element);
+    }
+
+    private void testShowRouterLayoutContent(HasElement content) {
+        // Works initially
+        systemUnderTest.showRouterLayoutContent(content);
+        assertEquals(content, systemUnderTest.getContent());
+
+        final Component component = new Div();
+        systemUnderTest.showRouterLayoutContent(component);
+        assertEquals(component, systemUnderTest.getContent());
+
+        // Works after setting other value
+        systemUnderTest.showRouterLayoutContent(content);
+        assertEquals(content, systemUnderTest.getContent());
     }
 
     private static Component getParent(Component component) {

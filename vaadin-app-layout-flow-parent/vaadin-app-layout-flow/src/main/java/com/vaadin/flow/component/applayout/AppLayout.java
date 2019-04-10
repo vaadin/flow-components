@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.PropertyDescriptor;
 import com.vaadin.flow.component.PropertyDescriptors;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.router.RouterLayout;
@@ -44,28 +45,66 @@ public class AppLayout extends Component implements RouterLayout {
 
     private Component content;
 
+    /**
+     * @see #setDrawerFirst(boolean)
+     * @return value for the drawerFirst property. Default is {@code false}.
+     */
+    @Synchronize("drawer-first-changed")
     public boolean isDrawerFirst() {
         return drawerFirstProperty.get(this);
     }
 
+    /**
+     * Defines how the navbar and the drawer will interact with each other on desktop view when the drawer is opened.
+     *
+     * <ul>
+     * <li>By default, the navbar takes the full available width and moves the drawer down.</li>
+     * <li>If set to {@code true}, then the drawer will move the navbar, taking the full available height.</li>
+     * </ul>
+     *
+     * @param drawerFirst new value for the drawerFirst property.
+     */
     public void setDrawerFirst(boolean drawerFirst) {
         drawerFirstProperty.set(this, drawerFirst);
     }
 
+    /**
+     * Whether the drawer is opened (visible) or not.
+     * Its default value depends on the viewport:
+     * <ul>
+     * <li>{@code true} for desktop size views</li>
+     * <li>{@code false} for mobile size views</li>
+     * </ul>
+     *
+     * @return {@code true} if the drawer is opened (visible). {@code false} otherwise.
+     */
+    @Synchronize("drawer-opened-changed")
     public boolean isDrawerOpened() {
         return drawerOpenedProperty.get(this);
     }
 
+    /**
+     * Controls whether the drawer is visible or not.
+     *
+     * @param drawerOpened new value for the drawerOpened property.
+     * @see #isDrawerOpened
+     */
     public void setDrawerOpened(boolean drawerOpened) {
         drawerOpenedProperty.set(this, drawerOpened);
     }
 
+    /**
+     *  <strong>Note:</strong> This property is controlled via CSS and can not be changed directly.
+     *
+     * @return {@code true} if drawer is an overlay on top of the content. {@code false} otherwise.
+     */
+    @Synchronize("overlay-changed")
     public boolean isOverlay() {
         return overlayProperty.get(this);
     }
 
     /**
-     * Returns the displayed content
+     * @return the displayed content
      */
     public Component getContent() {
         return content;
@@ -87,18 +126,54 @@ public class AppLayout extends Component implements RouterLayout {
         }
     }
 
+    /**
+     * Adds the components to the <em>drawer</em> slot of this AppLayout.
+     *
+     * @param components Components to add to the drawer slot.
+     * @throws NullPointerException if any of the components is null or if the components array is null.
+     */
     public void addToDrawer(Component... components) {
         addToSlot("drawer", components);
     }
 
+    /**
+     * Adds the components to the <em>navbar</em> slot of this AppLayout.
+     *
+     * @param components Components to add to the navbar slot.
+     * @throws NullPointerException if any of the components is null or if the components array is null.
+     */
     public void addToNavbar(Component... components) {
         addToSlot("navbar", components);
     }
 
+    /**
+     * Removes the child components from the parent. Components can be in any slot or be the main content.
+     *
+     * @param components Components to remove.
+     */
     public void remove(Component... components) {
         for (Component component : components) {
+            if(this.content != null && this.content.equals(component)) {
+                this.content = null;
+            }
             remove(component);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if content is not a {@link Component}
+     */
+    @Override
+    public void showRouterLayoutContent(HasElement content) {
+        Component target = null;
+        if (content != null) {
+            target = content.getElement().getComponent().orElseThrow(
+                () -> new IllegalArgumentException(
+                    "AppLayout content must be a Component"));
+        }
+        setContent(target);
     }
 
     private void addToSlot(String slot, Component... components) {
@@ -128,14 +203,5 @@ public class AppLayout extends Component implements RouterLayout {
         if (component != null) {
             component.getElement().removeFromParent();
         }
-    }
-
-    @Override
-    public void showRouterLayoutContent(HasElement content) {
-        final Component target = content.getElement().getComponent()
-            .orElseThrow(() -> new IllegalArgumentException(
-                "AppLayout content must be a Component"));
-
-        setContent(target);
     }
 }
