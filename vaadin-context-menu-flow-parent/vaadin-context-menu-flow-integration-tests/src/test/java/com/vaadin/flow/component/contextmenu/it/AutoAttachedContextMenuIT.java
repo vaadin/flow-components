@@ -59,6 +59,7 @@ public class AutoAttachedContextMenuIT extends AbstractContextMenuIT {
         clickBody();
         rightClickOn(TARGET_ID);
 
+        verifyOpened();
         Assert.assertEquals("Auto-attached context menu",
                 getOverlay().getAttribute("innerText"));
 
