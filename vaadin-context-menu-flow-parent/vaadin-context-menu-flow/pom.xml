@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-context-menu-flow-parent</artifactId>
-        <version>2.1-SNAPSHOT</version>
+        <version>2.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-context-menu-flow</artifactId>

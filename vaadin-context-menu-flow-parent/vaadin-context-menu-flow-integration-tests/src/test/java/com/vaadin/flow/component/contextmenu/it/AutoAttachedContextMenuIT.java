@@ -56,7 +56,9 @@ public class AutoAttachedContextMenuIT extends AbstractContextMenuIT {
         open();
 
         rightClickOn(TARGET_ID);
+        verifyOpened();
         clickBody();
+        verifyClosed();
         rightClickOn(TARGET_ID);
 
         verifyOpened();
