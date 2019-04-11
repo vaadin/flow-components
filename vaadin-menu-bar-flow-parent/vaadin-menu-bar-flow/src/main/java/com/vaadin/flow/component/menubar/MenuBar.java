@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.menubar;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -23,6 +24,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.contextmenu.HasMenuItems;
 import com.vaadin.flow.component.contextmenu.MenuItem;
@@ -39,7 +41,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 @Tag("vaadin-menu-bar")
 @HtmlImport("frontend://bower_components/vaadin-menu-bar/src/vaadin-menu-bar.html")
 public class MenuBar extends Component
-        implements HasMenuItems, HasSize, HasStyle {
+        implements HasMenuItems, HasSize, HasStyle, HasTheme {
 
     private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
     private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
@@ -218,6 +220,30 @@ public class MenuBar extends Component
      */
     public boolean isOpenOnHover() {
         return getElement().getProperty("openOnHover", false);
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(MenuBarVariant... variants) {
+        getThemeNames()
+                .addAll(Stream.of(variants).map(MenuBarVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(MenuBarVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(MenuBarVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 
     private void resetContent() {
