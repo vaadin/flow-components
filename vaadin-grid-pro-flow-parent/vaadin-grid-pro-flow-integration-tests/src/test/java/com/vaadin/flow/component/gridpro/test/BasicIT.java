@@ -30,7 +30,7 @@ public class BasicIT extends AbstractParallelTest {
     @Test
     public void columnIsRenderedInBeanGrid() {
         GridTHTDElement cell = beanGrid.getCell(0, 0);
-        Assert.assertEquals("Person 1", cell.getInnerHTML());
+        Assert.assertEquals("23", cell.getInnerHTML());
         AssertCellEnterEditModeOnDoubleClick(0, 0, "vaadin-grid-pro-edit-text-field", beanGrid);
     }
 
@@ -71,16 +71,16 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void customRepresentationIsRendered() {
-        GridTHTDElement cell = grid.getCell(0, 2);
+        GridTHTDElement cell = grid.getCell(0, 3);
         Assert.assertEquals("No", cell.$("span").first().getText());
     }
 
     @Test
     public void customRepresentationIsEdited() {
-        GridTHTDElement cell = grid.getCell(0, 2);
+        GridTHTDElement cell = grid.getCell(0, 3);
         Assert.assertEquals("No", cell.$("span").first().getText());
 
-        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-grid-pro-edit-checkbox");
+        AssertCellEnterEditModeOnDoubleClick(0, 3, "vaadin-grid-pro-edit-checkbox");
         TestBenchElement checkbox = cell.$("vaadin-grid-pro-edit-checkbox").first();
         checkbox.click();
         checkbox.dispatchEvent("focusout");
@@ -95,18 +95,52 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
+    public void cellEditStartedListenerCalledOnce() {
+        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
+        Assert.assertEquals("Person{id=1, age=23, name='Person 1', isSubscriber=false, email='person1@vaadin.com', department=sales}", getPanelText("events-panel"));
+    }
+
+    @Test
+    public void customComboBoxIsUsedForEditColumn() {
+        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
+    }
+
+    @Test
+    public void customComboBoxIsGettingValue() {
+        GridTHTDElement cell = grid.getCell(0, 2);
+        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
+        TestBenchElement comboBox = cell.$("vaadin-combo-box").first();
+
+        Assert.assertEquals("1", comboBox.getProperty("value"));
+    }
+
+    @Test
     public void checkboxEditorIsUsedForCheckboxColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-grid-pro-edit-checkbox");
+        AssertCellEnterEditModeOnDoubleClick(0, 3, "vaadin-grid-pro-edit-checkbox");
+    }
+
+    @Test
+    public void customTextFieldIsUsedForEditColumn() {
+        AssertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-text-field", beanGrid);
+    }
+
+    @Test
+    public void customTextFieldIsGettingValue() {
+        GridTHTDElement cell = beanGrid.getCell(0, 1);
+        AssertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-text-field", beanGrid);
+        TestBenchElement textField = cell.$("vaadin-text-field").first();
+
+        Assert.assertEquals("Person 1", textField.getProperty("value"));
     }
 
     @Test
     public void selectEditorIsUsedForSelectColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 3, "vaadin-grid-pro-edit-select-wrapper");
+        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-grid-pro-edit-select-wrapper", beanGrid);
     }
 
     @Test
     public void selectEditorOptionsAreSet() {
-        GridTHTDElement cell = grid.getCell(0, 3);
+        GridTHTDElement cell = beanGrid.getCell(0, 2);
         ArrayList optionsList = cell.getColumn().getOptionsList();
         Assert.assertTrue(optionsList.contains("Services"));
         Assert.assertTrue(optionsList.contains("Marketing"));
@@ -128,5 +162,9 @@ public class BasicIT extends AbstractParallelTest {
         executeScript("var cellContent = arguments[0].firstElementChild.assignedNodes()[0];" +
             "cellContent.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));", cell);
         Assert.assertTrue(cell.innerHTMLContains(editorTag));
+    }
+
+    private String getPanelText(String id) {
+        return $("div").onPage().id(id).getText();
     }
 }

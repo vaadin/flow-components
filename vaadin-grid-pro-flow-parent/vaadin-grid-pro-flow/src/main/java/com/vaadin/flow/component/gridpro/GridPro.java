@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -30,6 +31,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.grid.ColumnPathRenderer;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -49,6 +51,7 @@ import elemental.json.JsonObject;
 @Tag("vaadin-grid-pro")
 @HtmlImport("frontend://bower_components/vaadin-grid-pro/src/vaadin-grid-pro.html")
 @HtmlImport("frontend://bower_components/vaadin-grid-pro/src/vaadin-grid-pro-edit-column.html")
+@JavaScript("frontend://gridProConnector.js")
 /**
  * Server-side component for the {@code <vaadin-grid-pro>} element.
  *
@@ -102,9 +105,22 @@ public class GridPro<E> extends Grid<E> {
         addItemPropertyChangedListener(e -> {
             EditColumn<E> column = (EditColumn<E>) this.idToColumnMap.get(e.getPath());
 
-            column.getItemUpdater().accept(e.getItem(), e.getSourceItem().get(e.getPath()).asString());
+            if (column.getEditorType().equals("custom")) {
+                column.getItemUpdater().accept(e.getItem(), null);
+            } else {
+                column.getItemUpdater().accept(e.getItem(), e.getSourceItem().get(e.getPath()).asString());
+            }
+
 
             getDataProvider().refreshItem(e.getItem());
+        });
+
+        addCellEditStartedListener(e -> {
+            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap.get(e.getPath());
+
+            if (column.getEditorType().equals("custom")) {
+                column.getEditorField().setValue(column.getValueProvider().apply(e.getItem()));
+            }
         });
     }
 
@@ -123,6 +139,8 @@ public class GridPro<E> extends Grid<E> {
     public static class EditColumn<T> extends Column<T> {
 
         private ItemUpdater<T, String> itemUpdater;
+        private AbstractField editorField;
+        private ValueProvider<T, ?> valueProvider;
 
         /**
          * Constructs a new Column for use inside a Grid.
@@ -159,6 +177,14 @@ public class GridPro<E> extends Grid<E> {
          */
         protected ItemUpdater<T, String> getItemUpdater() {
             return itemUpdater;
+        }
+
+        protected AbstractField getEditorField() {
+            return editorField;
+        }
+
+        protected void setEditorField(AbstractField editorField) {
+            this.editorField = editorField;
         }
 
         /**
@@ -206,6 +232,15 @@ public class GridPro<E> extends Grid<E> {
         protected List<String> getOptions() {
             return JsonSerializer.toObjects(String.class,  (JsonArray) getElement().getPropertyRaw("editorOptions"));
         }
+
+
+        public ValueProvider<T, ?> getValueProvider() {
+            return valueProvider;
+        }
+
+        public void setValueProvider(ValueProvider<T, ?> valueProvider) {
+            this.valueProvider = valueProvider;
+        }
     }
 
     /**
@@ -224,7 +259,7 @@ public class GridPro<E> extends Grid<E> {
     public EditColumnConfigurator<E> addEditColumn(ValueProvider<E, ?> valueProvider) {
         EditColumn<E> column = this.addColumn(valueProvider, this::createEditColumn);
 
-        return new EditColumnConfigurator<>(column);
+        return new EditColumnConfigurator<>(column, valueProvider);
     }
 
     /**
@@ -251,47 +286,7 @@ public class GridPro<E> extends Grid<E> {
                 value -> valueProvider.apply(value), renderer)), this::createEditColumn);
         idToColumnMap.put(columnId, column);
 
-        return new EditColumnConfigurator<>(column);
-    }
-
-    /**
-     * Adds a new edit column to this {@link GridPro} with a renderer.
-     *
-     * @param renderer
-     *            the renderer used to create the grid cell structure
-     * @return an edit column configurer for configuring the column editor
-     *
-     * @see Grid#addColumn(Renderer)
-     * @see EditColumnConfigurator#text(ItemUpdater)
-     * @see EditColumnConfigurator#checkbox(ItemUpdater)
-     * @see EditColumnConfigurator#select(ItemUpdater, List)
-     * @see #removeColumn(Column)
-     */
-    public EditColumnConfigurator<E> addEditColumn(Renderer<E> renderer) {
-        EditColumn<E> column = this.addColumn(renderer, this::createEditColumn);
-
-        return new EditColumnConfigurator<>(column);
-    }
-
-    /**
-     * Adds a new edit column to this {@link GridPro} with a renderer and sorting properties.
-     *
-     * @param renderer
-     *            the renderer used to create the grid cell structure
-     * @param sortingProperties
-     *            the sorting properties to use for this column
-     * @return an edit column configurer for configuring the column editor
-     *
-     * @see Grid#addColumn(Renderer, String[])
-     * @see EditColumnConfigurator#text(ItemUpdater)
-     * @see EditColumnConfigurator#checkbox(ItemUpdater)
-     * @see EditColumnConfigurator#select(ItemUpdater, List)
-     * @see #removeColumn(Column)
-     */
-    public EditColumnConfigurator<E> addEditColumn(Renderer<E> renderer, String... sortingProperties) {
-        EditColumn<E> column = this.addColumn(renderer, this::createEditColumn, sortingProperties);
-
-        return new EditColumnConfigurator<>(column);
+        return new EditColumnConfigurator<>(column, valueProvider);
     }
 
     /**
@@ -317,7 +312,7 @@ public class GridPro<E> extends Grid<E> {
         EditColumn<E> column = addColumn(valueProvider, this::createEditColumn);
         column.setComparator(valueProvider);
         column.setSortProperty(sortingProperties);
-        return new EditColumnConfigurator<>(column);
+        return new EditColumnConfigurator<>(column, valueProvider);
     }
 
     /**
@@ -338,8 +333,8 @@ public class GridPro<E> extends Grid<E> {
      */
     public EditColumnConfigurator<E> addEditColumn(String propertyName) {
         EditColumn<E> column = this.addColumn(propertyName, this::createEditColumn);
-
-        return new EditColumnConfigurator<>(column);
+        ValueProvider<E, ?> valueProvider = item -> getPropertySet().getProperty(propertyName).get().getGetter().apply(item);
+        return new EditColumnConfigurator<>(column, valueProvider);
     }
 
     /**
@@ -415,6 +410,66 @@ public class GridPro<E> extends Grid<E> {
      *
      * @param <E> the bean type
      */
+    @DomEvent("cell-edit-started")
+    public static class CellEditStartedEvent<E> extends ComponentEvent<GridPro<E>> {
+
+        private E item;
+        private String path;
+
+        /**
+         * Creates a new event using the given source and indicator whether the
+         * event originated from the client side or the server side.
+         *
+         * @param source     the source component
+         * @param fromClient <code>true</code> if the event originated from the client
+         * @param item       the item to be edited, provided in JSON as internally represented in Grid
+         * @param path       item subproperty that was changed
+         */
+        public CellEditStartedEvent(GridPro<E> source, boolean fromClient,
+                                        @EventData("event.detail.item") JsonObject item,
+                                        @EventData("event.detail.path") String path) {
+            super(source, fromClient);
+            this.item = source.getDataCommunicator()
+                    .getKeyMapper().get(item.getString("key"));
+            this.path = path;
+        }
+
+        /**
+         * Gets an instance of edited item.
+         *
+         * @return the instance of edited item
+         */
+        public E getItem() {
+            return item;
+        }
+
+
+        /**
+         * Gets the key of the column where item was edited.
+         *
+         * @return the key of the column
+         */
+        private String getPath() {
+            return path;
+        }
+    }
+
+    /**
+     * Registers a listener to be notified when the user starts to edit an existing item.
+     *
+     * @param listener a listener to be notified
+     * @return a handle that can be used to unregister the listener
+     */
+    public Registration addCellEditStartedListener(ComponentEventListener<CellEditStartedEvent<E>> listener) {
+        return ComponentUtil.addListener(this, CellEditStartedEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    /**
+     * Event fired when the user has edited an existing item.
+     *
+     * @param <E> the bean type
+     */
     @DomEvent("item-property-changed")
     public static class ItemPropertyChangedEvent<E> extends ComponentEvent<GridPro<E>> {
 
@@ -455,7 +510,7 @@ public class GridPro<E> extends Grid<E> {
          *
          * @return the instance of edited item
          */
-        public JsonObject getSourceItem() {
+        private JsonObject getSourceItem() {
             return sourceItem;
         }
 
@@ -464,13 +519,13 @@ public class GridPro<E> extends Grid<E> {
          *
          * @return the key of the column
          */
-        public String getPath() {
+        private String getPath() {
             return path;
         }
     }
 
     /**
-     * Registers a listener to be notified when the user starts to edit an existing item.
+     * Registers a listener to be notified when the user has edited an existing item.
      *
      * @param listener a listener to be notified
      * @return a handle that can be used to unregister the listener

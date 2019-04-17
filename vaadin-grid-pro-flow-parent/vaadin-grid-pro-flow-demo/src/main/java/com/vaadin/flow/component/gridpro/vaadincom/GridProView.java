@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.gridpro.GridPro;
+import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.demo.DemoView;
@@ -21,6 +22,7 @@ public class GridProView extends DemoView {
         sortingEditColumn();
         editorTypes();
         customRepresentation();
+        customEditorType();
         enterNextRow();
         keepEditorOpen();
     }
@@ -118,6 +120,24 @@ public class GridProView extends DemoView {
         // end-source-example
 
         addCard("Custom Representation", grid);
+    }
+
+    private void customEditorType() {
+        // begin-source-example
+        // source-example-heading: Custom Editor Type
+        GridPro<Person> grid = new GridPro<>();
+        grid.setItems(createItems());
+
+        grid.addColumn(Person::getName).setHeader("NAME");
+
+        Input customInput = new Input();
+        grid.addEditColumn(Person::getEmail)
+                .custom(customInput, (item, newValue) -> {})
+                .setHeader("Department")
+                .setWidth("300px");
+        // end-source-example
+
+        addCard("Custom Editor Type", grid);
     }
 
     private void enterNextRow() {

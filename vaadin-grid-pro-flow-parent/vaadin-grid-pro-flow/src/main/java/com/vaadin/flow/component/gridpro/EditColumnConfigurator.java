@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.ValueProvider;
 
 /**
  * Configuration for the editor of an edit column.
@@ -47,9 +50,10 @@ public class EditColumnConfigurator<T> implements Serializable {
      * @param column
      *            the column to edit, not <code>null</code>
      */
-    public EditColumnConfigurator(EditColumn<T> column) {
+    EditColumnConfigurator(EditColumn<T> column, ValueProvider<T, ?> valueProvider) {
         assert column != null;
         this.column = column;
+        this.column.setValueProvider(valueProvider);
     }
 
     private Column<T> configureColumn(ItemUpdater<T, String> itemUpdater,
@@ -57,6 +61,15 @@ public class EditColumnConfigurator<T> implements Serializable {
         column.setEditorType(type);
         column.setItemUpdater(itemUpdater);
         column.setOptions(options);
+
+        return getColumn();
+    }
+
+    private <V> Column<T> configureColumn(ItemUpdater<T, String> itemUpdater,
+                                      EditorType type, AbstractField<?, V> editorField) {
+        column.setEditorType(type);
+        column.setItemUpdater(itemUpdater);
+        column.setEditorField(editorField);
 
         return getColumn();
     }
@@ -83,6 +96,22 @@ public class EditColumnConfigurator<T> implements Serializable {
         return configureColumn(itemUpdater, EditorType.TEXT,
                 Collections.emptyList());
     }
+
+    public <V> Column<T> custom(AbstractField<?, V> component, ItemUpdater<T, V> itemUpdater) {
+        column.getElement().appendVirtualChild(component.getElement());
+        column.getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(column,
+                        context -> setEditModeRenderer(component)));
+
+        return configureColumn((item, ignore) -> itemUpdater.accept(item, component.getValue()), EditorType.CUSTOM, component);
+    }
+
+    private <V> void setEditModeRenderer(AbstractField<?, V> component) {
+        UI.getCurrent().getPage().executeJavaScript(
+                "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
+                column.getElement(), component.getElement());
+    }
+
 
     /**
      * Configures the column to have a checkbox editor with the given item
