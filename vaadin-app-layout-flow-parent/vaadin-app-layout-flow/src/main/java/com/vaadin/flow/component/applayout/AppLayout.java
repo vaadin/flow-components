@@ -174,6 +174,18 @@ public class AppLayout extends Component implements RouterLayout {
                     "AppLayout content must be a Component"));
         }
         setContent(target);
+        afterNavigation();
+    }
+
+    /**
+     * Called after a navigation event.
+     * The default behaviour is to close the drawer on mobile devices after a navigation event.
+     */
+    protected void afterNavigation() {
+        // Close drawer after navigation on mobile devices.
+        if(isOverlay()) {
+            setDrawerOpened(false);
+        }
     }
 
     private void addToSlot(String slot, Component... components) {

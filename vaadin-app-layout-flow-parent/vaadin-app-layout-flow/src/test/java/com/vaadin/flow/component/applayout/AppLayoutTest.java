@@ -109,6 +109,30 @@ public class AppLayoutTest {
         systemUnderTest.showRouterLayoutContent(() -> element);
     }
 
+    @Test
+    public void testAfterNavigationClosesDrawerOnOverlay() {
+        systemUnderTest.getElement().setProperty("overlay", true);
+        assertTrue(systemUnderTest.isOverlay());
+        final boolean expectedDrawerOpened = false;
+        testAfterNavigationClosesDrawerOnOverlay(expectedDrawerOpened);
+    }
+
+    @Test
+    public void testAfterNavigationDoesNotCloseDrawerIfNotOverlay() {
+        systemUnderTest.getElement().setProperty("overlay", false);
+        assertFalse(systemUnderTest.isOverlay());
+        final boolean expectedDrawerOpened = true;
+        testAfterNavigationClosesDrawerOnOverlay(expectedDrawerOpened);
+    }
+
+    private void testAfterNavigationClosesDrawerOnOverlay(
+        boolean expectedDrawerOpened) {
+        systemUnderTest.setDrawerOpened(true);
+        assertTrue(systemUnderTest.isDrawerOpened());
+        systemUnderTest.afterNavigation();
+        assertEquals(expectedDrawerOpened, systemUnderTest.isDrawerOpened());
+    }
+
     private void testShowRouterLayoutContent(HasElement content) {
         // Works initially
         systemUnderTest.showRouterLayoutContent(content);
