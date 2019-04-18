@@ -61,9 +61,9 @@ public class GridProTest {
     }
 
     @Test
-    public void setKeepEditorOpen_getKeepEditorOpen() {
-        grid.setKeepEditorOpen(true);
-        Assert.assertEquals(grid.getKeepEditorOpen(), true);
+    public void setSingleCellEdit_getSingleCellEdit() {
+        grid.setSingleCellEdit(true);
+        Assert.assertEquals(grid.getSingleCellEdit(), true);
     }
 
     @Test
