@@ -68,7 +68,7 @@ public class MenuBar extends Component
      * The added {@link MenuItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
      * {@link MenuItem} is moved out of the button, into a context menu openable
-     * via ellipsis button.
+     * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
      * use {@link MenuItem#getSubMenu()}.
@@ -89,7 +89,7 @@ public class MenuBar extends Component
      * The added {@link MenuItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
      * {@link MenuItem} is moved out of the button, into a context menu openable
-     * via ellipsis button.
+     * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
      * use {@link MenuItem#getSubMenu()}.
@@ -109,7 +109,7 @@ public class MenuBar extends Component
      * The added {@link MenuItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
      * {@link MenuItem} is moved out of the button, into a context menu openable
-     * via ellipsis button.
+     * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
      * use {@link MenuItem#getSubMenu()}.
@@ -135,7 +135,7 @@ public class MenuBar extends Component
      * The added {@link MenuItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
      * {@link MenuItem} is moved out of the button, into a context menu openable
-     * via ellipsis button.
+     * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
      * use {@link MenuItem#getSubMenu()}.
