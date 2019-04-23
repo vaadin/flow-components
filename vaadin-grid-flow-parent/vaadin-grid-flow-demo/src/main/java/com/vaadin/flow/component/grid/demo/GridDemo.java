@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -38,6 +40,11 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
+import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
+import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -50,10 +57,13 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
@@ -612,6 +622,11 @@ public class GridDemo extends DemoView {
         createNotBufferedEditor();
         createBufferedDynamicEditor();
         createNotBufferedDynamicEditor();
+        createRowReordering();
+        createDragRowsBetweenGrids();
+        createDropLocations();
+        createDragData();
+        createDragDropFilters();
 
         addCard("Grid example model",
                 new Label("These objects are used in the examples above"));
@@ -2057,6 +2072,351 @@ public class GridDemo extends DemoView {
         grid.setId("not-buffered-dynamic-editor");
         addCard("Grid Editor", "Dynamic Editor in Not Buffered Mode", message,
                 grid);
+    }
+
+    // Drag and drop
+
+    private List<Person> draggedItems;
+    private Person draggedItem;
+    private Grid<Person> dragSource;
+
+    private void createRowReordering() {
+        // begin-source-example
+        // source-example-heading: Row Reordering
+
+        List<Person> gridItems = new PersonService().fetch(0, 5);
+
+        Grid<Person> grid = new Grid<>(Person.class);
+        grid.setColumns("firstName", "lastName", "phoneNumber");
+        grid.setItems(gridItems);
+        grid.setSelectionMode(SelectionMode.NONE);
+        grid.setRowsDraggable(true);
+
+        grid.addDragStartListener(event -> {
+            draggedItem = event.getDraggedItems().get(0);
+            grid.setDropMode(GridDropMode.BETWEEN);
+        });
+
+        grid.addDragEndListener(event -> {
+            draggedItem = null;
+            grid.setDropMode(null);
+        });
+
+        grid.addDropListener(event -> {
+            Person dropOverItem = event.getDropTargetItem().get();
+            if (!dropOverItem.equals(draggedItem)) {
+                gridItems.remove(draggedItem);
+                int dropIndex = gridItems.indexOf(dropOverItem)
+                        + (event.getDropLocation() == GridDropLocation.BELOW ? 1
+                                : 0);
+                gridItems.add(dropIndex, draggedItem);
+                grid.getDataProvider().refreshAll();
+            }
+        });
+
+        // end-source-example
+
+        addCard("Drag and Drop", "Row Reordering", grid);
+    }
+
+    private void createDragRowsBetweenGrids() {
+        // begin-source-example
+        // source-example-heading: Drag Rows Between Grids
+
+        Grid<Person> grid = new Grid<>(Person.class);
+        Grid<Person> grid2 = new Grid<>(Person.class);
+
+        ComponentEventListener<GridDragStartEvent<Person>> dragStartListener = event -> {
+            draggedItems = event.getDraggedItems();
+            dragSource = event.getSource();
+            grid.setDropMode(GridDropMode.BETWEEN);
+            grid2.setDropMode(GridDropMode.BETWEEN);
+        };
+
+        ComponentEventListener<GridDragEndEvent<Person>> dragEndListener = event -> {
+            draggedItems = null;
+            dragSource = null;
+            grid.setDropMode(null);
+            grid2.setDropMode(null);
+        };
+
+        ComponentEventListener<GridDropEvent<Person>> dropListener = event -> {
+            Optional<Person> target = event.getDropTargetItem();
+            if (target.isPresent() && draggedItems.contains(target.get())) {
+                return;
+            }
+
+            // Remove the items from the source grid
+            ListDataProvider<Person> sourceDataProvider = (ListDataProvider<Person>) dragSource
+                    .getDataProvider();
+            List<Person> sourceItems = new ArrayList<>(
+                    sourceDataProvider.getItems());
+            sourceItems.removeAll(draggedItems);
+            dragSource.setItems(sourceItems);
+
+            // Add dragged items to the target Grid
+            Grid<Person> targetGrid = event.getSource();
+            ListDataProvider<Person> targetDataProvider = (ListDataProvider<Person>) targetGrid
+                    .getDataProvider();
+            List<Person> targetItems = new ArrayList<>(
+                    targetDataProvider.getItems());
+
+            int index = target.map(person -> targetItems.indexOf(person)
+                    + (event.getDropLocation() == GridDropLocation.BELOW ? 1
+                            : 0))
+                    .orElse(0);
+            targetItems.addAll(index, draggedItems);
+            targetGrid.setItems(targetItems);
+        };
+
+        PersonService personService = new PersonService();
+
+        grid.setItems(personService.fetch(0, 5));
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        grid.addDropListener(dropListener);
+        grid.addDragStartListener(dragStartListener);
+        grid.addDragEndListener(dragEndListener);
+        grid.setRowsDraggable(true);
+        grid.setColumns("firstName", "lastName");
+
+        grid2.setItems(personService.fetch(5, 1));
+        grid2.setSelectionMode(Grid.SelectionMode.MULTI);
+        grid2.addDropListener(dropListener);
+        grid2.addDragStartListener(dragStartListener);
+        grid2.addDragEndListener(dragEndListener);
+        grid2.setRowsDraggable(true);
+        grid2.setColumns("firstName", "lastName");
+
+        // end-source-example
+
+        HorizontalLayout hl = new HorizontalLayout(grid, grid2);
+
+        addCard("Drag and Drop", "Drag Rows Between Grids", hl);
+    }
+
+    private void createDropLocations() {
+
+        // begin-source-example
+        // source-example-heading: Drop Location
+        PersonService personService = new PersonService();
+
+        TreeGrid<Person> treeGrid = new TreeGrid<>();
+        Grid<Person> grid = new Grid<>(Person.class);
+        grid.setSelectionMode(SelectionMode.NONE);
+        grid.setItems(personService.fetch(0, 50));
+
+        grid.addDragStartListener(event -> {
+            draggedItem = event.getDraggedItems().get(0);
+            /*
+             * This enables dropping in between or on top of the existing grid
+             * rows.
+             */
+            treeGrid.setDropMode(GridDropMode.ON_TOP_OR_BETWEEN);
+        });
+
+        grid.addDragEndListener(event -> {
+            draggedItem = null;
+            treeGrid.setDropMode(null);
+        });
+        grid.setColumns("firstName", "lastName", "phoneNumber");
+        grid.setRowsDraggable(true);
+
+        TreeData<Person> td = new TreeData<>();
+        td.addItems(null, personService.fetch(51, 2));
+
+        treeGrid.setDataProvider(new TreeDataProvider<Person>(td));
+        treeGrid.addHierarchyColumn(Person::getfirstName)
+                .setHeader("firstName");
+        treeGrid.addColumn(Person::getLastName).setHeader("lastName");
+        treeGrid.addColumn(Person::getPhoneNumber).setHeader("phoneNumber");
+        treeGrid.setSelectionMode(SelectionMode.NONE);
+        treeGrid.addDropListener(event -> {
+            // Remove the items from the source grid
+            ListDataProvider<Person> sourceDataProvider = (ListDataProvider<Person>) grid
+                    .getDataProvider();
+            Collection<Person> sourceItems = sourceDataProvider.getItems();
+            sourceItems.remove(draggedItem);
+            grid.setItems(sourceItems);
+
+            // Add the item to target grid
+            Person dropOverItem = event.getDropTargetItem().get();
+            if (GridDropLocation.ON_TOP == event.getDropLocation()) {
+                td.addItem(dropOverItem, draggedItem);
+            } else {
+                Person parent = td.getParent(dropOverItem);
+                td.addItem(parent, draggedItem);
+
+                List<Person> siblings = td.getChildren(parent);
+                int dropIndex = siblings.indexOf(dropOverItem)
+                        + (event.getDropLocation() == GridDropLocation.BELOW ? 1
+                                : 0);
+                td.moveAfterSibling(draggedItem,
+                        dropIndex > 0 ? siblings.get(dropIndex - 1) : null);
+            }
+
+            treeGrid.getDataProvider().refreshAll();
+
+        });
+
+        // end-source-example
+
+        HorizontalLayout hl = new HorizontalLayout(grid, treeGrid);
+
+        addCard("Drag and Drop", "Drop Location", hl);
+    }
+
+    private void createDragData() {
+
+        // begin-source-example
+        // source-example-heading: Custom Drag Data
+
+        // Operating with the drag event text data enables you to process drag
+        // and drop between different application windows. The default payload
+        // of the drag event is generated from the visible grid columns and
+        // items as a line break separated list of tab-separated values.
+        //
+        // Hint: Try dragging the grid's rows to the grid of the same demo but
+        // on another browser window.
+
+        PersonService personService = new PersonService();
+
+        Grid<Person> grid = new Grid<>(Person.class);
+        List<Person> persons = new ArrayList<>(personService.fetch(0, 50));
+        List<Person> availablePersons = new ArrayList<>(
+                personService.fetch(0, 50));
+
+        grid.setItems(persons);
+
+        grid.addDragStartListener(event -> {
+            draggedItems = event.getDraggedItems();
+            grid.setDropMode(null);
+        });
+        grid.setColumns("firstName", "lastName", "phoneNumber");
+        grid.setRowsDraggable(true);
+        grid.setDropMode(GridDropMode.BETWEEN);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+
+        // Generate the drag data to consist of person IDs. This makes it
+        // easier for the receiving grid to interpret the data drop.
+        grid.setDragDataGenerator("text",
+                person -> String.valueOf(person.getId()));
+
+        grid.addDropListener(event -> {
+            String text = event.getDataTransferText();
+            // The drag data tokens are separated by line breaks
+            Arrays.asList(text.split("\n")).forEach(idString -> {
+                Optional<Person> matchOptional = availablePersons
+                        .stream().filter(person -> String
+                                .valueOf(person.getId()).equals(idString))
+                        .findFirst();
+
+                matchOptional.ifPresent(match -> {
+                    int index = event.getDropTargetItem().map(person -> persons
+                            .indexOf(person)
+                            + (event.getDropLocation() == GridDropLocation.BELOW
+                                    ? 1
+                                    : 0))
+                            .orElse(0);
+                    persons.add(index, match.clone());
+                });
+            });
+            grid.getDataProvider().refreshAll();
+        });
+
+        grid.addDragEndListener(event -> {
+            // Additional validation logic might be needed to verify
+            // the drop was successful (on another browser window).
+            // The demo just removes the items regardless of whether the drop
+            // was legal.
+            persons.removeAll(draggedItems);
+            grid.getDataProvider().refreshAll();
+            grid.setDropMode(GridDropMode.BETWEEN);
+        });
+
+        // end-source-example
+
+        addCard("Drag and Drop", "Custom Drag Data", grid);
+    }
+
+    private void createDragDropFilters() {
+        // begin-source-example
+        // source-example-heading: Drag and Drop Filters
+        PersonService personService = new PersonService();
+
+        TreeGrid<Person> grid = new TreeGrid<>();
+        TreeData<Person> td = new TreeData<>();
+
+        // Disallow dragging supervisors
+        grid.setDragFilter(person -> td.getParent(person) != null);
+
+        grid.setDropFilter(person ->
+        // Only support dropping on top of supervisors
+        td.getRootItems().contains(person)
+                // Don't allow more than 4 subordinates
+                && td.getChildren(person).size() < 4
+                // Disallow dropping on own supervisor
+                && !td.getChildren(person).contains(draggedItem));
+
+        grid.addHierarchyColumn(Person::getfirstName).setHeader("First name");
+        grid.addColumn(Person::getLastName).setHeader("Last name");
+        grid.addColumn(Person::getPhoneNumber).setHeader("Phone");
+        grid.setRowsDraggable(true);
+        grid.setSelectionMode(Grid.SelectionMode.NONE);
+
+        td.addItems(null, personService.fetch(0, 3));
+        td.addItems(td.getRootItems().get(0), personService.fetch(3, 3));
+        td.addItems(td.getRootItems().get(1), personService.fetch(6, 2));
+
+        grid.setDataProvider(new TreeDataProvider<Person>(td));
+        grid.expand(td.getRootItems());
+
+        grid.addDragStartListener(event -> {
+            draggedItem = event.getDraggedItems().get(0);
+            grid.setDropMode(GridDropMode.ON_TOP);
+
+            // Refresh all related items to get the drop filter run for them
+            //
+            // For flat grids, dataProvider.refreshAll() does the job well but
+            // for a TreeGrid with nodes expanded, it's more efficient to
+            // refresh the items individually
+            td.getRootItems().forEach(supervisor -> {
+                grid.getDataProvider().refreshItem(supervisor);
+
+                td.getChildren(supervisor).forEach(subordinate -> grid
+                        .getDataProvider().refreshItem(subordinate));
+            });
+
+        });
+
+        grid.addDragEndListener(event -> {
+            draggedItem = null;
+            grid.setDropMode(null);
+        });
+
+        grid.addDropListener(event -> {
+            event.getDropTargetItem().ifPresent(supervisor -> {
+                // Remove the item from it's previous supervisor's subordinates
+                // list
+                td.removeItem(draggedItem);
+
+                // Close empty parents to avoid a TreeGrid issue
+                td.getRootItems().forEach(root -> {
+                    if (td.getChildren(root).isEmpty()) {
+                        grid.collapse(root);
+                    }
+                });
+
+                // Add the item to the target supervisor's subordinates list
+                td.addItem(supervisor, draggedItem);
+
+                grid.getDataProvider().refreshAll();
+            });
+        });
+
+        // end-source-example
+        VerticalLayout vl = new VerticalLayout(new Label("Supervisors"), grid);
+
+        addCard("Drag and Drop", "Drag and Drop Filters", vl);
     }
 
     private List<Person> getItems() {

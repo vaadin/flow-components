@@ -972,5 +972,27 @@ window.Vaadin.Flow.gridConnector = {
 
         return (style.row || '') + ' ' + (style[columnId] || '');
     }
+    
+    grid.dropFilter = function(rowData) {
+        return !rowData.item.dropDisabled;
+    }
+    
+    grid.dragFilter = function(rowData) {
+        return !rowData.item.dragDisabled;
+    }
+    
+    const __fdd = grid.formatDragData;
+    grid.formatDragData = items => {
+        if (grid.__dragDataTypes) {
+            return grid.__dragDataTypes.map(type => {
+                return {
+                    type,
+                    data: items.map(item => item.dragData[type]).join('\n')
+                };
+            });
+        } else {
+            return __fdd.call(grid, items);
+    	}
+    }
   }
 }
