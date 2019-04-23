@@ -38,14 +38,15 @@ public class GridProView extends DemoView {
          * the same functionality on top of basic one.
          * It is possible to use Grid's API in Grid Pro.
          */
-        grid.addColumn(Person::getName).setHeader("NAME");
+        grid.addColumn(Person::getName).setHeader("Name");
 
         /*
          * Lambda provided as a parameter for .text() method is a callback function that will
          * be called when item is changed.
          */
         grid.addEditColumn(Person::getEmail)
-                .text((item, newValue) -> {})
+                .text((item, newValue) ->
+                        item.setEmail(newValue))
                 .setHeader("Email (editable)");
         // end-source-example
 
@@ -59,11 +60,13 @@ public class GridProView extends DemoView {
         grid.setItems(createItems());
 
         grid.addEditColumn(Person::getName, "name")
-                .text((item, newValue) -> item.setName(newValue))
+                .text((item, newValue) ->
+                        item.setName(newValue))
                 .setHeader("Name (editable)");
 
         grid.addEditColumn(Person::isSubscriber)
-                .checkbox((item, newValue) -> {})
+                .checkbox((item, newValue) ->
+                        item.setSubscriber(newValue))
                 .setHeader("Subscriber (editable)");
         // end-source-example
 
@@ -81,11 +84,13 @@ public class GridProView extends DemoView {
          * "text", "checkbox" or "select" and provide needed parameters.
          */
         grid.addEditColumn(Person::getName)
-                .text((item, newValue) -> {})
+                .text((item, newValue) ->
+                        item.setName(newValue))
                 .setHeader("Name (editable)");
 
         grid.addEditColumn(Person::isSubscriber)
-                .checkbox((item, newValue) -> {})
+                .checkbox((item, newValue) ->
+                        item.setSubscriber(newValue))
                 .setHeader("Subscriber (editable)");
 
         List<String> optionsList = new ArrayList<>();
@@ -93,7 +98,8 @@ public class GridProView extends DemoView {
         optionsList.add("bla-bla@gmail.com");
         optionsList.add("super-mail@gmail.com");
         grid.addEditColumn(Person::getEmail)
-                .select((item, newValue) -> {}, optionsList)
+                .select((item, newValue) ->
+                        item.setEmail(newValue), optionsList)
                 .setHeader("Email (editable)");
         // end-source-example
 
@@ -106,7 +112,7 @@ public class GridProView extends DemoView {
         GridPro<Person> grid = new GridPro<>();
         grid.setItems(createItems());
 
-        grid.addColumn(Person::getName).setHeader("NAME");
+        grid.addColumn(Person::getName).setHeader("Name");
 
         /*
          * Using ComponentRenderer to create a custom representation of the boolean value.
@@ -115,7 +121,8 @@ public class GridProView extends DemoView {
             new Span(person.isSubscriber() ? "Yes" : "No")
         );
         grid.addEditColumn(Person::isSubscriber, booleanRenderer)
-                .checkbox((item, newValue) -> {})
+                .checkbox((item, newValue) ->
+                        item.setSubscriber(newValue))
                 .setHeader("Subscriber (editable)");
         // end-source-example
 
@@ -128,12 +135,13 @@ public class GridProView extends DemoView {
         GridPro<Person> grid = new GridPro<>();
         grid.setItems(createItems());
 
-        grid.addColumn(Person::getName).setHeader("NAME");
+        grid.addColumn(Person::getName).setHeader("Name");
 
         Input customInput = new Input();
         grid.addEditColumn(Person::getEmail)
-                .custom(customInput, (item, newValue) -> {})
-                .setHeader("Department")
+                .custom(customInput, (item, newValue) ->
+                        item.setEmail(newValue))
+                .setHeader("Email")
                 .setWidth("300px");
         // end-source-example
 
@@ -152,15 +160,18 @@ public class GridProView extends DemoView {
         grid.setEnterNextRow(true);
 
         grid.addEditColumn(Person::getName)
-                .text((item, newValue) -> {})
+                .text((item, newValue) ->
+                        item.setName(newValue))
                 .setHeader("Name (editable)");
 
         grid.addEditColumn(Person::getEmail)
-                .text((item, newValue) -> {})
+                .text((item, newValue) ->
+                        item.setEmail(newValue))
                 .setHeader("Email (editable)");
 
         grid.addEditColumn(Person::isSubscriber)
-                .checkbox((item, newValue) -> {})
+                .checkbox((item, newValue) ->
+                        item.setSubscriber(newValue))
                 .setHeader("Subscriber (editable)");
         // end-source-example
 
@@ -179,15 +190,18 @@ public class GridProView extends DemoView {
         grid.setSingleCellEdit(true);
 
         grid.addEditColumn(Person::getName)
-                .text((item, newValue) -> {})
+                .text((item, newValue) ->
+                        item.setName(newValue))
                 .setHeader("Name (editable)");
 
         grid.addEditColumn(Person::getEmail)
-                .text((item, newValue) -> {})
+                .text((item, newValue) ->
+                        item.setEmail(newValue))
                 .setHeader("Email (editable)");
 
         grid.addEditColumn(Person::isSubscriber)
-                .checkbox((item, newValue) -> {})
+                .checkbox((item, newValue) ->
+                        item.setSubscriber(newValue))
                 .setHeader("Subscriber (editable)");
         // end-source-example
 
