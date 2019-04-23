@@ -22,6 +22,7 @@ package com.vaadin.flow.component.applayout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.HtmlImport;
 
 /**
@@ -30,5 +31,5 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  */
 @Tag("vaadin-drawer-toggle")
 @HtmlImport("frontend://bower_components/vaadin-app-layout/src/vaadin-drawer-toggle.html")
-public class DrawerToggle extends Component {
+public class DrawerToggle extends Button {
 }

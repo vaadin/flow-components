@@ -143,7 +143,21 @@ public class AppLayout extends Component implements RouterLayout {
      * @throws NullPointerException if any of the components is null or if the components array is null.
      */
     public void addToNavbar(Component... components) {
-        addToSlot("navbar", components);
+        final boolean touchOptimized = false;
+        addToNavbar(touchOptimized, components);
+    }
+
+    /**
+     * Adds the components to the <em>navbar</em> slot of this AppLayout.
+     *
+     * @param touchOptimized if true, the components will be moved to the bottom navbar area on mobile devices.
+     * @param components Components to add to the navbar slot.
+     * @throws NullPointerException if any of the components is null or if the components array is null.
+     */
+    public void addToNavbar(boolean touchOptimized, Component... components) {
+        final String slot =
+            "navbar" + (touchOptimized ? " touch-optimized" : "");
+        addToSlot(slot, components);
     }
 
     /**

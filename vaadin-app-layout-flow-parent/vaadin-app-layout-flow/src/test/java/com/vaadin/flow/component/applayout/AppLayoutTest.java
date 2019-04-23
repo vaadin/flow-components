@@ -67,6 +67,25 @@ public class AppLayoutTest {
     }
 
     @Test
+    public void addToNavbarTouchOptimizedTrue() {
+        final boolean touchOptimized = true;
+        addToNavbarTouchOptimized(touchOptimized,"navbar touch-optimized");
+    }
+
+    @Test
+    public void addToNavbarTouchOptimizedFalse() {
+        final boolean touchOptimized = false;
+        addToNavbarTouchOptimized(touchOptimized,"navbar");
+    }
+
+    private void addToNavbarTouchOptimized(boolean touchOptimized, String expectedSlot) {
+        final Component component = new Div();
+        systemUnderTest.addToNavbar(touchOptimized, component);
+        assertEquals(expectedSlot, component.getElement().getAttribute("slot"));
+        assertEquals(systemUnderTest, getParent(component));
+    }
+
+    @Test
     public void removeContent() {
         testRemoval(systemUnderTest::setContent);
         assertNull(systemUnderTest.getContent());
@@ -80,6 +99,20 @@ public class AppLayoutTest {
     @Test
     public void removeNavbar() {
         testRemoval(systemUnderTest::addToNavbar);
+    }
+
+    @Test
+    public void removeNavbarTouchOptimizedTrue() {
+        final boolean touchOptimized = true;
+        testRemoval(component -> systemUnderTest
+            .addToNavbar(touchOptimized, component));
+    }
+
+    @Test
+    public void removeNavbarTouchOptimizedFalse() {
+        final boolean touchOptimized = false;
+        testRemoval(component -> systemUnderTest
+            .addToNavbar(touchOptimized, component));
     }
 
     private void testRemoval(Consumer<Component> adder) {
