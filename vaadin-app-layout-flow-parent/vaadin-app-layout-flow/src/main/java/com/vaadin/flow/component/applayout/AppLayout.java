@@ -88,10 +88,11 @@ public class AppLayout extends Component implements RouterLayout {
     }
 
     /**
-     * Controls whether the drawer is visible or not.
+     * Server-side API for showing and hiding the drawer.
      *
      * @param drawerOpened new value for the drawerOpened property.
      * @see #isDrawerOpened
+     * @see DrawerToggle for a component that allows the user to open and close the drawer.
      */
     public void setDrawerOpened(boolean drawerOpened) {
         drawerOpenedProperty.set(this, drawerOpened);
