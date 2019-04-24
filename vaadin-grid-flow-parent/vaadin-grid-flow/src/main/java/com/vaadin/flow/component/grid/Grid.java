@@ -415,6 +415,51 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
 
         /**
+         * Enables or disables automatic width for this column.
+         * <p>
+         * Automatically sets the width of the column based on the column
+         * contents when this is set to {@code true}.
+         * <p>
+         * For performance reasons the column width is calculated automatically
+         * only once when the grid items are rendered for the first time and the
+         * calculation only considers the rows which are currently rendered in
+         * DOM (a bit more than what is currently visible). If the grid is
+         * scrolled, or the cell content changes, the column width might not
+         * match the contents anymore.
+         * <p>
+         * Hidden columns are ignored in the calculation and their widths are
+         * not automatically updated when you show a column that was initially
+         * hidden.
+         * <p>
+         * You can manually trigger the auto sizing behavior again by calling
+         * {@link Grid#recalculateColumnWidths()}.
+         * <p>
+         * The column width may still grow larger when {@code flexGrow} is not
+         * 0.
+         *
+         * @see Grid#recalculateColumnWidths()
+         * @see Column#setFlexGrow
+         *
+         * @param autoWidth
+         *            whether to enable or disable automatic width on this
+         *            column
+         * @return this column, for method chaining
+         */
+        public Column<T> setAutoWidth(boolean autoWidth) {
+            getElement().setProperty("autoWidth", autoWidth);
+            return this;
+        }
+
+        /**
+         * Gets this column's auto width state.
+         *
+         * @return whether this column has automatic width enabled
+         */
+        public boolean isAutoWidth() {
+            return getElement().getProperty("autoWidth", false);
+        }
+
+        /**
          * Sets the user-defined identifier to map this column. The key can be
          * used to fetch the column later with
          * {@link Grid#getColumnByKey(String)}.
@@ -3168,6 +3213,16 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 "Class name generator can not be null");
         this.classNameGenerator = classNameGenerator;
         getDataCommunicator().reset();
+    }
+
+    /**
+     * Updates the {@code width} of all columns which have {@code autoWidth} set
+     * to {@code true}.
+     *
+     * @see Column#setAutoWidth(boolean)
+     */
+    public void recalculateColumnWidths() {
+        getElement().callFunction("recalculateColumnWidths");
     }
 
     /**
