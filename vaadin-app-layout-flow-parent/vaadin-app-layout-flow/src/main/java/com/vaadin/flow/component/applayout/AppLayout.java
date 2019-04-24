@@ -29,6 +29,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.router.RouterLayout;
 
+import java.util.Objects;
+
 /**
  * Server-side component for the {@code <vaadin-app-layout>} element.
  * Provides a quick and easy way to get a common application layout.
@@ -36,8 +38,8 @@ import com.vaadin.flow.router.RouterLayout;
 @Tag("vaadin-app-layout")
 @HtmlImport("frontend://bower_components/vaadin-app-layout/src/vaadin-app-layout.html")
 public class AppLayout extends Component implements RouterLayout {
-    private static final PropertyDescriptor<Boolean, Boolean> drawerFirstProperty = PropertyDescriptors
-        .propertyWithDefault("drawerFirst", false);
+    private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
+        .propertyWithDefault("primarySection", Section.NAVBAR.toWebcomponentValue());
     private static final PropertyDescriptor<Boolean, Boolean> drawerOpenedProperty = PropertyDescriptors
         .propertyWithDefault("drawerOpened", true);
     private static final PropertyDescriptor<Boolean, Boolean> overlayProperty = PropertyDescriptors
@@ -46,26 +48,28 @@ public class AppLayout extends Component implements RouterLayout {
     private Component content;
 
     /**
-     * @see #setDrawerFirst(boolean)
-     * @return value for the drawerFirst property. Default is {@code false}.
+     * @see #setPrimarySection(Section)
+     * @return value for the primarySection property. Default is {@link Section#NAVBAR}.
      */
-    @Synchronize("drawer-first-changed")
-    public boolean isDrawerFirst() {
-        return drawerFirstProperty.get(this);
+    @Synchronize("primary-section-changed")
+    public Section getPrimarySection() {
+        return Section.fromWebcomponentValue(primarySectionProperty.get(this));
     }
 
     /**
-     * Defines how the navbar and the drawer will interact with each other on desktop view when the drawer is opened.
+     * Defines whether navbar or drawer will come first visually.
      *
      * <ul>
-     * <li>By default, the navbar takes the full available width and moves the drawer down.</li>
-     * <li>If set to {@code true}, then the drawer will move the navbar, taking the full available height.</li>
+     * <li>If {@link Section#NAVBAR}, the navbar takes the full available width and moves the drawer down. This is the default.</li>
+     * <li>If {@link Section#DRAWER} is set, then the drawer will move the navbar, taking the full available height.</li>
      * </ul>
      *
-     * @param drawerFirst new value for the drawerFirst property.
+     * @param primarySection new value for the primarySection property. Not {@code null}.
+     * @throws NullPointerException if primarySection is {@code null}.
      */
-    public void setDrawerFirst(boolean drawerFirst) {
-        drawerFirstProperty.set(this, drawerFirst);
+    public void setPrimarySection(Section primarySection) {
+        Objects.requireNonNull(primarySection, "primary section must not be null");
+        primarySectionProperty.set(this, primarySection.toWebcomponentValue());
     }
 
     /**
@@ -228,6 +232,22 @@ public class AppLayout extends Component implements RouterLayout {
     private void remove(Component component) {
         if (component != null) {
             component.getElement().removeFromParent();
+        }
+    }
+
+    /**
+     * Sections in the component that can be used as primary.
+     * @see #setPrimarySection(Section)
+     */
+    public enum Section {
+        NAVBAR, DRAWER;
+
+        public String toWebcomponentValue() {
+            return this.name().toLowerCase();
+        }
+
+        public static Section fromWebcomponentValue(String webcomponentValue) {
+            return webcomponentValue != null ? valueOf(webcomponentValue.toUpperCase()) : null;
         }
     }
 }
