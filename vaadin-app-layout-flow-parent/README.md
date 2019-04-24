@@ -14,7 +14,7 @@ Add App Layout to your project:
   <dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-app-layout-flow</artifactId>
-    <version>1.0.3</version>
+    <version>2.0.0.alpha2</version>
   </dependency>
 </dependencies>
 ```
@@ -22,12 +22,27 @@ Add App Layout to your project:
 ### Basic Use
 
 ```java
-public class AppLayoutView extends AbstractAppRouterLayout {
-    @Override
-    protected void configure(AppLayout appLayout, AppLayoutMenu appLayoutMenu) {
-        appLayout.setBranding(new Span("App Name").getElement());
-        appLayoutMenu.addMenuItem(new AppLayoutMenuItem("About Company", "about"));
-    }
+@BodySize
+@Theme(Lumo.class)
+public class AppRouterLayout extends AppLayout {
+    
+     {
+         final DrawerToggle drawerToggle = new DrawerToggle();
+         final RouterLink home = new RouterLink("Home", HomeView.class);
+         final RouterLink about = new RouterLink("About Company", AboutView.class);
+         final VerticalLayout layout = new VerticalLayout(home, about);
+         addToDrawer(layout);
+         addToNavbar(drawerToggle);
+     }
+
 }
-/* Annotate AboutPage with @ParentLayout(AppLayoutView.class) */
+
+@Route(value = "", layout = AppRouterLayout.class)
+public class HomeView extends Div {
+}
+
+@Route(value = "about", layout = AppRouterLayout.class)
+public class AboutView extends Div {
+}
+
 ```
