@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2018 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,17 +15,20 @@
  */
 package com.vaadin.flow.component.button;
 
-import javax.annotation.Generated;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.ClickNotifier;
-import com.vaadin.flow.component.HasText;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasTheme;
-import java.util.stream.Stream;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Generated;
+
+import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -97,22 +100,23 @@ import com.vaadin.flow.dom.Element;
  * </tbody>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.2-SNAPSHOT",
         "WebComponent: Vaadin.ButtonElement#2.1.0", "Flow#1.2-SNAPSHOT" })
 @Tag("vaadin-button")
-@HtmlImport("frontend://bower_components/vaadin-button/src/vaadin-button.html")
+@NpmPackage(value = "@vaadin/vaadin-button", version = "2.1.0")
+@JsModule("@vaadin/vaadin-button/vaadin-button.js")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component
         implements HasStyle, ClickNotifier<R>, HasText, Focusable<R>, HasTheme {
 
     /**
      * Adds theme variants to the component.
-     * 
+     *
      * @param variants
      *            theme variants to add
      */
@@ -124,7 +128,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
 
     /**
      * Removes theme variants from the component.
-     * 
+     *
      * @param variants
      *            theme variants to remove
      */
@@ -144,7 +148,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code autofocus} property from the webcomponent
      */
     protected boolean isAutofocusBoolean() {
@@ -158,7 +162,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * <p>
      * Specify that this control should have input focus when the page loads.
      * </p>
-     * 
+     *
      * @param autofocus
      *            the boolean value to set
      */
@@ -176,7 +180,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code disabled} property from the webcomponent
      */
     protected boolean isDisabledBoolean() {
@@ -190,7 +194,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * <p>
      * If true, the user cannot interact with this element.
      * </p>
-     * 
+     *
      * @param disabled
      *            the boolean value to set
      */
@@ -201,14 +205,14 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
     /**
      * Adds the given components as children of this component at the slot
      * 'prefix'.
-     * 
+     *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToPrefix(Component... components) {
@@ -221,14 +225,14 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
     /**
      * Adds the given components as children of this component at the slot
      * 'suffix'.
-     * 
+     *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToSuffix(Component... components) {
@@ -240,7 +244,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
 
     /**
      * Removes the given child components from this component.
-     * 
+     *
      * @param components
      *            The components to remove.
      * @throws IllegalArgumentException
@@ -271,7 +275,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
 
     /**
      * Sets the given string as the content of this component.
-     * 
+     *
      * @param text
      *            the text content to set
      * @see HasText#setText(String)
