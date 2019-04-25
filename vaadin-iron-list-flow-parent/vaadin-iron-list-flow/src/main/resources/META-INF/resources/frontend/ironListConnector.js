@@ -1,11 +1,14 @@
+import {Debouncer} from '@polymer/polymer/lib/utils/debounce.js';
+import {timeOut} from '@polymer/polymer/lib/utils/async.js';
+
 window.Vaadin.Flow.ironListConnector = {
   initLazy: function(list) {
-      
+
     // Check whether the connector was already initialized for the Iron list
     if (list.$connector){
       return;
     }
-      
+
     const extraItemsBuffer = 20;
 
     let lastRequestedRange = [0, 0];
@@ -14,13 +17,13 @@ window.Vaadin.Flow.ironListConnector = {
     list.$connector.placeholderItem = {__placeholder: true};
 
     const updateRequestedItem = function() {
-        /* 
+        /*
          * TODO Iron list seems to do a small index adjustment after scrolling
          * has stopped. This causes a redundant request to be sent to make a
          * corresponding minimal change to the buffer. We should avoid these
          * requests by making the logic skip doing a request if the available
-         * buffer is within some tolerance compared to the requested buffer.   
-         */ 
+         * buffer is within some tolerance compared to the requested buffer.
+         */
         let firstNeededItem = list._virtualStart;
         let lastNeededItem = list._virtualEnd;
 
@@ -33,12 +36,12 @@ window.Vaadin.Flow.ironListConnector = {
           list.$server.setRequestedRange(first, count);
         }
     }
-    
+
     let requestDebounce;
     const scheduleUpdateRequest = function() {
-        requestDebounce = Polymer.Debouncer.debounce(
+        requestDebounce = Debouncer.debounce(
                 requestDebounce,
-                  Polymer.Async.timeOut.after(10),
+                  timeOut.after(10),
                   updateRequestedItem);
     }
 
@@ -47,7 +50,7 @@ window.Vaadin.Flow.ironListConnector = {
      * If this is not done, the component will keep looking ahead through the
      * array until finding enough present items to render. In our case, that's
      * a really slow way of achieving nothing since the rest of the array is
-     * empty.  
+     * empty.
      */
     const originalAssign = list._assignModels;
     list._assignModels = function() {
@@ -67,7 +70,7 @@ window.Vaadin.Flow.ironListConnector = {
          * TODO: Keep track of placeholder items in the "active" range and
          * avoid deleting them so that the next pass will be faster. Instead,
          * the end of each pass should only delete placeholders that are no
-         * longer needed. 
+         * longer needed.
          */
         for(let i = 0; i < tempItems.length; i++) {
             delete list.items[start + tempItems[i]];
@@ -97,7 +100,7 @@ window.Vaadin.Flow.ironListConnector = {
         const oldItems = list.items;
         const mapByKey = {};
         let leftToUpdate = items.length;
-        
+
         for (let i = 0; i< items.length; i++) {
             const item = items[i];
             mapByKey[item.key] = item;
