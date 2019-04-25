@@ -26,7 +26,6 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -78,7 +77,7 @@ import elemental.json.JsonValue;
 @NpmPackage(value = "@polymer/iron-list", version = "3.0.2")
 @JsModule("@polymer/iron-list/iron-list.js")
 @JsModule("frontend://flow-component-renderer.js")
-@JavaScript("frontend://ironListConnector.js")
+@JsModule("frontend://ironListConnector.js")
 @StyleSheet("frontend://ironListStyles.css")
 public class IronList<T> extends Component implements HasDataProvider<T>,
         HasStyle, HasSize, Focusable<IronList<T>> {
