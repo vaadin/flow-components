@@ -1,7 +1,12 @@
-<link rel="import" href="../bower_components/polymer/polymer-element.html">
+import {PolymerElement} from '@polymer/polymer/polymer-element.js';
+import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+import '@vaadin/vaadin-accordion/vaadin-accordion.js';
+import '@vaadin/vaadin-text-field/vaadin-text-field.js';
+import '@vaadin/vaadin-ordered-layout/vaadin-vertical-layout.js';
 
-<dom-module id="accordion-app">
-  <template>
+class AccordionApp extends PolymerElement {
+  static get template() {
+    return html`
     <style>
       :host {
         height: 100%;
@@ -37,17 +42,11 @@
     </vaadin-accordion>
 
     <vaadin-vertical-layout id="events"></vaadin-vertical-layout>
-  </template>
+`;
+  }
+    static get is() {
+      return 'accordion-app'
+  }
+}
 
-  <script>
-    (function() {
-      class AccordionApp extends Polymer.Element {
-        static get is() {
-          return 'accordion-app';
-        }
-      }
-
-      customElements.define(AccordionApp.is, AccordionApp);
-    })();
-  </script>
-</dom-module>
+customElements.define(AccordionApp.is, AccordionApp);

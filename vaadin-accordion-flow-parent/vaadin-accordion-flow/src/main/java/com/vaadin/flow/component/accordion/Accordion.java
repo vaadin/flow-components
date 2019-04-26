@@ -1,5 +1,9 @@
 package com.vaadin.flow.component.accordion;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
+
 /*
  * Copyright 2000-2019 Vaadin Ltd.
  *
@@ -25,19 +29,17 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalInt;
-
 /**
- * Accordion is a a vertically stacked set of expandable panels.
- * Only one panel can be opened at a time.
+ * Accordion is a a vertically stacked set of expandable panels. Only one panel
+ * can be opened at a time.
  */
 @Tag("vaadin-accordion")
-@HtmlImport("frontend://bower_components/vaadin-accordion/src/vaadin-accordion.html")
+@NpmPackage(value = "@vaadin/vaadin-accordion", version = "1.0.0")
+@JsModule("@vaadin/vaadin-accordion/vaadin-accordion.js")
 public class Accordion extends Component implements HasSize {
 
     private static final String OPENED_PROPERTY = "opened";
@@ -46,8 +48,10 @@ public class Accordion extends Component implements HasSize {
     /**
      * Adds a panel created from the given title and content.
      *
-     * @param summary the title of the panel
-     * @param content the content of th panel
+     * @param summary
+     *            the title of the panel
+     * @param content
+     *            the content of th panel
      * @return the panel created and added
      */
     public AccordionPanel add(String summary, Component content) {
@@ -58,7 +62,8 @@ public class Accordion extends Component implements HasSize {
     /**
      * Adds a panel.
      *
-     * @param panel the non-null panel to be added
+     * @param panel
+     *            the non-null panel to be added
      * @return the added panel
      */
     public AccordionPanel add(AccordionPanel panel) {
@@ -70,7 +75,8 @@ public class Accordion extends Component implements HasSize {
     /**
      * Removes a panel.
      *
-     * @param panel the non-null panel to be removed
+     * @param panel
+     *            the non-null panel to be removed
      */
     public void remove(AccordionPanel panel) {
         Objects.requireNonNull(panel, "The panel to be removed cannot be null");
@@ -80,26 +86,30 @@ public class Accordion extends Component implements HasSize {
     /**
      * Removes a panel based on the content
      *
-     * @param content the non-null content of the panel to be removed
+     * @param content
+     *            the non-null content of the panel to be removed
      */
     public void remove(Component content) {
-        Objects.requireNonNull(content, "The content of the panel to be removed cannot be null");
+        Objects.requireNonNull(content,
+                "The content of the panel to be removed cannot be null");
 
         if (content instanceof AccordionPanel) {
             remove((AccordionPanel) content);
             return;
         }
 
-
         if (content.getParent().isPresent()) {
-            final Optional<Component> grandParent = content.getParent().get().getParent();
-            if (grandParent.isPresent() && grandParent.get() instanceof  AccordionPanel) {
+            final Optional<Component> grandParent = content.getParent().get()
+                    .getParent();
+            if (grandParent.isPresent()
+                    && grandParent.get() instanceof AccordionPanel) {
                 remove((AccordionPanel) grandParent.get());
                 return;
             }
         }
 
-        throw new IllegalArgumentException("The supplied content is not a descendant of this Accordion");
+        throw new IllegalArgumentException(
+                "The supplied content is not a descendant of this Accordion");
     }
 
     /**
@@ -112,12 +122,14 @@ public class Accordion extends Component implements HasSize {
     /**
      * Opens the panel at the specified index.
      *
-     * @param index the (positive) index of the panel to be open.
-     *              The first panel is at index zero.
+     * @param index
+     *            the (positive) index of the panel to be open. The first panel
+     *            is at index zero.
      */
     public void open(int index) {
         if (index < 0) {
-            throw new IllegalArgumentException("The index to open cannot be negative");
+            throw new IllegalArgumentException(
+                    "The index to open cannot be negative");
         }
 
         getElement().setProperty(OPENED_PROPERTY, index);
@@ -126,7 +138,8 @@ public class Accordion extends Component implements HasSize {
     /**
      * Opens the specified panel.
      *
-     * @param panel the non-null panel to be opened
+     * @param panel
+     *            the non-null panel to be opened
      */
     public void open(AccordionPanel panel) {
         Objects.requireNonNull(panel, "The panel to be opened cannot be null");
@@ -141,15 +154,18 @@ public class Accordion extends Component implements HasSize {
     @Synchronize(property = OPENED_PROPERTY, value = OPENED_CHANGED_DOM_EVENT)
     public OptionalInt getOpenedIndex() {
         final String opened = getElement().getProperty(OPENED_PROPERTY);
-        return opened == null ? OptionalInt.empty() : OptionalInt.of(Integer.valueOf(opened));
+        return opened == null ? OptionalInt.empty()
+                : OptionalInt.of(Integer.valueOf(opened));
     }
 
     /**
      * Gets the opened panel.
      *
-     * Caution should be exercised when using this method with an Accordion which along with its panels
-     * were created in a template. Such template children would by default not be children of the
-     * Accordion Flow component, thus making it possible for this method to return the wrong panel in such cases.
+     * Caution should be exercised when using this method with an Accordion
+     * which along with its panels were created in a template. Such template
+     * children would by default not be children of the Accordion Flow
+     * component, thus making it possible for this method to return the wrong
+     * panel in such cases.
      *
      * @return the opened panel.
      */
@@ -165,21 +181,27 @@ public class Accordion extends Component implements HasSize {
         return Accordion.getOpenedPanel(this, index);
     }
 
-    private static Optional<AccordionPanel> getOpenedPanel(Accordion accordion, Integer index) {
-        return index == null || index >= accordion.getChildren().count() ? Optional.empty() :
-                accordion.getElement().getChild(index).getComponent().map(AccordionPanel.class::cast);
+    private static Optional<AccordionPanel> getOpenedPanel(Accordion accordion,
+            Integer index) {
+        return index == null || index >= accordion.getChildren().count()
+                ? Optional.empty()
+                : accordion.getElement().getChild(index).getComponent()
+                        .map(AccordionPanel.class::cast);
     }
 
     /**
      * Registers a listener to be notified whenever a panel is opened or closed.
      *
-     * @param listener the listener to be notified
-     * @return a handle to the registered listener which could also be used to unregister it.
+     * @param listener
+     *            the listener to be notified
+     * @return a handle to the registered listener which could also be used to
+     *         unregister it.
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
 
-        return ComponentUtil.addListener(this, OpenedChangeEvent.class, listener);
+        return ComponentUtil.addListener(this, OpenedChangeEvent.class,
+                listener);
     }
 
     /**
@@ -194,18 +216,23 @@ public class Accordion extends Component implements HasSize {
          * Creates a new event using the given source and indicator whether the
          * event originated from the client side or the server side.
          *
-         * @param source     the source component
-         * @param fromClient <code>true</code> if the event originated from the client
-         * @param index the index of the opened panel or null if the accordion is closed
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            <code>true</code> if the event originated from the client
+         * @param index
+         *            the index of the opened panel or null if the accordion is
+         *            closed
          */
         public OpenedChangeEvent(Accordion source, boolean fromClient,
-                                 @EventData("event.detail.value") Integer index) {
+                @EventData("event.detail.value") Integer index) {
             super(source, fromClient);
             this.index = index;
         }
 
         /**
-         * Gets the index of the opened panel or null if the accordion is closed.
+         * Gets the index of the opened panel or null if the accordion is
+         * closed.
          *
          * @return the index of the opened panel or null if closed
          */
@@ -216,9 +243,11 @@ public class Accordion extends Component implements HasSize {
         /**
          * Gets the opened panel.
          *
-         * Caution should be exercised when using this method with an Accordion which along with its panels
-         * were created in a template. Such template children would by default not be children of the
-         * Accordion Flow component, thus making it possible for this method to return the wrong panel in such cases.
+         * Caution should be exercised when using this method with an Accordion
+         * which along with its panels were created in a template. Such template
+         * children would by default not be children of the Accordion Flow
+         * component, thus making it possible for this method to return the
+         * wrong panel in such cases.
          *
          * @return the opened panel.
          */
