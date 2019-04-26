@@ -1,3 +1,6 @@
+import {GestureEventListeners} from '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
+import * as Gestures from '@polymer/polymer/lib/utils/gestures.js';
+
 window.Vaadin.Flow.contextMenuConnector = {
 
   // NOTE: This is for the TARGET component, not for the <vaadin-context-menu> itself
@@ -18,8 +21,8 @@ window.Vaadin.Flow.contextMenuConnector = {
         this.removeListener();
         this.openOnEventType = eventType;
 
-        if (Polymer.Gestures.gestures[eventType]) {
-          Polymer.Gestures.addListener(target, eventType, this.openOnHandler);
+        if (Gestures.gestures[eventType]) {
+            Gestures.addListener(target, eventType, this.openOnHandler);
         } else {
           target.addEventListener(eventType, this.openOnHandler);
         }
@@ -27,8 +30,8 @@ window.Vaadin.Flow.contextMenuConnector = {
 
       removeListener: function() {
         if (this.openOnEventType) {
-          if (Polymer.Gestures.gestures[this.openOnEventType]) {
-            Polymer.Gestures.removeListener(target, this.openOnEventType, this.openOnHandler);
+          if (Gestures.gestures[this.openOnEventType]) {
+            Gestures.removeListener(target, this.openOnEventType, this.openOnHandler);
           } else {
             target.removeEventListener(this.openOnEventType, this.openOnHandler);
           }
@@ -63,7 +66,7 @@ window.Vaadin.Flow.contextMenuConnector = {
       const container = getContainer(parent._containerNodeId);
       const items = Array.from(container.children).map(child => {
         const item = {component: child, checked: child._checked};
-        if (Vaadin.ItemElement && (child instanceof Vaadin.ItemElement) && child._containerNodeId) {
+        if (child.tagName == "VAADIN-CONTEXT-MENU-ITEM" && child._containerNodeId) {
           item.children = getChildItems(child);
         }
         return item;

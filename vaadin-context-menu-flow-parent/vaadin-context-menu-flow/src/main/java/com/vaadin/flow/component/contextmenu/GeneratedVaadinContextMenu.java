@@ -25,6 +25,8 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -140,7 +142,8 @@ import elemental.json.JsonObject;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.ContextMenuElement#4.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-context-menu")
-@HtmlImport("frontend://bower_components/vaadin-context-menu/src/vaadin-context-menu.html")
+@NpmPackage(value = "@vaadin/vaadin-context-menu", version = "4.3.4")
+@JsModule("@vaadin/vaadin-context-menu/vaadin-context-menu.js")
 public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContextMenu<R>>
         extends Component implements HasStyle, ClickNotifier<R> {
 

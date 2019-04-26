@@ -43,9 +43,6 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
         this.menu = menu;
         container = new Element("div");
         getElement().appendVirtualChild(container);
-
-        getElement().getNode().runWhenAttached(ui -> ui.getPage()
-                .addJavaScript("frontend://contextMenuConnector.js"));
     }
 
     /**
