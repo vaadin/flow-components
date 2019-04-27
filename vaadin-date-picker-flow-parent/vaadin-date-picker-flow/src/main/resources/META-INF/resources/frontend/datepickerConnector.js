@@ -1,4 +1,5 @@
 /* helper class for parsing regex from formatted date string */
+
 class FlowDatePickerPart {
     constructor(initial) {
         this.initial = initial;
@@ -16,7 +17,6 @@ class FlowDatePickerPart {
         return 0;
     }
 }
-
 window.Vaadin.Flow.datepickerConnector = {
     initLazy: function (datepicker) {
         // Check whether the connector was already initialized for the datepicker

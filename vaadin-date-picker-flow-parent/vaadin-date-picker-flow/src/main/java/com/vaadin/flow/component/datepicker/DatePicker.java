@@ -27,7 +27,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -44,7 +44,7 @@ import elemental.json.JsonObject;
  * {@link DatePickerI18n} object.
  *
  */
-@JavaScript("frontend://datepickerConnector.js")
+@JsModule("frontend://datepickerConnector.js")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation {
 
@@ -256,13 +256,15 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         this.locale = locale;
         String languageTag;
         // For ill-formed locales, Locale.toLanguageTag() will append subtag
-        // "lvariant" to it, which will cause the client side Date().toLocaleDateString()
+        // "lvariant" to it, which will cause the client side
+        // Date().toLocaleDateString()
         // fallback to the system default locale silently.
-        // This has been caught by DatePickerValidationPage::invalidLocale test when running on
+        // This has been caught by DatePickerValidationPage::invalidLocale test
+        // when running on
         // Chrome(73+)/FireFox(66)/Edge(42.17134).
-        if(!locale.toLanguageTag().contains("lvariant")){
+        if (!locale.toLanguageTag().contains("lvariant")) {
             languageTag = locale.toLanguageTag();
-        } else if (locale.getCountry().isEmpty()){
+        } else if (locale.getCountry().isEmpty()) {
             languageTag = locale.getLanguage();
         } else {
             languageTag = locale.getLanguage() + "-" + locale.getCountry();
