@@ -30,7 +30,9 @@ import org.junit.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 
@@ -260,6 +262,20 @@ public class CheckboxGroupTest {
         Set<String> newSelection = eventCapture.get().getNewSelection();
         Assert.assertTrue(newSelection.contains("foo"));
         Assert.assertTrue(newSelection.contains("bar"));
+    }
+
+    @Test // https://github.com/vaadin/vaadin-checkbox-flow/issues/81
+    public void disableParent_detachParent_notThrowing() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+
+        Div parent = new Div(checkboxGroup);
+
+        UI ui = new UI();
+        ui.add(parent);
+
+        parent.setEnabled(false);
+        ui.remove(parent);
     }
 
     private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(

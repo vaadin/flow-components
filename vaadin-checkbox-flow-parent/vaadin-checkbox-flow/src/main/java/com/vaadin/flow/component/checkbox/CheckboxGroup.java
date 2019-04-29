@@ -157,7 +157,7 @@ public class CheckboxGroup<T>
         } else {
             setDisabled(!enabled);
         }
-        refreshCheckboxes();
+        getCheckboxItems().forEach(this::updateEnabled);
     }
 
     @Override
