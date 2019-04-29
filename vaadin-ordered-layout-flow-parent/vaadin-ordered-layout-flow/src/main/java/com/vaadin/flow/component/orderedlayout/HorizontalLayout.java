@@ -20,6 +20,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
  * HorizontalLayout is a component container, which shows the subcomponents in
@@ -27,6 +29,8 @@ import com.vaadin.flow.component.dependency.HtmlImport;
  * have a predefined size - its size is defined by the components inside it.
  */
 @Tag("vaadin-horizontal-layout")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.1.0")
+@JsModule("@vaadin/vaadin-ordered-layout/vaadin-horizontal-layout.js")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-horizontal-layout.html")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent<HorizontalLayout>, ClickNotifier<HorizontalLayout> {
