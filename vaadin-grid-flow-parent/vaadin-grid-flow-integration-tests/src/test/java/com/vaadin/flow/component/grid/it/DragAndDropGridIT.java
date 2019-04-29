@@ -145,6 +145,27 @@ public class DragAndDropGridIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setSelectionDragData_dropEventHasDefaultTransferData() {
+        click("set-selection-drag-data");
+        click("ON_GRID");
+        fireDragStart(0);
+        fireDrop(0, "on-top");
+        Assert.assertEquals("0",
+                findElement(By.id("drop-data-text-message")).getText());
+    }
+
+    @Test
+    public void setSelectionDragData_dropEventHasCustomTransferData() {
+        click("set-selection-drag-data");
+        click("ON_GRID");
+        click("multiselect");
+        fireDragStart(0);
+        fireDrop(0, "on-top");
+        Assert.assertEquals("selection-drag-data",
+                findElement(By.id("drop-data-text-message")).getText());
+    }
+
+    @Test
     public void setDragFilter_draggable() {
         click("set-filters");
         fireDragStart(1);

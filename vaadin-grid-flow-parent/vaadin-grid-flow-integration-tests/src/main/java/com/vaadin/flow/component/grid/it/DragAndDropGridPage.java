@@ -16,7 +16,9 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -113,6 +115,15 @@ public class DragAndDropGridPage extends Div {
                 });
         setGeneratorsButton.setId("set-generators");
         add(setGeneratorsButton);
+
+        NativeButton setSelectionDragDataButton = new NativeButton(
+                "set selection drag data", e -> {
+                    Map<String, String> dragData = new HashMap<>();
+                    dragData.put("text", "selection-drag-data");
+                    grid.setSelectionDragDetails(-1, dragData);
+                });
+        setSelectionDragDataButton.setId("set-selection-drag-data");
+        add(setSelectionDragDataButton);
 
         NativeButton setFiltersButton = new NativeButton("set filters", e -> {
             grid.setDragFilter(item -> "1".equals(item));

@@ -56,7 +56,7 @@ public class GridDragStartEvent<T> extends ComponentEvent<Grid<T>> {
     public GridDragStartEvent(Grid<T> source, boolean fromClient,
             @EventData("event.detail") JsonObject details) {
         super(source, fromClient);
-        JsonArray items = details.getArray("items");
+        JsonArray items = details.getArray("draggedItems");
 
         draggedItems = new ArrayList<>();
         IntStream.range(0, items.length()).forEach(i -> {

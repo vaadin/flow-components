@@ -50,10 +50,10 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.component.grid.dnd.GridDropEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
@@ -3444,26 +3444,26 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * Sets the drop mode of this drop target. When set to not {@code null},
      * grid fires drop events upon data drop over the grid or the grid rows.
      * <p>
-     * When using {@link GridDropMode#ON_TOP}, and the grid is either empty or has
-     * empty space after the last row, the drop can still happen on the empty
-     * space, and the {@link GridDropEvent#getDropTargetItem()} will return an
-     * empty optional.
+     * When using {@link GridDropMode#ON_TOP}, and the grid is either empty or
+     * has empty space after the last row, the drop can still happen on the
+     * empty space, and the {@link GridDropEvent#getDropTargetItem()} will
+     * return an empty optional.
      * <p>
      * When using {@link GridDropMode#BETWEEN} or
-     * {@link GridDropMode#ON_TOP_OR_BETWEEN}, and there is at least one row in the
-     * grid, any drop after the last row in the grid will get the last row as
-     * the {@link GridDropEvent#getDropTargetItem()}. If there are no rows in
+     * {@link GridDropMode#ON_TOP_OR_BETWEEN}, and there is at least one row in
+     * the grid, any drop after the last row in the grid will get the last row
+     * as the {@link GridDropEvent#getDropTargetItem()}. If there are no rows in
      * the grid, then it will return an empty optional.
      * <p>
-     * If using {@link GridDropMode#ON_GRID}, then the drop will not happen on any
-     * row, but instead just "on the grid". The target row will not be present
-     * in this case.
+     * If using {@link GridDropMode#ON_GRID}, then the drop will not happen on
+     * any row, but instead just "on the grid". The target row will not be
+     * present in this case.
      * <p>
-     * <em>NOTE: Prefer not using a row specific {@link GridDropMode} with a grid
-     * that enables sorting. If for example a new row gets added to a specific
-     * location on drop event, it might not end up in the location of the drop
-     * but rather where the active sorting configuration prefers to place it.
-     * This behavior might feel unexpected for the users.
+     * <em>NOTE: Prefer not using a row specific {@link GridDropMode} with a
+     * grid that enables sorting. If for example a new row gets added to a
+     * specific location on drop event, it might not end up in the location of
+     * the drop but rather where the active sorting configuration prefers to
+     * place it. This behavior might feel unexpected for the users.
      * 
      * @param dropMode
      *            Drop mode that describes the allowed drop locations within the
@@ -3532,8 +3532,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * <p>
      * When the drop mode of the grid has been set to one of
      * {@link GridDropMode#BETWEEN}, {@link GridDropMode#ON_TOP} or
-     * {@link GridDropMode#ON_TOP_OR_BETWEEN}, by default all the visible rows can
-     * be dropped over.
+     * {@link GridDropMode#ON_TOP_OR_BETWEEN}, by default all the visible rows
+     * can be dropped over.
      * <p>
      * A drop filter function can be used to specify the rows that are available
      * for dropping over. The function receives an item and should return
@@ -3582,6 +3582,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * here. The function is executed for each item in the Grid during data
      * generation. Return a {@link String} to be appended to the row as {@code
      * type} data.
+     * 
+     * Note that IE11 only supports data type "text"
      *
      * @param type
      *            Type of the generated data. The generated value will be
@@ -3600,4 +3602,37 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         this.getElement().setPropertyJson("__dragDataTypes", types);
         getDataCommunicator().reset();
     }
+
+    /**
+     * Sets explicit drag operation details for when the user is dragging the
+     * selected items. By default, the drag data only covers the items in the
+     * visible viewport and all the items outside of it, even if selected, are
+     * excluded. Use this method to override the default drag data and the
+     * number shown in drag image on selection drag.
+     * 
+     * Note that IE11 only supports data type "text"
+     * 
+     * @param draggedItemsCount
+     *            The number shown in the drag image on selection drag. Only
+     *            values above 1 have any visible effect.
+     * @param dragData
+     *            The drag data for selection drag. The map should consist of
+     *            data type:data -entries
+     */
+    public void setSelectionDragDetails(int draggedItemsCount,
+            Map<String, String> dragData) {
+        this.getElement().setProperty("__selectionDraggedItemsCount",
+                draggedItemsCount);
+
+        if (dragData != null) {
+            JsonObject json = Json.createObject();
+            dragData.entrySet()
+                    .forEach(e -> json.put(e.getKey(), e.getValue()));
+            this.getElement().setPropertyJson("__selectionDragData", json);
+        } else {
+            this.getElement().setProperty("__selectionDragData", null);
+        }
+
+    }
+
 }

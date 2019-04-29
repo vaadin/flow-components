@@ -54,13 +54,16 @@ public class GridDropEvent<T> extends ComponentEvent<Grid<T>> {
      * @param fromClient
      *            <code>true</code> if the event originated from the client
      *            side, <code>false</code> otherwise
+     * @param item
+     *            The item on which the drop occurred, from
+     *            {@code detail.dropTargetItem}.
      * @param dropLocation
      *            Drop location from {@code detail.dropLocation}.
      * @param dragData
      *            Drag data from {@code detail.dragData}.
      */
     public GridDropEvent(Grid<T> source, boolean fromClient,
-            @EventData("event.detail.item") JsonObject item,
+            @EventData("event.detail.dropTargetItem") JsonObject item,
             @EventData("event.detail.dropLocation") String dropLocation,
             @EventData("event.detail.dragData") JsonArray dragData) {
         super(source, fromClient);

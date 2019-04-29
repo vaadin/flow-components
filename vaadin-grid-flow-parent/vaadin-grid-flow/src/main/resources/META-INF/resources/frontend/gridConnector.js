@@ -973,26 +973,33 @@ window.Vaadin.Flow.gridConnector = {
         return (style.row || '') + ' ' + (style[columnId] || '');
     }
     
-    grid.dropFilter = function(rowData) {
-        return !rowData.item.dropDisabled;
-    }
+    grid.dropFilter = rowData => !rowData.item.dropDisabled;
     
-    grid.dragFilter = function(rowData) {
-        return !rowData.item.dragDisabled;
-    }
+    grid.dragFilter = rowData => !rowData.item.dragDisabled;
     
-    const __fdd = grid.formatDragData;
-    grid.formatDragData = items => {
-        if (grid.__dragDataTypes) {
-            return grid.__dragDataTypes.map(type => {
-                return {
-                    type,
-                    data: items.map(item => item.dragData[type]).join('\n')
-                };
-            });
-        } else {
-            return __fdd.call(grid, items);
+    grid.addEventListener('grid-dragstart', e => {
+		
+    	if (grid._isSelected(e.detail.draggedItems[0])) {
+    		// Dragging selected (possibly multiple) items
+        	if (grid.__selectionDragData) {
+        		Object.keys(grid.__selectionDragData).forEach(type => {
+        			e.detail.setDragData(type, grid.__selectionDragData[type]);
+        		});
+        	} else {
+        		(grid.__dragDataTypes || []).forEach(type => {
+        			e.detail.setDragData(type, e.detail.draggedItems.map(item => item.dragData[type]).join('\n'));
+        		});
+        	}
+        	
+        	if (grid.__selectionDraggedItemsCount > 1) {
+        		e.detail.setDraggedItemsCount(grid.__selectionDraggedItemsCount);
+        	}
+    	} else {
+        	// Dragging just one (non-selected) item
+    		(grid.__dragDataTypes || []).forEach(type => {
+    			e.detail.setDragData(type, e.detail.draggedItems[0].dragData[type]);
+    		});
     	}
-    }
+    });
   }
 }
