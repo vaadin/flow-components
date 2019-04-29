@@ -1,3 +1,6 @@
+import {Debouncer} from '@polymer/polymer/lib/utils/debounce.js';
+import {} from '@polymer/polymer/lib/utils/async.js';
+
 window.Vaadin.Flow.comboBoxConnector = {
   initLazy: function (comboBox) {
     // Check whether the connector was already initialized for the ComboBox
@@ -50,9 +53,9 @@ window.Vaadin.Flow.comboBoxConnector = {
         const upperLimit = params.pageSize * (params.page + 1);
 
         if (filterChanged) {
-          this._debouncer = Polymer.Debouncer.debounce(
+          this._debouncer = Debouncer.debounce(
             this._debouncer,
-            Polymer.Async.timeOut.after(500),
+            timeOut.after(500),
             () => {
               comboBox.$server.setRequestedRange(0, upperLimit, params.filter);
               if (params.filter === '') {
