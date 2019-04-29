@@ -28,6 +28,8 @@ import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
@@ -146,6 +148,8 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-area")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-text-area.html")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.3.7")
+@JsModule("@vaadin/vaadin-text-field/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R>, HasTheme {
