@@ -20,7 +20,8 @@ import javax.annotation.Generated;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 
 import elemental.json.JsonObject;
 
@@ -93,7 +94,8 @@ import elemental.json.JsonObject;
  * </p>
  * <h3>Explicit New Row</h3>
  * <p>
- * Use the {@code <br>} line break element to wrap the items on a new row:
+ * Use the {@code <br>
+ * } line break element to wrap the items on a new row:
  * </p>
  * <p>
  * &lt;vaadin-form-layout&gt;
@@ -138,7 +140,8 @@ import elemental.json.JsonObject;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.FormLayoutElement#2.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-form-layout")
-@HtmlImport("frontend://bower_components/vaadin-form-layout/src/vaadin-form-layout.html")
+@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "2.1.1")
+@JsModule("@vaadin/vaadin-form-layout/vaadin-form-layout.js")
 public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
         extends Component implements HasStyle {
 

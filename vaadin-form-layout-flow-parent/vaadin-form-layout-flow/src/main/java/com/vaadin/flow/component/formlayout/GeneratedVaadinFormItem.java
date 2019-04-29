@@ -22,6 +22,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -167,7 +169,8 @@ import com.vaadin.flow.dom.Element;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.FormItemElement#2.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-form-item")
-@HtmlImport("frontend://bower_components/vaadin-form-layout/src/vaadin-form-item.html")
+@NpmPackage(value="@vaadin/vaadin-form-layout", version="2.1.1")
+@JsModule("@vaadin/vaadin-form-layout/vaadin-form-item.js")
 public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<R>>
         extends Component implements HasStyle, ClickNotifier<R> {
 
