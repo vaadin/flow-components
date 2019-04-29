@@ -27,6 +27,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
@@ -110,6 +111,7 @@ import com.vaadin.flow.dom.Element;
 @Tag("vaadin-button")
 @NpmPackage(value = "@vaadin/vaadin-button", version = "2.1.0")
 @JsModule("@vaadin/vaadin-button/vaadin-button.js")
+@HtmlImport("frontend://bower_components/vaadin-button/src/vaadin-button.html")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component
         implements HasStyle, ClickNotifier<R>, HasText, Focusable<R>, HasTheme {
