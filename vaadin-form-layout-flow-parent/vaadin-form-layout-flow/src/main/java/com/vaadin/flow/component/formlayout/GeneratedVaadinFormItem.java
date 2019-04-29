@@ -171,6 +171,7 @@ import com.vaadin.flow.dom.Element;
 @Tag("vaadin-form-item")
 @NpmPackage(value="@vaadin/vaadin-form-layout", version="2.1.1")
 @JsModule("@vaadin/vaadin-form-layout/vaadin-form-item.js")
+@HtmlImport("frontend://bower_components/vaadin-form-layout/src/vaadin-form-item.html")
 public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<R>>
         extends Component implements HasStyle, ClickNotifier<R> {
 
