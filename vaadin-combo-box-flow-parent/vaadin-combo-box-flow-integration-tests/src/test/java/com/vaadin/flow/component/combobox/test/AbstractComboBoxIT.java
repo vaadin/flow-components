@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Ignore;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
@@ -74,6 +75,14 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected void assertRendered(String innerHTML) {
+        try {
+            waitUntil(driver -> {
+                List<String> contents = getOverlayContents();
+                return contents.size() > 0 && contents.get(0).length() > 0;
+            });
+        } catch (TimeoutException e) {
+            Assert.fail("Timeout: no items with text content rendered.");
+        }
         List<String> overlayContents = getOverlayContents();
         Optional<String> matchingItem = overlayContents.stream()
                 .filter(s -> s.equals(innerHTML)).findFirst();

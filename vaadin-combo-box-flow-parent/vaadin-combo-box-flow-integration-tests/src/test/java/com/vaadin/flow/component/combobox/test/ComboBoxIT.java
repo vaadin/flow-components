@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.demo.ComboBoxView;
@@ -264,21 +265,33 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     }
 
     private void assertRendered() {
-        List<String> items = $("vaadin-combo-box-overlay").first().$("div")
-                .id("content").$("vaadin-combo-box-item").all().stream()
-                .map(element -> element.$("div").id("content")
-                        .getPropertyString("innerHTML"))
-                .collect(Collectors.toList());
+        try {
+            waitUntil(driver -> {
+                List<String> items = getRenderedItems();
+                return items.size() > 0 && items.get(0).length() > 0;
+            });
+        } catch (TimeoutException e) {
+            Assert.fail("Timeout: no items with text content rendered.");
+        }
+        List<String> items = getRenderedItems();
         Assert.assertTrue("Expected more than 10 items to be rendered.",
                 items.size() > 10);
         items.forEach(item -> {
             boolean containsAtLeastTwoWords = Pattern.matches("\\S+\\s\\S+.*",
                     item);
             Assert.assertTrue(
-                    "Expected rendred item to contain at least two words, but was: "
+                    "Expected rendered item to contain at least two words, but was: "
                             + item,
                     containsAtLeastTwoWords);
         });
+    }
+
+    private List<String> getRenderedItems() {
+        return $("vaadin-combo-box-overlay").first().$("div").id("content")
+                .$("vaadin-combo-box-item").all().stream()
+                .map(element -> element.$("div").id("content")
+                        .getPropertyString("innerHTML"))
+                .collect(Collectors.toList());
     }
 
     @Override

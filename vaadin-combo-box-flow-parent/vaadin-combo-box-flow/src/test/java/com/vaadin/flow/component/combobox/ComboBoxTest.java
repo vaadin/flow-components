@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +32,7 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
+import static org.junit.Assert.assertEquals;
 
 public class ComboBoxTest {
 
@@ -279,6 +278,16 @@ public class ComboBoxTest {
     public void clearWithoutItems_doesNotThrow() {
         ComboBox<String> combo = new ComboBox<>();
         combo.clear();
+    }
+
+    @Test
+    public void setClearButtonVisible_isClearButtonVisible() {
+        ComboBox<String> combo = new ComboBox<>();
+        Assert.assertFalse("Clear button should not be visible by default",
+                combo.isClearButtonVisible());
+        combo.setClearButtonVisible(true);
+        Assert.assertTrue("Getter should reflect the set value.",
+                combo.isClearButtonVisible());
     }
 
     private void assertItem(TestComboBox comboBox, int index, String caption) {

@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.github.javafaker.Faker;
+
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.html.Div;
@@ -100,6 +101,7 @@ public class ComboBoxView extends DemoView {
     @Override
     public void initView() {
         createStringComboBox();
+        createWithClearButton();
         createDisabledComboBox();
         createObjectComboBox();
         createComboBoxWithObjectStringSimpleValue();
@@ -130,6 +132,23 @@ public class ComboBoxView extends DemoView {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("string-selection-box");
         addCard("String selection", comboBox, message);
+    }
+
+    private void createWithClearButton() {
+        // begin-source-example
+        // source-example-heading: Clear button
+        ComboBox<String> comboBox = new ComboBox<>("Browsers");
+        comboBox.setItems("Google Chrome", "Mozilla Firefox", "Opera",
+                "Apple Safari", "Microsoft Edge");
+        comboBox.setValue("Google Chrome");
+
+        // Display an icon which can be clicked to clear the value:
+        comboBox.setClearButtonVisible(true);
+        // end-source-example
+
+        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
+        comboBox.setId("clear-button-box");
+        addCard("Clear button", comboBox);
     }
 
     private void createObjectComboBox() {
