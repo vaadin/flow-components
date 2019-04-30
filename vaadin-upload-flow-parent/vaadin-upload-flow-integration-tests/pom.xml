@@ -3,22 +3,22 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-upload-flow-parent</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
-    
+
     <artifactId>vaadin-upload-integration-tests</artifactId>
     <packaging>war</packaging>
-    
+
     <name>Vaadin Upload Integration Tests</name>
-    
+
     <properties>
         <failOnMissingWebXml>false</failOnMissingWebXml>
     </properties>
-    
+
     <dependencies>
         <!--Test scoped -->
         <dependency>
@@ -33,14 +33,14 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-        
+
         <!--System under test -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-upload-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+
         <!--Flow and friends -->
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -62,19 +62,19 @@
             <artifactId>flow-server-production-mode</artifactId>
             <version>${flow.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-lumo-theme</artifactId>
             <version>${flow.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
             <version>${flow.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
@@ -92,9 +92,16 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
@@ -115,7 +122,7 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <profiles>
         <profile>
             <id>local-run</id>

@@ -26,6 +26,8 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
@@ -109,14 +111,16 @@ import elemental.json.JsonObject;
  * </tbody>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.UploadElement#4.2.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-upload")
+@NpmPackage(value = "@vaadin/vaadin-upload", version = "4.2.0")
+@JsModule("@vaadin/vaadin-upload/vaadin-upload.js")
 @HtmlImport("frontend://bower_components/vaadin-upload/src/vaadin-upload.html")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
         extends Component implements HasStyle {
@@ -307,10 +311,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * The array of files being processed, or already uploaded.
      * </p>
      * <p>
-     * Each element is a <a
-     * href="https://developer.mozilla.org/en-US/docs/Web/API/File">{@code File}
-     * </a> object with a number of extra properties to track the upload
-     * process:
+     * Each element is a <a href=
+     * "https://developer.mozilla.org/en-US/docs/Web/API/File">{@code File} </a>
+     * object with a number of extra properties to track the upload process:
      * </p>
      * <ul>
      * <li>{@code uploadTarget}: The target URL used to upload this file.</li>
@@ -329,7 +332,8 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * <li>{@code status}: Status of the upload process.</li>
      * <li>{@code error}: Error message in case the upload failed.</li>
      * <li>{@code abort}: True if the file was canceled by the user.</li>
-     * <li>{@code complete}: True when the file was transferred to the server.</li>
+     * <li>{@code complete}: True when the file was transferred to the
+     * server.</li>
      * <li>{@code uploading}: True while transferring data to the server.
      * <p>
      * This property is synchronized automatically from client side when a
@@ -351,10 +355,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * The array of files being processed, or already uploaded.
      * </p>
      * <p>
-     * Each element is a <a
-     * href="https://developer.mozilla.org/en-US/docs/Web/API/File">{@code File}
-     * </a> object with a number of extra properties to track the upload
-     * process:
+     * Each element is a <a href=
+     * "https://developer.mozilla.org/en-US/docs/Web/API/File">{@code File} </a>
+     * object with a number of extra properties to track the upload process:
      * </p>
      * <ul>
      * <li>{@code uploadTarget}: The target URL used to upload this file.</li>
@@ -373,7 +376,8 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * <li>{@code status}: Status of the upload process.</li>
      * <li>{@code error}: Error message in case the upload failed.</li>
      * <li>{@code abort}: True if the file was canceled by the user.</li>
-     * <li>{@code complete}: True when the file was transferred to the server.</li>
+     * <li>{@code complete}: True when the file was transferred to the
+     * server.</li>
      * <li>{@code uploading}: True while transferring data to the server.</li>
      * </ul>
      *
@@ -1327,11 +1331,11 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToAddButton(Component... components) {
@@ -1347,11 +1351,11 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToDropLabelIcon(Component... components) {
@@ -1367,11 +1371,11 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToDropLabel(Component... components) {
@@ -1387,11 +1391,11 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToFileList(Component... components) {
