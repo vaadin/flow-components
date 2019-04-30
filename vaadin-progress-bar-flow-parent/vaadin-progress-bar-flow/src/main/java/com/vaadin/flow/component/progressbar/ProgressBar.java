@@ -18,12 +18,14 @@
 package com.vaadin.flow.component.progressbar;
 
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
  * Server-side component for the {@code vaadin-progress-bar} element.
  *
  * @author Vaadin Ltd.
  */
+@NpmPackage(value = "@vaadin/vaadin-progress-bar", version = "1.1.0")
 public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
         implements HasSize {
 
