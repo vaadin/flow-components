@@ -19,12 +19,14 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
 
 /**
  * Server-side component for the {@code vaadin-item} element, used to represent
  * individual items in a {@link ListBox}.
- * 
+ *
  * @author Vaadin Ltd
  *
  * @param <T>
@@ -32,6 +34,8 @@ import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
  */
 @Tag("vaadin-item")
 @HtmlImport("frontend://bower_components/vaadin-item/vaadin-item.html")
+@NpmPackage(value = "@vaadin/vaadin-item", version = "2.1.0")
+@JsModule("@vaadin/vaadin-item/vaadin-item.js")
 class VaadinItem<T> extends Component
         implements ItemComponent<T>, HasComponents {
 
@@ -39,7 +43,7 @@ class VaadinItem<T> extends Component
 
     /**
      * Constructs the component with the given item rendered as a String.
-     * 
+     *
      * @param item
      *            the item to be displayed by this component
      */

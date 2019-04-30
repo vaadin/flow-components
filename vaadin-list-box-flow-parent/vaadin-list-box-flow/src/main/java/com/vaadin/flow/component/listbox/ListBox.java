@@ -26,6 +26,8 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
@@ -46,6 +48,8 @@ import com.vaadin.flow.function.SerializablePredicate;
  */
 // Not extending the generated class since it adds no value
 @Tag("vaadin-list-box")
+@NpmPackage(value = "@vaadin/vaadin-list-box", version = "1.1.0")
+@JsModule("@vaadin/vaadin-list-box/vaadin-list-box.js")
 @HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
 public class ListBox<T> extends AbstractSinglePropertyField<ListBox<T>, T>
         implements HasItemsAndComponents<T>, SingleSelect<ListBox<T>, T>,
