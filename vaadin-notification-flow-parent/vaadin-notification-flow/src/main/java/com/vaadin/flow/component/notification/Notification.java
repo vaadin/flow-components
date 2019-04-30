@@ -30,6 +30,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -42,6 +43,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @HtmlImport("frontend://flow-component-renderer.html")
+@JsModule("flow-component-renderer.js")
 public class Notification extends GeneratedVaadinNotification<Notification>
         implements HasComponents {
 

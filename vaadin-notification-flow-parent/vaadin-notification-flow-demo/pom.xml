@@ -7,12 +7,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-notification-flow-parent</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-notification-flow-demo</artifactId>
     <packaging>${packaging.type}</packaging>
-    
+
     <name>Vaadin Notification Flow Demo</name>
 
     <properties>
@@ -101,6 +101,13 @@
             </properties>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>flow-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                    </plugin>
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>

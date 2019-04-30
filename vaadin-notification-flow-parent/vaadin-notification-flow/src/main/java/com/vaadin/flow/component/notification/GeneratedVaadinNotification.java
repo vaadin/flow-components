@@ -23,6 +23,8 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -45,6 +47,8 @@ Your work has been saved
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.NotificationElement#1.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-notification")
+@NpmPackage(value = "@vaadin/vaadin-notification", version = "1.2.0")
+@JsModule("@vaadin/vaadin-notification/vaadin-notification.js")
 @HtmlImport("frontend://bower_components/vaadin-notification/src/vaadin-notification.html")
 public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotification<R>>
         extends Component {
