@@ -29,7 +29,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
@@ -278,13 +278,13 @@ public class DialogTest {
         dialog.addComponentAtIndex(index, div);
     }
 
-    private List<JavaScriptInvocation> flushInvocations() {
+    private List<PendingJavaScriptInvocation> flushInvocations() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         return ui.getInternals().dumpPendingJavaScriptInvocations();
     }
 
     private void assertInvocations() {
-        List<JavaScriptInvocation> invocations = flushInvocations();
+        List<PendingJavaScriptInvocation> invocations = flushInvocations();
 
         Assert.assertEquals(1, invocations.size());
     }
