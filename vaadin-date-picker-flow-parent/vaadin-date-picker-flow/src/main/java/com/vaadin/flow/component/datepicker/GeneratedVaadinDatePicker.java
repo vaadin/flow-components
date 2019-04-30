@@ -16,25 +16,22 @@
 package com.vaadin.flow.component.datepicker;
 
 import javax.annotation.Generated;
-
-import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.Synchronize;
+import elemental.json.JsonObject;
+import com.vaadin.flow.component.NotSupported;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.NotSupported;
-import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 
 /**
  * <p>
@@ -177,9 +174,9 @@ import elemental.json.JsonObject;
  * </tbody>
  * </table>
  * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
  * </p>
  * <p>
  * The following state attributes are available for styling:
@@ -239,12 +236,26 @@ import elemental.json.JsonObject;
  * you should use the <a href="#vaadin-date-picker-light">
  * {@code <vaadin-date-picker-light>}</a> element.
  * </p>
+ * <p>
+ * In addition to {@code <vaadin-date-picker>} itself, the following internal
+ * components are themable:
+ * </p>
+ * <ul>
+ * <li>{@code <vaadin-text-field>}</li>
+ * <li>{@code <vaadin-date-picker-overlay>}</li>
+ * <li>{@code <vaadin-date-picker-overlay-content>}</li>
+ * <li>{@code <vaadin-month-calendar>}</li>
+ * </ul>
+ * <p>
+ * Note: the {@code theme} attribute value set on {@code <vaadin-date-picker>}
+ * is propagated to the internal themable components listed above.
+ * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.DatePickerElement#3.2.0", "Flow#1.1-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#2.0-SNAPSHOT",
+        "WebComponent: Vaadin.DatePickerElement#4.0.0-alpha1",
+        "Flow#2.0-SNAPSHOT" })
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "3.2.0")
-@JsModule("@vaadin/vaadin-date-picker/vaadin-date-picker.js")
+@HtmlImport("frontend://bower_components/vaadin-date-picker/src/vaadin-date-picker.html")
 public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R> {
@@ -575,16 +586,16 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * 	          // A function to format given {@code Object} as
      * 	          // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
+     * 	          // Note: The argument month is 0-based. This means that January = 0 and December = 11.
      * 	          formatDate: d =&gt; {
      * 	            // returns a string representation of the given
      * 	            // object in 'MM/DD/YYYY' -format
      * 	          },
      *
      * 	          // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     * 	          // Must properly parse (at least) text
-     * 	          // formatted by {@code formatDate}.
-     * 	          // Setting the property to null will disable
-     * 	          // keyboard input feature.
+     * 	          // Must properly parse (at least) text formatted by {@code formatDate}.
+     * 	          // Setting the property to null will disable keyboard input feature.
+     * 	          // Note: The argument month is 0-based. This means that January = 0 and December = 11.
      * 	          parseDate: text =&gt; {
      * 	            // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
      * 	            // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
@@ -663,16 +674,16 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * 	          // A function to format given {@code Object} as
      * 	          // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
+     * 	          // Note: The argument month is 0-based. This means that January = 0 and December = 11.
      * 	          formatDate: d =&gt; {
      * 	            // returns a string representation of the given
      * 	            // object in 'MM/DD/YYYY' -format
      * 	          },
      *
      * 	          // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     * 	          // Must properly parse (at least) text
-     * 	          // formatted by {@code formatDate}.
-     * 	          // Setting the property to null will disable
-     * 	          // keyboard input feature.
+     * 	          // Must properly parse (at least) text formatted by {@code formatDate}.
+     * 	          // Setting the property to null will disable keyboard input feature.
+     * 	          // Note: The argument month is 0-based. This means that January = 0 and December = 11.
      * 	          parseDate: text =&gt; {
      * 	            // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
      * 	            // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
@@ -790,6 +801,38 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      */
     protected void setMaxAsString(String maxAsString) {
         getElement().setProperty("max", maxAsString == null ? "" : maxAsString);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Set to true to display the clear icon which clears the input.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     *
+     * @return the {@code clearButtonVisible} property from the webcomponent
+     */
+    protected boolean isClearButtonVisibleBoolean() {
+        return getElement().getProperty("clearButtonVisible", false);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Set to true to display the clear icon which clears the input.
+     * </p>
+     *
+     * @param clearButtonVisible
+     *            the boolean value to set
+     */
+    protected void setClearButtonVisible(boolean clearButtonVisible) {
+        getElement().setProperty("clearButtonVisible", clearButtonVisible);
     }
 
     /**
@@ -1082,11 +1125,11 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param components
      *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a
+     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a
+     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToPrefix(Component... components) {
@@ -1145,9 +1188,9 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            the property type
      */
     public <P> GeneratedVaadinDatePicker(T initialValue, T defaultValue,
-            Class<P> elementPropertyType,
-            SerializableFunction<P, T> presentationToModel,
-            SerializableFunction<T, P> modelToPresentation) {
+                                         Class<P> elementPropertyType,
+                                         SerializableFunction<P, T> presentationToModel,
+                                         SerializableFunction<T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
@@ -1168,7 +1211,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            whether <code>null</code> is accepted as a model value
      */
     public GeneratedVaadinDatePicker(T initialValue, T defaultValue,
-            boolean acceptNullValues) {
+                                     boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
             setModelValue(initialValue, false);
@@ -1196,9 +1239,9 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            the property type
      */
     public <P> GeneratedVaadinDatePicker(T initialValue, T defaultValue,
-            Class<P> elementPropertyType,
-            SerializableBiFunction<R, P, T> presentationToModel,
-            SerializableBiFunction<R, T, P> modelToPresentation) {
+                                         Class<P> elementPropertyType,
+                                         SerializableBiFunction<R, P, T> presentationToModel,
+                                         SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {

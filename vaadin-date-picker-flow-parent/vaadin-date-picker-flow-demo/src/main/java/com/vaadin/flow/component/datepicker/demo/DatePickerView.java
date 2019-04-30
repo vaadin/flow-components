@@ -41,6 +41,7 @@ public class DatePickerView extends DemoView {
         createMinAndMaxDatePicker();
         createDisabledDatePicker();
         createFinnishDatePicker();
+        createWithClearButton();
         createStartAndEndDatePickers();
         createLocaleChangeDatePicker();
         addCard("Additional code used in the demo",
@@ -99,6 +100,19 @@ public class DatePickerView extends DemoView {
 
         datePicker.setId("disabled-picker");
         addCard("Disabled date picker", datePicker, message);
+    }
+
+    private void createWithClearButton() {
+        // begin-source-example
+        // source-example-heading: Clear button
+        DatePicker datePicker = new DatePicker();
+        datePicker.setValue(LocalDate.now());
+
+        // Display an icon which can be clicked to clear the value:
+        datePicker.setClearButtonVisible(true);
+        // end-source-example
+
+        addCard("Clear button", datePicker);
     }
 
     private void createFinnishDatePicker() {
