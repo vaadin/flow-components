@@ -21,6 +21,7 @@ import java.util.Optional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.shared.Registration;
@@ -136,6 +137,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "4.1.0")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
