@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-time-picker-flow-testbench</artifactId>
+            <artifactId>vaadin-time-picker-testbench</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
