@@ -24,6 +24,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
 
 /**
  * <p>
@@ -93,6 +94,7 @@ Tab 1
         "WebComponent: Vaadin.TabElement#2.1.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-tab")
 @HtmlImport("frontend://bower_components/vaadin-tabs/src/vaadin-tab.html")
+@JsModule("@vaadin/vaadin-tabs/vaadin-tab.js")
 public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
         extends Component implements HasStyle, HasTheme {
 

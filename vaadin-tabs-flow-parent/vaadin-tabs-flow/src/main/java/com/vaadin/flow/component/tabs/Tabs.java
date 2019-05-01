@@ -29,6 +29,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -48,6 +49,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
+@NpmPackage(value = "@vaadin/vaadin-tabs", version = "2.1.2")
 public class Tabs extends GeneratedVaadinTabs<Tabs>
         implements HasOrderedComponents<Tabs>, HasSize {
 
