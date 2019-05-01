@@ -16,8 +16,8 @@
 package com.vaadin.flow.component.timepicker;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -30,6 +30,7 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
@@ -41,6 +42,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @JavaScript("frontend://timepickerConnector.js")
+@JsModule("frontend://timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled {
 
@@ -120,7 +122,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         super.setLabel(label);
     }
 
-    //This is needed because the LocalTime format is not the same depending on the platform.
+    // This is needed because the LocalTime format is not the same depending on
+    // the platform.
     @Override
     public void setValue(LocalTime value) {
         if (value == null) {
@@ -130,7 +133,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
             super.setValue(truncatedValue);
         }
     }
-    
+
     /**
      * Gets the label of the time picker.
      *

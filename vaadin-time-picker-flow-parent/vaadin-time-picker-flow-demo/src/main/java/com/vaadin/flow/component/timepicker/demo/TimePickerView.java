@@ -29,6 +29,7 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
@@ -41,6 +42,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route("vaadin-time-picker")
 @HtmlImport("frontend://hide-clear-button-theme.html")
+@JsModule("frontend://hide-clear-button-theme.js")
 public class TimePickerView extends DemoView {
 
     @Override
