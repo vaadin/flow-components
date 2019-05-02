@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-progress-bar-flow-testbench</artifactId>
+            <artifactId>vaadin-progress-bar-testbench</artifactId>
             <version>${project.version}</version>
         </dependency>
 
