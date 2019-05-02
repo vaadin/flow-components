@@ -80,7 +80,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dialog-flow-testbench</artifactId>
+            <artifactId>vaadin-dialog-testbench</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
