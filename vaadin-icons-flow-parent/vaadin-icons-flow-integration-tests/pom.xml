@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-icons-flow-testbench</artifactId>
+            <artifactId>vaadin-icons-testbench</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
