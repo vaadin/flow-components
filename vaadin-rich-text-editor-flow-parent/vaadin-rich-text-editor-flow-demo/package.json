@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@vaadin/vaadin-button": "=2.1.5",
+    "@polymer/polymer": "=3.1.0",
+    "@vaadin/vaadin-lumo-styles": "=1.4.2",
+    "@vaadin/vaadin-rich-text-editor": "=1.0.1",
+    "@webcomponents/webcomponentsjs": "2.2.10"
+  },
+  "devDependencies": {
+    "webpack-babel-multi-target-plugin": "2.1.0",
+    "copy-webpack-plugin": "5.0.3",
+    "expose-loader": "^0.7.5",
+    "webpack-cli": "3.3.0",
+    "webpack": "4.30.0",
+    "webpack-dev-server": "3.3.0"
+  }
+}

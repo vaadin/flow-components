@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-rich-text-editor-flow-root</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-rich-text-editor-integration-tests</artifactId>
@@ -24,7 +25,7 @@
     </properties>
 
     <dependencies>
-        <!--Provided scoped-->
+        <!--Provided scoped -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -32,7 +33,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--Test scoped-->
+        <!--Test scoped -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
@@ -46,14 +47,14 @@
             <scope>test</scope>
         </dependency>
 
-        <!--System under test-->
+        <!--System under test -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-rich-text-editor-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-        <!--Flow and friends-->
+        <!--Flow and friends -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
@@ -114,9 +115,20 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
                 <configuration>
                     <filesets>
+                        <fileset>
+                            <directory>${project.basedir}</directory>
+                            <includes>
+                                <include>package.json</include>
+                                <include>webpack.config.js</include>
+                            </includes>
+                        </fileset>
                         <fileset>
                             <directory>src/main/webapp/frontend</directory>
                             <includes>
@@ -156,8 +168,9 @@
         </plugins>
     </build>
     <profiles>
-        <!--This profile is only present for quick testing against the element from GitHub-->
-        <!--Do not use with production mode-->
+        <!--This profile is only present for quick testing against the element 
+            from GitHub -->
+        <!--Do not use with production mode -->
         <profile>
             <id>bower</id>
             <activation>
@@ -278,8 +291,8 @@
                             </dependency>
                         </dependencies>
                         <executions>
-                            <!-- Start Sauce Connect prior to running the integration
-                                tests -->
+                            <!-- Start Sauce Connect prior to running the 
+                                integration tests -->
                             <execution>
                                 <id>start-sauceconnect</id>
                                 <phase>pre-integration-test</phase>
@@ -287,8 +300,8 @@
                                     <goal>start-sauceconnect</goal>
                                 </goals>
                             </execution>
-                            <!-- Stop the Sauce Connect process after the integration
-                                tests have finished -->
+                            <!-- Stop the Sauce Connect process after the 
+                                integration tests have finished -->
                             <execution>
                                 <id>stop-sauceconnect</id>
                                 <phase>post-integration-test</phase>
@@ -330,14 +343,16 @@
                             </systemPropertyVariables>
                         </configuration>
                     </plugin>
-                    <!-- Plugin for automatically download Chrome Driver for tests -->
+                    <!-- Plugin for automatically download Chrome Driver 
+                        for tests -->
                     <plugin>
                         <groupId>com.lazerycode.selenium</groupId>
                         <artifactId>driver-binary-downloader-maven-plugin</artifactId>
                         <version>1.0.17</version>
-                        <configuration combine.self="override">
-                            <!-- root directory that downloaded driver binaries will be stored
-                                in -->
+                        <configuration
+                            combine.self="override">
+                            <!-- root directory that downloaded driver binaries 
+                                will be stored in -->
                             <onlyGetDriversForHostOperatingSystem>true</onlyGetDriversForHostOperatingSystem>
                             <overwriteFilesThatExist>true</overwriteFilesThatExist>
                             <rootStandaloneServerDirectory>.driver</rootStandaloneServerDirectory>

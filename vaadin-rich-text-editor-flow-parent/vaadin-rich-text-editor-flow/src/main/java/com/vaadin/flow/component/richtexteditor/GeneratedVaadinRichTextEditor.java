@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.richtexteditor;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /*
  * #%L
  * Vaadin RichTextEditor for Vaadin 10
@@ -33,21 +36,23 @@ package com.vaadin.flow.component.richtexteditor;
  */
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
-import java.util.stream.Stream;
-import java.util.stream.Collectors;
-import com.vaadin.flow.component.Synchronize;
-import elemental.json.JsonArray;
-import com.vaadin.flow.component.DomEvent;
+
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.shared.Registration;
+
+import elemental.json.JsonArray;
 
 /**
  * <p>
@@ -206,6 +211,8 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
         "WebComponent: Vaadin.RichTextEditorElement#1.0.0-alpha3",
         "Flow#1.2-SNAPSHOT" })
 @Tag("vaadin-rich-text-editor")
+@NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "1.0.1")
+@JsModule("@vaadin/vaadin-rich-text-editor/vaadin-rich-text-editor.js")
 @HtmlImport("frontend://bower_components/vaadin-rich-text-editor/src/vaadin-rich-text-editor.html")
 public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRichTextEditor<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
