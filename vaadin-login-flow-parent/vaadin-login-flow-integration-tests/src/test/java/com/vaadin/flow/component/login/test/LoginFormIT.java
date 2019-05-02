@@ -1,12 +1,12 @@
 package com.vaadin.flow.component.login.test;
 
-import com.vaadin.flow.component.login.testbench.LoginFormElement;
-import com.vaadin.flow.component.notification.testbench.NotificationElement;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.parallel.BrowserUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
+
+import com.vaadin.flow.component.login.testbench.LoginFormElement;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.parallel.BrowserUtil;
 
 public class LoginFormIT extends BasicIT {
 
@@ -23,14 +23,16 @@ public class LoginFormIT extends BasicIT {
     @Test
     public void login() {
         LoginFormElement login = getLoginForm();
-        checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(), () -> login.submit());
+        checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(),
+                () -> login.submit());
     }
 
     @Override
     public void testDefaults() {
         super.testDefaults();
         LoginFormElement login = getLoginForm();
-        checkLoginForm(login.getUsernameField(), login.getPasswordField(), login.getSubmitButton());
+        checkLoginForm(login.getUsernameField(), login.getPasswordField(),
+                login.getSubmitButton());
     }
 
     @Test
@@ -40,9 +42,8 @@ public class LoginFormIT extends BasicIT {
 
     private void checkForgotPassword(LoginFormElement login) {
         login.forgotPassword();
-        String notification = $(NotificationElement.class).waitForFirst().getText().trim();
         Assert.assertEquals("Forgot password button pressed",
-                notification);
+                $("div").id("info").getText());
     }
 
     @Test
@@ -53,20 +54,22 @@ public class LoginFormIT extends BasicIT {
         login.getPasswordField().setValue("password");
         login.submit();
 
-        Assert.assertFalse("Login notification was shown",
-                $(NotificationElement.class).waitForFirst().isOpen());
+        Assert.assertTrue("Login notification was shown",
+                $("div").id("info").getText().isEmpty());
 
         sendKeys(login.getPasswordField(), Keys.ENTER);
-        Assert.assertFalse("Login notification was shown",
-                $(NotificationElement.class).waitForFirst().isOpen());
+        Assert.assertTrue("Login notification was shown",
+                $("div").id("info").getText().isEmpty());
 
-        Assert.assertFalse("Disabled property should not reflect to attribute", login.hasAttribute("disabled"));
+        Assert.assertFalse("Disabled property should not reflect to attribute",
+                login.hasAttribute("disabled"));
         // Forgot password event should be processed anyway
         checkForgotPassword(login);
     }
 
     private void sendKeys(TestBenchElement textField, CharSequence... keys) {
-        if (BrowserUtil.isEdge(getDesiredCapabilities()) || BrowserUtil.isFirefox(getDesiredCapabilities())) {
+        if (BrowserUtil.isEdge(getDesiredCapabilities())
+                || BrowserUtil.isFirefox(getDesiredCapabilities())) {
             // Firefox and Edge don't send keys to the slotted input
             textField = textField.$("input").attribute("slot", "input").first();
         }
@@ -76,17 +79,19 @@ public class LoginFormIT extends BasicIT {
     @Test
     public void passwordEnterKeyLogin() {
         LoginFormElement login = getLoginForm();
-        checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(), () -> {
-            sendKeys(login.getPasswordField(), Keys.ENTER);
-        });
+        checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(),
+                () -> {
+                    sendKeys(login.getPasswordField(), Keys.ENTER);
+                });
     }
 
     @Test
     public void usernameEnterKeyLogin() {
         LoginFormElement login = getLoginForm();
-        checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(), () -> {
-            sendKeys(login.getUsernameField(), Keys.ENTER);
-        });
+        checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(),
+                () -> {
+                    sendKeys(login.getUsernameField(), Keys.ENTER);
+                });
     }
 
     @Test
@@ -103,8 +108,10 @@ public class LoginFormIT extends BasicIT {
 
         // TODO #isDisplayed() should be used when safari 12 is in use
         Assert.assertFalse(errorMessage.hasAttribute("hidden"));
-        Assert.assertEquals("Incorrect username or password", login.getErrorMessageTitle());
-        Assert.assertEquals("Check that you have entered the correct username and password and try again.",
+        Assert.assertEquals("Incorrect username or password",
+                login.getErrorMessageTitle());
+        Assert.assertEquals(
+                "Check that you have entered the correct username and password and try again.",
                 login.getErrorMessage());
 
         Assert.assertTrue(login.isEnabled());
@@ -114,7 +121,8 @@ public class LoginFormIT extends BasicIT {
 
         // Should be disabled after 3rd attempt and change the error message
         Assert.assertFalse(login.isEnabled());
-        Assert.assertEquals("You made too many attempts", login.getErrorMessageTitle());
+        Assert.assertEquals("You made too many attempts",
+                login.getErrorMessageTitle());
     }
 
     @Test
