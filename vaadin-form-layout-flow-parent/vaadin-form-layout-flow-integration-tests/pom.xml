@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-form-layout-flow-testbench</artifactId>
+            <artifactId>vaadin-form-layout-testbench</artifactId>
             <version>${project.version}</version>
         </dependency>
 
