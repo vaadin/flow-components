@@ -198,7 +198,9 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                         setOpened(false);
                         getEditor().clear();
                     } finally {
-                        getGrid().getDataProvider().refreshAll();
+                        if (getGrid().getDataProvider() != null) {
+                            getGrid().getDataProvider().refreshAll();
+                        }
                     }
                 }));
 
@@ -227,8 +229,8 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
             getElement().setProperty("__isNew", true);
             event = new NewEvent<>(this, false, item, null);
         } else {
-            getElement().setProperty("__isDirty", false);
-            event = new EditEvent<E>(this, false, item);
+            setDirty(false);
+            event = new EditEvent<>(this, false, item);
         }
 
         setOpened(true);
@@ -243,6 +245,20 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
      */
     public void setOpened(boolean opened) {
         getElement().callFunction("set", "editorOpened", opened);
+    }
+
+    /**
+     * Set the dirty state of the Crud.
+     *
+     * A dirty Crud has its editor Save button enabled. Ideally a Crud automatically detects if it is dirty
+     * based on interactions with the form fields within it but in some special cases (e.g with composites)
+     * this might not be automatically detected. For such cases this method could be used to explicitly
+     * set the dirty state of the Crud editor.
+     *
+     * @param dirty true if dirty and false if otherwise.
+     */
+    public void setDirty(boolean dirty) {
+        getElement().executeJavaScript("this.set('__isDirty', $0)", dirty);
     }
 
     /**
