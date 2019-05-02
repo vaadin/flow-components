@@ -6,13 +6,15 @@ import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "")
 public class Home extends Div {
 
     public Home() {
+        Div info = new Div();
+        info.setId("info");
+
         Details details = new Details();
         details.setSummary(new Span("Some summary"));
         details.setContent(new Text("Some content"));
@@ -24,13 +26,18 @@ public class Home extends Div {
         detailsDisabled.addContent(new H3("Disabled content"));
         detailsDisabled.addContent(new Span("Always visible content"));
 
-        Details detailsThemed = new Details("Small Reversed Filled Summary", new Span("Themed Content"));
+        Details detailsThemed = new Details("Small Reversed Filled Summary",
+                new Span("Themed Content"));
         detailsThemed.addThemeVariants(DetailsVariant.values());
 
-        Details detailsListener = new Details("Details with opened change listener", new Span("Content"));
-        detailsListener.addOpenedChangeListener(e ->
-                Notification.show("opened-change"));
+        Details detailsListener = new Details(
+                "Details with opened change listener", new Span("Content"));
+        detailsListener.addOpenedChangeListener(event -> {
+            if (event.isOpened()) {
+                info.setText("opened-change");
+            }
+        });
 
-        add(details, detailsDisabled, detailsThemed, detailsListener);
+        add(details, detailsDisabled, detailsThemed, detailsListener, info);
     }
 }

@@ -1,16 +1,16 @@
 package com.vaadin.flow.component.details.test;
 
-import com.vaadin.flow.component.details.DetailsVariant;
-import com.vaadin.flow.component.details.testbench.DetailsElement;
-import com.vaadin.flow.component.notification.testbench.NotificationElement;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.vaadin.flow.component.details.DetailsVariant;
+import com.vaadin.flow.component.details.testbench.DetailsElement;
 
 public class BasicIT extends AbstractParallelTest {
 
@@ -29,20 +29,21 @@ public class BasicIT extends AbstractParallelTest {
         DetailsElement detail1 = detailsElements.get(0);
         Assert.assertEquals("Some summary", detail1.getSummaryText());
 
-        DetailsElement detailsThemed   = detailsElements.get(2);
-        List<String> themes = Arrays.asList( detailsThemed.getAttribute("theme").split(" "));
-        Assert.assertTrue(themes.containsAll(
-                Stream.of(DetailsVariant.values())
-                        .map(DetailsVariant::getVariantName).collect(Collectors.toList())));
-        Assert.assertEquals("Small Reversed Filled Summary", detailsThemed.getSummaryText());
+        DetailsElement detailsThemed = detailsElements.get(2);
+        List<String> themes = Arrays
+                .asList(detailsThemed.getAttribute("theme").split(" "));
+        Assert.assertTrue(themes.containsAll(Stream.of(DetailsVariant.values())
+                .map(DetailsVariant::getVariantName)
+                .collect(Collectors.toList())));
+        Assert.assertEquals("Small Reversed Filled Summary",
+                detailsThemed.getSummaryText());
     }
 
     @Test
     public void testOpenedChange() {
         DetailsElement detail = detailsElements.get(3);
         detail.toggle();
-        Assert.assertEquals("opened-change",
-                $(NotificationElement.class).first().getText());
+        Assert.assertEquals("opened-change", $("div").id("info").getText());
     }
 
     @Test
@@ -61,8 +62,9 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertEquals("Always visible content",
                 detailsDisabled.getContent().$("span").first().getText());
 
-        // TODO: uncomment when https://github.com/vaadin/vaadin-details/issues/4 is fixed
-        //  detail3.toggle();
-        //  Assert.assertTrue(detail3.isOpened());
+        // TODO: uncomment when
+        // https://github.com/vaadin/vaadin-details/issues/4 is fixed
+        // detail3.toggle();
+        // Assert.assertTrue(detail3.isOpened());
     }
 }

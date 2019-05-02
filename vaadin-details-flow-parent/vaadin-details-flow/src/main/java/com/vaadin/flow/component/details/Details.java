@@ -20,6 +20,9 @@ package com.vaadin.flow.component.details;
  * #L%
  */
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -30,14 +33,15 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.shared.Registration;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 @Tag("vaadin-details")
+@NpmPackage(value = "@vaadin/vaadin-details", version = "1.0.1")
+@JsModule("@vaadin/vaadin-details/vaadin-details.js")
 @HtmlImport("frontend://bower_components/vaadin-details/src/vaadin-details.html")
 public class Details extends Component implements HasEnabled, HasTheme {
 
@@ -55,8 +59,10 @@ public class Details extends Component implements HasEnabled, HasTheme {
     /**
      * Initializes a new Details using the provided summary and content.
      *
-     * @param summary the summary text to set.
-     * @param content the content component to set.
+     * @param summary
+     *            the summary text to set.
+     * @param content
+     *            the content component to set.
      *
      * @see #setSummaryText(String)
      * @see #setContent(Component)
@@ -70,8 +76,10 @@ public class Details extends Component implements HasEnabled, HasTheme {
     /**
      * Initializes a new Details using the provided summary and content.
      *
-     * @param summary the summary component to set.
-     * @param content the content component to set.
+     * @param summary
+     *            the summary component to set.
+     * @param content
+     *            the content component to set.
      *
      * @see #setSummary(Component)
      * @see #setContent(Component)
@@ -106,8 +114,8 @@ public class Details extends Component implements HasEnabled, HasTheme {
     }
 
     /**
-     * Returns summary component which was set via {@link #setSummary(Component)}
-     * or {@link #setSummaryText(String)}
+     * Returns summary component which was set via
+     * {@link #setSummary(Component)} or {@link #setSummaryText(String)}
      *
      * @return the summary component, <code>null</code> if nothing was set
      */
@@ -116,7 +124,8 @@ public class Details extends Component implements HasEnabled, HasTheme {
     }
 
     /**
-     * Creates a text wrapper and sets a summary via {@link #setSummary(Component)}
+     * Creates a text wrapper and sets a summary via
+     * {@link #setSummary(Component)}
      */
     public void setSummaryText(String summary) {
         if (summary == null) {
@@ -137,8 +146,8 @@ public class Details extends Component implements HasEnabled, HasTheme {
      *
      * @see #getContent()
      * @param content
-     *            the content of the component to set, or <code>null</code> to remove
-     *            any previously set content
+     *            the content of the component to set, or <code>null</code> to
+     *            remove any previously set content
      */
     public void setContent(Component content) {
         contentContainer.getElement().removeAllChildren();
@@ -161,8 +170,8 @@ public class Details extends Component implements HasEnabled, HasTheme {
     }
 
     /**
-     * Returns the content components which were added via {@link #setContent(Component)}
-     * or via {@link #addContent(Component...)}
+     * Returns the content components which were added via
+     * {@link #setContent(Component)} or via {@link #addContent(Component...)}
      *
      * @return the child components of the content section
      */
@@ -199,18 +208,21 @@ public class Details extends Component implements HasEnabled, HasTheme {
      *            theme variants to add
      */
     public void addThemeVariants(DetailsVariant... variants) {
-        getThemeNames().addAll(Stream.of(variants)
-                .map(DetailsVariant::getVariantName).collect(Collectors.toList()));
+        getThemeNames()
+                .addAll(Stream.of(variants).map(DetailsVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 
     /**
      * Removes theme variants from the component.
      *
-     * @param variants theme variants to remove
+     * @param variants
+     *            theme variants to remove
      */
     public void removeThemeVariants(DetailsVariant... variants) {
-        getThemeNames().removeAll(Stream.of(variants)
-                .map(DetailsVariant::getVariantName).collect(Collectors.toList()));
+        getThemeNames().removeAll(
+                Stream.of(variants).map(DetailsVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 
     @DomEvent("opened-changed")
@@ -231,11 +243,13 @@ public class Details extends Component implements HasEnabled, HasTheme {
      * Adds a listener for {@code opened-changed} events fired by the
      * webcomponent.
      *
-     * @param listener the listener
+     * @param listener
+     *            the listener
      * @return a {@link Registration} for removing the event listener
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return ComponentUtil.addListener(this, OpenedChangeEvent.class, listener);
+        return ComponentUtil.addListener(this, OpenedChangeEvent.class,
+                listener);
     }
 }
