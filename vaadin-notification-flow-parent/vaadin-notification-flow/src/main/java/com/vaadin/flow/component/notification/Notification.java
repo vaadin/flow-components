@@ -18,6 +18,7 @@ package com.vaadin.flow.component.notification;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -27,6 +28,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -45,7 +47,7 @@ import com.vaadin.flow.shared.Registration;
 @HtmlImport("frontend://flow-component-renderer.html")
 @JsModule("flow-component-renderer.js")
 public class Notification extends GeneratedVaadinNotification<Notification>
-        implements HasComponents {
+        implements HasComponents, HasTheme {
 
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
@@ -516,6 +518,30 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     public Registration addDetachListener(
             ComponentEventListener<DetachEvent> listener) {
         return super.addDetachListener(listener);
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(NotificationVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(NotificationVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(NotificationVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(NotificationVariant::getVariantName)
+                        .collect(Collectors.toList()));
     }
 
     private void attachComponentTemplate() {

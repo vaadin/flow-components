@@ -8,7 +8,7 @@ for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Running the component demo
 Run from the command line:
-- `mvn  -pl vaadin-notification-flow-demo -Pwar install jetty:run`
+- `mvn  -pl vaadin-notification-flow-demo -Pwar jetty:run`
 
 Then navigate to `http://localhost:9998/vaadin-notification` to view the demo.
 

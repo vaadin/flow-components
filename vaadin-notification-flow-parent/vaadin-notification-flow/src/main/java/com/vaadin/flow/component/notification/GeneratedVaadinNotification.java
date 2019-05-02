@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 Vaadin Ltd.
+ * Copyright 2000-2019 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,7 +33,40 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  * <p>
  * {@code <vaadin-notification>} is a Web Component providing accessible and
- * customizable notifications (toasts).
+ * customizable notifications (toasts). The content of the notification can be
+ * populated in two ways: imperatively by using renderer callback function and
+ * declaratively by using Polymer's Templates.
+ * </p>
+ * <h3>Rendering</h3>
+ * <p>
+ * By default, the notification uses the content provided by using the renderer
+ * callback function.
+ * </p>
+ * <p>
+ * The renderer function provides {@code root}, {@code notification} arguments.
+ * Generate DOM content, append it to the {@code root} element and control the
+ * state of the host element by accessing {@code notification}. Before
+ * generating new content, users are able to check if there is already content
+ * in {@code root} for reusing it.
+ * </p>
+ * <p>
+ * &lt;vaadin-notification
+ * id=&quot;notification&quot;&gt;&lt;/vaadin-notification&gt;
+ * {@code const notification = document.querySelector('#notification');
+ * notification.renderer = function(root) root.textContent = &quot;Your work has
+ * been saved&quot;; };}
+ * </p>
+ * <p>
+ * Renderer is called on the opening of the notification. DOM generated during
+ * the renderer call can be reused in the next renderer call and will be
+ * provided with the {@code root} argument. On first call it will be empty.
+ * </p>
+ * <h3>Polymer Templates</h3>
+ * <p>
+ * Alternatively, the content can be provided with Polymer's Template.
+ * Notification finds the first child template and uses that in case renderer
+ * callback function is not provided. You can also set a custom template using
+ * the {@code template} property.
  * </p>
  * <p>
  * {@code
@@ -43,9 +76,21 @@ Your work has been saved
 </template>
 </vaadin-notification>}
  * </p>
+ * <h3>Styling</h3>
+ * <p>
+ * {@code <vaadin-notification>} uses {@code <vaadin-notification-card>}
+ * internal themable component as the actual visible notification cards. See the
+ * stylable parts the <a href=
+ * "https://vaadin.com/components/vaadin-notification/html-api/elements/Vaadin.NotificationCard"
+ * >{@code <vaadin-notification-card>} API</a>.
+ * </p>
+ * <p>
+ * Note: the {@code theme} attribute value set on {@code <vaadin-notification>}
+ * is propagated to the internal {@code <vaadin-notification-card>}.
+ * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.NotificationElement#1.1.0", "Flow#1.1-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.5-SNAPSHOT",
+        "WebComponent: Vaadin.NotificationElement#1.3.0", "Flow#1.5-SNAPSHOT" })
 @Tag("vaadin-notification")
 @NpmPackage(value = "@vaadin/vaadin-notification", version = "1.2.0")
 @JsModule("@vaadin/vaadin-notification/vaadin-notification.js")
@@ -64,7 +109,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code duration} property from the webcomponent
      */
     protected double getDurationDouble() {
@@ -79,7 +124,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * The duration in milliseconds to show the notification. Set to {@code 0}
      * or a negative number to disable the notification auto-closing.
      * </p>
-     *
+     * 
      * @param duration
      *            the double value to set
      */
@@ -97,7 +142,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * This property is synchronized automatically from client side when a
      * 'opened-changed' event happens.
      * </p>
-     *
+     * 
      * @return the {@code opened} property from the webcomponent
      */
     @Synchronize(property = "opened", value = "opened-changed")
@@ -112,7 +157,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * <p>
      * True if the notification is currently displayed.
      * </p>
-     *
+     * 
      * @param opened
      *            the boolean value to set
      */
@@ -131,7 +176,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     *
+     * 
      * @return the {@code position} property from the webcomponent
      */
     protected String getPositionString() {
@@ -146,12 +191,24 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * Alignment of the notification in the viewport Valid values are
      * {@code top-stretch|top-start|top-center|top-end|middle|bottom-start|bottom-center|bottom-end|bottom-stretch}
      * </p>
-     *
+     * 
      * @param position
      *            the String value to set
      */
     protected void setPosition(String position) {
         getElement().setProperty("position", position == null ? "" : position);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Manually invoke existing renderer.
+     * </p>
+     */
+    protected void render() {
+        getElement().callFunction("render");
     }
 
     /**
@@ -195,7 +252,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
     /**
      * Adds a listener for {@code opened-changed} events fired by the
      * webcomponent.
-     *
+     * 
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
