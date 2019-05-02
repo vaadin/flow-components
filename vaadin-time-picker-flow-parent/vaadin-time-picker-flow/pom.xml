@@ -18,17 +18,17 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-time-picker</artifactId>
-            <version>1.2.0</version>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-combo-box</artifactId>
-            <version>4.2.2</version>
+            <version>5.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-text-field</artifactId>
-            <version>2.1.7</version>
+            <version>2.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>

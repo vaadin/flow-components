@@ -151,4 +151,35 @@ public class TimePickerTest {
         timePicker.setStep(Duration.ofNanos(500_000));
     }
 
+    @Test
+    public void setMin_getMin() {
+        TimePicker timePicker = new TimePicker();
+        timePicker.setMin("12:00");
+        assertEquals("12:00", timePicker.getMin());
+    }
+
+    @Test
+    public void setMax_getMax() {
+        TimePicker timePicker = new TimePicker();
+        timePicker.setMax("12:00");
+        assertEquals("12:00", timePicker.getMax());
+    }
+
+    @Test
+    public void clearButtonVisiblePropertyValue() {
+        TimePicker timePicker = new TimePicker();
+
+        assertFalse("Clear button should not be visible by default",
+                timePicker.isClearButtonVisible());
+        assertClearButtonPropertyValueEquals(timePicker, true);
+        assertClearButtonPropertyValueEquals(timePicker, false);
+    }
+
+    public void assertClearButtonPropertyValueEquals(TimePicker timePicker, Boolean value) {
+        timePicker.setClearButtonVisible(value);
+        assertEquals(value, timePicker.isClearButtonVisible());
+        assertEquals(timePicker.isClearButtonVisible(),
+                timePicker.getElement().getProperty("clearButtonVisible", value));
+    }
+
 }

@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2018 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -46,10 +46,85 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
  * When the selected {@code value} is changed, a {@code value-changed} event is
  * triggered.
  * </p>
+ * <h3>Styling</h3>
+ * <p>
+ * The following custom properties are available for styling:
+ * </p>
+ * <table>
+ * <thead>
+ * <tr>
+ * <th>Part name</th>
+ * <th>Description</th>
+ * </tr>
+ * </thead> <tbody>
+ * <tr>
+ * <td>{@code toggle-button}</td>
+ * <td>The toggle button</td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * <p>
+ * See <a
+ * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
+ * how to apply styles for shadow parts</a>
+ * </p>
+ * <p>
+ * The following state attributes are available for styling:
+ * </p>
+ * <table>
+ * <thead>
+ * <tr>
+ * <th>Attribute</th>
+ * <th>Description</th>
+ * <th>Part name</th>
+ * </tr>
+ * </thead> <tbody>
+ * <tr>
+ * <td>{@code disabled}</td>
+ * <td>Set to a disabled time picker</td>
+ * <td>:host</td>
+ * </tr>
+ * <tr>
+ * <td>{@code readonly}</td>
+ * <td>Set to a read only time picker</td>
+ * <td>:host</td>
+ * </tr>
+ * <tr>
+ * <td>{@code invalid}</td>
+ * <td>Set when the element is invalid</td>
+ * <td>:host</td>
+ * </tr>
+ * <tr>
+ * <td>{@code focused}</td>
+ * <td>Set when the element is focused</td>
+ * <td>:host</td>
+ * </tr>
+ * <tr>
+ * <td>{@code focus-ring}</td>
+ * <td>Set when the element is keyboard focused</td>
+ * <td>:host</td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * <p>
+ * In addition to {@code <vaadin-time-picker>} itself, the following internal
+ * components are themable:
+ * </p>
+ * <ul>
+ * <li>{@code <vaadin-time-picker-text-field>}, see <a href=
+ * "https://vaadin.com/components/vaadin-text-field/html-api/elements/Vaadin.TextFieldElement"
+ * >{@code <vaadin-text-field>} documentation</a> for the text field parts.</li>
+ * <li>{@code <vaadin-combo-box-light>}, see <a href=
+ * "https://vaadin.com/components/vaadin-combo-box/html-api/elements/Vaadin.ComboBoxElement"
+ * >{@code <vaadin-combo-box>} documentation</a> for the combo box parts.</li>
+ * </ul>
+ * <p>
+ * Note: the {@code theme} attribute value set on {@code <vaadin-time-picker>}
+ * is propagated to the internal themable components listed above.
+ * </p>
  */
-@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
-        "WebComponent: Vaadin.TimePickerElement#1.0.0-beta1",
-        "Flow#1.1-SNAPSHOT" })
+@Generated({ "Generator: com.vaadin.generator.ComponentGenerator#2.0-SNAPSHOT",
+        "WebComponent: Vaadin.TimePickerElement#2.0.0", "Flow#2.0-SNAPSHOT" })
 @Tag("vaadin-time-picker")
 @HtmlImport("frontend://bower_components/vaadin-time-picker/src/vaadin-time-picker.html")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
@@ -98,7 +173,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code disabled} property from the webcomponent
      */
     protected boolean isDisabledBoolean() {
@@ -112,7 +187,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * Set to true to disable this input.
      * </p>
-     * 
+     *
      * @param disabled
      *            the boolean value to set
      */
@@ -130,7 +205,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code name} property from the webcomponent
      */
     protected String getNameString() {
@@ -144,7 +219,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * The name of this element.
      * </p>
-     * 
+     *
      * @param name
      *            the String value to set
      */
@@ -162,7 +237,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code label} property from the webcomponent
      */
     protected String getLabelString() {
@@ -176,7 +251,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * The label for this element.
      * </p>
-     * 
+     *
      * @param label
      *            the String value to set
      */
@@ -194,7 +269,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code required} property from the webcomponent
      */
     protected boolean isRequiredBoolean() {
@@ -208,7 +283,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * Set to true to mark the input as required.
      * </p>
-     * 
+     *
      * @param required
      *            the boolean value to set
      */
@@ -226,7 +301,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code preventInvalidInput} property from the webcomponent
      */
     protected boolean isPreventInvalidInputBoolean() {
@@ -240,7 +315,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * Set to true to prevent the user from entering invalid input.
      * </p>
-     * 
+     *
      * @param preventInvalidInput
      *            the boolean value to set
      */
@@ -258,7 +333,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code pattern} property from the webcomponent
      */
     protected String getPatternString() {
@@ -272,7 +347,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * A pattern to validate the {@code input} with.
      * </p>
-     * 
+     *
      * @param pattern
      *            the String value to set
      */
@@ -290,7 +365,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code errorMessage} property from the webcomponent
      */
     protected String getErrorMessageString() {
@@ -304,7 +379,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * The error message to display when the input is invalid.
      * </p>
-     * 
+     *
      * @param errorMessage
      *            the String value to set
      */
@@ -323,7 +398,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code placeholder} property from the webcomponent
      */
     protected String getPlaceholderString() {
@@ -337,7 +412,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * A placeholder string in addition to the label.
      * </p>
-     * 
+     *
      * @param placeholder
      *            the String value to set
      */
@@ -356,7 +431,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code readonly} property from the webcomponent
      */
     protected boolean isReadonlyBoolean() {
@@ -370,7 +445,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * Set to true to prevent user picking a date or typing in the input.
      * </p>
-     * 
+     *
      * @param readonly
      *            the boolean value to set
      */
@@ -388,7 +463,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This property is synchronized automatically from client side when a
      * 'invalid-changed' event happens.
      * </p>
-     * 
+     *
      * @return the {@code invalid} property from the webcomponent
      */
     @Synchronize(property = "invalid", value = "invalid-changed")
@@ -403,7 +478,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * Set to true if the value is invalid.
      * </p>
-     * 
+     *
      * @param invalid
      *            the boolean value to set
      */
@@ -416,23 +491,124 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Specifies the number of valid intervals in a day or in an hour used for
-     * configuring the items displayed in the selection box.
+     * Minimum time allowed.
      * </p>
      * <p>
-     * It also configures the precission of the value string. By default the
+     * Supported time formats are in ISO 8601:
+     * </p>
+     * <ul>
+     * <li>{@code hh:mm}</li>
+     * <li>{@code hh:mm:ss}</li>
+     * <li>{@code hh:mm:ss.fff}
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.</li>
+     * </ul>
+     *
+     * @return the {@code min} property from the webcomponent
+     */
+    protected String getMinString() {
+        return getElement().getProperty("min");
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Minimum time allowed.
+     * </p>
+     * <p>
+     * Supported time formats are in ISO 8601:
+     * </p>
+     * <ul>
+     * <li>{@code hh:mm}</li>
+     * <li>{@code hh:mm:ss}</li>
+     * <li>{@code hh:mm:ss.fff}</li>
+     * </ul>
+     *
+     * @param min
+     *            the String value to set
+     */
+    protected void setMin(String min) {
+        getElement().setProperty("min", min == null ? "" : min);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Maximum time allowed.
+     * </p>
+     * <p>
+     * Supported time formats are in ISO 8601:
+     * </p>
+     * <ul>
+     * <li>{@code hh:mm}</li>
+     * <li>{@code hh:mm:ss}</li>
+     * <li>{@code hh:mm:ss.fff}
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.</li>
+     * </ul>
+     *
+     * @return the {@code max} property from the webcomponent
+     */
+    protected String getMaxString() {
+        return getElement().getProperty("max");
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Maximum time allowed.
+     * </p>
+     * <p>
+     * Supported time formats are in ISO 8601:
+     * </p>
+     * <ul>
+     * <li>{@code hh:mm}</li>
+     * <li>{@code hh:mm:ss}</li>
+     * <li>{@code hh:mm:ss.fff}</li>
+     * </ul>
+     *
+     * @param max
+     *            the String value to set
+     */
+    protected void setMax(String max) {
+        getElement().setProperty("max", max == null ? "" : max);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Specifies the number of valid intervals in a day used for configuring the
+     * items displayed in the selection box.
+     * </p>
+     * <p>
+     * It also configures the precision of the value string. By default the
      * component formats values as {@code hh:mm} but setting a step value lower
      * than one minute or one second, format resolution changes to
      * {@code hh:mm:ss} and {@code hh:mm:ss.fff} respectively.
      * </p>
      * <p>
      * Unit must be set in seconds, and for correctly configuring intervals in
-     * the dropdown, it need to evenly divide a day or an hour.
+     * the dropdown, it need to evenly divide a day.
+     * </p>
+     * <p>
+     * Note: it is possible to define step that is dividing an hour in inexact
+     * fragments (i.e. 5760 seconds which equals 1 hour 36 minutes), but it is
+     * not recommended to use it for better UX experience.
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code step} property from the webcomponent
      */
     protected double getStepDouble() {
@@ -444,25 +620,62 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Specifies the number of valid intervals in a day or in an hour used for
-     * configuring the items displayed in the selection box.
+     * Specifies the number of valid intervals in a day used for configuring the
+     * items displayed in the selection box.
      * </p>
      * <p>
-     * It also configures the precission of the value string. By default the
+     * It also configures the precision of the value string. By default the
      * component formats values as {@code hh:mm} but setting a step value lower
      * than one minute or one second, format resolution changes to
      * {@code hh:mm:ss} and {@code hh:mm:ss.fff} respectively.
      * </p>
      * <p>
      * Unit must be set in seconds, and for correctly configuring intervals in
-     * the dropdown, it need to evenly divide a day or an hour.
+     * the dropdown, it need to evenly divide a day.
      * </p>
-     * 
+     * <p>
+     * Note: it is possible to define step that is dividing an hour in inexact
+     * fragments (i.e. 5760 seconds which equals 1 hour 36 minutes), but it is
+     * not recommended to use it for better UX experience.
+     * </p>
+     *
      * @param step
      *            the double value to set
      */
     protected void setStep(double step) {
         getElement().setProperty("step", step);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Set to true to display the clear icon which clears the input.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     *
+     * @return the {@code clearButtonVisible} property from the webcomponent
+     */
+    protected boolean isClearButtonVisibleBoolean() {
+        return getElement().getProperty("clearButtonVisible", false);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * Set to true to display the clear icon which clears the input.
+     * </p>
+     *
+     * @param clearButtonVisible
+     *            the boolean value to set
+     */
+    protected void setClearButtonVisible(boolean clearButtonVisible) {
+        getElement().setProperty("clearButtonVisible", clearButtonVisible);
     }
 
     /**
@@ -477,7 +690,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * The object has the following JSON structure:
      * </p>
-     * 
+     *
      * <pre>
      * <code>            {
      * 	              // A function to format given {@code Object} as
@@ -486,7 +699,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * 	                // returns a string representation of the given
      * 	                // object in {@code hh} / 'hh:mm' / 'hh:mm:ss' / 'hh:mm:ss.fff' - formats
      * 	              },
-     * 
+     *
      * 	              // A function to parse the given text to an {@code Object} in the format
      * 	              // {@code { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }}.
      * 	              // Must properly parse (at least) text
@@ -494,14 +707,17 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * 	              parseTime: text =&gt; {
      * 	                // Parses a string in object/string that can be formatted by{@code formatTime}.
      * 	              }
-     * 
+     *
      * 	              // Translation of the time selector icon button title.
      * 	              selector: 'Time selector',
+     *
+     * 	              // Translation of the time selector clear button title.
+     * 	              clear: 'Clear'
      * 	            }
      * 	          &lt;p&gt;This property is not synchronized automatically from the client side, so the returned value may not be the same as in client side.
      * 	</code>
      * </pre>
-     * 
+     *
      * @return the {@code i18n} property from the webcomponent
      */
     protected JsonObject getI18nJsonObject() {
@@ -520,7 +736,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * The object has the following JSON structure:
      * </p>
-     * 
+     *
      * <pre>
      * <code>            {
      * 	              // A function to format given {@code Object} as
@@ -529,7 +745,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * 	                // returns a string representation of the given
      * 	                // object in {@code hh} / 'hh:mm' / 'hh:mm:ss' / 'hh:mm:ss.fff' - formats
      * 	              },
-     * 
+     *
      * 	              // A function to parse the given text to an {@code Object} in the format
      * 	              // {@code { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }}.
      * 	              // Must properly parse (at least) text
@@ -537,13 +753,16 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * 	              parseTime: text =&gt; {
      * 	                // Parses a string in object/string that can be formatted by{@code formatTime}.
      * 	              }
-     * 
+     *
      * 	              // Translation of the time selector icon button title.
      * 	              selector: 'Time selector',
+     *
+     * 	              // Translation of the time selector clear button title.
+     * 	              clear: 'Clear'
      * 	            }
      * 	</code>
      * </pre>
-     * 
+     *
      * @param i18n
      *            the JsonObject value to set
      */
@@ -584,46 +803,6 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
         getElement().callFunction("checkValidity");
     }
 
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Minimum time allowed.
-     *
-     * Supported time formats are in ISO 8601:
-     * - `hh:mm`
-     * - `hh:mm:ss`
-     * - `hh:mm:ss.fff`
-     * </p>
-     *
-     * @param min
-     *            the String value to set
-     */
-    protected void setMin(String min) {
-        getElement().setProperty("min", min);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Maximum time allowed.
-     *
-     * Supported time formats are in ISO 8601:
-     * - `hh:mm`
-     * - `hh:mm:ss`
-     * - `hh:mm:ss.fff`
-     * </p>
-     *
-     * @param max
-     *            the String value to set
-     */
-    protected void setMax(String max) {
-        getElement().setProperty("max", max);
-    }
-
     public static class InvalidChangeEvent<R extends GeneratedVaadinTimePicker<R, ?>>
             extends ComponentEvent<R> {
         private final boolean invalid;
@@ -641,7 +820,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
     /**
      * Adds a listener for {@code invalid-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -658,7 +837,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
     /**
      * Constructs a new GeneratedVaadinTimePicker component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -673,9 +852,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            the property type
      */
     public <P> GeneratedVaadinTimePicker(T initialValue, T defaultValue,
-            Class<P> elementPropertyType,
-            SerializableFunction<P, T> presentationToModel,
-            SerializableFunction<T, P> modelToPresentation) {
+                                         Class<P> elementPropertyType,
+                                         SerializableFunction<P, T> presentationToModel,
+                                         SerializableFunction<T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
@@ -687,7 +866,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
     /**
      * Constructs a new GeneratedVaadinTimePicker component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -696,7 +875,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            whether <code>null</code> is accepted as a model value
      */
     public GeneratedVaadinTimePicker(T initialValue, T defaultValue,
-            boolean acceptNullValues) {
+                                     boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
             setModelValue(initialValue, false);
@@ -707,7 +886,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
     /**
      * Constructs a new GeneratedVaadinTimePicker component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -724,9 +903,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            the property type
      */
     public <P> GeneratedVaadinTimePicker(T initialValue, T defaultValue,
-            Class<P> elementPropertyType,
-            SerializableBiFunction<R, P, T> presentationToModel,
-            SerializableBiFunction<R, T, P> modelToPresentation) {
+                                         Class<P> elementPropertyType,
+                                         SerializableBiFunction<R, P, T> presentationToModel,
+                                         SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {

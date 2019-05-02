@@ -48,6 +48,7 @@ public class TimePickerView extends DemoView {
         createDefaultTimePicker();
         createLocalizedTimePicker();
         createDisabledTimePicker();
+        createWithClearButton();
         createTimePickerWithStepSetting();
         createTimePickerWithMinAndMaxSetting();
     }
@@ -167,6 +168,19 @@ public class TimePickerView extends DemoView {
 
         timePicker.setId("disabled-picker");
         addCard("Disabled Time Picker", timePicker, message);
+    }
+
+    private void createWithClearButton() {
+        // begin-source-example
+        // source-example-heading: Clear button
+        TimePicker timePicker = new TimePicker();
+        timePicker.setValue(LocalTime.now());
+
+        // Display an icon which can be clicked to clear the value:
+        timePicker.setClearButtonVisible(true);
+        // end-source-example
+
+        addCard("Clear button", timePicker);
     }
 
     private void createTimePickerWithMinAndMaxSetting() {

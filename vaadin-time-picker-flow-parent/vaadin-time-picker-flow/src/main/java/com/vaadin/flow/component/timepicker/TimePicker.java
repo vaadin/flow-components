@@ -351,10 +351,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
-     * Set the minimum values for the date picker.
+     * Sets the minimum time in the time picker. Times before that will be
+     * disabled in the popup.
      *
      * @param min
-     *            the String value to set
+     *            the minimum time that is allowed to be selected, or
+     *            <code>null</code> to remove any minimum constraints
      */
     @Override
     public void setMin(String min) {
@@ -362,14 +364,64 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
-     * Set the minimum values for the date picker.
+     * Gets the minimum time in the time picker. Time before that will be
+     * disabled in the popup.
+     *
+     * @return the minimum time that is allowed to be selected, or
+     *         <code>null</code> if there's no minimum
+     */
+    public String getMin() {
+        return super.getMinString();
+    }
+
+    /**
+     * Sets the maximum time in the time picker. Times after that will be
+     * disabled in the popup.
      *
      * @param max
-     *            the String value to set
+     *            the maximum time that is allowed to be selected, or
+     *            <code>null</code> to remove any maximum constraints
      */
     @Override
     public void setMax(String max) {
         super.setMax(max);
+    }
+
+    /**
+     * Gets the maximum time in the time picker. Times after that will be
+     * disabled in the popup.
+     *
+     * @return the maximum time that is allowed to be selected, or
+     *         <code>null</code> if there's no maximum
+     */
+    public String getMax() {
+        return super.getMaxString();
+    }
+
+    /**
+     * Sets displaying a clear button in the time picker when it has value.
+     * <p>
+     * The clear button is an icon, which can be clicked to set the time picker
+     * value to {@code null}.
+     *
+     * @param clearButtonVisible
+     *            {@code true} to display the clear button, {@code false} to
+     *            hide it
+     */
+    @Override
+    public void setClearButtonVisible(boolean clearButtonVisible) {
+        super.setClearButtonVisible(clearButtonVisible);
+    }
+
+    /**
+     * Gets whether this time picker displays a clear button when it has value.
+     *
+     * @return {@code true} if this time picker displays a clear button,
+     *         {@code false} otherwise
+     * @see #setClearButtonVisible(boolean)
+     */
+    public boolean isClearButtonVisible() {
+        return super.isClearButtonVisibleBoolean();
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
