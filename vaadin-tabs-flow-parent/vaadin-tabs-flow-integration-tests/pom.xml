@@ -40,7 +40,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-tabs-flow-testbench</artifactId>
+            <artifactId>vaadin-tabs-testbench</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
