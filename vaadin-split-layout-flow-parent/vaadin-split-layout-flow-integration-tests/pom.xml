@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-split-layout-flow-testbench</artifactId>
+            <artifactId>vaadin-split-layout-testbench</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
