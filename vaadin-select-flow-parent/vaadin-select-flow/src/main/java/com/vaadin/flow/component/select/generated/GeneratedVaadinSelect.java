@@ -27,6 +27,8 @@ import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
@@ -189,6 +191,8 @@ import com.vaadin.flow.shared.Registration;
         "WebComponent: Vaadin.SelectElement#2.0.2", "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-select")
 @HtmlImport("frontend://bower_components/vaadin-select/src/vaadin-select.html")
+@NpmPackage(value = "@vaadin/vaadin-select", version = "2.1.0")
+@JsModule("@vaadin/vaadin-select/src/vaadin-select.js")
 public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R> {

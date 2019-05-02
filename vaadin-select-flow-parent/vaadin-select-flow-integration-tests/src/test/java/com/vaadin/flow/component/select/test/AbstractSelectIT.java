@@ -13,6 +13,7 @@ import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -52,9 +53,18 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
         private void setInputValue(String id, String value) {
             selectElement.closePopup();
             TestBenchElement input = $(TestBenchElement.class).id(id);
-            input.clear();
+            clear(input);
             input.sendKeys(value);
             input.callFunction("blur");
+        }
+
+        private void clear(TestBenchElement input) {
+            String value = input.getAttribute("value");
+            CharSequence[] clearSequence = new CharSequence[value.length()];
+            for (int i = 0; i < clearSequence.length; i++) {
+                clearSequence[i] = Keys.BACK_SPACE;
+            }
+            input.sendKeys(clearSequence);
         }
 
         public void clickResetNItems(int N) {
