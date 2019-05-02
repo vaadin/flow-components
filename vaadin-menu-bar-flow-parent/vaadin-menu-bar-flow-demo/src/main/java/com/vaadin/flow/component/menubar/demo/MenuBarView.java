@@ -24,7 +24,6 @@ import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -204,13 +203,8 @@ public class MenuBarView extends DemoView {
 
         menuBar.addItem(new Html("<b>Home</b>"), e -> selected.setText("Home"));
 
-        Icon icon = new Icon(VaadinIcon.USER);
-        icon.getStyle().set("height", "1em");
-        Span component = new Span(icon, new Text("Profile"));
-        component.getStyle().set("display", "flex").set("align-items",
-                "center");
-
-        MenuItem profile = menuBar.addItem(component);
+        MenuItem profile = menuBar.addItem("Profile");
+        profile.addComponentAsFirst(new Icon(VaadinIcon.USER));
 
         profile.getSubMenu().addItem("Edit Profile",
                 e -> selected.setText("Edit Profile"));
