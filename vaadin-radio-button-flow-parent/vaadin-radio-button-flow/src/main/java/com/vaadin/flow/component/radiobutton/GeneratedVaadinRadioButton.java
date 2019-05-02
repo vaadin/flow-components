@@ -26,6 +26,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -103,6 +104,7 @@ import com.vaadin.flow.shared.Registration;
         "WebComponent: Vaadin.RadioButtonElement#1.1.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-radio-button")
 @HtmlImport("frontend://bower_components/vaadin-radio-button/src/vaadin-radio-button.html")
+@JsModule("@vaadin/vaadin-radio-button/vaadin-radio-button.js")
 public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioButton<R>>
         extends Component implements HasStyle, Focusable<R>, ClickNotifier<R> {
 
