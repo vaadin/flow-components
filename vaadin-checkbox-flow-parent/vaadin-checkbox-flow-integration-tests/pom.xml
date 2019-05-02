@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-checkbox-flow-testbench</artifactId>
+            <artifactId>vaadin-checkbox-testbench</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
