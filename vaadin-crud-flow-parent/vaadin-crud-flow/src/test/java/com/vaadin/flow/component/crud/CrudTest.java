@@ -83,7 +83,7 @@ public class CrudTest {
         }
 
         @Override
-        public boolean isValid() {
+        public boolean validate() {
             return false;
         }
 

@@ -165,6 +165,22 @@ public class EventHandlingIT extends AbstractParallelTest {
                 $(GridElement.class).first().getCell(0, 2).getText());
     }
 
+    @Test
+    public void invalidFieldsIndicatedOnSave() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        crud.openRowForEditing(1);
+
+        TextFieldElement lastNameField = crud.getEditor().$(TextFieldElement.class)
+                .attribute("editor-role", "last-name").first();
+
+        Assert.assertFalse(lastNameField.hasAttribute("invalid"));
+
+        lastNameField.setValue("Raiden");
+        crud.getEditorSaveButton().click();
+
+        Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+    }
+
     private static String getFooterText(CrudElement crud) {
         return crud.getToolbar().get(0).getText();
     }

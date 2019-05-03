@@ -28,7 +28,7 @@ class PersonCrudDataProvider extends AbstractBackEndDataProvider<Person, CrudFil
     public static List<Person> generatePersonsList() {
         return Stream.of(
             new Person(1, "Sayo", "Sayo"),
-            new Person(2, "Manolo", "Manolo"),
+            new Person(2, "Manolo", "Otto"),
             new Person(3, "Guille", "Guille")
         ).collect(Collectors.toList());
     }

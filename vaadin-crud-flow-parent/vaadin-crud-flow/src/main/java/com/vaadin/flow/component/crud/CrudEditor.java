@@ -62,11 +62,13 @@ public interface CrudEditor<E> extends Serializable {
     void clear();
 
     /**
-     * Checks whether the data entered into an editor is valid.
+     * Runs validations on the data entered into an editor and returns their
+     * validity but could also have side-effects such as showing visual
+     * indicators for invalid fields.
      *
      * @return true if valid or false if otherwise
      */
-    boolean isValid();
+    boolean validate();
 
     /**
      * Writes any pending input update (if any) to the item.

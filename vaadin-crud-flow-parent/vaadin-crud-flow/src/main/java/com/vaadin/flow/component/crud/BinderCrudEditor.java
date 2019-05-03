@@ -90,8 +90,8 @@ public class BinderCrudEditor<E> implements CrudEditor<E> {
     }
 
     @Override
-    public boolean isValid() {
-        return binder.isValid();
+    public boolean validate() {
+        return binder.validate().isOk();
     }
 
     @Override

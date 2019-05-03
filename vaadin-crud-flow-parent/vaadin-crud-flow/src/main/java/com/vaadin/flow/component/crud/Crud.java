@@ -188,7 +188,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
 
         ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<SaveEvent<E>>) e -> {
-                    if (!getEditor().isValid()) {
+                    if (!getEditor().validate()) {
                         return;
                     }
 
