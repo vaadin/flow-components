@@ -259,7 +259,7 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     private List<JsonObject> getLoadedItems(ComboBoxElement comboBox) {
         List<JsonObject> list = (List<JsonObject>) executeScript(
                 "return arguments[0].filteredItems.filter("
-                        + "item => !(item instanceof Vaadin.ComboBoxPlaceholder));",
+                        + "item => !(item instanceof window.Vaadin.ComboBoxPlaceholder));",
                 comboBox);
         return list;
     }

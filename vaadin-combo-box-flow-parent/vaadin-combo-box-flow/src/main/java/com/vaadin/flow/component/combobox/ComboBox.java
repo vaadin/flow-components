@@ -31,6 +31,7 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.binder.HasFilterableDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
@@ -84,6 +85,7 @@ import elemental.json.JsonValue;
 @HtmlImport("frontend://flow-component-renderer.html")
 @JavaScript("frontend://flow-component-renderer.js")
 @JavaScript("frontend://comboBoxConnector.js")
+@JsModule("frontend://comboBoxConnector-es6.js")
 @SuppressWarnings("serial")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
@@ -163,7 +165,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
 
         private void enqueue(String name, Serializable... arguments) {
-            queue.add(() -> getElement().callFunction(name, arguments));
+            queue.add(() -> getElement().callJsFunction(name, arguments));
         }
     }
 
@@ -347,7 +349,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         // Workaround for property not updating in certain scenario
         // https://github.com/vaadin/flow/issues/4862
         runBeforeClientResponse(
-                ui -> ui.getPage().executeJavaScript("$0.value=$1",
+                ui -> ui.getPage().executeJs("$0.value=$1",
                         getElement(), getElement().getProperty("value")));
     }
 
@@ -474,18 +476,18 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             userProvidedFilter = UserProvidedFilter.YES;
         }
 
-        runBeforeClientResponse(ui -> ui.getPage().executeJavaScript(
+        runBeforeClientResponse(ui -> ui.getPage().executeJs(
                 "window.Vaadin.Flow.comboBoxConnector.initLazy($0);",
                 getElement()));
 
         if (dataCommunicator == null) {
             dataCommunicator = new DataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> getElement()
-                            .callFunction("$connector.updateData", data),
+                            .callJsFunction("$connector.updateData", data),
                     getElement().getNode());
         }
 
-        getElement().callFunction("$connector.reset");
+        getElement().callJsFunction("$connector.reset");
         scheduleRender();
         setValue(null);
 
@@ -892,7 +894,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        getElement().callFunction("$connector.enableClientValidation",
+        getElement().callJsFunction("$connector.enableClientValidation",
                 !requiredIndicatorVisible);
     }
 
@@ -986,7 +988,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private void initConnector() {
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached ComboBox"))
-                .getPage().executeJavaScript(
+                .getPage().executeJs(
                         "window.Vaadin.Flow.comboBoxConnector.initLazy($0)",
                         getElement());
     }
@@ -1004,7 +1006,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             dataCommunicator.setRequestedRange(0, 0);
             dataCommunicator.reset();
         }
-        runBeforeClientResponse(ui -> ui.getPage().executeJavaScript(
+        runBeforeClientResponse(ui -> ui.getPage().executeJs(
                 // If-statement is needed because on the first attach this
                 // JavaScript is called before initializing the connector.
                 "if($0.$connector) $0.$connector.reset();", getElement()));
