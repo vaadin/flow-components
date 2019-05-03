@@ -379,6 +379,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, templateBox);
+        assertRendered("Item 8");
 
         getItemElements().get(8).click();
         assertMessage("Item 8");
