@@ -1,7 +1,5 @@
 package com.vaadin.flow.component.applayout.testbench;
 
-import java.util.List;
-
 /*
  * #%L
  * Vaadin App Layout Testbench API
