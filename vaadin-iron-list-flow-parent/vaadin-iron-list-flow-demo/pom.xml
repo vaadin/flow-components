@@ -12,23 +12,17 @@
 
     <artifactId>vaadin-iron-list-flow-demo</artifactId>
     <packaging>${packaging.type}</packaging>
-
     <name>Vaadin IronList Flow Demo</name>
 
-    <properties>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
-    </properties>
     <dependencies>
+        <!-- Flow -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
-            <version>${flow.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
-            <version>${flow.version}</version>
         </dependency>
 
         <!-- Component -->
@@ -42,15 +36,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
-            <version>${flow.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
-        </dependency>
-
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
@@ -58,6 +44,11 @@
         </dependency>
 
         <!-- externals -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
+        </dependency>
         <dependency>
             <groupId>com.github.javafaker</groupId>
             <artifactId>javafaker</artifactId>
@@ -115,14 +106,6 @@
                         <artifactId>flow-maven-plugin</artifactId>
                     </plugin>
                     <plugin>
-                        <artifactId>maven-clean-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <version>3.2.2</version>
-                    </plugin>
-                    <plugin>
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
                         <configuration>
@@ -133,5 +116,4 @@
             </build>
         </profile>
     </profiles>
-
 </project>

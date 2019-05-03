@@ -1,8 +1,20 @@
-import {Debouncer} from '@polymer/polymer/lib/utils/debounce.js';
-import {timeOut} from '@polymer/polymer/lib/utils/async.js';
+
+
+// Not using ES6 imports in this file yet because the connector in V14 must
+// still work in Legacy bower projects. See: `ironListConnector-es6.js` for 
+// the Polymer3 approach.
+window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
+if (window.Polymer) {
+    // Polymer2 approach.
+    window.Vaadin.Flow.Legacy.Debouncer = window.Vaadin.Flow.Legacy.Debouncer || Polymer.Debouncer;
+    window.Vaadin.Flow.Legacy.timeOut = window.Vaadin.Flow.Legacy.timeOut || Polymer.Async.timeOut;
+}
 
 window.Vaadin.Flow.ironListConnector = {
   initLazy: function(list) {
+
+    const Debouncer = window.Vaadin.Flow.Legacy.Debouncer;
+    const timeOut = window.Vaadin.Flow.Legacy.timeOut;
 
     // Check whether the connector was already initialized for the Iron list
     if (list.$connector){

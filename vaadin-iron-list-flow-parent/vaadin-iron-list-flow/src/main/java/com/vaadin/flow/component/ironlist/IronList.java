@@ -26,6 +26,8 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -74,16 +76,22 @@ import elemental.json.JsonValue;
  *      webcomponent documentation</a>
  */
 @Tag("iron-list")
+// NPM MODE
 @NpmPackage(value = "@polymer/iron-list", version = "3.0.2")
 @JsModule("@polymer/iron-list/iron-list.js")
 @JsModule("frontend://flow-component-renderer.js")
-@JsModule("frontend://ironListConnector.js")
+@JsModule("frontend://ironListConnector-es6.js")
+@JsModule("frontend://ironListStyles.js")
+// BOWER MODE
+@HtmlImport("frontend://bower_components/iron-list/iron-list.html")
+@HtmlImport("frontend://flow-component-renderer.html")
+@JavaScript("frontend://ironListConnector.js")
 @StyleSheet("frontend://ironListStyles.css")
 public class IronList<T> extends Component implements HasDataProvider<T>,
         HasStyle, HasSize, Focusable<IronList<T>> {
 
     private final class UpdateQueue implements Update {
-        private List<Runnable> queue = new ArrayList<>();
+        private transient List<Runnable> queue = new ArrayList<>();
 
         private UpdateQueue(int size) {
             enqueue("$connector.updateSize", size);
@@ -108,7 +116,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
         }
 
         private void enqueue(String name, Serializable... arguments) {
-            queue.add(() -> getElement().callFunction(name, arguments));
+            queue.add(() -> getElement().callJsFunction(name, arguments));
         }
     }
 
@@ -132,11 +140,11 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataGeneratorRegistration;
-    private T placeholderItem;
+    private transient T placeholderItem;
 
     private final DataCommunicator<T> dataCommunicator = new DataCommunicator<>(
             dataGenerator, arrayUpdater,
-            data -> getElement().callFunction("$connector.updateData", data),
+            data -> getElement().callJsFunction("$connector.updateData", data),
             getElement().getNode());
 
     /**
@@ -157,7 +165,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
     private void initConnector() {
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached IronList"))
-                .getPage().executeJavaScript(
+                .getPage().executeJs(
                         "window.Vaadin.Flow.ironListConnector.initLazy($0)",
                         getElement());
     }
@@ -173,7 +181,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      *
      * @return the data provider of this list, not {@code null}
      */
-    public DataProvider<T, ?> getDataProvider() {
+    public DataProvider<T, ?> getDataProvider() { //NOSONAR
         return getDataCommunicator().getDataProvider();
     }
 
@@ -259,7 +267,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
      */
     public void setPlaceholderItem(T placeholderItem) {
         this.placeholderItem = placeholderItem;
-        getElement().callFunction("$connector.setPlaceholderItem",
+        getElement().callJsFunction("$connector.setPlaceholderItem",
                 JsonSerializer.toJson(placeholderItem));
 
         registerTemplateUpdate();
@@ -314,6 +322,7 @@ public class IronList<T> extends Component implements HasDataProvider<T>,
              */
             placeholderTemplate = "<div style='width:100px;height:18px'></div>";
         } else if (renderer instanceof ComponentRenderer) {
+            @SuppressWarnings("unchecked")
             ComponentRenderer<?, T> componentRenderer = (ComponentRenderer<?, T>) renderer;
             Component component = componentRenderer
                     .createComponent(placeholderItem);
