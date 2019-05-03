@@ -83,13 +83,16 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @HtmlImport("frontend://flow-component-renderer.html")
-@JavaScript("frontend://flow-component-renderer.js")
+@JsModule("@vaadin/flow-frontend/flow-component-renderer.js")
 @JavaScript("frontend://comboBoxConnector.js")
 @JsModule("frontend://comboBoxConnector-es6.js")
-@SuppressWarnings("serial")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
         HasFilterableDataProvider<T, String> {
+
+    private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
+    private static final String PROP_SELECTED_ITEM = "selectedItem";
+    private static final String PROP_VALUE = "value";
 
     /**
      * A callback method for fetching items. The callback is provided with a
@@ -139,7 +142,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private final class UpdateQueue implements Update {
-        private List<Runnable> queue = new ArrayList<>();
+        private transient List<Runnable> queue = new ArrayList<>();
 
         private UpdateQueue(int size) {
             enqueue("$connector.updateSize", size);
@@ -332,9 +335,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         }
 
         if (value == null) {
-            getElement().setProperty("selectedItem", null);
-            getElement().setProperty("value", "");
-            getElement().setProperty("_inputElementValue", "");
+            getElement().setProperty(PROP_SELECTED_ITEM, null);
+            getElement().setProperty(PROP_VALUE, "");
+            getElement().setProperty(PROP_INPUT_ELEMENT_VALUE, "");
             return;
         }
 
@@ -344,13 +347,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         json.put("key", keyMapper.key(value));
         dataGenerator.generateData(value, json);
         setSelectedItem(json);
-        getElement().setProperty("value", keyMapper.key(value));
+        getElement().setProperty(PROP_VALUE, keyMapper.key(value));
 
         // Workaround for property not updating in certain scenario
         // https://github.com/vaadin/flow/issues/4862
         runBeforeClientResponse(
                 ui -> ui.getPage().executeJs("$0.value=$1",
-                        getElement(), getElement().getProperty("value")));
+                        getElement(), getElement().getProperty(PROP_VALUE)));
     }
 
     /**
@@ -614,7 +617,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return the data provider used by this ComboBox
      */
-    public DataProvider<T, ?> getDataProvider() {
+    public DataProvider<T, ?> getDataProvider() { //NOSONAR
         return dataCommunicator.getDataProvider();
     }
 

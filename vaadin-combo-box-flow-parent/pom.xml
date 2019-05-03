@@ -13,19 +13,21 @@
     <artifactId>vaadin-combo-box-flow-parent</artifactId>
     <version>3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Vaadin ComboBox Flow Parent</name>
+    <name>Vaadin Combo Box Flow Parent</name>
 
-    <properties>
-        <flow.version>2.0-SNAPSHOT</flow.version>
-        <testbench.version>6.0.1</testbench.version>
-        <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
-    
-     <modules>
+   <repositories>
+        <!-- repositories are configured in parent but still need this
+             when parent is a snapshot -->
+        <repository>
+            <id>vaadin-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <modules>
         <module>vaadin-combo-box-flow</module>
         <module>vaadin-combo-box-testbench</module>
         <module>vaadin-combo-box-flow-demo</module>
@@ -41,8 +43,8 @@
             </activation>
             <modules>
                 <module>vaadin-combo-box-flow-integration-tests</module>
+                <module>vaadin-combo-box-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
-
 </project>
