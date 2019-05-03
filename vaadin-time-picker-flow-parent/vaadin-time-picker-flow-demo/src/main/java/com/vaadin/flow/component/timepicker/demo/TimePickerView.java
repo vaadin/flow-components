@@ -42,7 +42,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route("vaadin-time-picker")
 @HtmlImport("frontend://hide-clear-button-theme.html")
-@JsModule("frontend://hide-clear-button-theme.js")
+@JsModule("@vaadin/flow-frontend/hide-clear-button-theme.js")
 public class TimePickerView extends DemoView {
 
     @Override
