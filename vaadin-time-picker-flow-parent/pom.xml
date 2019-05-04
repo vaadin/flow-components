@@ -1,51 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
 
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
         <version>2.0-SNAPSHOT</version>
-        <relativePath />
     </parent>
 
     <artifactId>vaadin-time-picker-flow-parent</artifactId>
     <version>2.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Vaadin TimePicker Flow Parent</name>
 
-    <organization>
-        <name>Vaadin Ltd</name>
-        <url>http://vaadin.com/</url>
-    </organization>
-
-    <properties>
-        <flow.version>2.0-SNAPSHOT</flow.version>
-        <testbench.version>6.0.1</testbench.version>
-        <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
+   <repositories>
+        <!-- repositories are configured in parent but still need this
+             when parent is a snapshot -->
+        <repository>
+            <id>vaadin-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
 
     <modules>
         <module>vaadin-time-picker-flow</module>
         <module>vaadin-time-picker-testbench</module>
         <module>vaadin-time-picker-flow-demo</module>
     </modules>
-
-    <repositories>
-        <repository>
-            <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>
-        </repository>
-        <repository>
-            <id>vaadin-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-        </repository>
-    </repositories>
 
     <profiles>
         <profile>
@@ -57,6 +43,7 @@
             </activation>
             <modules>
                 <module>vaadin-time-picker-flow-integration-tests</module>
+                <module>vaadin-time-picker-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
