@@ -7,50 +7,54 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-checkbox-flow-parent</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-checkbox-flow-demo</artifactId>
     <packaging>${packaging.type}</packaging>
     <name>Vaadin Checkbox Flow Demo</name>
 
-    <properties>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
-    </properties>
-
     <dependencies>
+        <!-- Flow -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
+        </dependency>
+
+        <!-- Component -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-checkbox-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- Dependencies for the demo -->
+
+        <!-- demo specific -->
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-client</artifactId>
-            <version>${flow.version}</version>
+            <artifactId>flow-component-demo-helpers</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-data</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-html-components</artifactId>
-            <version>${flow.version}</version>
-        </dependency>
+
+        <!-- externals -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>1.7.25</version>
         </dependency>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-component-demo-helpers</artifactId>
-            <version>${flow.version}</version>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>0.14</version>
         </dependency>
     </dependencies>
+
     <build>
         <resources>
             <resource>
@@ -97,9 +101,8 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <version>3.2.2</version>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>flow-maven-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>

@@ -27,6 +27,8 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
@@ -112,14 +114,16 @@ import com.vaadin.flow.shared.Registration;
  * </tbody>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.CheckboxElement#2.2.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-checkbox")
+@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.2.2")
+@JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
 @HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
 public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
