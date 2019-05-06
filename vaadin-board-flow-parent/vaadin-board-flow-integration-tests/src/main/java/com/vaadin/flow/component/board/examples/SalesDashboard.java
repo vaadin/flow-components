@@ -19,12 +19,17 @@ import com.vaadin.flow.component.charts.model.PointPlacement;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
 @Route("SalesDashboard")
 @BodySize
+// Charts are not migrated yet, so this is required until it's migrated
+@NpmPackage(value = "@vaadin/vaadin-charts", version = "6.2.2")
+@JsModule("@vaadin/vaadin-charts/vaadin-chart.js")
 public class SalesDashboard extends Div {
 
     private final String YELLOW = "#F9DD51";
@@ -274,18 +279,15 @@ public class SalesDashboard extends Div {
         dataLead.setX(2543);
         dataSeries.add(dataLead);
 
-        DataSeriesItem dataMarketing = new DataSeriesItem(
-                "", 1);
+        DataSeriesItem dataMarketing = new DataSeriesItem("", 1);
         dataMarketing.setX(1264);
         dataSeries.add(dataMarketing);
 
-        DataSeriesItem dataSales = new DataSeriesItem("",
-                1);
+        DataSeriesItem dataSales = new DataSeriesItem("", 1);
         dataSales.setX(305);
         dataSeries.add(dataSales);
 
-        DataSeriesItem dataCustomer = new DataSeriesItem("",
-                1);
+        DataSeriesItem dataCustomer = new DataSeriesItem("", 1);
         dataCustomer.setX(141);
         dataSeries.add(dataCustomer);
 

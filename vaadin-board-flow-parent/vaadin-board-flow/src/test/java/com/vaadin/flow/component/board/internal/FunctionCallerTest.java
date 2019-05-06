@@ -2,6 +2,8 @@ package com.vaadin.flow.component.board.internal;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,8 +11,8 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.server.VaadinSession;
 
 public class FunctionCallerTest {
@@ -25,7 +27,7 @@ public class FunctionCallerTest {
         UI ui = new UI();
         ui.add(html);
 
-        assertPendingInvocations(ui, "$0.foo()");
+        assertPendingInvocations(ui, "return $0.foo()");
     }
 
     @Test
@@ -37,7 +39,7 @@ public class FunctionCallerTest {
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
 
-        assertPendingInvocations(ui, "$0.foo()");
+        assertPendingInvocations(ui, "return $0.foo()");
     }
 
     @Test
@@ -52,7 +54,7 @@ public class FunctionCallerTest {
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
 
-        assertPendingInvocations(ui, "$0.foo()");
+        assertPendingInvocations(ui, "return $0.foo()");
     }
 
     @Test
@@ -64,7 +66,7 @@ public class FunctionCallerTest {
 
         String trackingProperty = "CALLONCE_foo";
         Assert.assertTrue(html.getElement().hasProperty(trackingProperty));
-        assertPendingInvocations(ui, "$0.foo()");
+        assertPendingInvocations(ui, "return $0.foo()");
         Assert.assertFalse(html.getElement().hasProperty(trackingProperty));
     }
 
@@ -77,10 +79,13 @@ public class FunctionCallerTest {
         Method method = UIInternals.class
                 .getDeclaredMethod("getPendingJavaScriptInvocations");
         method.setAccessible(true);
-        List<JavaScriptInvocation> pendingJS = (List<JavaScriptInvocation>) method
+        Stream<PendingJavaScriptInvocation> pendingJS = (Stream<PendingJavaScriptInvocation>) method
                 .invoke(internals);
-        Assert.assertEquals(1, pendingJS.size());
-        Assert.assertEquals(expectedJS, pendingJS.get(0).getExpression());
+        List<PendingJavaScriptInvocation> invocations = pendingJS
+                .collect(Collectors.toList());
+        Assert.assertEquals(1, invocations.size());
+        Assert.assertEquals(expectedJS,
+                invocations.get(0).getInvocation().getExpression());
 
     }
 }
