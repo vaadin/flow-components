@@ -56,9 +56,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void clickRootButton_subMenuRenders() {
         menuBar.getButtons().get(0).click();
         verifyOpened();
-        Assert.assertArrayEquals(
-                new String[] { "sub item 1", "<p>sub item 2</p>" },
-                getOverlayMenuItemContents());
+        assertOverlayContents("sub item 1", "<p>sub item 2</p>");
     }
 
     @Test
@@ -122,8 +120,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("add-sub-item");
         menuBar.$("vaadin-menu-bar-button").get(1).click();
         verifyNumOfOverlays(1);
-        Assert.assertArrayEquals(new String[] { "added sub item" },
-                getOverlayMenuItemContents());
+        assertOverlayContents("added sub item");
     }
 
     @Test
@@ -150,8 +147,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
         overflowButton.click();
         verifyOpened();
-        Assert.assertArrayEquals(new String[] { "<p>item 2</p>", "added item" },
-                getOverlayMenuItemContents());
+        assertOverlayContents("<p>item 2</p>", "added item");
     }
 
     @Test
@@ -249,6 +245,38 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertButtonDisabled(1, true);
     }
 
+    @Test
+    public void toggleItemVisible_buttonRemovedAndAdded() {
+        click("toggle-visible");
+        assertButtonContents("item 1");
+        click("toggle-visible");
+        assertButtonContents("item 1", "<p>item 2</p>");
+    }
+
+    @Test
+    public void hiddenItemOverflows_overflowButtonNotRendered() {
+        click("toggle-visible");
+        click("set-width");
+        Assert.assertNull(menuBar.getOverflowButton());
+    }
+
+    @Test
+    public void itemsOverflow_toggleItemVisible_visibleStateCorrectInOverlay() {
+        click("add-root-item");
+        click("set-width");
+        click("toggle-visible");
+
+        menuBar.getOverflowButton().click();
+        assertOverlayContents("added item");
+
+        clickBody();
+        verifyClosed();
+        click("toggle-visible");
+
+        menuBar.getOverflowButton().click();
+        assertOverlayContents("<p>item 2</p>", "added item");
+    }
+
     @After
     public void afterTest() {
         checkLogsForErrors();
@@ -309,6 +337,10 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     private void verifyOpened() {
         waitForElementPresent(By.tagName(OVERLAY_TAG));
+    }
+
+    private void assertOverlayContents(String... expected) {
+        Assert.assertArrayEquals(expected, getOverlayMenuItemContents());
     }
 
     private String[] getOverlayMenuItemContents() {

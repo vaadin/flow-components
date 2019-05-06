@@ -83,8 +83,12 @@ public class MenuBarTestPage extends Div {
                         .forEach(item -> item.setEnabled(!item.isEnabled())));
         disableButton.setId("toggle-disable");
 
+        NativeButton visibleButton = new NativeButton("toggle visible item 2",
+                e -> item2.setVisible(!item2.isVisible()));
+        visibleButton.setId("toggle-visible");
+
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
-                disableButton);
+                disableButton, visibleButton);
     }
 }

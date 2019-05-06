@@ -246,7 +246,7 @@ public class MenuBar extends Component
                         .collect(Collectors.toList()));
     }
 
-    private void resetContent() {
+    void resetContent() {
         menuItemsArrayGenerator.generate();
         updateButtons();
     }
@@ -257,13 +257,20 @@ public class MenuBar extends Component
         }
         String script = //@formatter:off
 
-            // 1. Propagate disabled state from items to parent buttons
+            // 1. Remove hidden items entirely from the array. Just hiding them
+            //    could cause the overflow button to be rendered without items.
+            //    resetContent needs to be called to make buttons visible again.
+            "$0.items = $0.items.filter(function(i){" +
+                "return !i.component.hidden;" +
+            "});" +
+
+            // 2. Propagate disabled state from items to parent buttons
             "$0.items.forEach(function(i){" +
                 "i.disabled = i.component.disabled;" +
             "});" +
             "$0.render();"+
 
-            // 2. Propagate click events from the menu buttons to the item components
+            // 3. Propagate click events from the menu buttons to the item components
             "$0._buttons.forEach(function(b){" +
                 "if(b.item && b.item.component){" +
                     "b.addEventListener('click',function(e){" +

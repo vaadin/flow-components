@@ -43,4 +43,10 @@ class MenuBarRootItem extends MenuItem {
         super.setEnabled(enabled);
         menuBar.updateButtons();
     }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        menuBar.resetContent();
+    }
 }
