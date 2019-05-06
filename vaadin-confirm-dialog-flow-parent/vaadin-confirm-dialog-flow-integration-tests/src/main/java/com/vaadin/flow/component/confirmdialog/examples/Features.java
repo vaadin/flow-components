@@ -8,6 +8,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 
@@ -39,6 +40,8 @@ public class Features extends Div {
             Function<String, ConfirmDialog> creator) {
         Button button = new Button(sample);
         button.setId(sample);
+        // workaround for https://github.com/vaadin/flow/issues/5619
+        new Icon();
         button.addClickListener(event -> openSample(creator.apply(sample)));
         add(button);
     }
