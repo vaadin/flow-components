@@ -130,7 +130,7 @@ public class DialogView extends DemoView {
 
         button.addClickListener(event -> {
             dialog.open();
-            input.getElement().callFunction("focus");
+            input.getElement().callJsFunction("focus");
         });
         // end-source-example
 

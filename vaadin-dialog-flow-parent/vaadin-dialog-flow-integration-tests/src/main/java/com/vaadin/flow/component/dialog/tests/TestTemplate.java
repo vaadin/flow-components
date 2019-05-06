@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.dialog.tests;
 
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -28,7 +29,8 @@ import com.vaadin.flow.templatemodel.TemplateModel;
  * Simple template example.
  */
 @Tag("test-template")
-@JsModule("test-template.js")
+@JsModule("./src/test-template.js")
+@HtmlImport("frontend://src/test-template.html")
 public class TestTemplate extends PolymerTemplate<TemplateModel> {
 
     @Id("container")

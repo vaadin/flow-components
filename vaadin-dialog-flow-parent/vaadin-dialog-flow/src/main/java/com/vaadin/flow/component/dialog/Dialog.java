@@ -335,7 +335,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     private void doEnsureOnCloseConfigured(UI ui) {
         if (onCloseConfigured > 0) {
-            ui.getPage().executeJavaScript("var f = function(e) {"
+            ui.getPage().executeJs("var f = function(e) {"
                     + "  if (e.type == 'vaadin-overlay-escape-press' && !$0.noCloseOnEsc ||"
                     + "      e.type == 'vaadin-overlay-outside-click' && !$0.noCloseOnOutsideClick) {"
                     + "    e.preventDefault();"

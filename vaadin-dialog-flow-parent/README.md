@@ -12,6 +12,17 @@ Run from the command line:
 
 Then navigate to `http://localhost:9998/vaadin-dialog`
 
+## Running Integration tests
+
+For running integration tests demos execute one of the following lines depending on the desired mode
+- `mvn -pl vaadin-dialog-flow-integration-tests clean jetty:run`
+- `mvn -pl vaadin-dialog-flow-integration-tests clean jetty:run -Dvaadin.bowerMode`
+
+Then navigate to `http://localhost:9998/` for see integration tests demos.
+
+For running all integration tests execute
+- `mvn clean install verify`
+
 ## Installing the component
 Run from the command line:
 - `mvn clean install -DskipTests`
