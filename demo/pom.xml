@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-charts-flow-parent</artifactId>
-        <version>6.3-SNAPSHOT</version>
+        <version>7.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-charts-flow-demo</artifactId>
-    <version>6.3-SNAPSHOT</version>
+    <version>7.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>Vaadin Charts for Flow Demo</name>
@@ -42,7 +42,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-lumo-theme</artifactId>
-            <version>${flow.version}</version>
         </dependency>
 
         <dependency>

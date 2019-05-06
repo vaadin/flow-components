@@ -10,7 +10,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -21,6 +20,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.charts.AbstractChartExample;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.events.ChartClickEvent;
@@ -36,7 +36,6 @@ import com.vaadin.flow.component.charts.examples.dynamic.ServerSideEvents;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
-import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.tests.elements.LabelElement;
 
@@ -46,7 +45,6 @@ public class ServerSideEventsIT extends AbstractTBTest {
     @Before
     public void setup() throws Exception {
         super.setup();
-        driver.manage().window().setSize(new Dimension(1600, 1600));
         resetHistory();
     }
 

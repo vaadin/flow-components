@@ -62,12 +62,16 @@ import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
 import elemental.json.impl.JreJsonFactory;
 
 @Tag("vaadin-chart")
+@NpmPackage(value="@vaadin/vaadin-charts", version = "6.2.2")
+@JsModule("@vaadin/vaadin-charts/vaadin-chart.js")
 @HtmlImport("frontend://bower_components/vaadin-charts/vaadin-chart.html")
 public class Chart extends Component implements HasStyle, HasSize {
 
