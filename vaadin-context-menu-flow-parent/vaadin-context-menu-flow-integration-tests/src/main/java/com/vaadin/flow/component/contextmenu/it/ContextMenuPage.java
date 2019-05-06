@@ -23,13 +23,10 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
  * Test view for {@link ContextMenu}.
  */
-@Theme(Lumo.class)
 @Route("context-menu-test")
 public class ContextMenuPage extends Div {
 
@@ -110,22 +107,23 @@ public class ContextMenuPage extends Div {
         Paragraph content = new Paragraph("Context menu With SetOpenOnClick.");
         contextMenu.add(content);
 
+        String current = "Current state is ";
         Div message = new Div();
         message.setId("message-on-click");
-        message.setText("Current state is " + contextMenu.isOpenOnClick());
+        message.setText(current + contextMenu.isOpenOnClick());
 
         NativeButton on = new NativeButton("setOpenOnClick");
         on.setId("on");
         on.addClickListener(event -> {
             contextMenu.setOpenOnClick(true);
-            message.setText("Current state is " + contextMenu.isOpenOnClick());
+            message.setText(current + contextMenu.isOpenOnClick());
         });
 
         NativeButton off = new NativeButton("setOpenOnClick-off");
         off.setId("off");
         off.addClickListener(event -> {
             contextMenu.setOpenOnClick(false);
-            message.setText("Current state is " + contextMenu.isOpenOnClick());
+            message.setText(current + contextMenu.isOpenOnClick());
         });
 
         Label altTarget = new Label("Alternative target");

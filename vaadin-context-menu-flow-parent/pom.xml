@@ -15,36 +15,12 @@
     <packaging>pom</packaging>
     <name>Vaadin Context Menu Flow Parent</name>
 
-    <properties>
-        <flow.version>2.0-SNAPSHOT</flow.version>
-        <testbench.version>6.0.1</testbench.version>
-        <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>vaadin-snapshot</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </pluginRepository>
-    </pluginRepositories>
-
-    <repositories>
+   <repositories>
+        <!-- repositories are configured in parent but still need this
+             when parent is a snapshot -->
         <repository>
-            <id>vaadin-snapshot</id>
+            <id>vaadin-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -67,9 +43,8 @@
             </activation>
             <modules>
                 <module>vaadin-context-menu-flow-integration-tests</module>
+                <module>vaadin-context-menu-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
-
 </project>
-

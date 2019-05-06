@@ -10,9 +10,9 @@
     </parent>
 
     <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-context-menu-flow-integration-tests</artifactId>
+    <artifactId>vaadin-context-menu-flow-integration-tests-bower-mode</artifactId>
     <packaging>war</packaging>
-    <name>Vaadin Context Menu Integration Tests</name>
+    <name>Vaadin Context Menu Integration Tests in Bower Mode</name>
 
     <dependencies>
         <!-- Flow -->
@@ -23,10 +23,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-server-production-mode</artifactId>
         </dependency>
 
         <!-- Logger -->
@@ -63,7 +59,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -75,11 +70,27 @@
 
     <build>
         <plugins>
-            <!-- run vaadin frontend verify and build goals -->
             <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>vaadin.bowerMode</name>
+                                    <value>true</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
+
             <!-- start jetty before ITs -->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
@@ -89,14 +100,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-            <!-- Deploy configuration -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <configuration>
-                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-                </configuration>
             </plugin>
         </plugins>
     </build>

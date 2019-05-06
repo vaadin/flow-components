@@ -12,6 +12,17 @@ Run from the command line:
 
 Then navigate to `http://localhost:9998/vaadin-context-menu` to see the demo.
 
+## Running Integration tests
+
+For running integration tests demos execute one of the following lines depending on the desired mode
+- `mvn -pl vaadin-context-menu-flow-integration-tests clean jetty:run`
+- `mvn -pl vaadin-context-menu-flow-integration-tests clean jetty:run -Dvaadin.bowerMode`
+
+Then navigate to `http://localhost:9998/` for see integration tests demos.
+
+For running all integration tests execute
+- `mvn clean install verify`
+
 ## Installing the component
 Run from the command line:
 - `mvn clean install -DskipTests`

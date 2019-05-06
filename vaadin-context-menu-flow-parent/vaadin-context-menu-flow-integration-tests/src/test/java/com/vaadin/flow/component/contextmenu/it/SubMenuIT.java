@@ -20,6 +20,7 @@ import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -57,6 +58,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
     }
 
     @Test
+    @Ignore("Flaky test - issue #67")
     public void openAndCloseSubMenu_addContent_contentUpdatedAndFunctional() {
         rightClickOn("target");
         openSubMenu(getMenuItems().get(0));
@@ -84,6 +86,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
     }
 
     @Test
+    @Ignore("Flaky test - issue #67")
     public void openAndCloseSubMenu_addSubSubMenu_contentUpdatedAndFunctional() {
         rightClickOn("target");
         openSubMenu(getMenuItems().get(0));

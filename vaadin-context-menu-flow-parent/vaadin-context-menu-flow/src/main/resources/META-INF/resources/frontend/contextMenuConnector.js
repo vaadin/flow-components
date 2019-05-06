@@ -1,5 +1,12 @@
-import {GestureEventListeners} from '@polymer/polymer/lib/mixins/gesture-event-listeners.js';
-import * as Gestures from '@polymer/polymer/lib/utils/gestures.js';
+// Not using ES6 imports in this file yet because the connector in V14 must
+// still work in Legacy bower projects. See: `contextMenuConnector-es6.js` for
+// the Polymer3 approach.
+window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
+if (window.Polymer) {
+    // Polymer2 approach.
+    window.Vaadin.Flow.Legacy.GestureEventListeners = window.Vaadin.Flow.Legacy.GestureEventListeners || Polymer.GestureEventListeners;
+    window.Vaadin.Flow.Legacy.Gestures = window.Vaadin.Flow.Legacy.Gestures || Polymer.Gestures;
+}
 
 window.Vaadin.Flow.contextMenuConnector = {
 
@@ -8,6 +15,9 @@ window.Vaadin.Flow.contextMenuConnector = {
     if (target.$contextMenuConnector) {
       return;
     }
+
+    const GestureEventListeners = window.Vaadin.Flow.Legacy.GestureEventListeners;
+    const Gestures = window.Vaadin.Flow.Legacy.Gestures;
 
     target.$contextMenuConnector = {
 
