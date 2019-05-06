@@ -22,6 +22,8 @@ package com.vaadin.flow.component.customfield;
 
 import java.util.Objects;
 
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AbstractField;
@@ -46,6 +48,8 @@ import com.vaadin.flow.dom.Element;
  * @param <T> field value type
  */
 @Tag("vaadin-custom-field")
+@NpmPackage(value = "@vaadin/vaadin-custom-field", version="1.0.1")
+@JsModule("@vaadin/vaadin-custom-field/src/vaadin-custom-field.js")
 @HtmlImport("frontend://bower_components/vaadin-custom-field/src/vaadin-custom-field.html")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     implements HasSize, HasValidation, Focusable<CustomField> {

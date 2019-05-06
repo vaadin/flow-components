@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-custom-field-flow-parent</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-custom-field-integration-tests</artifactId>
@@ -87,9 +87,20 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
                 <configuration>
                     <filesets>
+                        <fileset>
+                            <directory>${project.basedir}</directory>
+                            <includes>
+                                <include>package.json</include>
+                                <include>webpack.config.js</include>
+                            </includes>
+                        </fileset>
                         <fileset>
                             <directory>src/main/webapp/frontend</directory>
                             <includes>
