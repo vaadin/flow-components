@@ -50,7 +50,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
 @JsModule("frontend://contextMenuConnector-es6.js")
 
-@HtmlImport("frontend://flow-component-renderer.html")
+@HtmlImport("flow-component-renderer.html")
 @HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
 @JavaScript("frontend://contextMenuConnector.js")
 public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
