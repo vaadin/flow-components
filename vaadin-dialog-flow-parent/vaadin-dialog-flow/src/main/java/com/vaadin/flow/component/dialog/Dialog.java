@@ -60,10 +60,11 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         container = new Element("div");
         getElement().appendVirtualChild(container);
 
-        // Attach <flow-component-renderer>
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        context -> attachComponentRenderer()));
+        // Attach <flow-component-renderer>. Needs to be updated on each
+        // attach, as element depends on node id which is subject to change if
+        // the dialog is transferred to another UI, e.g. due to
+        // @PreserveOnRefresh
+        getElement().getNode().addAttachListener(this::attachComponentRenderer);
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         setOpened(false);
