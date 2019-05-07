@@ -10,7 +10,7 @@
     </parent>
     <artifactId>vaadin-confirm-dialog-flow-demo</artifactId>
 
-    <packaging>jar</packaging>
+    <packaging>${packaging.type}</packaging>
     <name>Vaadin Confirm Dialog Flow Demo</name>
 
     <properties>
@@ -128,4 +128,21 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <packaging.type>jar</packaging.type>
+            </properties>
+        </profile>
+        <profile>
+            <id>war</id>
+            <properties>
+                <packaging.type>war</packaging.type>
+            </properties>
+        </profile>
+    </profiles>
 </project>
