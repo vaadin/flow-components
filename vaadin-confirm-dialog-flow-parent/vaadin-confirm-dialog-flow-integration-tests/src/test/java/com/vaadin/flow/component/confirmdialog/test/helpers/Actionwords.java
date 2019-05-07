@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.confirmdialog.test.hiptest;
+package com.vaadin.flow.component.confirmdialog.test.helpers;
 
 import java.util.Optional;
 

@@ -1,8 +1,0 @@
-public void {{{ camelize_lower rendered_children.name }}}({{#if has_parameters?}}{{{join rendered_children.parameters ', '}}}{{/if}}) throws Exception {{#curly}}
-{{#clear_empty_lines}}
-{{#indent}}{{#comment '//'}}{{#if has_tags?}}Tags: {{{ join rendered_children.tags ' '}}}
-{{/if}}{{#if has_description?}}{{rendered_children.description}}
-{{/if}}{{/comment}}{{/indent}}
-{{> body}}
-{{/clear_empty_lines}}
-{{/curly}}
