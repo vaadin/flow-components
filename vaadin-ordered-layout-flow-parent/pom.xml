@@ -53,6 +53,7 @@
             </activation>
             <modules>
                 <module>vaadin-ordered-layout-flow-integration-tests</module>
+                <module>vaadin-ordered-layout-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
