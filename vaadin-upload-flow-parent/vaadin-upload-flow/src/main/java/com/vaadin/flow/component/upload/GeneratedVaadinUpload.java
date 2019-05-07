@@ -120,7 +120,7 @@ import elemental.json.JsonObject;
         "WebComponent: Vaadin.UploadElement#4.2.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-upload")
 @NpmPackage(value = "@vaadin/vaadin-upload", version = "4.2.0")
-@JsModule("@vaadin/vaadin-upload/vaadin-upload.js")
+@JsModule("@vaadin/vaadin-upload/src/vaadin-upload.js")
 @HtmlImport("frontend://bower_components/vaadin-upload/src/vaadin-upload.html")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
         extends Component implements HasStyle {

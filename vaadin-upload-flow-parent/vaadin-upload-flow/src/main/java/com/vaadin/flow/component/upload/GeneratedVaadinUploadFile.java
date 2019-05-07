@@ -25,6 +25,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -145,6 +146,7 @@ import elemental.json.JsonObject;
         "WebComponent: Vaadin.UploadFileElement#UNKNOWN", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-upload-file")
 @HtmlImport("frontend://bower_components/vaadin-upload/src/vaadin-upload-file.html")
+@JsModule("@vaadin/vaadin-upload/src/vaadin-upload-file.js")
 public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadFile<R>>
         extends Component implements HasStyle {
 

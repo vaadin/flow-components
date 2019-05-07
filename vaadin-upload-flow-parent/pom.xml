@@ -73,6 +73,7 @@
             </activation>
             <modules>
                 <module>vaadin-upload-flow-integration-tests</module>
+                <module>vaadin-upload-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
