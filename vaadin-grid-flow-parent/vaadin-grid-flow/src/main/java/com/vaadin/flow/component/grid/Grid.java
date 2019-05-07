@@ -3490,8 +3490,20 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @see GridDropEvent#getDropLocation()
      */
     public void setDropMode(GridDropMode dropMode) {
+        polyfillMobileDragDrop();
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
+    }
+
+    private void polyfillMobileDragDrop() {
+        getElement().getNode().runWhenAttached(ui -> {
+            if (ui.getSession().getBrowser().isIOS()) {
+                ui.getPage().addJavaScript(
+                        "context://webjars/mobile-drag-drop/2.3.0-rc.1/index.min.js");
+                ui.getPage().addJavaScript(
+                        "context://webjars/vaadin__vaadin-mobile-drag-drop/1.0.0/index.min.js");
+            }
+        });
     }
 
     /**
@@ -3515,6 +3527,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            {@code false} if not
      */
     public void setRowsDraggable(boolean rowsRraggable) {
+        polyfillMobileDragDrop();
         getElement().setProperty("rowsDraggable", rowsRraggable);
     }
 
