@@ -110,7 +110,7 @@ import com.vaadin.flow.dom.Element;
         "WebComponent: Vaadin.ButtonElement#2.1.0", "Flow#1.2-SNAPSHOT" })
 @Tag("vaadin-button")
 @NpmPackage(value = "@vaadin/vaadin-button", version = "2.1.0")
-@JsModule("@vaadin/vaadin-button/vaadin-button.js")
+@JsModule("@vaadin/vaadin-button/src/vaadin-button.js")
 @HtmlImport("frontend://bower_components/vaadin-button/src/vaadin-button.html")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component
