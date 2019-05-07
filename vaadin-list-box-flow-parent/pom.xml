@@ -73,6 +73,7 @@
             </activation>
             <modules>
                 <module>vaadin-list-box-flow-integration-tests</module>
+                <module>vaadin-list-box-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>

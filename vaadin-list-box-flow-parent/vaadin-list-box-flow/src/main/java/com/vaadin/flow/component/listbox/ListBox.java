@@ -49,7 +49,7 @@ import com.vaadin.flow.function.SerializablePredicate;
 // Not extending the generated class since it adds no value
 @Tag("vaadin-list-box")
 @NpmPackage(value = "@vaadin/vaadin-list-box", version = "1.1.0")
-@JsModule("@vaadin/vaadin-list-box/vaadin-list-box.js")
+@JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
 @HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
 public class ListBox<T> extends AbstractSinglePropertyField<ListBox<T>, T>
         implements HasItemsAndComponents<T>, SingleSelect<ListBox<T>, T>,
