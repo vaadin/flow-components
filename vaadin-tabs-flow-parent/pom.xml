@@ -52,6 +52,7 @@
             </activation>
             <modules>
                 <module>vaadin-tabs-flow-integration-tests</module>
+                <module>vaadin-tabs-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
