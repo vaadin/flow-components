@@ -193,7 +193,7 @@ import com.vaadin.flow.shared.Registration;
         "WebComponent: Vaadin.SplitLayoutElement#4.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-split-layout")
 @HtmlImport("frontend://bower_components/vaadin-split-layout/src/vaadin-split-layout.html")
-@JsModule("@vaadin/vaadin-split-layout/vaadin-split-layout.js")
+@JsModule("@vaadin/vaadin-split-layout/src/vaadin-split-layout.js")
 public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
         extends Component implements HasStyle, ClickNotifier<R>, HasTheme {
 
