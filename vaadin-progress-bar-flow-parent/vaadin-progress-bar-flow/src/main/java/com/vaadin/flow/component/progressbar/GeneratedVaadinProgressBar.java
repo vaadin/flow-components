@@ -104,7 +104,7 @@ import com.vaadin.flow.component.dependency.JsModule;
         "WebComponent: Vaadin.ProgressBarElement#1.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-progress-bar")
 @HtmlImport("frontend://bower_components/vaadin-progress-bar/src/vaadin-progress-bar.html")
-@JsModule("@vaadin/vaadin-progress-bar/vaadin-progress-bar.js")
+@JsModule("@vaadin/vaadin-progress-bar/src/vaadin-progress-bar.js")
 public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
         extends Component implements HasStyle, HasTheme {
 
