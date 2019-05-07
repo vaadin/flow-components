@@ -31,6 +31,13 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
+	<repositories>
+		<repository>
+			<id>vaadin-snapshots</id>
+			<url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+		</repository>
+	</repositories>
+
 	<modules>
 		<module>vaadin-select-flow</module>
 		<module>vaadin-select-testbench</module>
@@ -47,6 +54,7 @@
 			</activation>
 			<modules>
 				<module>vaadin-select-flow-integration-tests</module>
+				<module>vaadin-select-flow-integration-tests/pom-bower-mode.xml</module>
 			</modules>
 		</profile>
 	</profiles>
