@@ -93,7 +93,7 @@ Your work has been saved
         "WebComponent: Vaadin.NotificationElement#1.3.0", "Flow#1.5-SNAPSHOT" })
 @Tag("vaadin-notification")
 @NpmPackage(value = "@vaadin/vaadin-notification", version = "1.2.0")
-@JsModule("@vaadin/vaadin-notification/vaadin-notification.js")
+@JsModule("@vaadin/vaadin-notification/src/vaadin-notification.js")
 @HtmlImport("frontend://bower_components/vaadin-notification/src/vaadin-notification.html")
 public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotification<R>>
         extends Component {
