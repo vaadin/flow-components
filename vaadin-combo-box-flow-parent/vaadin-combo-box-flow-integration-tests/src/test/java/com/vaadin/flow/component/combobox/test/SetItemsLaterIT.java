@@ -37,7 +37,7 @@ public class SetItemsLaterIT extends AbstractComboBoxIT {
         open();
         ComboBoxElement comboBox = $(ComboBoxElement.class).first();
 
-        waitForItems(comboBox, items -> items == null);
+        waitForItems(comboBox, items -> items.size() == 0);
 
         WebElement button = findElement(By.tagName("button"));
         button.click();

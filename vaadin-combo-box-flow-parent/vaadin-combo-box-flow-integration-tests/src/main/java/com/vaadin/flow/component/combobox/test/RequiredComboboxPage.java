@@ -44,5 +44,23 @@ public class RequiredComboboxPage extends Div {
         binder.setBean(item);
 
         add(comboBox, message);
+
+        requiredComboBoxSetItemsAfter();
+    }
+
+    private void requiredComboBoxSetItemsAfter() {
+
+        Binder<TestItem> binder = new Binder<>();
+
+        ComboBox<String> comboBox = new ComboBox<>();
+
+        binder.forField(comboBox).asRequired().bind(TestItem::getName,
+                TestItem::setName);
+        binder.setBean(new TestItem(0));
+
+        // Set items last:
+        comboBox.setItems("foo", "bar");
+
+        add(comboBox);
     }
 }

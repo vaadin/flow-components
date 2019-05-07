@@ -183,7 +183,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         @Override
         public void initialize() {
-            initConnector();
+            // NO-OP
         }
     };
 
@@ -246,6 +246,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItemValuePath("key");
         setItemIdPath("key");
         setPageSize(pageSize);
+        initConnector();
     }
 
     /**
@@ -351,9 +352,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         // Workaround for property not updating in certain scenario
         // https://github.com/vaadin/flow/issues/4862
-        runBeforeClientResponse(
-                ui -> ui.getPage().executeJs("$0.value=$1",
-                        getElement(), getElement().getProperty(PROP_VALUE)));
+        runBeforeClientResponse(ui -> ui.getPage().executeJs("$0.value=$1",
+                getElement(), getElement().getProperty(PROP_VALUE)));
     }
 
     /**
@@ -478,10 +478,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
             userProvidedFilter = UserProvidedFilter.YES;
         }
-
-        runBeforeClientResponse(ui -> ui.getPage().executeJs(
-                "window.Vaadin.Flow.comboBoxConnector.initLazy($0);",
-                getElement()));
 
         if (dataCommunicator == null) {
             dataCommunicator = new DataCommunicator<>(dataGenerator,
@@ -617,7 +613,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return the data provider used by this ComboBox
      */
-    public DataProvider<T, ?> getDataProvider() { //NOSONAR
+    public DataProvider<T, ?> getDataProvider() { // NOSONAR
         return dataCommunicator.getDataProvider();
     }
 
@@ -989,11 +985,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void initConnector() {
-        getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached ComboBox"))
-                .getPage().executeJs(
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.getPage().executeJs(
                         "window.Vaadin.Flow.comboBoxConnector.initLazy($0)",
-                        getElement());
+                        getElement()));
     }
 
     private DataKeyMapper<T> getKeyMapper() {

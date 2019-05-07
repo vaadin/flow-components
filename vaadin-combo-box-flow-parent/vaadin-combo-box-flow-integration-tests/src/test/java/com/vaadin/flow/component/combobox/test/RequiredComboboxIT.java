@@ -66,6 +66,12 @@ public class RequiredComboboxIT extends AbstractComponentIT {
         waitUntil(driver -> error.getSize().getHeight() == 0);
     }
 
+    @Test
+    public void setItemsAfterSettingRequired_noClientSideError() {
+        open();
+        checkLogsForErrors();
+    }
+
     private void assertValidationError(ComboBoxElement comboBox) {
         Assert.assertEquals(Boolean.TRUE.toString(),
                 comboBox.getAttribute("invalid"));
