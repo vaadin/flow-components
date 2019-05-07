@@ -27,6 +27,8 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
@@ -64,6 +66,9 @@ import java.util.stream.Collectors;
  * @param <E> the bean type
  */
 @Tag("vaadin-crud")
+@NpmPackage(value = "@vaadin/vaadin-crud", version="1.0.1")
+@JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
+@JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud-edit-column.html")
 public class Crud<E> extends Component implements HasSize, HasTheme {

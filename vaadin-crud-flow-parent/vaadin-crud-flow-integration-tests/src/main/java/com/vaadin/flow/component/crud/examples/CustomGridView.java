@@ -19,7 +19,8 @@ public class CustomGridView extends VerticalLayout {
 
     public CustomGridView() {
         final Grid<Person> grid = new Grid<>(Person.class);
-        final Crud<Person> crud = new Crud<>(Person.class, grid, Helper.createPersonEditor());
+        final Crud<Person> crud = new Crud<>(Person.class, grid,
+                Helper.createPersonEditor());
 
         PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
 
@@ -30,14 +31,15 @@ public class CustomGridView extends VerticalLayout {
         Crud.addEditColumn(grid);
 
         // no-border should not be reflected to the custom grid
-        final Button toggleBordersButton = new Button("Toggle borders", event -> {
-            if (hasBorder) {
-                crud.addThemeVariants(CrudVariant.NO_BORDER);
-            } else {
-                crud.removeThemeVariants(CrudVariant.NO_BORDER);
-            }
-            hasBorder = !hasBorder;
-        });
+        final Button toggleBordersButton = new Button("Toggle borders",
+                event -> {
+                    if (hasBorder) {
+                        crud.addThemeVariants(CrudVariant.NO_BORDER);
+                    } else {
+                        crud.removeThemeVariants(CrudVariant.NO_BORDER);
+                    }
+                    hasBorder = !hasBorder;
+                });
         toggleBordersButton.setId("toggleBorders");
 
         setHeight("100%");
