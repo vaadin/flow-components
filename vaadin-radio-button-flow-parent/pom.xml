@@ -52,6 +52,7 @@
             </activation>
             <modules>
                 <module>vaadin-radio-button-flow-integration-tests</module>
+                <module>vaadin-radio-button-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>

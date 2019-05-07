@@ -119,7 +119,7 @@ import com.vaadin.flow.shared.Registration;
         "WebComponent: Vaadin.RadioGroupElement#1.1.2", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-radio-group")
 @HtmlImport("frontend://bower_components/vaadin-radio-button/src/vaadin-radio-group.html")
-@JsModule("@vaadin/vaadin-radio-button/vaadin-radio-group.js")
+@JsModule("@vaadin/vaadin-radio-button/src/vaadin-radio-group.js")
 public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGroup<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, HasTheme {
