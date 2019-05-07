@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -10,16 +9,12 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>vaadin-icons-flow-integration-tests</artifactId>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-icons-integration-tests-bower-mode</artifactId>
     <packaging>war</packaging>
+    <name>Vaadin Icons Integration Tests in Bower Mode</name>
 
-    <name>Vaadin Icons Integration Tests</name>
-
-    <properties>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
-    </properties>
-
-    <dependencies>
+     <dependencies>
         <!--Test scoped -->
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -72,26 +67,34 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>vaadin.bowerMode</name>
+                                    <value>true</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
+            <!-- start jetty before ITs -->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
             </plugin>
+            <!-- run ITs -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <configuration>
-                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-                </configuration>
             </plugin>
         </plugins>
     </build>
