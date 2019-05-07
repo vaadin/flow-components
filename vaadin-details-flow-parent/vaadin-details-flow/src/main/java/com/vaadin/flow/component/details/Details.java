@@ -41,7 +41,7 @@ import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-details")
 @NpmPackage(value = "@vaadin/vaadin-details", version = "1.0.1")
-@JsModule("@vaadin/vaadin-details/vaadin-details.js")
+@JsModule("@vaadin/vaadin-details/src/vaadin-details.js")
 @HtmlImport("frontend://bower_components/vaadin-details/src/vaadin-details.html")
 public class Details extends Component implements HasEnabled, HasTheme {
 
