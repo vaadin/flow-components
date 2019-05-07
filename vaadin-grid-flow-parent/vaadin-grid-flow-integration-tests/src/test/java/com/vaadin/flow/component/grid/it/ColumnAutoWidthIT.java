@@ -78,6 +78,7 @@ public class ColumnAutoWidthIT extends AbstractComponentIT {
 
     @Test
     public void columnWidthsAreSetCorrectly() {
+        @SuppressWarnings("unchecked")
         List<String> colWidths = (List<String>) executeScript(
                 "return arguments[0]._getColumns().map(col => col.width)",
                 grid);

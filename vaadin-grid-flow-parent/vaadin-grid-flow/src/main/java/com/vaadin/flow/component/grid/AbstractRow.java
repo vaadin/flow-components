@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -224,6 +223,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
      * @throws IllegalArgumentException
      *             if it's not possible to join the given cells
      */
+    @SuppressWarnings("unchecked")
     public CELL join(CELL... cells) {
         return join(Arrays.asList(cells));
     }

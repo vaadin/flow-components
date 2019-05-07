@@ -88,6 +88,7 @@ public class GridContextMenu<T> extends
         private final transient Optional<T> item;
         private final transient Optional<String> columnId;
 
+        @SuppressWarnings("unchecked")
         public GridContextMenuOpenedEvent(GridContextMenu<T> source, boolean fromClient) {
             super(source, fromClient);
             grid = (Grid<T>) getSource().getTarget();

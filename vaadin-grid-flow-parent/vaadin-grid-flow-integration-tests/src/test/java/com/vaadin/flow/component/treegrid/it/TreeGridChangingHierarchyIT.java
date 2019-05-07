@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 
 import org.junit.After;
@@ -31,6 +28,9 @@ import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @TestPath("treegrid-changing-hierarchy")
 public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
 
@@ -38,7 +38,6 @@ public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
     private WebElement addItemsToABtn;
     private WebElement addItemsToAABtn;
     private WebElement removeAABtn;
-    private WebElement removeChildrenOfAABtn;
     private WebElement removeABtn;
     private WebElement removeChildrenOfABtn;
     private WebElement removeChildrenOfAAABtn;
@@ -52,7 +51,6 @@ public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
         addItemsToABtn = buttons.get(0);
         addItemsToAABtn = buttons.get(1);
         removeAABtn = buttons.get(2);
-        removeChildrenOfAABtn = buttons.get(3);
         removeABtn = buttons.get(4);
         removeChildrenOfABtn = buttons.get(5);
         removeChildrenOfAAABtn = buttons.get(6);

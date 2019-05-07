@@ -37,6 +37,7 @@ interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
      *            whether to allow user resizing of this column
      * @return this column, for method chaining
      */
+    @SuppressWarnings("unchecked")
     default T setResizable(boolean resizable) {
         getElement().setProperty("resizable", resizable);
         return (T) this;
@@ -62,6 +63,7 @@ interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
      *            whether to freeze or unfreeze this column
      * @return this column, for method chaining
      */
+    @SuppressWarnings("unchecked")
     default T setFrozen(boolean frozen) {
         getElement().setProperty("frozen", frozen);
         return (T) this;
@@ -86,6 +88,7 @@ interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
      *            {@link ColumnTextAlign#START}.
      * @return this column, for method chaining
      */
+    @SuppressWarnings("unchecked")
     default T setTextAlign(ColumnTextAlign textAlign) {
         getElement().setProperty("textAlign",
                 textAlign == null ? null : textAlign.getPropertyValue());

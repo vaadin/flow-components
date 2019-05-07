@@ -79,6 +79,7 @@ public class GridSortOrder<T> extends SortOrder<Column<T>> {
         return new GridSortOrderBuilder<T>().thenDesc(by);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof GridSortOrder)) {

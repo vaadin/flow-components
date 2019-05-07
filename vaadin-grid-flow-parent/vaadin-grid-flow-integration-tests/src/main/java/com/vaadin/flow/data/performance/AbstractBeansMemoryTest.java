@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
@@ -36,8 +38,7 @@ import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 
-import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
-
+@SuppressWarnings("restriction")
 public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
         implements HasUrlParameter<String> {
 
@@ -124,7 +125,6 @@ public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
 
     protected abstract void setBackendContainer(T component, List<Person> data);
 
-    @SuppressWarnings("restriction")
     private void setData(int size, T component, boolean memoryContainer) {
         dataSize = size;
         isInMemory = memoryContainer;

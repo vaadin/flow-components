@@ -44,14 +44,17 @@ public class TreeGridExpandCollapseRecursivelyPage extends Div {
             return name;
         }
 
+        @SuppressWarnings("unused")
         public void setName(String name) {
             this.name = name;
         }
 
+        @SuppressWarnings("unused")
         public Directory getParent() {
             return parent;
         }
 
+        @SuppressWarnings("unused")
         public void setParent(Directory parent) {
             this.parent = parent;
         }
@@ -60,6 +63,7 @@ public class TreeGridExpandCollapseRecursivelyPage extends Div {
             return subDirectories;
         }
 
+        @SuppressWarnings("unused")
         public void setSubDirectories(List<Directory> subDirectories) {
             this.subDirectories = subDirectories;
         }

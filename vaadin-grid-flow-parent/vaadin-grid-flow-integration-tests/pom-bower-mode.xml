@@ -9,9 +9,9 @@
         <version>4.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>vaadin-grid-flow-integration-tests</artifactId>
+    <artifactId>vaadin-grid-flow-integration-tests-bower-mode</artifactId>
     <packaging>war</packaging>
-    <name>Vaadin Grid Integration Tests</name>
+    <name>Vaadin Grid Integration Tests in Bower Mode</name>
 
     <dependencies>
         <!-- Flow -->
@@ -21,11 +21,15 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>flow-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-server-production-mode</artifactId>
+            <artifactId>flow-data</artifactId>
         </dependency>
 
         <!-- Logger -->
@@ -65,22 +69,22 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-radio-button-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-checkbox-flow</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>1.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -102,6 +106,7 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -118,33 +123,27 @@
 
     <build>
         <plugins>
-            <!-- run tests against production bundle in orther to save system
-                 resources as webpack-dev-server is not running in bg -->
+            <!-- Activate BOWER MODE -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
                 <version>1.0.0</version>
                 <executions>
                     <execution>
-                        <phase>ititialize</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>set-system-properties</goal>
                         </goals>
                         <configuration>
                             <properties>
                                 <property>
-                                    <name>vaadin.productionMode</name>
+                                    <name>vaadin.bowerMode</name>
                                     <value>true</value>
                                 </property>
                             </properties>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <!-- run vaadin frontend verify and build goals -->
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
             </plugin>
             <!-- start jetty before ITs -->
             <plugin>
@@ -155,20 +154,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <!-- reduce the number of threads in order to save system resources
-                     and give more stability to CI builds -->
                 <configuration>
                     <systemPropertyVariables>
                         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
                     </systemPropertyVariables>
-                </configuration>
-            </plugin>
-            <!-- Deploy configuration -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <configuration>
-                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
         </plugins>

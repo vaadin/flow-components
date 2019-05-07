@@ -39,9 +39,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -52,6 +51,8 @@ import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -93,11 +94,12 @@ import com.vaadin.flow.router.Route;
  * View for {@link Grid} demo.
  */
 @Route("vaadin-grid-it-demo")
+@JsModule("grid-demo-styles.js")
 @HtmlImport("grid-demo-styles.html")
 public class GridView extends DemoView {
 
-    public static List<Person> items = new ArrayList<>();
-    public static List<PersonWithLevel> rootItems = new ArrayList<>();
+    static final List<Person> items;
+    static final List<PersonWithLevel> rootItems;
     static {
         items = createItems();
         rootItems = createRootItems();
@@ -414,14 +416,15 @@ public class GridView extends DemoView {
         addCard("Selection", "Grid with No Selection Enabled", grid);
     }
 
+    @SuppressWarnings("unchecked")
     private void createColumnTemplate() {
-        List<Person> items = new ArrayList<>();
-        items.addAll(createItems());
+        List<Person> people = new ArrayList<>();
+        people.addAll(createItems());
 
         // begin-source-example
         // source-example-heading: Grid with columns using template renderer
         Grid<Person> grid = new Grid<>();
-        grid.setItems(items);
+        grid.setItems(people);
 
         // You can use the [[index]] variable to print the row index (0 based)
         grid.addColumn(TemplateRenderer.of("[[index]]")).setHeader("#");
@@ -465,6 +468,7 @@ public class GridView extends DemoView {
                 grid);
     }
 
+    @SuppressWarnings("unchecked")
     private void createColumnComponentRenderer() {
         // begin-source-example
         // source-example-heading: Grid with columns using component renderer
@@ -642,8 +646,8 @@ public class GridView extends DemoView {
 
         Column<Person> idColumn = grid.addColumn(Person::getId).setHeader("ID")
                 .setFlexGrow(0).setWidth("75px");
-        Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
-                .setHeader("Name").setResizable(true);
+
+        grid.addColumn(Person::getFirstName).setHeader("Name").setResizable(true);
 
         // Setting a column-key allows fetching the column later
         grid.addColumn(Person::getAge).setHeader("Age").setKey("age");
@@ -834,6 +838,7 @@ public class GridView extends DemoView {
                 showBasicInformation, showAddressInformation);
     }
 
+    @SuppressWarnings("unchecked")
     private void createBasicRenderers() {
         // begin-source-example
         // source-example-heading: Using basic renderers
@@ -1145,6 +1150,7 @@ public class GridView extends DemoView {
                         .collect(Collectors.toList()), grid, message));
     }
 
+    @SuppressWarnings("unchecked")
     private void createContextMenu() {
         // begin-source-example
         // source-example-heading: Using ContextMenu With Grid
@@ -1667,8 +1673,8 @@ public class GridView extends DemoView {
         addCard("Styling", "Generating CSS Class Names for Cells", grid);
     }
 
-    private <T> Component[] withTreeGridToggleButtons(List<T> roots,
-            TreeGrid<T> grid, Component... other) {
+    private <T> Component[] withTreeGridToggleButtons(List<T> roots, TreeGrid<T> grid, Component... other) { //NOSONAR
+        @SuppressWarnings("unchecked")
         NativeButton toggleFirstItem = new NativeButton("Toggle first item",
                 evt -> {
                     if (grid.isExpanded(roots.get(0))) {

@@ -240,6 +240,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     }
 
     private <L> Registration addListener(Class<L> listenerType, L listener) {
+        @SuppressWarnings("unchecked")
         List<L> list = (List<L>) listeners.computeIfAbsent(listenerType,
                 key -> Collections.synchronizedList(new ArrayList<>(1)));
         list.add(listener);

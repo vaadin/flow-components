@@ -29,6 +29,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
@@ -63,6 +64,7 @@ import elemental.json.JsonValue;
  * @param <T>
  *            the grid bean type
  */
+@JsModule("@vaadin/vaadin-grid/src/vaadin-grid-tree-toggle.js")
 @HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-tree-toggle.html")
 public class TreeGrid<T> extends Grid<T>
         implements HasHierarchicalDataProvider<T> {
@@ -201,7 +203,7 @@ public class TreeGrid<T> extends Grid<T>
 
             return new HierarchicalDataCommunicator<>(dataGenerator,
                     arrayUpdater,
-                    data -> element.callFunction("$connector.updateHierarchicalData", data),
+                    data -> element.callJsFunction("$connector.updateHierarchicalData", data),
                     element.getNode(), uniqueKeyProviderSupplier);
         }
     }
@@ -247,6 +249,7 @@ public class TreeGrid<T> extends Grid<T>
      *            the listener to add
      * @return a registration for the listener
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Registration addExpandListener(
             ComponentEventListener<ExpandEvent<T, TreeGrid<T>>> listener) {
         return ComponentUtil.addListener(this, ExpandEvent.class,
@@ -262,6 +265,7 @@ public class TreeGrid<T> extends Grid<T>
      *            the listener to add
      * @return a registration for the listener
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Registration addCollapseListener(
             ComponentEventListener<CollapseEvent<T, TreeGrid<T>>> listener) {
         return ComponentUtil.addListener(this, CollapseEvent.class,
@@ -503,6 +507,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param items
      *            the items to expand
      */
+    @SuppressWarnings("unchecked")
     public void expand(T... items) {
         expand(Arrays.asList(items));
     }
@@ -586,6 +591,7 @@ public class TreeGrid<T> extends Grid<T>
      * @param items
      *            the collection of items to collapse
      */
+    @SuppressWarnings("unchecked")
     public void collapse(T... items) {
         collapse(Arrays.asList(items));
     }
@@ -711,6 +717,7 @@ public class TreeGrid<T> extends Grid<T>
         return (HierarchicalDataCommunicator<T>) super.getDataCommunicator();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public HierarchicalDataProvider<T, SerializablePredicate<T>> getDataProvider() {
         if (!(super.getDataProvider() instanceof HierarchicalDataProvider)) {

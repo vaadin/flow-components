@@ -48,6 +48,8 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
@@ -119,6 +121,14 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.4.0")
+@JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
+@JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
+@JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
+@JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
+@JsModule("frontend://flow-component-renderer.js")
+@JsModule("frontend://gridConnector-es6.js")
+
 @HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid.html")
 @HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column.html")
 @HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-sorter.html")
@@ -170,7 +180,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
 
         public void enqueue(String name, Serializable... arguments) {
-            queue.add(() -> getElement().callFunction(name, arguments));
+            queue.add(() -> getElement().callJsFunction(name, arguments));
         }
 
         protected Element getElement() {
@@ -208,10 +218,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
                 return new AbstractGridSingleSelectionModel<T>(grid) {
 
+                    @SuppressWarnings("unchecked")
                     @Override
                     protected void fireSelectionEvent(
                             SelectionEvent<Grid<T>, T> event) {
-                        grid.fireEvent((ComponentEvent<Grid>) event);
+                        grid.fireEvent((ComponentEvent<Grid<T>>) event);
                     }
                 };
             }
@@ -228,6 +239,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
                 return new AbstractGridMultiSelectionModel<T>(grid) {
 
+                    @SuppressWarnings("unchecked")
                     @Override
                     protected void fireSelectionEvent(
                             SelectionEvent<Grid<T>, T> event) {
@@ -858,6 +870,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             return this;
         }
 
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         private void setupColumnEditor() {
             editorRenderer = new EditorRenderer<>((Editor) grid.getEditor(),
                     columnInternalId);
@@ -1262,6 +1275,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            the GridArrayUpdater type
      *
      */
+    @SuppressWarnings("unchecked")
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             int pageSize,
             SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuidler,
@@ -1304,7 +1318,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     protected void initConnector() {
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached Grid"))
-                .getPage().executeJavaScript(
+                .getPage().executeJs(
                         "window.Vaadin.Flow.gridConnector.initLazy($0)",
                         getElement());
     }
@@ -1342,7 +1356,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
             return new DataCommunicator<>(
                     dataGenerator, arrayUpdater, data -> element
-                            .callFunction("$connector.updateFlatData", data),
+                            .callJsFunction("$connector.updateFlatData", data),
                     element.getNode());
         }
     }
@@ -1572,7 +1586,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         C column = columnFactory.apply(renderer, columnId);
         idToColumnMap.put(columnId, column);
-        getElement().callFunction("$connector.setColumnId", column.getElement(),
+        getElement().callJsFunction("$connector.setColumnId", column.getElement(),
                 columnId);
 
         AbstractColumn<?> current = column;
@@ -1702,6 +1716,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            the sorting properties to use for this column
      * @return the created column
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     protected <C extends Column<T>> C addColumn(Renderer<T> renderer,
             BiFunction<Renderer<T>, String, C> columnFactory,
             String... sortingProperties) {
@@ -1831,6 +1846,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private <C extends Column<T>> C addColumn(PropertyDefinition<T, ?> property,
             BiFunction<Renderer<T>, String, C> columnFactory) {
+        @SuppressWarnings("unchecked")
         C column = (C) addColumn(item -> runPropertyValueGetter(property, item),
                 columnFactory).setHeader(property.getCaption());
         try {
@@ -1962,6 +1978,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @param key
      *            the user-defined identifier
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     protected void setColumnKey(String key, Column column) {
         if (keyToColumnMap.containsKey(key)) {
             throw new IllegalArgumentException(
@@ -2298,7 +2315,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
-        getElement().callFunction("$connector.reset");
+        getElement().callJsFunction("$connector.reset");
         setRequestedRange(0, pageSize);
         getDataCommunicator().reset();
     }
@@ -2348,7 +2365,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     protected void updateSelectionModeOnClient() {
-        getElement().callFunction("$connector.setSelectionMode",
+        getElement().callJsFunction("$connector.setSelectionMode",
                 selectionMode.name());
     }
 
@@ -2487,7 +2504,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 .map(item -> (Serializable) item).collect(Collectors.toList());
         collect.add(1, false);
         collect.toArray(values);
-        getElement().callFunction("$connector." + function, values);
+        getElement().callJsFunction("$connector." + function, values);
     }
 
     private JsonObject generateJsonForSelection(T item) {
@@ -2665,7 +2682,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         column.destroyDataGenerators();
         keyToColumnMap.remove(column.getKey());
         idToColumnMap.remove(column.getInternalId());
-        getElement().callFunction("$connector.columnRemoved",
+        getElement().callJsFunction("$connector.columnRemoved",
                 column.getInternalId());
     }
 
@@ -2723,7 +2740,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     public void setDetailsVisibleOnClick(boolean detailsVisibleOnClick) {
         if (this.detailsVisibleOnClick != detailsVisibleOnClick) {
             this.detailsVisibleOnClick = detailsVisibleOnClick;
-            getElement().callFunction("$connector.setDetailsVisibleOnClick",
+            getElement().callJsFunction("$connector.setDetailsVisibleOnClick",
                     detailsVisibleOnClick);
         }
     }
@@ -2806,6 +2823,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         return ret;
     }
 
+    @SuppressWarnings("unchecked")
     private void appendChildColumns(List<Column<T>> list,
             ColumnBase<?> column) {
         if (column instanceof Column) {
@@ -2962,7 +2980,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             }
             directions.set(i, direction);
         }
-        getElement().callFunction("$connector.setSorterDirections", directions);
+        getElement().callJsFunction("$connector.setSorterDirections", directions);
     }
 
     private void sort(boolean userOriginated) {
@@ -3087,7 +3105,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Returns the Class of bean this Grid is constructed with via
      * {@link #Grid(Class)}. Or null if not constructed from a bean type.
-     * 
+     *
      * @return the Class of bean this Grid is constructed with
      */
     public Class<T> getBeanType() {
@@ -3159,7 +3177,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             return;
         }
         verticalScrollingEnabled = enabled;
-        getElement().callFunction("$connector.setVerticalScrollingEnabled",
+        getElement().callJsFunction("$connector.setVerticalScrollingEnabled",
                 enabled);
     }
 
@@ -3222,7 +3240,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @see Column#setAutoWidth(boolean)
      */
     public void recalculateColumnWidths() {
-        getElement().callFunction("recalculateColumnWidths");
+        getElement().callJsFunction("recalculateColumnWidths");
     }
 
     /**
@@ -3511,7 +3529,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets the active drop filter.
-     * 
+     *
      * @return The drop filter function
      */
     public SerializablePredicate<T> getDropFilter() {
@@ -3520,7 +3538,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     /**
      * Gets the active drag filter.
-     * 
+     *
      * @return The drag filter function
      */
     public SerializablePredicate<T> getDragFilter() {

@@ -210,6 +210,7 @@ public class TreeGridBasicFeaturesPage extends Div {
                                 .orElse("null"))));
     }
 
+    @SuppressWarnings("rawtypes")
     private void createSelectionModeMenu() {
         LinkedHashMap<String, SelectionMode> options = new LinkedHashMap<>();
         options.put("none", SelectionMode.NONE);

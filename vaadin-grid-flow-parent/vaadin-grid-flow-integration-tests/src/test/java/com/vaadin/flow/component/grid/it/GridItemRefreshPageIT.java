@@ -19,15 +19,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -92,10 +91,6 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
 
         Assert.assertEquals("Cell content should have updated", "12345", firstRowCell.getText());
         Assert.assertEquals("Cell content should have not updated", "EDITED", grid.getCell(5,1).getText());
-    }
-
-    private void clickFirstChild(WebElement element) {
-        this.executeScript("arguments[0].firstElementChild.click();", element);
     }
 
     private void updateAndRefreshItemsOnTheServer(String gridId,

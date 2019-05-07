@@ -210,6 +210,7 @@ public class GridTestPageIT extends AbstractComponentIT {
         assertClientColumnIds(new String[] { "col2" }, grid);
     }
 
+    @SuppressWarnings("unchecked")
     private void assertClientColumnIds(String[] expectedIds, GridElement grid) {
         List<String> columnIds = (List<String>) executeScript(
                 "return Array.from(arguments[0].$connector.columnToIdMap.values())",
@@ -447,6 +448,7 @@ public class GridTestPageIT extends AbstractComponentIT {
                 executeScript("return arguments[0].innerText", element));
     }
 
+    @SuppressWarnings("unchecked")
     public static Map<String, Map<String, ?>> getItems(WebDriver driver,
             WebElement element) {
         Object result = ((JavascriptExecutor) driver)

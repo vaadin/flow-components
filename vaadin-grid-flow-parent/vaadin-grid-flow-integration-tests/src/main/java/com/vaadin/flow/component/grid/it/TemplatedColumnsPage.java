@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.polymertemplate.Id;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
@@ -34,6 +35,10 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @Tag("templated-columns")
 @HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column-group.html")
 @HtmlImport("src/templated-columns.html")
+
+// Order matters see https://github.com/vaadin/flow/issues/5591
+@JsModule("src/templated-columns.js")
+@JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column-group.js")
 public class TemplatedColumnsPage extends PolymerTemplate<TemplateModel> {
 
     @Id
