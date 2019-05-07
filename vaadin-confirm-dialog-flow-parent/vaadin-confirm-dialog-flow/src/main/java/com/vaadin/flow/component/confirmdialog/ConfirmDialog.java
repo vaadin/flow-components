@@ -41,7 +41,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-confirm-dialog")
 @NpmPackage(value="@vaadin/vaadin-confirm-dialog", version = "1.1.1")
-@JsModule("@vaadin/vaadin-confirm-dialog/vaadin-confirm-dialog.js")
+@JsModule("@vaadin/vaadin-confirm-dialog/src/vaadin-confirm-dialog.js")
 @HtmlImport("frontend://bower_components/vaadin-confirm-dialog/src/vaadin-confirm-dialog.html")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents<ConfirmDialog> {
