@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -10,17 +9,50 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>vaadin-menu-bar-integration-tests</artifactId>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-menu-bar-integration-tests-bower-mode</artifactId>
     <packaging>war</packaging>
-
-    <name>Vaadin MenuBar Integration Tests</name>
+    <name>Vaadin Menu Bar Tests in Bower Mode</name>
 
     <dependencies>
+        <!-- Flow -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
+        </dependency>
+
+        <!-- Logger -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+
+        <!-- Component under test -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-menu-bar-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-menu-bar-flow-demo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Test util -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-util</artifactId>
+        </dependency>
+
         <!--Test scoped -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -28,54 +60,9 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <!--System under test -->
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-menu-bar-flow</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!--Flow and friends -->
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-data</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-html-components</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-server-production-mode</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-lumo-theme</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-component-demo-helpers</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-menu-bar-flow-demo</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-test-util</artifactId>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -83,22 +70,34 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>vaadin.bowerMode</name>
+                                    <value>true</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- start jetty before ITs -->
+            <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
             </plugin>
+            <!-- run ITs -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <configuration>
-                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-                </configuration>
             </plugin>
         </plugins>
     </build>

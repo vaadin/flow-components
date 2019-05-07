@@ -7,12 +7,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>1.3-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <artifactId>vaadin-menu-bar-flow-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin MenuBar Flow Parent</name>
 
@@ -22,8 +22,8 @@
     </organization>
 
     <properties>
-        <flow.version>1.5-SNAPSHOT</flow.version>
-        <contextmenu.version>2.1.0</contextmenu.version>
+        <flow.version>2.0-SNAPSHOT</flow.version>
+        <contextmenu.version>3.0-SNAPSHOT</contextmenu.version>
 
         <testbench.version>6.0.1</testbench.version>
         <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
@@ -39,18 +39,7 @@
         <module>vaadin-menu-bar-flow-demo</module>
     </modules>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>vaadin-prereleases</id>
-            <url>http://maven.vaadin.com/vaadin-prereleases</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <repositories>
-        <repository>
-            <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>
-        </repository>
         <repository>
             <id>vaadin-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
@@ -67,6 +56,7 @@
             </activation>
             <modules>
                 <module>vaadin-menu-bar-flow-integration-tests</module>
+                <module>vaadin-menu-bar-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
