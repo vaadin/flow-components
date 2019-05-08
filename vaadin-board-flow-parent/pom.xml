@@ -38,6 +38,7 @@
 		<module>vaadin-board-testbench</module>
 		<module>vaadin-board-flow-integration-tests</module>
 		<module>vaadin-board-flow-demo</module>
+		<module>vaadin-board-integration-tests/pom-bower-mode.xml</module>
 	</modules>
 
 	<repositories>
