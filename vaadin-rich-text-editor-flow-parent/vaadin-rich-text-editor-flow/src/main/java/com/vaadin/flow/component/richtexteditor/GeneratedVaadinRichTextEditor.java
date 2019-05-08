@@ -212,7 +212,7 @@ import elemental.json.JsonArray;
         "Flow#1.2-SNAPSHOT" })
 @Tag("vaadin-rich-text-editor")
 @NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "1.0.1")
-@JsModule("@vaadin/vaadin-rich-text-editor/vaadin-rich-text-editor.js")
+@JsModule("@vaadin/vaadin-rich-text-editor/src/vaadin-rich-text-editor.js")
 @HtmlImport("frontend://bower_components/vaadin-rich-text-editor/src/vaadin-rich-text-editor.html")
 public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRichTextEditor<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
