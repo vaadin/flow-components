@@ -14,14 +14,6 @@
 
     <name>Vaadin Login</name>
 
-    <licenses>
-        <license>
-            <name>Apache License Version 2.0</name>
-            <distribution>repo</distribution>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-        </license>
-    </licenses>
-
     <dependencies>
         <!--Provided scoped-->
         <dependency>
