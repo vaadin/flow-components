@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -10,47 +9,41 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>vaadin-text-field-flow-integration-tests</artifactId>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-text-field-integration-tests-bower-mode</artifactId>
     <packaging>war</packaging>
-
-
-    <name>Vaadin Text Field Integration Tests</name>
-
-    <properties>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
-    </properties>
+    <name>Vaadin Text Field Tests in Bower Mode</name>
 
     <dependencies>
-        <!--Test scoped -->
+        <!-- Flow -->
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench-core</artifactId>
-            <scope>test</scope>
+            <artifactId>flow-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-text-field-testbench</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-radio-button-flow-testbench</artifactId>
-            <version>1.3.1</version>
-            <scope>test</scope>
+            <artifactId>flow-html-components</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-test-generic</artifactId>
-            <scope>test</scope>
-        </dependency>
-
+        <!-- Logger -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
         </dependency>
+
+        <!-- Component under test -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-text-field-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-text-field-flow-demo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Test util -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
@@ -67,87 +60,61 @@
             <version>6.0.1.Final</version>
         </dependency>
 
-        <!--System under test -->
+        <!--Test scoped -->
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-text-field-flow</artifactId>
+            <artifactId>vaadin-testbench-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-text-field-testbench</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <!--Flow and friends -->
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-client</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-data</artifactId>
+            <artifactId>vaadin-radio-button-flow-testbench</artifactId>
+            <version>1.3.1</version>
+            <scope>test</scope>
         </dependency>
-
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-server-production-mode</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-text-field-flow-demo</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-
             <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>validate</goal>
-                            <goal>build-frontend</goal>
+                            <goal>set-system-properties</goal>
                         </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>vaadin.bowerMode</name>
+                                    <value>true</value>
+                                </property>
+                            </properties>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- Remove stuff generated by the flow-maven-plugin -->
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${project.basedir}</directory>
-                            <includes>
-                                <include>package.json</include>
-                                <include>webpack.config.js</include>
-                            </includes>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-
+            <!-- start jetty before ITs -->
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
             </plugin>
-
+            <!-- run ITs -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <configuration>
-                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-                </configuration>
             </plugin>
         </plugins>
     </build>
