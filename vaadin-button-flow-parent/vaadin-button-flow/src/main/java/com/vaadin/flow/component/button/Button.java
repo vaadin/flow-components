@@ -29,7 +29,6 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
 import com.vaadin.flow.internal.nodefeature.NodeFeature;
 import com.vaadin.flow.shared.Registration;
@@ -42,7 +41,6 @@ import com.vaadin.flow.shared.Registration;
 public class Button extends GeneratedVaadinButton<Button>
         implements HasSize, HasEnabled {
 
-    private Element span;
     private Component iconComponent;
     private boolean iconAfterText;
     private boolean disableOnClick = false;
@@ -160,9 +158,6 @@ public class Button extends GeneratedVaadinButton<Button>
      * This method removes any existing text-content and replaces it with the
      * given text.
      * <p>
-     * If an icon has been set, the text will be wrapped in a
-     * <code>span</code>-element.
-     * <p>
      * This method also sets or removes this button's <code>theme=icon</code>
      * attribute based on whether this button contains only an icon after this
      * operation or not.
@@ -174,44 +169,10 @@ public class Button extends GeneratedVaadinButton<Button>
     @Override
     public void setText(String text) {
         removeAll(getNonTextNodes());
-
-        if (text == null || text.isEmpty()) {
-            if (span != null) {
-                getElement().removeChild(span);
-                span = null;
-            }
-        } else if (span != null) {
-            span.setText(text);
-        } else if (iconComponent == null) {
+        if (text != null && !text.isEmpty()) {
             getElement().appendChild(Element.createText(text));
-        } else {
-            span = ElementFactory.createSpan(text);
-            if (iconAfterText) {
-                getElement().insertChild(0, span);
-            } else {
-                getElement().appendChild(span);
-            }
         }
         updateThemeAttribute();
-    }
-
-    /**
-     * Gets the text content of this button.
-     * <p>
-     * If an icon has been set for this button, this method returns the text
-     * content wrapped in a <code>span</code>-element. Otherwise this method
-     * returns the text in this button without considering the text in any child
-     * components or elements.
-     *
-     * @return the text content of this component, not <code>null</code>
-     */
-    @Override
-    public String getText() {
-        if (span == null) {
-            return super.getText();
-        } else {
-            return span.getText();
-        }
     }
 
     /**
@@ -224,8 +185,8 @@ public class Button extends GeneratedVaadinButton<Button>
      * relative to the button's text content.
      * <p>
      * This method also sets or removes this button's <code>theme=icon</code>
-     * attribute and wraps it's possible text-content in a
-     * <code>span</code>-element for better theming support.
+     * attribute based on whether this button contains only an icon after this
+     * operation or not.
      *
      * @param icon
      *            component to be used as an icon, may be <code>null</code> to
@@ -239,21 +200,10 @@ public class Button extends GeneratedVaadinButton<Button>
         if (iconComponent != null) {
             remove(iconComponent);
         }
-
         iconComponent = icon;
-        if (iconComponent == null) {
-            updateThemeAttribute();
-            return;
-        }
-
-        if (iconAfterText) {
-            add(iconComponent);
-        } else {
-            getElement().insertChild(0, iconComponent.getElement());
-        }
-
-        if (span == null && !getText().isEmpty()) {
-            wrapTextInSpan();
+        if (icon != null) {
+            add(icon);
+            updateIconSlot();
         }
         updateThemeAttribute();
     }
@@ -272,8 +222,8 @@ public class Button extends GeneratedVaadinButton<Button>
      * Sets whether this button's icon should be positioned after it's text
      * content or the other way around.
      * <p>
-     * This method reorders possibly existing icon and text content if needed
-     * and also affects icon and text that are set afterwards.
+     * At the element-level, this method determines whether to set
+     * {@code slot="prefix"} or {@code slot="suffix"} attribute to the icon.
      *
      * @param iconAfterText
      *            whether the icon should be positioned after the text content
@@ -281,31 +231,8 @@ public class Button extends GeneratedVaadinButton<Button>
      */
     public void setIconAfterText(boolean iconAfterText) {
         this.iconAfterText = iconAfterText;
-
-        Element[] textNodes = getTextNodes();
-
-        if ((span == null && textNodes.length == 0) || iconComponent == null) {
-            // either no text or no icon, so no reordering needed
-            return;
-        }
-
-        int iconIndex = getElement().indexOfChild(iconComponent.getElement());
-        int textIndex;
-
-        if (span != null) {
-            textIndex = getElement().indexOfChild(span);
-        } else if (iconAfterText) {
-            textIndex = getElement()
-                    .indexOfChild(textNodes[textNodes.length - 1]);
-        } else {
-            textIndex = getElement().indexOfChild(textNodes[0]);
-        }
-
-        // reorder by moving the icon, if necessary
-        if (iconAfterText && iconIndex < textIndex) {
-            add(iconComponent);
-        } else if (!iconAfterText && textIndex < iconIndex) {
-            getElement().insertChild(0, iconComponent.getElement());
+        if (iconComponent != null) {
+            updateIconSlot();
         }
     }
 
@@ -423,6 +350,11 @@ public class Button extends GeneratedVaadinButton<Button>
         }
     }
 
+    private void updateIconSlot() {
+        iconComponent.getElement().setAttribute("slot",
+                iconAfterText ? "suffix" : "prefix");
+    }
+
     /**
      * Removes all contents from this component except elements in
      * {@code exclusion} array. This includes child components, text content as
@@ -441,34 +373,15 @@ public class Button extends GeneratedVaadinButton<Button>
         getElement().appendChild(exclusion);
     }
 
-    private void wrapTextInSpan() {
-        String text = getText();
-
-        getElement().removeChild(getTextNodes());
-
-        span = ElementFactory.createSpan(text);
-
-        if (iconAfterText) {
-            getElement().insertChild(0, span);
-        } else {
-            getElement().appendChild(span);
-        }
-    }
-
     private Element[] getNonTextNodes() {
         return getElement().getChildren()
                 .filter(element -> !element.isTextNode())
                 .toArray(Element[]::new);
     }
 
-    private Element[] getTextNodes() {
-        return getElement().getChildren().filter(Element::isTextNode)
-                .toArray(Element[]::new);
-    }
-
     private void updateThemeAttribute() {
         // Add theme attribute "icon" when the button contains only an icon to
-        // fully support themes like Valo. This doesn't override explicitly set
+        // fully support themes like Lumo. This doesn't override explicitly set
         // theme attribute.
 
         if (getElement().getChildCount() == 1 && iconComponent != null) {
