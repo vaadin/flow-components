@@ -26,8 +26,6 @@
 		</license>
 	</licenses>
 	<properties>
-		<flow.version>2.0.0.beta2</flow.version>
-		<testbench.version>6.0.1</testbench.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,6 +34,7 @@
 	<modules>
 		<module>vaadin-cookie-consent-flow</module>
 		<module>vaadin-cookie-consent-flow-integration-tests</module>
+        <module>vaadin-cookie-consent-integration-tests/pom-bower-mode.xml</module>
 		<module>vaadin-cookie-consent-flow-demo</module>
 		<module>vaadin-cookie-consent-testbench</module>
 	</modules>
@@ -46,12 +45,6 @@
 			<url>http://maven.vaadin.com/vaadin-prereleases</url>
 		</repository>
 	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>vaadin-prereleases</id>
-			<url>http://maven.vaadin.com/vaadin-prereleases</url>
-		</pluginRepository>
-	</pluginRepositories>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
