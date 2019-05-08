@@ -246,7 +246,14 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItemValuePath("key");
         setItemIdPath("key");
         setPageSize(pageSize);
+
         initConnector();
+        runBeforeClientResponse(ui -> {
+            // If user didn't provide any data, initialize with empty data set.
+            if (dataCommunicator == null) {
+                setItems();
+            }
+        });
     }
 
     /**

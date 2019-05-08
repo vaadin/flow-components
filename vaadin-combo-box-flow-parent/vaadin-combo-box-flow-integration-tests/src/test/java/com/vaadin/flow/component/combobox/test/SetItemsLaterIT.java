@@ -51,4 +51,24 @@ public class SetItemsLaterIT extends AbstractComboBoxIT {
 
     }
 
+    @Test
+    public void dontSetItemsOrDataProvider_openComboBox_loadingStateResolved() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class).first();
+        comboBox.openPopup();
+        waitUntil(driver -> !comboBox.getPropertyBoolean("loading"));
+        assertLoadedItemsCount("ComboBox should not have items", 0, comboBox);
+    }
+
+    @Test
+    public void openEmptyComboBox_setItems_open_containsItems() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class).first();
+        comboBox.openPopup();
+        findElement(By.tagName("button")).click();
+        comboBox.openPopup();
+        assertLoadedItemsCount("ComboBox should have loaded 2 items", 2,
+                comboBox);
+        assertRendered("foo");
+        assertRendered("bar");
+    }
+
 }
