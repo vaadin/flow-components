@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
  * Integration tests for the {@link DatePickerView}.
  */
 public class DatePickerIT extends ComponentDemoTest {
-    
+
     private static final String DATEPICKER_OVERLAY = "vaadin-date-picker-overlay";
 
     @Before
@@ -154,8 +154,10 @@ public class DatePickerIT extends ComponentDemoTest {
         WebElement displayText = findInShadowRoot(localePicker, By.id("input"))
                 .get(0);
         executeScript("arguments[0].value = '2018-03-27'", localePicker);
-        waitUntil(driver -> "Day: 27\nMonth: 3\nYear: 2018\nLocale: en_US"
-                .equals(message.getText()));
+
+        waitUntil(driver -> message.getText()
+                .contains("Day: 27\nMonth: 3\nYear: 2018\nLocale:"));
+
         Assert.assertEquals(
                 "The format of the displayed date should be MM/DD/YYYY.", true,
                 executeScript("return arguments[0].value === '3/27/2018'",

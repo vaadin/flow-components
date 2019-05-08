@@ -16,22 +16,26 @@
 package com.vaadin.flow.component.datepicker;
 
 import javax.annotation.Generated;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.Synchronize;
-import elemental.json.JsonObject;
-import com.vaadin.flow.component.NotSupported;
-import com.vaadin.flow.component.DomEvent;
+
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.NotSupported;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.shared.Registration;
+
+import elemental.json.JsonObject;
 
 /**
  * <p>
@@ -256,6 +260,8 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
         "Flow#2.0-SNAPSHOT" })
 @Tag("vaadin-date-picker")
 @HtmlImport("frontend://bower_components/vaadin-date-picker/src/vaadin-date-picker.html")
+@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "4.0.0")
+@JsModule("@vaadin/vaadin-date-picker/src/vaadin-date-picker.js")
 public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R> {
@@ -543,71 +549,71 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * <pre>
      * <code>        {
-     * 	          // An array with the full names of months starting
-     * 	          // with January.
-     * 	          monthNames: [
-     * 	            'January', 'February', 'March', 'April', 'May',
-     * 	            'June', 'July', 'August', 'September',
-     * 	            'October', 'November', 'December'
-     * 	          ],
+     *               // An array with the full names of months starting
+     *               // with January.
+     *               monthNames: [
+     *                 'January', 'February', 'March', 'April', 'May',
+     *                 'June', 'July', 'August', 'September',
+     *                 'October', 'November', 'December'
+     *               ],
      *
-     * 	          // An array of weekday names starting with Sunday. Used
-     * 	          // in screen reader announcements.
-     * 	          weekdays: [
-     * 	            'Sunday', 'Monday', 'Tuesday', 'Wednesday',
-     * 	            'Thursday', 'Friday', 'Saturday'
-     * 	          ],
+     *               // An array of weekday names starting with Sunday. Used
+     *               // in screen reader announcements.
+     *               weekdays: [
+     *                 'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+     *                 'Thursday', 'Friday', 'Saturday'
+     *               ],
      *
-     * 	          // An array of short weekday names starting with Sunday.
-     * 	          // Displayed in the calendar.
-     * 	          weekdaysShort: [
-     * 	            'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
-     * 	          ],
+     *               // An array of short weekday names starting with Sunday.
+     *               // Displayed in the calendar.
+     *               weekdaysShort: [
+     *                 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+     *               ],
      *
-     * 	          // An integer indicating the first day of the week
-     * 	          // (0 = Sunday, 1 = Monday, etc.).
-     * 	          firstDayOfWeek: 0,
+     *               // An integer indicating the first day of the week
+     *               // (0 = Sunday, 1 = Monday, etc.).
+     *               firstDayOfWeek: 0,
      *
-     * 	          // Used in screen reader announcements along with week
-     * 	          // numbers, if they are displayed.
-     * 	          week: 'Week',
+     *               // Used in screen reader announcements along with week
+     *               // numbers, if they are displayed.
+     *               week: 'Week',
      *
-     * 	          // Translation of the Calendar icon button title.
-     * 	          calendar: 'Calendar',
+     *               // Translation of the Calendar icon button title.
+     *               calendar: 'Calendar',
      *
-     * 	          // Translation of the Clear icon button title.
-     * 	          clear: 'Clear',
+     *               // Translation of the Clear icon button title.
+     *               clear: 'Clear',
      *
-     * 	          // Translation of the Today shortcut button text.
-     * 	          today: 'Today',
+     *               // Translation of the Today shortcut button text.
+     *               today: 'Today',
      *
-     * 	          // Translation of the Cancel button text.
-     * 	          cancel: 'Cancel',
+     *               // Translation of the Cancel button text.
+     *               cancel: 'Cancel',
      *
-     * 	          // A function to format given {@code Object} as
-     * 	          // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
-     * 	          // Note: The argument month is 0-based. This means that January = 0 and December = 11.
-     * 	          formatDate: d =&gt; {
-     * 	            // returns a string representation of the given
-     * 	            // object in 'MM/DD/YYYY' -format
-     * 	          },
+     *               // A function to format given {@code Object} as
+     *               // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
+     *               // Note: The argument month is 0-based. This means that January = 0 and December = 11.
+     *               formatDate: d =&gt; {
+     *                 // returns a string representation of the given
+     *                 // object in 'MM/DD/YYYY' -format
+     *               },
      *
-     * 	          // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     * 	          // Must properly parse (at least) text formatted by {@code formatDate}.
-     * 	          // Setting the property to null will disable keyboard input feature.
-     * 	          // Note: The argument month is 0-based. This means that January = 0 and December = 11.
-     * 	          parseDate: text =&gt; {
-     * 	            // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
-     * 	            // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     * 	          }
+     *               // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
+     *               // Must properly parse (at least) text formatted by {@code formatDate}.
+     *               // Setting the property to null will disable keyboard input feature.
+     *               // Note: The argument month is 0-based. This means that January = 0 and December = 11.
+     *               parseDate: text =&gt; {
+     *                 // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
+     *                 // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
+     *               }
      *
-     * 	          // A function to format given {@code monthName} and
-     * 	          // {@code fullYear} integer as calendar title string.
-     * 	          formatTitle: (monthName, fullYear) =&gt; {
-     * 	            return monthName + ' ' + fullYear;
-     * 	          }
-     * 	        }&lt;p&gt;This property is not synchronized automatically from the client side, so the returned value may not be the same as in client side.
-     * 	</code>
+     *               // A function to format given {@code monthName} and
+     *               // {@code fullYear} integer as calendar title string.
+     *               formatTitle: (monthName, fullYear) =&gt; {
+     *                 return monthName + ' ' + fullYear;
+     *               }
+     *             }&lt;p&gt;This property is not synchronized automatically from the client side, so the returned value may not be the same as in client side.
+     *     </code>
      * </pre>
      *
      * @return the {@code i18n} property from the webcomponent
@@ -631,71 +637,71 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * <pre>
      * <code>        {
-     * 	          // An array with the full names of months starting
-     * 	          // with January.
-     * 	          monthNames: [
-     * 	            'January', 'February', 'March', 'April', 'May',
-     * 	            'June', 'July', 'August', 'September',
-     * 	            'October', 'November', 'December'
-     * 	          ],
+     *               // An array with the full names of months starting
+     *               // with January.
+     *               monthNames: [
+     *                 'January', 'February', 'March', 'April', 'May',
+     *                 'June', 'July', 'August', 'September',
+     *                 'October', 'November', 'December'
+     *               ],
      *
-     * 	          // An array of weekday names starting with Sunday. Used
-     * 	          // in screen reader announcements.
-     * 	          weekdays: [
-     * 	            'Sunday', 'Monday', 'Tuesday', 'Wednesday',
-     * 	            'Thursday', 'Friday', 'Saturday'
-     * 	          ],
+     *               // An array of weekday names starting with Sunday. Used
+     *               // in screen reader announcements.
+     *               weekdays: [
+     *                 'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+     *                 'Thursday', 'Friday', 'Saturday'
+     *               ],
      *
-     * 	          // An array of short weekday names starting with Sunday.
-     * 	          // Displayed in the calendar.
-     * 	          weekdaysShort: [
-     * 	            'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
-     * 	          ],
+     *               // An array of short weekday names starting with Sunday.
+     *               // Displayed in the calendar.
+     *               weekdaysShort: [
+     *                 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+     *               ],
      *
-     * 	          // An integer indicating the first day of the week
-     * 	          // (0 = Sunday, 1 = Monday, etc.).
-     * 	          firstDayOfWeek: 0,
+     *               // An integer indicating the first day of the week
+     *               // (0 = Sunday, 1 = Monday, etc.).
+     *               firstDayOfWeek: 0,
      *
-     * 	          // Used in screen reader announcements along with week
-     * 	          // numbers, if they are displayed.
-     * 	          week: 'Week',
+     *               // Used in screen reader announcements along with week
+     *               // numbers, if they are displayed.
+     *               week: 'Week',
      *
-     * 	          // Translation of the Calendar icon button title.
-     * 	          calendar: 'Calendar',
+     *               // Translation of the Calendar icon button title.
+     *               calendar: 'Calendar',
      *
-     * 	          // Translation of the Clear icon button title.
-     * 	          clear: 'Clear',
+     *               // Translation of the Clear icon button title.
+     *               clear: 'Clear',
      *
-     * 	          // Translation of the Today shortcut button text.
-     * 	          today: 'Today',
+     *               // Translation of the Today shortcut button text.
+     *               today: 'Today',
      *
-     * 	          // Translation of the Cancel button text.
-     * 	          cancel: 'Cancel',
+     *               // Translation of the Cancel button text.
+     *               cancel: 'Cancel',
      *
-     * 	          // A function to format given {@code Object} as
-     * 	          // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
-     * 	          // Note: The argument month is 0-based. This means that January = 0 and December = 11.
-     * 	          formatDate: d =&gt; {
-     * 	            // returns a string representation of the given
-     * 	            // object in 'MM/DD/YYYY' -format
-     * 	          },
+     *               // A function to format given {@code Object} as
+     *               // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
+     *               // Note: The argument month is 0-based. This means that January = 0 and December = 11.
+     *               formatDate: d =&gt; {
+     *                 // returns a string representation of the given
+     *                 // object in 'MM/DD/YYYY' -format
+     *               },
      *
-     * 	          // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     * 	          // Must properly parse (at least) text formatted by {@code formatDate}.
-     * 	          // Setting the property to null will disable keyboard input feature.
-     * 	          // Note: The argument month is 0-based. This means that January = 0 and December = 11.
-     * 	          parseDate: text =&gt; {
-     * 	            // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
-     * 	            // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     * 	          }
+     *               // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
+     *               // Must properly parse (at least) text formatted by {@code formatDate}.
+     *               // Setting the property to null will disable keyboard input feature.
+     *               // Note: The argument month is 0-based. This means that January = 0 and December = 11.
+     *               parseDate: text =&gt; {
+     *                 // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
+     *                 // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
+     *               }
      *
-     * 	          // A function to format given {@code monthName} and
-     * 	          // {@code fullYear} integer as calendar title string.
-     * 	          formatTitle: (monthName, fullYear) =&gt; {
-     * 	            return monthName + ' ' + fullYear;
-     * 	          }
-     * 	        }
-     * 	</code>
+     *               // A function to format given {@code monthName} and
+     *               // {@code fullYear} integer as calendar title string.
+     *               formatTitle: (monthName, fullYear) =&gt; {
+     *                 return monthName + ' ' + fullYear;
+     *               }
+     *             }
+     *     </code>
      * </pre>
      *
      * @param i18n

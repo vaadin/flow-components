@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -15,52 +15,23 @@
     <packaging>pom</packaging>
     <name>Vaadin DatePicker Flow Parent</name>
 
-    <organization>
-        <name>Vaadin Ltd</name>
-        <url>http://vaadin.com/</url>
-    </organization>
-
-    <properties>
-        <flow.version>2.0-SNAPSHOT</flow.version>
-        <testbench.version>6.0.1</testbench.version>
-        <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
-
-    <modules>
-        <module>vaadin-date-picker-flow</module>
-        <module>vaadin-date-picker-flow-demo</module>
-        <module>vaadin-date-picker-testbench</module>
-    </modules>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>vaadin-snapshot</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </pluginRepository>
-    </pluginRepositories>
-
-    <repositories>
+   <repositories>
+        <!-- repositories are configured in parent but still need this
+             when parent is a snapshot -->
         <repository>
-            <id>vaadin-snapshot</id>
+            <id>vaadin-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
             <releases>
                 <enabled>false</enabled>
             </releases>
         </repository>
     </repositories>
+
+    <modules>
+        <module>vaadin-date-picker-flow</module>
+        <module>vaadin-date-picker-testbench</module>
+        <module>vaadin-date-picker-flow-demo</module>
+    </modules>
 
     <profiles>
         <profile>
@@ -72,6 +43,7 @@
             </activation>
             <modules>
                 <module>vaadin-date-picker-flow-integration-tests</module>
+                <module>vaadin-date-picker-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>

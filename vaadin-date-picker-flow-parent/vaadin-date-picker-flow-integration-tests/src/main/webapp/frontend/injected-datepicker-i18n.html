@@ -1,0 +1,14 @@
+<link rel="import" href="/frontend/bower_components/polymer/polymer-element.html">
+<link rel="import" href="/frontend/bower_components/vaadin-date-picker/vaadin-date-picker.html">
+
+<dom-module id="injected-datepicker-i18n">
+  <template>
+    <vaadin-date-picker id="date-picker"></vaadin-date-picker>
+  </template>
+  <script>
+    class InjectedDatepickerI18n extends Polymer.Element {
+      static get is() { return 'injected-datepicker-i18n' }
+    }
+    customElements.define(InjectedDatepickerI18n.is, InjectedDatepickerI18n);
+  </script>
+</dom-module>
