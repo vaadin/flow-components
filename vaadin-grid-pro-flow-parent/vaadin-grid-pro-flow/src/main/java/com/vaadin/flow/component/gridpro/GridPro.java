@@ -32,6 +32,8 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.ColumnPathRenderer;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -49,6 +51,11 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
+@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "2.0.0")
+@JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro.js")
+@JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro-edit-column.js")
+@JsModule("@vaadin/flow-frontend/gridProConnector.js")
+
 @HtmlImport("frontend://bower_components/vaadin-grid-pro/src/vaadin-grid-pro.html")
 @HtmlImport("frontend://bower_components/vaadin-grid-pro/src/vaadin-grid-pro-edit-column.html")
 @JavaScript("frontend://gridProConnector.js")
