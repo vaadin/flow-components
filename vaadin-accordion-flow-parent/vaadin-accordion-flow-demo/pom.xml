@@ -22,24 +22,20 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
-            <version>${flow.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
-            <version>${flow.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-component-demo-helpers</artifactId>
-            <version>${flow.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
-            <version>${flow.version}</version>
         </dependency>
 
         <dependency>
@@ -139,10 +135,6 @@
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>flow-maven-plugin</artifactId>
-                    </plugin>
-
-                    <plugin>
-                        <artifactId>maven-clean-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>

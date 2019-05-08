@@ -40,7 +40,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-accordion")
 @NpmPackage(value = "@vaadin/vaadin-accordion", version = "1.0.0")
-@JsModule("@vaadin/vaadin-accordion/vaadin-accordion.js")
+@JsModule("@vaadin/vaadin-accordion/src/vaadin-accordion.js")
 @HtmlImport("frontend://bower_components/vaadin-accordion/src/vaadin-accordion.html")
 public class Accordion extends Component implements HasSize {
 
