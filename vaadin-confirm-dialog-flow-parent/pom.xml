@@ -19,6 +19,13 @@
 		<url>http://vaadin.com/</url>
 	</organization>
 
+	<licenses>
+		<license>
+			<name>cval3</name>
+			<url>https://vaadin.com/license/cval-3</url>
+		</license>
+	</licenses>
+
 	<properties>
 		<flow.version>2.0.0.beta2</flow.version>
 		<testbench.version>6.0.1</testbench.version>
