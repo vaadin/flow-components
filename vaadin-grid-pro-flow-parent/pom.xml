@@ -21,6 +21,13 @@
         <url>http://vaadin.com/</url>
     </organization>
 
+    <licenses>
+        <license>
+            <name>cval3</name>
+            <url>https://vaadin.com/license/cval-3</url>
+        </license>
+    </licenses>
+
     <modules>
         <module>vaadin-grid-pro-flow</module>
         <module>vaadin-grid-pro-testbench</module>
