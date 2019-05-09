@@ -31,8 +31,8 @@ import com.vaadin.flow.dom.Element;
  *
  * @author Vaadin Ltd.
  */
-@JsModule("@vaadin/vaadin-grid/vaadin-grid-column-group.js")
-@HtmlImport("frontend://bower_components/vaadin-grid/vaadin-grid-column-group.html")
+@JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column-group.js")
+@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column-group.html")
 @Tag("vaadin-grid-column-group")
 class ColumnGroup extends AbstractColumn<ColumnGroup> {
 
