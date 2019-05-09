@@ -23,6 +23,7 @@
         <module>vaadin-charts-flow-demo</module>
         <module>demo</module>
         <module>vaadin-charts-flow-integration-tests</module>
+        <module>integration-test/pom-bower-mode.xml</module>
         <module>vaadin-charts-testbench</module>
     </modules>
 
