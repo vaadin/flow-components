@@ -25,6 +25,10 @@ public abstract class AbstractParallelTest extends ParallelTest {
     }
 
     public void compareScreen(String screenshotName) throws Exception {
+        // Only check screenshots in npm-mode and sauce-labs
+        if (Boolean.getBoolean("vaadin.bowerMode") || System.getProperty("runLocally") != null) {
+            return;
+        }
         String prefix = getClass().getSimpleName().replaceAll("IT", "");
         String referenceName = prefix + "_" + screenshotName;
         Thread.sleep(1000);
