@@ -70,6 +70,11 @@
 
     <build>
         <plugins>
+            <!-- run vaadin frontend verify and build goals -->
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
