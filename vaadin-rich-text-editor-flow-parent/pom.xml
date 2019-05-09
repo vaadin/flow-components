@@ -19,6 +19,13 @@
 		<url>http://vaadin.com/</url>
 	</organization>
 
+	<licenses>
+		<license>
+			<name>cval3</name>
+			<url>https://vaadin.com/license/cval-3</url>
+		</license>
+	</licenses>
+
 	<properties>
 		<jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -44,7 +51,7 @@
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
         </repository>
 	</repositories>
-    
+
     <build>
         <pluginManagement>
             <plugins>
