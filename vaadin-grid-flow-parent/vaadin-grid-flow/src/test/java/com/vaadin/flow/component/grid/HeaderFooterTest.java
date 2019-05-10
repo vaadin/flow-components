@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -29,7 +30,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.google.common.collect.Lists;
 import com.vaadin.flow.component.grid.FooterRow.FooterCell;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
@@ -732,7 +732,8 @@ public class HeaderFooterTest {
         }
         // reverse to have the same order as in the implementation code:
         // from inner-most to out-most
-        return Lists.reverse(layers);
+        Collections.reverse(layers);
+        return layers;
     }
 
     private boolean isHeaderRow(List<Element> layer) {
