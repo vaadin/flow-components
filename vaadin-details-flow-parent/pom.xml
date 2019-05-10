@@ -34,7 +34,6 @@
 	<modules>
 		<module>vaadin-details-flow</module>
 		<module>vaadin-details-testbench</module>
-		<module>vaadin-details-flow-integration-tests</module>
 		<module>vaadin-details-flow-demo</module>
 	</modules>
     
@@ -48,5 +47,26 @@
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
         </repository>
     </repositories>
+
+	<profiles>
+		<profile>
+			<id>npm-it</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>vaadin-details-flow-integration-tests</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>bower-it</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>vaadin-details-flow-integration-tests/pom-bower-mode.xml</module>
+			</modules>
+		</profile>
+	</profiles>
 
 </project>
