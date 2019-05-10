@@ -742,22 +742,47 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return getErrorMessageString();
     }
 
+    /**
+     * Enables or disables the component firing events for custom string input.
+     * <p>
+     * When enabled, a {@link CustomValueSetEvent} will be fired when the user
+     * inputs a string value that does not match any existing items and commits
+     * it eg. by blurring or pressing the enter-key.
+     * <p>
+     * Note that ComboBox doesn't do anything with the custom value string
+     * automatically. Use the
+     * {@link #addCustomValueSetListener(ComponentEventListener)} method to
+     * determine how the custom value should be handled. For example, when the
+     * ComboBox has {@code String} as the value type, you can add a listener
+     * which sets the custom string as the value of the ComboBox with
+     * {@link #setValue(Object)}.
+     * <p>
+     * Setting to {@code true} also allows an unfocused ComboBox to display a
+     * string that doesn't match any of its items nor its current value, unless
+     * this is explicitly handled with
+     * {@link #addCustomValueSetListener(ComponentEventListener)}. When set to
+     * {@code false}, an unfocused ComboBox will always display the label of the
+     * currently selected item.
+     * 
+     * @param allowCustomValue
+     *            {@code true} to enable custom value set events, {@code false}
+     *            to disable them
+     * @see #addCustomValueSetListener(ComponentEventListener)
+     */
     @Override
     public void setAllowCustomValue(boolean allowCustomValue) {
         super.setAllowCustomValue(allowCustomValue);
     }
 
     /**
-     * If {@code true}, the user can input a value that is not present in the
-     * items list. {@code value} property will be set to the input value in this
-     * case. Also, when {@code value} is set programmatically, the input value
-     * will be set to reflect that value.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
+     * If {@code true}, the user can input string values that do not match to
+     * any existing item labels, which will fire a {@link CustomValueSetEvent}.
      *
-     * @return the {@code allowCustomValue} property from the combobox
+     * @return {@code true} if the component fires custom value set events,
+     *         {@code false} otherwise
+     *
+     * @see #setAllowCustomValue(boolean)
+     * @see #addCustomValueSetListener(ComponentEventListener)
      */
     public boolean isAllowCustomValue() {
         return isAllowCustomValueBoolean();
@@ -868,20 +893,23 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     /**
-     * Adds a listener for CustomValueSetEvent which is fired when user types in
-     * a value that don't already exist in the ComboBox.
-     *
+     * Adds a listener for the event which is fired when user inputs a string
+     * value that does not match any existing items and commits it eg. by
+     * blurring or pressing the enter-key.
      * <p>
-     * As a side effect makes the ComboBox allow custom values. If you don't
-     * want to allow a user to add new values to the list once the listener is
-     * added please disable it explicitly via the
+     * Note that ComboBox doesn't do anything with the custom value string
+     * automatically. Use this method to determine how the custom value should
+     * be handled. For example, when the ComboBox has {@code String} as the
+     * value type, you can add a listener which sets the custom string as the
+     * value of the ComboBox with {@link #setValue(Object)}.
+     * <p>
+     * As a side effect, this makes the ComboBox allow custom values. If you
+     * want to disable the firing of custom value set events once the listener
+     * is added, please disable it explicitly via the
      * {@link #setAllowCustomValue(boolean)} method.
-     * </p>
-     *
      * <p>
      * The custom value becomes disallowed automatically once the last custom
      * value set listener is removed.
-     * </p>
      *
      * @param listener
      *            the listener to be notified when a new value is filled
