@@ -50,5 +50,4 @@ class ItemGenerator extends BeanGenerator {
                 ChronoUnit.DAYS));
         return item;
     }
-
 }

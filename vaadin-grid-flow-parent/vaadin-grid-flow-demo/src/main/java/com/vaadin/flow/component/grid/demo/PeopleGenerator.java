@@ -77,7 +77,7 @@ public class PeopleGenerator extends BeanGenerator {
             String street, int addressNumber, String postalCode) {
         T person = constructor.get();
         person.setId(id);
-        person.setfirstName(name);
+        person.setFirstName(name);
         person.setAge(age);
         person.setSubscriber(subscriber);
         person.setEmail(email);
