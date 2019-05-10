@@ -19,14 +19,11 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
-            <version>${flow.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -88,7 +85,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -101,7 +97,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-generic</artifactId>
-            <version>${flow.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -192,7 +187,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.4</version>
                 <executions>
                     <execution>
                         <id>attach-javadoc</id>
@@ -205,7 +199,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>

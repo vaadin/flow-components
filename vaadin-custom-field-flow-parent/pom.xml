@@ -35,6 +35,7 @@
 		<module>vaadin-custom-field-flow</module>
 		<module>vaadin-custom-field-testbench</module>
 		<module>vaadin-custom-field-flow-integration-tests</module>
+		<module>vaadin-custom-field-flow-integration-tests/pom-bower-mode.xml</module>
 		<module>vaadin-custom-field-flow-demo</module>
 	</modules>
 
