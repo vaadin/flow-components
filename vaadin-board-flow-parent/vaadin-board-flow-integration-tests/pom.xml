@@ -55,7 +55,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-charts-flow</artifactId>
-            <version>6.3.0</version>
+            <version>${charts.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
