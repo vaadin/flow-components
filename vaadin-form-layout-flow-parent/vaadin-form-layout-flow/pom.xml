@@ -44,22 +44,22 @@
         <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-icon</artifactId>
-            <version>3.0.1</version>
+            <version>2.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-meta</artifactId>
-            <version>3.0.1</version>
+            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-iconset-svg</artifactId>
-            <version>3.0.1</version>
+            <version>2.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
             <artifactId>iron-flex-layout</artifactId>
-            <version>3.0.1</version>
+            <version>2.0.3</version>
         </dependency>
 
         <dependency>
