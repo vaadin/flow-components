@@ -54,9 +54,8 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-crud</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
         </dependency>
-
 
         <!--Pinned transitive webjars-->
         <dependency>
@@ -122,11 +121,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-generic</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-lumo-theme</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

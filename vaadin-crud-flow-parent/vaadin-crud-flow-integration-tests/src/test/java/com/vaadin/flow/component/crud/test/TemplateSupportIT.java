@@ -72,18 +72,11 @@ public class TemplateSupportIT extends AbstractParallelTest {
 
     @Test
     public void saveTest() {
-        if (BrowserUtil.isFirefox(getDesiredCapabilities())) {
-            // ignore FF since the test doesn't pass
-            return;
-        }
         CrudElement crud = getCrud().waitForFirst();
         crud.openRowForEditing(0);
         TextFieldElement lastNameField = crud.getEditor()
                 .$(TextFieldElement.class).id("lastName");
-
-        lastNameField.setValue("");
-        lastNameField.sendKeys("Oladeji");
-        lastNameField.sendKeys(Keys.ENTER);
+        lastNameField.setValue("Oladeji");
 
         crud.getEditorSaveButton().click();
 

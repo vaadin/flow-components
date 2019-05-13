@@ -4,7 +4,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
@@ -143,10 +142,6 @@ public class EventHandlingIT extends AbstractParallelTest {
 
     @Test
     public void saveTest() {
-        if (BrowserUtil.isFirefox(getDesiredCapabilities())) {
-            // ignore FF since the test doesn't pass
-            return;
-        }
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(0);
         TextFieldElement lastNameField = crud.getEditor()
@@ -155,9 +150,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         Assert.assertTrue(lastNameField.hasAttribute("invalid"));
 
         // Invalid input
-        lastNameField.setValue("");
-        lastNameField.sendKeys("Manolo");
-        lastNameField.sendKeys(Keys.ENTER);
+        lastNameField.setValue("Manolo");
         crud.getEditorSaveButton().click();
         Assert.assertTrue(lastNameField.hasAttribute("invalid"));
         Assert.assertTrue(crud.isEditorOpen());

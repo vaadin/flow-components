@@ -54,11 +54,6 @@ public class ProtectedBackendIT extends AbstractParallelTest {
 
     @Test
     public void tryModify() {
-        if (BrowserUtil.isFirefox(getDesiredCapabilities())
-                || BrowserUtil.isEdge(getDesiredCapabilities())) {
-            // ignore FF and Edge since the test doesn't pass
-            return;
-        }
         if (BrowserUtil.isIE(getDesiredCapabilities())) {
             throw new AssumptionViolatedException(
                     "Skipped IE11, cause textfield setValue doesn't make the editor dirty");
@@ -84,9 +79,7 @@ public class ProtectedBackendIT extends AbstractParallelTest {
         TextFieldElement lastNameField = crud.getEditor()
                 .$(TextFieldElement.class).last();
 
-        lastNameField.setValue("");
-        lastNameField.sendKeys(newValue);
-        lastNameField.sendKeys(Keys.ENTER);
+        lastNameField.setValue(newValue);
         crud.getEditorSaveButton().click();
 
         if (!isModifyAllowed) {
