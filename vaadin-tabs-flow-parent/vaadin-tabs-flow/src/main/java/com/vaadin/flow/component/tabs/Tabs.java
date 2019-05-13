@@ -49,7 +49,6 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "2.1.2")
 public class Tabs extends GeneratedVaadinTabs<Tabs>
         implements HasOrderedComponents<Tabs>, HasSize {
 

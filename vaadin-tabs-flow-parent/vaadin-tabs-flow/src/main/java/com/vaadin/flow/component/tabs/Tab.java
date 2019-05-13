@@ -25,7 +25,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "2.1.2")
 public class Tab extends GeneratedVaadinTab<Tab> implements HasComponents {
 
     private static final String FLEX_GROW_CSS_PROPERTY = "flexGrow";
