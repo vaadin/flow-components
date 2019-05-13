@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.vaadin</groupId>
 		<artifactId>flow-component-base</artifactId>
-		<version>2.0.0.beta1</version>
+		<version>2.0.0.rc1</version>
 		<relativePath />
 	</parent>
 	<artifactId>vaadin-cookie-consent-flow-root</artifactId>
@@ -34,7 +34,7 @@
 	<modules>
 		<module>vaadin-cookie-consent-flow</module>
 		<module>vaadin-cookie-consent-flow-integration-tests</module>
-        <module>vaadin-cookie-consent-integration-tests/pom-bower-mode.xml</module>
+		<module>vaadin-cookie-consent-integration-tests/pom-bower-mode.xml</module>
 		<module>vaadin-cookie-consent-flow-demo</module>
 		<module>vaadin-cookie-consent-testbench</module>
 	</modules>
