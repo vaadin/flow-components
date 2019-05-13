@@ -12,6 +12,17 @@ Run from the command line:
 
 Then navigate to `http://localhost:9998/vaadin-form-layout`
 
+## Running Integration tests
+
+For running integration tests demos execute one of the following lines depending on the desired mode
+- `mvn -pl vaadin-form-layout-flow-integration-tests clean jetty:run`
+- `mvn -pl vaadin-form-layout-flow-integration-tests clean jetty:run -Dvaadin.bowerMode`
+
+Then navigate to integration tests URLs for see integration tests views.
+
+For running all integration tests execute
+- `mvn clean install verify`
+
 ## Installing the component
 Run from the command line:
 - `mvn clean install -DskipTests`
