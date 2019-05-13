@@ -32,9 +32,7 @@
     <modules>
         <module>vaadin-app-layout-flow</module>
         <module>vaadin-app-layout-testbench</module>
-        <module>vaadin-app-layout-flow-integration-tests</module>
         <module>vaadin-app-layout-flow-demo</module>
-        <module>vaadin-app-layout-integration-tests/pom-bower-mode.xml</module>
     </modules>
     <repositories>
         <repository>
@@ -42,17 +40,26 @@
             <url>http://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
     </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>vaadin-prereleases</id>
-            <url>http://maven.vaadin.com/vaadin-prereleases</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>vaadin-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
+
+    <profiles>
+        <profile>
+            <id>npm-it</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>vaadin-app-layout-flow-integration-tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>bower-it</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>vaadin-app-layout-integration-tests/pom-bower-mode.xml</module>
+            </modules>
+        </profile>
+    </profiles>
+
 </project>
