@@ -119,7 +119,7 @@ import elemental.json.JsonObject;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.UploadElement#4.2.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/vaadin-upload", version = "4.2.0")
+@NpmPackage(value = "@vaadin/vaadin-upload", version = "4.2.1")
 @JsModule("@vaadin/vaadin-upload/src/vaadin-upload.js")
 @HtmlImport("frontend://bower_components/vaadin-upload/src/vaadin-upload.html")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
