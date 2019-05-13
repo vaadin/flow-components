@@ -34,15 +34,35 @@
 	<modules>
 		<module>vaadin-login-flow</module>
 		<module>vaadin-login-testbench</module>
-		<module>vaadin-login-flow-integration-tests</module>
 		<module>vaadin-login-flow-demo</module>
 	</modules>
 
 	<repositories>
-        <repository>
-            <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>
-        </repository>
-    </repositories>
+		<repository>
+			<id>vaadin-prereleases</id>
+			<url>https://maven.vaadin.com/vaadin-prereleases</url>
+		</repository>
+	</repositories>
+
+	<profiles>
+		<profile>
+			<id>npm-it</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>vaadin-login-flow-integration-tests</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>bower-it</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>vaadin-login-flow-integration-tests/pom-bower-mode.xml</module>
+			</modules>
+		</profile>
+	</profiles>
 
 </project>
