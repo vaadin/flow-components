@@ -17,6 +17,18 @@ Then navigate to `http://localhost:9998/vaadin-text-field` for the demo of TextF
 to `http://localhost:9998/vaadin-password-field` for the demo of PasswordField and to
 `http://localhost:9998/vaadin-text-area` for the demo of TextArea 
 
+
+## Running Integration tests
+
+For running integration tests demos execute one of the following lines depending on the desired mode
+- `mvn -pl vaadin-text-field-flow-integration-tests clean jetty:run`
+- `mvn -pl vaadin-text-field-flow-integration-tests clean jetty:run -Dvaadin.bowerMode`
+
+Then navigate to integration tests URLs for see integration tests views.
+
+For running all integration tests execute
+- `mvn clean install verify`
+
 ## Installing the component
 Run from the command line:
 - `mvn clean install -DskipTests`

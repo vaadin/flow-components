@@ -15,27 +15,29 @@
  */
 package com.vaadin.flow.component.textfield;
 
-import javax.annotation.Generated;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasTheme;
-import java.util.stream.Stream;
 import java.util.stream.Collectors;
-import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.component.NotSupported;
-import com.vaadin.flow.component.DomEvent;
+import java.util.stream.Stream;
+
+import javax.annotation.Generated;
+
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.NotSupported;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * <p>
@@ -162,9 +164,9 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
  * </tbody>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
@@ -172,7 +174,7 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-text-field.html")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.3.7")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.4.3")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-field.js")
 public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextField<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -975,11 +977,11 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToPrefix(Component... components) {
@@ -995,11 +997,11 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToInput(Component... components) {
@@ -1015,11 +1017,11 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param components
      *            The components to add.
-     * @see <a
-     *      href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
      *      page about slots</a>
-     * @see <a
-     *      href="https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      */
     protected void addToSuffix(Component... components) {

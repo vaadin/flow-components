@@ -16,13 +16,14 @@
 package com.vaadin.flow.component.textfield;
 
 import javax.annotation.Generated;
+
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * <p>
@@ -77,9 +78,9 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * </tbody>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  */
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
@@ -87,7 +88,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-password-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-password-field.html")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.3.7")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.4.3")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-password-field.js")
 public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPasswordField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
