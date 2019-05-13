@@ -22,10 +22,6 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-components-testbench</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-details-testbench</artifactId>
             <version>${vaadin.details.flow.version}</version>
         </dependency>
