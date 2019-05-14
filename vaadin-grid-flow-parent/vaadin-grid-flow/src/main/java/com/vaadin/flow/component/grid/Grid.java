@@ -1318,8 +1318,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     protected void initConnector() {
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached Grid"))
-                .getPage().executeJs(
-                        "window.Vaadin.Flow.gridConnector.initLazy($0)",
+                .getPage()
+                .executeJs("window.Vaadin.Flow.gridConnector.initLazy($0)",
                         getElement());
     }
 
@@ -1586,8 +1586,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         C column = columnFactory.apply(renderer, columnId);
         idToColumnMap.put(columnId, column);
-        getElement().callJsFunction("$connector.setColumnId", column.getElement(),
-                columnId);
+        getElement().callJsFunction("$connector.setColumnId",
+                column.getElement(), columnId);
 
         AbstractColumn<?> current = column;
         columnLayers.get(0).addColumn(column);
@@ -2980,7 +2980,8 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             }
             directions.set(i, direction);
         }
-        getElement().callJsFunction("$connector.setSorterDirections", directions);
+        getElement().callJsFunction("$connector.setSorterDirections",
+                directions);
     }
 
     private void sort(boolean userOriginated) {
@@ -3482,7 +3483,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * specific location on drop event, it might not end up in the location of
      * the drop but rather where the active sorting configuration prefers to
      * place it. This behavior might feel unexpected for the users.
-     * 
+     *
      * @param dropMode
      *            Drop mode that describes the allowed drop locations within the
      *            Grid's row. Can be {@code null} to disable dropping on the
@@ -3613,7 +3614,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * here. The function is executed for each item in the Grid during data
      * generation. Return a {@link String} to be appended to the row as {@code
      * type} data.
-     * 
+     *
      * Note that IE11 only supports data type "text"
      *
      * @param type
@@ -3640,9 +3641,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * visible viewport and all the items outside of it, even if selected, are
      * excluded. Use this method to override the default drag data and the
      * number shown in drag image on selection drag.
-     * 
+     *
      * Note that IE11 only supports data type "text"
-     * 
+     *
      * @param draggedItemsCount
      *            The number shown in the drag image on selection drag. Only
      *            values above 1 have any visible effect.

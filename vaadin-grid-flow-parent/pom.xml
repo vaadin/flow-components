@@ -14,6 +14,10 @@
     <version>4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Grid Flow Parent</name>
+    
+    <properties>
+        <contextmenu.version>3.0-SNAPSHOT</contextmenu.version>
+    </properties>
 
    <repositories>
         <!-- repositories are configured in parent but still need this
