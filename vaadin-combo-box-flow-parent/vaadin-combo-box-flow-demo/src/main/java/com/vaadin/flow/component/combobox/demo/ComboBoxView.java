@@ -109,6 +109,7 @@ public class ComboBoxView extends DemoView {
         createComboBoxUsingComponentRenderer();
         createComboBoxWithInMemoryLazyLoading();
         createComboBoxWithCallbackLazyLoading();
+        createComboBoxWithCustomValues();
     }
 
     private void createStringComboBox() {
@@ -383,6 +384,37 @@ public class ComboBoxView extends DemoView {
         //@formatter:on
         comboBox.setId("callback-box");
         addCard("Lazy Loading", "Lazy loading with callbacks", comboBox);
+    }
+
+    private void createComboBoxWithCustomValues() {
+        Div message = createMessageDiv("custom-value-message");
+
+        // begin-source-example
+        // source-example-heading: Allow users to input custom values
+        ComboBox<String> comboBox = new ComboBox<>("City");
+        comboBox.setItems("Turku", "Berlin", "San Jose");
+
+        /**
+         * Allow users to enter a value which doesn't exist in the data set, and
+         * set it as the value of the ComboBox.
+         */
+        comboBox.addCustomValueSetListener(event -> {
+            comboBox.setValue(event.getDetail());
+        });
+
+        comboBox.addValueChangeListener(event -> {
+            if (event.getSource().isEmpty()) {
+                message.setText("No city selected");
+            } else {
+                message.setText("Selected city: " + event.getValue());
+            }
+        });
+        // end-source-example
+
+        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
+        comboBox.setId("custom-value-box");
+        addCard("Custom Values", "Allow users to input custom values", comboBox,
+                message);
     }
 
     private List<String> getNames(int count) {
