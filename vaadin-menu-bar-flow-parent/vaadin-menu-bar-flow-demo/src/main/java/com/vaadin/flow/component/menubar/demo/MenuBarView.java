@@ -27,6 +27,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -44,6 +45,10 @@ public class MenuBarView extends DemoView {
         createDisabledItems();
         createCheckableItems();
         createUsingComponents();
+        createPrimaryThemeVariant();
+        createTertiaryThemeVariant();
+        createTertiaryInlineThemeVariant();
+        createSmallThemeVariant();
     }
 
     private void createBasicDemo() {
@@ -225,6 +230,157 @@ public class MenuBarView extends DemoView {
         // end-source-example
 
         addCard("Items", "Item Components", menuBar, message);
+    }
+
+    private void createPrimaryThemeVariant() {
+        // begin-source-example
+        // source-example-heading: Primary Buttons
+        MenuBar menuBar = new MenuBar();
+
+        menuBar.addThemeVariants(MenuBarVariant.LUMO_PRIMARY);
+
+        Text selected = new Text("");
+        Div message = new Div(new Text("Selected: "), selected);
+
+        MenuItem project = menuBar.addItem("Project");
+        MenuItem account = menuBar.addItem("Account");
+        menuBar.addItem("Sign Out", e -> selected.setText("Sign Out"));
+
+        SubMenu projectSubMenu = project.getSubMenu();
+        MenuItem users = projectSubMenu.addItem("Users");
+        MenuItem billing = projectSubMenu.addItem("Billing");
+
+        SubMenu usersSubMenu = users.getSubMenu();
+        usersSubMenu.addItem("List", e -> selected.setText("List"));
+        usersSubMenu.addItem("Add", e -> selected.setText("Add"));
+
+        SubMenu billingSubMenu = billing.getSubMenu();
+        billingSubMenu.addItem("Invoices", e -> selected.setText("Invoices"));
+        billingSubMenu.addItem("Balance Events",
+                e -> selected.setText("Balance Events"));
+
+        account.getSubMenu().addItem("Edit Profile",
+                e -> selected.setText("Edit Profile"));
+        account.getSubMenu().addItem("Privacy Settings",
+                e -> selected.setText("Privacy Settings"));
+
+        // end-source-example
+        addCard("Theme Variants", "Primary Buttons", menuBar, message);
+    }
+
+    private void createTertiaryThemeVariant() {
+        // begin-source-example
+        // source-example-heading: Tertiary Buttons
+        MenuBar menuBar = new MenuBar();
+
+        menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
+
+        Text selected = new Text("");
+        Div message = new Div(new Text("Selected: "), selected);
+
+        MenuItem project = menuBar.addItem("Project");
+        MenuItem account = menuBar.addItem("Account");
+        menuBar.addItem("Sign Out", e -> selected.setText("Sign Out"));
+
+        SubMenu projectSubMenu = project.getSubMenu();
+        MenuItem users = projectSubMenu.addItem("Users");
+        MenuItem billing = projectSubMenu.addItem("Billing");
+
+        SubMenu usersSubMenu = users.getSubMenu();
+        usersSubMenu.addItem("List", e -> selected.setText("List"));
+        usersSubMenu.addItem("Add", e -> selected.setText("Add"));
+
+        SubMenu billingSubMenu = billing.getSubMenu();
+        billingSubMenu.addItem("Invoices", e -> selected.setText("Invoices"));
+        billingSubMenu.addItem("Balance Events",
+                e -> selected.setText("Balance Events"));
+
+        account.getSubMenu().addItem("Edit Profile",
+                e -> selected.setText("Edit Profile"));
+        account.getSubMenu().addItem("Privacy Settings",
+                e -> selected.setText("Privacy Settings"));
+
+        // end-source-example
+        addCard("Theme Variants", "Tertiary Buttons", menuBar, message);
+    }
+
+    private void createTertiaryInlineThemeVariant() {
+        // begin-source-example
+        // source-example-heading: Tertiary Inline Buttons
+        MenuBar menuBar = new MenuBar();
+
+        menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
+
+        Text selected = new Text("");
+        Div message = new Div(new Text("Selected: "), selected);
+
+        MenuItem mainMenu = menuBar.addItem(new Icon(VaadinIcon.MENU));
+        MenuItem profile = menuBar.addItem(new Icon(VaadinIcon.USER));
+        MenuItem notifications = menuBar.addItem(new Icon(VaadinIcon.BELL));
+
+        // Adding some horizontal spacing for each icon:
+        menuBar.getItems().forEach(
+                item -> item.getChildren().findFirst().ifPresent(icon -> icon
+                        .getElement().getStyle().set("margin", "0 6px")));
+
+        mainMenu.getSubMenu().addItem("Dashboard",
+                e -> selected.setText("Dashboard"));
+        mainMenu.getSubMenu().addItem("Reports",
+                e -> selected.setText("selected"));
+
+        profile.getSubMenu().addItem("Edit Profile",
+                e -> selected.setText("Edit Profile"));
+        profile.getSubMenu().add(new Hr());
+        profile.getSubMenu().addItem("Privacy Settings",
+                e -> selected.setText("Privacy Settings"));
+        profile.getSubMenu().addItem("Terms of Service",
+                e -> selected.setText("Terms of Service"));
+
+        notifications.getSubMenu().addItem("Notifications",
+                e -> selected.setText("Notifications"));
+        notifications.getSubMenu().addItem("Mark as Read",
+                e -> selected.setText("Mark as Read"));
+
+        // end-source-example
+        addCard("Theme Variants", "Tertiary Inline Buttons", menuBar, message);
+    }
+
+    private void createSmallThemeVariant() {
+        // begin-source-example
+        // source-example-heading: Small Buttons
+        MenuBar menuBar = new MenuBar();
+
+        // Theme variants can be also combined:
+        menuBar.addThemeVariants(MenuBarVariant.LUMO_SMALL,
+                MenuBarVariant.LUMO_TERTIARY);
+
+        Text selected = new Text("");
+        Div message = new Div(new Text("Selected: "), selected);
+
+        MenuItem project = menuBar.addItem("Project");
+        MenuItem account = menuBar.addItem("Account");
+        menuBar.addItem("Sign Out", e -> selected.setText("Sign Out"));
+
+        SubMenu projectSubMenu = project.getSubMenu();
+        MenuItem users = projectSubMenu.addItem("Users");
+        MenuItem billing = projectSubMenu.addItem("Billing");
+
+        SubMenu usersSubMenu = users.getSubMenu();
+        usersSubMenu.addItem("List", e -> selected.setText("List"));
+        usersSubMenu.addItem("Add", e -> selected.setText("Add"));
+
+        SubMenu billingSubMenu = billing.getSubMenu();
+        billingSubMenu.addItem("Invoices", e -> selected.setText("Invoices"));
+        billingSubMenu.addItem("Balance Events",
+                e -> selected.setText("Balance Events"));
+
+        account.getSubMenu().addItem("Edit Profile",
+                e -> selected.setText("Edit Profile"));
+        account.getSubMenu().addItem("Privacy Settings",
+                e -> selected.setText("Privacy Settings"));
+
+        // end-source-example
+        addCard("Theme Variants", "Small Buttons", menuBar, message);
     }
 
 }
