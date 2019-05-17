@@ -2,19 +2,24 @@
 // still work in Legacy bower projects. See: `contextMenuConnector-es6.js` for
 // the Polymer3 approach.
 window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
-if (window.Polymer) {
-    // Polymer2 approach.
-    window.Vaadin.Flow.Legacy.Debouncer = Polymer.Debouncer;
-    window.Vaadin.Flow.Legacy.timeOut = Polymer.Async.timeOut;
-    window.Vaadin.Flow.Legacy.animationFrame = Polymer.Async.animationFrame;
-    window.Vaadin.Flow.Legacy.GridElement = Vaadin.GridElement;
-    window.Vaadin.Flow.Legacy.ItemCache = Vaadin.Grid.ItemCache;
-}
 
 window.Vaadin.Flow.gridConnector = {
   initLazy: function(grid) {
     // Check whether the connector was already initialized for the grid
     if (grid.$connector){
+      return;
+    }
+
+    // Polymer
+    if (window.Polymer) {
+      // Polymer2 approach.
+      window.Vaadin.Flow.Legacy.Debouncer = Polymer.Debouncer;
+      window.Vaadin.Flow.Legacy.timeOut = Polymer.Async.timeOut;
+      window.Vaadin.Flow.Legacy.animationFrame = Polymer.Async.animationFrame;
+      window.Vaadin.Flow.Legacy.GridElement = Vaadin.GridElement;
+      window.Vaadin.Flow.Legacy.ItemCache = Vaadin.Grid.ItemCache;
+    }  else if (!window.Vaadin.Flow.Legacy.Debouncer) {
+      console.log("Grid is unable to load Polymer helpers.");
       return;
     }
 
@@ -112,7 +117,7 @@ window.Vaadin.Flow.gridConnector = {
 
     grid.size = 0; // To avoid NaN here and there before we get proper data
     grid.itemIdPath = 'key';
-    
+
     grid.$connector = {};
 
     grid.$connector.hasEnsureSubCacheQueue = function() {
@@ -122,7 +127,7 @@ window.Vaadin.Flow.gridConnector = {
     grid.$connector.hasParentRequestQueue = function() {
         return parentRequestQueue.length > 0;
     }
-    
+
     grid.$connector.beforeEnsureSubCacheForScaledIndex = function(targetCache, scaledIndex) {
       // add call to queue
       ensureSubCacheQueue.push({
@@ -917,7 +922,7 @@ window.Vaadin.Flow.gridConnector = {
     grid.addEventListener('vaadin-context-menu-before-open', function(e) {
       contextMenuListener(grid.$contextMenuConnector.openEvent);
     });
-    
+
     function _runWhenReady(){
         if ( grid.$ ){
             grid.$.scroller.addEventListener('click', _onClick);
@@ -928,36 +933,36 @@ window.Vaadin.Flow.gridConnector = {
             window.setTimeout(_runWhenReady, 0 );
         }
     }
-    
+
     _runWhenReady();
-    
+
     function _cellActivated(event){
         grid.$connector.clickedItem = event.detail.model.item;
     }
-    
+
     function _onClick(event){
         _fireClickEvent(event, 'item-click');
     }
-    
+
     function _onDblClick(event){
         _fireClickEvent(event, 'item-double-click');
     }
-    
+
     function _fireClickEvent(event, eventName){
         // if there was no click on item then don't do anything
         if (grid.$connector.clickedItem){
             event.itemKey = grid.$connector.clickedItem.key;
-            grid.dispatchEvent(new CustomEvent(eventName, 
-                    { 
+            grid.dispatchEvent(new CustomEvent(eventName,
+                    {
                         detail: event
                     }));
-            // can't clear the clicked item right away since there may be 
+            // can't clear the clicked item right away since there may be
             // not handled double click event (or may be not, it's not known)
             // schedule this for the next cycle
             window.setTimeout(_clearClickedItem, 0 );
         }
     }
-    
+
     function _clearClickedItem(){
         grid.$connector.clickedItem = null;
     }
@@ -986,34 +991,34 @@ window.Vaadin.Flow.gridConnector = {
 
         return (style.row || '') + ' ' + (style[columnId] || '');
     }
-    
+
     grid.dropFilter = rowData => !rowData.item.dropDisabled;
-    
+
     grid.dragFilter = rowData => !rowData.item.dragDisabled;
-    
+
     grid.addEventListener('grid-dragstart', e => {
-		
-    	if (grid._isSelected(e.detail.draggedItems[0])) {
-    		// Dragging selected (possibly multiple) items
-        	if (grid.__selectionDragData) {
-        		Object.keys(grid.__selectionDragData).forEach(type => {
-        			e.detail.setDragData(type, grid.__selectionDragData[type]);
-        		});
-        	} else {
-        		(grid.__dragDataTypes || []).forEach(type => {
-        			e.detail.setDragData(type, e.detail.draggedItems.map(item => item.dragData[type]).join('\n'));
-        		});
-        	}
-        	
-        	if (grid.__selectionDraggedItemsCount > 1) {
-        		e.detail.setDraggedItemsCount(grid.__selectionDraggedItemsCount);
-        	}
-    	} else {
-        	// Dragging just one (non-selected) item
-    		(grid.__dragDataTypes || []).forEach(type => {
-    			e.detail.setDragData(type, e.detail.draggedItems[0].dragData[type]);
-    		});
-    	}
+
+        if (grid._isSelected(e.detail.draggedItems[0])) {
+            // Dragging selected (possibly multiple) items
+            if (grid.__selectionDragData) {
+                Object.keys(grid.__selectionDragData).forEach(type => {
+                    e.detail.setDragData(type, grid.__selectionDragData[type]);
+                });
+            } else {
+                (grid.__dragDataTypes || []).forEach(type => {
+                    e.detail.setDragData(type, e.detail.draggedItems.map(item => item.dragData[type]).join('\n'));
+                });
+            }
+
+            if (grid.__selectionDraggedItemsCount > 1) {
+                e.detail.setDraggedItemsCount(grid.__selectionDraggedItemsCount);
+            }
+        } else {
+            // Dragging just one (non-selected) item
+            (grid.__dragDataTypes || []).forEach(type => {
+                e.detail.setDragData(type, e.detail.draggedItems[0].dragData[type]);
+            });
+        }
     });
   }
 }
