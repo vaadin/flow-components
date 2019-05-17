@@ -2,11 +2,6 @@
 // still work in Legacy bower projects. See: `ironListConnector-es6.js` for
 // the Polymer3 approach.
 window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
-if (window.Polymer) {
-    // Polymer2 approach.
-    window.Vaadin.Flow.Legacy.Debouncer = window.Vaadin.Flow.Legacy.Debouncer || Polymer.Debouncer;
-    window.Vaadin.Flow.Legacy.timeOut = window.Vaadin.Flow.Legacy.timeOut || Polymer.Async.timeOut;
-}
 
 window.Vaadin.Flow.comboBoxConnector = {
   initLazy: function (comboBox) {
@@ -14,6 +9,15 @@ window.Vaadin.Flow.comboBoxConnector = {
     // Check whether the connector was already initialized for the ComboBox
     if (comboBox.$connector) {
       return;
+    }
+
+    if (window.Polymer) {
+        // Polymer2 approach.
+        window.Vaadin.Flow.Legacy.Debouncer = window.Vaadin.Flow.Legacy.Debouncer || Polymer.Debouncer;
+        window.Vaadin.Flow.Legacy.timeOut = window.Vaadin.Flow.Legacy.timeOut || Polymer.Async.timeOut;
+    } else if (!window.Vaadin.Flow.Legacy.Debouncer) {
+        console.log("ComboBox is unable to load Polymer helpers.");
+        return;
     }
 
     const Debouncer = window.Vaadin.Flow.Legacy.Debouncer;
