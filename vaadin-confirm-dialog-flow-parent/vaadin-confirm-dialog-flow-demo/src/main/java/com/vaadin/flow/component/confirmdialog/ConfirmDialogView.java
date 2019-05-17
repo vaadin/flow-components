@@ -2,10 +2,8 @@ package com.vaadin.flow.component.confirmdialog;
 
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
@@ -101,12 +99,12 @@ public class ConfirmDialogView extends DemoView {
                 "your changes before navigating away?</p>";
         dialog.setText(new Html(textHtml).getElement());
 
-        Button saveButton = new Button("Save", new Icon(VaadinIcon.ENVELOPE_OPEN));
+        Button saveButton = new Button("Save", VaadinIcon.ENVELOPE_OPEN.create());
         saveButton.addClickListener(e -> dialog.close());
         saveButton.getElement().setAttribute("theme", "primary");
         dialog.setConfirmButton(saveButton.getElement());
 
-        Button rejectButton = new Button("Discard", new Icon(VaadinIcon.TRASH));
+        Button rejectButton = new Button("Discard", VaadinIcon.TRASH.create());
         rejectButton.addClickListener(e -> dialog.close());
         rejectButton.getElement().setAttribute("theme", "error tertiary");
         dialog.setRejectButton(rejectButton.getElement());
