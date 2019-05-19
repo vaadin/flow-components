@@ -25,10 +25,6 @@
             <artifactId>vaadin-testbench-core</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-components-testbench</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
