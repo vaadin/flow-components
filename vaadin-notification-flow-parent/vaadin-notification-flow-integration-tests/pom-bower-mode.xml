@@ -9,7 +9,6 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.vaadin</groupId>
     <artifactId>vaadin-notification-integration-tests-bower-mode</artifactId>
     <packaging>war</packaging>
     <name>Vaadin Notification Tests in Bower Mode</name>
