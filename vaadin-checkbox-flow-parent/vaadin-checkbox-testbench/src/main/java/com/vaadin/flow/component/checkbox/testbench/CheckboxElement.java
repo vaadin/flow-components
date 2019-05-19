@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.checkbox.testbench;
 
-import com.vaadin.flow.component.common.testbench.HasLabel;
+import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
