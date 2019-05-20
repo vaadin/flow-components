@@ -21,6 +21,9 @@ import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * A TestBench element representing a <code>&lt;vaadin-email-field&gt;</code>
  * element.
@@ -32,7 +35,8 @@ public class EmailFieldElement extends TestBenchElement
     @Override
     public void setValue(String string) {
         HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change");
+        dispatchEvent("change",
+                Collections.singletonMap("bubbles", true));
         dispatchEvent("blur");
     }
 
