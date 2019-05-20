@@ -1,0 +1,53 @@
+/*
+ * Copyright 2000-2019 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+window.Vaadin.Flow.menubarConnector = {
+  initLazy: function (menubar) {
+    if (menubar.$connector) {
+      return;
+    }
+    menubar.$connector = {
+
+      updateButtons: function () {
+
+        // Remove hidden items entirely from the array. Just hiding them
+        // could cause the overflow button to be rendered without items.
+        // resetContent needs to be called to make buttons visible again.
+        const visibleItems = menubar.items.filter(function (item) {
+          return !item.component.hidden;
+        });
+        if (menubar.items.length !== visibleItems.length) {
+          menubar.items = visibleItems;
+        }
+
+        // Propagate disabled state from items to parent buttons
+        menubar.items.forEach(function (item) {
+          item.disabled = item.component.disabled;
+        });
+
+        menubar.render();
+
+        // Propagate click events from the menu buttons to the item components
+        menubar._buttons.forEach(function (button) {
+          if (button.item && button.item.component) {
+            button.addEventListener('click', function (e) {
+              button.item.component.dispatchEvent(new Event('click'));
+            });
+          }
+        });
+      }
+    }
+  }
+};

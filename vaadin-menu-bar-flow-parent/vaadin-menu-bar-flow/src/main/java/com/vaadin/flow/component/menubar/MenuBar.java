@@ -26,14 +26,17 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.contextmenu.HasMenuItems;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.MenuItemsArrayGenerator;
 import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.function.SerializableConsumer;
 
 /**
  * Server-side component for the <code>vaadin-menu-bar</code> element.
@@ -41,6 +44,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
+@JavaScript("frontend://menubarConnector.js")
+@JsModule("frontend://menubarConnector.js")
 @HtmlImport("frontend://bower_components/vaadin-menu-bar/src/vaadin-menu-bar.html")
 @JsModule("@vaadin/vaadin-menu-bar/src/vaadin-menu-bar.js")
 @NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "1.0.0")
@@ -62,6 +67,7 @@ public class MenuBar extends Component
         menuManager = new MenuManager<>(this, this::resetContent,
                 (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
                 MenuItem.class, null);
+        initConnector();
         addAttachListener(event -> resetContent());
     }
 
@@ -259,35 +265,20 @@ public class MenuBar extends Component
         if (updateScheduled) {
             return;
         }
-        String script = //@formatter:off
-
-            // 1. Remove hidden items entirely from the array. Just hiding them
-            //    could cause the overflow button to be rendered without items.
-            //    resetContent needs to be called to make buttons visible again.
-            "$0.items = $0.items.filter(function(i){" +
-                "return !i.component.hidden;" +
-            "});" +
-
-            // 2. Propagate disabled state from items to parent buttons
-            "$0.items.forEach(function(i){" +
-                "i.disabled = i.component.disabled;" +
-            "});" +
-            "$0.render();"+
-
-            // 3. Propagate click events from the menu buttons to the item components
-            "$0._buttons.forEach(function(b){" +
-                "if(b.item && b.item.component){" +
-                    "b.addEventListener('click',function(e){" +
-                        "b.item.component.dispatchEvent(new Event('click'));" +
-                    "});" +
-                "}" +
-            "});";
-        //@formatter:on
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> {
-                    ui.getPage().executeJavaScript(script, getElement());
-                    updateScheduled = false;
-                }));
+        runBeforeClientResponse(ui -> {
+            getElement().executeJs("this.$connector.updateButtons()");
+            updateScheduled = false;
+        });
         updateScheduled = true;
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.menubarConnector.initLazy(this)");
+    }
+
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 }
