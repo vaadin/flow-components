@@ -21,14 +21,6 @@
     </properties>
 
     <dependencies>
-        <!-- Pin here because 2.0.2 contains the updated textfield but 2.0.1 comes from parent -->
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-components-testbench</artifactId>
-            <version>2.0.2</version>
-            <scope>test</scope>
-        </dependency>
-
         <!--Test scoped-->
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -44,6 +36,18 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-confirm-dialog-testbench</artifactId>
+            <version>2.0.0.rc1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-ordered-layout-testbench</artifactId>
+            <version>2.0.0.rc1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dialog-testbench</artifactId>
             <version>2.0.0.rc1</version>
             <scope>test</scope>
         </dependency>

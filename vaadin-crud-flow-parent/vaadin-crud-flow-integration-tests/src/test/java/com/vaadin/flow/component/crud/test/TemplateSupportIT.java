@@ -4,7 +4,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
