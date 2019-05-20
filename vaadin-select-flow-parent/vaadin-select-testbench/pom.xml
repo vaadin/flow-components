@@ -21,11 +21,6 @@
             <version>${testbench.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-components-testbench</artifactId>
-            <version>2.0.0</version>
-        </dependency>
     </dependencies>
 
     <build>

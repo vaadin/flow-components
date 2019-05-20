@@ -1,8 +1,13 @@
 package com.vaadin.flow.component.select.test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntSupplier;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.select.examples.TestView;
@@ -10,13 +15,6 @@ import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.testbench.TestBenchElement;
-import org.junit.Assert;
-import org.junit.Before;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public abstract class AbstractSelectIT extends AbstractComponentIT {
 
@@ -60,11 +58,13 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
 
         private void clear(TestBenchElement input) {
             String value = input.getAttribute("value");
-            CharSequence[] clearSequence = new CharSequence[value.length()];
-            for (int i = 0; i < clearSequence.length; i++) {
-                clearSequence[i] = Keys.BACK_SPACE;
+            if (value.length() > 0) {
+                CharSequence[] clearSequence = new CharSequence[value.length()];
+                for (int i = 0; i < clearSequence.length; i++) {
+                    clearSequence[i] = Keys.BACK_SPACE;
+                }
+                input.sendKeys(clearSequence);
             }
-            input.sendKeys(clearSequence);
         }
 
         public void clickResetNItems(int N) {

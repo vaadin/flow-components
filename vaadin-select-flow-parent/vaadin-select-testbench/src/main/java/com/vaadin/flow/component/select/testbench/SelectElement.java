@@ -20,15 +20,14 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.common.testbench.HasLabel;
-import com.vaadin.flow.component.common.testbench.HasPlaceholder;
-import com.vaadin.flow.component.common.testbench.HasSelectByText;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasPlaceholder;
+import com.vaadin.testbench.HasSelectByText;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.commands.TestBenchCommandExecutor;
 import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.CommandExecutor;
 
 /**
  * Testbench Element API for vaadin-select.
