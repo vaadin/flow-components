@@ -30,6 +30,7 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<testbench.version>6.1.0.rc1</testbench.version>
 	</properties>
 	<modules>
 		<module>vaadin-cookie-consent-flow</module>
