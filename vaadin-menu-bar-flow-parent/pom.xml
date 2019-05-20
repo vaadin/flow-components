@@ -25,7 +25,6 @@
         <flow.version>2.0-SNAPSHOT</flow.version>
         <contextmenu.version>3.0-SNAPSHOT</contextmenu.version>
 
-        <testbench.version>6.0.1</testbench.version>
         <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -40,9 +39,9 @@
     </modules>
 
     <repositories>
-        <repository>	
-            <id>vaadin-prereleases</id>	
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>	
+        <repository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
         <repository>
             <id>vaadin-snapshots</id>
