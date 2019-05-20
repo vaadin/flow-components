@@ -18,7 +18,7 @@
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
         <ci-sauce.version>1.138</ci-sauce.version>
     </properties>
-   <dependencies>
+    <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-charts-flow-examples</artifactId>
@@ -44,6 +44,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-charts-testbench</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
