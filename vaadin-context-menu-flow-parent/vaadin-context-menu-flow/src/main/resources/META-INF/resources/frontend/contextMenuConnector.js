@@ -2,17 +2,21 @@
 // still work in Legacy bower projects. See: `contextMenuConnector-es6.js` for
 // the Polymer3 approach.
 window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
-if (window.Polymer) {
-    // Polymer2 approach.
-    window.Vaadin.Flow.Legacy.GestureEventListeners = window.Vaadin.Flow.Legacy.GestureEventListeners || Polymer.GestureEventListeners;
-    window.Vaadin.Flow.Legacy.Gestures = window.Vaadin.Flow.Legacy.Gestures || Polymer.Gestures;
-}
 
 window.Vaadin.Flow.contextMenuConnector = {
 
   // NOTE: This is for the TARGET component, not for the <vaadin-context-menu> itself
   init: function(target) {
     if (target.$contextMenuConnector) {
+      return;
+    }
+
+    if (window.Polymer) {
+        // Polymer2 approach.
+        window.Vaadin.Flow.Legacy.GestureEventListeners = window.Vaadin.Flow.Legacy.GestureEventListeners || Polymer.GestureEventListeners;
+        window.Vaadin.Flow.Legacy.Gestures = window.Vaadin.Flow.Legacy.Gestures || Polymer.Gestures;
+    } else if (!window.Vaadin.Flow.Legacy.Gestures) {
+      console.log("ContextMenu is unable to load Polymer helpers.");
       return;
     }
 
