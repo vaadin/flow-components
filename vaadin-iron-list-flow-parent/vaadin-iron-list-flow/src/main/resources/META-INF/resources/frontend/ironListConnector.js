@@ -4,22 +4,26 @@
 // still work in Legacy bower projects. See: `ironListConnector-es6.js` for 
 // the Polymer3 approach.
 window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
-if (window.Polymer) {
-    // Polymer2 approach.
-    window.Vaadin.Flow.Legacy.Debouncer = window.Vaadin.Flow.Legacy.Debouncer || Polymer.Debouncer;
-    window.Vaadin.Flow.Legacy.timeOut = window.Vaadin.Flow.Legacy.timeOut || Polymer.Async.timeOut;
-}
 
 window.Vaadin.Flow.ironListConnector = {
   initLazy: function(list) {
-
-    const Debouncer = window.Vaadin.Flow.Legacy.Debouncer;
-    const timeOut = window.Vaadin.Flow.Legacy.timeOut;
 
     // Check whether the connector was already initialized for the Iron list
     if (list.$connector){
       return;
     }
+
+    if (window.Polymer) {
+        // Polymer2 approach.
+        window.Vaadin.Flow.Legacy.Debouncer = window.Vaadin.Flow.Legacy.Debouncer || Polymer.Debouncer;
+        window.Vaadin.Flow.Legacy.timeOut = window.Vaadin.Flow.Legacy.timeOut || Polymer.Async.timeOut;
+    } else if (!window.Vaadin.Flow.Legacy.Debouncer) {
+      console.log("IronList is unable to load Polymer helpers.");
+      return;
+    }
+
+    const Debouncer = window.Vaadin.Flow.Legacy.Debouncer;
+    const timeOut = window.Vaadin.Flow.Legacy.timeOut;
 
     const extraItemsBuffer = 20;
 
