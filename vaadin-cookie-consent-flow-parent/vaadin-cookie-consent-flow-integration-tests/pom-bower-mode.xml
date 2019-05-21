@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -16,7 +17,8 @@
     <properties>
         <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
         <failOnMissingWebXml>false</failOnMissingWebXml>
-        <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
+        <sauce.options>--tunnel-identifier ${maven.build.timestamp}
+        </sauce.options>
         <ci-sauce.version>1.138</ci-sauce.version>
     </properties>
     <dependencies>
@@ -145,7 +147,8 @@
                 <configuration>
                     <systemPropertyVariables>
                         <sauce.user>${sauce.user}</sauce.user>
-                        <sauce.sauceAccessKey>${sauce.sauceAccessKey}</sauce.sauceAccessKey>
+                        <sauce.sauceAccessKey>${sauce.sauceAccessKey}
+                        </sauce.sauceAccessKey>
                         <sauce.options>${sauce.options}</sauce.options>
                     </systemPropertyVariables>
                     <trimStackTrace>false</trimStackTrace>
@@ -220,7 +223,8 @@
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                         <configuration>
-                            <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+                            <skipNexusStagingDeployMojo>true
+                            </skipNexusStagingDeployMojo>
                         </configuration>
                     </plugin>
                 </plugins>
