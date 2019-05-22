@@ -48,7 +48,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 @JsModule("frontend://menubarConnector.js")
 @HtmlImport("frontend://bower_components/vaadin-menu-bar/src/vaadin-menu-bar.html")
 @JsModule("@vaadin/vaadin-menu-bar/src/vaadin-menu-bar.js")
-@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "1.0.0")
+@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "1.0.1")
 public class MenuBar extends Component
         implements HasMenuItems, HasSize, HasStyle, HasTheme {
 

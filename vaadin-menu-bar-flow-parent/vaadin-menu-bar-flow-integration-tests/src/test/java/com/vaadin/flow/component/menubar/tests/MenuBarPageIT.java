@@ -60,6 +60,14 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void clickRootItem_subMenuRenders() {
+        menuBar.getButtons().get(0).$("vaadin-context-menu-item").first()
+                .click();
+        verifyOpened();
+        assertOverlayContents("sub item 1", "<p>sub item 2</p>");
+    }
+
+    @Test
     public void clickRootButton_hoverOnParentItem_subSubMenuRenders() {
         openSubSubMenu();
 
@@ -151,15 +159,30 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void clickRootButtonWithClickListener_listenerCalled() {
+    public void clickRootButtonWithClickListener_listenerCalledOnce() {
         menuBar.getButtons().get(1).click();
         assertMessage("clicked item 2");
     }
 
     @Test
-    public void changeItems_clickRootButtonWithClickListener_clickListenerCalled() {
+    public void clickRootItemWithClickListener_listenerCalledOnce() {
+        menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
+                .click();
+        assertMessage("clicked item 2");
+    }
+
+    @Test
+    public void changeItems_clickRootButtonWithClickListener_clickListenerCalledOnce() {
         click("add-root-item");
         menuBar.getButtons().get(1).click();
+        assertMessage("clicked item 2");
+    }
+
+    @Test
+    public void changeItems_clickRootItemWithClickListener_clickListenerCalledOnce() {
+        click("add-root-item");
+        menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
+                .click();
         assertMessage("clicked item 2");
     }
 
@@ -172,13 +195,25 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void overflow_openAndClose_unOverflow_clickButton_listenerCalled() {
+    public void overflow_openAndClose_unOverflow_clickButton_listenerCalledOnce() {
         click("set-width");
         menuBar.getOverflowButton().click();
         verifyOpened();
         clickBody();
         click("reset-width");
         menuBar.getButtons().get(1).click();
+        assertMessage("clicked item 2");
+    }
+
+    @Test
+    public void overflow_openAndClose_unOverflow_clickItem_listenerCalledOnce() {
+        click("set-width");
+        menuBar.getOverflowButton().click();
+        verifyOpened();
+        clickBody();
+        click("reset-width");
+        menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
+                .click();
         assertMessage("clicked item 2");
     }
 

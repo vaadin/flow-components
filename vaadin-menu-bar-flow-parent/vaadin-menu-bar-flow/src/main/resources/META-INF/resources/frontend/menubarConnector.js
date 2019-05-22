@@ -43,7 +43,9 @@ window.Vaadin.Flow.menubarConnector = {
         menubar._buttons.forEach(function (button) {
           if (button.item && button.item.component) {
             button.addEventListener('click', function (e) {
-              button.item.component.dispatchEvent(new Event('click'));
+              if (e.path.indexOf(button.item.component) === -1) {
+                button.item.component.click();
+              }
             });
           }
         });
