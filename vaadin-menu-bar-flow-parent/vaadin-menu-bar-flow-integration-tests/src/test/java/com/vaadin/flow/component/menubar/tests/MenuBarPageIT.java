@@ -312,6 +312,23 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertOverlayContents("<p>item 2</p>", "added item");
     }
 
+    @Test
+    public void hideParentButton_noClientError() {
+        click("add-sub-item");
+        click("toggle-visible");
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void hideParentButton_setVisible_subMenuRendered() {
+        click("add-sub-item");
+        click("toggle-visible");
+        click("toggle-visible");
+        menuBar.getButtons().get(1).click();
+        verifyNumOfOverlays(1);
+        assertOverlayContents("added sub item");
+    }
+
     @After
     public void afterTest() {
         checkLogsForErrors();

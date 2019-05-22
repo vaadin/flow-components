@@ -46,6 +46,9 @@ class MenuBarRootItem extends MenuItem {
 
     @Override
     public void setVisible(boolean visible) {
+        if (visible == isVisible()) {
+            return;
+        }
         super.setVisible(visible);
         menuBar.resetContent();
     }
