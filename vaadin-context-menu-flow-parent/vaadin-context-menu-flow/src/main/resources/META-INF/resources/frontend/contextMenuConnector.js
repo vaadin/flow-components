@@ -78,7 +78,7 @@ window.Vaadin.Flow.contextMenuConnector = {
 
     const getChildItems = function(parent) {
       const container = getContainer(parent._containerNodeId);
-      const items = Array.from(container.children).map(child => {
+      const items = container && Array.from(container.children).map(child => {
         const item = {component: child, checked: child._checked};
         if (child.tagName == "VAADIN-CONTEXT-MENU-ITEM" && child._containerNodeId) {
           item.children = getChildItems(child);
