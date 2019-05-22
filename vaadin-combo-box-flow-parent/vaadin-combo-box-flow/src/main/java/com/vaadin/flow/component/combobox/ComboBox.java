@@ -336,6 +336,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             }
         }
         super.setValue(value);
+        refreshValue();
+    }
+
+    private void refreshValue() {
+        T value = getValue();
 
         DataKeyMapper<T> keyMapper = getKeyMapper();
         if (value != null && keyMapper.has(value)) {
@@ -641,6 +646,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
         reset();
+        if (getValue() != null) {
+            refreshValue();
+        }
     }
 
     /**

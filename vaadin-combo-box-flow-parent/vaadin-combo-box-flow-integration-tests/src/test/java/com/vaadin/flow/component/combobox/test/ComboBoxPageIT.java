@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import static org.junit.Assert.assertFalse;
-
 import java.util.List;
 
 import org.junit.Assert;
@@ -27,6 +25,8 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
+
+import static org.junit.Assert.assertFalse;
 
 @TestPath("combo-box-test")
 public class ComboBoxPageIT extends AbstractComboBoxIT {
@@ -177,6 +177,13 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         Assert.assertEquals("Item 2", getSelectedItemLabel(combo));
         Assert.assertEquals("Value: Item 2 isFromClient: false",
                 message.getText());
+    }
+
+    @Test
+    public void setValue_setLabelGenerator_selectedItemLabelUpdated() {
+        ComboBoxElement combo = $(ComboBoxElement.class)
+                .id("label-generator-after-value");
+        Assert.assertEquals("foo", combo.getSelectedText());
     }
 
 }

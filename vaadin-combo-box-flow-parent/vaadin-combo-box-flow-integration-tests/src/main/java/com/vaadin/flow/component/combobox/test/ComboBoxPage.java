@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.bean.SimpleBean;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -54,6 +55,7 @@ public class ComboBoxPage extends Div {
         createWithUpdatableValue();
         createWithPresetValue();
         createWithButtonRenderer();
+        setLabelGeneratorAfterValue();
     }
 
     private void createExternalSetValue() {
@@ -165,6 +167,18 @@ public class ComboBoxPage extends Div {
         message.setId("updatable-combo-message");
         button.setId("updatable-combo-button");
         add(combo, message, button);
+    }
+
+    private void setLabelGeneratorAfterValue() {
+        ComboBox<SimpleBean> combo = new ComboBox<>();
+        SimpleBean foo = new SimpleBean("foo");
+        combo.setItems(foo);
+        combo.setId("label-generator-after-value");
+
+        combo.setValue(foo);
+        combo.setItemLabelGenerator(SimpleBean::getName);
+
+        add(combo);
     }
 
     private void handleSelection(ComboBox<Title> titles) {
