@@ -85,7 +85,7 @@ import elemental.json.JsonValue;
 @HtmlImport("frontend://flow-component-renderer.html")
 @JsModule("@vaadin/flow-frontend/flow-component-renderer.js")
 @JavaScript("frontend://comboBoxConnector.js")
-@JsModule("frontend://comboBoxConnector-es6.js")
+@JsModule("./comboBoxConnector-es6.js")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation,
         HasFilterableDataProvider<T, String> {
