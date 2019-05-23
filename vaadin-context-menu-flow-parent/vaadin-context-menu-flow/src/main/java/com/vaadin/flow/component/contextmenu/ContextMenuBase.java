@@ -48,7 +48,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("flow-component-renderer.js")
 @NpmPackage(value = "@vaadin/vaadin-list-box", version = "1.1.0")
 @JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
-@JsModule("frontend://contextMenuConnector-es6.js")
+@JsModule("./contextMenuConnector-es6.js")
 
 @HtmlImport("flow-component-renderer.html")
 @HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
