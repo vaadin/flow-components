@@ -79,9 +79,9 @@ import elemental.json.JsonValue;
 // NPM MODE
 @NpmPackage(value = "@polymer/iron-list", version = "3.0.2")
 @JsModule("@polymer/iron-list/iron-list.js")
-@JsModule("frontend://flow-component-renderer.js")
-@JsModule("frontend://ironListConnector-es6.js")
-@JsModule("frontend://ironListStyles.js")
+@JsModule("./flow-component-renderer.js")
+@JsModule("./ironListConnector-es6.js")
+@JsModule("./ironListStyles.js")
 // BOWER MODE
 @HtmlImport("frontend://bower_components/iron-list/iron-list.html")
 @HtmlImport("frontend://flow-component-renderer.html")
