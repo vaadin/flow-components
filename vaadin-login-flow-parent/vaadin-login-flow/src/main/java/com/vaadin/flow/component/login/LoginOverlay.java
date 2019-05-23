@@ -41,7 +41,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value="@vaadin/vaadin-login", version = "1.0.0")
+@NpmPackage(value="@vaadin/vaadin-login", version = "1.0.1")
 @JsModule("@vaadin/vaadin-login/src/vaadin-login-overlay.js")
 @HtmlImport("frontend://bower_components/vaadin-login/src/vaadin-login-overlay.html")
 @HtmlImport("flow-component-renderer.html")
