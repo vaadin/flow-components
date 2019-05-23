@@ -45,7 +45,7 @@ import com.vaadin.flow.function.SerializableConsumer;
  */
 @Tag("vaadin-menu-bar")
 @JavaScript("frontend://menubarConnector.js")
-@JsModule("frontend://menubarConnector.js")
+@JsModule("./menubarConnector.js")
 @HtmlImport("frontend://bower_components/vaadin-menu-bar/src/vaadin-menu-bar.html")
 @JsModule("@vaadin/vaadin-menu-bar/src/vaadin-menu-bar.js")
 @NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "1.0.1")
