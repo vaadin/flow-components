@@ -42,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @JavaScript("frontend://timepickerConnector.js")
-@JsModule("frontend://timepickerConnector.js")
+@JsModule("./timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled {
 
