@@ -308,6 +308,8 @@ public class RadioButtonGroupView extends DemoView {
         addCard("Insert components before item in group", group);
     }
 
+    private Label below;
+
     private void dynamicComponents() {
         // begin-source-example
         // source-example-heading: Move component in group on selection
@@ -315,12 +317,12 @@ public class RadioButtonGroupView extends DemoView {
 
         group.setItems("foo", "foo-bar", "bar", "bar-foo", "baz", "baz-baz");
 
-        Label below = new Label("= After Selected =");
-
         group.addValueChangeListener(event -> {
-            if (below.getParent().isPresent()) {
+            if (below != null && below.getParent().isPresent()) {
                 group.remove(below);
             }
+            below = new Label("= After Selected =");
+
             group.addComponents(event.getValue(), below);
         });
 
