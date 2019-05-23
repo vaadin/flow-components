@@ -39,7 +39,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-testbench</artifactId>
-            <version>2.0.0.rc1</version>
+            <version>2.0.0.rc3</version>
             <scope>test</scope>
         </dependency>
 
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>2.0.0.rc1</version>
+            <version>2.0.0.rc3</version>
         </dependency>
 
         <dependency>
@@ -165,32 +165,6 @@
                                     <workingDirectory>${buildtools.directory}</workingDirectory>
                                     <arguments>install-bower-and-dependencies</arguments>
                                 </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>production</id>
-            <activation>
-                <property>
-                    <name>!skipFrontend</name>
-                </property>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.vaadin</groupId>
-                        <artifactId>flow-maven-plugin</artifactId>
-                        <version>${flow.version}</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>copy-production-files</goal>
-                                    <goal>package-for-production</goal>
-                                </goals>
                             </execution>
                         </executions>
                     </plugin>
