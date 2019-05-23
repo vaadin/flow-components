@@ -85,7 +85,9 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
-                <version>${flow.version}</version>
+                <configuration>
+                    <bowerMode>true</bowerMode>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

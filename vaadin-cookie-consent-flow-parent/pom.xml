@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.0.0.rc1</version>
+        <version>2.0.0.rc2</version>
         <relativePath/>
     </parent>
     <artifactId>vaadin-cookie-consent-flow-root</artifactId>
@@ -31,7 +31,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8
         </project.reporting.outputEncoding>
-        <testbench.version>6.1.0.rc1</testbench.version>
     </properties>
     <modules>
         <module>vaadin-cookie-consent-flow</module>
