@@ -126,8 +126,8 @@ import elemental.json.JsonValue;
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
-@JsModule("frontend://flow-component-renderer.js")
-@JsModule("frontend://gridConnector-es6.js")
+@JsModule("./flow-component-renderer.js")
+@JsModule("./gridConnector-es6.js")
 
 @HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid.html")
 @HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column.html")
