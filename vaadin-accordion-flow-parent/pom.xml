@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.0.0.rc1</version>
+        <version>2.0.0.rc2</version>
         <relativePath />
     </parent>
 
@@ -29,15 +29,13 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <vaadin.details.flow.version>2.0.0.rc1</vaadin.details.flow.version>
+        <vaadin.details.flow.version>2.0.0.rc2</vaadin.details.flow.version>
         <vaadin.details.wc.version>1.0.1</vaadin.details.wc.version>
     </properties>
 
     <modules>
         <module>vaadin-accordion-flow</module>
         <module>vaadin-accordion-testbench</module>
-        <module>vaadin-accordion-flow-integration-tests</module>
-        <module>vaadin-accordion-flow-integration-tests/pom-bower-mode.xml</module>
         <module>vaadin-accordion-flow-demo</module>
     </modules>
 
@@ -51,5 +49,26 @@
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
         </repository>
     </repositories>
+
+    <profiles>
+        <profile>
+            <id>npm-it</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>vaadin-accordion-flow-integration-tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>bower-it</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>vaadin-accordion-flow-integration-tests/pom-bower-mode.xml</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
