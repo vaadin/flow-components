@@ -45,7 +45,7 @@ import elemental.json.JsonObject;
  * {@link DatePickerI18n} object.
  *
  */
-@JsModule("frontend://datepickerConnector.js")
+@JsModule("./datepickerConnector.js")
 @JavaScript("frontend://datepickerConnector.js")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation {
