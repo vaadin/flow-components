@@ -23,7 +23,7 @@
         <node.version>v8.9.0</node.version>
         <yarn.version>v1.3.2</yarn.version>
         <frontend.working.directory>${project.basedir}/src/main/webapp/frontend</frontend.working.directory>
-    </properties>    
+    </properties>
 
     <dependencies>
         <!--Test scoped-->
@@ -41,12 +41,12 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>2.0.0.rc1</version>
+            <version>2.0.0.rc2</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
-            <version>2.0.0.rc1</version>
+            <version>2.0.0.rc2</version>
         </dependency>
 
         <!--System under test-->
@@ -59,13 +59,13 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-combo-box-flow</artifactId>
-            <version>3.0.0.rc1</version>
+            <version>3.0.0.rc2</version>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>2.0.0.rc2</version>
+            <version>2.0.0.rc3</version>
         </dependency>
 
         <!--Flow-->
@@ -133,27 +133,6 @@
                     <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
-            <!-- activate BOWER -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>set-system-properties</goal>
-                        </goals>
-                        <configuration>
-                            <properties>
-                                <property>
-                                    <name>vaadin.bowerMode</name>
-                                    <value>true</value>
-                                </property>
-                            </properties>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- install bower tooling -->
             <plugin>
                 <groupId>com.github.eirslett</groupId>
@@ -184,7 +163,9 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
-                <version>${flow.version}</version>
+                <configuration>
+                    <bowerMode>true</bowerMode>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
