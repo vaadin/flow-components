@@ -372,6 +372,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     private TestBenchElement getOverlay() {
+        verifyOpened();
         return $(OVERLAY_TAG).first();
     }
 
