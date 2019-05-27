@@ -336,7 +336,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         // component is still waiting for more data.
         stringBox.openPopup();
         stringBox.setFilter("foo");
-        waitUntil(driver -> !stringBox.getPropertyBoolean("loading"));
+        assertLoadingStateResolved(stringBox);
         assertLoadedItemsCount(
                 "Expected no items to be loaded after setting "
                         + "a filter which doesn't match any item",
@@ -347,8 +347,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void callbackDataProviderReturnsNoItems_openMultipleTimes_loadingStateResolved() {
         for (int i = 0; i < 3; i++) {
             emptyCallbackBox.openPopup();
-            waitUntil(
-                    driver -> !emptyCallbackBox.getPropertyBoolean("loading"));
+            assertLoadingStateResolved(callbackBox);
             assertLoadedItemsCount("Expected no items to be loaded", 0,
                     emptyCallbackBox);
             emptyCallbackBox.closePopup();

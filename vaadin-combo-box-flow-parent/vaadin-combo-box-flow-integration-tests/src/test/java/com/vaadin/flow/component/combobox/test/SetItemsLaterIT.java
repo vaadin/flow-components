@@ -55,7 +55,7 @@ public class SetItemsLaterIT extends AbstractComboBoxIT {
     public void dontSetItemsOrDataProvider_openComboBox_loadingStateResolved() {
         ComboBoxElement comboBox = $(ComboBoxElement.class).first();
         comboBox.openPopup();
-        waitUntil(driver -> !comboBox.getPropertyBoolean("loading"));
+        assertLoadingStateResolved(comboBox);
         assertLoadedItemsCount("ComboBox should not have items", 0, comboBox);
     }
 

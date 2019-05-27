@@ -1043,6 +1043,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     private void reset() {
+        lastFilter = null;
         if (dataCommunicator != null) {
             dataCommunicator.setRequestedRange(0, 0);
             dataCommunicator.reset();
