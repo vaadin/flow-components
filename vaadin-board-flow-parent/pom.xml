@@ -36,9 +36,7 @@
 	<modules>
 		<module>vaadin-board-flow</module>
 		<module>vaadin-board-testbench</module>
-		<module>vaadin-board-flow-integration-tests</module>
 		<module>vaadin-board-flow-demo</module>
-		<module>vaadin-board-integration-tests/pom-bower-mode.xml</module>
 	</modules>
 
 	<repositories>
@@ -51,4 +49,25 @@
 			<url>http://maven.vaadin.com/vaadin-prereleases</url>
 		</repository>
 	</repositories>
+
+	<profiles>
+			<profile>
+					<id>npm-it</id>
+					<activation>
+							<activeByDefault>true</activeByDefault>
+					</activation>
+					<modules>
+							<module>vaadin-board-flow-integration-tests</module>
+					</modules>
+			</profile>
+			<profile>
+					<id>bower-it</id>
+					<activation>
+							<activeByDefault>true</activeByDefault>
+					</activation>
+					<modules>
+							<module>vaadin-board-integration-tests/pom-bower-mode.xml</module>
+					</modules>
+			</profile>
+	</profiles>
 </project>
