@@ -247,7 +247,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setItemIdPath("key");
         setPageSize(pageSize);
 
-        initConnector();
+        addAttachListener(e -> initConnector());
+
         runBeforeClientResponse(ui -> {
             // If user didn't provide any data, initialize with empty data set.
             if (dataCommunicator == null) {
