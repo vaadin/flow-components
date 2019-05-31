@@ -45,8 +45,8 @@
                 </property>
             </activation>
             <modules>
-                <module>vaadin-progress-bar-flow-integration-tests</module>
                 <module>vaadin-progress-bar-flow-integration-tests/pom-bower-mode.xml</module>
+                <module>vaadin-progress-bar-flow-integration-tests</module>
             </modules>
         </profile>
     </profiles>
