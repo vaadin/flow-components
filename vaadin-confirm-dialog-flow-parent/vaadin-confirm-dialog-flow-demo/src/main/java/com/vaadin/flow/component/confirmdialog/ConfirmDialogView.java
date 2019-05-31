@@ -20,15 +20,11 @@ public class ConfirmDialogView extends DemoView {
         customButtons();
     }
 
-    private void createCard(String heading, String buttonText, ConfirmDialog dialog) {
+    private void createCard(String heading, Button button, ConfirmDialog dialog) {
         Span message = new Span();
         message.getStyle().set("margin-left", "var(--lumo-space-m)");
 
-        Button button = new Button(buttonText);
-        button.addClickListener(event -> {
-            message.setText("");
-            dialog.open();
-        });
+        button.addClickListener(event -> message.setText(""));
 
         dialog.addConfirmListener(event -> message.setText("Confirmed"));
         dialog.addRejectListener(event -> message.setText("Rejected"));
@@ -43,10 +39,12 @@ public class ConfirmDialogView extends DemoView {
         // source-example-heading: Alert Dialog
         ConfirmDialog dialog = new ConfirmDialog("Meeting starting",
                 "Your next meeting starts in 5 minutes", "OK", this::onOK);
+        Button button = new Button("Open dialog");
+        button.addClickListener(event -> dialog.open());
         // end-source-example
         // @formatter:on
 
-        createCard("Alert Dialog", "Open dialog", dialog);
+        createCard("Alert Dialog", button, dialog);
     }
 
     private void confirmationDialog() {
@@ -56,10 +54,12 @@ public class ConfirmDialogView extends DemoView {
         ConfirmDialog dialog = new ConfirmDialog("Confirm publish",
                 "Are you sure you want to publish the article?", "Publish", this::onPublish,
                 "Cancel", this::onCancel);
+        Button button = new Button("Open dialog");
+        button.addClickListener(event -> dialog.open());
         // end-source-example
         // @formatter:on
 
-        createCard("Confirmation Dialog", "Open dialog", dialog);
+        createCard("Confirmation Dialog", button, dialog);
     }
 
     private void confirmationDialogForDangerousAction() {
@@ -70,10 +70,12 @@ public class ConfirmDialogView extends DemoView {
                 "Are you sure you want to delete the item?",
                 "Delete", this::onDelete, "Cancel", this::onCancel);
         dialog.setConfirmButtonTheme("error primary");
+        Button button = new Button("Open dialog");
+        button.addClickListener(event -> dialog.open());
         // end-source-example
         // @formatter:on
 
-        createCard("Confirmation Dialog for Dangerous Actions", "Open dialog", dialog);
+        createCard("Confirmation Dialog for Dangerous Actions", button, dialog);
     }
 
     private void confirmationDialogWithRejectOption() {
@@ -83,10 +85,12 @@ public class ConfirmDialogView extends DemoView {
         ConfirmDialog dialog = new ConfirmDialog("Unsaved changes",
                 "Do you want to save or discard your changes before navigating away?",
                 "Save", this::onSave, "Discard", this::onDiscard, "Cancel", this::onCancel);
+        Button button = new Button("Open dialog");
+        button.addClickListener(event -> dialog.open());
         // end-source-example
         // @formatter:on
 
-        createCard("Confirmation Dialog with a Reject Option", "Open dialog", dialog);
+        createCard("Confirmation Dialog with a Reject Option", button, dialog);
     }
 
     private void customButtons() {
@@ -98,6 +102,9 @@ public class ConfirmDialogView extends DemoView {
         String textHtml = "<p>Do you want to <b>save</b> or <b>discard</b> " +
                 "your changes before navigating away?</p>";
         dialog.setText(new Html(textHtml).getElement());
+
+        Button openDialogButton = new Button("Open dialog");
+        openDialogButton.addClickListener(event -> dialog.open());
 
         Button saveButton = new Button("Save", VaadinIcon.ENVELOPE_OPEN.create());
         saveButton.addClickListener(e -> dialog.close());
@@ -113,7 +120,7 @@ public class ConfirmDialogView extends DemoView {
         // end-source-example
         // @formatter:on
 
-        createCard("Custom Buttons", "Open dialog", dialog);
+        createCard("Custom Buttons", openDialogButton, dialog);
     }
 
     private void onOK(ConfirmDialog.ConfirmEvent event) {
