@@ -75,15 +75,21 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
         openTabAndCheckForErrors("");
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("disabled-combo-box");
-        WebElement message = layout
-                .findElement(By.id("value-selection-message"));
-        Assert.assertEquals("", message.getText());
+        executeScript("arguments[0].removeAttribute(\"disabled\");", comboBox);
+        comboBox.openPopup();
 
-        executeScript("arguments[0].removeAttribute(\"disabled\");"
-                + "arguments[0].selectedItem = arguments[0].filteredItems[1]",
-                comboBox);
-        message = layout.findElement(By.id("value-selection-message"));
-        Assert.assertEquals("", message.getText());
+        try {
+            waitUntil(driver -> {
+                boolean isLoading = comboBox.getPropertyBoolean("loading");
+                Assert.assertTrue(
+                        "Expected ComboBox to remain in loading state, "
+                                + "as the server should not send data to disabled component.",
+                        isLoading);
+                return !isLoading;
+            }, 2);
+        } catch (TimeoutException e) {
+            // expected
+        }
     }
 
     @Test

@@ -40,6 +40,13 @@ public class DetachReattachIT extends AbstractComboBoxIT {
     }
 
     @Test
+    public void detachComboBox_reattachRedetach_noClientErrors() {
+        clickButton("detach");
+        clickButton("attach-detach");
+        checkLogsForErrors();
+    }
+
+    @Test
     public void openComboBox_detach_reattach_open_itemsLoaded() {
         combo.openPopup();
         assertRendered("foo");

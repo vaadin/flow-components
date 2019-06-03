@@ -33,6 +33,12 @@ public class DetachReattachPage extends Div {
         NativeButton attach = new NativeButton("attach", e -> add(comboBox));
         attach.setId("attach");
 
-        add(comboBox, detach, attach);
+        NativeButton attachDetach = new NativeButton("attach-detach", e -> {
+            add(comboBox);
+            remove(comboBox);
+        });
+        attachDetach.setId("attach-detach");
+
+        add(comboBox, detach, attach, attachDetach);
     }
 }
