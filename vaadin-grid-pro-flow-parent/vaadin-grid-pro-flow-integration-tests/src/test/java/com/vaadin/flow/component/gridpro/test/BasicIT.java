@@ -135,7 +135,7 @@ public class BasicIT extends AbstractParallelTest {
 
     @Test
     public void selectEditorIsUsedForSelectColumn() {
-        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-grid-pro-edit-select-wrapper", beanGrid);
+        AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-grid-pro-edit-select", beanGrid);
     }
 
     @Test
