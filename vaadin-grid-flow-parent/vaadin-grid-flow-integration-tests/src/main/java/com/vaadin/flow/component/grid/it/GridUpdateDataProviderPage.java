@@ -25,13 +25,11 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
 
 /**
  * @author Vaadin Ltd.
  */
 @Route("grid-page")
-@NoTheme
 public class GridUpdateDataProviderPage extends Div {
 
     public static class Pojo {

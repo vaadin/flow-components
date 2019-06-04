@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
-import org.junit.Assert;
-import org.junit.Test;
 
 @TestPath("beangridpage")
 public class BeanGridIT extends AbstractComponentIT {

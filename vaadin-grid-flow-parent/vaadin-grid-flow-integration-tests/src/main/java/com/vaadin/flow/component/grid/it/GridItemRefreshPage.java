@@ -26,10 +26,8 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
 
 @Route("grid-item-refresh-page")
-@NoTheme
 public class GridItemRefreshPage extends Div {
 
     public static final String UPDATED_FIRST_FIELD = "updated";

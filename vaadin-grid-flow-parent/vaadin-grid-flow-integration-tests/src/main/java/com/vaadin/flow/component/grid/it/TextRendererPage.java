@@ -22,10 +22,8 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
 
 @Route("text-renderer")
-@NoTheme
 public class TextRendererPage extends Div {
 
     public TextRendererPage() {

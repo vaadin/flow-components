@@ -18,10 +18,8 @@ package com.vaadin.flow.component.treegrid.it;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
 
 @Route("treegrid-empty")
-@NoTheme
 public class TreeGridEmptyPage extends Div {
 
     public TreeGridEmptyPage() {

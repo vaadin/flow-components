@@ -29,6 +29,9 @@
 
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
@@ -38,8 +41,6 @@ import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
-import java.util.ArrayList;
-import java.util.List;
 
 @Route("editor-focus")
 public class GridEditorFocusPage extends Div {

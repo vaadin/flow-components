@@ -30,13 +30,11 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
 
 /**
  * Test view for grid's multi selection column.
  */
 @Route("grid-multi-selection-column")
-@NoTheme
 public class GridMultiSelectionColumnPage extends Div {
 
     public static final int ITEM_COUNT = 1000;

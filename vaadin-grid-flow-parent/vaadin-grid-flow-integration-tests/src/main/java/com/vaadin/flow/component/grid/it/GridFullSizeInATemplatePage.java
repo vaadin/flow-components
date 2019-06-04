@@ -19,10 +19,8 @@ import java.util.Arrays;
 
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
 
 @Route("grid-with-full-size-in-template")
-@NoTheme
 public class GridFullSizeInATemplatePage extends GridInATemplate {
 
     public GridFullSizeInATemplatePage() {

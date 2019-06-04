@@ -25,13 +25,11 @@ import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
 
 import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addItems;
 import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addRootItems;
 
 @Route("treegrid-item-details-renderer")
-@NoTheme
 public class TreeGridItemDetailsRendererPage extends Div {
 
     public TreeGridItemDetailsRendererPage() {

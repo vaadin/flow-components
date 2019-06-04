@@ -22,10 +22,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
 
 @Route("delegate-focus-inside-component-renderer")
-@NoTheme
 public class GridDelegateFocusToComponentPage extends Div {
 
     public GridDelegateFocusToComponentPage() {

@@ -30,13 +30,11 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
 
 /**
  * Test view that adds header and footer rows to Grid after rendering.
  */
 @Route("grid-header-footer-rows")
-@NoTheme
 public class GridHeaderFooterRowPage extends Div {
 
     int counter = 0;

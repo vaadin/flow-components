@@ -19,10 +19,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.NoTheme;
 
 @Route("vaadin-button-inside-grid")
-@NoTheme
 public class ButtonInGridPage extends Div {
 
     public ButtonInGridPage() {
