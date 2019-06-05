@@ -40,7 +40,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
-@JsModule("flow-component-renderer.js")
+@JsModule("./flow-component-renderer.js")
 @HtmlImport("flow-component-renderer.html")
 public class Dialog extends GeneratedVaadinDialog<Dialog>
         implements HasComponents, HasSize {
