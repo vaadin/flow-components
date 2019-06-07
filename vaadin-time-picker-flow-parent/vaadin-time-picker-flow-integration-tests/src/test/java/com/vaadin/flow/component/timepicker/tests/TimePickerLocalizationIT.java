@@ -373,8 +373,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private String verifyFormat() {
-        String timePickerInputValue = getTimePickerElement()
-                .getTimePickerTextFieldValue();
+        String timePickerInputValue = getTimePickerTextFieldValueWithNormalSpaces();
         String formattedTextValue = getLabelValue();
         if (formattedTextValue.equals(timePickerInputValue)) {
             return null;
@@ -385,8 +384,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private String verifyFormatIncludingMilliseconds(String amPmString) {
-        String timePickerInputValue = getTimePickerElement()
-                .getTimePickerTextFieldValue();
+        String timePickerInputValue = getTimePickerTextFieldValueWithNormalSpaces();
         String[] splitInputValue = timePickerInputValue.replace(amPmString, "")
                 .split("\\.");
         String millisecondsInputValue = amPmString != null
@@ -446,5 +444,18 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     private static String prettyPrint(Locale locale) {
         return locale.getDisplayName() + "["
                 + TimePickerLocalizationView.getLocaleString(locale) + "]";
+    }
+
+    /**
+     * Calls {@code getTimePickerTextFieldValue()} for {@code
+     * TimePickerElement} and replaces non-breaking space characters (char 160)
+     * with normal spaces (char 32) for easier comparison. Small number of
+     * locales (such as es-PA) seem to use those for their localized
+     * timestamps.
+     *
+     * @return space-normalized timestamp
+     */
+    private String getTimePickerTextFieldValueWithNormalSpaces() {
+        return getTimePickerElement().getTimePickerTextFieldValue().replace((char)160, (char)32);
     }
 }
