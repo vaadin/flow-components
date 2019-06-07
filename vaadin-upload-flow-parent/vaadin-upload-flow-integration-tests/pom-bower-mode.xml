@@ -116,6 +116,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+                <configuration>
+                    <bowerMode>true</bowerMode>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
