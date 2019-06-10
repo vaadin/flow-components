@@ -100,6 +100,17 @@
                     <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
+            <!-- run tests against production bundle in order to save system
+                 resources as webpack-dev-server is not running in bg -->
+            <!-- run vaadin frontend verify and build goals -->
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+                <configuration>
+                    <bowerMode>false</bowerMode>
+                    <productionMode>true</productionMode>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
