@@ -662,8 +662,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     }
 
     /**
-     * Sets the page size, which is the number of items fetched at a time from
-     * the data provider.
+     * Sets the page size, which is the number of items requested at a time from
+     * the data provider. This does not guarantee a maximum query size to the
+     * backend; when the overlay has room to render more new items than the page
+     * size, multiple "pages" will be requested at once.
      * <p>
      * The page size is also the largest number of items that can support
      * client-side filtering. If you provide more items than the page size, the
