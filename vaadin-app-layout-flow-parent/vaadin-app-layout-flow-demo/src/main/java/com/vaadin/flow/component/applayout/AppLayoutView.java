@@ -8,10 +8,12 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.page.Viewport;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.PWA;
 
 @Route("vaadin-app-layout")
 public class AppLayoutView extends DemoView {
@@ -24,6 +26,7 @@ public class AppLayoutView extends DemoView {
         appLayoutBasic();
         appLayoutDrawerPrimary();
         appLayoutInMobile();
+        appLayoutInMainView();
     }
 
     private void appLayoutBasic() {
@@ -79,4 +82,26 @@ public class AppLayoutView extends DemoView {
         addCard("App layout in mobile");
     }
 
+    private void appLayoutInMainView() {
+        addCard("App layout as main view");
+    }
+
+    // @formatter:off
+    // begin-source-example
+    // source-example-heading: App layout as main view
+    @Viewport("width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes, viewport-fit=cover")
+    @PWA(name = "My Application", shortName = "My App")
+    class MainAppView extends AppLayout {
+
+        public MainAppView() {
+            Image img = new Image("https://i.imgur.com/GPpnszs.png", "Vaadin Logo");
+            img.setHeight("44px");
+            addToNavbar(new DrawerToggle(), img);
+            Tabs tabs = new Tabs(new Tab("Home"), new Tab("About"));
+            tabs.setOrientation(Tabs.Orientation.VERTICAL);
+            addToDrawer(tabs);
+        }
+    }
+    // end-source-example
+    // @formatter:on
 }

@@ -22,6 +22,7 @@ Add App Layout to your project:
 ### Basic Use
 
 ```java
+@Viewport("width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes, viewport-fit=cover")
 @BodySize
 @Theme(Lumo.class)
 public class AppRouterLayout extends AppLayout {
