@@ -27,12 +27,16 @@ public class MainView extends VerticalLayout {
     protected void createEditorColumns() {
         Div itemDisplayPanel = new Div();
         Div subPropertyDisplayPanel = new Div();
+        subPropertyDisplayPanel.setId("prop-panel");
 
         Div eventsPanel = new Div();
         eventsPanel.setId("events-panel");
 
         GridPro<Person> grid = new GridPro<>();
-        grid.setItems(createItems());
+        List<City> cityList = createCityItems();
+        List<Person> personList = createItems();
+        mapLists(personList, cityList);
+        grid.setItems(personList);
 
         grid.addCellEditStartedListener(e -> eventsPanel.add(e.getItem().toString()));
 
@@ -60,6 +64,27 @@ public class MainView extends VerticalLayout {
             itemDisplayPanel.setText(item.toString());
             subPropertyDisplayPanel.setText(newValue.toString());
         }).setHeader("Subscriber").setWidth("300px");
+
+        ComboBox<City> cityCb = new ComboBox<>();
+        cityCb.setItems(cityList);
+        cityCb.setItemLabelGenerator(City::getName);
+
+        ComponentRenderer<Span, Person> cityRenderer =
+            new ComponentRenderer<>(person -> {
+                if (person.getCity() != null) {
+                    return new Span(person.getCity().getName());
+                } else {
+                    return new Span("");
+                }
+            });
+
+        grid.addEditColumn(Person::getCity, cityRenderer).custom(cityCb,
+                (item, newValue) -> {
+                    item.setCity(newValue);
+                    newValue.setPerson(item);
+                    itemDisplayPanel.setText(item.toString());
+                    subPropertyDisplayPanel.setText(newValue.toString());
+        }).setHeader("City").setWidth("300px");
 
         add(grid, itemDisplayPanel, subPropertyDisplayPanel, eventsPanel);
     }
@@ -106,6 +131,30 @@ public class MainView extends VerticalLayout {
         }
 
         return person;
+    }
+
+    private static List<City> createCityItems() {
+        return IntStream.range(1, 500)
+                .mapToObj(index -> createCity(index))
+                .collect(Collectors.toList());
+    }
+
+    private static City createCity(int index) {
+        City city = new City();
+        city.setId(index);
+        city.setName("City " + index);
+
+        return city;
+    }
+
+    private static void mapLists(List<Person> personList, List<City> cityList) {
+        IntStream.range(0, personList.size())
+            .forEach(index -> {
+                Person person = personList.get(index);
+                City city = cityList.get(index);
+                person.setCity(city);
+                city.setPerson(person);
+            });
     }
 
     public static Department fromStringRepresentation(String stringRepresentation)

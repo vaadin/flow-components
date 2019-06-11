@@ -9,18 +9,21 @@ public class Person implements Serializable {
     private boolean isSubscriber;
     private String email;
     private Department department;
+    private City city;
 
     public Person() {
         super();
     }
 
-    public Person(String name, boolean isSubscriber, String email, int age, Department department) {
+    public Person(String name, boolean isSubscriber, String email, int age,
+                  Department department, City city) {
         super();
         this.name = name;
         this.isSubscriber = isSubscriber;
         this.email = email;
         this.age = age;
         this.department = department;
+        this.city = city;
     }
 
     public int getId() {
@@ -71,6 +74,14 @@ public class Person implements Serializable {
         this.department = department;
     }
 
+    public City getCity() {
+        return city;
+    }
+
+    public void setCity(City city) {
+        this.city = city;
+    }
+
     @Override
     public int hashCode() {
         return id;
@@ -96,7 +107,8 @@ public class Person implements Serializable {
                 ", isSubscriber=" + isSubscriber +
                 ", email='" + email + '\'' +
                 ", department=" + department +
-                '}';
+                ", city='" + city.getName() +
+                "'}";
     }
 
     @Override

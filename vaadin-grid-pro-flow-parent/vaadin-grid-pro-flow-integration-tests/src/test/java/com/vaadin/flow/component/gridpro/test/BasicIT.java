@@ -24,7 +24,7 @@ public class BasicIT extends AbstractParallelTest {
     @Test
     public void editColumnsAdded() {
         List<TestBenchElement> columns = grid.$("vaadin-grid-pro-edit-column").all();
-        Assert.assertEquals(columns.size(), 3);
+        Assert.assertEquals(columns.size(), 4);
     }
 
     @Test
@@ -90,6 +90,31 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
+    public void customComboBox_circularReferencesInData_isEdited() {
+        GridTHTDElement cell = grid.getCell(0, 4);
+        Assert.assertEquals("City 1", cell.$("span").first().getText());
+
+        AssertCellEnterEditModeOnDoubleClick(0, 4, "vaadin-combo-box");
+        TestBenchElement comboBox = cell.$("vaadin-combo-box").first();
+        comboBox.getCommandExecutor().executeScript("arguments[0].open()",
+                comboBox);
+        waitUntil(driver -> {
+            List comboItems = (List<?>) getCommandExecutor()
+                    .executeScript("return arguments[0].filteredItems;", comboBox);
+
+            return comboItems.size() > 0;
+        });
+        comboBox.setProperty("value", "2");
+        comboBox.dispatchEvent("focusout");
+
+        waitUntil(driver -> cell.$("span").exists());
+        Assert.assertEquals("City 2", cell.$("span").first().getText());
+
+        Assert.assertEquals("City{id=2, name='City 2', person='Person 1'}",
+                getPanelText("prop-panel"));
+    }
+
+    @Test
     public void textEditorIsUsedForTextColumn() {
         AssertCellEnterEditModeOnDoubleClick(0, 1, "vaadin-grid-pro-edit-text-field");
     }
@@ -97,7 +122,10 @@ public class BasicIT extends AbstractParallelTest {
     @Test
     public void cellEditStartedListenerCalledOnce() {
         AssertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
-        Assert.assertEquals("Person{id=1, age=23, name='Person 1', isSubscriber=false, email='person1@vaadin.com', department=sales}", getPanelText("events-panel"));
+        Assert.assertEquals("Person{id=1, age=23, name='Person 1', " +
+                "isSubscriber=false, email='person1@vaadin.com', " +
+                "department=sales, city='City 1'}", getPanelText("events" +
+                "-panel"));
     }
 
     @Test
