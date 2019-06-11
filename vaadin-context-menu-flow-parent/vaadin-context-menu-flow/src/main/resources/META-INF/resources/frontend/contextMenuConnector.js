@@ -83,6 +83,7 @@ window.Vaadin.Flow.contextMenuConnector = {
         if (child.tagName == "VAADIN-CONTEXT-MENU-ITEM" && child._containerNodeId) {
           item.children = getChildItems(child);
         }
+        child._item = item;
         return item;
       });
       return items;
