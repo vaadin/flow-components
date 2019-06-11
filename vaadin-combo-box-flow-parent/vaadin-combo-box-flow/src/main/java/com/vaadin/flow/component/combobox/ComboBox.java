@@ -402,6 +402,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * is less than the page size. To force client-side filtering with a larger
      * data set (at the cost of increased network traffic), you can increase the
      * page size with {@link #setPageSize(int)}.
+     * <p>
+     * Setting the items creates a new DataProvider, which in turn resets the
+     * combo box's value to {@code null}. If you want to add and remove items to
+     * the current item set without resetting the value, you should update the
+     * previously set item collection and call
+     * {@code getDataProvider().refreshAll()}.
      */
     @Override
     public void setItems(Collection<T> items) {
@@ -416,6 +422,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * server roundtrips to handle the filtering. Otherwise it can handle
      * filtering in the client-side, if the size of the data set is less than
      * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Setting the items creates a new DataProvider, which in turn resets the
+     * combo box's value to {@code null}. If you want to add and remove items to
+     * the current item set without resetting the value, you should update the
+     * previously set item collection and call
+     * {@code getDataProvider().refreshAll()}.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -437,6 +449,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * server roundtrips to handle the filtering. Otherwise it can handle
      * filtering in the client-side, if the size of the data set is less than
      * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Setting the items creates a new DataProvider, which in turn resets the
+     * combo box's value to {@code null}. If you want to add and remove items to
+     * the current item set without resetting the value, you should update the
+     * previously set item collection and call
+     * {@code getDataProvider().refreshAll()}.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
@@ -460,6 +478,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * to do the same thing is to use this method with your data provider
      * converted with
      * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
      */
     @Override
     public void setDataProvider(DataProvider<T, String> dataProvider) {
@@ -479,6 +500,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * Using this method provides the same result as using a data provider
      * wrapped with
      * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
      */
     @Override
     public <C> void setDataProvider(DataProvider<T, C> dataProvider,
@@ -554,6 +578,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * is less than the page size. To force client-side filtering with a larger
      * data set (at the cost of increased network traffic), you can increase the
      * page size with {@link #setPageSize(int)}.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
      *
      * @param listDataProvider
      *            the list data provider to use, not <code>null</code>
@@ -578,6 +605,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * <p>
      * This method is a shorthand for making a {@link CallbackDataProvider} that
      * handles a partial {@link com.vaadin.data.provider.Query Query} object.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
      *
      * @param fetchItems
      *            a callback for fetching items
@@ -604,6 +634,9 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * server roundtrips to handle the filtering. Otherwise it can handle
      * filtering in the client-side, if the size of the data set is less than
      * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
