@@ -25,13 +25,13 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.AbstractNoW3c;
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("context-menu-grid")
-public class ContextMenuGridIT extends AbstractComponentIT {
+public class ContextMenuGridIT extends AbstractNoW3c {
 
     private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
 
@@ -43,6 +43,8 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         grid = $(GridElement.class).first();
         verifyClosed();
     }
+
+
 
     @Test
     public void contextClickOnRow_itemClickGetsTargetItem() {

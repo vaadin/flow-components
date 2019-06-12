@@ -22,13 +22,14 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.AbstractNoW3c;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("item-click-listener")
-public class ItemClickListenerIT extends AbstractComponentIT {
+public class ItemClickListenerIT extends AbstractNoW3c {
 
     @Test
     public void doubleClickGoesWithSingleClicks() throws InterruptedException {

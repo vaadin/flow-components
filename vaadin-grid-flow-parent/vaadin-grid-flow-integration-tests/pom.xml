@@ -118,33 +118,16 @@
 
     <build>
         <plugins>
-            <!-- run tests against production bundle in orther to save system
+            <!-- run tests against production bundle in order to save system
                  resources as webpack-dev-server is not running in bg -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>ititialize</phase>
-                        <goals>
-                            <goal>set-system-properties</goal>
-                        </goals>
-                        <configuration>
-                            <properties>
-                                <property>
-                                    <name>vaadin.productionMode</name>
-                                    <value>true</value>
-                                </property>
-                            </properties>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- run vaadin frontend verify and build goals -->
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
+                <configuration>
+                    <bowerMode>false</bowerMode>
+                    <productionMode>true</productionMode>
+                </configuration>
             </plugin>
             <!-- start jetty before ITs -->
             <plugin>

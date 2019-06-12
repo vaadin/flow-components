@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.AbstractNoW3c;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
@@ -28,7 +29,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("update-editor")
-public class UpdateEditorComponentIT extends AbstractComponentIT {
+public class UpdateEditorComponentIT extends AbstractNoW3c {
 
     @Test
     public void updateEditorComponent() {
