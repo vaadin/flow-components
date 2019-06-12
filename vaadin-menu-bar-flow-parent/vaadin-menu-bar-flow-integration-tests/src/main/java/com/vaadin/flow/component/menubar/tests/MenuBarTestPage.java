@@ -87,8 +87,12 @@ public class MenuBarTestPage extends Div {
                 e -> item2.setVisible(!item2.isVisible()));
         visibleButton.setId("toggle-visible");
 
+        NativeButton checkedButton = new NativeButton("toggle checked",
+                e -> checkable.setChecked(!checkable.isChecked()));
+        checkedButton.setId("toggle-checked");
+
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
-                disableButton, visibleButton);
+                disableButton, visibleButton, checkedButton);
     }
 }

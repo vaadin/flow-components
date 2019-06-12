@@ -112,6 +112,15 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setCheckedExternally_openSubMenu_itemChecked() {
+        click("toggle-checked");
+        openSubSubMenu();
+        TestBenchElement checkableItem = getOverlayMenuItems(
+                getAllOverlays().get(1)).get(1);
+        Assert.assertTrue(checkableItem.hasAttribute("menu-item-checked"));
+    }
+
+    @Test
     public void addRootItem_newRootItemRendered() {
         click("add-root-item");
         assertButtonContents("item 1", "<p>item 2</p>", "added item");
