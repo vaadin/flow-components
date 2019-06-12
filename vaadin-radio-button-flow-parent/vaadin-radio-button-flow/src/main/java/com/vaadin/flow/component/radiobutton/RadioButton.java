@@ -24,7 +24,7 @@ import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "1.2.1")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "1.2.2")
 class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>>
         implements ItemComponent<T>, HasComponents {
 
