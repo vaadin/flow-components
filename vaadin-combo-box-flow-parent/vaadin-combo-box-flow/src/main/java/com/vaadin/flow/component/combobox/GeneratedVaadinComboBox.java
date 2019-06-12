@@ -35,6 +35,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
+
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
@@ -294,7 +295,7 @@ import elemental.json.JsonObject;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.5-SNAPSHOT",
         "WebComponent: Vaadin.ComboBoxElement#5.0.0", "Flow#1.5-SNAPSHOT" })
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "5.0.2")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "5.0.3")
 @HtmlImport("frontend://bower_components/vaadin-combo-box/src/vaadin-combo-box.html")
 @JsModule("@vaadin/vaadin-combo-box/src/vaadin-combo-box.js")
 public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<R, T>, T>

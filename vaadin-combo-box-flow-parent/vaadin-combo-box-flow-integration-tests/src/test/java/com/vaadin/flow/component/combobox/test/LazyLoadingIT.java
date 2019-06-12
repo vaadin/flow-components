@@ -363,12 +363,12 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertRendered("Item 10");
 
         callbackBox.openPopup();
-        scrollToItem(callbackBox, 75);
+        scrollToItem(callbackBox, 60);
 
         assertLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 callbackBox);
-        assertRendered("Item 70");
+        assertRendered("Item 58");
     }
 
     @Test
