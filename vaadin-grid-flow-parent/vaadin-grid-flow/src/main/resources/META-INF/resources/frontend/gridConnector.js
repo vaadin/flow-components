@@ -401,8 +401,8 @@ window.Vaadin.Flow.gridConnector = {
       }
     }
 
-    const sorterChangeListener = function() {
-      if (!sorterDirectionsSetFromServer) {
+    const sorterChangeListener = function(_, oldValue) {
+      if (oldValue !== undefined && !sorterDirectionsSetFromServer) {
         grid.$server.sortersChanged(grid._sorters.map(function(sorter) {
           return {
             path: sorter.path,
@@ -413,22 +413,23 @@ window.Vaadin.Flow.gridConnector = {
     }
 
     grid.$connector.setSorterDirections = function(directions) {
-      try {
-        sorterDirectionsSetFromServer = true;
+      sorterDirectionsSetFromServer = true;
+      setTimeout(() => {
+        try {
+          let allSorters = grid.querySelectorAll("vaadin-grid-sorter");
+          allSorters.forEach(sorter => sorter.direction = null);
 
-        let allSorters = grid.querySelectorAll("vaadin-grid-sorter");
-        allSorters.forEach(sorter => sorter.direction = null);
-
-        for (let i = directions.length - 1; i >= 0; i--) {
-          const columnId = directions[i].column;
-          let sorter = grid.querySelector("vaadin-grid-sorter[path='" + columnId + "']");
-          if (sorter) {
-            sorter.direction = directions[i].direction;
+          for (let i = directions.length - 1; i >= 0; i--) {
+            const columnId = directions[i].column;
+            let sorter = grid.querySelector("vaadin-grid-sorter[path='" + columnId + "']");
+            if (sorter) {
+              sorter.direction = directions[i].direction;
+            }
           }
+        } finally {
+          sorterDirectionsSetFromServer = false;
         }
-      } finally {
-        sorterDirectionsSetFromServer = false;
-      }
+      });
     }
     grid._createPropertyObserver("_previousSorters", sorterChangeListener);
 
