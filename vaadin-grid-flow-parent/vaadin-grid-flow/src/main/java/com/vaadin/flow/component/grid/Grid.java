@@ -1582,8 +1582,6 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             BiFunction<Renderer<T>, String, C> columnFactory) {
         String columnId = createColumnId(true);
 
-        getDataCommunicator().reset();
-
         C column = columnFactory.apply(renderer, columnId);
         idToColumnMap.put(columnId, column);
         getElement().callJsFunction("$connector.setColumnId",
@@ -1599,6 +1597,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         }
         getElement().appendChild(current.getElement());
 
+        getDataCommunicator().reset();
         return column;
     }
 
