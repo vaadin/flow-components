@@ -27,6 +27,7 @@ window.Vaadin.Flow.contextMenuConnector = {
 
       openOnHandler: function(e) {
         e.preventDefault();
+        e.stopPropagation();
         this.$contextMenuConnector.openEvent = e;
         target.dispatchEvent(new CustomEvent('vaadin-context-menu-before-open'));
       },

@@ -17,7 +17,9 @@ package com.vaadin.flow.component.contextmenu.it;
 
 import java.util.List;
 
+import org.junit.Assert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -51,7 +53,13 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
     }
 
     protected void verifyNumOfOverlays(int expected) {
-        waitUntil(driver -> getAllOverlays().size() == expected);
+        try {
+            waitUntil(driver -> getAllOverlays().size() == expected);
+        } catch (TimeoutException e) {
+            Assert.assertEquals(
+                    "Unexpected number of overlays opened at a time.", expected,
+                    getAllOverlays().size());
+        }
     }
 
     protected void verifyClosed() {
