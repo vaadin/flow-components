@@ -45,7 +45,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @HtmlImport("flow-component-renderer.html")
-@JsModule("flow-component-renderer.js")
+@JsModule("./flow-component-renderer.js")
 public class Notification extends GeneratedVaadinNotification<Notification>
         implements HasComponents, HasTheme {
 
