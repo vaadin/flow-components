@@ -115,12 +115,6 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             return;
         }
 
-        target.getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(target, context -> {
-                    ui.getInternals()
-                            .addComponentDependencies(ContextMenuBase.class);
-                }));
-
         // Target's JavaScript needs to be executed on each attach,
         // because Flow creates a new client-side element
         target.getUI().ifPresent(this::onTargetAttach);
@@ -352,7 +346,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     private void onTargetAttach(UI ui) {
-        ui.getPage().executeJavaScript(
+        ui.getInternals().addComponentDependencies(ContextMenu.class);
+        ui.getPage().executeJs(
                 "window.Vaadin.Flow.contextMenuConnector.init($0)", target);
         updateOpenOn();
     }
