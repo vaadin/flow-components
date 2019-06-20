@@ -277,7 +277,7 @@ public class UploadView extends DemoView {
         String text = String.format("Mime type: '%s'\nSHA-256 hash: '%s'",
                 mimeType, MessageDigestUtil.sha256(stream.toString()));
         content.setText(text);
-        return new Div();
+        return content;
 
     }
 
