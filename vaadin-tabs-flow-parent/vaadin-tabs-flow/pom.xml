@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-tabs</artifactId>
-            <version>3.0.2</version>
+            <version>3.0.4</version>
         </dependency>
 
         <!-- web components -->
