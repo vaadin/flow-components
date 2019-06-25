@@ -46,12 +46,9 @@ import com.vaadin.flow.shared.Registration;
  */
 @SuppressWarnings("serial")
 @JsModule("flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/vaadin-list-box", version = "1.1.1")
-@JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
 @JsModule("./contextMenuConnector-es6.js")
 
 @HtmlImport("flow-component-renderer.html")
-@HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
 @JavaScript("frontend://contextMenuConnector.js")
 public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends GeneratedVaadinContextMenu<C> implements HasComponents {

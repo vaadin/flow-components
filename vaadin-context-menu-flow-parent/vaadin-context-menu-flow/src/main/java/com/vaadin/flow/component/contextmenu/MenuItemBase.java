@@ -40,10 +40,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
-@NpmPackage(value = "@vaadin/vaadin-item", version = "2.1.0")
-@JsModule("@vaadin/vaadin-item/src/vaadin-item.js")
 
-@HtmlImport("frontend://bower_components/vaadin-item/src/vaadin-item.html")
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component implements HasText, HasComponents, HasEnabled {
 
