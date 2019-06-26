@@ -377,9 +377,9 @@ window.Vaadin.Flow.gridConnector = {
         let itemCache = (parentCache && parentCache.itemkeyCaches) ? parentCache.itemkeyCaches[parentUniqueKey] : undefined;
         if(cache[parentUniqueKey] && cache[parentUniqueKey][page] && itemCache) {
           // workaround: sometimes grid-element gives page index that overflows
-          page = Math.min(page, Math.floor(itemCache.size / grid.pageSize));
+          page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
 
-          callback(cache[parentUniqueKey][page], itemCache.size);
+          callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
         } else {
           treePageCallbacks[parentUniqueKey][page] = callback;
         }
@@ -807,6 +807,9 @@ window.Vaadin.Flow.gridConnector = {
     grid.$connector.confirmParent = function(id, parentKey, levelSize) {
       if(!treePageCallbacks[parentKey]) {
         return;
+      }
+      if(cache[parentKey]) {
+        cache[parentKey].size = levelSize;
       }
       let outstandingRequests = Object.getOwnPropertyNames(treePageCallbacks[parentKey]);
       for(let i = 0; i < outstandingRequests.length; i++) {
