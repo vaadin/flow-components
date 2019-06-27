@@ -152,4 +152,4 @@ A link:https://vaadin.com/pro/[Vaadin Pro Tools] subscription includes a
 subscription license for Vaadin Spreadsheet. Perpetual licenses can be purchased
 from the link:https://vaadin.com/spreadsheet[Vaadin Spreadsheet product page],
 where you can also find the licensing details. For evaluation purposes, a free
-trial key allows using Vaadin Spreadsheet for a 30-day evaluation period.
+trial key allows using Vaadin Spreadsheet for a 14-day evaluation period.
