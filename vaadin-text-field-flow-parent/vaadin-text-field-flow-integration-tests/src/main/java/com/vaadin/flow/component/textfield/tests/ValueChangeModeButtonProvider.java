@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield.demo;
+package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -30,7 +30,7 @@ import static com.vaadin.flow.component.textfield.TextFieldVariant.LUMO_SMALL;
 public class ValueChangeModeButtonProvider {
     private final HasValueChangeMode elementWithChangeMode;
 
-    ValueChangeModeButtonProvider(
+    public ValueChangeModeButtonProvider(
             HasValueChangeMode elementWithChangeMode) {
         this.elementWithChangeMode = elementWithChangeMode;
     }
@@ -56,7 +56,7 @@ public class ValueChangeModeButtonProvider {
         }
     }
 
-    Component getValueChangeModeRadios() {
+    public Component getValueChangeModeRadios() {
         Div container = new Div();
         RadioButtonGroup<ValueChangeMode> group = new RadioButtonGroup<>();
         group.setItems(ValueChangeMode.values());
@@ -66,5 +66,4 @@ public class ValueChangeModeButtonProvider {
         container.add(group, getTimeoutInput());
         return container;
     }
-
 }

@@ -17,16 +17,25 @@ package com.vaadin.flow.component.textfield.demo;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.GeneratedVaadinEmailField;
-import com.vaadin.flow.component.textfield.GeneratedVaadinNumberField;
 import com.vaadin.flow.component.textfield.GeneratedVaadinTextField;
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.component.textfield.demo.entity.Person;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.validator.RegexpValidator;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -40,17 +49,102 @@ public class TextFieldView extends DemoView {
 
     @Override
     public void initView() {
-        addBasicFeatures();
-        addClearButtonFeature();
-        addAutoselectFeature();
-        addNumberFields();
-        addDisabledField();
-        addEmailFieldFields();
-        addVariantsFeature();
-        addFocusShortcut();
+        textFieldBasic(); // TextField
+        textFieldDisabledReadonly();
+        textFieldAutoselect();
+        textFieldClearButton();
+        textFieldFocusShortcut();
+        passwordFieldBasic(); // PasswordField
+        passwordFieldHideRevealButton();
+        emailFieldBasic(); // EmailField
+        numberFieldBasic(); // NumberField
+        numberFieldWithControls();
+        numberFieldWithValueLimits();
+        numberFieldWithStep();
+        textAreaBasic(); // TextArea
+        textAreaMaxHeight();
+        textAreaMinHeight();
+        prefixAndSuffix(); // Prefix and suffix
+        prefixAndSuffixSearch();
+        validationMinMaxLength(); // Validation
+        validationPattern();
+        customValidation();
+        themeVariantsTextAlign(); // Theme Variants
+        themeVariantsSmallSize();
+        styling(); // Styling
     }
 
-    private void addFocusShortcut() {
+    private void textFieldBasic() {
+        Div div = new Div();
+
+        // begin-source-example
+        // source-example-heading: Basic text field
+        TextField labelField = new TextField();
+        labelField.setLabel("Label");
+
+        TextField placeholderField = new TextField();
+        placeholderField.setPlaceholder("Placeholder");
+
+        TextField valueField = new TextField();
+        valueField.setValue("Value");
+        // end-source-example
+
+        labelField.setId("text-field-label-id");
+        placeholderField.setId("text-field-placeholder-id");
+        valueField.setId("text-field-value");
+        div.add(labelField, new Text(" "), placeholderField, new Text(" "),
+                valueField);
+        addCard("Text field", "Basic text field", div);
+    }
+
+    private void textFieldDisabledReadonly() {
+        Div div = new Div();
+
+        // begin-source-example
+        // source-example-heading: Disabled and read-only
+        TextField disabledField = new TextField();
+        disabledField.setValue("Value");
+        disabledField.setLabel("Disabled");
+        disabledField.setEnabled(false);
+
+        TextField readonlyField = new TextField();
+        readonlyField.setValue("Value");
+        readonlyField.setLabel("Read-only");
+        readonlyField.setReadOnly(true);
+
+        // end-source-example
+        div.add(disabledField, new Text(" "), readonlyField);
+        disabledField.setId("text-field-disabled-id");
+        readonlyField.setId("text-field-readonly-id");
+        addCard("Text field", "Disabled and read-only", div);
+    }
+
+    private void textFieldAutoselect() {
+        // begin-source-example
+        // source-example-heading: Autoselect
+        TextField textField = new TextField();
+        textField.setLabel("Autoselect");
+        textField.setValue("Text selected on focus");
+        textField.setAutoselect(true);
+
+        // end-source-example
+        textField.setId("autoselect-id");
+        addCard("Text field", "Autoselect", textField);
+    }
+
+    private void textFieldClearButton() {
+        // begin-source-example
+        // source-example-heading: Display the clear button
+        TextField textField = new TextField();
+        textField.setValue("Value");
+        textField.setClearButtonVisible(true);
+        // end-source-example
+
+        textField.setId("text-field-clear-button-id");
+        addCard("Text field", "Display the clear button", textField);
+    }
+
+    private void textFieldFocusShortcut() {
         // begin-source-example
         // source-example-heading: Focus shortcut usage
         TextField textField = new TextField();
@@ -59,147 +153,312 @@ public class TextFieldView extends DemoView {
         // end-source-example
 
         textField.setId("shortcut-field");
-
-        this.addCard("Focus shortcut usage", textField);
+        this.addCard("Text field", "Focus shortcut usage", textField);
     }
 
-    private void addVariantsFeature() {
+    private void passwordFieldBasic() {
         // begin-source-example
-        // source-example-heading: Theme variants usage
-        TextField textField = new TextField();
-        textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        // source-example-heading: Basic password field
+        PasswordField passwordField = new PasswordField();
+        passwordField.setLabel("Password");
+        passwordField.setPlaceholder("Enter password");
+        passwordField.setValue("secret1");
+        // end-source-example
 
+        passwordField.setId("password-field-id");
+        addCard("Password Field", "Basic password field", passwordField);
+    }
+
+    private void passwordFieldHideRevealButton() {
+        // begin-source-example
+        // source-example-heading: Hide the reveal button
+        PasswordField passwordField = new PasswordField();
+        passwordField.setLabel("Password");
+        passwordField.setValue("secret1");
+        passwordField.setRevealButtonVisible(false);
+        // end-source-example
+
+        passwordField.setId("hidden-reveal-button-id");
+        addCard("Password Field", "Hide the reveal button", passwordField);
+    }
+
+    private void emailFieldBasic() {
+        // begin-source-example
+        // source-example-heading: Basic email field
+        EmailField emailField = new EmailField("Email");
+        emailField.setClearButtonVisible(true);
+        emailField.setErrorMessage("Please enter a valid email address");
+        // end-source-example
+
+        emailField.setId("email-field");
+        addCard("Email field", "Basic email field", emailField);
+    }
+
+    private void numberFieldBasic() {
+        // begin-source-example
+        // source-example-heading: Basic number field
+        NumberField numberField = new NumberField("Years of expertise");
+        // end-source-example
+
+        numberField.setId("number-field-id");
+        addCard("Number field", "Basic number field", numberField);
+    }
+
+    private void numberFieldWithControls() {
+        // begin-source-example
+        // source-example-heading: Number field with controls
         NumberField numberField = new NumberField();
-        numberField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-
-        EmailField emailField = new EmailField();
-        emailField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        numberField.setHasControls(true);
         // end-source-example
 
-        addVariantsDemo(TextField::new,
-                GeneratedVaadinTextField::addThemeVariants,
-                GeneratedVaadinTextField::removeThemeVariants,
-                TextFieldVariant::getVariantName, TextFieldVariant.LUMO_SMALL);
-
-        addVariantsDemo(NumberField::new,
-                GeneratedVaadinNumberField::addThemeVariants,
-                GeneratedVaadinNumberField::removeThemeVariants,
-                TextFieldVariant::getVariantName, TextFieldVariant.LUMO_SMALL);
-
-        addVariantsDemo(EmailField::new,
-                GeneratedVaadinEmailField::addThemeVariants,
-                GeneratedVaadinEmailField::removeThemeVariants,
-                TextFieldVariant::getVariantName, TextFieldVariant.LUMO_SMALL);
+        numberField.setId("number-field-has-control-id");
+        addCard("Number field", "Number field with controls", numberField);
     }
 
-    private void addBasicFeatures() {
-        Div message = new Div();
-
+    private void numberFieldWithValueLimits() {
         // begin-source-example
-        // source-example-heading: Basic text field
-        TextField textField = new TextField();
-        textField.setLabel("Text field label");
-        textField.setPlaceholder("placeholder text");
-        textField.addValueChangeListener(event -> message.setText(
-                String.format("Text field value changed from '%s' to '%s'",
-                        event.getOldValue(), event.getValue())));
+        // source-example-heading: Number field with value limits
+        NumberField numberField = new NumberField();
+        numberField.setValue(1d);
+        numberField.setHasControls(true);
+        numberField.setMin(1);
+        numberField.setMax(10);
         // end-source-example
 
-        textField.setId("text-field-with-value-change-listener");
-        message.setId("text-field-value");
-
-        addCard("Basic text field", textField,
-                new ValueChangeModeButtonProvider(textField)
-                        .getValueChangeModeRadios(),
-                message);
+        numberField.setId("number-field-limit-id");
+        addCard("Number field", "Number field with value limits", numberField);
     }
 
-    private void addClearButtonFeature() {
+    private void numberFieldWithStep() {
         // begin-source-example
-        // source-example-heading: Text field with clear button
-        TextField textField = new TextField();
-        textField.setLabel("Text field label");
-        textField.setPlaceholder("placeholder text");
-        NativeButton clearButton = new NativeButton("Toggle clear button", event -> {
-            textField.setClearButtonVisible(
-                    !textField.isClearButtonVisible());
-        });
+        // source-example-heading: Number field with step
+        NumberField numberField = new NumberField();
+        numberField.setHasControls(true);
+        numberField.setStep(0.2d);
+        numberField.setMin(0);
+        numberField.setMax(10);
         // end-source-example
 
-        addCard("Text field with clear button", textField, clearButton);
+        numberField.setId("number-field-step-id");
+        addCard("Number field", "Number field with step", numberField);
     }
 
-    private void addAutoselectFeature() {
+    private void textAreaBasic() {
         // begin-source-example
-        // source-example-heading: Text field with autoselect
-        TextField textField = new TextField();
-        textField.setLabel("Text field label");
-        textField.setValue("Text field value");
-        textField.setAutoselect(true);
-
+        // source-example-heading: Basic text area
+        TextArea textArea = new TextArea("Description");
+        textArea.setPlaceholder("Write here ...");
         // end-source-example
 
-        addCard("Text field with autoselect", textField);
+        textArea.setId("text-area-basic-id");
+        addCard("Text Area", "Basic text area", textArea);
     }
 
-    private void addNumberFields() {
+    private void textAreaMaxHeight() {
         // begin-source-example
-        // source-example-heading: Number fields
+        // source-example-heading: Maximum height
+        TextArea textArea = new TextArea("Description");
+        textArea.getStyle().set("maxHeight", "150px");
+        textArea.setPlaceholder("Write here ...");
+        // end-source-example
+
+        textArea.getStyle().set("padding", "0");
+        textArea.setId("text-area-with-max-height");
+        addCard("Text Area", "Maximum height", textArea);
+    }
+
+    private void textAreaMinHeight() {
+        // begin-source-example
+        // source-example-heading: Minimum height
+        TextArea textArea = new TextArea("Description");
+        textArea.getStyle().set("minHeight", "150px");
+        textArea.setPlaceholder("Write here ...");
+        // end-source-example
+
+        textArea.getStyle().set("padding", "0");
+        textArea.setId("text-area-with-min-height");
+        addCard("Text Area", "Minimum height", textArea);
+    }
+
+    private void prefixAndSuffix() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Currency field
         NumberField dollarField = new NumberField("Dollars");
         dollarField.setPrefixComponent(new Span("$"));
 
         NumberField euroField = new NumberField("Euros");
         euroField.setSuffixComponent(new Span("€"));
-
-        NumberField stepperField = new NumberField("Stepper");
-        stepperField.setValue(1d);
-        stepperField.setMin(0);
-        stepperField.setMax(10);
-        stepperField.setHasControls(true);
-
-        euroField.setSuffixComponent(new Span("€"));
         // end-source-example
 
         dollarField.setId("dollar-field");
         euroField.setId("euro-field");
-        stepperField.setId("step-number-field");
-
-        addCard("Number fields", dollarField, euroField, stepperField);
+        div.add(dollarField, new Text(" "), euroField);
+        addCard("Prefix and suffix", "Currency field", div);
     }
 
-    private void addEmailFieldFields() {
-        Div message = new Div();
-
+    private void prefixAndSuffixSearch() {
         // begin-source-example
-        // source-example-heading: Email field
-        EmailField emailField = new EmailField("Email");
-        emailField.addValueChangeListener(event -> message.setText(
-                String.format("Email field value changed from '%s' to '%s'",
-                        event.getOldValue(), event.getValue())));
-        // end-source-example
-
-        emailField.setId("email-field");
-        message.setId("email-field-value");
-
-        addCard("Email field", emailField, message);
-    }
-
-    private void addDisabledField() {
-
-        // begin-source-example
-        // source-example-heading: Disabled text field
+        // source-example-heading: Search field
         TextField textField = new TextField();
-        textField.setLabel("Text field label");
-        textField.setPlaceholder("placeholder text");
-        textField.setEnabled(false);
+        textField.setPlaceholder("Search");
+        Icon icon = VaadinIcon.SEARCH.create();
+        textField.setPrefixComponent(icon);
         // end-source-example
 
-        textField.setId("disabled-text-field");
-        Div message = new Div();
-        message.setId("disabled-text-field-message");
-        textField.addValueChangeListener(
-                change -> message.setText("Value changed"));
+        textField.setId("text-field-search-id");
+        icon.setId("icon-id");
+        addCard("Prefix and suffix", "Search field", textField);
+    }
 
-        addCard("Disabled text field", textField, message);
+    private void validationMinMaxLength() {
+        Person person = new Person();
+        Binder<Person> binder = new Binder<>();
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Minlength and maxlength
+        TextField minField = new TextField("Min 2 characters");
+        minField.setMinLength(2);
+        binder.forField(minField)
+                .withValidator(min -> min.length() >= 2, "Minimum 2 characters")
+                .bind(Person::getName, Person::setName);
+
+        TextField maxField = new TextField("Max 4 characters");
+        maxField.setMaxLength(4);
+        binder.forField(maxField)
+                .withValidator(max -> max.length() <= 4, "Maximum 4 characters")
+                .bind(Person::getName, Person::setName);
+        binder.setBean(person);
+        // end-source-example
+
+        minField.setId("min-id");
+        maxField.setId("max-id");
+        div.add(minField, new Text(" "), maxField);
+        addCard("Validation", "Minlength and maxlength", div);
+    }
+
+    private void validationPattern() {
+        Div div = new Div();
+        Person person = new Person();
+        Binder<Person> binder = new Binder<>();
+        // begin-source-example
+        // source-example-heading: Pattern
+        TextField textField = new TextField("Flight number");
+        binder.forField(textField)
+                .withValidator(new RegexpValidator("Not a valid flight number",
+                        "[A-Z]{2}\\d{3,4}"))
+                .bind(Person::getFlightNumber, Person::setFlightNumber);
+        binder.setBean(person);
+        // end-source-example
+
+        div.setText("Valid flight number: 2 uppercase letters followed by "
+                + "3 or 4 numbers. For example: SA1234");
+        textField.setId("text-field-pattern-id");
+        addCard("Validation", "Pattern", textField, div);
+    }
+
+    private void customValidation() {
+        Div div = new Div();
+        Person person = new Person();
+        Binder<Person> binder = new Binder<>();
+        // begin-source-example
+        // source-example-heading: Custom validator
+        TextField textField = new TextField("ID");
+        binder.forField(textField)
+                .withValidator((Validator<String>) (value, context) -> {
+
+                    long sumDigits = 0;
+                    long intValue = 0;
+
+                    try {
+                        intValue = Long.valueOf(value);
+                    } catch (NumberFormatException ex) {
+                        return ValidationResult.error("Is not a valid number");
+                    }
+
+                    if (value.length() != 10) {
+                        return ValidationResult
+                                .error("Length must be 10 digits");
+                    }
+
+                    while (intValue > 0) {
+                        sumDigits += intValue % 10;
+                        intValue = intValue / 10;
+                    }
+
+                    if (sumDigits % 10 != 0) {
+                        return ValidationResult.error("ID is not correct");
+                    }
+
+                    return ValidationResult.ok();
+                }).bind(Person::getId, Person::setId);
+        binder.setBean(person);
+        // end-source-example
+        div.setText(
+                "Valid ID: Use a 10 digit number. The sum of digits must be divisible by 10. For example 1111111111.");
+        textField.setId("text-field-synchronous-id");
+        addCard("Validation", "Custom validator", textField, div);
+    }
+
+    private void themeVariantsTextAlign() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Text align
+        TextField leftTextField = new TextField();
+        leftTextField.setValue("left");
+
+        TextField centerTextField = new TextField();
+        centerTextField.setValue("center");
+        centerTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_CENTER);
+
+        TextField rightTextField = new TextField();
+        rightTextField.setValue("right");
+        rightTextField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+        // end-source-example
+
+        leftTextField.setId("text-field-left-id");
+        centerTextField.setId("text-field-center-id");
+        rightTextField.setId("text-field-right-id");
+        div.add(leftTextField, new Text(" "), centerTextField, new Text(" "),
+                rightTextField);
+        addCard("Theme Variants", "Text align", div);
+    }
+
+    private void themeVariantsSmallSize() {
+        // begin-source-example
+        // source-example-heading: Small size
+        TextField textField = new TextField("Label");
+        textField.setPlaceholder("Text field");
+        textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        // end-source-example
+        addCard("Theme Variants", "Small size", textField);
+    }
+
+    private void styling() {
+
+        Div firstDiv = new Div();
+        firstDiv.setText(
+                "To read about styling you can read the related tutorial in");
+        Anchor firstAnchor = new Anchor("https://vaadin.com/docs/flow/theme/using-component-themes.html",
+                "Using Component Themes");
+
+        Div secondDiv = new Div();
+        secondDiv.setText("To know about styling in html you can read the ");
+        Anchor secondAnchor = new Anchor(
+                "https://vaadin.com/components/" +
+                        "vaadin-text-field/html-examples/text-field-styling-demos",
+                "HTML Styling Demos");
+
+        HorizontalLayout firstHorizontalLayout = new HorizontalLayout(firstDiv,
+                firstAnchor);
+        HorizontalLayout secondHorizontalLayout = new HorizontalLayout(
+                secondDiv, secondAnchor);
+        // begin-source-example
+        // source-example-heading: Styling references
+
+        // end-source-example
+        addCard("Styling", "Styling references", firstHorizontalLayout,
+                secondHorizontalLayout);
     }
 }
+

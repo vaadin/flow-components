@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -62,5 +64,54 @@ public class PasswordFieldPage extends Div {
                 .setText(String.format("Old value: '%s'. New value: '%s'.",
                         event.getOldValue(), event.getValue())));
         add(passwordFieldClear, clearValueMessage);
+        addFocusShortcut();
+        addBasicField();
+        addDisabledField();
+    }
+
+    private void addFocusShortcut() {
+        PasswordField passwordField = new PasswordField();
+        passwordField.setLabel("Press ALT + 1 to focus");
+        passwordField.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
+        passwordField.setId("shortcut-field");
+        add(passwordField);
+    }
+
+    private void addBasicField() {
+        Div message = new Div();
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setLabel("Password field label");
+        passwordField.setPlaceholder("placeholder text");
+        passwordField.addValueChangeListener(event -> message.setText(
+                String.format("Password field value changed from '%s' to '%s'",
+                        event.getOldValue(), event.getValue())));
+        NativeButton button = new NativeButton("Toggle eye icon", event -> {
+            passwordField.setRevealButtonVisible(
+                    !passwordField.isRevealButtonVisible());
+        });
+
+        passwordField.setId("password-field-with-value-change-listener");
+        message.setId("password-field-value");
+        button.setId("toggle-button");
+
+        add(button, passwordField,
+                new ValueChangeModeButtonProvider(passwordField)
+                        .getValueChangeModeRadios(),
+                message);
+    }
+
+    private void addDisabledField() {
+        PasswordField passwordField = new PasswordField();
+        passwordField.setLabel("Password field label");
+        passwordField.setPlaceholder("placeholder text");
+        passwordField.setEnabled(false);
+        passwordField.setId("disabled-password-field");
+        Div message = new Div();
+        message.setId("disabled-password-field-message");
+        passwordField.addValueChangeListener(
+                change -> message.setText("password changed"));
+
+        add(passwordField, message);
     }
 }

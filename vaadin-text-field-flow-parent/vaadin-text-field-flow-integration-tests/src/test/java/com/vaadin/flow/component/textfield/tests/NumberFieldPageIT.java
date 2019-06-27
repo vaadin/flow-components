@@ -81,7 +81,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         numberField.setProperty("disabled", "");
         numberField.setValue("789");
         Assert.assertEquals("Old value: 'null'. New value: '123.0'.", messageDiv.getText());
-        
+
         disableEnableButton.click();
         numberField.setValue("987");
         Assert.assertEquals("Old value: '123.0'. New value: '987.0'.", messageDiv.getText());
@@ -135,4 +135,35 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         Assert.assertEquals("Old value: 'null'. New value: '123.0'.", message);
     }
 
+    @Test
+    public void dollarFieldHasDollarPrefix() {
+        WebElement dollarField = findElement(By.id("dollar-field"));
+        WebElement span = dollarField.findElement(By.tagName("span"));
+
+        Assert.assertEquals("$", span.getText());
+
+        int spanX = span.getLocation().getX();
+        int middleX = dollarField.getLocation().getX()
+                + dollarField.getSize().getWidth() / 2;
+
+        Assert.assertTrue(
+                "The dollar sign should be located on the left side of the text field",
+                spanX < middleX);
+    }
+
+    @Test
+    public void euroFieldHasEuroSuffix() {
+        WebElement euroField = findElement(By.id("euro-field"));
+        WebElement span = euroField.findElement(By.tagName("span"));
+
+        Assert.assertEquals("€", span.getText());
+
+        int spanX = span.getLocation().getX();
+        int middleX = euroField.getLocation().getX()
+                + euroField.getSize().getWidth() / 2;
+
+        Assert.assertTrue(
+                "The euro sign should be located on the right side of the text field",
+                spanX > middleX);
+    }
 }

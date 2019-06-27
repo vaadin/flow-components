@@ -15,16 +15,20 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+
+import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
 
 /**
  * Integration tests for {@link TextField}.
@@ -58,9 +62,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
     @Test
     public void assertRequired() {
         WebElement webComponent = findElement(By.tagName("vaadin-text-field"));
-
         Assert.assertNull(webComponent.getAttribute("required"));
-
         WebElement button = findElement(By.id("required"));
         button.click();
         waitUntil(
@@ -74,11 +76,9 @@ public class TextFieldPageIT extends AbstractComponentIT {
     @Test
     public void assertValueWithoutListener() {
         WebElement field = findElement(By.id("value-change"));
-
         WebElement input = getInShadowRoot(field, By.cssSelector("input"));
         input.sendKeys("foo");
         blur();
-
         WebElement button = findElement(By.id("get-value"));
         new Actions(getDriver())
                 .moveToElement(button, button.getSize().getWidth() / 2,
@@ -91,16 +91,80 @@ public class TextFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertClearValue() {
-       WebElement field = findElement(By.id("clear-text-field"));
+        WebElement field = findElement(By.id("clear-text-field"));
+        WebElement input = getInShadowRoot(field, By.cssSelector("input"));
+        input.sendKeys("foo");
+        blur();
 
-       WebElement input = getInShadowRoot(field, By.cssSelector("input"));
-       input.sendKeys("foo");
-       blur();
+        WebElement clearButton = getInShadowRoot(field, By.cssSelector("[part~='clear-button']"));
+        clearButton.click();
 
-       WebElement clearButton = getInShadowRoot(field, By.cssSelector("[part~='clear-button']"));
-       clearButton.click();
+        String value = findElement(By.id("clear-message")).getText();
+        Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
+    }
 
-       String value = findElement(By.id("clear-message")).getText();
-       Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
+    @Test
+    public void disabledTextFieldNotUpdating() {
+        WebElement textField = findElement(By.id("disabled-text-field"));
+        WebElement message =
+                findElement(By.id("disabled-text-field-message"));
+        Assert.assertEquals("", message.getText());
+
+        executeScript("arguments[0].removeAttribute(\"disabled\");", textField);
+        textField.sendKeys("abc");
+        blur();
+
+        message = findElement(By.id("disabled-text-field-message"));
+        Assert.assertEquals("", message.getText());
+    }
+
+    @Test
+    public void valueChangeListenerReportsCorrectValues() {
+        WebElement textFieldValueDiv = findElement(By.id("text-field-value"));
+        WebElement textField = findElement(By.id("text-field-with-value-change-listener"));
+        updateValues(textFieldValueDiv, textField, true);
+        $(RadioButtonGroupElement.class).first()
+                .selectByText(EAGER.toString());
+        updateValues(textFieldValueDiv, textField, false);
+    }
+
+    @Test
+    public void textFieldHasPlaceholder() {
+        WebElement textField = findElement(By.id("text-field-with-value-change-listener"));
+        Assert.assertEquals(textField.getAttribute("placeholder"),
+                "placeholder text");
+    }
+
+    @Test
+    public void assertFocusShortcut() {
+        WebElement shortcutField = findElement(By.id("shortcut-field"));
+        Assert.assertNull("TextField should not be focused before the shortcut event is triggered.",
+                shortcutField.getAttribute("focused"));
+
+        SendKeysHelper.sendKeys(driver, Keys.ALT, "1");
+        Assert.assertTrue("TextField should be focused after the shortcut event is triggered.",
+                shortcutField.getAttribute("focused").equals("true")
+                        || shortcutField.getAttribute("focused").equals(""));
+    }
+
+    private void updateValues(WebElement textFieldValueDiv,
+                              WebElement textField, boolean toggleBlur) {
+        textField.sendKeys("a");
+        if (toggleBlur) {
+            blur();
+        }
+        waitUntilTextsEqual("Text field value changed from '' to 'a'",
+                textFieldValueDiv);
+
+        textField.sendKeys(Keys.BACK_SPACE);
+        if (toggleBlur) {
+            blur();
+        }
+        waitUntilTextsEqual("Text field value changed from 'a' to ''",
+                textFieldValueDiv);
+    }
+
+    private void waitUntilTextsEqual(String expected, WebElement valueDiv) {
+        waitUntil(driver -> expected.equals(valueDiv.getText()));
     }
 }

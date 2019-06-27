@@ -15,15 +15,22 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+
+import java.util.stream.IntStream;
+
+import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
 
 /**
  * Integration tests for {@link TextArea}.
@@ -49,5 +56,93 @@ public class TextAreaPageIT extends AbstractComponentIT {
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
+    }
+
+    @Test
+    public void assertFocusShortcut() {
+        TextAreaElement shortcutField = $(TextAreaElement.class).id("shortcut-field");
+        Assert.assertNull("TextArea should not be focused before the shortcut event is triggered.",
+                shortcutField.getAttribute("focused"));
+
+        SendKeysHelper.sendKeys(driver, Keys.ALT, "1");
+        Assert.assertTrue("TextArea should be focused after the shortcut event is triggered.",
+                shortcutField.getAttribute("focused").equals("true")
+                        || shortcutField.getAttribute("focused").equals(""));
+    }
+
+    @Test
+    public void disabledTextAreaNotUpdating() {
+        WebElement textArea = findElement(By.id("disabled-text-area"));
+        WebElement message = findElement(By.id("disabled-text-area-message"));
+        Assert.assertEquals("", message.getText());
+
+        executeScript("arguments[0].removeAttribute(\"disabled\");", textArea);
+        textArea.sendKeys("abc");
+        blur();
+
+        message = findElement(By.id("disabled-text-area-message"));
+        Assert.assertEquals("", message.getText());
+    }
+
+    @Test
+    public void valueChangeListenerReportsCorrectValues() {
+        WebElement textFieldValueDiv = findElement(By.id("text-area-value"));
+        WebElement textArea = findElement(By.id("text-area-with-value-change-listener"));
+
+        updateValues(textFieldValueDiv, textArea, true);
+        $(RadioButtonGroupElement.class).first()
+                .selectByText(EAGER.toString());
+        updateValues(textFieldValueDiv, textArea, false);
+    }
+
+    private void updateValues(WebElement textFieldValueDiv, WebElement textArea,
+                              boolean toggleBlur) {
+        textArea.sendKeys("a");
+        if (toggleBlur) {
+            blur();
+        }
+        waitUntilTextsEqual("Text area value changed from '' to 'a'",
+                textFieldValueDiv);
+
+        textArea.sendKeys(Keys.BACK_SPACE);
+        if (toggleBlur) {
+            blur();
+        }
+        waitUntilTextsEqual("Text area value changed from 'a' to ''",
+                textFieldValueDiv);
+    }
+
+    private void waitUntilTextsEqual(String expected, WebElement valueDiv) {
+        waitUntil(driver -> expected.equals(valueDiv.getText()));
+    }
+
+    @Test
+    public void textAreaHasPlaceholder() {
+        WebElement textField = findElement(By.id("text-area-with-value-change-listener"));
+        Assert.assertEquals(textField.getAttribute("placeholder"),
+                "placeholder text");
+    }
+
+    @Test
+    public void maxHeight() {
+        WebElement textArea = findElement(By.id("text-area-with-max-height"));
+
+        IntStream.range(0, 20).forEach(i -> textArea.sendKeys("foobarbaz\n"));
+
+        Assert.assertTrue(textArea.getSize().getHeight() <= 125);
+    }
+
+    @Test
+    public void minHeight() throws InterruptedException {
+        WebElement textArea = findElement(By.id("text-area-with-min-height"));
+
+        IntStream.range(0, 20).forEach(i -> textArea.sendKeys("foobarbaz\n"));
+
+        Assert.assertTrue(textArea.getSize().getHeight() >= 125);
+
+        IntStream.range(0, 20 * "foobarbaz\n".length())
+                .forEach(i -> textArea.sendKeys(Keys.BACK_SPACE));
+
+        Assert.assertEquals(125, textArea.getSize().getHeight());
     }
 }
