@@ -971,29 +971,12 @@ window.Vaadin.Flow.gridConnector = {
         grid.$connector.clickedItem = null;
     }
 
-    grid.$connector.columnToIdMap = new Map();
-    grid.$connector.setColumnId = function(column, id) {
-        grid.$connector.columnToIdMap.set(column, id);
-    }
-
-    grid.$connector.columnRemoved = function(columnId) {
-        const entries = Array.from(grid.$connector.columnToIdMap);
-        const entryToRemove = entries.filter(function(entry) {
-            return entry[1] === columnId;
-        })[0];
-        if (entryToRemove) {
-            grid.$connector.columnToIdMap.delete(entryToRemove[0]);
-        }
-    }
-
     grid.cellClassNameGenerator = function(column, rowData) {
         const style = rowData.item.style;
         if (!style) {
             return;
         }
-        const columnId = grid.$connector.columnToIdMap.get(column);
-
-        return (style.row || '') + ' ' + (style[columnId] || '');
+        return (style.row || '') + ' ' + (style[column._flowId] || '');
     }
 
     grid.dropFilter = rowData => !rowData.item.dropDisabled;

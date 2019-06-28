@@ -80,12 +80,23 @@ public class GridStylingPage extends Div {
                 });
         secondColumnClassNameGenerator.setId("second-column-generator");
 
+        NativeButton toggleAttached = new NativeButton("detach/attach grid",
+                e -> {
+                    if (grid.getParent().isPresent()) {
+                        remove(grid);
+                    } else {
+                        add(grid);
+                    }
+                });
+        toggleAttached.setId("toggle-attached");
+
         add(grid,
                 new Div(gridClassNameGenerator, columnClassNameGenerator,
                         secondColumnClassNameGenerator),
                 new Div(resetGridClassNameGenerator,
                         resetColumnClassNameGenerator),
-                new Div(gridMultipleClasses, columnMultipleClasses));
+                new Div(gridMultipleClasses, columnMultipleClasses),
+                new Div(toggleAttached));
     }
 
 }

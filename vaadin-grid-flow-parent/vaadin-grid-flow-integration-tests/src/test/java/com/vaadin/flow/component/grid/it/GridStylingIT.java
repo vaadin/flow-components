@@ -141,6 +141,21 @@ public class GridStylingIT extends AbstractComponentIT {
                 "grid foo col bar", "grid foo");
     }
 
+    @Test
+    public void setGridAndColumnClassNameGenerators_detach_attach_classesEffective() {
+        click("grid-generator");
+        click("column-generator");
+
+        click("toggle-attached");
+        click("toggle-attached");
+        grid = $(GridElement.class).first();
+
+        assertCellClassNames( //
+                "grid0 col0", "grid0", //
+                "grid1 col1", "grid1", //
+                "grid2 col2", "grid2");
+    }
+
     /**
      * Compares each class to the cell at the corresponding index
      */
