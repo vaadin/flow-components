@@ -907,19 +907,9 @@ window.Vaadin.Flow.gridConnector = {
     }
 
     const contextMenuListener = function(e) {
-      // https://github.com/vaadin/vaadin-grid/issues/1318
-      const path = e.composedPath();
-      const index = path.indexOf(grid.$.table);
-      const row = path[index - 2]; // <tr> element in shadow dom
-      const cell = path[index - 3]; // cell element
-      let key;
-      let colId;
-      if (row && row._item) {
-        key = row._item.key;
-      }
-      if (cell && cell._column) {
-        colId = cell._column.id;
-      }
+      const eventContext = grid.getEventContext(e);
+      const key = eventContext.item && eventContext.item.key;
+      const colId = eventContext.column && eventContext.column.id;
       grid.$server.updateContextMenuTargetItem(key, colId);
     }
 
@@ -927,48 +917,16 @@ window.Vaadin.Flow.gridConnector = {
       contextMenuListener(grid.$contextMenuConnector.openEvent);
     });
 
-    function _runWhenReady(){
-        if ( grid.$ ){
-            grid.$.scroller.addEventListener('click', _onClick);
-            grid.$.scroller.addEventListener('dblclick', _onDblClick);
-            grid.addEventListener('cell-activate', _cellActivated);
-        }
-        else {
-            window.setTimeout(_runWhenReady, 0 );
-        }
-    }
+    grid.addEventListener('click', e => _fireClickEvent(e, 'item-click'));
+    grid.addEventListener('dblclick', e => _fireClickEvent(e, 'item-double-click'));
 
-    _runWhenReady();
-
-    function _cellActivated(event){
-        grid.$connector.clickedItem = event.detail.model.item;
-    }
-
-    function _onClick(event){
-        _fireClickEvent(event, 'item-click');
-    }
-
-    function _onDblClick(event){
-        _fireClickEvent(event, 'item-double-click');
-    }
-
-    function _fireClickEvent(event, eventName){
-        // if there was no click on item then don't do anything
-        if (grid.$connector.clickedItem){
-            event.itemKey = grid.$connector.clickedItem.key;
-            grid.dispatchEvent(new CustomEvent(eventName,
-                    {
-                        detail: event
-                    }));
-            // can't clear the clicked item right away since there may be
-            // not handled double click event (or may be not, it's not known)
-            // schedule this for the next cycle
-            window.setTimeout(_clearClickedItem, 0 );
-        }
-    }
-
-    function _clearClickedItem(){
-        grid.$connector.clickedItem = null;
+    function _fireClickEvent(event, eventName) {
+      const item = grid.getEventContext(event).item;
+      if (item) {
+        event.itemKey = item.key;
+        grid.dispatchEvent(new CustomEvent(eventName,
+          { detail: event }));
+      }
     }
 
     grid.cellClassNameGenerator = function(column, rowData) {
