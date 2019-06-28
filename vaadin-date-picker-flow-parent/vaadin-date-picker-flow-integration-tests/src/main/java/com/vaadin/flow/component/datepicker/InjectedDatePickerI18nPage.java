@@ -15,10 +15,7 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import java.util.Arrays;
-
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.polymertemplate.Id;
@@ -36,16 +33,6 @@ public class InjectedDatePickerI18nPage extends PolymerTemplate<TemplateModel> {
     private DatePicker datePicker;
 
     public InjectedDatePickerI18nPage() {
-        DatePickerI18n i18n = new DatePickerI18n().setWeek("viikko")
-                .setCalendar("kalenteri").setClear("tyhjennä")
-                .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
-                .setMonthNames(Arrays.asList("tammiku", "helmikuu", "maaliskuu",
-                        "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",
-                        "syyskuu", "lokakuu", "marraskuu", "joulukuu"))
-                .setWeekdays(Arrays.asList("sunnuntai", "maanantai", "tiistai",
-                        "keskiviikko", "torstai", "perjantai", "lauantai"))
-                .setWeekdaysShort(Arrays.asList("su", "ma", "ti", "ke", "to",
-                        "pe", "la"));
-        datePicker.setI18n(i18n);
+        datePicker.setI18n(TestI18N.FINNISH);
     }
 }

@@ -61,6 +61,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     };
 
     private Locale locale;
+    private String languageTag;
 
     /**
      * Default constructor.
@@ -256,7 +257,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public void setLocale(Locale locale) {
         Objects.requireNonNull(locale, "Locale must not be null.");
         this.locale = locale;
-        String languageTag;
         // For ill-formed locales, Locale.toLanguageTag() will append subtag
         // "lvariant" to it, which will cause the client side
         // Date().toLocaleDateString()
@@ -271,8 +271,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         } else {
             languageTag = locale.getLanguage() + "-" + locale.getCountry();
         }
+        getUI().ifPresent(ui -> setLocaleWithJS());
+    }
+
+    private void setLocaleWithJS() {
         runBeforeClientResponse(ui -> getElement()
-                .callFunction("$connector.setLocale", languageTag));
+                .callJsFunction("$connector.setLocale", languageTag));
     }
 
     /**
@@ -289,6 +293,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
+        if (languageTag != null) {
+            setLocaleWithJS();
+        }
+        if (i18n != null) {
+            setI18nWithJS();
+        }
     }
 
     private void initConnector() {
@@ -321,15 +331,15 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         Objects.requireNonNull(i18n,
                 "The I18N properties object should not be null");
         this.i18n = i18n;
+        getUI().ifPresent(ui -> setI18nWithJS());
+    }
+
+    private void setI18nWithJS() {
         runBeforeClientResponse(ui -> {
-            if (i18n == this.i18n) {
-                JsonObject i18nObject = (JsonObject) JsonSerializer
-                        .toJson(this.i18n);
-                for (String key : i18nObject.keys()) {
-                    ui.getPage().executeJavaScript(
-                            "$0.set('i18n." + key + "', $1)", getElement(),
-                            i18nObject.get(key));
-                }
+            JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+            for (String key : i18nObject.keys()) {
+                getElement().executeJs("this.set('i18n." + key + "', $0)",
+                        i18nObject.get(key));
             }
         });
     }
