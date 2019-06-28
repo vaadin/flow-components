@@ -16,13 +16,14 @@
 
 package com.vaadin.flow.component.tabs.tests;
 
-import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.component.tabs.Tabs;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.concurrent.atomic.AtomicReference;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 
 /**
  * @author Vaadin Ltd.
@@ -41,14 +42,18 @@ public class SelectionEventTest {
         tab2 = new Tab("bar");
         tabs = new Tabs(tab1, tab2);
 
+        addSelectedChangeListener(tabs);
+
+        eventCount = 0;
+    }
+
+    private void addSelectedChangeListener(Tabs tabs) {
         tabs.addSelectedChangeListener(e -> {
             Assert.assertFalse(
                     "isFromClient() returned true for an event fired from server",
                     e.isFromClient());
             eventCount++;
         });
-
-        eventCount = 0;
     }
 
     @Test
@@ -279,12 +284,15 @@ public class SelectionEventTest {
         });
 
         tabs.setSelectedTab(tab1);
-        Assert.assertEquals("Current tab should be tab 1", currentTab.get(), tab1);
+        Assert.assertEquals("Current tab should be tab 1", currentTab.get(),
+                tab1);
         Assert.assertNull("Previous tab should be empty", previousTab.get());
 
         tabs.setSelectedTab(tab2);
-        Assert.assertEquals("Current tab should be tab 2", currentTab.get(), tab2);
-        Assert.assertEquals("Previous tab should be tab 1", previousTab.get(), tab1);
+        Assert.assertEquals("Current tab should be tab 2", currentTab.get(),
+                tab2);
+        Assert.assertEquals("Previous tab should be tab 1", previousTab.get(),
+                tab1);
     }
 
     @Test
@@ -295,6 +303,58 @@ public class SelectionEventTest {
 
         tabs.remove(tab2);
         Assert.assertEquals(tabs.getSelectedIndex(), -1);
+    }
+
+    @Test
+    public void addFirstTabWithAddComponentAtIndex_firstTabAutoselected() {
+        tabs = new Tabs();
+        addSelectedChangeListener(tabs);
+
+        tabs.addComponentAtIndex(0, tab1);
+
+        Assert.assertEquals(
+                "Unexpected selected index after adding the first tab.", 0,
+                tabs.getSelectedIndex());
+        Assert.assertEquals(
+                "Expected the first added tab to be automatically selected.",
+                tab1, tabs.getSelectedTab());
+        Assert.assertEquals("Expected autoselection to fire an event.", 1,
+                eventCount);
+    }
+
+    @Test
+    public void addSecondTabWithAddComponentAtIndex_selectionNotChanged() {
+        tabs = new Tabs();
+        addSelectedChangeListener(tabs);
+
+        tabs.addComponentAtIndex(0, tab1);
+        tabs.addComponentAtIndex(0, tab2);
+
+        Assert.assertEquals(
+                "Unexpected selected index after adding the first tab.", 1,
+                tabs.getSelectedIndex());
+        Assert.assertEquals(
+                "Expected the first added tab to be automatically selected.",
+                tab1, tabs.getSelectedTab());
+        Assert.assertEquals(
+                "Expected no selection event after adding the second tab.", 1,
+                eventCount);
+    }
+
+    @Test
+    public void disableAutoSelect_addFirstTabWithAddComponentAtIndex_noAutoselect() {
+        tabs = new Tabs(false);
+        addSelectedChangeListener(tabs);
+
+        tabs.addComponentAtIndex(0, tab1);
+
+        Assert.assertEquals(
+                "Unexpected selected index after adding the first tab.", -1,
+                tabs.getSelectedIndex());
+        Assert.assertNull("Expected no tab to be automatically selected.",
+                tabs.getSelectedTab());
+        Assert.assertEquals("Expected no selection event fired.", 0,
+                eventCount);
     }
 
 }
