@@ -36,11 +36,13 @@ window.Vaadin.Flow.contextMenuConnector = {
         this.removeListener();
         this.openOnEventType = eventType;
 
-        if (Gestures.gestures[eventType]) {
+        customElements.whenDefined('vaadin-context-menu').then(() => {
+          if (Gestures.gestures[eventType]) {
             Gestures.addListener(target, eventType, this.openOnHandler);
-        } else {
-          target.addEventListener(eventType, this.openOnHandler);
-        }
+          } else {
+            target.addEventListener(eventType, this.openOnHandler);
+          }
+        });
       },
 
       removeListener: function() {
