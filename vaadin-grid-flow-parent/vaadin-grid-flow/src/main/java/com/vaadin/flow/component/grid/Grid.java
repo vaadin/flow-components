@@ -1247,6 +1247,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         Objects.requireNonNull(beanType, "Bean type can't be null");
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
+        this.beanType = beanType;
         propertySet = BeanPropertySet.get(beanType);
         propertySet.getProperties()
                 .filter(property -> !property.isSubProperty())
