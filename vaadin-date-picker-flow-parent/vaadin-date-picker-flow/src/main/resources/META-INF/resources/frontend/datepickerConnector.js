@@ -81,8 +81,8 @@ window.Vaadin.Flow.datepickerConnector = {
             }
 
             /* create test-string where to extract parsing regex */
-            let testDate = new Date(datepicker.$connector.yearPart.initial, datepicker.$connector.monthPart.initial - 1, datepicker.$connector.dayPart.initial);
-            let testString = cleanString(testDate.toLocaleDateString(locale));
+            let testDate = new Date(Date.UTC(datepicker.$connector.yearPart.initial, datepicker.$connector.monthPart.initial - 1, datepicker.$connector.dayPart.initial));
+            let testString = cleanString(testDate.toLocaleDateString(locale, { timeZone: 'UTC' }));
             datepicker.$connector.parts.forEach(function (part) {
                 part.index = testString.indexOf(part.initial);
             });
@@ -103,8 +103,8 @@ window.Vaadin.Flow.datepickerConnector = {
             datepicker.$connector.regex = testString.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&').replace(datepicker.$connector.dayPart.initial, "(\\d{1,2})").replace(datepicker.$connector.monthPart.initial, "(\\d{1,2})").replace(datepicker.$connector.yearPart.initial, "(\\d{4})");
 
             datepicker.i18n.formatDate = function (date) {
-                let rawDate = new Date(date.year, date.month, date.day);
-                return cleanString(rawDate.toLocaleDateString(locale));
+                let rawDate = new Date(Date.UTC(date.year, date.month, date.day));
+                return cleanString(rawDate.toLocaleDateString(locale, { timeZone: 'UTC' }));
             };
 
             datepicker.i18n.parseDate = function (dateString) {
