@@ -29,6 +29,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
@@ -208,7 +209,7 @@ public class GridTestPageIT extends AbstractComponentIT {
 
         WebElement grid = container1.findElement(By.id("detachable-grid"));
         Map<String, Map<String, ?>> items = getItems(driver, grid);
-        Assert.assertEquals(20, items.size());
+        Assert.assertEquals(50, items.size());
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
         });
@@ -220,7 +221,7 @@ public class GridTestPageIT extends AbstractComponentIT {
         attach2.click();
         grid = container2.findElement(By.id("detachable-grid"));
         items = getItems(driver, grid);
-        Assert.assertEquals(20, items.size());
+        Assert.assertEquals(50, items.size());
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
         });
@@ -232,7 +233,7 @@ public class GridTestPageIT extends AbstractComponentIT {
         attach1.click();
         grid = container1.findElement(By.id("detachable-grid"));
         items = getItems(driver, grid);
-        Assert.assertEquals(20, items.size());
+        Assert.assertEquals(50, items.size());
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
         });
@@ -281,7 +282,7 @@ public class GridTestPageIT extends AbstractComponentIT {
         scrollToElement(grid);
 
         Map<String, Map<String, ?>> items = getItems(driver, grid);
-        Assert.assertEquals(20, items.size());
+        Assert.assertEquals(50, items.size());
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
         });
@@ -291,7 +292,7 @@ public class GridTestPageIT extends AbstractComponentIT {
         attach1.click();
         grid = container1.findElement(By.id("detachable-grid"));
         items = getItems(driver, grid);
-        Assert.assertEquals(20, items.size());
+        Assert.assertEquals(50, items.size());
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
         });
@@ -329,7 +330,7 @@ public class GridTestPageIT extends AbstractComponentIT {
         scrollToElement(grid);
 
         Map<String, Map<String, ?>> items = getItems(driver, grid);
-        Assert.assertEquals(20, items.size());
+        Assert.assertEquals(50, items.size());
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
         });
@@ -343,7 +344,7 @@ public class GridTestPageIT extends AbstractComponentIT {
         visible.click();
         waitUntil(driver -> grid.getAttribute("hidden") == null);
         items = getItems(driver, grid);
-        Assert.assertEquals(20, items.size());
+        Assert.assertEquals(50, items.size());
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
         });
@@ -372,6 +373,19 @@ public class GridTestPageIT extends AbstractComponentIT {
         visible.click();
         waitUntil(driver -> grid.getAttribute("hidden") == null);
         assertSelection(grid, "Item 0");
+    }
+
+    @Test
+    public void scrollDown_detachAndReattach_firstItemsRendered() {
+        GridElement grid = $(GridElement.class).id("detachable-grid");
+        grid.scrollToRow(150);
+
+        findElement(By.id("detachable-grid-detach")).click();
+        findElement(By.id("detachable-grid-attach-1")).click();
+
+        grid = $(GridElement.class).id("detachable-grid");
+        Assert.assertEquals(50, getItems(driver, grid).size());
+        Assert.assertEquals("Item 0", grid.getCell(0, 0).getText());
     }
 
     private void assertSelection(WebElement grid, String value) {

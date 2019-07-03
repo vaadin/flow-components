@@ -1073,6 +1073,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         public void initialize() {
             initConnector();
             updateSelectionModeOnClient();
+            setRequestedRange(0, getPageSize());
         }
 
         @Override

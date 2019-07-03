@@ -121,6 +121,7 @@ public class TreeGrid<T> extends Grid<T>
         public void initialize() {
             initConnector();
             updateSelectionModeOnClient();
+            getDataCommunicator().setRequestedRange(0, getPageSize());
         }
 
         @Override

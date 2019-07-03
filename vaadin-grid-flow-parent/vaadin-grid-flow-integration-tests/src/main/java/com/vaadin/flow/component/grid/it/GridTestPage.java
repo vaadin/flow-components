@@ -194,7 +194,7 @@ public class GridTestPage extends Div {
         Grid<Item> grid = new Grid<>();
         grid.setId("detachable-grid");
 
-        grid.setItems(generateItems(20, 0));
+        grid.setItems(generateItems(200, 0));
         grid.addColumn(Item::getName);
         container1.add(grid);
         add(container1);
