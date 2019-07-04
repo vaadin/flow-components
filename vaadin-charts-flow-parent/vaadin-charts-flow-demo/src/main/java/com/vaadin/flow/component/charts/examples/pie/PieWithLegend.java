@@ -24,7 +24,6 @@ public class PieWithLegend extends AbstractChartExample {
 
         Tooltip tooltip = new Tooltip();
         tooltip.setValueDecimals(1);
-        tooltip.setPointFormat("{series.name}: <b>{point.percentage}%</b>");
         conf.setTooltip(tooltip);
 
         PlotOptionsPie plotOptions = new PlotOptionsPie();
