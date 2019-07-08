@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
@@ -32,8 +33,9 @@ public class ItemClickListenerPage extends Div {
         Grid<String> grid = new Grid<>();
         grid.setItems("foo", "bar");
         grid.addColumn(item -> item).setHeader("Name");
+        grid.addComponentColumn(item -> new Checkbox(item));
 
-        grid.addItemClickListener(event -> clickMsg.setText("Click event "));
+        grid.addItemClickListener(event -> clickMsg.add(event.getItem()));
 
         grid.addItemDoubleClickListener(event -> dblClickMsg
                 .setText(String.valueOf(event.getClientY())));

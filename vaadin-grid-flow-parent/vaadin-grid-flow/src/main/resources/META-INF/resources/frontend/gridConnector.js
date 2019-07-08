@@ -917,13 +917,16 @@ window.Vaadin.Flow.gridConnector = {
       contextMenuListener(grid.$contextMenuConnector.openEvent);
     });
 
+    grid.addEventListener('cell-activate', e => {
+      grid.$connector.activeItem = e.detail.model.item;
+      setTimeout(() => grid.$connector.activeItem = undefined);
+    });
     grid.addEventListener('click', e => _fireClickEvent(e, 'item-click'));
     grid.addEventListener('dblclick', e => _fireClickEvent(e, 'item-double-click'));
 
     function _fireClickEvent(event, eventName) {
-      const item = grid.getEventContext(event).item;
-      if (item) {
-        event.itemKey = item.key;
+      if (grid.$connector.activeItem) {
+        event.itemKey = grid.$connector.activeItem.key;
         grid.dispatchEvent(new CustomEvent(eventName,
           { detail: event }));
       }
