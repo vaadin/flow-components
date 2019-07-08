@@ -18,7 +18,7 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @Route
 @Tag("crud-app")
 @HtmlImport("frontend://src/crud-in-template.html")
-@JsModule("src/crud-in-template.js")
+@JsModule("./src/crud-in-template.js")
 public class CrudInTemplate extends PolymerTemplate<TemplateModel> {
 
     @Id
