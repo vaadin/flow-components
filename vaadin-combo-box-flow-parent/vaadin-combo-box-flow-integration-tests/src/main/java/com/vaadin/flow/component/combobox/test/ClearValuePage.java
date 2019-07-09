@@ -18,6 +18,7 @@ package com.vaadin.flow.component.combobox.test;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Route;
 
 @Route("clear-value")
@@ -31,6 +32,8 @@ public class ClearValuePage extends Div {
     static final String COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_ID = "comboBoxWithAllowCustomValue";
     static final String BUTTON_CUSTOM_VALUE_SET_NULL_ID = "buttonSetNullCustom";
     static final String BUTTON_CUSTOM_VALUE_CLEAR_ID = "buttonClearCustom";
+
+    static final String COMBO_BOX_WITH_CLEAR_BUTTON_ID = "comboBoxWithClearButton";
 
     public ClearValuePage() {
         ComboBox<String> comboBox = new ComboBox<>("Ordinary combo box", "one",
@@ -63,7 +66,20 @@ public class ClearValuePage extends Div {
                 event -> comboBoxWithAllowCustomValue.clear());
         clearCustom.setId(BUTTON_CUSTOM_VALUE_CLEAR_ID);
 
+        Div valueMessages = new Div();
+        valueMessages.setId("value-messages");
+
+        ComboBox<String> comboBoxWithClearButton = new ComboBox<>("Combo box with clear button", "one",
+                INITIAL_VALUE, "three");
+        comboBoxWithClearButton.setValue(INITIAL_VALUE);
+        comboBoxWithClearButton.setClearButtonVisible(true);
+        comboBoxWithClearButton.setId(COMBO_BOX_WITH_CLEAR_BUTTON_ID);
+
+        comboBoxWithClearButton.addValueChangeListener(e -> valueMessages.add(
+                new Paragraph(e.getValue() == null ? "null" : e.getValue())));
+
         add(new Div(comboBox, setNull, clear), new Div(
-                comboBoxWithAllowCustomValue, setNullCustom, clearCustom));
+                comboBoxWithAllowCustomValue, setNullCustom, clearCustom),
+                new Div(comboBoxWithClearButton, valueMessages));
     }
 }
