@@ -338,6 +338,31 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertOverlayContents("added sub item");
     }
 
+    @Test
+    public void detach_reattach_noClientErrors_clientCodeFunctional() {
+        click("toggle-attached");
+        click("toggle-attached");
+        waitForElementPresent(By.tagName("vaadin-menu-bar"));
+        checkLogsForErrors();
+
+        // Verify client-code with setVisible functionality:
+        menuBar = $(MenuBarElement.class).first();
+        click("toggle-visible");
+        assertButtonContents("item 1");
+    }
+
+    @Test
+    public void preserveOnRefresh_refresh_noClientErrors_clientCodeFunctional() {
+        getDriver().navigate().refresh();
+        waitForElementPresent(By.tagName("vaadin-menu-bar"));
+        checkLogsForErrors();
+
+        // Verify client-code with setVisible functionality:
+        menuBar = $(MenuBarElement.class).first();
+        click("toggle-visible");
+        assertButtonContents("item 1");
+    }
+
     @After
     public void afterTest() {
         checkLogsForErrors();

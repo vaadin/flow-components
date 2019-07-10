@@ -67,8 +67,10 @@ public class MenuBar extends Component
         menuManager = new MenuManager<>(this, this::resetContent,
                 (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
                 MenuItem.class, null);
-        initConnector();
-        addAttachListener(event -> resetContent());
+        addAttachListener(event -> {
+            initConnector();
+            resetContent();
+        });
     }
 
     /**

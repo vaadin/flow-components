@@ -21,9 +21,11 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 
 @Route("menu-bar-test")
+@PreserveOnRefresh
 public class MenuBarTestPage extends Div {
 
     public MenuBarTestPage() {
@@ -91,8 +93,19 @@ public class MenuBarTestPage extends Div {
                 e -> checkable.setChecked(!checkable.isChecked()));
         checkedButton.setId("toggle-checked");
 
+        NativeButton toggleAttachedButton = new NativeButton("toggle attached",
+                e -> {
+                    if (menuBar.getParent().isPresent()) {
+                        remove(menuBar);
+                    } else {
+                        add(menuBar);
+                    }
+                });
+        toggleAttachedButton.setId("toggle-attached");
+
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
-                disableButton, visibleButton, checkedButton);
+                disableButton, visibleButton, checkedButton,
+                toggleAttachedButton);
     }
 }
