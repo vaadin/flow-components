@@ -44,11 +44,8 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
         container = new Element("div");
         getElement().appendVirtualChild(container);
 
-        if (UI.getCurrent() != null && UI.getCurrent().getInternals().getSession().getConfiguration()
-                .isBowerMode()) {
-            getElement().getNode().runWhenAttached(ui -> ui.getPage()
-                    .addJavaScript("frontend://contextMenuConnector.js"));
-        }
+        menu.getUI().ifPresent(this::addContextMenuDependencies);
+        menu.addAttachListener(e -> addContextMenuDependencies(e.getUI()));
     }
 
     /**
@@ -109,5 +106,9 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
 
     private Element getElement() {
         return menu.getElement();
+    }
+
+    private void addContextMenuDependencies(UI ui) {
+        ui.getInternals().addComponentDependencies(ContextMenu.class);
     }
 }
