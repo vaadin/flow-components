@@ -108,7 +108,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     }
 
     /**
-     * Constructs an empty {@code TextField} with a value change listener.
+     * Constructs an empty {@code RichTextEditor} with a value change listener.
      *
      * @param listener
      *            the value change listener
