@@ -17,6 +17,8 @@ package com.vaadin.flow.component.confirmdialog.testbench;
  * #L%
  */
 
+import org.openqa.selenium.SearchContext;
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
@@ -25,18 +27,19 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-confirm-dialog")
 public class ConfirmDialogElement extends TestBenchElement {
 
-    private TestBenchElement getOverlayContext() {
-        return $("vaadin-dialog-overlay").onPage().last().$(TestBenchElement.class).id("content");
+    @Override
+    public SearchContext getContext() {
+        return getPropertyElement("$", "dialog", "$", "overlay", "$", "content");
     }
 
     private TestBenchElement getButton(String buttonId, String slotName) {
-        ElementQuery<TestBenchElement> query = getOverlayContext().$(TestBenchElement.class)
+        ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
                 .attribute("slot", slotName);
         if (query.exists()) {
             return query.first();
         }
 
-        return getOverlayContext().$(ButtonElement.class).id(buttonId);
+        return $(ButtonElement.class).id(buttonId);
     }
 
     public TestBenchElement getConfirmButton() {
