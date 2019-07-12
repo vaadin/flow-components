@@ -25,7 +25,9 @@ import java.util.stream.Collectors;
 
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -40,6 +42,23 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 
 public class CheckboxGroupTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    @Test
+    public void hasEmptySetAsDefaultValue() {
+        Set<Object> value = new CheckboxGroup<>().getValue();
+        Assert.assertNotNull(value);
+        Assert.assertTrue(value.isEmpty());
+    }
+
+    @Test
+    public void setValueNull_throws() {
+        thrown.expect(NullPointerException.class);
+        thrown.expectMessage("Use the clear-method");
+        new CheckboxGroup<>().setValue(null);
+    }
 
     @Test
     public void setReadOnlyCheckboxGroup_groupIsReadOnlyAndDisabled() {

@@ -128,6 +128,27 @@ public class CheckboxGroup<T>
         setValue(value);
     }
 
+    /**
+     * Sets the value of this component. If the new value is not equal to the
+     * previous value, fires a value change event.
+     * <p>
+     * The component doesn't accept {@code null} values. The value of a checkbox
+     * group without any selected items is an empty set. You can use the
+     * {@link #clear()} method to set the empty value.
+     * 
+     * @param value
+     *            the new value to set, not {@code null}
+     * @throws NullPointerException
+     *             if value is {@code null}
+     */
+    @Override
+    public void setValue(Set<T> value) {
+        Objects.requireNonNull(value,
+                "Cannot set a null value to checkbox group. "
+                        + "Use the clear-method to reset the component's value to an empty set.");
+        super.setValue(value);
+    }
+
     @Override
     public Set<T> getSelectedItems() {
         return getValue();
