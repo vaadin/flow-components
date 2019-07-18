@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.select;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -29,10 +30,11 @@ public class SelectView extends DemoView {
     @Override
     protected void initView() {
         basicDemo();// Basic usage
-        entityListDemo();
-        disabledItemDemo();
-        configurationDisabledAndReadonlyDemo();// Validation
-        configurationForReqiredDemo();
+        disabledAndReadonly();
+        entityList();
+        valueChanged();
+        disabledItem();
+        configurationForReqiredDemo();// Validation
         formFieldDemo();
         separatorDemo();// Presentation
         customOptionsDemo();
@@ -40,20 +42,47 @@ public class SelectView extends DemoView {
     }
 
     private void basicDemo() {
+        Div div = new Div();
+
         // begin-source-example
         // source-example-heading: Basic usage
-        Select<String> select = new Select<>();
-        select.setLabel("Name");
-        select.setItems("Jose", "Manolo", "Pedro");
+        Select<String> labelSelect = new Select<>();
+        labelSelect.setItems("Option one", "Option two");
+        labelSelect.setLabel("Label");
 
-        Div value = new Div();
-        value.setText("Select a value");
-        select.addValueChangeListener(
-                event -> value.setText("Selected: " + event.getValue()));
+        Select<String> placeholderSelect = new Select<>();
+        placeholderSelect.setItems("Option one", "Option two");
+        placeholderSelect.setPlaceholder("Placeholder");
+
+        Select<String> valueSelect = new Select<>();
+        valueSelect.setItems("Value", "Option one", "Option two");
+        valueSelect.setValue("Value");
+
         // end-source-example
-        VerticalLayout verticalLayout = new VerticalLayout(select, value);
-        verticalLayout.setAlignItems(FlexComponent.Alignment.START);
-        addCard("Basic usage", verticalLayout);
+        labelSelect.getStyle().set("margin-right","5px");
+        placeholderSelect.getStyle().set("margin-right","5px");
+        div.add(labelSelect, placeholderSelect, valueSelect);
+        addCard("Basic usage", div);
+    }
+
+    private void disabledAndReadonly() {
+        // begin-source-example
+        // source-example-heading: Disabled and read-only
+        Select<String> disabledSelect = new Select<>("Value");
+        disabledSelect.setEnabled(false);
+        disabledSelect.setValue("Value");
+        disabledSelect.setLabel("Disabled");
+
+        Select<String> readOnlySelect = new Select<>("Value");
+        readOnlySelect.setReadOnly(true);
+        readOnlySelect.setValue("Value");
+        readOnlySelect.setLabel("Read-only");
+        // end-source-example
+        disabledSelect.getStyle().set("margin-right","5px");
+        HorizontalLayout layout = new HorizontalLayout(disabledSelect,
+                readOnlySelect);
+        layout.getStyle().set("flex-wrap", "wrap");
+        addCard("Disabled and read-only", layout);
     }
 
     private List<Department> getDepartments() {
@@ -67,7 +96,7 @@ public class SelectView extends DemoView {
         return teamData.getTeams();
     }
 
-    private void entityListDemo() {
+    private void entityList() {
         // begin-source-example
         // source-example-heading: Entity list
         Select<Department> select = new Select<>();
@@ -81,7 +110,24 @@ public class SelectView extends DemoView {
         addCard("Entity list", select);
     }
 
-    private void disabledItemDemo() {
+    private void valueChanged() {
+        // begin-source-example
+        // source-example-heading: Value change event
+        Select<String> select = new Select<>();
+        select.setLabel("Name");
+        select.setItems("Option one", "Option two");
+
+        Div value = new Div();
+        value.setText("Select a value");
+        select.addValueChangeListener(
+                event -> value.setText("Selected: " + event.getValue()));
+        // end-source-example
+        VerticalLayout verticalLayout = new VerticalLayout(select, value);
+        verticalLayout.setAlignItems(FlexComponent.Alignment.START);
+        addCard("Value change event", verticalLayout);
+    }
+
+    private void disabledItem() {
         // begin-source-example
         // source-example-heading: Disabled item
         Select<Team> select = new Select<>();
@@ -98,26 +144,6 @@ public class SelectView extends DemoView {
 
         // end-source-example
         addCard("Disabled item", select);
-    }
-
-    private void configurationDisabledAndReadonlyDemo() {
-        // begin-source-example
-        // source-example-heading: Disabled and Read-only
-        Select<String> disabledSelect = new Select<>("Option one",
-                "Option two");
-        disabledSelect.setEnabled(false);
-        disabledSelect.setLabel("Disabled");
-
-        Select<String> readOnlySelect = new Select<>("Option one",
-                "Option two");
-        readOnlySelect.setReadOnly(true);
-        readOnlySelect.setValue("Option one");
-        readOnlySelect.setLabel("Read-only");
-        // end-source-example
-        HorizontalLayout layout = new HorizontalLayout(disabledSelect,
-                readOnlySelect);
-        layout.getStyle().set("flex-wrap", "wrap");
-        addCard("Disabled and Read-only", layout);
     }
 
     private void configurationForReqiredDemo() {
@@ -229,7 +255,7 @@ public class SelectView extends DemoView {
         firstDiv.setText(
                 "To read about styling you can read the related tutorial in");
         Anchor firstAnchor = new Anchor(
-                "https://vaadin.com/docs/v13/flow/theme/using-component-themes.html",
+                "https://vaadin.com/docs/flow/theme/using-component-themes.html",
                 "Using Component Themes");
 
         Div secondDiv = new Div();
