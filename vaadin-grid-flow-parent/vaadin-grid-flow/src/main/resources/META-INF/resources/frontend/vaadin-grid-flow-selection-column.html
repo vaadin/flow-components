@@ -60,12 +60,6 @@
         };
       }
 
-      constructor() {
-        super();
-        this._boundOnSelectEvent = this._onSelectEvent.bind(this);
-        this._boundOnDeselectEvent = this._onDeselectEvent.bind(this);
-      }
-
       _prepareHeaderTemplate() {
         return this._prepareTemplatizer(this.$.defaultHeaderTemplate);
       }
@@ -75,21 +69,9 @@
       }
 
       /** @private */
-      connectedCallback() {
-        super.connectedCallback();
-        if (this._grid) {
-          this._grid.addEventListener('select', this._boundOnSelectEvent);
-          this._grid.addEventListener('deselect', this._boundOnDeselectEvent);
-        }
-      }
-
-      /** @private */
       disconnectedCallback() {
         super.disconnectedCallback();
         if (this._grid) {
-          this._grid.removeEventListener('select', this._boundOnSelectEvent);
-          this._grid.removeEventListener('deselect', this._boundOnDeselectEvent);
-
           const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
           if (isSafari && window.ShadyDOM && this.parentElement) {
             // Detach might have been caused by order change.
@@ -107,7 +89,7 @@
       }
 
       _onSelectClick(e) {
-        e.target.checked ? this._grid.$connector.doDeselection(e.model.item, true) : this._grid.$connector.doSelection(e.model.item, true);
+        e.target.checked ? this._grid.$connector.doDeselection([e.model.item], true) : this._grid.$connector.doSelection([e.model.item], true);
         e.target.checked = !e.target.checked;
       }
 
@@ -118,15 +100,6 @@
           return;
         }
         this.selectAll ? this.$server.deselectAll() : this.$server.selectAll();
-      }
-
-      _onSelectEvent(e) {
-      }
-
-      _onDeselectEvent(e) {
-        if (e.detail.userOriginated) {
-          this.selectAll = false;
-        }
       }
     }
 

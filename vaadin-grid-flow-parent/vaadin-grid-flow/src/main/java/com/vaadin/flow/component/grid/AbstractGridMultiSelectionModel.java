@@ -216,6 +216,11 @@ public abstract class AbstractGridMultiSelectionModel<T>
             }
 
             @Override
+            public void deselectAll() {
+                AbstractGridMultiSelectionModel.this.deselectAll();
+            }
+
+            @Override
             public void updateSelection(Set<T> addedItems,
                     Set<T> removedItems) {
                 AbstractGridMultiSelectionModel.this.updateSelection(addedItems,

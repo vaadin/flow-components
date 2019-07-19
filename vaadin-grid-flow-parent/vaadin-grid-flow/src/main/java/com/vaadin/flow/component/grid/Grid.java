@@ -2498,13 +2498,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         if (items.isEmpty()) {
             return;
         }
-        Serializable[] values = new Serializable[items.size() + 1];
-        List<Serializable> collect = items.stream()
-                .map(item -> generateJsonForSelection(item))
-                .map(item -> (Serializable) item).collect(Collectors.toList());
-        collect.add(1, false);
-        collect.toArray(values);
-        getElement().callJsFunction("$connector." + function, values);
+        JsonArray jsonArray = Json.createArray();
+        for (T item : items) {
+            JsonObject jsonObject = generateJsonForSelection(item);
+            jsonArray.set(jsonArray.length(), jsonObject);
+        }
+        getElement().callJsFunction("$connector." + function, jsonArray, false);
     }
 
     private JsonObject generateJsonForSelection(T item) {

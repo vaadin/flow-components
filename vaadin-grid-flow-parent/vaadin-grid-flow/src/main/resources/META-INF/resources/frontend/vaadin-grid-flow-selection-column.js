@@ -99,7 +99,7 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
     }
 
     _onSelectClick(e) {
-      e.target.checked ? this._grid.$connector.doDeselection(e.model.item, true) : this._grid.$connector.doSelection(e.model.item, true);
+      e.target.checked ? this._grid.$connector.doDeselection([e.model.item], true) : this._grid.$connector.doSelection([e.model.item], true);
       e.target.checked = !e.target.checked;
     }
 

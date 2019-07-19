@@ -149,54 +149,49 @@ window.Vaadin.Flow.gridConnector = {
       }
     }
 
-    grid.$connector.doSelection = function(item, userOriginated) {
-      if (selectionMode === 'NONE') {
+    grid.$connector.doSelection = function(items, userOriginated) {
+      if (selectionMode === 'NONE' || !items.length ||
+          (userOriginated && grid.hasAttribute('disabled'))) {
         return;
-      }
-      if (userOriginated && grid.hasAttribute('disabled')) {
-          return;
       }
       if (selectionMode === 'SINGLE') {
         grid.selectedItems = [];
         selectedKeys = {};
       }
-      grid.selectItem(item);
-      selectedKeys[item.key] = item;
-      if (userOriginated) {
+
+      grid.selectedItems = grid.selectedItems.concat(items);
+      items.forEach(item => {
+        selectedKeys[item.key] = item;
+        if (userOriginated) {
           item.selected = true;
           grid.$server.select(item.key);
-      } else {
-          grid.fire('select', {item: item, userOriginated: userOriginated});
-      }
-
-      if (selectionMode === 'MULTI' && arguments.length > 2) {
-          for (let i = 2; i < arguments.length; i++) {
-              grid.$connector.doSelection(arguments[i], userOriginated);
-          }
-      }
+        }
+      });
     };
 
-    grid.$connector.doDeselection = function(item, userOriginated) {
-      if (userOriginated && grid.hasAttribute('disabled')) {
+    grid.$connector.doDeselection = function(items, userOriginated) {
+      if (selectionMode === 'NONE' || !items.length ||
+          (userOriginated && grid.hasAttribute('disabled'))) {
         return;
       }
 
-      if (selectionMode === 'SINGLE' || selectionMode === 'MULTI') {
-        grid.deselectItem(item);
-        delete selectedKeys[item.key];
+      const updatedSelectedItems = grid.selectedItems.slice();
+      while (items.length) {
+        const itemToDeselect = items.shift();
+        for (let i = 0; i < updatedSelectedItems.length; i++) {
+          const selectedItem = updatedSelectedItems[i];
+          if (itemToDeselect.key === selectedItem.key) {
+            updatedSelectedItems.splice(i, 1);
+            break;
+          }
+        }
+        delete selectedKeys[itemToDeselect.key];
         if (userOriginated) {
-          delete item.selected;
-          grid.$server.deselect(item.key);
-        } else {
-          grid.fire('deselect', {item: item, userOriginated: userOriginated});
+          delete itemToDeselect.selected;
+          grid.$server.deselect(itemToDeselect.key);
         }
       }
-
-      if (selectionMode === 'MULTI' && arguments.length > 2) {
-          for (let i = 2; i < arguments.length; i++) {
-              grid.$connector.doDeselection(arguments[i], userOriginated);
-          }
-      }
+      grid.selectedItems = updatedSelectedItems;
     };
 
     grid.__activeItemChanged = function(newVal, oldVal) {
@@ -205,14 +200,14 @@ window.Vaadin.Flow.gridConnector = {
       }
       if (!newVal) {
         if (oldVal && selectedKeys[oldVal.key]) {
-          grid.$connector.doDeselection(oldVal, true);
+          grid.$connector.doDeselection([oldVal], true);
         }
         return;
       }
       if (!selectedKeys[newVal.key]) {
-        grid.$connector.doSelection(newVal, true);
+        grid.$connector.doSelection([newVal], true);
       } else {
-        grid.$connector.doDeselection(newVal, true);
+        grid.$connector.doDeselection([newVal], true);
       }
     };
     grid._createPropertyObserver('activeItem', '__activeItemChanged', true);
@@ -601,14 +596,12 @@ window.Vaadin.Flow.gridConnector = {
           cache[pkey] = {};
         }
         cache[pkey][page] = slice;
-        for(let j = 0; j < slice.length; j++) {
-          let item = slice[j]
-          if (item.selected && !isSelectedOnGrid(item)) {
-            grid.$connector.doSelection(item);
-          } else if (!item.selected && (selectedKeys[item.key] || isSelectedOnGrid(item))) {
-            grid.$connector.doDeselection(item);
-          }
-        }
+
+        grid.$connector.doSelection(slice.filter(
+          item => item.selected && !isSelectedOnGrid(item)));
+        grid.$connector.doDeselection(slice.filter(
+          item => !item.selected  && (selectedKeys[item.key] || isSelectedOnGrid(item))));
+
         const updatedItems = updateGridCache(page, pkey);
         if (updatedItems) {
           itemsUpdated(updatedItems);
@@ -708,12 +701,7 @@ window.Vaadin.Flow.gridConnector = {
       for (let i = 0; i < updatedPageCount; i++) {
         let page = firstPage + i;
         let items = cache[pkey][page];
-        for (let j = 0; j < items.length; j++) {
-          let item = items[j];
-          if (selectedKeys[item.key]) {
-            grid.$connector.doDeselection(item);
-          }
-        }
+        grid.$connector.doDeselection(items.filter(item => selectedKeys[item.key]));
         delete cache[pkey][page];
         const updatedItems = updateGridCache(page, parentKey);
         if (updatedItems) {
