@@ -181,7 +181,7 @@ public class SelectView extends DemoView {
                 "Developer");
 
         titleSelect.setEmptySelectionAllowed(true);
-        titleSelect.setEmptySelectionCaption("Select you title");
+        titleSelect.setEmptySelectionCaption("Select your title");
         titleSelect.addComponents(null, new Hr());
 
         binder.forField(titleSelect)
