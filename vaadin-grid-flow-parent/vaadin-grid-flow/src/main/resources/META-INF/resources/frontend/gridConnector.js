@@ -925,7 +925,7 @@ window.Vaadin.Flow.gridConnector = {
         if (!style) {
             return;
         }
-        return (style.row || '') + ' ' + (style[column._flowId] || '');
+        return (style.row || '') + ' ' + ((column && style[column._flowId]) || '');
     }
 
     grid.dropFilter = rowData => !rowData.item.dropDisabled;
