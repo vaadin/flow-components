@@ -40,7 +40,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value="@vaadin/vaadin-confirm-dialog", version = "1.1.1")
+@NpmPackage(value="@vaadin/vaadin-confirm-dialog", version = "1.1.4")
 @JsModule("@vaadin/vaadin-confirm-dialog/src/vaadin-confirm-dialog.js")
 @HtmlImport("frontend://bower_components/vaadin-confirm-dialog/src/vaadin-confirm-dialog.html")
 public class ConfirmDialog extends Component
@@ -76,6 +76,53 @@ public class ConfirmDialog extends Component
         public CancelEvent(ConfirmDialog source, boolean fromClient) {
             super(source, fromClient);
         }
+    }
+
+    private String height;
+    private String width;
+
+    /**
+     * Sets the width of the component content area.
+     * <p>
+     * The width should be in a format understood by the browser, e.g. "100px"
+     * or "2.5em" (Using relative unit, such as percentage, will lead to unexpected results).
+     * <p>
+     * If the provided {@code width} value is {@literal null} then width is
+     * removed.
+     *
+     * @param width
+     *            the width to set, may be {@code null}
+     */
+    @Override
+    public void setWidth(String width) {
+        this.width = width;
+        updateWidth();
+    }
+
+    private void updateWidth() {
+        this.getElement().executeJs("this._setWidth($0)", this.width);
+    }
+
+    /**
+     * Sets the height of the component content area.
+     * <p>
+     * The height should be in a format understood by the browser, e.g. "100px"
+     * or "2.5em" (Using relative unit, such as percentage, will lead to unexpected results).
+     * <p>
+     * If the provided {@code height} value is {@literal null} then height is
+     * removed.
+     *
+     * @param height
+     *            the height to set, may be {@code null}
+     */
+    @Override
+    public void setHeight(String height) {
+        this.height = height;
+        updateHeight();
+    }
+
+    public void updateHeight() {
+        this.getElement().executeJs("this._setHeight($0)", this.height);
     }
 
     private boolean autoAddedToTheUi;
@@ -537,12 +584,14 @@ public class ConfirmDialog extends Component
     }
 
     private void ensureAttached() {
-        if (getElement().getNode().getParent() == null) {
-            UI ui = getCurrentUI();
-            ui.beforeClientResponse(ui, context -> {
+        UI ui = getCurrentUI();
+        ui.beforeClientResponse(ui, context -> {
+            if (getElement().getNode().getParent() == null) {
                 ui.add(this);
                 autoAddedToTheUi = true;
-            });
-        }
+                updateWidth();
+                updateHeight();
+            }
+        });
     }
 }
