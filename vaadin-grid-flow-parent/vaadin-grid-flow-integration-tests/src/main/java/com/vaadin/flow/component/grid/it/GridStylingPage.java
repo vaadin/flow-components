@@ -22,6 +22,7 @@ import java.util.stream.IntStream;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("grid-styling")
@@ -90,13 +91,21 @@ public class GridStylingPage extends Div {
                 });
         toggleAttached.setId("toggle-attached");
 
+        NativeButton setDetailsRenderer = new NativeButton(
+                "set item details renderer", e -> {
+                    grid.setItemDetailsRenderer(
+                            new TextRenderer<>(item -> "details " + item));
+                });
+        setDetailsRenderer.setId("details-renderer");
+
         add(grid,
                 new Div(gridClassNameGenerator, columnClassNameGenerator,
                         secondColumnClassNameGenerator),
                 new Div(resetGridClassNameGenerator,
                         resetColumnClassNameGenerator),
                 new Div(gridMultipleClasses, columnMultipleClasses),
-                new Div(toggleAttached));
+                new Div(toggleAttached), //
+                new Div(setDetailsRenderer));
     }
 
 }

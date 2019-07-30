@@ -156,6 +156,20 @@ public class GridStylingIT extends AbstractComponentIT {
                 "grid2 col2", "grid2");
     }
 
+    @Test
+    public void setItemDetailsRenderer_gridClassNameGeneratorAppliedToDetailsRow() {
+        click("details-renderer");
+        click("grid-generator");
+        click("column-generator");
+
+        Assert.assertEquals("grid0",
+                grid.getRow(0).getDetailsRow().getAttribute("class"));
+        Assert.assertEquals("grid5",
+                grid.getRow(5).getDetailsRow().getAttribute("class"));
+
+        checkLogsForErrors();
+    }
+
     /**
      * Compares each class to the cell at the corresponding index
      */
