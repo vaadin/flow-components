@@ -2494,6 +2494,10 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         callSelectionFunctionForItems("doDeselection", items);
     }
 
+    boolean isInActiveRange(T item) {
+        return getDataCommunicator().getKeyMapper().has(item);
+    }
+
     private void callSelectionFunctionForItems(String function, Set<T> items) {
         if (items.isEmpty()) {
             return;

@@ -15,23 +15,50 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import java.util.*;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class AbstractGridMultiSelectionModelTest {
 
-    @Test
-    public void select_singleItemSignature_sendToClientSide() {
-        Set<String> selected = new HashSet<>();
-        Grid<String> grid = new Grid<String>() {
+    private Set<String> selected;
+    private Set<String> deselected;
+    private Grid<String> grid;
+
+    @Before
+    public void init() {
+        selected = new HashSet<>();
+        deselected = new HashSet<>();
+        grid = new Grid<String>() {
             @Override
-            void doClientSideSelection(Set<String> items) {
+            void doClientSideSelection(Set items) {
                 selected.addAll(items);
             }
+
+            @Override
+            void doClientSideDeselection(Set<String> items) {
+                deselected.addAll(items);
+            }
+
+            @Override
+            boolean isInActiveRange(String item) {
+                // Updates are sent only for items loaded by client
+                return true;
+            }
         };
+    }
+
+    @Test
+    public void select_singleItemSignature_sendToClientSide() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         grid.select("foo");
@@ -41,13 +68,6 @@ public class AbstractGridMultiSelectionModelTest {
 
     @Test
     public void select_singleItemSignature_selectFormClient_dontSendToClientSide() {
-        Set<String> selected = new HashSet<>();
-        Grid<String> grid = new Grid<String>() {
-            @Override
-            void doClientSideSelection(Set<String> items) {
-                selected.addAll(items);
-            }
-        };
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         grid.getSelectionModel().selectFromClient("foo");
@@ -56,13 +76,6 @@ public class AbstractGridMultiSelectionModelTest {
 
     @Test
     public void deselect_singleItemSignature_sendToClientSide() {
-        Set<String> deselected = new HashSet<>();
-        Grid<String> grid = new Grid<String>() {
-            @Override
-            void doClientSideDeselection(Set<String> items) {
-                deselected.addAll(items);
-            }
-        };
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         grid.select("foo");
@@ -74,13 +87,6 @@ public class AbstractGridMultiSelectionModelTest {
 
     @Test
     public void singleItemSignature_deselectFormClient_dontSendToClientSide() {
-        Set<String> deselected = new HashSet<>();
-        Grid<String> grid = new Grid<String>() {
-            @Override
-            void doClientSideDeselection(Set<String> items) {
-                deselected.addAll(items);
-            }
-        };
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");
         grid.select("foo");
@@ -95,8 +101,9 @@ public class AbstractGridMultiSelectionModelTest {
 
         grid.setSelectionMode(SelectionMode.MULTI);
         List<String> roots = Arrays.asList("foo", "bar");
-        grid.setItems(roots, root -> roots.contains(root)? Arrays.asList(root + 1, root + 2) :
-        Collections.emptyList());
+        grid.setItems(roots,
+                root -> roots.contains(root) ? Arrays.asList(root + 1, root + 2)
+                        : Collections.emptyList());
         // Asserting that selectFromClient does not throw any exception
         grid.getSelectionModel().selectFromClient("foo");
 

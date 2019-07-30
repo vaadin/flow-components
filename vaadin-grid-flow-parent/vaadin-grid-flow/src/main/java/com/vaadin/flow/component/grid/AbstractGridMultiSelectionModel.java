@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -99,9 +100,11 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
             long size = 0;
 
-            final DataProvider<T, ?> dataProvider = getGrid().getDataCommunicator().getDataProvider();
+            final DataProvider<T, ?> dataProvider = getGrid()
+                    .getDataCommunicator().getDataProvider();
 
-            // Avoid throwing an IllegalArgumentException in case of HierarchicalDataProvider
+            // Avoid throwing an IllegalArgumentException in case of
+            // HierarchicalDataProvider
             if (!(dataProvider instanceof HierarchicalDataProvider)) {
                 size = dataProvider.size(new Query<>());
             }
@@ -392,8 +395,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
         selected.removeAll(removedItems);
         selected.addAll(addedItems);
 
-        sendAddedItems(addedItems);
-        sendRemovedItems(removedItems);
+        sendSelectionUpdate(addedItems, getGrid()::doClientSideSelection);
+        sendSelectionUpdate(removedItems, getGrid()::doClientSideDeselection);
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, userOriginated));
@@ -402,21 +405,17 @@ public abstract class AbstractGridMultiSelectionModel<T>
         }
     }
 
-    private void sendAddedItems(Set<T> addedItems) {
-        if (addedItems.isEmpty()) {
+    private void sendSelectionUpdate(Set<T> updatedItems,
+            Consumer<Set<T>> clientSideUpdater) {
+        // Avoid sending updates for the items that the client doesn't have.
+        // This is important for the performance of e.g. selectAll.
+        Set<T> activeItems = updatedItems.stream()
+                .filter(getGrid()::isInActiveRange).collect(Collectors.toSet());
+        if (activeItems.isEmpty()) {
             return;
         }
 
-        addedItems.forEach(getGrid().getDataCommunicator()::refresh);
-        getGrid().doClientSideSelection(addedItems);
-    }
-
-    private void sendRemovedItems(Set<T> removedItems) {
-        if (removedItems.isEmpty()) {
-            return;
-        }
-
-        removedItems.forEach(getGrid().getDataCommunicator()::refresh);
-        getGrid().doClientSideDeselection(removedItems);
+        activeItems.forEach(getGrid().getDataCommunicator()::refresh);
+        clientSideUpdater.accept(activeItems);
     }
 }
