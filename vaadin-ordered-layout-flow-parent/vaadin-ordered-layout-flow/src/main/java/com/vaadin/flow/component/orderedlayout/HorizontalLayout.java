@@ -32,8 +32,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.1.0")
 @JsModule("@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-horizontal-layout.html")
-public class HorizontalLayout extends Component implements ThemableLayout,
-        FlexComponent<HorizontalLayout>, ClickNotifier<HorizontalLayout> {
+public class HorizontalLayout extends Component
+        implements ThemableLayout, FlexComponent<HorizontalLayout>,
+        ScrollableLayout, ClickNotifier<HorizontalLayout> {
 
     /**
      * Constructs an empty layout with spacing on by default.

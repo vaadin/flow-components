@@ -32,8 +32,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.1.0")
 @JsModule("@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-vertical-layout.html")
-public class VerticalLayout extends Component implements ThemableLayout,
-        FlexComponent<VerticalLayout>, ClickNotifier<VerticalLayout> {
+public class VerticalLayout extends Component
+        implements ThemableLayout, FlexComponent<VerticalLayout>,
+        ScrollableLayout, ClickNotifier<VerticalLayout> {
 
     /**
      * Constructs an empty layout with spacing and padding on by default.
