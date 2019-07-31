@@ -41,11 +41,11 @@
 	<repositories>
 		<repository>
 			<id>vaadin-snapshots</id>
-			<url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+			<url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
 		</repository>
 		<repository>
 			<id>vaadin-prereleases</id>
-			<url>http://maven.vaadin.com/vaadin-prereleases</url>
+			<url>https://maven.vaadin.com/vaadin-prereleases</url>
 		</repository>
 	</repositories>
 
