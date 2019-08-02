@@ -31,6 +31,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <vaadin.details.flow.version>2.0.0</vaadin.details.flow.version>
         <vaadin.details.wc.version>1.0.1</vaadin.details.wc.version>
+        <flow.version>2.0.2</flow.version>
     </properties>
 
     <modules>
