@@ -413,12 +413,12 @@
         <snapshotRepository>
             <id>vaadin-snapshots</id>
             <name>Vaadin snapshot repository</name>
-            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
         </snapshotRepository>
         <repository>
             <id>vaadin-addons</id>
             <name>Vaadin add-ons repository</name>
-            <url>http://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
+            <url>https://tools.vaadin.com/nexus/content/repositories/vaadin-addons</url>
         </repository>
     </distributionManagement>
 
@@ -431,33 +431,18 @@
 
         <repository>
             <id>Vaadin releases</id>
-            <url>http://oss.sonatype.org/content/repositories/vaadin-releases</url>
+            <url>https://oss.sonatype.org/content/repositories/vaadin-releases</url>
         </repository>
-
-        <repository>
-            <id>Apache POI</id>
-            <url>http://mvnrepository.com/artifact/org.apache.poi/poi</url>
-        </repository>
-
         <repository>
             <id>vaadin-addons</id>
-            <url>http://maven.vaadin.com/vaadin-addons</url>
+            <url>https://maven.vaadin.com/vaadin-addons</url>
         </repository>
         <repository>
             <id>vaadin-snapshots</id>
-            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Maven 2 Repository</name>
-            <url>http://download.java.net/maven/2</url>
-            <layout>default</layout>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -472,7 +457,7 @@
         </pluginRepository>
         <pluginRepository>
             <id>vaadin-snapshots</id>
-            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
             <releases>
                 <enabled>false</enabled>
             </releases>

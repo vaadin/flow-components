@@ -32,7 +32,7 @@ The add-on is available in Vaadin Add-Ons repository:
 
 <repository>
 <id>vaadin-addons</id>
-<url>http://maven.vaadin.com/vaadin-addons</url>
+<url>https://maven.vaadin.com/vaadin-addons</url>
 </repository>
 
 Ivy
