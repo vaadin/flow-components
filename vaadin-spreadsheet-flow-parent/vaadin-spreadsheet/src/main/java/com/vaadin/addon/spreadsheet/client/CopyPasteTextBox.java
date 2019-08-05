@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.TextArea;
  * and oncut events, and put our string into the HTML clipboard instead of the
  * normal one.
  *
- * @author Thomas Mattsson / Vaadin Ltd.
  */
 public class CopyPasteTextBox extends TextArea implements NativePreviewHandler {
 
@@ -77,14 +76,12 @@ public class CopyPasteTextBox extends TextArea implements NativePreviewHandler {
 
     private SheetWidget widget;
     private CopyPasteHandler handler;
-    private HandlerRegistration nativePreviewHandler;
+    private HandlerRegistration nativePreviewHandlerRegistration;
 
     public CopyPasteTextBox(SheetWidget widget, CopyPasteHandler handler) {
 
         this.widget = widget;
         this.handler = handler;
-
-        nativePreviewHandler = Event.addNativePreviewHandler(this);
 
         getElement().getStyle().setPosition(Position.ABSOLUTE);
         getElement().getStyle().setZIndex(100);
@@ -92,6 +89,16 @@ public class CopyPasteTextBox extends TextArea implements NativePreviewHandler {
 
         // gets round browser security (field must be 'visible' when copying)
         getElement().getStyle().setOpacity(0);
+    }
+
+    /**
+     * Register this instance to listen to all native events
+     */
+    public void registerHandler() {
+        if (nativePreviewHandlerRegistration == null) {
+            nativePreviewHandlerRegistration = Event
+                    .addNativePreviewHandler(this);
+        }
     }
 
     @Override
@@ -175,10 +182,13 @@ public class CopyPasteTextBox extends TextArea implements NativePreviewHandler {
         }
     }
 
+    /**
+     * Removes the registration of the handler responsible for native events
+     */
     public void onDestroy() {
-        if (nativePreviewHandler != null) {
-            nativePreviewHandler.removeHandler();
+        if (nativePreviewHandlerRegistration != null) {
+            nativePreviewHandlerRegistration.removeHandler();
+            nativePreviewHandlerRegistration = null;
         }
     }
-
 }

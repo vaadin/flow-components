@@ -599,7 +599,7 @@ public class SheetWidget extends Panel {
     @Override
     protected void onAttach() {
         super.onAttach();
-
+        copyPasteBox.registerHandler();
         // we need to use the selectAll() method that needs GWT attachment
         if (copyPasteBox.getParent() == null) {
             adopt(copyPasteBox);
