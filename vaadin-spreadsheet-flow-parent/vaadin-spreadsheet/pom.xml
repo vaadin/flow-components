@@ -128,7 +128,7 @@
                         <Export-Package>com.vaadin.addon.spreadsheet,com.vaadin.addon.spreadsheet.action,com.vaadin.addon.spreadsheet.command</Export-Package>
                         <!-- Ignore GWT stuff, not needed in osgi bundles,
                             GWT compilation seldom happens in such -->
-                        <Import-Package>!com.google.gwt.*,
+                        <Import-Package>!com.google.gwt.*,org.apache.poi.ss.formula,
                             !com.vaadin.client.*, *</Import-Package>
                     </instructions>
                 </configuration>
