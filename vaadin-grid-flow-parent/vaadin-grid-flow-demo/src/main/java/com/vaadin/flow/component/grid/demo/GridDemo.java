@@ -1483,7 +1483,7 @@ public class GridDemo extends DemoView {
         LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
         LocalDate localDate = LocalDate.parse(str, formatter);
 
-        orderList.add(new Order("Tshit", 2, 20, dateTime, localDate, "Mickael",
+        orderList.add(new Order("T-shirt", 2, 20, dateTime, localDate, "Mickael",
                 new Address("12080", "Washington")));
         orderList.add(new Order("Pant", 2, 70, dateTime, localDate, "Peter",
                 new Address("93849", "New York")));
