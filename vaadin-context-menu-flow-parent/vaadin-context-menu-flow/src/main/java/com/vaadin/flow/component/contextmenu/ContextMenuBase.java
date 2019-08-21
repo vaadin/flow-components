@@ -45,7 +45,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
-@JsModule("flow-component-renderer.js")
+@JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector-es6.js")
 
 @HtmlImport("flow-component-renderer.html")
