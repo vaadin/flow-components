@@ -83,7 +83,7 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @HtmlImport("frontend://flow-component-renderer.html")
-@JsModule("@vaadin/flow-frontend/flow-component-renderer.js")
+@JsModule("./flow-component-renderer.js")
 @JavaScript("frontend://comboBoxConnector.js")
 @JsModule("./comboBoxConnector-es6.js")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
