@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -31,6 +32,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 
@@ -509,4 +511,86 @@ public class GridMultiSelectionModelTest {
 
         Mockito.verify(model, Mockito.times(1)).getSelectedItems();
     }
+
+    @Test
+    public void shouldUseGetIdFromListProviderToAlterSelectionNoEquals() {
+        shouldUseGetIdFromListProviderToAlterSelection(NoEquals::new,
+            NoEquals::getLabel);
+    }
+
+    @Test
+    public void shouldUseGetIdFromListProviderToAlterSelectionAllEquals() {
+        shouldUseGetIdFromListProviderToAlterSelection(AllEquals::new,
+            AllEquals::getLabel);
+    }
+
+    private <T> void shouldUseGetIdFromListProviderToAlterSelection(Function<String,T> itemFactory,
+        Function<T,String> labelGetter) {
+        Grid<T> g = new Grid<T>();
+        g.addColumn(labelGetter::apply).setHeader("Label");
+        g.setDataProvider(
+            new ListDataProvider<T>(Arrays.asList(itemFactory.apply("A"), itemFactory.apply("B"))) {
+                @Override
+                public Object getId(T item) {
+                    return labelGetter.apply(item);
+                }
+            });
+        g.setSelectionMode(Grid.SelectionMode.MULTI);
+        g.select(itemFactory.apply("B"));
+        g.select(itemFactory.apply("B"));
+        g.select(itemFactory.apply("B"));
+
+        assertEquals(1, g.getSelectedItems().size());
+        g.deselect(itemFactory.apply("A"));
+        assertEquals(1, g.getSelectedItems().size());
+        g.deselect(itemFactory.apply("B"));
+        assertEquals(0, g.getSelectedItems().size());
+
+    }
+
+    public static class NoEquals {
+        private String label;
+
+        public NoEquals(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+
+    }
+
+    public static class AllEquals {
+        private String label;
+
+        public AllEquals(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof AllEquals;
+        }
+
+        @Override
+        public int hashCode() {
+            return 2;
+        }
+    }
+
 }

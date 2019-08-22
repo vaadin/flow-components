@@ -17,8 +17,10 @@ package com.vaadin.flow.component.grid;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -191,7 +193,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public boolean isSelected(T item) {
-        return getSelectedItems().contains(item);
+        return getSelectedItems().stream().anyMatch(selectedItem -> Objects
+            .equals(getItemId(selectedItem), getItemId(item)));
     }
 
     @Override
@@ -386,23 +389,46 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     private void doUpdateSelection(Set<T> addedItems, Set<T> removedItems,
             boolean userOriginated) {
-        addedItems.removeIf(removedItems::remove);
-        if (selected.containsAll(addedItems)
-                && Collections.disjoint(selected, removedItems)) {
+        Map<Object, T> addedItemsMap = mapItemsById(addedItems);
+        Map<Object, T> removedItemsMap = mapItemsById(removedItems);
+        addedItemsMap.keySet().stream().filter(removedItemsMap::containsKey)
+            .collect(Collectors.toList()).forEach(key -> {
+            addedItemsMap.remove(key);
+            removedItemsMap.remove(key);
+        });
+        doUpdateSelection(addedItemsMap,removedItemsMap,userOriginated);
+    }
+
+    private void doUpdateSelection(Map<Object, T> addedItems,
+        Map<Object, T> removedItems, boolean userOriginated) {
+
+        Map<Object, T> selectedMap = mapItemsById(selected);
+        if (selectedMap.keySet().containsAll(addedItems.keySet()) && Collections
+            .disjoint(selectedMap.keySet(), removedItems.keySet())) {
             return;
         }
         Set<T> oldSelection = new LinkedHashSet<>(selected);
-        selected.removeAll(removedItems);
-        selected.addAll(addedItems);
+        removedItems.keySet().forEach(selectedMap::remove);
+        selectedMap.putAll(addedItems);
+        selected.clear();
+        selected.addAll(selectedMap.values());
 
-        sendSelectionUpdate(addedItems, getGrid()::doClientSideSelection);
-        sendSelectionUpdate(removedItems, getGrid()::doClientSideDeselection);
+        sendSelectionUpdate(new LinkedHashSet<>(addedItems.values()),
+            getGrid()::doClientSideSelection);
+        sendSelectionUpdate(new LinkedHashSet<>(removedItems.values()),
+            getGrid()::doClientSideDeselection);
 
-        fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
-                getGrid().asMultiSelect(), oldSelection, userOriginated));
+        fireSelectionEvent(
+            new MultiSelectionEvent<>(getGrid(), getGrid().asMultiSelect(),
+                oldSelection, userOriginated));
         if (!removedItems.isEmpty()) {
             selectionColumn.setSelectAllCheckboxState(false);
         }
+    }
+
+    private Map<Object, T> mapItemsById(Set<T> items) {
+        return items.stream().collect(LinkedHashMap::new,
+            (map, item) -> map.put(this.getItemId(item), item), Map::putAll);
     }
 
     private void sendSelectionUpdate(Set<T> updatedItems,
@@ -417,5 +443,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         activeItems.forEach(getGrid().getDataCommunicator()::refresh);
         clientSideUpdater.accept(activeItems);
+    }
+
+    private Object getItemId(T item) {
+        return getGrid().getDataCommunicator().getDataProvider().getId(item);
     }
 }
