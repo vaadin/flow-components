@@ -25,9 +25,11 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
+
+import elemental.json.JsonObject;
 
 /**
  * Base functionality for server-side components based on
@@ -52,6 +54,8 @@ import com.vaadin.flow.shared.Registration;
 @JavaScript("frontend://contextMenuConnector.js")
 public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends GeneratedVaadinContextMenu<C> implements HasComponents {
+
+    public static final String EVENT_DETAIL = "event.detail";
 
     private Component target;
     private MenuManager<C, I, S> menuManager;
@@ -100,13 +104,13 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             targetBeforeOpenRegistration.remove();
             targetAttachRegistration.remove();
             getTarget().getElement()
-                    .callFunction("$contextMenuConnector.removeConnector");
+                    .callJsFunction("$contextMenuConnector.removeConnector");
         }
 
         this.target = target;
         getElement().getNode().runWhenAttached(
                 ui -> ui.beforeClientResponse(this, context -> ui.getPage()
-                        .executeJavaScript("$0.listenOn=$1", this, target)));
+                        .executeJs("$0.listenOn=$1", this, target)));
 
         if (target == null) {
             return;
@@ -120,11 +124,9 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
         // Server round-trip before opening the overlay
         targetBeforeOpenRegistration = target.getElement()
-                .addEventListener("vaadin-context-menu-before-open", event -> {
-                    beforeOpen();
-                    target.getElement().callFunction(
-                            "$contextMenuConnector.openMenu", getElement());
-                });
+                .addEventListener("vaadin-context-menu-before-open",
+                        this::beforeOpenHandler)
+                .addEventData(EVENT_DETAIL);
     }
 
     /**
@@ -331,12 +333,36 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * Creates a menu manager instance which contains logic to control the menu
      * content.
      *
-     * @param a
+     * @param contentReset
      *            callback to reset the menu content
      * @return a new menu manager instance
      */
     protected abstract MenuManager<C, I, S> createMenuManager(
             SerializableRunnable contentReset);
+
+    /**
+     * Decides whether to open the menu when the
+     * {@link ContextMenuBase#beforeOpenHandler(DomEvent)} is processed,
+     * sub-classes can easily override it and perform additional operations in
+     * this phase.
+     * <p>
+     * The event details are completely specified by the target component that
+     * is in charge of defining the data it sends to the server. Based on this
+     * information, this method enables for dynamically modifying the contents
+     * of the context menu. Furthermore, this method's return value specifies if
+     * the context menu will be opened.
+     * </p>
+     *
+     * @param eventDetail
+     *            the client side event details provided by the target
+     *            component.
+     *
+     * @return {@code true} if the context menu should be opened, {@code false}
+     *         otherwise.
+     */
+    protected boolean onBeforeOpenMenu(JsonObject eventDetail) {
+        return true;
+    }
 
     private void resetContent() {
         menuItemsArrayGenerator.generate();
@@ -351,12 +377,24 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     private void updateOpenOn() {
         if (target != null) {
-            target.getElement().callFunction(
+            target.getElement().callJsFunction(
                     "$contextMenuConnector.updateOpenOn", openOnEventName);
         }
     }
 
-    private void beforeOpen() {
+    private void beforeOpenHandler(DomEvent event) {
+        JsonObject eventDetail = event.getEventData().getObject(EVENT_DETAIL);
+
+        boolean shouldOpenMenu = onBeforeOpenMenu(eventDetail);
+
+        if (shouldOpenMenu) {
+            addContextMenuToUi();
+            target.getElement().callJsFunction("$contextMenuConnector.openMenu",
+                    getElement());
+        }
+    }
+
+    private void addContextMenuToUi() {
         if (getElement().getNode().getParent() == null) {
             UI ui = getCurrentUI();
             ui.beforeClientResponse(ui, context -> {

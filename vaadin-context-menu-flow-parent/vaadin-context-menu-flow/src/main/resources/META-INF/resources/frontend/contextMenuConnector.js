@@ -29,7 +29,11 @@ window.Vaadin.Flow.contextMenuConnector = {
         e.preventDefault();
         e.stopPropagation();
         this.$contextMenuConnector.openEvent = e;
-        target.dispatchEvent(new CustomEvent('vaadin-context-menu-before-open'));
+        let detail = {};
+        if (target.getContextMenuBeforeOpenDetail) {
+          detail = target.getContextMenuBeforeOpenDetail(e);
+        }
+        target.dispatchEvent(new CustomEvent('vaadin-context-menu-before-open', {detail: detail}));
       },
 
       updateOpenOn: function(eventType) {
@@ -101,4 +105,4 @@ window.Vaadin.Flow.contextMenuConnector = {
       component._item.checked = checked;
     }
   }
-}
+};
