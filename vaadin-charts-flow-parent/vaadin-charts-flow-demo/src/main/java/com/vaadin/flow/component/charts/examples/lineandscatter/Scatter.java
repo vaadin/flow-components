@@ -13,7 +13,9 @@ import com.vaadin.flow.component.charts.model.PlotOptionsScatter;
 import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.dependency.CssImport;
 
+@CssImport(value="./styles/Scatter.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class Scatter extends AbstractChartExample {
     @Override
     public void initDemo() {

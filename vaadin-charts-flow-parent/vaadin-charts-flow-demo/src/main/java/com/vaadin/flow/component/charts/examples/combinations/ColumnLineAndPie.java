@@ -12,7 +12,9 @@ import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.style.LabelStyle;
+import com.vaadin.flow.component.dependency.CssImport;
 
+@CssImport(value="./styles/ColumnLineAndPie.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class ColumnLineAndPie extends AbstractChartExample {
 
     @Override

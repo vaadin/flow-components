@@ -15,7 +15,9 @@ import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.CssImport;
 
+@CssImport(value="./styles/BoxPlot.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class BoxPlot extends AbstractChartExample {
 
     @Override

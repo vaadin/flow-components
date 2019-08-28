@@ -152,7 +152,7 @@ public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlP
 
             try {
                 styleSnippet.setSource(IOUtils.toString(getClass().getResourceAsStream(
-                        exampleName + ".html"), "UTF-8"));
+                        exampleName + ".css"), "UTF-8"));
             } catch (NullPointerException expected) {
                 styleSnippet.setSource(null);
             }

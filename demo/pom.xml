@@ -202,6 +202,13 @@
                     <version>4.1.0</version>
                 </dependency>
 
+                <!-- COMPATIBILITY MODE-->
+                <dependency>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>flow-server-compatibility-mode</artifactId>
+                    <version>${flow.version}</version>
+                </dependency>
+
                 <!--PAPER ELEMENTS-->
                 <dependency>
                     <groupId>org.webjars.bowergithub.polymerelements</groupId>

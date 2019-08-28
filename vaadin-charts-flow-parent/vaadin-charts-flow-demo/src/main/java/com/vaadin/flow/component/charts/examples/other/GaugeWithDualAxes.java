@@ -11,9 +11,11 @@ import com.vaadin.flow.component.charts.model.PlotOptionsGauge;
 import com.vaadin.flow.component.charts.model.SeriesTooltip;
 import com.vaadin.flow.component.charts.model.TickPosition;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.component.dependency.CssImport;
 
 import java.util.Random;
 
+@CssImport(value="./styles/GaugeWithDualAxes.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class GaugeWithDualAxes extends AbstractChartExample {
 
     @Override
