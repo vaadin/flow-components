@@ -37,6 +37,7 @@ public class DialogTestPage extends Div {
     public DialogTestPage() {
         createDialogWithAddOpenedChangeListener();
         createDialogWithoutAddingToTheUi();
+        createDialogAddingToTheUiAfterOpening();
         createEmptyDialog();
         createDialogAndAddComponentAtIndex();
     }
@@ -85,6 +86,26 @@ public class DialogTestPage extends Div {
         dialog.add(new Label("Hei! Moika! Moi!"), close);
 
         open.addClickListener(event -> dialog.open());
+        close.addClickListener(event -> dialog.close());
+        add(open);
+    }
+
+    private void createDialogAddingToTheUiAfterOpening() {
+        NativeButton open = new NativeButton("Open and attach dialog");
+        open.setId("dialog-in-ui-after-opened-open");
+        NativeButton close = new NativeButton("Close dialog");
+        close.setId("dialog-in-ui-after-opened-close");
+
+        Dialog dialog = new Dialog();
+        dialog.setId("dialog-in-ui-after-opened");
+        dialog.add(new Label("Hei! Moika! Moi!"), close);
+
+        open.addClickListener(event -> {
+            dialog.setOpened(true);
+            if(getChildren().noneMatch(child -> child.equals(dialog))){
+                add(dialog);
+            }
+        });
         close.addClickListener(event -> dialog.close());
         add(open);
     }

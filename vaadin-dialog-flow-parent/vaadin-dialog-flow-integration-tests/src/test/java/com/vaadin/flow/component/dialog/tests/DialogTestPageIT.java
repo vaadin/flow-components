@@ -111,6 +111,18 @@ public class DialogTestPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void dialogNotAttachedToThePage_openAndAttach_dialogIsAttachedAndNotRemoved() {
+        waitForElementNotPresent(By.id("dialog-in-ui-after-opened"));
+        findElement(By.id("dialog-in-ui-after-opened-open")).click();
+        waitForElementPresent(By.id("dialog-in-ui-after-opened"));
+        checkDialogIsOpened();
+        executeScript("document.body.click()");
+        checkDialogIsClosed();
+        //Verify that element is not auto removed and that parent node is div
+        waitForElementPresent(By.cssSelector("div > #dialog-in-ui-after-opened"));
+    }
+
+    @Test
     public void openDialogAddComponentAtFirst() {
         verifyInitialDialog(3);
         findElement(By.id("button-to-first")).click();

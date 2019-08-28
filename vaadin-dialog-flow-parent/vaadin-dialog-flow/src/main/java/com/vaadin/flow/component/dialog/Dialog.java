@@ -287,7 +287,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * Note: You don't need to add the dialog component anywhere before opening
      * it. Since {@code <vaadin-dialog>}'s location in the DOM doesn't really
      * matter, opening a dialog will automatically add it to the {@code <body>}
-     * if it's not yet attached anywhere.
+     * if necessary.
      */
     public void open() {
         setOpened(true);
@@ -316,13 +316,13 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     }
 
     private void ensureAttached() {
-        if (getElement().getNode().getParent() == null) {
-            UI ui = getCurrentUI();
-            ui.beforeClientResponse(ui, context -> {
+        UI ui = getCurrentUI();
+        ui.beforeClientResponse(ui, context -> {
+            if (getElement().getNode().getParent() == null) {
                 ui.add(this);
                 autoAddedToTheUi = true;
-            });
-        }
+            }
+        });
     }
 
     private void ensureOnCloseConfigured() {
@@ -358,7 +358,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * Note: You don't need to add the dialog component anywhere before opening
      * it. Since {@code <vaadin-dialog>}'s location in the DOM doesn't really
      * matter, opening a dialog will automatically add it to the {@code <body>}
-     * if it's not yet attached anywhere.
+     * if necessary.
      *
      * @param opened
      *            {@code true} to open the dialog, {@code false} to close it
