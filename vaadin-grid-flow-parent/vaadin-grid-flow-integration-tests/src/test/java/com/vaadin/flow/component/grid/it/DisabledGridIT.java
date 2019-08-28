@@ -38,25 +38,43 @@ public class DisabledGridIT extends AbstractComponentIT {
         WebElement message = findElement(By.id("message"));
         GridElement grid = $(GridElement.class).id("grid");
         GridTRElement row = grid.getRow(0);
-        GridTHTDElement cell = row.getCell(grid.getColumn("Button renderer"));
-        WebElement button = cell.getContext().findElement(By.tagName("button"));
+        GridTHTDElement buttonCell = row
+                .getCell(grid.getColumn("Button renderer"));
+        WebElement button = buttonCell.getContext()
+                .findElement(By.tagName("button"));
 
         Assert.assertTrue("The rendered button should be enabled",
                 button.isEnabled());
+
+        GridTHTDElement checkboxCell = row.getCell(grid.getColumn("Checkbox"));
+        WebElement checkBox = checkboxCell.getContext()
+                .findElement(By.tagName("vaadin-checkbox"));
+
+        Assert.assertTrue("The rendered checkbox should be enabled",
+                checkBox.isEnabled());
 
         WebElement toggleEnabled = findElement(By.id("toggleEnabled"));
         toggleEnabled.click();
 
         row = grid.getRow(0);
-        cell = row.getCell(grid.getColumn("Button renderer"));
-        button = cell.getContext().findElement(By.tagName("button"));
+        buttonCell = row.getCell(grid.getColumn("Button renderer"));
+        button = buttonCell.getContext().findElement(By.tagName("button"));
         Assert.assertFalse("The rendered button should be disabled",
                 button.isEnabled());
 
-        button = cell.getContext().findElement(By.tagName("button"));
+        checkBox = checkboxCell.getContext()
+                .findElement(By.tagName("vaadin-checkbox"));
+        Assert.assertFalse("The rendered checkbox should be disabled",
+                checkBox.isEnabled());
+
+        button = buttonCell.getContext().findElement(By.tagName("button"));
         executeScript("arguments[0].disabled = false", button);
         button.click();
 
+        assertEmptyMessage(message);
+
+        executeScript("arguments[0].disabled = false", checkBox);
+        checkBox.click();
         assertEmptyMessage(message);
     }
 
