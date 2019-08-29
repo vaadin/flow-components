@@ -1,5 +1,8 @@
 package com.vaadin.flow.component.richtexteditor.test;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.richtexteditor.testbench.RichTextEditorElement;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -7,10 +10,6 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.richtexteditor.testbench.RichTextEditorElement;
-import com.vaadin.testbench.TestBenchElement;
 
 public class BasicUseIT extends AbstractParallelTest {
 
@@ -109,6 +108,52 @@ public class BasicUseIT extends AbstractParallelTest {
 
         getValue.click();
         Assert.assertEquals("", getLastRteBinderValue());
+    }
+
+    // asHtml with Binder
+    @Test
+    public void useBinderWithRichTextEditorAsHtml() {
+        WebElement info = findElement(By.id("html-binder-info"));
+        ButtonElement save = getTestButton("html-binder-save");
+        ButtonElement setBeanHtmlValue = getTestButton("html-binder-set-bean-value");
+        ButtonElement reset = getTestButton("html-binder-reset");
+        ButtonElement getValue = getTestButton("get-html-binder-rte-value");
+        save.click();
+
+        // Empty rte validation: there is an error
+        waitUntil(
+                driver -> "There are errors: html value should contain something"
+                        .equals(getLastHtmlBinderInfoValue()));
+
+        RichTextEditorElement rte = $(RichTextEditorElement.class).id("html-rte");
+        TestBenchElement editor = rte.getEditor();
+        editor.setProperty("innerHTML", "<p><b>Foo</b></p>");
+
+        // Rte validation
+        waitUntil(driver -> {
+            rte.dispatchEvent("change");
+            save.click();
+            return info.getText().startsWith("Saved bean values");
+        });
+
+        Assert.assertTrue(getLastHtmlBinderInfoValue().contains("<p><strong>Foo</strong></p>"));
+
+        reset.click();
+        // Wait for everything to update.
+        waitUntil(driver -> info.getText().isEmpty());
+
+        setBeanHtmlValue.click();
+        waitUntil(driver -> {
+            getValue.click();
+            return getLastRteHtmlBinderValue().contains("<p><b>Foo</b></p> <p><strong>Foo</strong></p>");
+        });
+
+        reset.click();
+        // Wait for everything to update.
+        waitUntil(driver -> {
+            getValue.click();
+            return getLastRteHtmlBinderValue().equals("null <p><br></p>");
+        });
     }
 
     @Test

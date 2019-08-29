@@ -2,11 +2,12 @@ package com.vaadin.flow.component.richtexteditor;
 
 import static org.junit.Assert.assertEquals;
 
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import com.vaadin.flow.component.richtexteditor.RichTextEditor;
 
 /**
  * Tests for the {@link RichTextEditor}.
@@ -172,5 +173,34 @@ public class RichTextEditorTest {
     public void sanitizePreTag_preTagPersist() {
         RichTextEditor rte = new RichTextEditor();
         Assert.assertEquals("<pre>Foo</pre>", rte.sanitize("<pre>Foo</pre>"));
+    }
+
+    // asHtml
+
+    @Test
+    public void asHtml_setValue_getValue() {
+        HasValue<ValueChangeEvent<String>, String> rteAsHtml = new RichTextEditor().asHtml();
+        String htmlValue = "<strong>Foo</strong>";
+        rteAsHtml.setValue(htmlValue);
+        Assert.assertEquals("Should get the same value as it was set",
+                htmlValue, rteAsHtml.getValue());
+    }
+
+    @Test
+    public void asHtml_setReadOnly_rteIsReadonly() {
+        RichTextEditor rte = new RichTextEditor();
+        HasValue<ValueChangeEvent<String>, String> rteAsHtml = rte.asHtml();
+        rteAsHtml.setReadOnly(true);
+        Assert.assertTrue("Should be possible to set readonly on asHtml",
+                rte.isReadOnly());
+    }
+
+    @Test
+    public void asHtml_setRequiredIndicatorVisible_rteRequiredIndicatorVisible() {
+        RichTextEditor rte = new RichTextEditor();
+        HasValue<ValueChangeEvent<String>, String> rteAsHtml = rte.asHtml();
+        rteAsHtml.setRequiredIndicatorVisible(true);
+        Assert.assertTrue("Should be possible to set required indicator to be visible on asHtml",
+                rte.isRequiredIndicatorVisible());
     }
 }

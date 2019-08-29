@@ -93,8 +93,16 @@ public abstract class AbstractParallelTest extends ParallelTest {
         return $("div").id("binder-info").getText();
     }
 
+    protected String getLastHtmlBinderInfoValue() {
+        return $("div").id("html-binder-info").getText();
+    }
+
     protected String getLastRteBinderValue() {
         return $("div").id("binder-value-panel").getText();
+    }
+
+    protected String getLastRteHtmlBinderValue() {
+        return $("div").id("html-binder-value-panel").getText();
     }
 
     protected String getLastRteTemplateValue() {

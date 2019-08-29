@@ -211,7 +211,7 @@ import elemental.json.JsonArray;
         "WebComponent: Vaadin.RichTextEditorElement#1.0.0-alpha3",
         "Flow#1.2-SNAPSHOT" })
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "1.0.4")
+@NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "1.1.0")
 @JsModule("@vaadin/vaadin-rich-text-editor/src/vaadin-rich-text-editor.js")
 @HtmlImport("frontend://bower_components/vaadin-rich-text-editor/src/vaadin-rich-text-editor.html")
 public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRichTextEditor<R, T>, T>
