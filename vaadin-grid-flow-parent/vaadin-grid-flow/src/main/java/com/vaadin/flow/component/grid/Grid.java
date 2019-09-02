@@ -1013,6 +1013,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             }
         }
 
+        /**
+         * Remove the displayed details and remove details item from the list
+         *
+         * @param item item to removed
+         */
         @Override
         public void destroyData(T item) {
             detailsVisible.remove(item);
@@ -1021,9 +1026,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             }
         }
 
+        /**
+         * Remove the displayed details but keep the items from list of details
+         */
         @Override
         public void destroyAllData() {
-            detailsVisible.clear();
             if (itemDetailsDataGenerator != null) {
                 itemDetailsDataGenerator.destroyAllData();
             }

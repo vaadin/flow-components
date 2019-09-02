@@ -107,7 +107,7 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         grid.expandWithClick(1);
         waitUntil(tets -> grid.getNumberOfExpandedRows() == 99);
-        waitUntil(test -> !grid.isLoadingExpandedRows());
+        waitUntil(test -> !grid.isLoadingExpandedRows(),25);
 
         assertCellTexts(0, 0, cellTexts);
     }

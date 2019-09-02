@@ -216,6 +216,11 @@ window.Vaadin.Flow.gridConnector = {
       if(!detailsVisibleOnClick) {
         return;
       }
+      // when grid is attached, newVal is not set and oldVal is undefined
+      // do nothing
+      if ((newVal == null) && (oldVal === undefined)) {
+        return;
+      }
       if (newVal && !newVal.detailsOpened) {
         grid.$server.setDetailsVisible(newVal.key);
       } else {
@@ -458,11 +463,12 @@ window.Vaadin.Flow.gridConnector = {
         if (parentCache && parentCache.itemkeyCaches && parentCache.itemkeyCaches[parentKey]) {
           delete parentCache.itemkeyCaches[parentKey];
         }
-        if (parentCache && parentCache.itemCaches && parentCache.itemCaches[parentKey]) {
-          delete parentCache.itemCaches[parentKey];
+        if (parentCache && parentCache.itemkeyCaches) {
+          Object.keys(parentCache.itemCaches)
+              .filter(idx => parentCache.items[idx].key === parentKey)
+              .forEach(idx => delete parentCache.itemCaches[idx]);
         }
         delete lastRequestedRanges[parentKey];
-
         this.collapseItem(inst.item);
       }
     }
