@@ -36,6 +36,13 @@ public class RichTextEditorTest {
                 rte.getElement().getProperty("value"));
     }
 
+    @Test
+    public void initialHtmlValueNull() {
+        RichTextEditor rte = new RichTextEditor();
+        Assert.assertNull("Initial htmlValue should not through NPE",
+                rte.getHtmlValue());
+    }
+
     // Decoration group sanitization
 
     @Test

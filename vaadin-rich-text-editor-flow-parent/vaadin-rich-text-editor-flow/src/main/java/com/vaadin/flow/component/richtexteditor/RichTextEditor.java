@@ -215,11 +215,17 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
     /**
      * Value of the editor presented as HTML string.
      *
-     * @return the sanitized {@code htmlValue} property from the webcomponent.
+     * @return the sanitized {@code htmlValue} property from the webcomponent
+     * or {@code null} if is not available.
      */
     public String getHtmlValue() {
+        String htmlValueString = getHtmlValueString();
+        if (htmlValueString == null) {
+            return null;
+        }
+
         // Using basic whitelist and adding img tag with data protocol enabled.
-        return sanitize(getHtmlValueString());
+        return sanitize(htmlValueString);
     }
 
     String sanitize(String html) {
