@@ -93,7 +93,7 @@ CssStyleExample.java
 
 [source, java]
 ----
-@CssImport(value = "./styles/shared-styles.html", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value = "./styles/huge-axis.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
 public class CssStyleExample extends Div {
 
     public CssStyleExample() {
