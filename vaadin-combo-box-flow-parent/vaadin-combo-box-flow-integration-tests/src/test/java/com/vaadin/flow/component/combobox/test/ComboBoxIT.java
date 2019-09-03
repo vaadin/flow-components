@@ -15,35 +15,37 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.combobox.demo.ComboBoxView;
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.demo.TabbedComponentDemoTest;
-
-import elemental.json.JsonObject;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
- * Integration tests for the {@link ComboBoxView}.
+ * Integration tests for the {@link ComboBoxDemoPage}.
  */
-public class ComboBoxIT extends TabbedComponentDemoTest {
+public class ComboBoxIT extends AbstractComboBoxIT {
+
+    @Before
+    public void init() {
+        open();
+        waitUntil(driver -> findElements(By.tagName("vaadin-combo-box"))
+                .size() > 0);
+    }
 
     @Test
     public void openStringBoxAndSelectAnItem() {
-        openTabAndCheckForErrors("");
+        checkLogsForErrors();
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("string-selection-box");
-        WebElement message = layout
-                .findElement(By.id("string-selection-message"));
+        WebElement message = findElement(By.id("string-selection-message"));
 
         comboBox.openPopup();
         executeScript(
@@ -55,11 +57,10 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
     @Test
     public void openObjectBoxAndSelectAnItem() {
-        openTabAndCheckForErrors("");
+        checkLogsForErrors();
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("object-selection-box");
-        WebElement message = layout
-                .findElement(By.id("object-selection-message"));
+        WebElement message = findElement(By.id("object-selection-message"));
 
         comboBox.openPopup();
         executeScript(
@@ -72,7 +73,7 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
     @Test
     public void setEnabledCombobox() {
-        openTabAndCheckForErrors("");
+        checkLogsForErrors();
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("disabled-combo-box");
         executeScript("arguments[0].removeAttribute(\"disabled\");", comboBox);
@@ -94,11 +95,10 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
     @Test
     public void openValueBoxSelectTwoItems() {
-        openTabAndCheckForErrors("");
+        checkLogsForErrors();
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("value-selection-box");
-        WebElement message = layout
-                .findElement(By.id("value-selection-message"));
+        WebElement message = findElement(By.id("value-selection-message"));
 
         comboBox.openPopup();
         executeScript(
@@ -118,12 +118,11 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
     @Test
     public void openTemplateBox() {
-        openTabAndCheckForErrors("using-templates");
+        checkLogsForErrors();
 
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("template-selection-box");
-        WebElement message = layout
-                .findElement(By.id("template-selection-message"));
+        WebElement message = findElement(By.id("template-selection-message"));
 
         comboBox.openPopup();
         List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
@@ -158,7 +157,7 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
     @Test
     public void templateBoxCustomFiltering_filterableByArtist() {
-        openTabAndCheckForErrors("using-templates");
+        checkLogsForErrors();
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("template-selection-box");
         comboBox.openPopup();
@@ -176,7 +175,7 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
     @Test
     public void componentBoxCustomFiltering_filterableByArtist() {
-        openTabAndCheckForErrors("using-components");
+        checkLogsForErrors();
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("component-selection-box");
         comboBox.openPopup();
@@ -194,12 +193,11 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
     @Test
     public void openComponentBox() {
-        openTabAndCheckForErrors("using-components");
+        checkLogsForErrors();
 
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("component-selection-box");
-        WebElement message = layout
-                .findElement(By.id("component-selection-message"));
+        WebElement message = findElement(By.id("component-selection-message"));
 
         comboBox.openPopup();
         List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
@@ -234,12 +232,12 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
     }
 
     @Test
-    public void callBackLazyComboBox_itemsLoadedLazily() {
+    public void callBackLazcallBackLazyComboBox_itemsLoadedLazilyyComboBox_itemsLoadedLazily() {
         testLazyComboBox("callback-box");
     }
 
     private void testLazyComboBox(String comboBoxId) {
-        openTabAndCheckForErrors("lazy-loading");
+        checkLogsForErrors();
         ComboBoxElement comboBox = $(ComboBoxElement.class).id(comboBoxId);
 
         Assert.assertEquals("No items should be loaded initially.", 0,
@@ -255,19 +253,6 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
         scrollToItem(comboBox, 50);
         Assert.assertEquals("Second page should be loaded after scrolling.",
                 100, getLoadedItems(comboBox).size());
-    }
-
-    private void scrollToItem(ComboBoxElement comboBox, int index) {
-        executeScript("arguments[0].$.overlay._scrollIntoView(arguments[1])",
-                comboBox, index);
-    }
-
-    private List<JsonObject> getLoadedItems(ComboBoxElement comboBox) {
-        List<JsonObject> list = (List<JsonObject>) executeScript(
-                "return arguments[0].filteredItems.filter("
-                        + "item => !(item instanceof window.Vaadin.ComboBoxPlaceholder));",
-                comboBox);
-        return list;
     }
 
     private void assertRendered() {
@@ -302,6 +287,6 @@ public class ComboBoxIT extends TabbedComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return ("/vaadin-combo-box");
+        return ("/vaadin-combo-box-test-demo");
     }
 }
