@@ -388,6 +388,16 @@ public class GridTestPageIT extends AbstractComponentIT {
         Assert.assertEquals("Item 0", grid.getCell(0, 0).getText());
     }
 
+    @Test
+    public void mockedColumnReorderEvent_smokeTest() {
+        findElement(By.id("toggle-column-ordering")).click();
+        GridElement grid = $(GridElement.class).id("grid-with-component-renderers");
+        grid.getCommandExecutor().executeScript("arguments[0].dispatchEvent(new CustomEvent('column-reorder', {detail: { columns: [{_flowId:'col1'}, {_flowId:'col0'}] }}));", grid.getWrappedElement());
+
+        final WebElement currentColumnOrdering = findElement(By.id("current-column-ordering"));
+        Assert.assertEquals("number, name", currentColumnOrdering.getText());
+    }
+
     private void assertSelection(WebElement grid, String value) {
         Assert.assertTrue(value + " should be selected",
                 (Boolean) executeScript(

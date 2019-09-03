@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.grid.Grid;
@@ -26,6 +27,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
@@ -86,13 +88,13 @@ public class GridTestPage extends Div {
             label.setId("grid-with-component-renderers-item-name-"
                     + item.getNumber());
             return label;
-        }));
+        })).setKey("name").setHeader("Name");
         grid.addColumn(new ComponentRenderer<>(item -> {
             Label label = new Label(String.valueOf(item.getNumber()));
             label.setId("grid-with-component-renderers-item-number-"
                     + item.getNumber());
             return label;
-        }));
+        })).setKey("number").setHeader("Number");
         grid.addColumn(new ComponentRenderer<>(item -> {
             NativeButton remove = new NativeButton("Remove", evt -> {
                 if (usingFirstList.get()) {
@@ -105,7 +107,7 @@ public class GridTestPage extends Div {
             remove.setId(
                     "grid-with-component-renderers-remove-" + item.getNumber());
             return remove;
-        }));
+        })).setKey("remove");
 
         grid.setId("grid-with-component-renderers");
         grid.setWidth("500px");
@@ -124,7 +126,14 @@ public class GridTestPage extends Div {
             grid.setColumnReorderingAllowed(!grid.isColumnReorderingAllowed());
         });
         toggleColumnOrdering.setId("toggle-column-ordering");
-        add(grid, changeList, toggleColumnOrdering);
+
+        Span currentColumnOrdering = new Span();
+        currentColumnOrdering.setId("current-column-ordering");
+        grid.addColumnReorderListener(e -> currentColumnOrdering.setText(e.getColumns().stream()
+                .map(Column::getKey)
+                .collect(Collectors.joining(", "))));
+
+        add(grid, changeList, toggleColumnOrdering, currentColumnOrdering);
     }
 
     private void createGridWithTemplateDetailsRow() {

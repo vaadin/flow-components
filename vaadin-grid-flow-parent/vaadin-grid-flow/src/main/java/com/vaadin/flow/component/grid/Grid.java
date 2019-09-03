@@ -3675,4 +3675,17 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     }
 
+    /**
+     * Adds a column reorder listener to this component.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Registration addColumnReorderListener(
+            ComponentEventListener<ColumnReorderEvent<T>> listener) {
+        return addListener(ColumnReorderEvent.class,
+                (ComponentEventListener) Objects.requireNonNull(listener));
+    }
 }

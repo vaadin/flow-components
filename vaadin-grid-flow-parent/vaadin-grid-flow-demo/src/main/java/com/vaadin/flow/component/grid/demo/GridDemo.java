@@ -615,6 +615,7 @@ public class GridDemo extends DemoView {
         createAutoWidthColumns();
         createFrozenColumns();
         createColumnAlignment();
+        columnReorder();
         createHeaderAndFooter();// Header and footer
         createColumnGrouping();
         createHeaderAndFooterUsingComponents();
@@ -1302,6 +1303,34 @@ public class GridDemo extends DemoView {
         alignments.setId("column-alignment-example-alignments");
         addCard("Configuring columns", "Column alignment example", grid,
                 alignments);
+    }
+
+    private void columnReorder() {
+        // begin-source-example
+        // source-example-heading: Column reorder example
+        List<Person> personList = getItems();
+        Grid<Person> grid = new Grid<>();
+
+        grid.setItems(personList);
+
+        grid.addColumn(Person::getFirstName).setHeader("First Name").setKey("firstName");
+        grid.addColumn(Person::getLastName).setHeader("Last Name").setKey("lastName");
+        grid.addColumn(Person::getAge).setHeader("Age").setKey("age");
+        grid.addColumn(Person::getEmail).setHeader("Email").setKey("email");
+        grid.addColumn(Person::getPhoneNumber).setHeader("Phone Number").setKey("phoneNo");
+        grid.addColumn(Person::getBirthDate).setHeader("Birth Date").setKey("birthDate");
+
+        Span columnOrder = new Span();
+
+        grid.setColumnReorderingAllowed(true);
+        grid.addColumnReorderListener(event ->
+                columnOrder.setText(event.getColumns().stream()
+                        .map(Column::getKey).collect(Collectors.joining(", "))));
+
+        // end-source-example
+        grid.setId("column-reorder-example");
+        addCard("Configuring columns", "Column reorder example",
+                grid, columnOrder);
     }
 
     // Header and footer begin
