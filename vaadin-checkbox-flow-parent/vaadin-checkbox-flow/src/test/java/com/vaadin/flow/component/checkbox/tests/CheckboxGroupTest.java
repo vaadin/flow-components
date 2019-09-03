@@ -33,6 +33,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -186,6 +187,45 @@ public class CheckboxGroupTest {
 
         Assert.assertThat(checkboxGroup.getValue(), IsEmptyCollection.empty());
         Assert.assertThat(capture.get(), IsEmptyCollection.empty());
+    }
+
+    @Test
+    public void deselectAll_selectionIsReset() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("Foo", "Bar");
+
+        AtomicReference<Set<String>> capture = new AtomicReference<>();
+        checkboxGroup
+                .addValueChangeListener(event -> capture.set(event.getValue()));
+
+        checkboxGroup.setValue(Collections.singleton("Foo"));
+
+        Assert.assertEquals(Collections.singleton("Foo"), capture.get());
+
+        Assert.assertEquals(Collections.singleton("Foo"),
+                checkboxGroup.getValue());
+
+        checkboxGroup.deselectAll();
+
+        Assert.assertThat(checkboxGroup.getValue(), IsEmptyCollection.empty());
+        Assert.assertThat(capture.get(), IsEmptyCollection.empty());
+    }
+
+    @Test
+    public void updateSelection_checkboxesUpdated() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("Foo", "Bar");
+
+        List<Checkbox> checkboxes = checkboxGroup.getChildren()
+                .map(Checkbox.class::cast).collect(Collectors.toList());
+
+        checkboxGroup.select("Foo");
+        Assert.assertTrue(checkboxes.get(0).getValue());
+        Assert.assertFalse(checkboxes.get(1).getValue());
+
+        checkboxGroup.deselectAll();
+        Assert.assertFalse(checkboxes.get(0).getValue());
+        Assert.assertFalse(checkboxes.get(1).getValue());
     }
 
     @Test
