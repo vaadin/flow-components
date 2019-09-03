@@ -25,6 +25,8 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 
+import java.util.Objects;
+
 /**
  * Server-side component for the {@code vaadin-number-field} element.
  *
@@ -50,12 +52,22 @@ public class NumberField
 
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
+    private Double max;
+    private Double min;
+    private boolean required;
+
     /**
      * Constructs an empty {@code NumberField}.
      */
     public NumberField() {
         super(null, null, String.class, PARSER, FORMATTER);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
+        addInvalidChangeListener(e -> {
+            // If invalid is updated from client to false, check it
+            if(e.isFromClient() && !e.isInvalid()) {
+                setInvalid(isInvalid(getValue()));
+            }
+        });
     }
 
     /**
@@ -186,6 +198,17 @@ public class NumberField
         return isInvalidBoolean();
     }
 
+    /**
+     * Performs a server-side validation of the given value. This is needed because it is possible to circumvent the
+     * client side validation constraints using browser development tools.
+     */
+    private boolean isInvalid(Double value) {
+        final boolean isRequiredButEmpty = required && Objects.equals(getEmptyValue(), value);
+        final boolean isGreaterThanMax  = value != null && max != null && value > max;
+        final boolean isSmallerThenMin = (value != null && min != null && value < min);
+        return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
+    }
+
     @Override
     public void setInvalid(boolean invalid) {
         super.setInvalid(invalid);
@@ -208,6 +231,7 @@ public class NumberField
     @Override
     public void setMax(double max) {
         super.setMax(max);
+        this.max = max;
     }
 
     /**
@@ -222,6 +246,7 @@ public class NumberField
     @Override
     public void setMin(double min) {
         super.setMin(min);
+        this.min = min;
     }
 
     /**
@@ -454,6 +479,12 @@ public class NumberField
     }
 
     @Override
+    protected void setModelValue(Double newModelValue, boolean fromClient) {
+        super.setModelValue(newModelValue, fromClient);
+        setInvalid(isInvalid(newModelValue));
+    }
+
+    @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
         if (!isConnectorAttached) {
@@ -462,5 +493,6 @@ public class NumberField
         }
         RequiredValidationUtil.updateClientValidation(requiredIndicatorVisible,
                 this);
+        this.required = requiredIndicatorVisible;
     }
 }

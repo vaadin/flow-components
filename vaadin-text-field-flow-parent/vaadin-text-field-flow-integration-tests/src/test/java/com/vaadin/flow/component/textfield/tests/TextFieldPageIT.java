@@ -16,6 +16,10 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,10 +27,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
 
@@ -101,6 +101,13 @@ public class TextFieldPageIT extends AbstractComponentIT {
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
+    }
+
+    @Test
+    public void assertCantMakeInvalidValueValidThroughClientManipulation() {
+        ValidationTestHelper.testValidation(getCommandExecutor(),getContext(),$(
+            TextFieldElement.class)
+            .id("invalid-test-field"));
     }
 
     @Test

@@ -16,17 +16,16 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
 
@@ -133,6 +132,13 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
         $(RadioButtonGroupElement.class).first()
                 .selectByText(EAGER.toString());
         updateValues(passwordFieldValueDiv, passwordField, false);
+    }
+
+    @Test
+    public void assertCantMakeInvalidValueValidThroughClientManipulation() {
+        ValidationTestHelper.testValidation(getCommandExecutor(),getContext(),$(
+            PasswordFieldElement.class)
+            .id("invalid-test-field"));
     }
 
     private void updateValues(WebElement passwordFieldValueDiv,

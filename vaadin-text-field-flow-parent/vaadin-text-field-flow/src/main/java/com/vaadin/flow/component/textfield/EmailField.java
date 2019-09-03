@@ -35,11 +35,15 @@ public class EmailField
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect {
+    private static final String EMAIL_PATTERN = "^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$";
+
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
 
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
+
+    private TextFieldValidationSupport validationSupport;
 
     /**
      * Constructs an empty {@code EmailField}.
@@ -47,6 +51,12 @@ public class EmailField
     public EmailField() {
         super("", "", false);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
+        addInvalidChangeListener(e -> {
+            // If invalid is updated from client to false, check it
+            if(e.isFromClient() && !e.isInvalid()) {
+                setInvalid(getValidationSupport().isInvalid(getValue()));
+            }
+        });
     }
 
     /**
@@ -126,6 +136,14 @@ public class EmailField
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
+    }
+
+    private TextFieldValidationSupport getValidationSupport() {
+        if (validationSupport == null) {
+            validationSupport = new TextFieldValidationSupport(this);
+            validationSupport.setPattern(EMAIL_PATTERN);
+        }
+        return validationSupport;
     }
 
     /**
@@ -233,6 +251,7 @@ public class EmailField
      */
     public void setMaxLength(int maxLength) {
         super.setMaxlength(maxLength);
+        getValidationSupport().setMaxLength(maxLength);
     }
 
     /**
@@ -254,6 +273,7 @@ public class EmailField
      */
     public void setMinLength(int minLength) {
         super.setMinlength(minLength);
+        getValidationSupport().setMinLength(minLength);
     }
 
     /**
@@ -284,6 +304,7 @@ public class EmailField
     @Override
     public void setPattern(String pattern) {
         super.setPattern(pattern);
+        getValidationSupport().setPattern(pattern);
     }
 
     /**
@@ -390,6 +411,12 @@ public class EmailField
     }
 
     @Override
+    protected void setModelValue(String newModelValue, boolean fromClient) {
+        super.setModelValue(newModelValue, fromClient);
+        setInvalid(getValidationSupport().isInvalid(newModelValue));
+    }
+
+    @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
         if (!isConnectorAttached) {
@@ -398,5 +425,6 @@ public class EmailField
         }
         RequiredValidationUtil.updateClientValidation(requiredIndicatorVisible,
                 this);
+        getValidationSupport().setRequired(requiredIndicatorVisible);
     }
 }

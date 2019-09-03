@@ -1,12 +1,12 @@
 package com.vaadin.flow.component.textfield.tests;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Wrapper for {@link Actions#sendKeys(CharSequence...)} which retains the

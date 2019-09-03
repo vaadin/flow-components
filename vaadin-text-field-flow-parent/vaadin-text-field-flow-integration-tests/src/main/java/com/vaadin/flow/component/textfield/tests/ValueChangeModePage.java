@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import java.util.Arrays;
-
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -27,6 +25,8 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
+
+import java.util.Arrays;
 
 /**
  * Test view for changing the ValueChangMode of TextField, TextArea and

@@ -15,14 +15,12 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Assert;
+import com.vaadin.flow.component.textfield.TextArea;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.textfield.TextArea;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for the {@link TextArea}.

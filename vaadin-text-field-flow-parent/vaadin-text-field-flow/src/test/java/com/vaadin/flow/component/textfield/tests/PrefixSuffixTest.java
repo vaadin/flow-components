@@ -15,13 +15,12 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Tests for setting prefix and suffix components for {@link TextField}.

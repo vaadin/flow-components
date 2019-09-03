@@ -15,10 +15,6 @@
  */
 package com.vaadin.flow.component.textfield;
 
-import javax.annotation.Generated;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -37,6 +33,10 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
+
+import javax.annotation.Generated;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>

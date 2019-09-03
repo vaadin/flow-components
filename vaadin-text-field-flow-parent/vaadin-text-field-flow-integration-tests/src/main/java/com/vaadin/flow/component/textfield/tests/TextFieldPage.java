@@ -80,6 +80,7 @@ public class TextFieldPage extends Div {
         addDisabledField();
         addBasicFeatures();
         addFocusShortcut();
+        addInvalidCheck();
     }
 
     private void handleTextFieldValue(TextField field) {
@@ -126,5 +127,12 @@ public class TextFieldPage extends Div {
         textField.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
         textField.setId("shortcut-field");
         add(textField);
+    }
+
+    private void addInvalidCheck() {
+        final TextField field = new TextField();
+        field.setMaxLength(10);
+        field.setMinLength(5);
+        TextFieldTestPageUtil.addInvalidCheck(this, field);
     }
 }

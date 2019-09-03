@@ -16,17 +16,16 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 import java.util.stream.IntStream;
 
@@ -145,4 +144,11 @@ public class TextAreaPageIT extends AbstractComponentIT {
 
         Assert.assertEquals(125, textArea.getSize().getHeight());
     }
+
+    @Test
+    public void assertCantMakeInvalidValueValidThroughClientManipulation() {
+        ValidationTestHelper.testValidation(getCommandExecutor(), getContext(),
+            $(TextAreaElement.class).id("invalid-test-field"));
+    }
+
 }

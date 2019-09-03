@@ -15,12 +15,11 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.HasAutocorrect;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class HasAutocorrectTest {
 

@@ -41,12 +41,20 @@ public class PasswordField
 
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
+    private TextFieldValidationSupport validationSupport;
+
     /**
      * Constructs an empty {@code PasswordField}.
      */
     public PasswordField() {
         super("", "", false);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
+        addInvalidChangeListener(e -> {
+            // If invalid is updated from client to false, check it
+            if(e.isFromClient() && !e.isInvalid()) {
+                setInvalid(getValidationSupport().isInvalid(getValue()));
+            }
+        });
     }
 
     /**
@@ -126,6 +134,13 @@ public class PasswordField
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
+    }
+
+    private TextFieldValidationSupport getValidationSupport() {
+        if (validationSupport == null) {
+            validationSupport = new TextFieldValidationSupport(this);
+        }
+        return validationSupport;
     }
 
     /**
@@ -233,6 +248,7 @@ public class PasswordField
      */
     public void setMaxLength(int maxLength) {
         super.setMaxlength(maxLength);
+        getValidationSupport().setMaxLength(maxLength);
     }
 
     /**
@@ -254,6 +270,7 @@ public class PasswordField
      */
     public void setMinLength(int minLength) {
         super.setMinlength(minLength);
+        getValidationSupport().setMinLength(minLength);
     }
 
     /**
@@ -278,6 +295,7 @@ public class PasswordField
     @Override
     public void setRequired(boolean required) {
         super.setRequired(required);
+        getValidationSupport().setRequired(required);
     }
 
     /**
@@ -298,6 +316,7 @@ public class PasswordField
     @Override
     public void setPattern(String pattern) {
         super.setPattern(pattern);
+        getValidationSupport().setPattern(pattern);
     }
 
     /**
@@ -428,6 +447,12 @@ public class PasswordField
     }
 
     @Override
+    protected void setModelValue(String newModelValue, boolean fromClient) {
+        super.setModelValue(newModelValue, fromClient);
+        setInvalid(getValidationSupport().isInvalid(newModelValue));
+    }
+
+    @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
         if (!isConnectorAttached) {
@@ -436,5 +461,6 @@ public class PasswordField
         }
         RequiredValidationUtil.updateClientValidation(requiredIndicatorVisible,
                 this);
+        getValidationSupport().setRequired(requiredIndicatorVisible);
     }
 }

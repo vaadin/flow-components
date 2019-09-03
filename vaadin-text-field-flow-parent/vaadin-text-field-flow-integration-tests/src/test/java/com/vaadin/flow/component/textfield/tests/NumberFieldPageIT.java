@@ -15,19 +15,18 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertFalse;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
-
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
+import static org.junit.Assert.assertFalse;
+import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 /**
  * Integration tests for {@link NumberField}.
@@ -125,6 +124,41 @@ public class NumberFieldPageIT extends AbstractComponentIT {
 
         String value = findElement(By.id("step-message")).getText();
         Assert.assertEquals("Old value: 'null'. New value: '0.5'.", value);
+    }
+
+    @Test
+    public void assertInvalidAfterClientChange() {
+        final boolean valid = true;
+        NumberFieldElement field = $(NumberFieldElement.class)
+            .id("step-number-field");
+        assertValidStateOfStepNumberField(valid);
+
+        // max is 10
+        field.setValue("11");
+        assertValidStateOfStepNumberField(!valid);
+
+        // Forcing max to 11 on the client does not make the field valid
+        field.setProperty("max", "11");
+        getCommandExecutor().waitForVaadin();
+        assertValidStateOfStepNumberField(!valid);
+
+        // Forcing the field to be valid does not work
+        field.setProperty("invalid", false);
+        getCommandExecutor().waitForVaadin();
+        assertValidStateOfStepNumberField(!valid);
+
+        // Setting a valid value makes the field return to valid mode
+        field.setValue("10");
+        getCommandExecutor().waitForVaadin();
+        assertValidStateOfStepNumberField(valid);
+    }
+
+    private void assertValidStateOfStepNumberField(boolean valid) {
+        final WebElement checkIsInvalid = findElement(By.id("check-is-invalid"));
+        checkIsInvalid.click();
+
+        final String expectedValue = !valid ? "invalid" : "valid";
+        Assert.assertEquals(expectedValue, findElement(By.id("is-invalid")).getText());
     }
 
     @Test

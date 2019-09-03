@@ -22,7 +22,6 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 import java.util.Collections;
-import java.util.Map;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-password-field&gt;</code>

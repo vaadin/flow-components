@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.textfield;
 
-import javax.annotation.Generated;
-
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -24,6 +22,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
+
+import javax.annotation.Generated;
 
 /**
  * <p>

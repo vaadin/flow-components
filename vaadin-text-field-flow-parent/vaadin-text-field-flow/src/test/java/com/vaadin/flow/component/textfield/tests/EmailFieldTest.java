@@ -15,13 +15,12 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-
+import com.vaadin.flow.component.textfield.EmailField;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.textfield.EmailField;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for the {@link EmailField}.
