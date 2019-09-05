@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
+import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -32,14 +33,16 @@ import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebElement;
 
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertThat;
 
 /**
  * Upload component test class.
  */
-public class UploadIT extends ComponentDemoTest {
+@TestPath("vaadin-upload")
+public class UploadIT extends AbstractComponentIT {
 
     @Test
     public void testUploadAnyFile() throws Exception {
@@ -51,17 +54,55 @@ public class UploadIT extends ComponentDemoTest {
         fillPathToUploadInput(tempFile.getPath());
 
         WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
-        String actualFileName = uploadOutput.findElement(By.tagName("p"))
-                .getText();
-        Assert.assertEquals("File name was wrong.", tempFile.getName(),
-                actualFileName);
 
         String content = uploadOutput.getText();
 
-        String expectedContent = actualFileName + "\n" + getTempFileContents();
+        String expectedContent = tempFile.getName() + getTempFileContents();
 
         Assert.assertEquals("Upload content does not match expected",
                 expectedContent, content);
+    }
+
+    @Test
+    public void testUploadMultipleEventOrder() throws Exception {
+        if (getRunLocallyBrowser() == null) {
+            // Multiple file upload does not work with Remotewebdriver
+            // https://github.com/SeleniumHQ/selenium/issues/7408
+            throw new AssumptionViolatedException(
+                    "Skipped <Multiple file upload does not work with Remotewebdriver>");
+        }
+        open();
+
+        waitUntil(driver -> getUpload().isDisplayed());
+
+        File tempFile = createTempFile();
+
+        fillPathToUploadInput(tempFile.getPath(), tempFile.getPath(),
+                tempFile.getPath());
+
+        WebElement eventsOutput = getDriver()
+                .findElement(By.id("test-events-output"));
+
+        Assert.assertEquals("Upload event order does not match expected",
+                "-succeeded-succeeded-succeeded-finished",
+                eventsOutput.getText());
+    }
+
+    @Test
+    public void testUploadEventOrder() throws Exception {
+        open();
+
+        waitUntil(driver -> getUpload().isDisplayed());
+
+        File tempFile = createTempFile();
+
+        fillPathToUploadInput(tempFile.getPath());
+
+        WebElement eventsOutput = getDriver()
+                .findElement(By.id("test-events-output"));
+
+        Assert.assertEquals("Upload event order does not match expected",
+                "-succeeded-finished", eventsOutput.getText());
     }
 
     @Test
@@ -111,12 +152,13 @@ public class UploadIT extends ComponentDemoTest {
         return "This is a test file! Row 2 Row3";
     }
 
-    private void fillPathToUploadInput(String tempFileName) throws Exception {
+    private void fillPathToUploadInput(String... tempFileNames)
+            throws Exception {
         // create a valid path in upload input element. Instead of selecting a
         // file by some file browsing dialog, we use the local path directly.
         WebElement input = getInput();
         setLocalFileDetector(input);
-        input.sendKeys(tempFileName);
+        input.sendKeys(String.join(System.lineSeparator(), tempFileNames));
     }
 
     private WebElement getUpload() {
@@ -149,10 +191,5 @@ public class UploadIT extends ComponentDemoTest {
                     "Expected argument of type RemoteWebElement, received "
                             + element.getClass().getName());
         }
-    }
-
-    @Override
-    protected String getTestPath() {
-        return "/vaadin-upload";
     }
 }

@@ -22,11 +22,13 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -36,6 +38,7 @@ import com.vaadin.flow.server.StreamReceiver;
 import com.vaadin.flow.server.StreamVariable;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.JsonArray;
 import elemental.json.JsonNull;
 import elemental.json.JsonObject;
 
@@ -50,6 +53,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     private boolean interrupted = false;
 
     private int activeUploads = 0;
+    private boolean uploading;
 
     private static final String I18N_PROPERTY = "i18n";
     private UploadI18N i18n;
@@ -76,6 +80,29 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
 
         getElement().setAttribute("target", new StreamReceiver(
                 getElement().getNode(), "upload", getStreamVariable()));
+
+        DomEventListener uploadsFinishedListener = e -> {
+            JsonArray files = e.getEventData().getArray("element.files");
+
+            boolean uploading = IntStream.range(0, files.length()).anyMatch(
+                    index -> files.getObject(index).getBoolean("uploading"));
+
+            if (this.uploading && !uploading) {
+                this.fireUploadsFinish();
+            }
+            this.uploading = uploading;
+        };
+
+        addUploadStartListener(e -> this.uploading = true);
+        getElement().addEventListener("upload-success", uploadsFinishedListener)
+                .addEventData("element.files");
+        getElement().addEventListener("upload-error", uploadsFinishedListener)
+                .addEventData("element.files");
+    }
+
+    public Registration addUploadsFinishedListener(
+            ComponentEventListener<UploadsFinishedEvent> listener) {
+        return addListener(UploadsFinishedEvent.class, listener);
     }
 
     /**
@@ -109,8 +136,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Get the maximum number of files allowed for the user to select to
-     * upload.
+     * Get the maximum number of files allowed for the user to select to upload.
      *
      * @return the maximum number of files
      */
@@ -119,8 +145,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Specify the maximum file size in bytes allowed to upload. Notice that
-     * it is a client-side constraint, which will be checked before sending the
+     * Specify the maximum file size in bytes allowed to upload. Notice that it
+     * is a client-side constraint, which will be checked before sending the
      * request.
      *
      * @param maxFileSize
@@ -325,8 +351,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     /**
      * Interrupt the upload currently being received.
      * <p>
-     * The interruption will be done by the receiving thread so this method
-     * will return immediately and the actual interrupt will happen a bit later.
+     * The interruption will be done by the receiving thread so this method will
+     * return immediately and the actual interrupt will happen a bit later.
      * <p>
      * Note! this will interrupt all uploads in multi-upload mode.
      */
@@ -379,10 +405,14 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
             long length) {
         fireEvent(new SucceededEvent(this, filename, MIMEType, length));
     }
-    
+
     private void fireUploadFinish(String filename, String MIMEType,
             long length) {
         fireEvent(new FinishedEvent(this, filename, MIMEType, length));
+    }
+
+    private void fireUploadsFinish() {
+        fireEvent(new UploadsFinishedEvent(this));
     }
 
     /**
@@ -499,7 +529,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
                 JsonObject i18nObject = (JsonObject) JsonSerializer
-                    .toJson(this.i18n);
+                        .toJson(this.i18n);
                 for (String key : i18nObject.keys()) {
                     ui.getPage().executeJavaScript(
                             "$0.set('i18n." + key + "', $1)", getElement(),
@@ -611,7 +641,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
                         event.getMimeType(), event.getContentLength());
             } finally {
                 upload.endUpload();
-                upload.fireUploadFinish(event.getFileName(), event.getMimeType(), event.getContentLength());
+                upload.fireUploadFinish(event.getFileName(),
+                        event.getMimeType(), event.getContentLength());
             }
         }
 
@@ -632,7 +663,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
                 }
             } finally {
                 upload.endUpload();
-                upload.fireUploadFinish(event.getFileName(), event.getMimeType(), event.getContentLength());
+                upload.fireUploadFinish(event.getFileName(),
+                        event.getMimeType(), event.getContentLength());
             }
         }
     }
