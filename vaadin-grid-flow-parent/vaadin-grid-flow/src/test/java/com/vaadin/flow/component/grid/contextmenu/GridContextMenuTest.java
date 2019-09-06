@@ -104,6 +104,9 @@ public class GridContextMenuTest {
                 element.addEventListener(Mockito.anyString(), Mockito.any()))
                 .thenReturn(registration);
 
+        Mockito.when(registration.addEventData(Mockito.anyString()))
+                .thenReturn(registration);
+
         Mockito.when(grid.getUI()).thenReturn(Optional.empty());
 
         Registration attachRegistration = Mockito.mock(Registration.class);
@@ -117,6 +120,6 @@ public class GridContextMenuTest {
 
         Mockito.verify(registration).remove();
         Mockito.verify(element)
-                .callFunction("$contextMenuConnector.removeConnector");
+                .callJsFunction("$contextMenuConnector.removeConnector");
     }
 }

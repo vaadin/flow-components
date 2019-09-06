@@ -24,8 +24,11 @@ import com.vaadin.flow.component.contextmenu.ContextMenuBase;
 import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
+
+import elemental.json.JsonObject;
 
 /**
  * Server-side component for {@code <vaadin-context-menu>} to be used with
@@ -37,6 +40,8 @@ import com.vaadin.flow.shared.Registration;
 public class GridContextMenu<T> extends
         ContextMenuBase<GridContextMenu<T>, GridMenuItem<T>, GridSubMenu<T>>
         implements HasGridMenuItems<T> {
+
+    private SerializableFunction<T, Boolean> dynamicContentHandler;
 
     /**
      * Event that is fired when a {@link GridMenuItem} is clicked inside a
@@ -202,4 +207,58 @@ public class GridContextMenu<T> extends
         return super.addOpenedChangeListener(ev -> listener.onComponentEvent(new GridContextMenuOpenedEvent<>(ev.getSource(), ev.isFromClient())));
     }
 
+    /**
+     * Gets the callback function that is executed before the context menu is
+     * opened.
+     *
+     * <p>
+     * The dynamic context handler allows for customizing the contents of the
+     * context menu before it is open.
+     * </p>
+     *
+     * @return the callback function that is executed before opening the context
+     *         menu, or {@code null} if not specified.
+     */
+    public SerializableFunction<T, Boolean> getDynamicContentHandler() {
+        return dynamicContentHandler;
+    }
+
+    /**
+     * Sets a callback that is executed before the context menu is opened.
+     *
+     * <p>
+     * This callback receives the clicked item (if any) as an input parameter
+     * and further can dynamically modify the contents of the context menu. This
+     * is useful in situations where the context menu items cannot be known in
+     * advance and depend on the specific context (i.e. clicked row) and thus
+     * can be configured dynamically.
+     *
+     * The boolean return value of this callback specifies if the context menu
+     * will be opened.
+     * </p>
+     *
+     * @param dynamicContentHandler
+     *            the callback function that will be executed before opening the
+     *            context menu.
+     */
+    public void setDynamicContentHandler(
+            SerializableFunction<T, Boolean> dynamicContentHandler) {
+        this.dynamicContentHandler = dynamicContentHandler;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean onBeforeOpenMenu(JsonObject eventDetail) {
+        Grid<T> grid = (Grid<T>) getTarget();
+        String key = eventDetail.getString("key");
+
+        if (getDynamicContentHandler() != null) {
+            final T item = grid.getDataCommunicator().getKeyMapper().get(key);
+            return getDynamicContentHandler().apply(item);
+        }
+
+        return super.onBeforeOpenMenu(eventDetail);
+    }
 }

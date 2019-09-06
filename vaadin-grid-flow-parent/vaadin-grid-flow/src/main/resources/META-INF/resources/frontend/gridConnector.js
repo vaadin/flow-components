@@ -911,6 +911,13 @@ window.Vaadin.Flow.gridConnector = {
       contextMenuListener(grid.$contextMenuConnector.openEvent);
     });
 
+    grid.getContextMenuBeforeOpenDetail = function(event) {
+      const eventContext = grid.getEventContext(event);
+      return {
+        key: (eventContext.item && eventContext.item.key) || ""
+      };
+    };
+
     grid.addEventListener('cell-activate', e => {
       grid.$connector.activeItem = e.detail.model.item;
       setTimeout(() => grid.$connector.activeItem = undefined);

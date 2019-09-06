@@ -1,13 +1,35 @@
 package com.vaadin.flow.component.grid.demo;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.HtmlImport;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.FooterRow;
 import com.vaadin.flow.component.grid.Grid;
@@ -62,27 +84,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.lang3.StringUtils;
-
-import java.math.BigDecimal;
-import java.text.NumberFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 
 import static com.vaadin.flow.component.grid.demo.data.CountryData.UNITED_STATES;
 
@@ -627,6 +628,7 @@ public class GridDemo extends DemoView {
         createItemDetailsOpenedProgrammatically();
         createContextMenu();// Context Menu
         createContextSubMenu();// Context Sub Menu
+        createDynamicContextMenu(); // Dynamic Context Menu
         createClickListener();// Click Listener
         createDoubleClickListener();
         createBufferedEditor();// Grid Editor
@@ -1769,9 +1771,38 @@ public class GridDemo extends DemoView {
             dataProvider.refreshAll();
         });
         // end-source-example
-        grid.setId("context-menu-grid");
+        grid.setId("context-sub-menu-grid");
         addCard("Context Menu", "Using Context Sub Menu With Grid", grid,
                 contextMenu);
+    }
+
+    // Dynamic Context Menu begin
+    private void createDynamicContextMenu() {
+        TaskData taskData = new TaskData();
+
+        // begin-source-example
+        // source-example-heading: Dynamic Context Menu
+        Grid<Task> grid = new Grid<>();
+        ListDataProvider<Task> dataProvider = DataProvider
+                .ofCollection(taskData.getTasks());
+
+        grid.setDataProvider(dataProvider);
+        grid.addColumn(Task::getName).setHeader("Task Name");
+        grid.addColumn(Task::getDueDate).setHeader("Due Date");
+        GridContextMenu<Task> contextMenu = new GridContextMenu<>(grid);
+        contextMenu.setDynamicContentHandler(task -> {
+            if (task == null) {
+                // do not show the context menu when a row is not clicked
+                return false;
+            }
+            contextMenu.removeAll();
+            contextMenu.addItem("Name: " + task.getName());
+            contextMenu.addItem("Due date: " + task.getDueDate());
+            return true; // show the context menu
+        });
+        // end-source-example
+        grid.setId("dynamic-context-menu-grid");
+        addCard("Context Menu", "Dynamic Context Menu", grid, contextMenu);
     }
 
     // Click Listener Begin
