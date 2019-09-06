@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -235,4 +236,15 @@ class ColumnLayer implements Serializable {
         columns.forEach(col -> col.updateSortingIndicators(sortingIndicators));
     }
 
+    /**
+     * Updates the internal column order according to given column total ordering.
+     *
+     * @param columnsPreOrder
+     *            the total column ordering, having parent column groups preceding
+     *            children (pre-order).
+     */
+    protected void updateColumnOrder(List<ColumnBase<?>> columnsPreOrder) {
+        columns.sort(Comparator.comparingInt(columnsPreOrder::indexOf));
+        setColumns(columns);
+    }
 }

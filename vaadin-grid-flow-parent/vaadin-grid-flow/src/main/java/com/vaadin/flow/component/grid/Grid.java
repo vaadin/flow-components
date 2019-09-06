@@ -2671,27 +2671,48 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         removeColumn(columnByKey);
     }
 
+    void ensureOwner(Column<T> column) {
+        if (!column.getGrid().equals(this)
+                || column.getElement().getParent() == null) {
+            throw new IllegalArgumentException("The column with key '"
+                    + column.getKey() + "' is not owned by this Grid");
+        }
+    }
+
     /**
      * Removes a column from the Grid.
      *
      * @param column
      *            the column to be removed, not <code>null</code>
+     * @throws NullPointerException
+     *             if the column is {@code null}
      * @throws IllegalArgumentException
-     *             if column is <code>null</code> or if it is not part of this
-     *             Grid
+     *             if the column is not owned by this Grid
      */
     public void removeColumn(Column<T> column) {
         Objects.requireNonNull(column, "column should not be null");
 
-        if (!column.getGrid().equals(this)
-                || column.getElement().getParent() == null) {
-            throw new IllegalArgumentException("The column with key '"
-                    + column.getKey() + "' is not part of this Grid");
-        }
+        ensureOwner(column);
         removeColumnAndColumnGroupsIfNeeded(column);
         column.destroyDataGenerators();
         keyToColumnMap.remove(column.getKey());
         idToColumnMap.remove(column.getInternalId());
+    }
+
+    /**
+     * Removes columns from the Grid. Does nothing if the array is empty.
+     *
+     * @param columns
+     *            the columns to be removed, not <code>null</code>
+     * @throws NullPointerException
+     *             if the column is {@code null}
+     * @throws IllegalArgumentException
+     *             if the column is not owned by this Grid
+     */
+    public void removeColumns(Column<T>... columns) {
+        for (Column<T> column : columns) {
+            removeColumn(column);
+        }
     }
 
     /**
@@ -3622,7 +3643,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * here. The function is executed for each item in the Grid during data
      * generation. Return a {@link String} to be appended to the row as {@code
      * type} data.
-     *
+     * <p>
      * Note that IE11 only supports data type "text"
      *
      * @param type
@@ -3649,7 +3670,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * visible viewport and all the items outside of it, even if selected, are
      * excluded. Use this method to override the default drag data and the
      * number shown in drag image on selection drag.
-     *
+     * <p>
      * Note that IE11 only supports data type "text"
      *
      * @param draggedItemsCount
@@ -3687,5 +3708,72 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             ComponentEventListener<ColumnReorderEvent<T>> listener) {
         return addListener(ColumnReorderEvent.class,
                 (ComponentEventListener) Objects.requireNonNull(listener));
+    }
+
+    /**
+     * Sets a new column order for the grid.
+     * <p>
+     * The function doesn't support column
+     * removal: all columns must be present in the list, otherwise
+     * {@link IllegalArgumentException} is thrown.
+     * <p>
+     * The {@link #getColumns()} function will reflect the new column ordering.
+     * <p>
+     * Fires the {@link ColumnReorderEvent} with {@link ColumnReorderEvent#isFromClient()}
+     * returning {@code false}.
+     * <p>
+     * The method is atomic: if the requested reordering is not achievable,
+     * the function fails cleanly with {@link IllegalArgumentException} without
+     * doing any work.
+     *
+     * @see #setColumnOrder(List)
+     * @param columns
+     *            the new ordering of the columns, not {@code null}.
+     * @throws NullPointerException
+     *            if the {@code columns} parameter is {@code null}.
+     * @throws IllegalArgumentException if a column is present two times in the
+     *            list, or if the column is not owned by this Grid, or if the
+     *            list doesn't contain all columns currently present in the Grid,
+     *            or if the column rearranging would require to split a joined
+     *            header/footer cell group.
+     */
+    public void setColumnOrder(Column<T>... columns) {
+        setColumnOrder(Arrays.asList(columns));
+    }
+
+    /**
+     * Sets a new column order for the grid.
+     * <p>
+     * The function doesn't support column
+     * removal: all columns must be present in the list, otherwise
+     * {@link IllegalArgumentException} is thrown.
+     * <p>
+     * The {@link #getColumns()} function will reflect the new column ordering.
+     * <p>
+     * Fires the {@link ColumnReorderEvent} with {@link ColumnReorderEvent#isFromClient()}
+     * returning {@code false}.
+     * <p>
+     * The method is atomic: if the requested reordering is not achievable,
+     * the function fails cleanly with {@link IllegalArgumentException} without
+     * doing any work.
+     *
+     * @see #setColumnOrder(Column[])
+     * @param columns
+     *            the new ordering of the columns, not {@code null}.
+     * @throws NullPointerException
+     *            if the {@code columns} parameter is {@code null}.
+     * @throws IllegalArgumentException if a column is present two times in the
+     *            list, or if the column is not owned by this Grid, or if the
+     *            list doesn't contain all columns currently present in the Grid,
+     *            or if the column rearranging would require to split a joined
+     *            header/footer cell group.
+     */
+    public void setColumnOrder(List<Column<T>> columns) {
+        new GridColumnOrderHelper<>(this).setColumnOrder(columns);
+        fireColumnReorderEvent(getColumns());
+    }
+
+    private void fireColumnReorderEvent(List<Column<T>> columns) {
+        fireEvent(new ColumnReorderEvent<>(this, false, columns));
     }
 }

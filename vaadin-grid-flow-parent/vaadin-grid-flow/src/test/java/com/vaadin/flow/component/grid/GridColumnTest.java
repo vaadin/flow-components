@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import static org.junit.Assert.assertNotNull;
+
 public class GridColumnTest {
 
     Grid<String> grid;
@@ -123,7 +125,7 @@ public class GridColumnTest {
     @Test
     public void removeInvalidColumn_throws() {
         expectIllegalArgumentException(
-                "The column with key 'wrong' is not part of this Grid");
+                "The column with key 'wrong' is not owned by this Grid");
 
         Grid<String> grid2 = new Grid<>();
         Column<String> wrongColumn = grid2.addColumn(str -> str);
@@ -134,7 +136,7 @@ public class GridColumnTest {
     @Test
     public void removeColumnTwice_throws() {
         expectIllegalArgumentException(
-                "The column with key 'first' is not part of this Grid");
+                "The column with key 'first' is not owned by this Grid");
 
         firstColumn.setKey("first");
         grid.removeColumn(firstColumn);
@@ -219,7 +221,7 @@ public class GridColumnTest {
     @Test
     public void createColumn_returnsNonNullAndBasicType() {
         Column column = new Grid<Person>().createColumn(TemplateRenderer.of(""), "");
-        Assert.assertNotNull(column);
+        assertNotNull(column);
         Assert.assertEquals(Column.class, column.getClass());
     }
 
@@ -234,7 +236,7 @@ public class GridColumnTest {
 
         Column<Person> column = extendedGrid.addColumn(Person::toString);
 
-        Assert.assertNotNull(column);
+        assertNotNull(column);
         Assert.assertEquals(ExtendedColumn.class, column.getClass());
     }
 
@@ -253,7 +255,7 @@ public class GridColumnTest {
 
         Column<Person> column = extendedGrid.addColumn(Person::toString);
 
-        Assert.assertNotNull(column);
+        assertNotNull(column);
         Assert.assertEquals(ExtendedColumn.class, column.getClass());
     }
 
@@ -268,7 +270,7 @@ public class GridColumnTest {
         columnsList.add(extendedGrid.addColumn(TemplateRenderer.of(""), extendedGrid::createCustomColumn, ""));
 
         columnsList.forEach(column -> {
-            Assert.assertNotNull(column);
+            assertNotNull(column);
             Assert.assertEquals(ExtendedColumn.class, column.getClass());
         });
     }
@@ -283,9 +285,8 @@ public class GridColumnTest {
         assertEqualColumnClasses(regularColumn.getClass(), Column.class);
         assertEqualColumnClasses(extendedColumn.getClass(), ExtendedColumn.class);
     }
-
     private void assertEqualColumnClasses(Class columnClass, Class compareTo) {
-        Assert.assertNotNull(columnClass);
+        assertNotNull(columnClass);
         Assert.assertEquals(compareTo, columnClass);
     }
 
