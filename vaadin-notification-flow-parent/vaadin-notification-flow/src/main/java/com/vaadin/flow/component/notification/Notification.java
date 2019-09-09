@@ -425,7 +425,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         if (ui == null) {
             throw new IllegalStateException("UI instance is not available. "
                     + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitely set. "
+                    + "out of a normal workflow where it's always implicitly set. "
                     + "That may happen if you call the method from the custom thread without "
                     + "'UI::access' or from tests without proper initialization.");
         }
