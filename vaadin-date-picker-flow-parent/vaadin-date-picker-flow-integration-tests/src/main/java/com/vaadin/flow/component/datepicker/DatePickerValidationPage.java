@@ -37,6 +37,7 @@ public class DatePickerValidationPage extends Div {
         createPickerInsideDiv();
         createPickerTestLocales();
         createPickerWithValueAndLocaleFromServerSide();
+        createPickerWithMaxAndMinValues();
     }
 
     private void initView() {
@@ -137,5 +138,21 @@ public class DatePickerValidationPage extends Div {
                 e -> datePicker.setLocale(new Locale("sv", "SE")));
 
         add(datePicker, locale1, locale2);
+    }
+
+    private void createPickerWithMaxAndMinValues() {
+        final DatePicker datePicker = new DatePicker();
+        datePicker.setMin(LocalDate.of(2017, 4, 5));
+        datePicker.setMax(LocalDate.of(2018, 6, 7));
+        datePicker.setId("picker-with-valid-range");
+
+        final Div isValid = new Div();
+        isValid.setId("is-invalid");
+        final NativeButton checkIsValid = new NativeButton(
+            "Check if current value of step-number-field is invalid");
+        checkIsValid.setId("check-is-invalid");
+        checkIsValid.addClickListener(event -> isValid
+            .setText(datePicker.isInvalid() ? "invalid" : "valid"));
+        add(datePicker, checkIsValid, isValid);
     }
 }

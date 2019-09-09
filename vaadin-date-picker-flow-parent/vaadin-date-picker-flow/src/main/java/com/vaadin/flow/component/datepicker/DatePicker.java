@@ -63,6 +63,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private Locale locale;
     private String languageTag;
 
+    private LocalDate max;
+    private LocalDate min;
+    private boolean required;
+
     /**
      * Default constructor.
      */
@@ -82,6 +86,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         super(initialDate, null, String.class, PARSER, FORMATTER);
         getElement().synchronizeProperty("invalid", "invalid-changed");
         setLocale(UI.getCurrent().getLocale());
+        addInvalidChangeListener(e -> {
+            // If invalid is updated from client to false, check it
+            if(e.isFromClient() && !e.isInvalid()) {
+                setInvalid(isInvalid(getValue()));
+            }
+        });
+
     }
 
     /**
@@ -206,6 +217,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      */
     public void setMin(LocalDate min) {
         setMinAsString(FORMATTER.apply(min));
+        this.min = min;
     }
 
     /**
@@ -229,6 +241,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      */
     public void setMax(LocalDate max) {
         setMaxAsString(FORMATTER.apply(max));
+        this.max = max;
     }
 
     /**
@@ -385,6 +398,17 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         return isInvalidBoolean();
     }
 
+
+    /**
+     * Performs a server-side validation of the given value. This is needed because it is possible to circumvent the
+     * client side validation constraints using browser development tools.
+     */
+    private boolean isInvalid(LocalDate value) {
+        final boolean isRequiredButEmpty = required && Objects.equals(getEmptyValue(), value);
+        final boolean isGreaterThanMax  = value != null && max != null && value.isAfter(max);
+        final boolean isSmallerThenMin = value != null && min != null && value.isBefore(min);
+        return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
+    }
     /**
      * Sets displaying a clear button in the datepicker when it has value.
      * <p>
@@ -474,6 +498,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     @Override
     public void setRequired(boolean required) {
         super.setRequired(required);
+        this.required = required;
+    }
+
+    @Override
+    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        super.setRequiredIndicatorVisible(required);
+        this.required = requiredIndicatorVisible;
     }
 
     /**
@@ -565,6 +596,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      */
     public String getName() {
         return getNameString();
+    }
+
+    @Override
+    protected void setModelValue(LocalDate newModelValue, boolean fromClient) {
+        super.setModelValue(newModelValue, fromClient);
+        setInvalid(isInvalid(newModelValue));
     }
 
     @Override
