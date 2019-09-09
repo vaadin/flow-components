@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.dialog.testbench;
 
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 
@@ -59,7 +60,15 @@ public class DialogElement extends TestBenchElement {
      * @return the overlay element
      */
     private TestBenchElement getOverlay() {
-        return getPropertyElement("$", "overlay", "content");
+        try {
+            return getPropertyElement("$", "overlay", "content");
+        } catch (JavascriptException e) {
+            // Overlay content can be the overlay itself or the shadowRoot of
+            // the content part
+            // https://github.com/vaadin/vaadin-overlay/blob/master/src/vaadin-overlay.html#L837-L841
+            // return shadowRoot is not supported in WebDriver and doesn't work in Firefox
+            return getPropertyElement("$", "overlay", "$", "content");
+        }
     }
 
 }
