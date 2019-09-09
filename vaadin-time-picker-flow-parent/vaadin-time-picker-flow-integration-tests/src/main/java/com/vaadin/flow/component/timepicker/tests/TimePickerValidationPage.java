@@ -16,6 +16,8 @@
 package com.vaadin.flow.component.timepicker.tests;
 
 import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.testutil.ValidationTestView;
@@ -26,9 +28,29 @@ import com.vaadin.flow.testutil.ValidationTestView;
 @Route("time-picker-validation")
 public class TimePickerValidationPage extends ValidationTestView {
 
+    public TimePickerValidationPage() {
+        createPickerWithMaxAndMinValues();
+    }
+
     @Override
     protected HasValidation getValidationComponent() {
         return new TimePicker();
+    }
+
+    private void createPickerWithMaxAndMinValues() {
+        final TimePicker timePicker = new TimePicker();
+        timePicker.setMin("09:30");
+        timePicker.setMax("17:00");
+        timePicker.setId("picker-with-valid-range");
+
+        final Div isValid = new Div();
+        isValid.setId("is-invalid");
+        final NativeButton checkIsValid = new NativeButton(
+            "Check if current value of step-number-field is invalid");
+        checkIsValid.setId("check-is-invalid");
+        checkIsValid.addClickListener(event -> isValid
+            .setText(timePicker.isInvalid() ? "invalid" : "valid"));
+        add(timePicker, checkIsValid, isValid);
     }
 
 }

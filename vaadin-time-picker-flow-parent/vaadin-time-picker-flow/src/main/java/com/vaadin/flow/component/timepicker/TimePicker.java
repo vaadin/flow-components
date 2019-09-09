@@ -17,6 +17,7 @@ package com.vaadin.flow.component.timepicker;
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
@@ -59,6 +60,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private static final long MILLISECONDS_IN_AN_HOUR = 3600000L;
 
     private Locale locale;
+    private transient DateTimeFormatter dateTimeFormatter;
+
+    private LocalTime max;
+    private LocalTime min;
+    private boolean required;
+
 
     /**
      * Default constructor.
@@ -75,6 +82,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     public TimePicker(LocalTime time) {
         super(time, null, String.class, PARSER, FORMATTER);
+        addInvalidChangeListener(e -> {
+            // If invalid is updated from client to false, check it
+            if(e.isFromClient() && !e.isInvalid()) {
+                setInvalid(isInvalid(getValue()));
+            }
+        });
     }
 
     /**
@@ -175,6 +188,17 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return isInvalidBoolean();
     }
 
+    /**
+     * Performs a server-side validation of the given value. This is needed because it is possible to circumvent the
+     * client side validation constraints using browser development tools.
+     */
+    private boolean isInvalid(LocalTime value) {
+        final boolean isRequiredButEmpty = required && Objects.equals(getEmptyValue(), value);
+        final boolean isGreaterThanMax  = value != null && max != null && value.isAfter(max);
+        final boolean isSmallerThenMin = value != null && min != null && value.isBefore(min);
+        return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
+    }
+
     @Override
     public void setPlaceholder(String placeholder) {
         super.setPlaceholder(placeholder);
@@ -196,6 +220,13 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     @Override
     public void setRequired(boolean required) {
         super.setRequired(required);
+        this.required = required;
+    }
+
+    @Override
+    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        super.setRequiredIndicatorVisible(required);
+        this.required = requiredIndicatorVisible;
     }
 
     /**
@@ -277,6 +308,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     @Override
+    protected void setModelValue(LocalTime newModelValue, boolean fromClient) {
+        super.setModelValue(newModelValue, fromClient);
+        setInvalid(isInvalid(newModelValue));
+    }
+
+    @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         if (getLocale() == null) {
@@ -327,6 +364,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         }
 
         this.locale = locale;
+        this.dateTimeFormatter = null;
         // we could support script & variant, but that requires more work on
         // client side to detect the different
         // number characters for other scripts (current only Arabic there)
@@ -363,6 +401,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     @Override
     public void setMin(String min) {
+        this.min = LocalTime.parse(min, initializeAndReturnFormatter());
         super.setMin(min);
     }
 
@@ -387,6 +426,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     @Override
     public void setMax(String max) {
+        this.max = LocalTime.parse(max, initializeAndReturnFormatter());
         super.setMax(max);
     }
 
@@ -449,5 +489,14 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     public static Stream<Locale> getSupportedAvailableLocales() {
         return Stream.of(Locale.getAvailableLocales())
                 .filter(locale -> !locale.getLanguage().isEmpty());
+    }
+
+    private DateTimeFormatter initializeAndReturnFormatter() {
+        if(dateTimeFormatter == null) {
+            dateTimeFormatter = locale == null ?
+                DateTimeFormatter.ISO_LOCAL_TIME :
+                DateTimeFormatter.ISO_LOCAL_TIME.withLocale(locale);
+        }
+        return dateTimeFormatter;
     }
 }
