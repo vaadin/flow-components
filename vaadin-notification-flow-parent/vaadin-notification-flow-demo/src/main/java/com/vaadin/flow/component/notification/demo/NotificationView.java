@@ -22,8 +22,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -92,8 +92,7 @@ public class NotificationView extends DemoView {
         button.setId("component-notification-button");
         // begin-source-example
         // source-example-heading: Notification with components
-        Label content = new Label(
-                "Hello, I am a notification with components!");
+        Span content = new Span("Hello, I am a notification with components!");
         NativeButton buttonInside = new NativeButton("Bye");
         Notification notification = new Notification(content, buttonInside);
         notification.setDuration(3000);
@@ -159,7 +158,7 @@ public class NotificationView extends DemoView {
         // source-example-heading: Default
         Notification notification = new Notification();
 
-        Label label = new Label("Please update your password");
+        Span label = new Span("Please update your password");
 
         Button notNowButton = new Button("Not now", e -> notification.close());
 
@@ -184,7 +183,7 @@ public class NotificationView extends DemoView {
         Notification notification = new Notification();
         notification.addThemeVariants(NotificationVariant.LUMO_PRIMARY);
 
-        Label label = new Label("Get notified with our latest updates");
+        Span label = new Span("Get notified with our latest updates");
 
         Button skipButton = new Button("Skip", e -> notification.close());
 
@@ -210,7 +209,7 @@ public class NotificationView extends DemoView {
         Notification notification = new Notification();
         notification.addThemeVariants(NotificationVariant.LUMO_CONTRAST);
 
-        Label label = new Label("Message deleted");
+        Span label = new Span("Message deleted");
 
         Button dismissButton = new Button("Dismiss", e -> notification.close());
 
@@ -236,7 +235,7 @@ public class NotificationView extends DemoView {
         Notification notification = new Notification();
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
-        Label label = new Label("New version deployed sucessfully");
+        Span label = new Span("New version deployed sucessfully");
 
         Button viewLogButton = new Button("View log",
                 e -> notification.close());
@@ -264,7 +263,7 @@ public class NotificationView extends DemoView {
         Notification notification = new Notification();
         notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
 
-        Label label = new Label("System error occured");
+        Span label = new Span("System error occured");
 
         Button thisIsFineButton = new Button("This is fine",
                 e -> notification.close());
