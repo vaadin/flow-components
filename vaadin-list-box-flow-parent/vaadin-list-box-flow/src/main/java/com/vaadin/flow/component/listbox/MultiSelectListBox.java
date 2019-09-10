@@ -56,10 +56,11 @@ public class MultiSelectListBox<T>
 
     private static <T> Set<T> presentationToModel(MultiSelectListBox<T> listBox,
             JsonArray presentation) {
-        return IntStream.range(0, presentation.length())
+        Set<T> modelValue = IntStream.range(0, presentation.length())
                 .map(i -> (int) presentation.getNumber(i))
                 .mapToObj(index -> listBox.getItems().get(index))
                 .collect(Collectors.toSet());
+        return Collections.unmodifiableSet(modelValue);
     }
 
     private static <T> JsonArray modelToPresentation(

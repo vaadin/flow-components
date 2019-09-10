@@ -172,6 +172,16 @@ public class MultiSelectListBoxTest {
         assertValueChangeEvents(createSet(foo), createSet(bar));
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void getValue_modifySet_throws() {
+        listBox.getValue().add(new Item("baz"));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getSelectedItems_modifySet_throws() {
+        listBox.getSelectedItems().add(new Item("baz"));
+    }
+
     private void assertValueChangeEvents(Set<Item>... expectedValues) {
         Assert.assertEquals(expectedValues.length, eventValues.size());
         IntStream.range(0, expectedValues.length).forEach(i -> {
