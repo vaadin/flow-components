@@ -100,6 +100,15 @@ public class MultiSelectListBox<T>
         setValue(value);
     }
 
+    /**
+     * Returns an immutable set of the currently selected items. It is safe to
+     * invoke other {@code SelectionModel} methods while iterating over the set.
+     * <p>
+     * There are no guarantees of the iteration order of the returned set of
+     * items.
+     *
+     * @return the items in the current selection, not {@code null}
+     */
     @Override
     public Set<T> getSelectedItems() {
         return getValue();
