@@ -75,10 +75,6 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
             </plugin>
             <plugin>
@@ -118,6 +114,10 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-war-plugin</artifactId>
                         <version>3.2.2</version>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>flow-maven-plugin</artifactId>
                     </plugin>
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>
