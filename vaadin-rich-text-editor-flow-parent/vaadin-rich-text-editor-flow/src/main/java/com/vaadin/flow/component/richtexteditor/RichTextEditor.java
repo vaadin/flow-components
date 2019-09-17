@@ -28,10 +28,8 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
-import javax.xml.bind.ValidationEvent;
-import java.util.Objects;
-
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Server-side component for the {@code <vaadin-rich-text-editor>} component.
@@ -101,7 +99,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
      * Constructs a {@code RichTextEditor} with the initial value
      *
      * @param initialValue
-     *            the initial value
+     *            the initial value in Delta format, not {@code null}
      *
      * @see #setValue(Object)
      */
