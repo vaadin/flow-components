@@ -27,7 +27,7 @@ public class TreeGridRefreshAllPage extends Div {
     public TreeGridRefreshAllPage() {
         TreeGrid<HierarchicalTestBean> grid = new TreeGrid<>();
         grid.addHierarchyColumn(HierarchicalTestBean::toString);
-        grid.setDataProvider(new LazyHierarchicalDataProvider(1, 4));
+        grid.setDataProvider(new LazyHierarchicalDataProvider(50, 4));
 
         NativeButton refreshAll = new NativeButton("Refresh All",
                 e -> grid.getDataProvider().refreshAll());

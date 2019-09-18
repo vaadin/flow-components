@@ -559,6 +559,8 @@ window.Vaadin.Flow.gridConnector = {
      * Updates all visible grid rows in DOM.
      */
     const updateAllGridRowsInDomBasedOnCache = function () {
+      grid._cache.updateSize();
+      grid._effectiveSize = grid._cache.effectiveSize;
       grid._assignModels();
     }
 
