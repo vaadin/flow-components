@@ -927,6 +927,20 @@ window.Vaadin.Flow.gridConnector = {
     grid.addEventListener('click', e => _fireClickEvent(e, 'item-click'));
     grid.addEventListener('dblclick', e => _fireClickEvent(e, 'item-double-click'));
 
+    grid.addEventListener('column-resize', e => {
+      const cols = grid._getColumns().filter(col => !col.hidden);
+      const columnWidths = {}, columnFlexGrows = {};
+        cols.forEach(col => {
+          columnWidths[col._flowId] = col.width;
+          columnFlexGrows[col._flowId] = col.flexGrow;
+        });
+      grid.dispatchEvent(new CustomEvent('column-drag-resize', { detail: {
+        columnWidths: columnWidths,
+        columnFlexGrows: columnFlexGrows,
+        resizedColumnKey: e.detail.resizedColumn._flowId
+      }}));
+    });
+
     function _fireClickEvent(event, eventName) {
       if (grid.$connector.activeItem) {
         event.itemKey = grid.$connector.activeItem.key;
