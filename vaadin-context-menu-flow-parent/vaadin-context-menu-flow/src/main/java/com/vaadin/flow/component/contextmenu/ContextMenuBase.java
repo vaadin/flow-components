@@ -64,6 +64,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private String openOnEventName = "vaadin-contextmenu";
     private Registration targetBeforeOpenRegistration;
     private Registration targetAttachRegistration;
+    private Registration targetBeforeClientResponseRegistration;
 
     private boolean autoAddedToTheUi;
 
@@ -105,6 +106,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             targetAttachRegistration.remove();
             getTarget().getElement()
                     .callJsFunction("$contextMenuConnector.removeConnector");
+            if (targetBeforeClientResponseRegistration != null) {
+                targetBeforeClientResponseRegistration.remove();
+                targetBeforeClientResponseRegistration = null;
+            }
         }
 
         this.target = target;
@@ -370,8 +375,15 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     private void onTargetAttach(UI ui) {
         ui.getInternals().addComponentDependencies(ContextMenu.class);
-        ui.getPage().executeJs(
-                "window.Vaadin.Flow.contextMenuConnector.init($0)", target);
+        if (targetBeforeClientResponseRegistration == null) {
+            targetBeforeClientResponseRegistration = ui
+                    .beforeClientResponse(target, context -> {
+                        ui.getPage().executeJs(
+                                "window.Vaadin.Flow.contextMenuConnector.init($0)",
+                                target);
+                        targetBeforeClientResponseRegistration = null;
+                    });
+        }
         updateOpenOn();
     }
 

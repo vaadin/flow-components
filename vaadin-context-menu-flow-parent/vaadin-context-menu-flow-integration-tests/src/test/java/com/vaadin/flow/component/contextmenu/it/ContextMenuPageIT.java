@@ -219,6 +219,14 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
     }
 
     @Test
+    public void detachedTarget_attachDetachTarget_noErrors() {
+        clickElementWithJs("detach-target");
+
+        clickElementWithJs("attach-detach-target");
+        checkLogsForErrors();
+    }
+
+    @Test
     public void detachTarget_changeTarget_attachOldTarget_rightClickOldTarget_menuNotOpened() {
         clickElementWithJs("detach-target");
         clickElementWithJs("change-target");
