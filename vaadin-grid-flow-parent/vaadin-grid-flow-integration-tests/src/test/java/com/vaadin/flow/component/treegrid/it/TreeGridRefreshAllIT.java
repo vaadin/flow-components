@@ -78,4 +78,15 @@ public class TreeGridRefreshAllIT extends AbstractTreeGridIT {
 
     }
 
+    @Test // https://github.com/vaadin/vaadin-grid-flow/issues/499
+    public void expandItems_clearData_refreshAll_noRowsRendered() {
+        getTreeGrid().expandWithClick(0);
+        getTreeGrid().expandWithClick(1);
+
+        clickElementWithJs("clear");
+
+        Assert.assertEquals("Expected no rows to be rendered", 0,
+                getTreeGrid().getRowCount());
+    }
+
 }

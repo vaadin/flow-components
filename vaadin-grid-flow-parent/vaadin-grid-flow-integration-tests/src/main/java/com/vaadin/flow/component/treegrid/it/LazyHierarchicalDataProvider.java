@@ -30,6 +30,8 @@ public class LazyHierarchicalDataProvider extends
     private final int nodesPerLevel;
     private final int depth;
 
+    private boolean cleared;
+
     public LazyHierarchicalDataProvider(int nodesPerLevel, int depth) {
         this.nodesPerLevel = nodesPerLevel;
         this.depth = depth;
@@ -38,6 +40,9 @@ public class LazyHierarchicalDataProvider extends
     @Override
     public int getChildCount(
             HierarchicalQuery<HierarchicalTestBean, Void> query) {
+        if (cleared) {
+            return 0;
+        }
 
         Optional<Integer> count = query.getParentOptional()
                 .flatMap(parent -> Optional.of(Integer.valueOf(
@@ -53,6 +58,10 @@ public class LazyHierarchicalDataProvider extends
 
     private boolean internalHasChildren(HierarchicalTestBean node) {
         return node.getDepth() < depth;
+    }
+
+    public void clear() {
+        this.cleared = true;
     }
 
     @Override

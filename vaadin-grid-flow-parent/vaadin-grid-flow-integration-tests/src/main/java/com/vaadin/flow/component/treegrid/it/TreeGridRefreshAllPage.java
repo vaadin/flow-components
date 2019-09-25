@@ -27,12 +27,20 @@ public class TreeGridRefreshAllPage extends Div {
     public TreeGridRefreshAllPage() {
         TreeGrid<HierarchicalTestBean> grid = new TreeGrid<>();
         grid.addHierarchyColumn(HierarchicalTestBean::toString);
-        grid.setDataProvider(new LazyHierarchicalDataProvider(50, 4));
+        LazyHierarchicalDataProvider dataProvider = new LazyHierarchicalDataProvider(
+                50, 4);
+        grid.setDataProvider(dataProvider);
 
         NativeButton refreshAll = new NativeButton("Refresh All",
                 e -> grid.getDataProvider().refreshAll());
         refreshAll.setId("refresh-all");
 
-        add(grid, refreshAll);
+        NativeButton clear = new NativeButton("clear", e -> {
+            dataProvider.clear();
+            dataProvider.refreshAll();
+        });
+        clear.setId("clear");
+
+        add(grid, refreshAll, clear);
     }
 }
