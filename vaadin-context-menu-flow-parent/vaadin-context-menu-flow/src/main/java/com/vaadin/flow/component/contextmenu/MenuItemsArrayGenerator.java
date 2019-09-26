@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.contextmenu;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
+import com.vaadin.flow.function.SerializableConsumer;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
@@ -99,7 +99,7 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
                 .map(MenuItemBase.class::cast);
     }
 
-    private void runBeforeClientResponse(Consumer<UI> command) {
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(menu, context -> command.accept(ui)));
     }
