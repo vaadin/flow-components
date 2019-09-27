@@ -28,7 +28,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.JsonSerializable;
-import org.jsoup.helper.StringUtil;
 
 import com.vaadin.flow.component.html.Label;
 
@@ -125,7 +124,7 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
         @Override
         public JsonObject toJson() {
             JsonObject json = Json.createObject();
-            if (!StringUtil.isBlank(minWidth)) {
+            if (minWidth != null && !minWidth.chars().allMatch(Character::isWhitespace)) {
                 json.put(MIN_WIDTH_JSON_KEY, minWidth);
             }
             json.put(COLUMNS_JSON_KEY, columns);
