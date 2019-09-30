@@ -274,7 +274,7 @@ window.Vaadin.Flow.gridConnector = {
       let end = grid._virtualEnd;
       let buffer = end - start;
       let firstNeededIndex = Math.max(0, start + grid._vidxOffset - buffer);
-      let lastNeededIndex = Math.min(end + grid._vidxOffset + buffer, grid._virtualCount);
+      let lastNeededIndex = Math.min(end + grid._vidxOffset + buffer, grid._effectiveSize);
 
       // only fetch if given item is still in visible range
       for(let index = firstNeededIndex; index <= lastNeededIndex; index++) {
@@ -337,7 +337,7 @@ window.Vaadin.Flow.gridConnector = {
       let buffer = end - start;
 
       let firstNeededIndex = Math.max(0, start + grid._vidxOffset - buffer);
-      let lastNeededIndex = Math.min(end + grid._vidxOffset + buffer, grid._virtualCount);
+      let lastNeededIndex = Math.min(end + grid._vidxOffset + buffer, grid._effectiveSize);
 
       let firstNeededPage = page;
       let lastNeededPage = page;
