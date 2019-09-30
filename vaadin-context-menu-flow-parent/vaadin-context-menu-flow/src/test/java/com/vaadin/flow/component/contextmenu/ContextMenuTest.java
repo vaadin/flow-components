@@ -15,9 +15,13 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.html.NativeButton;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -178,6 +182,15 @@ public class ContextMenuTest {
 
         foo.getSubMenu().addItem("bar", null);
         foo.getSubMenu().addItem(new Div(), null);
+    }
+
+    @Test
+    public void serializeContextMenu() throws IOException {
+        NativeButton menuButton = new NativeButton();
+        ContextMenu menu = new ContextMenu(menuButton);
+        menu.add(new Label());
+        ObjectOutputStream out = new ObjectOutputStream(new ByteArrayOutputStream());
+        out.writeObject(menu);
     }
 
     private void addDivAtIndex(int index) {
