@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.select;
 
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -38,6 +37,8 @@ public class SelectView extends DemoView {
         formFieldDemo();
         separatorDemo();// Presentation
         customOptionsDemo();
+        themeVariantsTextAlign(); //ThemeVariants
+        themeVariantsSmallSize();
         styling();// Styling
     }
 
@@ -59,8 +60,8 @@ public class SelectView extends DemoView {
         valueSelect.setValue("Value");
 
         // end-source-example
-        labelSelect.getStyle().set("margin-right","5px");
-        placeholderSelect.getStyle().set("margin-right","5px");
+        labelSelect.getStyle().set("margin-right", "5px");
+        placeholderSelect.getStyle().set("margin-right", "5px");
         div.add(labelSelect, placeholderSelect, valueSelect);
         addCard("Basic usage", div);
     }
@@ -78,7 +79,7 @@ public class SelectView extends DemoView {
         readOnlySelect.setValue("Value");
         readOnlySelect.setLabel("Read-only");
         // end-source-example
-        disabledSelect.getStyle().set("margin-right","5px");
+        disabledSelect.getStyle().set("margin-right", "5px");
         HorizontalLayout layout = new HorizontalLayout(disabledSelect,
                 readOnlySelect);
         layout.getStyle().set("flex-wrap", "wrap");
@@ -247,6 +248,43 @@ public class SelectView extends DemoView {
         // end-source-example
 
         addCard("Presentation", "Customizing drop down options", select);
+    }
+
+    private void themeVariantsTextAlign() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Text align
+        Select<String> leftSelect = new Select<>();
+        leftSelect.setItems("Left", "Center", "Right");
+        leftSelect.setValue("Left");
+        leftSelect.getElement().setAttribute("theme", "align-left");
+
+        Select<String> centerSelect = new Select<>();
+        centerSelect.setItems("Left", "Center", "Right");
+        centerSelect.setValue("Center");
+        centerSelect.getElement().setAttribute("theme", "align-center");
+
+        Select<String> rightSelect = new Select<>();
+        rightSelect.setItems("Left", "Center", "Right");
+        rightSelect.setValue("Right");
+        rightSelect.getElement().setAttribute("theme", "align-right");
+        // end-source-example
+        div.add(leftSelect, centerSelect, rightSelect);
+        leftSelect.getStyle().set("margin-right", "5px");
+        centerSelect.getStyle().set("margin-right", "5px");
+        addCard("Theme Variants", "Text align", div);
+
+    }
+
+    private void themeVariantsSmallSize() {
+        // begin-source-example
+        // source-example-heading: Small size
+        Select<String> select = new Select<>("Label");
+        select.setItems("Option one", "Option two");
+        select.setPlaceholder("Placeholder");
+        select.getElement().setAttribute("theme", "small");
+        // end-source-example
+        addCard("Theme Variants", "Small size", select);
     }
 
     private void styling() {
