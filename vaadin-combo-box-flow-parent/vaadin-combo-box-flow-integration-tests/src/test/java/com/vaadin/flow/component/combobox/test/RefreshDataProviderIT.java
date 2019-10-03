@@ -43,6 +43,8 @@ public class RefreshDataProviderIT extends AbstractComponentIT {
 
         findElement(By.id("update")).click();
 
+        waitUntil(e -> comboBox.getOptions().size() == 2);
+
         testItems(
                 "Expected to contain added items after refreshing data provider",
                 comboBox, "foo", "bar");

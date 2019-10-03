@@ -65,6 +65,9 @@ public class SetItemsLaterIT extends AbstractComboBoxIT {
         comboBox.openPopup();
         findElement(By.tagName("button")).click();
         comboBox.openPopup();
+
+        waitUntil(e -> comboBox.getOptions().size() == 2);
+
         assertLoadedItemsCount("ComboBox should have loaded 2 items", 2,
                 comboBox);
         assertRendered("foo");

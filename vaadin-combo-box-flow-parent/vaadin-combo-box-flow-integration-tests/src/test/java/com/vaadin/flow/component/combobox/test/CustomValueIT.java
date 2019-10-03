@@ -120,6 +120,7 @@ public class CustomValueIT extends AbstractComboBoxIT {
         assertValueChanges("bar");
 
         combo.openPopup();
+        waitUntilTextInContent("bar");
         assertLoadedItemsCount(
                 "Expected 2 items to be loaded after adding the custom value",
                 2, combo);

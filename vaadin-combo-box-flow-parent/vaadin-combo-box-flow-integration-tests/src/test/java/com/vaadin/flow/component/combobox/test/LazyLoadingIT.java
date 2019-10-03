@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -71,9 +72,10 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void scrollOverlay_morePagesLoaded() {
+    public void scrollOverlay_morePagesLoaded_overflowingPagesDiscarded() {
         stringBox.openPopup();
         scrollToItem(stringBox, 50);
+        waitUntilTextInContent("Item 52");
 
         assertLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
@@ -81,20 +83,46 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertRendered("Item 52");
 
         scrollToItem(stringBox, 100);
+        waitUntilTextInContent("Item 102");
 
         assertLoadedItemsCount(
                 "There should be 150 items after loading three pages", 150,
                 stringBox);
-        assertRendered("Item 115");
+        assertRendered("Item 102");
+
+        // The first pages should get discarded (active range has default limit
+        // of 500)
+        for (int i = 150; i <= 600; i += 50) {
+            scrollToItem(stringBox, i);
+            waitUntilTextInContent("Item " + i);
+        }
+
+        assertLoadedItemsCount(
+                "There should be 500 items after loading multiple pages", 500,
+                stringBox);
+        assertRendered("Item 602");
+
+        // The last pages should get discarded (active range has default limit
+        // of 500)
+        for (int i = 600; i >= 0; i -= 50) {
+            scrollToItem(stringBox, i);
+            waitUntilTextInContent("Item " + i);
+        }
+
+        assertLoadedItemsCount(
+                "There should be 500 items after scrolling back to start", 500,
+                stringBox);
+        assertRendered("Item 2");
     }
 
     @Test
-    public void openPopup_scrollToEnd_onlyFirstAndLastPagesLoaded() {
+    public void openPopup_scrollToEnd_onlyLastPageLoaded() {
         stringBox.openPopup();
         scrollToItem(stringBox, 1000);
+        waitUntil(e -> getOverlayContents().contains("Item 999"));
         assertLoadedItemsCount(
-                "Expected the first and the last pages to be loaded (100 items).",
-                100, stringBox);
+                "Expected the last page to be loaded (50 items).", 50,
+                stringBox);
         assertRendered("Item 999");
     }
 
@@ -102,12 +130,24 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void scrollToEnd_scrollUpwards_pagesLoaded() {
         stringBox.openPopup();
         scrollToItem(stringBox, 1000);
+        waitUntilTextInContent("Item 999");
         scrollToItem(stringBox, 920);
+        waitUntilTextInContent("Item 919");
 
         assertLoadedItemsCount(
-                "Expected the first and the two last pages to be loaded (150 items).",
-                150, stringBox);
+                "Expected the two last pages to be loaded (100 items).", 100,
+                stringBox);
         assertRendered("Item 920");
+
+        scrollToItem(stringBox, 870);
+        waitUntilTextInContent("Item 869");
+
+        assertLoadedItemsCount(
+                "Expected the three last pages to be loaded (150 items).", 150,
+                stringBox);
+        assertRendered("Item 870");
+        assertNotRendered("Item 990");
+
     }
 
     @Test
@@ -189,6 +229,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 180, pagesizeBox);
 
         scrollToItem(pagesizeBox, 200);
+        waitUntilTextInContent("Item 200");
 
         assertLoadedItemsCount("Expected two pages to be loaded.", 360,
                 pagesizeBox);
@@ -202,6 +243,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         clickButton("change-pagesize");
         pagesizeBox.openPopup();
+        waitUntilTextInContent("Item");
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 'pageSize' amount "
                         + "of items should be loaded (with updated pageSize: 100).",
@@ -413,12 +455,54 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void setComponentRenderer_scrollDown_scrollUp_itemsRendered() {
         clickButton("component-renderer");
         beanBox.openPopup();
+
         scrollToItem(beanBox, 300);
+        waitUntilTextInContent("<h4>Person 300</h4>");
+
         scrollToItem(beanBox, 0);
+        waitUntilTextInContent("<h4>Person 0</h4>");
 
         assertComponentRendered("<h4>Person 0</h4>");
         assertComponentRendered("<h4>Person 4</h4>");
         assertComponentRendered("<h4>Person 9</h4>");
+    }
+
+    @Test
+    public void scrollDown_scrollUp_selectionRetained() {
+        beanBox.sendKeys("Person 0");
+        waitUntilTextInContent("Person 0");
+        beanBox.sendKeys(Keys.ENTER);
+
+        beanBox.openPopup();
+        waitUntilTextInContent("Person 0");
+
+        int scrollIndex = 600;
+        scrollToItem(beanBox, scrollIndex);
+        waitUntilTextInContent("Person " + scrollIndex);
+
+        Assert.assertTrue(
+                "First item should not be loaded after scrolling down enough",
+                getLoadedItems(beanBox).size() < scrollIndex);
+
+        scrollToItem(beanBox, 0);
+        waitUntilTextInContent("Person 0");
+
+        assertItemSelected("Person 0");
+    }
+
+    @Test
+    public void filtering_filterRetained() {
+        beanBox.sendKeys("Person 1");
+        waitUntilTextInContent("Person 1");
+        beanBox.sendKeys(Keys.ENTER);
+
+        beanBox.sendKeys("11");
+        waitUntilTextInContent("Person 111");
+
+        String filterText = (String) executeScript(
+                "return arguments[0].focusElement.value", beanBox);
+        Assert.assertEquals("The ComboBox filter text got modified",
+                "Person 111", filterText);
     }
 
     private void assertMessage(String expectedMessage) {

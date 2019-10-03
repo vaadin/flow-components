@@ -145,6 +145,13 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
                 comboBox, index);
     }
 
+    protected void waitUntilTextInContent(String text) {
+        waitUntil(e -> {
+            List<String> overlayContents = getOverlayContents();
+            return overlayContents.stream().anyMatch(s -> s.contains(text));
+        });
+    }
+
     protected TestBenchElement getOverlay() {
         return $("vaadin-combo-box-overlay").first();
     }

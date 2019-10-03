@@ -25,12 +25,35 @@ window.Vaadin.Flow.comboBoxConnector = {
 
     comboBox.$connector = {};
 
+    // holds pageIndex -> callback pairs of subsequent indexes (current active range)
     let pageCallbacks = {};
     let cache = {};
     let lastFilter = '';
+    const placeHolder = new Vaadin.ComboBoxPlaceholder();
+    const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 500); // Max item count in active range
+
+    let setRequestedRange;
+
+    const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
+      // Flush and empty the existing requests
+      pages.forEach(page => {
+        pageCallbacks[page]([], comboBox.size);
+        delete pageCallbacks[page];
+
+        // Empty the comboBox's internal cache without invoking observers by filling
+        // the filteredItems array with placeholders (comboBox will request for data when it
+        // encounters a placeholder)
+        const pageStart = parseInt(page) * comboBox.pageSize;
+        const pageEnd = pageStart + comboBox.pageSize;
+        for (let i = pageStart; i < pageEnd; i++) {
+          if (i < comboBox.filteredItems.length) {
+            comboBox.filteredItems[i] = placeHolder;
+          }
+        }
+      });
+    }
 
     comboBox.dataProvider = function (params, callback) {
-
       if (params.pageSize != comboBox.pageSize) {
         throw 'Invalid pageSize';
       }
@@ -56,36 +79,59 @@ window.Vaadin.Flow.comboBoxConnector = {
 
       const filterChanged = params.filter !== lastFilter;
       if (filterChanged) {
-        pageCallbacks = {};
         cache = {};
         lastFilter = params.filter;
+        this._debouncer = Debouncer.debounce(
+          this._debouncer,
+          timeOut.after(500),
+          () => {
+            clearPageCallbacks();
+            comboBox.clearCache();
+            if (params.filter === '') {
+              // Fixes the case when the filter changes
+              // from '' to something else and back to ''
+              // within debounce timeout, and the
+              // DataCommunicator thinks it doesn't need to send data
+              comboBox.$server.resetDataCommunicator();
+            }
+          });
+        return;
       }
 
       if (cache[params.page]) {
         // This may happen after skipping pages by scrolling fast
         commitPage(params.page, callback);
       } else {
-        const upperLimit = params.pageSize * (params.page + 1);
+        pageCallbacks[params.page] = callback
+        const activePages = Object.keys(pageCallbacks).map(page => parseInt(page));
+        const rangeMin = Math.min(...activePages);
+        const rangeMax = Math.max(...activePages);
 
-        if (filterChanged) {
+        if (activePages.length * params.pageSize > MAX_RANGE_COUNT) {
+          if (params.page === rangeMin) {
+            clearPageCallbacks([String(rangeMax)]);
+          } else {
+            clearPageCallbacks([String(rangeMin)]);
+          }
+          comboBox.dataProvider(params, callback);
+        } else if (rangeMax - rangeMin + 1 !== activePages.length) {
+          // Wasn't a sequential page index, clear the cache so combo-box will request for new pages
+          clearPageCallbacks();
+        } else {
+          // The requested page was sequential, extend the requested range
+          const startIndex = params.pageSize * rangeMin;
+          const endIndex = params.pageSize * (rangeMax + 1);
+          const count = endIndex - startIndex;
+          setRequestedRange = () => comboBox.$server.setRequestedRange(startIndex, count, params.filter);
+          if (!this._debouncer || !this._debouncer.isActive()) {
+            setRequestedRange();
+            setRequestedRange = null;
+          }
           this._debouncer = Debouncer.debounce(
             this._debouncer,
-            timeOut.after(500),
-            () => {
-              comboBox.$server.setRequestedRange(0, upperLimit, params.filter);
-              if (params.filter === '') {
-                // Fixes the case when the filter changes 
-                // from '' to something else and back to '' 
-                // within debounce timeout, and the
-                // DataCommunicator thinks it doesn't need to send data
-                comboBox.$server.resetDataCommunicator();
-              }
-            });
-        } else {
-          comboBox.$server.setRequestedRange(0, upperLimit, params.filter);
+            timeOut.after(200),
+            () => setRequestedRange && setRequestedRange());
         }
-
-        pageCallbacks[params.page] = callback;
       }
     }
 
@@ -150,7 +196,7 @@ window.Vaadin.Flow.comboBoxConnector = {
     }
 
     comboBox.$connector.reset = function () {
-      pageCallbacks = {};
+      clearPageCallbacks();
       cache = {};
       comboBox.clearCache();
     }
@@ -161,22 +207,23 @@ window.Vaadin.Flow.comboBoxConnector = {
         return;
       }
 
-      // We're done applying changes from this batch, resolve outstanding
+      // We're done applying changes from this batch, resolve pending
       // callbacks
-      let outstandingRequests = Object.getOwnPropertyNames(pageCallbacks);
-      for (let i = 0; i < outstandingRequests.length; i++) {
-        let page = outstandingRequests[i];
+      let activePages = Object.getOwnPropertyNames(pageCallbacks);
+      for (let i = 0; i < activePages.length; i++) {
+        let page = activePages[i];
 
         if (cache[page]) {
-          let callback = pageCallbacks[page];
-          delete pageCallbacks[page];
-
-          commitPage(page, callback);
+          commitPage(page, pageCallbacks[page]);
         }
       }
 
       // Let server know we're done
       comboBox.$server.confirmUpdate(id);
+
+      if (comboBox.selectedItem && comboBox._selectedKey) {
+        comboBox.value = comboBox.selectedItem.key = comboBox._selectedKey;
+      }
     }
 
     comboBox.$connector.enableClientValidation = function( enable ){
