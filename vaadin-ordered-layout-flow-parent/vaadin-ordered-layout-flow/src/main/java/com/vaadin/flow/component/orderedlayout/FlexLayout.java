@@ -17,6 +17,7 @@ package com.vaadin.flow.component.orderedlayout;
 
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
 
 import java.util.Arrays;
@@ -34,6 +35,106 @@ import java.util.Arrays;
 @Tag(Tag.DIV)
 public class FlexLayout extends Component
         implements FlexComponent<FlexLayout>, ClickNotifier<FlexLayout> {
+
+    /**
+     * Enum with the possible values for the component alignment inside the
+     * layout. It correlates to the <code>align-items</code> CSS property.
+     */
+    public enum ContentAlignment {
+
+        /**
+         * Items are positioned at the beginning of the container.
+         */
+        START("flex-start"),
+
+        /**
+         * Items are positioned at the end of the container.
+         */
+        END("flex-end"),
+
+        /**
+         * Items are positioned at the center of the container.
+         */
+        CENTER("center"),
+
+        /**
+         * Items are stretched to fit the container.
+         */
+        STRETCH("stretch"),
+
+        /**
+         * Items are distributed evenly inside the container.
+         * The first item is flush with the start, the last is flush with the end.
+         */
+        SPACE_BETWEEN("space-between"),
+
+        /**
+         * Items are distributed evenly inside the container.
+         * Items have a half-size space on either end.
+         */
+        SPACE_AROUND("space-around");
+
+        private final String flexValue;
+
+        ContentAlignment(String flexValue) {
+            this.flexValue = flexValue;
+        }
+
+        String getFlexValue() {
+            return flexValue;
+        }
+
+        static ContentAlignment toAlignment(String flexValue, ContentAlignment defaultValue) {
+            return Arrays.stream(values()).filter(
+                    alignment -> alignment.getFlexValue().equals(flexValue))
+                    .findFirst().orElse(defaultValue);
+        }
+    }
+
+    /**
+     * Possible values for the {@code flex-direction} CSS property, which determines how the elements are placed
+     * inside the layout.
+     */
+    public enum FlexDirection {
+
+        /**
+         * The items are displayed horizontally, as a row.
+         */
+        ROW("row"),
+
+        /**
+         * The items are displayed horizontally, as a row in reverse order.
+         */
+        ROW_REVERSE("row-reverse"),
+
+        /**
+         * The items are displayed vertically, as a column.
+         */
+        COLUMN("column"),
+
+        /**
+         * The items are displayed vertically, as a column in reverse order.
+         */
+        COLUMN_REVERSE("column-reverse");
+
+        private final String directionValue;
+
+        FlexDirection(String directionValue) {
+            this.directionValue = directionValue;
+        }
+
+        String getDirectionValue() {
+            return directionValue;
+        }
+
+        static FlexDirection toFlexDirection(String flexValue, FlexDirection defaultValue) {
+            return Arrays.stream(values())
+                    .filter(flexDirection -> flexDirection.getDirectionValue()
+                            .equals(flexValue))
+                    .findFirst().orElse(defaultValue);
+        }
+    }
+
 
     /**
      * Possible values for the {@code flex-wrap} CSS property, which determines how the elements inside the layout
@@ -129,4 +230,211 @@ public class FlexLayout extends Component
                 WrapMode.NOWRAP);
     }
 
+    /**
+     * Similar to {@link #setAlignItems(Alignment)}, but instead of aligning
+     * components, it aligns flex lines.
+     * <p>
+     * It effectively sets the {@code "alignContent"} style value.
+     * <p>
+     * The default alignment is {@link ContentAlignment#STRETCH}.
+     *
+     * @param alignment
+     *            the alignment to apply to the components. Setting
+     *            <code>null</code> will reset the alignment to its default
+     */
+    public void setAlignContent(ContentAlignment alignment) {
+        if (alignment == null) {
+            getStyle().remove(
+                    FlexConstants.ALIGN_CONTENT_CSS_PROPERTY);
+        } else {
+            getStyle().set(
+                    FlexConstants.ALIGN_CONTENT_CSS_PROPERTY,
+                    alignment.getFlexValue());
+        }
+    }
+
+    /**
+     * Gets the current align content property of the layout.
+     *
+     * @return the align content property,
+     *         or {@link ContentAlignment#STRETCH} if none was set
+     */
+    public ContentAlignment getAlignContent() {
+        return ContentAlignment.toAlignment(
+                getElement().getStyle()
+                        .get(FlexConstants.ALIGN_CONTENT_CSS_PROPERTY),
+                ContentAlignment.STRETCH);
+    }
+
+    /**
+     * Sets the flex basis property of the components inside the layout.
+     * The flex basis property specifies the initial main size of a component.
+     *
+     * @param width
+     *            the width for the components.
+     *            Setting <code>null</code> will remove the flex basis property
+     * @param elementContainers
+     *            the containers (components) to apply the flex basis
+     *            property
+     */
+    public void setFlexBasis(String width,
+                                     HasElement... elementContainers) {
+        if (width == null) {
+            for (HasElement element : elementContainers) {
+                element.getElement().getStyle().remove(
+                        FlexConstants.FLEX_BASIS_CSS_PROPERTY);
+            }
+        } else {
+            for (HasElement element : elementContainers) {
+                element.getElement().getStyle().set(
+                        FlexConstants.FLEX_BASIS_CSS_PROPERTY,
+                        width);
+            }
+        }
+    }
+
+    /**
+     * Gets the flex basis property of a given element container.
+     *
+     * @param elementContainer
+     *            the element container to read the flex basis property from
+     * @return the flex grow property
+     */
+    public String getFlexBasis(HasElement elementContainer) {
+        return elementContainer.getElement().getStyle()
+                .get(FlexConstants.FLEX_BASIS_CSS_PROPERTY);
+    }
+
+    /**
+     * Sets the flex direction property of the layout.
+     * The flex direction property specifies how components are placed in the
+     * layout defining the main axis and the direction (normal or reversed).
+     *
+     * The default direction is {@link FlexDirection#ROW}.
+     *
+     * @param flexDirection
+     *            the direction for the components.
+     *            Setting <code>null</code> will remove the flex direction property
+     */
+    public void setFlexDirection(FlexDirection flexDirection) {
+        if (flexDirection == null) {
+            getElement().getStyle().remove(
+                    FlexConstants.FLEX_DIRECTION_CSS_PROPERTY);
+        } else {
+            getElement().getStyle().set(
+                    FlexConstants.FLEX_DIRECTION_CSS_PROPERTY,
+                    flexDirection.getDirectionValue());
+        }
+    }
+
+    /**
+     * Gets the flex direction property of a given element container.
+     *
+     * @param elementContainer
+     *            the element container to read the flex direction property from
+     * @return the flex direction property,
+     *         or {@link FlexDirection#ROW} if none was set
+     */
+    public FlexDirection getFlexDirection(HasElement elementContainer) {
+        return FlexDirection.toFlexDirection(elementContainer.getElement().getStyle()
+                        .get(FlexConstants.FLEX_DIRECTION_CSS_PROPERTY),
+                FlexDirection.ROW);
+    }
+
+    /**
+     * Sets the flex shrink property of the components inside the layout. The flex
+     * shrink property specifies how the item will shrink relative to the rest
+     * of the components inside the same layout.
+     *
+     * Negative values are not allowed.
+     *
+     * The default value is 1.
+     *
+     * @param flexShrink
+     *            how much the component will shrink relative to the rest
+     *            of the components
+     * @param elementContainers
+     *            the containers (components) to apply the flex shrink property
+     */
+    public void setFlexShrink(double flexShrink,
+                                      HasElement... elementContainers) {
+        if (flexShrink < 0) {
+            throw new IllegalArgumentException(
+                    "Flex shrink property cannot be negative");
+        }
+
+        for (HasElement container : elementContainers) {
+            container.getElement().getStyle().set(
+                    FlexConstants.FLEX_SHRINK_CSS_PROPERTY,
+                    String.valueOf(flexShrink));
+        }
+    }
+
+    /**
+     * Gets the flex shrink property of a given element container.
+     *
+     * @param elementContainer
+     *            the element container to read the flex shrink property from
+     * @return the flex shrink property, or 1 if none was set
+     */
+    public double getFlexShrink(HasElement elementContainer) {
+        String ratio = elementContainer.getElement().getStyle()
+                .get(FlexConstants.FLEX_SHRINK_CSS_PROPERTY);
+        if (ratio == null || ratio.isEmpty()) {
+            return 1;
+        }
+
+        try {
+            return Double.parseDouble(ratio);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "The flex shrink property of the element container is not parseable to double: " + ratio, e);
+        }
+    }
+
+    /**
+     * Sets the order property of the component inside the layout. The order
+     * property specifies the order of a component relative to the
+     * rest of the components inside the same layout.
+     *
+     * The default value is 0, and setting 0 can be used to remove an existing
+     * order for a component.
+     *
+     * @param order
+     *            the order for the component
+     * @param elementContainer
+     *            the container (component) to apply the order property
+     */
+    public void setOrder(int order, HasElement elementContainer) {
+        if (order == 0) {
+            elementContainer.getElement().getStyle().remove(
+                    FlexConstants.ORDER_CSS_PROPERTY);
+        }
+        elementContainer.getElement().getStyle().set(
+                FlexConstants.ORDER_CSS_PROPERTY,
+                String.valueOf(order));
+    }
+
+    /**
+     * Gets the order property of a given element container.
+     *
+     * @param elementContainer
+     *            the element container to read the order property from
+     * @return the order property,
+     *         or 0 if none was set
+     */
+    public int getOrder(HasElement elementContainer) {
+        String order = elementContainer.getElement().getStyle()
+                .get(FlexConstants.ORDER_CSS_PROPERTY);
+
+        if (order == null || order.isEmpty()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(order);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "The order property of the element container is not parseable to integer: " + order, e);
+        }
+    }
 }
