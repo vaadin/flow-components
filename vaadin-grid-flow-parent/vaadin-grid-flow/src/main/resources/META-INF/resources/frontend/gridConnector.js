@@ -944,6 +944,11 @@ window.Vaadin.Flow.gridConnector = {
     function _fireClickEvent(event, eventName) {
       if (grid.$connector.activeItem) {
         event.itemKey = grid.$connector.activeItem.key;
+        const eventContext = grid.getEventContext(event);
+        // if you have a details-renderer, getEventContext().column is undefined
+        if (eventContext.column) {
+          event.internalColumnId = eventContext.column._flowId;
+        }
         grid.dispatchEvent(new CustomEvent(eventName,
           { detail: event }));
       }

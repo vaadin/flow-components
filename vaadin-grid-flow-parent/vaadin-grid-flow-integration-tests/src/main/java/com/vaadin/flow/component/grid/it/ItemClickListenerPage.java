@@ -18,6 +18,9 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
 
 @Route("item-click-listener")
@@ -30,17 +33,38 @@ public class ItemClickListenerPage extends Div {
         Div dblClickMsg = new Div();
         dblClickMsg.setId("dblClickMsg");
 
+        Div columnClickMsg = new Div();
+        columnClickMsg.setId("columnClickMsg");
+
+        Div columnDblClickMsg = new Div();
+        columnDblClickMsg.setId("columnDblClickMsg");
+
         Grid<String> grid = new Grid<>();
         grid.setItems("foo", "bar");
-        grid.addColumn(item -> item).setHeader("Name");
-        grid.addComponentColumn(item -> new Checkbox(item));
+        grid.addColumn(item -> item).setHeader("Name").setKey("Name");
+        grid.addComponentColumn(Checkbox::new);
 
-        grid.addItemClickListener(event -> clickMsg.add(event.getItem()));
+        grid.addItemClickListener(event -> {
+            clickMsg.add(event.getItem());
+            columnClickMsg.add(event.getColumn().getKey());
+        });
 
-        grid.addItemDoubleClickListener(event -> dblClickMsg
-                .setText(String.valueOf(event.getClientY())));
+        grid.addItemDoubleClickListener(event -> {
+            dblClickMsg.add(String.valueOf(event.getClientY()));
+            columnDblClickMsg.add(event.getColumn().getKey());
+        });
 
-        add(grid, clickMsg, dblClickMsg);
+        grid.setItemDetailsRenderer(new ComponentRenderer<>((SerializableFunction<String, Span>) ItemClickListenerPage::getDetailsComponent));
+        grid.setDetailsVisible("foo", false);
+        grid.setDetailsVisible("bar", true);
+
+        add(grid, clickMsg, dblClickMsg, columnClickMsg, columnDblClickMsg);
+    }
+
+    private static Span getDetailsComponent(String s) {
+        Span result = new Span(s);
+        result.setId("details-"+s);
+        return result;
     }
 
 }

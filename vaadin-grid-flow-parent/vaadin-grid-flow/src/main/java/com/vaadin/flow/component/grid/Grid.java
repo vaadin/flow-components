@@ -2661,6 +2661,17 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     }
 
     /**
+     * Gets a {@link Column} of this grid by its internal id ({@code _flowId}).
+     * @param internalId
+     *            the internal identifier of the column to get
+     * @return the column corresponding to the given column identifier, or {@code null}
+     *         if no column has such an identifier
+     */
+    Column<T> getColumnByInternalId(String internalId) {
+        return idToColumnMap.get(internalId);
+    }
+
+    /**
      * Removes a column with the given column key from the Grid.
      *
      * @param columnKey
