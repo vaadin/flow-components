@@ -26,6 +26,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.GeneratedVaadinTextField;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -58,6 +59,7 @@ public class TextFieldView extends DemoView {
         passwordFieldHideRevealButton();
         emailFieldBasic(); // EmailField
         numberFieldBasic(); // NumberField
+        integerField();
         numberFieldWithControls();
         numberFieldWithValueLimits();
         numberFieldWithStep();
@@ -202,6 +204,16 @@ public class TextFieldView extends DemoView {
 
         numberField.setId("number-field-id");
         addCard("Number field", "Basic number field", numberField);
+    }
+
+    private void integerField() {
+        // begin-source-example
+        // source-example-heading: Integer field
+        IntegerField integerField = new IntegerField("Age");
+        // end-source-example
+
+        integerField.setId("integer-field");
+        addCard("Number field", "Integer field", integerField);
     }
 
     private void numberFieldWithControls() {

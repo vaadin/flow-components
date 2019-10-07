@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 
 import static org.junit.Assert.assertFalse;
 import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
@@ -40,6 +41,14 @@ public class NumberFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void assertDefaultMinMaxStepNotOverridden() {
+        NumberFieldElement numberField = $(NumberFieldElement.class).first();
+        Assert.assertNull(numberField.getProperty("min"));
+        Assert.assertNull(numberField.getProperty("max"));
+        Assert.assertEquals("1", numberField.getPropertyString("step"));
+    }
+
+    @Test
     public void assertReadOnly() {
         NumberFieldElement numberField = $(NumberFieldElement.class).first();
         WebElement messageDiv = $("div").id("message");
@@ -52,16 +61,19 @@ public class NumberFieldPageIT extends AbstractComponentIT {
 
         numberField.setValue("456");
         Assert.assertEquals("123.0", numberField.getValue());
-        Assert.assertEquals("Old value: 'null'. New value: '123.0'.", messageDiv.getText());
+        Assert.assertEquals("Old value: 'null'. New value: '123.0'.",
+                messageDiv.getText());
 
         numberField.setProperty("readonly", "");
         numberField.setValue("789");
         Assert.assertEquals("123.0", numberField.getValue());
-        Assert.assertEquals("Old value: 'null'. New value: '123.0'.", messageDiv.getText());
+        Assert.assertEquals("Old value: 'null'. New value: '123.0'.",
+                messageDiv.getText());
 
         readOnlyButton.click();
         numberField.setValue("987");
-        Assert.assertEquals("Old value: '123.0'. New value: '987.0'.", messageDiv.getText());
+        Assert.assertEquals("Old value: '123.0'. New value: '987.0'.",
+                messageDiv.getText());
     }
 
     @Test
@@ -75,15 +87,18 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         disableEnableButton.click();
 
         numberField.setValue("456");
-        Assert.assertEquals("Old value: 'null'. New value: '123.0'.", messageDiv.getText());
+        Assert.assertEquals("Old value: 'null'. New value: '123.0'.",
+                messageDiv.getText());
 
         numberField.setProperty("disabled", "");
         numberField.setValue("789");
-        Assert.assertEquals("Old value: 'null'. New value: '123.0'.", messageDiv.getText());
+        Assert.assertEquals("Old value: 'null'. New value: '123.0'.",
+                messageDiv.getText());
 
         disableEnableButton.click();
         numberField.setValue("987");
-        Assert.assertEquals("Old value: '123.0'. New value: '987.0'.", messageDiv.getText());
+        Assert.assertEquals("Old value: '123.0'. New value: '987.0'.",
+                messageDiv.getText());
     }
 
     @Test
@@ -102,13 +117,15 @@ public class NumberFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertClearValue() {
-        NumberFieldElement field = $(NumberFieldElement.class).id("clear-number-field");
+        NumberFieldElement field = $(NumberFieldElement.class)
+                .id("clear-number-field");
 
         WebElement input = field.$("input").first();
         input.sendKeys("300");
         blur();
 
-        WebElement clearButton = getInShadowRoot(field, By.cssSelector("[part~='clear-button']"));
+        WebElement clearButton = getInShadowRoot(field,
+                By.cssSelector("[part~='clear-button']"));
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
@@ -119,7 +136,8 @@ public class NumberFieldPageIT extends AbstractComponentIT {
     public void assertStepValue() {
         WebElement field = findElement(By.id("step-number-field"));
 
-        WebElement increaseButton = getInShadowRoot(field, By.cssSelector("[part~='increase-button']"));
+        WebElement increaseButton = getInShadowRoot(field,
+                By.cssSelector("[part~='increase-button']"));
         increaseButton.click();
 
         String value = findElement(By.id("step-message")).getText();
@@ -130,7 +148,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
     public void assertInvalidAfterClientChange() {
         final boolean valid = true;
         NumberFieldElement field = $(NumberFieldElement.class)
-            .id("step-number-field");
+                .id("step-number-field");
         assertValidStateOfStepNumberField(valid);
 
         // max is 10
@@ -154,16 +172,19 @@ public class NumberFieldPageIT extends AbstractComponentIT {
     }
 
     private void assertValidStateOfStepNumberField(boolean valid) {
-        final WebElement checkIsInvalid = findElement(By.id("check-is-invalid"));
+        final WebElement checkIsInvalid = findElement(
+                By.id("check-is-invalid"));
         checkIsInvalid.click();
 
         final String expectedValue = !valid ? "invalid" : "valid";
-        Assert.assertEquals(expectedValue, findElement(By.id("is-invalid")).getText());
+        Assert.assertEquals(expectedValue,
+                findElement(By.id("is-invalid")).getText());
     }
 
     @Test
     public void assertValueChange() {
-        NumberFieldElement field = $(NumberFieldElement.class).id("clear-number-field");
+        NumberFieldElement field = $(NumberFieldElement.class)
+                .id("clear-number-field");
         field.setValue("123.0");
         String message = $("div").id("clear-message").getText();
         Assert.assertEquals("Old value: 'null'. New value: '123.0'.", message);
