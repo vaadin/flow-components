@@ -96,7 +96,7 @@ Tab 1
 @Tag("vaadin-tab")
 @HtmlImport("frontend://bower_components/vaadin-tabs/src/vaadin-tab.html")
 @JsModule("@vaadin/vaadin-tabs/src/vaadin-tab.js")
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "3.0.4")
+@NpmPackage(value = "@vaadin/vaadin-tabs", version = "3.0.5")
 public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
         extends Component implements HasStyle, HasTheme {
 
