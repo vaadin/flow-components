@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>vaadin-text-field-flow-parent</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin TextField Flow Parent</name>
 
