@@ -24,7 +24,7 @@ import com.vaadin.flow.component.contextmenu.ContextMenuBase;
 import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
 
@@ -41,7 +41,7 @@ public class GridContextMenu<T> extends
         ContextMenuBase<GridContextMenu<T>, GridMenuItem<T>, GridSubMenu<T>>
         implements HasGridMenuItems<T> {
 
-    private SerializableFunction<T, Boolean> dynamicContentHandler;
+    private SerializablePredicate<T> dynamicContentHandler;
 
     /**
      * Event that is fired when a {@link GridMenuItem} is clicked inside a
@@ -94,14 +94,15 @@ public class GridContextMenu<T> extends
         private final transient Optional<String> columnId;
 
         @SuppressWarnings("unchecked")
-        public GridContextMenuOpenedEvent(GridContextMenu<T> source, boolean fromClient) {
+        public GridContextMenuOpenedEvent(GridContextMenu<T> source,
+                boolean fromClient) {
             super(source, fromClient);
             grid = (Grid<T>) getSource().getTarget();
             item = Optional.ofNullable(grid.getDataCommunicator().getKeyMapper()
                     .get(grid.getElement()
                             .getProperty("_contextMenuTargetItemKey")));
             columnId = Optional.ofNullable(grid.getElement()
-                            .getProperty("_contextMenuTargetColumnId"));
+                    .getProperty("_contextMenuTargetColumnId"));
         }
 
         /**
@@ -116,9 +117,10 @@ public class GridContextMenu<T> extends
         }
 
         /**
-         * Gets the column ID in the Grid that was the target of the context-click,
-         * or an empty {@code Optional} if the context-click didn't target any
-         * application column in the Grid (eg. selection column).
+         * Gets the column ID in the Grid that was the target of the
+         * context-click, or an empty {@code Optional} if the context-click
+         * didn't target any application column in the Grid (eg. selection
+         * column).
          *
          * @return the target item of the context-click
          */
@@ -204,7 +206,9 @@ public class GridContextMenu<T> extends
      */
     public Registration addGridContextMenuOpenedListener(
             ComponentEventListener<GridContextMenuOpenedEvent<T>> listener) {
-        return super.addOpenedChangeListener(ev -> listener.onComponentEvent(new GridContextMenuOpenedEvent<>(ev.getSource(), ev.isFromClient())));
+        return super.addOpenedChangeListener(ev -> listener.onComponentEvent(
+                new GridContextMenuOpenedEvent<>(ev.getSource(),
+                        ev.isFromClient())));
     }
 
     /**
@@ -219,7 +223,7 @@ public class GridContextMenu<T> extends
      * @return the callback function that is executed before opening the context
      *         menu, or {@code null} if not specified.
      */
-    public SerializableFunction<T, Boolean> getDynamicContentHandler() {
+    public SerializablePredicate<T> getDynamicContentHandler() {
         return dynamicContentHandler;
     }
 
@@ -242,7 +246,7 @@ public class GridContextMenu<T> extends
      *            context menu.
      */
     public void setDynamicContentHandler(
-            SerializableFunction<T, Boolean> dynamicContentHandler) {
+            SerializablePredicate<T> dynamicContentHandler) {
         this.dynamicContentHandler = dynamicContentHandler;
     }
 
@@ -256,7 +260,7 @@ public class GridContextMenu<T> extends
 
         if (getDynamicContentHandler() != null) {
             final T item = grid.getDataCommunicator().getKeyMapper().get(key);
-            return getDynamicContentHandler().apply(item);
+            return getDynamicContentHandler().test(item);
         }
 
         return super.onBeforeOpenMenu(eventDetail);
