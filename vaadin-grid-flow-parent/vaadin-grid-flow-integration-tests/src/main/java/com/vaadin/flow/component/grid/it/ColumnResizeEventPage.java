@@ -61,14 +61,10 @@ public class ColumnResizeEventPage extends Div {
 
         grid.addColumnResizeListener(e -> {
             resizedColumnIdLabel.setText(e.getResizedColumn().getId().get());
-
-            Map<Column<Person>, Double> cfg = e.getColumnFlexGrows();
-            flexGrowsColValuesLabel.setText(cfg.get(firstNameColumn) + "|"
-                    + cfg.get(lastNameColumn) + "|" + cfg.get(idColumn));
-
-            Map<Column<Person>, String> cw = e.getColumnWidths();
-            widthsColValuesLabel.setText(cw.get(firstNameColumn) + "|"
-                    + cw.get(lastNameColumn) + "|" + cw.get(idColumn));
+            flexGrowsColValuesLabel.setText(firstNameColumn.getFlexGrow() + "|"
+                    + lastNameColumn.getFlexGrow() + "|" + idColumn.getFlexGrow());
+            widthsColValuesLabel.setText(firstNameColumn.getWidth() + "|"
+                    + lastNameColumn.getWidth() + "|" + idColumn.getWidth());
         });
 
         resizedColumnIdLabel.setId(RESIZED_COLUMN_ID_LABEL);

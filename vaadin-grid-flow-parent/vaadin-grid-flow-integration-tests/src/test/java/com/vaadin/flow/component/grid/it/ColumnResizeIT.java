@@ -55,7 +55,7 @@ public class ColumnResizeIT extends AbstractComponentIT {
                 By.id(ColumnResizeEventPage.FLEX_GROWS_COLUMN_VALUES_LABEL));
         Assert.assertEquals(
                 "Column flex-grow values did not match expected ones.",
-                "0.0|0.0|1.0", colFlexGrowsLabel.getText());
+                "0|0|1", colFlexGrowsLabel.getText());
 
         WebElement colWidthsLabel = findElement(
                 By.id(ColumnResizeEventPage.WIDTHS_COLUMN_VALUES_LABEL));

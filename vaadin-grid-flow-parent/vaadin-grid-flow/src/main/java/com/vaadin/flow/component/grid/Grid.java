@@ -393,15 +393,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         /**
          * Gets the width of this column as a CSS-string.
-         * <p>
-         * <strong>Note:</strong> If the width is changed from the client side,
-         * e.g. by the user resizing the column, the changed value will
-         * not be returned by this method.
          * 
          * @see Grid#addColumnResizeListener(ComponentEventListener)
          * 
          * @return the width of this column as a CSS-string
          */
+        @Synchronize("column-drag-resize")
         public String getWidth() {
             return getElement().getProperty("width");
         }
@@ -423,15 +420,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         /**
          * Gets the flex grow value, by default 1.
-         * <p>
-         * <strong>Note:</strong> If the flex grow is changed from the client
-         * side, e.g. by the user resizing the column, the changed value will
-         * not be returned by this method.
          * 
          * @see Grid#addColumnResizeListener(ComponentEventListener)
          * 
          * @return the flex grow value, by default 1
          */
+        @Synchronize("column-drag-resize")
         public int getFlexGrow() {
             return getElement().getProperty("flexGrow", 1);
         }

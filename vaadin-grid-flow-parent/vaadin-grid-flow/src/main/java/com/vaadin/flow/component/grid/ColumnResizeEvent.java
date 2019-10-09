@@ -39,8 +39,6 @@ import elemental.json.JsonObject;
 @DomEvent("column-drag-resize")
 public class ColumnResizeEvent<T> extends ComponentEvent<Grid<T>> {
 
-    private final JsonObject columnWidths;
-    private final JsonObject columnFlexGrows;
     private final String resizedColumnKey;
 
     /**
@@ -52,24 +50,14 @@ public class ColumnResizeEvent<T> extends ComponentEvent<Grid<T>> {
      *            <code>true</code> if the event was originally fired on the
      *            client, <code>false</code> if the event originates from
      *            server-side logic
-     * @param columnWidths
-     *            CSS width properties of all visible columns when resizing
-     *            finished, mapped by their internal id
-     * @param columnFlexGrows
-     *            CSS flex-grow properties of all visible columns when resizing
-     *            finished, mapped by their internal id
      * @param resizedColumnKey
      *            internal id of the column that was the target of user's resize
      *            action
      *
      */
     public ColumnResizeEvent(Grid<T> source, boolean fromClient,
-            @EventData("event.detail.columnWidths") JsonObject columnWidths,
-            @EventData("event.detail.columnFlexGrows") JsonObject columnFlexGrows,
             @EventData("event.detail.resizedColumnKey") String resizedColumnKey) {
         super(source, fromClient);
-        this.columnWidths = columnWidths;
-        this.columnFlexGrows = columnFlexGrows;
         this.resizedColumnKey = resizedColumnKey;
     }
 
@@ -84,33 +72,4 @@ public class ColumnResizeEvent<T> extends ComponentEvent<Grid<T>> {
                 .findFirst().orElse(null);
     }
 
-    /**
-     * Returns a map containing the CSS width properties of all visible columns
-     * after the resize finished.
-     * 
-     * Note that resizing a single column can have side effects to the widths of
-     * other columns.
-     * 
-     * @return CSS width properties of all visible columns
-     */
-    public Map<Column<T>, String> getColumnWidths() {
-        return getSource().getColumns().stream().filter(Column::isVisible)
-                .collect(Collectors.toMap(col -> col,
-                        col -> columnWidths.getString(col.getInternalId())));
-    }
-
-    /**
-     * Returns a map containing the CSS flex-grow properties of all visible
-     * columns after the resize finished.
-     * 
-     * Note that resizing a single column can have side effects to the flex-grow
-     * properties of other columns.
-     * 
-     * @return CSS flex-grow properties of all visible columns
-     */
-    public Map<Column<T>, Double> getColumnFlexGrows() {
-        return getSource().getColumns().stream().filter(Column::isVisible)
-                .collect(Collectors.toMap(col -> col,
-                        col -> columnFlexGrows.getNumber(col.getInternalId())));
-    }
 }
