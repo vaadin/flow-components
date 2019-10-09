@@ -1,12 +1,12 @@
 package com.vaadin.flow.component.combobox.demo.entity;
 
-public class Elements {
+public class Element {
 
     private String name;
     private String symbol;
     private int number;
 
-    public Elements(String name) {
+    public Element(String name) {
         this.name = name;
     }
 

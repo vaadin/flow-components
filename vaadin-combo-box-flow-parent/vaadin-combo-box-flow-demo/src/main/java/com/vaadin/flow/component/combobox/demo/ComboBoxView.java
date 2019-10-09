@@ -18,10 +18,12 @@ package com.vaadin.flow.component.combobox.demo;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBox.ItemFilter;
 import com.vaadin.flow.component.combobox.demo.data.DepartmentData;
-import com.vaadin.flow.component.combobox.demo.data.ElementsData;
+import com.vaadin.flow.component.combobox.demo.data.ElementData;
+import com.vaadin.flow.component.combobox.demo.data.ProjectData;
 import com.vaadin.flow.component.combobox.demo.entity.Department;
-import com.vaadin.flow.component.combobox.demo.entity.Elements;
+import com.vaadin.flow.component.combobox.demo.entity.Element;
 import com.vaadin.flow.component.combobox.demo.entity.Person;
+import com.vaadin.flow.component.combobox.demo.entity.Project;
 import com.vaadin.flow.component.combobox.demo.entity.Song;
 import com.vaadin.flow.component.combobox.demo.service.PersonService;
 import com.vaadin.flow.component.html.Anchor;
@@ -31,6 +33,8 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.demo.DemoView;
@@ -39,6 +43,7 @@ import com.vaadin.flow.router.Route;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * View for {@link ComboBox} demo.
@@ -49,6 +54,7 @@ import java.util.List;
 public class ComboBoxView extends DemoView {
 
     private static final String WIDTH_STRING = "250px";
+    private ProjectData projectData = new ProjectData();
 
     @Override
     public void initView() {
@@ -58,11 +64,14 @@ public class ComboBoxView extends DemoView {
         displayClearButton();
         valueChangeEvent();
         customValues();
+        storingCustomValues();
         lazyLoading();
         configurationForReqired(); // Validation
         customFiltering(); // Filtering
         customOptionsDemo(); // Presentation
         usingTemplateRenderer();
+        themeVariantsTextAlign(); // Theme variants
+        themeVariantsSmallSize();
         styling(); // Styling
     }
 
@@ -116,9 +125,9 @@ public class ComboBoxView extends DemoView {
         return departmentData.getDepartments();
     }
 
-    private List<Elements> getElements() {
-        ElementsData elementsData = new ElementsData();
-        return elementsData.getElements();
+    private List<Element> getElements() {
+        ElementData elementData = new ElementData();
+        return elementData.getElements();
     }
 
     private void entityList() {
@@ -173,29 +182,72 @@ public class ComboBoxView extends DemoView {
         Div message = createMessageDiv("custom-value-message");
 
         // begin-source-example
-        // source-example-heading: Allow users to input custom values
-        ComboBox<String> comboBox = new ComboBox<>("City");
-        comboBox.setItems("Turku", "Berlin", "San Jose");
+        // source-example-heading: Allow custom values
+        ComboBox<String> comboBox = new ComboBox<>("Fruit");
+        comboBox.setItems("Apple", "Orange", "Banana");
 
         /**
          * Allow users to enter a value which doesn't exist in the data set, and
          * set it as the value of the ComboBox.
          */
-        comboBox.addCustomValueSetListener(event -> 
-            comboBox.setValue(event.getDetail()));
+        comboBox.addCustomValueSetListener(
+                event -> comboBox.setValue(event.getDetail()));
 
         comboBox.addValueChangeListener(event -> {
             if (event.getValue() == null) {
-                message.setText("No city selected");
+                message.setText("No fruit selected");
             } else {
-                message.setText("Selected city: " + event.getValue());
+                message.setText("Selected value: " + event.getValue());
             }
         });
         // end-source-example
 
-        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("custom-value-box");
-        addCard("Allow users to input custom values", comboBox, message);
+        addCard("Allow custom values", comboBox, message);
+    }
+
+    private Stream<Project> fetchProjects(Query<Project, String> query) {
+        return projectData.getProjects().stream()
+                .filter(project -> !query.getFilter().isPresent() || project
+                        .getName().startsWith(query.getFilter().get()))
+                .skip(query.getOffset()).limit(query.getLimit());
+    }
+
+    private int countProjects(Query<Project, String> query) {
+        return (int) projectData.getProjects().stream()
+                .filter(project -> !query.getFilter().isPresent() || project
+                        .getName().startsWith(query.getFilter().get()))
+                .count();
+    }
+
+    private void storingCustomValues() {
+        Div message = createMessageDiv("custom-value-message");
+        // begin-source-example
+        // source-example-heading: Storing custom values
+        ComboBox<Project> comboBox = new ComboBox<>("Project");
+        DataProvider<Project, String> dataProvider = DataProvider
+                .fromFilteringCallbacks(this::fetchProjects,
+                        this::countProjects);
+        comboBox.setDataProvider(dataProvider);
+        comboBox.setItemLabelGenerator(Project::getName);
+
+        comboBox.addValueChangeListener(valueChangeEvent -> {
+            if (valueChangeEvent.getValue() == null) {
+                message.setText("No project selected");
+            } else {
+                message.setText(
+                        "Selected value: " + valueChangeEvent.getValue());
+            }
+        });
+
+        comboBox.addCustomValueSetListener(event -> {
+            Project project = projectData.addProject(event.getDetail());
+            comboBox.setValue(project);
+        });
+        // end-source-example
+
+        addCard("Storing custom values", comboBox, message);
+
     }
 
     private void lazyLoading() {
@@ -241,18 +293,18 @@ public class ComboBoxView extends DemoView {
         div.setText("Example uses case-sensitive starts-with filtering");
         // begin-source-example
         // source-example-heading: Custom filtering
-        ComboBox<Elements> filteringComboBox = new ComboBox<>();
-        List<Elements> elementsList = getElements();
+        ComboBox<Element> filteringComboBox = new ComboBox<>();
+        List<Element> elementsList = getElements();
 
         /*
          * Providing a custom item filter allows filtering based on all of the
          * rendered properties:
          */
-        ItemFilter<Elements> filter = (element, filterString) -> element
+        ItemFilter<Element> filter = (element, filterString) -> element
                 .getName().startsWith(filterString);
 
         filteringComboBox.setItems(filter, elementsList);
-        filteringComboBox.setItemLabelGenerator(Elements::getName);
+        filteringComboBox.setItemLabelGenerator(Element::getName);
         filteringComboBox.setClearButtonVisible(true);
         // end-source-example
         addCard("Filtering", "Custom filtering", div, filteringComboBox);
@@ -261,7 +313,8 @@ public class ComboBoxView extends DemoView {
 
     private void customOptionsDemo() {
         // begin-source-example
-        // source-example-heading: Customizing drop down items with ComponentRenderer
+        // source-example-heading: Customizing drop down items with
+        // ComponentRenderer
         ComboBox<Information> comboBox = new ComboBox<>();
         comboBox.setLabel("User");
         comboBox.setItems(
@@ -330,13 +383,52 @@ public class ComboBoxView extends DemoView {
                 "Customizing drop down items with TemplateRenderer", comboBox);
     }
 
+    private void themeVariantsTextAlign() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Text align
+        ComboBox<String> leftComboBox = new ComboBox<>();
+        leftComboBox.setItems("Left", "Center", "Right");
+        leftComboBox.setValue("Left");
+        leftComboBox.getElement().setAttribute("theme", "align-left");
+
+        ComboBox<String> centerComboBox = new ComboBox<>();
+        centerComboBox.setItems("Left", "Center", "Right");
+        centerComboBox.setValue("Center");
+        centerComboBox.getElement().setAttribute("theme", "align-center");
+
+        ComboBox<String> rightComboBox = new ComboBox<>();
+        rightComboBox.setItems("Left", "Center", "Right");
+        rightComboBox.setValue("Right");
+        rightComboBox.getElement().setAttribute("theme", "align-right");
+        // end-source-example
+        div.add(leftComboBox, centerComboBox, rightComboBox);
+        leftComboBox.getStyle().set("margin-right", "5px");
+        centerComboBox.getStyle().set("margin-right", "5px");
+        addCard("Theme Variants", "Text align", div);
+
+    }
+
+    private void themeVariantsSmallSize() {
+        // begin-source-example
+        // source-example-heading: Small size
+        ComboBox<String> comboBox = new ComboBox<>("Label");
+        comboBox.setItems("Option one", "Option two");
+        comboBox.setPlaceholder("Placeholder");
+        comboBox.getElement().setAttribute("theme", "small");
+        // end-source-example
+        addCard("Theme Variants", "Small size", comboBox);
+    }
+
     private void styling() {
-        Paragraph p1 = new Paragraph("To read about styling you can read the related tutorial ");
+        Paragraph p1 = new Paragraph(
+                "To read about styling you can read the related tutorial ");
         p1.add(new Anchor(
                 "https://vaadin.com/docs/flow/theme/using-component-themes.html",
                 "Using Component Themes"));
 
-        Paragraph p2 = new Paragraph("To know about styling in HTML you can read the ");
+        Paragraph p2 = new Paragraph(
+                "To know about styling in HTML you can read the ");
         p2.add(new Anchor("https://vaadin.com/components/"
                 + "vaadin-combo-box/html-examples/combo-box-styling-demos",
                 "HTML Styling Demos"));
