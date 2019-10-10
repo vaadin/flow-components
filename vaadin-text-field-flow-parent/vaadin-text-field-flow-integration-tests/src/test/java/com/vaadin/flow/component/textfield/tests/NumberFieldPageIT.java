@@ -60,13 +60,13 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         readOnlyButton.click();
 
         numberField.setValue("456");
-        Assert.assertEquals("123.0", numberField.getValue());
+        Assert.assertEquals("123", numberField.getValue());
         Assert.assertEquals("Old value: 'null'. New value: '123.0'.",
                 messageDiv.getText());
 
         numberField.setProperty("readonly", "");
         numberField.setValue("789");
-        Assert.assertEquals("123.0", numberField.getValue());
+        Assert.assertEquals("123", numberField.getValue());
         Assert.assertEquals("Old value: 'null'. New value: '123.0'.",
                 messageDiv.getText());
 

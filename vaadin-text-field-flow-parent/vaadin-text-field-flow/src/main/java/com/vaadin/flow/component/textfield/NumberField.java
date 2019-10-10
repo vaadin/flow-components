@@ -18,6 +18,11 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.function.SerializableFunction;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
+import java.util.Locale;
+
 /**
  * Server-side component for the {@code vaadin-number-field} element.
  *
@@ -25,20 +30,11 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 public class NumberField extends AbstractNumberField<NumberField, Double> {
 
-    private static final SerializableFunction<String, Double> PARSER = valueFromClient -> valueFromClient == null
-            || valueFromClient.isEmpty() ? null
-                    : Double.parseDouble(valueFromClient);
-
-    private static final SerializableFunction<Double, String> FORMATTER = valueFromModel -> valueFromModel == null
-            ? ""
-            : valueFromModel.toString();
-
     /**
      * Constructs an empty {@code NumberField}.
      */
     public NumberField() {
-        super(PARSER, FORMATTER, Double.NEGATIVE_INFINITY,
-                Double.POSITIVE_INFINITY);
+        this(new Formatter());
     }
 
     /**
@@ -118,6 +114,17 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs an empty {@code NumberField}.
+     *
+     * @param formatter
+     *            Formatter for the field.
+     */
+    private NumberField(Formatter formatter) {
+        super(formatter::parse, formatter, Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY);
     }
 
     @Override
@@ -234,4 +241,33 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
         return getPatternString();
     }
 
+    private static class Formatter
+            implements SerializableFunction<Double, String> {
+
+        // Using Locale.ENGLISH to keep format independent of JVM locale
+        // settings. The value property always uses period as the decimal
+        // separator regardless of the browser locale.
+        private final DecimalFormat decimalFormat = new DecimalFormat("#.#",
+                DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+
+        private Formatter() {
+            decimalFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
+        }
+
+        @Override
+        public String apply(Double valueFromModel) {
+            return valueFromModel == null ? ""
+                    : decimalFormat.format(valueFromModel.doubleValue());
+        }
+
+        private Double parse(String valueFromClient) {
+            try {
+                return valueFromClient == null || valueFromClient.isEmpty()
+                        ? null
+                        : decimalFormat.parse(valueFromClient).doubleValue();
+            } catch (ParseException e) {
+                throw new NumberFormatException(valueFromClient);
+            }
+        }
+    }
 }
