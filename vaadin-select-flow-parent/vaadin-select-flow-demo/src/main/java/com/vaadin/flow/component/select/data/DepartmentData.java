@@ -15,8 +15,8 @@ public class DepartmentData {
         departmentList = new ArrayList<>();
         departmentList.add(new Department(1, "Product"));
         departmentList.add(new Department(2, "Service"));
-        departmentList.add(new Department(1, "HR"));
-        departmentList.add(new Department(1, "Accounting"));
+        departmentList.add(new Department(3, "HR"));
+        departmentList.add(new Department(4, "Accounting"));
 
         return departmentList;
     }
