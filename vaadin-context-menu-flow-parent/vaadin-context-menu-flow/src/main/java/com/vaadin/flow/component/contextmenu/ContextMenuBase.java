@@ -25,6 +25,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
@@ -64,7 +65,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private String openOnEventName = "vaadin-contextmenu";
     private Registration targetBeforeOpenRegistration;
     private Registration targetAttachRegistration;
-    private Registration targetBeforeClientResponseRegistration;
+    private PendingJavaScriptResult targetJsRegistration;
 
     private boolean autoAddedToTheUi;
 
@@ -106,9 +107,9 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             targetAttachRegistration.remove();
             getTarget().getElement()
                     .callJsFunction("$contextMenuConnector.removeConnector");
-            if (targetBeforeClientResponseRegistration != null) {
-                targetBeforeClientResponseRegistration.remove();
-                targetBeforeClientResponseRegistration = null;
+            if (isTargetJsPending()) {
+                targetJsRegistration.cancelExecution();
+                targetJsRegistration = null;
             }
         }
 
@@ -158,7 +159,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     public void setOpenOnClick(boolean openOnClick) {
         openOnEventName = openOnClick ? "click" : "vaadin-contextmenu";
-        updateOpenOn();
+        requestTargetJsExecutions();
     }
 
     /**
@@ -375,23 +376,26 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     private void onTargetAttach(UI ui) {
         ui.getInternals().addComponentDependencies(ContextMenu.class);
-        if (targetBeforeClientResponseRegistration == null) {
-            targetBeforeClientResponseRegistration = ui
-                    .beforeClientResponse(target, context -> {
-                        ui.getPage().executeJs(
-                                "window.Vaadin.Flow.contextMenuConnector.init($0)",
-                                target);
-                        targetBeforeClientResponseRegistration = null;
-                    });
-        }
-        updateOpenOn();
+        requestTargetJsExecutions();
     }
 
-    private void updateOpenOn() {
-        if (target != null) {
-            target.getElement().callJsFunction(
-                    "$contextMenuConnector.updateOpenOn", openOnEventName);
+    /*
+     * Used for both initializing the client-side connector and to update the
+     * openOn-event. This ensures that openOn is never updated before the
+     * connector is initialized.
+     */
+    private void requestTargetJsExecutions() {
+        if (target != null && !isTargetJsPending()) {
+            targetJsRegistration = target.getElement().executeJs(
+                    "window.Vaadin.Flow.contextMenuConnector.init(this);"
+                            + "this.$contextMenuConnector.updateOpenOn($0);",
+                    openOnEventName);
         }
+    }
+
+    private boolean isTargetJsPending() {
+        return targetJsRegistration != null
+                && !targetJsRegistration.isSentToBrowser();
     }
 
     private void beforeOpenHandler(DomEvent event) {

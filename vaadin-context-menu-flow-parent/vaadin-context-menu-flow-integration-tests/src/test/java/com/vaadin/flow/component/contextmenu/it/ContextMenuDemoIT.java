@@ -70,6 +70,7 @@ public class ContextMenuDemoIT extends ComponentDemoTest {
         Assert.assertEquals("This is not a menu item", label.getText());
 
         checkbox.click();
+        $("body").first().click();
         verifyClosed();
         WebElement message = findElement(
                 By.id("context-menu-with-components-message"));
