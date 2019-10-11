@@ -55,7 +55,6 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     private int activeUploads = 0;
     private boolean uploading;
 
-    private static final String I18N_PROPERTY = "i18n";
     private UploadI18N i18n;
 
     /**
@@ -72,8 +71,11 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         // Get a server round trip for upload error and success.
         addUploadErrorListener(event -> {
         });
+
         addUploadSuccessListener(event -> {
         });
+
+        addFileRejectListener(event -> fireEvent(new FileRejectedEvent(this, event.getDetailError())));
 
         // If client aborts upload mark upload as interrupted on server also
         addUploadAbortListener(event -> interruptUpload());
@@ -81,28 +83,24 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         getElement().setAttribute("target", new StreamReceiver(
                 getElement().getNode(), "upload", getStreamVariable()));
 
-        DomEventListener uploadsFinishedListener = e -> {
-            JsonArray files = e.getEventData().getArray("element.files");
+      final String elementFiles = "element.files";
+      DomEventListener uploadsFinishedListener = e -> {
+            JsonArray files = e.getEventData().getArray(elementFiles);
 
-            boolean uploading = IntStream.range(0, files.length()).anyMatch(
+            boolean isUploading = IntStream.range(0, files.length()).anyMatch(
                     index -> files.getObject(index).getBoolean("uploading"));
 
-            if (this.uploading && !uploading) {
+            if (this.uploading && !isUploading) {
                 this.fireUploadsFinish();
             }
-            this.uploading = uploading;
+            this.uploading = isUploading;
         };
 
         addUploadStartListener(e -> this.uploading = true);
         getElement().addEventListener("upload-success", uploadsFinishedListener)
-                .addEventData("element.files");
+                .addEventData(elementFiles);
         getElement().addEventListener("upload-error", uploadsFinishedListener)
-                .addEventData("element.files");
-    }
-
-    public Registration addUploadsFinishedListener(
-            ComponentEventListener<UploadsFinishedEvent> listener) {
-        return addListener(UploadsFinishedEvent.class, listener);
+                .addEventData(elementFiles);
     }
 
     /**
@@ -112,9 +110,21 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *            receiver that handles the upload
      */
     public Upload(Receiver receiver) {
-        this();
+      this();
 
-        setReceiver(receiver);
+      setReceiver(receiver);
+    }
+
+    /**
+     * Add a finished listener that is informed on upload finished.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    public Registration addUploadsFinishedListener(
+            ComponentEventListener<UploadsFinishedEvent> listener) {
+        return addListener(UploadsFinishedEvent.class, listener);
     }
 
     private StreamVariable getStreamVariable() {
@@ -376,39 +386,39 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         return activeUploads > 0;
     }
 
-    private void fireStarted(String filename, String MIMEType,
+    private void fireStarted(String filename, String mimeType,
             long contentLength) {
-        fireEvent(new StartedEvent(this, filename, MIMEType, contentLength));
+        fireEvent(new StartedEvent(this, filename, mimeType, contentLength));
     }
 
-    private void fireUploadInterrupted(String filename, String MIMEType,
+    private void fireUploadInterrupted(String filename, String mimeType,
             long length) {
-        fireEvent(new FailedEvent(this, filename, MIMEType, length));
+        fireEvent(new FailedEvent(this, filename, mimeType, length));
     }
 
-    private void fireNoInputStream(String filename, String MIMEType,
+    private void fireNoInputStream(String filename, String mimeType,
             long length) {
-        fireEvent(new NoInputStreamEvent(this, filename, MIMEType, length));
+        fireEvent(new NoInputStreamEvent(this, filename, mimeType, length));
     }
 
-    private void fireNoOutputStream(String filename, String MIMEType,
+    private void fireNoOutputStream(String filename, String mimeType,
             long length) {
-        fireEvent(new NoOutputStreamEvent(this, filename, MIMEType, length));
+        fireEvent(new NoOutputStreamEvent(this, filename, mimeType, length));
     }
 
-    private void fireUploadInterrupted(String filename, String MIMEType,
+    private void fireUploadInterrupted(String filename, String mimeType,
             long length, Exception e) {
-        fireEvent(new FailedEvent(this, filename, MIMEType, length, e));
+        fireEvent(new FailedEvent(this, filename, mimeType, length, e));
     }
 
-    private void fireUploadSuccess(String filename, String MIMEType,
+    private void fireUploadSuccess(String filename, String mimeType,
             long length) {
-        fireEvent(new SucceededEvent(this, filename, MIMEType, length));
+        fireEvent(new SucceededEvent(this, filename, mimeType, length));
     }
 
-    private void fireUploadFinish(String filename, String MIMEType,
+    private void fireUploadFinish(String filename, String mimeType,
             long length) {
-        fireEvent(new FinishedEvent(this, filename, MIMEType, length));
+        fireEvent(new FinishedEvent(this, filename, mimeType, length));
     }
 
     private void fireUploadsFinish() {
@@ -485,6 +495,20 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     public Registration addSucceededListener(
             ComponentEventListener<SucceededEvent> listener) {
         return addListener(SucceededEvent.class, listener);
+    }
+
+
+    /**
+     * Adds a listener for {@code file-reject} events fired when a file cannot be added due to some constrains:
+     * {@code setMaxFileSize, setMaxFiles, setAcceptedFileTypes}
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    public Registration addFileRejectedListener(
+            ComponentEventListener<FileRejectedEvent> listener) {
+        return addListener(FileRejectedEvent.class, listener);
     }
 
     /**
