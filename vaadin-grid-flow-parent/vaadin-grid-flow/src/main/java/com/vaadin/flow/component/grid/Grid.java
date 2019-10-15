@@ -224,6 +224,14 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                             SelectionEvent<Grid<T>, T> event) {
                         grid.fireEvent((ComponentEvent<Grid<T>>) event);
                     }
+
+                    @Override
+                    public void setDeselectAllowed(boolean deselectAllowed) {
+                        super.setDeselectAllowed(deselectAllowed);
+                        grid.getElement().executeJs(
+                                "this.$connector.deselectAllowed = $0",
+                                deselectAllowed);
+                    }
                 };
             }
         },

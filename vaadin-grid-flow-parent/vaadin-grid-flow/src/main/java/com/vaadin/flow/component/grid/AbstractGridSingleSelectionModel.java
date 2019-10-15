@@ -85,7 +85,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     @Override
     public void deselectFromClient(T item) {
-        if (isSelected(item)) {
+        if (isSelected(item) && isDeselectAllowed()) {
             selectFromClient(null);
         }
     }
