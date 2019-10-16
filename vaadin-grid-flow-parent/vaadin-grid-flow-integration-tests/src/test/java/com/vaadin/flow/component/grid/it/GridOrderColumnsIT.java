@@ -15,13 +15,14 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Tests reorder of columns
@@ -63,9 +64,25 @@ public class GridOrderColumnsIT extends AbstractComponentIT {
         assertColumnHeaders("Col1", "Col2", "Col3");
     }
 
+    @Test
+    public void clientReorderColumns_serverResetOrder() {
+        // This will visually reorder the columns (the same as dragging the
+        // columns to a different order in UI = doesn't affect the column
+        // elements' DOM order)
+        findElement(By.id("button-visual-order")).click();
+        // Make sure the order is as expected
+        assertColumnHeaders("Col2", "Col1", "Col3");
+        // Reorder the columns back to the initial order = the order in which
+        // the physical column elements are still in the DOM
+        findElement(By.id("button-123")).click();
+        // See that the visual order matches expected
+        assertColumnHeaders("Col1", "Col2", "Col3");
+    }
+
     private void assertColumnHeaders(String... headers) {
         for (int i = 0; i < headers.length; i++) {
-            Assert.assertEquals("Unexpected header for column " + i, headers[i], grid.getHeaderCell(i).getText());
+            Assert.assertEquals("Unexpected header for column " + i, headers[i],
+                    grid.getHeaderCell(i).getText());
         }
     }
 }
