@@ -18,7 +18,7 @@ public class CompositeIT extends AbstractParallelTest {
 
         Assert.assertFalse(crud.getEditorSaveButton().isEnabled());
 
-        $("div")
+        $("vaadin-dialog-overlay").first().$("div")
                 .attribute("editor-role", "language")
                 .first()
                 .$(ButtonElement.class)
@@ -30,7 +30,7 @@ public class CompositeIT extends AbstractParallelTest {
                 .first()
                 .setValue("English");
 
-        $(ButtonElement.class)
+        $("vaadin-dialog-overlay").first().$(ButtonElement.class)
                 .attribute("editor-role", "language-confirm")
                 .first()
                 .click();

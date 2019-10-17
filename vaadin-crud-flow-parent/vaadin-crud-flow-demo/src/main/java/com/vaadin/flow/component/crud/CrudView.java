@@ -46,6 +46,7 @@ public class CrudView extends DemoView {
         basicCrud();
         // Using unicode spaces so as card does not show any header
         addCard(" ");
+        setEditorPosition();
         editOnDoubleClick();
         internationalization();
         addCard("  ");
@@ -90,6 +91,26 @@ public class CrudView extends DemoView {
         return new BinderCrudEditor<>(binder, form);
     }
     // end-source-example
+
+    private void setEditorPosition() {
+        // begin-source-example
+        // source-example-heading: Editor Position
+        Crud<Person> crud = new Crud<>(Person.class, createPersonEditor());
+
+        crud.setEditorPosition(CrudEditorPosition.ASIDE);
+
+        PersonDataProvider dataProvider = new PersonDataProvider();
+
+        crud.setDataProvider(dataProvider);
+        crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
+        crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
+
+        crud.getGrid().removeColumnByKey("id");
+        crud.addThemeVariants(CrudVariant.NO_BORDER);
+        // end-source-example
+
+        addCard("Editor Position", crud);
+    }
 
     private void editOnDoubleClick() {
         // begin-source-example

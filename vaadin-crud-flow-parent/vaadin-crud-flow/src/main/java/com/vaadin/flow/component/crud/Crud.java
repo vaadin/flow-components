@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
  * @param <E> the bean type
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/vaadin-crud", version="1.0.5")
+@NpmPackage(value = "@vaadin/vaadin-crud", version="1.1.0-alpha3")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
@@ -367,6 +367,37 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
             editor.getView().getElement().setAttribute(SLOT_KEY, FORM_SLOT_NAME);
             getElement().appendChild(editor.getView().getElement());
         }
+    }
+
+    /**
+     * Sets how editor will be presented on desktop screen.
+     * <p>
+     * The default position is {@link CrudEditorPosition#OVERLAY}.
+     *
+     * @param editorPosition the editor position, never
+     *                     <code>null</code>
+     * @see CrudEditorPosition
+     */
+    public void setEditorPosition(CrudEditorPosition editorPosition) {
+        if (editorPosition == null) {
+            throw new IllegalArgumentException(
+                    "The 'editorPosition' argument can not be null");
+        }
+        getElement().setProperty("editorPosition", editorPosition.getEditorPosition());
+    }
+
+    /**
+     * Gets the current editor position on the desktop screen.
+     * <p>
+     * The default position is {@link CrudEditorPosition#OVERLAY}.
+     *
+     * @return the editor position
+     */
+    public CrudEditorPosition getEditorPosition() {
+        return
+                CrudEditorPosition.toPosition(
+                        getElement().getProperty("editorPosition", ""),
+                        CrudEditorPosition.OVERLAY);
     }
 
     /**

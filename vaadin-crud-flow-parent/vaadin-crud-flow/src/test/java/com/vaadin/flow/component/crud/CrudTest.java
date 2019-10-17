@@ -17,11 +17,11 @@ import java.util.Arrays;
 
 public class CrudTest {
 
+    final Crud<Thing> systemUnderTest
+            = new Crud<>(Thing.class, createFakeGrid(), new ThingEditor());
+
     @Test
     public void itemAvailableInAllEvents() {
-        final Crud<Thing> systemUnderTest
-                = new Crud<>(Thing.class, createFakeGrid(), new ThingEditor());
-
         // Assert that all events come with an item.
         systemUnderTest.addCancelListener(e -> Assert.assertNotNull(e.getItem()));
         systemUnderTest.addDeleteListener(e -> Assert.assertNotNull(e.getItem()));
@@ -44,6 +44,11 @@ public class CrudTest {
                 new Crud.EditEvent<>(systemUnderTest, false, selectedItem, null),
                 new Crud.SaveEvent<>(systemUnderTest, false, null)
         ).forEach(e -> ComponentUtil.fireEvent(systemUnderTest, e));
+    }
+
+    @Test
+    public void getEditorPosition_defaultOVERLAY() {
+        Assert.assertEquals(CrudEditorPosition.OVERLAY, systemUnderTest.getEditorPosition());
     }
 
     private Grid<Thing> createFakeGrid() {

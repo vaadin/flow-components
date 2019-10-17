@@ -103,7 +103,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         getTestButton("editServerItem").click();
         crud.getEditor().$(TextFieldElement.class)
                 .attribute("editor-role", "first-name").first()
-                .sendKeys("Vaadin");
+                .setValue("Vaadin");
 
         dismissDialog();
 

@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>vaadin-crud-flow-root</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Vaadin Crud Root</name>
@@ -31,7 +31,7 @@
     </licenses>
 
     <properties>
-        <flow.version>2.0.2</flow.version>
+        <flow.version>2.0.15</flow.version>
         <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
