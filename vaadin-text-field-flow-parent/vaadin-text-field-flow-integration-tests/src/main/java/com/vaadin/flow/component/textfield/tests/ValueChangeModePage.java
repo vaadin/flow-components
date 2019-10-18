@@ -15,9 +15,17 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -25,8 +33,6 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
-
-import java.util.Arrays;
 
 /**
  * Test view for changing the ValueChangMode of TextField, TextArea and
@@ -47,17 +53,14 @@ public class ValueChangeModePage extends Div {
         message.setId("message");
         add(message);
 
-        TextField textField = new TextField();
-        addField(textField);
-        addButtons(textField);
+        Stream.of(new TextField(), new TextArea(), new PasswordField(),
+                new NumberField(), new EmailField(), new IntegerField(),
+                new BigDecimalField()).forEach(this::setupTestComponent);
+    }
 
-        TextArea textArea = new TextArea();
-        addField(textArea);
-        addButtons(textArea);
-
-        PasswordField passwordField = new PasswordField();
-        addField(passwordField);
-        addButtons(passwordField);
+    private void setupTestComponent(Component field) {
+        addField((AbstractField<?, ?>) field);
+        addButtons((HasValueChangeMode) field);
     }
 
     private void addField(AbstractField<?, ?> field) {
@@ -81,8 +84,8 @@ public class ValueChangeModePage extends Div {
             add(button);
         });
         TextField timeoutField = new TextField();
-        timeoutField.addValueChangeListener(event ->
-                component.setValueChangeTimeout(new Integer(event.getValue())));
+        timeoutField.addValueChangeListener(event -> component
+                .setValueChangeTimeout(new Integer(event.getValue())));
         timeoutField.setId(name.toLowerCase() + "-set-change-timeout");
         add(timeoutField);
     }
