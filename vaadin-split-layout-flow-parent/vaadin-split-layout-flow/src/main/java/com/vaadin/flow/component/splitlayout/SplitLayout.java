@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.splitlayout;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -296,7 +295,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * @param value     the value to set
      */
     public void setPrimaryStyle(String styleName, String value) {
-        setInnerComponentStyle(primaryComponent, styleName, value);
+        setInnerComponentStyle(styleName, value, true);
     }
 
     /**
@@ -306,7 +305,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * @param value     the value to set
      */
     public void setSecondaryStyle(String styleName, String value) {
-        setInnerComponentStyle(secondaryComponent, styleName, value);
+        setInnerComponentStyle(styleName, value, false);
     }
 
     private void setComponents() {
@@ -349,9 +348,16 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         return super.addSplitterDragendListener(listener);
     }
 
-    private void setInnerComponentStyle(Component innerComponent,
-                                               String styleName, String value) {
-        Optional.ofNullable(innerComponent).ifPresent(component -> component
-                .getElement().getStyle().set(styleName, value));
+    private void setInnerComponentStyle(String styleName, String value,
+            boolean primary) {
+        Component innerComponent = primary ? primaryComponent
+                : secondaryComponent;
+        if (innerComponent != null) {
+            innerComponent.getElement().getStyle().set(styleName, value);
+        } else {
+            getElement().executeJs(
+                    "var element = this.children[$0]; if (element) { element.style[$1]=$2; }",
+                    primary ? 0 : 1, styleName, value);
+        }
     }
 }
