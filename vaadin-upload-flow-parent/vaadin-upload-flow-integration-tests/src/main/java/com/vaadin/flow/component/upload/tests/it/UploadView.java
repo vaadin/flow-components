@@ -60,7 +60,7 @@ public class UploadView extends Div {
             }
             eventsOutput.add("-succeeded");
         });
-        upload.addUploadsFinishedListener(
+        upload.addAllFinishedListener(
                 event -> eventsOutput.add("-finished"));
 
         upload.setMaxFileSize(500 * 1024);

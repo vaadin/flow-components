@@ -75,7 +75,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         addUploadSuccessListener(event -> {
         });
 
-        addFileRejectListener(event -> fireEvent(new FileRejectedEvent(this, event.getDetailError())));
+        addFileRejectListener(event -> fireEvent(
+                new FileRejectedEvent(this, event.getDetailError())));
 
         // If client aborts upload mark upload as interrupted on server also
         addUploadAbortListener(event -> interruptUpload());
@@ -83,23 +84,26 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         getElement().setAttribute("target", new StreamReceiver(
                 getElement().getNode(), "upload", getStreamVariable()));
 
-      final String elementFiles = "element.files";
-      DomEventListener uploadsFinishedListener = e -> {
+        final String elementFiles = "element.files";
+        DomEventListener allFinishedListener = e -> {
             JsonArray files = e.getEventData().getArray(elementFiles);
 
             boolean isUploading = IntStream.range(0, files.length()).anyMatch(
                     index -> files.getObject(index).getBoolean("uploading"));
 
             if (this.uploading && !isUploading) {
-                this.fireUploadsFinish();
+                this.fireAllFinish();
             }
             this.uploading = isUploading;
         };
 
         addUploadStartListener(e -> this.uploading = true);
-        getElement().addEventListener("upload-success", uploadsFinishedListener)
+
+        getElement().addEventListener("upload-success", allFinishedListener)
                 .addEventData(elementFiles);
-        getElement().addEventListener("upload-error", uploadsFinishedListener)
+        getElement().addEventListener("upload-error", allFinishedListener)
+                .addEventData(elementFiles);
+        getElement().addEventListener("upload-abort", allFinishedListener)
                 .addEventData(elementFiles);
     }
 
@@ -110,21 +114,21 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *            receiver that handles the upload
      */
     public Upload(Receiver receiver) {
-      this();
+        this();
 
-      setReceiver(receiver);
+        setReceiver(receiver);
     }
 
     /**
-     * Add a finished listener that is informed on upload finished.
+     * Add listener that is informed on all uploads finished.
      *
      * @param listener
-     *            the listener
+     *            all finished listener to add
      * @return a {@link Registration} for removing the event listener
      */
-    public Registration addUploadsFinishedListener(
-            ComponentEventListener<UploadsFinishedEvent> listener) {
-        return addListener(UploadsFinishedEvent.class, listener);
+    public Registration addAllFinishedListener(
+            ComponentEventListener<AllFinishedEvent> listener) {
+        return addListener(AllFinishedEvent.class, listener);
     }
 
     private StreamVariable getStreamVariable() {
@@ -421,8 +425,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         fireEvent(new FinishedEvent(this, filename, mimeType, length));
     }
 
-    private void fireUploadsFinish() {
-        fireEvent(new UploadsFinishedEvent(this));
+    private void fireAllFinish() {
+        fireEvent(new AllFinishedEvent(this));
     }
 
     /**
@@ -497,9 +501,9 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         return addListener(SucceededEvent.class, listener);
     }
 
-
     /**
-     * Adds a listener for {@code file-reject} events fired when a file cannot be added due to some constrains:
+     * Adds a listener for {@code file-reject} events fired when a file cannot
+     * be added due to some constrains:
      * {@code setMaxFileSize, setMaxFiles, setAcceptedFileTypes}
      *
      * @param listener

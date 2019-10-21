@@ -18,13 +18,13 @@ package com.vaadin.flow.component.upload;
 import com.vaadin.flow.component.ComponentEvent;
 
 /**
- * UploadsFinishedEvent is sent when the upload has processed all the files in
- * its upload queue, regardless of whether all the receptions were successful or
+ * AllFinishedEvent is sent when the upload has processed all the files in its
+ * upload queue, regardless of whether all the receptions were successful or
  * not.
  *
  * @author Vaadin Ltd.
  */
-public class UploadsFinishedEvent extends ComponentEvent<Upload> {
+public class AllFinishedEvent extends ComponentEvent<Upload> {
 
     /**
      * Create an instance of the event.
@@ -32,7 +32,7 @@ public class UploadsFinishedEvent extends ComponentEvent<Upload> {
      * @param source
      *            the source of the file
      */
-    public UploadsFinishedEvent(Upload source) {
+    public AllFinishedEvent(Upload source) {
         super(source, false);
     }
 
