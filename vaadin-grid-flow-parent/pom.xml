@@ -17,6 +17,7 @@
     
     <properties>
         <contextmenu.version>3.1-SNAPSHOT</contextmenu.version>
+        <flow.version>2.1-SNAPSHOT</flow.version>
     </properties>
 
    <repositories>
