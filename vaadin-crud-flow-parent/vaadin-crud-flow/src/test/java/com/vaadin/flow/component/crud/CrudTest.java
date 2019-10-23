@@ -22,12 +22,14 @@ public class CrudTest {
 
     @Test
     public void itemAvailableInAllEvents() {
-        // Assert that all events come with an item.
+        // Assert that all these events come with an item.
         systemUnderTest.addCancelListener(e -> Assert.assertNotNull(e.getItem()));
         systemUnderTest.addDeleteListener(e -> Assert.assertNotNull(e.getItem()));
         systemUnderTest.addEditListener(e -> Assert.assertNotNull(e.getItem()));
-        systemUnderTest.addNewListener(e -> Assert.assertNotNull(e.getItem()));
         systemUnderTest.addSaveListener(e -> Assert.assertNotNull(e.getItem()));
+
+        // Client side new should not come with an item
+        systemUnderTest.addNewListener(e -> Assert.assertNull(e.getItem()));
 
         // A client-side Grid item.
         final JsonObject selectedItem = new JreJsonFactory()

@@ -752,7 +752,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
 
         @Override
         public E getItem() {
-            return item != null ? item : super.getItem();
+            return item;
         }
     }
 

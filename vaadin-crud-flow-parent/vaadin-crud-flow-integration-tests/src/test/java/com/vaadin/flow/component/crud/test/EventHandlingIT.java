@@ -40,7 +40,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         Assert.assertFalse(crud.isEditorOpen());
         crud.getNewItemButton().get().click();
         Assert.assertEquals(
-                "New: Person{id=null, firstName='null', lastName='null'}",
+                "New: null",
                 getLastEvent());
         Assert.assertTrue(crud.isEditorOpen());
     }
