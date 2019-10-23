@@ -94,7 +94,11 @@ public class BinderCrudEditor<E> implements CrudEditor<E> {
         return binder.validate().isOk();
     }
 
+    /**
+     * @deprecated This method should not be used outside.
+     */
     @Override
+    @Deprecated
     public Component getView() {
         return view;
     }
