@@ -36,6 +36,10 @@ import com.vaadin.flow.function.SerializableFunction;
  * handling decimal numbers with high precision. The component also prevents
  * users from entering characters which can't be used in a decimal number, such
  * as alphabets.
+ * <p>
+ * When setting values from the server-side, the {@code scale} of the provided
+ * {@link BigDecimal} is preserved in the presentation format shown to the user,
+ * as described in {@link #setValue(BigDecimal)}.
  *
  * @author Vaadin Ltd.
  */
@@ -288,7 +292,7 @@ public class BigDecimalField
     }
 
     /**
-     * Gets the visibility state of the button which clears the text field.
+     * Gets the visibility state of the button which clears the field.
      *
      * @return <code>true</code> if the button is visible, <code>false</code>
      *         otherwise
@@ -344,16 +348,20 @@ public class BigDecimalField
     }
 
     /**
-     * Sets the value of this text field. If the new value is not equal to
-     * {@code getValue()}, fires a value change event. Throws
-     * {@code NullPointerException}, if the value is null.
+     * Sets the value of this field. If the new value is not equal to
+     * {@code getValue()}, fires a value change event.
      * <p>
-     * Note: {@link com.vaadin.flow.data.binder.Binder} will take care of the
-     * {@code null} conversion when integrates with text field, as long as no
-     * new converter is defined.
+     * You can adjust how the value is presented in the field with the APIs
+     * provided by the value type {@link BigDecimal}. For example, you can
+     * change the number of decimal places with
+     * {@link BigDecimal#setScale(int)}. This doesn't however restrict the user
+     * from entering values with different number of decimals. Note that
+     * BigDecimals are immutable, so their methods will return new instances
+     * instead of editing the existing ones. Scientific notation (such as 1e9)
+     * is turned into plain number format for the presentation.
      *
      * @param value
-     *            the new value, not {@code null}
+     *            the new value
      */
     @Override
     public void setValue(BigDecimal value) {
@@ -361,8 +369,8 @@ public class BigDecimalField
     }
 
     /**
-     * Returns the current value of the text field. By default, the empty text
-     * field will return an empty string.
+     * Returns the current value of the field. By default, the empty
+     * BigDecimalField will return {@code null}.
      *
      * @return the current value.
      */
