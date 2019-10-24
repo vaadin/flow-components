@@ -40,6 +40,16 @@ public class IntegerFieldTest extends TextFieldTest {
         field.setValue(null);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void assertStepIsNotNegative() {
+        field.setStep(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void assertStepGreaterThanZero() {
+        field.setStep(0);
+    }
+
     @Override
     @Test
     public void initialValuePropertyValue() {

@@ -50,6 +50,16 @@ public class NumberFieldTest extends TextFieldTest {
                 field.getElement().getProperty("value"));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void assertStepIsNotNegative() {
+        field.setStep(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void assertStepGreaterThanZero() {
+        field.setStep(0);
+    }
+
     @Test
     public void assertDefaultValuesForMinMaxStep() {
         Assert.assertEquals(
