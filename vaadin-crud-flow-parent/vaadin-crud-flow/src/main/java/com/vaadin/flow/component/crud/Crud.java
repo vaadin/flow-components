@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
  * @param <E> the bean type
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/vaadin-crud", version="1.1.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-crud", version="1.1.0-alpha5")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
@@ -89,6 +89,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     private Class<E> beanType;
     private Grid<E> grid;
     private CrudEditor<E> editor;
+    private E gridActiveItem;
 
     /**
      * Instantiates a new Crud using a custom grid.
@@ -169,6 +170,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                 ((ComponentEventListener<NewEvent<E>>) e -> {
                     try {
                         getEditor().setItem(e.getItem() != null ? e.getItem() : getBeanType().newInstance());
+                        clearActiveItem();
                     } catch (Exception ex) {
                         throw new RuntimeException("Unable to instantiate new bean", ex);
                     }
@@ -178,7 +180,14 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
 
         ComponentUtil.addListener(this, EditEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<EditEvent<E>>) e -> {
-                    getEditor().setItem(e.getItem(), true);
+                    if (getEditor().getItem() != e.getItem()) {
+                        getEditor().setItem(e.getItem(), true);
+                        setOpened(true);
+
+                        if(isEditOnClick() && getGrid() instanceof CrudGrid) {
+                            getGrid().select(e.getItem());
+                        }
+                    }
 
                     editListeners.forEach(listener -> listener.onComponentEvent(e));
                 }));
@@ -186,9 +195,13 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
         ComponentUtil.addListener(this, CancelEvent.class, (ComponentEventListener)
                 ((ComponentEventListener<CancelEvent<E>>) e -> {
                     cancelListeners.forEach(listener -> listener.onComponentEvent(e));
-
-                    setOpened(false);
-                    getEditor().clear();
+                    if (
+                            (this.gridActiveItem != null && this.getEditor().getItem() == this.gridActiveItem)
+                            || this.gridActiveItem == null) {
+                        setOpened(false);
+                        getEditor().clear();
+                        clearActiveItem();
+                    }
                 }));
 
         ComponentUtil.addListener(this, SaveEvent.class, (ComponentEventListener)
@@ -398,6 +411,52 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                 CrudEditorPosition.toPosition(
                         getElement().getProperty("editorPosition", ""),
                         CrudEditorPosition.OVERLAY);
+    }
+
+    private Registration gridItemClickRegistration;
+
+    /**
+     * Sets the option to open item to edit by row click.
+     * <p>
+     * If enabled, it removes the edit column created by {@link CrudGrid}.
+     *
+     * @param editOnClick {@code true} to enable it ({@code false}, by default).
+     */
+    public void setEditOnClick(boolean editOnClick) {
+        getElement().setProperty("editOnClick", editOnClick);
+        Grid<E> grid = getGrid();
+
+        if (editOnClick) {
+            if (getGrid() instanceof CrudGrid) {
+                grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+
+                if (hasEditColumn(grid)) {
+                    removeEditColumn(grid);
+                }
+            }
+            gridItemClickRegistration = grid.addItemClickListener(e -> this.gridActiveItem = e.getItem());
+        } else if (gridItemClickRegistration != null) {
+            clearActiveItem();
+            gridItemClickRegistration.remove();
+            if (grid instanceof CrudGrid) {
+                addEditColumn(grid);
+                grid.setSelectionMode(Grid.SelectionMode.NONE);
+            }
+        }
+    }
+
+    /**
+     * Gets whether click on row to edit item is enabled or not.
+     *
+     * @return @{code true} if enabled, {@code false} otherwise
+     */
+    public boolean isEditOnClick() {
+        return getElement().getProperty("editOnClick", false);
+    }
+
+    private void clearActiveItem() {
+        this.gridActiveItem = null;
+        grid.select(null);
     }
 
     /**

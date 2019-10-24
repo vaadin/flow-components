@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.crud.testbench;
 
+
 /*
  * #%L
  * Vaadin Crud Testbench API
@@ -8,10 +9,10 @@ package com.vaadin.flow.component.crud.testbench;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -78,7 +79,11 @@ public class CrudElement extends TestBenchElement {
      * @param row the row to open for editing
      */
     public void openRowForEditing(int row) {
-        this.$("vaadin-crud-edit").all().get(row).click();
+        if (isEditOnClick()) {
+            this.getGrid().getCell(row, 0).click();
+        } else {
+            this.$("vaadin-crud-edit").all().get(row).click();
+        }
     }
 
     /**
@@ -113,12 +118,35 @@ public class CrudElement extends TestBenchElement {
     }
 
     /**
-     * Checks if an editor overlay is open
+     * Checks if an editor overlay is open on the default editor position
+     * Otherwise, checks the value of editorOpened property
      *
-     * @return true if the editor overlay is open and false if otherwise
+     * @return {@code true} if the editor is open and {@code false}, otherwise
      */
     public boolean isEditorOpen() {
-        return $("vaadin-dialog-overlay").onPage().attribute("opened", "").exists();
+        if (getEditorPosition().isEmpty()) {
+            return $("vaadin-dialog-overlay").onPage().attribute("opened", "").exists();
+        }
+        return getPropertyBoolean("editorOpened");
+    }
+
+    /**
+     * Gets the editor position selected for the CRUD
+     * Possible values are "" (default), "bottom" and "aside"
+     *
+     * @return a string containing the value defined for the editor position
+     */
+    public String getEditorPosition() {
+        return getPropertyString("editorPosition");
+    }
+
+    /**
+     * Gets whether editor can be opened by a click on the row or not
+     *
+     * @return {@code true} if feature is enabled or {@code false} otherwise
+     */
+    public boolean isEditOnClick() {
+        return getPropertyBoolean("editOnClick");
     }
 
     /**
@@ -127,6 +155,9 @@ public class CrudElement extends TestBenchElement {
      * @return the open editor overlay
      */
     public TestBenchElement getEditor() {
-        return $("vaadin-dialog-overlay").onPage().attribute("opened", "").first();
+        if (getEditorPosition().isEmpty()) {
+            return $("vaadin-dialog-overlay").onPage().attribute("opened", "").first();
+        }
+        return this.$("vaadin-dialog-layout").first();
     }
 }
