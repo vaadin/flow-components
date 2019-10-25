@@ -43,6 +43,7 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
+        checkLogsForErrors();
         field = $(BigDecimalFieldElement.class).first();
     }
 
@@ -50,6 +51,19 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
     public void shouldHaveInputModeNumeric() {
         Assert.assertEquals("numeric",
                 field.$("input").first().getAttribute("inputmode"));
+    }
+
+    @Test
+    public void shouldHaveSameWidthAsNumberField() {
+        // The width-property is set as 8em, but getComputedStyle returns the
+        // width in pixels.
+        String widthInEm = (String) executeScript(
+                "const style = getComputedStyle(arguments[0]);"
+                        + "const widthInPx = parseFloat(style.width);"
+                        + "const fontSize = parseFloat(style.fontSize);"
+                        + "return (widthInPx / fontSize) + 'em';",
+                field);
+        Assert.assertEquals("8em", widthInEm);
     }
 
     @Test

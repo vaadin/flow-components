@@ -14,9 +14,25 @@
  * the License.
  */
 (function() {
+
+  let memoizedTemplate;
+
   customElements.whenDefined('vaadin-text-field').then(() => {
 
     class BigDecimalFieldElement extends customElements.get('vaadin-text-field') {
+
+      static get template() {
+        if (!memoizedTemplate) {
+          memoizedTemplate = super.template.cloneNode(true);
+          memoizedTemplate.innerHTML +=
+            `<style>
+                  :host {
+                    width: 8em;
+                  }
+            </style>`;
+        }
+        return memoizedTemplate;
+      }
 
       static get is() {
         return 'vaadin-big-decimal-field';
