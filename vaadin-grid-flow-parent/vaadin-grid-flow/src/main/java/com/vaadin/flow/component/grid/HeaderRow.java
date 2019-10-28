@@ -102,8 +102,8 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
             throw new UnsupportedOperationException(
                     "Cells cannot be joined on the first created header row. "
                             + "This row is used as the default row for setting column "
-                            + "headers and for displaying sorting indicators, so the cells "
-                            + "need to have 1-1 relationship with the columns.");
+                            + "headers and for displaying sorting indicators, so each cell "
+                            + "in it should have maximum one related column.");
         }
         return super.join(cells);
     }

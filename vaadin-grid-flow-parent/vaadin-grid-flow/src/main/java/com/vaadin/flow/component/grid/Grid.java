@@ -1983,7 +1983,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     private void checkForBeanGrid() {
         if (propertySet == null) {
             throw new UnsupportedOperationException(
-                    "This method can't be used for a Grid that isn't constructed from a bean type");
+                    "This method can't be used for a Grid that isn't constructed from a bean type. "
+                            + "To construct Grid from a bean type, please provide a beanType argument"
+                            + "to the constructor: Grid<Person> grid = new Grid<>(Person.class)");
         }
     }
 

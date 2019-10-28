@@ -254,7 +254,8 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         Grid<?> grid = layer.getGrid();
         if (!isOutmostRow()) {
             throw new IllegalArgumentException(
-                    "Cells can be joined only on the out-most row");
+                    "Cells can be joined only on the top-most HeaderRow "
+                        + "or the bottom-most FooterRow.");
         }
         if (cells.size() < 2) {
             throw new IllegalArgumentException("Cannot join less than 2 cells");

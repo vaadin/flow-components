@@ -70,8 +70,8 @@ public class FooterRow extends AbstractRow<FooterCell> {
             throw new UnsupportedOperationException(
                     "Cells cannot be joined on the top-most footer row. "
                             + "This row is used as the default row for setting column "
-                            + "footers, so the cells need to have 1-1 relationship "
-                            + "with the columns.");
+                            + "footers, so each cell in it should have maximum one "
+                            + "related column.");
         }
         return super.join(cells);
     }
