@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -103,6 +105,48 @@ public class IntegerFieldTest extends TextFieldTest {
 
         field.setValue(98);
         Assert.assertFalse(field.isInvalid());
+    }
+
+    @Test
+    public void stepValidation_minNotDefined() {
+        field.setStep(3);
+
+        assertValidValues(-9, -6, -3, 0, 3, 6, 30);
+        assertInvalidValues(-10, -1, 2, 32);
+    }
+
+    @Test
+    public void stepValidation_positiveMin_minUsedAsStepBasis() {
+        field.setMin(1);
+        field.setStep(3);
+
+        assertValidValues(1, 4, 7);
+        assertInvalidValues(2, 3, 5, 6);
+    }
+
+    @Test
+    public void stepValidation_negativeMin_minUsedAsStepBasis() {
+        field.setMin(-5);
+        field.setStep(4);
+
+        assertValidValues(-5, -1, 3, 7);
+        assertInvalidValues(0, 4, -4);
+    }
+
+    private void assertValidValues(Integer... values) {
+        Arrays.asList(values).forEach(v -> {
+            field.setValue(v);
+            Assert.assertFalse("Expected field to be valid with value " + v,
+                    field.isInvalid());
+        });
+    }
+
+    private void assertInvalidValues(Integer... values) {
+        Arrays.asList(values).forEach(v -> {
+            field.setValue(v);
+            Assert.assertTrue("Expected field to be invalid with value " + v,
+                    field.isInvalid());
+        });
     }
 
 }

@@ -16,6 +16,7 @@
 
 package com.vaadin.flow.component.textfield;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.vaadin.flow.component.CompositionNotifier;
@@ -56,6 +57,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     private double min;
     private double max;
     private double step;
+
+    private boolean stepSetByUser;
+    private boolean minSetByUser;
 
     /**
      * Sets up the common logic for number fields.
@@ -289,6 +293,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     protected void setMin(double min) {
         super.setMin(min);
         this.min = min;
+        minSetByUser = true;
     }
 
     @Override
@@ -311,6 +316,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     protected void setStep(double step) {
         super.setStep(step);
         this.step = step;
+        stepSetByUser = true;
     }
 
     @Override
@@ -342,6 +348,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     protected void validate() {
         T value = getValue();
+
         final boolean isRequiredButEmpty = required
                 && Objects.equals(getEmptyValue(), value);
         final boolean isGreaterThanMax = value != null
@@ -349,7 +356,28 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         final boolean isSmallerThanMin = value != null
                 && value.doubleValue() < min;
 
-        setInvalid(isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin);
+        setInvalid(isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin
+                || !isValidByStep(value));
+    }
+
+    private boolean isValidByStep(T value) {
+
+        if (!stepSetByUser// Don't use step in validation if it's not explicitly
+                          // set by user. This follows the web component logic.
+                || value == null || step == 0) {
+            return true;
+        }
+
+        // When min is not defined by user, its value is the absoluteMin
+        // provided in constructor. In this case, min should not be considered
+        // in the step validation.
+        double stepBasis = minSetByUser ? getMinDouble() : 0.0;
+
+        // (value - stepBasis) % step == 0
+        return new BigDecimal(String.valueOf(value))
+                .subtract(BigDecimal.valueOf(stepBasis))
+                .remainder(BigDecimal.valueOf(step))
+                .compareTo(BigDecimal.ZERO) == 0;
     }
 
     @Override

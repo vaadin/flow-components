@@ -15,14 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.textfield.NumberField;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Tests for the {@link NumberField}.
@@ -109,6 +111,60 @@ public class NumberFieldTest extends TextFieldTest {
     }
 
     @Test
+    public void stepValidation_doesntValidateWhenPropertyNotExplicitlySet() {
+        Assert.assertEquals(1.0, field.getStep(), 0.0);
+
+        field.setValue(0.3);
+        Assert.assertFalse(field.isInvalid());
+
+        field.setMin(0.0);
+        field.setMax(10.0);
+        field.setValue(0.4);
+        Assert.assertFalse(field.isInvalid());
+    }
+
+    @Test
+    public void stepValidation_minNotDefined() {
+        field.setStep(1.5);
+
+        assertValidValues(-6.0, -1.5, 0.0, 1.5, 4.5);
+        assertInvalidValues(-3.5, -1.0, 2.0, 2.5);
+    }
+
+    @Test
+    public void stepValidation_positiveMin_minUsedAsStepBasis() {
+        field.setMin(1.0);
+        field.setStep(1.5);
+
+        assertValidValues(1.0, 2.5, 4.0, 5.5);
+        assertInvalidValues(1.5, 2.0, 3.5, 6.0);
+    }
+
+    @Test
+    public void stepValidation_negativeMin_minUsedAsStepBasis() {
+        field.setMin(-5.0);
+        field.setStep(4.5);
+
+        assertValidValues(-5.0, -0.5, 4.0);
+        assertInvalidValues(-4.5, 0.0, 1.0, 4.5);
+    }
+
+    private void assertValidValues(Double... values) {
+        Arrays.asList(values).forEach(v -> {
+            field.setValue(v);
+            Assert.assertFalse("Expected field to be valid with value " + v,
+                    field.isInvalid());
+        });
+    }
+
+    private void assertInvalidValues(Double... values) {
+        Arrays.asList(values).forEach(v -> {
+            field.setValue(v);
+            Assert.assertTrue("Expected field to be invalid with value " + v,
+                    field.isInvalid());
+        });
+    }
+
     public void setValue_valuePropertyFormatted() {
         testValuePropertyFormatting(1.0d, "1");
         testValuePropertyFormatting(2.0d, "2");
