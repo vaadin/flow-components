@@ -15,15 +15,20 @@
  */
 package com.vaadin.flow.component.textfield.demo;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.GeneratedVaadinTextField;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -63,6 +68,7 @@ public class TextFieldView extends DemoView {
         numberFieldWithControls();
         numberFieldWithValueLimits();
         numberFieldWithStep();
+        bigDecimalField();
         textAreaBasic(); // TextArea
         textAreaMaxHeight();
         textAreaMinHeight();
@@ -253,6 +259,31 @@ public class TextFieldView extends DemoView {
 
         numberField.setId("number-field-step-id");
         addCard("Number field", "Number field with step", numberField);
+    }
+
+    private void bigDecimalField() {
+        // begin-source-example
+        // source-example-heading: Big decimal field
+        BigDecimalField bigDecimalField = new BigDecimalField("Total cost");
+        bigDecimalField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+        bigDecimalField.setPrefixComponent(new Icon(VaadinIcon.DOLLAR));
+
+        Paragraph tax = new Paragraph();
+
+        bigDecimalField.addValueChangeListener(e -> {
+            BigDecimal taxValue;
+            if (e.getValue() == null) {
+                taxValue = BigDecimal.ZERO;
+            } else {
+                taxValue = e.getValue().multiply(new BigDecimal("0.24"))
+                        .setScale(2, RoundingMode.HALF_EVEN);
+            }
+            tax.setText("VAT 24%: $" + taxValue);
+        });
+
+        bigDecimalField.setValue(new BigDecimal(15).setScale(2));
+        // end-source-example
+        addCard("Number field", "Big decimal field", bigDecimalField, tax);
     }
 
     private void textAreaBasic() {
