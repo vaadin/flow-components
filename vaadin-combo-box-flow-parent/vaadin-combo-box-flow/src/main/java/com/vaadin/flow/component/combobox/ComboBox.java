@@ -1052,7 +1052,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
         // Send (possibly updated) key for the selected value
-        getElement().setProperty("_selectedKey",
+        getElement().executeJs("this._selectedKey=$0",
                 getValue() != null ? getKeyMapper().key(getValue()) : "");
     }
 

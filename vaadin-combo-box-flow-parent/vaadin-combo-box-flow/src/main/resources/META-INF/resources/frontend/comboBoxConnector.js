@@ -247,6 +247,7 @@ window.Vaadin.Flow.comboBoxConnector = {
 
       if (comboBox.selectedItem && comboBox._selectedKey) {
         comboBox.value = comboBox.selectedItem.key = comboBox._selectedKey;
+        delete comboBox._selectedKey;
       }
     }
 

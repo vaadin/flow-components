@@ -15,11 +15,13 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("detach-reattach")
 public class DetachReattachIT extends AbstractComboBoxIT {
@@ -55,6 +57,26 @@ public class DetachReattachIT extends AbstractComboBoxIT {
         combo = $(ComboBoxElement.class).first();
         combo.openPopup();
         assertLoadedItemsCount("Expected 2 items to be loaded", 2, combo);
+    }
+
+    @Test
+    public void setValueFromServer_selectOtherValue_detach_reattach_valueNotChanged() {
+        clickButton("set-value");
+        assertValueChanges("foo");
+
+        combo.openPopup();
+        combo.selectByText("bar");
+        assertValueChanges("foo", "bar");
+
+        clickButton("detach");
+        clickButton("attach");
+        assertValueChanges("foo", "bar");
+    }
+
+    private void assertValueChanges(String... expected) {
+        String[] valueChanges = $("div").id("value-changes").$("p").all()
+                .stream().map(TestBenchElement::getText).toArray(String[]::new);
+        Assert.assertArrayEquals(expected, valueChanges);
     }
 
 }

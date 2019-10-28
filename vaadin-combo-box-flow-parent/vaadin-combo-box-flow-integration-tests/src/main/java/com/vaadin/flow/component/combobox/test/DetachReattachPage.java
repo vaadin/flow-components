@@ -18,6 +18,7 @@ package com.vaadin.flow.component.combobox.test;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.Route;
 
 @Route("detach-reattach")
@@ -39,6 +40,16 @@ public class DetachReattachPage extends Div {
         });
         attachDetach.setId("attach-detach");
 
-        add(comboBox, detach, attach, attachDetach);
+        NativeButton setValue = new NativeButton("set value foo",
+                e -> comboBox.setValue("foo"));
+        setValue.setId("set-value");
+
+        Div valueChanges = new Div();
+        valueChanges.setId("value-changes");
+        comboBox.addValueChangeListener(e -> {
+            valueChanges.add(new Paragraph(e.getValue()));
+        });
+
+        add(comboBox, detach, attach, attachDetach, setValue, valueChanges);
     }
 }
