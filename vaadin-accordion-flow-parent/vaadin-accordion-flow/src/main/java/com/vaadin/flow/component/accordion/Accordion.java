@@ -111,7 +111,8 @@ public class Accordion extends Component implements HasSize {
         }
 
         throw new IllegalArgumentException(
-                "The supplied content is not a descendant of this Accordion");
+                "The supplied content is not a descendant of this Accordion. "
+                    + "It can be added with the accordion.add.");
     }
 
     /**
