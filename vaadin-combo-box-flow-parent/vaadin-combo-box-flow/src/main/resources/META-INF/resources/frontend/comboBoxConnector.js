@@ -244,12 +244,26 @@ window.Vaadin.Flow.comboBoxConnector = {
 
       // Let server know we're done
       comboBox.$server.confirmUpdate(id);
-
-      if (comboBox.selectedItem && comboBox._selectedKey) {
-        comboBox.value = comboBox.selectedItem.key = comboBox._selectedKey;
-        delete comboBox._selectedKey;
-      }
     }
+
+    customElements.whenDefined('vaadin-combo-box').then(() => {
+      const _isItemSelected = comboBox.$.overlay._isItemSelected;
+      // Override comboBox's _isItemSelected logic to handle remapped items
+      comboBox.$.overlay._isItemSelected = (item, selectedItem, itemIdPath) => {
+        let selected = _isItemSelected.call(comboBox, item, selectedItem, itemIdPath);
+
+        if (comboBox._selectedKey) {
+          if (comboBox.filteredItems.indexOf(selectedItem) > -1) {
+            delete comboBox._selectedKey;
+          } else {
+            selected = selected || item.key === comboBox._selectedKey;
+          }
+        }
+
+        return selected;
+      }
+    });
+
 
     comboBox.$connector.enableClientValidation = function( enable ){
         let input = null;

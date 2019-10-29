@@ -72,6 +72,20 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     }
 
     @Test
+    public void selectItem_changeFilter_properlyFilteredItems() {
+        clickButton("set-value");
+        stringBox.openPopup();
+
+        stringBox.setFilter("Item 11");
+        assertRendered("Item 11");
+        assertNotRendered("Item 2");
+
+        stringBox.setFilter("Item 111");
+        assertRendered("Item 111");
+        assertNotRendered("Item 2");
+    }
+
+    @Test
     public void scrollOverlay_morePagesLoaded_overflowingPagesDiscarded() {
         stringBox.openPopup();
         scrollToItem(stringBox, 50);
