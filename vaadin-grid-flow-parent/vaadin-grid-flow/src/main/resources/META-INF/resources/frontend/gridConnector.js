@@ -437,16 +437,21 @@ window.Vaadin.Flow.gridConnector = {
     grid._updateItem = function(row, item) {
       GridElement.prototype._updateItem.call(grid, row, item);
 
-      // make sure that component renderers are updated
-      Array.from(row.children).forEach(cell => {
-        if(cell._instance && cell._instance.children) {
-          Array.from(cell._instance.children).forEach(content => {
-            if(content._attachRenderedComponentIfAble) {
-              content._attachRenderedComponentIfAble();
-            }
-          });
-        }
-      });
+      // There might be inactive component renderers on hidden rows that still refer to the
+      // same component instance as one of the renderers on a visible row. Making the
+      // inactive/hidden renderer attach the component might steal it from a visible/active one.
+      if (!row.hidden) {
+        // make sure that component renderers are updated
+        Array.from(row.children).forEach(cell => {
+          if(cell._instance && cell._instance.children) {
+            Array.from(cell._instance.children).forEach(content => {
+              if(content._attachRenderedComponentIfAble) {
+                content._attachRenderedComponentIfAble();
+              }
+            });
+          }
+        });
+      }
     }
 
     grid._expandedInstanceChangedCallback = function(inst, value) {

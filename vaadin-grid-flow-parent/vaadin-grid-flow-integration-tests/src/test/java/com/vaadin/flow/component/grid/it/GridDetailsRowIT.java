@@ -72,30 +72,7 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         // detail on row 1 is empty
         assertElementHasNoButton(detailsElement.get(1));
         // detail on row 3 contains a button
-        assertElementHasButton(detailsElement.get(2),"Person 4");
-    }
-
-
-    /**
-     * If the details of an item is opened and the items removed
-     * then the details should be empty
-     */
-    @Test
-    public void gridRemoveItemRemoveDetails() {
-        open();
-        GridElement grid = $(GridElement.class).first();
-        // select row 3
-        clickElementWithJs(getRow(grid, 3).findElement(By.tagName("td")));
-
-        WebElement removeButton = findElement(By.id("remove-button"));
-        // remove the last row
-        removeButton.click();
-
-        List<WebElement> detailsElementsAfterRemoval = grid
-                .findElements(By.tagName("flow-component-renderer"));
-
-        detailsElementsAfterRemoval.forEach(this::assertElementHasNoButton);
-
+        assertElementHasButton(detailsElement.get(2), "Person 4");
     }
 
     /**
