@@ -357,7 +357,8 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
         Component selectedComponent = getComponentAt(selectedIndex);
         if (!(selectedComponent instanceof Tab)) {
             throw new IllegalStateException(
-                    "Illegal component inside Tabs: " + selectedComponent);
+                    "Illegal component inside Tabs: " + selectedComponent + "."
+                        + "Component should be an instance of Tab.");
         }
         return (Tab) selectedComponent;
     }
