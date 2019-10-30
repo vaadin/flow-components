@@ -279,6 +279,8 @@ window.Vaadin.Flow.comboBoxConnector = {
                 disableClientValidation(comboBox);
                 disableTextFieldClientValidation(input,comboBox );
             }
+
+            comboBox.validate();
         }
         else {
             setTimeout( function(){
@@ -290,11 +292,13 @@ window.Vaadin.Flow.comboBoxConnector = {
     const disableClientValidation =  function (combo){
         if ( typeof combo.$checkValidity == 'undefined'){
             combo.$checkValidity = combo.checkValidity;
-            combo.checkValidity = function() { return true; };
+            combo.checkValidity = function() { return !comboBox.invalid; };
         }
         if ( typeof combo.$validate == 'undefined'){
             combo.$validate = combo.validate;
-            combo.validate = function() { return true; };
+            combo.validate = function() {
+                return !(comboBox.focusElement.invalid = comboBox.invalid);
+            };
         }
     }
 

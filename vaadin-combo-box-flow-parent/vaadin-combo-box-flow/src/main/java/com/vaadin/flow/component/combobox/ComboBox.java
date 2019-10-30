@@ -873,7 +873,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @Override
     public void setRequired(boolean required) {
-        super.setRequired(required);
+        super.setRequiredIndicatorVisible(required);
     }
 
     /**
