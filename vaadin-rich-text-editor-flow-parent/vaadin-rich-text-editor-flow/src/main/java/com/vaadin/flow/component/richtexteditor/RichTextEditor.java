@@ -44,6 +44,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
 
     private ValueChangeMode currentMode;
     private RichTextEditorI18n i18n;
+    private AsHtml asHtml;
 
     /**
      * Gets the internationalization object previously set for this component.
@@ -741,7 +742,10 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
      * @return an instance of {@code HasValue}
      */
     public HasValue<ValueChangeEvent<String>, String> asHtml() {
-        return new AsHtml(this);
+        if (asHtml == null) {
+            asHtml = new AsHtml(this);
+        }
+        return asHtml;
     }
 
     /**
@@ -755,6 +759,7 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
 
         AsHtml(RichTextEditor rte) {
             this.rte = rte;
+            this.value = getHtmlValue();
             rte.addValueChangeListener(event -> {
                 if (event.isFromClient()) {
                    setValue(getHtmlValue(), false);

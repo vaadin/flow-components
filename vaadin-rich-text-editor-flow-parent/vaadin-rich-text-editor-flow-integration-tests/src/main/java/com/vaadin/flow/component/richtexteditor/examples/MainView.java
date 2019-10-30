@@ -185,8 +185,6 @@ public class MainView extends VerticalLayout {
         rte.setId("html-rte");
         add(rte);
 
-        HasValue<ValueChangeEvent<String>, String> asHtml = rte.asHtml();
-
         Div valuePanel = new Div();
         valuePanel.setId("html-binder-value-panel");
 
@@ -203,7 +201,7 @@ public class MainView extends VerticalLayout {
         Button getValueButton = new Button("Get value");
         getValueButton.setId("get-html-binder-rte-value");
         getValueButton.addClickListener(event -> {
-            String value = asHtml.getValue();
+            String value = rte.asHtml().getValue();
             String webcomponentValue = rte.getElement().getProperty("htmlValue");
             valuePanel.setText(value + ' ' + webcomponentValue);
         });
@@ -213,16 +211,16 @@ public class MainView extends VerticalLayout {
         actions.add(save, reset, getValueButton, setBeanHtmlValue);
         save.getStyle().set("marginRight", "10px");
 
-        SerializablePredicate<String> htmlValuePredicate = value -> !asHtml
+        SerializablePredicate<String> htmlValuePredicate = value -> !rte.asHtml()
                 .getValue().trim().isEmpty();
 
-        Binding<HtmlEntry, String> asHtmlValueBinding = binder.forField(asHtml)
+        Binding<HtmlEntry, String> asHtmlValueBinding = binder.forField(rte.asHtml())
                 .withValidator(htmlValuePredicate,
                         "html value should contain something")
                 .bind(HtmlEntry::getHtmlValue, HtmlEntry::setHtmlValue);
 
         // Editor is a required field
-        asHtml.setRequiredIndicatorVisible(true);
+        rte.asHtml().setRequiredIndicatorVisible(true);
 
         // Click listeners for the buttons
         save.addClickListener(event -> {
