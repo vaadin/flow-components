@@ -643,7 +643,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         public OutputStream getOutputStream() {
             if (upload.getReceiver() == null) {
                 throw new IllegalStateException(
-                        "Upload cannot be performed without a receiver set");
+                        "Upload cannot be performed without a receiver set. "
+                            + "Please firstly set the receiver implementation with upload.setReceiver");
             }
             StreamVariable.StreamingStartEvent event = lastStartedEvent.pop();
             OutputStream receiveUpload = upload.getReceiver()
