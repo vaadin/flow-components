@@ -160,15 +160,28 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         super.setPlaceholder(placeholder);
     }
 
+    /**
+     * Sets the visibility of the control buttons for increasing/decreasing
+     * the value accordingly to the default or specified step.
+     *
+     * @see #setStep(double)
+     *
+     * @param hasControls
+     *            {@code true} if control buttons should be visible;
+     *            {@code false} if those should be hidden
+     */
     @Override
     public void setHasControls(boolean hasControls) {
         super.setHasControls(hasControls);
     }
 
     /**
-     * Set to true to display value increase/decrease controls.
+     * Gets whether the control buttons for increasing/decreasing
+     * the value are visible.
      *
-     * @return the {@code hasControls} property from the webcomponent
+     * @see #setStep(double)
+     *
+     * @return {@code true} if buttons are visible, {@code false} otherwise
      */
     public boolean hasControls() {
         return super.hasControlsBoolean();
