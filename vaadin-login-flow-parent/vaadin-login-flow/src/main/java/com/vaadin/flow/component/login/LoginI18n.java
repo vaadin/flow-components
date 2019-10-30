@@ -48,7 +48,8 @@ public class LoginI18n implements Serializable {
                         StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new IllegalStateException(
-                "Cannot find the default i18n configuration");
+                "Cannot find the default i18n configuration. "
+                    + "Please make sure the i18n.json does exist.");
         }
     }
 
