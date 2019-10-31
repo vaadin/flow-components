@@ -33,6 +33,15 @@ import java.util.Objects;
 
 /**
  * Server-side component for the {@code <vaadin-rich-text-editor>} component.
+ * <p>
+ * The value of the rich text editor is in
+ * <a href="https://github.com/quilljs/delta">Delta</a> format. The
+ * {@link #setValue(String) setValue} and {@link #getValue() getValue} methods
+ * deal with the default Delta format, but it is also possible to get and set
+ * the value as an HTML string using
+ * <code>rte.{@link #asHtml()}.{@link AsHtml#getValue() getValue()}</code>,
+ * <code>rte.{@link #asHtml()}.{@link AsHtml#setValue(String) setValue()}</code>
+ * and {@link #getHtmlValue()}.
  *
  * @author Vaadin Ltd
  *
@@ -168,6 +177,8 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
      * Note: {@link Binder} will take care of the {@code null} conversion when
      * integrates with the editor, as long as no new converter is defined.
      *
+     * @see #asHtml()
+     * @see AsHtml#setValue(String)
      * @param value
      *            the new value in Delta format, not {@code null}
      */
@@ -203,6 +214,9 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
      * Returns the current value of the text editor in <a href="https://github.com/quilljs/delta">Delta</a> format. By default, the empty
      * editor will return an empty string.
      *
+     * @see #getHtmlValue()
+     * @see #asHtml()
+     * @see AsHtml#getValue()
      * @return the current value.
      */
     @Override
@@ -212,10 +226,19 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
 
 
     /**
-     * Value of the editor presented as HTML string.
+     * The value of the editor presented as an HTML string.
+     * <p>
+     * This represents the value currently set on the client side. If you have
+     * just set the value on the server side using {@link #setValue(String)} or
+     * {@link AsHtml#setValue(String)} then the value returned from this method
+     * will not yet correspond to the newly set value until the next server
+     * round trip.
      *
-     * @return the sanitized {@code htmlValue} property from the webcomponent
-     * or {@code null} if is not available.
+     * @see #getValue()
+     * @see #asHtml()
+     * @see AsHtml#getValue()
+     * @return the sanitized {@code htmlValue} property from the web component
+     * or {@code null} if it is not available.
      */
     public String getHtmlValue() {
         String htmlValueString = getHtmlValueString();
@@ -768,10 +791,17 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
         }
 
         /**
-         * Sets the value of the editor presented as HTML string.
-         * Also updates the old value which is provided in
-         * {@code ValueChangeEvent}.
+         * Sets the value of the editor presented as an HTML string. Also
+         * updates the old value which is provided in {@code ValueChangeEvent}.
+         * <p>
+         * On the client side the newly set HTML snippet is interpreted by
+         * <a href=
+         * "https://quilljs.com/docs/modules/clipboard/#matchers">Quill's
+         * Clipboard matchers</a>, which may not produce the exactly same HTML
+         * that was set. The server side value will be updated to reflect the
+         * new state after the round trip.
          *
+         * @see RichTextEditor#setValue(String)
          * @param value
          *            the HTML string
          */
@@ -802,8 +832,20 @@ public class RichTextEditor extends GeneratedVaadinRichTextEditor<RichTextEditor
         }
 
         /**
-         * Gets the value of the editor presented as HTML string.
+         * Gets the value of the editor presented as an HTML string.
+         * <p>
+         * If you have just set the value on the server side using the
+         * {@link #setValue(String) AsHtml.setValue()} method then his method
+         * will give you back the exact same value until the next server round
+         * trip. On the client side the newly set HTML snippet is interpreted by
+         * <a href=
+         * "https://quilljs.com/docs/modules/clipboard/#matchers">Quill's
+         * Clipboard matchers</a>, which may not produce the exactly same HTML
+         * that was set. The server side value will be updated to reflect the
+         * new state after the round trip.
          *
+         * @see RichTextEditor#getValue()
+         * @see RichTextEditor#getHtmlValue()
          * @return the sanitized HTML string
          */
         @Override
