@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.html.Div;
@@ -53,13 +54,17 @@ public class BigDecimalFieldPage extends Div {
                 e -> field.setEnabled(!field.isEnabled()));
         toggleEnabled.setId("toggle-enabled");
 
+        NativeButton setFrenchLocale = new NativeButton("Set French locale",
+                e -> field.setLocale(Locale.FRENCH));
+        setFrenchLocale.setId("set-french-locale");
+
         BigDecimalField fieldWithClearButton = new BigDecimalField();
         fieldWithClearButton.setClearButtonVisible(true);
         fieldWithClearButton.setId("clear-big-decimal-field");
         fieldWithClearButton.addValueChangeListener(this::logValueChangeEvent);
 
         Div buttons = new Div(setValueWithScale, toggleReadOnly, toggleRequired,
-                toggleEnabled);
+                toggleEnabled, setFrenchLocale);
         add(field, buttons, fieldWithClearButton, messageContainer);
     }
 
