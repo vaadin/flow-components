@@ -947,6 +947,16 @@ window.Vaadin.Flow.gridConnector = {
       }}));
     });
 
+    grid.addEventListener('column-reorder', e => {
+      const columns = grid._columnTree.slice(0).pop()
+        .sort((b, a) => (b._order - a._order))
+        .map(c => c._flowId);
+
+      grid.dispatchEvent(new CustomEvent('column-reorder-all-columns', {
+        detail: { columns }
+      }));
+    });
+
     function _fireClickEvent(event, eventName) {
       if (grid.$connector.activeItem) {
         event.itemKey = grid.$connector.activeItem.key;

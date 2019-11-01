@@ -36,6 +36,12 @@ public class GridOrderColumnsPage extends VerticalLayout {
                 .setHeader("Col2").setKey("2");
         Grid.Column<Integer> column3 = grid.addColumn(value -> "col3 " + value)
                 .setHeader("Col3").setKey("3");
+        Grid.Column<Integer> column4 = grid.addColumn(value -> "col4 " + value)
+                .setHeader("Col4").setKey("4");
+
+        // Adding invisible column to make sure it's not affecting ordering
+        // of the visible columns
+        column4.setVisible(false);
 
         ListDataProvider<Integer> dataProvider = DataProvider.ofItems(1, 2, 3,
                 4, 5);
@@ -43,16 +49,16 @@ public class GridOrderColumnsPage extends VerticalLayout {
         add(grid);
 
         Button orderCol123Button = new Button("Col 1 2 3 ",
-                e -> grid.setColumnOrder(column1, column2, column3));
+                e -> grid.setColumnOrder(column1, column2, column3, column4));
         orderCol123Button.setId("button-123");
         Button orderCol321Button = new Button("Col 3 2 1 ",
-                e -> grid.setColumnOrder(column3, column2, column1));
+                e -> grid.setColumnOrder(column4, column3, column2, column1));
         orderCol321Button.setId("button-321");
 
         Button orderCol31Button = new Button("order only the columns 3 and 1 ",
                 e -> {
                     grid.removeColumn(column2);
-                    grid.setColumnOrder(column3, column1);
+                    grid.setColumnOrder(column4, column3, column1);
                 });
         orderCol31Button.setId("button-31");
 

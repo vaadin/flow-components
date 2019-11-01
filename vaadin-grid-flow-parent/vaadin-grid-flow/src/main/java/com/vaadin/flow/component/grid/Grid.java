@@ -1607,6 +1607,24 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         idToColumnMap.put(columnId, column);
         column.getElement().setProperty("_flowId", columnId);
 
+        /*
+         * Properties don't automatically synchronize to non-visible columns.
+         * This bypasses the limitation in order to set the _flowId property for
+         * hidden columns also (needed by column reorder event).
+         */
+        column.addAttachListener(e -> {
+            e.getUI().beforeClientResponse(this, ctx -> {
+                // Make sure the non-visible column is still attached to UI
+                if (!column.isVisible() && column.getUI().isPresent()) {
+                    int nodeId = column.getElement().getNode().getId();
+                    String appId = e.getUI().getInternals().getAppId();
+                    this.getElement().executeJs(
+                            "Vaadin.Flow.clients[$0].getByNodeId($1)._flowId = $2",
+                            appId, nodeId, columnId);
+                }
+            });
+        });
+
         AbstractColumn<?> current = column;
         columnLayers.get(0).addColumn(column);
 
@@ -1618,6 +1636,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         getElement().appendChild(current.getElement());
 
         getDataCommunicator().reset();
+
         return column;
     }
 

@@ -35,7 +35,7 @@ import java.util.List;
  * @see Grid#addColumnReorderListener(com.vaadin.flow.component.ComponentEventListener)
  *
  */
-@DomEvent("column-reorder")
+@DomEvent("column-reorder-all-columns")
 public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
 
     /**
@@ -57,7 +57,7 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
      *
      */
     public ColumnReorderEvent(Grid<T> source, boolean fromClient,
-                              @EventData("event.detail.columns.map(col => col._flowId)") JsonArray columnIDs) {
+                              @EventData("event.detail.columns") JsonArray columnIDs) {
         this(source, fromClient, getSortedByIds(source.getColumns(), columnIDs));
     }
 
