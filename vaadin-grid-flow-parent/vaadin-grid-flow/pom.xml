@@ -16,18 +16,6 @@
     <name>Vaadin Grid Flow</name>
 
     <dependencies>
-        <!-- webjars -->
-        <!-- using an npm based webjar because it will contain the version number in the path for the resources -->
-        <dependency>
-            <groupId>org.webjars.npm</groupId>
-            <artifactId>vaadin__vaadin-mobile-drag-drop</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.npm</groupId>
-            <artifactId>mobile-drag-drop</artifactId>
-            <version>2.3.0-rc.1</version>
-        </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-grid</artifactId>
@@ -116,6 +104,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-dnd</artifactId>
+            <scope>provided</scope>
+            <version>${flow.version}</version>
         </dependency>
 
         <!-- Flow components this depends on -->

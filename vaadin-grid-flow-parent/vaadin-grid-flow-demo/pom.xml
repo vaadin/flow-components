@@ -24,6 +24,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-dnd</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
 
         <!-- Component -->
         <dependency>

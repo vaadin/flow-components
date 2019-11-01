@@ -38,6 +38,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
@@ -50,6 +51,7 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.dnd.internal.DndUtil;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
@@ -401,9 +403,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         /**
          * Gets the width of this column as a CSS-string.
-         * 
+         *
          * @see Grid#addColumnResizeListener(ComponentEventListener)
-         * 
+         *
          * @return the width of this column as a CSS-string
          */
         @Synchronize("column-drag-resize")
@@ -428,9 +430,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
         /**
          * Gets the flex grow value, by default 1.
-         * 
+         *
          * @see Grid#addColumnResizeListener(ComponentEventListener)
-         * 
+         *
          * @return the flex grow value, by default 1
          */
         @Synchronize("column-drag-resize")
@@ -1324,6 +1326,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 SelectionMode.SINGLE);
 
         columnLayers.add(new ColumnLayer(this));
+
+        addDragStartListener(this::onDragStart);
+        addDragEndListener(this::onDragEnd);
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
@@ -3211,7 +3216,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         return addListener(ItemClickEvent.class,
                 (ComponentEventListener) Objects.requireNonNull(listener));
     }
-    
+
     /**
      * Adds a column resize listener to this component. Note that the listener
      * will be notified only for user-initiated column resize actions.
@@ -3579,20 +3584,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @see GridDropEvent#getDropLocation()
      */
     public void setDropMode(GridDropMode dropMode) {
-        polyfillMobileDragDrop();
+        DndUtil.addMobileDndPolyfillIfNeeded(this);
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
-    }
-
-    private void polyfillMobileDragDrop() {
-        getElement().getNode().runWhenAttached(ui -> {
-            if (ui.getSession().getBrowser().isIOS()) {
-                ui.getPage().addJavaScript(
-                        "context://webjars/mobile-drag-drop/2.3.0-rc.1/index.min.js");
-                ui.getPage().addJavaScript(
-                        "context://webjars/vaadin__vaadin-mobile-drag-drop/1.0.0/index.min.js");
-            }
-        });
     }
 
     /**
@@ -3616,7 +3610,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            {@code false} if not
      */
     public void setRowsDraggable(boolean rowsRraggable) {
-        polyfillMobileDragDrop();
+        DndUtil.addMobileDndPolyfillIfNeeded(this);
         getElement().setProperty("rowsDraggable", rowsRraggable);
     }
 
@@ -3839,11 +3833,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Scrolls to the given row index. Scrolls so that the row is shown at the
      * start of the visible area whenever possible.
-     * 
+     *
      * If the index parameter exceeds current item set size the grid will scroll
      * to the end.
      *
-     * @param index
+     * @param rowIndex
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
@@ -3863,6 +3857,18 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     public void scrollToEnd() {
         getElement().executeJs("$0.scrollToIndex($0._effectiveSize)",
                 this.getElement());
+    }
+
+    private void onDragStart(GridDragStartEvent<T> event) {
+        ComponentUtil.setData(this,
+                DndUtil.DRAG_SOURCE_DATA_KEY, event.getDraggedItems());
+        getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(this));
+    }
+
+    private void onDragEnd(GridDragEndEvent<T> event) {
+        ComponentUtil.setData(this,
+                DndUtil.DRAG_SOURCE_DATA_KEY, null);
+        getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(null));
     }
 
 }
