@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
  * @param <E> the bean type
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/vaadin-crud", version="1.1.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-crud", version="1.1.0-beta1")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
 @HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
