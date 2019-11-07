@@ -189,7 +189,13 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
      *
      * @param maxLength
      *            the maximum length
+     *
+     * @deprecated Not supported by NumberField (as it's built on
+     *             {@code <input type="number">} in HTML). You can set numeric
+     *             value constraints with {@link #setMin(double)},
+     *             {@link #setMax(double)} and {@link #setStep(double)}.
      */
+    @Deprecated
     public void setMaxLength(int maxLength) {
         super.setMaxlength(maxLength);
     }
@@ -199,7 +205,13 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
      * enter.
      *
      * @return the {@code maxlength} property from the webcomponent
+     *
+     * @deprecated Not supported by NumberField (as it's built on
+     *             {@code <input type="number">} in HTML). You can set numeric
+     *             value constraints with {@link #setMin(double)},
+     *             {@link #setMax(double)} and {@link #setStep(double)}.
      */
+    @Deprecated
     public int getMaxLength() {
         return (int) getMaxlengthDouble();
     }
@@ -210,7 +222,13 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
      *
      * @param minLength
      *            the minimum length
+     *
+     * @deprecated Not supported by NumberField (as it's built on
+     *             {@code <input type="number">} in HTML). You can set numeric
+     *             value constraints with {@link #setMin(double)},
+     *             {@link #setMax(double)} and {@link #setStep(double)}.
      */
+    @Deprecated
     public void setMinLength(int minLength) {
         super.setMinlength(minLength);
     }
@@ -220,7 +238,13 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
      * enter.
      *
      * @return the {@code minlength} property from the webcomponent
+     *
+     * @deprecated Not supported by NumberField (as it's built on
+     *             {@code <input type="number">} in HTML). You can set numeric
+     *             value constraints with {@link #setMin(double)},
+     *             {@link #setMax(double)} and {@link #setStep(double)}.
      */
+    @Deprecated
     public int getMinLength() {
         return (int) getMinlengthDouble();
     }
@@ -230,17 +254,43 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
      * conflicts with the given {@code pattern}.
      *
      * @return the {@code preventInvalidInput} property from the webcomponent
+     *
+     * @deprecated Not supported by NumberField (as it's built on
+     *             {@code <input type="number">} in HTML). You can set numeric
+     *             value constraints with {@link #setMin(double)},
+     *             {@link #setMax(double)} and {@link #setStep(double)}. For
+     *             setting a custom value pattern and preventing invalid input,
+     *             use the TextField component instead.
      */
+    @Deprecated
     public boolean isPreventInvalidInput() {
         return isPreventInvalidInputBoolean();
     }
 
+    /**
+     * @deprecated Not supported by NumberField (as it's built on
+     *             {@code <input type="number">} in HTML). You can set numeric
+     *             value constraints with {@link #setMin(double)},
+     *             {@link #setMax(double)} and {@link #setStep(double)}. For
+     *             setting a custom value pattern and preventing invalid input,
+     *             use the TextField component instead.
+     */
     @Override
+    @Deprecated
     public void setPreventInvalidInput(boolean preventInvalidInput) {
         super.setPreventInvalidInput(preventInvalidInput);
     }
 
+    /**
+     * @deprecated Not supported by NumberField (as it's built on
+     *             {@code <input type="number">} in HTML). You can set numeric
+     *             value constraints with {@link #setMin(double)},
+     *             {@link #setMax(double)} and {@link #setStep(double)}. For
+     *             setting a custom value pattern, use the TextField component
+     *             instead.
+     */
     @Override
+    @Deprecated
     public void setPattern(String pattern) {
         super.setPattern(pattern);
     }
@@ -250,7 +300,15 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
      * match the entire value, not just some subset.
      *
      * @return the {@code pattern} property from the webcomponent
+     *
+     * @deprecated Not supported by NumberField (as it's built on
+     *             {@code <input type="number">} in HTML). You can set numeric
+     *             value constraints with {@link #setMin(double)},
+     *             {@link #setMax(double)} and {@link #setStep(double)}. For
+     *             setting a custom value pattern, use the TextField component
+     *             instead.
      */
+    @Deprecated
     public String getPattern() {
         return getPatternString();
     }
