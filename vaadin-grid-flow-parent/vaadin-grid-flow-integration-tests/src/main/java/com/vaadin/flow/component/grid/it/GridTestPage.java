@@ -76,6 +76,7 @@ public class GridTestPage extends Div {
 
     private void createGridWithComponentRenderers() {
         Grid<Item> grid = new Grid<>();
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
 
         AtomicBoolean usingFirstList = new AtomicBoolean(true);
 

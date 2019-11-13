@@ -955,6 +955,7 @@ window.Vaadin.Flow.gridConnector = {
 
     grid.addEventListener('column-reorder', e => {
       const columns = grid._columnTree.slice(0).pop()
+        .filter(c => c._flowId)
         .sort((b, a) => (b._order - a._order))
         .map(c => c._flowId);
 
