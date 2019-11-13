@@ -50,13 +50,15 @@ public class EmailField
      */
     public EmailField() {
         super("", "", false);
+
+        // workaround for https://github.com/vaadin/flow/issues/3496
+        setInvalid(false);
+
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
-        addInvalidChangeListener(e -> {
-            // If invalid is updated from client to false, check it
-            if(e.isFromClient() && !e.isInvalid()) {
-                setInvalid(getValidationSupport().isInvalid(getValue()));
-            }
-        });
+
+        addValueChangeListener(e -> validate());
+
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -411,20 +413,18 @@ public class EmailField
     }
 
     @Override
-    protected void setModelValue(String newModelValue, boolean fromClient) {
-        super.setModelValue(newModelValue, fromClient);
-        setInvalid(getValidationSupport().isInvalid(newModelValue));
-    }
-
-    @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        if (!isConnectorAttached) {
-            RequiredValidationUtil.attachConnector(this);
-            isConnectorAttached = true;
-        }
-        RequiredValidationUtil.updateClientValidation(requiredIndicatorVisible,
-                this);
         getValidationSupport().setRequired(requiredIndicatorVisible);
+    }
+
+    /**
+     * Performs server-side validation of the current value. This is needed
+     * because it is possible to circumvent the client-side validation
+     * constraints using browser development tools.
+     */
+    @Override
+    protected void validate() {
+        setInvalid(getValidationSupport().isInvalid(getValue()));
     }
 }

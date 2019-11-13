@@ -92,14 +92,14 @@ public class BigDecimalField
         setLocale(Optional.ofNullable(UI.getCurrent()).map(UI::getLocale)
                 .orElse(Locale.ROOT));
 
+        // workaround for https://github.com/vaadin/flow/issues/3496
+        setInvalid(false);
+
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
-        addInvalidChangeListener(e -> {
-            // If invalid is updated from client to false, check it
-            if (e.isFromClient() && !e.isInvalid()) {
-                validate();
-            }
-        });
+        addValueChangeListener(e -> validate());
+
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -392,12 +392,6 @@ public class BigDecimalField
         return super.getValue();
     }
 
-    @Override
-    protected void setModelValue(BigDecimal newModelValue, boolean fromClient) {
-        super.setModelValue(newModelValue, fromClient);
-        validate();
-    }
-
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
@@ -413,12 +407,6 @@ public class BigDecimalField
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        if (!isConnectorAttached) {
-            RequiredValidationUtil.attachConnector(this);
-            isConnectorAttached = true;
-        }
-        RequiredValidationUtil.updateClientValidation(requiredIndicatorVisible,
-                this);
         this.required = requiredIndicatorVisible;
     }
 

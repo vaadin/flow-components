@@ -149,7 +149,7 @@ import java.util.stream.Stream;
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-area")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-text-area.html")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.5.0")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.5.3")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -698,14 +698,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      * <p>
      * This property is set to true when the control value is invalid.
-     * <p>
-     * This property is synchronized automatically from client side when a
-     * 'invalid-changed' event happens.
      * </p>
      *
      * @return the {@code invalid} property from the webcomponent
      */
-    @Synchronize(property = "invalid", value = "invalid-changed")
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }

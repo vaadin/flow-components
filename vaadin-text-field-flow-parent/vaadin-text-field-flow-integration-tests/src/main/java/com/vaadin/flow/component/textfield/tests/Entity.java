@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 public class Entity {
 
-    @NotNull
+    @NotEmpty
     private String name;
 
     public void setName(String name) {

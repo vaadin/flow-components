@@ -82,6 +82,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             double absoluteMax) {
         super(null, null, String.class, parser, formatter);
 
+        // workaround for https://github.com/vaadin/flow/issues/3496
+        setInvalid(false);
+
         // Not setting these defaults to the web component, so it will have
         // undefined as min and max
         this.min = absoluteMin;
@@ -89,12 +92,10 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         this.step = 1.0;
 
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
-        addInvalidChangeListener(e -> {
-            // If invalid is updated from client to false, check it
-            if (e.isFromClient() && !e.isInvalid()) {
-                validate();
-            }
-        });
+
+        addValueChangeListener(e -> validate());
+
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -338,12 +339,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     @Override
-    protected void setModelValue(T newModelValue, boolean fromClient) {
-        super.setModelValue(newModelValue, fromClient);
-        validate();
-    }
-
-    @Override
     public void setInvalid(boolean invalid) {
         super.setInvalid(invalid);
     }
@@ -396,12 +391,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        if (!isConnectorAttached) {
-            RequiredValidationUtil.attachConnector(this);
-            isConnectorAttached = true;
-        }
-        RequiredValidationUtil.updateClientValidation(requiredIndicatorVisible,
-                this);
         this.required = requiredIndicatorVisible;
     }
 }
