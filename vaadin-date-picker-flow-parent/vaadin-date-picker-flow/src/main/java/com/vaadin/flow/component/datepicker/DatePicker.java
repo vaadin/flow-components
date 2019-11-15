@@ -84,15 +84,14 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      */
     public DatePicker(LocalDate initialDate) {
         super(initialDate, null, String.class, PARSER, FORMATTER);
-        getElement().synchronizeProperty("invalid", "invalid-changed");
         setLocale(UI.getCurrent().getLocale());
-        addInvalidChangeListener(e -> {
-            // If invalid is updated from client to false, check it
-            if(e.isFromClient() && !e.isInvalid()) {
-                setInvalid(isInvalid(getValue()));
-            }
-        });
 
+        // workaround for https://github.com/vaadin/flow/issues/3496
+        setInvalid(false);
+
+        addValueChangeListener(e -> validate());
+
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -502,9 +501,9 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+    public void setRequiredIndicatorVisible(boolean required) {
         super.setRequiredIndicatorVisible(required);
-        this.required = requiredIndicatorVisible;
+        this.required = required;
     }
 
     /**
@@ -598,10 +597,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         return getNameString();
     }
 
-    @Override
-    protected void setModelValue(LocalDate newModelValue, boolean fromClient) {
-        super.setModelValue(newModelValue, fromClient);
-        setInvalid(isInvalid(newModelValue));
+    /**
+     * Performs server-side validation of the current value. This is needed
+     * because it is possible to circumvent the client-side validation
+     * constraints using browser development tools.
+     */
+    protected void validate() {
+        setInvalid(isInvalid(getValue()));
     }
 
     @Override

@@ -121,7 +121,8 @@ public class DatePickerTest {
         assertClearButtonPropertyValueEquals(picker, false);
     }
 
-    public void assertClearButtonPropertyValueEquals(DatePicker picker, Boolean value) {
+    public void assertClearButtonPropertyValueEquals(DatePicker picker,
+            Boolean value) {
         picker.setClearButtonVisible(value);
         assertEquals(value, picker.isClearButtonVisible());
         assertEquals(picker.isClearButtonVisible(),
