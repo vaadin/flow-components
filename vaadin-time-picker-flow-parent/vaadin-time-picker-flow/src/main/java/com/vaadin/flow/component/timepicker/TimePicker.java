@@ -82,12 +82,13 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     public TimePicker(LocalTime time) {
         super(time, null, String.class, PARSER, FORMATTER);
-        addInvalidChangeListener(e -> {
-            // If invalid is updated from client to false, check it
-            if(e.isFromClient() && !e.isInvalid()) {
-                setInvalid(isInvalid(getValue()));
-            }
-        });
+
+        // workaround for https://github.com/vaadin/flow/issues/3496
+        setInvalid(false);
+
+        addValueChangeListener(e -> validate());
+
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -225,7 +226,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(required);
+        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
         this.required = requiredIndicatorVisible;
     }
 
@@ -307,10 +308,14 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return super.addInvalidChangeListener(listener);
     }
 
+    /**
+     * Performs server-side validation of the current value. This is needed
+     * because it is possible to circumvent the client-side validation
+     * constraints using browser development tools.
+     */
     @Override
-    protected void setModelValue(LocalTime newModelValue, boolean fromClient) {
-        super.setModelValue(newModelValue, fromClient);
-        setInvalid(isInvalid(newModelValue));
+    protected void validate() {
+        setInvalid(isInvalid(getValue()));
     }
 
     @Override
