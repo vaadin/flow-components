@@ -53,12 +53,6 @@
             <artifactId>vaadin-accordion</artifactId>
             <version>1.0.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-details</artifactId>
-            <version>${vaadin.details.wc.version}</version>
-        </dependency>
-
 
         <!--Pinned transitive webjars-->
         <dependency>
