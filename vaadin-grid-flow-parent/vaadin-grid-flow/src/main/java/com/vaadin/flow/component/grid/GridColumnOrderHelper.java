@@ -287,10 +287,17 @@ class GridColumnOrderHelper<T> {
          * @return set of {@link Grid.Column#getInternalId()}, never null.
          *         Returns a singleton set for {@link Grid.Column}.
          */
-        public Set<String> getColumnIDs(Component component) {
+        private Set<String> getColumnIDs(Component component) {
             Objects.requireNonNull(component);
-            return nodeLeafsCache.computeIfAbsent(component,
-                    this::computeNodeLeafs);
+            if (nodeLeafsCache.get(component) == null) {
+                Set<String> computeNodeLeafs = computeNodeLeafs(component);
+                if (computeNodeLeafs != null) {
+                    nodeLeafsCache.put(component, computeNodeLeafs);
+                } else {
+                    return new HashSet<>();
+                }
+            }
+            return nodeLeafsCache.get(component);
         }
 
         /**

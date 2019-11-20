@@ -85,6 +85,56 @@ public class GridColumnOrderTest {
     }
 
     @Test
+    public void setColumnOrder_simpleCaseWithTenHeadersAndFooters() {
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        grid.appendFooterRow();
+        grid.appendFooterRow();
+        grid.appendFooterRow();
+        grid.appendFooterRow();
+        grid.appendFooterRow();
+        grid.appendFooterRow();
+        grid.appendFooterRow();
+        grid.appendFooterRow();
+        grid.appendFooterRow();
+        grid.appendFooterRow();
+        // verify that the Grid wrapped <grid-column> elements in <grid-column-group> elements
+        assertEquals(4, grid.getChildren().filter(it -> it instanceof ColumnGroup).count());
+        grid.setColumnOrder(fourthColumn, thirdColumn, secondColumn, firstColumn);
+        assertArrayEquals(new Object[]{fourthColumn, thirdColumn, secondColumn, firstColumn}, grid.getColumns().toArray());
+    }
+
+    @Test
+    public void setColumnOrder_headerFooterMultiSelect() {
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        // verify that the Grid wrapped <grid-column> elements in <grid-column-group> elements
+        assertEquals(4, grid.getChildren().filter(it -> it instanceof ColumnGroup).count());
+        grid.setColumnOrder(fourthColumn, thirdColumn, secondColumn, firstColumn);
+        assertArrayEquals(new Object[]{fourthColumn, thirdColumn, secondColumn, firstColumn}, grid.getColumns().toArray());
+    }
+
+    @Test
+    public void setColumnOrder_headerFooterSingleSelect() {
+        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+        grid.appendHeaderRow();
+        grid.appendHeaderRow();
+        // verify that the Grid wrapped <grid-column> elements in <grid-column-group> elements
+        assertEquals(4, grid.getChildren().filter(it -> it instanceof ColumnGroup).count());
+        grid.setColumnOrder(fourthColumn, thirdColumn, secondColumn, firstColumn);
+        assertArrayEquals(new Object[]{fourthColumn, thirdColumn, secondColumn, firstColumn}, grid.getColumns().toArray());
+    }
+
+    @Test
     public void setColumnOrder_simpleCaseWithFooter() {
         grid.appendFooterRow();
         grid.appendFooterRow();
