@@ -55,22 +55,20 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-grid-flow</artifactId>
+            <version>${grid.version}</version>
+        </dependency>
+
         <!--Webjar-->
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-grid-pro</artifactId>
             <version>2.0.5</version>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-grid-flow</artifactId>
-            <version>4.0.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-grid</artifactId>
-            <version>5.4.9</version>
-        </dependency>
+
+        <!--Pinned transitive webjars-->
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-list-box</artifactId>
@@ -108,11 +106,6 @@
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-lumo-styles</artifactId>
-            <version>1.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-themable-mixin</artifactId>
             <version>1.4.4</version>
         </dependency>
@@ -131,9 +124,6 @@
             <artifactId>vaadin-checkbox</artifactId>
             <version>2.2.10</version>
         </dependency>
-
-
-        <!--Pinned transitive webjars-->
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>license-checker</artifactId>

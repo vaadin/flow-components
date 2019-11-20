@@ -28,6 +28,15 @@
         </license>
     </licenses>
 
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <grid.version>4.0.11</grid.version>
+    </properties>
+
+
     <modules>
         <module>vaadin-grid-pro-flow</module>
         <module>vaadin-grid-pro-testbench</module>
