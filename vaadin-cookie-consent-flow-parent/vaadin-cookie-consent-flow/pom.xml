@@ -33,6 +33,12 @@
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-cookie-consent</artifactId>
             <version>1.1.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.webjars.bowergithub.osano</groupId>
+                    <artifactId>cookieconsent</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
