@@ -20,6 +20,7 @@ package com.vaadin.flow.component.applayout;
  * #L%
  */
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -40,4 +41,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/vaadin-app-layout", version = "2.0.4")
 @JsModule("@vaadin/vaadin-app-layout/src/vaadin-drawer-toggle.js")
 public class DrawerToggle extends Button {
+
+    public void setIcon(Component icon) {
+        super.setIcon(icon);
+        // the slot attribute needs to be removed because vaadin-drawer-toggle
+        // template doesn't have prefix and suffix slots
+        icon.getElement().removeAttribute("slot");
+    }
+
 }
