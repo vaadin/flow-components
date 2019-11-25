@@ -54,7 +54,9 @@
         <profile>
             <id>npm-it</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!release</name>
+                </property>
             </activation>
             <modules>
                 <module>vaadin-accordion-flow-integration-tests</module>
@@ -63,7 +65,9 @@
         <profile>
             <id>bower-it</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!release</name>
+                </property>
             </activation>
             <modules>
                 <module>vaadin-accordion-flow-integration-tests/pom-bower-mode.xml</module>
