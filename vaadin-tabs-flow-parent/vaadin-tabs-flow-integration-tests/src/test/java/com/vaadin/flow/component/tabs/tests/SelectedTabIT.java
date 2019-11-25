@@ -75,7 +75,7 @@ public class SelectedTabIT extends AbstractComponentIT {
     }
 
     @Test
-    public void selectDisabledTab_noSelectionEvent_tabIsRedisabled() {
+    public void disabledTab_enableAndClick_noSelectionEvent() {
         List<TestBenchElement> tabs = $("vaadin-tabs").first().$("vaadin-tab")
                 .all();
         TestBenchElement lastTab = tabs.get(tabs.size() - 1);
@@ -86,9 +86,6 @@ public class SelectedTabIT extends AbstractComponentIT {
         lastTab.click();
 
         assertSelectionEvent(0, null);
-
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                lastTab.getAttribute("disabled"));
     }
 
     @Test // https://github.com/vaadin/vaadin-tabs-flow/issues/69

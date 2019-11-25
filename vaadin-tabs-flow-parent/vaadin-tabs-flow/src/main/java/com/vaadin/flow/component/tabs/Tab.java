@@ -124,35 +124,6 @@ public class Tab extends GeneratedVaadinTab<Tab> implements HasComponents {
         }
     }
 
-    /**
-     * <p>
-     * If {@code false}, the user cannot interact with this element.
-     * </p>
-     *
-     * @param enabled
-     *            the boolean value to set
-     */
-    @Override
-    public void setEnabled(boolean enabled) {
-        setDisabled(!enabled);
-    }
-
-    /**
-     * <p>
-     * If {@code false}, the user cannot interact with this element.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the negation of {@code disabled} property value from the
-     *         webcomponent
-     */
-    @Override
-    public boolean isEnabled() {
-        return !isDisabledBoolean();
-    }
-
     @Override
     public void setSelected(boolean selected) {
         super.setSelected(selected);
