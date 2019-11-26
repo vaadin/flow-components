@@ -15,16 +15,28 @@
  */
 package com.vaadin.flow.component.checkbox.demo;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
-import com.vaadin.flow.component.checkbox.GeneratedVaadinCheckboxGroup;
+import com.vaadin.flow.component.checkbox.demo.data.DepartmentData;
+import com.vaadin.flow.component.checkbox.demo.entity.Department;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * View for {@link CheckboxGroup} demo.
@@ -34,174 +46,219 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-checkbox-group")
 public class CheckboxGroupView extends DemoView {
 
-    public static class Person {
-
-        private String name;
-        private int id;
-
-        public Person(String name) {
-            this.name = name;
-        }
-
-        public Person(int id, String name) {
-            this.name = name;
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-    }
-
     @Override
     protected void initView() {
-        addBasicFeatures();
-        addComponentWithLabelAndErrorMessage();
-        addItemLabelGenerator();
-        addDisabled();
-        addDisabledItems();
-        addReadOnlyGroup();
-        addComponentWithThemeVariant();
+        basicDemo(); // Basic Usage
+        basicDemoWithCheckboxGroup();
+        disabledAndDisabledItem();
+        entityList();
+        valueChangeEvent();
+        indeterminateCheckbox();
+        configurationForRequired(); // Validation
+        themeVariantsHorizontal();// Theme Variants
+        styling(); // Styling
     }
 
-    private void addBasicFeatures() {
-        Div message = new Div();
-
+    private void basicDemo() {
         // begin-source-example
-        // source-example-heading: Basic checkbox group
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.addValueChangeListener(event -> message.setText(String.format(
-                "Checkbox group value changed from '%s' to '%s'",
-                toString(event.getOldValue()), toString(event.getValue()))));
+        // source-example-heading: Basic usage
+        Checkbox checkbox = new Checkbox();
+        checkbox.setLabel("Option");
+        checkbox.setValue(true);
         // end-source-example
 
-        group.setId("checkbox-group-with-value-change-listener");
-        message.setId("checkbox-group-value");
-
-        addCard("Basic checkbox group", group, message);
+        addCard("Basic usage", checkbox);
     }
 
-    private void addComponentWithLabelAndErrorMessage() {
+    private void basicDemoWithCheckboxGroup() {
         // begin-source-example
-        // source-example-heading: Group with label and error message
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setLabel("Group label");
-        group.setErrorMessage("Field has been set to invalid from server side");
-        NativeButton button = new NativeButton("Switch validity state",
-                event -> group.setInvalid(!group.isInvalid()));
-
-        // end-source-example
-        group.setId("group-with-label-and-error-message");
-        button.setId("group-with-label-button");
-        addCard("Group with label and error message", group, button);
-    }
-
-    private void addItemLabelGenerator() {
-        Div message = new Div();
-
-        // begin-source-example
-        // source-example-heading: Checkbox group with label generator
-        CheckboxGroup<Person> group = new CheckboxGroup<>();
-        group.setItems(new Person("Joe"), new Person("John"),
-                new Person("Bill"));
-        group.setItemLabelGenerator(Person::getName);
-        group.addValueChangeListener(event -> message.setText(String.format(
-                "Checkbox group value changed from '%s' to '%s'",
-                getNames(event.getOldValue()), getNames(event.getValue()))));
+        // source-example-heading: Basic usage with checkbox group
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Label");
+        checkboxGroup.setItems("Option one", "Option two", "Option three");
+        checkboxGroup.setValue(Collections.singleton("Option one"));
+        checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         // end-source-example
 
-        group.setId("checkbox-group-with-item-generator");
-        message.setId("checkbox-group-gen-value");
-
-        addCard("Checkbox group with label generator", group, message);
+        addCard("Basic usage with checkbox group", checkboxGroup);
     }
 
-    private void addDisabled() {
-
+    private void disabledAndDisabledItem() {
         // begin-source-example
-        // source-example-heading: Disabled checkbox group
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setEnabled(false);
+        // source-example-heading: Disabled state
+        CheckboxGroup<String> disabledCheckGroup = new CheckboxGroup<>();
+        disabledCheckGroup.setLabel("Disabled");
+        disabledCheckGroup.setItems("Option one", "Option two", "Option three");
+        disabledCheckGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        disabledCheckGroup.setValue(Collections.singleton("Option one"));
+        disabledCheckGroup.setEnabled(false);
+
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Disabled item");
+        checkboxGroup.setItems("Option one", "Option two", "Option three");
+        checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        checkboxGroup
+                .setItemEnabledProvider(item -> !"Option three".equals(item));
         // end-source-example
 
-        group.setId("checkbox-group-disabled");
-
-        addCard("Disabled checkbox group", group);
+        disabledCheckGroup.getStyle().set("margin-right", "7.5em");
+        VerticalLayout verticalLayout = new VerticalLayout(disabledCheckGroup,
+                checkboxGroup);
+        addCard("Disabled state", verticalLayout);
     }
 
-    private void addDisabledItems() {
+    private List<Department> getDepartments() {
 
-        Div valueInfo = new Div();
+        DepartmentData departmentData = new DepartmentData();
+        return departmentData.getDepartments();
+    }
+
+    private void entityList() {
         // begin-source-example
-        // source-example-heading: Checkbox group with item enabled
-        // provider
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setItemEnabledProvider(item -> !"bar".equals(item));
+        // source-example-heading: Entity list
+        CheckboxGroup<Department> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Department");
+        List<Department> departmentList = getDepartments();
+        checkboxGroup.setItems(departmentList);
+        checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         // end-source-example
 
-        group.addValueChangeListener(
-                event -> valueInfo.setText(toString(group.getValue())));
-
-        group.setId("checkbox-group-disabled-items");
-        valueInfo.setId("checkbox-group-disabled-items-info");
-
-        addCard("Checkbox group with item enabled provider", group, valueInfo);
+        addCard("Entity list", checkboxGroup);
     }
 
-    private void addReadOnlyGroup() {
+    private void valueChangeEvent() {
         // begin-source-example
-        // source-example-heading: Read-only checkbox group
-        Div valueInfo = new Div();
+        // source-example-heading: Value change event
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Label");
+        checkboxGroup.setItems("Option one", "Option two", "Option three");
+        checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
 
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setReadOnly(true);
-
-        NativeButton button = new NativeButton("Switch read-only state",
-                event -> group.setReadOnly(!group.isReadOnly()));
-        group.addValueChangeListener(
-                event -> valueInfo.setText(toString(group.getValue())));
+        Div value = new Div();
+        value.setText("Select a value");
+        checkboxGroup.addValueChangeListener(event -> {
+            if (event.getValue() == null) {
+                value.setText("No option selected");
+            } else {
+                value.setText("Selected: " + event.getValue());
+            }
+        });
         // end-source-example
 
-        group.setId("checkbox-group-read-only");
-        valueInfo.setId("selected-value-info");
-        button.setId("switch-read-only");
-
-        addCard("Read-only checkbox group", group, button, valueInfo);
+        addCard("Value change event", checkboxGroup, value);
     }
 
-    private void addComponentWithThemeVariant() {
+    private void indeterminateCheckbox() {
         // begin-source-example
-        // source-example-heading: Theme variants usage
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        // source-example-heading: Indeterminate checkbox
+        Checkbox checkbox = new Checkbox("Select all");
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        Set<String> items = new LinkedHashSet<>(
+                Arrays.asList("Option one", "Option two"));
+        checkboxGroup.setItems(items);
+        checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        checkboxGroup.addValueChangeListener(event -> {
+            if (event.getValue().size() == items.size()) {
+                checkbox.setValue(true);
+                checkbox.setIndeterminate(false);
+            } else if (event.getValue().size() == 0) {
+                checkbox.setValue(false);
+                checkbox.setIndeterminate(false);
+            } else
+                checkbox.setIndeterminate(true);
+
+        });
+        checkbox.addValueChangeListener(event -> {
+
+            if (checkbox.getValue()) {
+                checkboxGroup.setValue(items);
+            } else {
+                checkboxGroup.deselectAll();
+            }
+        });
+        checkboxGroup.setValue(Collections.singleton("Option one"));
         // end-source-example
 
-        addVariantsDemo(() -> {
-            return group;
-        }, GeneratedVaadinCheckboxGroup::addThemeVariants,
-                GeneratedVaadinCheckboxGroup::removeThemeVariants,
-                CheckboxGroupVariant::getVariantName,
-                CheckboxGroupVariant.LUMO_VERTICAL);
+        addCard("Indeterminate checkbox", checkbox, checkboxGroup);
     }
 
-    private String toString(Set<String> value) {
-        return value.stream().sorted().collect(Collectors.toList()).toString();
+    private void configurationForRequired() {
+        // begin-source-example
+        // source-example-heading: Required
+        Employee employee = new Employee();
+        Binder<Employee> binder = new Binder<>();
+
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setLabel("Employee titles");
+        checkboxGroup.setItems("Account Manager", "Designer",
+                "Marketing Manager", "Developer");
+        checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+
+        binder.forField(checkboxGroup)
+                .asRequired("Please choose employee titles")
+                .bind(Employee::getTitles, Employee::setTitles);
+
+        Button button = new Button("Submit", event -> {
+            if (binder.writeBeanIfValid(employee)) {
+                Notification.show("Submit successful", 2000,
+                        Notification.Position.MIDDLE);
+            }
+        });
+        // end-source-example
+
+        checkboxGroup.getStyle().set("margin-right", "5.5em");
+        HorizontalLayout layout = new HorizontalLayout(checkboxGroup, button);
+        layout.setAlignItems(FlexComponent.Alignment.BASELINE);
+        addCard("Validation", "Required", layout);
+
     }
 
-    private String getNames(Set<Person> persons) {
-        return persons.stream().map(Person::getName).sorted()
-                .collect(Collectors.toList()).toString();
+    private void themeVariantsHorizontal() {
+        // begin-source-example
+        // source-example-heading: Orientation
+        CheckboxGroup<String> horizontal = new CheckboxGroup<>();
+        horizontal.setLabel("Horizontal");
+        horizontal.setItems("Option one", "Option two", "Option three");
+        horizontal.setValue(Collections.singleton("Option one"));
+
+        CheckboxGroup<String> vertical = new CheckboxGroup<>();
+        vertical.setLabel("Vertical");
+        vertical.setItems("Option one", "Option two", "Option three");
+        vertical.setValue(Collections.singleton("Option one"));
+        vertical.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
+        // end-source-example
+
+        addCard("Theme variants", "Orientation", horizontal, vertical);
     }
 
+    private void styling() {
+        Paragraph p1 = new Paragraph(
+                "To read about styling you can read the related tutorial ");
+        p1.add(new Anchor(
+                "https://vaadin.com/docs/flow/theme/using-component-themes.html",
+                "Using Component Themes"));
+
+        Paragraph p2 = new Paragraph(
+                "To know about styling in HTML you can read the ");
+        p2.add(new Anchor("https://vaadin.com/components/"
+                + "vaadin-checkbox/html-examples/checkbox-styling-demos",
+                "HTML Styling Demos"));
+        // begin-source-example
+        // source-example-heading: Styling references
+
+        // end-source-example
+        addCard("Styling", "Styling references", p1, p2);
+    }
+
+    private static class Employee {
+        private Set<String> titles;
+
+        public Set<String> getTitles() {
+            return titles;
+        }
+
+        public void setTitles(Set<String> titles) {
+            this.titles = titles;
+        }
+    }
 }

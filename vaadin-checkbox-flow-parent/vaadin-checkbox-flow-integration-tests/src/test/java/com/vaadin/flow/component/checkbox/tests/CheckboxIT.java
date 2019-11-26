@@ -15,16 +15,14 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import com.vaadin.flow.demo.ComponentDemoTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.checkbox.demo.CheckboxView;
-import com.vaadin.flow.demo.ComponentDemoTest;
-
 /**
- * Integration tests for the {@link CheckboxView}.
+ * Integration tests for the {@link CheckboxDemoPage}.
  */
 public class CheckboxIT extends ComponentDemoTest {
 
@@ -102,6 +100,6 @@ public class CheckboxIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return ("/vaadin-checkbox");
+        return ("/vaadin-checkbox-test-demo");
     }
 }

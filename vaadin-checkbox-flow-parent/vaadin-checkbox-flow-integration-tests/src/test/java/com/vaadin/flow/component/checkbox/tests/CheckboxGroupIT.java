@@ -32,7 +32,7 @@ public class CheckboxGroupIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return "/vaadin-checkbox-group";
+        return "/vaadin-checkbox-group-test-demo";
     }
 
     @Test
