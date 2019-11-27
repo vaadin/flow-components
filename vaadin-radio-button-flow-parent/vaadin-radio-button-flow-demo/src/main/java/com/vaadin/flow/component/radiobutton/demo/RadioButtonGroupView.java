@@ -15,330 +15,275 @@
  */
 package com.vaadin.flow.component.radiobutton.demo;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.radiobutton.GeneratedVaadinRadioGroup;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
+import com.vaadin.flow.component.radiobutton.demo.data.DepartmentData;
+import com.vaadin.flow.component.radiobutton.demo.entity.Department;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
+import java.util.List;
+
 @Route("vaadin-radio-button")
 public class RadioButtonGroupView extends DemoView {
 
-    public static class Person {
-
-        private String name;
-        private int id;
-
-        public Person(String name) {
-            this.name = name;
-        }
-
-        public Person(int id, String name) {
-            this.name = name;
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-    }
-
     @Override
     protected void initView() {
-        addBasicFeatures();
-        addComponentWithLabelAndErrorMessage();
-        addItemRenderer();
-        addItemLabelGenerator();
-        addItemIconGenerator();
-        addDisabled();
-        addDisabledItems();
-        addComponentAfterItems();
-        addReadOnlyGroup();
-        insertComponentsBetweenItems();
-        prependAndInsertComponents();
-        dynamicComponents();
-        addComponentWithThemeVariant();
+        basicDemo(); // Basic Usage
+        entityList();
+        disabledAndDisabledItem();
+        valueChangeEvent();
+        configurationForReqired(); // Validation
+        customOptions(); // Presentation
+        usingTemplateRenderer();
+        themeVariantsHorizontal();// Theme Variants
+        styling(); // Styling
     }
 
-    private void addComponentWithLabelAndErrorMessage() {
+    private void basicDemo() {
         // begin-source-example
-        // source-example-heading: Group with label and error message
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setLabel("Group label");
-        group.setErrorMessage("Field has been set to invalid from server side");
-        NativeButton button = new NativeButton("Switch validity state",
-                event -> group.setInvalid(!group.isInvalid()));
-
-        // end-source-example
-        group.setId("group-with-label-and-error-message");
-        button.setId("group-with-label-button");
-        addCard("Group with label and error message", group,
-                button);
-    }
-
-    private void addComponentWithThemeVariant() {
-        // begin-source-example
-        // source-example-heading: Theme variants usage
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        // source-example-heading: Basic usage
+        RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
+        radioGroup.setLabel("Label");
+        radioGroup.setItems("Option one", "Option two", "Option three");
+        radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        radioGroup.setValue("Option one");
         // end-source-example
 
-        addVariantsDemo(() -> {
-            return group;
-        }, GeneratedVaadinRadioGroup::addThemeVariants,
-                GeneratedVaadinRadioGroup::removeThemeVariants,
-                RadioGroupVariant::getVariantName,
-                RadioGroupVariant.LUMO_VERTICAL);
+        addCard("Basic usage", radioGroup);
     }
 
-    private void addBasicFeatures() {
-        Div message = new Div();
-
+    private void entityList() {
         // begin-source-example
-        // source-example-heading: Basic radio button group
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.addValueChangeListener(event -> message.setText(String.format(
-                "Radio button group value changed from '%s' to '%s'",
-                event.getOldValue(), event.getValue())));
+        // source-example-heading: Entity list
+        RadioButtonGroup<Department> radioGroup = new RadioButtonGroup<>();
+        radioGroup.setLabel("Department");
+        List<Department> departmentList = getDepartments();
+        radioGroup.setItems(departmentList);
+        radioGroup.setRenderer(new TextRenderer<>(Department::getName));
+        radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         // end-source-example
 
-        group.setId("button-group-with-value-change-listener");
-        message.setId("button-group-value");
-
-        addCard("Basic radio button group", group, message);
+        addCard("Entity list", radioGroup);
     }
 
-    private void addItemRenderer() {
-        Div message = new Div();
-
+    private void disabledAndDisabledItem() {
         // begin-source-example
-        // source-example-heading: Radio button group with renderer
-        RadioButtonGroup<Person> group = new RadioButtonGroup<>();
-        group.setItems(new Person(1, "Joe"), new Person(2, "John"),
-                new Person(3, "Bill"));
-        group.setRenderer(new ComponentRenderer<>(person -> new Anchor(
-                "http://example.com/" + person.getId(), person.getName())));
-        group.addValueChangeListener(event -> message.setText(String.format(
-                "Radio button group value changed from '%s' to '%s'",
-                getName(event.getOldValue()), getName(event.getValue()))));
+        // source-example-heading: Disabled state
+        RadioButtonGroup<String> disabledRadioGroup = new RadioButtonGroup<>();
+        disabledRadioGroup.setLabel("Disabled");
+        disabledRadioGroup.setItems("Option one", "Option two", "Option three");
+        disabledRadioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        disabledRadioGroup.setValue("Option one");
+        disabledRadioGroup.setEnabled(false);
+
+        RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
+        radioGroup.setLabel("Disabled item");
+        radioGroup.setItems("Option one", "Option two", "Option three");
+        radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        radioGroup.setItemEnabledProvider(item -> !"Option three".equals(item));
         // end-source-example
 
-        group.setId("button-group-renderer");
-        message.setId("button-group-renderer-value");
-
-        addCard("Radio button group with renderer", group, message);
+        disabledRadioGroup.getStyle().set("margin-right", "7.5em");
+        VerticalLayout verticalLayout = new VerticalLayout(disabledRadioGroup,
+                radioGroup);
+        addCard("Disabled state", verticalLayout);
     }
 
-    private void addItemLabelGenerator() {
-        Div message = new Div();
+    private List<Department> getDepartments() {
 
+        DepartmentData departmentData = new DepartmentData();
+        return departmentData.getDepartments();
+    }
+
+    private void valueChangeEvent() {
         // begin-source-example
-        // source-example-heading: Radio button group with label generator
-        RadioButtonGroup<Person> group = new RadioButtonGroup<>();
-        group.setItems(new Person("Joe"), new Person("John"),
-                new Person("Bill"));
-        group.setRenderer(new TextRenderer<>(Person::getName));
-        group.addValueChangeListener(event -> message.setText(String.format(
-                "Radio button group value changed from '%s' to '%s'",
-                getName(event.getOldValue()), getName(event.getValue()))));
-        // end-source-example
+        // source-example-heading: Value change event
+        RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
+        radioGroup.setLabel("Label");
+        radioGroup.setItems("Option one", "Option two", "Option three");
+        radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
 
-        group.setId("button-group-with-item-generator");
-        message.setId("button-group-gen-value");
-
-        addCard("Radio button group with label generator", group, message);
-    }
-
-    private void addItemIconGenerator() {
-        // begin-source-example
-        // source-example-heading: Radio button group with icon generator
-        RadioButtonGroup<Person> group = new RadioButtonGroup<>();
-        group.setItems(new Person(1, "Joe"), new Person(2, "John"),
-                new Person(3, "Bill"));
-        group.setRenderer(new IconRenderer<>(item -> {
-            Image image = new Image("https://vaadin.com/images/vaadin-logo.svg",
-                    "");
-            image.getStyle().set("height", "15px");
-            image.getStyle().set("float", "left");
-            image.getStyle().set("marginRight", "5px");
-            image.getStyle().set("marginTop", "2px");
-            return image;
-        }, Person::getName));
-        // end-source-example
-
-        group.setId("button-group-icon-generator");
-
-        addCard("Radio button group with icon generator", group);
-    }
-
-    private void addDisabled() {
-
-        // begin-source-example
-        // source-example-heading: Disabled radio button group
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setEnabled(false);
-        // end-source-example
-
-        group.setId("button-group-disabled");
-
-        addCard("Disabled radio button group", group);
-    }
-
-    private void addReadOnlyGroup() {
-        // begin-source-example
-        // source-example-heading: Read-only radio button group
-        Div valueInfo = new Div();
-
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setReadOnly(true);
-
-        NativeButton button = new NativeButton("Switch read-only state",
-                event -> group.setReadOnly(!group.isReadOnly()));
-        group.addValueChangeListener(
-                event -> valueInfo.setText(group.getValue()));
-        // end-source-example
-
-        group.setId("button-group-read-only");
-        valueInfo.setId("selected-value-info");
-        button.setId("switch-read-only");
-
-        addCard("Read-only radio button group", group, button, valueInfo);
-    }
-
-    private void addDisabledItems() {
-
-        Div valueInfo = new Div();
-        // begin-source-example
-        // source-example-heading: Radio button group with item enabled provider
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setItemEnabledProvider(item -> !"bar".equals(item));
-        // end-source-example
-
-        group.addValueChangeListener(
-                event -> valueInfo.setText(group.getValue()));
-
-        group.setId("button-group-disabled-items");
-        valueInfo.setId("button-group-disabled-items-info");
-
-        addCard("Radio button group with item enabled provider", group,
-                valueInfo);
-    }
-
-    private String getName(Person person) {
-        if (person == null) {
-            return null;
-        }
-        return person.getName();
-    }
-
-    private void addComponentAfterItems() {
-        // begin-source-example
-        // source-example-heading: Add component to group
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.add(new Label("My Custom text"));
-
-        group.getElement().getStyle().set("display", "flex");
-        group.getElement().getStyle().set("flexDirection", "column");
-        // end-source-example
-
-        group.setId("button-group-with-appended-text");
-
-        addCard("Add component to group", group);
-    }
-
-    private void insertComponentsBetweenItems() {
-        // begin-source-example
-        // source-example-heading: Insert component after item in group
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-
-        // Note that setting items clear any components
-        group.add(new Label("Foo group"), getFullSizeHr());
-
-        group.setItems("foo", "bar", "baz");
-        group.addComponents("foo", new Label("Not foo selections"),
-                getFullSizeHr());
-
-        group.getElement().getStyle().set("display", "flex");
-        group.getElement().getStyle().set("flexDirection", "column");
-        // end-source-example
-
-        group.setId("button-group-with-inserted-component");
-
-        addCard("Insert component after item in group", group);
-    }
-
-    private void prependAndInsertComponents() {
-        // begin-source-example
-        // source-example-heading: Insert components before item in group
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-
-        group.setItems("foo", "foo-bar", "bar", "bar-foo", "baz", "baz-baz");
-
-        group.prependComponents("foo", new Label("Foo group"), getFullSizeHr());
-        group.prependComponents("bar", new Label("Bar group"), getFullSizeHr());
-        group.prependComponents("baz", new Label("Baz group"), getFullSizeHr());
-
-        group.getElement().getStyle().set("display", "flex");
-        group.getElement().getStyle().set("flexDirection", "column");
-        // end-source-example
-
-        group.setId("button-group-with-prepended-component");
-
-        addCard("Insert components before item in group", group);
-    }
-
-    private Label below;
-
-    private void dynamicComponents() {
-        // begin-source-example
-        // source-example-heading: Move component in group on selection
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-
-        group.setItems("foo", "foo-bar", "bar", "bar-foo", "baz", "baz-baz");
-
-        group.addValueChangeListener(event -> {
-            if (below != null && below.getParent().isPresent()) {
-                group.remove(below);
+        Div value = new Div();
+        value.setText("Select a value");
+        radioGroup.addValueChangeListener(event -> {
+            if (event.getValue() == null) {
+                value.setText("No option selected");
+            } else {
+                value.setText("Selected: " + event.getValue());
             }
-            below = new Label("= After Selected =");
-
-            group.addComponents(event.getValue(), below);
         });
-
-        group.getElement().getStyle().set("display", "flex");
-        group.getElement().getStyle().set("flexDirection", "column");
         // end-source-example
 
-        group.setId("button-group-with-dynamic-component");
-
-        addCard("Move component in group on selection", group);
+        addCard("Value change event", radioGroup, value);
     }
 
-    private Hr getFullSizeHr() {
-        Hr hr = new Hr();
-        hr.setSizeFull();
-        return hr;
+    private void configurationForReqired() {
+        // begin-source-example
+        // source-example-heading: Required
+        Employee employee = new Employee();
+        Binder<Employee> binder = new Binder<>();
+
+        RadioButtonGroup<String> radioGroup = new RadioButtonGroup<>();
+        radioGroup.setLabel("Employee title");
+        radioGroup.setItems("Account Manager", "Designer", "Marketing Manager",
+                "Developer");
+        radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+        binder.forField(radioGroup)
+                .asRequired("Please choose an employee title")
+                .bind(Employee::getTitle, Employee::setTitle);
+
+        Button button = new Button("Submit", event -> {
+            if (binder.writeBeanIfValid(employee)) {
+                Notification.show("Submit successful", 2000,
+                        Notification.Position.MIDDLE);
+            }
+        });
+        // end-source-example
+
+        radioGroup.getStyle().set("margin-right", "5.5em");
+        HorizontalLayout layout = new HorizontalLayout(radioGroup, button);
+        layout.setAlignItems(FlexComponent.Alignment.BASELINE);
+        addCard("Validation", "Required", layout);
+
     }
 
+    private void customOptions() {
+        // begin-source-example
+        // source-example-heading: Customizing radio button label
+        RadioButtonGroup<Employee> radioButton = new RadioButtonGroup<>();
+        radioButton.setLabel("Employee");
+        radioButton.setItems(
+                new Employee("Gabriella",
+                        "https://randomuser.me/api/portraits/women/43.jpg"),
+                new Employee("Rudi",
+                        "https://randomuser.me/api/portraits/men/77.jpg"),
+                new Employee("Hamsa",
+                        "https://randomuser.me/api/portraits/men/35.jpg"),
+                new Employee("Jacob",
+                        "https://randomuser.me/api/portraits/men/76.jpg"));
+        radioButton.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+        radioButton.setRenderer(new ComponentRenderer<>(employee -> {
+            Div title = new Div();
+            title.setText(employee.getTitle());
+
+            Image image = new Image();
+            image.setWidth("21px");
+            image.setHeight("21px");
+            image.setSrc(employee.getImage());
+
+            FlexLayout wrapper = new FlexLayout();
+            title.getStyle().set("margin-left", "0.5em");
+            wrapper.add(image, title);
+            return wrapper;
+        }));
+        // end-source-example
+
+        addCard("Presentation", "Customizing radio button label", radioButton);
+    }
+
+    private void usingTemplateRenderer() {
+        // begin-source-example
+        // source-example-heading: Multi-line label
+        RadioButtonGroup<Department> radioGroup = new RadioButtonGroup<>();
+        List<Department> listOfDepartments = getDepartments();
+        radioGroup.setItems(listOfDepartments);
+        radioGroup.setLabel("Department");
+        radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+        radioGroup.setRenderer(new ComponentRenderer<>(department -> {
+            Div name = new Div();
+            name.getStyle().set("font-weight", "bold");
+            name.setText(department.getName());
+
+            Div description = new Div();
+            description.setText(department.getDescription());
+            Div div = new Div(name, description);
+            return div;
+        }));
+        // end-source-example
+
+        addCard("Presentation", "Multi-line label", radioGroup);
+    }
+
+    private void themeVariantsHorizontal() {
+        // begin-source-example
+        // source-example-heading: Direction
+        RadioButtonGroup<String> horizontal = new RadioButtonGroup<>();
+        horizontal.setLabel("Horizontal");
+        horizontal.setItems("Option one", "Option two", "Option three");
+        horizontal.setValue("Option one");
+
+        RadioButtonGroup<String> vertical = new RadioButtonGroup<>();
+        vertical.setLabel("Vertical");
+        vertical.setItems("Option one", "Option two", "Option three");
+        vertical.setValue("Option one");
+        vertical.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        // end-source-example
+
+        addCard("Theme variants", "Direction", horizontal, vertical);
+    }
+
+    private void styling() {
+        Paragraph p1 = new Paragraph(
+                "To read about styling you can read the related tutorial ");
+        p1.add(new Anchor(
+                "https://vaadin.com/docs/flow/theme/using-component-themes.html",
+                "Using Component Themes"));
+
+        Paragraph p2 = new Paragraph(
+                "To know about styling in HTML you can read the ");
+        p2.add(new Anchor("https://vaadin.com/components/"
+                + "vaadin-radio-button/html-examples/radio-button-styling-demos",
+                "HTML Styling Demos"));
+        // begin-source-example
+        // source-example-heading: Styling references
+
+        // end-source-example
+        addCard("Styling", "Styling references", p1, p2);
+    }
+
+    private static class Employee {
+        private String title;
+        private String image;
+
+        public Employee() {
+        }
+
+        private Employee(String title, String image) {
+            this.title = title;
+            this.image = image;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getImage() {
+            return image;
+        }
+
+        public void setImage(String image) {
+            this.image = image;
+        }
+    }
 }

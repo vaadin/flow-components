@@ -32,7 +32,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return "/vaadin-radio-button";
+        return "/vaadin-radio-button-group-test-demo";
     }
 
     @Test
