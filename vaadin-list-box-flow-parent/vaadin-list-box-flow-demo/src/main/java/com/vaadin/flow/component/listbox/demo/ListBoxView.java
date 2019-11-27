@@ -15,18 +15,23 @@
  */
 package com.vaadin.flow.component.listbox.demo;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.listbox.ListBox;
+import com.vaadin.flow.component.listbox.MultiSelectListBox;
+import com.vaadin.flow.component.listbox.demo.data.DepartmentData;
+import com.vaadin.flow.component.listbox.demo.entity.Department;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
+
+import java.time.DayOfWeek;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * View for {@link ListBox} demo.
@@ -38,140 +43,177 @@ public class ListBoxView extends DemoView {
 
     @Override
     public void initView() {
-        addListboxWithSelection();
-        addComponentsBetween();
-        addItemRenderer();
-        addDisabledListBox();
-
-        addCard("Example object used in the demo");
+        basicDemo();// Basic usage
+        disabledItem();
+        multiSelection();
+        separatorDemo();// Presentation
+        customOptions();
+        usingTemplateRenderer();
+        styling(); // Styling
     }
 
-    private void addListboxWithSelection() {
-        Label message = new Label("-");
+    private void basicDemo() {
         // begin-source-example
-        // source-example-heading: ListBox and selection
+        // source-example-heading: Basic usage
         ListBox<String> listBox = new ListBox<>();
-        listBox.setItems("Bread", "Butter", "Milk");
-
-        listBox.addValueChangeListener(event -> message.setText(String.format(
-                "Selection changed from %s to %s, selection is from client: %s",
-                event.getOldValue(), event.getValue(), event.isFromClient())));
-
-        NativeButton button = new NativeButton("Select Milk",
-                event -> listBox.setValue("Milk"));
+        listBox.setItems("Option one", "Option two", "Option three");
+        listBox.setValue("Option one");
         // end-source-example
-        addCard("ListBox and selection", listBox, button, message)
-                .setId("list-box-with-selection");
+
+        addCard("Basic usage", listBox);
     }
 
-    private void addComponentsBetween() {
+    private void disabledItem() {
         // begin-source-example
-        // source-example-heading: Adding components between items
+        // source-example-heading: Disabled item
         ListBox<String> listBox = new ListBox<>();
-        listBox.setItems("Bread", "Butter", "Milk");
-
-        // Adding components to the end:
-        listBox.add(new H3("After all the items"));
-
-        // Adding components after a specific item:
-        listBox.addComponents("Butter", new H3("After butter"));
-
-        // Adding components before a specific item:
-        listBox.prependComponents("Bread", new H3("Before bread"));
+        listBox.setItems("Option one", "Option two", "Option three");
+        listBox.setValue("Option one");
+        listBox.setItemEnabledProvider(item -> !"Option three".equals(item));
         // end-source-example
-        addCard("Adding components between items", listBox)
-                .setId("list-box-with-components-between");
+
+        addCard("Disabled item", listBox);
     }
 
-    private void addItemRenderer() {
+    private void multiSelection() {
         // begin-source-example
-        // source-example-heading: Using item renderer and disabling items
-        ListBox<Item> listBox = new ListBox<>();
-        listBox.setItems(getItems());
+        // source-example-heading: Multi select list box
+        MultiSelectListBox<String> listBox = new MultiSelectListBox<>();
+        listBox.setItems("Option one", "Option two", "Option three",
+                "Option four");
+        // end-source-example
 
-        listBox.setRenderer(new ComponentRenderer<>(item -> {
-            Label name = new Label("Item: " + item.getName());
-            Label stock = new Label("In stock: " + item.getStock());
+        addCard("Multi select list box", listBox);
+    }
 
-            NativeButton button = new NativeButton("Buy", event -> {
-                item.setStock(item.getStock() - 1);
-                listBox.getDataProvider().refreshItem(item);
-            });
+    private void separatorDemo() {
+        // begin-source-example
+        // source-example-heading: Separators
+        ListBox<DayOfWeek> listBox = new ListBox<>();
+        listBox.setItems(DayOfWeek.values());
+        listBox.setValue(DayOfWeek.MONDAY);
+        listBox.addComponents(DayOfWeek.FRIDAY, new Hr());
+        // end-source-example
 
-            Div labels = new Div(name, stock);
-            Div layout = new Div(labels, button);
+        addCard("Presentation", "Separators", listBox);
+    }
 
-            labels.getStyle().set("display", "flex")
-                    .set("flexDirection", "column").set("marginRight", "10px");
-            layout.getStyle().set("display", "flex")
-                    .set("alignItems", "center");
+    private void customOptions() {
+        // begin-source-example
+        // source-example-heading: Customizing the label
+        ListBox<Employee> listBox = new ListBox<>();
+        List<Employee> list = Arrays.asList(
+                new Employee("Gabriella",
+                        "https://randomuser.me/api/portraits/women/43.jpg"),
+                new Employee("Rudi",
+                        "https://randomuser.me/api/portraits/men/77.jpg"),
+                new Employee("Hamsa",
+                        "https://randomuser.me/api/portraits/men/35.jpg"),
+                new Employee("Jacob",
+                        "https://randomuser.me/api/portraits/men/76.jpg"));
+        listBox.setItems(list);
+        listBox.setValue(list.get(0));
 
-            return layout;
+        listBox.setRenderer(new ComponentRenderer<>(employee -> {
+            Div text = new Div();
+            text.setText(employee.getTitle());
+
+            Image image = new Image();
+            image.setWidth("21px");
+            image.setHeight("21px");
+            image.setSrc(employee.getImage());
+
+            FlexLayout wrapper = new FlexLayout();
+            text.getStyle().set("margin-left", "0.5em");
+            wrapper.add(image, text);
+            return wrapper;
         }));
-
-        listBox.setItemEnabledProvider(item -> item.getStock() > 0);
-
         // end-source-example
-        addCard("Using item renderer and disabling items", listBox)
-                .setId("list-box-with-renderer");
+
+        addCard("Presentation", "Customizing the label", listBox);
     }
 
-    private void addDisabledListBox() {
-        Label message = new Label("-");
-        message.setId("message-label");
+    private List<Department> getDepartments() {
 
+        DepartmentData departmentData = new DepartmentData();
+        return departmentData.getDepartments();
+    }
+
+    private void usingTemplateRenderer() {
         // begin-source-example
-        // source-example-heading: Disabled ListBox and selection
-        ListBox<String> listBox = new ListBox<>();
-        listBox.setItems("Bread", "Butter", "Milk");
-        listBox.setEnabled(false);
-        listBox.addValueChangeListener(event -> message.setText(String.format(
-                "Selection changed from %s to %s, selection is from client: %s",
-                event.getOldValue(), event.getValue(), event.isFromClient())));
+        // source-example-heading: Multi-line label
+        ListBox<Department> listBox = new ListBox<>();
+        List<Department> listOfDepartments = getDepartments();
+        listBox.setItems(listOfDepartments);
+        listBox.setValue(listOfDepartments.get(0));
 
-        NativeButton button = new NativeButton("Select Milk",
-                event -> listBox.setValue("Milk"));
+        listBox.setRenderer(new ComponentRenderer<>(department -> {
+            Div name = new Div();
+            name.getStyle().set("font-weight", "bold");
+            name.setText(department.getName());
+
+            Div description = new Div();
+            description.setText(department.getDescription());
+            Div div = new Div(name, description);
+            return div;
+        }));
         // end-source-example
 
-        Label note = new Label(
-                "Note! Even though updating from the client doesn't work, "
-                        + "the server may push a new status for the component.");
-
-        addCard("Disabled ListBox and selection", listBox, button, message,
-                note).setId("disabled-list-box");
+        addCard("Presentation", "Multi-line label", listBox);
     }
 
-    private List<Item> getItems() {
-        return Stream.of("Bread", "Butter", "Milk").map(name -> {
-            Item item = new Item();
-            item.setName(name);
-            item.setStock((int) (Math.random() * 5) + 1);
-            return item;
-        }).collect(Collectors.toList());
+    private void styling() {
+        Div firstDiv = new Div();
+        firstDiv.setText(
+                "To read about styling you can read the related tutorial in");
+        Anchor firstAnchor = new Anchor(
+                "https://vaadin.com/docs/flow/theme/using-component-themes.html",
+                "Using Component Themes");
+
+        Div secondDiv = new Div();
+        secondDiv.setText("To know about styling in html you can read the ");
+        Anchor secondAnchor = new Anchor(
+                "https://vaadin.com/components/vaadin-list-box/html-examples/list-box-styling-demos",
+                "HTML Styling Demos");
+
+        HorizontalLayout firstHorizontalLayout = new HorizontalLayout(firstDiv,
+                firstAnchor);
+        HorizontalLayout secondHorizontalLayout = new HorizontalLayout(
+                secondDiv, secondAnchor);
+        // begin-source-example
+        // source-example-heading: Styling references
+
+        // end-source-example
+        addCard("Styling", "Styling references", firstHorizontalLayout,
+                secondHorizontalLayout);
     }
 
-    // begin-source-example
-    // source-example-heading: Example object used in the demo
-    public static class Item {
+    private static class Employee {
+        private String title;
+        private String image;
 
-        private String name;
-        private int stock;
-
-        public String getName() {
-            return name;
+        public Employee() {
         }
 
-        public void setName(String name) {
-            this.name = name;
+        private Employee(String title, String image) {
+            this.title = title;
+            this.image = image;
         }
 
-        public int getStock() {
-            return stock;
+        public String getTitle() {
+            return title;
         }
 
-        public void setStock(int stock) {
-            this.stock = stock;
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getImage() {
+            return image;
+        }
+
+        public void setImage(String image) {
+            this.image = image;
         }
     }
-    // end-source-example
 }

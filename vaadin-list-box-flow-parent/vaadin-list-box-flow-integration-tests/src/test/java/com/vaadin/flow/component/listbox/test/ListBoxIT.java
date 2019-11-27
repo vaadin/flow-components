@@ -29,6 +29,9 @@ import com.vaadin.flow.demo.ComponentDemoTest;
 
 import static org.hamcrest.CoreMatchers.containsString;
 
+/**
+ * Integration tests for the {@link ListBoxViewDemoPage}.
+ */
 public class ListBoxIT extends ComponentDemoTest {
 
     private static final String BREAD = "Bread";
@@ -43,7 +46,7 @@ public class ListBoxIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return "/vaadin-list-box";
+        return "/vaadin-list-box-demo";
     }
 
     private void init(String cardId) {
