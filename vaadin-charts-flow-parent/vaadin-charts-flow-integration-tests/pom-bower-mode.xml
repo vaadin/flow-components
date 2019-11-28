@@ -18,6 +18,7 @@
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
         <ci-sauce.version>1.138</ci-sauce.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -33,6 +34,8 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-lumo-theme</artifactId>
         </dependency>
+
+        <!-- TEST SCOPE -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
@@ -41,14 +44,20 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-components-testbench</artifactId>
-            <version>1.0.0</version>
+            <artifactId>vaadin-charts-testbench</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-charts-testbench</artifactId>
-            <version>${project.version}</version>
+            <artifactId>vaadin-button-testbench</artifactId>
+            <version>2.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-checkbox-testbench</artifactId>
+            <version>2.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
