@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.0.0</version>
+        <version>2.0-SNAPSHOT</version>
         <relativePath />
     </parent>
     <artifactId>vaadin-board-flow-root</artifactId>
@@ -25,7 +25,7 @@
     </licenses>
 
     <properties>
-        <charts.version>7.0.0</charts.version>
+        <charts.version>7.0-SNAPSHOT</charts.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
