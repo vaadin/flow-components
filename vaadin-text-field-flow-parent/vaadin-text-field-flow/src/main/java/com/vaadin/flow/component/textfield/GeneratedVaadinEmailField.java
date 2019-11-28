@@ -52,7 +52,7 @@ import javax.annotation.Generated;
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-email-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-email-field.html")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.5.3")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.6.0-alpha2")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-email-field.js")
 public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {

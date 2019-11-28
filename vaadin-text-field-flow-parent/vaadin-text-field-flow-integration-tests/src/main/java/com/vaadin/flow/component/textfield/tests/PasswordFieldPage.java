@@ -19,6 +19,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.Route;
 
@@ -68,6 +69,7 @@ public class PasswordFieldPage extends Div {
         addBasicField();
         addDisabledField();
         addInvalidCheck();
+        addHelperCheck();
     }
 
     private void addFocusShortcut() {
@@ -121,6 +123,20 @@ public class PasswordFieldPage extends Div {
         field.setMaxLength(10);
         field.setMinLength(5);
         TextFieldTestPageUtil.addInvalidCheck(this, field);
+    }
+
+    private void addHelperCheck() {
+        PasswordField passwordHelperText = new PasswordField();
+        passwordHelperText.setHelperText("Helper text test");
+
+        PasswordField passwordHelperComponent = new PasswordField();
+        passwordHelperComponent
+                .setHelperComponent(VaadinIcon.INFO_CIRCLE_O.create());
+
+        passwordHelperText.setId("password-helper-text");
+        passwordHelperComponent.setId("password-helper-component");
+
+        add(passwordHelperText, passwordHelperComponent);
     }
 
 }

@@ -20,6 +20,7 @@ import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.Route;
 
@@ -91,6 +92,7 @@ public class NumberFieldPage extends Div {
             .setText(numberFieldStep.isInvalid() ? "invalid" : "valid"));
         add(checkIsValid,isValid);
         addNumberFields();
+        addHelperCheck();
     }
 
     private ValueChangeListener<? super ComponentValueChangeEvent<NumberField, Double>> logValueChangeListener(
@@ -120,5 +122,19 @@ public class NumberFieldPage extends Div {
         stepperField.setId("step-number-field");
 
         add(dollarField, euroField, stepperField);
+    }
+
+    private void addHelperCheck() {
+        NumberField numberFieldHelperText = new NumberField();
+        numberFieldHelperText.setHelperText("Helper text test");
+
+        NumberField numberFieldHelperComponent = new NumberField();
+        numberFieldHelperComponent
+                .setHelperComponent(VaadinIcon.INFO_CIRCLE_O.create());
+
+        numberFieldHelperText.setId("number-field-helper-text");
+        numberFieldHelperComponent.setId("number-field-helper-component");
+
+        add(numberFieldHelperText, numberFieldHelperComponent);
     }
 }

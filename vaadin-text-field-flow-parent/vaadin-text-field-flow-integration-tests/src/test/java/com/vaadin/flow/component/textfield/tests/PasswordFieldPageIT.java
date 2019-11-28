@@ -15,11 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
+import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +24,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Integration tests for {@link PasswordField}.
@@ -136,9 +138,18 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertCantMakeInvalidValueValidThroughClientManipulation() {
-        ValidationTestHelper.testValidation(getCommandExecutor(),getContext(),$(
-            PasswordFieldElement.class)
-            .id("invalid-test-field"));
+        ValidationTestHelper.testValidation(getCommandExecutor(), getContext(),
+                $(PasswordFieldElement.class).id("invalid-test-field"));
+    }
+
+    @Test
+    public void assertHelperText() {
+        PasswordFieldElement passwordHelperText = $(PasswordFieldElement.class).id("password-helper-text");
+        Assert.assertEquals("Helper text test", passwordHelperText.getHelperText());
+
+        PasswordFieldElement passwordHelperComponent = $(PasswordFieldElement.class).id("password-helper-component");
+        TestBenchElement icon = passwordHelperComponent.findElement(By.tagName("iron-icon"));
+        Assert.assertEquals("vaadin:info-circle-o", icon.getPropertyString("icon"));
     }
 
     private void updateValues(WebElement passwordFieldValueDiv,

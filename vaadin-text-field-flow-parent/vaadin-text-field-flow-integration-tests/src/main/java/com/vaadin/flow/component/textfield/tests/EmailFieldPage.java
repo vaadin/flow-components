@@ -17,6 +17,7 @@ package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.router.Route;
 
@@ -72,5 +73,20 @@ public class EmailFieldPage extends Div {
                         event.getOldValue(), event.getValue())));
         add(emailFieldClear, clearValueMessage);
         TextFieldTestPageUtil.addInvalidCheck(this, new EmailField());
+        addHelperCheck();
+    }
+
+    private void addHelperCheck() {
+        EmailField emailFieldHelperText = new EmailField();
+        emailFieldHelperText.setHelperText("Helper text test");
+
+        EmailField emailFieldHelperComponent = new EmailField();
+        emailFieldHelperComponent
+                .setHelperComponent(VaadinIcon.INFO_CIRCLE_O.create());
+
+        emailFieldHelperText.setId("email-field-helper-text");
+        emailFieldHelperComponent.setId("email-field-helper-component");
+
+        add(emailFieldHelperText, emailFieldHelperComponent);
     }
 }

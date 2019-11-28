@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Generated;
+
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -33,10 +38,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
-
-import javax.annotation.Generated;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * <p>
@@ -149,7 +150,7 @@ import java.util.stream.Stream;
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-area")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-text-area.html")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.5.3")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.6.0-alpha2")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -491,6 +492,39 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      */
     protected void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * String used for the helper text.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     *
+     * @return the {@code helperText} property from the web component
+     */
+    protected String getHelperTextString() {
+        return getElement().getProperty("helperText");
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
+     * String used for the helper text.
+     * </p>
+     *
+     * @param label
+     *            the String value to set
+     */
+    protected void setHelperText(String helperText) {
+        getElement().setProperty("helperText",
+                helperText == null ? "" : helperText);
     }
 
     /**

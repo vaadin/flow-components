@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.textfield.testbench;
 
+import java.util.Collections;
+
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
-
-import java.util.Collections;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-number-field&gt;</code>
@@ -29,7 +29,7 @@ import java.util.Collections;
  */
 @Element("vaadin-number-field")
 public class NumberFieldElement extends TestBenchElement
-        implements HasStringValueProperty, HasLabel, HasPlaceholder {
+        implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelperText {
 
     @Override
     public void setValue(String string) {

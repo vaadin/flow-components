@@ -20,6 +20,7 @@ import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
@@ -81,6 +82,7 @@ public class TextFieldPage extends Div {
         addBasicFeatures();
         addFocusShortcut();
         addInvalidCheck();
+        addHelperCheck();
     }
 
     private void handleTextFieldValue(TextField field) {
@@ -134,5 +136,19 @@ public class TextFieldPage extends Div {
         field.setMaxLength(10);
         field.setMinLength(5);
         TextFieldTestPageUtil.addInvalidCheck(this, field);
+    }
+
+    private void addHelperCheck() {
+        TextField textFieldHelperText = new TextField();
+        textFieldHelperText.setHelperText("Helper text test");
+
+        TextField textFieldHelperComponent = new TextField();
+        textFieldHelperComponent
+                .setHelperComponent(VaadinIcon.INFO_CIRCLE_O.create());
+
+        textFieldHelperText.setId("text-field-helper-text");
+        textFieldHelperComponent.setId("text-field-helper-component");
+
+        add(textFieldHelperText, textFieldHelperComponent);
     }
 }

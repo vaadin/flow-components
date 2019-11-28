@@ -18,6 +18,7 @@ package com.vaadin.flow.component.textfield.tests;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
 
@@ -47,6 +48,7 @@ public class TextAreaPage extends Div {
         addMaxHeightFeature();
         addMinHeightFeature();
         addInvalidCheck();
+        addHelperCheck();
     }
 
     private void addFocusShortcut() {
@@ -80,10 +82,8 @@ public class TextAreaPage extends Div {
                         event.getOldValue(), event.getValue())));
         textArea.setId("text-area-with-value-change-listener");
         message.setId("text-area-value");
-        add(textArea,
-                new ValueChangeModeButtonProvider(textArea)
-                        .getValueChangeModeRadios(),
-                message);
+        add(textArea, new ValueChangeModeButtonProvider(textArea)
+                .getValueChangeModeRadios(), message);
     }
 
     private void addMaxHeightFeature() {
@@ -111,6 +111,20 @@ public class TextAreaPage extends Div {
         field.setMaxLength(10);
         field.setMinLength(5);
         TextFieldTestPageUtil.addInvalidCheck(this, field);
+    }
+
+    private void addHelperCheck() {
+        TextArea textAreaHelperText = new TextArea();
+        textAreaHelperText.setHelperText("Helper text test");
+
+        TextArea textAreaHelperComponent = new TextArea();
+        textAreaHelperComponent
+                .setHelperComponent(VaadinIcon.INFO_CIRCLE_O.create());
+
+        textAreaHelperText.setId("text-area-helper-text");
+        textAreaHelperComponent.setId("text-area-helper-component");
+
+        add(textAreaHelperText, textAreaHelperComponent);
     }
 
 }

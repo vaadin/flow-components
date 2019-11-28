@@ -38,7 +38,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         extends GeneratedVaadinNumberField<C, T>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
 
     private ValueChangeMode currentMode;
 
@@ -195,6 +195,20 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      */
     public String getPlaceholder() {
         return getPlaceholderString();
+    }
+
+    @Override
+    public void setHelperText(String helperText) {
+        super.setHelperText(helperText);
+    }
+
+    /**
+     * String used for the helper text.
+     *
+     * @return the {@code helperText} property from the web component
+     */
+    public String getHelperText() {
+        return getHelperTextString();
     }
 
     @Override

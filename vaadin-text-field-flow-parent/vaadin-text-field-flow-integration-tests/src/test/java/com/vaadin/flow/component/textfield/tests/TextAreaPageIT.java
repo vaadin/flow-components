@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
+import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+
+import java.util.stream.IntStream;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,9 +26,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import java.util.stream.IntStream;
-
-import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * Integration tests for {@link TextArea}.
@@ -148,7 +150,17 @@ public class TextAreaPageIT extends AbstractComponentIT {
     @Test
     public void assertCantMakeInvalidValueValidThroughClientManipulation() {
         ValidationTestHelper.testValidation(getCommandExecutor(), getContext(),
-            $(TextAreaElement.class).id("invalid-test-field"));
+                $(TextAreaElement.class).id("invalid-test-field"));
+    }
+
+    @Test
+    public void assertHelperText() {
+        TextAreaElement textAreaHelperText = $(TextAreaElement.class).id("text-area-helper-text");
+        Assert.assertEquals("Helper text test", textAreaHelperText.getHelperText());
+
+        TextAreaElement textAreaHelperComponent = $(TextAreaElement.class).id("text-area-helper-component");
+        TestBenchElement icon = textAreaHelperComponent.findElement(By.tagName("iron-icon"));
+        Assert.assertEquals("vaadin:info-circle-o", icon.getPropertyString("icon"));
     }
 
 }

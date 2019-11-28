@@ -25,7 +25,9 @@ import javax.annotation.Generated;
         "Flow#1.3-SNAPSHOT" })
 public enum TextAreaVariant {
     LUMO_SMALL("small"), LUMO_ALIGN_CENTER("align-center"), LUMO_ALIGN_RIGHT(
-            "align-right"), MATERIAL_ALWAYS_FLOAT_LABEL("always-float-label");
+            "align-right"), LUMO_HELPER_ABOVE_FIELD(
+                    "helper-above-field"), MATERIAL_ALWAYS_FLOAT_LABEL(
+                            "always-float-label");
 
     private final String variant;
 
