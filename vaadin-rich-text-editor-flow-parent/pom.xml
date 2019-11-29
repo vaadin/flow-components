@@ -1,54 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.vaadin</groupId>
-		<artifactId>flow-component-base</artifactId>
-		<version>2.1-SNAPSHOT</version>
-		<relativePath />
-	</parent>
-	<artifactId>vaadin-rich-text-editor-flow-root</artifactId>
-	<packaging>pom</packaging>
-	<version>2.1-SNAPSHOT</version>
-	<name>Vaadin Rich Text Editor Root</name>
-	<inceptionYear>2018</inceptionYear>
-	<organization>
-		<name>Vaadin Ltd</name>
-		<url>http://vaadin.com/</url>
-	</organization>
+    <parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>flow-component-base</artifactId>
+        <version>2.1-SNAPSHOT</version>
+        <relativePath />
+    </parent>
+    <artifactId>vaadin-rich-text-editor-flow-root</artifactId>
+    <packaging>pom</packaging>
+    <version>2.1-SNAPSHOT</version>
+    <name>Vaadin Rich Text Editor Root</name>
+    <inceptionYear>2018</inceptionYear>
+    <organization>
+        <name>Vaadin Ltd</name>
+        <url>http://vaadin.com/</url>
+    </organization>
 
-	<licenses>
-		<license>
-			<name>cval3</name>
-			<url>https://vaadin.com/license/cval-3</url>
-		</license>
-	</licenses>
+    <licenses>
+        <license>
+            <name>cval3</name>
+            <url>https://vaadin.com/license/cval-3</url>
+        </license>
+    </licenses>
 
-	<properties>
-		<jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-	</properties>
+    <properties>
+        <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
 
-	<modules>
-		<module>vaadin-rich-text-editor-flow</module>
-		<module>vaadin-rich-text-editor-testbench</module>
-		<module>vaadin-rich-text-editor-flow-demo</module>
-	</modules>
-	<repositories>
-		<repository>
-			<id>vaadin-prereleases</id>
-			<url>https://maven.vaadin.com/vaadin-prereleases</url>
-		</repository>
+    <modules>
+        <module>vaadin-rich-text-editor-flow</module>
+        <module>vaadin-rich-text-editor-testbench</module>
+        <module>vaadin-rich-text-editor-flow-demo</module>
+    </modules>
+    <repositories>
+        <repository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+        </repository>
         <repository>
             <id>vaadin-snapshot</id>
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
         </repository>
-	</repositories>
+    </repositories>
 
     <build>
         <pluginManagement>
