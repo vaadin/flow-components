@@ -17,6 +17,7 @@ package com.vaadin.flow.component.button.tests;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -30,6 +31,11 @@ import com.vaadin.flow.demo.ComponentDemoTest;
  * Integration tests for the ButtonView.
  */
 public class ButtonIT extends ComponentDemoTest {
+    @Before
+    public void init() {
+        waitForElementPresent(By.tagName("vaadin-button"));
+    }
+
     @Test
     public void clickOnDefaultButton_textIsDisplayed() {
         WebElement button = layout.findElement(By.id("default-button"));
