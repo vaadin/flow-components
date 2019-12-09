@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.crud.test;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,9 +29,9 @@ public class EventHandlingIT extends AbstractParallelTest {
         }
     }
 
-    private void dismissConfirmDialog(CrudElement crud) {
+    private void dismissConfirmDialog(CrudElement crud, ConfirmDialogType type) {
         final TestBenchElement confirmButton = crud
-                .$(ConfirmDialogElement.class).first().getConfirmButton();
+                .$(ConfirmDialogElement.class).id(type.getId()).getConfirmButton();
         confirmButton.click();
     }
 
@@ -94,7 +95,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         dismissDialog();
         Assert.assertFalse(crud.isEditorOpen());
         try {
-            dismissConfirmDialog(crud);
+            dismissConfirmDialog(crud, ConfirmDialogType.CANCEL);
             Assert.fail("There should be no confirm dialog open");
         } catch (Exception ignored) {
         }
@@ -109,7 +110,7 @@ public class EventHandlingIT extends AbstractParallelTest {
 
         // Send keys not working as expected in Firefox
         if (!BrowserUtil.isFirefox(getDesiredCapabilities())) {
-            dismissConfirmDialog(crud);
+            dismissConfirmDialog(crud, ConfirmDialogType.CANCEL);
         }
     }
 
@@ -131,7 +132,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         Assert.assertEquals("3 items available", getFooterText(crud));
         crud.openRowForEditing(2);
         crud.getEditorDeleteButton().click();
-        dismissConfirmDialog(crud);
+        dismissConfirmDialog(crud, ConfirmDialogType.DELETE);
 
         Assert.assertEquals(
                 "Delete: Person{id=3, firstName='Guille', lastName='Guille'}",
@@ -198,5 +199,13 @@ public class EventHandlingIT extends AbstractParallelTest {
 
     private ButtonElement getTestButton(String id) {
         return $(ButtonElement.class).onPage().id(id);
+    }
+
+    private enum ConfirmDialogType {
+        CANCEL, DELETE;
+
+        private String getId() {
+            return "confirm" + StringUtils.capitalize(name().toLowerCase());
+        }
     }
 }
