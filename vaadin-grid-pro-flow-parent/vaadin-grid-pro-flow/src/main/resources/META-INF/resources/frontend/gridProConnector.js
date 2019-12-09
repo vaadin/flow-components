@@ -1,39 +1,39 @@
-window.Vaadin.Flow.gridProConnector = {
-  setEditModeRenderer: function(column, component) {
-      column.editModeRenderer = function(root) {
-          root.appendChild(component);
-          this._grid._cancelStopEdit();
-          component.focus();
-      };
+(function () {
+    const tryCatchWrapper = function (callback) {
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid Pro', 'vaadin-grid-pro-flow');
+    };
 
-      column._setEditorValue = function(editor, value) {
-          // Not needed in case of custom editor as value is set on server-side.
-          // Overridden in order to avoid blinking of the cell content.
-      }
+    window.Vaadin.Flow.gridProConnector = {
+        setEditModeRenderer: tryCatchWrapper(function (column, component) {
+            column.editModeRenderer = tryCatchWrapper(function (root) {
+                root.appendChild(component);
+                this._grid._cancelStopEdit();
+                component.focus();
+            });
 
-      column._getEditorValue = function(editor) {
-          // Not needed in case of custom editor as value is set on server-side.
-          // Overridden in order to avoid blinking of the cell content.
-          return;
-      }
-  },
+            // Not needed in case of custom editor as value is set on server-side.
+            // Overridden in order to avoid blinking of the cell content.
+            column._setEditorValue = function (editor, value) {};
+            column._getEditorValue = function (editor) {
+                return;
+            };
+        }),
 
-  patchEditModeRenderer: function(column) {
-      column.__editModeRenderer = function(root, column, rowData) {
-          const cell = root.assignedSlot.parentNode;
-          const grid = column._grid;
+        patchEditModeRenderer: tryCatchWrapper(function (column) {
+            column.__editModeRenderer = tryCatchWrapper(function (root, column, rowData) {
+                const cell = root.assignedSlot.parentNode;
+                const grid = column._grid;
 
-          if (grid.__edited && grid.__edited.model.item.key !== rowData.item.key) {
-              grid._stopEdit();
-              return;
-          }
+                if (grid.__edited && grid.__edited.model.item.key !== rowData.item.key) {
+                    grid._stopEdit();
+                    return;
+                }
 
-          const tagName = column._getEditorTagName(cell);
-          if (!root.firstElementChild || root.firstElementChild.localName.toLowerCase() !== tagName) {
-              root.innerHTML = `
-              <${tagName}></${tagName}>
-            `;
-          }
-      };
-  }
-};
+                const tagName = column._getEditorTagName(cell);
+                if (!root.firstElementChild || root.firstElementChild.localName.toLowerCase() !== tagName) {
+                    root.innerHTML = `<${tagName}></${tagName}>`;
+                }
+            });
+        })
+    };
+})();
