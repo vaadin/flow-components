@@ -1,29 +1,35 @@
-window.Vaadin.Flow.selectConnector = {
-initLazy: function (select) {
-    const _findListBoxElement = function() {
-        for (let i = 0; i < select.childElementCount; i++) {
-            const child = select.children[i];
-            if ("VAADIN-LIST-BOX" === child.tagName.toUpperCase()) {
-                return child;
-            }
-        }
+(function () {
+    const tryCatchWrapper = function (callback) {
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Select', 'vaadin-select-flow');
     };
 
-      // do not init this connector twice for the given select
-      if (select.$connector) {
-          return;
-      }
+    window.Vaadin.Flow.selectConnector = {
+        initLazy: tryCatchWrapper(function (select) {
+            const _findListBoxElement = tryCatchWrapper(function () {
+                for (let i = 0; i < select.childElementCount; i++) {
+                    const child = select.children[i];
+                    if ("VAADIN-LIST-BOX" === child.tagName.toUpperCase()) {
+                        return child;
+                    }
+                }
+            });
 
-      select.$connector = {};
+            // do not init this connector twice for the given select
+            if (select.$connector) {
+                return;
+            }
 
-      select.renderer = function(root) {
-          const listBox = _findListBoxElement();
-          if (listBox) {
-              if (root.firstChild) {
-                  root.firstChild.remove();
-              }
-              root.appendChild(listBox);
-          }
-      };
-  }
-};
+            select.$connector = {};
+
+            select.renderer = tryCatchWrapper(function (root) {
+                const listBox = _findListBoxElement();
+                if (listBox) {
+                    if (root.firstChild) {
+                        root.firstChild.remove();
+                    }
+                    root.appendChild(listBox);
+                }
+            });
+        })
+    };
+})();
