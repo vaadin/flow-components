@@ -674,12 +674,12 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         if (vaadinItem == emptySelectionItem) {
             vaadinItem.setText(emptySelectionCaption);
+        } else if (getItemRenderer() != null) {
+            vaadinItem.add(getItemRenderer().createComponent(item));
         } else if (getItemLabelGenerator() != null) {
             vaadinItem.setText(getItemLabelGenerator().apply(item));
-        } else if (getItemRenderer() == null) {
-            vaadinItem.setText(item.toString());
         } else {
-            vaadinItem.add(getItemRenderer().createComponent(item));
+            vaadinItem.setText(item.toString());
         }
 
         if (getItemLabelGenerator() != null) {

@@ -221,6 +221,14 @@ public class SelectTest {
     }
 
     @Test
+    public void renderer_itemLabelGenerator_prefersRenderer() {
+        select.setItems("foo");
+        select.setRenderer(new ComponentRenderer<>((SerializableFunction<String, Span>) Span::new));
+        select.setItemLabelGenerator(item -> "bar");
+        Assert.assertEquals("<vaadin-item value=\"1\" label=\"bar\">\n <span>foo</span>\n</vaadin-item>", getListBoxChild(0).getOuterHTML());
+    }
+
+    @Test
     public void emptySelectionAllowed_emptySelectionCaptionChanged() {
         select.setItems("foo", "bar");
 
