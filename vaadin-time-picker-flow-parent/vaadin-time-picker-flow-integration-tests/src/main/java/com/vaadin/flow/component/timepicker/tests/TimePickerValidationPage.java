@@ -22,6 +22,8 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.testutil.ValidationTestView;
 
+import java.time.LocalTime;
+
 /**
  * View for testing validation with {@link TimePicker}.
  */
@@ -39,8 +41,8 @@ public class TimePickerValidationPage extends ValidationTestView {
 
     private void createPickerWithMaxAndMinValues() {
         final TimePicker timePicker = new TimePicker();
-        timePicker.setMin("09:30");
-        timePicker.setMax("17:00");
+        timePicker.setMinTime(LocalTime.parse("09:30"));
+        timePicker.setMaxTime(LocalTime.parse("17:00"));
         timePicker.setId("picker-with-valid-range");
 
         final Div isValid = new Div();

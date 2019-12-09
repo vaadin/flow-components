@@ -192,8 +192,8 @@ public class TimePickerView extends DemoView {
         TimePicker timePicker = new TimePicker();
         timePicker.setLabel("TimePicker Min & Max");
 
-        timePicker.setMin("05:00");
-        timePicker.setMax("18:00");
+        timePicker.setMinTime(LocalTime.parse("05:00"));
+        timePicker.setMaxTime(LocalTime.parse("18:00"));
 
         // end-source-example
         timePicker.addValueChangeListener(
