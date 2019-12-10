@@ -1,6 +1,8 @@
 (function () {
     const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Time Picker', 'vaadin-time-picker-flow');
+        return (...args) => {
+            return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Time Picker', 'vaadin-time-picker-flow')(...args);
+        };
     };
 
     window.Vaadin.Flow.timepickerConnector = {
