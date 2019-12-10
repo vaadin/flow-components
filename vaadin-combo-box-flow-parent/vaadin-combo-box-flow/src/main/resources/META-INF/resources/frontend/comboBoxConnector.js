@@ -3,7 +3,9 @@
 // the Polymer3 approach.
 (function () {
     const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Combo Box', 'vaadin-combo-box-flow');
+        return (...args) => {
+            return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Combo Box', 'vaadin-combo-box-flow')(...args);
+        };
     };
 
     window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
