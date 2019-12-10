@@ -1,6 +1,8 @@
 (function () {
     const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker-flow');
+        return (...args) => {
+            return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker-flow')(...args);
+        };
     };
 
     /* helper class for parsing regex from formatted date string */
