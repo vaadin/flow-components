@@ -1,8 +1,6 @@
 (function () {
     const tryCatchWrapper = function (callback) {
-        return (...args) => {
-            return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker-flow')(...args);
-        };
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker-flow');
     };
 
     /* helper class for parsing regex from formatted date string */
@@ -25,7 +23,7 @@
         }
     }
     window.Vaadin.Flow.datepickerConnector = {
-        initLazy: tryCatchWrapper(function (datepicker) {
+        initLazy: datepicker => tryCatchWrapper(function (datepicker) {
             // Check whether the connector was already initialized for the datepicker
             if (datepicker.$connector) {
                 return;
@@ -143,6 +141,6 @@
                     datepicker._selectedDate = new Date(currentDate.year, currentDate.month, currentDate.day);
                 }
             });
-        })
+        })(datepicker)
     };
 })();
