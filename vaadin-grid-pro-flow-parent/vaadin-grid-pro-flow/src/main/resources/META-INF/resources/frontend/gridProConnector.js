@@ -4,7 +4,7 @@
     };
 
     window.Vaadin.Flow.gridProConnector = {
-        setEditModeRenderer: tryCatchWrapper(function (column, component) {
+        setEditModeRenderer: (column, component) => tryCatchWrapper(function (column, component) {
             column.editModeRenderer = tryCatchWrapper(function (root) {
                 root.appendChild(component);
                 this._grid._cancelStopEdit();
@@ -17,9 +17,9 @@
             column._getEditorValue = function (editor) {
                 return;
             };
-        }),
+        })(column, component),
 
-        patchEditModeRenderer: tryCatchWrapper(function (column) {
+        patchEditModeRenderer: column => tryCatchWrapper(function (column) {
             column.__editModeRenderer = tryCatchWrapper(function (root, column, rowData) {
                 const cell = root.assignedSlot.parentNode;
                 const grid = column._grid;
@@ -34,6 +34,6 @@
                     root.innerHTML = `<${tagName}></${tagName}>`;
                 }
             });
-        })
+        })(column)
     };
 })();
