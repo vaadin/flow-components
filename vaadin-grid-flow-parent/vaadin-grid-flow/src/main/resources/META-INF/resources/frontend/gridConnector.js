@@ -9,7 +9,7 @@
   window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
 
   window.Vaadin.Flow.gridConnector = {
-    initLazy: tryCatchWrapper(function(grid) {
+    initLazy: grid => tryCatchWrapper(function(grid) {
       // Check whether the connector was already initialized for the grid
       if (grid.$connector){
         return;
@@ -1019,6 +1019,6 @@
           });
         }
       }));
-    })
+    })(grid)
   }
 })();
