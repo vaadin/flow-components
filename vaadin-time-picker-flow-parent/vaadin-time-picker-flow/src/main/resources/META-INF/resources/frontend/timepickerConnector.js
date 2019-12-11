@@ -1,12 +1,10 @@
 (function () {
     const tryCatchWrapper = function (callback) {
-        return (...args) => {
-            return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Time Picker', 'vaadin-time-picker-flow')(...args);
-        };
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Time Picker', 'vaadin-time-picker-flow');
     };
 
     window.Vaadin.Flow.timepickerConnector = {
-        initLazy: tryCatchWrapper(function (timepicker) {
+        initLazy: timepicker => tryCatchWrapper(function (timepicker) {
             // Check whether the connector was already initialized for the timepicker
             if (timepicker.$connector) {
                 return;
@@ -238,6 +236,6 @@
                     }
                 }
             });
-        })
+        })(timepicker)
     };
 })();
