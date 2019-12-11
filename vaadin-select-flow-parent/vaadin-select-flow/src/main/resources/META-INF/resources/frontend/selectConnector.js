@@ -1,12 +1,10 @@
 (function () {
     const tryCatchWrapper = function (callback) {
-        return (...args) => {
-            return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Select', 'vaadin-select-flow')(...args);
-        };
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Select', 'vaadin-select-flow');
     };
 
     window.Vaadin.Flow.selectConnector = {
-        initLazy: tryCatchWrapper(function (select) {
+        initLazy: select => tryCatchWrapper(function (select) {
             const _findListBoxElement = tryCatchWrapper(function () {
                 for (let i = 0; i < select.childElementCount; i++) {
                     const child = select.children[i];
@@ -32,6 +30,6 @@
                     root.appendChild(listBox);
                 }
             });
-        })
+        })(select)
     };
 })();
