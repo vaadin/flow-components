@@ -11,7 +11,7 @@
   window.Vaadin.Flow.contextMenuConnector = {
 
     // NOTE: This is for the TARGET component, not for the <vaadin-context-menu> itself
-    init: tryCatchWrapper(function(target) {
+    init: target => tryCatchWrapper(function(target) {
       if (target.$contextMenuConnector) {
         return;
       }
@@ -74,9 +74,9 @@
         })
 
       };
-    }),
+    })(target),
 
-    generateItems: tryCatchWrapper(function(menu, appId, nodeId) {
+    generateItems: (menu, appId, nodeId) => tryCatchWrapper(function(menu, appId, nodeId) {
       menu._containerNodeId = nodeId;
 
       const getContainer = function(nodeId) {
@@ -103,12 +103,12 @@
 
       const items = getChildItems(menu);
       menu.items = items;
-    }),
+    })(menu, appId, nodeId),
 
-    setChecked: tryCatchWrapper(function(component, checked) {
+    setChecked: (component, checked) => tryCatchWrapper(function(component, checked) {
       if (component._item) {
         component._item.checked = checked;
       }
-    })
+    })(component, checked)
   };
 })();
