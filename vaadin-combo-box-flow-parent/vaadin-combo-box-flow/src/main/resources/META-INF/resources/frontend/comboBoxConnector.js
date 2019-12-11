@@ -3,15 +3,13 @@
 // the Polymer3 approach.
 (function () {
     const tryCatchWrapper = function (callback) {
-        return (...args) => {
-            return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Combo Box', 'vaadin-combo-box-flow')(...args);
-        };
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Combo Box', 'vaadin-combo-box-flow');
     };
 
     window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
 
     window.Vaadin.Flow.comboBoxConnector = {
-        initLazy: tryCatchWrapper(function (comboBox) {
+        initLazy: comboBox => tryCatchWrapper(function (comboBox) {
 
             // Check whether the connector was already initialized for the ComboBox
             if (comboBox.$connector) {
@@ -373,6 +371,6 @@
 
             // Prevent setting the custom value as the 'value'-prop automatically
             comboBox.addEventListener('custom-value-set', tryCatchWrapper(e => e.preventDefault()));
-        })
+        })(comboBox)
     }
 })();
