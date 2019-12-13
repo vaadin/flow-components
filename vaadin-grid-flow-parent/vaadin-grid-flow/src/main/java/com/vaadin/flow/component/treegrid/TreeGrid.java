@@ -46,6 +46,7 @@ import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
@@ -304,9 +305,10 @@ public class TreeGrid<T> extends Grid<T>
                         item -> !getDataCommunicator().hasChildren(item))
                 .withProperty("name",
                         value -> String.valueOf(valueProvider.apply(value))));
-        column.setComparator(
-                ((a, b) -> compareMaybeComparables(valueProvider.apply(a),
-                        valueProvider.apply(b))));
+        final SerializableComparator<T> comparator = 
+                (a, b) -> compareMaybeComparables(valueProvider.apply(a),
+                        valueProvider.apply(b));
+        column.setComparator(comparator);
 
         return column;
     }
