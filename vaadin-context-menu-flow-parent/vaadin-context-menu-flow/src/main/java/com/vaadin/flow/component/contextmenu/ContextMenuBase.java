@@ -385,7 +385,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * connector is initialized.
      */
     private void requestTargetJsExecutions() {
-        if (target != null && !isTargetJsPending()) {
+        if (target != null) {
+            if (isTargetJsPending()) {
+                targetJsRegistration.cancelExecution();
+            }
             targetJsRegistration = target.getElement().executeJs(
                     "window.Vaadin.Flow.contextMenuConnector.init(this);"
                             + "this.$contextMenuConnector.updateOpenOn($0);",
