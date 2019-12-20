@@ -108,6 +108,12 @@ public class GridPro<E> extends Grid<E> {
         setup();
     }
 
+    @Override
+    public void onEnabledStateChanged(boolean enabled) {
+        super.onEnabledStateChanged(enabled);
+        getElement().setProperty("_editingDisabled", !enabled);
+    }
+
     private void setup() {
         addItemPropertyChangedListener(e -> {
             EditColumn<E> column = (EditColumn<E>) this.idToColumnMap.get(e.getPath());
