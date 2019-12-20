@@ -16,13 +16,17 @@
 package com.vaadin.flow.component;
 
 import java.net.URL;
+import java.util.Optional;
 
+import com.vaadin.flow.testutil.LocalExecution;
+import com.vaadin.testbench.parallel.Browser;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.testbench.Parameters;
 import com.vaadin.testbench.TestBench;
 
 /**
@@ -32,22 +36,37 @@ public class AbstractNoW3c extends AbstractComponentIT {
 
     @Override
     public void setup() throws Exception {
-        if (getRunOnHub(getClass()) != null
-                        || Parameters.getHubHostname() != null) {
-
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments(
-                    new String[] { "--headless", "--disable-gpu" });
-            options.setExperimentalOption("w3c", false);
-
-            options.merge(getDesiredCapabilities());
+        final WebDriver webDriver = createChromeDriverWithoutW3c(
+            getLocalExecution(), getDesiredCapabilities(), getHubURL());
+        if (webDriver != null) {
             setDesiredCapabilities(getDesiredCapabilities());
-
-            WebDriver driver = TestBench.createDriver(
-                    new RemoteWebDriver(new URL(getHubURL()), options));
-            setDriver(driver);
+            setDriver(webDriver);
         } else {
             super.setup();
         }
+    }
+
+    public static WebDriver createChromeDriverWithoutW3c(
+        Optional<LocalExecution> localExecution,
+        DesiredCapabilities capabilities, String hubURL) throws Exception {
+
+        final ChromeOptions options = createChromeOptions();
+        options.merge(capabilities);
+
+        if (!localExecution.isPresent()) {
+            return TestBench
+                .createDriver(new RemoteWebDriver(new URL(hubURL), options));
+        } else if (localExecution.get().value() == Browser.CHROME) {
+            return TestBench.createDriver(new ChromeDriver(options));
+        }
+        return null;
+    }
+
+    private static ChromeOptions createChromeOptions() {
+        final ChromeOptions options = new ChromeOptions();
+        options.addArguments(
+            new String[] { "--headless", "--disable-gpu" });
+        options.setExperimentalOption("w3c", false);
+        return options;
     }
 }
