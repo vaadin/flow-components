@@ -190,6 +190,6 @@ public class DatePickerIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return ("/vaadin-date-picker");
+        return ("/vaadin-date-picker-test-demo");
     }
 }

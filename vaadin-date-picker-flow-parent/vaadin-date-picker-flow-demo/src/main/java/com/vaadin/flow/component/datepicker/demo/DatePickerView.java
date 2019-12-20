@@ -15,17 +15,23 @@
  */
 package com.vaadin.flow.component.datepicker.demo;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.datepicker.demo.entity.Appointment;
+import com.vaadin.flow.component.datepicker.demo.entity.Person;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.demo.DemoView;
+import com.vaadin.flow.router.Route;
+
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Locale;
-
-import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.demo.DemoView;
-import com.vaadin.flow.router.Route;
 
 /**
  * View for {@link DatePicker} demo.
@@ -37,72 +43,64 @@ public class DatePickerView extends DemoView {
 
     @Override
     public void initView() {
-        createSimpleDatePicker();
-        createMinAndMaxDatePicker();
-        createDisabledDatePicker();
-        createFinnishDatePicker();
-        createWithClearButton();
-        createStartAndEndDatePickers();
-        createLocaleChangeDatePicker();
-        addCard("Additional code used in the demo",
-                new Label("These methods are used in the demo."));
+        basicDemo(); // Basic usage
+        disabledAndReadonly();
+        clearButton();
+        valueChangeEvent();
+        configurationForRequired(); // Validation
+        minAndMaXDateValidation();
+        customValidator();
+        startAndEndDatePickers(); // Presentation
+        datePickerWithWeekNumbers();
+        finnishDatePicker(); // Localizing
+        customDateParser();
+        themeVariantsTextAlign(); // Theme variants
+        themeVariantsSmallSize();
+        styling(); // Styling
     }
 
-    private void createSimpleDatePicker() {
-        Div message = createMessageDiv("simple-picker-message");
-
+    private void basicDemo() {
+        Div div = new Div();
         // begin-source-example
-        // source-example-heading: Simple date picker
-        DatePicker datePicker = new DatePicker();
+        // source-example-heading: Basic usage
+        DatePicker labelDatePicker = new DatePicker();
+        labelDatePicker.setLabel("Label");
 
-        datePicker.addValueChangeListener(
-                event -> UpdateMessage(message, datePicker));
-        // end-source-example
+        DatePicker placeholderDatePicker = new DatePicker();
+        placeholderDatePicker.setPlaceholder("Placeholder");
 
-        datePicker.setId("simple-picker");
-        addCard("Simple date picker", datePicker, message);
-    }
-
-    private void createMinAndMaxDatePicker() {
-        Div message = createMessageDiv("min-and-max-picker-message");
-
-        // begin-source-example
-        // source-example-heading: Date picker with min and max
-        DatePicker datePicker = new DatePicker();
-        datePicker.setLabel("Select a day within this month");
-        datePicker.setPlaceholder("Date within this month");
-
+        DatePicker valueDatePicker = new DatePicker();
         LocalDate now = LocalDate.now();
-
-        datePicker.setMin(now.withDayOfMonth(1));
-        datePicker.setMax(now.withDayOfMonth(now.lengthOfMonth()));
-
-        datePicker.addValueChangeListener(
-                event -> UpdateMessage(message, datePicker));
+        valueDatePicker.setValue(now);
         // end-source-example
 
-        datePicker.setId("min-and-max-picker");
-        addCard("Date picker with min and max", datePicker, message);
+        labelDatePicker.getStyle().set("margin-right", "5px");
+        placeholderDatePicker.getStyle().set("margin-right", "5px");
+        div.add(labelDatePicker, placeholderDatePicker, valueDatePicker);
+        addCard("Basic usage", div);
     }
 
-    private void createDisabledDatePicker() {
-        Div message = createMessageDiv("disabled-picker-message");
-
+    private void disabledAndReadonly() {
+        Div div = new Div();
         // begin-source-example
-        // source-example-heading: Disabled date picker
-        DatePicker datePicker = new DatePicker();
-        datePicker.setEnabled(false);
+        // source-example-heading: Disabled and read-only
+        DatePicker disabledDatePicker = new DatePicker();
+        disabledDatePicker.setLabel("Disabled");
+        disabledDatePicker.setValue(LocalDate.now());
+        disabledDatePicker.setEnabled(false);
+
+        DatePicker readonlyDatePicker = new DatePicker();
+        readonlyDatePicker.setLabel("Read-only");
+        readonlyDatePicker.setValue(LocalDate.now());
+        readonlyDatePicker.setReadOnly(true);
         // end-source-example
 
-        datePicker.addValueChangeListener(event -> {
-            message.setText("This event should not have happened");
-        });
-
-        datePicker.setId("disabled-picker");
-        addCard("Disabled date picker", datePicker, message);
+        disabledDatePicker.getStyle().set("margin-right", "5px");
+        div.add(disabledDatePicker, readonlyDatePicker);
+        addCard("Disabled and read-only", div);
     }
 
-    private void createWithClearButton() {
+    private void clearButton() {
         // begin-source-example
         // source-example-heading: Clear button
         DatePicker datePicker = new DatePicker();
@@ -115,29 +113,175 @@ public class DatePickerView extends DemoView {
         addCard("Clear button", datePicker);
     }
 
-    private void createFinnishDatePicker() {
-        Div message = createMessageDiv("finnish-picker-message");
+    private void valueChangeEvent() {
+        // begin-source-example
+        // source-example-heading: Value change event
+        DatePicker datePicker = new DatePicker();
+        datePicker.setLabel("Label");
+
+        Div value = new Div();
+        value.setText("Select a value");
+        datePicker.addValueChangeListener(event -> {
+            if (event.getValue() == null) {
+                value.setText("No date selected");
+            } else {
+                value.setText("Selected date: " + event.getValue());
+            }
+        });
+        // end-source-example
+
+        VerticalLayout verticalLayout = new VerticalLayout(datePicker, value);
+        verticalLayout.setPadding(false);
+        addCard("Value change event", verticalLayout);
+    }
+
+    private void configurationForRequired() {
+        // begin-source-example
+        // source-example-heading: Required
+        DatePicker datePicker = new DatePicker();
+        Binder<Person> binder = new Binder<>();
+        datePicker.setLabel("Birth date");
+        binder.forField(datePicker).asRequired("Please choose a date")
+                .bind(Person::getBirthDate, Person::setBirthDate);
+
+        Button button = new Button("Submit", event ->
+            binder.validate()
+        );
+        // end-source-example
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setPadding(false);
+        verticalLayout.add(datePicker, button);
+        addCard("Validation", "Required", verticalLayout);
+    }
+
+    private void minAndMaXDateValidation() {
+        // begin-source-example
+        // source-example-heading: Min and max date validation
+        DatePicker datePicker = new DatePicker();
+        datePicker.setLabel("Label");
+        datePicker.setValue(LocalDate.of(2019, 11, 11));
+        datePicker.setMin(LocalDate.of(2019, 11, 10));
+        datePicker.setMax(LocalDate.of(2019, 11, 16));
+        // end-source-example
+
+        addCard("Validation", "Min and max date validation", datePicker);
+    }
+
+    private void customValidator() {
+        // begin-source-example
+        // source-example-heading: Custom validator
+        DatePicker datePicker = new DatePicker();
+        Binder<Appointment> binder = new Binder<>();
+        datePicker.setLabel("Select a working day");
+        binder.forField(datePicker).withValidator(
+                value -> !DayOfWeek.SATURDAY.equals(value.getDayOfWeek())
+                        && !DayOfWeek.SUNDAY.equals(value.getDayOfWeek()),
+                "The selected date must be between Monday to Friday")
+                .bind(Appointment::getDate, Appointment::setDate);
+        // end-source-example
+
+        addCard("Validation", "Custom validator", datePicker);
+    }
+
+    private void startAndEndDatePickers() {
+        Div message = new Div();
+        message.setText("Selected range: ");
 
         // begin-source-example
-        // source-example-heading: Internationalized date picker
+        // source-example-heading: Date range
+        DatePicker fromDatePicker = new DatePicker();
+        fromDatePicker.setLabel("From date");
+        DatePicker toDatePicker = new DatePicker();
+        toDatePicker.setLabel("To date");
+
+        fromDatePicker.addValueChangeListener(event -> {
+            LocalDate selectedDate = event.getValue();
+            LocalDate endDate = toDatePicker.getValue();
+            if (selectedDate != null) {
+                toDatePicker.setMin(selectedDate.plusDays(1));
+                if (endDate == null) {
+                    toDatePicker.setOpened(true);
+                    message.setText("Select the to date");
+                } else {
+                    message.setText(
+                            "Selected range: From " + selectedDate.toString()
+                                    + " to " + endDate.toString());
+                }
+            } else {
+                toDatePicker.setMin(null);
+                message.setText("Select the from date");
+            }
+        });
+
+        toDatePicker.addValueChangeListener(event -> {
+            LocalDate selectedDate = event.getValue();
+            LocalDate startDate = fromDatePicker.getValue();
+            if (selectedDate != null) {
+                fromDatePicker.setMax(selectedDate.minusDays(1));
+                if (startDate != null) {
+                    message.setText(
+                            "Selected range: From " + startDate.toString()
+                                    + " to " + selectedDate.toString());
+                } else {
+                    message.setText("Select the from date");
+                }
+            } else {
+                fromDatePicker.setMax(null);
+                if (startDate != null) {
+                    message.setText("Select the to date");
+                } else {
+                    message.setText("No date is selected");
+                }
+            }
+        });
+        // end-source-example
+
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.add(fromDatePicker, toDatePicker);
+        addCard("Presentation", "Date range", horizontalLayout, message);
+    }
+
+    private void datePickerWithWeekNumbers() {
+        // begin-source-example
+        // source-example-heading: Date picker with week numbers
+        DatePicker datePicker = new DatePicker();
+        datePicker.setLabel("Label");
+        datePicker.setWeekNumbersVisible(true);
+        datePicker.setI18n(new DatePickerI18n().setWeek("Week")
+                .setCalendar("Calendar").setClear("Clear").setToday("Today")
+                .setCancel("cancel").setFirstDayOfWeek(1)
+                .setMonthNames(Arrays.asList("January", "February", "March",
+                        "April", "May", "June", "July", "August", "September",
+                        "October", "November", "December"))
+                .setWeekdays(Arrays.asList("Sunday", "Monday", "Tuesday",
+                        "Wednesday", "Thursday", "Friday", "Saturday"))
+                .setWeekdaysShort(Arrays.asList("Sun", "Mon", "Tue", "Wed",
+                        "Thu", "Fri", "Sat")));
+        // end-source-example
+
+        addCard("Presentation", "Date picker with week numbers", datePicker);
+    }
+
+    private void finnishDatePicker() {
+        Div message = new Div();
+        // begin-source-example
+        // source-example-heading: Localizing
         DatePicker datePicker = new DatePicker();
         datePicker.setLabel("Finnish date picker");
         datePicker.setPlaceholder("Syntymäpäivä");
         datePicker.setLocale(new Locale("fi"));
 
-        datePicker.setI18n(
-                new DatePickerI18n().setWeek("viikko").setCalendar("kalenteri")
-                        .setClear("tyhjennä").setToday("tänään")
-                        .setCancel("peruuta").setFirstDayOfWeek(1)
-                        .setMonthNames(Arrays.asList("tammiku", "helmikuu",
-                                "maaliskuu", "huhtikuu", "toukokuu", "kesäkuu",
-                                "heinäkuu", "elokuu", "syyskuu", "lokakuu",
-                                "marraskuu", "joulukuu")).setWeekdays(
-                        Arrays.asList("sunnuntai", "maanantai", "tiistai",
-                                "keskiviikko", "torstai", "perjantai",
-                                "lauantai")).setWeekdaysShort(
-                        Arrays.asList("su", "ma", "ti", "ke", "to", "pe",
-                                "la")));
+        datePicker.setI18n(new DatePickerI18n().setWeek("viikko")
+                .setCalendar("kalenteri").setClear("tyhjennä")
+                .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
+                .setMonthNames(Arrays.asList("tammiku", "helmikuu", "maaliskuu",
+                        "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",
+                        "syyskuu", "lokakuu", "marraskuu", "joulukuu"))
+                .setWeekdays(Arrays.asList("sunnuntai", "maanantai", "tiistai",
+                        "keskiviikko", "torstai", "perjantai", "lauantai"))
+                .setWeekdaysShort(Arrays.asList("su", "ma", "ti", "ke", "to",
+                        "pe", "la")));
 
         datePicker.addValueChangeListener(event -> {
             LocalDate selectedDate = event.getValue();
@@ -150,7 +294,7 @@ public class DatePickerView extends DemoView {
                 String monthName = datePicker.getI18n().getMonthNames()
                         .get(month);
 
-                message.setText("Day of week: " + weekdayName + "\nMonth: "
+                message.setText("Day of week: " + weekdayName + ", Month: "
                         + monthName);
             } else {
                 message.setText("No date is selected");
@@ -159,124 +303,87 @@ public class DatePickerView extends DemoView {
         // end-source-example
 
         datePicker.setId("finnish-picker");
-        addCard("Internationalized date picker", datePicker, message);
+        addCard("Localization", "Localizing", datePicker, message);
     }
 
-    private void createStartAndEndDatePickers() {
-        Div message = createMessageDiv("start-and-end-message");
-
+    private void customDateParser() {
         // begin-source-example
-        // source-example-heading: Two linked date pickers
-        DatePicker startDatePicker = new DatePicker();
-        startDatePicker.setLabel("Start");
-        DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setLabel("End");
-
-        startDatePicker.addValueChangeListener(event -> {
-            LocalDate selectedDate = event.getValue();
-            LocalDate endDate = endDatePicker.getValue();
-            if (selectedDate != null) {
-                endDatePicker.setMin(selectedDate.plusDays(1));
-                if (endDate == null) {
-                    endDatePicker.setOpened(true);
-                    message.setText("Select the ending date");
-                } else {
-                    message.setText(
-                            "Selected period:\nFrom " + selectedDate.toString()
-                                    + " to " + endDate.toString());
-                }
-            } else {
-                endDatePicker.setMin(null);
-                message.setText("Select the starting date");
-            }
-        });
-
-        endDatePicker.addValueChangeListener(event -> {
-            LocalDate selectedDate = event.getValue();
-            LocalDate startDate = startDatePicker.getValue();
-            if (selectedDate != null) {
-                startDatePicker.setMax(selectedDate.minusDays(1));
-                if (startDate != null) {
-                    message.setText(
-                            "Selected period:\nFrom " + startDate.toString()
-                                    + " to " + selectedDate.toString());
-                } else {
-                    message.setText("Select the starting date");
-                }
-            } else {
-                startDatePicker.setMax(null);
-                if (startDate != null) {
-                    message.setText("Select the ending date");
-                } else {
-                    message.setText("No date is selected");
-                }
-            }
-        });
-        // end-source-example
-
-        startDatePicker.setId("start-picker");
-        endDatePicker.setId("end-picker");
-        addCard("Two linked date pickers", startDatePicker, endDatePicker,
-                message);
-
-    }
-
-    private void createLocaleChangeDatePicker() {
-        Div message = createMessageDiv("Customize-locale-picker-message");
-        // begin-source-example
-        // source-example-heading: Date picker with customize locales
-        // By default, the datePicker uses the current UI locale
+        // source-example-heading: Simple date picker
         DatePicker datePicker = new DatePicker();
-        NativeButton locale1 = new NativeButton("Locale: US");
-        NativeButton locale2 = new NativeButton("Locale: UK");
-        NativeButton locale3 = new NativeButton("Locale: CHINA");
-
-        locale1.addClickListener(e -> {
-            datePicker.setLocale(Locale.US);
-            UpdateMessage(message, datePicker);
-        });
-        locale2.addClickListener(e -> {
-            datePicker.setLocale(Locale.UK);
-            UpdateMessage(message, datePicker);
-        });
-        locale3.addClickListener(e -> {
-            datePicker.setLocale(Locale.CHINA);
-            UpdateMessage(message, datePicker);
-        });
-
-        datePicker.addValueChangeListener(
-                event -> UpdateMessage(message, datePicker));
+        datePicker.setLabel("Label");
+        datePicker.setI18n(new DatePickerI18n().setWeek("Week")
+                .setCalendar("Calendar").setClear("clear").setToday("today")
+                .setCancel("cancel").setFirstDayOfWeek(1)
+                .setMonthNames(Arrays.asList("January", "February", "March",
+                        "April", "May", "June", "July", "August", "September",
+                        "October", "November", "December"))
+                .setWeekdays(Arrays.asList("Sunday", "Monday", "Tuesday",
+                        "Wednesday", "Thursday", "Friday", "Saturday"))
+                .setWeekdaysShort(Arrays.asList("Sun", "Mon", "Tue", "Wed",
+                        "Thu", "Fri", "Sat")));
         // end-source-example
-        locale1.setId("Locale-US");
-        locale2.setId("Locale-UK");
-        datePicker.setId("locale-change-picker");
-        addCard("Date picker with customize locales", datePicker, locale1,
-                locale2, locale3, message);
+
     }
 
-    // begin-source-example
-    // source-example-heading: Additional code used in the demo
-    /**
-     * Additional code used in the demo
-     */
-    private void UpdateMessage(Div message, DatePicker datePicker) {
-        LocalDate selectedDate = datePicker.getValue();
-        if (selectedDate != null) {
-            message.setText(
-                    "Day: " + selectedDate.getDayOfMonth() + "\nMonth: "
-                            + selectedDate.getMonthValue() + "\nYear: "
-                            + selectedDate.getYear() + "\nLocale: "
-                            + datePicker.getLocale());
-        } else {
-            message.setText("No date is selected");
-        }
+    private void themeVariantsTextAlign() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Text align
+        DatePicker leftDatePicker = new DatePicker();
+        leftDatePicker.setValue(LocalDate.now());
+        leftDatePicker.getElement().setAttribute("theme", "align-left");
+
+        DatePicker centerDatePicker = new DatePicker();
+        centerDatePicker.setValue(LocalDate.now());
+        centerDatePicker.getElement().setAttribute("theme", "align-center");
+
+        DatePicker rightDatePicker = new DatePicker();
+        rightDatePicker.setValue(LocalDate.now());
+        rightDatePicker.getElement().setAttribute("theme", "align-right");
+
+        // end-source-example
+
+        div.add(leftDatePicker, centerDatePicker, rightDatePicker);
+        leftDatePicker.getStyle().set("margin-right", "5px");
+        centerDatePicker.getStyle().set("margin-right", "5px");
+        addCard("Theme Variants", "Text align", div);
     }
 
-    private Div createMessageDiv(String id) {
-        Div message = new Div();
-        message.setId(id);
-        message.getStyle().set("whiteSpace", "pre");
-        return message;
+    private void themeVariantsSmallSize() {
+        // begin-source-example
+        // source-example-heading: Text align
+        DatePicker datePicker = new DatePicker();
+        datePicker.setLabel("Label");
+        datePicker.getElement().setAttribute("theme", "small");
+        // end-source-example
+
+        addCard("Theme Variants", "Small text field", datePicker);
     }
-    // end-source-example
+
+    private void styling() {
+        Div firstDiv = new Div();
+        firstDiv.setText(
+                "To read about styling you can read the related tutorial in");
+        Anchor firstAnchor = new Anchor(
+                "https://vaadin.com/docs/flow/theme/using-component-themes.html",
+                "Using Component Themes");
+
+        Div secondDiv = new Div();
+        secondDiv.setText("To know about styling in html you can read the ");
+        Anchor secondAnchor = new Anchor("https://vaadin.com/components/"
+                + "vaadin-date-picker/html-examples/date-picker-styling-demos",
+                "HTML Styling Demos");
+
+        HorizontalLayout firstHorizontalLayout = new HorizontalLayout(firstDiv,
+                firstAnchor);
+        HorizontalLayout secondHorizontalLayout = new HorizontalLayout(
+                secondDiv, secondAnchor);
+        // begin-source-example
+        // source-example-heading: Styling references
+
+        // end-source-example
+
+        addCard("Styling", "Styling references", firstHorizontalLayout,
+                secondHorizontalLayout);
+    }
 }
