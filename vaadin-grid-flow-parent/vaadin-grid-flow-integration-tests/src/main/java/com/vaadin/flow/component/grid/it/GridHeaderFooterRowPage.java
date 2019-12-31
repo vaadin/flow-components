@@ -80,6 +80,11 @@ public class GridHeaderFooterRowPage extends Div {
         button.setId("set-multiselect");
         add(button);
 
+        button = new NativeButton("Set singleselect",
+                event -> grid.setSelectionMode(SelectionMode.SINGLE));
+        button.setId("set-singleselect");
+        add(button);
+
         button = new NativeButton("Disable selection",
                 event -> grid.setSelectionMode(SelectionMode.NONE));
         button.setId("disable-selection");

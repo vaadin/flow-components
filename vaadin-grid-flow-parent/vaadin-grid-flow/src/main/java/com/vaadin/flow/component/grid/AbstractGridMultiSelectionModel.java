@@ -76,8 +76,21 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         selectionColumn
                 .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
-        grid.getElement().getNode().runWhenAttached(ui -> grid.getElement()
-                .insertChild(0, selectionColumn.getElement()));
+
+        if (grid.getElement().getNode().isAttached()) {
+            this.insertSelectionColumn(grid, selectionColumn);
+        } else {
+            grid.getElement().getNode().runWhenAttached(ui -> {
+                if (grid.getSelectionModel() == this) {
+                    this.insertSelectionColumn(grid, selectionColumn);
+                }
+            });
+        }
+    }
+
+    private void insertSelectionColumn(Grid<T> grid,
+            GridSelectionColumn selectionColumn) {
+        grid.getElement().insertChild(0, selectionColumn.getElement());
     }
 
     @Override

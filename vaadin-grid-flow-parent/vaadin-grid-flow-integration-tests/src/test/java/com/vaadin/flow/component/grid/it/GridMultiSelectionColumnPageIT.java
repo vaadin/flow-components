@@ -67,6 +67,33 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void selectCheckboxMultiSelectionMode() {
+        open();
+
+        // Test switch selection mode from single to multi mode before adding the grid to DOM
+        WebElement gridSelectionMode = findElement(By.id("in-testing-multi-selection-mode-grid"));
+        WebElement selectAllCheckbox_selectionMode = gridSelectionMode
+                .findElement(By.id("selectAllCheckbox"));
+        WebElement message_selectionMode = findElement(By.id("selected-item-count"));
+        Assert.assertEquals(true, selectAllCheckbox_selectionMode.isDisplayed());
+        selectAllCheckbox_selectionMode.click();
+        Assert.assertEquals("true", selectAllCheckbox_selectionMode.getAttribute("checked"));
+        Assert.assertEquals(
+                "Selected item count: "
+                        + (GridMultiSelectionColumnPage.ITEM_COUNT),
+                message_selectionMode.getText());
+        selectAllCheckbox_selectionMode.click();
+        WebElement selectCheckbox15_multiSelection = gridSelectionMode
+                .findElements(By.tagName("vaadin-checkbox")).get(15);
+        selectCheckbox15_multiSelection.click();
+        WebElement selectCheckbox6_multiSelection = gridSelectionMode
+                .findElements(By.tagName("vaadin-checkbox")).get(6);
+        selectCheckbox6_multiSelection.click();
+        Assert.assertEquals("true", selectCheckbox15_multiSelection.getAttribute("checked"));
+        Assert.assertEquals("true", selectCheckbox6_multiSelection.getAttribute("checked"));
+    }
+
+    @Test
     public void noSelectOnRowItemClick() {
         open();
         WebElement grid = findElement(By.id("in-memory-grid"));
@@ -76,6 +103,11 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 .get().click();
         Assert.assertEquals("No selection event should be fired", "",
                 findElement(By.id("selected-item-count")).getText());
+
+        // Test switch selection mode from Multi to single mode before adding the grid to DOM
+        // By checking the vaadin-grid-cell-content
+        WebElement gridSelectionMode = findElement(By.id("in-testing-multi-selection-mode-grid-single"));
+        Assert.assertTrue(gridSelectionMode.findElements(By.tagName("vaadin-checkbox")).isEmpty());
     }
 
     @Test

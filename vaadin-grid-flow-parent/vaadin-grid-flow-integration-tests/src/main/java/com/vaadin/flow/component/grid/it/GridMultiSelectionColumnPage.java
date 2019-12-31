@@ -53,6 +53,8 @@ public class GridMultiSelectionColumnPage extends Div {
         createGridWithSwappedDataProvider();
 
         add(message);
+        createBasicGridFromSingleToMultiBeforeAttached();
+        createBasicGridFromMultiToSingleBeforeAttached();
     }
 
     private void createLazyGrid() {
@@ -116,5 +118,31 @@ public class GridMultiSelectionColumnPage extends Div {
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
         grid.addSelectionListener(event -> message.setText(
                 "Selected item count: " + event.getAllSelectedItems().size()));
+    }
+
+    private void createBasicGridFromSingleToMultiBeforeAttached() {
+        Grid<String> grid = new Grid<>();
+        grid.setItems(
+                IntStream.range(0, ITEM_COUNT).mapToObj(Integer::toString));
+        setUp(grid);
+        grid.setId("in-testing-multi-selection-mode-grid");
+        add(new H2("in-testing-multi-selection-mode-grid"), grid);
+
+        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        add(grid);
+    }
+
+    private void createBasicGridFromMultiToSingleBeforeAttached() {
+        Grid<String> grid = new Grid<>();
+        grid.setItems(
+                IntStream.range(0, ITEM_COUNT).mapToObj(Integer::toString));
+        setUp(grid);
+        grid.setId("in-testing-multi-selection-mode-grid-single");
+        add(new H2("in-testing-multi-selection-mode-grid-single"), grid);
+
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        add(grid);
     }
 }
