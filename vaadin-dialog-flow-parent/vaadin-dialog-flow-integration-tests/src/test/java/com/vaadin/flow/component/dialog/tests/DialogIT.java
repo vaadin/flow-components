@@ -51,12 +51,12 @@ public class DialogIT extends ComponentDemoTest {
                 By.id("confirmation-dialog-label"));
 
         findElement(By.id("confirmation-dialog-button")).click();
-        getOverlayContent().findElements(By.tagName("button")).get(0).click();
+        getOverlayContent().findElements(By.tagName("vaadin-button")).get(0).click();
         verifyDialogClosed();
         Assert.assertEquals("Confirmed!", messageLabel.getText());
 
         findElement(By.id("confirmation-dialog-button")).click();
-        getOverlayContent().findElements(By.tagName("button")).get(1).click();
+        getOverlayContent().findElements(By.tagName("vaadin-button")).get(1).click();
         verifyDialogClosed();
         Assert.assertEquals("Cancelled...", messageLabel.getText());
     }

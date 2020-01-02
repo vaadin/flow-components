@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
@@ -78,11 +79,11 @@ public class DialogView extends DemoView {
 
         Label messageLabel = new Label();
 
-        NativeButton confirmButton = new NativeButton("Confirm", event -> {
+        Button confirmButton = new Button("Confirm", event -> {
             messageLabel.setText("Confirmed!");
             dialog.close();
         });
-        NativeButton cancelButton = new NativeButton("Cancel", event -> {
+        Button cancelButton = new Button("Cancel", event -> {
             messageLabel.setText("Cancelled...");
             dialog.close();
         });
