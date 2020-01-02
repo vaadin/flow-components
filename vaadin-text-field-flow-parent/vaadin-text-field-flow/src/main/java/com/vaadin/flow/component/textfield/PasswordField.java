@@ -346,7 +346,7 @@ public class PasswordField
     }
 
     /**
-     * Message to show to the user when validation fails.
+     * The text usually displayed in a tooltip popup when the mouse is over the field.
      *
      * @return the {@code title} property from the webcomponent
      */

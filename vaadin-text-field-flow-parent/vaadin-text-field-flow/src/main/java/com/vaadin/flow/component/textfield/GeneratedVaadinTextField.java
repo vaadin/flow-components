@@ -903,7 +903,7 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Message to show to the user when validation fails.
+     * The text usually displayed in a tooltip popup when the mouse is over the field.
      * </p>
      *
      * @param title
