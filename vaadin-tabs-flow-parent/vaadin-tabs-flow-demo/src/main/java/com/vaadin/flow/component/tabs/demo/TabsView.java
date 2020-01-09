@@ -207,15 +207,11 @@ public class TabsView extends DemoView {
         tabsToPages.put(tab3, page3);
         Tabs tabs = new Tabs(tab1, tab2, tab3);
         Div pages = new Div(page1, page2, page3);
-        Set<Component> pagesShown = Stream.of(page1)
-                .collect(Collectors.toSet());
 
         tabs.addSelectedChangeListener(event -> {
-            pagesShown.forEach(page -> page.setVisible(false));
-            pagesShown.clear();
+            tabsToPages.values().forEach(page -> page.setVisible(false));
             Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
             selectedPage.setVisible(true);
-            pagesShown.add(selectedPage);
         });
         // end-source-example
 
