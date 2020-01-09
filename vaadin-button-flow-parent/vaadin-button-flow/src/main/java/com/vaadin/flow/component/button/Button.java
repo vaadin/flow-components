@@ -264,7 +264,7 @@ public class Button extends GeneratedVaadinButton<Button>
      * behaves the same as if the user would have clicked on the button.
      */
     public void clickInClient() {
-        getElement().callFunction("click");
+        getElement().callJsFunction("click");
     }
 
     /**
@@ -342,7 +342,7 @@ public class Button extends GeneratedVaadinButton<Button>
      */
     private void initDisableOnClick() {
         if (!disableOnClickConfigured) {
-            getElement().executeJavaScript("var disableEvent = function () {"
+            getElement().executeJs("var disableEvent = function () {"
                     + "if($0.getAttribute('disableOnClick')){"
                     + " $0.setAttribute('disabled', 'true');" + "}" + "};"
                     + "$0.addEventListener('click', disableEvent)");
@@ -416,7 +416,7 @@ public class Button extends GeneratedVaadinButton<Button>
                         // case it was that already
                         if (isEnabled()) {
                             executionContext.getUI().getPage()
-                                    .executeJavaScript("$0.disabled = false;",
+                                    .executeJs("$0.disabled = false;",
                                             getElement());
                         }
                     }));
