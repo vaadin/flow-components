@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.notification.tests;
 
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -29,7 +28,6 @@ import com.vaadin.flow.templatemodel.TemplateModel;
  * Simple template example.
  */
 @Tag("test-template")
-@HtmlImport("src/test-template.html")
 @JsModule("test-template.js")
 public class TestTemplate extends PolymerTemplate<TemplateModel> {
 

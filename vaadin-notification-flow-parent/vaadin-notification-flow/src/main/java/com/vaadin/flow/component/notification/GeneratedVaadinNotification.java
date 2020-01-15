@@ -22,7 +22,6 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
@@ -94,7 +93,6 @@ Your work has been saved
 @Tag("vaadin-notification")
 @NpmPackage(value = "@vaadin/vaadin-notification", version = "1.4.0")
 @JsModule("@vaadin/vaadin-notification/src/vaadin-notification.js")
-@HtmlImport("frontend://bower_components/vaadin-notification/src/vaadin-notification.html")
 public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotification<R>>
         extends Component {
 
@@ -208,7 +206,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * </p>
      */
     protected void render() {
-        getElement().callFunction("render");
+        getElement().callJsFunction("render");
     }
 
     /**
@@ -220,7 +218,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * </p>
      */
     protected void open() {
-        getElement().callFunction("open");
+        getElement().callJsFunction("open");
     }
 
     /**
@@ -232,7 +230,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * </p>
      */
     protected void close() {
-        getElement().callFunction("close");
+        getElement().callJsFunction("close");
     }
 
     public static class OpenedChangeEvent<R extends GeneratedVaadinNotification<R>>
