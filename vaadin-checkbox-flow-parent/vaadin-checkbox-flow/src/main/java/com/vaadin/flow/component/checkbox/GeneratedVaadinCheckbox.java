@@ -26,7 +26,6 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -124,7 +123,6 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-checkbox")
 @NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.2.10")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox.js")
-@HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
 public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R>, ClickNotifier<R> {
