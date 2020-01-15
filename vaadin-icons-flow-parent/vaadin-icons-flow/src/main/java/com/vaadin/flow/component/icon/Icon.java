@@ -20,7 +20,6 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.ElementConstants;
@@ -35,7 +34,6 @@ import com.vaadin.flow.dom.ElementConstants;
 @Tag("iron-icon")
 @NpmPackage(value = "@vaadin/vaadin-icons", version = "4.3.1")
 @JsModule("@vaadin/vaadin-icons/vaadin-icons.js")
-@HtmlImport("frontend://bower_components/vaadin-icons/vaadin-icons.html")
 public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
 
     private static final String ICON_ATTRIBUTE_NAME = "icon";
