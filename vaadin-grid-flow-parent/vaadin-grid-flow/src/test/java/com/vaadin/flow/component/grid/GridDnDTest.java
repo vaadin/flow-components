@@ -11,14 +11,12 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.dnd.EffectAllowed;
-import com.vaadin.flow.component.dnd.internal.DndUtil;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
 import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
 import com.vaadin.flow.router.RouterLink;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -55,7 +53,7 @@ public class GridDnDTest {
         ComponentUtil.fireEvent(grid, startEvent);
 
         Assert.assertEquals("No active drag source set", grid, ui.getActiveDragSourceComponent());
-        Assert.assertEquals("No drag data set", dragData, ComponentUtil.getData(grid, DndUtil.DRAG_SOURCE_DATA_KEY));
+        Assert.assertEquals("No drag data set", dragData, ComponentUtil.getData(grid, Grid.DRAG_SOURCE_DATA_KEY));
 
         AtomicReference<DropEvent<RouterLink>> eventCapture = new AtomicReference<>();
         RouterLink routerLink = new RouterLink() {
@@ -77,7 +75,7 @@ public class GridDnDTest {
         ComponentUtil.fireEvent(grid, new GridDragEndEvent<>(grid, true));
 
         Assert.assertNull("Active drag source not cleared", ui.getActiveDragSourceComponent());
-        Assert.assertNull("Drag data not cleared", ComponentUtil.getData(grid, DndUtil.DRAG_SOURCE_DATA_KEY));
+        Assert.assertNull("Drag data not cleared", ComponentUtil.getData(grid, Grid.DRAG_SOURCE_DATA_KEY));
     }
 
 }

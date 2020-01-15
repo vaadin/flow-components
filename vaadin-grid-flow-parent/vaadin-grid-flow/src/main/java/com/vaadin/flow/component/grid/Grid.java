@@ -51,7 +51,8 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.dnd.internal.DndUtil;
+import com.vaadin.flow.component.dnd.DragSource;
+import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
@@ -140,6 +141,9 @@ import elemental.json.JsonValue;
 public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,
         HasTheme, HasDataGenerators<T> {
+
+    // package-private because it's used in tests
+    static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
 
     protected static class UpdateQueue implements Update {
         private final ArrayList<SerializableRunnable> queue = new ArrayList<>();
@@ -3588,7 +3592,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      * @see GridDropEvent#getDropLocation()
      */
     public void setDropMode(GridDropMode dropMode) {
-        DndUtil.addMobileDndPolyfillIfNeeded(this);
+        // We need to add DnD mobile polyfill here by invoking
+        // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
+        // internal package, DropTarget.create is called to invoke
+        // addMobileDndPolyfillIfNeeded indirectly.
+        DropTarget.create(this).setActive(false);
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
     }
@@ -3614,7 +3622,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *            {@code false} if not
      */
     public void setRowsDraggable(boolean rowsRraggable) {
-        DndUtil.addMobileDndPolyfillIfNeeded(this);
+        // We need to add DnD mobile polyfill here by invoking
+        // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
+        // internal package, DragSource.create is called to invoke
+        // addMobileDndPolyfillIfNeeded indirectly.
+        DragSource.create(this).setDraggable(false);
         getElement().setProperty("rowsDraggable", rowsRraggable);
     }
 
@@ -3865,13 +3877,13 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
 
     private void onDragStart(GridDragStartEvent<T> event) {
         ComponentUtil.setData(this,
-                DndUtil.DRAG_SOURCE_DATA_KEY, event.getDraggedItems());
+                DRAG_SOURCE_DATA_KEY, event.getDraggedItems());
         getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(this));
     }
 
     private void onDragEnd(GridDragEndEvent<T> event) {
         ComponentUtil.setData(this,
-                DndUtil.DRAG_SOURCE_DATA_KEY, null);
+                DRAG_SOURCE_DATA_KEY, null);
         getUI().ifPresent(ui -> ui.getInternals().setActiveDragSourceComponent(null));
     }
 
