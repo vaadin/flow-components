@@ -44,7 +44,7 @@ public abstract class AbstractLayout extends DemoView {
         return component;
     }
 
-    protected Component createSpacingButton(FlexComponent<?> layout, String id,
+    protected Component createSpacingButton(FlexComponent layout, String id,
             FlexComponent.JustifyContentMode spacing) {
         NativeButton button = new NativeButton(spacing.name());
         button.setId(id);

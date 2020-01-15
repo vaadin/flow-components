@@ -34,7 +34,7 @@ import java.util.Arrays;
  */
 @Tag(Tag.DIV)
 public class FlexLayout extends Component
-        implements FlexComponent<FlexLayout>, ClickNotifier<FlexLayout> {
+        implements FlexComponent, ClickNotifier<FlexLayout> {
 
     /**
      * Enum with the possible values for the component alignment inside the

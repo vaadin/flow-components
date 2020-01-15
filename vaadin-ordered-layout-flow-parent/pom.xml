@@ -6,16 +6,16 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-ordered-layout-flow-parent</artifactId>
-    <version>2.1-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Ordered Layout Flow Parent</name>
 
     <properties>
-        <flow.version>2.0-SNAPSHOT</flow.version>
+        <flow.version>3.0-SNAPSHOT</flow.version>
         <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -52,7 +52,6 @@
             </activation>
             <modules>
                 <module>vaadin-ordered-layout-flow-integration-tests</module>
-                <module>vaadin-ordered-layout-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
