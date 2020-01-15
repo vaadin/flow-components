@@ -6,12 +6,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
         <relativePath />
     </parent>
     <artifactId>vaadin-rich-text-editor-flow-root</artifactId>
     <packaging>pom</packaging>
-    <version>2.1-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     <name>Vaadin Rich Text Editor Root</name>
     <inceptionYear>2018</inceptionYear>
     <organization>
@@ -82,17 +82,6 @@
             </activation>
             <modules>
                 <module>vaadin-rich-text-editor-flow-integration-tests</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>bower-it</id>
-            <activation>
-                <property>
-                    <name>!release</name>
-                </property>
-            </activation>
-            <modules>
-                <module>vaadin-rich-text-editor-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
