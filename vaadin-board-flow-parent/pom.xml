@@ -25,7 +25,6 @@
     </licenses>
 
     <properties>
-        <charts.version>7.0-SNAPSHOT</charts.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
