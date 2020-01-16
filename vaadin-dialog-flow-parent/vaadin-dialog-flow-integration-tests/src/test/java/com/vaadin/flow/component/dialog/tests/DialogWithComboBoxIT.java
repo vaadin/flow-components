@@ -31,6 +31,7 @@ public class DialogWithComboBoxIT extends AbstractComponentIT {
     public void openOverlayUsingKeybaord_overlayIsShown() {
         open();
 
+        waitForElementPresent(By.id("open-dialog"));
         findElement(By.id("open-dialog")).click();
 
         WebElement combo = findElement(By.id("combo"));

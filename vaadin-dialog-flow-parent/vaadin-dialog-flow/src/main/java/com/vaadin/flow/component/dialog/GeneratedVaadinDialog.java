@@ -22,7 +22,6 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
@@ -56,7 +55,6 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-dialog")
 @NpmPackage(value = "@vaadin/vaadin-dialog", version = "2.2.1")
 @JsModule("@vaadin/vaadin-dialog/src/vaadin-dialog.js")
-@HtmlImport("frontend://bower_components/vaadin-dialog/src/vaadin-dialog.html")
 public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
         extends Component {
 

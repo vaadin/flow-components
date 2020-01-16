@@ -7,11 +7,11 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-dialog-flow-parent</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Dialog Flow Parent</name>
 
@@ -43,7 +43,6 @@
             </activation>
             <modules>
                 <module>vaadin-dialog-flow-integration-tests</module>
-                <module>vaadin-dialog-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>
