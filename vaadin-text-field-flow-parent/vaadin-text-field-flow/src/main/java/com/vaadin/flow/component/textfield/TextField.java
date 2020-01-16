@@ -32,7 +32,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class TextField extends GeneratedVaadinTextField<TextField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -244,23 +244,9 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         return getPlaceholderString();
     }
 
-    @Override
-    public void setHelperText(String helperText) {
-        super.setHelperText(helperText);
-    }
-
     /**
-     * String used for the helper text.
-     *
-     * @return the {@code helperText} property from the web component
-     */
-    public String getHelperText() {
-        return getHelperTextString();
-    }
-
-    /**
-     * Specifies if the field value gets automatically selected when the field
-     * gains focus.
+     * Specifies if the field value gets automatically selected when
+     * the field gains focus.
      *
      * @return <code>true</code> if autoselect is active, <code>false</code>
      *         otherwise
