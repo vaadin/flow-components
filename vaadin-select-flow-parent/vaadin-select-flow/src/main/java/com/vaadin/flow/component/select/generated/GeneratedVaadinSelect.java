@@ -26,7 +26,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
@@ -190,7 +189,6 @@ import com.vaadin.flow.shared.Registration;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
         "WebComponent: Vaadin.SelectElement#2.0.2", "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-select")
-@HtmlImport("frontend://bower_components/vaadin-select/src/vaadin-select.html")
 @NpmPackage(value = "@vaadin/vaadin-select", version = "2.1.6")
 @JsModule("@vaadin/vaadin-select/src/vaadin-select.js")
 public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T>, T>
@@ -536,7 +534,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * </p>
      */
     protected void render() {
-        getElement().callFunction("render");
+        getElement().callJsFunction("render");
     }
 
     /**
