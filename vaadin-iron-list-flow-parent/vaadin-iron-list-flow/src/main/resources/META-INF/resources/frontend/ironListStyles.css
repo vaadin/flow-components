@@ -1,5 +1,0 @@
-/* Fixes zero width in flex layouts */
-iron-list {
-  flex: auto;
-  align-self: stretch;
-}
