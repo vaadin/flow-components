@@ -10,6 +10,7 @@ import java.util.List;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.board.Row;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.page.BodySize;
@@ -22,6 +23,7 @@ import com.vaadin.flow.server.VaadinServlet;
  */
 @Route("ImageCollage")
 @BodySize
+@CssImport("styles.css")
 public class ImageCollage extends Div {
     private static final String IMAGE_PATH = "image-collage/small/";
     private List<String> imageUrls = new ArrayList<>();

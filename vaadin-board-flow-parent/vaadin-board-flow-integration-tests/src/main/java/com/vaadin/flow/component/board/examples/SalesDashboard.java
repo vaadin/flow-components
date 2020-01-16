@@ -2,6 +2,7 @@ package com.vaadin.flow.component.board.examples;
 
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.board.Row;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.page.BodySize;
@@ -10,6 +11,7 @@ import com.vaadin.flow.router.Route;
 
 @Route("SalesDashboard")
 @BodySize
+@CssImport("styles.css")
 public class SalesDashboard extends Div {
 
         private final String YELLOW = "#F9DD51";
