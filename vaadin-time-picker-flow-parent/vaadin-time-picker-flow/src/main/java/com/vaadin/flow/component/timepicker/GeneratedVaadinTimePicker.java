@@ -23,9 +23,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.NotSupported;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -68,9 +66,9 @@ import elemental.json.JsonObject;
  * </tbody>
  * </table>
  * <p>
- * See <a
- * href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin –
- * how to apply styles for shadow parts</a>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
  * </p>
  * <p>
  * The following state attributes are available for styling:
@@ -132,7 +130,6 @@ import elemental.json.JsonObject;
 @Tag("vaadin-time-picker")
 @NpmPackage(value = "@vaadin/vaadin-time-picker", version = "2.0.4")
 @JsModule("@vaadin/vaadin-time-picker/src/vaadin-time-picker.js")
-@HtmlImport("frontend://bower_components/vaadin-time-picker/src/vaadin-time-picker.html")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R> {
@@ -805,7 +802,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      */
     protected void checkValidity() {
-        getElement().callFunction("checkValidity");
+        getElement().callJsFunction("checkValidity");
     }
 
     public static class InvalidChangeEvent<R extends GeneratedVaadinTimePicker<R, ?>>
@@ -857,9 +854,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            the property type
      */
     public <P> GeneratedVaadinTimePicker(T initialValue, T defaultValue,
-                                         Class<P> elementPropertyType,
-                                         SerializableFunction<P, T> presentationToModel,
-                                         SerializableFunction<T, P> modelToPresentation) {
+            Class<P> elementPropertyType,
+            SerializableFunction<P, T> presentationToModel,
+            SerializableFunction<T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {
@@ -880,7 +877,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            whether <code>null</code> is accepted as a model value
      */
     public GeneratedVaadinTimePicker(T initialValue, T defaultValue,
-                                     boolean acceptNullValues) {
+            boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
         if (initialValue != null) {
             setModelValue(initialValue, false);
@@ -908,9 +905,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            the property type
      */
     public <P> GeneratedVaadinTimePicker(T initialValue, T defaultValue,
-                                         Class<P> elementPropertyType,
-                                         SerializableBiFunction<R, P, T> presentationToModel,
-                                         SerializableBiFunction<R, T, P> modelToPresentation) {
+            Class<P> elementPropertyType,
+            SerializableBiFunction<R, P, T> presentationToModel,
+            SerializableBiFunction<R, T, P> modelToPresentation) {
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if (initialValue != null) {

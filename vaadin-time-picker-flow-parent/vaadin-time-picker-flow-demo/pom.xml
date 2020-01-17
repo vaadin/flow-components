@@ -6,7 +6,7 @@
     <parent>
         <artifactId>vaadin-time-picker-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>2.1-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-time-picker-flow-demo</artifactId>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-combo-box-flow</artifactId>
-            <version>3.0-SNAPSHOT</version>
+            <version>4.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

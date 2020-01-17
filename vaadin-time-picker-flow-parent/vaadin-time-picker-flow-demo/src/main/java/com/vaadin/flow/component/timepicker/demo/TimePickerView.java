@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -41,7 +40,6 @@ import com.vaadin.flow.router.Route;
  * View for {@link TimePicker} demo.
  */
 @Route("vaadin-time-picker")
-@HtmlImport("frontend://hide-clear-button-theme.html")
 @JsModule("@vaadin/flow-frontend/hide-clear-button-theme.js")
 public class TimePickerView extends DemoView {
 
@@ -264,11 +262,10 @@ public class TimePickerView extends DemoView {
             if (step.getSeconds() < 1) {
                 expression += "+' " + MILLISECONDS_SPLIT + "'+ $1;";
                 int milliSeconds = localTime.get(ChronoField.MILLI_OF_SECOND);
-                getElement().executeJavaScript(expression, getElement(),
-                        milliSeconds);
+                getElement().executeJs(expression, getElement(), milliSeconds);
             } else {
                 expression += ";";
-                getElement().executeJavaScript(expression, getElement());
+                getElement().executeJs(expression, getElement());
             }
         }
     }
