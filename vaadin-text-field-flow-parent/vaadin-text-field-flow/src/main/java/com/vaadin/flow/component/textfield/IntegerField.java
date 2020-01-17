@@ -17,7 +17,6 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableFunction;
 
@@ -27,7 +26,6 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-integer-field")
-@HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-integer-field.html")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-integer-field.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
 

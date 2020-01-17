@@ -17,7 +17,6 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -42,7 +41,6 @@ import javax.annotation.Generated;
         "WebComponent: Vaadin.NumberFieldElement#2.3.0-alpha8",
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-number-field")
-@HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-number-field.html")
 @NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.5.3")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-number-field.js")
 public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumberField<R, T>, T>
@@ -178,7 +176,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
 
     @Override
     protected void checkValidity() {
-        getElement().callFunction("checkValidity");
+        getElement().callJsFunction("checkValidity");
     }
 
     /**
