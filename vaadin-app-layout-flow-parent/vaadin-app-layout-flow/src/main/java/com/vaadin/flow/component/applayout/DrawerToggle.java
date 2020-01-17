@@ -23,7 +23,6 @@ package com.vaadin.flow.component.applayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -37,7 +36,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </code>
  */
 @Tag("vaadin-drawer-toggle")
-@HtmlImport("frontend://bower_components/vaadin-app-layout/src/vaadin-drawer-toggle.html")
 @NpmPackage(value = "@vaadin/vaadin-app-layout", version = "2.0.4")
 @JsModule("@vaadin/vaadin-app-layout/src/vaadin-drawer-toggle.js")
 public class DrawerToggle extends Button {
