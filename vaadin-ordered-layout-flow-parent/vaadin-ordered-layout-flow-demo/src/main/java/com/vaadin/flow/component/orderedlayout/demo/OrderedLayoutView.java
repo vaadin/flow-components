@@ -17,19 +17,14 @@ package com.vaadin.flow.component.orderedlayout.demo;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.BoxSizing;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
-
-import java.util.stream.Stream;
 
 /**
  * View for the orderred layouts {@link HorizontalLayout} and
@@ -50,7 +45,6 @@ public class OrderedLayoutView extends AbstractLayout {
         createHorizontalLayoutWithCenterComponent();
         createHorizontalLayoutWithBoxSizing();
         createHorizontalLayoutWithExpandingContent();
-        createHorizontalLayoutScrollable();
 
         createDefaultVerticalLayout();
         createVerticalLayoutWithJustifyContent();
@@ -60,160 +54,6 @@ public class OrderedLayoutView extends AbstractLayout {
         createVerticalLayoutWithCenterComponent();
         createVerticalLayoutWithBoxSizing();
         createVerticalLayoutWithExpandingContent();
-        createVerticalLayoutScrollable();
-
-        createFlexLayoutWithAlignmentContent();
-        createFlexLayoutWithFlexBasis();
-        createFlexLayoutWithFlexDirection();
-        createFlexLayoutWithFlexShrink();
-        createFlexLayoutWithOrderedItems();
-    }
-
-    /* FlexLayout demos */
-
-    private void createFlexLayoutWithAlignmentContent() {
-        // begin-source-example
-        // source-example-heading: FlexLayout with alignment content
-        FlexLayout layout = new FlexLayout();
-        layout.setWidth("130px");
-        layout.setHeight("150px");
-        layout.getStyle().set("border", "1px solid #9E9E9E");
-        layout.setWrapMode(FlexLayout.WrapMode.WRAP);
-
-        Component component1 = createComponent(1, "#78909C");
-        Component component2 = createComponent(2, "#546E7A");
-        Component component3 = createComponent(3, "#37474F");
-
-        layout.add(component1, component2, component3);
-
-        Div buttons = new Div();
-        Stream.of(FlexLayout.ContentAlignment.values())
-                .forEach(alignment -> {
-                    NativeButton button = new NativeButton(alignment.name());
-                    button.addClickListener(event -> layout
-                            .setAlignContent(alignment));
-                    buttons.add(button);
-                });
-        // end-source-example
-
-        layout.setId("flex-layout-with-alignment-content");
-
-        addCard("FlexLayout", "FlexLayout with alignment content",
-                layout, buttons);
-    }
-
-    private void createFlexLayoutWithFlexBasis() {
-        // begin-source-example
-        // source-example-heading: FlexLayout with flex basis
-        FlexLayout layout = new FlexLayout();
-        layout.setWidth("100%");
-        layout.setHeight("50px");
-        layout.getStyle().set("border", "1px solid #9E9E9E");
-
-        Component component1 = createComponent(1, "#78909C");
-        Component component2 = createComponent(2, "#546E7A");
-        Component component3 = createComponent(3, "#37474F");
-
-        layout.add(component1, component2, component3);
-
-        Div buttons = new Div();
-        String[] widths = {"200px", "100%", "auto"};
-        Stream.of(widths).forEach(width -> {
-            NativeButton button = new NativeButton(width);
-            button.addClickListener(event -> layout
-                    .setFlexBasis(width, component1));
-            buttons.add(button);
-        });
-        // end-source-example
-
-        layout.setId("flex-layout-with-flex-basis");
-
-        addCard("FlexLayout", "FlexLayout with flex basis",
-                layout, buttons);
-    }
-
-    private void createFlexLayoutWithFlexDirection() {
-        // begin-source-example
-        // source-example-heading: FlexLayout with flex direction
-        FlexLayout layout = new FlexLayout();
-        layout.setWidth("100%");
-        layout.setHeight("150px");
-        layout.getStyle().set("border", "1px solid #9E9E9E");
-
-        Component component1 = createComponent(1, "#78909C");
-        Component component2 = createComponent(2, "#546E7A");
-        Component component3 = createComponent(3, "#37474F");
-
-        layout.add(component1, component2, component3);
-
-        Div buttons = new Div();
-        Stream.of(FlexLayout.FlexDirection.values()).forEach(direction -> {
-            NativeButton button = new NativeButton(direction.name());
-            button.addClickListener(event -> layout
-                    .setFlexDirection(direction));
-            buttons.add(button);
-        });
-        // end-source-example
-
-        layout.setId("flex-layout-with-flex-direction");
-
-        addCard("FlexLayout", "FlexLayout with flex direction",
-                layout, buttons);
-    }
-
-    private void createFlexLayoutWithFlexShrink() {
-        // begin-source-example
-        // source-example-heading: FlexLayout with flex shrink
-        FlexLayout layout = new FlexLayout();
-        layout.setWidth("100%");
-        layout.setHeight("50px");
-        layout.getStyle().set("border", "1px solid #9E9E9E");
-
-        Component component1 = createComponent(1, "#78909C");
-        Component component2 = createComponent(2, "#546E7A");
-        Component component3 = createComponent(3, "#37474F");
-
-        layout.setFlexBasis("500px", component1, component2, component3);
-        layout.add(component1, component2, component3);
-
-        Div buttons = new Div();
-        Integer[] shrinkValues = {0, 1, 2};
-        Stream.of(shrinkValues).forEach(shrink -> {
-            NativeButton button = new NativeButton(String.valueOf(shrink));
-            button.addClickListener(event -> layout
-                    .setFlexShrink(shrink, component1));
-            buttons.add(button);
-        });
-        // end-source-example
-
-        layout.setId("flex-layout-with-flex-shrink");
-
-        addCard("FlexLayout", "FlexLayout with flex shrink",
-                layout, buttons);
-    }
-
-    private void createFlexLayoutWithOrderedItems() {
-        // begin-source-example
-        // source-example-heading: FlexLayout with ordered items
-        FlexLayout layout = new FlexLayout();
-        layout.setWidth("100%");
-        layout.setHeight("50px");
-        layout.getStyle().set("border", "1px solid #9E9E9E");
-
-        Component component1 = createComponent(1, "#78909C");
-        Component component2 = createComponent(2, "#546E7A");
-        Component component3 = createComponent(3, "#37474F");
-
-        layout.add(component1, component2, component3);
-
-        layout.setOrder(0, component3);
-        layout.setOrder(1, component1);
-        layout.setOrder(2, component2);
-        // end-source-example
-
-        layout.setId("flex-layout-with-ordered-items");
-
-        addCard("FlexLayout", "FlexLayout with ordered items", layout);
     }
 
     /* HorizontalLayout demos */
@@ -457,22 +297,7 @@ public class OrderedLayoutView extends AbstractLayout {
 
         layout.setId("horizontal-layout-with-expanding-content");
 
-        addCard("HorizontalLayout", "Horizontal layout with expanding content",
-                layout);
-    }
-
-    private void createHorizontalLayoutScrollable() {
-        // begin-source-example
-        // source-example-heading: Scrollable horizontal layout
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.add(createLoremIpsum());
-
-        layout.setScrollable(true);
-        layout.setWidth("200px");
-        layout.setHeight("200px");
-        // end-source-example
-
-        addCard("HorizontalLayout", "Scrollable horizontal layout", layout);
+        addCard("HorizontalLayout", "Horizontal layout with expanding content", layout);
     }
 
     /* VerticalLayout demos */
@@ -714,22 +539,7 @@ public class OrderedLayoutView extends AbstractLayout {
 
         layout.setId("vertical-layout-with-expanding-content");
 
-        addCard("VerticalLayout", "Vertical layout with expanding content",
-                layout);
-    }
-
-    private void createVerticalLayoutScrollable() {
-        // begin-source-example
-        // source-example-heading: Scrollable vertical layout
-        VerticalLayout layout = new VerticalLayout();
-        layout.add(new H3("Heading"), createLoremIpsum());
-
-        layout.setScrollable(true);
-        layout.setWidth("200px");
-        layout.setHeight("200px");
-        // end-source-example
-
-        addCard("VerticalLayout", "Scrollable vertical layout", layout);
+        addCard("VerticalLayout", "Vertical layout with expanding content", layout);
     }
 
     /* Override setParameter to redirect to horizontal tab */

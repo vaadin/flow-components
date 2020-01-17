@@ -11,7 +11,7 @@ The repository contains implementations for `FlexLayout`, `HorizontalLayout` and
 Run from the command line:
 - `mvn  -pl vaadin-ordered-layout-flow-demo -Pwar install jetty:run`
 
-Then navigate to `http://localhost:9998/vaadin-ordered-layout` for the demo.
+Then navigate to `http://localhost:9998/vaadin-horizontal-layout` for the demo of HorizontalLayout and to `http://localhost:9998/vaadin-vertical-layout` for the demo of VerticalLayout
 
 ## Installing the component
 Run from the command line:
