@@ -34,7 +34,6 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -50,7 +49,6 @@ import com.vaadin.flow.dom.Element;
 @Tag("vaadin-custom-field")
 @NpmPackage(value = "@vaadin/vaadin-custom-field", version="1.0.10")
 @JsModule("@vaadin/vaadin-custom-field/src/vaadin-custom-field.js")
-@HtmlImport("frontend://bower_components/vaadin-custom-field/src/vaadin-custom-field.html")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     implements HasSize, HasValidation, Focusable<CustomField> {
 
