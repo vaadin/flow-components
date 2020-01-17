@@ -5,23 +5,22 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
         <relativePath />
     </parent>
     <artifactId>vaadin-charts-flow-parent</artifactId>
-    <version>7.0-SNAPSHOT</version>
+    <version>8.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
     <name>Vaadin Charts Parent</name>
 
     <inceptionYear>2014</inceptionYear>
-    <description>Parent project for Charts addon, demos and packaging</description>
+    <description>Parent project for Charts addon, examples and packaging</description>
 
     <modules>
         <module>vaadin-charts-flow</module>
         <module>vaadin-charts-flow-demo</module>
-        <module>demo</module>
         <module>vaadin-charts-testbench</module>
     </modules>
 
@@ -35,17 +34,6 @@
             </activation>
             <modules>
                 <module>vaadin-charts-flow-integration-tests</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>bower-it</id>
-            <activation>
-                <property>
-                    <name>!release</name>
-                </property>
-            </activation>
-            <modules>
-                <module>integration-test/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>

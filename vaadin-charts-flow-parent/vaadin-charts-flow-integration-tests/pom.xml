@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-charts-flow-parent</artifactId>
-        <version>7.0-SNAPSHOT</version>
+        <version>8.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-charts-flow-integration-test</artifactId>
@@ -19,7 +19,7 @@
 
         <!-- Plugins -->
         <driver.binary.downloader.maven.plugin.version>1.0.14</driver.binary.downloader.maven.plugin.version>
-        <maven.failsafe.plugin.version>2.20</maven.failsafe.plugin.version>
+        <maven.failsafe.plugin.version>2.22.2</maven.failsafe.plugin.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
     </properties>
@@ -51,13 +51,13 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-testbench</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>3.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-checkbox-testbench</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>3.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
