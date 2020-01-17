@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
@@ -66,7 +65,6 @@ import elemental.json.JsonValue;
  *            the grid bean type
  */
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-tree-toggle.js")
-@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-tree-toggle.html")
 public class TreeGrid<T> extends Grid<T>
         implements HasHierarchicalDataProvider<T> {
 

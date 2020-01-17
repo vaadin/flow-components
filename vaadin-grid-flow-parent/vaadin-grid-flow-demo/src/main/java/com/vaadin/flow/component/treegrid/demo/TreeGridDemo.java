@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.treegrid.demo;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.demo.GridDemo.Person;
 import com.vaadin.flow.component.treegrid.demo.data.DepartmentData;
@@ -23,7 +22,6 @@ import java.util.stream.Stream;
 
 @Route("vaadin-tree-grid")
 @JsModule("@vaadin/flow-frontend/grid-demo-styles.js")
-@HtmlImport("grid-demo-styles.html")
 public class TreeGridDemo extends DemoView {
 
     /**

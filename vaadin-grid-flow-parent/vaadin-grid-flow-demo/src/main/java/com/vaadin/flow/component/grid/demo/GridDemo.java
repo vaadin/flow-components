@@ -27,7 +27,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -89,7 +88,6 @@ import static com.vaadin.flow.component.grid.demo.data.CountryData.UNITED_STATES
 
 @Route("vaadin-grid")
 @JsModule("@vaadin/flow-frontend/grid-demo-styles.js")
-@HtmlImport("./grid-demo-styles.html")
 @SuppressWarnings("squid:S1192")
 public class GridDemo extends DemoView {
 

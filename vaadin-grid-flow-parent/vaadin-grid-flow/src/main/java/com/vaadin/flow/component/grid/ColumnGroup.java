@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.dom.Element;
@@ -32,7 +31,6 @@ import com.vaadin.flow.dom.Element;
  * @author Vaadin Ltd.
  */
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column-group.js")
-@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column-group.html")
 @Tag("vaadin-grid-column-group")
 class ColumnGroup extends AbstractColumn<ColumnGroup> {
 
