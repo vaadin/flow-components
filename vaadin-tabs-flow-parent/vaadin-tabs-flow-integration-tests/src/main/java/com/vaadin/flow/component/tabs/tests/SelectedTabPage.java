@@ -40,11 +40,11 @@ public class SelectedTabPage extends Div {
 
         NativeButton button = new NativeButton("Show tabs selection", event -> {
             Div div = new Div();
-            div.addClassName("first");
+            div.addClassName("tab-first");
             div.setText("The first tab is selected: " + tab1.isSelected());
             add(div);
             div = new Div();
-            div.addClassName("second");
+            div.addClassName("tab-second");
             div.setText("The second tab is selected: " + tab2.isSelected());
             add(div);
         });

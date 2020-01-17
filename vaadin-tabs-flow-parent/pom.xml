@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>2.0-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-tabs-flow-parent</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Tabs Flow Parent</name>
 
@@ -21,7 +21,7 @@
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
-        <flow.version>2.0-SNAPSHOT</flow.version>
+        <flow.version>3.0-SNAPSHOT</flow.version>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -49,7 +49,6 @@
                 </property>
             </activation>
             <modules>
-                <module>vaadin-tabs-flow-integration-tests/pom-bower-mode.xml</module>
                 <module>vaadin-tabs-flow-integration-tests</module>
             </modules>
         </profile>

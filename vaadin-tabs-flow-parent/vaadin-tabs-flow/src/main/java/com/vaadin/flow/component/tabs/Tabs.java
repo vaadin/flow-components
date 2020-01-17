@@ -52,7 +52,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 public class Tabs extends GeneratedVaadinTabs<Tabs>
-        implements HasOrderedComponents<Tabs>, HasSize {
+        implements HasOrderedComponents, HasSize {
 
     private static final String SELECTED = "selected";
 
@@ -304,7 +304,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
     protected void onAttach(AttachEvent attachEvent) {
         getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
                 this,
-                context -> ui.getPage().executeJavaScript(
+                context -> ui.getPage().executeJs(
                         "$0.addEventListener('items-changed', "
                                 + "function(){ this.$server.updateSelectedTab(true); });",
                         getElement())));
