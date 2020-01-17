@@ -4,7 +4,6 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.bean.SimpleBean;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.polymertemplate.Id;
@@ -14,7 +13,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.templatemodel.TemplateModel;
 
 @Tag("validation-connector")
-@HtmlImport("src/validation-connector.html")
 @JsModule("./src/validation-connector.js")
 @Route("validation-connector")
 public class ValidationConnectorErrorPage extends PolymerTemplate<TemplateModel>

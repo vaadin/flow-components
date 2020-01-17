@@ -1,12 +1,11 @@
-// Not using ES6 imports in this file yet because the connector in V14 must
-// still work in Legacy bower projects. See: `comboBoxConnector-es6.js` for
-// the Polymer3 approach.
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import { timeOut } from '@polymer/polymer/lib/utils/async.js';
+import { ComboBoxPlaceholder } from '@vaadin/vaadin-combo-box/src/vaadin-combo-box-placeholder.js';
+
 (function () {
     const tryCatchWrapper = function (callback) {
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Combo Box', 'vaadin-combo-box-flow');
     };
-
-    window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
 
     window.Vaadin.Flow.comboBoxConnector = {
         initLazy: comboBox => tryCatchWrapper(function (comboBox) {
@@ -16,17 +15,6 @@
                 return;
             }
 
-            if (window.Polymer) {
-                // Polymer2 approach.
-                window.Vaadin.Flow.Legacy.Debouncer = window.Vaadin.Flow.Legacy.Debouncer || Polymer.Debouncer;
-                window.Vaadin.Flow.Legacy.timeOut = window.Vaadin.Flow.Legacy.timeOut || Polymer.Async.timeOut;
-            } else if (!window.Vaadin.Flow.Legacy.Debouncer) {
-                console.log("ComboBox is unable to load Polymer helpers.");
-                return;
-            }
-
-            const Debouncer = window.Vaadin.Flow.Legacy.Debouncer;
-            const timeOut = window.Vaadin.Flow.Legacy.timeOut;
             comboBox.$connector = {};
 
             // holds pageIndex -> callback pairs of subsequent indexes (current active range)
@@ -374,3 +362,5 @@
         })(comboBox)
     }
 })();
+
+window.Vaadin.ComboBoxPlaceholder = ComboBoxPlaceholder;
