@@ -27,7 +27,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -46,7 +45,6 @@ import elemental.json.JsonObject;
  *
  */
 @JsModule("./datepickerConnector.js")
-@JavaScript("frontend://datepickerConnector.js")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation {
 
@@ -314,7 +312,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private void initConnector() {
-        runBeforeClientResponse(ui -> ui.getPage().executeJavaScript(
+        runBeforeClientResponse(ui -> ui.getPage().executeJs(
                 "window.Vaadin.Flow.datepickerConnector.initLazy($0)",
                 getElement()));
     }
@@ -397,17 +395,21 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         return isInvalidBoolean();
     }
 
-
     /**
-     * Performs a server-side validation of the given value. This is needed because it is possible to circumvent the
-     * client side validation constraints using browser development tools.
+     * Performs a server-side validation of the given value. This is needed
+     * because it is possible to circumvent the client side validation
+     * constraints using browser development tools.
      */
     private boolean isInvalid(LocalDate value) {
-        final boolean isRequiredButEmpty = required && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax  = value != null && max != null && value.isAfter(max);
-        final boolean isSmallerThenMin = value != null && min != null && value.isBefore(min);
+        final boolean isRequiredButEmpty = required
+                && Objects.equals(getEmptyValue(), value);
+        final boolean isGreaterThanMax = value != null && max != null
+                && value.isAfter(max);
+        final boolean isSmallerThenMin = value != null && min != null
+                && value.isBefore(min);
         return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
     }
+
     /**
      * Sets displaying a clear button in the datepicker when it has value.
      * <p>

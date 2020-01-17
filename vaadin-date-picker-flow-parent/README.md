@@ -16,7 +16,6 @@ Then navigate to `http://localhost:9998/vaadin-grid`
 
 For running integration tests demos execute one of the following lines depending on the desired mode
 - `mvn -pl vaadin-date-picker-flow-integration-tests clean jetty:run`
-- `mvn -pl vaadin-date-picker-flow-integration-tests clean jetty:run -Dvaadin.bowerMode`
 
 Then navigate to `http://localhost:9998/` for see integration tests demos.
 

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.datepicker;
 
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.polymertemplate.Id;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
@@ -25,7 +24,6 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 
 @Route("injected-datepicker")
 @JsModule("injected-datepicker-i18n.js")
-@HtmlImport("frontend://injected-datepicker-i18n.html")
 @Tag("injected-datepicker-i18n")
 public class InjectedDatePickerI18nPage extends PolymerTemplate<TemplateModel> {
 
