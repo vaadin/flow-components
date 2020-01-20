@@ -28,7 +28,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
@@ -42,9 +41,8 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-confirm-dialog")
 @NpmPackage(value="@vaadin/vaadin-confirm-dialog", version = "1.1.5")
 @JsModule("@vaadin/vaadin-confirm-dialog/src/vaadin-confirm-dialog.js")
-@HtmlImport("frontend://bower_components/vaadin-confirm-dialog/src/vaadin-confirm-dialog.html")
 public class ConfirmDialog extends Component
-        implements HasSize, HasStyle, HasOrderedComponents<ConfirmDialog> {
+        implements HasSize, HasStyle, HasOrderedComponents {
 
     /**
      * `confirm` is sent when the user clicks Confirm button

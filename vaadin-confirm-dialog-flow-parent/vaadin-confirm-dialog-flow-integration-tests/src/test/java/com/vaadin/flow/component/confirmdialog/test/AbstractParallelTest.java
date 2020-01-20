@@ -72,10 +72,8 @@ public abstract class AbstractParallelTest extends ParallelTest {
 
     @BrowserConfiguration
     public List<DesiredCapabilities> getBrowserConfiguration() {
-        DesiredCapabilities ie11Capabilities = BrowserUtil.ie11();
-        ie11Capabilities.setPlatform(Platform.WIN8_1);
-        return Arrays.asList(ie11Capabilities, BrowserUtil.firefox(),
-                BrowserUtil.chrome(), BrowserUtil.edge());
+        return Arrays.asList(BrowserUtil.firefox(), BrowserUtil.chrome(),
+            BrowserUtil.edge());
     }
 
 }

@@ -13,6 +13,7 @@ import com.vaadin.flow.router.Route;
 @BodySize
 public class Dimensions extends Div {
 
+    public static String VIEW_ID = "dimensions";
     public static String CONFIRM_DIALOG_ID = "confirm-dialog-dimensions";
     public static String OPEN_DIALOG_ID = "open-confirm-dialog-id";
     public static String ATTACH_DIALOG_ID = "attach-confirm-dialog";
@@ -26,6 +27,7 @@ public class Dimensions extends Div {
     public static String DIMENSION_SMALLER = "300px";
 
     public Dimensions() {
+        setId(VIEW_ID);
         ConfirmDialog confirmDialog = new ConfirmDialog();
         confirmDialog.setId(CONFIRM_DIALOG_ID);
         confirmDialog.setHeader("Confirm dialog header");
