@@ -213,10 +213,12 @@
           return;
         }
         if (!newVal) {
-          if (!grid.$connector.deselectAllowed && oldVal) {
-            grid.activeItem = oldVal;
-          } else if (oldVal && selectedKeys[oldVal.key]) {
-            grid.$connector.doDeselection([oldVal], true);
+          if (oldVal && selectedKeys[oldVal.key]) {
+            if (!grid.$connector.deselectAllowed) {
+              grid.activeItem = oldVal;
+            } else {
+              grid.$connector.doDeselection([oldVal], true);
+            }
           }
         } else if (!selectedKeys[newVal.key]) {
           grid.$connector.doSelection([newVal], true);

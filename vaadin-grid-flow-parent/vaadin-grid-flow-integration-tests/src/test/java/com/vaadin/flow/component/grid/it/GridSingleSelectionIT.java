@@ -21,6 +21,10 @@ import org.junit.Test;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
+import javax.validation.constraints.AssertTrue;
 
 @TestPath("grid-single-selection")
 public class GridSingleSelectionIT extends AbstractComponentIT {
@@ -84,5 +88,50 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
         grid.getRow(1).deselect();
         Assert.assertTrue("Row 1 was still selected after de-selecting it.",
                 !grid.getRow(1).isSelected());
+    }
+
+    @Test
+    public void selectItemAndSetItemsWithDeselectDisallowed() {
+        open();
+
+        // De-selection is not allowed(deselectAllowed is false) and then setting items for grid
+        GridElement grid = $(GridElement.class)
+                .id(GridSingleSelectionPage.ITEMS_GRID);
+
+        grid.getRow(1).select();
+        Assert.assertTrue("Row 1 was selected after selecting it.",
+                grid.getRow(1).isSelected());
+        // Set Items again by clicking the button
+        $("button").id(GridSingleSelectionPage.SET_ITEMS)
+                .click();
+        $("button").id(GridSingleSelectionPage.SET_ITEMS)
+                .click();
+    }
+
+    @Test
+    public void selectAnotherItemWithDeselectDisallowed() {
+        open();
+
+        // De-selection is not allowed(deselectAllowed is false) and then setting items for grid
+        GridElement grid = $(GridElement.class)
+                .id(GridSingleSelectionPage.ITEMS_GRID);
+
+        grid.getRow(0).select();
+
+        Assert.assertTrue("Row 1 was selected after selecting it.",
+                grid.getRow(0).isSelected());
+
+        WebElement text1 = findElement(By.id("item1"));
+        Assert.assertTrue("Row 1 is selected", text1.isDisplayed());
+
+        grid.getRow(0).deselect();
+
+        grid.getRow(1).select();
+
+        Assert.assertTrue("Row 2 was selected after selecting it.",
+                grid.getRow(1).isSelected());
+
+        WebElement text2 = findElement(By.id("item2"));
+        Assert.assertTrue("Row 2 is selected", text2.isDisplayed());
     }
 }
