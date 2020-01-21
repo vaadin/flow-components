@@ -36,11 +36,6 @@
 
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-osgi</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
             <scope>provided</scope>
         </dependency>
