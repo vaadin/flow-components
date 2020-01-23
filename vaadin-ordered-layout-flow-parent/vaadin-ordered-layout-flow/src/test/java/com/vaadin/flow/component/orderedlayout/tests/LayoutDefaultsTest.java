@@ -1,16 +1,15 @@
 package com.vaadin.flow.component.orderedlayout.tests;
 
-import java.util.stream.Stream;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.stream.Stream;
 
 public class LayoutDefaultsTest {
 
