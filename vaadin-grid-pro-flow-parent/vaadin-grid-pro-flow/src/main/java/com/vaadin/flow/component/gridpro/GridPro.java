@@ -53,8 +53,7 @@ import elemental.json.JsonObject;
 @NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "2.0.6")
 @JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro-edit-column.js")
-@JsModule("@vaadin/flow-frontend/gridProConnector.js")
-@JavaScript("frontend://gridProConnector.js")
+@JsModule("./gridProConnector.js")
 /**
  * Server-side component for the {@code <vaadin-grid-pro>} element.
  *
