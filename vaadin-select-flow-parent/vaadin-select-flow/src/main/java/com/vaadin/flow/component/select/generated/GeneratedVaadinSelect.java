@@ -189,7 +189,7 @@ import com.vaadin.flow.shared.Registration;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.3-SNAPSHOT",
         "WebComponent: Vaadin.SelectElement#2.0.2", "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/vaadin-select", version = "2.1.6")
+@NpmPackage(value = "@vaadin/vaadin-select", version = "2.1.7")
 @JsModule("@vaadin/vaadin-select/src/vaadin-select.js")
 public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
