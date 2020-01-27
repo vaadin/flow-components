@@ -55,6 +55,7 @@ public class GridMultiSelectionColumnPage extends Div {
         add(message);
         createBasicGridFromSingleToMultiBeforeAttached();
         createBasicGridFromMultiToSingleBeforeAttached();
+        setAutoWidthIsTrueOfSelectionColumn();
     }
 
     private void createLazyGrid() {
@@ -143,6 +144,18 @@ public class GridMultiSelectionColumnPage extends Div {
 
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setSelectionMode(SelectionMode.SINGLE);
+        add(grid);
+    }
+
+    private void setAutoWidthIsTrueOfSelectionColumn() {
+        Grid<String> grid = new Grid<>();
+        grid.setItems(
+                IntStream.range(0, ITEM_COUNT).mapToObj(Integer::toString));
+        setUp(grid);
+        grid.setId("set-auto-width-true");
+        add(new H2("In-set-auto-width-true"), grid);
+
+        grid.setSelectionMode(SelectionMode.MULTI);
         add(grid);
     }
 }

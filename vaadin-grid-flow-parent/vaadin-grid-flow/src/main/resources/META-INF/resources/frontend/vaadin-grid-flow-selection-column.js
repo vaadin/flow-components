@@ -24,11 +24,19 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
       return {
 
         /**
+         * Automatically sets the width of the column based on the column contents when this is set to `true`.
+         */
+        autoWidth: {
+          type: Boolean,
+          value: true
+        },
+
+        /**
          * Width of the cells for this column.
          */
         width: {
           type: String,
-          value: '58px'
+          value: '56px'
         },
 
         /**
