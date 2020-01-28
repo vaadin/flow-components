@@ -35,12 +35,6 @@ public class TimePickerBinderValidationIT extends AbstractComponentIT {
         open();
     }
 
-    @Test
-    public void selectTimeOnSimpleTimePicker() {
-        final TimePickerElement element = $(TimePickerElement.class).waitForFirst();
-        Assert.assertTrue(element.getPropertyBoolean("invalid"));
-    }
-
     private void setInternalValidBinderInvalidValue(TimePickerElement field) {
         field.setValue("14:00");
         field.dispatchEvent("change",
