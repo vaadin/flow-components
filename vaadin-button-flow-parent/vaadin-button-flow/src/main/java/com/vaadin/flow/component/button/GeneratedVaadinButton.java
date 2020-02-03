@@ -197,7 +197,11 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      *
      * @param disabled
      *            the boolean value to set
+     *
+     * @deprecated Since 3.0, this API is deprecated in favor of
+     *             {@link Button#setEnabled(boolean)}
      */
+    @Deprecated
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
