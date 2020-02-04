@@ -176,7 +176,7 @@ public class TimePickerElement extends TestBenchElement
      * Closes the drop down for the time picker.
      */
     public void closeDropDown() {
-        executeScript("arguments[0].close()",
+        executeScript("const cb = arguments[0]; window.requestAnimationFrame(function(){ cb.close(); });",
                 getTimePickerComboBoxLightElement());
         waitUntil(input -> input
                 .findElements(By.tagName("vaadin-combo-box-overlay"))

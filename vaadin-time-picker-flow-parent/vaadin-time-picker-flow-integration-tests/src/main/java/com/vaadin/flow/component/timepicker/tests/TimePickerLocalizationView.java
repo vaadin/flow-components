@@ -17,7 +17,6 @@
 package com.vaadin.flow.component.timepicker.tests;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.timepicker.demo.TimePickerView;
@@ -29,12 +28,9 @@ import com.vaadin.flow.router.Route;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 @Route("time-picker-localization")
 public class TimePickerLocalizationView extends Div
@@ -44,27 +40,22 @@ public class TimePickerLocalizationView extends Div
     private final TimePickerView.LocalTimeTextBlock browserFormattedTime;
 
     public TimePickerLocalizationView() {
-        Stream<Locale> supportedAvailableLocales = TimePicker
-                .getSupportedAvailableLocales();
-        ComboBox<Locale> localesCB = new ComboBox<>();
-        localesCB.setItemLabelGenerator(
-                TimePickerLocalizationView::getLocaleString);
-        localesCB.setWidth("300px");
-        localesCB.setItems(supportedAvailableLocales);
-        localesCB.setId("locale-picker");
+        NativeSelect localesSelect = new NativeSelect();
+        localesSelect.setWidth("230px");
+        localesSelect.setOptions(TimePicker.getSupportedAvailableLocales()
+                .map(Locale::toLanguageTag).sorted()
+                .collect(Collectors.toList()));
+        localesSelect.setId("locale-picker");
 
         timePicker = new TimePicker();
 
-        ComboBox<Duration> stepSelector = new ComboBox<>();
-        stepSelector.setItems(Duration.ofMillis(1), Duration.ofMillis(500),
-                Duration.ofSeconds(1), Duration.ofSeconds(10),
-                Duration.ofMinutes(1), Duration.ofMinutes(15),
-                Duration.ofMinutes(30), Duration.ofHours(1));
-        stepSelector.setItemLabelGenerator(duration -> {
-            return duration.toString().replace("PT", "").toLowerCase();
-        });
+        NativeSelect stepSelector = new NativeSelect();
+        stepSelector.setWidth("70px");
+        stepSelector.setOptions(Arrays.asList("0.001s", "0.5s", "1s", "10s",
+                "1m", "15m", "30m", "1h"));
         stepSelector.setId("step-picker");
-        stepSelector.setValue(timePicker.getStep());
+        stepSelector.setValue(timePicker.getStep().toString().replace("PT", "")
+                .toLowerCase());
 
         browserFormattedTime = new TimePickerView.LocalTimeTextBlock();
         browserFormattedTime.setId("formatted-time");
@@ -73,18 +64,21 @@ public class TimePickerLocalizationView extends Div
         Div valueLabel = new Div();
         valueLabel.setId("value-label");
 
-        localesCB.addValueChangeListener(event -> {
-            if (event.getValue() == null) {
+        localesSelect.addValueChangeListener(event -> {
+            if (event.getValue() == null || event.getValue().isEmpty()) {
                 return;
             }
-            timePicker.setLocale(event.getValue());
-            browserFormattedTime.setLocale(event.getValue());
+            Locale locale = Locale.forLanguageTag(event.getValue());
+            timePicker.setLocale(locale);
+            browserFormattedTime.setLocale(locale);
         });
 
         stepSelector.addValueChangeListener(event -> {
-            if (event.getValue() != null) {
-                timePicker.setStep(event.getValue());
-                browserFormattedTime.setStep(event.getValue());
+            if (event.getValue() != null && !event.getValue().isEmpty()) {
+                Duration step = Duration
+                        .parse("PT" + event.getValue().toUpperCase());
+                timePicker.setStep(step);
+                browserFormattedTime.setStep(step);
             }
         });
 
@@ -96,9 +90,9 @@ public class TimePickerLocalizationView extends Div
                     value.get(ChronoField.MILLI_OF_SECOND)));
         });
 
-        add(localesCB, stepSelector, timePicker, browserFormattedTime,
+        add(localesSelect, stepSelector, timePicker, browserFormattedTime,
                 valueLabel);
-        localesCB.setValue(UI.getCurrent().getLocale());
+        localesSelect.setValue(UI.getCurrent().getLocale().toLanguageTag());
     }
 
     @Override
@@ -114,10 +108,5 @@ public class TimePickerLocalizationView extends Div
             timePicker.setValue(LocalTime.of(Integer.parseInt(split[2]),
                     Integer.parseInt(split[3])));
         }
-    }
-
-    static String getLocaleString(Locale locale) {
-        String country = locale.getCountry();
-        return locale.getLanguage() + (country.isEmpty() ? "" : "-" + country);
     }
 }
