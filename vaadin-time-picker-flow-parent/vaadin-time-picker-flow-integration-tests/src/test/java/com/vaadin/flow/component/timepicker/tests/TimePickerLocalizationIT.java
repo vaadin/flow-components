@@ -29,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.timepicker.demo.TimePickerView;
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
@@ -121,13 +120,13 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
 
     @Test
     public void testChangingStep_reduceStepToHigherScale_valueIsNotTooDetailed() {
-        runReduceStepTest(new Locale("en-US"), "4:00 PM", "PM");
-        runReduceStepTest(new Locale("en-CA"), "16:00", "p.m.");
-        runReduceStepTest(new Locale("fi-FI"), "16:00", "");
-        runReduceStepTest(new Locale("no-NO"), "16:00", "PM");
-        runReduceStepTest(new Locale("zh-TW"), "16:00", "");
-        runReduceStepTest(new Locale("ko-KR"), "16:00", "");
-        runReduceStepTest(new Locale("es-PA"), "16:00", "p. m.");
+        runReduceStepTest(new Locale("en", "US"), "4:00 PM", "PM");
+        runReduceStepTest(new Locale("en", "CA"), "16:00", "p.m.");
+        runReduceStepTest(new Locale("fi", "FI"), "16:00", "");
+        runReduceStepTest(new Locale("no", "NO"), "16:00", "PM");
+        runReduceStepTest(new Locale("zh", "TW"), "16:00", "");
+        runReduceStepTest(new Locale("ko", "KR"), "16:00", "");
+        runReduceStepTest(new Locale("es", "PA"), "16:00", "p. m.");
     }
 
     private void runReduceStepTest(Locale locale, String initialValue4PM,
@@ -204,9 +203,10 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         int tested = 0;
         Logger logger = Logger.getLogger(getClass().getName());
 
-
-        for (Iterator<Locale> localeIterator = TimePicker.getSupportedAvailableLocales()
-                .iterator(); tested < numberOfTestedLocales && localeIterator.hasNext(); tested++) {
+        for (Iterator<Locale> localeIterator = TimePicker
+                .getSupportedAvailableLocales()
+                .iterator(); tested < numberOfTestedLocales
+                        && localeIterator.hasNext(); tested++) {
 
             List<String> errors = new ArrayList<>();
             Locale oldLocale = locale;
@@ -420,17 +420,15 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private void selectLocale(Locale locale) {
-        ComboBoxElement comboBox = $(ComboBoxElement.class).id("locale-picker");
-        String localeString = TimePickerLocalizationView
-                .getLocaleString(locale);
-        TimePickerIT.selectFromComboBox(comboBox, localeString);
-        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
+        NativeSelectElement select = $(NativeSelectElement.class)
+                .id("locale-picker");
+        select.setValue(locale.toLanguageTag());
     }
 
     private void selectStep(String step) {
-        ComboBoxElement comboBox = $(ComboBoxElement.class).id("step-picker");
-        TimePickerIT.selectFromComboBox(comboBox, step);
-        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
+        NativeSelectElement select = $(NativeSelectElement.class)
+                .id("step-picker");
+        select.setValue(step);
     }
 
     private String getLabelValue() {
@@ -442,20 +440,19 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
     }
 
     private static String prettyPrint(Locale locale) {
-        return locale.getDisplayName() + "["
-                + TimePickerLocalizationView.getLocaleString(locale) + "]";
+        return locale.getDisplayName() + "[" + locale.toLanguageTag() + "]";
     }
 
     /**
      * Calls {@code getTimePickerTextFieldValue()} for {@code
      * TimePickerElement} and replaces non-breaking space characters (char 160)
      * with normal spaces (char 32) for easier comparison. Small number of
-     * locales (such as es-PA) seem to use those for their localized
-     * timestamps.
+     * locales (such as es-PA) seem to use those for their localized timestamps.
      *
      * @return space-normalized timestamp
      */
     private String getTimePickerTextFieldValueWithNormalSpaces() {
-        return getTimePickerElement().getTimePickerTextFieldValue().replace((char)160, (char)32);
+        return getTimePickerElement().getTimePickerTextFieldValue()
+                .replace((char) 160, (char) 32);
     }
 }
