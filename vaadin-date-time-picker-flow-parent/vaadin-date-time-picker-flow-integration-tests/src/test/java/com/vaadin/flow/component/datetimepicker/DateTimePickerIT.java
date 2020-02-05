@@ -30,6 +30,7 @@ import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
 import com.vaadin.flow.testutil.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.commands.TestBenchCommandExecutor;
 
 /**
  * Integration tests for the {@link DateTimePickerView}.
@@ -78,6 +79,22 @@ public class DateTimePickerIT extends AbstractComponentIT {
 
         picker.setDate(null);
         Assert.assertEquals("No date is selected", message.getText());
+    }
+
+    @Test
+    public void focus() {
+        TestBenchElement focusButton = $("button").id("button-focus");
+        TestBenchCommandExecutor cmd = focusButton.getCommandExecutor();
+
+        Assert.assertEquals(true, cmd.executeScript(
+                "return document.activeElement !== arguments[0].__datePicker",
+                picker));
+
+        focusButton.click();
+
+        Assert.assertEquals(true, cmd.executeScript(
+                "return document.activeElement === arguments[0].__datePicker",
+                picker));
     }
 
     @Test

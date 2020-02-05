@@ -34,7 +34,11 @@ public class DateTimePickerPage extends Div {
         picker.setId("date-time-picker");
         picker.addValueChangeListener(event -> updateMessage(message, picker));
 
-        add(picker, message);
+        NativeButton focusButton = new NativeButton("focus");
+        focusButton.setId("button-focus");
+        focusButton.addClickListener(event -> picker.focus());
+
+        add(picker, message, focusButton);
 
         // 2
         Div message2 = createMessageDiv("message-value-from-server");
@@ -59,8 +63,7 @@ public class DateTimePickerPage extends Div {
                 LocalDateTime.of(2018, 1, 2, 15, 30),
                 Locale.forLanguageTag("fi"));
         picker3.setId("date-time-picker-locale");
-        button3.addClickListener(event -> picker3
-                .setLocale(Locale.US));
+        button3.addClickListener(event -> picker3.setLocale(Locale.US));
 
         add(picker3, button3);
     }
