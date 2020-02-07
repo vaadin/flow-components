@@ -17,7 +17,6 @@ package com.vaadin.flow.component.orderedlayout.demo;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.BoxSizing;
@@ -50,7 +49,6 @@ public class OrderedLayoutView extends AbstractLayout {
         createHorizontalLayoutWithCenterComponent();
         createHorizontalLayoutWithBoxSizing();
         createHorizontalLayoutWithExpandingContent();
-        createHorizontalLayoutScrollable();
 
         createDefaultVerticalLayout();
         createVerticalLayoutWithJustifyContent();
@@ -60,7 +58,6 @@ public class OrderedLayoutView extends AbstractLayout {
         createVerticalLayoutWithCenterComponent();
         createVerticalLayoutWithBoxSizing();
         createVerticalLayoutWithExpandingContent();
-        createVerticalLayoutScrollable();
 
         createFlexLayoutWithAlignmentContent();
         createFlexLayoutWithFlexBasis();
@@ -461,20 +458,6 @@ public class OrderedLayoutView extends AbstractLayout {
                 layout);
     }
 
-    private void createHorizontalLayoutScrollable() {
-        // begin-source-example
-        // source-example-heading: Scrollable horizontal layout
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.add(createLoremIpsum());
-
-        layout.setScrollable(true);
-        layout.setWidth("200px");
-        layout.setHeight("200px");
-        // end-source-example
-
-        addCard("HorizontalLayout", "Scrollable horizontal layout", layout);
-    }
-
     /* VerticalLayout demos */
 
     private void createDefaultVerticalLayout() {
@@ -716,20 +699,6 @@ public class OrderedLayoutView extends AbstractLayout {
 
         addCard("VerticalLayout", "Vertical layout with expanding content",
                 layout);
-    }
-
-    private void createVerticalLayoutScrollable() {
-        // begin-source-example
-        // source-example-heading: Scrollable vertical layout
-        VerticalLayout layout = new VerticalLayout();
-        layout.add(new H3("Heading"), createLoremIpsum());
-
-        layout.setScrollable(true);
-        layout.setWidth("200px");
-        layout.setHeight("200px");
-        // end-source-example
-
-        addCard("VerticalLayout", "Scrollable vertical layout", layout);
     }
 
     /* Override setParameter to redirect to horizontal tab */
