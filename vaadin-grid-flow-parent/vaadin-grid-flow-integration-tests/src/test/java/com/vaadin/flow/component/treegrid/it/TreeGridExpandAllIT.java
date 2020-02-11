@@ -17,6 +17,8 @@ package com.vaadin.flow.component.treegrid.it;
 
 import java.util.List;
 
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -24,6 +26,8 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.WebElement;
 
 @TestPath("treegrid-expand-all")
 public class TreeGridExpandAllIT extends AbstractTreeGridIT {
@@ -44,6 +48,21 @@ public class TreeGridExpandAllIT extends AbstractTreeGridIT {
             runAddNewItemAfterCollapseAndExpand();
         }
         assertNewChild();
+    }
+
+    @Test
+    public void recalculateWidthsAfterExpend() throws InterruptedException {
+        open();
+        TreeGridElement grid = $(TreeGridElement.class).get(1);
+        WebElement expandToggleElement = grid.getExpandToggleElement(1, 0);
+        int widthBeforeExpend = grid.getCell(1,0).getSize().getWidth();
+        expandToggleElement.click();
+        grid.getCell(1,0);
+        int widthAfterExpend = grid.getCell(1,0).getSize().getWidth();
+        Assert.assertNotEquals(widthBeforeExpend, widthAfterExpend);
+        grid.collapseWithClick(1);
+        int widthAfterCollapse = grid.getCell(1,0).getSize().getWidth();
+        Assert.assertEquals(widthBeforeExpend, widthAfterCollapse);
     }
 
     private void runAddNewItemAfterCollapseAndExpand()
