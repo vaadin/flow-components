@@ -16,13 +16,15 @@
 package com.vaadin.flow.component.datetimepicker.demo;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.Locale;
 
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -36,79 +38,143 @@ public class DateTimePickerView extends DemoView {
 
     @Override
     public void initView() {
-        createSimpleDateTimePicker();
-        createLocaleChangeDateTimePicker();
-        addCard("Additional code used in the demo",
-                new Label("These methods are used in the demo."));
+        basicDemo(); // Basic usage
+        valueChangeEvent();
+        finnishDateTimePicker(); // Localizing
+        themeVariantsTextAlign(); // Theme variants
+        themeVariantsSmallSize();
+        styling(); // Styling
     }
 
-    private void createSimpleDateTimePicker() {
-        Div message = createMessageDiv("simple-picker-message");
-
+    private void basicDemo() {
+        Div div = new Div();
         // begin-source-example
-        // source-example-heading: Simple date time picker
+        // source-example-heading: Basic usage
         DateTimePicker dateTimePicker = new DateTimePicker();
 
-        dateTimePicker.addValueChangeListener(
-                event -> updateMessage(message, dateTimePicker));
+        DateTimePicker valueDateTimePicker = new DateTimePicker();
+        LocalDateTime now = LocalDateTime.now();
+        valueDateTimePicker.setValue(now);
         // end-source-example
 
-        dateTimePicker.setId("simple-picker");
-        addCard("Simple date time picker", dateTimePicker, message);
+        dateTimePicker.getStyle().set("margin-right", "5px");
+        div.add(dateTimePicker, valueDateTimePicker);
+        addCard("Basic usage", div);
     }
 
-    private void createLocaleChangeDateTimePicker() {
-        Div message = createMessageDiv("Customize-locale-picker-message");
+    private void valueChangeEvent() {
         // begin-source-example
-        // source-example-heading: Date time picker with different locales
-        // By default, the dateTimePicker uses the current UI locale
+        // source-example-heading: Value change event
         DateTimePicker dateTimePicker = new DateTimePicker();
-        NativeButton locale1 = new NativeButton("Locale: US");
-        NativeButton locale2 = new NativeButton("Locale: UK");
-        NativeButton locale3 = new NativeButton("Locale: CHINA");
 
-        locale1.addClickListener(e -> {
-            dateTimePicker.setLocale(Locale.US);
-            updateMessage(message, dateTimePicker);
+        Div value = new Div();
+        value.setText("Select a value");
+        dateTimePicker.addValueChangeListener(event -> {
+            if (event.getValue() == null) {
+                value.setText("No date time selected");
+            } else {
+                value.setText("Selected date time: " + event.getValue());
+            }
         });
-        locale2.addClickListener(e -> {
-            dateTimePicker.setLocale(Locale.UK);
-            updateMessage(message, dateTimePicker);
-        });
-        locale3.addClickListener(e -> {
-            dateTimePicker.setLocale(Locale.CHINA);
-            updateMessage(message, dateTimePicker);
-        });
-
-        dateTimePicker.addValueChangeListener(
-                event -> updateMessage(message, dateTimePicker));
         // end-source-example
-        locale1.setId("Locale-US");
-        locale2.setId("Locale-UK");
-        dateTimePicker.setId("locale-change-picker");
-        addCard("Date time picker with different locales", dateTimePicker, locale1,
-                locale2, locale3, message);
+
+        Paragraph note = new Paragraph(
+                "Note: The date time picker has a non-empty value only when"
+                        + " both a date and a time have been selected.");
+        VerticalLayout verticalLayout = new VerticalLayout(note, dateTimePicker,
+                value);
+        verticalLayout.setPadding(false);
+        addCard("Value change event", verticalLayout);
     }
 
-    // begin-source-example
-    // source-example-heading: Additional code used in the demo
-    private void updateMessage(Div message, DateTimePicker dateTimePicker) {
-        LocalDateTime selectedDateTime = dateTimePicker.getValue();
-        if (selectedDateTime != null) {
-            final DateTimeFormatter formatter = DateTimeFormatter
-                    .ofPattern("yyyy-MM-dd HH:mm:ss");
-            message.setText("Value: " + selectedDateTime.format(formatter)
-                    + "\n" + "Locale: " + dateTimePicker.getLocale());
-        } else {
-            message.setText("No date is selected");
-        }
-    }
-    // end-source-example
-
-    private Div createMessageDiv(String id) {
+    private void finnishDateTimePicker() {
         Div message = new Div();
-        message.setId(id);
-        message.getStyle().set("whiteSpace", "pre");
-        return message;
+        /*
+         * TODO: This needs to be extended to be similar to DatePicker
+         * Localizing demo once setI18n() has been implemented
+         */
+        // begin-source-example
+        // source-example-heading: Localizing
+        DateTimePicker dateTimePicker = new DateTimePicker();
+        Locale localeFI = new Locale("fi");
+        dateTimePicker.setLocale(localeFI);
+
+        dateTimePicker.addValueChangeListener(event -> {
+            LocalDateTime selectedDateTime = event.getValue();
+            if (selectedDateTime != null) {
+                String weekdayName = selectedDateTime.getDayOfWeek()
+                        .getDisplayName(TextStyle.FULL, localeFI);
+                String monthName = selectedDateTime.getMonth()
+                        .getDisplayName(TextStyle.FULL, localeFI);
+
+                message.setText("Day of week: " + weekdayName + ", Month: "
+                        + monthName);
+            } else {
+                message.setText("No date is selected");
+            }
+        });
+        // end-source-example
+
+        addCard("Localization", "Localizing", dateTimePicker, message);
+    }
+
+    private void themeVariantsTextAlign() {
+        VerticalLayout verticalLayout = new VerticalLayout();
+        // begin-source-example
+        // source-example-heading: Text align
+        DateTimePicker leftDateTimePicker = new DateTimePicker();
+        leftDateTimePicker.setValue(LocalDateTime.now());
+        leftDateTimePicker.addThemeName("align-left");
+
+        DateTimePicker centerDateTimePicker = new DateTimePicker();
+        centerDateTimePicker.setValue(LocalDateTime.now());
+        centerDateTimePicker.addThemeName("align-center");
+
+        DateTimePicker rightDateTimePicker = new DateTimePicker();
+        rightDateTimePicker.setValue(LocalDateTime.now());
+        rightDateTimePicker.addThemeName("align-right");
+        // end-source-example
+
+        verticalLayout.add(leftDateTimePicker, centerDateTimePicker,
+                rightDateTimePicker);
+        verticalLayout.setPadding(false);
+        addCard("Theme Variants", "Text align", verticalLayout);
+    }
+
+    private void themeVariantsSmallSize() {
+        // begin-source-example
+        // source-example-heading: Small text field
+        DateTimePicker dateTimePicker = new DateTimePicker();
+        dateTimePicker.addThemeName("small");
+        // end-source-example
+
+        addCard("Theme Variants", "Small text field", dateTimePicker);
+    }
+
+    private void styling() {
+        Div firstDiv = new Div();
+        firstDiv.setText(
+                "To read about styling you can read the related tutorial in");
+        Anchor firstAnchor = new Anchor(
+                "https://vaadin.com/docs/flow/theme/using-component-themes.html",
+                "Using Component Themes");
+
+        Div secondDiv = new Div();
+        secondDiv.setText("To know about styling in HTML you can read the ");
+        Anchor secondAnchor = new Anchor("https://vaadin.com/components/"
+                + "vaadin-date-time-picker/html-examples/date-time-picker-styling-demos",
+                "HTML Styling Demos");
+
+        HorizontalLayout firstHorizontalLayout = new HorizontalLayout(firstDiv,
+                firstAnchor);
+        HorizontalLayout secondHorizontalLayout = new HorizontalLayout(
+                secondDiv, secondAnchor);
+        // begin-source-example
+        // source-example-heading: Styling references
+
+        // end-source-example
+
+        addCard("Styling", "Styling references", firstHorizontalLayout,
+                secondHorizontalLayout);
     }
 }
