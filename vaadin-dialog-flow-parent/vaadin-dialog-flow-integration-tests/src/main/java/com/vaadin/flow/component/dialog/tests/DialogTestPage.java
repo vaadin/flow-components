@@ -40,6 +40,7 @@ public class DialogTestPage extends Div {
         createDialogAddingToTheUiAfterOpening();
         createEmptyDialog();
         createDialogAndAddComponentAtIndex();
+        createDivInDialog();
     }
 
     private void createDialogWithAddOpenedChangeListener() {
@@ -154,4 +155,18 @@ public class DialogTestPage extends Div {
         return button;
     }
 
+    private void createDivInDialog() {
+        Div div = new Div();
+        div.setId("div-in-dialog");
+
+        Dialog dialog = new Dialog(div);
+
+        NativeButton button = new NativeButton("open Dialog",
+                event -> dialog.open());
+        button.setId("button-for-dialog-with-div");
+
+        dialog.setSizeFull();
+        div.setSizeFull();
+        add(button);
+    }
 }

@@ -111,7 +111,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations();
+        assertInvocations(3);
     }
 
     @Test
@@ -120,12 +120,12 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertTrue(flushInvocations().isEmpty());
+        Assert.assertEquals(2, flushInvocations().size());
 
         dialog.addDialogCloseActionListener(event -> {
         });
 
-        assertInvocations();
+        assertInvocations(1);
     }
 
     @Test
@@ -144,7 +144,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertTrue(flushInvocations().isEmpty());
+        Assert.assertEquals(2, flushInvocations().size());
     }
 
     @Test
@@ -159,7 +159,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertTrue(flushInvocations().isEmpty());
+        Assert.assertEquals(2, flushInvocations().size());
     }
 
     @Test
@@ -177,7 +177,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations();
+        assertInvocations(1);
     }
 
     @Test
@@ -192,7 +192,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations();
+        assertInvocations(3);
     }
 
     @Test
@@ -210,7 +210,7 @@ public class DialogTest {
 
         registration.remove();
 
-        assertInvocations();
+        assertInvocations(3);
     }
 
     @Test
@@ -234,7 +234,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations();
+        assertInvocations(1);
     }
 
     @Test
@@ -258,7 +258,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations();
+        assertInvocations(1);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -283,9 +283,9 @@ public class DialogTest {
         return ui.getInternals().dumpPendingJavaScriptInvocations();
     }
 
-    private void assertInvocations() {
+    private void assertInvocations(int expectedInvocations) {
         List<PendingJavaScriptInvocation> invocations = flushInvocations();
 
-        Assert.assertEquals(1, invocations.size());
+        Assert.assertEquals(expectedInvocations, invocations.size());
     }
 }
