@@ -49,6 +49,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     private Element container;
     private boolean autoAddedToTheUi;
     private int onCloseConfigured;
+    private String width;
+    private String height;
 
     /**
      * Creates an empty dialog.
@@ -58,6 +60,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         getElement().appendChild(template);
 
         container = new Element("div");
+        container.getStyle().set(ElementConstants.STYLE_WIDTH, "100%");
+        container.getStyle().set(ElementConstants.STYLE_HEIGHT, "100%");
+
         getElement().appendVirtualChild(container);
 
         // Attach <flow-component-renderer>. Needs to be updated on each
@@ -90,22 +95,22 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     @Override
     public void setWidth(String value) {
-        container.getStyle().set(ElementConstants.STYLE_WIDTH, value);
+        width = value;
     }
 
     @Override
     public void setHeight(String value) {
-        container.getStyle().set(ElementConstants.STYLE_HEIGHT, value);
+        height = value;
     }
 
     @Override
     public String getWidth() {
-        return container.getStyle().get(ElementConstants.STYLE_WIDTH);
+        return width;
     }
 
     @Override
     public String getHeight() {
-        return container.getStyle().get(ElementConstants.STYLE_HEIGHT);
+        return height;
     }
 
     /**
@@ -433,6 +438,10 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
                 "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
                 appId, nodeId);
         template.setProperty("innerHTML", renderer);
-    }
 
+        getElement().executeJs("this.$.overlay.$.overlay.style.height=$0",
+                height);
+        getElement().executeJs("this.$.overlay.$.overlay.style.width=$0",
+                width);
+    }
 }
