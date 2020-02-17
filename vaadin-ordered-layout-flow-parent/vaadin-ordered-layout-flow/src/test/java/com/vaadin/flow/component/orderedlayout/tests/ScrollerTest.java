@@ -19,66 +19,66 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.orderedlayout.ScrollContainer;
-import com.vaadin.flow.component.orderedlayout.ScrollContainer.ScrollDirection;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.Scroller.ScrollDirection;
 
-public class ScrollContainerTest {
+public class ScrollerTest {
 
     private static final String SCROLL_DIRECTION_PROPERTY = "scrollDirection";
 
-    private ScrollContainer container;
+    private Scroller scroller;
 
     @Before
     public void init() {
-        container = new ScrollContainer();
+        scroller = new Scroller();
     }
 
     @Test
     public void getScrollDirection_defaultsToBoth() {
         Assert.assertEquals(ScrollDirection.BOTH,
-                container.getScrollDirection());
+                scroller.getScrollDirection());
         Assert.assertEquals(ScrollDirection.BOTH.toWebComponentValue(),
-                container.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
+                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
     }
 
     @Test
     public void setScrollDirection_Horizontal_updatesProperty() {
-        container.setScrollDirection(ScrollDirection.HORIZONTAL);
+        scroller.setScrollDirection(ScrollDirection.HORIZONTAL);
         Assert.assertNotNull(
-                container.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
+                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
         Assert.assertEquals(ScrollDirection.HORIZONTAL.toWebComponentValue(),
-                container.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
+                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
     }
 
     @Test
     public void setScrollDirection_Vertical_updatesProperty() {
-        container.setScrollDirection(ScrollDirection.VERTICAL);
+        scroller.setScrollDirection(ScrollDirection.VERTICAL);
         Assert.assertNotNull(
-                container.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
+                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
         Assert.assertEquals(ScrollDirection.VERTICAL.toWebComponentValue(),
-                container.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
+                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
     }
 
     @Test
     public void setScrollDirection_None_updatesProperty() {
-        container.setScrollDirection(ScrollDirection.NONE);
+        scroller.setScrollDirection(ScrollDirection.NONE);
         Assert.assertNotNull(
-                container.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
+                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
         Assert.assertEquals(ScrollDirection.NONE.toWebComponentValue(),
-                container.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
+                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
     }
 
     @Test
     public void setScrollDirection_Both_updatesProperty() {
-        container.setScrollDirection(ScrollDirection.BOTH);
-        Assert.assertNull(container.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
+        scroller.setScrollDirection(ScrollDirection.BOTH);
+        Assert.assertNull(scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
         Assert.assertEquals(ScrollDirection.BOTH.toWebComponentValue(),
-                container.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
+                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
     }
 
     @Test(expected = NullPointerException.class)
     public void setNullScrollDirection_NullPointerExceptionIsThrown() {
-        container.setScrollDirection(null);
+        scroller.setScrollDirection(null);
     }
 
 }

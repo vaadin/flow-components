@@ -27,7 +27,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.ScrollContainer;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.OptionalParameter;
@@ -68,8 +68,8 @@ public class OrderedLayoutView extends AbstractLayout {
         createFlexLayoutWithFlexShrink();
         createFlexLayoutWithOrderedItems();
 
-        createScrollContainer();
-        createScrollContainerWithVerticalLayout();
+        createScroller();
+        createScrollerWithVerticalLayout();
     }
 
     /* FlexLayout demos */
@@ -707,34 +707,34 @@ public class OrderedLayoutView extends AbstractLayout {
                 layout);
     }
 
-    private void createScrollContainer() {
+    private void createScroller() {
         // begin-source-example
-        // source-example-heading: Small ScrollContainer with large content
-        ScrollContainer container = new ScrollContainer();
-        container.setHeight("100px");
-        container.setWidth("200px");
-        container.getStyle().set("border", "1px solid #9E9E9E");
+        // source-example-heading: Small Scroller with large content
+        Scroller scroller = new Scroller();
+        scroller.setHeight("100px");
+        scroller.setWidth("200px");
+        scroller.getStyle().set("border", "1px solid #9E9E9E");
 
         Div content = createLoremIpsum();
 
-        container.setContent(content);
+        scroller.setContent(content);
         // end-source-example
 
-        container.setId("small-scroll-container-large-content");
+        scroller.setId("small-scroller-large-content");
 
-        addCard("ScrollContainer", "Small ScrollContainer with large content",
-                container);
+        addCard("Scroller", "Small Scroller with large content",
+                scroller);
     }
 
-    private void createScrollContainerWithVerticalLayout() {
+    private void createScrollerWithVerticalLayout() {
         String[] colors = new String[] { "#33C3F3", "#66D2F6", "#99E1F9",
                 "#CCF0FC", "#E5F7FD", "#E5F7FD", "#CCF0FC", "#99E1F9",
                 "#66D2F6", "#33C3F3" };
 
         // begin-source-example
-        // source-example-heading: ScrollContainer with VerticalLayout content
-        ScrollContainer container = new ScrollContainer();
-        container.setHeight("200px");
+        // source-example-heading: Scroller with VerticalLayout content
+        Scroller scroller = new Scroller();
+        scroller.setHeight("200px");
 
         VerticalLayout content = new VerticalLayout();
         content.setAlignItems(Alignment.STRETCH);
@@ -746,13 +746,13 @@ public class OrderedLayoutView extends AbstractLayout {
             content.add(component);
         }
 
-        container.setContent(content);
+        scroller.setContent(content);
         // end-source-example
 
-        container.setId("scroll-container-with-vertical-layout");
+        scroller.setId("scroller-with-vertical-layout");
 
-        addCard("ScrollContainer",
-                "ScrollContainer with VerticalLayout content", container);
+        addCard("Scroller",
+                "Scroller with VerticalLayout content", scroller);
     }
 
     /* Override setParameter to redirect to horizontal tab */

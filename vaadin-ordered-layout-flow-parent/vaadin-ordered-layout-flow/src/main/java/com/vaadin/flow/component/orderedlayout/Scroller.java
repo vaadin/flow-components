@@ -26,75 +26,75 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * ScrollContainer is a component container, which will display scrollbars when
- * its content is overflowing.
+ * Scroller is a component container which enables scrolling overflowing
+ * content.
  * 
- * Scrollbars can be configured with
+ * Scroll direction can be configured with
  * {@link #setScrollDirection(ScrollDirection)}
  */
-@Tag("vaadin-scroll-container")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.2.0-alpha2")
-@JsModule("@vaadin/vaadin-ordered-layout/vaadin-scroll-container.js")
-@HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-scroll-container.html")
-public class ScrollContainer extends Component implements HasSize, HasStyle {
+@Tag("vaadin-scroller")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.2.0-alpha3")
+@JsModule("@vaadin/vaadin-ordered-layout/vaadin-scroller.js")
+@HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-scroller.html")
+public class Scroller extends Component implements HasSize, HasStyle {
 
     private static final String SCROLL_DIRECTION_PROPERTY = "scrollDirection";
 
     private Component content;
 
     /**
-     * Constructs an empty container. Content can be set with
+     * Constructs an empty scroller. Content can be set with
      * {@link #setContent(Component)} and scroll direction defaults to
      * {@link ScrollDirection#BOTH} and can be set with
      * {@link #setScrollDirection(ScrollDirection)}.
      * 
      */
-    public ScrollContainer() {
+    public Scroller() {
     }
 
     /**
-     * Convenience constructor to create a container with the given content.
+     * Convenience constructor to create a scroller with the given content.
      * Scroll direction defaults to {@link ScrollDirection#BOTH} and can be set
      * with {@link #setScrollDirection(ScrollDirection)}.
      * 
      * @param content
-     *            the content of this container
+     *            the content of this scroller
      * @see #setContent(Component)
      */
-    public ScrollContainer(Component content) {
+    public Scroller(Component content) {
         this();
         setContent(content);
     }
 
     /**
-     * Convenience constructor to create a container with the given content and
+     * Convenience constructor to create a scroller with the given content and
      * scroll direction.
      *
      * @param content
-     *            the content of this container
+     *            the content of this scroller
      * @param scrollDirection
-     *            scroll direction that the container will have
+     *            scroll direction that the scroller will have
      */
-    public ScrollContainer(Component content, ScrollDirection scrollDirection) {
+    public Scroller(Component content, ScrollDirection scrollDirection) {
         this();
         setContent(content);
         setScrollDirection(scrollDirection);
     }
 
     /**
-     * Convenience constructor to create an empty container with the given
-     * scroll direction. Content can be set with {@link #setContent(Component)}
+     * Convenience constructor to create an empty scroller with the given scroll
+     * direction. Content can be set with {@link #setContent(Component)}
      *
      * @param scrollDirection
-     *            scroll direction that the container will have
+     *            scroll direction that the scroller will have
      */
-    public ScrollContainer(ScrollDirection scrollDirection) {
+    public Scroller(ScrollDirection scrollDirection) {
         this();
         setScrollDirection(scrollDirection);
     }
 
     /**
-     * Sets the content of this container.
+     * Sets the content of this scroller.
      *
      * The content must always be set, either with a constructor parameter or by
      * calling this method.
@@ -111,7 +111,7 @@ public class ScrollContainer extends Component implements HasSize, HasStyle {
     }
 
     /**
-     * Gets the content of this container.
+     * Gets the content of this scroller.
      *
      * @return the component used as content
      */
@@ -120,7 +120,7 @@ public class ScrollContainer extends Component implements HasSize, HasStyle {
     }
 
     /**
-     * Sets the scroll direction for this container. Defaults to
+     * Sets the scroll direction for this scroller. Defaults to
      * {@link ScrollDirection#BOTH}.
      *
      * @param scrollDirection
@@ -138,11 +138,11 @@ public class ScrollContainer extends Component implements HasSize, HasStyle {
     }
 
     /**
-     * Returns the scroll direction for this container.
+     * Returns the scroll direction for this scroller.
      * 
      * @see #setScrollDirection(ScrollDirection)
      * 
-     * @return the scroll direction for this container.
+     * @return the scroll direction for this scroller.
      */
     public ScrollDirection getScrollDirection() {
         return ScrollDirection.fromWebComponentValue(
@@ -152,7 +152,7 @@ public class ScrollContainer extends Component implements HasSize, HasStyle {
     /**
      * Enum for the values of the ScrollDirection property.
      * 
-     * @see ScrollContainer#setScrollDirection(ScrollDirection)
+     * @see Scroller#setScrollDirection(ScrollDirection)
      */
     public enum ScrollDirection {
         VERTICAL, HORIZONTAL, BOTH, NONE;
