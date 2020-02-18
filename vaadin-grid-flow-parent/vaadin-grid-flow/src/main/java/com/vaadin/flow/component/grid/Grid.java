@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -3004,6 +3005,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             order = Collections.emptyList();
         }
         setSortOrder(order, false);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        updateClientSideSorterIndicators(sortOrder);
     }
 
     private void setSortOrder(List<GridSortOrder<T>> order,
