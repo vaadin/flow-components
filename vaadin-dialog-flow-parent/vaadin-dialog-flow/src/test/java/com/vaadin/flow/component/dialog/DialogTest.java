@@ -271,6 +271,53 @@ public class DialogTest {
         addDivAtIndex(1);
     }
 
+    @Test
+    public void isDraggable_falseByDefault() {
+        Dialog dialog = new Dialog();
+
+        Assert.assertFalse("draggable is false by default", dialog.getElement().getProperty("draggable", false));
+    }
+
+    @Test
+    public void setDraggable_dialogCanBeDraggable() {
+        Dialog dialog = new Dialog();
+        dialog.setDraggable(true);
+
+        Assert.assertTrue("draggable can be set to true", dialog.getElement().getProperty("draggable", false));
+    }
+
+    @Test
+    public void isResizable_falseByDefault() {
+        Dialog dialog = new Dialog();
+
+        Assert.assertFalse("resizable is false by default", dialog.getElement().getProperty("resizable", false));
+    }
+
+    @Test
+    public void setResizable_dialogCanBeResizable() {
+        Dialog dialog = new Dialog();
+        dialog.setResizable(true);
+
+        Assert.assertTrue("resizable can be set to true", dialog.getElement().getProperty("resizable", false));
+    }
+
+    @Test
+    public void isModal_trueByDefault() {
+        Dialog dialog = new Dialog();
+
+        // Element's api "modeless" acts inverted to Flow's api "modal": modeless is false and modal is true by default 
+        Assert.assertTrue("modal is true by default", !dialog.getElement().getProperty("modeless", false));
+    }
+
+    @Test
+    public void setModal_dialogCanBeModeless() {
+        Dialog dialog = new Dialog();
+        dialog.setModal(false);
+
+        // Element's api "modeless" acts inverted to Flow's api "modal": modeless is false and modal is true by default 
+        Assert.assertFalse("modal can be set to false", !dialog.getElement().getProperty("modeless", false));
+    }
+
     private void addDivAtIndex(int index) {
         Dialog dialog = new Dialog();
 

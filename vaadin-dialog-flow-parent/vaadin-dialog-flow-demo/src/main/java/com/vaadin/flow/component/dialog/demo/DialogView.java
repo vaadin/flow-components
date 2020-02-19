@@ -47,6 +47,7 @@ public class DialogView extends DemoView {
         addCloseFromServerSideDialog();
         addDialogWithFocusedElement();
         addStyledDialogContent();
+        addModelessDraggableResizableDialog();
     }
 
     private void addBasicDialog() {
@@ -179,5 +180,36 @@ public class DialogView extends DemoView {
 
         button.setId("styled-content-dialog-button");
         addCard("Dialog with styled content", button);
+    }
+
+    private void addModelessDraggableResizableDialog() {
+        NativeButton openDialog = new NativeButton(BUTTON_CAPTION);
+        NativeButton openSecondDialog = new NativeButton("Open another dialog");
+
+        // begin-source-example
+        // source-example-heading: Modeless Draggable Resizable Dialog
+        Dialog firstDialog = new Dialog();
+        firstDialog.add(
+            new Label("This is the first dialog"),
+            new Button("Close", e -> firstDialog.close())
+        );
+        firstDialog.setModal(false);
+        firstDialog.setDraggable(true);
+        firstDialog.setResizable(true);
+        
+        Dialog secondDialog = new Dialog();
+        secondDialog.add(
+            new Label("This is the second dialog"),
+            new Button("Close", e -> secondDialog.close())
+        );
+        secondDialog.setModal(false);
+        secondDialog.setDraggable(true);
+        secondDialog.setResizable(true);
+
+        openDialog.addClickListener(e -> firstDialog.open());
+        openSecondDialog.addClickListener(e -> secondDialog.open());
+        // end-source-example
+
+        addCard("Modeless Draggable Resizable Dialog", openDialog, openSecondDialog, firstDialog);
     }
 }
