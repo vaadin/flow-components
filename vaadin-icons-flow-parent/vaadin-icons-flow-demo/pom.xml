@@ -86,6 +86,7 @@
             <id>war</id>
             <properties>
                 <packaging.type>war</packaging.type>
+                <vaadin.bowerMode>true</vaadin.bowerMode>
             </properties>
             <build>
                 <plugins>

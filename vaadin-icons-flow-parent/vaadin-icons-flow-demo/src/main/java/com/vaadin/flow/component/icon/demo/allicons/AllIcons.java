@@ -7,6 +7,6 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 
 @Tag("all-icons")
 @HtmlImport("./all-icons.html")
-public class AllIcons extends PolymerTemplate<AllIcons.AllIconsViewModel> {
-    public interface AllIconsViewModel extends TemplateModel {}
+public class AllIcons extends PolymerTemplate<AllIcons.AllIconsModel> {
+    public interface AllIconsModel extends TemplateModel {}
 }

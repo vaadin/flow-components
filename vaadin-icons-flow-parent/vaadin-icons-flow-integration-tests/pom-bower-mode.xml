@@ -14,7 +14,7 @@
     <packaging>war</packaging>
     <name>Vaadin Icons Integration Tests in Bower Mode</name>
 
-     <dependencies>
+    <dependencies>
         <!--Test scoped -->
         <dependency>
             <groupId>com.vaadin</groupId>
