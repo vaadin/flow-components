@@ -18,18 +18,22 @@ package com.vaadin.flow.component.icon.tests;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.icon.demo.IconView;
-import com.vaadin.flow.demo.ComponentDemoTest;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 
-/**
- * Integration tests for the {@link IconView}.
- */
-public class IconIT extends ComponentDemoTest {
+@TestPath("vaadin-icons")
+public class IconIT extends AbstractComponentIT {
+
+    @Before
+    public void init() {
+        open();
+    }
 
     @Test
     public void basicIcons() {
@@ -39,7 +43,7 @@ public class IconIT extends ComponentDemoTest {
 
     @Test
     public void styledIcon() {
-        WebElement icon = layout.findElement(By.id("logo-icon"));
+        WebElement icon = findElement(By.id("logo-icon"));
         assertIconProperty(icon, "vaadin-h");
 
         assertCssValue(icon, "width", "100px");
@@ -51,16 +55,16 @@ public class IconIT extends ComponentDemoTest {
 
     @Test
     public void clickableIcon() {
-        WebElement message = layout.findElement(By.id("clickable-message"));
+        WebElement message = findElement(By.id("clickable-message"));
         Assert.assertEquals("", message.getText());
 
-        WebElement icon = layout.findElement(By.id("clickable-v-icon"));
+        WebElement icon = findElement(By.id("clickable-v-icon"));
         icon.click();
 
         Assert.assertEquals("The VAADIN_V icon was clicked!",
                 message.getText());
 
-        icon = layout.findElement(By.id("clickable-h-icon"));
+        icon = findElement(By.id("clickable-h-icon"));
         icon.click();
 
         Assert.assertEquals("The VAADIN_H icon was clicked!",
@@ -69,7 +73,7 @@ public class IconIT extends ComponentDemoTest {
 
     @Test
     public void allAvailableIcons() {
-        WebElement allIcons = layout.findElement(By.id("all-icons"));
+        WebElement allIcons = findElement(By.id("all-icons"));
         List<WebElement> children = allIcons
                 .findElements(By.tagName("vaadin-vertical-layout"));
 
@@ -88,7 +92,7 @@ public class IconIT extends ComponentDemoTest {
     }
 
     private void assertIconProperty(String id, String iconName) {
-        assertIconProperty(layout.findElement(By.id(id)), iconName);
+        assertIconProperty(findElement(By.id(id)), iconName);
     }
 
     private void assertIconProperty(WebElement icon, String iconName) {
@@ -98,10 +102,5 @@ public class IconIT extends ComponentDemoTest {
     private void assertCssValue(WebElement element, String propertyName,
             String expectedValue) {
         Assert.assertEquals(expectedValue, element.getCssValue(propertyName));
-    }
-
-    @Override
-    protected String getTestPath() {
-        return ("/vaadin-icons");
     }
 }

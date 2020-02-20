@@ -97,6 +97,9 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-war-plugin</artifactId>
                         <version>3.2.2</version>
+                        <configuration>
+                            <warSourceDirectory>${basedir}/src/main/resources/META-INF/resources</warSourceDirectory>
+                        </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.eclipse.jetty</groupId>
