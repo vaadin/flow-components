@@ -43,8 +43,8 @@ import java.util.Set;
  *
  * @author Vaadin Ltd
  */
-@Route("vaadin-checkbox-group")
-public class CheckboxGroupView extends DemoView {
+@Route("vaadin-checkbox")
+public class CheckboxView extends DemoView {
 
     @Override
     protected void initView() {
