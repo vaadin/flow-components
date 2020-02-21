@@ -41,10 +41,8 @@ final class FieldValidationUtil {
     private static void overrideClientValidation(Component component) {
         PendingJavaScriptResult javaScriptResult =
                 component.getElement()
-                        .executeJs("this.validate = function (value) {" +
-                            "value = value !== undefined ? value : this._inputValue;" +
-                            "return this.checkValidity(value);};" +
-                            "this._validateInput = function (date, min, max) {}");
+                        .executeJs("this.validate = function() {" +
+                            "return this.checkValidity(this._inputValue);};");
 
         javaScriptResult.then(result -> {
             if (component instanceof HasValidation && ((HasValidation) component).isInvalid()) {

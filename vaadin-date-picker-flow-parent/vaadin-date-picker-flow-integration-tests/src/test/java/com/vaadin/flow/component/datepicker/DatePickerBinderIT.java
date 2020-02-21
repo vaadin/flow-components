@@ -50,19 +50,10 @@ public class DatePickerBinderIT extends AbstractComponentIT {
         field.dispatchEvent("blur");
     }
 
-    private void setInternalValidBinderInvalidValue(DatePickerElement field, int day) {
-        field.setDate(LocalDate.of(2019, 1, day));
-        field.dispatchEvent("change",
-                Collections.singletonMap("bubbles", true));
-        field.dispatchEvent("blur");
-    }
-
     @Test
     public void dateField_internalValidationPass_binderValidationFail_fieldInvalid() {
         DatePickerElement field = $(DatePickerElement.class).first();
         setInternalValidBinderInvalidValue(field);
-        // Double checking to avoid false invalid with `_validateInput`
-        setInternalValidBinderInvalidValue(field, 3);
         assertInvalid(field);
     }
 
