@@ -15,9 +15,8 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import com.vaadin.flow.dom.ElementConstants;
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
+import java.util.List;
+
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,7 +27,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import java.util.List;
+import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -244,6 +245,76 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
         Assert.assertEquals(overLayHeightValue - paddingValue * 2,
                 divHeightValue);
+    }
+
+    @Test
+    public void resizableDialogShouldPreserveWidthAndHeight() {
+        findElement(By.id("dialog-resizable-open-button")).click();
+
+        WebElement overlayContent = getOverlayContent();
+        WebElement overlay = getInShadowRoot(overlayContent, By.id("overlay"));
+
+        Long overLayHeightBeforeResize = getSizeFromElement(overlay,
+                ElementConstants.STYLE_HEIGHT);
+        Long overLayWidthBeforeResize = getSizeFromElement(overlay,
+                ElementConstants.STYLE_WIDTH);
+
+        resizeDialog(overlayContent);
+
+        Long overLayHeightAfterResize = getSizeFromElement(overlay,
+                ElementConstants.STYLE_HEIGHT);
+        Long overLayWidthAfterResize = getSizeFromElement(overlay,
+                ElementConstants.STYLE_WIDTH);
+
+        Assert.assertNotEquals(overLayHeightBeforeResize,
+                overLayHeightAfterResize);
+        Assert.assertNotEquals(overLayWidthBeforeResize,
+                overLayWidthAfterResize);
+
+        findElement(By.id("dialog-resizable-close-button")).click();
+        waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
+        findElement(By.id("dialog-resizable-open-button")).click();
+
+        overlay = getInShadowRoot(getOverlayContent(), By.id("overlay"));
+
+        Long overLayHeightAfterReopen = getSizeFromElement(overlay,
+                ElementConstants.STYLE_HEIGHT);
+        Long overLayWidthAfterReopen = getSizeFromElement(overlay,
+                ElementConstants.STYLE_WIDTH);
+
+        Assert.assertEquals(overLayHeightAfterResize, overLayHeightAfterReopen);
+        Assert.assertEquals(overLayWidthAfterResize, overLayWidthAfterReopen);
+    }
+
+    @Test
+    public void resizableDialogListenerIsCalled() {
+        findElement(By.id("dialog-resizable-open-button")).click();
+        WebElement message = findElement(By.id("dialog-resizable-message"));
+
+        Assert.assertEquals(
+                "Initial size with width (200px) and height (200px)",
+                message.getText());
+
+        WebElement overlayContent = getOverlayContent();
+
+        resizeDialog(overlayContent);
+
+        Assert.assertEquals(
+                "Rezise listener called with width (250px) and height (250px)",
+                message.getText());
+    }
+
+    private void resizeDialog(WebElement overlayContent) {
+        WebElement resizerSE = getInShadowRoot(overlayContent, 
+                By.cssSelector(".resizer.se"));
+
+        Actions resizeAction = new Actions(getDriver());
+        resizeAction.dragAndDropBy(resizerSE, 50, 50);
+        resizeAction.perform();
+    }
+
+    private Long getSizeFromElement(WebElement element, String cssProperty) {
+        return getLongValue(element.getCssValue(cssProperty));
     }
 
     /**

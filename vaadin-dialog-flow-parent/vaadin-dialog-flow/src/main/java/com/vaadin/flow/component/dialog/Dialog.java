@@ -26,6 +26,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
@@ -80,6 +81,11 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
                 autoAddedToTheUi = false;
             }
         });
+
+        addListener(DialogResizeEvent.class, event -> {
+            setWidth(event.getWidth());
+            setHeight(event.getHeight());
+        });
     }
 
     /**
@@ -90,6 +96,43 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     public static class DialogCloseActionEvent extends ComponentEvent<Dialog> {
         public DialogCloseActionEvent(Dialog source, boolean fromClient) {
             super(source, fromClient);
+        }
+    }
+
+    /**
+     * `resize` event is sent when the user finishes resizing the overlay.
+     */
+    @DomEvent("resize") 
+    public static class DialogResizeEvent
+            extends ComponentEvent<Dialog> {
+
+        private final String width;
+        private final String height;
+
+        public DialogResizeEvent(Dialog source, boolean fromClient,
+                @EventData("event.detail.width") String width,
+                @EventData("event.detail.height") String height) {
+            super(source, fromClient);
+            this.width = width;
+            this.height = height;
+        }
+
+        /**
+         * Gets the width of the overlay after resize is done
+         *
+         * @return the width in pixels of the overlay
+         */
+        public String getWidth() {
+            return width;
+        }
+
+        /**
+         * Gets the height of the overlay after resize is done
+         *
+         * @return the height in pixels of the overlay
+         */
+        public String getHeight() {
+            return height;
         }
     }
 
@@ -157,6 +200,22 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
             openedRegistration.remove();
             registration.remove();
         };
+    }
+
+    /**
+     * Adds a listener that is called after user finishes resizing the overlay.
+     * It is called only if resizing is enabled (see
+     * {@link Dialog#setResizable(boolean)}).
+     * <p>
+     * Note: By default, the component will sync the width/height values after
+     * every resizing.
+     *
+     * @param listener
+     * @return registration for removal of listener
+     */
+    public Registration addResizeListener(
+            ComponentEventListener<DialogResizeEvent> listener) {
+        return addListener(DialogResizeEvent.class, listener);
     }
 
     /**
