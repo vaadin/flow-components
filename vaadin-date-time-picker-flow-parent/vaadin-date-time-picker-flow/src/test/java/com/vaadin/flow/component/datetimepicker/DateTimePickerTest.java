@@ -64,4 +64,20 @@ public class DateTimePickerTest {
                 picker.getValue());
     }
 
+    @Test
+    public void setMinGetMin() {
+        DateTimePicker picker = new DateTimePicker();
+        picker.setMin(LocalDateTime.of(2018, 4, 25, 13, 45, 10));
+        assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
+                picker.getMin());
+    }
+
+    @Test
+    public void setMaxGetMax() {
+        DateTimePicker picker = new DateTimePicker();
+        picker.setMax(LocalDateTime.of(2018, 4, 25, 13, 45, 10));
+        assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
+                picker.getMax());
+    }
+
 }

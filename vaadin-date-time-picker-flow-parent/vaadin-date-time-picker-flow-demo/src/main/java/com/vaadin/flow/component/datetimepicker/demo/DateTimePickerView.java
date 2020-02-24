@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2019 Vaadin Ltd.
+ * Copyright 2000-2020 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.component.datetimepicker.demo;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
@@ -39,6 +41,7 @@ public class DateTimePickerView extends DemoView {
     @Override
     public void initView() {
         basicDemo(); // Basic usage
+        createMinAndMaxDateTimePicker();
         valueChangeEvent();
         finnishDateTimePicker(); // Localizing
         themeVariantsTextAlign(); // Theme variants
@@ -60,6 +63,22 @@ public class DateTimePickerView extends DemoView {
         dateTimePicker.getStyle().set("margin-right", "5px");
         div.add(dateTimePicker, valueDateTimePicker);
         addCard("Basic usage", div);
+    }
+
+    private void createMinAndMaxDateTimePicker() {
+        // begin-source-example
+        // source-example-heading: Min and max
+        DateTimePicker dateTimePicker = new DateTimePicker();
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime min = LocalDateTime.of(today, LocalTime.MIN);
+        LocalDateTime max = LocalDateTime.of(today.plusWeeks(1), LocalTime.MAX);
+
+        dateTimePicker.setMin(min);
+        dateTimePicker.setMax(max);
+        // end-source-example
+
+        addCard("Min and max", dateTimePicker);
     }
 
     private void valueChangeEvent() {
