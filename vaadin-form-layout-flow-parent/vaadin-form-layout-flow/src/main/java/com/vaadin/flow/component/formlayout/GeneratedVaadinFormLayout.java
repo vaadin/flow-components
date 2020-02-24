@@ -140,7 +140,7 @@ import elemental.json.JsonObject;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.FormLayoutElement#2.1.0", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "2.1.6")
+@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "2.1.7")
 @JsModule("@vaadin/vaadin-form-layout/src/vaadin-form-layout.js")
 public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
         extends Component implements HasStyle {
