@@ -317,6 +317,59 @@ public class DialogTestPageIT extends AbstractComponentIT {
         return getLongValue(element.getCssValue(cssProperty));
     }
 
+    public void notAttachedDialog_opened_changeDimension() {
+        findElement(By.id("dimension-open-self-attached-button")).click();
+        findElement(By.id("dimension-change-size-self-attached")).click();
+
+        WebElement overlay = getInShadowRoot(getOverlayContent(),
+                By.id("overlay"));
+        String overlayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
+        String overlayHeight = overlay.getCssValue(ElementConstants.STYLE_HEIGHT);
+
+        Assert.assertEquals(overlayWidth, "500px");
+        Assert.assertEquals(overlayHeight, "500px");
+
+        getOverlayContent().findElement(By.tagName("button")).click();
+        findElement(By.id("dimension-open-self-attached-button")).click();
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+
+        overlay = getInShadowRoot(getOverlayContent(),
+                By.id("overlay"));
+        overlayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
+        overlayHeight = overlay.getCssValue(ElementConstants.STYLE_HEIGHT);
+
+        Assert.assertEquals(overlayWidth, "500px");
+        Assert.assertEquals(overlayHeight, "500px");
+    }
+
+    @Test
+    public void attachedDialog_beforeOpen_changeDimension() {
+        // Change size of attached dialog
+        findElement(By.id("dimension-change-size-attached")).click();
+        // Open dialog
+        findElement(By.id("dimension-open-attached-button")).click();
+
+        WebElement overlay = getInShadowRoot(getOverlayContent(),
+                By.id("overlay"));
+        String overlayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
+        String overlayHeight = overlay.getCssValue(ElementConstants.STYLE_HEIGHT);
+
+        Assert.assertEquals(overlayWidth, "500px");
+        Assert.assertEquals(overlayHeight, "500px");
+
+        getOverlayContent().findElement(By.tagName("button")).click();
+        findElement(By.id("dimension-open-attached-button")).click();
+        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+
+        overlay = getInShadowRoot(getOverlayContent(),
+                By.id("overlay"));
+        overlayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
+        overlayHeight = overlay.getCssValue(ElementConstants.STYLE_HEIGHT);
+
+        Assert.assertEquals(overlayWidth, "500px");
+        Assert.assertEquals(overlayHeight, "500px");
+    }
+
     /**
      * Get the number for a css value with px suffix
      *
