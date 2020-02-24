@@ -41,6 +41,7 @@ public class DialogTestPage extends Div {
         createEmptyDialog();
         createDialogAndAddComponentAtIndex();
         createDivInDialog();
+        createResizableDialog();
     }
 
     private void createDialogWithAddOpenedChangeListener() {
@@ -168,5 +169,35 @@ public class DialogTestPage extends Div {
         dialog.setSizeFull();
         div.setSizeFull();
         add(button);
+    }
+
+    private void createResizableDialog() {
+        Dialog dialog = new Dialog();
+        dialog.setId("dialog-resizable");
+        dialog.setResizable(true);
+        dialog.setWidth("200px");
+        dialog.setHeight("200px");
+
+        Div message = new Div();
+        message.setId("dialog-resizable-message");
+
+        dialog.addResizeListener(e ->
+                message.setText("Rezise listener called with width (" +
+                e.getWidth() + ") and height (" + e.getHeight() + ")"));
+
+        dialog.addOpenedChangeListener(e ->
+                message.setText("Initial size with width (" +
+                dialog.getWidth() + ") and height (" + dialog.getHeight() + ")"));            
+
+        NativeButton closeButton = new NativeButton("close",
+                e -> dialog.close());
+        closeButton.setId("dialog-resizable-close-button");
+        dialog.add(closeButton);
+
+        NativeButton openDialog = new NativeButton("open resizable dialog",
+                e -> dialog.open());
+        openDialog.setId("dialog-resizable-open-button");
+
+        add(openDialog, message);
     }
 }
