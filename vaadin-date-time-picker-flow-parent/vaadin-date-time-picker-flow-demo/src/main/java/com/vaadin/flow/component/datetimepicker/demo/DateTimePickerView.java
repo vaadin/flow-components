@@ -19,8 +19,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
+import java.util.Arrays;
 import java.util.Locale;
 
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -108,15 +110,23 @@ public class DateTimePickerView extends DemoView {
 
     private void finnishDateTimePicker() {
         Div message = new Div();
-        /*
-         * TODO: This needs to be extended to be similar to DatePicker
-         * Localizing demo once setI18n() has been implemented
-         */
         // begin-source-example
         // source-example-heading: Localizing
         DateTimePicker dateTimePicker = new DateTimePicker();
         Locale localeFI = new Locale("fi");
         dateTimePicker.setLocale(localeFI);
+
+        dateTimePicker.setDatePickerI18n(new DatePicker.DatePickerI18n().setWeek("viikko")
+                .setCalendar("kalenteri").setClear("tyhjennä")
+                .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
+                .setMonthNames(Arrays.asList("tammikuu", "helmikuu", "maaliskuu",
+                        "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",
+                        "syyskuu", "lokakuu", "marraskuu", "joulukuu"))
+                .setWeekdays(Arrays.asList("sunnuntai", "maanantai", "tiistai",
+                        "keskiviikko", "torstai", "perjantai", "lauantai"))
+                .setWeekdaysShort(Arrays.asList("su", "ma", "ti", "ke", "to",
+                        "pe", "la")));
+
 
         dateTimePicker.addValueChangeListener(event -> {
             LocalDateTime selectedDateTime = event.getValue();

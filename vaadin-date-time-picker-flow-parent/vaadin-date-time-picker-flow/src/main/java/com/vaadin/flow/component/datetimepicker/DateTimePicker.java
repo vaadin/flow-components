@@ -31,6 +31,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -60,6 +61,7 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
+    private DatePickerI18n i18n;
     private Locale locale;
 
     private final static SerializableFunction<String, LocalDateTime> PARSER = s -> {
@@ -341,7 +343,34 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      */
     public LocalDateTime getMax() {
         return PARSER.apply(
-            getElement().getProperty("max")
+                getElement().getProperty("max")
         );
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     *
+     * Note: updating the object content that is gotten from this method will
+     * not update the lang on the component if not set back using
+     * {@link DateTimePicker#setDatePickerI18n(DatePickerI18n)}
+     *
+     * @return the i18n object. It will be <code>null</code>, If the i18n
+     *         properties weren't set.
+     */
+    public DatePickerI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for the date picker inside this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not <code>null</code>
+     */
+    public void setDatePickerI18n(DatePickerI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+        this.i18n = i18n;
+        datePicker.setI18n(i18n);
     }
 }

@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
+import com.vaadin.flow.component.datepicker.DatePicker;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
@@ -78,6 +80,25 @@ public class DateTimePickerTest {
         picker.setMax(LocalDateTime.of(2018, 4, 25, 13, 45, 10));
         assertEquals(LocalDateTime.of(2018, 4, 25, 13, 45, 10),
                 picker.getMax());
+    }
+
+    @Test
+    public void setI18n() {
+        DateTimePicker picker = new DateTimePicker();
+
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n().setWeek("viikko")
+            .setCalendar("kalenteri").setClear("tyhjennä")
+            .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
+            .setMonthNames(Arrays.asList("tammikuu", "helmikuu", "maaliskuu",
+                    "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",
+                    "syyskuu", "lokakuu", "marraskuu", "joulukuu"))
+            .setWeekdays(Arrays.asList("sunnuntai", "maanantai", "tiistai",
+                    "keskiviikko", "torstai", "perjantai", "lauantai"))
+            .setWeekdaysShort(Arrays.asList("su", "ma", "ti", "ke", "to",
+                    "pe", "la"));
+
+        picker.setDatePickerI18n(i18n);
+        assertEquals(i18n, picker.getI18n());
     }
 
 }
