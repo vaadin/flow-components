@@ -30,6 +30,8 @@ import com.vaadin.flow.router.Route;
 @Route("dialog-test")
 public class DialogTestPage extends Div {
 
+    private static final String CLOSE_CAPTION = "close";
+    private static final String SIZE_500PX = "500px";
     private static final String BUTTON_CAPTION = "Open dialog";
 
     private int eventCounter;
@@ -42,6 +44,7 @@ public class DialogTestPage extends Div {
         createDialogAndAddComponentAtIndex();
         createDivInDialog();
         createResizableDialog();
+        changeDialogDimensions();
     }
 
     private void createDialogWithAddOpenedChangeListener() {
@@ -189,7 +192,7 @@ public class DialogTestPage extends Div {
                 message.setText("Initial size with width (" +
                 dialog.getWidth() + ") and height (" + dialog.getHeight() + ")"));            
 
-        NativeButton closeButton = new NativeButton("close",
+        NativeButton closeButton = new NativeButton(CLOSE_CAPTION,
                 e -> dialog.close());
         closeButton.setId("dialog-resizable-close-button");
         dialog.add(closeButton);
@@ -199,5 +202,47 @@ public class DialogTestPage extends Div {
         openDialog.setId("dialog-resizable-open-button");
 
         add(openDialog, message);
+    }
+
+    private void changeDialogDimensions() {
+        Dialog selfAttachedDialog = new Dialog();
+        selfAttachedDialog.setId("dimension-dialog-self-attached");
+        selfAttachedDialog.setModal(false);
+        selfAttachedDialog.add(new NativeButton(CLOSE_CAPTION, 
+                e -> selfAttachedDialog.close()));
+
+        NativeButton openSelfAttachedButton = new NativeButton(
+                "open self attached dialog", e -> selfAttachedDialog.open());
+        openSelfAttachedButton.setId("dimension-open-self-attached-button");
+
+        Dialog attachedDialog = new Dialog();
+        attachedDialog.setId("dimension-dialog-attached");
+        attachedDialog.setModal(false);
+        attachedDialog
+                .add(new NativeButton(CLOSE_CAPTION, e -> attachedDialog.close()));
+
+        NativeButton openAttachedButton = new NativeButton(
+                "open attached dialog", e -> attachedDialog.open());
+        openAttachedButton.setId("dimension-open-attached-button");
+
+        NativeButton changeDimensionSelfAttachedButton = new NativeButton(
+                "change size self attached dialog");
+        changeDimensionSelfAttachedButton
+                .setId("dimension-change-size-self-attached");
+        changeDimensionSelfAttachedButton.addClickListener(e -> {
+            selfAttachedDialog.setWidth(SIZE_500PX);
+            selfAttachedDialog.setHeight(SIZE_500PX);
+        });
+
+        NativeButton changeDimensionAttachedButton = new NativeButton(
+                "change size self attached dialog");
+        changeDimensionAttachedButton.setId("dimension-change-size-attached");
+        changeDimensionAttachedButton.addClickListener(e -> {
+            attachedDialog.setWidth(SIZE_500PX);
+            attachedDialog.setHeight(SIZE_500PX);
+        });
+
+        add(attachedDialog, openSelfAttachedButton, openAttachedButton,
+            changeDimensionSelfAttachedButton, changeDimensionAttachedButton);
     }
 }

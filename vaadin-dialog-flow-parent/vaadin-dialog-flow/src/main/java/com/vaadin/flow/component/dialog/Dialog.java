@@ -83,8 +83,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         });
 
         addListener(DialogResizeEvent.class, event -> {
-            setWidth(event.getWidth());
-            setHeight(event.getHeight());
+            width = event.getWidth();
+            height = event.getHeight();
         });
     }
 
@@ -139,11 +139,13 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     @Override
     public void setWidth(String value) {
         width = value;
+        setDimension(ElementConstants.STYLE_WIDTH, value);
     }
 
     @Override
     public void setHeight(String value) {
         height = value;
+        setDimension(ElementConstants.STYLE_HEIGHT, value);
     }
 
     @Override
@@ -566,6 +568,11 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         return super.addDetachListener(listener);
     }
 
+    private void setDimension(String dimension, String value) {
+        getElement()
+            .executeJs("this.$.overlay.$.overlay.style[$0]=$1", dimension, value);
+    }
+
     private void attachComponentRenderer() {
         String appId = UI.getCurrent().getInternals().getAppId();
         int nodeId = container.getNode().getId();
@@ -574,9 +581,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
                 appId, nodeId);
         template.setProperty("innerHTML", renderer);
 
-        getElement().executeJs("this.$.overlay.$.overlay.style.height=$0",
-                height);
-        getElement().executeJs("this.$.overlay.$.overlay.style.width=$0",
-                width);
+        setDimension(ElementConstants.STYLE_WIDTH, width);
+        setDimension(ElementConstants.STYLE_HEIGHT, height);
+
     }
 }
