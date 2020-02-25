@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -147,6 +148,19 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     }
 
     @Override
+    public void setValue(LocalDateTime value) {
+        super.setValue(value);
+        // Get the value from client after possible adjustment.
+        // This is a workaround for infinite value change loop which can be
+        // triggered when the field is set as read-only.
+        // fixme(haprog) This workaround should probably be removed after this
+        // is fixed: https://github.com/vaadin/vaadin-time-picker-flow/issues/77
+        getElement().executeJs("return this.value;")
+                .then(jsonValue -> super.setValue(
+                        LocalDateTime.parse(jsonValue.asString())));
+    }
+
+    @Override
     protected void setPresentationValue(LocalDateTime newPresentationValue) {
         datePicker.setValue(newPresentationValue != null
                 ? newPresentationValue.toLocalDate()
@@ -177,6 +191,157 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         Objects.requireNonNull(component, "Component to add cannot be null");
         component.getElement().setAttribute("slot", slot);
         getElement().appendChild(component.getElement());
+    }
+
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        super.setReadOnly(readOnly);
+        // fixme(haprog) This override can probably be removed after we use a
+        // version which includes this fix:
+        // https://github.com/vaadin/vaadin-date-time-picker/pull/30
+        datePicker.setReadOnly(readOnly);
+        timePicker.setReadOnly(readOnly);
+    }
+
+    /**
+     * Sets the label for this field.
+     *
+     * @param label
+     *            the String value to set
+     */
+    public void setLabel(String label) {
+        getElement().setProperty("label", label == null ? "" : label);
+    }
+
+    /**
+     * Gets the label of this field.
+     *
+     * @return the {@code label} property of the date time picker
+     */
+    public String getLabel() {
+        return getElement().getProperty("label");
+    }
+
+    /**
+     * Sets a placeholder string for the date field.
+     *
+     * @param placeholder
+     *            the String value to set
+     */
+    public void setDatePlaceholder(String placeholder) {
+        datePicker.setPlaceholder(placeholder);
+    }
+
+    /**
+     * Gets the placeholder string of the date field.
+     *
+     * @return the {@code placeholder} property of the date picker
+     */
+    public String getDatePlaceholder() {
+        return datePicker.getPlaceholder();
+    }
+
+    /**
+     * Set a placeholder string for the time field.
+     *
+     * @param placeholder
+     *            the String value to set
+     */
+    public void setTimePlaceholder(String placeholder) {
+        timePicker.setPlaceholder(placeholder);
+    }
+
+    /**
+     * Gets the placeholder string of the time field.
+     *
+     * @return the {@code placeholder} property of the time picker
+     */
+    public String getTimePlaceholder() {
+        return timePicker.getPlaceholder();
+    }
+
+    /**
+     * Sets the {@code step} property of the time picker using duration. It
+     * specifies the intervals for the displayed items in the time picker
+     * dropdown and also the displayed time format.
+     * <p>
+     * The set step needs to evenly divide a day or an hour and has to be larger
+     * than 0 milliseconds. By default, the format is {@code hh:mm} (same as *
+     * {@code Duration.ofHours(1)}
+     * <p>
+     * If the step is less than 60 seconds, the format will be changed to
+     * {@code hh:mm:ss} and it can be in {@code hh:mm:ss.fff} format, when the
+     * step is less than 1 second.
+     * <p>
+     * <em>NOTE:</em> If the step is less than 900 seconds, the dropdown is
+     * hidden.
+     * <p>
+     * <em>NOTE: changing the step to a larger duration can cause a new
+     * {@link com.vaadin.flow.component.HasValue.ValueChangeEvent} to be fired
+     * if some parts (eg. seconds) is discarded from the value.</em>
+     *
+     * @param step
+     *            the step to set, not {@code null} and should divide a day or
+     *            an hour evenly
+     */
+    public void setStep(Duration step) {
+        timePicker.setStep(step);
+    }
+
+    /**
+     * Gets the step of the time picker.
+     *
+     * @return the {@code step} property from the picker, unit seconds
+     */
+    public Duration getStep() {
+        return timePicker.getStep();
+    }
+
+    /**
+     * Date which should be visible in the date picker when there is no value
+     * selected.
+     *
+     * @param initialPosition
+     *            the LocalDate value to set
+     */
+    public void setInitialPosition(LocalDate initialPosition) {
+        datePicker.setInitialPosition(initialPosition);
+    }
+
+    /**
+     * Get the visible date when there is no value selected.
+     *
+     * @return the {@code initialPosition} property from the datepicker
+     */
+    public LocalDate getInitialPosition() {
+        return datePicker.getInitialPosition();
+    }
+
+    /**
+     * Show or hide the week numbers in the date picker. By default the week
+     * numbers are not shown.
+     * <p>
+     * Set true to display ISO-8601 week numbers in the calendar.
+     * <p>
+     * Note that displaying of week numbers is only supported when
+     * i18n.firstDayOfWeek is 1 (Monday).
+     *
+     * @param weekNumbersVisible
+     *            the boolean value to set
+     * @see #setDatePickerI18n(DatePickerI18n)
+     * @see DatePickerI18n#setFirstDayOfWeek(int)
+     */
+    public void setWeekNumbersVisible(boolean weekNumbersVisible) {
+        datePicker.setWeekNumbersVisible(weekNumbersVisible);
+    }
+
+    /**
+     * Get the state of {@code showWeekNumbers} property of the date picker.
+     *
+     * @return the {@code showWeekNumbers} property from the date picker
+     */
+    public boolean isWeekNumbersVisible() {
+        return datePicker.isWeekNumbersVisible();
     }
 
     /**

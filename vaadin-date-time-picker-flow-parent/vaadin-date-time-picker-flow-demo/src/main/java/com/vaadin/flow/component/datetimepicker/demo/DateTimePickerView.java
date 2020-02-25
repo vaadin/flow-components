@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.datetimepicker.demo;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -22,6 +23,7 @@ import java.time.format.TextStyle;
 import java.util.Arrays;
 import java.util.Locale;
 
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.Anchor;
@@ -43,28 +45,75 @@ public class DateTimePickerView extends DemoView {
     @Override
     public void initView() {
         basicDemo(); // Basic usage
+        disabledAndReadonly();
+        timePickerStep();
         createMinAndMaxDateTimePicker();
         valueChangeEvent();
-        finnishDateTimePicker(); // Localizing
+        datePickerInitialPosition(); // Presentation
+        datePickerWithWeekNumbers();
+        finnishDateTimePicker(); // Localization
         themeVariantsTextAlign(); // Theme variants
         themeVariantsSmallSize();
         styling(); // Styling
     }
 
     private void basicDemo() {
-        Div div = new Div();
+        VerticalLayout layout = new VerticalLayout();
         // begin-source-example
         // source-example-heading: Basic usage
-        DateTimePicker dateTimePicker = new DateTimePicker();
+        DateTimePicker labelDateTimePicker = new DateTimePicker();
+        labelDateTimePicker.setLabel("Label");
+
+        DateTimePicker placeholderDateTimePicker = new DateTimePicker();
+        placeholderDateTimePicker.setDatePlaceholder("Date");
+        placeholderDateTimePicker.setTimePlaceholder("Time");
 
         DateTimePicker valueDateTimePicker = new DateTimePicker();
         LocalDateTime now = LocalDateTime.now();
         valueDateTimePicker.setValue(now);
         // end-source-example
 
-        dateTimePicker.getStyle().set("margin-right", "5px");
-        div.add(dateTimePicker, valueDateTimePicker);
-        addCard("Basic usage", div);
+        layout.add(labelDateTimePicker, placeholderDateTimePicker,
+                valueDateTimePicker);
+        addCard("Basic usage", layout);
+    }
+
+    private void disabledAndReadonly() {
+        Div div = new Div();
+        // begin-source-example
+        // source-example-heading: Disabled and read-only
+        DateTimePicker disabledDateTimePicker = new DateTimePicker();
+        disabledDateTimePicker.setLabel("Disabled");
+        disabledDateTimePicker.setValue(LocalDateTime.now());
+        disabledDateTimePicker.setEnabled(false);
+
+        DateTimePicker readonlyDateTimePicker = new DateTimePicker();
+        readonlyDateTimePicker.setLabel("Read-only");
+        readonlyDateTimePicker.setValue(LocalDateTime.now());
+        readonlyDateTimePicker.setReadOnly(true);
+        // end-source-example
+
+        disabledDateTimePicker.getStyle().set("margin-right", "1rem")
+                .set("width", "22em");
+        readonlyDateTimePicker.getStyle().set("width", "22em");
+        div.add(disabledDateTimePicker, readonlyDateTimePicker);
+        addCard("Disabled and read-only", div);
+    }
+
+    private void timePickerStep() {
+        Div div = new Div();
+        Paragraph note = new Paragraph(
+                "Note: Changing the step changes the time format and the time"
+                        + " drop down is not shown when step is less than 15 minutes.");
+        // begin-source-example
+        // source-example-heading: Time picker step
+        DateTimePicker dateTimePicker = new DateTimePicker();
+        dateTimePicker.setLabel("Label");
+        dateTimePicker.setStep(Duration.ofMinutes(30));
+        // end-source-example
+
+        div.add(note, dateTimePicker);
+        addCard("Time picker step", div);
     }
 
     private void createMinAndMaxDateTimePicker() {
@@ -87,6 +136,7 @@ public class DateTimePickerView extends DemoView {
         // begin-source-example
         // source-example-heading: Value change event
         DateTimePicker dateTimePicker = new DateTimePicker();
+        dateTimePicker.setLabel("Label");
 
         Div value = new Div();
         value.setText("Select a value");
@@ -108,25 +158,69 @@ public class DateTimePickerView extends DemoView {
         addCard("Value change event", verticalLayout);
     }
 
+    private void datePickerInitialPosition() {
+        Div div = new Div();
+        Paragraph note = new Paragraph(
+                "The date picker of this field will open showing the date"
+                        + " January 15, 2000 by default when no date has been selected yet.");
+        // begin-source-example
+        // source-example-heading: Date picker initial position
+        DateTimePicker dateTimePicker = new DateTimePicker();
+        dateTimePicker.setLabel("Label");
+        dateTimePicker.setInitialPosition(LocalDate.of(2000, 1, 15));
+        // end-source-example
+
+        div.add(note, dateTimePicker);
+        addCard("Presentation", "Date picker initial position", div);
+    }
+
+    private void datePickerWithWeekNumbers() {
+        Div div = new Div();
+        Html note = new Html(
+                "<p>Note: Displaying week numbers is only supported when"
+                        + " first day of week has been configured as Monday via"
+                        + " <code>setFirstDayOfWeek(1)</code>.</p>");
+        // begin-source-example
+        // source-example-heading: Date picker with week numbers
+        DateTimePicker dateTimePicker = new DateTimePicker();
+        dateTimePicker.setLabel("Label");
+        dateTimePicker.setWeekNumbersVisible(true);
+        dateTimePicker.setDatePickerI18n(new DatePicker.DatePickerI18n()
+                .setWeek("Week").setCalendar("Calendar").setClear("Clear")
+                .setToday("Today").setCancel("cancel").setFirstDayOfWeek(1)
+                .setMonthNames(Arrays.asList("January", "February", "March",
+                        "April", "May", "June", "July", "August", "September",
+                        "October", "November", "December"))
+                .setWeekdays(Arrays.asList("Sunday", "Monday", "Tuesday",
+                        "Wednesday", "Thursday", "Friday", "Saturday"))
+                .setWeekdaysShort(Arrays.asList("Sun", "Mon", "Tue", "Wed",
+                        "Thu", "Fri", "Sat")));
+        // end-source-example
+
+        div.add(note, dateTimePicker);
+        addCard("Presentation", "Date picker with week numbers", div);
+    }
+
     private void finnishDateTimePicker() {
         Div message = new Div();
         // begin-source-example
         // source-example-heading: Localizing
         DateTimePicker dateTimePicker = new DateTimePicker();
+        dateTimePicker.setLabel("Finnish date time picker");
         Locale localeFI = new Locale("fi");
         dateTimePicker.setLocale(localeFI);
 
-        dateTimePicker.setDatePickerI18n(new DatePicker.DatePickerI18n().setWeek("viikko")
-                .setCalendar("kalenteri").setClear("tyhjennä")
+        dateTimePicker.setDatePickerI18n(new DatePicker.DatePickerI18n()
+                .setWeek("viikko").setCalendar("kalenteri").setClear("tyhjennä")
                 .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
-                .setMonthNames(Arrays.asList("tammikuu", "helmikuu", "maaliskuu",
-                        "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",
-                        "syyskuu", "lokakuu", "marraskuu", "joulukuu"))
+                .setMonthNames(Arrays.asList("tammikuu", "helmikuu",
+                        "maaliskuu", "huhtikuu", "toukokuu", "kesäkuu",
+                        "heinäkuu", "elokuu", "syyskuu", "lokakuu", "marraskuu",
+                        "joulukuu"))
                 .setWeekdays(Arrays.asList("sunnuntai", "maanantai", "tiistai",
                         "keskiviikko", "torstai", "perjantai", "lauantai"))
                 .setWeekdaysShort(Arrays.asList("su", "ma", "ti", "ke", "to",
                         "pe", "la")));
-
 
         dateTimePicker.addValueChangeListener(event -> {
             LocalDateTime selectedDateTime = event.getValue();
