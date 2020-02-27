@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.datetimepicker.demo;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,13 +25,16 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.datetimepicker.demo.entity.Appointment;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 
@@ -49,6 +53,8 @@ public class DateTimePickerView extends DemoView {
         timePickerStep();
         createMinAndMaxDateTimePicker();
         valueChangeEvent();
+        configurationForRequired(); // Validation
+        customValidator();
         datePickerInitialPosition(); // Presentation
         datePickerWithWeekNumbers();
         finnishDateTimePicker(); // Localization
@@ -156,6 +162,42 @@ public class DateTimePickerView extends DemoView {
                 value);
         verticalLayout.setPadding(false);
         addCard("Value change event", verticalLayout);
+    }
+
+    private void configurationForRequired() {
+        // begin-source-example
+        // source-example-heading: Required
+        DateTimePicker dateTimePicker = new DateTimePicker();
+        Binder<Appointment> binder = new Binder<>();
+        dateTimePicker.setLabel("Appointment time");
+        binder.forField(dateTimePicker)
+                .asRequired("Please choose a date and time")
+                .bind(Appointment::getDateTime, Appointment::setDateTime);
+
+        Button button = new Button("Submit", event -> binder.validate());
+        // end-source-example
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setPadding(false);
+        verticalLayout.add(dateTimePicker, button);
+        addCard("Validation", "Required", verticalLayout);
+    }
+
+    private void customValidator() {
+        // begin-source-example
+        // source-example-heading: Custom validator
+        DateTimePicker dateTimePicker = new DateTimePicker();
+        Binder<Appointment> binder = new Binder<>();
+        dateTimePicker.setLabel("Select an appointment date and time");
+        binder.forField(dateTimePicker).withValidator(
+                value -> !DayOfWeek.SATURDAY.equals(value.getDayOfWeek())
+                        && !DayOfWeek.SUNDAY.equals(value.getDayOfWeek())
+                        && value.getHour() >= 8 && value.getHour() <= 16,
+                "The selected date must be between Monday to Friday 8AM to 4PM")
+                .bind(Appointment::getDateTime, Appointment::setDateTime);
+        // end-source-example
+
+        addCard("Validation", "Custom validator", dateTimePicker);
     }
 
     private void datePickerInitialPosition() {

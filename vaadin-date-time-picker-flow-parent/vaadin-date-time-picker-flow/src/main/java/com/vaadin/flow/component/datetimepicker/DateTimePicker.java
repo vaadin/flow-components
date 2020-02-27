@@ -29,6 +29,7 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -41,11 +42,19 @@ import com.vaadin.flow.function.SerializableFunction;
 @Tag("vaadin-date-time-picker-date-picker")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
+    @Override
+    protected void validate() {
+        // Should not change invalid state
+    }
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
+    @Override
+    protected void validate() {
+        // Should not change invalid state
+    }
 }
 
 /**
@@ -55,10 +64,11 @@ class DateTimePickerTimePicker
  */
 @Tag("vaadin-date-time-picker")
 @HtmlImport("frontend://bower_components/vaadin-date-time-picker/src/vaadin-date-time-picker.html")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.0.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.0.0-alpha6")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
-        implements HasStyle, HasSize, HasTheme, Focusable<DateTimePicker> {
+        implements HasStyle, HasSize, HasTheme, HasValidation,
+        Focusable<DateTimePicker> {
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
@@ -72,6 +82,10 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     private final static SerializableFunction<LocalDateTime, String> FORMATTER = d -> {
         return d == null ? "" : d.truncatedTo(ChronoUnit.MILLIS).toString();
     };
+
+    private LocalDateTime max;
+    private LocalDateTime min;
+    private boolean required;
 
     /**
      * Default constructor.
@@ -94,12 +108,18 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
             updateValue();
         }
 
-        getElement().addEventListener("value-changed", e -> this.updateValue());
-
         addToSlot(datePicker, "date-picker");
         addToSlot(timePicker, "time-picker");
 
         setLocale(UI.getCurrent().getLocale());
+
+        // workaround for https://github.com/vaadin/flow/issues/3496
+        setInvalid(false);
+
+        getElement().addEventListener("value-changed", e -> this.updateValue());
+        addValueChangeListener(e -> validate());
+
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -463,8 +483,65 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     }
 
     /**
-     * Sets the minimum date and time in the date time picker. Dates and times before that will be
-     * disabled in the popups.
+     * Sets the error message to display when the input is invalid.
+     */
+    public void setErrorMessage(String errorMessage) {
+        getElement().setProperty("errorMessage",
+                errorMessage == null ? "" : errorMessage);
+    }
+
+    /**
+     * Gets the error message to display when the input is invalid.
+     *
+     * @return the current error message
+     */
+    public String getErrorMessage() {
+        return getElement().getProperty("error-message");
+    }
+
+    /**
+     * Sets the validity indication of the date time picker output.
+     */
+    public void setInvalid(boolean invalid) {
+        getElement().setProperty("invalid", invalid);
+    }
+
+    /**
+     * Gets the validity indication of the date time picker output.
+     *
+     * @return the current validity indication.
+     */
+    public boolean isInvalid() {
+        return getElement().getProperty("invalid", false);
+    }
+
+    /**
+     * Gets the validity of the date time picker value.
+     *
+     * @return the current validity of the value.
+     */
+    private boolean isInvalid(LocalDateTime value) {
+        final boolean isRequiredButEmpty = required
+                && Objects.equals(getEmptyValue(), value);
+        final boolean isGreaterThanMax = value != null && max != null
+                && value.isAfter(max);
+        final boolean isSmallerThanMin = value != null && min != null
+                && value.isBefore(min);
+        return isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin;
+    }
+
+    /**
+     * Performs server-side validation of the current value. This is needed
+     * because it is possible to circumvent the client-side validation
+     * constraints using browser development tools.
+     */
+    protected void validate() {
+        setInvalid(isInvalid(getValue()));
+    }
+
+    /**
+     * Sets the minimum date and time in the date time picker. Dates and times
+     * before that will be disabled in the popups.
      *
      * @param min
      *            the minimum date and time that is allowed to be set, or
@@ -472,24 +549,23 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      */
     public void setMin(LocalDateTime min) {
         getElement().setProperty("min", FORMATTER.apply(min));
+        this.min = min;
     }
 
     /**
-     * Gets the minimum date and time in the date time picker. Dates and times before that will be
-     * disabled in the popups.
+     * Gets the minimum date and time in the date time picker. Dates and times
+     * before that will be disabled in the popups.
      *
      * @return the minimum date and time that is allowed to be set, or
      *         <code>null</code> if there's no minimum
      */
     public LocalDateTime getMin() {
-        return PARSER.apply(
-                getElement().getProperty("min")
-        );
+        return PARSER.apply(getElement().getProperty("min"));
     }
 
     /**
-     * Sets the maximum date and time in the date time picker. Dates and times above that will be
-     * disabled in the popups.
+     * Sets the maximum date and time in the date time picker. Dates and times
+     * above that will be disabled in the popups.
      *
      * @param max
      *            the maximum date and time that is allowed to be set, or
@@ -497,19 +573,18 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      */
     public void setMax(LocalDateTime max) {
         getElement().setProperty("max", FORMATTER.apply(max));
+        this.max = max;
     }
 
     /**
-     * Gets the maximum date and time in the date time picker. Dates and times above that will be
-     * disabled in the popups.
+     * Gets the maximum date and time in the date time picker. Dates and times
+     * above that will be disabled in the popups.
      *
      * @return the maximum date and time that is allowed to be set, or
      *         <code>null</code> if there's no minimum
      */
     public LocalDateTime getMax() {
-        return PARSER.apply(
-                getElement().getProperty("max")
-        );
+        return PARSER.apply(getElement().getProperty("max"));
     }
 
     /**
@@ -522,12 +597,13 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      * @return the i18n object. It will be <code>null</code>, If the i18n
      *         properties weren't set.
      */
-    public DatePickerI18n getI18n() {
+    public DatePickerI18n getDatePickerI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for the date picker inside this component.
+     * Sets the internationalization properties for the date picker inside this
+     * component.
      *
      * @param i18n
      *            the internationalized properties, not <code>null</code>
@@ -537,5 +613,17 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
                 "The i18n properties object should not be null");
         this.i18n = i18n;
         datePicker.setI18n(i18n);
+    }
+
+    /**
+     * Sets whether the date time picker is marked as input required.
+     *
+     * @param requiredIndicatorVisible
+     *            the value of the requiredIndicatorVisible to be set
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
+        this.required = requiredIndicatorVisible;
     }
 }

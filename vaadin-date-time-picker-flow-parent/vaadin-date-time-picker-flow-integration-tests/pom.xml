@@ -56,6 +56,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Other components used in tests and demos -->

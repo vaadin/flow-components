@@ -10,6 +10,11 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <timepicker.version>2.0-SNAPSHOT</timepicker.version>
+        <datepicker.version>2.0-SNAPSHOT</datepicker.version>
+    </properties>
+
     <artifactId>vaadin-date-time-picker-flow-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
