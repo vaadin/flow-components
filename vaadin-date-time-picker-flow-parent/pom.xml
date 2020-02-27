@@ -21,8 +21,10 @@
     <name>Vaadin DateTimePicker Flow Parent</name>
 
    <repositories>
-        <!-- repositories are configured in parent but still need this
-             when parent is a snapshot -->
+        <repository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+        </repository>
         <repository>
             <id>vaadin-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
