@@ -16,22 +16,26 @@
 package com.vaadin.flow.component.dialog.tests;
 
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.dialog.demo.DialogView;
-import com.vaadin.flow.demo.ComponentDemoTest;
 
-/**
- * Integration tests for the {@link DialogView}.
- */
-public class DialogIT extends ComponentDemoTest {
+@TestPath("vaadin-dialog-view")
+public class DialogIT extends AbstractComponentIT {
 
     private static final String DIALOG_OVERLAY_TAG = "vaadin-dialog-overlay";
+
+    @Before
+    public void init() {
+        open();
+    }
 
     @Test
     public void openAndCloseBasicDialog_labelRendered() {
@@ -137,6 +141,6 @@ public class DialogIT extends ComponentDemoTest {
 
     @Override
     protected String getTestPath() {
-        return ("/vaadin-dialog");
+        return ("/vaadin-dialog-view");
     }
 }
