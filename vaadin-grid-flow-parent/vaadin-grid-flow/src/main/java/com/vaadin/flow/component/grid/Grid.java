@@ -1260,7 +1260,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *
      * @param beanType
      *            the bean type to use, not <code>null</code>
-     * @param updateQueueBuidler
+     * @param updateQueueBuilder
      *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
@@ -1272,9 +1272,9 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             Class<T> beanType,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuidler,
+            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
             B dataCommunicatorBuilder) {
-        this(50, updateQueueBuidler, dataCommunicatorBuilder);
+        this(50, updateQueueBuilder, dataCommunicatorBuilder);
         Objects.requireNonNull(beanType, "Bean type can't be null");
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
@@ -1296,7 +1296,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      *
      * @param pageSize
      *            the page size. Must be greater than zero.
-     * @param updateQueueBuidler
+     * @param updateQueueBuilder
      *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
@@ -1310,12 +1310,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     @SuppressWarnings("unchecked")
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             int pageSize,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuidler,
+            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
             B dataCommunicatorBuilder) {
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
         arrayUpdater = createDefaultArrayUpdater(
-                Optional.ofNullable(updateQueueBuidler)
+                Optional.ofNullable(updateQueueBuilder)
                         .orElseGet(() -> UpdateQueue::new));
         arrayUpdater.setUpdateQueueData(
                 new UpdateQueueData(getElement(), getUniqueKeyProperty()));
