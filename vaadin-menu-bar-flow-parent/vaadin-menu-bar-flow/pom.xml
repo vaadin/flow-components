@@ -19,7 +19,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-menu-bar</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.5</version>
         </dependency>
 
         <dependency>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-context-menu</artifactId>
-            <version>4.3.10</version>
+            <version>4.3.15</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-overlay</artifactId>
-            <version>3.2.11</version>
+            <version>3.2.18</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.polymerelements</groupId>
