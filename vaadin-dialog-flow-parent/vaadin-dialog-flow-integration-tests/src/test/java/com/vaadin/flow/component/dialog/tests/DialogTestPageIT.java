@@ -249,7 +249,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
     @Test
     public void resizableDialogShouldPreserveWidthAndHeight() {
-        findElement(By.id("dialog-resizable-open-button")).click();
+        findElement(By.id("dialog-resizable-draggable-open-button")).click();
 
         WebElement overlayContent = getOverlayContent();
         WebElement overlay = getInShadowRoot(overlayContent, By.id("overlay"));
@@ -271,9 +271,9 @@ public class DialogTestPageIT extends AbstractComponentIT {
         Assert.assertNotEquals(overLayWidthBeforeResize,
                 overLayWidthAfterResize);
 
-        findElement(By.id("dialog-resizable-close-button")).click();
+        findElement(By.id("dialog-resizable-draggable-close-button")).click();
         waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
-        findElement(By.id("dialog-resizable-open-button")).click();
+        findElement(By.id("dialog-resizable-draggable-open-button")).click();
 
         overlay = getInShadowRoot(getOverlayContent(), By.id("overlay"));
 
@@ -288,8 +288,8 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
     @Test
     public void resizableDialogListenerIsCalled() {
-        findElement(By.id("dialog-resizable-open-button")).click();
-        WebElement message = findElement(By.id("dialog-resizable-message"));
+        findElement(By.id("dialog-resizable-draggable-open-button")).click();
+        WebElement message = findElement(By.id("dialog-resizable-draggable-message"));
 
         Assert.assertEquals(
                 "Initial size with width (200px) and height (200px)",
@@ -368,6 +368,27 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
         Assert.assertEquals(overlayWidth, "500px");
         Assert.assertEquals(overlayHeight, "500px");
+    }
+
+    @Test
+    public void draggableDialog_shouldAllowDraggingFromDivContainer() {
+        findElement(By.id("dialog-resizable-draggable-open-button")).click();
+
+        WebElement overlayContent = getOverlayContent();
+        WebElement container = overlayContent.findElement(By.tagName("div"));
+        WebElement overlay = getInShadowRoot(overlayContent, By.id("overlay"));
+
+        // resizing only to force component to set top/left values
+        resizeDialog(overlayContent);
+        String overlayLeft = overlay.getCssValue("left");
+        String overlayTop = overlay.getCssValue("top");
+
+        Actions dragAction = new Actions(getDriver());
+        dragAction.dragAndDropBy(container, 50, 50);
+        dragAction.perform();
+
+        Assert.assertNotEquals(overlayLeft, overlay.getCssValue("left"));
+        Assert.assertNotEquals(overlayTop, overlay.getCssValue("top"));
     }
 
     /**

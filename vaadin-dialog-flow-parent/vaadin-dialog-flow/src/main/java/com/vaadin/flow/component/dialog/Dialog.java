@@ -29,6 +29,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
@@ -59,6 +60,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         getElement().appendChild(template);
 
         container = new Element("div");
+        container.getClassList().add("draggable");
         container.getStyle().set(ElementConstants.STYLE_WIDTH, "100%");
         container.getStyle().set(ElementConstants.STYLE_HEIGHT, "100%");
 
@@ -395,6 +397,10 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Sets whether dialog is enabled to be dragged by the user or not.
+     * <p>
+     * To allow an element inside the dialog to be dragged by the user
+     * (for instance, a header inside the dialog), a class {@code "draggable"}
+     * can be added to it (see {@link HasStyle#addClassName(String)}).
      * <p>
      * Note: If draggable is enabled and dialog is opened without first
      * being explicitly attached to a parent, then it won't restore its
