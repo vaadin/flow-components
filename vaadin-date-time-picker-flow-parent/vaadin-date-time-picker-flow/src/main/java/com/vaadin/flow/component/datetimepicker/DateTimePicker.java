@@ -95,6 +95,34 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     }
 
     /**
+     * Convenience constructor to create a date time picker with a label.
+     *
+     * @param label
+     *            the label describing the date time picker
+     * @see #setLabel(String)
+     */
+    public DateTimePicker(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Convenience constructor to create a date time picker with a pre-selected
+     * date and time in current UI locale format and a label.
+     *
+     * @param label
+     *            the label describing the date time picker
+     * @param initialDateTime
+     *            the pre-selected date time in the picker
+     * @see #setValue(LocalDateTime)
+     * @see #setLabel(String)
+     */
+    public DateTimePicker(String label, LocalDateTime initialDateTime) {
+        this(initialDateTime);
+        setLabel(label);
+    }
+
+    /**
      * Convenience constructor to create a date time picker with a pre-selected
      * date time in current UI locale format.
      *
@@ -137,6 +165,24 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     }
 
     /**
+     * Convenience constructor to create a date time picker with a
+     * {@link ValueChangeListener} and a label.
+     *
+     *
+     * @param label
+     *            the label describing the date time picker
+     * @param listener
+     *            the listener to receive value change events
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(HasValue.ValueChangeListener)
+     */
+    public DateTimePicker(String label,
+            ValueChangeListener<ComponentValueChangeEvent<DateTimePicker, LocalDateTime>> listener) {
+        this(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
      * Convenience constructor to create a date time picker with a pre-selected
      * date time in current UI locale format and a {@link ValueChangeListener}.
      *
@@ -150,6 +196,28 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     public DateTimePicker(LocalDateTime initialDateTime,
             ValueChangeListener<ComponentValueChangeEvent<DateTimePicker, LocalDateTime>> listener) {
         this(initialDateTime);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Convenience constructor to create a date time picker with a pre-selected
+     * date and time in current UI locale format, a {@link ValueChangeListener}
+     * and a label.
+     *
+     * @param label
+     *            the label describing the date time picker
+     * @param initialDateTime
+     *            the pre-selected date time in the picker
+     * @param listener
+     *            the listener to receive value change events
+     * @see #setLabel(String)
+     * @see #setValue(LocalDateTime)
+     * @see #addValueChangeListener(HasValue.ValueChangeListener)
+     */
+    public DateTimePicker(String label, LocalDateTime initialDateTime,
+            ValueChangeListener<ComponentValueChangeEvent<DateTimePicker, LocalDateTime>> listener) {
+        this(initialDateTime);
+        setLabel(label);
         addValueChangeListener(listener);
     }
 
