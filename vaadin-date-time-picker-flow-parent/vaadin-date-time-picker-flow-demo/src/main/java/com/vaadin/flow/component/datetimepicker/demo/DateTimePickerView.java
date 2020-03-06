@@ -55,8 +55,7 @@ public class DateTimePickerView extends DemoView {
         valueChangeEvent();
         configurationForRequired(); // Validation
         customValidator();
-        datePickerInitialPosition(); // Presentation
-        datePickerWithWeekNumbers();
+        datePickerWithWeekNumbers(); // Presentation
         finnishDateTimePicker(); // Localization
         themeVariantsTextAlign(); // Theme variants
         themeVariantsSmallSize();
@@ -198,22 +197,6 @@ public class DateTimePickerView extends DemoView {
         // end-source-example
 
         addCard("Validation", "Custom validator", dateTimePicker);
-    }
-
-    private void datePickerInitialPosition() {
-        Div div = new Div();
-        Paragraph note = new Paragraph(
-                "The date picker of this field will open showing the date"
-                        + " January 15, 2000 by default when no date has been selected yet.");
-        // begin-source-example
-        // source-example-heading: Date picker initial position
-        DateTimePicker dateTimePicker = new DateTimePicker();
-        dateTimePicker.setLabel("Label");
-        dateTimePicker.setInitialPosition(LocalDate.of(2000, 1, 15));
-        // end-source-example
-
-        div.add(note, dateTimePicker);
-        addCard("Presentation", "Date picker initial position", div);
     }
 
     private void datePickerWithWeekNumbers() {

@@ -386,26 +386,6 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     }
 
     /**
-     * Date which should be visible in the date picker when there is no value
-     * selected.
-     *
-     * @param initialPosition
-     *            the LocalDate value to set
-     */
-    public void setInitialPosition(LocalDate initialPosition) {
-        datePicker.setInitialPosition(initialPosition);
-    }
-
-    /**
-     * Get the visible date when there is no value selected.
-     *
-     * @return the {@code initialPosition} property from the datepicker
-     */
-    public LocalDate getInitialPosition() {
-        return datePicker.getInitialPosition();
-    }
-
-    /**
      * Show or hide the week numbers in the date picker. By default the week
      * numbers are not shown.
      * <p>
