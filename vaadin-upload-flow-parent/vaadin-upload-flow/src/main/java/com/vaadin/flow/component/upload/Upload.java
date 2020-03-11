@@ -264,11 +264,11 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
 
     /**
      * Set the component as the actionable button inside the upload component,
-     * that starts the upload of the selected files.
+     * that opens the dialog for choosing the files to be upload.
      *
      * @param uploadButton
-     *            the component to be clicked by the user to start the upload,
-     *            or <code>null</code> to clear it
+     *            the component to be clicked by the user to open the dialog,
+     *            or <code>null</code> to reset to the default button
      */
     public void setUploadButton(Component uploadButton) {
         removeElementsAtSlot("add-button");
