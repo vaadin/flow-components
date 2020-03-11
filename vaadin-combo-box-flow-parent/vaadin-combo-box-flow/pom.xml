@@ -19,7 +19,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-combo-box</artifactId>
-            <version>5.0.10</version>
+            <version>5.0.11</version>
         </dependency>
 
         <dependency>
