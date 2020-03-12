@@ -294,7 +294,7 @@ import elemental.json.JsonObject;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.5-SNAPSHOT",
         "WebComponent: Vaadin.ComboBoxElement#5.0.0", "Flow#1.5-SNAPSHOT" })
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "5.0.10")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "5.0.11")
 @JsModule("@vaadin/vaadin-combo-box/src/vaadin-combo-box.js")
 public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
