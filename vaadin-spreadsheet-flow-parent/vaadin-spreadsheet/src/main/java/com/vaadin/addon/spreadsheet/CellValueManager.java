@@ -1191,30 +1191,34 @@ public class CellValueManager implements Serializable {
                 int columnIndex = cell.getColumnIndex();
                 final String key = SpreadsheetUtil.toKey(columnIndex + 1,
                         rowIndex + 1);
-                CellData cd = createCellDataForCell(cell);
+
+                // Mark for update if there are formatting rules.
+                if (spreadsheet.getConditionalFormatter()
+                    .getCellFormattingIndex(cell) != null) {
+                    markedCells.add(key);
+                }
+
                 // update formula cells
                 if (cell.getCellType() == CellType.FORMULA) {
-                    if (cd != null) {
-                        if (sentFormulaCells.contains(key)
-                                || markedCells.contains(key)) {
-                            sentFormulaCells.add(key);
-                            updatedCellData.add(cd);
+                    if (sentFormulaCells.contains(key)
+                            || markedCells.contains(key)) {
+                        CellData cd = createCellDataForCell(cell);
+                        if (cd == null) {
+                            // in case the formula cell value has changed to null or
+                            // empty; this case is probably quite rare, formula cell
+                            // pointing to a cell that was removed or had its value
+                            // cleared ???
+                            cd = new CellData();
+                            cd.col = columnIndex + 1;
+                            cd.row = rowIndex + 1;
+                            cd.cellStyle = "" + cell.getCellStyle().getIndex();
                         }
-                    } else if (sentFormulaCells.contains(key)) {
-                        // in case the formula cell value has changed to null or
-                        // empty; this case is probably quite rare, formula cell
-                        // pointing to a cell that was removed or had its value
-                        // cleared ???
                         sentFormulaCells.add(key);
-                        cd = new CellData();
-                        cd.col = columnIndex + 1;
-                        cd.row = rowIndex + 1;
-                        cd.cellStyle = "" + cell.getCellStyle().getIndex();
                         updatedCellData.add(cd);
                     }
                 } else if (markedCells.contains(key)) {
                     sentCells.add(key);
-                    updatedCellData.add(cd);
+                    updatedCellData.add(createCellDataForCell(cell));
                 }
             }
         }
