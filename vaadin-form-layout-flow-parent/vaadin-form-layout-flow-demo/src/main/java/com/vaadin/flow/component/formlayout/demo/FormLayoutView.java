@@ -175,6 +175,11 @@ public class FormLayoutView extends DemoView {
 
         nameLayout.add(titleField, firstNameField, lastNameField);
 
+        // Default number of columns in a FormLayout is 2. By setting the
+        // responsive steps we specify different numbers for columns with
+        // breakpoints at “40em” “32em” and “25em”. Now by changing the size of
+        // the browser horizontally, you can notice that the number of the
+        // columns in the FormLayout changes.
         nameLayout.setResponsiveSteps(
                 new ResponsiveStep("25em", 1),
                 new ResponsiveStep("32em", 2),
