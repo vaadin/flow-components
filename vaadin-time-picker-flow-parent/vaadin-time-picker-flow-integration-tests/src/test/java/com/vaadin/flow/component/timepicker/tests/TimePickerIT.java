@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +35,11 @@ public class TimePickerIT extends AbstractComponentIT {
     public void init() {
         open();
         $(TimePickerElement.class).waitForFirst();
+    }
+
+    @After
+    public void after() {
+        checkLogsForErrors();
     }
 
     @Test

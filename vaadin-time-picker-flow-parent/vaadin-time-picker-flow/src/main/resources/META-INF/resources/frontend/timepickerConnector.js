@@ -3,6 +3,16 @@
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Time Picker', 'vaadin-time-picker-flow');
     };
 
+    // Execute callback when predicate returns true.
+    // Try again later if predicate returns false.
+    function when(predicate, callback) {
+        if (predicate()) {
+            callback();
+        } else {
+            setTimeout(() => when(predicate, callback));
+        }
+    }
+
     window.Vaadin.Flow.timepickerConnector = {
         initLazy: timepicker => tryCatchWrapper(function (timepicker) {
             // Check whether the connector was already initialized for the timepicker
@@ -227,13 +237,15 @@
                 };
 
                 if (previousValueObject) {
-                    const newValue = timepicker.i18n.formatTime(previousValueObject);
-                    // FIXME works but uses private API, needs fixes in web component
-                    if (timepicker.__inputElement.value !== newValue) {
-                        timepicker.__inputElement.value = newValue;
-                        timepicker.__dropdownElement.value = newValue;
-                        timepicker.__onInputChange();
-                    }
+                    when(() => timepicker.shadowRoot, () => {
+                        const newValue = timepicker.i18n.formatTime(previousValueObject);
+                        // FIXME works but uses private API, needs fixes in web component
+                        if (timepicker.__inputElement.value !== newValue) {
+                            timepicker.__inputElement.value = newValue;
+                            timepicker.__dropdownElement.value = newValue;
+                            timepicker.__onInputChange();
+                        }
+                    });
                 }
             });
         })(timepicker)
