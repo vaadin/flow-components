@@ -423,7 +423,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      *      {@code true} if dragging is enabled,
      *      {@code false} otherwise (default).
      */
-    public boolean isDaggable() {
+    public boolean isDraggable() {
         return getElement().getProperty("draggable", false);
     }
 
