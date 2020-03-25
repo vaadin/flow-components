@@ -137,9 +137,11 @@ public class FlexLayout extends Component
 
 
     /**
+     * @deprecated Use {@link FlexWrap} instead
      * Possible values for the {@code flex-wrap} CSS property, which determines how the elements inside the layout
      * should behave when they don't fit inside the layout.
      */
+    @Deprecated
     public enum WrapMode {
 
         /**
@@ -179,6 +181,48 @@ public class FlexLayout extends Component
     }
 
     /**
+     * Possible values for the {@code flex-wrap} CSS property, which determines how the elements inside the layout
+     * should behave when they don't fit inside the layout.
+     */
+    public enum FlexWrap {
+
+        /**
+         * If the items use up too much space they will overflow.
+         */
+        NOWRAP("nowrap"),
+
+        /**
+         * If items are not able to fit into a single row they are allowed to wrap into a follow up line.
+         *
+         * */
+        WRAP("wrap"),
+
+        /**
+         * If items are not able to fit into a single row they are allowed to wrap into a follow up line.
+         *  Additionally the order of the items will be reversed.
+         */
+        WRAP_REVERSE("wrap-reverse");
+
+        private final String flexValue;
+
+        FlexWrap(String flexValue) {
+            this.flexValue = flexValue;
+        }
+
+        String getFlexValue() {
+            return flexValue;
+        }
+
+        static FlexWrap toFlexWrap(String flexValue, FlexWrap defaultValue) {
+            return Arrays.stream(values())
+                    .filter(flexWrap -> flexWrap.getFlexValue()
+                            .equals(flexValue))
+                    .findFirst().orElse(defaultValue);
+        }
+
+    }
+
+    /**
      * Default constructor. Creates an empty layout.
      */
     public FlexLayout() {
@@ -199,6 +243,7 @@ public class FlexLayout extends Component
     }
 
     /**
+     * @deprecated Use {@link #setFlexWrap(FlexWrap)} instead
      * Gets the {@link WrapMode} used by this layout.
      * <p>
      * The default flex wrap mode is {@link WrapMode#NOWRAP}.
@@ -206,6 +251,7 @@ public class FlexLayout extends Component
      * @param wrapMode the flex wrap mode of the layout, never
      *                     <code>null</code>
      */
+    @Deprecated
     public void setWrapMode(WrapMode wrapMode) {
         if (wrapMode == null) {
             throw new IllegalArgumentException(
@@ -216,6 +262,24 @@ public class FlexLayout extends Component
     }
 
     /**
+     * Gets the {@link FlexWrap} used by this layout.
+     * <p>
+     * The default flex wrap is {@link FlexWrap#NOWRAP}.
+     *
+     * @param flexWrap the flex wrap of the layout, never
+     *                     <code>null</code>
+     */
+    public void setFlexWrap(FlexWrap flexWrap) {
+        if (flexWrap == null) {
+            throw new IllegalArgumentException(
+                    "The 'flexWrap' argument can not be null");
+        }
+        getElement().getStyle().set(FlexConstants.FLEX_WRAP_CSS_PROPERTY,
+                flexWrap.getFlexValue());
+    }
+
+    /**
+     * @deprecated Use {@link #getFlexWrap()} instead
      * Gets the current flex wrap mode of the layout.
      * <p>
      * The default flex wrap mode is {@link WrapMode#NOWRAP}.
@@ -223,11 +287,27 @@ public class FlexLayout extends Component
      * @return the flex wrap mode used by the layout, never
      * <code>null</code>
      */
+    @Deprecated
     public WrapMode getWrapMode() {
         return WrapMode.toWrapMode(
                 getElement().getStyle()
                         .get(FlexConstants.FLEX_WRAP_CSS_PROPERTY),
                 WrapMode.NOWRAP);
+    }
+
+    /**
+     * Gets the current flex wrap of the layout.
+     * <p>
+     * The default flex wrap is {@link FlexWrap#NOWRAP}.
+     *
+     * @return the flex wrap used by the layout, never
+     * <code>null</code>
+     */
+    public FlexWrap getFlexWrap() {
+        return FlexWrap.toFlexWrap(
+                getElement().getStyle()
+                        .get(FlexConstants.FLEX_WRAP_CSS_PROPERTY),
+                FlexWrap.NOWRAP);
     }
 
     /**
