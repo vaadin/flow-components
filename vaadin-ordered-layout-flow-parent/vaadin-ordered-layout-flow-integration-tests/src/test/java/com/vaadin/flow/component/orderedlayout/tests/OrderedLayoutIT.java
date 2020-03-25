@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.orderedlayout.tests;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -22,6 +23,36 @@ public class OrderedLayoutIT extends AbstractComponentIT {
         open();
         WebElement vLayout = findElement(By.id("vl-spacing"));
         testSpacing(vLayout);
+    }
+
+    @Test
+    public void testGetterSetterFlexWrapFlexLayout() {
+        open();
+        WebElement fLayout = findElement(By.id("flex-layout"));
+        WebElement btnNoWrap = fLayout
+                .findElement(By.id("no-wrap"));
+        WebElement btnWrap = fLayout
+                .findElement(By.id("wrap"));
+        WebElement btnWrapReverse = fLayout
+                .findElement(By.id("wrap-reverse"));
+        WebElement getFlexWrapBtn = fLayout
+                .findElement(By.id("wrap-btn"));
+        WebElement flexWrapDisplay = findElement(By.id("flex-wrap-display"));
+
+        btnNoWrap.click();
+        Assert.assertEquals("nowrap",
+                fLayout.getCssValue("flex-wrap"));
+
+        btnWrap.click();
+        Assert.assertEquals("wrap",
+                fLayout.getCssValue("flex-wrap"));
+
+        btnWrapReverse.click();
+        Assert.assertEquals("wrap-reverse",
+                fLayout.getCssValue("flex-wrap"));
+
+        getFlexWrapBtn.click();
+        Assert.assertEquals("WRAP_REVERSE", flexWrapDisplay.getText());
     }
 
     private void testSpacing(WebElement layout) {
