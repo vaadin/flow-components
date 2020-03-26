@@ -105,7 +105,9 @@ public class Scroller extends Component implements HasSize, HasStyle {
             this.content.getElement().removeFromParent();
         }
         this.content = content;
-        this.getElement().appendChild(content.getElement());
+        if (content != null) {
+            this.getElement().appendChild(content.getElement());
+        }
     }
 
     /**
