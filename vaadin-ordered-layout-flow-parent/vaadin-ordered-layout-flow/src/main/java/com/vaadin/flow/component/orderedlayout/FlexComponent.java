@@ -294,7 +294,7 @@ public interface FlexComponent<C extends Component>
     }
 
     /**
-     * Gets the {@link JustifyContentMode} used by this layout.
+     * Sets the {@link JustifyContentMode} used by this layout.
      * <p>
      * The default justify content mode is {@link JustifyContentMode#START}.
      *
