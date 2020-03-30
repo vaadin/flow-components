@@ -5,11 +5,11 @@
 
     // Execute callback when predicate returns true.
     // Try again later if predicate returns false.
-    function when(predicate, callback) {
+    function when(predicate, callback, timeout = 0) {
         if (predicate()) {
             callback();
         } else {
-            setTimeout(() => when(predicate, callback));
+            setTimeout(() => when(predicate, callback, 200), timeout);
         }
     }
 
