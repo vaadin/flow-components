@@ -47,6 +47,8 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
 
     @Test
     public void compThenGridRendered_compButton() {
+        assertCellContains(compThenGrid, 0, 0, "vaadin-text-field");
+        assertCellContains(compThenGrid, 1, 0, "vaadin-text-field");
         assertCellContains(compThenGrid, 0, 1, "vaadin-text-field");
         assertCellContains(compThenGrid, 1, 1, "vaadin-text-field");
         assertCellContains(compThenGrid, 1, 2, "vaadin-button");
@@ -55,6 +57,8 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
 
     @Test
     public void gridThenCompRendered_compButton() {
+        assertCellContains(gridThenComp, 0, 0, "vaadin-text-field");
+        assertCellContains(gridThenComp, 1, 0, "vaadin-text-field");
         assertCellContains(gridThenComp, 0, 1, "vaadin-text-field");
         assertCellContains(gridThenComp, 1, 1, "vaadin-text-field");
         assertCellContains(gridThenComp, 1, 2, "vaadin-button");
@@ -68,6 +72,9 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         compThenGrid.collapseWithClick(0);
         compThenGrid.select(1);
 
+        assertCellContains(compThenGrid, 2, 0, "vaadin-text-field");
+        assertCellContains(compThenGrid, 3, 0, "vaadin-text-field");
+        assertCellContains(compThenGrid, 4, 0, "vaadin-text-field");
         assertCellContains(compThenGrid, 2, 1, "vaadin-text-field");
         assertCellContains(compThenGrid, 3, 1, "vaadin-text-field");
         assertCellContains(compThenGrid, 4, 1, "vaadin-text-field");
