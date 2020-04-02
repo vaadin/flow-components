@@ -12,32 +12,29 @@ public class OrderedLayoutITView extends Div {
     public OrderedLayoutITView() {
         VerticalLayout verticalLayoutWithSpacing = new VerticalLayout();
         verticalLayoutWithSpacing.setId("vl-spacing");
-        verticalLayoutWithSpacing.add(
-                AbstractLayout.createToggleThemeButton(
+        verticalLayoutWithSpacing.add(AbstractLayout.createToggleThemeCheckbox(
                         verticalLayoutWithSpacing, "spacing-xs"),
-                AbstractLayout.createToggleThemeButton(
+                AbstractLayout.createToggleThemeCheckbox(
                         verticalLayoutWithSpacing, "spacing-s"),
-                AbstractLayout.createToggleThemeButton(
-                        verticalLayoutWithSpacing, "spacing",
-                        verticalLayoutWithSpacing::setSpacing),
-                AbstractLayout.createToggleThemeButton(
+                AbstractLayout.createToggleThemeCheckbox("spacing",
+                        verticalLayoutWithSpacing::setSpacing,true),
+                AbstractLayout.createToggleThemeCheckbox(
                         verticalLayoutWithSpacing, "spacing-l"),
-                AbstractLayout.createToggleThemeButton(
+                AbstractLayout.createToggleThemeCheckbox(
                         verticalLayoutWithSpacing, "spacing-xl"));
 
         HorizontalLayout horizontalLayoutWithSpacing = new HorizontalLayout();
         horizontalLayoutWithSpacing.setId("hl-spacing");
         horizontalLayoutWithSpacing.add(
-                AbstractLayout.createToggleThemeButton(
+                AbstractLayout.createToggleThemeCheckbox(
                         horizontalLayoutWithSpacing, "spacing-xs"),
-                AbstractLayout.createToggleThemeButton(
+                AbstractLayout.createToggleThemeCheckbox(
                         horizontalLayoutWithSpacing, "spacing-s"),
-                AbstractLayout.createToggleThemeButton(
-                        horizontalLayoutWithSpacing, "spacing",
-                        horizontalLayoutWithSpacing::setSpacing),
-                AbstractLayout.createToggleThemeButton(
+                AbstractLayout.createToggleThemeCheckbox("spacing",
+                        horizontalLayoutWithSpacing::setSpacing,true),
+                AbstractLayout.createToggleThemeCheckbox(
                         horizontalLayoutWithSpacing, "spacing-l"),
-                AbstractLayout.createToggleThemeButton(
+                AbstractLayout.createToggleThemeCheckbox(
                         horizontalLayoutWithSpacing, "spacing-xl"));
 
         add(verticalLayoutWithSpacing, horizontalLayoutWithSpacing);
