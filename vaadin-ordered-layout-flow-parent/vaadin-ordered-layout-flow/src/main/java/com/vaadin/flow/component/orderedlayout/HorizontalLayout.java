@@ -29,7 +29,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * have a predefined size - its size is defined by the components inside it.
  */
 @Tag("vaadin-horizontal-layout")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.2.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.2.0")
 @JsModule("@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-horizontal-layout.html")
 public class HorizontalLayout extends Component implements ThemableLayout,

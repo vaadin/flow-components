@@ -33,7 +33,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * {@link #setScrollDirection(ScrollDirection)}
  */
 @Tag("vaadin-scroller")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.2.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.2.0")
 @JsModule("@vaadin/vaadin-ordered-layout/vaadin-scroller.js")
 @HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-scroller.html")
 public class Scroller extends Component implements HasSize, HasStyle {
