@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>vaadin-grid-flow-parent</artifactId>
-    <version>5.0-SNAPSHOT</version>
+    <version>5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Grid Flow Parent</name>
     
