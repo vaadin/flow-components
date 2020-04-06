@@ -25,7 +25,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("lazy-loading")
+@Route("lazy-loading-grid")
 public class LazyLoadingGridPage extends Div {
 
     private static class LazyLoadingProvider
@@ -42,7 +42,7 @@ public class LazyLoadingGridPage extends Div {
         @Override
         protected int sizeInBackEnd(Query<String, Void> query) {
             /*
-             * TODO : this method should be removed or implemented simehow in
+             * TODO : this method should be removed or implemented somehow in
              * the super class by default
              */
             // this is wrong
