@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.HtmlImport;
@@ -42,6 +43,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater.Hierarch
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
@@ -312,6 +314,30 @@ public class TreeGrid<T> extends Grid<T>
 
         return column;
     }
+
+    /**
+     * Adds a new Hierarchy column that shows components.
+     * <p>
+     * <em>NOTE:</em> Using {@link ComponentRenderer} is not as efficient as the
+     * built in renderers.
+     * </p>
+     *
+     * @param componentProvider
+     *            a value provider that will return a component for the given
+     *            item
+     * @param <V>
+     *            the component type
+     * @return the new column
+     * @see #addColumn(Renderer)
+     * @see #removeColumn(Column)
+     */
+    public <V extends Component> Column<T> addComponentHierarchyColumn(
+            ValueProvider<T, V> componentProvider) {
+        return addColumn(new HierarchyColumnComponentRenderer<V, T>(
+                componentProvider).withProperty("leaf",
+                        item -> !getDataCommunicator().hasChildren(item)));
+    }
+
 
     /**
      * <strong>Note:</strong> This method can only be used for a TreeGrid created

@@ -2,6 +2,7 @@ package com.vaadin.flow.component.treegrid.demo;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.HtmlImport;
+
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.demo.GridDemo.Person;
 import com.vaadin.flow.component.treegrid.demo.data.DepartmentData;
@@ -10,6 +11,8 @@ import com.vaadin.flow.component.treegrid.demo.entity.Department;
 import com.vaadin.flow.component.treegrid.demo.service.AccountService;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.AbstractBackEndHierarchicalDataProvider;
@@ -46,6 +49,7 @@ public class TreeGridDemo extends DemoView {
     protected void initView() {
         createBasicTreeGridUsage();
         createLazyLoadingTreeGridUsage();
+        createTreeGridWithComponentsInHierarchyColumnUsage();
     }
 
     private void createBasicTreeGridUsage() {
@@ -147,5 +151,30 @@ public class TreeGridDemo extends DemoView {
         grid.setId("treegridlazy");
 
         addCard("TreeGrid with lazy loading", grid);
+    }
+
+    private void createTreeGridWithComponentsInHierarchyColumnUsage() {
+        DepartmentData departmentData = new DepartmentData();
+        // begin-source-example
+        // source-example-heading: TreeGrid with Component in Hierarchy Column
+        TreeGrid<Department> grid = new TreeGrid<>();
+
+        grid.setItems(departmentData.getRootDepartments(), departmentData::getChildDepartments);
+        grid.addComponentHierarchyColumn(
+                department -> {
+                    Span departmentName = new Span(department.getName());
+                    Span managerName = new Span(department.getManager());
+                    managerName.getStyle().set("color", "var(--lumo-secondary-text-color)");
+                    managerName.getStyle().set("font-size", "var(--lumo-font-size-s)");
+                    VerticalLayout departmentLine = new VerticalLayout(departmentName, managerName);
+                    departmentLine.setPadding(false);
+                    departmentLine.setSpacing(false);
+                    return departmentLine;
+                }).setHeader("Departments");
+
+        // end-source-example
+        grid.setId("treegridcomponent");
+
+        addCard("TreeGrid with Component in Hierarchy Column", grid);
     }
 }

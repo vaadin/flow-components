@@ -15,6 +15,12 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addItems;
+import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addRootItems;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -28,12 +34,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addItems;
-import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addRootItems;
 
 /**
  * Test page for dynamically adding new columns with different renderers when
@@ -62,14 +62,13 @@ public class TreeComponentColumnsPage extends Div {
             add(grid);
         }
 
-        grid.addHierarchyColumn(String::toString).setHeader("Header A")
-                .setId("string");
-
         ComponentRenderer<TextField, String> componentRenderer = new ComponentRenderer<>(
                 TextField::new, (component, item) -> {
             component.setReadOnly(true);
             component.setValue(item);
         });
+
+        grid.addComponentHierarchyColumn(this::createTextField).setHeader("Header A").setId("textfield");
         grid.addColumn(componentRenderer).setHeader("Header B");
 
         ComponentRenderer<Button,String> componentRendererBtn = new ComponentRenderer<>(
@@ -90,5 +89,12 @@ public class TreeComponentColumnsPage extends Div {
             grid.setId("comp-then-grid");
             add(grid);
         }
+    }
+
+    private TextField createTextField(String val) {
+        TextField textField = new TextField();
+        textField.setReadOnly(true);
+        textField.setValue(val);
+        return textField;
     }
 }
