@@ -15,11 +15,8 @@
  */
 package com.vaadin.flow.component.orderedlayout.demo;
 
-import java.util.stream.Stream;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.BoxSizing;
@@ -29,9 +26,13 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
+
+import java.util.stream.Stream;
 
 /**
  * View for the orderred layouts {@link HorizontalLayout} and
@@ -242,11 +243,13 @@ public class OrderedLayoutView extends AbstractLayout {
 
         layout.setId("default-layout");
 
-        Div themeSettings = new Div(new Label(
-                "Current theme supports 'padding', 'margin' and 'spacing: "),
-                createToggleThemeButton(layout, "padding", layout::setPadding),
-                createToggleThemeButton(layout, "margin", layout::setMargin),
-                createToggleThemeButton(layout, "spacing", layout::setSpacing));
+        Div themeSettings = new Div(
+                createToggleThemeCheckbox("padding", layout::setPadding,
+                        layout.isPadding()),
+                createToggleThemeCheckbox("margin", layout::setMargin,
+                        layout.isMargin()),
+                createToggleThemeCheckbox("spacing", layout::setSpacing,
+                        layout.isSpacing()));
 
         addCard("HorizontalLayout", "Default horizontal layout", layout,
                 themeSettings);
@@ -272,23 +275,19 @@ public class OrderedLayoutView extends AbstractLayout {
         component2.getElement().setText("Component 2 with long text");
         component3.getElement().setText("C 3");
 
-        Div buttons = new Div();
-        buttons.add(createSpacingButton(layout, "justify-content-start-button",
-                FlexComponent.JustifyContentMode.START));
-        buttons.add(createSpacingButton(layout, "justify-content-end-button",
-                FlexComponent.JustifyContentMode.END));
-        buttons.add(
-                createSpacingButton(layout, "justify-content-between-button",
-                        FlexComponent.JustifyContentMode.BETWEEN));
-        buttons.add(createSpacingButton(layout, "justify-content-around-button",
-                FlexComponent.JustifyContentMode.AROUND));
-        buttons.add(createSpacingButton(layout, "justify-content-evenly-button",
-                FlexComponent.JustifyContentMode.EVENLY));
-
+        RadioButtonGroup<FlexComponent.JustifyContentMode> justifyContentMode = new RadioButtonGroup<>();
+        justifyContentMode.setItems(FlexComponent.JustifyContentMode.values());
+        justifyContentMode.setRenderer(new TextRenderer<>(
+                justifyContent -> justifyContent.name().toLowerCase()));
+        justifyContentMode.addValueChangeListener(
+                event -> layout.setJustifyContentMode(event.getValue()));
+        justifyContentMode
+                .setId("horizontal-layout-justify-content-radio-button");
+        justifyContentMode.setValue(FlexComponent.JustifyContentMode.BETWEEN);
         layout.setId("layout-with-justify-content");
 
         addCard("HorizontalLayout", "HorizontalLayout with justify content",
-                layout, buttons);
+                layout, justifyContentMode);
     }
 
     private void createHorizontalLayoutWithDefaultAlignment() {
@@ -314,22 +313,18 @@ public class OrderedLayoutView extends AbstractLayout {
         component2.getElement().getStyle().set("fontSize", "24px");
         component3.getElement().getStyle().set("fontSize", "9px");
 
-        Div buttons = new Div();
-        buttons.add(createAlignmentButton(layout, "align-start-button",
-                FlexComponent.Alignment.START));
-        buttons.add(createAlignmentButton(layout, "align-end-button",
-                FlexComponent.Alignment.END));
-        buttons.add(createAlignmentButton(layout, "align-center-button",
-                FlexComponent.Alignment.CENTER));
-        buttons.add(createAlignmentButton(layout, "align-stretch-button",
-                FlexComponent.Alignment.STRETCH));
-        buttons.add(createAlignmentButton(layout, "align-baseline-button",
-                FlexComponent.Alignment.BASELINE));
+        RadioButtonGroup<FlexComponent.Alignment> alignments = new RadioButtonGroup<>();
+        alignments.setItems(FlexComponent.Alignment.values());
+        alignments.setRenderer(new TextRenderer<>(
+                alignment -> alignment.name().toLowerCase()));
+        alignments.setValue(FlexComponent.Alignment.CENTER);
+        alignments.setId("horizontal-layout-alignment-radio-button");
+        alignments.addValueChangeListener(event -> layout.setDefaultVerticalComponentAlignment(event.getValue()));
 
         layout.setId("layout-with-alignment");
 
         addCard("HorizontalLayout", "HorizontalLayout with general alignment",
-                layout, buttons);
+                layout, alignments);
     }
 
     private void createHorizontalLayoutWithIndividualAlignments() {
@@ -488,11 +483,13 @@ public class OrderedLayoutView extends AbstractLayout {
 
         layout.setId("default-layout");
 
-        Div themeSettings = new Div(new Label(
-                "Current theme supports 'padding', 'margin' and 'spacing: "),
-                createToggleThemeButton(layout, "padding", layout::setPadding),
-                createToggleThemeButton(layout, "margin", layout::setMargin),
-                createToggleThemeButton(layout, "spacing", layout::setSpacing));
+        Div themeSettings = new Div(
+                createToggleThemeCheckbox("padding", layout::setPadding,
+                        layout.isPadding()),
+                createToggleThemeCheckbox("margin", layout::setMargin,
+                        layout.isMargin()),
+                createToggleThemeCheckbox("spacing", layout::setSpacing,
+                        layout.isSpacing()));
 
         addCard("VerticalLayout", "Default vertical layout", layout,
                 themeSettings);
@@ -503,6 +500,7 @@ public class OrderedLayoutView extends AbstractLayout {
         // source-example-heading: VerticalLayout with justify content
         VerticalLayout layout = new VerticalLayout();
         layout.getStyle().set("border", "1px solid #9E9E9E");
+        layout.setHeight("300px");
 
         // the default is JustifyContentMode.START
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
@@ -518,23 +516,19 @@ public class OrderedLayoutView extends AbstractLayout {
                 "Component 2<br>With long text");
         component3.getElement().getStyle().set("fontSize", "9px");
 
-        Div buttons = new Div();
-        buttons.add(createSpacingButton(layout, "justify-content-start-button",
-                FlexComponent.JustifyContentMode.START));
-        buttons.add(createSpacingButton(layout, "justify-content-end-button",
-                FlexComponent.JustifyContentMode.END));
-        buttons.add(
-                createSpacingButton(layout, "justify-content-between-button",
-                        FlexComponent.JustifyContentMode.BETWEEN));
-        buttons.add(createSpacingButton(layout, "justify-content-around-button",
-                FlexComponent.JustifyContentMode.AROUND));
-        buttons.add(createSpacingButton(layout, "justify-content-evenly-button",
-                FlexComponent.JustifyContentMode.EVENLY));
-
+        RadioButtonGroup<FlexComponent.JustifyContentMode> justifyContentMode = new RadioButtonGroup<>();
+        justifyContentMode.setItems(FlexComponent.JustifyContentMode.values());
+        justifyContentMode.setRenderer(new TextRenderer<>(
+                justifyContent -> justifyContent.name().toLowerCase()));
+        justifyContentMode
+                .setId("vertical-layout-justify-content-radio-button");
+        justifyContentMode.addValueChangeListener(
+                event -> layout.setJustifyContentMode(event.getValue()));
+        justifyContentMode.setValue(FlexComponent.JustifyContentMode.BETWEEN);
         layout.setId("layout-with-justify-content");
 
         addCard("VerticalLayout", "VerticalLayout with justify content", layout,
-                buttons);
+                justifyContentMode);
     }
 
     private void createVerticalLayoutWithDefaultAlignment() {
@@ -558,20 +552,18 @@ public class OrderedLayoutView extends AbstractLayout {
         component2.getElement().setText("Component 2 with long text");
         component3.getElement().setText("C 3");
 
-        Div buttons = new Div();
-        buttons.add(createAlignmentButton(layout, "align-start-button",
-                FlexComponent.Alignment.START));
-        buttons.add(createAlignmentButton(layout, "align-end-button",
-                FlexComponent.Alignment.END));
-        buttons.add(createAlignmentButton(layout, "align-center-button",
-                FlexComponent.Alignment.CENTER));
-        buttons.add(createAlignmentButton(layout, "align-stretch-button",
-                FlexComponent.Alignment.STRETCH));
+        RadioButtonGroup<FlexComponent.Alignment> alignments = new RadioButtonGroup<>();
+        alignments.setItems(FlexComponent.Alignment.values());
+        alignments.setRenderer(new TextRenderer<>(
+                alignment -> alignment.name().toLowerCase()));
+        alignments.setValue(FlexComponent.Alignment.STRETCH);
+        alignments.setId("vertical-layout-alignment-radio-button");
+        alignments.addValueChangeListener(event -> layout.setDefaultHorizontalComponentAlignment(event.getValue()));
 
         layout.setId("layout-with-alignment");
 
         addCard("VerticalLayout", "VerticalLayout with general alignment",
-                layout, buttons);
+                layout, alignments);
     }
 
     private void createVerticalLayoutWithIndividualAlignments() {

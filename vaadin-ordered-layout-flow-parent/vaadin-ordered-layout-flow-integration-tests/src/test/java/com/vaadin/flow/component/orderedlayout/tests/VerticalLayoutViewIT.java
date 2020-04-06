@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -69,28 +71,29 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         Assert.assertEquals("space-between",
                 vlayout.getCssValue("justify-content"));
 
-        WebElement button = layout
-                .findElement(By.id("justify-content-start-button"));
-        button.click();
+        RadioButtonGroupElement rbg = $(
+                RadioButtonGroupElement.class).id("vertical-layout-justify-content-radio-button");
+        rbg.selectByText(
+                FlexComponent.JustifyContentMode.START.name().toLowerCase());
         Assert.assertEquals("flex-start",
                 vlayout.getCssValue("justify-content"));
 
-        button = layout.findElement(By.id("justify-content-end-button"));
-        button.click();
+        rbg.selectByText(
+                FlexComponent.JustifyContentMode.END.name().toLowerCase());
         Assert.assertEquals("flex-end", vlayout.getCssValue("justify-content"));
 
-        button = layout.findElement(By.id("justify-content-between-button"));
-        button.click();
+        rbg.selectByText(
+                FlexComponent.JustifyContentMode.BETWEEN.name().toLowerCase());
         Assert.assertEquals("space-between",
                 vlayout.getCssValue("justify-content"));
 
-        button = layout.findElement(By.id("justify-content-around-button"));
-        button.click();
+        rbg.selectByText(
+                FlexComponent.JustifyContentMode.AROUND.name().toLowerCase());
         Assert.assertEquals("space-around",
                 vlayout.getCssValue("justify-content"));
 
-        button = layout.findElement(By.id("justify-content-evenly-button"));
-        button.click();
+        rbg.selectByText(
+                FlexComponent.JustifyContentMode.EVENLY.name().toLowerCase());
         Assert.assertEquals("space-evenly",
                 vlayout.getCssValue("justify-content"));
     }
@@ -101,24 +104,22 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("stretch", vlayout.getCssValue("align-items"));
+        RadioButtonGroupElement rbg = $(
+                RadioButtonGroupElement.class).id("vertical-layout-alignment-radio-button");
 
-        WebElement button = layout.findElement(By.id("align-end-button"));
-        button.click();
+        rbg.selectByText(FlexComponent.Alignment.END.name().toLowerCase());
         waitUntil(driver -> "flex-end"
                 .equals(vlayout.getCssValue("align-items")));
 
-        button = layout.findElement(By.id("align-center-button"));
-        button.click();
+        rbg.selectByText(FlexComponent.Alignment.CENTER.name().toLowerCase());
         waitUntil(
                 driver -> "center".equals(vlayout.getCssValue("align-items")));
 
-        button = layout.findElement(By.id("align-stretch-button"));
-        button.click();
+        rbg.selectByText(FlexComponent.Alignment.STRETCH.name().toLowerCase());
         waitUntil(
                 driver -> "stretch".equals(vlayout.getCssValue("align-items")));
 
-        button = layout.findElement(By.id("align-start-button"));
-        button.click();
+        rbg.selectByText(FlexComponent.Alignment.START.name().toLowerCase());
         waitUntil(driver -> "flex-start"
                 .equals(vlayout.getCssValue("align-items")));
     }
@@ -178,9 +179,9 @@ public class VerticalLayoutViewIT extends ComponentDemoTest {
                 .findElement(By.id("vertical-layout-with-box-sizing"));
         Assert.assertEquals("border-box", vlayout.getCssValue("box-sizing"));
 
-        WebElement button = layout.findElement(
-                By.id("vertical-layout-with-box-sizing-content-box"));
-        button.click();
+        RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
+                .id("vertical-layout-with-box-sizing-radio-button");
+        rbg.selectByText("Content-box");
         Assert.assertEquals("content-box", vlayout.getCssValue("box-sizing"));
     }
 

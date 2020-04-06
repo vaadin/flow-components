@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -70,28 +72,30 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
         Assert.assertEquals("space-between",
                 hLayout.getCssValue("justify-content"));
 
-        WebElement button = layout
-                .findElement(By.id("justify-content-start-button"));
-        button.click();
+        RadioButtonGroupElement rbg = $(
+                RadioButtonGroupElement.class).id("horizontal-layout-justify-content-radio-button");
+
+        rbg.selectByText(
+                FlexComponent.JustifyContentMode.START.name().toLowerCase());
         Assert.assertEquals("flex-start",
                 hLayout.getCssValue("justify-content"));
 
-        button = layout.findElement(By.id("justify-content-end-button"));
-        button.click();
+        rbg.selectByText(
+                FlexComponent.JustifyContentMode.END.name().toLowerCase());
         Assert.assertEquals("flex-end", hLayout.getCssValue("justify-content"));
 
-        button = layout.findElement(By.id("justify-content-between-button"));
-        button.click();
+        rbg.selectByText(
+                FlexComponent.JustifyContentMode.BETWEEN.name().toLowerCase());
         Assert.assertEquals("space-between",
                 hLayout.getCssValue("justify-content"));
 
-        button = layout.findElement(By.id("justify-content-around-button"));
-        button.click();
+        rbg.selectByText(
+                FlexComponent.JustifyContentMode.AROUND.name().toLowerCase());
         Assert.assertEquals("space-around",
                 hLayout.getCssValue("justify-content"));
 
-        button = layout.findElement(By.id("justify-content-evenly-button"));
-        button.click();
+        rbg.selectByText(
+                FlexComponent.JustifyContentMode.EVENLY.name().toLowerCase());
         Assert.assertEquals("space-evenly",
                 hLayout.getCssValue("justify-content"));
     }
@@ -103,28 +107,25 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
         Assert.assertEquals("center", vlayout.getCssValue("align-items"));
 
-        WebElement button = layout.findElement(By.id("align-end-button"));
-        button.click();
+        RadioButtonGroupElement rbg = $(
+                RadioButtonGroupElement.class).id("horizontal-layout-alignment-radio-button");
+        rbg.selectByText(FlexComponent.Alignment.END.name().toLowerCase());
         waitUntil(driver -> "flex-end"
                 .equals(vlayout.getCssValue("align-items")));
 
-        button = layout.findElement(By.id("align-center-button"));
-        button.click();
+        rbg.selectByText(FlexComponent.Alignment.CENTER.name().toLowerCase());
         waitUntil(
                 driver -> "center".equals(vlayout.getCssValue("align-items")));
 
-        button = layout.findElement(By.id("align-stretch-button"));
-        button.click();
+        rbg.selectByText(FlexComponent.Alignment.STRETCH.name().toLowerCase());
         waitUntil(
                 driver -> "stretch".equals(vlayout.getCssValue("align-items")));
 
-        button = layout.findElement(By.id("align-start-button"));
-        button.click();
+        rbg.selectByText(FlexComponent.Alignment.START.name().toLowerCase());
         waitUntil(driver -> "flex-start"
                 .equals(vlayout.getCssValue("align-items")));
 
-        button = layout.findElement(By.id("align-baseline-button"));
-        button.click();
+        rbg.selectByText(FlexComponent.Alignment.BASELINE.name().toLowerCase());
         waitUntil(driver -> "baseline"
                 .equals(vlayout.getCssValue("align-items")));
     }
@@ -184,9 +185,9 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
                 .findElement(By.id("horizontal-layout-with-box-sizing"));
         Assert.assertEquals("border-box", hlayout.getCssValue("box-sizing"));
 
-        WebElement button = layout.findElement(
-                By.id("horizontal-layout-with-box-sizing-content-box"));
-        button.click();
+        RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
+                .id("horizontal-layout-with-box-sizing-radio-button");
+        rbg.selectByText("Content-box");
         Assert.assertEquals("content-box", hlayout.getCssValue("box-sizing"));
     }
 

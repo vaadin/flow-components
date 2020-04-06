@@ -15,20 +15,15 @@
  */
 package com.vaadin.flow.component.orderedlayout.demo;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.BoxSizing;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.demo.DemoView;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.impl.ThemeListImpl;
 
 /**
  * Abstract layout class containing common code for horizontal and vertical
@@ -44,68 +39,37 @@ public abstract class AbstractLayout extends DemoView {
         return component;
     }
 
-    protected Component createSpacingButton(FlexComponent<?> layout, String id,
-            FlexComponent.JustifyContentMode spacing) {
-        NativeButton button = new NativeButton(spacing.name());
-        button.setId(id);
-        button.addClickListener(event -> layout.setJustifyContentMode(spacing));
-        return button;
+    public static Checkbox createToggleThemeCheckbox(ThemableLayout layout,
+                                                       String themeName) {
+        return createToggleThemeCheckbox(themeName,
+                toggle -> layout.getThemeList().set(themeName, toggle),false);
     }
 
-    public static NativeButton createToggleThemeButton(ThemableLayout layout,
-            String themeName) {
-        return createToggleThemeButton(layout, themeName,
-                toggle -> layout.getThemeList().set(themeName, toggle));
-    }
-
-    public static NativeButton createToggleThemeButton(ThemableLayout layout,
-            String themeName, Consumer<Boolean> toggleAction) {
-        NativeButton toggleButton = new NativeButton(
-                String.format("Toggle %s", themeName),
-                event -> toggleAction.accept(hasNoAttributeValue(
-                        layout.getElement(), ThemeListImpl.THEME_ATTRIBUTE_NAME,
-                        themeName)));
+    public static Checkbox createToggleThemeCheckbox(String themeName,
+                                                   Consumer<Boolean> toggleAction, boolean defaultValue) {
+        Checkbox toggleButton = new Checkbox(themeName);
+        toggleButton.setValue(defaultValue);
+        toggleButton.addValueChangeListener(event -> toggleAction.accept(event.getValue()));
         toggleButton.setId(String.format("toggle-%s", themeName));
         return toggleButton;
     }
 
-    protected static boolean hasNoAttributeValue(Element element,
-            String attribute, String attributeValue) {
-        return Optional.ofNullable(element.getAttribute(attribute))
-                .map(value -> !value.contains(attributeValue)).orElse(true);
-    }
-
-    protected Component createAlignmentButton(HorizontalLayout layout,
-            String id, FlexComponent.Alignment alignment) {
-        NativeButton button = new NativeButton(alignment.name());
-        button.setId(id);
-        button.addClickListener(event -> layout
-                .setDefaultVerticalComponentAlignment(alignment));
-        return button;
-    }
-
-    protected Component createAlignmentButton(VerticalLayout layout, String id,
-            FlexComponent.Alignment alignment) {
-        NativeButton button = new NativeButton(alignment.name());
-        button.setId(id);
-        button.addClickListener(event -> layout
-                .setDefaultHorizontalComponentAlignment(alignment));
-        return button;
-    }
-
     protected Component createBoxSizingButtons(ThemableLayout layout,
             String idPrefix) {
-        NativeButton contentBox = new NativeButton("Use content-box");
-        contentBox.setId(idPrefix + "-content-box");
-        contentBox.addClickListener(
-                event -> layout.setBoxSizing(BoxSizing.CONTENT_BOX));
+        RadioButtonGroup<String> boxSizing = new RadioButtonGroup<>();
+        boxSizing.setItems("Content-box", "Border-box");
 
-        NativeButton borderBox = new NativeButton("Use border-box");
-        borderBox.setId(idPrefix + "-border-box");
-        borderBox.addClickListener(
-                event -> layout.setBoxSizing(BoxSizing.BORDER_BOX));
+        boxSizing.addValueChangeListener(event -> {
+            if ("Border-box".equals(event.getValue()))
+                layout.setBoxSizing(BoxSizing.BORDER_BOX);
 
-        return new Div(contentBox, borderBox);
+            else
+                layout.setBoxSizing(BoxSizing.CONTENT_BOX);
+        });
+        boxSizing.setValue("Border-box");
+        boxSizing.setId(idPrefix + "-radio-button");
+
+        return boxSizing;
     }
 
     protected Div createLoremIpsum() {
