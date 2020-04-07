@@ -20,9 +20,11 @@ import java.util.Objects;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -142,6 +144,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
 
     private Component primaryComponent;
     private Component secondaryComponent;
+    private StateTree.ExecutionRegistration clearStylesRegistration;
 
     /**
      * numeration of all available orientation for VaadinSplitLayout component
@@ -155,6 +158,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     public SplitLayout() {
         setOrientation(Orientation.HORIZONTAL);
+        addAttachListener(e -> this.clearStylesAddedByWebcomponent(e.getUI()));
     }
 
     /**
@@ -286,6 +290,22 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         }
         setPrimaryStyle(styleName, primary + "%");
         setSecondaryStyle(styleName, secondary + "%");
+        getUI().ifPresent(this::clearStylesAddedByWebcomponent);
+    }
+
+    private void clearStylesAddedByWebcomponent(UI ui) {
+        if (clearStylesRegistration != null) {
+            clearStylesRegistration.remove();
+        }
+        this.clearStylesRegistration = ui
+            .beforeClientResponse(this, context -> {
+                final String JS = "for(let i = 0;i < this.children.length;i++)"
+                    + "if(this.children[i].slot === 'primary'"
+                    + "   || this.children[i].slot === 'secondary')"
+                    + "this.children[i].style.flex = ''";
+                getElement().executeJs(JS);
+                this.clearStylesRegistration = null;
+            });
     }
 
     /**
