@@ -118,7 +118,7 @@ import elemental.json.JsonObject;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.UploadElement#4.2.1", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/vaadin-upload", version = "4.2.2")
+@NpmPackage(value = "@vaadin/vaadin-upload", version = "4.3.0-alpha1")
 @JsModule("@vaadin/vaadin-upload/src/vaadin-upload.js")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
         extends Component implements HasStyle {
