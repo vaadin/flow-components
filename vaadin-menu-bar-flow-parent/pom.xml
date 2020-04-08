@@ -22,7 +22,7 @@
     </organization>
 
     <properties>
-        <contextmenu.version>4.0-SNAPSHOT</contextmenu.version>
+        <contextmenu.version>4.1-SNAPSHOT</contextmenu.version>
 
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
