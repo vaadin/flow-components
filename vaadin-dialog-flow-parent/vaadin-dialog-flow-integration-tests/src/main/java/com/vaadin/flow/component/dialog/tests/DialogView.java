@@ -119,7 +119,7 @@ public class DialogView extends Div {
 
         button.addClickListener(event -> {
             dialog.open();
-            input.getElement().callJsFunction("focus");
+            input.focus();
         });
 
         button.setId("focus-dialog-button");
