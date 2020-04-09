@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
-import static java.util.Objects.requireNonNull;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Scroller is a component container which enables scrolling overflowing
@@ -157,11 +157,11 @@ public class Scroller extends Component implements HasSize, HasStyle {
     public enum ScrollDirection {
         VERTICAL, HORIZONTAL, BOTH, NONE;
 
-        public String toWebComponentValue() {
+        private String toWebComponentValue() {
             return BOTH == this ? null : this.name().toLowerCase();
         }
 
-        public static ScrollDirection fromWebComponentValue(
+        private static ScrollDirection fromWebComponentValue(
                 String stringValue) {
             return stringValue != null ? valueOf(stringValue.toUpperCase())
                     : BOTH;
