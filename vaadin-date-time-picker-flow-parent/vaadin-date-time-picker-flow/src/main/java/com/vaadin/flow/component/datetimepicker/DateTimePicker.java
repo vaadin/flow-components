@@ -34,7 +34,6 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableFunction;
@@ -63,8 +62,7 @@ class DateTimePickerTimePicker
  *
  */
 @Tag("vaadin-date-time-picker")
-@HtmlImport("frontend://bower_components/vaadin-date-time-picker/src/vaadin-date-time-picker.html")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.1.0-alpha1")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
@@ -533,6 +531,7 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     /**
      * Sets the error message to display when the input is invalid.
      */
+    @Override
     public void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage",
                 errorMessage == null ? "" : errorMessage);
@@ -543,6 +542,7 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      *
      * @return the current error message
      */
+    @Override
     public String getErrorMessage() {
         return getElement().getProperty("error-message");
     }
@@ -550,6 +550,7 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
     /**
      * Sets the validity indication of the date time picker output.
      */
+    @Override
     public void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
     }
@@ -559,6 +560,7 @@ public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
      *
      * @return the current validity indication.
      */
+    @Override
     public boolean isInvalid() {
         return getElement().getProperty("invalid", false);
     }
