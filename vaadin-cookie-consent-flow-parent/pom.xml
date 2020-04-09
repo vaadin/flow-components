@@ -7,12 +7,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>flow-component-base</artifactId>
-        <version>3.0-SNAPSHOT</version>
+        <version>3.1-SNAPSHOT</version>
         <relativePath/>
     </parent>
     <artifactId>vaadin-cookie-consent-flow-root</artifactId>
     <packaging>pom</packaging>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1-SNAPSHOT</version>
     <name>vaadin-cookie-consent-flow-root</name>
     <inceptionYear>2018</inceptionYear>
     <organization>
