@@ -38,25 +38,21 @@ public class ScrollerTest {
     public void getScrollDirection_defaultsToBoth() {
         Assert.assertEquals(ScrollDirection.BOTH,
                 scroller.getScrollDirection());
-        Assert.assertEquals(ScrollDirection.BOTH.toWebComponentValue(),
+        Assert.assertNull(
                 scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
     }
 
     @Test
     public void setScrollDirection_Horizontal_updatesProperty() {
         scroller.setScrollDirection(ScrollDirection.HORIZONTAL);
-        Assert.assertNotNull(
-                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
-        Assert.assertEquals(ScrollDirection.HORIZONTAL.toWebComponentValue(),
+        Assert.assertEquals("horizontal",
                 scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
     }
 
     @Test
     public void setScrollDirection_Vertical_updatesProperty() {
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
-        Assert.assertNotNull(
-                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
-        Assert.assertEquals(ScrollDirection.VERTICAL.toWebComponentValue(),
+        Assert.assertEquals("vertical",
                 scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
     }
 
@@ -72,17 +68,14 @@ public class ScrollerTest {
     @Test
     public void setScrollDirection_None_updatesProperty() {
         scroller.setScrollDirection(ScrollDirection.NONE);
-        Assert.assertNotNull(
-                scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
-        Assert.assertEquals(ScrollDirection.NONE.toWebComponentValue(),
+        Assert.assertEquals("none",
                 scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
     }
 
     @Test
     public void setScrollDirection_Both_updatesProperty() {
         scroller.setScrollDirection(ScrollDirection.BOTH);
-        Assert.assertNull(scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
-        Assert.assertEquals(ScrollDirection.BOTH.toWebComponentValue(),
+        Assert.assertNull(
                 scroller.getElement().getProperty(SCROLL_DIRECTION_PROPERTY));
     }
 
