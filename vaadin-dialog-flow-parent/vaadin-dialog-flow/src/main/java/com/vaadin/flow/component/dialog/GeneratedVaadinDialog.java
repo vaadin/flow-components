@@ -53,7 +53,7 @@ import com.vaadin.flow.shared.Registration;
 @Generated({ "Generator: com.vaadin.generator.ComponentGenerator#1.1-SNAPSHOT",
         "WebComponent: Vaadin.DialogElement#null", "Flow#1.1-SNAPSHOT" })
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/vaadin-dialog", version = "2.3.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-dialog", version = "2.4.0-alpha1")
 @JsModule("@vaadin/vaadin-dialog/src/vaadin-dialog.js")
 public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
         extends Component {

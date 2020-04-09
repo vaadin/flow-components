@@ -13,10 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.dialog.demo;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
+package com.vaadin.flow.component.dialog.tests;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
@@ -24,38 +21,37 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
 /**
- * View for {@link Dialog} demo.
+ * Page created for testing purposes. Not suitable for demos.
  *
  * @author Vaadin Ltd
  */
-@Route("vaadin-dialog")
-public class DialogView extends DemoView {
+@Route("vaadin-dialog-view")
+public class DialogView extends Div {
 
     private static final String BUTTON_CAPTION = "Open dialog";
 
-    @Override
-    public void initView() {
+
+    public DialogView() {
         addBasicDialog();
         addConfirmationDialog();
         addCloseFromServerSideDialog();
         addDialogWithFocusedElement();
         addStyledDialogContent();
-        addModelessDraggableResizableDialog();
     }
 
     private void addBasicDialog() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
 
-        // begin-source-example
-        // source-example-heading: Sized dialog
         Dialog dialog = new Dialog();
         dialog.add(new Text("Close me with the esc-key or an outside click"));
 
@@ -63,69 +59,59 @@ public class DialogView extends DemoView {
         dialog.setHeight("150px");
 
         button.addClickListener(event -> dialog.open());
-        // end-source-example
 
         button.setId("basic-dialog-button");
-        addCard("Sized dialog", button);
+        add(button);
     }
 
     private void addConfirmationDialog() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
 
-        // begin-source-example
-        // source-example-heading: Confirmation dialog
         Dialog dialog = new Dialog();
 
         dialog.setCloseOnEsc(false);
         dialog.setCloseOnOutsideClick(false);
 
-        Span message= new Span();
+        Label messageLabel = new Label();
 
         Button confirmButton = new Button("Confirm", event -> {
-            message.setText("Confirmed!");
+            messageLabel.setText("Confirmed!");
             dialog.close();
         });
         Button cancelButton = new Button("Cancel", event -> {
-            message.setText("Cancelled...");
+            messageLabel.setText("Cancelled...");
             dialog.close();
         });
         dialog.add(confirmButton, cancelButton);
-        // end-source-example
         button.addClickListener(event -> dialog.open());
 
-        message.setId("confirmation-dialog-span");
+        messageLabel.setId("confirmation-dialog-label");
         button.setId("confirmation-dialog-button");
-        addCard("Confirmation dialog", button, message);
+        add(button, messageLabel);
     }
 
     private void addCloseFromServerSideDialog() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
-
-        // begin-source-example
-        // source-example-heading: Close from server-side
-        Span message = new Span();
+        Label messageLabel = new Label();
 
         Dialog dialog = new Dialog(new Text("Close me with the esc-key"));
         dialog.setCloseOnOutsideClick(false);
 
         dialog.addDialogCloseActionListener(e -> {
-            message.setText("Closed from server-side");
+            messageLabel.setText("Closed from server-side");
             dialog.close();
         });
-        // end-source-example
 
         button.addClickListener(event -> dialog.open());
 
-        message.setId("server-side-close-dialog-span");
+        messageLabel.setId("server-side-close-dialog-label");
         button.setId("server-side-close-dialog-button");
-        addCard("Close from server-side", button, message);
+        add(button, messageLabel);
     }
 
     private void addDialogWithFocusedElement() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
 
-        // begin-source-example
-        // source-example-heading: Focus internal Element
         Dialog dialog = new Dialog();
         Input input = new Input();
 
@@ -135,17 +121,14 @@ public class DialogView extends DemoView {
             dialog.open();
             input.focus();
         });
-        // end-source-example
 
         button.setId("focus-dialog-button");
-        addCard("Focus internal Element", button);
+        add( button);
     }
 
     private void addStyledDialogContent() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
 
-        // begin-source-example
-        // source-example-heading: Dialog with styled content
         Dialog dialog = new Dialog();
         Div content = new Div();
         content.addClassName("my-style");
@@ -153,11 +136,9 @@ public class DialogView extends DemoView {
         content.setText("This component is styled using global styles");
         dialog.add(content);
 
-        // @formatter:off
         String styles = ".my-style { "
                 + "  color: red;"
                 + " }";
-        // @formatter:on
 
         /*
          * The code below register the style file dynamically. Normally you
@@ -177,40 +158,8 @@ public class DialogView extends DemoView {
         dialog.setHeight("150px");
 
         button.addClickListener(event -> dialog.open());
-        // end-source-example
 
         button.setId("styled-content-dialog-button");
-        addCard("Dialog with styled content", button);
-    }
-
-    private void addModelessDraggableResizableDialog() {
-        NativeButton openDialog = new NativeButton(BUTTON_CAPTION);
-        NativeButton openSecondDialog = new NativeButton("Open another dialog");
-
-        // begin-source-example
-        // source-example-heading: Modeless Draggable Resizable Dialog
-        Dialog firstDialog = new Dialog();
-        firstDialog.add(
-            new Label("This is the first dialog"),
-            new Button("Close", e -> firstDialog.close())
-        );
-        firstDialog.setModal(false);
-        firstDialog.setDraggable(true);
-        firstDialog.setResizable(true);
-        
-        Dialog secondDialog = new Dialog();
-        secondDialog.add(
-            new Label("This is the second dialog"),
-            new Button("Close", e -> secondDialog.close())
-        );
-        secondDialog.setModal(false);
-        secondDialog.setDraggable(true);
-        secondDialog.setResizable(true);
-
-        openDialog.addClickListener(e -> firstDialog.open());
-        openSecondDialog.addClickListener(e -> secondDialog.open());
-        // end-source-example
-
-        addCard("Modeless Draggable Resizable Dialog", openDialog, openSecondDialog, firstDialog);
+        add(button);
     }
 }
