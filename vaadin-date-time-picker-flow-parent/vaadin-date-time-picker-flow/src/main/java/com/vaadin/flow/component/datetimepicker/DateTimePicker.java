@@ -64,7 +64,7 @@ class DateTimePickerTimePicker
  */
 @Tag("vaadin-date-time-picker")
 @HtmlImport("frontend://bower_components/vaadin-date-time-picker/src/vaadin-date-time-picker.html")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.0.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.0.0-beta1")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker extends AbstractField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
