@@ -144,7 +144,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
 
     private Component primaryComponent;
     private Component secondaryComponent;
-    private StateTree.ExecutionRegistration clearStylesRegistration;
+    private StateTree.ExecutionRegistration updateStylesRegistration;
+    private Double splitterPosition;
 
     /**
      * numeration of all available orientation for VaadinSplitLayout component
@@ -158,7 +159,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     public SplitLayout() {
         setOrientation(Orientation.HORIZONTAL);
-        addAttachListener(e -> this.clearStylesAddedByWebcomponent(e.getUI()));
+        addAttachListener(e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
     }
 
     /**
@@ -280,7 +281,35 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * @param position the relative position of the splitter, in percentages
      */
     public void setSplitterPosition(double position) {
-        double primary = Math.min(Math.max(position, 0), 100);
+        this.splitterPosition = position;
+        getUI().ifPresent(this::requestStylesUpdatesForSplitterPosition);
+    }
+
+    private void requestStylesUpdatesForSplitterPosition(UI ui) {
+        if (this.updateStylesRegistration != null) {
+            updateStylesRegistration.remove();
+        }
+        this.updateStylesRegistration = ui
+            .beforeClientResponse(this, context -> {
+                // Remove flex property for primary and secondary children.
+                final String JS = "for(let i = 0;i < this.children.length;i++)"
+                    + "if(this.children[i].slot === 'primary'"
+                    + "   || this.children[i].slot === 'secondary')"
+                    + "this.children[i].style.flex = ''";
+                getElement().executeJs(JS);
+
+                // Update width or height if splitter position is set.
+                updateStylesForSplitterPosition();
+
+                this.updateStylesRegistration = null;
+            });
+    }
+
+    private void updateStylesForSplitterPosition() {
+        if(this.splitterPosition == null) {
+            return;
+        }
+        double primary = Math.min(Math.max(this.splitterPosition, 0), 100);
         double secondary = 100 - primary;
         String styleName;
         if (getOrientation() == Orientation.VERTICAL) {
@@ -290,22 +319,6 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         }
         setPrimaryStyle(styleName, primary + "%");
         setSecondaryStyle(styleName, secondary + "%");
-        getUI().ifPresent(this::clearStylesAddedByWebcomponent);
-    }
-
-    private void clearStylesAddedByWebcomponent(UI ui) {
-        if (clearStylesRegistration != null) {
-            clearStylesRegistration.remove();
-        }
-        this.clearStylesRegistration = ui
-            .beforeClientResponse(this, context -> {
-                final String JS = "for(let i = 0;i < this.children.length;i++)"
-                    + "if(this.children[i].slot === 'primary'"
-                    + "   || this.children[i].slot === 'secondary')"
-                    + "this.children[i].style.flex = ''";
-                getElement().executeJs(JS);
-                this.clearStylesRegistration = null;
-            });
     }
 
     /**

@@ -35,7 +35,10 @@ public class SplitterPositionView extends Div {
                 "Create layout with element API",
                 e -> createLayoutElementApi());
         buttonElement.setId("createLayoutElementApi");
-        add(buttonJava, buttonElement);
+        NativeButton buttonLayoutComponent = new NativeButton(
+            "Create layout component", e -> add(new LayoutComponent()));
+        buttonLayoutComponent.setId("createLayoutComponent");
+        add(buttonJava, buttonElement, buttonLayoutComponent);
     }
 
     private void createLayoutJavaApi() {

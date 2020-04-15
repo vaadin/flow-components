@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.splitlayout.tests;
 
+import com.vaadin.flow.component.html.testbench.DivElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,6 +64,20 @@ public class SplitterPositionIT extends AbstractComponentIT {
     @Test
     public void testSplitterPositionAfterDragElement() {
         testSplitterPositionAfterDrag(ELEMENT_API);
+    }
+
+    // Issue https://github.com/vaadin/vaadin-split-layout-flow/issues/75
+    @Test
+    public void testSplitterContentCanHaveWidthChanged() {
+        $(NativeButtonElement.class).id("createLayoutComponent").click();
+        final TestBenchElement toggleButton = $(TestBenchElement.class)
+            .id("toggleButtonInLayoutComponent");
+        toggleButton.click();
+        toggleButton.click();
+        final String width = $(DivElement.class)
+            .id("mainContentInLayoutComponent")
+            .getPropertyString("style", "width");
+        Assert.assertEquals("100%", width);
     }
 
     private void testSplitterPosition(String testId) {
