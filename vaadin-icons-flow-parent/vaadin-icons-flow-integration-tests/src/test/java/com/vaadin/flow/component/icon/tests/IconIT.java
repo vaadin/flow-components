@@ -33,14 +33,14 @@ public class IconIT extends ComponentDemoTest {
 
     @Test
     public void basicIcons() {
-        assertIconProperty("edit-icon", "edit");
-        assertIconProperty("close-icon", "close");
+        assertIconProperty("close-icon", "vaadin", "close");
+        assertIconProperty("clock-icon", "lumo", "clock");
     }
 
     @Test
     public void styledIcon() {
-        WebElement icon = layout.findElement(By.id("logo-icon"));
-        assertIconProperty(icon, "vaadin-h");
+        WebElement icon = findElement(By.id("logo-icon"));
+        assertIconProperty(icon, "vaadin", "vaadin-h");
 
         assertCssValue(icon, "width", "100px");
         assertCssValue(icon, "height", "100px");
@@ -83,16 +83,21 @@ public class IconIT extends ComponentDemoTest {
 
             Assert.assertEquals(enumName, label.getText());
 
-            assertIconProperty(icon, enumName.toLowerCase().replace('_', '-'));
+            assertIconProperty(icon, "vaadin",
+                    enumName.toLowerCase().replace('_', '-'));
         }
     }
 
-    private void assertIconProperty(String id, String iconName) {
-        assertIconProperty(layout.findElement(By.id(id)), iconName);
+    private void assertIconProperty(String id, String collection,
+            String iconName) {
+        assertIconProperty(findElement(By.id(id)), collection,
+                iconName);
     }
 
-    private void assertIconProperty(WebElement icon, String iconName) {
-        Assert.assertEquals("vaadin:" + iconName, icon.getAttribute("icon"));
+    private void assertIconProperty(WebElement icon, String collection,
+            String iconName) {
+        Assert.assertEquals(collection + ":" + iconName,
+                icon.getAttribute("icon"));
     }
 
     private void assertCssValue(WebElement element, String propertyName,
