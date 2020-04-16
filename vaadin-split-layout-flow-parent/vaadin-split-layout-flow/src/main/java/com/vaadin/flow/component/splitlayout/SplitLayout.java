@@ -20,9 +20,11 @@ import java.util.Objects;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -142,6 +144,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
 
     private Component primaryComponent;
     private Component secondaryComponent;
+    private StateTree.ExecutionRegistration updateStylesRegistration;
+    private Double splitterPosition;
 
     /**
      * numeration of all available orientation for VaadinSplitLayout component
@@ -155,6 +159,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     public SplitLayout() {
         setOrientation(Orientation.HORIZONTAL);
+        addAttachListener(e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
     }
 
     /**
@@ -276,7 +281,35 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * @param position the relative position of the splitter, in percentages
      */
     public void setSplitterPosition(double position) {
-        double primary = Math.min(Math.max(position, 0), 100);
+        this.splitterPosition = position;
+        getUI().ifPresent(this::requestStylesUpdatesForSplitterPosition);
+    }
+
+    private void requestStylesUpdatesForSplitterPosition(UI ui) {
+        if (this.updateStylesRegistration != null) {
+            updateStylesRegistration.remove();
+        }
+        this.updateStylesRegistration = ui
+            .beforeClientResponse(this, context -> {
+                // Remove flex property for primary and secondary children.
+                final String JS = "for(let i = 0;i < this.children.length;i++)"
+                    + "if(this.children[i].slot === 'primary'"
+                    + "   || this.children[i].slot === 'secondary')"
+                    + "this.children[i].style.flex = ''";
+                getElement().executeJs(JS);
+
+                // Update width or height if splitter position is set.
+                updateStylesForSplitterPosition();
+
+                this.updateStylesRegistration = null;
+            });
+    }
+
+    private void updateStylesForSplitterPosition() {
+        if(this.splitterPosition == null) {
+            return;
+        }
+        double primary = Math.min(Math.max(this.splitterPosition, 0), 100);
         double secondary = 100 - primary;
         String styleName;
         if (getOrientation() == Orientation.VERTICAL) {
