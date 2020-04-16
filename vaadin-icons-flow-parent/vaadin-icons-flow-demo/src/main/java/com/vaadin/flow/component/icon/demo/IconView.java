@@ -17,6 +17,7 @@ package com.vaadin.flow.component.icon.demo;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.icon.demo.allicons.AllIcons;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -41,17 +42,21 @@ public class IconView extends DemoView {
 
     private void createBasicIconsView() {
         // begin-source-example
-        // source-example-heading: Two ways to create a new icon
-        Icon edit = new Icon(VaadinIcon.EDIT);
-        Icon close = VaadinIcon.CLOSE.create();
+        // source-example-heading: Creating a new icon
+        // Creating an icon from the Vaadin icons collection
+        Icon close = new Icon(VaadinIcon.CLOSE);
+
+        // Creating an icon from the Lumo icons collection
+        IronIcon clock = new IronIcon("lumo", "clock");
+
         // end-source-example
 
-        edit.getStyle().set("marginRight", "5px");
-        addCard("Two ways to create a new icon",
-                new HorizontalLayout(edit, close));
+        close.getStyle().set("marginRight", "5px");
+        addCard("Creating a new icon",
+                new HorizontalLayout(close, clock));
 
-        edit.setId("edit-icon");
         close.setId("close-icon");
+        clock.setId("clock-icon");
     }
 
     private void createStyledIconView() {

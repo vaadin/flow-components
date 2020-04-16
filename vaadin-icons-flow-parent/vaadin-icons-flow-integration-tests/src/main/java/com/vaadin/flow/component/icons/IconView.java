@@ -2,6 +2,7 @@ package com.vaadin.flow.component.icons;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.IronIcon;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -25,14 +26,13 @@ public class IconView extends VerticalLayout {
     }
 
     private void createBasicIconsView() {
-        Icon edit = new Icon(VaadinIcon.EDIT);
-        Icon close = VaadinIcon.CLOSE.create();
+        Icon close = new Icon(VaadinIcon.CLOSE);
+        IronIcon clock = new IronIcon("lumo", "clock");
 
-        edit.getStyle().set("marginRight", "5px");
-        add(new HorizontalLayout(edit, close));
-
-        edit.setId("edit-icon");
+        close.getStyle().set("marginRight", "5px");
+        add(new HorizontalLayout(close, clock));
         close.setId("close-icon");
+        clock.setId("clock-icon");
     }
 
     private void createStyledIconView() {
