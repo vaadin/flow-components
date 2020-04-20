@@ -23,10 +23,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-server-production-mode</artifactId>
-        </dependency>
 
         <!-- Logger -->
         <dependency>
@@ -134,13 +130,6 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-maven-plugin</artifactId>
-                <goals>
-                    <goal>prepare-frontend</goal>
-                    <goal>build-frontend</goal>
-                </goals>
-                <configuration>
-                    <productionMode>true</productionMode>
-                </configuration>
             </plugin>
             <!-- start jetty before ITs -->
             <plugin>
