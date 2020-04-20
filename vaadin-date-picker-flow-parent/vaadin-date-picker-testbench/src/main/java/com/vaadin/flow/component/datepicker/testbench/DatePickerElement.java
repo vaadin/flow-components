@@ -86,4 +86,25 @@ public class DatePickerElement extends TestBenchElement implements HasLabel {
     protected String getValue() {
         return getPropertyString("value");
     }
+
+    /**
+     * Opens the overlay, sets the value to the inner input element as a string
+     * and closes the overlay. This simulates the user typing into the input and
+     * triggering an update of the value property.
+     */
+    public void setInputValue(String value) {
+        executeScript("arguments[0].open();", this);
+        setProperty("_inputValue", value);
+        executeScript("arguments[0].close();", this);
+    }
+
+    /**
+     * Gets the visible presentation value from the inner input element as a
+     * string. This value depends on the used Locale.
+     *
+     * @return
+     */
+    public String getInputValue() {
+        return getPropertyString("_inputValue");
+    }
 }
