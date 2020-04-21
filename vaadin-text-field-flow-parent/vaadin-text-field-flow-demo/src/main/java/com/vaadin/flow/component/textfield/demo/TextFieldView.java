@@ -60,6 +60,7 @@ public class TextFieldView extends DemoView {
         textFieldAutoselect();
         textFieldClearButton();
         textFieldFocusShortcut();
+        textFieldSetPattern();
         passwordFieldBasic(); // PasswordField
         passwordFieldHideRevealButton();
         emailFieldBasic(); // EmailField
@@ -162,6 +163,33 @@ public class TextFieldView extends DemoView {
 
         textField.setId("shortcut-field");
         this.addCard("Text field", "Focus shortcut usage", textField);
+    }
+
+    private void textFieldSetPattern(){
+        // begin-source-example
+        // source-example-heading: Pattern usage
+        TextField zipCode = new TextField("ZIP code");
+        zipCode.setPlaceholder("Only 3 letters codes are valid");
+        zipCode.setPattern("[A-Za-z]{3}");
+        zipCode.setPreventInvalidInput(true);
+
+        Paragraph status = new Paragraph();
+        TextField username = new TextField("Username");
+        username.setPattern("^[a-zA-Z0-9._-]{3,}");
+        username.addValueChangeListener(e -> {
+                if (username.isInvalid())
+                        status.setText(
+                                "Username should be, at least, 3 character long "
+                                        + "and contain only letters, digits, dashes or dots.");
+                else
+                        status.setText("Your username seems valid!");
+        });
+        // end-source-example
+
+        zipCode.setId("text-field-zip-pattern");
+        username.setId("text-field-username-pattern");
+        addCard("Text field", "Pattern usage", zipCode, username,
+                status);
     }
 
     private void passwordFieldBasic() {
