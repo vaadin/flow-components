@@ -171,6 +171,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                     try {
                         getEditor().setItem(e.getItem() != null ? e.getItem() : getBeanType().newInstance());
                         clearActiveItem();
+                        setClientIsNew(true);
                     } catch (Exception ex) {
                         throw new RuntimeException("Unable to instantiate new bean", ex);
                     }
@@ -183,7 +184,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
                     if (getEditor().getItem() != e.getItem()) {
                         getEditor().setItem(e.getItem(), true);
                         setOpened(true);
-
+                        setClientIsNew(false);
                         if(isEditOnClick() && getGrid() instanceof CrudGrid) {
                             getGrid().select(e.getItem());
                         }
@@ -244,7 +245,6 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
     public void edit(E item, EditMode editMode) {
         final CrudEvent<E> event;
         if (editMode == EditMode.NEW_ITEM) {
-            getElement().setProperty("__isNew", true);
             event = new NewEvent<>(this, false, item, null);
         } else {
             setDirty(false);
@@ -253,6 +253,10 @@ public class Crud<E> extends Component implements HasSize, HasTheme {
 
         setOpened(true);
         ComponentUtil.fireEvent(this, event);
+    }
+
+    private void setClientIsNew(boolean isNew) {
+        getElement().setProperty("__isNew", isNew);
     }
 
     /**

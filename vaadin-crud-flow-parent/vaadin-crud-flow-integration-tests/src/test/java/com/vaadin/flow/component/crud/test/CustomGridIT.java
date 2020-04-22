@@ -9,6 +9,7 @@ import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.parallel.BrowserUtil;
 
 public class CustomGridIT extends AbstractParallelTest {
@@ -79,6 +80,53 @@ public class CustomGridIT extends AbstractParallelTest {
         toggleBordersButton().click();
         Assert.assertEquals("no-border", crud.getAttribute("theme"));
         Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+    }
+
+    @Test
+    public void editorShouldHaveRightTitleWhenOpenedInExistingItemMode() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        
+        crud.getNewItemButton().ifPresent(button -> button.click());
+        Assert.assertEquals("New item", getEditorHeaderText(crud));
+        
+        crud.getEditorCancelButton().click();
+        editItemButton().click();
+
+        String editorHeaderText = getEditorHeaderText(crud);
+        Assert.assertEquals("Edit item", editorHeaderText);
+    }
+
+    @Test
+    public void editorShouldHaveRightTitleWhenOpenedInNewItemMode() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+
+        newItemButton().click();
+        Assert.assertEquals("New item", getEditorHeaderText(crud));
+        crud.getEditorCancelButton().click();
+
+        crud.$("vaadin-crud-edit").first().click();
+        Assert.assertEquals("Edit item", getEditorHeaderText(crud));
+        
+        crud.getEditorCancelButton().click();
+
+        newItemButton().click();
+        waitUntil((c) -> crud.getEditor().isDisplayed(), 100);
+        Assert.assertEquals("New item", getEditorHeaderText(crud));
+    }
+
+    private String getEditorHeaderText(CrudElement crud) {
+        return crud.getEditor()
+                .$(TestBenchElement.class)
+                .attribute("slot","header")
+                .first().getText();
+    }
+
+    private ButtonElement newItemButton() {
+        return $(ButtonElement.class).onPage().id("newItemEditor");
+    }
+
+    private ButtonElement editItemButton() {
+        return $(ButtonElement.class).onPage().id("editItemEditor");
     }
 
     private ButtonElement toggleBordersButton() {
