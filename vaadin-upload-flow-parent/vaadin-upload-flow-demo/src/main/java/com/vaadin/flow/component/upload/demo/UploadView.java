@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.upload.demo;
 
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Paragraph;
-import java.nio.charset.StandardCharsets;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
@@ -25,6 +22,7 @@ import javax.imageio.stream.ImageInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,7 +36,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
@@ -66,6 +66,9 @@ public class UploadView extends DemoView {
         changeDefaultComponents();
         i18nSampleUpload();
         createUploadWithFileConstraints();
+
+        addCard("Helper methods",
+                new Label("These methods are used in the examples above"));
     }
 
     private void createSimpleUpload() {
@@ -114,7 +117,8 @@ public class UploadView extends DemoView {
         upload.setId("test-upload");
         output.setId("test-output");
 
-        addCard("Simple single file upload showing messages when file rejected", upload, output);
+        addCard("Simple single file upload showing messages when file rejected",
+                upload, output);
     }
 
     private void createSimpleMultiFileUpload() {
@@ -264,10 +268,12 @@ public class UploadView extends DemoView {
         addCard("i18n translations example", upload, output);
     }
 
+    // begin-source-example
+    // source-example-heading: Helper methods
     private Component createComponent(String mimeType, String fileName,
             InputStream stream) {
         if (mimeType.startsWith("text")) {
-          return createTextComponent(stream);
+            return createTextComponent(stream);
         } else if (mimeType.startsWith("image")) {
             Image image = new Image();
             try {
@@ -304,21 +310,22 @@ public class UploadView extends DemoView {
 
     }
 
-  private Component createTextComponent(InputStream stream) {
-    String text;
-    try {
-        text = IOUtils.toString(stream, StandardCharsets.UTF_8);
-    } catch (IOException e) {
-        text = "exception reading stream";
+    private Component createTextComponent(InputStream stream) {
+        String text;
+        try {
+            text = IOUtils.toString(stream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            text = "exception reading stream";
+        }
+        return new Text(text);
     }
-    return new Text(text);
-  }
 
-  private void showOutput(String text, Component content,
+    private void showOutput(String text, Component content,
             HasComponents outputContainer) {
         HtmlComponent p = new HtmlComponent(Tag.P);
         p.getElement().setText(text);
         outputContainer.add(p);
         outputContainer.add(content);
     }
+    // end-source-example
 }
