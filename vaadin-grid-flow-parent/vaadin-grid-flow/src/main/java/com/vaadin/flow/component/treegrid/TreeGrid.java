@@ -36,6 +36,7 @@ import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
@@ -140,6 +141,8 @@ public class TreeGrid<T> extends Grid<T>
 
     private final ValueProvider<T, String> defaultUniqueKeyProvider = item -> String
             .valueOf(item.hashCode());
+
+    private Registration dataProviderRegistration;
 
     /**
      * Creates a new {@code TreeGrid} without support for creating columns based
@@ -281,8 +284,17 @@ public class TreeGrid<T> extends Grid<T>
         if (!(dataProvider instanceof HierarchicalDataProvider)) {
             throw new IllegalArgumentException(
                     "TreeGrid only accepts hierarchical data providers. "
-                        + "An example of interface to be used: HierarchicalDataProvider");
+                            + "An example of interface to be used: HierarchicalDataProvider");
         }
+        if (dataProviderRegistration != null) {
+            dataProviderRegistration.remove();
+        }
+        dataProviderRegistration = dataProvider.addDataProviderListener(e -> {
+            if (!(e instanceof DataChangeEvent.DataRefreshEvent)) {
+                // refreshAll was called
+                getElement().callJsFunction("$connector.reset");
+            }
+        });
         super.setDataProvider(dataProvider);
     }
 
