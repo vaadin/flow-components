@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-testbench</artifactId>
-            <version>3.1-SNAPSHOT</version>
+            <version>${button.version}</version>
         </dependency>
     </dependencies>
 
