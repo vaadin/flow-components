@@ -31,13 +31,15 @@
     </licenses>
 
     <properties>
+        <textfield.version>2.1-SNAPSHOT</textfield.version>
+        <grid.version>4.1-SNAPSHOT</grid.version>
+        <button.version>2.0-SNAPSHOT</button.version>
+
         <jetty.plugin.version>9.4.11.v20180605</jetty.plugin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <textfield.version>2.1-SNAPSHOT</textfield.version>
-        <grid.version>4.1-SNAPSHOT</grid.version>
     </properties>
 
     <modules>
