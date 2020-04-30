@@ -118,4 +118,12 @@ public class ComboBoxElement extends TestBenchElement
         return getPropertyString("filter");
     }
 
+    /**
+     * Gets whether dropdown will open automatically or not.
+     *
+     * @return @{code true} if enabled, {@code false} otherwise
+     */
+    public boolean isAutoOpenEnabled() {
+        return !getPropertyBoolean("autoOpenDisabled");
+    }
 }

@@ -93,6 +93,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     /**
      * A callback method for fetching items. The callback is provided with a
@@ -824,6 +825,28 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public boolean isAllowCustomValue() {
         return isAllowCustomValueBoolean();
+    }
+
+    /**
+     * Enables or disables the dropdown opening automatically. If {@code false}
+     * the dropdown is only opened when clicking the toggle button or pressing
+     * Up or Down arrow keys.
+     * 
+     * @param autoOpenEnabled
+     *            {@code false} to prevent the dropdown from opening
+     *            automatically
+     */
+    public void setAutoOpenEnabled(boolean autoOpenEnabled) {
+        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpenEnabled);
+    }
+
+    /**
+     * Gets whether dropdown will open automatically or not.
+     *
+     * @return @{code true} if enabled, {@code false} otherwise
+     */
+    public boolean isAutoOpenEnabled() {
+        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
     }
 
     /**

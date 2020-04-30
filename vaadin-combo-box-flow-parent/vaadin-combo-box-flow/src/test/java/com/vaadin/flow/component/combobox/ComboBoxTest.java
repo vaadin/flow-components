@@ -36,6 +36,8 @@ import static org.junit.Assert.assertEquals;
 
 public class ComboBoxTest {
 
+    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -162,6 +164,15 @@ public class ComboBoxTest {
     public void ensureComboBoxIsFocusable() {
         Assert.assertTrue("ComboBox should be focusable",
                 Focusable.class.isAssignableFrom(ComboBox.class));
+    }
+
+    @Test
+    public void setAutoOpenDisabled() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assert.assertTrue(comboBox.isAutoOpenEnabled());
+        comboBox.setAutoOpenEnabled(false);
+        Assert.assertTrue(comboBox.getElement().getProperty(PROP_AUTO_OPEN_DISABLED,false));
+        Assert.assertFalse(comboBox.isAutoOpenEnabled());
     }
 
     @Test

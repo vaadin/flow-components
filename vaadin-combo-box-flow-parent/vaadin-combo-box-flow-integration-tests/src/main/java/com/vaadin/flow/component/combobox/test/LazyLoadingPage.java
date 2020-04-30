@@ -45,6 +45,8 @@ public class LazyLoadingPage extends Div {
         add(message);
 
         addSeparator();
+        createListDataProviderWithStringsAutoOpenDisabled();
+        addSeparator();
         createListDataProviderWithStrings();
         addSeparator();
         createComboBoxWithCustomPageSize();
@@ -60,6 +62,21 @@ public class LazyLoadingPage extends Div {
         createCallbackDataProviderWhichReturnsZeroItems();
     }
 
+    private void createListDataProviderWithStringsAutoOpenDisabled() {
+        addTitle("ListDataProvider with strings and AutoOpenDisabled");
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setId("lazy-strings-autoopendisabled");
+        comboBox.setAutoOpenEnabled(false);
+
+        List<String> items = generateStrings(1000);
+        ListDataProvider<String> dp = DataProvider.ofCollection(items);
+        comboBox.setDataProvider(dp);
+
+        comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
+
+        add(comboBox);
+    }
+    
     private void createListDataProviderWithStrings() {
         addTitle("ListDataProvider with strings");
         ComboBox<String> comboBox = new ComboBox<>();
