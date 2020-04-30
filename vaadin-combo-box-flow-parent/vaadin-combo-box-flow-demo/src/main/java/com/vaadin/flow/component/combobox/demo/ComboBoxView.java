@@ -65,6 +65,7 @@ public class ComboBoxView extends DemoView {
         displayClearButton();
         valueChangeEvent();
         customValues();
+        autoOpenDisabled();
         storingCustomValues();
         lazyLoading();
         pagedRepository();
@@ -151,12 +152,24 @@ public class ComboBoxView extends DemoView {
     private void displayClearButton() {
         // begin-source-example
         // source-example-heading: Display the clear button
-        ComboBox comboBox = new ComboBox();
+        ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems("Option one", "Option two");
         comboBox.setClearButtonVisible(true);
         // end-source-example
 
         addCard("Display the clear button", comboBox);
+    }
+
+    private void autoOpenDisabled() {
+        Span note = new Span("Dropdown is only opened when clicking the toggle button or pressing Up or Down arrow keys.");
+        // begin-source-example
+        // source-example-heading: Auto open disabled
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setItems("Option one", "Option two");
+        comboBox.setAutoOpenEnabled(false);
+        // end-source-example
+
+        addCard("Auto open disabled", note, comboBox);
     }
 
     private void valueChangeEvent() {
