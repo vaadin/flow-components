@@ -23,6 +23,8 @@ public class RichTextEditorView extends DemoView {
         // begin-source-example
         // source-example-heading: Basic Rich Text Editor
         RichTextEditor rte = new RichTextEditor();
+
+        add(rte);
         // end-source-example
 
         addCard("Basic Rich Text Editor", rte);
@@ -35,6 +37,8 @@ public class RichTextEditorView extends DemoView {
         RichTextEditor rte = new RichTextEditor();
         Button saveBtn = new Button("Save value", e -> valueBlock.setText(rte.getValue()));
         Button setBtn = new Button("Set value", e ->  rte.setValue(valueBlock.getText()));
+
+        add(rte, saveBtn, setBtn, valueBlock);
         // end-source-example
 
         addCard("Save Rich Text Editor value", rte, saveBtn, setBtn, valueBlock);
@@ -51,6 +55,8 @@ public class RichTextEditorView extends DemoView {
                 htmlBlock.getElement().setProperty("innerHTML", rte.getHtmlValue());
             }
         });
+
+        add(rte, showHtmlValue, htmlBlock);
         // end-source-example
 
         addCard("Save Rich Text Editor htmlValue", rte, showHtmlValue, htmlBlock);
