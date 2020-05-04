@@ -14,7 +14,7 @@ Add App Layout to your project:
   <dependency>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-app-layout-flow</artifactId>
-    <version>2.0.0.alpha2</version>
+    <version>${component.version}</version>
   </dependency>
 </dependencies>
 ```
@@ -26,7 +26,7 @@ Add App Layout to your project:
 @BodySize
 @Theme(Lumo.class)
 public class AppRouterLayout extends AppLayout {
-    
+
      {
          final DrawerToggle drawerToggle = new DrawerToggle();
          final RouterLink home = new RouterLink("Home", HomeView.class);
