@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import com.vaadin.flow.testutil.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -24,6 +22,9 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.testutil.AbstractComponentIT;
+import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-dialog-view")
 public class DialogIT extends AbstractComponentIT {
@@ -36,13 +37,38 @@ public class DialogIT extends AbstractComponentIT {
 
         findElement(By.id("basic-dialog-button")).click();
 
-        WebElement container = getOverlayContent()
-                .findElement(By.tagName("div"));
-        Assert.assertEquals("400px", container.getCssValue("width"));
-        Assert.assertEquals("150px", container.getCssValue("height"));
+        WebElement overlay = getInShadowRoot(getOverlayContent(),
+                By.id("overlay"));
 
-        new Actions(getDriver()).sendKeys(Keys.ESCAPE).perform();
-        verifyDialogClosed();
+        WebElement div = getOverlayContent().findElement(By.tagName("div"));
+        WebElement content = overlay.findElement(By.id("content"));
+
+        String overLayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
+        int overlayWidthValue = Integer
+                .valueOf(overLayWidth.substring(0, overLayWidth.length() - 2));
+
+        String paddingWidth = content.getCssValue("padding");
+        int paddingValue = Integer
+                .valueOf(paddingWidth.substring(0, paddingWidth.length() - 2));
+
+        String divWidth = div.getCssValue(ElementConstants.STYLE_WIDTH);
+        int divWidthValue = Integer
+                .valueOf(divWidth.substring(0, divWidth.length() - 2));
+
+        Assert.assertEquals(overlayWidthValue - paddingValue * 2,
+                divWidthValue);
+
+        String overLayHeight = overlay
+                .getCssValue(ElementConstants.STYLE_HEIGHT);
+        int overLayHeightValue = Integer.valueOf(
+                overLayHeight.substring(0, overLayHeight.length() - 2));
+
+        String divHeight = div.getCssValue(ElementConstants.STYLE_HEIGHT);
+        int divHeightValue = Integer
+                .valueOf(divHeight.substring(0, divHeight.length() - 2));
+
+        Assert.assertEquals(overLayHeightValue - paddingValue * 2,
+                divHeightValue);
     }
 
     @Test
@@ -53,12 +79,14 @@ public class DialogIT extends AbstractComponentIT {
                 By.id("confirmation-dialog-label"));
 
         findElement(By.id("confirmation-dialog-button")).click();
-        getOverlayContent().findElements(By.tagName("vaadin-button")).get(0).click();
+        getOverlayContent().findElements(By.tagName("vaadin-button")).get(0)
+                .click();
         verifyDialogClosed();
         Assert.assertEquals("Confirmed!", messageLabel.getText());
 
         findElement(By.id("confirmation-dialog-button")).click();
-        getOverlayContent().findElements(By.tagName("vaadin-button")).get(1).click();
+        getOverlayContent().findElements(By.tagName("vaadin-button")).get(1)
+                .click();
         verifyDialogClosed();
         Assert.assertEquals("Cancelled...", messageLabel.getText());
     }
