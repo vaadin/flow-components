@@ -147,7 +147,7 @@ import java.util.stream.Stream;
         "WebComponent: Vaadin.TextAreaElement#2.3.0-alpha8",
         "Flow#1.3-SNAPSHOT" })
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.6.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.6.0")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
