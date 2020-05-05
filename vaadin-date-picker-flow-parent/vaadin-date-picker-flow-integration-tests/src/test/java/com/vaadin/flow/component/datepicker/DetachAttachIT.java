@@ -83,7 +83,7 @@ public class DetachAttachIT extends AbstractComponentIT {
     }
 
     private String getInputValue() {
-        return $(DatePickerElement.class).first().$("vaadin-text-field").first()
+        return $(DatePickerElement.class).first().$("vaadin-date-picker-text-field").first()
                 .getPropertyString("value");
     }
 
