@@ -14,7 +14,7 @@
     <version>5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Grid Flow Parent</name>
-    
+
     <properties>
         <contextmenu.version>4.1-SNAPSHOT</contextmenu.version>
     </properties>
@@ -33,6 +33,15 @@
             </snapshots>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <modules>
         <module>vaadin-grid-flow</module>
