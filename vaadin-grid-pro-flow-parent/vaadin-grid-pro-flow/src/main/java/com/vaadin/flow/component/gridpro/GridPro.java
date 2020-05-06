@@ -30,7 +30,6 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.ColumnPathRenderer;
@@ -50,7 +49,7 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "2.1.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "2.1.0")
 @JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/vaadin-grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
