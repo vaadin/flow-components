@@ -61,6 +61,8 @@ public class RadioButtonGroupView extends DemoView {
         radioGroup.setItems("Option one", "Option two", "Option three");
         radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         radioGroup.setValue("Option one");
+
+        add(radioGroup);
         // end-source-example
 
         addCard("Basic usage", radioGroup);
@@ -75,6 +77,8 @@ public class RadioButtonGroupView extends DemoView {
         radioGroup.setItems(departmentList);
         radioGroup.setRenderer(new TextRenderer<>(Department::getName));
         radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+        add(radioGroup);
         // end-source-example
 
         addCard("Entity list", radioGroup);
@@ -95,6 +99,8 @@ public class RadioButtonGroupView extends DemoView {
         radioGroup.setItems("Option one", "Option two", "Option three");
         radioGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         radioGroup.setItemEnabledProvider(item -> !"Option three".equals(item));
+
+        add(disabledRadioGroup, radioGroup);
         // end-source-example
 
         disabledRadioGroup.getStyle().set("margin-right", "7.5em");
@@ -126,6 +132,8 @@ public class RadioButtonGroupView extends DemoView {
                 value.setText("Selected: " + event.getValue());
             }
         });
+
+        add(radioGroup, value);
         // end-source-example
 
         addCard("Value change event", radioGroup, value);
@@ -153,6 +161,8 @@ public class RadioButtonGroupView extends DemoView {
                         Notification.Position.MIDDLE);
             }
         });
+
+        add(radioGroup, button);
         // end-source-example
 
         radioGroup.getStyle().set("margin-right", "5.5em");
@@ -192,6 +202,8 @@ public class RadioButtonGroupView extends DemoView {
             wrapper.add(image, title);
             return wrapper;
         }));
+
+        add(radioButton);
         // end-source-example
 
         addCard("Presentation", "Customizing radio button label", radioButton);
@@ -216,6 +228,8 @@ public class RadioButtonGroupView extends DemoView {
             Div div = new Div(name, description);
             return div;
         }));
+
+        add(radioGroup);
         // end-source-example
 
         addCard("Presentation", "Multi-line label", radioGroup);
@@ -234,6 +248,8 @@ public class RadioButtonGroupView extends DemoView {
         vertical.setItems("Option one", "Option two", "Option three");
         vertical.setValue("Option one");
         vertical.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+
+        add(horizontal, vertical);
         // end-source-example
 
         addCard("Theme variants", "Direction", horizontal, vertical);
