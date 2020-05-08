@@ -64,7 +64,7 @@ public class AccordionView extends DemoView {
         );
         AccordionPanel billingAddressPanel = accordion.add("Payment", paymenLayout);
         billingAddressPanel.setEnabled(false);
-
+        add(accordion);
         // end-source-example
 
         addCard("Basics", accordion);
@@ -85,7 +85,7 @@ public class AccordionView extends DemoView {
         AccordionPanel disabledPannel = accordion.add("Panel 3", new Span("Panel content"));
         disabledPannel.addThemeVariants(DetailsVariant.FILLED);
         disabledPannel.setEnabled(false);
-
+        add(accordion);
         // end-source-example
 
         addCard("Theme variants - Filled Pannels", accordion);
@@ -105,7 +105,7 @@ public class AccordionView extends DemoView {
 
         accordion.add("Panel 3", new Span("Panel content"))
             .addThemeVariants(DetailsVariant.SMALL);
-
+        add(accordion);
         // end-source-example
 
         addCard("Theme variants - Small Pannels", accordion);
@@ -125,7 +125,7 @@ public class AccordionView extends DemoView {
 
         accordion.add("Panel 3", new Span("Panel content"))
             .addThemeVariants(DetailsVariant.REVERSE);
-
+        add(accordion);
         // end-source-example
 
         addCard("Theme variants - Reverse Pannels", accordion);
@@ -181,7 +181,7 @@ public class AccordionView extends DemoView {
         submit.setEnabled(false);
         submit.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         submit.addClickListener(e -> Notification.show("Complete! \uD83D\uDC4D",
-                4000, Position.BOTTOM_END));
+                4000, Notification.Position.BOTTOM_END));
         Checkbox consent = new Checkbox("I agree");
         consent.addValueChangeListener(e -> submit.setEnabled(e.getValue()));
 
@@ -191,6 +191,7 @@ public class AccordionView extends DemoView {
         VerticalLayout terms = new VerticalLayout(paragraph, bottomPanel);
 
         accordion.add("Terms and conditions", terms);
+        add(accordion);
         // end-source-example
 
         addCard("Complex form", accordion);
